@@ -1,0 +1,34 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Notification {
+
+    /**
+     * @hide
+     * @Involve
+     * interface IParcelable
+     */
+    interface INotificationRankingUpdate {
+        GetOrderedKeys(
+            [out, callee] ArrayOf<String>* keys);
+
+        GetFirstAmbientIndex(
+            [out] Int32* index);
+
+        GetInterceptedKeys(
+            [out, callee] ArrayOf<String>* keys);
+
+        GetVisibilityOverrides(
+            [out] IBundle** ret);
+    }
+
+    } //Notification
+    } //Service
+    } //Droid
+    } //Elastos
+}

@@ -1,0 +1,287 @@
+
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    /**
+     * Service interface to handle MMS API requests
+     */
+    [deprecated]
+    interface IIMms {
+        /**
+         * Send an MMS message
+         *
+         * @param subId the SIM id
+         * @param callingPkg the package name of the calling app
+         * @param contentUri the content uri from which to read MMS message encoded in standard MMS
+         *  PDU format
+         * @param locationUrl the optional location url for where this message should be sent to
+         * @param configOverrides the carrier-specific messaging configuration values to override for
+         *  sending the message. See {@link android.telephony.MessagingConfigurationManager} for the
+         *  value names and types.
+         * @param sentIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is successfully sent, or failed
+         */
+        SendMessage(
+            [in] Int64 subId,
+            [in] String callingPkg,
+            [in] IUri* contentUri,
+            [in] String locationUrl,
+            [in] IBundle* configOverrides,
+            [in] IPendingIntent* sentIntent);
+
+        /**
+         * Download an MMS message using known location and transaction id
+         *
+         * @param subId the SIM id
+         * @param callingPkg the package name of the calling app
+         * @param locationUrl the location URL of the MMS message to be downloaded, usually obtained
+         *  from the MMS WAP push notification
+         * @param contentUri a contentUri to which the downloaded MMS message will be written
+         * @param configOverrides the carrier-specific messaging configuration values to override for
+         *  downloading the message. See {@link android.telephony.MessagingConfigurationManager} for the
+         *  value names and types.
+         * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is downloaded, or the download is failed
+         */
+        DownloadMessage(
+            [in] Int64 subId,
+            [in] String callingPkg,
+            [in] String locationUrl,
+            [in] IUri* contentUri,
+            [in] IBundle* configOverrides,
+            [in] IPendingIntent* downloadedIntent);
+
+        /**
+         * Update the status of a pending (send-by-IP) MMS message handled by the carrier app.
+         * If the carrier app fails to send this message, it may be resent via carrier network
+         * depending on the status code.
+         *
+         * The caller should have carrier privileges.
+         * @see android.telephony.TelephonyManager.hasCarrierPrivileges
+         *
+         * @param messageRef the reference number of the MMS message.
+         * @param pdu non-empty (contains the SendConf PDU) if the message was sent successfully,
+         *   otherwise, this param should be null.
+         * @param status send status. It can be Activity.RESULT_OK or one of the MMS error codes.
+         *   If status is Activity.RESULT_OK, the MMS was sent successfully.
+         *   If status is MMS_ERROR_RETRY, this message would be resent via carrier
+         *   network. The message will not be resent for other MMS error statuses.
+         */
+        UpdateMmsSendStatus(
+            [in] Int32 messageRef,
+            [in] ArrayOf<Byte>* pdu,
+            [in] Int32 status);
+
+        /**
+         * Update the status of a pending (download-by-IP) MMS message handled by the carrier app.
+         * If the carrier app fails to download this message, it may be re-downloaded via carrier
+         * network depending on the status code.
+         *
+         * The caller should have carrier privileges.
+         * @see android.telephony.TelephonyManager.hasCarrierPrivileges
+         *
+         * @param messageRef the reference number of the MMS message.
+         * @param status download status.  It can be Activity.RESULT_OK or one of the MMS error codes.
+         *   If status is Activity.RESULT_OK, the MMS was downloaded successfully.
+         *   If status is MMS_ERROR_RETRY, this message would be re-downloaded via carrier
+         *   network. The message will not be re-downloaded for other MMS error statuses.
+         */
+        UpdateMmsDownloadStatus(
+            [in] Int32 messageRef,
+            [in] Int32 status);
+
+        /**
+         * Get carrier-dependent configuration values.
+         *
+         * @param subId the SIM id
+         */
+        GetCarrierConfigValues(
+            [in] Int64 subId,
+            [out] IBundle** values);
+
+        /**
+         * Import a text message into system's SMS store
+         *
+         * @param callingPkg the calling app's package name
+         * @param address the destination address of the message
+         * @param type the type of the message
+         * @param text the message text
+         * @param timestampMillis the message timestamp in milliseconds
+         * @param seen if the message is seen
+         * @param read if the message is read
+         * @return the message URI, null if failed
+         */
+        ImportTextMessage(
+            [in] String callingPkg,
+            [in] String address,
+            [in] Int32 type,
+            [in] String text,
+            [in] Int64 timestampMillis,
+            [in] Boolean seen,
+            [in] Boolean read,
+            [out] IUri** uri);
+
+        /**
+          * Import a multimedia message into system's MMS store
+          *
+          * @param callingPkg the package name of the calling app
+          * @param contentUri the content uri from which to read PDU of the message to import
+          * @param messageId the optional message id
+          * @param timestampSecs the message timestamp in seconds
+          * @param seen if the message is seen
+          * @param read if the message is read
+          * @return the message URI, null if failed
+          */
+        ImportMultimediaMessage(
+            [in] String callingPkg,
+            [in] IUri* contentUri,
+            [in] String messageId,
+            [in] Int64 timestampSecs,
+            [in] Boolean seen,
+            [in] Boolean read,
+            [out] IUri** uri);
+
+        /**
+         * Delete a system stored SMS or MMS message
+         *
+         * @param callingPkg the package name of the calling app
+         * @param messageUri the URI of the stored message
+         * @return true if deletion is successful, false otherwise
+         */
+        DeleteStoredMessage(
+            [in] String callingPkg,
+            [in] IUri* messageUri,
+            [out] Boolean* result);
+
+        /**
+         * Delete a system stored SMS or MMS thread
+         *
+         * @param callingPkg the package name of the calling app
+         * @param conversationId the ID of the message conversation
+         * @return true if deletion is successful, false otherwise
+         */
+        DeleteStoredConversation(
+            [in] String callingPkg,
+            [in] Int64 conversationId,
+            [out] Boolean* result);
+
+        /**
+         * Update the status properties of a system stored SMS or MMS message, e.g.
+         * the read status of a message, etc.
+         *
+         * @param callingPkg the package name of the calling app
+         * @param messageUri the URI of the stored message
+         * @param statusValues a list of status properties in key-value pairs to update
+         * @return true if deletion is successful, false otherwise
+         */
+        UpdateStoredMessageStatus(
+            [in] String callingPkg,
+            [in] IUri* messageUri,
+            [in] IContentValues* statusValues,
+            [out] Boolean* result);
+
+        /**
+         * Archive or unarchive a stored conversation
+         *
+         * @param callingPkg the package name of the calling app
+         * @param conversationId the ID of the message conversation
+         * @param archived true to archive the conversation, false otherwise
+         * @return true if update is successful, false otherwise
+         */
+        ArchiveStoredConversation(
+            [in] String callingPkg,
+            [in] Int64 conversationId,
+            [in] Boolean archived,
+            [out] Boolean* result);
+
+        /**
+         * Add a text message draft to system SMS store
+         *
+         * @param callingPkg the package name of the calling app
+         * @param address the destination address of message
+         * @param text the body of the message to send
+         * @return the URI of the stored draft message
+         */
+        AddTextMessageDraft(
+            [in] String callingPkg,
+            [in] String address,
+            [in] String text,
+            [out] IUri** uri);
+
+        /**
+         * Add a multimedia message draft to system MMS store
+         *
+         * @param callingPkg the package name of the calling app
+         * @param contentUri the content Uri from which to read PDU data of the draft MMS
+         * @return the URI of the stored draft message
+         */
+        AddMultimediaMessageDraft(
+            [in] String callingPkg,
+            [in] IUri* contentUri,
+            [out] IUri** uri);
+
+        /**
+         * Send a system stored MMS message
+         *
+         * This is used for sending a previously sent, but failed-to-send, message or
+         * for sending a text message that has been stored as a draft.
+         *
+         * @param subId the SIM id
+         * @param callingPkg the package name of the calling app
+         * @param messageUri the URI of the stored message
+         * @param configOverrides the carrier-specific messaging configuration values to override for
+         *  sending the message. See {@link android.telephony.MessagingConfigurationManager} for the
+         *  value names and types.
+         * @param sentIntent if not NULL this <code>PendingIntent</code> is
+         *  broadcast when the message is successfully sent, or failed
+         */
+        SendStoredMessage(
+            [in] Int64 subId,
+            [in] String callingPkg,
+            [in] IUri* messageUri,
+            [in] IBundle* configOverrides,
+            [in] IPendingIntent* sentIntent);
+
+        /**
+         * Turns on/off the flag to automatically write sent/received SMS/MMS messages into system
+         *
+         * When this flag is on, all SMS/MMS sent/received are stored by system automatically
+         * When this flag is off, only SMS/MMS sent by non-default SMS apps are stored by system
+         * automatically
+         *
+         * This flag can only be changed by default SMS apps
+         *
+         * @param callingPkg the name of the calling app package
+         * @param enabled Whether to enable message auto persisting
+         */
+        SetAutoPersisting(
+            [in] String callingPkg,
+            [in] Boolean enabled);
+
+        /**
+         * Get the value of the flag to automatically write sent/received SMS/MMS messages into system
+         *
+         * When this flag is on, all SMS/MMS sent/received are stored by system automatically
+         * When this flag is off, only SMS/MMS sent by non-default SMS apps are stored by system
+         * automatically
+         *
+         * @return the current value of the auto persist flag
+         */
+        GetAutoPersisting(
+            [out] Boolean* result);
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

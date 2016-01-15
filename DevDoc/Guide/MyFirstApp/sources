@@ -1,0 +1,20 @@
+TARGET_NAME = MyFirstApp
+TARGET_TYPE = eco
+
+SOURCES  = MyFirstApp.car
+SOURCES += CMainActivity.cpp
+SOURCES += Elastos.Core.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+LIBRARIES  = $(XDK_LIB_PATH)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Core.lib
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Core.eco
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Droid.lib
+LIBRARIES += $(XDK_LIB_PATH)/crt0.lib
+
+LIBRARIES += -lm -licuuc -llog
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+

@@ -1,0 +1,5 @@
+
+module
+{
+    merge("textui/IResultPrinter.car");
+}

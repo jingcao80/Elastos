@@ -1,0 +1,112 @@
+module
+{
+    interface Elastos.Core.IClassLoader;
+
+    namespace Elastos {
+    namespace Utility {
+    /**
+     * A service-provider loader.
+     *
+     * <p>A service provider is a factory for creating all known implementations of a particular
+     * class or interface {@code S}. The known implementations are read from a configuration file in
+     * {@code META-INF/services/}. The file's name should match the class' binary name (such as
+     * {@code java.util.Outer$Inner}).
+     *
+     * <p>The file format is as follows.
+     * The file's character encoding must be UTF-8.
+     * Whitespace is ignored, and {@code #} is used to begin a comment that continues to the
+     * next newline.
+     * Lines that are empty after comment removal and whitespace trimming are ignored.
+     * Otherwise, each line contains the binary name of one implementation class.
+     * Duplicate entries are ignored, but entries are otherwise returned in order (that is, the file
+     * is treated as an ordered set).
+     *
+     * <p>Given these classes:
+     * <pre>
+     * package a.b.c;
+     * public interface MyService { ... }
+     * public class MyImpl1 implements MyService { ... }
+     * public class MyImpl2 implements MyService { ... }
+     * </pre>
+     * And this configuration file (stored as {@code META-INF/services/a.b.c.MyService}):
+     * <pre>
+     * # Known MyService providers.
+     * a.b.c.MyImpl1  # The original implementation for handling "bar"s.
+     * a.b.c.MyImpl2  # A later implementation for "foo"s.
+     * </pre>
+     * You might use {@code ServiceProvider} something like this:
+     * <pre>
+     *   for (MyService service : ServiceLoader<MyService>.load(MyService.class)) {
+     *     if (service.supports(o)) {
+     *       return service.handle(o);
+     *     }
+     *   }
+     * </pre>
+     *
+     * <p>Note that each iteration creates new instances of the various service implementations, so
+     * any heavily-used code will likely want to cache the known implementations itself and reuse them.
+     * Note also that the candidate classes are instantiated lazily as you call {@code next} on the
+     * iterator: construction of the iterator itself does not instantiate any of the providers.
+     *
+     * @param <S> the service class or interface
+     * @since 1.6
+     */
+    interface IServiceLoader {
+        /**
+         * Invalidates the cache of known service provider class names.
+         */
+        Reload();
+
+        ToString(
+            [out] String* str);
+    }
+
+    [local]
+    interface IServiceLoaderHelper {
+        /**
+         * Constructs a service loader. If {@code classLoader} is null, the system class loader
+         * is used.
+         *
+         * @param service the service class or interface
+         * @param classLoader the class loader
+         * @return a new ServiceLoader
+         */
+        Load(
+            [in] IInterface* service,
+            [in] IClassLoader* classLoader,
+            [out] IServiceLoader** outser);
+
+        /**
+         * Constructs a service loader, using the current thread's context class loader.
+         *
+         * @param service the service class or interface
+         * @return a new ServiceLoader
+         */
+        Load(
+            [in] IInterface* service,
+            [out] IServiceLoader** outser);
+
+        /**
+         * Constructs a service loader, using the extension class loader.
+         *
+         * @param service the service class or interface
+         * @return a new ServiceLoader
+         */
+        LoadInstalled(
+            [in] IInterface* service,
+            [out] IServiceLoader** outser);
+
+        /**
+         * Internal API to support built-in SPIs that check a system property first.
+         * Returns an instance specified by a property with the class' binary name, or null if
+         * no such property is set.
+         * @hide
+         */
+        LoadFromSystemProperty(
+            [in] IInterface* service,
+            [out] IInterface** outface);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

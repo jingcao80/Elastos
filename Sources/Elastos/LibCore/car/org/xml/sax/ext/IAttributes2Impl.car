@@ -1,0 +1,73 @@
+module
+{
+    namespace Org {
+    namespace Xml {
+    namespace Sax {
+    namespace Ext {
+
+    /**
+     * SAX2 extension helper for additional Attributes information,
+     * implementing the {@link Attributes2} interface.
+     *
+     * <blockquote>
+     * <em>This module, both source code and documentation, is in the
+     * Public Domain, and comes with <strong>NO WARRANTY</strong>.</em>
+     * </blockquote>
+     *
+     * <p>This is not part of core-only SAX2 distributions.</p>
+     *
+     * <p>The <em>specified</em> flag for each attribute will always
+     * be true, unless it has been set to false in the copy constructor
+     * or using {@link #setSpecified}.
+     * Similarly, the <em>declared</em> flag for each attribute will
+     * always be false, except for defaulted attributes (<em>specified</em>
+     * is false), non-CDATA attributes, or when it is set to true using
+     * {@link #setDeclared}.
+     * If you change an attribute's type by hand, you may need to modify
+     * its <em>declared</em> flag to match.
+     * </p>
+     *
+     * @since SAX 2.0 (extensions 1.1 alpha)
+     * @author David Brownell
+     * @version TBS
+     */
+    /**
+      * @Involve
+      * interface Org.Xml.Sax.Helpers.IAttributesImpl;
+      */
+    interface IAttributes2Impl {
+        /**
+         * Assign a value to the "declared" flag of a specific attribute.
+         * This is normally needed only for attributes of type CDATA,
+         * including attributes whose type is changed to or from CDATA.
+         *
+         * @param index The index of the attribute (zero-based).
+         * @param value The desired flag value.
+         * @exception java.lang.ArrayIndexOutOfBoundsException When the
+         *            supplied index does not identify an attribute.
+         * @see #setType
+         */
+        SetDeclared(
+            [in] Int32 index,
+            [in] Boolean value);
+
+        /**
+         * Assign a value to the "specified" flag of a specific attribute.
+         * This is the only way this flag can be cleared, except clearing
+         * by initialization with the copy constructor.
+         *
+         * @param index The index of the attribute (zero-based).
+         * @param value The desired flag value.
+         * @exception java.lang.ArrayIndexOutOfBoundsException When the
+         *            supplied index does not identify an attribute.
+         */
+        SetSpecified(
+            [in] Int32 index,
+            [in] Boolean value);
+    }
+
+    } // namespace Ext
+    } // namespace Sax
+    } // namespace Xml
+    } // namespace Org
+}

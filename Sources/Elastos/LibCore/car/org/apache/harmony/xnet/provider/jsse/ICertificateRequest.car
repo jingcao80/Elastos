@@ -1,0 +1,32 @@
+
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     *
+     * Represents certificate request message
+     * @see <a href="http://www.ietf.org/rfc/rfc2246.txt">TLS 1.0 spec., 7.4.4.
+     * Certificate request</a>
+     */
+    interface ICertificateRequest extends IMessage {
+        /**
+         * Returns requested certificate types as array of strings
+         */
+        GetTypesAsString(
+            [out, callee] ArrayOf<String>* types);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

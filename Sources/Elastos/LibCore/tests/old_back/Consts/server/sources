@@ -1,0 +1,10 @@
+TARGET_NAME= TestConsts
+TARGET_TYPE= eco
+
+SOURCES = TestConsts.car
+SOURCES += CDummy.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib

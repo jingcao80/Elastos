@@ -1,0 +1,56 @@
+
+module
+{
+    using interface Elastos.IO.IByteArrayOutputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Stores SSID octets and handles conversion.
+     *
+     * For Ascii encoded string, any octet < 32 or > 127 is encoded as
+     * a "\x" followed by the hex representation of the octet.
+     * Exception chars are ", \, \e, \n, \r, \t which are escaped by a \
+     * See src/utils/common.c for the implementation in the supplicant.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiSsid {
+        const String NONE = "<unknown ssid>";
+
+        GetOctets(
+            [out] IByteArrayOutputStream** result);
+
+        /** @hide */
+        IsHidden(
+            [out] Boolean* result);
+
+        /** @hide */
+        GetOctets(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /** @hide */
+        GetHexString(
+            [out] String* result);
+    }
+
+    interface IWifiSsidHelper {
+        CreateFromAsciiEncoded(
+            [in] String asciiEncoded,
+            [out] IWifiSsid** result);
+
+        CreateFromHex(
+            [in] String hexStr,
+            [out] IWifiSsid** result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

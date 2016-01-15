@@ -1,0 +1,33 @@
+
+TARGET_NAME= io
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+#VPATH := $(MAKEDIR)/../../../../../../src/elastos/io
+
+SOURCES = AbstractMessageParser.cpp
+SOURCES += AbstractMessageWriter.cpp
+SOURCES += AbstractSessionInputBuffer.cpp
+SOURCES += AbstractSessionOutputBuffer.cpp
+#SOURCES += InputStream.cpp
+SOURCES += ChunkedInputStream.cpp
+#SOURCES += OutputStream.cpp
+SOURCES += ChunkedOutputStream.cpp
+SOURCES += ContentLengthOutputStream.cpp
+SOURCES += ContentLengthInputStream.cpp
+SOURCES += HttpRequestParser.cpp
+SOURCES += HttpRequestWriter.cpp
+SOURCES += HttpResponseParser.cpp
+SOURCES += HttpResponseWriter.cpp
+SOURCES += HttpTransportMetricsImpl.cpp
+SOURCES += IdentityInputStream.cpp
+SOURCES += IdentityOutputStream.cpp
+SOURCES += SocketInputBuffer.cpp
+SOURCES += SocketOutputBuffer.cpp

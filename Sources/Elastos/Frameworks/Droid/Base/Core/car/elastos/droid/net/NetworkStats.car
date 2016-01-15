@@ -1,0 +1,338 @@
+
+module
+{
+    interface Elastos.Droid.Net.INetworkStatsEntry;
+
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.Utility.IHashSet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Collection of active network statistics. Can contain summary details across
+     * all interfaces, or details with per-UID granularity. Internally stores data
+     * as a large table, closely matching {@code /proc/} data format. This structure
+     * optimizes for rapid in-memory comparison, but consider using
+     * {@link NetworkStatsHistory} when persisting.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface INetworkStats {
+        /** {@link #iface} value when interface details unavailable. */
+        //const String IFACE_ALL = null;
+
+        /** {@link #uid} value when UID details unavailable. */
+        const Int32 UID_ALL = -1;
+
+        /** {@link #tag} value matching any tag. */
+        const Int32 TAG_ALL = -1;
+
+        /** {@link #set} value when all sets combined. */
+        const Int32 SET_ALL = -1;
+
+        /** {@link #set} value where background data is accounted. */
+        const Int32 SET_DEFAULT = 0;
+
+        /** {@link #set} value where foreground data is accounted. */
+        const Int32 SET_FOREGROUND = 1;
+
+        /** {@link #tag} value for total data across all tags. */
+        const Int32 TAG_NONE = 0;
+
+        // @VisibleForTesting
+        AddIfaceValues(
+            [in] String iface,
+            [in] Int64 rxBytes,
+            [in] Int64 rxPackets,
+            [in] Int64 txBytes,
+            [in] Int64 txPackets);
+
+        // @VisibleForTesting
+        AddValues(
+            [in] String iface,
+            [in] Int32 uid,
+            [in] Int32 set,
+            [in] Int32 tag,
+            [in] Int64 rxBytes,
+            [in] Int64 rxPackets,
+            [in] Int64 txBytes,
+            [in] Int64 txPackets,
+            [in] Int64 operations);
+
+        /**
+         * Add new stats entry, copying from given {@link Entry}. The {@link Entry}
+         * object can be recycled across multiple calls.
+         */
+        AddValues(
+            [in] INetworkStatsEntry* entry);
+
+        /**
+         * Return specific stats entry.
+         */
+        GetValues(
+            [in] Int32 i,
+            [in] INetworkStatsEntry* recycle,
+            [out] INetworkStatsEntry** result);
+
+        GetElapsedRealtime(
+            [out] Int64* result);
+
+        SetElapsedRealtime(
+            [in] Int64 time);
+
+        /**
+         * Return age of this {@link NetworkStats} object with respect to
+         * {@link SystemClock#elapsedRealtime()}.
+         */
+        GetElapsedRealtimeAge(
+            [out] Int64* result);
+
+        GetSize(
+            [out] Int32* result);
+
+        // @VisibleForTesting
+        GetInternalSize(
+            [out] Int32* result);
+
+        // @Deprecated
+        CombineValues(
+            [in] String iface,
+            [in] Int32 uid,
+            [in] Int32 tag,
+            [in] Int64 rxBytes,
+            [in] Int64 rxPackets,
+            [in] Int64 txBytes,
+            [in] Int64 txPackets,
+            [in] Int64 operations);
+
+        CombineValues(
+            [in] String iface,
+            [in] Int32 uid,
+            [in] Int32 set,
+            [in] Int32 tag,
+            [in] Int64 rxBytes,
+            [in] Int64 rxPackets,
+            [in] Int64 txBytes,
+            [in] Int64 txPackets,
+            [in] Int64 operations);
+
+        /**
+         * Combine given values with an existing row, or create a new row if
+         * {@link #findIndex(String, int, int, int)} is unable to find match. Can
+         * also be used to subtract values from existing rows.
+         */
+        CombineValues(
+            [in] INetworkStatsEntry* entry);
+
+        /**
+         * Combine all values from another {@link NetworkStats} into this object.
+         */
+        CombineAllValues(
+            [in] INetworkStats* another);
+
+        /**
+         * Find first stats index that matches the requested parameters.
+         */
+        FindIndex(
+            [in] String iface,
+            [in] Int32 uid,
+            [in] Int32 set,
+            [in] Int32 tag,
+            [out] Int32* result);
+
+        /**
+         * Find first stats index that matches the requested parameters, starting
+         * search around the hinted index as an optimization.
+         */
+        //     @VisibleForTesting
+        FindIndexHinted(
+            [in] String iface,
+            [in] Int32 uid,
+            [in] Int32 set,
+            [in] Int32 tag,
+            [in] Int32 hintIndex,
+            [out] Int32* result);
+
+        /**
+         * Splice in {@link #operations} from the given {@link NetworkStats} based
+         * on matching {@link #uid} and {@link #tag} rows. Ignores {@link #iface},
+         * since operation counts are at data layer.
+         */
+        SpliceOperationsFrom(
+            [in] INetworkStats* stats);
+
+        /**
+         * Return list of unique interfaces known by this data structure.
+         */
+        GetUniqueIfaces(
+            [out, callee] ArrayOf<String>* result);
+
+        /**
+         * Return list of unique UIDs known by this data structure.
+         */
+        GetUniqueUids(
+            [out, callee] ArrayOf<Int32>* result);
+
+        /**
+         * Return total bytes represented by this snapshot object, usually used when
+         * checking if a {@link #subtract(NetworkStats)} delta passes a threshold.
+         */
+        GetTotalBytes(
+            [out] Int64* result);
+
+        /**
+         * Return total of all fields represented by this snapshot object.
+         */
+        GetTotal(
+            [in] INetworkStatsEntry* recycle,
+            [out] INetworkStatsEntry** result);
+
+        /**
+         * Return total of all fields represented by this snapshot object matching
+         * the requested {@link #uid}.
+         */
+        GetTotal(
+            [in] INetworkStatsEntry* recycle,
+            [in] Int32 limitUid,
+            [out] INetworkStatsEntry** result);
+
+        /**
+         * Return total of all fields represented by this snapshot object matching
+         * the requested {@link #iface}.
+         */
+        GetTotal(
+            [in] INetworkStatsEntry* recycle,
+            [in] IHashSet* limitIface,
+            [out] INetworkStatsEntry** result);
+
+        GetTotalIncludingTags(
+            [in] INetworkStatsEntry* recycle,
+            [out] INetworkStatsEntry** result);
+
+        /**
+         * Fast path for battery stats.
+         */
+        GetTotalPackets(
+            [out] Int64* result);
+
+        /**
+         * Subtract the given {@link NetworkStats}, effectively leaving the delta
+         * between two snapshots in time. Assumes that statistics rows collect over
+         * time, and that none of them have disappeared.
+         */
+        Subtract(
+            [in] INetworkStats* right,
+            [out] INetworkStats** result);
+
+        /**
+         * Return total statistics grouped by {@link #iface}; doesn't mutate the
+         * original structure.
+         */
+        GroupedByIface(
+            [out] INetworkStats** result);
+
+        /**
+         * Return total statistics grouped by {@link #uid}; doesn't mutate the
+         * original structure.
+         */
+        GroupedByUid(
+            [out] INetworkStats** result);
+
+        /**
+         * Return all rows except those attributed to the requested UID; doesn't
+         * mutate the original structure.
+         */
+        WithoutUids(
+            [in] ArrayOf<Int32>* uids,
+            [out] INetworkStats** result);
+
+        Dump(
+            [in] String prefix,
+            [in] IPrintWriter* pw);
+    }
+
+    interface INetworkStatsEntry {
+        GetIface(
+            [out] String* result);
+
+        SetIface(
+            [in] String iface);
+
+        GetUid(
+            [out] Int32* result);
+
+        SetUid(
+            [in] Int32 uid);
+
+        GetSet(
+            [out] Int32* result);
+
+        SetSet(
+            [in] Int32 set);
+
+        GetTag(
+            [out] Int32* result);
+
+        SetTag(
+            [in] Int32 tag);
+
+        GetRxBytes(
+            [out] Int64* result);
+
+        SetRxBytes(
+            [in] Int64 rxBytes);
+
+        GetRxPackets(
+            [out] Int64* result);
+
+        SetRxPackets(
+            [in] Int64 rxPackets);
+
+        GetTxBytes(
+            [out] Int64* result);
+
+        SetTxBytes(
+            [in] Int64 txBytes);
+
+        GetTxPackets(
+            [out] Int64* result);
+
+        SetTxPackets(
+            [in] Int64 txPackets);
+
+        GetOperations(
+            [out] Int64* result);
+
+        SetOperations(
+            [in] Int64 operations);
+
+        IsNegative(
+            [out] Boolean* result);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        Add(
+            [in] INetworkStatsEntry* another);
+    }
+
+    interface INetworkStatsNonMonotonicObserver {
+        FoundNonMonotonic(
+            [in] INetworkStats* left,
+            [in] Int32 leftIndex,
+            [in] INetworkStats* right,
+            [in] Int32 rightIndex,
+            [in] IInterface* cookie);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

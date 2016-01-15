@@ -1,0 +1,555 @@
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Net.IInterfaceConfiguration;
+    interface Elastos.Droid.Net.IINetworkManagementEventObserver;
+    interface Elastos.Droid.Net.INetwork;
+    interface Elastos.Droid.Net.INetworkStats;
+    interface Elastos.Droid.Net.IRouteInfo;
+    interface Elastos.Droid.Net.IUidRange;
+    interface Elastos.Droid.Os.INetworkActivityListener;
+    interface Elastos.Droid.Wifi.IWifiConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * @hide
+     */
+    [deprecated]
+    interface IINetworkManagementService {
+        /**
+         ** GENERAL
+         **/
+
+        /**
+         * Register an observer to receive events
+         */
+        RegisterObserver(
+            [in] IINetworkManagementEventObserver* obs);
+
+        /**
+         * Unregister an observer from receiving events.
+         */
+        UnregisterObserver(
+            [in] IINetworkManagementEventObserver* obs);
+
+        /**
+         * Returns a list of currently known network interfaces
+         */
+        ListInterfaces(
+            [out, callee] ArrayOf<String>* interfaces);
+
+        /**
+         * Retrieves the specified interface config
+         *
+         */
+        GetInterfaceConfig(
+            [in] String iface,
+            [out] IInterfaceConfiguration** config);
+
+        /**
+         * Sets the configuration of the specified interface
+         */
+        SetInterfaceConfig(
+            [in] String iface,
+            [in] IInterfaceConfiguration* cfg);
+
+        /**
+         * Clear all IP addresses on the specified interface
+         */
+        ClearInterfaceAddresses(
+            [in] String iface);
+
+        /**
+         * Set interface down
+         */
+        SetInterfaceDown(
+            [in] String iface);
+
+        /**
+         * Set interface up
+         */
+        SetInterfaceUp(
+            [in] String iface);
+
+        /**
+         * Set interface IPv6 privacy extensions
+         */
+        SetInterfaceIpv6PrivacyExtensions(
+            [in] String iface,
+            [in] Boolean enabled);
+
+        /**
+         * Disable IPv6 on an interface
+         */
+        DisableIpv6(
+            [in] String iface);
+
+        /**
+         * Enable IPv6 on an interface
+         */
+        EnableIpv6(
+            [in] String iface);
+
+        /**
+         * Retrieves the network routes currently configured on the specified
+         * interface
+         */
+        GetRoutes(
+            [in] String iface,
+            [out, callee] ArrayOf<IRouteInfo*>* routes);
+
+        /**
+         * Add the specified route to the interface.
+         */
+        AddRoute(
+            [in] Int32 netId,
+            [in] IRouteInfo* route);
+
+        /**
+         * Remove the specified route from the interface.
+         */
+        RemoveRoute(
+            [in] Int32 netId,
+            [in] IRouteInfo* route);
+
+        /**
+         * Set the specified MTU size
+         */
+        SetMtu(
+            [in] String iface,
+            [in] Int32 mtu);
+
+        /**
+         * Shuts down the service
+         */
+        Shutdown();
+
+        /**
+         ** TETHERING RELATED
+         **/
+
+        /**
+         * Returns true if IP forwarding is enabled
+         */
+        GetIpForwardingEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Enables/Disables IP Forwarding
+         */
+        SetIpForwardingEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Start tethering services with the specified dhcp server range
+         * arg is a set of start end pairs defining the ranges.
+         */
+        StartTethering(
+            [in] ArrayOf<String>* dhcpRanges);
+
+        /**
+         * Stop currently running tethering services
+         */
+        StopTethering();
+
+        /**
+         * Returns true if tethering services are started
+         */
+        IsTetheringStarted(
+            [out] Boolean* started);
+
+        /**
+         * Start bluetooth reverse tethering services
+         */
+        StartReverseTethering(
+            [in] String iface);
+
+        /**
+         * Stop currently running bluetooth reserse tethering services
+         */
+        StopReverseTethering();
+
+        /**
+         * Tethers the specified interface
+         */
+        TetherInterface(
+            [in] String iface);
+
+        /**
+         * Untethers the specified interface
+         */
+        UntetherInterface(
+            [in] String iface);
+
+        /**
+         * Returns a list of currently tethered interfaces
+         */
+        ListTetheredInterfaces(
+            [out, callee] ArrayOf<String>* interfaces);
+
+        /**
+         * Sets the list of DNS forwarders (in order of priority)
+         */
+        SetDnsForwarders(
+            [in] INetwork* network,
+            [in] ArrayOf<String>* dns);
+
+        /**
+         * Returns the list of DNS fowarders (in order of priority)
+         */
+        GetDnsForwarders(
+            [out, callee] ArrayOf<String>* dns);
+
+        /**
+         *  Enables Network Address Translation between two interfaces.
+         *  The address and netmask of the external interface is used for
+         *  the NAT'ed network.
+         */
+        EnableNat(
+            [in] String internalInterface,
+            [in] String externalInterface);
+
+        /**
+         *  Disables Network Address Translation between two interfaces.
+         */
+        DisableNat(
+            [in] String internalInterface,
+            [in] String externalInterface);
+
+        /**
+         ** PPPD
+         **/
+
+        /**
+         * Returns the list of currently known TTY devices on the system
+         */
+        ListTtys(
+            [out, callee] ArrayOf<String>* ttys);
+
+        /**
+         * Attaches a PPP server daemon to the specified TTY with the specified
+         * local/remote addresses.
+         */
+        AttachPppd(
+            [in] String tty,
+            [in] String localAddr,
+            [in] String remoteAddr,
+            [in] String dns1Addr,
+            [in] String dns2Addr);
+
+        /**
+         * Detaches a PPP server daemon from the specified TTY.
+         */
+        DetachPppd(
+            [in] String tty);
+
+        /**
+         * Load firmware for operation in the given mode. Currently the three
+         * modes supported are "AP", "STA" and "P2P".
+         */
+        WifiFirmwareReload(
+            [in] String wlanIface,
+            [in] String mode);
+
+        /**
+         * Start Wifi Access Point
+         */
+        StartAccessPoint(
+            [in] IWifiConfiguration* wifiConfig,
+            [in] String iface);
+
+        /**
+         * Stop Wifi Access Point
+         */
+        StopAccessPoint(
+            [in] String iface);
+
+        /**
+         * Set Access Point config
+         */
+        SetAccessPoint(
+            [in] IWifiConfiguration* wifiConfig,
+            [in] String iface);
+
+        /**
+         ** DATA USAGE RELATED
+         **/
+
+        /**
+         * Return global network statistics summarized at an interface level,
+         * without any UID-level granularity.
+         */
+        GetNetworkStatsSummaryDev(
+            [out] INetworkStats** stats);
+
+        GetNetworkStatsSummaryXt(
+            [out] INetworkStats** stats);
+
+        /**
+         * Return detailed network statistics with UID-level granularity,
+         * including interface and tag details.
+         */
+        GetNetworkStatsDetail(
+            [out] INetworkStats** stats);
+
+        /**
+         * Return detailed network statistics for the requested UID,
+         * including interface and tag details.
+         */
+        GetNetworkStatsUidDetail(
+            [in] Int32 uid,
+            [out] INetworkStats** stats);
+
+        /**
+         * Return summary of network statistics all tethering interfaces.
+         */
+        GetNetworkStatsTethering(
+            [out] INetworkStats** stats);
+
+        /**
+         * Set quota for an interface.
+         */
+        SetInterfaceQuota(
+            [in] String iface,
+            [in] Int64 quotaBytes);
+
+        /**
+         * Remove quota for an interface.
+         */
+        RemoveInterfaceQuota(
+            [in] String iface);
+
+        /**
+         * Set alert for an interface; requires that iface already has quota.
+         */
+        SetInterfaceAlert(
+            [in] String iface,
+            [in] Int64 alertBytes);
+
+        /**
+         * Remove alert for an interface.
+         */
+        RemoveInterfaceAlert(
+            [in] String iface);
+
+        /**
+         * Set alert across all interfaces.
+         */
+        SetGlobalAlert(
+            [in] Int64 alertBytes);
+
+        /**
+         * Control network activity of a UID over interfaces with a quota limit.
+         */
+        SetUidNetworkRules(
+            [in] Int32 uid,
+            [in] Boolean rejectOnQuotaInterfaces);
+
+        /**
+         * Return status of bandwidth control module.
+         */
+        IsBandwidthControlEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Sets idletimer for an interface.
+         *
+         * This either initializes a new idletimer or increases its
+         * reference-counting if an idletimer already exists for given
+         * {@code iface}.
+         *
+         * {@code type} is the type of the interface, such as TYPE_MOBILE.
+         *
+         * Every {@code addIdleTimer} should be paired with a
+         * {@link removeIdleTimer} to cleanup when the network disconnects.
+         */
+        AddIdleTimer(
+            [in] String iface,
+            [in] Int32 timeout,
+            [in] Int32 type);
+
+        /**
+         * Removes idletimer for an interface.
+         */
+        RemoveIdleTimer(
+            [in] String iface);
+
+        /**
+         * Bind name servers to a network in the DNS resolver.
+         */
+        SetDnsServersForNetwork(
+            [in] Int32 netId,
+            [in] ArrayOf<String>* servers,
+            [in] String domains);
+
+        /**
+         * Flush the DNS cache associated with the specified network.
+         */
+        FlushNetworkDnsCache(
+            [in] Int32 netId);
+
+        /**
+         * Bind name servers to an interface in the DNS resolver.
+         */
+        SetDnsServersForInterface(
+            [in] String iface,
+            [in] ArrayOf<String>* servers);
+
+        /**
+         * Flush the DNS cache associated with the specified interface.
+         */
+        FlushInterfaceDnsCache(
+            [in] String iface);
+
+        SetFirewallEnabled(
+            [in] Boolean enabled,
+            [out] Boolean* prev);
+
+        IsFirewallEnabled(
+            [out] Boolean* enabled);
+
+        SetFirewallInterfaceRule(
+            [in] String iface,
+            [in] Boolean allow);
+
+        SetFirewallEgressSourceRule(
+            [in] String addr,
+            [in] Boolean allow);
+
+        SetFirewallEgressDestRule(
+            [in] String addr,
+            [in] Int32 port,
+            [in] Boolean allow);
+
+        SetFirewallUidRule(
+            [in] Int32 uid,
+            [in] Boolean allow);
+
+        /**
+         * Set all packets from users in ranges to go through VPN specified by netId.
+         */
+        AddVpnUidRanges(
+            [in] Int32 netId,
+            [in] ArrayOf<IUidRange*>* ranges);
+
+        /**
+         * Clears the special VPN rules for users in ranges and VPN specified by netId.
+         */
+        RemoveVpnUidRanges(
+            [in] Int32 netId,
+            [in] ArrayOf<IUidRange*>* ranges);
+
+        /**
+         * Start the clatd (464xlat) service
+         */
+        StartClatd(
+            [in] String interfaceName);
+
+        /**
+         * Stop the clatd (464xlat) service
+         */
+        StopClatd();
+
+        /**
+         * Determine whether the clatd (464xlat) service has been started
+         */
+        IsClatdStarted(
+            [out] Boolean* result);
+
+        /**
+         * Start listening for mobile activity state changes.
+         */
+        RegisterNetworkActivityListener(
+            [in] INetworkActivityListener* listener);
+
+        /**
+         * Stop listening for mobile activity state changes.
+         */
+        UnregisterNetworkActivityListener(
+            [in] INetworkActivityListener* listener);
+
+        /**
+         * Check whether the mobile radio is currently active.
+         */
+        IsNetworkActive(
+            [out] Boolean* result);
+
+        /**
+         * Setup a new physical network.
+         */
+        CreatePhysicalNetwork(
+            [in] Int32 netId);
+
+        /**
+         * Setup a new VPN.
+         */
+        CreateVirtualNetwork(
+            [in] Int32 netId,
+            [in] Boolean hasDNS,
+            [in] Boolean secure);
+
+        /**
+         * Remove a network.
+         */
+        RemoveNetwork(
+            [in] Int32 netId);
+
+        /**
+         * Add an interface to a network.
+         */
+        AddInterfaceToNetwork(
+            [in] String iface,
+            [in] Int32 netId);
+
+        /**
+         * Remove an Interface from a network.
+         */
+        RemoveInterfaceFromNetwork(
+            [in] String iface,
+            [in] Int32 netId);
+
+        AddLegacyRouteForNetId(
+            [in] Int32 netId,
+            [in] IRouteInfo* routeInfo,
+            [in] Int32 uid);
+
+        SetDefaultNetId(
+            [in] Int32 netId);
+
+        ClearDefaultNetId();
+
+        SetPermission(
+            [in] String permission,
+            [in] ArrayOf<Int32>* uids);
+
+        ClearPermission(
+            [in] ArrayOf<Int32>* uids);
+
+        /**
+         * Allow UID to call protect().
+         */
+        AllowProtect(
+            [in] Int32 uid);
+
+        /**
+         * Deny UID from calling protect().
+         */
+        DenyProtect(
+            [in] Int32 uid);
+
+        AddInterfaceToLocalNetwork(
+            [in] String iface,
+            [in] IList* routes); //List<RouteInfo>
+
+        RemoveInterfaceFromLocalNetwork(
+            [in] String iface);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

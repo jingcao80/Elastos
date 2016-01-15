@@ -1,0 +1,29 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace IO {
+
+    interface IHttpTransportMetrics {
+
+        /**
+         * Returns the number of bytes trasferred.
+         */
+        GetBytesTransferred(
+            [out] Int64* number);
+
+        /**
+         * Resets the counts
+         */
+        Reset();
+    }
+
+    } // namespace IO
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,56 @@
+
+module
+{
+    interface Elastos.Security.ICodeSigner;
+    interface Elastos.Security.Cert.ICertificate;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    /**
+     * @Involve
+     * interface IZipEntry;
+     */
+    interface IJarEntry {
+        /**
+         * Returns the {@code Attributes} object associated with this entry or
+         * {@code null} if none exists.
+         *
+         * @return the {@code Attributes} for this entry.
+         * @exception IOException
+         *                If an error occurs obtaining the {@code Attributes}.
+         * @see Attributes
+         */
+        GetAttributes(
+            [out] IAttributes** attrib);
+
+        /**
+         * Returns an array of {@code Certificate} Objects associated with this
+         * entry or {@code null} if none exists. Make sure that the everything is
+         * read from the input stream before calling this method, or else the method
+         * returns {@code null}.
+         *
+         * @return the certificate for this entry.
+         * @see java.security.cert.Certificate
+         */
+        GetCertificates(
+            [out, callee] ArrayOf<ICertificate*>* certificates);
+
+        /**
+         * Returns the code signers for the digital signatures associated with the
+         * JAR file. If there is no such code signer, it returns {@code null}. Make
+         * sure that the everything is read from the input stream before calling
+         * this method, or else the method returns {@code null}.
+         *
+         * @return the code signers for the JAR entry.
+         * @see CodeSigner
+        */
+        GetCodeSigners(
+            [out, callee] ArrayOf<ICodeSigner*>* codeSigner);
+    }
+
+    } //Jar
+    } //Utility
+    } //Elastos
+}

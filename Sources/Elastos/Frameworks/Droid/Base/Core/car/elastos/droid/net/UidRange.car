@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * An inclusive range of UIDs.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IUidRange {
+        GetStart(
+            [out] Int32* result);
+
+        GetStop(
+            [out] Int32* result);
+
+        GetStartUser(
+            [out] Int32* result);
+    }
+
+    interface IUidRangeHelper {
+        CreateForUser(
+            [in] Int32 userId,
+            [out] IUidRange** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

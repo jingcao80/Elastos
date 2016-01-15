@@ -1,0 +1,52 @@
+
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Stack {
+
+    /**
+     * Filters the animations for only a certain type of properties.
+     */
+    interface IAnimationFilter {
+        AnimateAlpha();
+
+        AnimateY();
+
+        HasDelays();
+
+        AnimateZ();
+
+        AnimateScale();
+
+        AnimateHeight();
+
+        AnimateTopInset();
+
+        AnimateDimmed();
+
+        AnimateDark();
+
+        AnimateHideSensitive();
+
+        /**
+         * Combines multiple filters into {@code this} filter, using or as the operand .
+         *
+         * @param events The animation events from the filters to combine.
+         */
+        ApplyCombination(
+            [in] IArrayList* events);
+    }
+
+    } // namespace Stack
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

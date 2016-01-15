@@ -1,0 +1,87 @@
+
+module
+{
+    interface Elastos.Core.IComparator;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+
+    /**
+     * An unbounded {@linkplain BlockingQueue blocking queue} that uses
+     * the same ordering rules as class {@link PriorityQueue} and supplies
+     * blocking retrieval operations.  While this queue is logically
+     * unbounded, attempted additions may fail due to resource exhaustion
+     * (causing {@code OutOfMemoryError}). This class does not permit
+     * {@code null} elements.  A priority queue relying on {@linkplain
+     * Comparable natural ordering} also does not permit insertion of
+     * non-comparable objects (doing so results in
+     * {@code ClassCastException}).
+     *
+     * <p>This class and its iterator implement all of the
+     * <em>optional</em> methods of the {@link Collection} and {@link
+     * Iterator} interfaces.  The Iterator provided in method {@link
+     * #iterator()} is <em>not</em> guaranteed to traverse the elements of
+     * the PriorityBlockingQueue in any particular order. If you need
+     * ordered traversal, consider using
+     * {@code Arrays.sort(pq.toArray())}.  Also, method {@code drainTo}
+     * can be used to <em>remove</em> some or all elements in priority
+     * order and place them in another collection.
+     *
+     * <p>Operations on this class make no guarantees about the ordering
+     * of elements with equal priority. If you need to enforce an
+     * ordering, you can define custom classes or comparators that use a
+     * secondary key to break ties in primary priority values.  For
+     * example, here is a class that applies first-in-first-out
+     * tie-breaking to comparable elements. To use it, you would insert a
+     * {@code new FIFOEntry(anEntry)} instead of a plain entry object.
+     *
+     *  <pre> {@code
+     * class FIFOEntry<E extends Comparable<? super E>>
+     *     implements Comparable<FIFOEntry<E>> {
+     *   static final AtomicLong seq = new AtomicLong(0);
+     *   final long seqNum;
+     *   final E entry;
+     *   public FIFOEntry(E entry) {
+     *     seqNum = seq.getAndIncrement();
+     *     this.entry = entry;
+     *   }
+     *   public E getEntry() { return entry; }
+     *   public int compareTo(FIFOEntry<E> other) {
+     *     int res = entry.compareTo(other.entry);
+     *     if (res == 0 && other.entry != this.entry)
+     *       res = (seqNum < other.seqNum ? -1 : 1);
+     *     return res;
+     *   }
+     * }}</pre>
+     *
+     * @since 1.5
+     * @author Doug Lea
+     * @param <E> the type of elements held in this collection
+     */
+
+    /**
+     * @Involve
+     * interface IIterable;
+     * interface ICollection;
+     * interface IQueue;
+     * interface IBlockingQueue;
+     */
+    interface IPriorityBlockingQueue {
+        /**
+         * Returns the comparator used to order the elements in this queue,
+         * or {@code null} if this queue uses the {@linkplain Comparable
+         * natural ordering} of its elements.
+         *
+         * @return the comparator used to order the elements in this queue,
+         *         or {@code null} if this queue uses the natural
+         *         ordering of its elements
+         */
+        GetComparator(
+            [out] IComparator** outcom);
+    }
+
+    } // Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

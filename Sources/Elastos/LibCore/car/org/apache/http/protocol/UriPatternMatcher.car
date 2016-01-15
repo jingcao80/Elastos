@@ -1,0 +1,54 @@
+
+module
+{
+
+    using interface Elastos.Utility.IMap;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+    /**
+     * Maintains a map of objects keyed by a request URI pattern.
+     * Instances can be looked up by request URI.<br/>
+     * Patterns may have three formats:
+     * <ul>
+     *   <li><code>*</code></li>
+     *   <li><code>*&lt;uri&gt;</code></li>
+     *   <li><code>&lt;uri&gt;*</code></li>
+     * </ul>
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 630662 $
+     */
+    interface IUriPatternMatcher {
+
+        Register(
+            [in] String pattern,
+            [in] IInterface* handler);
+
+        Unregister(
+            [in] String pattern);
+
+        SetHandlers(
+            [in] IMap* map);
+
+        Lookup(
+            [in] String requestURI,
+            [out] IInterface** value);
+
+        MatchUriRequestPattern(
+            [in] String pattern,
+            [in] String requestUri,
+            [out] Boolean* isMatch);
+
+    }
+
+    } // namespace Protocol
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

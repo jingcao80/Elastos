@@ -1,0 +1,18 @@
+TARGET_NAME= remote
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = AbstractDeviceFactory.cpp
+SOURCES += LanDispatcher.cpp
+SOURCES += RemoteCmdListener.cpp
+SOURCES += RemoteUtils.cpp
+SOURCES += ResultMsg.cpp
+SOURCES += ServerSocketTimer.cpp
+SOURCES += SessionCmdTask.cpp
+SOURCES += ZigbeeFactory.cpp
+SOURCES += RouterSettingFactory.cpp

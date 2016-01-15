@@ -1,0 +1,839 @@
+module
+{
+    interface Elastos.Core.IComparator;
+    interface Elastos.Utility.IRandom;
+    interface Elastos.Utility.IArrayList;
+
+    namespace Elastos {
+    namespace Utility {
+
+    [deprecated]
+    interface ICollections {
+    /**
+     * Performs a binary search for the specified element in the specified
+     * sorted list. The list needs to be already sorted in natural sorting
+     * order. Searching in an unsorted array has an undefined result. It's also
+     * undefined which element is found if there are multiple occurrences of the
+     * same element.
+     *
+     * @param list
+     *            the sorted list to search.
+     * @param object
+     *            the element to find.
+     * @return the non-negative index of the element, or a negative index which
+     *         is the {@code -index - 1} where the element would be inserted
+     * @throws ClassCastException
+     *             if an element in the List or the search element does not
+     *             implement Comparable, or cannot be compared to each other.
+     */
+    BinarySearch(
+        [in] IList* list,
+        [in] IInterface* object,
+        [out] Int32* index);
+
+    /**
+     * Performs a binary search for the specified element in the specified
+     * sorted list using the specified comparator. The list needs to be already
+     * sorted according to the comparator passed. Searching in an unsorted array
+     * has an undefined result. It's also undefined which element is found if
+     * there are multiple occurrences of the same element.
+     *
+     * @param list
+     *            the sorted List to search.
+     * @param object
+     *            the element to find.
+     * @param comparator
+     *            the comparator. If the comparator is {@code null} then the
+     *            search uses the objects' natural ordering.
+     * @return the non-negative index of the element, or a negative index which
+     *         is the {@code -index - 1} where the element would be inserted.
+     * @throws ClassCastException
+     *             when an element in the list and the searched element cannot
+     *             be compared to each other using the comparator.
+     */
+    BinarySearch(
+        [in] IList* list,
+        [in] IInterface* object,
+        [in] IComparator* comparator,
+        [out] Int32* index);
+
+    /**
+     * Copies the elements from the source list to the destination list. At the
+     * end both lists will have the same objects at the same index. If the
+     * destination array is larger than the source list, the elements in the
+     * destination list with {@code index >= source.size()} will be unchanged.
+     *
+     * @param destination
+     *            the list whose elements are set from the source list.
+     * @param source
+     *            the list with the elements to be copied into the destination.
+     * @throws IndexOutOfBoundsException
+     *             when the destination list is smaller than the source list.
+     * @throws UnsupportedOperationException
+     *             when replacing an element in the destination list is not
+     *             supported.
+     */
+    Copy(
+        [in] IList* destination,
+        [in] IList* source);
+
+    /**
+     * Returns an {@code Enumeration} on the specified collection.
+     *
+     * @param collection
+     *            the collection to enumerate.
+     * @return an Enumeration.
+     */
+    Enumeration(
+        [in] ICollection* collection,
+        [out] IEnumeration** result);
+
+    /**
+     * Fills the specified list with the specified element.
+     *
+     * @param list
+     *            the list to fill.
+     * @param object
+     *            the element to fill the list with.
+     * @throws UnsupportedOperationException
+     *             when replacing an element in the List is not supported.
+     */
+    Fill(
+        [in] IList* list,
+        [in] IInterface* object);
+
+    /**
+     * Searches the specified collection for the maximum element.
+     *
+     * @param collection
+     *            the collection to search.
+     * @return the maximum element in the Collection.
+     * @throws ClassCastException
+     *             when an element in the collection does not implement
+     *             {@code Comparable} or elements cannot be compared to each
+     *             other.
+     */
+    Max(
+        [in] ICollection* collection,
+        [out] PInterface* result);
+
+    /**
+     * Searches the specified collection for the maximum element using the
+     * specified comparator.
+     *
+     * @param collection
+     *            the collection to search.
+     * @param comparator
+     *            the comparator.
+     * @return the maximum element in the Collection.
+     * @throws ClassCastException
+     *             when elements in the collection cannot be compared to each
+     *             other using the {@code Comparator}.
+     */
+    Max(
+        [in] ICollection* collection,
+        [in] IComparator* comparator,
+        [out] PInterface* result);
+
+    /**
+     * Searches the specified collection for the minimum element.
+     *
+     * @param collection
+     *            the collection to search.
+     * @return the minimum element in the collection.
+     * @throws ClassCastException
+     *             when an element in the collection does not implement
+     *             {@code Comparable} or elements cannot be compared to each
+     *             other.
+     */
+    Min(
+        [in] ICollection* collection,
+        [out] PInterface* result);
+
+    /**
+     * Searches the specified collection for the minimum element using the
+     * specified comparator.
+     *
+     * @param collection
+     *            the collection to search.
+     * @param comparator
+     *            the comparator.
+     * @return the minimum element in the collection.
+     * @throws ClassCastException
+     *             when elements in the collection cannot be compared to each
+     *             other using the {@code Comparator}.
+     */
+    Min(
+        [in] ICollection* collection,
+        [in] IComparator* comparator,
+        [out] PInterface* result);
+
+    /**
+     * Returns a list containing the specified number of the specified element.
+     * The list cannot be modified. The list is serializable.
+     *
+     * @param length
+     *            the size of the returned list.
+     * @param object
+     *            the element to be added {@code length} times to a list.
+     * @return a list containing {@code length} copies of the element.
+     * @throws IllegalArgumentException
+     *             when {@code length < 0}.
+     */
+    NCopies(
+        [in] Int32 length,
+        [in] IInterface* object,
+        [out] IList** result);
+
+    /**
+     * Modifies the specified {@code List} by reversing the order of the
+     * elements.
+     *
+     * @param list
+     *            the list to reverse.
+     * @throws UnsupportedOperationException
+     *             when replacing an element in the List is not supported.
+     */
+    Reverse(
+        [in] IList* list);
+
+    /**
+     * A comparator which reverses the natural order of the elements. The
+     * {@code Comparator} that's returned is {@link Serializable}.
+     *
+     * @return a {@code Comparator} instance.
+     */
+    ReverseOrder(
+        [out] IComparator** result);
+
+    /**
+     * Returns a {@link Comparator} that reverses the order of the
+     * {@code Comparator} passed. If the {@code Comparator} passed is
+     * {@code null}, then this method is equivalent to {@link #reverseOrder()}.
+     * <p>
+     * The {@code Comparator} that's returned is {@link Serializable} if the
+     * {@code Comparator} passed is serializable or {@code null}.
+     *
+     * @param c
+     *            the {@code Comparator} to reverse or {@code null}.
+     * @return a {@code Comparator} instance.
+     * @since 1.5
+     */
+    ReverseOrder(
+        [in] IComparator* c,
+        [out] IComparator** result);
+
+    /**
+     * Moves every element of the list to a random new position in the list.
+     *
+     * @param list
+     *            the List to shuffle.
+     *
+     * @throws UnsupportedOperationException
+     *             when replacing an element in the List is not supported.
+     */
+    Shuffle(
+        [in] IList* list);
+
+    /**
+     * Moves every element of the list to a random new position in the list
+     * using the specified random number generator.
+     *
+     * @param list
+     *            the list to shuffle.
+     * @param random
+     *            the random number generator.
+     * @throws UnsupportedOperationException
+     *             when replacing an element in the list is not supported.
+     */
+    Shuffle(
+        [in] IList* list,
+        [in] IRandom* random);
+
+    /**
+     * Returns a set containing the specified element. The set cannot be
+     * modified. The set is serializable.
+     *
+     * @param object
+     *            the element.
+     * @return a set containing the element.
+     */
+    Singleton(
+        [in] IInterface* object,
+        [out] ISet** result);
+
+    /**
+     * Returns a list containing the specified element. The list cannot be
+     * modified. The list is serializable.
+     *
+     * @param object
+     *            the element.
+     * @return a list containing the element.
+     */
+    SingletonList(
+        [in] IInterface* object,
+        [out] IList** result);
+
+    /**
+     * Returns a Map containing the specified key and value. The map cannot be
+     * modified. The map is serializable.
+     *
+     * @param key
+     *            the key.
+     * @param value
+     *            the value.
+     * @return a Map containing the key and value.
+     */
+    SingletonMap(
+        [in] PInterface key,
+        [in] PInterface value,
+        [out] IMap** result);
+
+    /**
+     * Sorts the specified list in ascending natural order. The algorithm is
+     * stable which means equal elements don't get reordered.
+     *
+     * @param list
+     *            the list to be sorted.
+     * @throws ClassCastException
+     *             when an element in the List does not implement Comparable or
+     *             elements cannot be compared to each other.
+     */
+    Sort(
+        [in] IList* list);
+
+    /**
+     * Sorts the specified list using the specified comparator. The algorithm is
+     * stable which means equal elements don't get reordered.
+     *
+     * @param list
+     *            the list to be sorted.
+     * @param comparator
+     *            the comparator.
+     * @throws ClassCastException
+     *             when elements in the list cannot be compared to each other
+     *             using the comparator.
+     */
+    Sort(
+        [in] IList* list,
+        [in] IComparator* comparator);
+
+    /**
+     * Swaps the elements of list {@code list} at indices {@code index1} and
+     * {@code index2}.
+     *
+     * @param list
+     *            the list to manipulate.
+     * @param index1
+     *            position of the first element to swap with the element in
+     *            index2.
+     * @param index2
+     *            position of the other element.
+     *
+     * @throws IndexOutOfBoundsException
+     *             if index1 or index2 is out of range of this list.
+     * @since 1.4
+     */
+    Swap(
+        [in] IList* list,
+        [in] Int32 index1,
+        [in] Int32 index2);
+
+    /**
+     * Replaces all occurrences of Object {@code obj} in {@code list} with
+     * {@code newObj}. If the {@code obj} is {@code null}, then all
+     * occurrences of {@code null} are replaced with {@code newObj}.
+     *
+     * @param list
+     *            the list to modify.
+     * @param obj
+     *            the object to find and replace occurrences of.
+     * @param obj2
+     *            the object to replace all occurrences of {@code obj} in
+     *            {@code list}.
+     * @return true, if at least one occurrence of {@code obj} has been found in
+     *         {@code list}.
+     * @throws UnsupportedOperationException
+     *             if the list does not support setting elements.
+     */
+    ReplaceAll(
+        [in] IList* list,
+        [in] IInterface* obj,
+        [in] IInterface* obj2,
+        [out] Boolean* result);
+
+    /**
+     * Rotates the elements in {@code list} by the distance {@code dist}
+     * <p>
+     * e.g. for a given list with elements [1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+     * calling rotate(list, 3) or rotate(list, -7) would modify the list to look
+     * like this: [8, 9, 0, 1, 2, 3, 4, 5, 6, 7]
+     *
+     * @param lst
+     *            the list whose elements are to be rotated.
+     * @param dist
+     *            is the distance the list is rotated. This can be any valid
+     *            integer. Negative values rotate the list backwards.
+     */
+    Rotate(
+        [in] IList* lst,
+        [in] Int32 dist);
+
+    /**
+     * Searches the {@code list} for {@code sublist} and returns the beginning
+     * index of the first occurrence.
+     * <p>
+     * -1 is returned if the {@code sublist} does not exist in {@code list}.
+     *
+     * @param list
+     *            the List to search {@code sublist} in.
+     * @param sublist
+     *            the List to search in {@code list}.
+     * @return the beginning index of the first occurrence of {@code sublist} in
+     *         {@code list}, or -1.
+     */
+    IndexOfSubList(
+        [in] IList* list,
+        [in] IList* sublist,
+        [out] Int32* index);
+
+    /**
+     * Searches the {@code list} for {@code sublist} and returns the beginning
+     * index of the last occurrence.
+     * <p>
+     * -1 is returned if the {@code sublist} does not exist in {@code list}.
+     *
+     * @param list
+     *            the list to search {@code sublist} in.
+     * @param sublist
+     *            the list to search in {@code list}.
+     * @return the beginning index of the last occurrence of {@code sublist} in
+     *         {@code list}, or -1.
+     */
+    LastIndexOfSubList(
+        [in] IList* list,
+        [in] IList* sublist,
+        [out] Int32* index);
+
+    /**
+     * Returns an {@code ArrayList} with all the elements in the {@code
+     * enumeration}. The elements in the returned {@code ArrayList} are in the
+     * same order as in the {@code enumeration}.
+     *
+     * @param enumeration
+     *            the source {@link Enumeration}.
+     * @return an {@code ArrayList} from {@code enumeration}.
+     */
+    List(
+        [in] IEnumeration* enumeration,
+        [out] IArrayList** result);
+
+    /**
+     * Returns a wrapper on the specified collection which synchronizes all
+     * access to the collection.
+     *
+     * @param collection
+     *            the Collection to wrap in a synchronized collection.
+     * @return a synchronized Collection.
+     */
+    SynchronizedCollection(
+        [in] ICollection* collection,
+        [out] ICollection** result);
+
+    /**
+     * Returns a wrapper on the specified List which synchronizes all access to
+     * the List.
+     *
+     * @param list
+     *            the List to wrap in a synchronized list.
+     * @return a synchronized List.
+     */
+    SynchronizedList(
+        [in] IList* list,
+        [out] IList** result);
+
+    /**
+     * Returns a wrapper on the specified map which synchronizes all access to
+     * the map.
+     *
+     * @param map
+     *            the map to wrap in a synchronized map.
+     * @return a synchronized Map.
+     */
+    SynchronizedMap(
+        [in] IMap* map,
+        [out] IMap** result);
+
+    /**
+     * Returns a wrapper on the specified set which synchronizes all access to
+     * the set.
+     *
+     * @param set
+     *            the set to wrap in a synchronized set.
+     * @return a synchronized set.
+     */
+    SynchronizedSet(
+        [in] ISet* set,
+        [out] ISet** result);
+
+    /**
+     * Returns a wrapper on the specified sorted map which synchronizes all
+     * access to the sorted map.
+     *
+     * @param map
+     *            the sorted map to wrap in a synchronized sorted map.
+     * @return a synchronized sorted map.
+     */
+    SynchronizedSortedMap(
+        [in] ISortedMap* map,
+        [out] ISortedMap** result);
+
+    /**
+     * Returns a wrapper on the specified sorted set which synchronizes all
+     * access to the sorted set.
+     *
+     * @param set
+     *            the sorted set to wrap in a synchronized sorted set.
+     * @return a synchronized sorted set.
+     */
+    SynchronizedSortedSet(
+        [in] ISortedSet* set,
+        [out] ISortedSet** result);
+
+    /**
+     * Returns a wrapper on the specified collection which throws an
+     * {@code UnsupportedOperationException} whenever an attempt is made to
+     * modify the collection.
+     *
+     * @param collection
+     *            the collection to wrap in an unmodifiable collection.
+     * @return an unmodifiable collection.
+     */
+    UnmodifiableCollection(
+        [in] ICollection* collection,
+        [out] ICollection** result);
+
+    /**
+     * Returns a wrapper on the specified list which throws an
+     * {@code UnsupportedOperationException} whenever an attempt is made to
+     * modify the list.
+     *
+     * @param list
+     *            the list to wrap in an unmodifiable list.
+     * @return an unmodifiable List.
+     */
+    UnmodifiableList(
+        [in] IList* list,
+        [out] IList** result);
+
+    /**
+     * Returns a wrapper on the specified map which throws an
+     * {@code UnsupportedOperationException} whenever an attempt is made to
+     * modify the map.
+     *
+     * @param map
+     *            the map to wrap in an unmodifiable map.
+     * @return a unmodifiable map.
+     */
+    UnmodifiableMap(
+        [in] IMap* map,
+        [out] IMap** result);
+
+    /**
+     * Returns a wrapper on the specified set which throws an
+     * {@code UnsupportedOperationException} whenever an attempt is made to
+     * modify the set.
+     *
+     * @param set
+     *            the set to wrap in an unmodifiable set.
+     * @return a unmodifiable set
+     */
+    UnmodifiableSet(
+        [in] ISet* set,
+        [out] ISet** result);
+
+    /**
+     * Returns a wrapper on the specified sorted map which throws an
+     * {@code UnsupportedOperationException} whenever an attempt is made to
+     * modify the sorted map.
+     *
+     * @param map
+     *            the sorted map to wrap in an unmodifiable sorted map.
+     * @return a unmodifiable sorted map
+     */
+    UnmodifiableSortedMap(
+        [in] ISortedMap* map,
+        [out] ISortedMap** result);
+
+    /**
+     * Returns a wrapper on the specified sorted set which throws an
+     * {@code UnsupportedOperationException} whenever an attempt is made to
+     * modify the sorted set.
+     *
+     * @param set
+     *            the sorted set to wrap in an unmodifiable sorted set.
+     * @return a unmodifiable sorted set.
+     */
+    UnmodifiableSortedSet(
+        [in] ISortedSet* set,
+        [out] ISortedSet** result);
+
+    /**
+     * Returns the number of elements in the {@code Collection} that match the
+     * {@code Object} passed. If the {@code Object} is {@code null}, then the
+     * number of {@code null} elements is returned.
+     *
+     * @param c
+     *            the {@code Collection} to search.
+     * @param o
+     *            the {@code Object} to search for.
+     * @return the number of matching elements.
+     * @throws NullPointerException
+     *             if the {@code Collection} parameter is {@code null}.
+     * @since 1.5
+     */
+    Frequency(
+        [in] ICollection* c,
+        [in] IInterface* o,
+        [out] Int32* result);
+
+    /**
+     * Returns a type-safe empty, immutable {@link List}.
+     *
+     * @return an empty {@link List}.
+     * @since 1.5
+     * @see #EMPTY_LIST
+     */
+    GetEmptyList(
+        [out] IList** result);
+
+    /**
+     * Returns a type-safe empty, immutable {@link Set}.
+     *
+     * @return an empty {@link Set}.
+     * @since 1.5
+     * @see #EMPTY_SET
+     */
+    GetEmptySet(
+        [out] ISet** result);
+
+    /**
+     * Returns a type-safe empty, immutable {@link Map}.
+     *
+     * @return an empty {@link Map}.
+     * @since 1.5
+     * @see #EMPTY_MAP
+     */
+    GetEmptyMap(
+        [out] IMap** result);
+
+    /**
+     * Returns an enumeration containing no elements.
+     * @hide 1.7
+     */
+    GetEmptyEnumeration(
+        [out] IEnumeration** result);
+
+    /**
+     * Returns an iterator containing no elements.
+     * @hide 1.7
+     */
+    GetEmptyIterator(
+        [out] IIterator** result);
+
+    /**
+     * Returns a list iterator containing no elements.
+     * @hide 1.7
+     */
+    GetEmptyListIterator(
+        [out] IListIterator** result);
+
+    /**
+     * Returns a dynamically typesafe view of the specified collection. Trying
+     * to insert an element of the wrong type into this collection throws a
+     * {@code ClassCastException}. At creation time the types in {@code c} are
+     * not checked for correct type.
+     *
+     * @param c
+     *            the collection to be wrapped in a typesafe collection.
+     * @param type
+     *            the type of the elements permitted to insert.
+     * @return a typesafe collection.
+     */
+    CheckedCollection(
+        [in] ICollection* c,
+        [in] InterfaceID type,
+        [out] ICollection** result);
+
+    /**
+     * Returns a dynamically typesafe view of the specified map. Trying to
+     * insert an element of the wrong type into this map throws a
+     * {@code ClassCastException}. At creation time the types in {@code m} are
+     * not checked for correct type.
+     *
+     * @param m
+     *            the map to be wrapped in a typesafe map.
+     * @param keyType
+     *            the type of the keys permitted to insert.
+     * @param valueType
+     *            the type of the values permitted to insert.
+     * @return a typesafe map.
+     */
+    CheckedMap(
+        [in] IMap* m,
+        [in] InterfaceID keyType,
+        [in] InterfaceID valueType,
+        [out] IMap** result);
+
+    /**
+     * Returns a dynamically typesafe view of the specified list. Trying to
+     * insert an element of the wrong type into this list throws a
+     * {@code ClassCastException}. At creation time the types in {@code list}
+     * are not checked for correct type.
+     *
+     * @param list
+     *            the list to be wrapped in a typesafe list.
+     * @param type
+     *            the type of the elements permitted to insert.
+     * @return a typesafe list.
+     */
+    CheckedList(
+        [in] IList* list,
+        [in] InterfaceID type,
+        [out] IList** result);
+
+    /**
+     * Returns a dynamically typesafe view of the specified set. Trying to
+     * insert an element of the wrong type into this set throws a
+     * {@code ClassCastException}. At creation time the types in {@code s} are
+     * not checked for correct type.
+     *
+     * @param s
+     *            the set to be wrapped in a typesafe set.
+     * @param type
+     *            the type of the elements permitted to insert.
+     * @return a typesafe set.
+     */
+    CheckedSet(
+        [in] ISet* s,
+        [in] InterfaceID type,
+        [out] ISet** result);
+
+    /**
+     * Returns a dynamically typesafe view of the specified sorted map. Trying
+     * to insert an element of the wrong type into this sorted map throws a
+     * {@code ClassCastException}. At creation time the types in {@code m} are
+     * not checked for correct type.
+     *
+     * @param m
+     *            the sorted map to be wrapped in a typesafe sorted map.
+     * @param keyType
+     *            the type of the keys permitted to insert.
+     * @param valueType
+     *            the type of the values permitted to insert.
+     * @return a typesafe sorted map.
+     */
+    CheckedSortedMap(
+        [in] ISortedMap* m,
+        [in] InterfaceID keyType,
+        [in] InterfaceID valueType,
+        [out] ISortedMap** result);
+
+    /**
+     * Returns a dynamically typesafe view of the specified sorted set. Trying
+     * to insert an element of the wrong type into this sorted set throws a
+     * {@code ClassCastException}. At creation time the types in {@code s} are
+     * not checked for correct type.
+     *
+     * @param s
+     *            the sorted set to be wrapped in a typesafe sorted set.
+     * @param type
+     *            the type of the elements permitted to insert.
+     * @return a typesafe sorted set.
+     */
+    CheckedSortedSet(
+        [in] ISortedSet* s,
+        [in] InterfaceID type,
+        [out] ISortedSet** result);
+
+    /**
+     * Adds all the specified elements to the specified collection.
+     *
+     * @param c
+     *            the collection the elements are to be inserted into.
+     * @param a
+     *            the elements to insert.
+     * @return true if the collection changed during insertion.
+     * @throws UnsupportedOperationException
+     *             when the method is not supported.
+     * @throws NullPointerException
+     *             when {@code c} or {@code a} is {@code null}, or {@code a}
+     *             contains one or more {@code null} elements and {@code c}
+     *             doesn't support {@code null} elements.
+     * @throws IllegalArgumentException
+     *             if at least one of the elements can't be inserted into the
+     *             collection.
+     */
+    AddAll(
+        [in] ICollection* c,
+        [in] ArrayOf<IInterface*>* a,
+        [out] Boolean* result);
+
+    AddAll(
+        [in] ICollection* c,
+        [in] ArrayOf<IInterface*>* a);
+
+    /**
+     * Returns whether the specified collections have no elements in common.
+     *
+     * @param c1
+     *            the first collection.
+     * @param c2
+     *            the second collection.
+     * @return {@code true} if the collections have no elements in common,
+     *         {@code false} otherwise.
+     * @throws NullPointerException
+     *             if one of the collections is {@code null}.
+     */
+    Disjoint(
+        [in] ICollection* c1,
+        [in] ICollection* c2,
+        [out] Boolean* result);
+
+    /**
+     * Checks if specified object is instance of specified class. Used for a
+     * dynamically typesafe view of the collections.
+     *
+     * @param obj -
+     *            object is to be checked
+     * @param type -
+     *            class of object that should be
+     * @return specified object
+     */
+    CheckType(
+        [in] IInterface* obj,
+        [in] InterfaceID type);
+
+    /**
+     * Returns a set backed by {@code map}.
+     *
+     * @throws IllegalArgumentException if the map is not empty
+     * @since 1.6
+     */
+    SetFromMap(
+        [in] IMap* map,
+        [out] ISet** result);
+
+    /**
+     * Returns a last-in, first-out queue as a view of {@code deque}.
+     *
+     * @since 1.6
+     */
+    AsLifoQueue(
+        [in] IDeque* deque,
+        [out] IQueue** result);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

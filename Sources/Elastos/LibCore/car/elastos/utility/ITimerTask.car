@@ -1,0 +1,64 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * @Involve
+     * interface IRunnable;
+     */
+    interface ITimerTask {
+        /*
+         * Method called from the Timer for synchronized getting of when field.
+         */
+        GetWhen(
+            [out] Int64* when);
+
+        SetWhen(
+            [in] Int64 when);
+
+        /*
+         * Method called from the Timer object when scheduling an event @param time
+         */
+        SetScheduledTime(
+            [in] Int64 time);
+
+        /*
+         * Is TimerTask scheduled into any timer?
+         *
+         * @return {@code true} if the timer task is scheduled, {@code false}
+         * otherwise.
+         */
+        IsScheduled(
+            [out] Boolean* scheduled);
+
+        Cancel(
+            [out] Boolean* value);
+
+        ScheduledExecutionTime(
+            [out] Int64* value);
+
+        IsCancelled(
+            [out] Boolean* cancelled);
+
+        GetPeriod(
+            [out] Int64* period);
+
+        SetPeriod(
+            [in] Int64 period);
+
+        IsFixedRate(
+            [out] Boolean* fixed);
+
+        SetFixedRate(
+            [in] Boolean fixed);
+
+        Lock();
+
+        Unlock();
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

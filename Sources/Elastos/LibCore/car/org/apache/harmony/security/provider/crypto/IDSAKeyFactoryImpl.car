@@ -1,0 +1,19 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Crypto {
+
+    interface IDSAKeyFactoryImpl extends Elastos.Security.IKeyFactorySpi {}
+
+    } // namespace Crypto
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

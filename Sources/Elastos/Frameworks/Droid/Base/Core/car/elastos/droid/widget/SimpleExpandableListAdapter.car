@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IBaseExpandableListAdapter
+     *
+     * interface Elastos.Droid.Widget.IExpandableListAdapter
+     * interface Elastos.Droid.Widget.HeterogeneousExpandableList
+     */
+    [local]
+    interface ISimpleExpandableListAdapter {
+        /**
+         * Instantiates a new View for a child.
+         * @param isLastChild Whether the child is the last child within its group.
+         * @param parent The eventual parent of this new View.
+         * @return A new child View
+         */
+        NewChildView(
+            [in] Boolean isLastChild,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        /**
+         * Instantiates a new View for a group.
+         * @param isExpanded Whether the group is currently expanded.
+         * @param parent The eventual parent of this new View.
+         * @return A new group View
+         */
+        NewGroupView(
+            [in] Boolean isExpanded,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

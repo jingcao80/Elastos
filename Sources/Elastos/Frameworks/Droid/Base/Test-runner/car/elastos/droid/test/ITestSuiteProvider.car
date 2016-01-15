@@ -1,0 +1,22 @@
+
+module
+{
+    using interface Eunit.Framework.ITestSuite;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Test {
+
+    /**
+     * Implementors will know how to get a test suite.
+     */
+    [local]
+    interface ITestSuiteProvider {
+        GetTestSuite(
+            [out] ITestSuite** suite);
+    }
+
+    } // namespace Test
+    } // namespace Droid
+    } // namespace Elastos
+}

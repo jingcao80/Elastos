@@ -1,0 +1,142 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Audiofx {
+
+    interface IPresetReverb;
+
+    /**
+     * The OnParameterChangeListener interface defines a method called by the PresetReverb
+     * when a parameter value has changed.
+     */
+    interface IPresetReverbOnParameterChangeListener {
+        /**
+         * Method called when a parameter value has changed. The method is called only if the
+         * parameter was changed by another application having the control of the same
+         * PresetReverb engine.
+         * @param effect the PresetReverb on which the interface is registered.
+         * @param status status of the set parameter operation.
+         * @param param ID of the modified parameter. See {@link #PARAM_PRESET} ...
+         * @param value the new parameter value.
+         */
+        OnParameterChange(
+            [in] IPresetReverb* effect,
+            [in] Int32 status,
+            [in] Int32 param,
+            [in] Int16 value);
+    }
+
+    /**
+     * The Settings class regroups all preset reverb parameters. It is used in
+     * conjuntion with getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    interface IPresetReverbSettings {
+        GetPreset(
+            [out] Int16* result);
+
+        SetPreset(
+            [in] Int16 result);
+    }
+
+    /**
+     * @Involve
+     * interface IAudioEffect
+     */
+    interface IPresetReverb {
+
+        /**
+         * Preset. Parameter ID for
+         * {@link android.media.audiofx.PresetReverb.OnParameterChangeListener}
+         */
+        const Int32 PARAM_PRESET = 0;
+
+        /**
+         * No reverb or reflections
+         */
+        const Int16 PRESET_NONE        = 0;
+        /**
+         * Reverb preset representing a small room less than five meters in length
+         */
+        const Int16 PRESET_SMALLROOM   = 1;
+        /**
+         * Reverb preset representing a medium room with a length of ten meters or less
+         */
+        const Int16 PRESET_MEDIUMROOM  = 2;
+        /**
+         * Reverb preset representing a large-sized room suitable for live performances
+         */
+        const Int16 PRESET_LARGEROOM   = 3;
+        /**
+         * Reverb preset representing a medium-sized hall
+         */
+        const Int16 PRESET_MEDIUMHALL  = 4;
+        /**
+         * Reverb preset representing a large-sized hall suitable for a full orchestra
+         */
+        const Int16 PRESET_LARGEHALL   = 5;
+        /**
+         * Reverb preset representing a synthesis of the traditional plate reverb
+         */
+        const Int16 PRESET_PLATE       = 6;
+
+        /**
+         *  Enables a preset on the reverb.
+         *  <p>The reverb PRESET_NONE disables any reverb from the current output but does not free the
+         *  resources associated with the reverb. For an application to signal to the implementation
+         *  to free the resources, it must call the release() method.
+         * @param preset this must be one of the the preset constants defined in this class.
+         * e.g. {@link #PRESET_SMALLROOM}
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetPreset(
+            [in] Int16 preset);
+
+        /**
+         * Gets current reverb preset.
+         * @return the preset that is set at the moment.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetPreset(
+            [out] Int16* preset);
+
+        /**
+         * Registers an OnParameterChangeListener interface.
+         * @param listener OnParameterChangeListener interface registered
+         */
+        SetParameterListener(
+            [in] IPresetReverbOnParameterChangeListener* listener);
+
+        /**
+         * Gets the preset reverb properties. This method is useful when a snapshot of current
+         * preset reverb settings must be saved by the application.
+         * @return a PresetReverb.Settings object containing all current parameters values
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetProperties(
+            [out] IPresetReverbSettings** properties);
+
+        /**
+         * Sets the preset reverb properties. This method is useful when preset reverb settings have to
+         * be applied from a previous backup.
+         * @param settings a PresetReverb.Settings object containing the properties to apply
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetProperties(
+            [in] IPresetReverbSettings* properties);
+    }
+    } // namespace audiofx
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

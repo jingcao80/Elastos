@@ -1,0 +1,9 @@
+DIRS = api
+DIRS += android_webview
+DIRS += base
+DIRS += components
+DIRS += content
+DIRS += content_public
+DIRS += media
+DIRS += net
+DIRS += ui

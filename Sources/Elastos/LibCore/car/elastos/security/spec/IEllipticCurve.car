@@ -1,0 +1,69 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Security.Spec.IECField;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    interface IEllipticCurve {
+        /**
+         * Returns the coefficient {@code a} of this elliptic curve.
+         *
+         * @return the coefficient {@code a} of this elliptic curve.
+         */
+        GetA(
+            [out] IBigInteger** a);
+
+        /**
+         * Returns the coefficient {@code b} of this elliptic curve.
+         *
+         * @return the coefficient {@code b} of this elliptic curve.
+         */
+        GetB(
+            [out] IBigInteger** b);
+
+        /**
+         * Returns the finite field of this elliptic curve.
+         *
+         * @return the finite field of this elliptic curve.
+         */
+        GetField(
+            [out] IECField** field);
+
+        /**
+         * Returns a copy of the seed that was used to generate this elliptic curve.
+         *
+         * @return a copy of the seed that was used to generate this elliptic curve,
+         *         or {@code null} if none specified.
+         */
+        GetSeed(
+            [out, callee] ArrayOf<Byte>* seed);
+
+        /**
+         * Returns whether the specified object equals to this elliptic curve.
+         *
+         * @param other
+         *            the object to compare.
+         * @return {@code true} if the specified object is equal to this elliptic
+         *         curve, otherwise {@code false}.
+         */
+        Equals(
+            [in] IInterface* other,
+            [out] Boolean* result);
+
+        /**
+         * Returns the hashcode of this elliptic curve.
+         *
+         * @return the hashcode of this elliptic curve.
+         */
+        GetHashCode(
+            [out] Int32* hashCode);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

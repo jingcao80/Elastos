@@ -1,0 +1,49 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * Basic Constraints Extension (OID == 2.5.29.19).
+     *
+     * The ASN.1 definition for Basic Constraints Extension is:
+     *
+     * <pre>
+     *   id-ce-basicConstraints OBJECT IDENTIFIER ::=  { id-ce 19 }
+     *
+     *   BasicConstraints ::= SEQUENCE {
+     *        ca                      BOOLEAN DEFAULT FALSE,
+     *        pathLenConstraint       INTEGER (0..MAX) OPTIONAL
+     *   }
+     * </pre>
+     * (as specified in RFC 3280)
+     *
+     *
+     * @Involve
+     * interface IExtensionValue;
+     */
+    interface IBasicConstraints {
+        GetCa(
+            [out] Boolean* ca);
+
+        GetPathLenConstraint(
+            [out] Int32* pathLenConstraint);
+    }
+
+    interface IBasicConstraintsHelper {
+        GetASN1(
+            [out] IASN1Type** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

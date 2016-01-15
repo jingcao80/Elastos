@@ -1,0 +1,44 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    interface IBackup {
+        /**
+         * Finish a backup.
+         */
+        Finish();
+
+        /**
+         * Perform a backup step.
+         *
+         * @param n number of pages to backup
+         * @return true when backup completed
+         */
+        Step(
+            [in] Int32 n,
+            [out] Boolean* isCompleted);
+
+        /**
+         * Perform the backup in one step.
+         */
+        Backup();
+
+        /**
+         * Return number of remaining pages to be backed up.
+         */
+        Remaining(
+            [out] Int32* number);
+
+        /**
+         * Return the total number of pages in the backup source database.
+         */
+        Pagecount(
+            [out] Int32* number);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

@@ -1,0 +1,112 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+    /*
+     * Copyright (C) 2010 The Android Open Source Project
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    [deprecated]
+    interface IINfcTag {
+        Close(
+            [in] Int32 nativeHandle,
+            [out] Int32* res);
+
+        Connect(
+            [in] Int32 nativeHandle,
+            [in] Int32 technology,
+            [out] Int32* res);
+
+        Reconnect(
+            [in] Int32 nativeHandle,
+            [out] Int32* res);
+
+        GetTechList(
+            [in] Int32 nativeHandle,
+            [out, callee] ArrayOf<Int32>* res);
+
+        IsNdef(
+            [in] Int32 nativeHandle,
+            [out] Boolean* res);
+
+        IsPresent(
+            [in] Int32 nativeHandle,
+            [out] Boolean* res);
+
+        Transceive(
+            [in] Int32 nativeHandle,
+            [in] ArrayOf<Byte> data,
+            [in] Boolean raw,
+            [out] ITransceiveResult** res);
+
+        NdefRead(
+            [in] Int32 nativeHandle,
+            [out] INdefMessage** res);
+
+        NdefWrite(
+            [in] Int32 nativeHandle,
+            [in] INdefMessage* msg,
+            [out] Int32* res);
+
+        NdefMakeReadOnly(
+            [in] Int32 nativeHandle,
+            [out] Int32* res);
+
+        NdefIsWritable(
+            [in] Int32 nativeHandle,
+            [out] Boolean* res);
+
+        FormatNdef(
+            [in] Int32 nativeHandle,
+            [in] ArrayOf<Byte>* key,
+            [out] Int32* res);
+
+        Rediscover(
+            [in] Int32 nativehandle,
+            [out] ITag** tag);
+
+        SetTimeout(
+            [in] Int32 technology,
+            [in] Int32 timeout,
+            [out] Int32* res);
+
+        GetTimeout(
+            [in] Int32 technology,
+            [out] Int32* res);
+
+        ResetTimeouts();
+
+        CanMakeReadOnly(
+            [in] Int32 ndefType,
+            [out] Boolean* res);
+
+        GetMaxTransceiveLength(
+            [in] Int32 technology,
+            [out] Int32* res);
+
+        GetExtendedLengthApdusSupported(
+            [out] Boolean* res);
+
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

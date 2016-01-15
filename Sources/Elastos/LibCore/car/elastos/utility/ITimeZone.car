@@ -1,0 +1,356 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Utility.IDate;
+
+    namespace Elastos {
+    namespace Utility {
+
+
+    /**
+     * TimeZone represents a time zone, primarily used for configuring a Calendar or SimpleDateFormat instance.
+     *
+     * @sa Calendar
+     * @sa SimpleDateFormat
+     * <p>
+     * Most applications will use getDefault() which returns a TimeZone based on the time zone where the program is running.</p>
+     *
+     * @sa getDefault()
+     * <p>
+     * You can also get a specific TimeZone by Olson ID.
+     *
+     * @sa by Olson ID
+     * <p>
+     * It is highly unlikely you'll ever want to use anything but the factory methods yourself.
+     * Let classes like Calendar and SimpleDateFormat do the date computations for you.
+     *
+     * @sa Calendar
+     * @sa SimpleDateFormat
+     * <p>
+     * If you do need to do date computations manually, there are two common cases to take into account:
+     * <p>
+     * <li>Somewhere like California, where daylight time is used. The
+     * useDaylightTime() method will always return true, and inDaylightTime(Date)
+     * must be used to determine whether or not daylight time applies to a
+     * given Date. The getRawOffset() method will return a raw offset of
+     * (in this case) -8 hours from UTC, which isn't usually very useful.
+     * More usefully, the getOffset(int, int, int, int, int, int) methods
+     * return the actual offset from UTC for a given point in time; this is
+     * the raw offset plus (if the point in time is in daylight time) the
+     * applicable DST savings (usually, but not necessarily, 1 hour).</li></p>
+     *
+     * @sa useDaylightTime()
+     * @sa inDaylightTime(Date)
+     * @sa getRawOffset()
+     * @sa getOffset(int, int, int, int, int, int)
+     * @sa in daylight time
+     * @sa DST savings
+     *
+     * <p>
+     * <li>Somewhere like Japan, where daylight time is not used. The
+     * useDaylightTime() and inDaylightTime(Date) methods both always return
+     * false, and the raw and actual offsets will always be the same.</li></p>
+     *
+     * @sa useDaylightTime()
+     * @sa inDaylightTime(Date)
+     *
+     * <p>
+     * Note the type returned by the factory methods getDefault() and
+     * getTimeZone(String) is implementation dependent. This may introduce
+     * serialization incompatibility issues between different
+     * implementations, or different versions of Android.</p>
+     *
+     * @sa getDefault()
+     * @sa getTimeZone(String)
+     *
+     * @sa Calendar
+     * @sa GregorianCalendar
+     * @sa ERROR(/SimpleDateFormat)
+     */
+
+    interface ITimeZone {
+        const Int32 SHORT = 0;
+        const Int32 LONG = 1;
+
+        /**
+         * Equivalent to {getDisplayName(false, TimeZone.LONG, Locale.getDefault())}.
+         * <a href="../util/Locale.html#default_locale">Be wary of the default locale</a>.
+         */
+        GetDisplayName(
+            [out] String* name);
+
+        /**
+         * Equivalent to {getDisplayName(false, TimeZone.LONG, locale)}.
+         */
+        GetDisplayName(
+            [in] ILocale* locale,
+            [out] String* name);
+
+        /**
+         * Equivalent to {getDisplayName(daylightTime, style, Locale.getDefault())}.
+         * <a href="../util/Locale.html#default_locale">Be wary of the default locale</a>.
+         */
+        GetDisplayName(
+            [in] Boolean daylightTime,
+            [in] Int32 style,
+            [out] String* name);
+
+        /**
+         * Returns the #SHORT short or #LONG long name of this time
+         * zone with either standard or daylight time, as written in {locale}.
+         *
+         * @sa #SHORT short
+         * @sa #LONG long
+         * If the name is not available, the result is in the format
+         * {GMT[+-]hh:mm}.
+         *
+         * @param daylightTime true for daylight time, false for standard time.
+         * @param style either TimeZone#LONG or TimeZone#SHORT.
+         *
+         * @sa TimeZone#LONG
+         * @sa TimeZone#SHORT
+         * @param locale the display locale.
+         */
+        GetDisplayName(
+            [in] Boolean daylightTime,
+            [in] Int32 style,
+            [in] ILocale* locale,
+            [out] String* name);
+
+        /**
+         * Returns the ID of this {TimeZone}, such as
+         * {America/Los_Angeles}, {GMT-08:00} or {UTC}.
+         */
+        GetID(
+            [out] String* id);
+
+        /**
+         * Returns the latest daylight savings in milliseconds for this time zone, relative
+         * to this time zone's regular UTC offset (as returned by #getRawOffset).
+         *
+         * sa #getRawOffset
+         *
+         * <p>This class returns {3600000} (1 hour) for time zones
+         * that use daylight savings time and {0} for timezones that do not,
+         * leaving it to subclasses to override this method for other daylight savings
+         * offsets. (There are time zones, such as {Australia/Lord_Howe},
+         * that use other values.)
+         *
+         * <p>Note that this method doesn't tell you whether or not to <i>apply</i> the
+         * offset: you need to call {inDaylightTime} for the specific time
+         * you're interested in. If this method returns a non-zero offset, that only
+         * tells you that this {TimeZone} sometimes observes daylight savings.
+         *
+         * <p>Note also that this method doesn't necessarily return the value you need
+         * to apply to the time you're working with. This value can and does change over
+         * time for a given time zone.
+         *
+         * <p>It's highly unlikely that you should ever call this method. You
+         * probably want #getOffset instead, which tells you the offset
+         * for a specific point in time, and takes daylight savings into account for you.
+         * @sa #getOffset
+         */
+        GetDSTSavings(
+            [out] Int32* savings);
+
+        /**
+         * Returns the offset in milliseconds from UTC for this time zone at {
+         * time}. The offset includes daylight savings time if the specified
+         * date is within the daylight savings time period.
+         *
+         * @param time the date in milliseconds since January 1, 1970 00:00:00 UTC
+         */
+        GetOffset(
+            [in] Int64 time,
+            [out] Int32* offset);
+
+        /**
+         * Returns this time zone's offset in milliseconds from UTC at the specified
+         * date and time. The offset includes daylight savings time if the date
+         * and time is within the daylight savings time period.
+         *
+         * <p>This method is intended to be used by Calendar to compute
+         * Calendar#DST_OFFSET and Calendar#ZONE_OFFSET. Application
+         * code should have no reason to call this method directly. Each parameter
+         * is interpreted in the same way as the corresponding {Calendar}
+         * field. Refer to Calendar for specific definitions of this
+         * method's parameters.
+         *
+         * @sa Calendar
+         * @sa Calendar#DST_OFFSET
+         * @sa Calendar#ZONE_OFFSET
+         * @sa Calendar
+         */
+        GetOffset(
+            [in] Int32 era,
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int32 dayOfWeek,
+            [in] Int32 timeOfDayMillis,
+            [out] Int32* offset);
+
+        /**
+         * Returns the offset in milliseconds from UTC of this time zone's standard
+         * time.
+         */
+        GetRawOffset(
+            [out] Int32* rawOffset);
+
+        /**
+         * Returns true if {timeZone} has the same rules as this time zone.
+         *
+         * <p>The base implementation returns true if both time zones have the same
+         * raw offset.
+         */
+        HasSameRules(
+            [in] ITimeZone* timeZone,
+            [out] Boolean *hasRules);
+
+        /**
+         * Returns true if {time} is in a daylight savings time period for
+         * this time zone.
+         */
+        InDaylightTime(
+            [in] IDate* time,
+            [out] Boolean* isIn);
+
+        /**
+         * Sets the ID of this {TimeZone}.
+         */
+        SetID(
+            [in] String id);
+
+        /**
+         * Sets the offset in milliseconds from UTC of this time zone's standard
+         * time.
+         */
+        SetRawOffset(
+            [in] Int32 offsetMillis);
+
+        /**
+         * Returns true if this time zone has a future transition to or from
+         * daylight savings time.
+         *
+         * <p><strong>Warning:</strong> this returns false for time zones like
+         * {Asia/Kuala_Lumpur} that have previously used DST but do not
+         * currently. A hypothetical country that has never observed daylight
+         * savings before but plans to start next year would return true.
+         *
+         * <p><strong>Warning:</strong> this returns true for time zones that use
+         * DST, even when it is not active.
+         *
+         * <p>Use #inDaylightTime to find out whether daylight savings is
+         * in effect at a specific time.
+         *
+         * @sa #inDaylightTime
+         *
+         * <p>Most applications should not use this method.
+         */
+        UseDaylightTime(
+            [out] Boolean* isUsed);
+
+        /**
+         * Compares the specified object to this {SimpleTimeZone} and returns whether they
+         * are equal. The object must be an instance of {SimpleTimeZone} and have the
+         * same internal data.
+         *
+         * @param object
+         *            the object to compare with this object.
+         * @return {true} if the specified object is equal to this
+         *         {SimpleTimeZone}, {false} otherwise.
+         * @see #hashCode
+         */
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* result);
+
+        Clone(
+            [out] ITimeZone** newObj);
+    }
+
+    interface ITimeZoneHelper {
+        /**
+         * Returns the system's installed time zone IDs. Any of these IDs can be
+         * passed to #getTimeZone to lookup the corresponding time zone
+         * instance.
+         *
+         * @sa #getTimeZone
+         */
+        GetAvailableIDs(
+            [out, callee] ArrayOf<String>* ids);
+
+        /**
+         * Returns the IDs of the time zones whose offset from UTC is {
+         * offsetMillis}. Any of these IDs can be passed to #getTimeZone to
+         * lookup the corresponding time zone instance.
+         *
+         * @sa #getTimeZone
+         *
+         * @return a possibly-empty array.
+         */
+        GetAvailableIDs(
+            [in] Int32 offsetMillis,
+            [out, callee] ArrayOf<String>* ids);
+
+        /**
+         * Returns the user's preferred time zone. This may have been overridden for
+         * this process with #setDefault.
+         *
+         * @sa #setDefault
+         *
+         * <p>Since the user's time zone changes dynamically, avoid caching this
+         * value. Instead, use this method to look it up for each use.
+         */
+        GetDefault(
+            [out] ITimeZone** timezone);
+
+        /**
+         * Returns a {TimeZone} corresponding to the given {id}, or {GMT}
+         * for unknown ids.
+         *
+         * <p>An ID can be an Olson name of the form <i>Area</i>/<i>Location</i>, such
+         * as {America/Los_Angeles}. The #getAvailableIDs method returns
+         * the supported names.
+         *
+         * @sa #getAvailableIDs
+         *
+         * <p>This method can also create a custom {TimeZone} given an ID with the following
+         * syntax: {GMT[+|-]hh[[:]mm]}. For example, {"GMT+05:00"}, {"GMT+0500"},
+         * {"GMT+5:00"}, {"GMT+500"}, {"GMT+05"}, and {"GMT+5"} all return
+         * an object with a raw offset of +5 hours from UTC, and which does <i>not</i> use daylight
+         * savings. These are rarely useful, because they don't correspond to time zones actually
+         * in use by humans.
+         *
+         * <p>Other than the special cases "UTC" and "GMT" (which are synonymous in this context,
+         * both corresponding to UTC), Android does not support the deprecated three-letter time
+         * zone IDs used in Java 1.1.
+         */
+        GetTimeZone(
+            [in] String id,
+            [out] ITimeZone** timezone);
+
+        /**
+         * Overrides the default time zone for the current process only.
+         *
+         * <p><strong>Warning</strong>: avoid using this method to use a custom time
+         * zone in your process. This value may be cleared or overwritten at any
+         * time, which can cause unexpected behavior. Instead, manually supply a
+         * custom time zone as needed.
+         *
+         * @param timeZone a custom time zone, or {null} to set the default to
+         *     the user's preferred value.
+         */
+        SetDefault(
+            [in] ITimeZone* timeZone);
+
+        GetGMT(
+            [out] ITimeZone** timezone);
+
+        GetUTC(
+            [out] ITimeZone** timezone);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

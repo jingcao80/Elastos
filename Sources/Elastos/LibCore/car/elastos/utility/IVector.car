@@ -1,0 +1,412 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    /**
+     * Vector is an implementation of {@link List}, backed by an array and synchronized.
+     * All optional operations including adding, removing, and replacing elements are supported.
+     *
+     * <p>All elements are permitted, including null.
+     *
+     * <p>This class is equivalent to {@link ArrayList} with synchronized operations. This has a
+     * performance cost, and the synchronization is not necessarily meaningful to your application:
+     * synchronizing each call to {@code get}, for example, is not equivalent to synchronizing on the
+     * list and iterating over it (which is probably what you intended). If you do need very highly
+     * concurrent access, you should also consider {@link java.util.concurrent.CopyOnWriteArrayList}.
+     *
+     * @param <E> The element type of this list.
+     */
+
+    /**
+     * @Involve
+     * interface IIterable;
+     * interface ICollection;
+     * interface IList;
+     * interface ICloneable;
+     */
+    [deprecated]
+    interface IVector {
+
+        /**
+         * Adds the specified object at the end of this vector.
+         *
+         * @param object
+         *            the object to add to the vector.
+         */
+        AddElement(
+            [in] IInterface* object);
+
+        /**
+         * Returns the number of elements this vector can hold without growing.
+         *
+         * @return the capacity of this vector.
+         * @see #ensureCapacity
+         * @see #size
+         */
+        GetCapacity(
+            [out] Int32* value);
+
+        /**
+         * Attempts to copy elements contained by this {@code Vector} into the
+         * corresponding elements of the supplied {@code Object} array.
+         *
+         * @param elements
+         *            the {@code Object} array into which the elements of this
+         *            vector are copied.
+         * @throws IndexOutOfBoundsException
+         *             if {@code elements} is not big enough.
+         * @see #clone
+         */
+        CopyInto(
+            [in] ArrayOf<IInterface *> * elements);
+
+        /**
+         * Returns the element at the specified location in this vector.
+         *
+         * @param location
+         *            the index of the element to return in this vector.
+         * @return the element at the specified location.
+         * @throws ArrayIndexOutOfBoundsException
+         *                if {@code location < 0 || location >= size()}.
+         * @see #size
+         */
+        // @SuppressWarnings("unchecked")
+        GetElementAt(
+            [in] Int32 location,
+            [out] IInterface** outface);
+
+        /**
+         * Returns an enumeration on the elements of this vector. The results of the
+         * enumeration may be affected if the contents of this vector is modified.
+         *
+         * @return an enumeration of the elements of this vector.
+         * @see #elementAt
+         * @see Enumeration
+         */
+        GetElements(
+            [out] IEnumeration** enu);
+
+        /**
+         * Ensures that this vector can hold the specified number of elements
+         * without growing.
+         *
+         * @param minimumCapacity
+         *            the minimum number of elements that this vector will hold
+         *            before growing.
+         * @see #capacity
+         */
+        EnsureCapacity(
+            [in] Int32 minimumCapacity);
+
+        /**
+         * Returns the first element in this vector.
+         *
+         * @return the element at the first position.
+         * @throws NoSuchElementException
+         *                if this vector is empty.
+         * @see #elementAt
+         * @see #lastElement
+         * @see #size
+         */
+        // @SuppressWarnings("unchecked")
+        GetFirstElement(
+            [out] IInterface** outface);
+
+        /**
+         * Searches in this vector for the index of the specified object. The search
+         * for the object starts at the specified location and moves towards the end
+         * of this vector.
+         *
+         * @param object
+         *            the object to find in this vector.
+         * @param location
+         *            the index at which to start searching.
+         * @return the index in this vector of the specified element, -1 if the
+         *         element isn't found.
+         * @throws ArrayIndexOutOfBoundsException
+         *                if {@code location < 0}.
+         * @see #contains
+         * @see #lastIndexOf(Object)
+         * @see #lastIndexOf(Object, int)
+         */
+        IndexOf(
+            [in] IInterface* object,
+            [in] Int32 location,
+            [out] Int32* value);
+
+        /**
+         * Inserts the specified object into this vector at the specified location.
+         * This object is inserted before any previous element at the specified
+         * location. All elements with an index equal or greater than
+         * {@code location} have their index increased by 1. If the location is
+         * equal to the size of this vector, the object is added at the end.
+         *
+         * @param object
+         *            the object to insert in this vector.
+         * @param location
+         *            the index at which to insert the element.
+         * @throws ArrayIndexOutOfBoundsException
+         *                if {@code location < 0 || location > size()}.
+         * @see #addElement
+         * @see #size
+         */
+        InsertElementAt(
+            [in] IInterface* object,
+            [in] Int32 location);
+
+        /**
+         * Returns the last element in this vector.
+         *
+         * @return the element at the last position.
+         * @throws NoSuchElementException
+         *                if this vector is empty.
+         * @see #elementAt
+         * @see #firstElement
+         * @see #size
+         */
+        // @SuppressWarnings("unchecked")
+        GetLastElement(
+            [out] IInterface** outface);
+
+        /**
+         * Searches in this vector for the index of the specified object. The search
+         * for the object starts at the specified location and moves towards the
+         * start of this vector.
+         *
+         * @param object
+         *            the object to find in this vector.
+         * @param location
+         *            the index at which to start searching.
+         * @return the index in this vector of the specified element, -1 if the
+         *         element isn't found.
+         * @throws ArrayIndexOutOfBoundsException
+         *                if {@code location >= size()}.
+         * @see #contains
+         * @see #indexOf(Object)
+         * @see #indexOf(Object, int)
+         */
+        LastIndexOf(
+            [in] IInterface* object,
+            [in] Int32 location,
+            [out] Int32* value);
+
+        /**
+         * Removes all elements from this vector, leaving the size zero and the
+         * capacity unchanged.
+         *
+         * @see #isEmpty
+         * @see #size
+         */
+        RemoveAllElements();
+
+        /**
+         * Removes the first occurrence, starting at the beginning and moving
+         * towards the end, of the specified object from this vector. All elements
+         * with an index bigger than the element that gets removed have their index
+         * decreased by 1.
+         *
+         * @param object
+         *            the object to remove from this vector.
+         * @return {@code true} if the specified object was found, {@code false}
+         *         otherwise.
+         * @see #removeAllElements
+         * @see #removeElementAt
+         * @see #size
+         */
+        RemoveElement(
+            [in] IInterface* object,
+            [out] Boolean* value);
+
+        RemoveElement(
+            [in] IInterface* object);
+
+        /**
+         * Removes the element found at index position {@code location} from
+         * this {@code Vector}. All elements with an index bigger than
+         * {@code location} have their index decreased by 1.
+         *
+         * @param location
+         *            the index of the element to remove.
+         * @throws ArrayIndexOutOfBoundsException
+         *                if {@code location < 0 || location >= size()}.
+         * @see #removeElement
+         * @see #removeAllElements
+         * @see #size
+         */
+        RemoveElementAt(
+            [in] Int32 location);
+
+        /**
+         * Replaces the element at the specified location in this vector with the
+         * specified object.
+         *
+         * @param object
+         *            the object to add to this vector.
+         * @param location
+         *            the index at which to put the specified object.
+         * @throws ArrayIndexOutOfBoundsException
+         *                if {@code location < 0 || location >= size()}.
+         * @see #size
+         */
+        SetElementAt(
+            [in] IInterface* object,
+            [in] Int32 location);
+
+        /**
+         * Sets the size of this vector to the specified size. If there are more
+         * than length elements in this vector, the elements at end are lost. If
+         * there are less than length elements in the vector, the additional
+         * elements contain null.
+         *
+         * @param length
+         *            the new size of this vector.
+         * @see #size
+         */
+        SetSize(
+            [in] Int32 length);
+
+        /**
+         * Sets the capacity of this vector to be the same as the size.
+         *
+         * @see #capacity
+         * @see #ensureCapacity
+         * @see #size
+         */
+        TrimToSize();
+
+
+
+        /**
+         * interfaces from IList
+         *
+         */
+        Add(
+            [in] Int32 location,
+            [in] IInterface* object);
+
+        Add(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Add(
+            [in] IInterface* object);
+
+        AddAll(
+            [in] Int32 location,
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] Int32 location,
+            [in] ICollection* collection);
+
+        Get(
+            [in] Int32 location,
+            [out] IInterface** object);
+
+        IndexOf(
+            [in] IInterface* object,
+            [out] Int32* index);
+
+        LastIndexOf(
+            [in] IInterface* object,
+            [out] Int32* index);
+
+        GetListIterator(
+            [out] IListIterator** it);
+
+        GetListIterator(
+            [in] Int32 location,
+            [out] IListIterator** it);
+
+        Remove(
+            [in] Int32 location,
+            [out] IInterface** object);
+
+        Remove(
+            [in] Int32 location);
+
+        Set(
+            [in] Int32 location,
+            [in] IInterface* object,
+            [out] IInterface** prevObject);
+
+        Set(
+            [in] Int32 location,
+            [in] IInterface* object);
+
+        GetSubList(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] IList** subList);
+
+
+        /**
+         * interfaces from ICollection
+         *
+         */
+        GetIterator(
+            [out] IIterator** it);
+
+        AddAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] ICollection* collection);
+
+        Clear();
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        ContainsAll(
+            [in] ICollection* collection,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        Remove(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Remove(
+            [in] IInterface* object);
+
+        RemoveAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RemoveAll(
+            [in] ICollection* collection);
+
+        RetainAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RetainAll(
+            [in] ICollection* collection);
+
+        GetSize(
+            [out] Int32* size);
+
+        ToArray(
+            [out, callee] ArrayOf<IInterface *> * array);
+
+        ToArray(
+            [in] ArrayOf<IInterface* > * inArray,
+            [out, callee] ArrayOf<IInterface *> * outArray);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

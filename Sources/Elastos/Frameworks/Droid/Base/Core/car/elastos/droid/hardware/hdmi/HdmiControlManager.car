@@ -1,0 +1,317 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Hdmi.IHdmiClient;
+    interface Elastos.Droid.Hardware.Hdmi.IHdmiHotplugEvent;
+    interface Elastos.Droid.Hardware.Hdmi.IHdmiTvClient;
+    interface Elastos.Droid.Hardware.Hdmi.IHdmiPlaybackClient;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+    /**
+     * Listener used to get hotplug event from HDMI port.
+     */
+    interface IHdmiControlManagerHotplugEventListener {
+        OnReceived(
+            [in] IHdmiHotplugEvent* event);
+    }
+
+    /**
+     * Listener used to get vendor-specific commands.
+     */
+    [deprecated]
+    interface IHdmiControlManagerVendorCommandListener {
+        /**
+         * Called when a vendor command is received.
+         *
+         * @param srcAddress source logical address
+         * @param params vendor-specific parameters
+         * @param hasVendorId {@code true} if the command is &lt;Vendor Command
+         *        With ID&gt;. The first 3 bytes of params is vendor id.
+         */
+        OnReceived(
+            [in] Int32 srcAddress,
+            [in] ArrayOf<Byte>* params,
+            [in] Boolean hasVendorId);
+    }
+
+    /**
+     * The {@link HdmiControlManager} class is used to send HDMI control messages
+     * to attached CEC devices.
+     *
+     * <p>Provides various HDMI client instances that represent HDMI-CEC logical devices
+     * hosted in the system. {@link #getTvClient()}, for instance will return an
+     * {@link HdmiTvClient} object if the system is configured to host one. Android system
+     * can host more than one logical CEC devices. If multiple types are configured they
+     * all work as if they were independent logical devices running in the system.
+     *
+     * @hide
+     */
+    //@SystemApi
+    interface IHdmiControlManager {
+        /**
+         * Broadcast Action: Display OSD message.
+         * <p>Send when the service has a message to display on screen for events
+         * that need user's attention such as ARC status change.
+         * <p>Always contains the extra fields {@link #EXTRA_MESSAGE_ID}.
+         * <p>Requires {@link android.Manifest.permission#HDMI_CEC} to receive.
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_OSD_MESSAGE = "android.hardware.hdmi.action.OSD_MESSAGE";
+
+        // --- Messages for ACTION_OSD_MESSAGE ---
+        /**
+         * Message that ARC enabled device is connected to invalid port (non-ARC port).
+         */
+        const Int32 OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT = 1;
+
+        /**
+         * Message used by TV to receive volume status from Audio Receiver. It should check volume value
+         * that is retrieved from extra value with the key {@link #EXTRA_MESSAGE_EXTRAM_PARAM1}. If the
+         * value is in range of [0,100], it is current volume of Audio Receiver. And there is another
+         * value, {@link #AVR_VOLUME_MUTED}, which is used to inform volume mute.
+         */
+        const Int32 OSD_MESSAGE_AVR_VOLUME_CHANGED = 2;
+
+        /**
+         * Used as an extra field in the intent {@link #ACTION_OSD_MESSAGE}. Contains the ID of
+         * the message to display on screen.
+         */
+        const String EXTRA_MESSAGE_ID = "android.hardware.hdmi.extra.MESSAGE_ID";
+        /**
+         * Used as an extra field in the intent {@link #ACTION_OSD_MESSAGE}. Contains the extra value
+         * of the message.
+         */
+        const String EXTRA_MESSAGE_EXTRAM_PARAM1 =
+                "android.hardware.hdmi.extra.MESSAGE_EXTRA_PARAM1";
+
+        /**
+         * Volume value for mute state.
+         */
+        const Int32 AVR_VOLUME_MUTED = 101;
+
+        const Int32 POWER_STATUS_UNKNOWN = -1;
+        const Int32 POWER_STATUS_ON = 0;
+        const Int32 POWER_STATUS_STANDBY = 1;
+        const Int32 POWER_STATUS_TRANSIENT_TO_ON = 2;
+        const Int32 POWER_STATUS_TRANSIENT_TO_STANDBY = 3;
+
+        const Int32 RESULT_SUCCESS = 0;
+        const Int32 RESULT_TIMEOUT = 1;
+        const Int32 RESULT_SOURCE_NOT_AVAILABLE = 2;
+        const Int32 RESULT_TARGET_NOT_AVAILABLE = 3;
+        const Int32 RESULT_ALREADY_IN_PROGRESS = 4;
+        const Int32 RESULT_EXCEPTION = 5;
+        const Int32 RESULT_INCORRECT_MODE = 6;
+        const Int32 RESULT_COMMUNICATION_FAILED = 7;
+
+        const Int32 DEVICE_EVENT_ADD_DEVICE = 1;
+        const Int32 DEVICE_EVENT_REMOVE_DEVICE = 2;
+        const Int32 DEVICE_EVENT_UPDATE_DEVICE = 3;
+
+        // --- One Touch Recording success result
+        /** Recording currently selected source. Indicates the status of a recording. */
+        const Int32 ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE = 0x01;
+        /** Recording Digital Service. Indicates the status of a recording. */
+        const Int32 ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE = 0x02;
+        /** Recording Analogue Service. Indicates the status of a recording. */
+        const Int32 ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE = 0x03;
+        /** Recording External input. Indicates the status of a recording. */
+        const Int32 ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT = 0x04;
+
+        // --- One Touch Record failure result
+        /** No recording – unable to record Digital Service. No suitable tuner. */
+        const Int32 ONE_TOUCH_RECORD_UNABLE_DIGITAL_SERVICE = 0x05;
+        /** No recording – unable to record Analogue Service. No suitable tuner. */
+        const Int32 ONE_TOUCH_RECORD_UNABLE_ANALOGUE_SERVICE = 0x06;
+        /**
+         * No recording – unable to select required service. as suitable tuner, but the requested
+         * parameters are invalid or out of range for that tuner.
+         */
+        const Int32 ONE_TOUCH_RECORD_UNABLE_SELECTED_SERVICE = 0x07;
+        /** No recording – invalid External plug number */
+        const Int32 ONE_TOUCH_RECORD_INVALID_EXTERNAL_PLUG_NUMBER = 0x09;
+        /** No recording – invalid External Physical Address */
+        const Int32 ONE_TOUCH_RECORD_INVALID_EXTERNAL_PHYSICAL_ADDRESS = 0x0A;
+        /** No recording – CA system not supported */
+        const Int32 ONE_TOUCH_RECORD_UNSUPPORTED_CA = 0x0B;
+        /** No Recording – No or Insufficient CA Entitlements” */
+        const Int32 ONE_TOUCH_RECORD_NO_OR_INSUFFICIENT_CA_ENTITLEMENTS = 0x0C;
+        /** No recording – Not allowed to copy source. Source is “copy never”. */
+        const Int32 ONE_TOUCH_RECORD_DISALLOW_TO_COPY = 0x0D;
+        /** No recording – No further copies allowed */
+        const Int32 ONE_TOUCH_RECORD_DISALLOW_TO_FUTHER_COPIES = 0x0E;
+        /** No recording – No media */
+        const Int32 ONE_TOUCH_RECORD_NO_MEDIA = 0x10;
+        /** No recording – playing */
+        const Int32 ONE_TOUCH_RECORD_PLAYING = 0x11;
+        /** No recording – already recording */
+        const Int32 ONE_TOUCH_RECORD_ALREADY_RECORDING = 0x12;
+        /** No recording – media protected */
+        const Int32 ONE_TOUCH_RECORD_MEDIA_PROTECTED = 0x13;
+        /** No recording – no source signal */
+        const Int32 ONE_TOUCH_RECORD_NO_SOURCE_SIGNAL = 0x14;
+        /** No recording – media problem */
+        const Int32 ONE_TOUCH_RECORD_MEDIA_PROBLEM = 0x15;
+        /** No recording – not enough space available */
+        const Int32 ONE_TOUCH_RECORD_NOT_ENOUGH_SPACE = 0x16;
+        /** No recording – Parental Lock On */
+        const Int32 ONE_TOUCH_RECORD_PARENT_LOCK_ON = 0x17;
+        /** Recording terminated normally */
+        const Int32 ONE_TOUCH_RECORD_RECORDING_TERMINATED_NORMALLY = 0x1A;
+        /** Recording has already terminated */
+        const Int32 ONE_TOUCH_RECORD_RECORDING_ALREADY_TERMINATED = 0x1B;
+        /** No recording – other reason */
+        const Int32 ONE_TOUCH_RECORD_OTHER_REASON = 0x1F;
+        // From here extra message for recording that is not mentioned in CEC spec
+        /** No recording. Previous recording request in progress. */
+        const Int32 ONE_TOUCH_RECORD_PREVIOUS_RECORDING_IN_PROGRESS = 0x30;
+        /** No recording. Please check recorder and connection. */
+        const Int32 ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION = 0x31;
+        /** Cannot record currently displayed source. */
+        const Int32 ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN = 0x32;
+        /** CEC is disabled. */
+        const Int32 ONE_TOUCH_RECORD_CEC_DISABLED = 0x33;
+
+        // --- Types for timer recording
+        /** Timer recording type for digital service source. */
+        const Int32 TIMER_RECORDING_TYPE_DIGITAL = 1;
+        /** Timer recording type for analogue service source. */
+        const Int32 TIMER_RECORDING_TYPE_ANALOGUE = 2;
+        /** Timer recording type for external source. */
+        const Int32 TIMER_RECORDING_TYPE_EXTERNAL = 3;
+
+        // --- Timer Status Data
+        /** [Timer Status Data/Media Info] - Media present and not protected. */
+        const Int32 TIMER_STATUS_MEDIA_INFO_PRESENT_NOT_PROTECTED = 0x0;
+        /** [Timer Status Data/Media Info] - Media present, but protected. */
+        const Int32 TIMER_STATUS_MEDIA_INFO_PRESENT_PROTECTED = 0x1;
+        /** [Timer Status Data/Media Info] - Media not present. */
+        const Int32 TIMER_STATUS_MEDIA_INFO_NOT_PRESENT = 0x2;
+
+        /** [Timer Status Data/Programmed Info] - Enough space available for recording. */
+        const Int32 TIMER_STATUS_PROGRAMMED_INFO_ENOUGH_SPACE = 0x8;
+        /** [Timer Status Data/Programmed Info] - Not enough space available for recording. */
+        const Int32 TIMER_STATUS_PROGRAMMED_INFO_NOT_ENOUGH_SPACE = 0x9;
+        /** [Timer Status Data/Programmed Info] - Might not enough space available for recording. */
+        const Int32 TIMER_STATUS_PROGRAMMED_INFO_MIGHT_NOT_ENOUGH_SPACE = 0xB;
+        /** [Timer Status Data/Programmed Info] - No media info available. */
+        const Int32 TIMER_STATUS_PROGRAMMED_INFO_NO_MEDIA_INFO = 0xA;
+
+        /** [Timer Status Data/Not Programmed Error Info] - No free timer available. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_NO_FREE_TIME = 0x1;
+        /** [Timer Status Data/Not Programmed Error Info] - Date out of range. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_DATE_OUT_OF_RANGE = 0x2;
+        /** [Timer Status Data/Not Programmed Error Info] - Recording Sequence error. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_INVALID_SEQUENCE = 0x3;
+        /** [Timer Status Data/Not Programmed Error Info] - Invalid External Plug Number. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_INVALID_EXTERNAL_PLUG_NUMBER = 0x4;
+        /** [Timer Status Data/Not Programmed Error Info] - Invalid External Physical Address. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_INVALID_EXTERNAL_PHYSICAL_NUMBER = 0x5;
+        /** [Timer Status Data/Not Programmed Error Info] - CA system not supported. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_CA_NOT_SUPPORTED = 0x6;
+        /** [Timer Status Data/Not Programmed Error Info] - No or insufficient CA Entitlements. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_NO_CA_ENTITLEMENTS = 0x7;
+        /** [Timer Status Data/Not Programmed Error Info] - Does not support resolution. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_UNSUPPORTED_RESOLUTION = 0x8;
+        /** [Timer Status Data/Not Programmed Error Info] - Parental Lock On. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_PARENTAL_LOCK_ON= 0x9;
+        /** [Timer Status Data/Not Programmed Error Info] - Clock Failure. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_CLOCK_FAILURE = 0xA;
+        /** [Timer Status Data/Not Programmed Error Info] - Duplicate: already programmed. */
+        const Int32 TIMER_STATUS_NOT_PROGRAMMED_DUPLICATED = 0xE;
+
+        // --- Extra result value for timer recording.
+        /** No extra error. */
+        const Int32 TIMER_RECORDING_RESULT_EXTRA_NO_ERROR = 0x00;
+        /** No timer recording - check recorder and connection. */
+        const Int32 TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION = 0x01;
+        /** No timer recording - cannot record selected source. */
+        const Int32 TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE = 0x02;
+        /** CEC is disabled. */
+        const Int32 TIMER_RECORDING_RESULT_EXTRA_CEC_DISABLED = 0x03;
+
+        // -- Timer cleared status data code used for result of onClearTimerRecordingResult.
+        /** Timer not cleared – recording. */
+        const Int32 CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_RECORDING = 0x00;
+        /** Timer not cleared – no matching. */
+        const Int32 CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_NO_MATCHING = 0x01;
+        /** Timer not cleared – no info available. */
+        const Int32 CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_NO_INFO_AVAILABLE = 0x02;
+        /** Timer cleared. */
+        const Int32 CLEAR_TIMER_STATUS_TIMER_CLEARED = 0x80;
+        /** Clear timer error - check recorder and connection. */
+        const Int32 CLEAR_TIMER_STATUS_CHECK_RECORDER_CONNECTION = 0xA0;
+        /** Clear timer error - cannot clear timer for selected source. */
+        const Int32 CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE = 0xA1;
+        /** Clear timer error - CEC is disabled. */
+        const Int32 CLEAR_TIMER_STATUS_CEC_DISABLE = 0xA2;
+
+        /**
+         * Gets an object that represents an HDMI-CEC logical device of a specified type.
+         *
+         * @param type CEC device type
+         * @return {@link HdmiClient} instance. {@code null} on failure.
+         * See {@link HdmiDeviceInfo#DEVICE_PLAYBACK}
+         * See {@link HdmiDeviceInfo#DEVICE_TV}
+         */
+        //@Nullable
+        GetClient(
+            [in] Int32 type,
+            [out] IHdmiClient** client);
+
+        /**
+         * Gets an object that represents an HDMI-CEC logical device of type playback on the system.
+         *
+         * <p>Used to send HDMI control messages to other devices like TV or audio amplifier through
+         * HDMI bus. It is also possible to communicate with other logical devices hosted in the same
+         * system if the system is configured to host more than one type of HDMI-CEC logical devices.
+         *
+         * @return {@link HdmiPlaybackClient} instance. {@code null} on failure.
+         */
+        //@Nullable
+        GetPlaybackClient(
+            [out] IHdmiPlaybackClient** client);
+
+        /**
+         * Gets an object that represents an HDMI-CEC logical device of type TV on the system.
+         *
+         * <p>Used to send HDMI control messages to other devices and manage them through
+         * HDMI bus. It is also possible to communicate with other logical devices hosted in the same
+         * system if the system is configured to host more than one type of HDMI-CEC logical devices.
+         *
+         * @return {@link HdmiTvClient} instance. {@code null} on failure.
+         */
+        //@Nullable
+        GetTvClient(
+            [out] IHdmiTvClient** client);
+
+        /**
+         * Adds a listener to get informed of {@link HdmiHotplugEvent}.
+         *
+         * <p>To stop getting the notification,
+         * use {@link #removeHotplugEventListener(HotplugEventListener)}.
+         *
+         * @param listener {@link HotplugEventListener} instance
+         * @see HdmiControlManager#removeHotplugEventListener(HotplugEventListener)
+         */
+        AddHotplugEventListener(
+            [in] IHdmiControlManagerHotplugEventListener* listener);
+
+        /**
+         * Removes a listener to stop getting informed of {@link HdmiHotplugEvent}.
+         *
+         * @param listener {@link HotplugEventListener} instance to be removed
+         */
+        RemoveHotplugEventListener(
+            [in] IHdmiControlManagerHotplugEventListener* listener);
+    }
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,38 @@
+TARGET_NAME= spec
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/crypto/spec
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/crypto
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/crypto
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security/spec
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/utility
+INCLUDES += $(MAKEDIR)/../../../../inc/src/elastos
+
+SOURCES =  CDESKeySpec.cpp
+SOURCES += CDESKeySpecHelper.cpp
+SOURCES += CDESedeKeySpec.cpp
+SOURCES += CDESedeKeySpecHelper.cpp
+SOURCES += CDHGenParameterSpec.cpp
+SOURCES += CDHParameterSpec.cpp
+SOURCES += CDHPrivateKeySpec.cpp
+SOURCES += CDHPublicKeySpec.cpp
+SOURCES += CGCMParameterSpec.cpp
+SOURCES += CIvParameterSpec.cpp
+SOURCES += COAEPParameterSpec.cpp
+SOURCES += COAEPParameterSpecHelper.cpp
+SOURCES += CPBEKeySpec.cpp
+SOURCES += CPBEParameterSpec.cpp
+SOURCES += PSource.cpp
+SOURCES += CPSource.cpp
+SOURCES += CPSpecified.cpp
+SOURCES += CPSpecifiedHelper.cpp
+SOURCES += CRC2ParameterSpec.cpp
+SOURCES += CRC5ParameterSpec.cpp
+SOURCES += CSecretKeySpec.cpp

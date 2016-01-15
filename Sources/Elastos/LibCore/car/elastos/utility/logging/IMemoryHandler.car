@@ -1,0 +1,77 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Logging {
+    /**
+     * A {@code Handler} put the description of log events into a cycled memory
+     * buffer.
+     * <p>
+     * Mostly this {@code MemoryHandler} just puts the given {@code LogRecord} into
+     * the internal buffer and doesn't perform any formatting or any other process.
+     * When the buffer is full, the earliest buffered records will be discarded.
+     * <p>
+     * Every {@code MemoryHandler} has a target handler, and push action can be
+     * triggered so that all buffered records will be output to the target handler
+     * and normally the latter will publish the records. After the push action, the
+     * buffer will be cleared.
+     * <p>
+     * The push method can be called directly, but will also be called automatically
+     * if a new <code>LogRecord</code> is added that has a level greater than or
+     * equal to than the value defined for the property
+     * java.util.logging.MemoryHandler.push.
+     * <p>
+     * {@code MemoryHandler} will read following {@code LogManager} properties for
+     * initialization, if given properties are not defined or has invalid values,
+     * default value will be used.
+     * <ul>
+     * <li>java.util.logging.MemoryHandler.filter specifies the {@code Filter}
+     * class name, defaults to no {@code Filter}.</li>
+     * <li>java.util.logging.MemoryHandler.level specifies the level for this
+     * {@code Handler}, defaults to {@code Level.ALL}.</li>
+     * <li>java.util.logging.MemoryHandler.push specifies the push level, defaults
+     * to level.SEVERE.</li>
+     * <li>java.util.logging.MemoryHandler.size specifies the buffer size in number
+     * of {@code LogRecord}, defaults to 1000.</li>
+     * <li>java.util.logging.MemoryHandler.target specifies the class of the target
+     * {@code Handler}, no default value, which means this property must be
+     * specified either by property setting or by constructor.</li>
+     * </ul>
+     */
+
+    /**
+     * @Involve
+     * interface ILogHandler;
+     */
+    interface IMemoryHandler {
+        /**
+         * Return the push level.
+         *
+         * @return the push level
+         */
+        GetPushLevel(
+            [out] ILevel** outlevel);
+
+        /**
+         * Triggers a push action to output all buffered records to the target handler,
+         * and the target handler will publish them. Then the buffer is cleared.
+         */
+        Push();
+
+        /**
+         * Set the push level. The push level is used to check the push action
+         * triggering. When a new {@code LogRecord} is put into the internal
+         * buffer and its level is not less than the push level, the push action
+         * will be triggered. Note that set new push level won't trigger push action.
+         *
+         * @param newLevel
+         *                 the new level to set.
+         */
+        SetPushLevel(
+            [in] ILevel* newLevel);
+    }
+
+    } // namespace Logging
+    } // namespace Utility
+    } // namespace Elastos
+}

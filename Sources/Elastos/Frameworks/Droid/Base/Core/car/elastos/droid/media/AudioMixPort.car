@@ -1,0 +1,36 @@
+
+module
+{
+    interface Elastos.Droid.Media.IAudioMixPortConfig;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * Class for system services to access extra AudioManager functionality. The
+     * AudioService is responsible for registering an implementation with
+     * {@link LocalServices}.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Media.IAudioPort
+     */
+    interface IAudioMixPort {
+        /**
+         * Build a specific configuration of this audio mix port for use by methods
+         * like AudioManager.connectAudioPatch().
+         */
+        BuildConfig(
+            [in] Int32 samplingRate,
+            [in] Int32 channelMask,
+            [in] Int32 format,
+            [in] IAudioGainConfig* gain,
+            [out] IAudioMixPortConfig** result);
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

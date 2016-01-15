@@ -1,0 +1,324 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface IProcessStartResult {
+        GetPid(
+            [out] Int32* pid);
+
+        SetPid(
+            [in] Int32 pid);
+
+        GetUsingWrapper(
+            [out] Boolean* usingWrapper);
+
+        SetUsingWrapper(
+            [in] Boolean usingWrapper);
+    }
+
+    interface IProcess {
+        /**
+         * Defines the UID/GID under which system code runs.
+         */
+        const Int32 SYSTEM_UID = 1000;
+
+        /**
+         * Defines the UID/GID under which the telephony code runs.
+         */
+        const Int32 PHONE_UID = 1001;
+
+        /**
+         * Defines the UID/GID for the user shell.
+         * @hide
+         */
+        const Int32 SHELL_UID = 2000;
+
+        /**
+         * Defines the UID/GID for the log group.
+         * @hide
+         */
+        const Int32 LOG_UID = 1007;
+
+        /**
+         * Defines the UID/GID for the WIFI supplicant process.
+         * @hide
+         */
+        const Int32 WIFI_UID = 1010;
+
+        /**
+         * Defines the UID/GID for the mediaserver process.
+         * @hide
+         */
+        const Int32 MEDIA_UID = 1013;
+
+        /**
+         * Defines the UID/GID for the DRM process.
+         * @hide
+         */
+        const Int32 DRM_UID = 1019;
+
+        /**
+         * Defines the UID/GID for the group that controls VPN services.
+         * @hide
+         */
+        const Int32 VPN_UID = 1016;
+
+        /**
+         * Defines the UID/GID for the NFC service process.
+         * @hide
+         */
+        const Int32 NFC_UID = 1027;
+
+        /**
+         * Defines the UID/GID for the Bluetooth service process.
+         * @hide
+         */
+        const Int32 BLUETOOTH_UID = 1002;
+
+        /**
+         * Defines the GID for the group that allows write access to the internal media storage.
+         * @hide
+         */
+        const Int32 MEDIA_RW_GID = 1023;
+
+        /**
+         * Access to installed package details
+         * @hide
+         */
+        const Int32 PACKAGE_INFO_GID = 1032;
+
+        /**
+         * Defines the UID/GID for the shared RELRO file updater process.
+         * @hide
+         */
+        const Int32 SHARED_RELRO_UID = 1037;
+
+        /**
+         * Defines the start of a range of UIDs (and GIDs), going from this
+         * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
+         * to applications.
+         */
+        const Int32 FIRST_APPLICATION_UID = 10000;
+        /**
+         * Last of application-specific UIDs starting at
+         * {@link #FIRST_APPLICATION_UID}.
+         */
+        const Int32 LAST_APPLICATION_UID = 19999;
+
+        /**
+         * First uid used for fully isolated sandboxed processes (with no permissions of their own)
+         * @hide
+         */
+        const Int32 FIRST_ISOLATED_UID = 99000;
+
+        /**
+         * Last uid used for fully isolated sandboxed processes (with no permissions of their own)
+         * @hide
+         */
+        const Int32 LAST_ISOLATED_UID = 99999;
+
+        /**
+         * Defines the gid shared by all applications running under the same profile.
+         * @hide
+         */
+        const Int32 SHARED_USER_GID = 9997;
+
+        /**
+         * First gid for applications to share resources. Used when forward-locking
+         * is enabled but all UserHandles need to be able to read the resources.
+         * @hide
+         */
+        const Int32 FIRST_SHARED_APPLICATION_GID = 50000;
+
+        /**
+         * Last gid for applications to share resources. Used when forward-locking
+         * is enabled but all UserHandles need to be able to read the resources.
+         * @hide
+         */
+        const Int32 LAST_SHARED_APPLICATION_GID = 59999;
+
+        /**
+         * Standard priority of application threads.
+         * Use with {@link #setThreadPriority(int)} and
+         * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+         * {@link java.lang.Thread} class.
+         */
+        const Int32 THREAD_PRIORITY_DEFAULT = 0;
+
+        /*
+         * ***************************************
+         * ** Keep in sync with utils/threads.h **
+         * ***************************************
+         */
+
+        /**
+         * Lowest available thread priority.  Only for those who really, really
+         * don't want to run if anything else is happening.
+         * Use with {@link #setThreadPriority(int)} and
+         * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+         * {@link java.lang.Thread} class.
+         */
+        const Int32 THREAD_PRIORITY_LOWEST = 19;
+
+        /**
+         * Standard priority background threads.  This gives your thread a slightly
+         * lower than normal priority, so that it will have less chance of impacting
+         * the responsiveness of the user interface.
+         * Use with {@link #setThreadPriority(int)} and
+         * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+         * {@link java.lang.Thread} class.
+         */
+        const Int32 THREAD_PRIORITY_BACKGROUND = 10;
+
+        /**
+         * Standard priority of threads that are currently running a user interface
+         * that the user is interacting with.  Applications can not normally
+         * change to this priority; the system will automatically adjust your
+         * application threads as the user moves through the UI.
+         * Use with {@link #setThreadPriority(int)} and
+         * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+         * {@link java.lang.Thread} class.
+         */
+        const Int32 THREAD_PRIORITY_FOREGROUND = -2;
+
+        /**
+         * Standard priority of system display threads, involved in updating
+         * the user interface.  Applications can not
+         * normally change to this priority.
+         * Use with {@link #setThreadPriority(int)} and
+         * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+         * {@link java.lang.Thread} class.
+         */
+        const Int32 THREAD_PRIORITY_DISPLAY = -4;
+
+        /**
+         * Standard priority of the most important display threads, for compositing
+         * the screen and retrieving input events.  Applications can not normally
+         * change to this priority.
+         * Use with {@link #setThreadPriority(int)} and
+         * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+         * {@link java.lang.Thread} class.
+         */
+        const Int32 THREAD_PRIORITY_URGENT_DISPLAY = -8;
+
+        /**
+         * Standard priority of audio threads.  Applications can not normally
+         * change to this priority.
+         * Use with {@link #setThreadPriority(int)} and
+         * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+         * {@link java.lang.Thread} class.
+         */
+        const Int32 THREAD_PRIORITY_AUDIO = -16;
+
+        /**
+         * Standard priority of the most important audio threads.
+         * Applications can not normally change to this priority.
+         * Use with {@link #setThreadPriority(int)} and
+         * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+         * {@link java.lang.Thread} class.
+         */
+        const Int32 THREAD_PRIORITY_URGENT_AUDIO = -19;
+
+        /**
+         * Minimum increment to make a priority more favorable.
+         */
+        const Int32 THREAD_PRIORITY_MORE_FAVORABLE = -1;
+
+        /**
+         * Minimum increment to make a priority less favorable.
+         */
+        const Int32 THREAD_PRIORITY_LESS_FAVORABLE = 1;
+
+        /**
+         * Default scheduling policy
+         * @hide
+         */
+        const Int32 PROC_SCHED_OTHER = 0;
+
+        /**
+         * First-In First-Out scheduling policy
+         * @hide
+         */
+        const Int32 PROC_SCHED_FIFO = 1;
+
+        /**
+         * Round-Robin scheduling policy
+         * @hide
+         */
+        const Int32 PROC_SCHED_RR = 2;
+
+        /**
+         * Batch scheduling policy
+         * @hide
+         */
+        const Int32 PROC_SCHED_BATCH = 3;
+
+        /**
+         * Idle scheduling policy
+         * @hide
+         */
+        const Int32 PROC_SCHED_IDLE = 5;
+
+        // Keep in sync with SP_* constants of enum type SchedPolicy
+        // declared in system/core/include/cutils/sched_policy.h,
+        // except THREAD_GROUP_DEFAULT does not correspond to any SP_* value.
+
+        /**
+         * Default thread group -
+         * has meaning with setProcessGroup() only, cannot be used with setThreadGroup().
+         * When used with setProcessGroup(), the group of each thread in the process
+         * is conditionally changed based on that thread's current priority, as follows:
+         * threads with priority numerically less than THREAD_PRIORITY_BACKGROUND
+         * are moved to foreground thread group.  All other threads are left unchanged.
+         * @hide
+         */
+        const Int32 THREAD_GROUP_DEFAULT = -1;
+
+        /**
+         * Background thread group - All threads in
+         * this group are scheduled with a reduced share of the CPU.
+         * Value is same as constant SP_BACKGROUND of enum SchedPolicy.
+         * FIXME rename to THREAD_GROUP_BACKGROUND.
+         * @hide
+         */
+        const Int32 THREAD_GROUP_BG_NONINTERACTIVE = 0;
+
+        /**
+         * Foreground thread group - All threads in
+         * this group are scheduled with a normal share of the CPU.
+         * Value is same as constant SP_FOREGROUND of enum SchedPolicy.
+         * Not used at this level.
+         * @hide
+         **/
+        const Int32 THREAD_GROUP_FOREGROUND = 1;
+
+        /**
+         * System thread group.
+         * @hide
+         **/
+        const Int32 THREAD_GROUP_SYSTEM = 2;
+
+        /**
+         * Application audio thread group.
+         * @hide
+         **/
+        const Int32 THREAD_GROUP_AUDIO_APP = 3;
+
+        /**
+         * System audio thread group.
+         * @hide
+         **/
+        const Int32 THREAD_GROUP_AUDIO_SYS = 4;
+
+        const Int32 SIGNAL_QUIT = 3;
+        const Int32 SIGNAL_KILL = 9;
+        const Int32 SIGNAL_USR1 = 10;
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

@@ -1,0 +1,90 @@
+module
+{
+    using interface Elastos.Droid.App.IWallpaperInfo;
+    using interface Elastos.Droid.App.IIWallpaperManager;
+    using interface Elastos.Droid.App.IIWallpaperManagerCallback;
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.Os.IIRemoteCallback;
+    using interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Wallpaper {
+
+    interface IWallpaperData {
+    }
+
+    /**
+    * @Involve
+    * interface IIWallpaperConnection
+    * interface IServiceConnection
+    * interface IBinder
+    */
+    interface IWallpaperConnection {
+    }
+
+    /**
+    * @Involve
+    * interface IIWallpaperManager
+    * interface IBinder
+    */
+    [local, deprecated]
+    interface IWallpaperManagerService {
+
+        SystemRunning();
+
+        UpdateWallpaperBitmapLocked(
+            [in] String name,
+            [in] IWallpaperData* wallpaper,
+            [out] IParcelFileDescriptor** descriptor);
+
+        OnStoppingUser(
+            [in] Int32 userId);
+
+        OnRemoveUser(
+            [in] Int32 userId);
+
+        SwitchUser(
+            [in] Int32 userId,
+            [in] IIRemoteCallback* reply);
+
+        SwitchWallpaper(
+            [in] IWallpaperData* wallpaper,
+            [in] IIRemoteCallback* reply);
+
+        ClearWallpaperLocked(
+            [in] Boolean defaultFailed,
+            [in] Int32 userId,
+            [in] IIRemoteCallback* reply);
+
+        BindWallpaperComponentLocked(
+            [in] IComponentName* componentName,
+            [in] Boolean force,
+            [in] Boolean fromUser,
+            [in] IWallpaperData* wallpaper,
+            [in] IIRemoteCallback* reply,
+            [out] Boolean* isBinded);
+
+        DetachWallpaperLocked(
+            [in] IWallpaperData* wallpaper);
+
+        ClearWallpaperComponentLocked(
+            [in] IWallpaperData* wallpaper);
+
+        AttachServiceLocked(
+            [in] IWallpaperConnection* conn,
+            [in] IWallpaperData* wallpaper);
+
+        RestoreNamedResourceLocked(
+            [in] IWallpaperData* wallpaper,
+            [out] Boolean* isRestored);
+    }
+
+    } // namespace Wallpaper
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

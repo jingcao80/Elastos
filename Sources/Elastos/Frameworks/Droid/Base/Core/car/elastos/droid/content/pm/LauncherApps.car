@@ -1,0 +1,224 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Callbacks for package changes to this and related managed profiles.
+     */
+    [deprecated]
+    interface ILauncherAppsCallback {
+        /**
+         * Indicates that a package was removed from the specified profile.
+         *
+         * If a package is removed while being updated onPackageChanged will be
+         * called instead.
+         *
+         * @param packageName The name of the package that was removed.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        OnPackageRemoved(
+            [in] String packageName,
+            [in] IUserHandle* user);
+
+        /**
+         * Indicates that a package was added to the specified profile.
+         *
+         * If a package is added while being updated then onPackageChanged will be
+         * called instead.
+         *
+         * @param packageName The name of the package that was added.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        OnPackageAdded(
+            [in] String packageName,
+            [in] IUserHandle* user);
+
+        /**
+         * Indicates that a package was modified in the specified profile.
+         * This can happen, for example, when the package is updated or when
+         * one or more components are enabled or disabled.
+         *
+         * @param packageName The name of the package that has changed.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        OnPackageChanged(
+            [in] String packageName,
+            [in] IUserHandle* user);
+
+        /**
+         * Indicates that one or more packages have become available. For
+         * example, this can happen when a removable storage card has
+         * reappeared.
+         *
+         * @param packageNames The names of the packages that have become
+         *            available.
+         * @param user The UserHandle of the profile that generated the change.
+         * @param replacing Indicates whether these packages are replacing
+         *            existing ones.
+         */
+        OnPackagesAvailable(
+            [in] ArrayOf<String>* packageName,
+            [in] IUserHandle* user,
+            [in] Boolean replacing);
+
+        /**
+         * Indicates that one or more packages have become unavailable. For
+         * example, this can happen when a removable storage card has been
+         * removed.
+         *
+         * @param packageNames The names of the packages that have become
+         *            unavailable.
+         * @param user The UserHandle of the profile that generated the change.
+         * @param replacing Indicates whether the packages are about to be
+         *            replaced with new versions.
+         */
+        OnPackagesUnavailable(
+            [in] ArrayOf<String>* packageName,
+            [in] IUserHandle* user,
+            [in] Boolean replacing);
+    }
+
+    /**
+     * Class for retrieving a list of launchable activities for the current user and any associated
+     * managed profiles. This is mainly for use by launchers. Apps can be queried for each user profile.
+     * Since the PackageManager will not deliver package broadcasts for other profiles, you can register
+     * for package changes here.
+     * <p>
+     * To watch for managed profiles being added or removed, register for the following broadcasts:
+     * {@link Intent#ACTION_MANAGED_PROFILE_ADDED} and {@link Intent#ACTION_MANAGED_PROFILE_REMOVED}.
+     * <p>
+     * You can retrieve the list of profiles associated with this user with
+     * {@link UserManager#getUserProfiles()}.
+     */
+    [deprecated, local]
+    interface ILauncherApps {
+
+        /**
+         * Retrieves a list of launchable activities that match {@link Intent#ACTION_MAIN} and
+         * {@link Intent#CATEGORY_LAUNCHER}, for a specified user.
+         *
+         * @param packageName The specific package to query. If null, it checks all installed packages
+         *            in the profile.
+         * @param user The UserHandle of the profile.
+         * @return List of launchable activities. Can be an empty list but will not be null.
+         */
+        GetActivityList(
+            [in] String packageName,
+            [in] IUserHandle* user,
+            [out] IList** infos);
+
+        /**
+         * Returns the activity info for a given intent and user handle, if it resolves. Otherwise it
+         * returns null.
+         *
+         * @param intent The intent to find a match for.
+         * @param user The profile to look in for a match.
+         * @return An activity info object if there is a match.
+         */
+        ResolveActivity(
+            [in] IIntent* intent,
+            [in] IUserHandle* user,
+            [out] ILauncherActivityInfo** info);
+
+        /**
+         * Starts a Main activity in the specified profile.
+         *
+         * @param component The ComponentName of the activity to launch
+         * @param user The UserHandle of the profile
+         * @param sourceBounds The Rect containing the source bounds of the clicked icon
+         * @param opts Options to pass to startActivity
+         */
+        StartMainActivity(
+            [in] IComponentName* component,
+            [in] IUserHandle* user,
+            [in] IRect* sourceBounds,
+            [in] IBundle* opts);
+
+        /**
+         * Starts the settings activity to show the application details for a
+         * package in the specified profile.
+         *
+         * @param component The ComponentName of the package to launch settings for.
+         * @param user The UserHandle of the profile
+         * @param sourceBounds The Rect containing the source bounds of the clicked icon
+         * @param opts Options to pass to startActivity
+         */
+        StartAppDetailsActivity(
+            [in] IComponentName* component,
+            [in] IUserHandle* user,
+            [in] IRect* sourceBounds,
+            [in] IBundle* opts);
+
+        /**
+         * Checks if the package is installed and enabled for a profile.
+         *
+         * @param packageName The package to check.
+         * @param user The UserHandle of the profile.
+         *
+         * @return true if the package exists and is enabled.
+         */
+        IsPackageEnabled(
+            [in] String packageName,
+            [in] IUserHandle* user,
+            [out] Boolean* result);
+
+        /**
+         * Checks if the activity exists and it enabled for a profile.
+         *
+         * @param component The activity to check.
+         * @param user The UserHandle of the profile.
+         *
+         * @return true if the activity exists and is enabled.
+         */
+        IsActivityEnabled(
+            [in] IComponentName* packageName,
+            [in] IUserHandle* user,
+            [out] Boolean* result);
+
+        /**
+         * Registers a callback for changes to packages in current and managed profiles.
+         *
+         * @param callback The callback to register.
+         */
+        RegisterCallback(
+            [in] ILauncherAppsCallback* cb);
+
+        /**
+         * Registers a callback for changes to packages in current and managed profiles.
+         *
+         * @param callback The callback to register.
+         * @param handler that should be used to post callbacks on, may be null.
+         */
+        RegisterCallback(
+            [in] ILauncherAppsCallback* cb,
+            [in] IHandler* handler);
+
+        /**
+         * Unregisters a callback that was previously registered.
+         *
+         * @param callback The callback to unregister.
+         * @see #registerCallback(Callback)
+         */
+        UnregisterCallback(
+            [in] ILauncherAppsCallback* cb);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,2134 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Media.IAudioAttributes;
+    interface Elastos.Droid.Media.Session.IMediaSessionToken;
+    interface Elastos.Droid.Widget.IRemoteViews;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface INotificationStyle;
+    interface INotificationAction;
+    interface INotificationExtender;
+    interface INotificationAction;
+
+     /**
+      * @Involve
+      * interface IRemoteViews
+      */
+    interface IBuilderRemoteViews {
+    }
+
+    /**
+     * A class that represents how a persistent notification is to be presented to the user using the NotificationManager.
+     *
+     * @sa NotificationManager
+     * <p>
+     * The Notification.Builder has been added to make it easier to construct Notifications.
+     *
+     * @sa Notification.Builder
+     * <p>
+     * <h3>Developer Guides</h3>
+     * <p>
+     * For a guide to creating notifications, read the Status Bar Notifications developer guide.
+     *
+     * @sa Status Bar Notifications
+     */
+     /**
+      * @Involve
+      * interface IParcelable
+      * interface ICloneable
+      */
+    [deprecated, local, parcelable]
+    interface INotification {
+        /**
+         * An activity that provides a user interface for adjusting notification preferences for its
+         * containing application. Optional but recommended for apps that post
+         * {@link android.app.Notification Notifications}.
+         */
+        //@SdkConstant(SdkConstantType.INTENT_CATEGORY)
+        const String INTENT_CATEGORY_NOTIFICATION_PREFERENCES
+                = "android.intent.category.NOTIFICATION_PREFERENCES";
+
+        /**
+         * Use all default values (where applicable).
+         */
+        const Int32 DEFAULT_ALL = ~0;
+
+        /**
+         * Use the default notification sound. This will ignore any given #sound.
+         *
+         * @sa #sound
+         *
+         * @see #defaults
+         */
+
+        const Int32 DEFAULT_SOUND = 1;
+
+        /**
+         * Use the default notification vibrate. This will ignore any given
+         * #vibrate. Using phone vibration requires the
+         * android.Manifest.permission#VIBRATE VIBRATE permission.
+         *
+         * @sa #vibrate
+         * @sa android.Manifest.permission#VIBRATE VIBRATE
+         *
+         * @see #defaults
+         */
+
+        const Int32 DEFAULT_VIBRATE = 2;
+
+        /**
+         * Use the default notification lights. This will ignore the
+         * #FLAG_SHOW_LIGHTS bit, and #ledARGB, #ledOffMS, or
+         * #ledOnMS.
+         *
+         * @sa #FLAG_SHOW_LIGHTS
+         * @sa #ledARGB
+         * @sa #ledOffMS
+         * @sa #ledOnMS
+         *
+         * @see #defaults
+         */
+
+        const Int32 DEFAULT_LIGHTS = 4;
+
+        /**
+         * Use this constant as the value for audioStreamType to request that
+         * the default stream type for notifications be used.  Currently the
+         * default stream type is AudioManager#STREAM_NOTIFICATION.
+         *
+         * @sa AudioManager#STREAM_NOTIFICATION
+         */
+        const Int32 STREAM_DEFAULT = -1;
+
+        /**
+         * Bit to be bitwise-ored into the #flags field that should be
+         * set if you want the LED on for this notification.
+         *
+         * @sa #flags
+         * <ul>
+         * <li>To turn the LED off, pass 0 in the alpha channel for colorARGB
+         *      or 0 for both ledOnMS and ledOffMS.</li>
+         * <li>To turn the LED on, pass 1 for ledOnMS and 0 for ledOffMS.</li>
+         * <li>To flash the LED, pass the number of milliseconds that it should
+         *      be on and off to ledOnMS and ledOffMS.</li>
+         * </ul>
+         * <p>
+         * Since hardware varies, you are not guaranteed that any of the values
+         * you pass are honored exactly.  Use the system defaults (TODO) if possible
+         * because they will be set to values that work on any given hardware.
+         * <p>
+         * The alpha channel must be set for forward compatibility.
+         *
+         */
+        const Int32 FLAG_SHOW_LIGHTS        = 0x00000001;
+
+        /**
+         * Bit to be bitwise-ored into the #flags field that should be
+         * set if this notification is in reference to something that is ongoing,
+         * like a phone call.  It should not be set if this notification is in
+         * reference to something that happened at a particular point in time,
+         * like a missed phone call.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_ONGOING_EVENT      = 0x00000002;
+
+        /**
+         * Bit to be bitwise-ored into the #flags field that if set,
+         * the audio will be repeated until the notification is
+         * cancelled or the notification window is opened.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_INSISTENT          = 0x00000004;
+
+        /**
+         * Bit to be bitwise-ored into the #flags field that should be
+         * set if you want the sound and/or vibration play each time the
+         * notification is sent, even if it has not been canceled before that.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_ONLY_ALERT_ONCE    = 0x00000008;
+
+        /**
+         * Bit to be bitwise-ored into the #flags field that should be
+         * set if the notification should be canceled when it is clicked by the
+         * user.  On tablets, the
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_AUTO_CANCEL        = 0x00000010;
+
+        /**
+         * Bit to be bitwise-ored into the #flags field that should be
+         * set if the notification should not be canceled when the user clicks
+         * the Clear all button.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_NO_CLEAR           = 0x00000020;
+
+        /**
+         * Bit to be bitwise-ored into the #flags field that should be
+         * set if this notification represents a currently running service.  This
+         * will normally be set for you by Service#startForeground.
+         *
+         * @sa #flags
+         * @sa Service#startForeground
+         */
+        const Int32 FLAG_FOREGROUND_SERVICE = 0x00000040;
+
+        /**
+         * Obsolete flag indicating high-priority notifications; use the priority field instead.
+         *
+         * @deprecated Use #priority with a positive value.
+         *
+         * @sa #priority
+         */
+        const Int32 FLAG_HIGH_PRIORITY      = 0x00000080;
+
+        /**
+         * Bit to be bitswise-ored into the {@link #flags} field that should be
+         * set if this notification is relevant to the current device only
+         * and it is not recommended that it bridge to other devices.
+         */
+        const Int32 FLAG_LOCAL_ONLY         = 0x00000100;
+
+        /**
+         * Bit to be bitswise-ored into the {@link #flags} field that should be
+         * set if this notification is the group summary for a group of notifications.
+         * Grouped notifications may display in a cluster or stack on devices which
+         * support such rendering. Requires a group key also be set using {@link Builder#setGroup}.
+         */
+        const Int32 FLAG_GROUP_SUMMARY      = 0x00000200;
+
+        /**
+         * Default notification #priority. If your application does not prioritize its own
+         * notifications, use this value for all notifications.
+         *
+         * @sa #priority
+         */
+        const Int32 PRIORITY_DEFAULT = 0;
+
+        /**
+         * Lower #priority, for items that are less important. The UI may choose to show these
+         * items smaller, or at a different position in the list, compared with your app's
+         * #PRIORITY_DEFAULT items.
+         *
+         * @sa #priority
+         */
+        const Int32 PRIORITY_LOW = -1;
+
+        /**
+         * Lowest #priority; these items might not be shown to the user except under special
+         * circumstances, such as detailed notification logs.
+         *
+         * @sa #priority
+         */
+        const Int32 PRIORITY_MIN = -2;
+
+        /**
+         * Higher #priority, for more important notifications or alerts. The UI may choose to
+         * show these items larger, or at a different position in notification lists, compared with
+         * your app's #PRIORITY_DEFAULT items.
+         *
+         * @sa #priority
+         * @sa #PRIORITY_DEFAULT
+         */
+        const Int32 PRIORITY_HIGH = 1;
+
+        /**
+         * Highest #priority, for your application's most important items that require the
+         * user's prompt attention or input.
+         *
+         * @sa #priority
+         */
+        const Int32 PRIORITY_MAX = 2;
+
+        /**
+         * Special value of {@link #color} telling the system not to decorate this notification with
+         * any special color but instead use default colors when presenting this notification.
+         */
+        const Int32 COLOR_DEFAULT = 0; // AKA Color.TRANSPARENT
+
+        /**
+         * Notification visibility: Show this notification in its entirety on all lockscreens.
+         *
+         * {@see #visibility}
+         */
+        const Int32 VISIBILITY_PUBLIC = 1;
+
+        /**
+         * Notification visibility: Show this notification on all lockscreens, but conceal sensitive or
+         * private information on secure lockscreens.
+         *
+         * {@see #visibility}
+         */
+        const Int32 VISIBILITY_PRIVATE = 0;
+
+        /**
+         * Notification visibility: Do not reveal any part of this notification on a secure lockscreen.
+         *
+         * {@see #visibility}
+         */
+        const Int32 VISIBILITY_SECRET = -1;
+
+        /**
+         * Notification category: incoming call (voice or video) or similar synchronous communication request.
+         */
+        const String CATEGORY_CALL = "call";
+
+        /**
+         * Notification category: incoming direct message (SMS, instant message, etc.).
+         */
+        const String CATEGORY_MESSAGE = "msg";
+
+        /**
+         * Notification category: asynchronous bulk message (email).
+         */
+        const String CATEGORY_EMAIL = "email";
+
+        /**
+         * Notification category: calendar event.
+         */
+        const String CATEGORY_EVENT = "event";
+
+        /**
+         * Notification category: promotion or advertisement.
+         */
+        const String CATEGORY_PROMO = "promo";
+
+        /**
+         * Notification category: alarm or timer.
+         */
+        const String CATEGORY_ALARM = "alarm";
+
+        /**
+         * Notification category: progress of a long-running background operation.
+         */
+        const String CATEGORY_PROGRESS = "progress";
+
+        /**
+         * Notification category: social network or sharing update.
+         */
+        const String CATEGORY_SOCIAL = "social";
+
+        /**
+         * Notification category: error in background operation or authentication status.
+         */
+        const String CATEGORY_ERROR = "err";
+
+        /**
+         * Notification category: media transport control for playback.
+         */
+        const String CATEGORY_TRANSPORT = "transport";
+
+        /**
+         * Notification category: system or device status update.  Reserved for system use.
+         */
+        const String CATEGORY_SYSTEM = "sys";
+
+        /**
+         * Notification category: indication of running background service.
+         */
+        const String CATEGORY_SERVICE = "service";
+
+        /**
+         * Notification category: a specific, timely recommendation for a single thing.
+         * For example, a news app might want to recommend a news story it believes the user will
+         * want to read next.
+         */
+        const String CATEGORY_RECOMMENDATION = "recommendation";
+
+        /**
+         * Notification category: ongoing information about device or contextual status.
+         */
+        const String CATEGORY_STATUS = "status";
+
+        /**
+         * {@link #extras} key: this is the title of the notification,
+         * as supplied to {@link Builder#setContentTitle(CharSequence)}.
+         */
+        const String EXTRA_TITLE = "android.title";
+
+        /**
+         * {@link #extras} key: this is the title of the notification when shown in expanded form,
+         * e.g. as supplied to {@link BigTextStyle#setBigContentTitle(CharSequence)}.
+         */
+        const String EXTRA_TITLE_BIG = "android.title.big";//EXTRA_TITLE + ".big";
+
+        /**
+         * {@link #extras} key: this is the main text payload, as supplied to
+         * {@link Builder#setContentText(CharSequence)}.
+         */
+        const String EXTRA_TEXT = "android.text";
+
+        /**
+         * {@link #extras} key: this is a third line of text, as supplied to
+         * {@link Builder#setSubText(CharSequence)}.
+         */
+        const String EXTRA_SUB_TEXT = "android.subText";
+
+        /**
+         * {@link #extras} key: this is a small piece of additional text as supplied to
+         * {@link Builder#setContentInfo(CharSequence)}.
+         */
+        const String EXTRA_INFO_TEXT = "android.infoText";
+
+        /**
+         * {@link #extras} key: this is a line of summary information intended to be shown
+         * alongside expanded notifications, as supplied to (e.g.)
+         * {@link BigTextStyle#setSummaryText(CharSequence)}.
+         */
+        const String EXTRA_SUMMARY_TEXT = "android.summaryText";
+
+        /**
+         * {@link #extras} key: this is the longer text shown in the big form of a
+         * {@link BigTextStyle} notification, as supplied to
+         * {@link BigTextStyle#bigText(CharSequence)}.
+         */
+        const String EXTRA_BIG_TEXT = "android.bigText";
+
+        /**
+         * {@link #extras} key: this is the resource ID of the notification's main small icon, as
+         * supplied to {@link Builder#setSmallIcon(int)}.
+         */
+        const String EXTRA_SMALL_ICON = "android.icon";
+
+        /**
+         * {@link #extras} key: this is a bitmap to be used instead of the small icon when showing the
+         * notification payload, as
+         * supplied to {@link Builder#setLargeIcon(android.graphics.Bitmap)}.
+         */
+        const String EXTRA_LARGE_ICON = "android.largeIcon";
+
+        /**
+         * {@link #extras} key: this is a bitmap to be used instead of the one from
+         * {@link Builder#setLargeIcon(android.graphics.Bitmap)} when the notification is
+         * shown in its expanded form, as supplied to
+         * {@link BigPictureStyle#bigLargeIcon(android.graphics.Bitmap)}.
+         */
+        const String EXTRA_LARGE_ICON_BIG = "android.largeIcon.big";//EXTRA_LARGE_ICON + ".big";
+
+        /**
+         * {@link #extras} key: this is the progress value supplied to
+         * {@link Builder#setProgress(int, int, boolean)}.
+         */
+        const String EXTRA_PROGRESS = "android.progress";
+
+        /**
+         * {@link #extras} key: this is the maximum value supplied to
+         * {@link Builder#setProgress(int, int, boolean)}.
+         */
+        const String EXTRA_PROGRESS_MAX = "android.progressMax";
+
+        /**
+         * {@link #extras} key: whether the progress bar is indeterminate, supplied to
+         * {@link Builder#setProgress(int, int, boolean)}.
+         */
+        const String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
+
+        /**
+         * {@link #extras} key: whether {@link #when} should be shown as a count-up timer (specifically
+         * a {@link android.widget.Chronometer}) instead of a timestamp, as supplied to
+         * {@link Builder#setUsesChronometer(boolean)}.
+         */
+        const String EXTRA_SHOW_CHRONOMETER = "android.showChronometer";
+
+        /**
+         * {@link #extras} key: whether {@link #when} should be shown,
+         * as supplied to {@link Builder#setShowWhen(boolean)}.
+         */
+        const String EXTRA_SHOW_WHEN = "android.showWhen";
+
+        /**
+         * {@link #extras} key: this is a bitmap to be shown in {@link BigPictureStyle} expanded
+         * notifications, supplied to {@link BigPictureStyle#bigPicture(android.graphics.Bitmap)}.
+         */
+        const String EXTRA_PICTURE = "android.picture";
+
+        /**
+         * {@link #extras} key: An array of CharSequences to show in {@link InboxStyle} expanded
+         * notifications, each of which was supplied to {@link InboxStyle#addLine(CharSequence)}.
+         */
+        const String EXTRA_TEXT_LINES = "android.textLines";
+
+        /**
+         * {@link #extras} key: A string representing the name of the specific
+         * {@link android.app.Notification.Style} used to create this notification.
+         */
+        const String EXTRA_TEMPLATE = "android.template";
+
+        /**
+         * {@link #extras} key: A String array containing the people that this notification relates to,
+         * each of which was supplied to {@link Builder#addPerson(String)}.
+         */
+        const String EXTRA_PEOPLE = "android.people";
+
+        /**
+         * {@link #extras} key: used to provide hints about the appropriateness of
+         * displaying this notification as a heads-up notification.
+         * @hide
+         */
+        const String EXTRA_AS_HEADS_UP = "headsup";
+
+        /**
+         * Allow certain system-generated notifications to appear before the device is provisioned.
+         * Only available to notifications coming from the android package.
+         * @hide
+         */
+        const String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
+
+        /**
+         * {@link #extras} key: A
+         * {@link android.content.ContentUris content URI} pointing to an image that can be displayed
+         * in the background when the notification is selected. The URI must point to an image stream
+         * suitable for passing into
+         * {@link android.graphics.BitmapFactory#decodeStream(java.io.InputStream)
+         * BitmapFactory.decodeStream}; all other content types will be ignored. The content provider
+         * URI used for this purpose must require no permissions to read the image data.
+         */
+        const String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
+
+        /**
+         * {@link #extras} key: A
+         * {@link android.media.session.MediaSession.Token} associated with a
+         * {@link android.app.Notification.MediaStyle} notification.
+         */
+        const String EXTRA_MEDIA_SESSION = "android.mediaSession";
+
+        /**
+         * {@link #extras} key: the indices of actions to be shown in the compact view,
+         * as supplied to (e.g.) {@link MediaStyle#setShowActionsInCompactView(int...)}.
+         */
+        const String EXTRA_COMPACT_ACTIONS = "android.compactActions";
+
+        /**
+         * {@link #extras} key: the user that built the notification.
+         *
+         * @hide
+         */
+        const String EXTRA_ORIGINATING_USERID = "android.originatingUserId";
+
+        /**
+         * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification should not be
+         * displayed in the heads up space.
+         *
+         * <p>
+         * If this notification has a {@link #fullScreenIntent}, then it will always launch the
+         * full-screen intent when posted.
+         * </p>
+         * @hide
+         */
+        const Int32 HEADS_UP_NEVER = 0;
+
+        /**
+         * Default value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification may be
+         * displayed as a heads up.
+         * @hide
+         */
+        const Int32 HEADS_UP_ALLOWED = 1;
+
+        /**
+         * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification is a
+         * good candidate for display as a heads up.
+         * @hide
+         */
+        const Int32 HEADS_UP_REQUESTED = 2;
+
+        GetWhen(
+            [out] Int64* when);
+
+        SetWhen(
+            [in] Int64 when);
+
+        GetIcon(
+            [out] Int32* icon);
+
+        SetIcon(
+            [in] Int32 icon);
+
+        GetIconLevel(
+            [out] Int32* iconLevel);
+
+        SetIconLevel(
+            [in] Int32 iconLevel);
+
+        GetNumber(
+            [out] Int32* number);
+
+        SetNumber(
+            [in] Int32 number);
+
+        GetContentIntent(
+            [out] IPendingIntent** intent);
+
+        SetContentIntent(
+            [in] IPendingIntent* intent);
+
+        GetDeleteIntent(
+            [out] IPendingIntent** intent);
+
+        SetDeleteIntent(
+            [in] IPendingIntent* intent);
+
+        GetFullScreenIntent(
+            [out] IPendingIntent** intent);
+
+        SetFullScreenIntent(
+            [in] IPendingIntent* intent);
+
+        GetTickerText(
+            [out] ICharSequence** text);
+
+        SetTickerText(
+            [in] ICharSequence* text);
+
+        GetTickerView(
+            [out] IRemoteViews** view);
+
+        SetTickerView(
+            [in] IRemoteViews* view);
+
+        GetContentView(
+            [out] IRemoteViews** view);
+
+        SetContentView(
+            [in] IRemoteViews* view);
+
+        GetBigContentView(
+            [out] IRemoteViews** view);
+
+        SetBigContentView(
+            [in] IRemoteViews* view);
+
+        GetHeadsUpContentView(
+            [out] IRemoteViews** view);
+
+        SetHeadsUpContentView(
+            [in] IRemoteViews* view);
+
+        GetLargeIcon(
+            [out] IBitmap** bitmap);
+
+        SetLargeIcon(
+            [in] IBitmap* bitmap);
+
+        GetSound(
+            [out] IUri** sound);
+
+        SetSound(
+            [in] IUri* sound);
+
+        GetAudioStreamType(
+            [out] Int32* type);
+
+        SetAudioStreamType(
+            [in] Int32 type);
+
+        GetAudioAttributes(
+            [out] IAudioAttributes** attr);
+
+        SetAudioAttributes(
+            [in] IAudioAttributes* attr);
+
+        GetVibrate(
+            [out, callee] ArrayOf<Int64>* vibrate);
+
+        SetVibrate(
+            [in] ArrayOf<Int64>* vibrate);
+
+        GetLedARGB(
+            [out] Int32* argb);
+
+        SetLedARGB(
+            [in] Int32 argb);
+
+        GetLedOnMS(
+            [out] Int32* onMS);
+
+        SetLedOnMS(
+            [in] Int32 onMS);
+
+        GetLedOffMS(
+            [out] Int32* offMS);
+
+        SetLedOffMS(
+            [in] Int32 offMS);
+
+        GetDefaults(
+            [out] Int32* defaults);
+
+        SetDefaults(
+            [in] Int32 defaults);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        GetPriority(
+            [out] Int32* priority);
+
+        SetPriority(
+            [in] Int32 priority);
+
+        GetColor(
+            [out] Int32* color);
+
+        SetColor(
+            [in] Int32 color);
+
+        GetVisibility(
+            [out] Int32* visibility);
+
+        SetVisibility(
+            [in] Int32 visibility);
+
+        GetCategory(
+            [out] String* category);
+
+        SetCategory(
+            [in] String category);
+
+        SetGroup(
+            [in] String groupKey);
+
+        /**
+         * Get the key used to group this notification into a cluster or stack
+         * with other notifications on devices which support such rendering.
+         */
+        GetGroup(
+            [out] String* group);
+
+        SetSortKey(
+            [in] String sortKey);
+
+        /**
+         * Get a sort key that orders this notification among other notifications from the
+         * same package. This can be useful if an external sort was already applied and an app
+         * would like to preserve this. Notifications will be sorted lexicographically using this
+         * value, although providing different priorities in addition to providing sort key may
+         * cause this value to be ignored.
+         *
+         * <p>This sort key can also be used to order members of a notification group. See
+         * {@link Builder#setGroup}.
+         *
+         * @see String#compareTo(String)
+         */
+        GetSortKey(
+            [out] String* softKey);
+
+        GetExtras(
+            [out] IBundle** extras);
+
+        SetExtras(
+            [in] IBundle* extras);
+
+        GetActions(
+            [out, callee] ArrayOf<INotificationAction*>* actions);
+
+        SetActions(
+            [in] ArrayOf<INotificationAction*>* actions);
+
+        /**
+         * Replacement version of this notification whose content will be shown
+         * in an insecure context such as atop a secure keyguard. See {@link #visibility}
+         * and {@link #VISIBILITY_PUBLIC}.
+         */
+        GetPublicVersion(
+            [out] INotification** n);
+
+        SetPublicVersion(
+            [in] INotification* n);
+
+        /**
+         * Copy all (or if heavy is false, all except Bitmaps and RemoteViews) members
+         * of this into that.
+         * @hide
+         */
+        CloneInto(
+            [in] INotification* that,
+            [in] Boolean heavy);
+
+        /**
+         * Removes heavyweight parts of the Notification object for archival or for sending to
+         * listeners when the full contents are not necessary.
+         * @hide
+         */
+        LightenPayload();
+
+        /**
+         * Sets the #contentView field to be a view with the standard "Latest Event"
+         * layout.
+         *
+         * @sa #contentView
+         *
+         * <p>Uses the #icon and #when fields to set the icon and time fields
+         * in the view.</p>
+         *
+         * @sa #icon
+         * @sa #when
+         *
+         * @param context       The context for your application / activity.
+         * @param contentTitle The title that goes in the expanded entry.
+         * @param contentText  The text that goes in the expanded entry.
+         * @param contentIntent The intent to launch when the user clicks the expanded notification.
+         * If this is an activity, it must include the
+         * android.content.Intent#FLAG_ACTIVITY_NEW_TASK flag, which requires
+         * that you take care of task management as described in the
+         * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+         * Stack</a> document.
+         *
+         * @sa android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+         *
+         * @deprecated Use Builder instead.
+         *
+         * @sa Builder
+         */
+        //@Deprecated
+        SetLatestEventInfo(
+            [in] IContext* ctx,
+            [in] ICharSequence* contentTitle,
+            [in] ICharSequence* contentText,
+            [in] IPendingIntent* contentIntent);
+
+        /**
+         * @hide
+         */
+        IsValid(
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        IsGroupSummary(
+            [out] Boolean* result);
+
+        Clone(
+            [out] IInterface** result);
+    }
+
+    interface INotificationAction {
+
+        GetIcon(
+            [out] Int32* icon);
+
+        GetTitle(
+            [out] ICharSequence** title);
+
+        GetActionIntent(
+            [out] IPendingIntent** actionIntent);
+    }
+
+    /**
+     * Builder class for Notification objects.
+     *
+     * @sa Notification
+     *
+     * Provides a convenient way to set the various fields of a Notification and generate
+     * content views using the platform's notification layout template. If your app supports
+     * versions of Android as old as API level 4, you can instead use
+     * android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder,
+     * available in the <a href="{@docRoot}tools/extras/support-library.html">Android Support
+     * library</a>.
+     *
+     * @sa Notification
+     * @sa android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder
+     *
+     * <p>Example:
+     *
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.Builder(mContext)
+     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *         .setContentText(subject)
+     *         .setSmallIcon(R.drawable.new_mail)
+     *         .setLargeIcon(aBitmap)
+     *         .build();
+     * </pre>
+     */
+    [deprecated]
+    interface INotificationBuilder {
+        /**
+         * @hide
+         */
+        const String EXTRA_NEEDS_REBUILD = "android.rebuild";
+
+        /**
+         * @hide
+         */
+        const String EXTRA_REBUILD_LARGE_ICON = "android.rebuild.largeIcon";
+        /**
+         * @hide
+         */
+        const String EXTRA_REBUILD_CONTENT_VIEW = "android.rebuild.contentView";
+        /**
+         * @hide
+         */
+        const String EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT =
+                "android.rebuild.contentViewActionCount";
+        /**
+         * @hide
+         */
+        const String EXTRA_REBUILD_BIG_CONTENT_VIEW
+                = "android.rebuild.bigView";
+        /**
+         * @hide
+         */
+        const String EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT
+                = "android.rebuild.bigViewActionCount";
+        /**
+         * @hide
+         */
+        const String EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW
+                = "android.rebuild.hudView";
+        /**
+         * @hide
+         */
+        const String EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT
+                = "android.rebuild.hudViewActionCount";
+
+        /**
+         * Add a timestamp pertaining to the notification (usually the time the event occurred).
+         * It will be shown in the notification content view by default; use
+         * Builder#setShowWhen(boolean) setShowWhen to control this.
+         *
+         * @sa Builder#setShowWhen(boolean) setShowWhen
+         * @see Notification#when
+         */
+        SetWhen(
+            [in] Int64 when);
+
+        /**
+         * Control whether the timestamp set with Builder#setWhen(long) setWhen is shown
+         * in the content view.
+         *
+         * @sa Builder#setWhen(long) setWhen
+         */
+        SetShowWhen(
+            [in] Boolean show);
+
+        /**
+         * Show the Notification#when field as a stopwatch.
+         *
+         * @sa Notification#when
+         *
+         * Instead of presenting <code>when</code> as a timestamp, the notification will show an
+         * automatically updating display of the minutes and seconds since <code>when</code>.
+         *
+         * Useful when showing an elapsed time (like an ongoing phone call).
+         *
+         * @see android.widget.Chronometer
+         * @see Notification#when
+         */
+        SetUsesChronometer(
+            [in] Boolean b);
+
+        /**
+         * Set the small icon resource, which will be used to represent the notification in the
+         * status bar.
+         *
+
+         * The platform template for the expanded view will draw this icon in the left, unless a
+         * #setLargeIcon(Bitmap) large icon has also been specified, in which case the small
+         * icon will be moved to the right-hand side.
+         *
+         * @sa #setLargeIcon(Bitmap) large icon
+         *
+
+         * @param icon
+         *            A resource ID in the application's package of the drawable to use.
+         * @see Notification#icon
+         */
+        SetSmallIcon(
+            [in] Int32 icon);
+
+        /**
+         * A variant of #setSmallIcon(int) setSmallIcon(int) that takes an additional
+         * level parameter for when the icon is a android.graphics.drawable.LevelListDrawable LevelListDrawable.
+         *
+         * @sa #setSmallIcon(int) setSmallIcon(int)
+         * @sa android.graphics.drawable.LevelListDrawable LevelListDrawable
+         *
+         * @param icon A resource ID in the application's package of the drawable to use.
+         * @param level The level to use for the icon.
+         *
+         * @see Notification#icon
+         * @see Notification#iconLevel
+         */
+        SetSmallIcon(
+            [in] Int32 icon,
+            [in] Int32 level);
+
+        /**
+         * Set the first line of text in the platform notification template.
+         */
+        SetContentTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Set the second line of text in the platform notification template.
+         */
+        SetContentText(
+            [in] ICharSequence* text);
+
+        /**
+         * Set the third line of text in the platform notification template.
+         * Don't use if you're also using #setProgress(int, int, boolean); they occupy the same location in the standard template.
+         *
+         * @sa #setProgress(int, int, boolean)
+         */
+        SetSubText(
+            [in] ICharSequence* text);
+
+        /**
+         * Set the large number at the right-hand side of the notification.  This is
+         * equivalent to setContentInfo, although it might show the number in a different
+         * font size for readability.
+         */
+        SetNumber(
+            [in] Int32 number);
+
+        /**
+         * A small piece of additional information pertaining to this notification.
+         *
+         * The platform template will draw this on the last line of the notification, at the far
+         * right (to the right of a smallIcon if it has been placed there).
+         */
+        SetContentInfo(
+            [in] ICharSequence* info);
+
+        /**
+         * Set the progress this notification represents.
+         *
+         * The platform template will represent this using a ProgressBar.
+         *
+         * @sa ProgressBar
+         */
+        SetProgress(
+            [in] Int32 max,
+            [in] Int32 progress,
+            [in] Boolean indeterminate);
+
+        /**
+         * Supply a custom RemoteViews to use instead of the platform template.
+         *
+         * @see Notification#contentView
+         */
+        SetContent(
+            [in] IRemoteViews* views);
+
+        /**
+         * Supply a PendingIntent to be sent when the notification is clicked.
+         *
+         * @sa PendingIntent
+         *
+         * As of android.os.Build.VERSION_CODES#HONEYCOMB, if this field is unset and you
+         * have specified a custom RemoteViews with #setContent(RemoteViews), you can use
+         * RemoteViews#setOnClickPendingIntent RemoteViews.setOnClickPendingIntent(int,PendingIntent)
+         * to assign PendingIntents to individual views in that custom layout (i.e., to create
+         * clickable buttons inside the notification view).
+         *
+         * @sa android.os.Build.VERSION_CODES#HONEYCOMB
+         * @sa #setContent(RemoteViews)
+         * @sa RemoteViews#setOnClickPendingIntent RemoteViews.setOnClickPendingIntent(int,PendingIntent)
+         *
+         * @see Notification#contentIntent Notification.contentIntent
+         */
+        SetContentIntent(
+            [in] IPendingIntent* intent);
+
+        /**
+         * Supply a PendingIntent to send when the notification is cleared explicitly by the user.
+         *
+         * @sa PendingIntent
+         *
+         * @see Notification#deleteIntent
+         */
+        SetDeleteIntent(
+            [in] IPendingIntent* intent);
+
+        /**
+         * An intent to launch instead of posting the notification to the status bar.
+         * Only for use with extremely high-priority notifications demanding the user's
+         * <strong>immediate</strong> attention, such as an incoming phone call or
+         * alarm clock that the user has explicitly set to a particular time.
+         * If this facility is used for something else, please give the user an option
+         * to turn it off and use a normal notification, as this can be extremely
+         * disruptive.
+         *
+         * @param intent The pending intent to launch.
+         * @param highPriority Passing true will cause this notification to be sent
+         *          even if other notifications are suppressed.
+         *
+         * @see Notification#fullScreenIntent
+         */
+        SetFullScreenIntent(
+            [in] IPendingIntent* intent,
+            [in] Boolean highPriority);
+
+        /**
+         * Set the "ticker" text which is displayed in the status bar when the notification first
+         * arrives.
+         *
+         * @see Notification#tickerText
+         */
+        SetTicker(
+            [in] ICharSequence* tickerText);
+
+        /**
+         * Set the text that is displayed in the status bar when the notification first
+         * arrives, and also a RemoteViews object that may be displayed instead on some
+         * devices.
+         *
+         * @see Notification#tickerText
+         * @see Notification#tickerView
+         */
+        SetTicker(
+            [in] ICharSequence* tickerText,
+            [in] IRemoteViews* views);
+
+        /**
+         * Add a large icon to the notification (and the ticker on some devices).
+         *
+         * In the platform template, this image will be shown on the left of the notification view
+         * in place of the #setSmallIcon(int) small icon (which will move to the right side).
+         *
+         * @sa #setSmallIcon(int) small icon
+         *
+         * @see Notification#largeIcon
+         */
+        SetLargeIcon(
+            [in] IBitmap* icon);
+
+        /**
+         * Set the sound to play.
+         *
+         * It will be played on the #STREAM_DEFAULT default stream for notifications.
+         *
+         * @sa #STREAM_DEFAULT default stream
+         *
+         * @see Notification#sound
+         */
+        SetSound(
+            [in] IUri* sound);
+
+        /**
+         * Set the sound to play, along with a specific stream on which to play it.
+         *
+         * See android.media.AudioManager for the <code>STREAM_</code> constants.
+         *
+         * @sa android.media.AudioManager
+         *
+         * @see Notification#sound
+         */
+        SetSound(
+            [in] IUri* sound,
+            [in] Int32 streamType);
+
+        /**
+         * Set the vibration pattern to use.
+         *
+
+         * See android.os.Vibrator#vibrate(long[], int) for a discussion of the
+         * <code>pattern</code> parameter.
+         *
+         * @sa android.os.Vibrator#vibrate(long[], int)
+         *
+         * @see Notification#vibrate
+         */
+        SetVibrate(
+            [in] ArrayOf<Int64>* pattern);
+
+        /**
+         * Set the desired color for the indicator LED on the device, as well as the
+         * blink duty cycle (specified in milliseconds).
+         *
+         * Not all devices will honor all (or even any) of these values.
+         *
+         * @see Notification#ledARGB
+         * @see Notification#ledOnMS
+         * @see Notification#ledOffMS
+         */
+        SetLights(
+            [in] Int32 argb,
+            [in] Int32 onMs,
+            [in] Int32 offMs);
+
+        /**
+         * Set whether this is an "ongoing" notification.
+         *
+         * Ongoing notifications cannot be dismissed by the user, so your application or service
+         * must take care of canceling them.
+         *
+         * They are typically used to indicate a background task that the user is actively engaged
+         * with (e.g., playing music) or is pending in some way and therefore occupying the device
+         * (e.g., a file download, sync operation, active network connection).
+         *
+         * @see Notification#FLAG_ONGOING_EVENT
+         * @see Service#setForeground(boolean)
+         */
+        SetOngoing(
+            [in] Boolean ongoing);
+
+        /**
+         * Set this flag if you would only like the sound, vibrate
+         * and ticker to be played if the notification is not already showing.
+         *
+         * @see Notification#FLAG_ONLY_ALERT_ONCE
+         */
+        SetOnlyAlertOnce(
+            [in] Boolean onlyAlertOnce);
+
+        /**
+         * Make this notification automatically dismissed when the user touches it. The
+         * PendingIntent set with #setDeleteIntent will be sent when this happens.
+         *
+         * @sa #setDeleteIntent
+         *
+         * @see Notification#FLAG_AUTO_CANCEL
+         */
+        SetAutoCancel(
+            [in] Boolean autoCancel);
+
+        /**
+         * Set whether or not this notification should not bridge to other devices.
+         *
+         * <p>Some notifications can be bridged to other devices for remote display.
+         * This hint can be set to recommend this notification not be bridged.
+         */
+        SetLocalOnly(
+            [in] Boolean localOnly);
+
+        /**
+         * Set which notification properties will be inherited from system defaults.
+         * <p>
+         * The value should be one or more of the following fields combined with
+         * bitwise-or:
+         * #DEFAULT_SOUND, #DEFAULT_VIBRATE, #DEFAULT_LIGHTS.
+         *
+         * @sa #DEFAULT_SOUND
+         * @sa #DEFAULT_VIBRATE
+         * @sa #DEFAULT_LIGHTS
+         * <p>
+         * For all default values, use #DEFAULT_ALL.
+         *
+         * @sa #DEFAULT_ALL
+         */
+        SetDefaults(
+            [in] Int32 defaults);
+
+        /**
+         * Set the priority of this notification.
+         *
+         * @see Notification#priority
+         */
+        SetPriority(
+            [in] Int32 pri);
+
+        /**
+         * Set the notification category.
+         *
+         * @see Notification#category
+         */
+        SetCategory(
+            [in] String category);
+
+        /**
+         * Add a person that is relevant to this notification.
+         *
+         * <P>
+         * Depending on user preferences, this annotation may allow the notification to pass
+         * through interruption filters, and to appear more prominently in the user interface.
+         * </P>
+         *
+         * <P>
+         * The person should be specified by the {@code String} representation of a
+         * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
+         * </P>
+         *
+         * <P>The system will also attempt to resolve {@code mailto:} and {@code tel:} schema
+         * URIs.  The path part of these URIs must exist in the contacts database, in the
+         * appropriate column, or the reference will be discarded as invalid. Telephone schema
+         * URIs will be resolved by {@link android.provider.ContactsContract.PhoneLookup}.
+         * </P>
+         *
+         * @param uri A URI for the person.
+         * @see Notification#EXTRA_PEOPLE
+         */
+        AddPerson(
+            [in] String uri);
+
+        /**
+         * Set this notification to be part of a group of notifications sharing the same key.
+         * Grouped notifications may display in a cluster or stack on devices which
+         * support such rendering.
+         *
+         * <p>To make this notification the summary for its group, also call
+         * {@link #setGroupSummary}. A sort order can be specified for group members by using
+         * {@link #setSortKey}.
+         * @param groupKey The group key of the group.
+         * @return this object for method chaining
+         */
+        SetGroup(
+            [in] String groupKey);
+
+        /**
+         * Set this notification to be the group summary for a group of notifications.
+         * Grouped notifications may display in a cluster or stack on devices which
+         * support such rendering. Requires a group key also be set using {@link #setGroup}.
+         * @param isGroupSummary Whether this notification should be a group summary.
+         * @return this object for method chaining
+         */
+        SetGroupSummary(
+            [in] Boolean isGroupSummary);
+
+        /**
+         * Set a sort key that orders this notification among other notifications from the
+         * same package. This can be useful if an external sort was already applied and an app
+         * would like to preserve this. Notifications will be sorted lexicographically using this
+         * value, although providing different priorities in addition to providing sort key may
+         * cause this value to be ignored.
+         *
+         * <p>This sort key can also be used to order members of a notification group. See
+         * {@link #setGroup}.
+         *
+         * @see String#compareTo(String)
+         */
+        SetSortKey(
+            [in] String sortKey);
+
+        /**
+         * Merge additional metadata into this notification.
+         *
+         * <p>Values within the Bundle will replace existing extras values in this Builder.
+         *
+         * @see Notification#extras
+         */
+        AddExtras(
+            [in] IBundle* extras);
+
+        /**
+         * Add metadata to this notification.
+         *
+         * A reference to the Bundle is held for the lifetime of this Builder, and the Bundle's
+         * current contents are copied into the Notification each time #build() is
+         * called.
+         *
+         * @sa #build()
+         *
+         * @see Notification#extras
+         * @hide
+         */
+        SetExtras(
+            [in] IBundle* extras);
+
+        /**
+         * Get the current metadata Bundle used by this notification Builder.
+         *
+         * <p>The returned Bundle is shared with this Builder.
+         *
+         * <p>The current contents of this Bundle are copied into the Notification each time
+         * {@link #build()} is called.
+         *
+         * @see Notification#extras
+         */
+        GetExtras(
+            [out] IBundle** extras);
+
+        /**
+         * Add an action to this notification. Actions are typically displayed by
+         * the system as a button adjacent to the notification content.
+         *
+         * @param icon Resource ID of a drawable that represents the action.
+         * @param title Text describing the action.
+         * @param intent PendingIntent to be fired when the action is invoked.
+         */
+        AddAction(
+            [in] Int32 icon,
+            [in] ICharSequence* title,
+            [in] IPendingIntent* intent);
+
+        /**
+         * Add an action to this notification. Actions are typically displayed by
+         * the system as a button adjacent to the notification content.
+         * <p>
+         * Every action must have an icon (32dp square and matching the
+         * <a href="{@docRoot}design/style/iconography.html#action-bar">Holo
+         * Dark action bar</a> visual style), a textual label, and a {@link PendingIntent}.
+         * <p>
+         * A notification in its expanded form can display up to 3 actions, from left to right in
+         * the order they were added. Actions will not be displayed when the notification is
+         * collapsed, however, so be sure that any essential functions may be accessed by the user
+         * in some other way (for example, in the Activity pointed to by {@link #contentIntent}).
+         *
+         * @param action The action to add.
+         */
+        AddAction(
+            [in] INotificationAction* action);
+
+        /**
+         * Add a rich notification style to be applied at build time.
+         *
+         * @param style Object responsible for modifying the notification style.
+         */
+        SetStyle(
+            [in] INotificationStyle* style);
+
+        /**
+         * Specify the value of {@link #visibility}.
+         *
+         * @param visibility One of {@link #VISIBILITY_PRIVATE} (the default),
+         * {@link #VISIBILITY_SECRET}, or {@link #VISIBILITY_PUBLIC}.
+         *
+         * @return The same Builder.
+         */
+        SetVisibility(
+            [in] Int32 visibility);
+
+        /**
+         * Supply a replacement Notification whose contents should be shown in insecure contexts
+         * (i.e. atop the secure lockscreen). See {@link #visibility} and {@link #VISIBILITY_PUBLIC}.
+         * @param n A replacement notification, presumably with some or all info redacted.
+         * @return The same Builder.
+         */
+        SetPublicVersion(
+            [in] INotification* visibility);
+
+        /**
+         * Apply an extender to this notification builder. Extenders may be used to add
+         * metadata or change options on this builder.
+         */
+        Extend(
+            [in] INotificationExtender* extender);
+
+        /**
+         * Sets {@link Notification#color}.
+         *
+         * @param argb The accent color to use
+         *
+         * @return The same Builder.
+         */
+        SetColor(
+            [in] Int32 color);
+
+        /**
+         * @deprecated Use #build() instead.
+         *
+         * @sa #build()
+         */
+        //@Deprecated
+        GetNotification(
+            [out] INotification** notification);
+
+        /**
+         * Combine all of the options that have been set and return a new  Notification
+         * object.
+         *
+         * @sa Notification
+         */
+        Build(
+            [out] INotification** notification);
+    }
+
+    /**
+     * An object that can apply a rich notification style to a Notification.Builder
+     * object.
+     *
+     * @sa Notification.Builder
+     */
+    interface INotificationStyle {
+        SetBuilder(
+            [in] INotificationBuilder* builder);
+
+        Build(
+            [out] INotification** notification);
+
+        /**
+         * @hide
+         */
+        AddExtras(
+            [in] IBundle* extras);
+
+        /**
+         * @hide
+         */
+        BuildStyled(
+            [in] INotification* wip);
+    }
+
+    /**
+     * Helper class for generating large-format notifications that include a large image attachment.
+     *
+     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.BigPictureStyle(
+     *      new Notification.Builder()
+     *         .setContentTitle(&quot;New photo from &quot; + sender.toString())
+     *         .setContentText(subject)
+     *         .setSmallIcon(R.drawable.new_post)
+     *         .setLargeIcon(aBitmap))
+     *      .bigPicture(aBigBitmap)
+     *      .build();
+     * </pre>
+     *
+     * @see Notification#bigContentView
+     */
+    /**
+     * @Involve
+     * interface INotificationStyle
+     */
+    interface INotificationBigPictureStyle {
+        /**
+         * Overrides ContentTitle in the big form of the template.
+         * This defaults to the value passed to setContentTitle().
+         */
+        SetBigContentTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Set the first line of text after the detail section in the big form of the template.
+         */
+        SetSummaryText(
+            [in] ICharSequence* cs);
+
+        /**
+         * Provide the bitmap to be used as the payload for the BigPicture notification.
+         */
+        BigPicture(
+            [in] IBitmap* b);
+
+        /**
+         * Override the large icon when the big notification is shown.
+         */
+        BigLargeIcon(
+            [in] IBitmap* b);
+    }
+
+    /**
+     * Helper class for generating large-format notifications that include a lot of text.
+     *
+     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.BigTextStyle(
+     *      new Notification.Builder()
+     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *         .setContentText(subject)
+     *         .setSmallIcon(R.drawable.new_mail)
+     *         .setLargeIcon(aBitmap))
+     *      .bigText(aVeryLongString)
+     *      .build();
+     * </pre>
+     *
+     * @see Notification#bigContentView
+     *
+     * @implements Elastos.Droid.App.INotificationStyle
+     */
+    /**
+     * @Involve
+     * interface INotificationStyle
+     */
+    interface INotificationBigTextStyle {
+        /**
+         * Overrides ContentTitle in the big form of the template.
+         * This defaults to the value passed to setContentTitle().
+         */
+        SetBigContentTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Set the first line of text after the detail section in the big form of the template.
+         */
+        SetSummaryText(
+            [in] ICharSequence* cs);
+
+        /**
+         * Provide the longer text to be displayed in the big form of the
+         * template in place of the content text.
+         */
+        BigText(
+            [in] ICharSequence* cs);
+    }
+
+    /**
+     * Helper class for generating large-format notifications that include a list of (up to 5) strings.
+     *
+     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.InboxStyle(
+     *      new Notification.Builder()
+     *         .setContentTitle(&quot;5 New mails from &quot; + sender.toString())
+     *         .setContentText(subject)
+     *         .setSmallIcon(R.drawable.new_mail)
+     *         .setLargeIcon(aBitmap))
+     *      .addLine(str1)
+     *      .addLine(str2)
+     *      .setContentTitle("")
+     *      .setSummaryText(&quot;+3 more&quot;)
+     *      .build();
+     * </pre>
+     *
+     * @see Notification#bigContentView
+     */
+    /**
+     * @Involve
+     * interface INotificationStyle
+     */
+    interface INotificationInboxStyle {
+        /**
+         * Overrides ContentTitle in the big form of the template.
+         * This defaults to the value passed to setContentTitle().
+         */
+        SetBigContentTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Set the first line of text after the detail section in the big form of the template.
+         */
+        SetSummaryText(
+            [in] ICharSequence* cs);
+
+        /**
+         * Append a line to the digest section of the Inbox notification.
+         */
+        AddLine(
+            [in] ICharSequence* cs);
+    }
+
+    /**
+     * Notification style for media playback notifications.
+     *
+     * In the expanded form, {@link Notification#bigContentView}, up to 5
+     * {@link Notification.Action}s specified with
+     * {@link Notification.Builder#addAction(int, CharSequence, PendingIntent) addAction} will be
+     * shown as icon-only pushbuttons, suitable for transport controls. The Bitmap given to
+     * {@link Notification.Builder#setLargeIcon(android.graphics.Bitmap) setLargeIcon()} will be
+     * treated as album artwork.
+     *
+     * Unlike the other styles provided here, MediaStyle can also modify the standard-size
+     * {@link Notification#contentView}; by providing action indices to
+     * {@link #setShowActionsInCompactView(int...)} you can promote up to 2 actions to be displayed
+     * in the standard view alongside the usual content.
+     *
+     * Notifications created with MediaStyle will have their category set to
+     * {@link Notification#CATEGORY_TRANSPORT CATEGORY_TRANSPORT} unless you set a different
+     * category using {@link Notification.Builder#setCategory(String) setCategory()}.
+     *
+     * Finally, if you attach a {@link android.media.session.MediaSession.Token} using
+     * {@link android.app.Notification.MediaStyle#setMediaSession(MediaSession.Token)},
+     * the System UI can identify this as a notification representing an active media session
+     * and respond accordingly (by showing album artwork in the lockscreen, for example).
+     *
+     * To use this style with your Notification, feed it to
+     * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.Builder()
+     *     .setSmallIcon(R.drawable.ic_stat_player)
+     *     .setContentTitle(&quot;Track title&quot;)     // these three lines are optional
+     *     .setContentText(&quot;Artist - Album&quot;)   // if you use
+     *     .setLargeIcon(albumArtBitmap))      // setMediaSession(token)
+     *     .setStyle(<b>new Notification.MediaStyle()</b>
+     *         .setMediaSession(mySession))
+     *     .build();
+     * </pre>
+     *
+     * @see Notification#bigContentView
+     */
+    /**
+     * @Involve
+     * interface INotificationStyle
+     */
+    [deprecated]
+    interface INotificationMediaStyle {
+
+        /**
+         * Request up to 3 actions (by index in the order of addition) to be shown in the compact
+         * notification view.
+         *
+         * @param actions the indices of the actions to show in the compact notification view
+         */
+        SetShowActionsInCompactView(
+            [in] ArrayOf<Int32>* actions);
+
+        /**
+         * Attach a {@link android.media.session.MediaSession.Token} to this Notification
+         * to provide additional playback information and control to the SystemUI.
+         */
+        SetMediaSession(
+            [in] IMediaSessionToken* token);
+    }
+
+    // When adding a new Style subclass here, don't forget to update
+    // Builder.getNotificationStyleClass.
+
+    /**
+     * Extender interface for use with {@link Builder#extend}. Extenders may be used to add
+     * metadata or change options on a notification builder.
+     */
+    interface INotificationExtender {
+        /**
+         * Apply this extender to a notification builder.
+         * @param builder the builder to be modified.
+         * @return the build object for chaining.
+         */
+        Extend(
+            [in] INotificationBuilder* builder);
+    }
+
+    /**
+     * Helper class to add wearable extensions to notifications.
+     * <p class="note"> See
+     * <a href="{@docRoot}wear/notifications/creating.html">Creating Notifications
+     * for Android Wear</a> for more information on how to use this class.
+     * <p>
+     * To create a notification with wearable extensions:
+     * <ol>
+     *   <li>Create a {@link android.app.Notification.Builder}, setting any desired
+     *   properties.
+     *   <li>Create a {@link android.app.Notification.WearableExtender}.
+     *   <li>Set wearable-specific properties using the
+     *   {@code add} and {@code set} methods of {@link android.app.Notification.WearableExtender}.
+     *   <li>Call {@link android.app.Notification.Builder#extend} to apply the extensions to a
+     *   notification.
+     *   <li>Post the notification to the notification system with the
+     *   {@code NotificationManager.notify(...)} methods.
+     * </ol>
+     *
+     * <pre class="prettyprint">
+     * Notification notif = new Notification.Builder(mContext)
+     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *         .setContentText(subject)
+     *         .setSmallIcon(R.drawable.new_mail)
+     *         .extend(new Notification.WearableExtender()
+     *                 .setContentIcon(R.drawable.new_mail))
+     *         .build();
+     * NotificationManager notificationManger =
+     *         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+     * notificationManger.notify(0, notif);</pre>
+     *
+     * <p>Wearable extensions can be accessed on an existing notification by using the
+     * {@code WearableExtender(Notification)} constructor,
+     * and then using the {@code get} methods to access values.
+     *
+     * <pre class="prettyprint">
+     * Notification.WearableExtender wearableExtender = new Notification.WearableExtender(
+     *         notification);
+     * List&lt;Notification&gt; pages = wearableExtender.getPages();</pre>
+     */
+    /**
+     * @Involve
+     * interface INotificationExtender
+     */
+    interface INotificationWearableExtender {
+        /**
+         * Sentinel value for an action index that is unset.
+         */
+        const Int32 UNSET_ACTION_INDEX = -1;
+
+        /**
+         * Size value for use with {@link #setCustomSizePreset} to show this notification with
+         * default sizing.
+         * <p>For custom display notifications created using {@link #setDisplayIntent},
+         * the default is {@link #SIZE_LARGE}. All other notifications size automatically based
+         * on their content.
+         */
+        const Int32 SIZE_DEFAULT = 0;
+
+        /**
+         * Size value for use with {@link #setCustomSizePreset} to show this notification
+         * with an extra small size.
+         * <p>This value is only applicable for custom display notifications created using
+         * {@link #setDisplayIntent}.
+         */
+        const Int32 SIZE_XSMALL = 1;
+
+        /**
+         * Size value for use with {@link #setCustomSizePreset} to show this notification
+         * with a small size.
+         * <p>This value is only applicable for custom display notifications created using
+         * {@link #setDisplayIntent}.
+         */
+        const Int32 SIZE_SMALL = 2;
+
+        /**
+         * Size value for use with {@link #setCustomSizePreset} to show this notification
+         * with a medium size.
+         * <p>This value is only applicable for custom display notifications created using
+         * {@link #setDisplayIntent}.
+         */
+        const Int32 SIZE_MEDIUM = 3;
+
+        /**
+         * Size value for use with {@link #setCustomSizePreset} to show this notification
+         * with a large size.
+         * <p>This value is only applicable for custom display notifications created using
+         * {@link #setDisplayIntent}.
+         */
+        const Int32 SIZE_LARGE = 4;
+
+        /**
+         * Size value for use with {@link #setCustomSizePreset} to show this notification
+         * full screen.
+         * <p>This value is only applicable for custom display notifications created using
+         * {@link #setDisplayIntent}.
+         */
+        const Int32 SIZE_FULL_SCREEN = 5;
+
+
+        /**
+         * Add a wearable action to this notification.
+         *
+         * <p>When wearable actions are added using this method, the set of actions that
+         * show on a wearable device splits from devices that only show actions added
+         * using {@link android.app.Notification.Builder#addAction}. This allows for customization
+         * of which actions display on different devices.
+         *
+         * @param action the action to add to this notification
+         * @return this object for method chaining
+         * @see android.app.Notification.Action
+         */
+        AddAction(
+            [in] INotificationAction* action);
+
+        /**
+         * Adds wearable actions to this notification.
+         *
+         * <p>When wearable actions are added using this method, the set of actions that
+         * show on a wearable device splits from devices that only show actions added
+         * using {@link android.app.Notification.Builder#addAction}. This allows for customization
+         * of which actions display on different devices.
+         *
+         * @param actions the actions to add to this notification
+         * @return this object for method chaining
+         * @see android.app.Notification.Action
+         */
+        AddActions(
+            [in] IList* actions);
+
+        /**
+         * Clear all wearable actions present on this builder.
+         * @return this object for method chaining.
+         * @see #addAction
+         */
+         ClearActions();
+
+        /**
+         * Get the wearable actions present on this notification.
+         */
+        GetActions(
+            [out] IList** actions);
+
+        /**
+         * Set an intent to launch inside of an activity view when displaying
+         * this notification. The {@link PendingIntent} provided should be for an activity.
+         *
+         * <pre class="prettyprint">
+         * Intent displayIntent = new Intent(context, MyDisplayActivity.class);
+         * PendingIntent displayPendingIntent = PendingIntent.getActivity(context,
+         *         0, displayIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+         * Notification notif = new Notification.Builder(context)
+         *         .extend(new Notification.WearableExtender()
+         *                 .setDisplayIntent(displayPendingIntent)
+         *                 .setCustomSizePreset(Notification.WearableExtender.SIZE_MEDIUM))
+         *         .build();</pre>
+         *
+         * <p>The activity to launch needs to allow embedding, must be exported, and
+         * should have an empty task affinity. It is also recommended to use the device
+         * default light theme.
+         *
+         * <p>Example AndroidManifest.xml entry:
+         * <pre class="prettyprint">
+         * &lt;activity android:name=&quot;com.example.MyDisplayActivity&quot;
+         *     android:exported=&quot;true&quot;
+         *     android:allowEmbedded=&quot;true&quot;
+         *     android:taskAffinity=&quot;&quot;
+         *     android:theme=&quot;@android:style/Theme.DeviceDefault.Light&quot; /&gt;</pre>
+         *
+         * @param intent the {@link PendingIntent} for an activity
+         * @return this object for method chaining
+         * @see android.app.Notification.WearableExtender#getDisplayIntent
+         */
+        SetDisplayIntent(
+            [in] IPendingIntent* intent);
+
+        /**
+         * Get the intent to launch inside of an activity view when displaying this
+         * notification. This {@code PendingIntent} should be for an activity.
+         */
+        GetDisplayIntent(
+            [out] IPendingIntent** intent);
+
+        /**
+         * Add an additional page of content to display with this notification. The current
+         * notification forms the first page, and pages added using this function form
+         * subsequent pages. This field can be used to separate a notification into multiple
+         * sections.
+         *
+         * @param page the notification to add as another page
+         * @return this object for method chaining
+         * @see android.app.Notification.WearableExtender#getPages
+         */
+        AddPage(
+            [in] INotification* page);
+
+        /**
+         * Add additional pages of content to display with this notification. The current
+         * notification forms the first page, and pages added using this function form
+         * subsequent pages. This field can be used to separate a notification into multiple
+         * sections.
+         *
+         * @param pages a list of notifications
+         * @return this object for method chaining
+         * @see android.app.Notification.WearableExtender#getPages
+         */
+        AddPages(
+            [in] IList* pages);
+
+        /**
+         * Clear all additional pages present on this builder.
+         * @return this object for method chaining.
+         * @see #addPage
+         */
+        ClearPages();
+
+        /**
+         * Get the array of additional pages of content for displaying this notification. The
+         * current notification forms the first page, and elements within this array form
+         * subsequent pages. This field can be used to separate a notification into multiple
+         * sections.
+         * @return the pages for this notification
+         */
+        GetPages(
+            [out] IList** pages);
+
+        /**
+         * Set a background image to be displayed behind the notification content.
+         * Contrary to the {@link android.app.Notification.BigPictureStyle}, this background
+         * will work with any notification style.
+         *
+         * @param background the background bitmap
+         * @return this object for method chaining
+         * @see android.app.Notification.WearableExtender#getBackground
+         */
+        SetBackground(
+            [in] IBitmap* background);
+
+        /**
+         * Get a background image to be displayed behind the notification content.
+         * Contrary to the {@link android.app.Notification.BigPictureStyle}, this background
+         * will work with any notification style.
+         *
+         * @return the background image
+         * @see android.app.Notification.WearableExtender#setBackground
+         */
+        GetBackground(
+            [out] IBitmap** background);
+
+        /**
+         * Set an icon that goes with the content of this notification.
+         */
+        SetContentIcon(
+            [in] Int32 icon);
+
+        /**
+         * Get an icon that goes with the content of this notification.
+         */
+        GetContentIcon(
+            [out] Int32* icon);
+
+        /**
+         * Set the gravity that the content icon should have within the notification display.
+         * Supported values include {@link android.view.Gravity#START} and
+         * {@link android.view.Gravity#END}. The default value is {@link android.view.Gravity#END}.
+         * @see #setContentIcon
+         */
+        SetContentIconGravity(
+            [in] Int32 contentIconGravity);
+
+        /**
+         * Get the gravity that the content icon should have within the notification display.
+         * Supported values include {@link android.view.Gravity#START} and
+         * {@link android.view.Gravity#END}. The default value is {@link android.view.Gravity#END}.
+         * @see #getContentIcon
+         */
+        GetContentIconGravity(
+            [out] Int32* contentIconGravity);
+
+        /**
+         * Set an action from this notification's actions to be clickable with the content of
+         * this notification. This action will no longer display separately from the
+         * notification's content.
+         *
+         * <p>For notifications with multiple pages, child pages can also have content actions
+         * set, although the list of available actions comes from the main notification and not
+         * from the child page's notification.
+         *
+         * @param actionIndex The index of the action to hoist onto the current notification page.
+         *                    If wearable actions were added to the main notification, this index
+         *                    will apply to that list, otherwise it will apply to the regular
+         *                    actions list.
+         */
+        SetContentAction(
+            [in] Int32 actionIndex);
+
+        /**
+         * Get the index of the notification action, if any, that was specified as being clickable
+         * with the content of this notification. This action will no longer display separately
+         * from the notification's content.
+         *
+         * <p>For notifications with multiple pages, child pages can also have content actions
+         * set, although the list of available actions comes from the main notification and not
+         * from the child page's notification.
+         *
+         * <p>If wearable specific actions were added to the main notification, this index will
+         * apply to that list, otherwise it will apply to the regular actions list.
+         *
+         * @return the action index or {@link #UNSET_ACTION_INDEX} if no action was selected.
+         */
+        GetContentAction(
+            [out] Int32* actionIndex);
+
+        /**
+         * Set the gravity that this notification should have within the available viewport space.
+         * Supported values include {@link android.view.Gravity#TOP},
+         * {@link android.view.Gravity#CENTER_VERTICAL} and {@link android.view.Gravity#BOTTOM}.
+         * The default value is {@link android.view.Gravity#BOTTOM}.
+         */
+        SetGravity(
+            [in] Int32 gravity);
+
+        /**
+         * Get the gravity that this notification should have within the available viewport space.
+         * Supported values include {@link android.view.Gravity#TOP},
+         * {@link android.view.Gravity#CENTER_VERTICAL} and {@link android.view.Gravity#BOTTOM}.
+         * The default value is {@link android.view.Gravity#BOTTOM}.
+         */
+        GetGravity(
+            [out] Int32* gravity);
+
+        /**
+         * Set the custom size preset for the display of this notification out of the available
+         * presets found in {@link android.app.Notification.WearableExtender}, e.g.
+         * {@link #SIZE_LARGE}.
+         * <p>Some custom size presets are only applicable for custom display notifications created
+         * using {@link android.app.Notification.WearableExtender#setDisplayIntent}. Check the
+         * documentation for the preset in question. See also
+         * {@link #setCustomContentHeight} and {@link #getCustomSizePreset}.
+         */
+        SetCustomSizePreset(
+            [in] Int32 sizePreset);
+
+        /**
+         * Get the custom size preset for the display of this notification out of the available
+         * presets found in {@link android.app.Notification.WearableExtender}, e.g.
+         * {@link #SIZE_LARGE}.
+         * <p>Some custom size presets are only applicable for custom display notifications created
+         * using {@link #setDisplayIntent}. Check the documentation for the preset in question.
+         * See also {@link #setCustomContentHeight} and {@link #setCustomSizePreset}.
+         */
+        GetCustomSizePreset(
+            [out] Int32* sizePreset);
+
+        /**
+         * Set the custom height in pixels for the display of this notification's content.
+         * <p>This option is only available for custom display notifications created
+         * using {@link android.app.Notification.WearableExtender#setDisplayIntent}. See also
+         * {@link android.app.Notification.WearableExtender#setCustomSizePreset} and
+         * {@link #getCustomContentHeight}.
+         */
+        SetCustomContentHeight(
+            [in] Int32 height);
+
+        /**
+         * Get the custom height in pixels for the display of this notification's content.
+         * <p>This option is only available for custom display notifications created
+         * using {@link #setDisplayIntent}. See also {@link #setCustomSizePreset} and
+         * {@link #setCustomContentHeight}.
+         */
+        GetCustomContentHeight(
+            [out] Int32* height);
+
+        /**
+         * Set whether the scrolling position for the contents of this notification should start
+         * at the bottom of the contents instead of the top when the contents are too long to
+         * display within the screen.  Default is false (start scroll at the top).
+         */
+        SetStartScrollBottom(
+            [in] Boolean startScrollBottom);
+
+        /**
+         * Get whether the scrolling position for the contents of this notification should start
+         * at the bottom of the contents instead of the top when the contents are too long to
+         * display within the screen. Default is false (start scroll at the top).
+         */
+        GetStartScrollBottom(
+            [out] Boolean* startScrollBottom);
+
+        /**
+         * Set whether the content intent is available when the wearable device is not connected
+         * to a companion device.  The user can still trigger this intent when the wearable device
+         * is offline, but a visual hint will indicate that the content intent may not be available.
+         * Defaults to true.
+         */
+        SetContentIntentAvailableOffline(
+            [in] Boolean contentIntentAvailableOffline);
+
+        /**
+         * Get whether the content intent is available when the wearable device is not connected
+         * to a companion device.  The user can still trigger this intent when the wearable device
+         * is offline, but a visual hint will indicate that the content intent may not be available.
+         * Defaults to true.
+         */
+        GetContentIntentAvailableOffline(
+            [out] Boolean* result);
+
+        /**
+         * Set a hint that this notification's icon should not be displayed.
+         * @param hintHideIcon {@code true} to hide the icon, {@code false} otherwise.
+         * @return this object for method chaining
+         */
+        SetHintHideIcon(
+            [in] Boolean hintHideIcon);
+
+        /**
+         * Get a hint that this notification's icon should not be displayed.
+         * @return {@code true} if this icon should not be displayed, false otherwise.
+         * The default value is {@code false} if this was never set.
+         */
+        GetHintHideIcon(
+            [out] Boolean* result);
+
+        /**
+         * Set a visual hint that only the background image of this notification should be
+         * displayed, and other semantic content should be hidden. This hint is only applicable
+         * to sub-pages added using {@link #addPage}.
+         */
+        SetHintShowBackgroundOnly(
+            [in] Boolean hintShowBackgroundOnly);
+
+        /**
+         * Get a visual hint that only the background image of this notification should be
+         * displayed, and other semantic content should be hidden. This hint is only applicable
+         * to sub-pages added using {@link android.app.Notification.WearableExtender#addPage}.
+         */
+        GetHintShowBackgroundOnly(
+            [out] Boolean* result);
+    }
+
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

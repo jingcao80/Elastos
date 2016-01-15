@@ -1,0 +1,127 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IImageView;
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.Widget.IImageView
+     *
+     * interface Elastos.Droid.View.IViewOnClickListener;
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [deprecated]
+    interface IQuickContactBadge {
+        /**
+         * Resets the contact photo to the default state.
+         */
+        SetImageToDefault();
+
+        /**
+         * Assign the contact uri that this QuickContactBadge should be associated
+         * with. Note that this is only used for displaying the QuickContact window and
+         * won't bind the contact's photo for you. Call {@link #setImageDrawable(Drawable)} to set the
+         * photo.
+         *
+         * @param contactUri Either a {@link Contacts#CONTENT_URI} or
+         *            {@link Contacts#CONTENT_LOOKUP_URI} style URI.
+         */
+        AssignContactUri(
+            [in] IUri* contactUri);
+
+        /**
+         * Assign a contact based on an email address. This should only be used when
+         * the contact's URI is not available, as an extra query will have to be
+         * performed to lookup the URI based on the email.
+         *
+         * @param emailAddress The email address of the contact.
+         * @param lazyLookup If this is true, the lookup query will not be performed
+         * until this view is clicked.
+         */
+        AssignContactFromEmail(
+            [in] String emailAddress,
+            [in] Boolean lazyLookup);
+
+        /**
+         * Assign a contact based on an email address. This should only be used when
+         * the contact's URI is not available, as an extra query will have to be
+         * performed to lookup the URI based on the email.
+
+         @param emailAddress The email address of the contact.
+         @param lazyLookup If this is true, the lookup query will not be performed
+         until this view is clicked.
+         @param extras A bundle of extras to populate the contact edit page with if the contact
+         is not found and the user chooses to add the email address to an existing contact or
+         create a new contact. Uses the same string constants as those found in
+         {@link android.provider.ContactsContract.Intents.Insert}
+        */
+
+        AssignContactFromEmail(
+            [in] String emailAddress,
+            [in] Boolean lazyLookup,
+            [in] IBundle* extras);
+
+        /**
+         * Assign a contact based on a phone number. This should only be used when
+         * the contact's URI is not available, as an extra query will have to be
+         * performed to lookup the URI based on the phone number.
+         *
+         * @param phoneNumber The phone number of the contact.
+         * @param lazyLookup If this is true, the lookup query will not be performed
+         * until this view is clicked.
+         */
+        AssignContactFromPhone(
+            [in] String phoneNumber,
+            [in] Boolean lazyLookup);
+
+        /**
+         * Assign a contact based on a phone number. This should only be used when
+         * the contact's URI is not available, as an extra query will have to be
+         * performed to lookup the URI based on the phone number.
+         *
+         * @param phoneNumber The phone number of the contact.
+         * @param lazyLookup If this is true, the lookup query will not be performed
+         * until this view is clicked.
+         * @param extras A bundle of extras to populate the contact edit page with if the contact
+         * is not found and the user chooses to add the phone number to an existing contact or
+         * create a new contact. Uses the same string constants as those found in
+         * {@link android.provider.ContactsContract.Intents.Insert}
+         */
+        AssignContactFromPhone(
+            [in] String phoneNumber,
+            [in] Boolean lazyLookup,
+            [in] IBundle* extras);
+
+        /**
+         * Assigns the drawable that is to be drawn on top of the assigned contact photo.
+         *
+         * @param overlay Drawable to be drawn over the assigned contact photo. Must have a non-zero
+         *         instrinsic width and height.
+         */
+        SetOverlay(
+            [in] IDrawable* overlay);
+
+        /**
+         * Set a list of specific MIME-types to exclude and not display. For
+         * example, this can be used to hide the {@link Contacts#CONTENT_ITEM_TYPE}
+         * profile icon.
+         */
+        SetExcludeMimes(
+            [in] ArrayOf<String>* excludeMimes);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

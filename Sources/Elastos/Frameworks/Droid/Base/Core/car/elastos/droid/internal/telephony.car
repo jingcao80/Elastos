@@ -1,0 +1,25 @@
+module
+{
+    merge("telephony/CallInfo.car");
+    merge("telephony/CallerInfo.car");
+    merge("telephony/CallerInfoAsyncQuery.car");
+    merge("telephony/DctConstants.car");
+    merge("telephony/GsmAlphabet.car");
+    merge("telephony/ICallService.car");
+    merge("telephony/ICallServiceAdapter.car");
+    merge("telephony/IMms.car");
+    merge("telephony/IPhoneStateListener.car");
+    merge("telephony/IPhoneSubInfo.car");
+    merge("telephony/ISms.car");
+    merge("telephony/ISub.car");
+    merge("telephony/ITelephony.car");
+    merge("telephony/ITelephonyRegistry.car");
+    merge("telephony/IWapPushManager.car");
+    merge("telephony/IccCardConstants.car");
+    merge("telephony/PhoneConstants.car");
+    merge("telephony/RILConstants.car");
+    merge("telephony/SmsConstants.car");
+    merge("telephony/SmsRawData.car");
+    merge("telephony/TelephonyIntents.car");
+    merge("telephony/TelephonyProperties.car");
+}

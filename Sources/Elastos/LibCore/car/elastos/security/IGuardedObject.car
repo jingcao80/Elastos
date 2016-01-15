@@ -1,0 +1,23 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    interface IGuardedObject {
+        /**
+         * Returns the guarded {@code Object} if the associated {@code Guard}
+         * permits access. If access is not granted, then a {@code
+         * SecurityException} is thrown.
+         *
+         * @return the guarded object.
+         * @exception SecurityException
+         *                if access is not granted to the guarded object.
+         */
+        GetObject(
+            [out] IInterface** object);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

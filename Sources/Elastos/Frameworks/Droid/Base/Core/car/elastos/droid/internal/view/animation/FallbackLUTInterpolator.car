@@ -1,0 +1,44 @@
+
+module
+{
+    interface Elastos.Droid.Animation.ITimeInterpolator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Animation {
+
+    /**
+     * Interpolator that builds a lookup table to use. This is a fallback for
+     * building a native interpolator from a TimeInterpolator that is not marked
+     * with {@link HasNativeInterpolator}
+     *
+     * This implements TimeInterpolator to allow for easier interop with Animators
+     */
+    /**
+     * @Involve
+     * interface ITimeInterpolator
+     * interface INativeInterpolatorFactory
+     */
+    [local]
+    interface IFallbackLUTInterpolator {
+    }
+
+    /**
+     * Used to create a one-shot float[] LUT & native interpolator
+     */
+    [local]
+    interface IFallbackLUTInterpolatorHelper {
+        CreateNativeInterpolator(
+            [in] ITimeInterpolator* interpolator,
+            [in] Int64 duration,
+            [out] Int64* result);
+    }
+
+    }   //namespace Animation
+    }   //namespace View
+    }   //namespace Internal
+    }   //namespace Droid
+    }   //namespace Elastos
+}

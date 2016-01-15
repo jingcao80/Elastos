@@ -1,0 +1,34 @@
+
+module
+{
+
+    namespace Libcore {
+    namespace Net {
+    namespace Url {
+
+    /**
+     * This subclass extends {@code URLConnection}.
+     * <p>
+     *
+     * This class is responsible for connecting and retrieving resources from a Jar
+     * file which can be anywhere that can be referred to by an URL.
+     *
+     * @Involve
+     * interface Elastos.Net.IURLConnection;
+     * interface Elastos.Net.IJarURLConnection;
+     */
+    interface IJarURLConnectionImpl {
+    }
+
+    interface IJarURLConnectionImplHelper {
+        /**
+         * Closes the cached files.
+         */
+        CloseCachedFiles();
+    }
+
+    } // namespace Url
+    } // namespace Net
+    } // namespace Libcore
+
+}

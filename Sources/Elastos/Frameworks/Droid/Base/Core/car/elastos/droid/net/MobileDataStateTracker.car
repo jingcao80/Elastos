@@ -1,0 +1,154 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.INetworkInfo;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessenger;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Track the state of mobile data connectivity. This is done by
+     * receiving broadcast intents from the Phone process whenever
+     * the state of data connectivity changes.
+     *
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * interface IBaseNetworkStateTracker;
+     * interface INetworkStateTracker;
+     */
+    [deprecated]
+    interface IMobileDataStateTracker {
+
+        /**
+         * Begin monitoring data connectivity.
+         *
+         * @param context is the current Android context
+         * @param target is the Hander to which to return the events.
+         */
+        StartMonitoring(
+            [in] IContext* context,
+            [in] IHandler* target);
+
+        IsPrivateDnsRouteSet(
+            [out] Boolean* result);
+
+        PrivateDnsRouteSet(
+            [in] Boolean enabled);
+
+        GetNetworkInfo(
+            [out] INetworkInfo** result);
+
+        IsDefaultRouteSet(
+            [out] Boolean* result);
+
+        DefaultRouteSet(
+            [in] Boolean enabled);
+
+        /**
+         * This is not implemented.
+         */
+        ReleaseWakeLock();
+
+        /**
+         * Report whether data connectivity is possible.
+         */
+        IsAvailable(
+            [out] Boolean* result);
+
+        /**
+         * Return the system properties name associated with the tcp buffer sizes
+         * for this network.
+         */
+        GetTcpBufferSizesPropName(
+            [out] String* result);
+
+        /**
+         * Tear down mobile data connectivity, i.e., disable the ability to create
+         * mobile data connections.
+         * TODO - make async and return nothing?
+         */
+        Teardown(
+            [out] Boolean* result);
+
+        /**
+         * @return true if this is ready to operate
+         */
+        IsReady(
+            [out] Boolean* result);
+
+        SetTeardownRequested(
+            [in] Boolean isRequested);
+
+        IsTeardownRequested(
+            [out] Boolean* result);
+
+        /**
+         * Re-enable mobile data connectivity after a {@link #teardown()}.
+         * TODO - make async and always get a notification?
+         */
+        Reconnect(
+            [out] Boolean* result);
+
+        /**
+         * Turn on or off the mobile radio. No connectivity will be possible while the
+         * radio is off. The operation is a no-op if the radio is already in the desired state.
+         * @param turnOn {@code true} if the radio should be turned on, {@code false} if
+         */
+        SetRadio(
+            [in] Boolean turnOn,
+            [out] Boolean* result);
+
+        SetInternalDataEnable(
+            [in] Boolean enabled);
+
+        /**
+         * Eanble/disable FailFast
+         *
+         * @param enabled is DctConstants.ENABLED/DISABLED
+         */
+        SetEnableFailFastMobileData(
+            [in] Int32 enabled);
+
+        /**
+         * carrier dependency is met/unmet
+         * @param met
+         */
+        SetDependencyMet(
+            [in] Boolean met);
+
+        /**
+         *  Inform DCT mobile provisioning has started, it ends when provisioning completes.
+         */
+        EnableMobileProvisioning(
+            [in] String url);
+
+        /**
+         * Return if this network is the provisioning network. Valid only if connected.
+         * @param met
+         */
+        IsProvisioningNetwork(
+            [out] Boolean* result);
+
+        /**
+         * @see android.net.NetworkStateTracker#getLinkProperties()
+         */
+        SupplyMessenger(
+            [in] IMessenger* messenger);
+    }
+
+    interface IMobileDataStateTrackerHelper {
+        NetworkTypeToApnType(
+            [in] Int32 netType,
+            [out] String* result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

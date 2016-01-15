@@ -1,0 +1,43 @@
+
+module
+{
+    namespace Elastos {
+    namespace Core {
+
+    /**
+     * @Involve
+     * interface INumber;
+     * interface ISerializable;
+     * interface IComparable;
+     */
+    interface IDouble {
+        /**
+          * Gets the primitive value of this byte.
+          *
+          * @return this object's primitive value.
+          */
+        GetValue(
+            [out] Double* value);
+
+        /**
+         * Indicates whether this object represents an infinite value.
+         *
+         * @return {@code true} if the value of this double is positive or negative
+         *         infinity; {@code false} otherwise.
+         */
+        IsInfinite(
+            [out] Boolean* result);
+
+        /**
+         * Indicates whether this object is a <em>Not-a-Number (NaN)</em> value.
+         *
+         * @return {@code true} if this double is <em>Not-a-Number</em>;
+         *         {@code false} if it is a (potentially infinite) double number.
+         */
+        IsNaN(
+            [out] Boolean* result);
+    }
+
+    } // namespace Core
+    } // namespace Elastos
+}

@@ -1,0 +1,110 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.ICanvasProperty;
+    interface Elastos.Droid.View.IHardwareLayer;
+    interface Elastos.Droid.View.IRenderNode;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Hardware accelerated canvas.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * inteface ICanvas
+     */
+    interface IHardwareCanvas {
+        OnPreDraw(
+            [in] IRect* dirty,
+            [out] Int32* result);
+
+        OnPostDraw(
+            [in] IRect* dirty,
+            [out] Int32* result);
+
+        /**
+         * Draws the specified display list onto this canvas. The display list can only
+         * be drawn if {@link android.view.RenderNode#isValid()} returns true.
+         *
+         * @param renderNode The RenderNode to replay.
+         */
+        DrawRenderNode(
+            [in] IRenderNode* renderNode);
+
+        /**
+         * Draws the specified display list onto this canvas.
+         *
+         * @param renderNode The RenderNode to replay.
+         * @param dirty Ignored, can be null.
+         * @param flags Optional flags about drawing, see {@link RenderNode} for
+         *              the possible flags.
+         *
+         * @return One of {@link RenderNode#STATUS_DONE} or {@link RenderNode#STATUS_DREW}
+         *         if anything was drawn.
+         *
+         * @hide
+         */
+        DrawRenderNode(
+            [in] IRenderNode* renderNode,
+            [in] IRect* dirty,
+            [in] Int32 flags,
+            [out] Int32* result);
+
+        /**
+         * Draws the specified layer onto this canvas.
+         *
+         * @param layer The layer to composite on this canvas
+         * @param x The left coordinate of the layer
+         * @param y The top coordinate of the layer
+         * @param paint The paint used to draw the layer
+         *
+         * @hide
+         */
+        DrawHardwareLayer(
+            [in] IHardwareLayer* layer,
+            [in] Float x,
+            [in] Float y,
+            [in] IPaint* paint);
+
+        /**
+         * Calls the function specified with the drawGLFunction function pointer. This is
+         * functionality used by webkit for calling into their renderer from our display lists.
+         * This function may return true if an invalidation is needed after the call.
+         *
+         * @param drawGLFunction A native function pointer
+         *
+         * @return {@link RenderNode#STATUS_DONE}
+         *
+         * @hide
+         */
+        CallDrawGLFunction(
+            [in] Int64 drawGLFunction,
+            [out] Int32* result);
+
+        DrawCircle(
+            [in] ICanvasProperty* cx,
+            [in] ICanvasProperty* cy,
+            [in] ICanvasProperty* radius,
+            [in] ICanvasProperty* paint);
+
+        DrawRoundRect(
+            [in] ICanvasProperty* left,
+            [in] ICanvasProperty* top,
+            [in] ICanvasProperty* right,
+            [in] ICanvasProperty* bottom,
+            [in] ICanvasProperty* rx,
+            [in] ICanvasProperty* ry,
+            [in] ICanvasProperty* paint);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

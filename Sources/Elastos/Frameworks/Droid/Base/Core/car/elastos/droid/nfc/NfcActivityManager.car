@@ -1,0 +1,103 @@
+
+module
+{
+
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.App.IApplication;
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.NFC.INfcAdapterReaderCallback;
+    interface Elastos.Droid.NFC.INfcAdapterCreateBeamUrisCallback;
+    interface Elastos.Droid.NFC.INfcAdapterCreateNdefMessageCallback;
+    interface Elastos.Droid.NFC.INfcAdapterOnNdefPushCompleteCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+    interface INfcApplicationState {
+        Register();
+
+        Unregister();
+    }
+
+    interface INfcActivityState {
+        Destroy();
+    }
+
+    /**
+     * @Involve
+     * interace IIAppCallback
+     * interface IApplicationActivityLifecycleCallbacks
+     */
+    [deprecated, local]
+    interface INfcActivityManager {
+        FindAppState(
+            [in] IApplication* app,
+            [out] INfcApplicationState** state);
+
+        RegisterApplication(
+            [in] IApplication* app);
+
+        UnregisterApplication(
+            [in] IApplication* app);
+
+        FindActivityState(
+            [in] IActivity* activity,
+            [out] INfcApplicationState** state);
+
+        GetActivityState(
+            [in] IActivity* activity,
+            [out] INfcActivityState** state);
+
+        FindResumedActivityState(
+            [out] INfcActivityState** state);
+
+        DestroyActivityState(
+            [in] IActivity* activity);
+
+        EnableReaderMode(
+            [in] IActivity* activity,
+            [in] INfcAdapterReaderCallback* p,
+            [in] Int32 flags,
+            [in] IBundle* extras);
+
+        DisableReaderMode(
+            [in] IActivity* activity);
+
+        SetReaderMode(
+            [in] IBinder* token,
+            [in] Int32 flags,
+            [in] IBundle* extras);
+
+        SetNdefPushContentUri(
+            [in] IActivity* activity,
+            [in] ArrayOf<IUri*>* uris);
+
+        SetNdefPushContentUriCallback(
+            [in] IActivity* activity,
+            [in] INfcAdapterCreateBeamUrisCallback* cb);
+
+        SetNdefPushMessage(
+            [in] IActivity* activity,
+            [in] INdefMessage* message,
+            [in] Int32 flags);
+
+        SetNdefPushMessageCallback(
+            [in] IActivity* activity,
+            [in] INfcAdapterCreateNdefMessageCallback* cb,
+            [in] Int32 flags);
+
+        SetOnNdefPushCompleteCallback(
+            [in] IActivity* activity,
+            [in] INfcAdapterOnNdefPushCompleteCallback* cb);
+
+        RequestNfcServiceCallback();
+
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

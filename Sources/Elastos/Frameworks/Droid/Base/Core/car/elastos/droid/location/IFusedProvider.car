@@ -1,0 +1,29 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Location.IIFusedLocationHardware;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * Interface definition for Location providers that require FLP services.
+     * @hide
+     */
+    [deprecated]
+    interface IIFusedProvider {
+        /**
+         * Provides access to a FusedLocationHardware instance needed for the provider to work.
+         *
+         * @param instance      The FusedLocationHardware available for the provider to use.
+         */
+        OnFusedLocationHardwareChange(
+            [in] IIFusedLocationHardware* instance);
+    }
+
+    } // namespace Location
+    } // namespace Droid
+    } // namespace Elastos
+}
+

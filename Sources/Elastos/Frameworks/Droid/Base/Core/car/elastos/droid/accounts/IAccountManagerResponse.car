@@ -1,0 +1,26 @@
+
+module
+{
+    using interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Accounts {
+
+    /**
+     * The interface used to return responses for asynchronous calls to the {@link IAccountManager}
+     * @hide
+     */
+    interface IAccountManagerResponse {
+        OnResult(
+            [in] IBundle* value);
+
+        OnError(
+            [in] Int32 errorCode,
+            [in] String errorMessage);
+    }
+
+    } // Accounts
+    } // Droid
+    } // Elastos
+}

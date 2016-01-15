@@ -1,0 +1,198 @@
+
+module
+{
+    interface Elastos.Droid.Utility.IDisplayMetrics;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IRegion;
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPointF;
+    interface Elastos.Droid.View.IWindowManagerLayoutParams;
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+    /**
+     * A helper object to translate the screen and window coordinates back and forth.
+     * @hide
+     */
+    interface ICompatibilityInfoTranslator {
+        /**
+         * Translate the screen rect to the application frame.
+         */
+        TranslateRectInScreenToAppWinFrame(
+            [in] IRect* rect);
+
+        /**
+         * Translate the region in window to screen.
+         */
+        TranslateRegionInWindowToScreen(
+            [in] IRegion* transparentRegion);
+
+        /**
+         * Apply translation to the canvas that is necessary to draw the content.
+         */
+        TranslateCanvas(
+            [in] ICanvas* canvas);
+
+        /**
+         * Translate the motion event captured on screen to the application's window.
+         */
+        TranslateEventInScreenToAppWindow(
+            [in] IMotionEvent* event);
+
+        /**
+         * Translate the window's layout parameter, from application's view to
+         * Screen's view.
+         */
+        TranslateWindowLayout(
+            [in] IWindowManagerLayoutParams* params);
+
+        /**
+         * Translate a Rect in application's window to screen.
+         */
+        TranslateRectInAppWindowToScreen(
+            [in] IRect* rect);
+
+        /**
+         * Translate a Rect in screen coordinates into the app window's coordinates.
+         */
+        TranslateRectInScreenToAppWindow(
+            [in] IRect* rect);
+
+        /**
+         * Translate a Point in screen coordinates into the app window's coordinates.
+         */
+        TranslatePointInScreenToAppWindow(
+            [in] IPointF* point);
+
+        /**
+         * Translate the location of the sub window.
+         * @param params
+         */
+        TranslateLayoutParamsInAppWindowToScreen(
+            [in] IWindowManagerLayoutParams* params);
+
+        /**
+         * Translate the content insets in application window to Screen. This uses
+         * the internal buffer for content insets to avoid extra object allocation.
+         */
+        GetTranslatedContentInsets(
+            [in] IRect* contentInsets,
+            [out] IRect** rect);
+
+        /**
+         * Translate the visible insets in application window to Screen. This uses
+         * the internal buffer for visible insets to avoid extra object allocation.
+         */
+        GetTranslatedVisibleInsets(
+            [in] IRect* visibleInsets,
+            [out] IRect** rect);
+
+        /**
+         * Translate the touchable area in application window to Screen. This uses
+         * the internal buffer for touchable area to avoid extra object allocation.
+         */
+        GetTranslatedTouchableArea(
+            [in] IRegion* touchableArea,
+            [out] IRegion** region);
+
+        GetApplicationScale(
+            [out] Float* appScale);
+
+        GetApplicationInvertedScale(
+            [out] Float* appInvertedScale);
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated]
+    interface ICompatibilityInfo {
+        /**
+         * This is the number of pixels we would like to have along the
+         * short axis of an app that needs to run on a normal size screen.
+         */
+        const Int32 DEFAULT_NORMAL_SHORT_DIMENSION = 320;
+
+        /**
+         * This is the maximum aspect ratio we will allow while keeping
+         * applications in a compatible screen size.
+        */
+        const Float MAXIMUM_ASPECT_RATIO = 1.472413793; // 854 / 480
+
+        GetApplicationDensity(
+            [out] Int32* applicationDensity);
+
+        SetApplicationDensity(
+            [in] Int32 applicationDensity);
+
+        GetApplicationScale(
+            [out] Float* applicationScale);
+
+        SetApplicationScale(
+            [in] Float applicationScale);
+
+        GetApplicationInvertedScale(
+            [out] Float* applicationInvertedScale);
+
+        SetApplicationInvertedScale(
+            [in] Float applicationInvertedScale);
+
+        /**
+         * @return true if the scaling is required
+         */
+        IsScalingRequired(
+            [out] Boolean* isRequire);
+
+        SupportsScreen(
+            [out] Boolean* isSupport);
+
+        NeverSupportsScreen(
+            [out] Boolean* value);
+
+        AlwaysSupportsScreen(
+            [out] Boolean* value);
+
+        /**
+         * Returns the translator which translates the coordinates in compatibility mode.
+         * @param params the window's parameter
+         */
+        GetTranslator(
+            [out] ICompatibilityInfoTranslator** translator);
+
+        ApplyToDisplayMetrics(
+            [in] IDisplayMetrics* inoutDm);
+
+        ApplyToConfiguration(
+            [in] Int32 displayDensity,
+            [in] IConfiguration* inoutConfig);
+    }
+
+    interface ICompatibilityInfoHelper {
+        /**
+        * Compute the frame Rect for applications runs under compatibility mode.
+        *
+        * @param dm the display metrics used to compute the frame size.
+        * @param orientation the orientation of the screen.
+        * @param outRect the output parameter which will contain the result.
+        * @return Returns the scaling factor for the window.
+        */
+        ComputeCompatibleScaling(
+            [in] IDisplayMetrics* dm,
+            [in] IDisplayMetrics* outDm,
+            [out] Float* scale);
+
+        GetDefault(
+            [out] ICompatibilityInfo** info);
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

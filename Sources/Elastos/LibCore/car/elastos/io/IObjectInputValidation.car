@@ -1,0 +1,27 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * A callback interface for post-deserialization checks on objects. Allows, for
+     * example, the validation of a whole graph of objects after all of them have
+     * been loaded.
+     *
+     * @see ObjectInputStream#registerValidation(ObjectInputValidation, int)
+     */
+    interface IObjectInputValidation {
+        /**
+         * Validates this object.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * InvalidObjectException | if this object fails to validate itself.
+         */
+        ValidateObject();
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

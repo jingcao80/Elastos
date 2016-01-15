@@ -1,0 +1,74 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+
+    /**
+     * <p><code>CameraAccessException</code> is thrown if a camera device could not
+     * be queried or opened by the {@link CameraManager}, or if the connection to an
+     * opened {@link CameraDevice} is no longer valid.</p>
+     *
+     * @see CameraManager
+     * @see CameraDevice
+     */
+    interface ICameraAccessException {
+        /**
+         * The camera device is in use already
+         * @hide
+         */
+        const Int32 CAMERA_IN_USE = 4;
+
+        /**
+         * The system-wide limit for number of open cameras has been reached,
+         * and more camera devices cannot be opened until previous instances are
+         * closed.
+         * @hide
+         */
+        const Int32 MAX_CAMERAS_IN_USE = 5;
+
+        /**
+         * The camera is disabled due to a device policy, and cannot be opened.
+         *
+         * @see android.app.admin.DevicePolicyManager#setCameraDisabled(android.content.ComponentName, boolean)
+         */
+        const Int32 CAMERA_DISABLED = 1;
+
+        /**
+         * The camera device is removable and has been disconnected from the Android
+         * device, or the camera id used with {@link android.hardware.camera2.CameraManager#openCamera}
+         * is no longer valid, or the camera service has shut down the connection due to a
+         * higher-priority access request for the camera device.
+         */
+        const Int32 CAMERA_DISCONNECTED = 2;
+
+        /**
+         * The camera device is currently in the error state.
+         *
+         * <p>The camera has failed to open or has failed at a later time
+         * as a result of some non-user interaction. Refer to
+         * {@link CameraDevice.StateCallback#onError} for the exact
+         * nature of the error.</p>
+         *
+         * <p>No further calls to the camera will succeed. Clean up
+         * the camera with {@link CameraDevice#close} and try
+         * handling the error in order to successfully re-open the camera.
+         * </p>
+         *
+         */
+        const Int32 CAMERA_ERROR = 3;
+
+        /**
+         * A deprecated HAL version is in use.
+         * @hide
+         */
+        const Int32 CAMERA_DEPRECATED_HAL = 1000;
+    }
+
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

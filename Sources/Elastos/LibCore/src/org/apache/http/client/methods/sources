@@ -1,0 +1,21 @@
+
+TARGET_NAME= methods
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+SOURCES = HttpRequestBase.cpp
+SOURCES += HttpEntityEnclosingRequestBase.cpp
+SOURCES += CHttpDelete.cpp
+SOURCES += CHttpGet.cpp
+SOURCES += CHttpHead.cpp
+SOURCES += CHttpOptions.cpp
+SOURCES += CHttpPost.cpp
+SOURCES += CHttpPut.cpp
+SOURCES += CHttpTrace.cpp

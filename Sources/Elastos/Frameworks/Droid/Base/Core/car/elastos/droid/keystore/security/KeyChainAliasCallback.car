@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace KeyStore {
+    namespace Security {
+
+    /**
+     * The KeyChainAliasCallback is the callback for {@link
+     * KeyChain#choosePrivateKeyAlias}.
+     */
+    interface IKeyChainAliasCallback {
+
+    /**
+     * Called with the alias of the certificate chosen by the user, or
+     * null if no value was chosen.
+     */
+        Alias(
+            [in] String alias);
+    }
+
+    }// namespace Security
+    }// namespace KeyStore
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+

@@ -1,0 +1,41 @@
+module
+{
+    merge("nfc/ApduList.car");
+    merge("nfc/BeamShareData.car");
+    merge("nfc/ErrorCodes.car");
+    merge("nfc/FormatException.car");
+    merge("nfc/TransceiveResult.car");
+    merge("nfc/NdefRecord.car");
+    merge("nfc/NdefMessage.car");
+    merge("nfc/INfcTag.car");
+    merge("nfc/Tag.car");
+    merge("nfc/IAppCallback.car");
+    merge("nfc/INfcAdapter.car");
+    merge("nfc/INfcAdapterExtras.car");
+    merge("nfc/INfcCardEmulation.car");
+    merge("nfc/INfcUnlockHandler.car");
+    merge("nfc/NfcActivityManager.car");
+    merge("nfc/NfcAdapter.car");
+    merge("nfc/NfcEvent.car");
+    merge("nfc/NfcManager.car");
+    merge("nfc/TechListParcel.car");
+
+    merge("nfc/cardemulation/AidGroup.car");
+    merge("nfc/cardemulation/ApduServiceInfo.car");
+    merge("nfc/cardemulation/CardEmulation.car");
+    merge("nfc/cardemulation/HostApduService.car");
+    merge("nfc/cardemulation/OffHostApduService.car");
+
+    merge("nfc/tech/BasicTagTechnology.car");
+    merge("nfc/tech/IsoDep.car");
+    merge("nfc/tech/MifareClassic.car");
+    merge("nfc/tech/MifareUltralight.car");
+    merge("nfc/tech/Ndef.car");
+    merge("nfc/tech/NdefFormatable.car");
+    merge("nfc/tech/NfcA.car");
+    merge("nfc/tech/NfcB.car");
+    merge("nfc/tech/NfcBarcode.car");
+    merge("nfc/tech/NfcF.car");
+    merge("nfc/tech/NfcV.car");
+    merge("nfc/tech/TagTechnology.car");
+}

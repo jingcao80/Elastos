@@ -1,0 +1,715 @@
+
+module
+{
+    interface Elastos.Droid.Utility.IPrinter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /*
+     * Information you can retrieve about a particular application activity or
+     * receiver. This corresponds to information collected from the
+     * AndroidManifest.xml's <activity> and <receiver> tags.
+     *
+     * @implements Elastos.Droid.Content.Pm.Elastos.Droid.Content.Pm.IComponentInfo
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.Pm.IPackageItemInfo
+     * interface Elastos.Droid.Content.Pm.IComponentInfo
+     */
+    interface IActivityInfo {
+        /**
+         * Constant corresponding to <code>standard</code> in
+         * the android.R.attr#launchMode attribute.
+         *
+         * @sa android.R.attr#launchMode
+         */
+        const Int32 LAUNCH_MULTIPLE = 0;
+
+        /**
+         * Constant corresponding to <code>singleTop</code> in
+         * the android.R.attr#launchMode attribute.
+         *
+         * @sa android.R.attr#launchMode
+         */
+        const Int32 LAUNCH_SINGLE_TOP = 1;
+
+        /**
+         * Constant corresponding to <code>singleTask</code> in
+         * the android.R.attr#launchMode attribute.
+         *
+         * @sa android.R.attr#launchMode
+         */
+        const Int32 LAUNCH_SINGLE_TASK = 2;
+
+        /**
+         * Constant corresponding to <code>singleInstance</code> in
+         * the android.R.attr#launchMode attribute.
+         *
+         * @sa android.R.attr#launchMode
+         */
+        const Int32 LAUNCH_SINGLE_INSTANCE = 3;
+
+        /**
+         * Constant corresponding to <code>none</code> in
+         * the {@link android.R.attr#documentLaunchMode} attribute.
+         */
+        const Int32 DOCUMENT_LAUNCH_NONE = 0;
+        /**
+         * Constant corresponding to <code>intoExisting</code> in
+         * the {@link android.R.attr#documentLaunchMode} attribute.
+         */
+        const Int32 DOCUMENT_LAUNCH_INTO_EXISTING = 1;
+        /**
+         * Constant corresponding to <code>always</code> in
+         * the {@link android.R.attr#documentLaunchMode} attribute.
+         */
+        const Int32 DOCUMENT_LAUNCH_ALWAYS = 2;
+        /**
+         * Constant corresponding to <code>never</code> in
+         * the {@link android.R.attr#documentLaunchMode} attribute.
+         */
+        const Int32 DOCUMENT_LAUNCH_NEVER = 3;
+
+        /**
+         * Constant corresponding to <code>persistRootOnly</code> in
+         * the {@link android.R.attr#persistableMode} attribute.
+         */
+        const Int32 PERSIST_ROOT_ONLY = 0;
+        /**
+         * Constant corresponding to <code>doNotPersist</code> in
+         * the {@link android.R.attr#persistableMode} attribute.
+         */
+        const Int32 PERSIST_NEVER = 1;
+        /**
+         * Constant corresponding to <code>persistAcrossReboots</code> in
+         * the {@link android.R.attr#persistableMode} attribute.
+         */
+        const Int32 PERSIST_ACROSS_REBOOTS = 2;
+
+        /**
+         * Bit in #flags indicating whether this activity is able to
+         * run in multiple processes.  If
+         * true, the system may instantiate it in the some process as the
+         * process starting it in order to conserve resources.  If false, the
+         * default, it always runs in #processName.  Set from the
+         * android.R.attr#multiprocess attribute.
+         *
+         * @sa #flags
+         * @sa #processName
+         * @sa android.R.attr#multiprocess
+         */
+        const Int32 FLAG_MULTIPROCESS = 0x0001;
+
+        /**
+         * Bit in #flags indicating that, when the activity's task is
+         * relaunched from home, this activity should be finished.
+         * Set from the
+         * android.R.attr#finishOnTaskLaunch attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#finishOnTaskLaunch
+         */
+        const Int32 FLAG_FINISH_ON_TASK_LAUNCH = 0x0002;
+
+        /**
+         * Bit in #flags indicating that, when the activity is the root
+         * of a task, that task's stack should be cleared each time the user
+         * re-launches it from home.  As a result, the user will always
+         * return to the original activity at the top of the task.
+         * This flag only applies to activities that
+         * are used to start the root of a new task.  Set from the
+         * android.R.attr#clearTaskOnLaunch attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#clearTaskOnLaunch
+         */
+        const Int32 FLAG_CLEAR_TASK_ON_LAUNCH = 0x0004;
+
+        /**
+         * Bit in #flags indicating that, when the activity is the root
+         * of a task, that task's stack should never be cleared when it is
+         * relaunched from home.  Set from the
+         * android.R.attr#alwaysRetainTaskState attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#alwaysRetainTaskState
+         */
+        const Int32 FLAG_ALWAYS_RETAIN_TASK_STATE = 0x0008;
+
+        /**
+         * Bit in #flags indicating that the activity's state
+         * is not required to be saved, so that if there is a failure the
+         * activity will not be removed from the activity stack.  Set from the
+         * android.R.attr#stateNotNeeded attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#stateNotNeeded
+         */
+        const Int32 FLAG_STATE_NOT_NEEDED = 0x0010;
+
+        /**
+         * Bit in #flags that indicates that the activity should not
+         * appear in the list of recently launched activities.  Set from the
+         * android.R.attr#excludeFromRecents attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#excludeFromRecents
+         */
+        const Int32 FLAG_EXCLUDE_FROM_RECENTS = 0x0020;
+
+        /**
+         * Bit in #flags that indicates that the activity can be moved
+         * between tasks based on its task affinity.  Set from the
+         * android.R.attr#allowTaskReparenting attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#allowTaskReparenting
+         */
+        const Int32 FLAG_ALLOW_TASK_REPARENTING = 0x0040;
+
+        /**
+         * Bit in #flags indicating that, when the user navigates away
+         * from an activity, it should be finished.
+         * Set from the
+         * android.R.attr#noHistory attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#noHistory
+         */
+        const Int32 FLAG_NO_HISTORY = 0x0080;
+
+        /**
+         * Bit in #flags indicating that, when a request to close system
+         * windows happens, this activity is finished.
+         * Set from the
+         * android.R.attr#finishOnCloseSystemDialogs attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#finishOnCloseSystemDialogs
+         */
+        const Int32 FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS = 0x0100;
+
+        /**
+         * Value for #flags: true when the application's rendering should
+         * be hardware accelerated.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_HARDWARE_ACCELERATED = 0x0200;
+
+        /**
+         * Value for #flags: true when the application can be displayed over the lockscreen
+         * and consequently over all users' windows.
+         *
+         * @sa #flags
+         * @hide
+         */
+        const Int32 FLAG_SHOW_ON_LOCK_SCREEN = 0x0400;
+
+        /**
+         * @hide
+         * Bit in #flags corresponding to an immersive activity
+         * that wishes not to be interrupted by notifications.
+         * Applications that hide the system notification bar with
+         * android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN
+         * may still be interrupted by high-priority notifications; for example, an
+         * incoming phone call may use
+         * android.app.Notification#fullScreenIntent fullScreenIntent
+         * to present a full-screen in-call activity to the user, pausing the
+         * current activity as a side-effect. An activity with
+         * #FLAG_IMMERSIVE set, however, will not be interrupted; the
+         * notification may be shown in some other way (such as a small floating
+         * "toast" window).
+         * {@see android.app.Notification#FLAG_HIGH_PRIORITY}
+         *
+         * @sa #flags
+         * @sa android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN
+         * @sa android.app.Notification#fullScreenIntent fullScreenIntent
+         * @sa #FLAG_IMMERSIVE
+         *
+         */
+        const Int32 FLAG_IMMERSIVE = 0x0800;
+
+        /**
+         * Bit in {@link #flags}: If set, a task rooted at this activity will have its
+         * baseIntent replaced by the activity immediately above this. Each activity may further
+         * relinquish its identity to the activity above it using this flag. Set from the
+         * {@link android.R.attr#relinquishTaskIdentity} attribute.
+         */
+        const Int32 FLAG_RELINQUISH_TASK_IDENTITY = 0x1000;
+        /**
+         * Bit in {@link #flags} indicating that tasks started with this activity are to be
+         * removed from the recent list of tasks when the last activity in the task is finished.
+         * Corresponds to {@link android.R.attr#autoRemoveFromRecents}
+         */
+        const Int32 FLAG_AUTO_REMOVE_FROM_RECENTS = 0x2000;
+        /**
+         * Bit in {@link #flags} indicating that this activity can start is creation/resume
+         * while the previous activity is still pausing.  Corresponds to
+         * {@link android.R.attr#resumeWhilePausing}
+         */
+        const Int32 FLAG_RESUME_WHILE_PAUSING = 0x4000;
+
+        /**
+         * @hide Bit in #flags: If set, this component will only be seen
+         * by the primary user.  Only works with broadcast receivers.  Set from the
+         * android.R.attr#primaryUserOnly attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#primaryUserOnly
+         */
+        const Int32 FLAG_PRIMARY_USER_ONLY = 0x20000000;
+
+        /**
+         * Bit in #flags: If set, a single instance of the receiver will
+         * run for all users on the device.  Set from the
+         * android.R.attr#singleUser attribute.  Note that this flag is
+         * only relevant for ActivityInfo structures that are describing receiver
+         * components; it is not applied to activities.
+         *
+         * @sa #flags
+         * @sa android.R.attr#singleUser
+         */
+        const Int32 FLAG_SINGLE_USER = 0x40000000;
+
+        /**
+         * @hide Bit in {@link #flags}: If set, this activity may be launched into an
+         * owned ActivityContainer such as that within an ActivityView. If not set and
+         * this activity is launched into such a container a SecurityExcception will be
+         * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
+         */
+        const Int32 FLAG_ALLOW_EMBEDDED = 0x80000000;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_UNSPECIFIED = -1;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_LANDSCAPE = 0;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_PORTRAIT = 1;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_USER = 2;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_BEHIND = 3;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_SENSOR = 4;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_NOSENSOR = 5;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_SENSOR_LANDSCAPE = 6;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_SENSOR_PORTRAIT = 7;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_REVERSE_LANDSCAPE = 8;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_REVERSE_PORTRAIT = 9;
+
+        /**
+         * Constant corresponding to <code>unspecified</code> in
+         * the android.R.attr#screenOrientation attribute.
+         *
+         * @sa android.R.attr#screenOrientation
+         */
+        const Int32 SCREEN_ORIENTATION_FULL_SENSOR = 10;
+
+        /**
+         * Constant corresponding to <code>userLandscape</code> in
+         * the {@link android.R.attr#screenOrientation} attribute.
+         */
+        const Int32 SCREEN_ORIENTATION_USER_LANDSCAPE = 11;
+
+        /**
+         * Constant corresponding to <code>userPortrait</code> in
+         * the {@link android.R.attr#screenOrientation} attribute.
+         */
+        const Int32 SCREEN_ORIENTATION_USER_PORTRAIT = 12;
+
+        /**
+         * Constant corresponding to <code>fullUser</code> in
+         * the {@link android.R.attr#screenOrientation} attribute.
+         */
+        const Int32 SCREEN_ORIENTATION_FULL_USER = 13;
+
+        /**
+         * Constant corresponding to <code>locked</code> in
+         * the {@link android.R.attr#screenOrientation} attribute.
+         */
+        const Int32 SCREEN_ORIENTATION_LOCKED = 14;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the IMSI MCC.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_MCC = 0x0001;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the IMSI MNC.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_MNC = 0x0002;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the locale.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_LOCALE = 0x0004;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the touchscreen type.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_TOUCHSCREEN = 0x0008;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the touchscreen type.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_KEYBOARD = 0x0010;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the keyboard or navigation being hidden/exposed.
+         * Note that inspite of the name, this applies to the changes to any
+         * hidden states: keyboard or navigation.
+         * Set from the android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_KEYBOARD_HIDDEN = 0x0020;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the touchscreen type.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_NAVIGATION = 0x0040;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the touchscreen type.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_ORIENTATION = 0x0080;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the touchscreen type.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_SCREEN_LAYOUT = 0x0100;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the touchscreen type.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_UI_MODE = 0x0200;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle the screen size. Set from the
+         * android.R.attr#configChanges attribute.  This will be
+         * set by default for applications that target an earlier version
+         * than android.os.Build.VERSION_CODES#HONEYCOMB_MR2...
+         * <b>however</b>, you will not see the bit set here becomes some
+         * applications incorrectly compare #configChanges against
+         * an absolute value rather than correctly masking out the bits
+         * they are interested in.  Please don't do that, thanks.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         * @sa android.os.Build.VERSION_CODES#HONEYCOMB_MR2
+         */
+        const Int32 CONFIG_SCREEN_SIZE = 0x0400;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle the screen size. Set from the
+         * android.R.attr#configChanges attribute.  This will be
+         * set by default for applications that target an earlier version
+         * than android.os.Build.VERSION_CODES#HONEYCOMB_MR2...
+         * <b>however</b>, you will not see the bit set here becomes some
+         * applications incorrectly compare #configChanges against
+         * an absolute value rather than correctly masking out the bits
+         * they are interested in.  Please don't do that, thanks.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         * @sa android.os.Build.VERSION_CODES#HONEYCOMB_MR2
+         */
+        const Int32 CONFIG_SMALLEST_SCREEN_SIZE = 0x0800;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the touchscreen type.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_DENSITY = 0x1000;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the touchscreen type.  Set from the
+         * android.R.attr#configChanges attribute.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_LAYOUT_DIRECTION = 0x2000;
+
+        /**
+         * Bit in #configChanges that indicates that the activity
+         * can itself handle changes to the font scaling factor.  Set from the
+         * android.R.attr#configChanges attribute.  This is
+         * not a core resource configutation, but a higher-level value, so its
+         * constant starts at the high bits.
+         *
+         * @sa #configChanges
+         * @sa android.R.attr#configChanges
+         */
+        const Int32 CONFIG_FONT_SCALE = 0x40000000;
+
+        /**
+         * Flag for use with #uiOptions.
+         * Indicates that the action bar should put all action items in a separate bar when
+         * the screen is narrow.
+         * <p>This value corresponds to "splitActionBarWhenNarrow" for the #uiOptions XML
+         * attribute.
+         *
+         * @sa #uiOptions
+         * @sa #uiOptions
+         */
+        const Int32 UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1;
+
+
+        /**
+         * @hide
+         * Unfortunately some developers (OpenFeint I am looking at you) have
+         * compared the configChanges bit field against absolute values, so if we
+         * introduce a new bit they break.  To deal with that, we will make sure
+         * the public field will not have a value that breaks them, and let the
+         * framework call here to get the real value.
+         */
+        GetRealConfigChanged(
+            [out] Int32* value);
+
+        GetThemeResource(
+            [out] Int32* theme);
+
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+
+        ToString(
+            [out] String* str);
+
+        GetTheme(
+            [out] Int32* theme);
+
+        SetTheme(
+            [in] Int32 theme);
+
+        GetLaunchMode(
+            [out] Int32* mode);
+
+        SetLaunchMode(
+            [in] Int32 mode);
+
+        GetDocumentLaunchMode(
+            [out] Int32* mode);
+
+        SetDocumentLaunchMode(
+            [in] Int32 mode);
+
+        GetPersistableMode(
+            [out] Int32* mode);
+
+        SetPersistableMode(
+            [in] Int32 mode);
+
+        GetMaxRecents(
+            [out] Int32* max);
+
+        SetMaxRecents(
+            [in] Int32 max);
+
+        GetPermission(
+            [out] String* permission);
+
+        SetPermission(
+            [in] String permission);
+
+        GetTaskAffinity(
+            [out] String* task);
+
+        SetTaskAffinity(
+            [in] String task);
+
+        GetTargetActivity(
+            [out] String* target);
+
+        SetTargetActivity(
+            [in] String target);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        GetScreenOrientation(
+            [out] Int32* orientation);
+
+        SetScreenOrientation(
+            [in] Int32 orientation);
+
+        GetConfigChanges(
+            [out] Int32* changes);
+
+        SetConfigChanges(
+            [in] Int32 changes);
+
+        GetSoftInputMode(
+            [out] Int32* mode);
+
+        SetSoftInputMode(
+            [in] Int32 mode);
+
+        GetUiOptions(
+            [out] Int32* uiOptions);
+
+        SetUiOptions(
+            [in] Int32 uiOptions);
+
+        GetParentActivityName(
+            [out] String* parentActivityName);
+
+        SetParentActivityName(
+            [in] String parentActivityName);
+    }
+
+    interface IActivityInfoHelper {
+        /** @hide
+         * Unfortunately the constants for config changes in native code are
+         * different from ActivityInfo. :(  Here are the values we should use for the
+         * native side given the bit we have assigned in ActivityInfo.
+         */
+        GetCONFIG_NATIVE_BITS(
+            [out, callee] ArrayOf<Int32>* bits);
+
+        /** @hide
+         * Convert Java change bits to native.
+         */
+        ActivityInfoConfigToNative(
+            [in] Int32 input,
+            [out] Int32* native);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

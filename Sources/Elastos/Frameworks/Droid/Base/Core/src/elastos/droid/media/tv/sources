@@ -1,0 +1,40 @@
+
+TARGET_NAME= tv
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = CITvInputSessionWrapper.cpp
+SOURCES += CTvContentRating.cpp
+SOURCES += CTvContentRatingHelper.cpp
+SOURCES += CTvContentRatingSystemInfo.cpp
+SOURCES += CTvContentRatingSystemInfoHelper.cpp
+SOURCES += CTvInputHardwareInfo.cpp
+SOURCES += CTvInputHardwareInfoBuilder.cpp
+SOURCES += CTvInputInfo.cpp
+SOURCES += CTvInputInfoHelper.cpp
+SOURCES += TvInputInfoTvInputSettings.cpp
+SOURCES += CTvInputInfoTvInputSettings.cpp
+SOURCES += CTvInputManagerHardware.cpp
+SOURCES += CTvInputManagerSession.cpp
+SOURCES += CTvInputManager.cpp
+SOURCES += CTvStreamConfig.cpp
+SOURCES += CTvStreamConfigBuilder.cpp
+SOURCES += CTvTrackInfo.cpp
+SOURCES += CTvTrackInfoBuilder.cpp
+SOURCES += CTvView.cpp
+SOURCES += TvContract.cpp
+SOURCES += TvContractChannels.cpp
+SOURCES += TvContractPrograms.cpp
+SOURCES += TvContractProgramsGenres.cpp
+SOURCES += TvContractWatchedPrograms.cpp
+SOURCES += TvInputManagerSessionCallback.cpp
+SOURCES += TvInputService.cpp
+SOURCES += TvInputServiceSession.cpp
+SOURCES += TvInputServiceHardwareSession.cpp
+

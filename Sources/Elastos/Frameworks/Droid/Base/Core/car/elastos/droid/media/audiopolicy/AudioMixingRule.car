@@ -1,0 +1,69 @@
+module
+{
+    interface Elastos.Droid.Media.IAudioAttributes;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace AudioPolicy {
+
+    /**
+     * @hide CANDIDATE FOR PUBLIC API
+     *
+     * Here's an example of creating a mixing rule for all media playback:
+     * <pre>
+     * AudioAttributes mediaAttr = new AudioAttributes.Builder()
+     *         .setUsage(AudioAttributes.USAGE_MEDIA)
+     *         .build();
+     * AudioMixingRule mediaRule = new AudioMixingRule.Builder()
+     *         .addRule(mediaAttr, AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE)
+     *         .build();
+     * </pre>
+     */
+    interface IAudioMixingRule {
+
+        /**
+         * A rule requiring the usage information of the {@link AudioAttributes} to match
+         */
+        const Int32 RULE_MATCH_ATTRIBUTE_USAGE = 0x1;
+
+        /**
+         * A rule requiring the usage information of the {@link AudioAttributes} to differ
+         */
+        const Int32 RULE_EXCLUDE_ATTRIBUTE_USAGE = 0x1 << 1;
+
+    }
+
+    /**
+     * Builder class for {@link AudioMixingRule} objects
+     *
+     */
+    interface IAudioMixingRuleBuilder {
+        /**
+         * Add a rule for the selection of which streams are mixed together.
+         * @param attrToMatch a non-null AudioAttributes instance for which a contradictory
+         *     rule hasn't been set yet.
+         * @param rule one of {@link AudioMixingRule#RULE_EXCLUDE_ATTRIBUTE_USAGE},
+         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        AddRule(
+            [in] IAudioAttributes * attrToMatch,
+            [in] Int32 rule,
+            [out] IAudioMixingRuleBuilder** builder);
+
+        /**
+         * Combines all of the matching and exclusion rules that have been set and return a new
+         * {@link AudioMixingRule} object.
+         * @return a new {@link AudioMixingRule} object
+         */
+        Build(
+            [out] IAudioMixingRule** result);
+    }
+
+    } // namespace AudioPolicy
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

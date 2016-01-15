@@ -1,0 +1,84 @@
+
+module
+{
+    using interface Elastos.IO.IWriter;
+
+    interface Elastosx.Microedition.Khronos.Egl.IEGL;
+    interface Elastosx.Microedition.Khronos.Opengles.IGL;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    interface IGLDebugHelper {
+        /**
+         * Check glError() after every call.
+         */
+        const Int32 _CONFIG_CHECK_GL_ERROR = 1 << 0;
+
+        /**
+         * Check if all calls are on the same thread.
+         */
+        const Int32 _CONFIG_CHECK_THREAD = 1 << 1;
+
+        /**
+         * Print argument names when logging GL Calls.
+         */
+        const Int32 _CONFIG_LOG_ARGUMENT_NAMES = 1 << 2;
+
+        /**
+         * The Error number used in the GLException that is thrown if
+         * CONFIG_CHECK_THREAD is enabled and you call OpenGL ES on the
+         * a different thread.
+         */
+        const Int32 _ERROR_WRONG_THREAD = 0x7000;
+
+        /**
+         * Wrap an existing GL interface in a new GL interface that adds support for
+         * error checking and/or logging.
+         * <p>
+         * Wrapping means that the GL instance that is passed in to this method is
+         * wrapped inside a new GL instance that optionally performs additional
+         * operations before and after calling the wrapped GL instance.
+         * <p>
+         * Error checking means that the wrapper will automatically call
+         * glError after each GL operation,
+         * and throw a GLException if an error occurs. (By design, calling glError
+         * itself will not cause an exception to be thrown.) Enabling error checking
+         * is an alternative to manually calling glError after every GL operation.
+         * <p>
+         * Logging means writing a text representation of each GL method call to
+         * a log.
+         * <p>
+         * @param gl the existing GL interface. Must implement GL and GL10. May
+         * optionally implement GL11 as well.
+         * @param configFlags A bitmask of error checking flags.
+         * @param log - null to disable logging, non-null to enable logging.
+         * @return the wrapped GL instance.
+         */
+        Wrap(
+            [in] IGL* gl,
+            [in] Int32 configFlags,
+            [in] IWriter* log,
+            [out] IGL** glInstance);
+
+        /**
+         * Wrap an existing EGL interface in a new EGL interface that adds
+         * support for error checking and/or logging.
+         * @param egl the existing GL interface. Must implement EGL and EGL10. May
+         * optionally implement EGL11 as well.
+         * @param configFlags A bitmask of error checking flags.
+         * @param log - null to disable logging, non-null to enable logging.
+         * @return the wrapped EGL interface.
+         */
+        Wrap(
+            [in] IEGL* egl,
+            [in] Int32 configFlags,
+            [in] IWriter* log,
+            [out] IEGL** eglInterface);
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}

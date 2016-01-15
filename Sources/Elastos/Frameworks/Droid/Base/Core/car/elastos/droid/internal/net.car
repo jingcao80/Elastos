@@ -1,0 +1,70 @@
+module
+{
+    merge("net/LegacyVpnInfo.car");
+    merge("net/NetworkStatsFactory.car");
+    merge("net/VpnConfig.car");
+    merge("net/VpnProfile.car");
+
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.IO.IFile;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Net {
+
+    class CLegacyVpnInfo {
+        constructor();
+
+        interface ILegacyVpnInfo;
+        interface IParcelable;
+    }
+
+    singleton class CLegacyVpnInfoHelper {
+        interface ILegacyVpnInfoHelper;
+    }
+
+    class CNetworkStatsFactory {
+        constructor();
+
+        constructor(
+            [in] IFile* procRoot);
+
+        interface INetworkStatsFactory;
+    }
+
+    singleton class CNetworkStatsFactoryHelper {
+        interface INetworkStatsFactoryHelper;
+    }
+
+    class CVpnConfig {
+        constructor();
+
+        interface IVpnConfig;
+        interface IParcelable;
+    }
+
+    singleton class CVpnConfigHelper {
+        interface IVpnConfigHelper;
+    }
+
+    class CVpnProfile {
+        constructor();
+
+        constructor(
+            [in] String key);
+
+        interface IVpnProfile;
+        interface ICloneable;
+        interface IParcelable;
+    }
+
+    singleton class CVpnProfileHelper {
+        interface IVpnProfileHelper;
+    }
+
+    } // namespace Net
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

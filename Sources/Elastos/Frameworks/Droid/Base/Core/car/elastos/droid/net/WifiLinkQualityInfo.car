@@ -1,0 +1,99 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcel;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     *  Class that represents useful attributes of wifi network links
+     *  such as the upload/download throughput or error rate etc.
+     *  @hide
+     */
+    /**
+     * @Involved
+     * interface ILinkQualityInfo;
+     * interface IParcelable;
+     */
+    interface IWifiLinkQualityInfo {
+        /**
+         * returns Wifi network type
+         * @return network type or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetType(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetType(
+            [in] Int32 type);
+
+        /**
+         * returns BSSID of the access point
+         * @return the BSSID, in the form of a six-byte MAC address: {@code XX:XX:XX:XX:XX:XX} or null
+         */
+        GetBssid(
+            [out] String* result);
+
+        /**
+         * @hide
+         */
+        SetBssid(
+            [in] String bssid);
+
+        /**
+         * returns RSSI of the network in raw form
+         * @return un-normalized RSSI or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetRssi(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetRssi(
+            [in] Int32 rssi);
+
+        /**
+         * returns number of packets transmitted without error
+         * @return number of packets or {@link android.net.LinkQualityInfo#UNKNOWN_LONG}
+         */
+        GetTxGood(
+            [out] Int64* result);
+
+        /**
+         * @hide
+         */
+        SetTxGood(
+            [in] Int64 txGood);
+
+        /**
+         * returns number of transmitted packets that encountered errors
+         * @return number of packets or {@link android.net.LinkQualityInfo#UNKNOWN_LONG}
+         */
+        GetTxBad(
+            [out] Int64* result);
+
+        /**
+         * @hide
+         */
+        SetTxBad(
+            [in] Int64 txBad);
+    }
+
+    interface IWifiLinkQualityInfoHelper {
+        /**
+         * @hide
+         */
+        CreateFromParcelBody(
+            [in] IParcel* inParcel,
+            [out] IWifiLinkQualityInfo** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

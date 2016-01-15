@@ -1,0 +1,34 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IUserSwitcherController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.ISecurityController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /** Platform implementation of the quick settings tile host **/
+    /**
+     * @Involve
+     * interface IQSTile.Host
+     */
+    [local]
+    interface IPhoneQSTileHost {
+        GetUserSwitcherController(
+            [out] IUserSwitcherController** result);
+
+        GetSecurityController(
+            [out] ISecurityController** result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

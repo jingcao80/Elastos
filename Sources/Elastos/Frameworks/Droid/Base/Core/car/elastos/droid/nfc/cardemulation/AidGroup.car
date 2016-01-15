@@ -1,0 +1,50 @@
+
+module
+{
+
+    interface Elastos.Utility.IList;
+    interface Org.Xmlpull.V1.IXmlSerializer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Cardemulation{
+
+    /**
+     * The AidGroup class represents a group of Application Identifiers (AIDs).
+     *
+     * <p>The format of AIDs is defined in the ISO/IEC 7816-4 specification. This class
+     * requires the AIDs to be input as a hexadecimal string, with an even amount of
+     * hexadecimal characters, e.g. "F014811481".
+     *
+     * @Involve
+     * interace IParcelable
+     */
+    interface IAidGroup {
+
+        GetCategory(
+            [out] String* category);
+
+        GetAids(
+            [out] IList** res);
+
+        WriteAsXml(
+            [in] IXmlSerializer* res);
+    }
+
+    interface IAidGroupHelper {
+
+        CreateFromXml(
+            [in] IXmlSerializer* parser,
+            [out] IAidGroup** res);
+
+        IsValidCategory(
+            [in] String category,
+            [out] Boolean* res);
+    }
+
+    }// namespace Cardemulation
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

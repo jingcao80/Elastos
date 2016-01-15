@@ -1,0 +1,161 @@
+
+module
+{
+    interface Elastos.Core.IRunnable;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * A scene represents the collection of values that various properties in the
+     * View hierarchy will have when the scene is applied. A Scene can be
+     * configured to automatically run a Transition when it is applied, which will
+     * animate the various property changes that take place during the
+     * scene change.
+     */
+    [local]
+    interface IScene {
+
+        /**
+         * Gets the root of the scene, which is the root of the view hierarchy
+         * affected by changes due to this scene, and which will be animated
+         * when this scene is entered.
+         *
+         * @return The root of the view hierarchy affected by this scene.
+         */
+        GetSceneRoot(
+            [out] IViewGroup** result);
+
+        /**
+         * Exits this scene, if it is the current scene
+         * on the scene's {@link #getSceneRoot() scene root}. The current scene is
+         * set when {@link #enter() entering} a scene.
+         * Exiting a scene runs the {@link #setExitAction(Runnable) exit action}
+         * if there is one.
+         */
+        Exit();
+
+        /**
+         * Enters this scene, which entails changing all values that
+         * are specified by this scene. These may be values associated
+         * with a layout view group or layout resource file which will
+         * now be added to the scene root, or it may be values changed by
+         * an {@link #setEnterAction(Runnable)} enter action}, or a
+         * combination of the these. No transition will be run when the
+         * scene is entered. To get transition behavior in scene changes,
+         * use one of the methods in {@link TransitionManager} instead.
+         */
+        Enter();
+
+        /**
+         * Scenes that are not defined with layout resources or
+         * hierarchies, or which need to perform additional steps
+         * after those hierarchies are changed to, should set an enter
+         * action, and possibly an exit action as well. An enter action
+         * will cause Scene to call back into application code to do
+         * anything else the application needs after transitions have
+         * captured pre-change values and after any other scene changes
+         * have been applied, such as the layout (if any) being added to
+         * the view hierarchy. After this method is called, Transitions will
+         * be played.
+         *
+         * @param action The runnable whose {@link Runnable#run() run()} method will
+         * be called when this scene is entered
+         * @see #setExitAction(Runnable)
+         * @see Scene#Scene(ViewGroup, int, Context)
+         * @see Scene#Scene(ViewGroup, ViewGroup)
+         */
+        SetEnterAction(
+            [in] IRunnable* action);
+
+        /**
+         * Scenes that are not defined with layout resources or
+         * hierarchies, or which need to perform additional steps
+         * after those hierarchies are changed to, should set an enter
+         * action, and possibly an exit action as well. An exit action
+         * will cause Scene to call back into application code to do
+         * anything the application needs to do after applicable transitions have
+         * captured pre-change values, but before any other scene changes
+         * have been applied, such as the new layout (if any) being added to
+         * the view hierarchy. After this method is called, the next scene
+         * will be entered, including a call to {@link #setEnterAction(Runnable)}
+         * if an enter action is set.
+         *
+         * @see #setEnterAction(Runnable)
+         * @see Scene#Scene(ViewGroup, int, Context)
+         * @see Scene#Scene(ViewGroup, ViewGroup)
+         */
+        SetExitAction(
+            [in] IRunnable* action);
+
+        /**
+         * Returns whether this Scene was created by a layout resource file, determined
+         * by the layoutId passed into
+         * {@link #getSceneForLayout(android.view.ViewGroup, int, android.content.Context)}.
+         * This is called by TransitionManager to determine whether it is safe for views from
+         * this scene to be removed from their parents when the scene is exited, which is
+         * used by {@link Fade} to fade these views out (the views must be removed from
+         * their parent in order to add them to the overlay for fading purposes). If a
+         * Scene is not based on a resource file, then the impact of removing views
+         * arbitrarily is unknown and should be avoided.
+         */
+        IsCreatedFromLayoutResource(
+            [out] Boolean* result);
+    }
+
+    [local]
+    interface ISceneHelper {
+
+        /**
+         * Returns a Scene described by the resource file associated with the given
+         * <code>layoutId</code> parameter. If such a Scene has already been created for
+         * the given <code>sceneRoot</code>, that same Scene will be returned.
+         * This caching of layoutId-based scenes enables sharing of common scenes
+         * between those created in code and those referenced by {@link TransitionManager}
+         * XML resource files.
+         *
+         * @param sceneRoot The root of the hierarchy in which scene changes
+         * and transitions will take place.
+         * @param layoutId The id of a standard layout resource file.
+         * @param context The context used in the process of inflating
+         * the layout resource.
+         * @return The scene for the given root and layout id
+         */
+        GetSceneForLayout(
+            [in] IViewGroup* sceneRoot,
+            [in] Int32 layoutId,
+            [in] IContext* context,
+            [out] IScene** result);
+
+        /**
+         * Set the scene that the given view is in. The current scene is set only
+         * on the root view of a scene, not for every view in that hierarchy. This
+         * information is used by Scene to determine whether there is a previous
+         * scene which should be exited before the new scene is entered.
+         *
+         * @param view The view on which the current scene is being set
+         */
+        SetCurrentScene(
+            [in] IView* vw,
+            [in] IScene* scene);
+
+        /**
+         * Gets the current {@link Scene} set on the given view. A scene is set on a view
+         * only if that view is the scene root.
+         *
+         * @return The current Scene set on this view. A value of null indicates that
+         * no Scene is currently set.
+         */
+        GetCurrentScene(
+            [in] IView* view,
+            [out] IScene** result);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

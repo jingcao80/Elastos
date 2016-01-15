@@ -1,0 +1,33 @@
+
+module
+{
+//    const FAMILY_CORE = 0x31    // http exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos http exception codes (Family: 0x31)
+    const E_CONNECTION_CLOSED_EXCEPTION                     = 0xB1010000;
+    const E_HTTP_EXCEPTION                                  = 0xB1020000;
+    const E_MALFORMED_CHUNK_CODING_EXCEPTION                = 0xB1030000;
+    const E_METHOD_NOT_SUPPORTED_EXCEPTION                  = 0xB1040000;
+    const E_NO_HTTP_RESPONSE_EXCEPTION                      = 0xB1050000;
+    const E_UNSUPPORTED_HTTP_VERSION_EXCEPTION              = 0xB1060000;
+    const E_AUTHENTICATION_EXCEPTION                        = 0xB1070000;
+    const E_INVALID_CREDENTIALS_EXCEPTION                   = 0xB1080000;
+    const E_MALFORMED_CHALLENGE_EXCEPTION                   = 0xB1090000;
+    const E_CLIENT_PROTOCOL_EXCEPTION                       = 0xB10A0000;
+    const E_CIRCULAR_REDIRECT_EXCEPTION                     = 0xB10B0000;
+    const E_HTTP_RESPONSE_EXCEPTION                         = 0xB10C0000;
+    const E_NON_REPEATABLE_REQUEST_EXCEPTION                = 0xB10D0000;
+    const E_CONNECTION_POOL_TIMEOUT_EXCEPTION               = 0xB10E0000;
+    const E_CONNECT_TIMEOUT_EXCEPTION                       = 0xB10F0000;
+    const E_HTTP_HOST_CONNECT_EXCEPTION                     = 0xB2010000;
+    const E_MALFORMED_COOKIE_EXCEPTION                      = 0xB2020000;
+    const E_NTLM_ENGINE_EXCEPTION                           = 0xB2030000;
+    const E_UNSUPPORTED_DIGEST_ALGORITHM_EXCEPTION          = 0xB2040000;
+    const E_TUNNEL_REFUSED_EXCEPTION                        = 0xB2050000;
+    const E_DATE_PARSE_EXCEPTION                            = 0xB2060000;
+    const E_REDIRECT_EXCEPTION                              = 0xB2070000;
+}

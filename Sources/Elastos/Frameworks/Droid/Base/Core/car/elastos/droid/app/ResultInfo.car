@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * {@hide}
+     */
+    /**
+     * @Invovle
+     * interface IParcelable
+     */
+    interface IResultInfo {
+        GetResultWho(
+            [out] String* who);
+
+        SetResultWho(
+            [in] String who);
+
+        GetRequestCode(
+            [out] Int32* code);
+
+        SetRequestCode(
+            [in] Int32 code);
+
+        GetResultCode(
+            [out] Int32* code);
+
+        SetResultCode(
+            [in] Int32 code);
+
+        GetData(
+            [out] IIntent** data);
+
+        SetData(
+            [in] IIntent* data);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

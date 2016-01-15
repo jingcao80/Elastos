@@ -1,0 +1,201 @@
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IReader;
+    interface Elastos.IO.IWriter;
+
+    namespace Elastos {
+    namespace Sql {
+
+    interface IClob {
+        /**
+         * Gets the value of this {@code Clob} object as an ASCII stream.
+         *
+         * @return an ASCII {@code InputStream} giving access to the
+         *            {@code Clob} data.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        GetAsciiStream(
+            [out] IInputStream** is);
+
+        /**
+         * Gets the data of this {@code Clob} object in a {@code java.io.Reader}.
+         *
+         * @return a character stream Reader object giving access to the {@code
+         *         Clob} data.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        GetCharacterStream(
+            [out] IReader** reader);
+
+        /**
+         * Gets a copy of a specified substring in this {@code Clob}.
+         *
+         * @param pos
+         *            the index of the start of the substring in the {@code Clob}.
+         * @param length
+         *            the length of the data to retrieve.
+         * @return A string containing the requested data.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        GetSubString(
+            [in] Int64 pos,
+            [in] Int32 length,
+            [out] String* str);
+
+        /**
+         * Retrieves the number of characters in this {@code Clob} object.
+         *
+         * @return a long value with the number of character in this {@code Clob}.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+           GetLength(
+               [out] Int64* len);
+
+        /**
+         * Retrieves the character position at which a specified {@code Clob} object
+         * appears in this {@code Clob} object.
+         *
+         * @param searchstr
+         *            the specified {@code Clob} to search for.
+         * @param start
+         *            the position within this {@code Clob} to start the search
+         * @return a long value with the position at which the specified {@code
+         *         Clob} occurs within this {@code Clob}.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        GetPosition(
+            [in] IClob* searchstr,
+            [in] Int64 start,
+            [out] Int64* position);
+
+        /**
+         * Retrieves the character position at which a specified substring appears
+         * in this {@code Clob} object.
+         *
+         * @param searchstr
+         *            the string to search for.
+         * @param start
+         *            the position at which to start the search within this {@code
+         *            Clob}.
+         * @return a long value with the position at which the specified string
+         *         occurs within this {@code Clob}.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        GetPosition(
+            [in] String searchstr,
+            [in] Int64 start,
+            [out] Int64* position);
+
+        /**
+         * Retrieves a stream which can be used to write Ascii characters to this
+         * {@code Clob} object, starting at specified position.
+         *
+         * @param pos
+         *            the position at which to start the writing.
+         * @return an OutputStream which can be used to write ASCII characters to
+         *         this {@code Clob}.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        SetAsciiStream(
+            [in] Int64 pos,
+            [out] IOutputStream** os);
+
+        /**
+         * Retrieves a stream which can be used to write a stream of unicode
+         * characters to this {@code Clob} object, at a specified position.
+         *
+         * @param pos
+         *            the position at which to start the writing.
+         * @return a Writer which can be used to write unicode characters to this
+         *         {@code Clob}.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        SetCharacterStream(
+            [in] Int64 pos,
+            [out] IWriter** writer);
+
+        /**
+         * Writes a given Java String to this {@code Clob} object at a specified
+         * position.
+         *
+         * @param pos
+         *            the position at which to start the writing.
+         * @param str
+         *            the string to write.
+         * @return the number of characters written.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        SetString(
+            [in] Int64 pos,
+            [in] String str,
+            [out] Int32 *size);
+
+        /**
+         * Writes {@code len} characters of a string, starting at a specified
+         * character offset, to this {@code Clob}.
+         *
+         * @param pos
+         *            the position at which to start the writing.
+         * @param str
+         *            the String to write.
+         * @param offset
+         *            the offset within {@code str} to start writing from.
+         * @param len
+         *            the number of characters to write.
+         * @return the number of characters written.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        SetString(
+            [in] Int64 pos,
+            [in] String str,
+            [in] Int32 offset,
+            [in] Int32 len,
+            [out] Int32* size);
+
+        /**
+         * Truncates this {@code Clob} after the specified number of characters.
+         *
+         * @param len
+         *            the length in characters giving the place to
+         *            truncate this {@code Clob}.
+         * @throws SQLException
+         *             if an error occurs accessing the {@code Clob}.
+         */
+        Truncate(
+            [in] Int64 len);
+
+        /**
+         * Frees any resources held by this clob. After {@code free} is called, calling
+         * method other than {@code free} will throw {@code SQLException} (calling {@code free}
+         * repeatedly will do nothing).
+         *
+         * @throws SQLException
+         */
+        Free();
+
+        /**
+         * Returns a {@link Reader} that reads {@code length} characters from this clob, starting
+         * at 1-based offset {code pos}.
+         */
+        GetCharacterStream(
+            [in] Int64 pos,
+            [in] Int64 length,
+            [out] IReader** reader);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}
+

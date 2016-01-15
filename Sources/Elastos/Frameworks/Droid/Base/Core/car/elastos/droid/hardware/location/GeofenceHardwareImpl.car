@@ -1,0 +1,130 @@
+
+module
+{
+    interface Elastos.Droid.Location.IIGpsGeofenceHardware;
+    interface Elastos.Droid.Location.IIFusedGeofenceHardware;
+    interface Elastos.Droid.Hardware.Location.IGeofenceHardwareRequestParcelable;
+    interface Elastos.Droid.Hardware.Location.IIGeofenceHardwareCallback;
+    interface Elastos.Droid.Hardware.Location.IIGeofenceHardwareMonitorCallback;
+    interface Elastos.Droid.Location.ILocation;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * This class manages the geofences which are handled by hardware.
+     *
+     * @hide
+     */
+    [local]
+    interface IGeofenceHardwareImpl {
+        SetGpsHardwareGeofence(
+            [in] IIGpsGeofenceHardware* service);
+
+        SetFusedGeofenceHardware(
+            [in] IIFusedGeofenceHardware* service);
+
+        GetMonitoringTypes(
+            [out, callee] ArrayOf<Int32>* types);
+
+        GetStatusOfMonitoringType(
+            [in] Int32 monitoringType,
+            [out] Int32* type);
+
+        AddCircularFence(
+            [in] Int32 monitoringType,
+            [in] IGeofenceHardwareRequestParcelable* request,
+            [in] IIGeofenceHardwareCallback* _callback,
+            [out] Boolean* result);
+
+        RemoveGeofence(
+            [in] Int32 geofenceId,
+            [in] Int32 monitoringType,
+            [out] Boolean* result);
+
+        PauseGeofence(
+            [in] Int32 geofenceId,
+            [in] Int32 monitoringType,
+            [out] Boolean* result);
+
+        ResumeGeofence(
+            [in] Int32 geofenceId,
+            [in] Int32 monitoringType,
+            [in] Int32 monitorTransition,
+            [out] Boolean* result);
+
+        RegisterForMonitorStateChangeCallback(
+            [in] Int32 monitoringType,
+            [in] IIGeofenceHardwareMonitorCallback* _callback,
+            [out] Boolean* result);
+
+        UnregisterForMonitorStateChangeCallback(
+            [in] Int32 monitoringType,
+            [in] IIGeofenceHardwareMonitorCallback* _callback,
+            [out] Boolean* result);
+
+        /**
+         * Used to report geofence transitions
+         */
+        ReportGeofenceTransition(
+            [in] Int32 geofenceId,
+            [in] ILocation* location,
+            [in] Int32 transition,
+            [in] Int64 transitionTimestamp,
+            [in] Int32 monitoringType,
+            [in] Int32 sourcesUsed);
+
+        /**
+         * Used to report Monitor status changes.
+         */
+        ReportGeofenceMonitorStatus(
+            [in] Int32 monitoringType,
+            [in] Int32 monitoringStatus,
+            [in] ILocation* location,
+            [in] Int32 source);
+
+        /**
+         * Used to report the status of a Geofence Add operation.
+         */
+        ReportGeofenceAddStatus(
+            [in] Int32 geofenceId,
+            [in] Int32 status);
+
+        /**
+         * Used to report the status of a Geofence Remove operation.
+         */
+        ReportGeofenceRemoveStatus(
+            [in] Int32 geofenceId,
+            [in] Int32 status);
+
+        /**
+         * Used to report the status of a Geofence Pause operation.
+         */
+        ReportGeofencePauseStatus(
+            [in] Int32 geofenceId,
+            [in] Int32 status);
+
+        /**
+         * Used to report the status of a Geofence Resume operation.
+         */
+        ReportGeofenceResumeStatus(
+            [in] Int32 geofenceId,
+            [in] Int32 status);
+
+        GetMonitoringResolutionLevel(
+            [in] Int32 monitoringType,
+            [out] Int32* level);
+
+        GetAllowedResolutionLevel(
+            [in] Int32 pid,
+            [in] Int32 uid,
+            [out] Int32* level);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

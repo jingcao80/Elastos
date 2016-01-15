@@ -1,0 +1,222 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Hdmi.IHdmiDeviceInfo;
+    interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlService;
+    interface Elastos.Droid.Hardware.Hdmi.IHdmiControlManagerVendorCommandListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+    /**
+     * Callback interface used to get the result of {@link #deviceSelect}.
+     */
+    interface IHdmiTvClientSelectCallback {
+        /**
+         * Called when the operation is finished.
+         *
+         * @param result the result value of {@link #deviceSelect}
+         */
+        OnComplete(
+            [in] Int32 result);
+    }
+
+    /**
+     * Callback interface used to get the input change event.
+     */
+    interface IHdmiTvClientInputChangeListener {
+        /**
+         * Called when the input was changed.
+         *
+         * @param info newly selected HDMI input
+         */
+        OnChanged(
+            [in] IHdmiDeviceInfo* info);
+    }
+
+    /**
+     * Interface used to get incoming MHL vendor command.
+     */
+    [deprecated]
+    interface IHdmiTvClientHdmiMhlVendorCommandListener {
+        OnReceived(
+            [in] Int32 portId,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] ArrayOf<Byte>* data);
+    }
+
+    /**
+     * HdmiTvClient represents HDMI-CEC logical device of type TV in the Android system
+     * which acts as TV/Display. It provides with methods that manage, interact with other
+     * devices on the CEC bus.
+     *
+     * @invoke
+     * iinterface IHdmiClient
+     *
+     * @hide
+     */
+    //@SystemApi
+    [deprecated]
+    interface IHdmiTvClient {
+        /**
+         * Size of MHL register for vendor command
+         */
+        const Int32 VENDOR_DATA_SIZE = 16;
+
+        /**
+         * Select a CEC logical device to be a new active source.
+         *
+         * @param logicalAddress logical address of the device to select
+         * @param callback callback to get the result with
+         * @throws {@link IllegalArgumentException} if the {@code callback} is null
+         */
+        DeviceSelect(
+            [in] Int32 logicalAddress,
+            [in] IHdmiTvClientSelectCallback* _callback);
+
+        /**
+         * Select a HDMI port to be a new route path.
+         *
+         * @param portId HDMI port to select
+         * @param callback callback to get the result with
+         * @throws {@link IllegalArgumentException} if the {@code callback} is null
+         */
+        PortSelect(
+            [in] Int32 portId,
+            [in] IHdmiTvClientSelectCallback* _callback);
+
+        /**
+         * Set the listener used to get informed of the input change event.
+         *
+         * @param listener listener object
+         */
+        SetInputChangeListener(
+            [in] IHdmiTvClientInputChangeListener* listener);
+
+        /**
+         * Set system audio volume
+         *
+         * @param oldIndex current volume index
+         * @param newIndex volume index to be set
+         * @param maxIndex maximum volume index
+         */
+        SetSystemAudioVolume(
+            [in] Int32 oldIndex,
+            [in] Int32 newIndex,
+            [in] Int32 maxIndex);
+
+        /**
+         * Set system audio mute status
+         *
+         * @param mute {@code true} if muted; otherwise, {@code false}
+         */
+        SetSystemAudioMute(
+            [in] Boolean mute);
+
+        /**
+         * Set record listener
+         *
+         * @param listener
+         */
+        SetRecordListener(
+            [in] IHdmiRecordListener* listener);
+
+        /**
+         * Start one touch recording with the given recorder address and recorder source.
+         * <p>
+         * Usage
+         * <pre>
+         * HdmiTvClient tvClient = ....;
+         * // for own source.
+         * OwnSource ownSource = ownHdmiRecordSources.ownSource();
+         * tvClient.startOneTouchRecord(recorderAddress, ownSource);
+         * </pre>
+         */
+        StartOneTouchRecord(
+            [in] Int32 recorderAddress,
+            [in] IRecordSource* source);
+
+        /**
+         * Stop one touch record.
+         *
+         * @param recorderAddress recorder address where recoding will be stopped
+         */
+        StopOneTouchRecord(
+            [in] Int32 recorderAddress);
+
+        /**
+         * Start timer recording with the given recoder address and recorder source.
+         * <p>
+         * Usage
+         * <pre>
+         * HdmiTvClient tvClient = ....;
+         * // create timer info
+         * TimerInfo timerInfo = HdmiTimerRecourdSources.timerInfoOf(...);
+         * // for digital source.
+         * DigitalServiceSource recordSource = HdmiRecordSources.ofDigitalService(...);
+         * // create timer recording source.
+         * TimerRecordSource source = HdmiTimerRecourdSources.ofDigitalSource(timerInfo, recordSource);
+         * tvClient.startTimerRecording(recorderAddress, source);
+         * </pre>
+         *
+         * @param recorderAddress target recorder address
+         * @param sourceType type of record source. It should be one of
+         *          {@link HdmiControlManager#TIMER_RECORDING_TYPE_DIGITAL},
+         *          {@link HdmiControlManager#TIMER_RECORDING_TYPE_ANALOGUE},
+         *          {@link HdmiControlManager#TIMER_RECORDING_TYPE_EXTERNAL}.
+         * @param source record source to be used
+         */
+        StartTimerRecording(
+            [in] Int32 recorderAddress,
+            [in] Int32 sourceType,
+            [in] ITimerRecordSource* source);
+
+        /**
+         * Clear timer recording with the given recorder address and recording source.
+         * For more details, please refer {@link #startTimerRecording(int, int, TimerRecordSource)}.
+         */
+        ClearTimerRecording(
+            [in] Int32 recorderAddress,
+            [in] Int32 sourceType,
+            [in] ITimerRecordSource* source);
+
+        /**
+         * Set {@link HdmiMhlVendorCommandListener} to get incoming MHL vendor command.
+         *
+         * @param listener to receive incoming MHL vendor command
+         */
+        SetHdmiMhlVendorCommandListener(
+            [in] IHdmiTvClientHdmiMhlVendorCommandListener* listener);
+
+        /**
+         * Send MHL vendor command to the device connected to a port of the given portId.
+         *
+         * @param portId id of port to send MHL vendor command
+         * @param offset offset in the in given data
+         * @param length length of data. offset + length should be bound to length of data.
+         * @param data container for vendor command data. It should be 16 bytes.
+         * @throws IllegalArgumentException if the given parameters are invalid
+         */
+        SendMhlVendorCommand(
+            [in] Int32 portId,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] ArrayOf<Byte>* data);
+    }
+
+    interface IHdmiTvClientHelper {
+        // Factory method for HdmiTvClient.
+        // Declared package-private. Accessed by HdmiControlManager only.
+        Create(
+            [in] IIHdmiControlService* service,
+            [out] IHdmiTvClient** client);
+    }
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

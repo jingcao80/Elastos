@@ -1,0 +1,188 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    /**
+     * A callback for camera devices becoming available or
+     * unavailable to open.
+     *
+     * <p>Cameras become available when they are no longer in use, or when a new
+     * removable camera is connected. They become unavailable when some
+     * application or service starts using a camera, or when a removable camera
+     * is disconnected.</p>
+     *
+     * <p>Extend this callback and pass an instance of the subclass to
+     * {@link CameraManager#registerAvailabilityCallback} to be notified of such availability
+     * changes.</p>
+     *
+     * @see registerAvailabilityCallback
+     */
+    interface ICameraManagerAvailabilityCallback {
+        /**
+         * A new camera has become available to use.
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param cameraId The unique identifier of the new camera.
+         */
+        OnCameraAvailable(
+            [in] String cameraId);
+
+        /**
+         * A previously-available camera has become unavailable for use.
+         *
+         * <p>If an application had an active CameraDevice instance for the
+         * now-disconnected camera, that application will receive a
+         * {@link CameraDevice.StateCallback#onDisconnected disconnection error}.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param cameraId The unique identifier of the disconnected camera.
+         */
+        OnCameraUnavailable(
+            [in] String cameraId);
+    }
+
+    /**
+     * <p>A system service manager for detecting, characterizing, and connecting to
+     * {@link CameraDevice CameraDevices}.</p>
+     *
+     * <p>You can get an instance of this class by calling
+     * {@link android.content.Context#getSystemService(String) Context.getSystemService()}.</p>
+     *
+     * <pre>CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);</pre>
+     *
+     * <p>For more details about communicating with camera devices, read the Camera
+     * developer guide or the {@link android.hardware.camera2 camera2}
+     * package documentation.</p>
+     */
+    interface ICameraManager {
+
+        /**
+         * Return the list of currently connected camera devices by
+         * identifier.
+         *
+         * <p>Non-removable cameras use integers starting at 0 for their
+         * identifiers, while removable cameras have a unique identifier for each
+         * individual device, even if they are the same model.</p>
+         *
+         * @return The list of currently connected camera devices.
+         */
+        GetCameraIdList(
+            [out, callee] ArrayOf<String>* outarr);
+
+        /**
+         * Register a callback to be notified about camera device availability.
+         *
+         * <p>Registering the same callback again will replace the handler with the
+         * new one provided.</p>
+         *
+         * <p>The first time a callback is registered, it is immediately called
+         * with the availability status of all currently known camera devices.</p>
+         *
+         * @param callback the new callback to send camera availability notices to
+         * @param handler The handler on which the callback should be invoked, or
+         * {@code null} to use the current thread's {@link android.os.Looper looper}.
+         */
+        RegisterAvailabilityCallback(
+            [in] ICameraManagerAvailabilityCallback* ccallback,
+            [in] IHandler* handler);
+
+        /**
+         * Remove a previously-added callback; the callback will no longer receive connection and
+         * disconnection callbacks.
+         *
+         * <p>Removing a callback that isn't registered has no effect.</p>
+         *
+         * @param callback The callback to remove from the notification list
+         */
+        UnregisterAvailabilityCallback(
+            [in] ICameraManagerAvailabilityCallback* ccallback);
+
+        /**
+         * <p>Query the capabilities of a camera device. These capabilities are
+         * immutable for a given camera.</p>
+         *
+         * @param cameraId The id of the camera device to query
+         * @return The properties of the given camera
+         *
+         * @throws IllegalArgumentException if the cameraId does not match any
+         *         known camera device.
+         * @throws CameraAccessException if the camera is disabled by device policy, or
+         *         the camera device has been disconnected.
+         * @throws SecurityException if the application does not have permission to
+         *         access the camera
+         *
+         * @see #getCameraIdList
+         * @see android.app.admin.DevicePolicyManager#setCameraDisabled
+         */
+        GetCameraCharacteristics(
+            [in] String cameraId,
+            [out] ICameraCharacteristics** outcc);
+
+        /**
+         * Open a connection to a camera with the given ID.
+         *
+         * <p>Use {@link #getCameraIdList} to get the list of available camera
+         * devices. Note that even if an id is listed, open may fail if the device
+         * is disconnected between the calls to {@link #getCameraIdList} and
+         * {@link #openCamera}.</p>
+         *
+         * <p>Once the camera is successfully opened, {@link CameraDevice.StateCallback#onOpened} will
+         * be invoked with the newly opened {@link CameraDevice}. The camera device can then be set up
+         * for operation by calling {@link CameraDevice#createCaptureSession} and
+         * {@link CameraDevice#createCaptureRequest}</p>
+         *
+         * <!--
+         * <p>Since the camera device will be opened asynchronously, any asynchronous operations done
+         * on the returned CameraDevice instance will be queued up until the device startup has
+         * completed and the callback's {@link CameraDevice.StateCallback#onOpened onOpened} method is
+         * called. The pending operations are then processed in order.</p>
+         * -->
+         * <p>If the camera becomes disconnected during initialization
+         * after this function call returns,
+         * {@link CameraDevice.StateCallback#onDisconnected} with a
+         * {@link CameraDevice} in the disconnected state (and
+         * {@link CameraDevice.StateCallback#onOpened} will be skipped).</p>
+         *
+         * <p>If opening the camera device fails, then the device callback's
+         * {@link CameraDevice.StateCallback#onError onError} method will be called, and subsequent
+         * calls on the camera device will throw a {@link CameraAccessException}.</p>
+         *
+         * @param cameraId
+         *             The unique identifier of the camera device to open
+         * @param callback
+         *             The callback which is invoked once the camera is opened
+         * @param handler
+         *             The handler on which the callback should be invoked, or
+         *             {@code null} to use the current thread's {@link android.os.Looper looper}.
+         *
+         * @throws CameraAccessException if the camera is disabled by device policy,
+         * or the camera has become or was disconnected.
+         *
+         * @throws IllegalArgumentException if cameraId or the callback was null,
+         * or the cameraId does not match any currently or previously available
+         * camera device.
+         *
+         * @throws SecurityException if the application does not have permission to
+         * access the camera
+         *
+         * @see #getCameraIdList
+         * @see android.app.admin.DevicePolicyManager#setCameraDisabled
+         */
+        OpenCamera(
+            [in] String cameraId,
+            [in] ICameraDeviceStateCallback* ccallback,
+            [in] IHandler* handler);
+    }
+
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,33 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+    namespace Tiles {
+
+    /**
+     * Quick settings tile: Cellular
+     * @Involve
+     * interface IListenable
+     * interface IQSTile
+     */
+    interface ICellularTile {}
+
+
+    interface ICellularTileHelper {
+        // Remove the period from the network name
+        RemoveTrailingPeriod(
+            [in] String string,
+            [out] String* str);
+    }
+
+    } // namespace Tiles
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

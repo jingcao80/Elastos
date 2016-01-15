@@ -1,0 +1,274 @@
+
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Internal.Net.ILegacyVpnInfo;
+    interface Elastos.Droid.Internal.Net.IVpnConfig;
+    interface Elastos.Droid.Internal.Net.IVpnProfile;
+    interface Elastos.Droid.Net.INetworkRequest;
+    interface Elastos.Droid.Net.INetworkState;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IMessenger;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Interface that answers queries about, and allows changing, the
+     * state of network connectivity.
+     */
+    /** {@hide} */
+    [deprecated]
+    interface IIConnectivityManager {
+        GetActiveNetworkInfo(
+            [out] INetworkInfo** result);
+
+        GetActiveNetworkInfoForUid(
+            [in] Int32 uid,
+            [out] INetworkInfo** result);
+
+        GetNetworkInfo(
+            [in] Int32 networkType,
+            [out] INetworkInfo** result);
+
+        GetNetworkInfoForNetwork(
+            [in] INetwork* network,
+            [out] INetworkInfo** result);
+
+        GetAllNetworkInfo(
+            [out, callee] ArrayOf<INetworkInfo*>* result);
+
+        GetNetworkForType(
+            [in] Int32 networkType,
+            [out] INetwork** result);
+
+        GetAllNetworks(
+            [out, callee] ArrayOf<INetwork*>* result);
+
+        GetProvisioningOrActiveNetworkInfo(
+            [out] INetworkInfo** result);
+
+        IsNetworkSupported(
+            [in] Int32 networkType,
+            [out] Boolean* result);
+
+        GetActiveLinkProperties(
+            [out] ILinkProperties** result);
+
+        GetLinkPropertiesForType(
+            [in] Int32 networkType,
+            [out] ILinkProperties** result);
+
+        GetLinkProperties(
+            [in] INetwork* network,
+            [out] ILinkProperties** result);
+
+        GetNetworkCapabilities(
+            [in] INetwork* network,
+            [out] INetworkCapabilities** result);
+
+        GetAllNetworkState(
+            [out, callee] ArrayOf<INetworkState*>* result);
+
+        GetActiveNetworkQuotaInfo(
+            [out] INetworkQuotaInfo** result);
+
+        IsActiveNetworkMetered(
+            [out] Boolean* result);
+
+        RequestRouteToHostAddress(
+            [in] Int32 networkType,
+            [in] ArrayOf<Byte>* hostAddress,
+            [out] Boolean* result);
+
+        /** Policy control over specific {@link NetworkStateTracker}. */
+        SetPolicyDataEnable(
+            [in] Int32 networkType,
+            [in] Boolean enabled);
+
+        Tether(
+            [in] String iface,
+            [out] Int32* result);
+
+        Untether(
+            [in] String iface,
+            [out] Int32* result);
+
+        GetLastTetherError(
+            [in] String iface,
+            [out] Int32* result);
+
+        IsTetheringSupported(
+            [out] Boolean* result);
+
+        GetTetherableIfaces(
+            [out, callee] ArrayOf<String>* result);
+
+        GetTetheredIfaces(
+            [out, callee] ArrayOf<String>* result);
+
+        GetTetheringErroredIfaces(
+            [out, callee] ArrayOf<String>* result);
+
+        GetTetheredDhcpRanges(
+            [out, callee] ArrayOf<String>* result);
+
+        GetTetherableUsbRegexs(
+            [out, callee] ArrayOf<String>* result);
+
+        GetTetherableWifiRegexs(
+            [out, callee] ArrayOf<String>* result);
+
+        GetTetherableBluetoothRegexs(
+            [out, callee] ArrayOf<String>* result);
+
+        SetUsbTethering(
+            [in] Boolean bEnable,
+            [out] Int32* result);
+
+        ReportInetCondition(
+            [in] Int32 networkType,
+            [in] Int32 percentage);
+
+        ReportBadNetwork(
+            [in] INetwork* network);
+
+        GetGlobalProxy(
+            [out] IProxyInfo** result);
+
+        SetGlobalProxy(
+            [in] IProxyInfo* p);
+
+        GetProxy(
+            [out] IProxyInfo** result);
+
+        SetDataDependency(
+            [in] Int32 networkType,
+            [in] Boolean met);
+
+        PrepareVpn(
+            [in] String oldPackage,
+            [in] String newPackage,
+            [out] Boolean* result);
+
+        SetVpnPackageAuthorization(
+            [in] Boolean authorized);
+
+        EstablishVpn(
+            [in] IVpnConfig* config,
+            [out] IParcelFileDescriptor** result);
+
+        GetVpnConfig(
+            [out] IVpnConfig** result);
+
+        StartLegacyVpn(
+            [in] IVpnProfile* profile);
+
+        GetLegacyVpnInfo(
+            [out] ILegacyVpnInfo** result);
+
+        UpdateLockdownVpn(
+            [out] Boolean* result);
+
+        CaptivePortalCheckCompleted(
+            [in] INetworkInfo* info,
+            [in] Boolean isCaptivePortal);
+
+        SupplyMessenger(
+            [in] Int32 networkType,
+            [in] IMessenger* messenger);
+
+        FindConnectionTypeForIface(
+            [in] String iface,
+            [out] Int32* result);
+
+        CheckMobileProvisioning(
+            [in] Int32 suggestedTimeOutMs,
+            [out] Int32* result);
+
+        GetMobileProvisioningUrl(
+            [out] String* result);
+
+        GetMobileRedirectedProvisioningUrl(
+            [out] String* result);
+
+        GetLinkQualityInfo(
+            [in] Int32 networkType,
+            [out] ILinkQualityInfo** result);
+
+        GetActiveLinkQualityInfo(
+            [out] ILinkQualityInfo** result);
+
+        GetAllLinkQualityInfo(
+            [out, callee] ArrayOf<ILinkQualityInfo*>* result);
+
+        SetProvisioningNotificationVisible(
+            [in] Boolean visible,
+            [in] Int32 networkType,
+            [in] String action);
+
+        SetAirplaneMode(
+            [in] Boolean bEnable);
+
+        RegisterNetworkFactory(
+            [in] IMessenger* messenger,
+            [in] String name);
+
+        UnregisterNetworkFactory(
+            [in] IMessenger* messenger);
+
+        RegisterNetworkAgent(
+            [in] IMessenger* messenger,
+            [in] INetworkInfo* ni,
+            [in] ILinkProperties* lp,
+            [in] INetworkCapabilities* nc,
+            [in] Int32 score,
+            [in] INetworkMisc* misc);
+
+        RequestNetwork(
+            [in] INetworkCapabilities* networkCapabilities,
+            [in] IMessenger* messenger,
+            [in] Int32 timeoutSec,
+            [in] IBinder* binder,
+            [in] Int32 legacy,
+            [out] INetworkRequest** result);
+
+        PendingRequestForNetwork(
+            [in] INetworkCapabilities* networkCapabilities,
+            [in] IPendingIntent* operation,
+            [out] INetworkRequest** result);
+
+        ListenForNetwork(
+            [in] INetworkCapabilities* networkCapabilities,
+            [in] IMessenger* messenger,
+            [in] IBinder* binder,
+            [out] INetworkRequest** result);
+
+        PendingListenForNetwork(
+            [in] INetworkCapabilities* networkCapabilities,
+            [in] IPendingIntent* operation);
+
+        ReleaseNetworkRequest(
+            [in] INetworkRequest* networkRequest);
+
+        GetRestoreDefaultNetworkDelay(
+            [in] Int32 networkType,
+            [out] Int32* result);
+
+        AddVpnAddress(
+            [in] String address,
+            [in] Int32 prefixLength,
+            [out] Boolean* result);
+
+        RemoveVpnAddress(
+            [in] String address,
+            [in] Int32 prefixLength,
+            [out] Boolean* result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

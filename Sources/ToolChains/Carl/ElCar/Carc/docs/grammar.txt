@@ -1,0 +1,290 @@
+//==========================================================================
+// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+//==========================================================================
+CAR Grammar, Version 2.0, Revision 19
+
+Symbols of mealanguage in this text
+    |    : or
+    { }  : repeat 0-n times
+    { }+ : repeat 1-n times
+    [ ]  : optional item
+    < >  : nesessary item
+
+Used symbols in CAR language
+    lbracket    => [        rbracket    => ]        lparen      => (
+    rparen      => )        lbrace      => {        rbrace      => }
+    langle      => <        rangle      => >        comma       => ,
+    semicolon   => ;        colon       => :        star        => *
+    assign      => =
+
+G(CAR) = (VN, VT, S, P);
+
+VN = {
+    CAR,            CAR_ATTRIBS,    CAR_ID,         CAR_BODY,
+    CAR_ATTRIB,     UUNM,           VERSION,        GRAPHICS,
+    SERVICE,        CAR_ELEM,
+
+    TYPE,           BASE_TYPE,      DEF_TYPE,       C_TYPE,
+    SIGNED_TYPE,    EZ_TYPE,        ARRAYOF,        EZENUM,
+
+    INTERFACE,      ITF_ATTRIBS,    ITF_ID,         ITF_BODY,
+    ITF_ATTRIB,     METHOD,         METHOD_ARGS,    METHOD_ARG,
+    ARG_ATTRIBS,    ARG_ATTRIB,
+
+    CLASS,          CLS_ATTRIBS,    CLS_ID,         CLS_BODY,
+    CLS_ATTRIB,     AGGREGATE,      CLS_ITF,        CLS_TYPE,
+    ASPECT,         CLS_CTOR,
+
+    ENUM,           ENUM_BODY,      ENUM_ELEM,
+    STRUCT,         STRUCT_BODY,    STRUCT_ELEM,    ELEM_NAME,
+    TYPEDEF,        DTYPE,          ALIAS,          CONST,
+
+    PRAGMA,         PRAGMA_EXPS,    DWARNING,       EWARNING,
+    IMPORTLIB,      MERGE,          IMPORT,         MERGELIB,
+};
+
+VT = {
+    // symbols
+    s_lbracket,     s_rbracket,     s_comma,        s_lparen,
+    s_rparen,       s_lbrace,       s_rbrace,       s_colon,
+    s_semicolon,    s_star,         s_langle,       s_rangle,
+    s_assign,       s_sharp,
+
+    // keywords
+    k_console,      k_service,      k_library,      k_project,
+    k_module,       k_version,      k_graphics,     k_litegraphics,
+
+    k_interface,    k_in,           k_out,          k_retval,
+    k_local,        k_async,
+
+    k_void,         k_Float,        k_Double,       //k_unsigned,
+    k_Char8,        k_Char16,       k_Int8,         K_Byte,
+    k_Int16,        K_Int32,        K_Int64,        K_UInt16,
+    K_ArrayOf_,     K_MemoryBuf_,
+
+    k_GUID,         k_ClassId,      k_ECode,        k_Delegate,
+    k_ArrayOf,      k_Enum,
+
+    k_class         k_main,         k_scriptable,   k_monitor,
+    k_singleton,    k_aggregate,    k_virtual,      k_category,
+    k_aspect,       k_regime,      k_domain,       k_hidden,
+    k_callback,     k_sequenced,    k_synchronized, k_constructor,
+    k_private,
+
+    k_struct,       k_enum,         k_typedef,      k_dummytype,
+    k_progma,       k_disable,      k_enable,       k_importlib,
+    k_merge,        k_import,       k_mergelib,     k_const,
+
+    // others
+    uunm,           ident,          integer,        decimal,
+    hinteger,       string,
+};
+
+S = CAR;
+
+P = {
+    // Special semantic rules about CAR header:
+    //
+    // 1) 'project' can't be used before library.
+    // 2) 'console', 'service' and 'graphics' are conflicting each other,
+    //    and once they declared, the 'main' class must present.
+    // 3) If headers' attributes appear more than once, the first definition
+    //    will validate.
+    // 4) The version is a decimal number. i.e. version(2.10) is same as
+    //    version(2.1).
+    //
+    CAR         -> [ CAR_ATTRIBS ] CAR_ID CAR_BODY
+    CAR_ATTRIBS -> s_lbracket CAR_ATTRIB { s_comma CAR_ATTRIB } s_rbracket
+    CAR_ATTRIB  -> [ VERSION | k_project |
+                     k_console | SERVICE | GRAPHICS ]
+    VERSION     -> k_version s_lparen < integer | decimal > s_rparen
+    SERVICE     -> k_service s_lparen string s_rparen
+    GRAPHICS    -> k_graphics [ s_lparen k_litegraphics s_rparen ]
+    CAR_ID      -> < k_module | k_library > [ uunm ]
+
+    // Special semantic rules about CAR body:
+    //
+    // 1) At least one class be defined in module(not library).
+    // 2) All of interface, class, enum and struct have global name in same
+    //    file, they can't have same name each other.
+    // 3) Alias(typedef) has global name too, but the duplicate name is
+    //    legal while the alias has a same type with another dup-name-type.
+    //
+    CAR_BODY    -> s_lbrace { CAR_ELEM { s_semicolon } }+ s_rbrace
+    CAR_ELEM    -> INTERFACE | CLASS | ENUM | STRUCT | TYPEDEF | CONST |
+                   PRAGMA | IMPORT | IMPORTLIB | MERGE | MERGELIB
+
+    // Special semantic rules about data type:
+    //
+    // 1) The 'ident' has two possible types: alias or interface.
+    // 2) Compiler will try to retrieve undefined type from imported
+    //    libraries immediately. That mean, using type before declaring
+    //    or defining maybe result in redefined error.
+    // 3) EzArray and EzEnum can't nested more than once.
+    //
+    TYPE        -> < BASE_TYPE | DEF_TYPE > [ s_star [ s_star ] ]
+    BASE_TYPE   -> C_TYPE | EZ_TYPE
+//    C_TYPE      -> k_void | k_float | k_double | SIGNED_TYPE |
+//                   < < k_unsigned | k_signed > [ SIGNED_TYPE ] >
+//    SIGNED_TYPE -> k_char | < k_short [ k_int ] > |
+//                   < k_int [ k_short | k_long ] > |
+//                   < k_long [ k_long | k_int ] >
+    EZ_TYPE     -> k_GUID | k_EZCLSID | k_ECODE |
+                   k_EzStr | k_EzStrBuf | k_EzByteBuf | k_EzDelegate | k_EzChar16Buf |
+			       ARRAYOF | EZENUM
+			       k_Char8| k_Char16| k_Int8| K_Byte|
+				   k_Int16|  K_Int32|  K_Int64|  K_UInt16|
+				   K_UInt32|   K_UInt64|
+				   EZ_BUFFER_ARRAY | EZ_STRUCT_ARRAY
+    ARRAYOF     -> ARRAYOF_PREFIX s_langle TYPE s_rangle
+    EZ_BUFFER_ARRAY   -> EZ_ARRAY_PREFIX s_langle ARRAY_NUMBER s_rangle
+	ARRAYOF_PREFIX   -> K_Char8Array_| K_Char16Array_|
+				   K_StringArray_|  K_ByteArray_| K_Int8Array_|
+				   K_Int16Array_|  K_Int32Array_|  K_Int64Array_| K_UInt16Array_|
+				   K_UInt32Array_| K_UInt64Array_ | K_FloatArray_ | K_ObjectArray_ |
+				   K_BooleanArray_| K_EMuidArray_| K_EGuidArray_| K_ECodeArray_
+    ARRAY_NUMBER   -> integer | hinteger | ident
+	EZ_STRUCT_ARRAY  -> K_StructArray_ s_langle < ident k_commas ARRAY_NUMBER > s_rangle
+    DEF_TYPE    -> [ k_struct | k_enum ] ident
+
+    // Special semantic rules about interface:
+    //
+    // 1) Interface and icallback are two different types, their
+    //    declaration and definition must hold the line.
+    // 2) Attributes can't apply to interface or icallback's declaration.
+    // 3) Icallback can't be set as parent.
+    // 4) Nested inheriting is not permitted. e.g. IA->IB->IC->IA.
+    // 5) If interface inherited from a local interface, it will be set as
+    //    local too.
+   // 6) An interface which has local method parameters will be treat as
+    //    local.
+    //
+    INTERFACE   -> [ ITF_ATTRIBS ] ITF_ID [ ITF_BODY | s_semicolon ]
+    ITF_ATTRIBS -> s_lbracket ITF_ATTRIB { s_comma ITF_ATTRIB } s_rbracket
+    ITF_ATTRIB  -> k_local | k_async
+    ITF_ID      -> k_interface ident
+    ITF_BODY    -> [ s_colon ident ]
+                   s_lbrace { METHOD { s_semicolon } } s_rbrace
+
+    // Special semantic rules about method:
+    //
+    // 1) None-pointer 'void' parameter type is not permitted.
+    // 2) None-pointer [out] parameter is not permitted too, except it's
+    //    type is EzxxxBuf or EzArray.
+    // 3) [retval] has [out] attribute automatically.
+    // 4) Method parameters of callback should not be [out] or [retval].
+    //
+    METHOD      -> ident METHOD_ARGS s_semicolon
+    METHOD_ARGS -> s_lparen [ METHOD_ARG { s_comma METHOD_ARG } ] s_rparen
+    METHOD_ARG  -> [ ARG_ATTRIBS ] TYPE ident
+    ARG_ATTRIBS -> s_lbracket ARG_ATTRIB { s_comma ARG_ATTRIB } s_rbracket
+    ARG_ATTRIB  -> k_in | k_out | k_retval
+
+    // Special semantic rules about class:
+    //
+    // 1)  If the 'main' attribute specified, the IMainApplet is included
+    //     automaticaly.
+    // 2)  The whole file can only has one 'main' class existed.
+    // 3)  'aggregate' attribute is similar to 'aggregator' in previous
+    //     version, except the multi-aggregation are permited, and
+    //     the classes in parentheses must be aspects.
+    // 4)  'aspect' attribute can only be used before regime, and those
+    //     listed classes in parentheses must be aspects.
+    // 5)  'singleton' can't be used before aspect.
+    // 6)  'aspect' type is similar to 'aggregatee' in previous version, but
+    //     the aspect can not only be aggregated, but also has ability to
+    //     aggregate other aspect.
+    // 7)  If the class include callback interface, the sink class is generated
+    //     automatically.
+    // 8)  The parents of class can't nested point to current class.
+    // 9)  Class can't inherit a none-virtual-interface class.
+    // 10) The parents' virtual interfaces will be included automatically.
+    // 11) All interfaces of category are virtual.
+    // 12) If interface(include inherited) in class is duplicated, the
+    //     duplication interface is skiped simply.
+    // 13) The callbacks in same class can't have same name methods.
+    // 14) The scriptable class can't have same name methods.
+    // 15) The parent of other class interfaces will be ignored.
+    //
+    CLASS       -> [ CLS_ATTRIBS ] CLS_ID [ CLS_BODY | s_semicolon ]
+    CLS_ATTRIBS -> s_lbracket CLS_ATTRIB { s_comma CLS_ATTRIB } s_rbracket
+    CLS_ATTRIB  -> k_main | k_scriptable | k_monitor | k_singleton | k_private |
+                   k_sequenced | k_synchronized | AGGREGATE | ASPECT
+    AGGREGATE   -> k_aggregate s_lparen ident { s_comma ident } s_rparen
+    ASPECT      -> k_aspect s_lparen ident { s_comma ident } s_rparen
+    CLS_ID      -> CLS_TYPE ident
+    CLS_TYPE    -> k_class | k_category | k_aspect | k_regime | k_domain
+    CLS_BODY    -> [ s_colon [s_colon] ident ]
+                   s_lbrace { < CLS_CTOR | CLS_ITF > { s_semicolon } } s_rbrace
+    CLS_CTOR    -> k_constructor s_lparen [ METHOD_ARG { s_comma METHOD_ARG } ] s_rparen s_semicolon
+    CLS_ITF     -> [ k_virtual | k_hidden | k_callback ]
+                   k_interface ident s_semicolon
+
+    // Special semantic rules about enum:
+    //
+    // 1) Enum member name is global in .car file, they can't duplicate with
+    //    other enum members. And Enum member name must have "EnumName_"
+    //    as its prefix.
+    //
+    ENUM        -> k_enum ident [ ENUM_BODY | s_semicolon ]
+    ENUM_BODY   -> s_lbrace ENUM_ELEM { s_comma ENUM_ELEM }
+                   [ s_comma ] s_rbrace ]
+    ENUM_ELEM   -> ident [ s_assign < integer | hinteger | ident > ]
+
+    // Special semantic rules about struct:
+    //
+    // 1) Nested definition is not permitted. e.g. struct A { A a; };
+    // 2) Type of member variable can not be None-pointer 'void'.
+    //
+    STRUCT      -> k_struct ident [ STRUCT_BODY | s_semicolon ]
+    STRUCT_BODY -> s_lbrace { STRUCT_ELEM { s_semicolon } }+ s_rbrace
+    STRUCT_ELEM -> DTYPE ELEM_NAME { s_comma ELEM_NAME } s_semicolon
+    ELEM_NAME   -> [ s_star [ s_star] ] ident {s_lbracket < Token_hinteger | ident > s_rbracket}
+
+    // Special semantic rules about typedef(alias):
+    //
+    // None.
+    //
+    TYPEDEF     -> k_typedef [ k_dummytype ]
+                   DTYPE ALIAS { s_comma ALIAS } s_semicolon
+    DTYPE       -> BASE_TYPE | ident
+    ALIAS       -> [ s_star [ s_star ] ] ident
+
+    // Const
+    //
+    CONST       -> k_const ident s_assign < integer | hinteger > s_semicolon
+
+    // Special semantic rules about pragma:
+    //
+    // 1) Disable or enable option be using to control warning messages'
+    //    output, invalid warning number is ignored.
+    //
+    PRAGMA      -> k_pragma s_lparen PRAGMA_EXPS s_rparen
+    PRAGMA_EXPS -> < k_disalbe | k_enable > s_colon < integer | hinteger >
+
+    // Special semantic rules about import, importlib, merge, mergelib:
+    //
+    // 1) merge: compile .car source file and merge result to current file.
+    // 2) mergelib: merge .cls or .dll's metadata to current file.
+    // 3) import: compile .car source file and treat result as a library.
+    // 4) importlib: load .cls or .dll's metadata as a library.
+    // 5) Merge and mergelib will result in complete merging, i.e. the
+    //    compiler copy all content of object file to current file except
+    //    header information(uunm, verion, module name, etc.).
+    // 6) Unlike merge, compiler selectively retrieve useful information
+    //    from imported libraries only when needed.
+    // 7) User can specify .car source file's search dir-list by using
+    //    compiler switch /I, otherwise, the compiler only search current
+    //    directory default.
+    // 8) Compiler default using environment variable PATH's dir-list to
+    //    search .cls and .dll libraries, user can change it by set comipler
+    //    switch /L.
+    // 9) System basic definition is packed into compiler image, compiler
+    //    load it and elastos.dll as imported libraries when startup.
+    //
+    MERGE       -> k_merge s_lparen string s_rparen s_semicolon
+    MERGELIB    -> k_mergelib s_lparen string s_rparen s_semicolon
+    IMPORT      -> k_import s_lparen string s_rparen s_semicolon
+    IMPORTLIB   -> k_importlib s_lparen string s_rparen s_semicolon
+};
+

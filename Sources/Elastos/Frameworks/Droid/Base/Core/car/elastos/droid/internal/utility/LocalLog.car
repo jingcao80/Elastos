@@ -1,0 +1,32 @@
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    /**
+     * Helper class for logging serious issues, which also keeps a small
+     * snapshot of the logged events that can be printed later, such as part
+     * of a system service's dumpsys output.
+     * @hide
+     */
+    [local]
+    interface ILocalLog {
+        W(
+            [in] String msg);
+
+        Dump(
+            [in] IPrintWriter* pw,
+            [in] String header,
+            [in] String prefix,
+            [out] Boolean* result);
+    }
+
+    } // namespace Utility
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

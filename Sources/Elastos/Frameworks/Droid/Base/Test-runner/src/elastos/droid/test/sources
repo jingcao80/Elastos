@@ -1,0 +1,24 @@
+
+TARGET_NAME= test
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../inc
+INCLUDES += ../../
+
+C_DEFINES += -DDROID_TEST
+
+SOURCES += ActivityInstrumentationTestCase2.cpp
+SOURCES += ActivityTestCase.cpp
+SOURCES += CAndroidTestRunner.cpp
+SOURCES += CInstrumentationTestRunner.cpp
+SOURCES += ClassPathPackageInfo.cpp
+SOURCES += ClassPathPackageInfoSource.cpp
+SOURCES += EcoFile.cpp
+SOURCES += ElastosTestCase.cpp
+SOURCES += InstrumentationTestCase.cpp
+SOURCES += PackageInfoSources.cpp
+SOURCES += TestCaseUtil.cpp
+SOURCES += TestFilePrinter.cpp
+SOURCES += TestPrinter.cpp
+
+ELASTOS_LIBS += suitebuilder/suitebuilder.lib

@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.Security.IPermissionCollection;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * @Involve
+     * interface IGuard
+     */
+    interface IPermission {
+        GetName(
+            [out] String* name);
+
+        NewPermissionCollection(
+            [out] IPermissionCollection** permissions);
+
+        GetActions(
+            [out] String* actions);
+
+        Implies(
+            [in] IPermission* permission,
+            [out] Boolean* result);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

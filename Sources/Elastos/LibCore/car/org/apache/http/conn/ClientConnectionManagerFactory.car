@@ -1,0 +1,34 @@
+
+module
+{
+    interface Org.Apache.Http.Conn.IClientConnectionManager;
+    interface Org.Apache.Http.Conn.Scheme.ISchemeRegistry;
+    interface Org.Apache.Http.Params.IHttpParams;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+
+    /**
+     * A factory for creating new {@link ClientConnectionManager} instances.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 4.0
+     */
+    interface IClientConnectionManagerFactory {
+
+        NewInstance(
+            [in] IHttpParams* params,
+            [in] ISchemeRegistry* schemeRegistry,
+            [out] IClientConnectionManager** manager);
+
+    }
+
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

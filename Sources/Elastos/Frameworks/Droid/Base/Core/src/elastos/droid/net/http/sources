@@ -1,0 +1,41 @@
+TARGET_NAME= http
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES += ElastosHttpClient.cpp
+SOURCES += CElastosHttpClientHelper.cpp
+SOURCES += ElastosHttpClientConnection.cpp
+SOURCES += CCertificateChainValidatorHelper.cpp
+SOURCES += CertificateChainValidator.cpp
+SOURCES += CharArrayBuffers.cpp
+SOURCES += Connection.cpp
+SOURCES += ConnectionThread.cpp
+SOURCES += DelegatingSSLSession.cpp
+SOURCES += ErrorStrings.cpp
+SOURCES += CErrorStrings.cpp
+SOURCES += Headers.cpp
+SOURCES += HttpAuthHeader.cpp
+SOURCES += HttpConnection.cpp
+SOURCES += HttpLog.cpp
+SOURCES += HttpResponseCache.cpp
+SOURCES += CHttpResponseCacheHelper.cpp
+SOURCES += HttpsConnection.cpp
+SOURCES += CHttpsConnectionHelper.cpp
+SOURCES += IdleCache.cpp
+SOURCES += LoggingEventHandler.cpp
+SOURCES += Request.cpp
+SOURCES += RequestHandle.cpp
+SOURCES += CRequestHandleHelper.cpp
+SOURCES += RequestQueue.cpp
+SOURCES += SslCertificate.cpp
+SOURCES += CSslCertificateHelper.cpp
+SOURCES += SslError.cpp
+SOURCES += CSslErrorHelper.cpp
+SOURCES += Timer.cpp
+SOURCES += X509TrustManagerExtensions.cpp
+
+#ELASTOS_LIBS += multipart/multipart.lib

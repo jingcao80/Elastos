@@ -1,0 +1,63 @@
+
+module
+{
+    interface Elastos.Security.IPublicKey;
+    interface Elastos.Security.ISignature;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface ISignedObject {
+        /**
+         * Returns the encapsulated object. Each time this method is invoked, the
+         * encapsulated object is deserialized before it is returned.
+         *
+         * @return the encapsulated object.
+         * @throws IOException
+         *             if deserialization failed.
+         * @throws ClassNotFoundException
+         *             if the class of the encapsulated object can not be found.
+         */
+        GetObject(
+            [out] IInterface** obj);
+
+        /**
+         * Returns the signature data of the encapsulated serialized object.
+         *
+         * @return the signature data of the encapsulated serialized object.
+         */
+        GetSignature(
+            [out, callee] ArrayOf<Byte>* sign);
+
+        /**
+         * Returns the name of the algorithm of this {@code SignedObject}.
+         *
+         * @return the name of the algorithm of this {@code SignedObject}.
+         */
+        GetAlgorithm(
+            [out] String* algo);
+
+        /**
+         * Indicates whether the contained signature for the encapsulated object is
+         * valid.
+         *
+         * @param verificationKey
+         *            the public key to verify the signature.
+         * @param verificationEngine
+         *            the signature engine.
+         * @return {@code true} if the contained signature for the encapsulated
+         *         object is valid, {@code false} otherwise.
+         * @throws InvalidKeyException
+         *             if the public key is invalid.
+         * @throws SignatureException
+         *             if signature verification failed.
+         */
+        Verify(
+            [in] IPublicKey* verificationKey,
+            [in] ISignature* verificationEngine,
+            [out] Boolean* isVerified);
+    }
+
+    } // end namespace Security
+    } // end namespace Elastos
+}

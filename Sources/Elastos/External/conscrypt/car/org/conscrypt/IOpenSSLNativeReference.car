@@ -1,0 +1,14 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLNativeReference {
+        GetNativeContext(
+            [out] Int64* ctxRef);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

@@ -1,0 +1,445 @@
+
+module
+{
+    interface Elastos.Droid.View.InputMethod.ICorrectionInfo;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.Os.IBundle;
+
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * The InputConnection interface is the communication channel from an
+     * {@link InputMethod} back to the application that is receiving its input. It
+     * is used to perform such things as reading text around the cursor,
+     * committing text to the text box, and sending raw key events to the application.
+     *
+     * <p>Applications should never directly implement this interface, but instead
+     * subclass from {@link BaseInputConnection}.  This will ensure that the
+     * application does not break when new methods are added to the interface.
+     */
+    interface IInputConnection {
+        /**
+         * Flag for use with {@link #getTextAfterCursor} and
+         * {@link #getTextBeforeCursor} to have style information returned along
+         * with the text.  If not set, you will receive only the raw text.  If
+         * set, you may receive a complex CharSequence of both text and style
+         * spans.
+         */
+        const Int32 GET_TEXT_WITH_STYLES = 0x0001;
+
+        /**
+         * Flag for use with {@link #getExtractedText} to indicate you would
+         * like to receive updates when the extracted text changes.
+         */
+        const Int32 GET_EXTRACTED_TEXT_MONITOR = 0x0001;
+
+        /**
+         * The editor is requested to call
+         * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} at
+         * once, as soon as possible, regardless of cursor/anchor position changes. This flag can be
+         * used together with {@link #CURSOR_UPDATE_MONITOR}.
+         */
+        const Int32 CURSOR_UPDATE_IMMEDIATE = 1 << 0;
+
+        /**
+         * The editor is requested to call
+         * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+         * whenever cursor/anchor position is changed. To disable monitoring, call
+         * {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
+         * <p>
+         * This flag can be used together with {@link #CURSOR_UPDATE_IMMEDIATE}.
+         * </p>
+         */
+        const Int32 CURSOR_UPDATE_MONITOR = 1 << 1;
+
+
+        /**
+         * Get <var>n</var> characters of text before the current cursor position.
+         *
+         * <p>This method may fail either if the input connection has become invalid
+         * (such as its process crashing) or the client is taking too long to
+         * respond with the text (it is given a couple seconds to return).
+         * In either case, a null is returned.
+         *
+         * @param n The expected length of the text.
+         * @param flags Supplies additional options controlling how the text is
+         * returned.  May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+         *
+         * @return Returns the text before the cursor position; the length of the
+         * returned text might be less than <var>n</var>.
+         */
+        GetTextBeforeCursor(
+            [in] Int32 n,
+            [in] Int32 flags,
+            [out] ICharSequence** text);
+
+        /**
+         * Get <var>n</var> characters of text after the current cursor position.
+         *
+         * <p>This method may fail either if the input connection has become invalid
+         * (such as its process crashing) or the client is taking too long to
+         * respond with the text (it is given a couple seconds to return).
+         * In either case, a null is returned.
+         *
+         * @param n The expected length of the text.
+         * @param flags Supplies additional options controlling how the text is
+         * returned.  May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+         *
+         * @return Returns the text after the cursor position; the length of the
+         * returned text might be less than <var>n</var>.
+         */
+        GetTextAfterCursor(
+            [in] Int32 n,
+            [in] Int32 flags,
+            [out] ICharSequence** text);
+
+        /**
+         * Gets the selected text, if any.
+         *
+         * <p>This method may fail if either the input connection has become
+         * invalid (such as its process crashing) or the client is taking too
+         * long to respond with the text (it is given a couple of seconds to return).
+         * In either case, a null is returned.
+         *
+         * @param flags Supplies additional options controlling how the text is
+         * returned.  May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
+         * @return Returns the text that is currently selected, if any, or null if
+         * no text is selected.
+         */
+        GetSelectedText(
+            [in] Int32 flags,
+            [out] ICharSequence** text);
+
+        /**
+         * Retrieve the current capitalization mode in effect at the current
+         * cursor position in the text.  See
+         * {@link android.text.TextUtils#getCapsMode TextUtils.getCapsMode} for
+         * more information.
+         *
+         * <p>This method may fail either if the input connection has become invalid
+         * (such as its process crashing) or the client is taking too long to
+         * respond with the text (it is given a couple seconds to return).
+         * In either case, a 0 is returned.
+         *
+         * @param reqModes The desired modes to retrieve, as defined by
+         * {@link android.text.TextUtils#getCapsMode TextUtils.getCapsMode}.  These
+         * constants are defined so that you can simply pass the current
+         * {@link EditorInfo#inputType TextBoxAttribute.contentType} value
+         * directly in to here.
+         *
+         * @return Returns the caps mode flags that are in effect.
+         */
+        GetCursorCapsMode(
+            [in] Int32 reqModes,
+            [out] Int32* capsMode);
+
+        /**
+         * Retrieve the current text in the input connection's editor, and monitor
+         * for any changes to it.  This function returns with the current text,
+         * and optionally the input connection can send updates to the
+         * input method when its text changes.
+         *
+         * <p>This method may fail either if the input connection has become invalid
+         * (such as its process crashing) or the client is taking too long to
+         * respond with the text (it is given a couple seconds to return).
+         * In either case, a null is returned.
+         *
+         * @param request Description of how the text should be returned.
+         * @param flags Additional options to control the client, either 0 or
+         * {@link #GET_EXTRACTED_TEXT_MONITOR}.
+         *
+         * @return Returns an ExtractedText object describing the state of the
+         * text view and containing the extracted text itself.
+         */
+        GetExtractedText(
+            [in] IExtractedTextRequest* request,
+            [in] Int32 flags,
+            [out] IExtractedText** extractedText);
+
+        /**
+         * Delete <var>beforeLength</var> characters of text before the current cursor
+         * position, and delete <var>afterLength</var> characters of text after the
+         * current cursor position, excluding composing text. Before and after refer
+         * to the order of the characters in the string, not to their visual representation.
+         *
+         *
+         * @param beforeLength The number of characters to be deleted before the
+         *        current cursor position.
+         * @param afterLength The number of characters to be deleted after the
+         *        current cursor position.
+         *
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         */
+        DeleteSurroundingText(
+            [in] Int32 beforeLength,
+            [in] Int32 afterLength,
+            [out] Boolean* result);
+
+        /**
+         * Set composing text around the current cursor position with the given text,
+         * and set the new cursor position.  Any composing text set previously will
+         * be removed automatically.
+         *
+         * @param text The composing text with styles if necessary. If no style
+         *        object attached to the text, the default style for composing text
+         *        is used. See {#link android.text.Spanned} for how to attach style
+         *        object to the text. {#link android.text.SpannableString} and
+         *        {#link android.text.SpannableStringBuilder} are two
+         *        implementations of the interface {#link android.text.Spanned}.
+         * @param newCursorPosition The new cursor position around the text.  If
+         *        > 0, this is relative to the end of the text - 1; if <= 0, this
+         *        is relative to the start of the text.  So a value of 1 will
+         *        always advance you to the position after the full text being
+         *        inserted.  Note that this means you can't position the cursor
+         *        within the text, because the editor can make modifications to
+         *        the text you are providing so it is not possible to correctly
+         *        specify locations there.
+         *
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         */
+        SetComposingText(
+            [in] ICharSequence* text,
+            [in] Int32 newCursorPosition,
+            [out] Boolean* result);
+
+        /**
+         * Mark a certain region of text as composing text. Any composing text set
+         * previously will be removed automatically. The default style for composing
+         * text is used.
+         *
+         * @param start the position in the text at which the composing region begins
+         * @param end the position in the text at which the composing region ends
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         */
+        SetComposingRegion(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] Boolean* result);
+
+        /**
+         * Have the text editor finish whatever composing text is currently
+         * active.  This simply leaves the text as-is, removing any special
+         * composing styling or other state that was around it.  The cursor
+         * position remains unchanged.
+         */
+        FinishComposingText(
+            [out] Boolean* result);
+
+        /**
+         * Commit text to the text box and set the new cursor position.
+         * Any composing text set previously will be removed
+         * automatically.
+         *
+         * @param text The committed text.
+         * @param newCursorPosition The new cursor position around the text.  If
+         *        > 0, this is relative to the end of the text - 1; if <= 0, this
+         *        is relative to the start of the text.  So a value of 1 will
+         *        always advance you to the position after the full text being
+         *        inserted.  Note that this means you can't position the cursor
+         *        within the text, because the editor can make modifications to
+         *        the text you are providing so it is not possible to correctly
+         *        specify locations there.
+         *
+         *
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         */
+        CommitText(
+            [in] ICharSequence* text,
+            [in] Int32 newCursorPosition,
+            [out] Boolean* result);
+
+        /**
+         * Commit a completion the user has selected from the possible ones
+         * previously reported to {@link InputMethodSession#displayCompletions
+         * InputMethodSession.displayCompletions()}.  This will result in the
+         * same behavior as if the user had selected the completion from the
+         * actual UI.
+         *
+         * @param text The committed completion.
+         *
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         */
+        CommitCompletion(
+            [in] ICompletionInfo* text,
+            [out] Boolean* result);
+
+        /**
+         * Commit a correction automatically performed on the raw user's input. A typical example would
+         * be to correct typos using a dictionary.
+         *
+         * @param correctionInfo Detailed information about the correction.
+         *
+         * @return True on success, false if the input connection is no longer valid.
+         */
+        CommitCorrection(
+            [in] ICorrectionInfo* correctionInfo,
+            [out] Boolean* successed);
+
+        /**
+         * Set the selection of the text editor.  To set the cursor position,
+         * start and end should have the same value.
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         */
+        SetSelection(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] Boolean* result);
+
+        /**
+         * Have the editor perform an action it has said it can do.
+         *
+         * @param editorAction This must be one of the action constants for
+         * {@link EditorInfo#imeOptions EditorInfo.editorType}, such as
+         * {@link EditorInfo#IME_ACTION_GO EditorInfo.EDITOR_ACTION_GO}.
+         *
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         */
+        PerformEditorAction(
+            [in] Int32 editorAction,
+            [out] Boolean* result);
+
+        /**
+         * Perform a context menu action on the field.  The given id may be one of:
+         * {@link android.R.id#selectAll},
+         * {@link android.R.id#startSelectingText}, {@link android.R.id#stopSelectingText},
+         * {@link android.R.id#cut}, {@link android.R.id#copy},
+         * {@link android.R.id#paste}, {@link android.R.id#copyUrl},
+         * or {@link android.R.id#switchInputMethod}
+         */
+        PerformContextMenuAction(
+            [in] Int32 id,
+            [out] Boolean* result);
+
+        /**
+         * Tell the editor that you are starting a batch of editor operations.
+         * The editor will try to avoid sending you updates about its state
+         * until {@link #endBatchEdit} is called.
+         */
+        BeginBatchEdit(
+            [out] Boolean* result);
+
+        /**
+         * Tell the editor that you are done with a batch edit previously
+         * initiated with {@link #beginBatchEdit}.
+         */
+        EndBatchEdit(
+            [out] Boolean* result);
+
+        /**
+         * Send a key event to the process that is currently attached through
+         * this input connection.  The event will be dispatched like a normal
+         * key event, to the currently focused; this generally is the view that
+         * is providing this InputConnection, but due to the asynchronous nature
+         * of this protocol that can not be guaranteed and the focus may have
+         * changed by the time the event is received.
+         *
+         * <p>
+         * This method can be used to send key events to the application. For
+         * example, an on-screen keyboard may use this method to simulate a hardware
+         * keyboard. There are three types of standard keyboards, numeric (12-key),
+         * predictive (20-key) and ALPHA (QWERTY). You can specify the keyboard type
+         * by specify the device id of the key event.
+         *
+         * <p>
+         * You will usually want to set the flag
+         * {@link KeyEvent#FLAG_SOFT_KEYBOARD KeyEvent.FLAG_SOFT_KEYBOARD} on all
+         * key event objects you give to this API; the flag will not be set
+         * for you.
+         *
+         * <p>Note that it's discouraged to send such key events in normal operation;
+         * this is mainly for use with {@link android.text.InputType#TYPE_NULL} type
+         * text fields. Use the {@link #commitText} family of methods to send text
+         * to the application instead.
+         * @param event The key event.
+         *
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         *
+         * @see KeyEvent
+         * @see KeyCharacterMap#NUMERIC
+         * @see KeyCharacterMap#PREDICTIVE
+         * @see KeyCharacterMap#ALPHA
+         */
+        SendKeyEvent(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * Clear the given meta key pressed states in the given input connection.
+         *
+         * @param states The states to be cleared, may be one or more bits as
+         * per {@link KeyEvent#getMetaState() KeyEvent.getMetaState()}.
+         *
+         * @return Returns true on success, false if the input connection is no longer
+         * valid.
+         */
+        ClearMetaKeyStates(
+            [in] Int32 states,
+            [out] Boolean* result);
+
+        /**
+         * Called by the IME to tell the client when it switches between fullscreen
+         * and normal modes.  This will normally be called for you by the standard
+         * implementation of {@link android.inputmethodservice.InputMethodService}.
+         */
+        ReportFullscreenMode(
+            [in] Boolean enabled,
+            [out] Boolean* result);
+
+        /**
+         * API to send private commands from an input method to its connected
+         * editor.  This can be used to provide domain-specific features that are
+         * only known between certain input methods and their clients.  Note that
+         * because the InputConnection protocol is asynchronous, you have no way
+         * to get a result back or know if the client understood the command; you
+         * can use the information in {@link EditorInfo} to determine if
+         * a client supports a particular command.
+         *
+         * @param action Name of the command to be performed.  This <em>must</em>
+         * be a scoped name, i.e. prefixed with a package name you own, so that
+         * different developers will not create conflicting commands.
+         * @param data Any data to include with the command.
+         * @return Returns true if the command was sent (whether or not the
+         * associated editor understood it), false if the input connection is no longer
+         * valid.
+         */
+        PerformPrivateCommand(
+            [in] String action,
+            [in] IBundle* data,
+            [out] Boolean* result);
+
+        /**
+         * Called by the input method to ask the editor for calling back
+         * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} to
+         * notify cursor/anchor locations.
+         *
+         * @param cursorUpdateMode {@link #CURSOR_UPDATE_IMMEDIATE} and/or
+         * {@link #CURSOR_UPDATE_MONITOR}. Pass {@code 0} to disable the effect of
+         * {@link #CURSOR_UPDATE_MONITOR}.
+         * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
+         * application will not call
+         * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}.
+         */
+        RequestCursorUpdates(
+            [in] Int32 cursorUpdateMode,
+            [out] Boolean* result);
+
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

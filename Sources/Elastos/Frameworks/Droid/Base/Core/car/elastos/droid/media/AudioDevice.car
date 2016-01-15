@@ -1,0 +1,143 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * Class to provide information about the audio devices.
+     * @hide
+     */
+    interface IAudioDevice {
+        /**
+         * A device type associated with an unknown or uninitialized device.
+         */
+        const Int32 TYPE_UNKNOWN          = 0;
+        /**
+         * A device type describing the attached earphone speaker.
+         */
+        const Int32 TYPE_BUILTIN_EARPIECE = 1;
+        /**
+         * A device type describing the speaker system (i.e. a mono speaker or stereo speakers) built
+         * in a device.
+         */
+        const Int32 TYPE_BUILTIN_SPEAKER  = 2;
+        /**
+         * A device type describing a headset, which is the combination of a headphones and microphone.
+         */
+        const Int32 TYPE_WIRED_HEADSET    = 3;
+        /**
+         * A device type describing a pair of wired headphones .
+         */
+        const Int32 TYPE_WIRED_HEADPHONES = 4;
+        /**
+         * A device type describing an analog line-level connection.
+         */
+        const Int32 TYPE_LINE_ANALOG      = 5;
+        /**
+         * A device type describing a digital line connection (e.g. SPDIF).
+         */
+        const Int32 TYPE_LINE_DIGITAL     = 6;
+        /**
+         * A device type describing a Bluetooth device typically used for telephony .
+         */
+        const Int32 TYPE_BLUETOOTH_SCO    = 7;
+        /**
+         * A device type describing a Bluetooth device supporting the A2DP profile.
+         */
+        const Int32 TYPE_BLUETOOTH_A2DP   = 8;
+        /**
+         * A device type describing an HDMI connection .
+         */
+        const Int32 TYPE_HDMI             = 9;
+        /**
+         * A device type describing the Audio Return Channel of an HDMI connection.
+         */
+        const Int32 TYPE_HDMI_ARC         = 10;
+        /**
+         * A device type describing a USB audio device.
+         */
+        const Int32 TYPE_USB_DEVICE       = 11;
+        /**
+         * A device type describing a USB audio device in accessory mode.
+         */
+        const Int32 TYPE_USB_ACCESSORY    = 12;
+        /**
+         * A device type describing the audio device associated with a dock.
+         */
+        const Int32 TYPE_DOCK             = 13;
+        /**
+         * A device type associated with the transmission of audio signals over FM.
+         */
+        const Int32 TYPE_FM               = 14;
+        /**
+         * A device type describing the microphone(s) built in a device.
+         */
+        const Int32 TYPE_BUILTIN_MIC      = 15;
+        /**
+         * A device type for accessing the audio content transmitted over FM.
+         */
+        const Int32 TYPE_FM_TUNER         = 16;
+        /**
+         * A device type for accessing the audio content transmitted over the TV tuner system.
+         */
+        const Int32 TYPE_TV_TUNER         = 17;
+        /**
+         * A device type describing the transmission of audio signals over the telephony network.
+         */
+        const Int32 TYPE_TELEPHONY        = 18;
+        /**
+         * A device type describing the auxiliary line-level connectors.
+         */
+        const Int32 TYPE_AUX_LINE         = 19;
+
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * @return
+         */
+        IsInputDevice(
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * @return
+         */
+        IsOutputDevice(
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * @return
+         */
+        GetDeviceType(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * @return
+         */
+        GetAddress(
+            [out] String* result);
+    }
+
+    interface IAudioDeviceHelper {
+        /** @hide */
+        ConvertDeviceTypeToInternalDevice(
+            [in] Int32 deviceType,
+            [out] Int32* result);
+
+        /** @hide */
+        ConvertInternalDeviceToDeviceType(
+            [in] Int32 intDevice,
+            [out] Int32* result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

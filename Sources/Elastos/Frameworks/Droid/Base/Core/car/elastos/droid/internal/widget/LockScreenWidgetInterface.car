@@ -1,0 +1,24 @@
+
+module
+{
+    interface Elastos.Droid.Internal.Widget.ILockScreenWidgetCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    [local]
+    interface ILockScreenWidgetInterface {
+        SetCallback(
+            [in] ILockScreenWidgetCallback* cb);
+
+        ProvidesClock(
+            [out] Boolean* clock);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+}

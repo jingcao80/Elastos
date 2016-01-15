@@ -1,0 +1,1269 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IActionModeCallback;
+    interface Elastos.Droid.View.IActionMode;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.Widget.ISpinnerAdapter;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface IActionBarLayoutParams;
+    interface IActionBarOnNavigationListener;
+    interface IActionBarTab;
+    interface IActionBarOnMenuVisibilityListener;
+    interface IActionBarTabListener;
+    interface IFragmentTransaction;
+
+    [local]
+    interface IActionBar {
+        /**
+         * Standard navigation mode. Consists of either a logo or icon
+         * and title text with an optional subtitle. Clicking any of these elements
+         * will dispatch onOptionsItemSelected to the host Activity with
+         * a MenuItem with item ID android.R.id.home.
+         */
+        const Int32 NAVIGATION_MODE_STANDARD = 0;
+
+        /**
+         * List navigation mode. Instead of static title text this mode
+         * presents a list menu for navigation within the activity.
+         * e.g. this might be presented to the user as a dropdown list.
+         */
+        const Int32 NAVIGATION_MODE_LIST = 1;
+
+        /**
+         * Tab navigation mode. Instead of static title text this mode
+         * presents a series of tabs for navigation within the activity.
+         */
+        const Int32 NAVIGATION_MODE_TABS = 2;
+
+        /**
+         * Use logo instead of icon if available. This flag will cause appropriate
+         * navigation modes to use a wider logo in place of the standard icon.
+         *
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        const Int32 DISPLAY_USE_LOGO = 0x1;
+
+        /**
+         * Show 'home' elements in this action bar, leaving more space for other
+         * navigation elements. This includes logo and icon.
+         *
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        const Int32 DISPLAY_SHOW_HOME = 0x2;
+
+        /**
+         * Display the 'home' element such that it appears as an 'up' affordance.
+         * e.g. show an arrow to the left indicating the action that will be taken.
+         *
+         * Set this flag if selecting the 'home' button in the action bar to return
+         * up by a single level in your UI rather than back to the top level or front page.
+         *
+         * <p>Setting this option will implicitly enable interaction with the home/up
+         * button. See #setHomeButtonEnabled(boolean).
+         *
+         * @sa #setHomeButtonEnabled(boolean)
+         *
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        const Int32 DISPLAY_HOME_AS_UP = 0x4;
+
+        /**
+         * Show the activity title and subtitle, if present.
+         *
+         * @see #setTitle(CharSequence)
+         * @see #setTitle(int)
+         * @see #setSubtitle(CharSequence)
+         * @see #setSubtitle(int)
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        const Int32 DISPLAY_SHOW_TITLE = 0x8;
+
+        /**
+         * Show the custom view if one has been set.
+         * @see #setCustomView(View)
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        const Int32 DISPLAY_SHOW_CUSTOM = 0x10;
+
+        /**
+         * Allow the title to wrap onto multiple lines if space is available
+         * @hide pending API approval
+         */
+        const Int32 DISPLAY_TITLE_MULTIPLE_LINES = 0x20;
+
+        /**
+         * Set the action bar into custom navigation mode, supplying a view
+         * for custom navigation.
+         *
+         * Custom navigation views appear between the application icon and
+         * any action buttons and may use any space available there. Common
+         * use cases for custom navigation views might include an auto-suggesting
+         * address bar for a browser or other navigation mechanisms that do not
+         * translate well to provided navigation modes.
+         *
+         * @param view Custom navigation view to place in the ActionBar.
+         */
+        SetCustomView(
+            [in] IView* view);
+
+        /**
+         * Set the action bar into custom navigation mode, supplying a view
+         * for custom navigation.
+         *
+         * <p>Custom navigation views appear between the application icon and
+         * any action buttons and may use any space available there. Common
+         * use cases for custom navigation views might include an auto-suggesting
+         * address bar for a browser or other navigation mechanisms that do not
+         * translate well to provided navigation modes.</p>
+         *
+         * <p>The display option #DISPLAY_SHOW_CUSTOM must be set for
+         * the custom view to be displayed.</p>
+         *
+         * @sa #DISPLAY_SHOW_CUSTOM
+         *
+         * @param view Custom navigation view to place in the ActionBar.
+         * @param layoutParams How this custom view should layout in the bar.
+         *
+         * @see #setDisplayOptions(int, int)
+         */
+        SetCustomView(
+            [in] IView* view,
+            [in] IActionBarLayoutParams* layoutParams);
+
+        /**
+         * Set the action bar into custom navigation mode, supplying a view
+         * for custom navigation.
+         *
+         * <p>Custom navigation views appear between the application icon and
+         * any action buttons and may use any space available there. Common
+         * use cases for custom navigation views might include an auto-suggesting
+         * address bar for a browser or other navigation mechanisms that do not
+         * translate well to provided navigation modes.</p>
+         *
+         * <p>The display option #DISPLAY_SHOW_CUSTOM must be set for
+         * the custom view to be displayed.</p>
+         *
+         * @sa #DISPLAY_SHOW_CUSTOM
+         *
+         * @param resId Resource ID of a layout to inflate into the ActionBar.
+         *
+         * @see #setDisplayOptions(int, int)
+         */
+        SetCustomView(
+            [in] Int32 resId);
+
+        /**
+         * Set the icon to display in the 'home' section of the action bar.
+         * The action bar will use an icon specified by its style or the
+         * activity icon by default.
+         *
+         * Whether the home section shows an icon or logo is controlled
+         * by the display option #DISPLAY_USE_LOGO.
+         *
+         * @sa #DISPLAY_USE_LOGO
+         *
+         * @param resId Resource ID of a drawable to show as an icon.
+         *
+         * @see #setDisplayUseLogoEnabled(boolean)
+         * @see #setDisplayShowHomeEnabled(boolean)
+         */
+        SetIcon(
+            [in] Int32 resId);
+
+        /**
+         * Set the icon to display in the 'home' section of the action bar.
+         * The action bar will use an icon specified by its style or the
+         * activity icon by default.
+         *
+         * Whether the home section shows an icon or logo is controlled
+         * by the display option #DISPLAY_USE_LOGO.
+         *
+         * @sa #DISPLAY_USE_LOGO
+         *
+         * @param icon Drawable to show as an icon.
+         *
+         * @see #setDisplayUseLogoEnabled(boolean)
+         * @see #setDisplayShowHomeEnabled(boolean)
+         */
+        SetIcon(
+            [in] IDrawable* icon);
+
+        /**
+         * Set the logo to display in the 'home' section of the action bar.
+         * The action bar will use a logo specified by its style or the
+         * activity logo by default.
+         *
+         * Whether the home section shows an icon or logo is controlled
+         * by the display option #DISPLAY_USE_LOGO.
+         *
+         * @sa #DISPLAY_USE_LOGO
+         *
+         * @param resId Resource ID of a drawable to show as a logo.
+         *
+         * @see #setDisplayUseLogoEnabled(boolean)
+         * @see #setDisplayShowHomeEnabled(boolean)
+         */
+        SetLogo(
+            [in] Int32 resId);
+
+        /**
+         * Set the logo to display in the 'home' section of the action bar.
+         * The action bar will use a logo specified by its style or the
+         * activity logo by default.
+         *
+         * Whether the home section shows an icon or logo is controlled
+         * by the display option #DISPLAY_USE_LOGO.
+         *
+         * @sa #DISPLAY_USE_LOGO
+         *
+         * @param logo Drawable to show as a logo.
+         *
+         * @see #setDisplayUseLogoEnabled(boolean)
+         * @see #setDisplayShowHomeEnabled(boolean)
+         */
+        SetLogo(
+            [in] IDrawable* logo);
+
+        /**
+         * Set the adapter and navigation callback for list navigation mode.
+         *
+         * The supplied adapter will provide views for the expanded list as well as
+         * the currently selected item. (These may be displayed differently.)
+         *
+         * The supplied OnNavigationListener will alert the application when the user
+         * changes the current list selection.
+         *
+         * @param adapter An adapter that will provide views both to display
+         *                the current navigation selection and populate views
+         *                within the dropdown navigation menu.
+         * @param callback An OnNavigationListener that will receive events when the user
+         *                 selects a navigation item.
+         */
+        SetListNavigationCallbacks(
+            [in] ISpinnerAdapter* adapter,
+            [in] IActionBarOnNavigationListener* cb);
+
+        /**
+         * Set the selected navigation item in list or tabbed navigation modes.
+         *
+         * @param position Position of the item to select.
+         */
+        SetSelectedNavigationItem(
+            [in] Int32 position);
+
+        /**
+         * Get the position of the selected navigation item in list or tabbed navigation modes.
+         *
+         * @return Position of the selected item.
+         */
+        GetSelectedNavigationIndex(
+            [out] Int32* index);
+
+        /**
+         * Get the number of navigation items present in the current navigation mode.
+         *
+         * @return Number of navigation items.
+         */
+        GetNavigationItemCount(
+            [out] Int32* count);
+
+        /**
+         * Set the action bar's title. This will only be displayed if
+         * #DISPLAY_SHOW_TITLE is set.
+         *
+         * @sa #DISPLAY_SHOW_TITLE
+         *
+         * @param title Title to set
+         *
+         * @see #setTitle(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Set the action bar's title. This will only be displayed if
+         * #DISPLAY_SHOW_TITLE is set.
+         *
+         * @sa #DISPLAY_SHOW_TITLE
+         *
+         * @param resId Resource ID of title string to set
+         *
+         * @see #setTitle(CharSequence)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetTitle(
+            [in] Int32 resId);
+
+        /**
+         * Set the action bar's subtitle. This will only be displayed if
+         * #DISPLAY_SHOW_TITLE is set. Set to null to disable the
+         * subtitle entirely.
+         *
+         * @sa #DISPLAY_SHOW_TITLE
+         *
+         * @param subtitle Subtitle to set
+         *
+         * @see #setSubtitle(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetSubtitle(
+            [in] ICharSequence* subtitle);
+
+        /**
+         * Set the action bar's subtitle. This will only be displayed if
+         * #DISPLAY_SHOW_TITLE is set.
+         *
+         * @sa #DISPLAY_SHOW_TITLE
+         *
+         * @param resId Resource ID of subtitle string to set
+         *
+         * @see #setSubtitle(CharSequence)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetSubtitle(
+            [in] Int32 resId);
+
+        /**
+         * Set display options. This changes all display option bits at once. To change
+         * a limited subset of display options, see #setDisplayOptions(int, int).
+         *
+         * @sa #setDisplayOptions(int, int)
+         *
+         * @param options A combination of the bits defined by the DISPLAY_ constants
+         *                defined in ActionBar.
+         */
+        SetDisplayOptions(
+            [in] Int32 options);
+
+        /**
+         * Set selected display options. Only the options specified by mask will be changed.
+         * To change all display option bits at once, see #setDisplayOptions(int).
+         *
+         * @sa #setDisplayOptions(int)
+         *
+         * <p>Example: setDisplayOptions(0, DISPLAY_SHOW_HOME) will disable the
+         * #DISPLAY_SHOW_HOME option.
+         * setDisplayOptions(DISPLAY_SHOW_HOME, DISPLAY_SHOW_HOME | DISPLAY_USE_LOGO)
+         * will enable #DISPLAY_SHOW_HOME and disable #DISPLAY_USE_LOGO.
+         *
+         * @sa #DISPLAY_SHOW_HOME
+         * @sa #DISPLAY_SHOW_HOME
+         * @sa #DISPLAY_USE_LOGO
+         *
+         * @param options A combination of the bits defined by the DISPLAY_ constants
+         *                defined in ActionBar.
+         * @param mask A bit mask declaring which display options should be changed.
+         */
+        SetDisplayOptions(
+            [in] Int32 options,
+            [in] Int32 mask);
+
+        /**
+         * Set whether to display the activity logo rather than the activity icon.
+         * A logo is often a wider, more detailed image.
+         *
+         * <p>To set several display options at once, see the setDisplayOptions methods.
+         *
+         * @param useLogo true to use the activity logo, false to use the activity icon.
+         *
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetDisplayUseLogoEnabled(
+            [in] Boolean useLogo);
+
+        /**
+         * Set whether to include the application home affordance in the action bar.
+         * Home is presented as either an activity icon or logo.
+         *
+         * <p>To set several display options at once, see the setDisplayOptions methods.
+         *
+         * @param showHome true to show home, false otherwise.
+         *
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetDisplayShowHomeEnabled(
+            [in] Boolean showHome);
+
+        /**
+         * Set whether home should be displayed as an "up" affordance.
+         * Set this to true if selecting "home" returns up by a single level in your UI
+         * rather than back to the top level or front page.
+         *
+         * <p>To set several display options at once, see the setDisplayOptions methods.
+         *
+         * @param showHomeAsUp true to show the user that selecting home will return one
+         *                     level up rather than to the top level of the app.
+         *
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetDisplayHomeAsUpEnabled(
+            [in] Boolean showHomeAsUp);
+
+        /**
+         * Set whether an activity title/subtitle should be displayed.
+         *
+         * <p>To set several display options at once, see the setDisplayOptions methods.
+         *
+         * @param showTitle true to display a title/subtitle if present.
+         *
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetDisplayShowTitleEnabled(
+            [in] Boolean showTitle);
+
+        /**
+         * Set whether a custom view should be displayed, if set.
+         *
+         * <p>To set several display options at once, see the setDisplayOptions methods.
+         *
+         * @param showCustom true if the currently set custom view should be displayed, false otherwise.
+         *
+         * @see #setDisplayOptions(int)
+         * @see #setDisplayOptions(int, int)
+         */
+        SetDisplayShowCustomEnabled(
+            [in] Boolean showCustom);
+
+        /**
+         * Set the ActionBar's background. This will be used for the primary
+         * action bar.
+         *
+         * @param d Background drawable
+         * @see #setStackedBackgroundDrawable(Drawable)
+         * @see #setSplitBackgroundDrawable(Drawable)
+         */
+        SetBackgroundDrawable(
+            [in] IDrawable* d);
+
+        /**
+         * Set the ActionBar's stacked background. This will appear
+         * in the second row/stacked bar on some devices and configurations.
+         *
+         * @param d Background drawable for the stacked row
+         */
+        SetStackedBackgroundDrawable(
+            [in] IDrawable* d);
+
+        /**
+         * Set the ActionBar's split background. This will appear in
+         * the split action bar containing menu-provided action buttons
+         * on some devices and configurations.
+         * <p>You can enable split action bar with android.R.attr#uiOptions
+         *
+         * @sa android.R.attr#uiOptions
+         *
+         * @param d Background drawable for the split bar
+         */
+        SetSplitBackgroundDrawable(
+            [in] IDrawable* d);
+
+        /**
+         * @return The current custom view.
+         */
+        GetCustomView(
+            [out] IView** view);
+
+        /**
+         * Returns the current ActionBar title in standard mode.
+         * Returns null if #getNavigationMode() would not return
+         * #NAVIGATION_MODE_STANDARD.
+         *
+         * @sa #getNavigationMode()
+         * @sa #NAVIGATION_MODE_STANDARD
+         *
+         * @return The current ActionBar title or null.
+         */
+        GetTitle(
+            [out] ICharSequence** title);
+
+        /**
+         * Returns the current ActionBar subtitle in standard mode.
+         * Returns null if #getNavigationMode() would not return
+         * #NAVIGATION_MODE_STANDARD.
+         *
+         * @sa #getNavigationMode()
+         * @sa #NAVIGATION_MODE_STANDARD
+         *
+         * @return The current ActionBar subtitle or null.
+         */
+        GetSubtitle(
+            [out] ICharSequence** title);
+
+        /**
+         * Returns the current navigation mode. The result will be one of:
+         * <ul>
+         * <li>#NAVIGATION_MODE_STANDARD</li>
+         * <li>#NAVIGATION_MODE_LIST</li>
+         * <li>#NAVIGATION_MODE_TABS</li>
+         * </ul>
+         *
+         * @sa #NAVIGATION_MODE_STANDARD
+         * @sa #NAVIGATION_MODE_LIST
+         * @sa #NAVIGATION_MODE_TABS
+         *
+         * @return The current navigation mode.
+         */
+        GetNavigationMode(
+            [out] Int32* mode);
+
+        /**
+         * Set the current navigation mode.
+         *
+         * @param mode The new mode to set.
+         * @see #NAVIGATION_MODE_STANDARD
+         * @see #NAVIGATION_MODE_LIST
+         * @see #NAVIGATION_MODE_TABS
+         */
+        SetNavigationMode(
+            [in] Int32 mode);
+
+        /**
+         * @return The current set of display options.
+         */
+        GetDisplayOptions(
+            [out] Int32* options);
+
+        /**
+         * Create and return a new Tab.
+         * This tab will not be included in the action bar until it is added.
+         *
+         * @sa Tab
+         *
+         * <p>Very often tabs will be used to switch between Fragment
+         * objects.  Here is a typical implementation of such tabs:</p>
+         *
+         * @sa Fragment
+         *
+         * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentTabs.java
+         *      complete}
+         *
+         * @return A new Tab
+         *
+         * @see #addTab(Tab)
+         */
+        NewTab(
+            [out] IActionBarTab** tab);
+
+        /**
+         * Add a tab for use in tabbed navigation mode. The tab will be added at the end of the list.
+         * If this is the first tab to be added it will become the selected tab.
+         *
+         * @param tab Tab to add
+         */
+        AddTab(
+            [in] IActionBarTab* tab);
+
+        /**
+         * Add a tab for use in tabbed navigation mode. The tab will be added at the end of the list.
+         *
+         * @param tab Tab to add
+         * @param setSelected True if the added tab should become the selected tab.
+         */
+        AddTab(
+            [in] IActionBarTab* tab,
+            [in] Boolean setSelected);
+
+        /**
+         * Add a tab for use in tabbed navigation mode. The tab will be inserted at
+         * <code>position</code>. If this is the first tab to be added it will become
+         * the selected tab.
+         *
+         * @param tab The tab to add
+         * @param position The new position of the tab
+         */
+        AddTab(
+            [in] IActionBarTab* tab,
+            [in] Int32 position);
+
+        /**
+         * Add a tab for use in tabbed navigation mode. The tab will be insterted at
+         * <code>position</code>.
+         *
+         * @param tab The tab to add
+         * @param position The new position of the tab
+         * @param setSelected True if the added tab should become the selected tab.
+         */
+        AddTab(
+            [in] IActionBarTab* tab,
+            [in] Int32 position,
+            [in] Boolean setSelected);
+
+        /**
+         * Remove a tab from the action bar. If the removed tab was selected it will be deselected
+         * and another tab will be selected if present.
+         *
+         * @param tab The tab to remove
+         */
+        RemoveTab(
+            [in] IActionBarTab* tab);
+
+        /**
+         * Remove a tab from the action bar. If the removed tab was selected it will be deselected
+         * and another tab will be selected if present.
+         *
+         * @param position Position of the tab to remove
+         */
+        RemoveTabAt(
+            [in] Int32 position);
+
+        /**
+         * Remove all tabs from the action bar and deselect the current tab.
+         */
+        RemoveAllTabs();
+
+        /**
+         * Select the specified tab. If it is not a child of this action bar it will be added.
+         *
+         * <p>Note: If you want to select by index, use #setSelectedNavigationItem(int).</p>
+         *
+         * @sa #setSelectedNavigationItem(int)
+         *
+         * @param tab Tab to select
+         */
+        SelectTab(
+            [in] IActionBarTab* tab);
+
+        /**
+         * Returns the currently selected tab if in tabbed navigation mode and there is at least
+         * one tab present.
+         *
+         * @return The currently selected tab or null
+         */
+        GetSelectedTab(
+            [out] IActionBarTab** tab);
+
+        /**
+         * Returns the tab at the specified index.
+         *
+         * @param index Index value in the range 0-get
+         * @return
+         */
+        GetTabAt(
+            [in] Int32 index,
+            [out] IActionBarTab** tab);
+
+        /**
+         * Returns the number of tabs currently registered with the action bar.
+         * @return Tab count
+         */
+        GetTabCount(
+            [out] Int32* count);
+
+        /**
+         * Retrieve the current height of the ActionBar.
+         *
+         * @return The ActionBar's height
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * Show the ActionBar if it is not currently showing.
+         * If the window hosting the ActionBar does not have the feature
+         * Window#FEATURE_ACTION_BAR_OVERLAY it will resize application
+         * content to fit the new space available.
+         *
+         * @sa Window#FEATURE_ACTION_BAR_OVERLAY
+         *
+         * <p>If you are hiding the ActionBar through
+         * View#SYSTEM_UI_FLAG_FULLSCREEN View.SYSTEM_UI_FLAG_FULLSCREEN,
+         * you should not call this function directly.
+         *
+         * @sa View#SYSTEM_UI_FLAG_FULLSCREEN View.SYSTEM_UI_FLAG_FULLSCREEN
+         */
+        Show();
+
+        /**
+         * Hide the ActionBar if it is currently showing.
+         * If the window hosting the ActionBar does not have the feature
+         * Window#FEATURE_ACTION_BAR_OVERLAY it will resize application
+         * content to fit the new space available.
+         *
+         * @sa Window#FEATURE_ACTION_BAR_OVERLAY
+         *
+         * <p>Instead of calling this function directly, you can also cause an
+         * ActionBar using the overlay feature to hide through
+         * View#SYSTEM_UI_FLAG_FULLSCREEN View.SYSTEM_UI_FLAG_FULLSCREEN.
+         * Hiding the ActionBar through this system UI flag allows you to more
+         * seamlessly hide it in conjunction with other screen decorations.
+         *
+         * @sa View#SYSTEM_UI_FLAG_FULLSCREEN View.SYSTEM_UI_FLAG_FULLSCREEN
+         */
+        Hide();
+
+        /**
+         * @return <code>true</code> if the ActionBar is showing, <code>false</code> otherwise.
+         */
+        IsShowing(
+            [out] Boolean* isShow);
+
+        /**
+         * Add a listener that will respond to menu visibility change events.
+         *
+         * @param listener The new listener to add
+         */
+        AddOnMenuVisibilityListener(
+            [in] IActionBarOnMenuVisibilityListener* listener);
+
+        /**
+         * Remove a menu visibility listener. This listener will no longer receive menu
+         * visibility change events.
+         *
+         * @param listener A listener to remove that was previously added
+         */
+        RemoveOnMenuVisibilityListener(
+            [in] IActionBarOnMenuVisibilityListener* listener);
+
+        /**
+         * Enable or disable the "home" button in the corner of the action bar. (Note that this
+         * is the application home/up affordance on the action bar, not the systemwide home
+         * button.)
+         *
+         * <p>This defaults to true for packages targeting &lt; API 14. For packages targeting
+         * API 14 or greater, the application should call this method to enable interaction
+         * with the home/up affordance.
+         *
+         * <p>Setting the #DISPLAY_HOME_AS_UP display option will automatically enable
+         * the home button.
+         *
+         * @sa #DISPLAY_HOME_AS_UP
+         *
+         * @param enabled true to enable the home button, false to disable the home button.
+         */
+        SetHomeButtonEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Returns a Context with an appropriate theme for creating views that
+         * will appear in the action bar. If you are inflating or instantiating custom views
+         * that will appear in an action bar, you should use the Context returned by this method.
+         *
+         * @sa Context
+         * (This includes adapters used for list navigation mode.)
+         * This will ensure that views contrast properly against the action bar.
+         *
+         * @return A themed Context for creating views
+         */
+        GetThemedContext(
+            [out] IContext** context);
+
+        /**
+         * Returns true if the Title field has been truncated during layout for lack
+         * of available space.
+         *
+         * @return true if the Title field has been truncated
+         * @hide pending API approval
+         */
+        IsTitleTruncated(
+            [out] Boolean* isTruncated);
+
+        /**
+         * Set an alternate drawable to display next to the icon/logo/title
+         * when {@link #DISPLAY_HOME_AS_UP} is enabled. This can be useful if you are using
+         * this mode to display an alternate selection for up navigation, such as a sliding drawer.
+         *
+         * <p>If you pass <code>null</code> to this method, the default drawable from the theme
+         * will be used.</p>
+         *
+         * <p>If you implement alternate or intermediate behavior around Up, you should also
+         * call {@link #setHomeActionContentDescription(int) setHomeActionContentDescription()}
+         * to provide a correct description of the action for accessibility support.</p>
+         *
+         * @param indicator A drawable to use for the up indicator, or null to use the theme's default
+         *
+         * @see #setDisplayOptions(int, int)
+         * @see #setDisplayHomeAsUpEnabled(boolean)
+         * @see #setHomeActionContentDescription(int)
+         */
+        SetHomeAsUpIndicator(
+            [in] IDrawable* indicator);
+
+        /**
+         * Set an alternate drawable to display next to the icon/logo/title
+         * when {@link #DISPLAY_HOME_AS_UP} is enabled. This can be useful if you are using
+         * this mode to display an alternate selection for up navigation, such as a sliding drawer.
+         *
+         * <p>If you pass <code>0</code> to this method, the default drawable from the theme
+         * will be used.</p>
+         *
+         * <p>If you implement alternate or intermediate behavior around Up, you should also
+         * call {@link #setHomeActionContentDescription(int) setHomeActionContentDescription()}
+         * to provide a correct description of the action for accessibility support.</p>
+         *
+         * @param resId Resource ID of a drawable to use for the up indicator, or null
+         *              to use the theme's default
+         *
+         * @see #setDisplayOptions(int, int)
+         * @see #setDisplayHomeAsUpEnabled(boolean)
+         * @see #setHomeActionContentDescription(int)
+         */
+        SetHomeAsUpIndicator(
+            [in] Int32 resId);
+
+        /**
+         * Set an alternate description for the Home/Up action, when enabled.
+         *
+         * <p>This description is commonly used for accessibility/screen readers when
+         * the Home action is enabled. (See {@link #setDisplayHomeAsUpEnabled(boolean)}.)
+         * Examples of this are, "Navigate Home" or "Navigate Up" depending on the
+         * {@link #DISPLAY_HOME_AS_UP} display option. If you have changed the home-as-up
+         * indicator using {@link #setHomeAsUpIndicator(int)} to indicate more specific
+         * functionality such as a sliding drawer, you should also set this to accurately
+         * describe the action.</p>
+         *
+         * <p>Setting this to <code>null</code> will use the system default description.</p>
+         *
+         * @param description New description for the Home action when enabled
+         * @see #setHomeAsUpIndicator(int)
+         * @see #setHomeAsUpIndicator(android.graphics.drawable.Drawable)
+         */
+        SetHomeActionContentDescription(
+            [in] ICharSequence* description);
+
+        /**
+         * Set an alternate description for the Home/Up action, when enabled.
+         *
+         * <p>This description is commonly used for accessibility/screen readers when
+         * the Home action is enabled. (See {@link #setDisplayHomeAsUpEnabled(boolean)}.)
+         * Examples of this are, "Navigate Home" or "Navigate Up" depending on the
+         * {@link #DISPLAY_HOME_AS_UP} display option. If you have changed the home-as-up
+         * indicator using {@link #setHomeAsUpIndicator(int)} to indicate more specific
+         * functionality such as a sliding drawer, you should also set this to accurately
+         * describe the action.</p>
+         *
+         * <p>Setting this to <code>0</code> will use the system default description.</p>
+         *
+         * @param resId Resource ID of a string to use as the new description
+         *              for the Home action when enabled
+         * @see #setHomeAsUpIndicator(int)
+         * @see #setHomeAsUpIndicator(android.graphics.drawable.Drawable)
+         */
+        SetHomeActionContentDescription(
+            [in] Int32 resId);
+
+        /**
+         * Enable hiding the action bar on content scroll.
+         *
+         * <p>If enabled, the action bar will scroll out of sight along with a
+         * {@link View#setNestedScrollingEnabled(boolean) nested scrolling child} view's content.
+         * The action bar must be in {@link Window#FEATURE_ACTION_BAR_OVERLAY overlay mode}
+         * to enable hiding on content scroll.</p>
+         *
+         * <p>When partially scrolled off screen the action bar is considered
+         * {@link #hide() hidden}. A call to {@link #show() show} will cause it to return to full view.
+         * </p>
+         * @param hideOnContentScroll true to enable hiding on content scroll.
+         */
+        SetHideOnContentScrollEnabled(
+            [in] Boolean hideOnContentScroll);
+
+        /**
+         * Return whether the action bar is configured to scroll out of sight along with
+         * a {@link View#setNestedScrollingEnabled(boolean) nested scrolling child}.
+         *
+         * @return true if hide-on-content-scroll is enabled
+         * @see #setHideOnContentScrollEnabled(boolean)
+         */
+        IsHideOnContentScrollEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Return the current vertical offset of the action bar.
+         *
+         * <p>The action bar's current hide offset is the distance that the action bar is currently
+         * scrolled offscreen in pixels. The valid range is 0 (fully visible) to the action bar's
+         * current measured {@link #getHeight() height} (fully invisible).</p>
+         *
+         * @return The action bar's offset toward its fully hidden state in pixels
+         */
+        GetHideOffset(
+            [out] Int32* result);
+
+        /**
+         * Set the current hide offset of the action bar.
+         *
+         * <p>The action bar's current hide offset is the distance that the action bar is currently
+         * scrolled offscreen in pixels. The valid range is 0 (fully visible) to the action bar's
+         * current measured {@link #getHeight() height} (fully invisible).</p>
+         *
+         * @param offset The action bar's offset toward its fully hidden state in pixels.
+         */
+        SetHideOffset(
+            [in] Int32 offset);
+
+        /**
+         * Set the Z-axis elevation of the action bar in pixels.
+         *
+         * <p>The action bar's elevation is the distance it is placed from its parent surface. Higher
+         * values are closer to the user.</p>
+         *
+         * @param elevation Elevation value in pixels
+         */
+        SetElevation(
+            [in] Float elevation);
+
+        /**
+         * Get the Z-axis elevation of the action bar in pixels.
+         *
+         * <p>The action bar's elevation is the distance it is placed from its parent surface. Higher
+         * values are closer to the user.</p>
+         *
+         * @return Elevation value in pixels
+         */
+        GetElevation(
+            [out] Float* elevation);
+
+        /** @hide */
+        SetDefaultDisplayHomeAsUpEnabled(
+            [in] Boolean enabled);
+
+        /** @hide */
+        SetShowHideAnimationEnabled(
+            [in] Boolean enabled);
+
+        /** @hide */
+        OnConfigurationChanged(
+            [in] IConfiguration* config);
+
+        /** @hide */
+        DispatchMenuVisibilityChanged(
+            [in] Boolean visible);
+
+        /** @hide */
+        StartActionMode(
+            [in] IActionModeCallback* cb,
+            [out] IActionMode** mode);
+
+        /** @hide */
+        OpenOptionsMenu(
+            [out] Boolean* result);
+
+        /** @hide */
+        InvalidateOptionsMenu(
+            [out] Boolean* result);
+
+        /** @hide */
+        OnMenuKeyEvent(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /** @hide */
+        CollapseActionView(
+            [out] Boolean* result);
+
+        /** @hide */
+        SetWindowTitle(
+            [in] ICharSequence* title);
+    }
+
+    /**
+     * Listener interface for ActionBar navigation events.
+     */
+    interface IActionBarOnNavigationListener {
+        /**
+         * This method is called whenever a navigation item in your action bar
+         * is selected.
+         *
+         * @param itemPosition Position of the item clicked.
+         * @param itemId ID of the item clicked.
+         * @return True if the event was handled, false otherwise.
+         */
+        OnNavigationItemSelected(
+            [in] Int32 itemPosition,
+            [in] Int64 itemId,
+            [out] Boolean* selected);
+    }
+
+    /**
+     * Listener for receiving events when action bar menus are shown or hidden.
+     */
+    interface IActionBarOnMenuVisibilityListener {
+        /**
+         * Called when an action bar menu is shown or hidden. Applications may want to use
+         * this to tune auto-hiding behavior for the action bar or pause/resume video playback,
+         * gameplay, or other activity within the main content area.
+         *
+         * @param isVisible True if an action bar menu is now visible, false if no action bar
+         *                  menus are visible.
+         */
+        OnMenuVisibilityChanged(
+            [in] Boolean isVisible);
+    }
+
+    /**
+     * A tab in the action bar.
+     *
+     * <p>Tabs manage the hiding and showing of Fragments.
+     *
+     * @sa Fragment
+     */
+    [local]
+    interface IActionBarTab {
+        /**
+         * An invalid position for a tab.
+         *
+         * @see #getPosition()
+         */
+        const Int32 INVALID_POSITION = -1;
+
+        /**
+         * Return the current position of this tab in the action bar.
+         *
+         * @return Current position, or #INVALID_POSITION if this tab is not currently in
+         *         the action bar.
+         *
+         * @sa #INVALID_POSITION
+         */
+        GetPosition(
+            [out] Int32* position);
+
+        /**
+         * Return the icon associated with this tab.
+         *
+         * @return The tab's icon
+         */
+        GetIcon(
+            [out] IDrawable** icon);
+
+        /**
+         * Return the text of this tab.
+         *
+         * @return The tab's text
+         */
+        GetText(
+            [out] ICharSequence** text);
+
+        /**
+         * Set the icon displayed on this tab.
+         *
+         * @param icon The drawable to use as an icon
+         * @return The current instance for call chaining
+         */
+        SetIcon(
+            [in] IDrawable* icon);
+
+        /**
+         * Set the icon displayed on this tab.
+         *
+         * @param resId Resource ID referring to the drawable to use as an icon
+         * @return The current instance for call chaining
+         */
+        SetIcon(
+            [in] Int32 resId);
+
+        /**
+         * Set the text displayed on this tab. Text may be truncated if there is not
+         * room to display the entire string.
+         *
+         * @param text The text to display
+         * @return The current instance for call chaining
+         */
+        SetText(
+            [in] ICharSequence* text);
+
+        /**
+         * Set the text displayed on this tab. Text may be truncated if there is not
+         * room to display the entire string.
+         *
+         * @param resId A resource ID referring to the text that should be displayed
+         * @return The current instance for call chaining
+         */
+        SetText(
+            [in] Int32 resId);
+
+        /**
+         * Set a custom view to be used for this tab. This overrides values set by
+         * #setText(CharSequence) and #setIcon(Drawable).
+         *
+         * @sa #setText(CharSequence)
+         * @sa #setIcon(Drawable)
+         *
+         * @param view Custom view to be used as a tab.
+         * @return The current instance for call chaining
+         */
+        SetCustomView(
+            [in] IView* view);
+
+        /**
+         * Set a custom view to be used for this tab. This overrides values set by
+         * #setText(CharSequence) and #setIcon(Drawable).
+         *
+         * @sa #setText(CharSequence)
+         * @sa #setIcon(Drawable)
+         *
+         * @param layoutResId A layout resource to inflate and use as a custom tab view
+         * @return The current instance for call chaining
+         */
+        SetCustomView(
+            [in] Int32 layoutResId);
+
+        /**
+         * Retrieve a previously set custom view for this tab.
+         *
+         * @return The custom view set by #setCustomView(View).
+         *
+         * @sa #setCustomView(View)
+         */
+        GetCustomView(
+            [out] IView** view);
+
+        /**
+         * Give this Tab an arbitrary object to hold for later use.
+         *
+         * @param obj Object to store
+         * @return The current instance for call chaining
+         */
+        SetTag(
+            [in] IInterface* obj);
+
+        /**
+         * @return This Tab's tag object.
+         */
+        GetTag(
+            [out] IInterface** obj);
+
+        /**
+         * Set the TabListener that will handle switching to and from this tab.
+         * All tabs must have a TabListener set before being added to the ActionBar.
+         *
+         * @sa TabListener
+         *
+         * @param listener Listener to handle tab selection events
+         * @return The current instance for call chaining
+         */
+        SetTabListener(
+            [in] IActionBarTabListener* listener);
+
+        /**
+         * Select this tab. Only valid if the tab has been added to the action bar.
+         */
+        Select();
+
+        /**
+         * Set a description of this tab's content for use in accessibility support.
+         * If no content description is provided the title will be used.
+         *
+         * @param resId A resource ID referring to the description text
+         * @return The current instance for call chaining
+         * @see #setContentDescription(CharSequence)
+         * @see #getContentDescription()
+         */
+        SetContentDescription(
+            [in] Int32 resId);
+
+        /**
+         * Set a description of this tab's content for use in accessibility support.
+         * If no content description is provided the title will be used.
+         *
+         * @param contentDesc Description of this tab's content
+         * @return The current instance for call chaining
+         * @see #setContentDescription(int)
+         * @see #getContentDescription()
+         */
+        SetContentDescription(
+            [in] ICharSequence* contentDesc);
+
+        /**
+         * Gets a brief description of this tab's content for use in accessibility support.
+         *
+         * @return Description of this tab's content
+         * @see #setContentDescription(CharSequence)
+         * @see #setContentDescription(int)
+         */
+        GetContentDescription(
+            [out] ICharSequence** description);
+    }
+
+    /**
+     * Callback interface invoked when a tab is focused, unfocused, added, or removed.
+     */
+    [local]
+    interface IActionBarTabListener {
+        /**
+         * Called when a tab enters the selected state.
+         *
+         * @param tab The tab that was selected
+         * @param ft A FragmentTransaction for queuing fragment operations to execute
+         *        during a tab switch. The previous tab's unselect and this tab's select will be
+         *        executed in a single transaction. This FragmentTransaction does not support
+         *        being added to the back stack.
+         *
+         * @sa FragmentTransaction
+         */
+        OnTabSelected(
+            [in] IActionBarTab* tab,
+            [in] IFragmentTransaction* ft);
+
+        /**
+         * Called when a tab exits the selected state.
+         *
+         * @param tab The tab that was unselected
+         * @param ft A FragmentTransaction for queuing fragment operations to execute
+         *        during a tab switch. This tab's unselect and the newly selected tab's select
+         *        will be executed in a single transaction. This FragmentTransaction does not
+         *        support being added to the back stack.
+         *
+         * @sa FragmentTransaction
+         */
+        OnTabUnselected(
+            [in] IActionBarTab* tab,
+            [in] IFragmentTransaction* ft);
+
+        /**
+         * Called when a tab that is already selected is chosen again by the user.
+         * Some applications may use this action to return to the top level of a category.
+         *
+         * @param tab The tab that was reselected.
+         * @param ft A FragmentTransaction for queuing fragment operations to execute
+         *        once this method returns. This FragmentTransaction does not support
+         *        being added to the back stack.
+         *
+         * @sa FragmentTransaction
+         */
+        OnTabReselected(
+            [in] IActionBarTab* tab,
+            [in] IFragmentTransaction* ft);
+    }
+
+    /**
+     * Per-child layout information associated with action bar custom views.
+     *
+     * @attr ref android.R.styleable#ActionBar_LayoutParams_layout_gravity
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupMarginLayoutParams
+     */
+    interface IActionBarLayoutParams {
+
+        GetGravity(
+           [out] Int32* gravity);
+
+        SetGravity(
+           [in] Int32 gravity);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

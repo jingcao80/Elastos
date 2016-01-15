@@ -1,0 +1,72 @@
+module
+{
+    interface Elastos.Droid.App.Backup.IRestoreSet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Backup {
+
+    /**
+     * Callback class for receiving progress reports during a restore operation.
+     *
+     * @hide
+     */
+    [oneway, deprecated]
+    interface IIRestoreObserver {
+        /**
+         * Supply a list of the restore datasets available from the current transport.  This
+         * method is invoked as a callback following the application's use of the
+         * android.app.backup.IRestoreSession.getAvailableRestoreSets method.
+         *
+         * @sa android.app.backup.IRestoreSession.getAvailableRestoreSets
+         *
+         * @param result An array of android.app.backup.RestoreSet RestoreSet objects
+         *   describing all of the available datasets that are candidates for restoring to
+         *   the current device.  If no applicable datasets exist, {result} will be
+         *   {null}.
+         *
+         * @sa android.app.backup.RestoreSet RestoreSet
+         */
+        RestoreSetsAvailable(
+            [in] ArrayOf<IRestoreSet*>* result);
+
+        /**
+         * The restore operation has begun.
+         *
+         * @param numPackages The total number of packages being processed in
+         *   this restore operation.
+         */
+        RestoreStarting(
+            [in] Int32 numPackages);
+
+        /**
+         * An indication of which package is being restored currently, out of the
+         * total number provided in the #restoreStarting(int numPackages) callback.
+         * This method is not guaranteed to be called.
+         *
+         * @sa #restoreStarting(int numPackages)
+         *
+         * @param nowBeingRestored The index, between 1 and the numPackages parameter
+         *   to the restoreStarting() callback, of the package now being restored.
+         * @param currentPackage The name of the package now being restored.
+         */
+        OnUpdate(
+            [in] Int32 nowBeingRestored,
+            [in] String curentPackage);
+
+        /**
+         * The restore operation has completed.
+         *
+         * @param error Zero on success; a nonzero error code if the restore operation
+         *   as a whole failed.
+         */
+        RestoreFinished(
+            [in] Int32 error);
+    }
+
+    } // namespace Backup
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

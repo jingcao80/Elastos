@@ -1,0 +1,185 @@
+
+module {
+
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IRegion;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.View.IIInputFilter;
+    interface Elastos.Droid.View.IMagnificationSpec;
+
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Interface to receive a callback when the windows reported for
+     * accessibility changed.
+     */
+    interface IWindowsForAccessibilityCallback {
+        /**
+         * Called when the windows for accessibility changed.
+         *
+         * @param windows The windows for accessibility.
+         */
+        OnWindowsForAccessibilityChanged(
+            [in] IList* windows);
+    }
+
+    /**
+     * Callbacks for contextual changes that affect the screen magnification
+     * feature.
+     */
+    interface IMagnificationCallbacks {
+        /**
+         * Called when the bounds of the screen content that is magnified changed.
+         * Note that not the entire screen is magnified.
+         *
+         * @param bounds The bounds.
+         */
+        OnMagnifedBoundsChanged(
+            [in] IRegion* bounds);
+
+        /**
+         * Called when an application requests a rectangle on the screen to allow
+         * the client to apply the appropriate pan and scale.
+         *
+         * @param left The rectangle left.
+         * @param top The rectangle top.
+         * @param right The rectangle right.
+         * @param bottom The rectangle bottom.
+         */
+        OnRectangleOnScreenRequested(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /**
+         * Notifies that the rotation changed.
+         *
+         * @param rotation The current rotation.
+         */
+        OnRotationChanged(
+            [in] Int32 rotation);
+
+        /**
+         * Notifies that the context of the user changed. For example, an application
+         * was started.
+         */
+        OnUserContextChanged();
+    }
+
+    /**
+     * Window manager local system service interface.
+     *
+     * @hide Only for use within the system server.
+     */
+    interface IWindowManagerInternal {
+        /**
+         * Request that the window manager call
+         * {@link DisplayManagerInternal#performTraversalInTransactionFromWindowManager}
+         * within a surface transaction at a later time.
+         */
+        RequestTraversalFromDisplayManager();
+
+        /**
+         * Set by the accessibility layer to observe changes in the magnified region,
+         * rotation, and other window transformations related to display magnification
+         * as the window manager is responsible for doing the actual magnification
+         * and has access to the raw window data while the accessibility layer serves
+         * as a controller.
+         *
+         * @param callbacks The callbacks to invoke.
+         */
+        SetMagnificationCallbacks(
+            [in] IMagnificationCallbacks* cb);
+
+        /**
+         * Set by the accessibility layer to specify the magnification and panning to
+         * be applied to all windows that should be magnified.
+         *
+         * @param spec The MagnficationSpec to set.
+         *
+         * @see #setMagnificationCallbacks(MagnificationCallbacks)
+         */
+        SetMagnificationSpec(
+            [in] IMagnificationSpec* spec);
+
+        /**
+         * Gets the magnification and translation applied to a window given its token.
+         * Not all windows are magnified and the window manager policy determines which
+         * windows are magnified. The returned result also takes into account the compat
+         * scale if necessary.
+         *
+         * @param windowToken The window's token.
+         *
+         * @return The magnification spec for the window.
+         *
+         * @see #setMagnificationCallbacks(MagnificationCallbacks)
+         */
+        GetCompatibleMagnificationSpecForWindow(
+            [in] IBinder* windowToken,
+            [out] IMagnificationSpec** spec);
+
+        /**
+         * Sets a callback for observing which windows are touchable for the purposes
+         * of accessibility.
+         *
+         * @param callback The callback.
+         */
+        SetWindowsForAccessibilityCallback(
+            [in] IWindowsForAccessibilityCallback* cb);
+
+        /**
+         * Sets a filter for manipulating the input event stream.
+         *
+         * @param filter The filter implementation.
+         */
+        SetInputFilter(
+            [in] IIInputFilter* filter);
+
+        /**
+         * Gets the token of the window that has input focus.
+         *
+         * @return The token.
+         */
+        GetFocusedWindowToken(
+            [out] IBinder** binder);
+
+        /**
+         * @return Whether the keyguard is engaged.
+         */
+        IsKeyguardLocked(
+            [out] Boolean* engaged);
+
+        /**
+         * Gets the frame of a window given its token.
+         *
+         * @param token The token.
+         * @param outBounds The frame to populate.
+         */
+        GetWindowFrame(
+            [in] IBinder* token,
+            [in] IRect* outBounds);
+
+        /**
+         * Opens the global actions dialog.
+         */
+        ShowGlobalActions();
+
+        /**
+         * Invalidate all visible windows. Then report back on the callback once all windows have
+         * redrawn.
+         */
+        WaitForAllWindowsDrawn(
+            [in] IRunnable* cb,
+            [in] Int64 timeout);
+    }
+
+    }// namespace View
+    }// namespace Droid
+    }// namespace Elastos
+}

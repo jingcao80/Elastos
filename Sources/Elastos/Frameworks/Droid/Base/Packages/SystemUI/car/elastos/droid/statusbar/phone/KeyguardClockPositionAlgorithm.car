@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IResources;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    interface IResult {
+    }
+
+    /**
+     * Utility class to calculate the clock position and top padding of notifications on Keyguard.
+     */
+    interface IKeyguardClockPositionAlgorithm {
+
+        /**
+         * Refreshes the dimension values.
+         */
+        LoadDimens(
+            [in] IResources* res);
+
+        Setup(
+            [in] Int32 maxKeyguardNotifications,
+            [in] Int32 maxPanelHeight,
+            [in] Float expandedHeight,
+            [in] Int32 notificationCount,
+            [in] Int32 height,
+            [in] Int32 keyguardStatusHeight,
+            [in] Float emptyDragAmount);
+
+        Run(
+            [in] IResult* result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

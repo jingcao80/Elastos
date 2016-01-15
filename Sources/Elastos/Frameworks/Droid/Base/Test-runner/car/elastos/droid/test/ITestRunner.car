@@ -1,0 +1,35 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Eunit.Framework.ITestFailure;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Test {
+
+    interface ITestRunnerListener {
+        Started(
+            [in] String className);
+
+        Finished(
+            [in] String className);
+
+        Performance(
+            [in] String className,
+            [in] Int64 itemTimeNS,
+            [in] Int32 iterations,
+            [in] IList* itermediates);
+
+        Passed(
+            [in] String className);
+
+        Failed(
+            [in] String className,
+            [in] ITestFailure* failure);
+    }
+
+    } // namespace Test
+    } // namespace Droid
+    } // namespace Elastos
+}

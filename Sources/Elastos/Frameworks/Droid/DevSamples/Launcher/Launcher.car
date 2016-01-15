@@ -1,0 +1,98 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("GeckoInputConnection.car");
+    merge("AlertNotification.car");
+    merge("GeckoNetworkManager.car");
+    merge("LauncherHelper.car");
+    //merge("LauncherShortcuts.car");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.ISurfaceView;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.Text.ITextWatcher;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace Launcher {
+
+        [local]
+        class CAlertNotification {
+            constructor(
+                [in] IContext* ctx,
+                [in] Int32 aNotificationId,
+                [in] Int32 aIcon,
+                [in] String aTitle,
+                [in] String aText,
+                [in] Int64 when);
+
+            interface IAlertNotification;
+        }
+
+        class CApp {
+            interface IActivity;
+        }
+
+        class CGeckoBatteryManager {
+//            interface IBroadcastReceiver;
+        }
+
+        class CGeckoConnectivityReceiver {
+//            interface IObjectEnumerator;
+//            interface IBroadcastReceiver;
+        }
+
+        [local]
+        class CGeckoInputConnection {
+
+            constructor(
+                    [in] IView* targetView);
+
+            interface IGeckoInputConnection;
+            interface ITextWatcher;
+        }
+
+        class CGeckoNetworkManager {
+            interface IGeckoNetworkManager;
+//            interface IBroadcastReceiver;
+        }
+
+        class CVideoPlayer {
+            interface IActivity;
+        }
+
+//        class CLauncherShortcuts {
+//            interface IActivity;
+//        }
+
+        class CNotificationHandler {
+//            interface IBroadcastReceiver;
+        }
+
+        [local]
+        class CGeckoSurfaceView {
+            constructor(
+                [in] IContext* ctx);
+
+            interface ISurfaceView;
+            interface IKeyEventCallback;
+        }
+
+        class CRestarter {
+            interface IActivity;
+        }
+
+        singleton class CLauncherHelper {
+            interface ILauncherHelper;
+        }
+    } // Launcher
+    } // DevSamples
+    } // Droid
+    } // Elastos
+}
+

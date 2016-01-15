@@ -1,0 +1,126 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Location.IIFusedLocationHardwareSink;
+    interface Elastos.Droid.Location.IFusedBatchOptions;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * Fused Location hardware interface.
+     * This interface is the basic set of supported functionality by Fused Hardware
+     * modules that offer Location batching capabilities.
+     *
+     * @hide
+     */
+    interface IIFusedLocationHardware {
+        /**
+         * Registers a sink with the Location Hardware object.
+         *
+         * @param eventSink     The sink to register.
+         */
+        RegisterSink(
+            [in] IIFusedLocationHardwareSink* eventSink);
+
+        /**
+         * Unregisters a sink with the Location Hardware object.
+         *
+         * @param eventSink     The sink to unregister.
+         */
+        UnregisterSink(
+            [in] IIFusedLocationHardwareSink* eventSink);
+
+        /**
+         * Provides access to the batch size available in Hardware.
+         *
+         * @return The batch size the hardware supports.
+         */
+        GetSupportedBatchSize(
+            [out] Int32* size);
+
+        /**
+         * Requests the Hardware to start batching locations.
+         *
+         * @param id            An Id associated with the request.
+         * @param batchOptions  The options required for batching.
+         *
+         * @throws RuntimeException if the request Id exists.
+         */
+        StartBatching(
+            [in] Int32 id,
+            [in] IFusedBatchOptions* batchOptions);
+
+        /**
+         * Requests the Hardware to stop batching for the given Id.
+         *
+         * @param id    The request that needs to be stopped.
+         * @throws RuntimeException if the request Id is unknown.
+         */
+        StopBatching(
+           [in] Int32 id);
+
+        /**
+         * Updates a batching operation in progress.
+         *
+         * @param id                The Id of the operation to update.
+         * @param batchOptions     The options to apply to the given operation.
+         *
+         * @throws RuntimeException if the Id of the request is unknown.
+         */
+        UpdateBatchingOptions(
+           [in] Int32 id,
+           [in] IFusedBatchOptions* batchOptions);
+
+        /**
+         * Requests the most recent locations available in Hardware.
+         * This operation does not dequeue the locations, so still other batching
+         * events will continue working.
+         *
+         * @param batchSizeRequested    The number of locations requested.
+         */
+        RequestBatchOfLocations(
+            [in] Int32 batchSizeRequested);
+
+        /**
+         * Flags if the Hardware supports injection of diagnostic data.
+         *
+         * @return True if data injection is supported, false otherwise.
+         */
+        SupportsDiagnosticDataInjection(
+            [out] Boolean* result);
+
+        /**
+         * Injects diagnostic data into the Hardware subsystem.
+         *
+         * @param data  The data to inject.
+         * @throws RuntimeException if injection is not supported.
+         */
+        InjectDiagnosticData(
+            [in] String data);
+
+        /**
+         * Flags if the Hardware supports injection of device context information.
+         *
+         * @return True if device context injection is supported, false otherwise.
+         */
+        SupportsDeviceContextInjection(
+            [out] Boolean* result);
+
+        /**
+         * Injects device context information into the Hardware subsystem.
+         *
+         * @param deviceEnabledContext  The context to inject.
+         * @throws RuntimeException if injection is not supported.
+         */
+        InjectDeviceContext(
+            [in] Int32 deviceEnabledContext);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

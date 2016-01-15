@@ -1,0 +1,33 @@
+
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * Represents Client Hello message
+     * @see <a href="http://www.ietf.org/rfc/rfc2246.txt">TLS 1.0 spec., 7.4.1.2.
+     * Client hello</a>
+     *
+     */
+    interface IClientHello extends IMessage {
+        /**
+         * Returns client random
+         * @return client random
+         */
+        GetRandom(
+            [out, callee] ArrayOf<Byte>* random);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

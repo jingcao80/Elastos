@@ -1,0 +1,335 @@
+module
+{
+    merge("webkit/DownloadListener.car");
+    merge("webkit/ClientCertRequest.car");
+    merge("webkit/CacheManager.car");
+    merge("webkit/ConsoleMessage.car");
+    merge("webkit/CookieManager.car");
+    merge("webkit/CookieSyncManager.car");
+    merge("webkit/DateSorter.car");
+    merge("webkit/ValueCallback.car");
+    merge("webkit/GeolocationPermissions.car");
+    merge("webkit/HttpAuthHandler.car");
+    merge("webkit/JsDialogHelper.car");
+    merge("webkit/JsResult.car");
+    merge("webkit/JsPromptResult.car");
+    merge("webkit/MimeTypeMap.car");
+    merge("webkit/PermissionRequest.car");
+    merge("webkit/Plugin.car");
+    merge("webkit/PluginData.car");
+    merge("webkit/PluginList.car");
+    merge("webkit/PluginStub.car");
+    merge("webkit/SslErrorHandler.car");
+    merge("webkit/UrlInterceptHandler.car");
+    merge("webkit/UrlInterceptRegistry.car");
+    merge("webkit/URLUtil.car");
+    merge("webkit/WebChromeClient.car");
+    merge("webkit/WebHistoryItem.car");
+    merge("webkit/WebIconDatabase.car");
+    merge("webkit/WebResourceRequest.car");
+    merge("webkit/WebResourceResponse.car");
+    merge("webkit/WebSettings.car");
+    merge("webkit/WebStorage.car");
+    merge("webkit/WebBackForwardList.car");
+    merge("webkit/WebView.car");
+    merge("webkit/WebViewProvider.car");
+    merge("webkit/WebViewClient.car");
+    merge("webkit/WebViewDatabase.car");
+    merge("webkit/WebViewFragment.car");
+    merge("webkit/WebViewFactory.car");
+    merge("webkit/WebViewFactoryProvider.car");
+    merge("webkit/webview/chromium/WebViewChromiumFactoryProvider.car");
+    merge("webkit/native/ui/OnColorChangedListener.car");
+    merge("webkit/native/ui/ColorSuggestionListAdapter.car");
+    merge("webkit/native/net/IRemoteElastosKeyStore.car");
+    merge("webkit/native/net/IRemoteElastosKeyStoreCallbacks.car");
+    merge("webkit/native/net/IRemoteElastosKeyStoreInterface.car");
+
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Utility.IMap;
+
+    interface Elastos.Droid.App.IFragment;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IComponentCallbacks;
+    interface Elastos.Droid.Content.IComponentCallbacks2;
+    interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.View.IKeyEventCallback;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.View.IViewParent;
+    interface Elastos.Droid.View.IViewManager;
+    interface Elastos.Droid.View.IOnGlobalFocusChangeListener;
+    interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    interface Elastos.Droid.Webkit.Webview.Chromium.IWebViewChromiumFactoryProvider;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+        singleton class CCacheManager {
+            interface ICacheManager;
+        }
+
+        class CConsoleMessage {
+            constructor(
+                [in] String message,
+                [in] String sourceId,
+                [in] Int32 lineNumber,
+                [in] MessageLevel msgLevel);
+
+            interface IConsoleMessage;
+        }
+
+        singleton class CCookieManagerHelper {
+            interface ICookieManagerHelper;
+        }
+
+        singleton class CCookieSyncManagerHelper {
+            interface ICookieSyncManagerHelper;
+        }
+
+        class CCookieSyncManager {
+            constructor();
+
+            interface ICookieSyncManager;
+        }
+
+        [local]
+        class CDateSorter {
+            constructor(
+                [in] IContext* ctx);
+
+            interface IDateSorter;
+        }
+
+        singleton class CGeolocationPermissionsHelper {
+            interface IGeolocationPermissionsHelper;
+        }
+
+        class CGeolocationPermissions {
+            constructor();
+
+            interface IGeolocationPermissions;
+        }
+
+        class CHttpAuthHandler {
+            constructor();
+
+            interface IHttpAuthHandler;
+            interface IHandler;
+        }
+
+        class CJsPromptResult {
+            constructor(
+                [in] IJsResultReceiver* receiver);
+
+            interface IJsResult;
+            interface IJsPromptResult;
+        }
+
+        class CJsResult {
+            constructor(
+                [in] IJsResultReceiver* receiver);
+
+            interface IJsResult;
+        }
+
+        class CJsDialogHelper {
+            constructor(
+                [in] IJsPromptResult* result,
+                [in] Int32 type,
+                [in] String defaultValue,
+                [in] String message,
+                [in] String url);
+
+            constructor(
+                [in] IJsPromptResult* result,
+                [in] IMessage* msg);
+
+            interface IJsDialogHelper;
+        }
+
+        singleton class CMimeTypeMapHelper {
+            interface IMimeTypeMapHelper;
+        }
+
+        class CPlugin {
+            constructor(
+                [in] String name,
+                [in] String path,
+                [in] String fileName,
+                [in] String description);
+
+            interface IPlugin;
+        }
+
+        class CPluginData {
+            constructor(
+                [in] IInputStream* stream,
+                [in] Int64 length,
+                [in] IMap* headers,
+                [in] Int32 code);
+
+            interface IPluginData;
+        }
+
+        class CPluginList {
+            constructor();
+
+            interface IPluginList;
+        }
+
+        singleton class CURLUtil {
+            interface IURLUtil;
+        }
+
+        singleton class CUrlInterceptRegistry {
+            interface IUrlInterceptRegistry;
+        }
+
+        class CWebChromeClient {
+            constructor();
+
+            interface IWebChromeClient;
+        }
+
+        singleton class CWebIconDatabaseHelper {
+            interface IWebIconDatabaseHelper;
+        }
+
+        class CWebResourceResponse {
+            constructor(
+                [in] String mimeType,
+                [in] String encoding,
+                [in] IInputStream* data);
+
+            constructor(
+                [in] String mimeType,
+                [in] String encoding,
+                [in] Int32 statusCode,
+                [in] String reasonPhrase,
+                [in] IMap* responseHeaders,
+                [in] IInputStream* data);
+
+            interface IWebResourceResponse;
+        }
+
+        singleton class CWebSettingsHelper {
+            interface IWebSettingsHelper;
+        }
+
+//        class CWebStorageOrigin {
+//            interface IWebStorageOrigin;
+//        }
+
+        singleton class CWebStorageHelper {
+            interface IWebStorageHelper;
+        }
+
+        class CWebStorage {
+            constructor();
+
+            interface IWebStorage;
+        }
+
+        class CWebViewTransport {
+            constructor();
+
+            interface IWebViewTransport;
+        }
+
+        class CWebViewHitTestResult {
+            constructor();
+
+            interface IWebViewHitTestResult;
+        }
+
+        singleton class CWebViewHelper {
+            interface IWebViewHelper;
+        }
+
+        [local]
+        class CWebView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle,
+                [in] Boolean privateBrowsing);
+
+            interface IWebView;
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IOnGlobalFocusChangeListener;
+            interface IViewGroupOnHierarchyChangeListener;
+        }
+
+        class CWebViewClient {
+            interface IWebViewClient;
+        }
+
+        singleton class CWebViewDatabaseHelper {
+            interface IWebViewDatabaseHelper;
+        }
+
+        class CWebViewFragment {
+            constructor();
+
+            interface IWebViewFragment;
+            interface IFragment;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IViewOnCreateContextMenuListener;
+        }
+
+        singleton class CWebChromeClientFileChooserParamsHelper {
+            interface IWebChromeClientFileChooserParamsHelper;
+        }
+
+        singleton class CWebViewFactory {
+            interface IWebViewFactory;
+        }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+    namespace Webview {
+    namespace Chromium {
+
+    class CWebViewChromiumFactoryProvider {
+        constructor();
+
+        interface IWebViewChromiumFactoryProvider;
+    }
+
+    } // namespace Chromium
+    } // namespace Webview
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

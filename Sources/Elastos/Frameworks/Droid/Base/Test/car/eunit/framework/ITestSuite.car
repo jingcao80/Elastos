@@ -1,0 +1,86 @@
+
+module
+{
+    using interface Elastos.Utility.IEnumeration;
+
+    namespace Eunit {
+    namespace Framework {
+
+    interface ITest;
+    interface ITestResult;
+
+    [local]
+    interface ITestSuite {
+        /**
+         * Adds a test to the suite.
+         */
+        AddTest(
+            [in] ITest* test);
+
+        /**
+         * Adds the tests from the given class to the suite
+         */
+        AddTestSuite(
+            [in] IClassInfo* testClass);
+
+        /**
+         * Returns the name of the suite. Not all
+         * test suites have a name and this method
+         * can return null.
+         */
+        GetName(
+            [out] String* name);
+
+        RunTest(
+            [in] ITest* test,
+            [in] ITestResult* result);
+
+        /**
+         * Sets the name of the suite.
+         * @param name the name to set
+         */
+        SetName(
+            [in] String name);
+
+        /**
+         * Returns the test at the given index
+         */
+        TestAt(
+            [in] Int32 index,
+            [out] ITest** test);
+
+        /**
+         * Returns the number of tests in this suite
+         */
+        TestCount(
+            [out] Int32* number);
+
+        /**
+         * Returns the tests as an enumeration
+         */
+        Tests(
+            [out] IEnumeration** tests);
+    }
+
+    interface ITestSuiteHelper {
+//        /**
+//         * ...as the moon sets over the early morning Merlin, Oregon
+//         * mountains, our intrepid adventurers type...
+//         */
+//        static public Test createTest(Class<?> theClass, String name);
+//
+//        /**
+//         * Gets a constructor which takes a single String as
+//         * its argument or a no arg constructor.
+//         */
+//        public static Constructor<?> getTestConstructor(Class<?> theClass);
+//
+//        /**
+//         * Returns a test which will fail and log a warning message.
+//         */
+//        public static Test warning(final String message);
+    }
+
+    } // namespace Framework;
+    } // namespace Eunit;
+}

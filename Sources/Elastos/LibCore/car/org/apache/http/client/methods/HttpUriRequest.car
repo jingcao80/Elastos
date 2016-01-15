@@ -1,0 +1,69 @@
+
+module
+{
+
+    using interface Elastos.Net.IURI;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+    namespace Methods {
+
+    /**
+     * Extended version of the {@link HttpRequest} interface that provides
+     * convenience methods to access request properties such as request URI
+     * and method type.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version   $Revision: 659191 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IHttpRequest;
+     */
+    interface IHttpUriRequest {
+
+        /**
+         * Returns the HTTP method this request uses, such as <code>GET</code>,
+         * <code>PUT</code>, <code>POST</code>, or other.
+         */
+        GetMethod(
+            [out] String* method);
+
+        /**
+         * Returns the URI this request uses, such as
+         * <code>http://example.org/path/to/file</code>.
+         */
+        GetURI(
+            [out] IURI** URI);
+
+        /**
+         * Aborts execution of the request.
+         *
+         * @throws UnsupportedOperationException if the abort operation
+         *   is not supported / cannot be implemented.
+         */
+        Abort();
+
+        /**
+         * Tests if the request execution has been aborted.
+         *
+         * @return <code>true</code> if the request execution has been aborted,
+         *   <code>false</code> otherwise.
+         */
+        IsAborted(
+            [out] Boolean* isAborted);
+
+    }
+
+    } // namespace Methods
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

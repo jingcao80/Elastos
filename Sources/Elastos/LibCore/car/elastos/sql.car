@@ -1,0 +1,421 @@
+
+module
+{
+    merge("sql/Exceptions.car");
+    merge("sql/ITypes.car");
+    merge("sql/IClob.car");
+    merge("sql/IBlob.car");
+    merge("sql/INClob.car");
+    merge("sql/IArray.car");
+    merge("sql/IStruct.car");
+    merge("sql/ISQLDate.car");
+    merge("sql/ITime.car");
+    merge("sql/IWrapper.car");
+    merge("sql/IParameterMetaData.car");
+    merge("sql/IRowId.car");
+    merge("sql/ITimestamp.car");
+    merge("sql/IRef.car");
+    merge("sql/ISQLStruct.car");
+    merge("sql/ISQLXML.car");
+    merge("sql/ISQLInput.car");
+    merge("sql/ISQLOutput.car");
+    merge("sql/ISQLData.car");
+    merge("sql/IStatement.car");
+    merge("sql/ISQLWarning.car");
+    merge("sql/IRowIdLifeTime.car");
+    merge("sql/IResultSetMetaData.car");
+    merge("sql/IResultSet.car");
+    merge("sql/IDatabaseMetaData.car");
+    merge("sql/IPreparedStatement.car");
+    merge("sql/ICallableStatement.car");
+    merge("sql/ISavePoint.car");
+    merge("sql/ISQLPermission.car");
+    merge("sql/IConnection.car");
+    merge("sql/IDriver.car");
+    merge("sql/IDriverManager.car");
+    merge("sql/IDataTruncation.car");
+    merge("sql/IDriverPropertyInfo.car");
+
+    merge("sql/sqlite/IStringEncoder.car");
+    merge("sql/sqlite/IAuthorizer.car");
+    merge("sql/sqlite/IBlob.car");
+    merge("sql/sqlite/ICallback.car");
+    merge("sql/sqlite/IBusyHandler.car");
+    merge("sql/sqlite/ITableResult.car");
+    merge("sql/sqlite/IFunctionContext.car");
+    merge("sql/sqlite/IFunction.car");
+    merge("sql/sqlite/ITrace.car");
+    merge("sql/sqlite/IProfile.car");
+    merge("sql/sqlite/IVm.car");
+    merge("sql/sqlite/IStmt.car");
+    merge("sql/sqlite/IBackup.car");
+    merge("sql/sqlite/IProgressHandler.car");
+    merge("sql/sqlite/IDatabase.car");
+
+    merge("sql/sqlite/IMockFunction.car");
+
+    merge("sql/sqlite/IConstants.car");
+    merge("sql/sqlite/IShell.car");
+
+    merge("sql/sqlite/jdbc/IJDBCConnection.car");
+    merge("sql/sqlite/jdbc/IJDBCStatement.car");
+    merge("sql/sqlite/jdbc/IJDBCPreparedStatement.car");
+    merge("sql/sqlite/jdbc/IJDBCResultSetMetaData.car");
+    merge("sql/sqlite/jdbc/ITableResultX.car");
+    merge("sql/sqlite/jdbc/IJDBCDatabaseMetaData.car");
+    merge("sql/sqlite/jdbc/IJDBCResultSet.car");
+
+    interface Elastos.Core.IThrowable;
+    interface Elastos.Core.IComparable;
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Utility.IDate;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.IFlushable;
+    interface Elastos.IO.IPrintWriter;
+    interface Elastos.IO.ISerializable;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IPrintStream;
+    interface Elastos.Sql.ISQLWarning;
+    interface Elastos.Sql.IDriver;
+    interface Elastos.Sql.IConnection;
+    interface Elastos.Sql.IWrapper;
+    interface Elastos.Sql.IStatement;
+    interface Elastos.Sql.IPreparedStatement;
+    interface Elastos.Sql.IResultSetMetaData;
+    interface Elastos.Sql.IDatabaseMetaData;
+    interface Elastos.Sql.IResultSet;
+    interface Elastos.Sql.SQLite.ICallback;
+    interface Elastos.Sql.SQLite.ITableResult;
+    interface Elastos.Sql.SQLite.IBusyHandler;
+    interface Elastos.Sql.SQLite.IDatabase;
+
+    namespace Elastos {
+    namespace Sql {
+
+        class CSQLWarning {
+            constructor();
+
+            constructor(
+                [in] String theReason);
+
+            constructor(
+                [in] String theReason,
+                [in] String theSQLState);
+
+            constructor(
+                [in] String theReason,
+                [in] String theSQLState,
+                [in] Int32 theErrorCode);
+
+    //         //constructor(
+    //         //    [in] IThrowable * cause);
+
+    //         //constructor(
+    //         //    [in] String reason,
+    //         //    [in] IThrowable * cause);
+
+    //         //constructor(
+    //         //    [in] String reason,
+    //         //    [in] String SQLState,
+    //         //    [in] IThrowable * cause);
+
+    //         //constructor(
+    //         //    [in] String reason,
+    //         //    [in] String SQLState,
+    //         //    [in] Int32 vendorCode,
+    //         //    [in] IThrowable * cause);
+
+            interface ISQLWarning;
+        }
+
+        class CTime {
+            constructor(
+                [in] Int32 theHour,
+                [in] Int32 theMinute,
+                [in] Int32 theSecond);
+
+            constructor(
+                [in] Int64 theTime);
+
+            interface ITime;
+            interface IDate;
+            interface ICloneable;
+            interface IComparable;
+            interface ISerializable;
+        }
+
+        class CSqlDate {
+            constructor(
+                [in] Int32 theYear,
+                [in] Int32 theMonth,
+                [in] Int32 theDay);
+
+            constructor(
+                [in] Int64 theDate);
+
+            interface ISQLDate;
+            interface IDate;
+            interface ICloneable;
+            interface IComparable;
+            interface ISerializable;
+        }
+
+        class CTimestamp {
+            constructor(
+                [in] Int32 theYear,
+                [in] Int32 theMonth,
+                [in] Int32 theDate,
+                [in] Int32 theHour,
+                [in] Int32 theMinute,
+                [in] Int32 theSecond,
+                [in] Int32 theNano);
+
+            constructor(
+                [in] Int64 theTime);
+
+            interface ITimestamp;
+            interface IDate;
+            interface ICloneable;
+            interface IComparable;
+            interface ISerializable;
+        }
+
+        class CDriverPropertyInfo {
+            constructor(
+                [in] String name,
+                [in] String value);
+
+            interface IDriverPropertyInfo;
+        }
+
+        class CDataTruncation {
+            constructor(
+                [in] Int32 index,
+                [in] Boolean parameter,
+                [in] Boolean read,
+                [in] Int32 dataSize,
+                [in] Int32 transferSize);
+
+            constructor(
+                [in] Int32 index,
+                [in] Boolean parameter,
+                [in] Boolean read,
+                [in] Int32 dataSize,
+                [in] Int32 transferSize,
+                [in] IThrowable * cause);
+
+            interface IDataTruncation;
+            interface ISQLWarning;
+            interface ISerializable;
+        }
+
+        singleton class CDriverManager{
+            interface IDriverManager;
+        }
+
+        class CSQLPermission {
+            constructor(
+                [in] String name);
+
+            constructor(
+                [in] String name,
+                [in] String actions);
+
+            interface ISQLPermission;
+        }
+
+    } //Sql
+    } //Elastos
+
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+        class CTableResult {
+            constructor();
+
+            constructor(
+                [in] Int32 maxrows);
+
+            interface ITableResult;
+            interface ICallback;
+        }
+
+        class CShell {
+            constructor(
+                [in] IPrintWriter* pw,
+                [in] IPrintWriter* err);
+
+            constructor(
+                [in] IPrintStream* pw,
+                [in] IPrintStream* errs);
+
+            interface IShell;
+            interface ICallback;
+        }
+
+        [deprecated]
+        class CDBDump {
+            constructor(
+                [in] IShell* s,
+                [in] ArrayOf<String> * tables);
+
+            interface IDBDump;
+            interface ICallback;
+        }
+
+        class CVm {
+            interface IVm;
+        }
+
+        class CBlob {
+            interface IBlob;
+        }
+
+        class CBlobR {
+            constructor(
+                [in] IBlob* blob);
+
+            interface IBlobR;
+            interface IInputStream;
+            interface ICloseable;
+        }
+
+        class CBlobW {
+            constructor(
+                [in] IBlob* blob);
+
+            interface IBlobW;
+            interface IOutputStream;
+            interface ICloseable;
+            interface IFlushable;
+        }
+
+        class CDatabase {
+            interface IDatabase;
+        }
+
+        singleton class CDatabaseHelper {
+            interface IDatabaseHelper;
+        }
+
+        class CJDBCDriver {
+            constructor();
+
+            interface IDriver;
+        }
+
+        class CBackup {
+            interface IBackup;
+        }
+
+        class CFunctionContext {
+            interface IFunctionContext;
+        }
+
+        class CStmt {
+            interface IStmt;
+        }
+
+        singleton class CStringEncoderHelper {
+            interface IStringEncoderHelper;
+        }
+
+    } //SQLite
+    } //Sql
+    } //Elastos
+
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+    namespace JDBC{
+
+        class CJDBCConnection {
+            constructor(
+                [in] String url,
+                [in] String enc,
+                [in] String pwd,
+                [in] String drep,
+                [in] String vfs);
+
+            interface IJDBCConnection;
+            interface IConnection;
+            interface IWrapper;
+            interface IBusyHandler;
+            interface ICloseable;
+        }
+
+        class CJDBCPreparedStatement {
+            constructor(
+                [in] IJDBCConnection* conn,
+                [in] String sql);
+
+            interface IJDBCPreparedStatement;
+            interface IJDBCStatement;
+            interface IStatement;
+            interface IWrapper;
+            interface IPreparedStatement;
+        }
+
+        class CJDBCStatement {
+            constructor(
+                [in] IJDBCConnection* conn);
+
+            interface IJDBCStatement;
+            interface IStatement;
+            interface IWrapper;
+        }
+
+        class CJDBCResultSetMetaData {
+            constructor(
+                [in] IJDBCResultSet* r);
+
+            interface IJDBCResultSetMetaData;
+            interface IResultSetMetaData;
+            interface IWrapper;
+        }
+
+        class CTableResultX {
+            constructor();
+
+            constructor(
+                [in] Int32 maxrows);
+
+            constructor(
+                [in] ITableResult* tr);
+
+            interface ITableResultX;
+            interface ITableResult;
+            interface ICallback;
+        }
+
+        class CJDBCDatabaseMetaData {
+            constructor(
+                [in] IJDBCConnection* conn);
+
+            interface IJDBCDatabaseMetaData;
+            interface IDatabaseMetaData;
+            interface IWrapper;
+        }
+
+        class CJDBCResultSet {
+            constructor(
+                [in] ITableResult* tr,
+                [in] IJDBCStatement* s);
+
+            interface IJDBCResultSet;
+            interface IResultSet;
+            interface IWrapper;
+        }
+
+        class CDatabaseX {
+            interface IDatabase;
+        }
+
+
+    } //JDBC
+    } //SQLite
+    } //Sql
+    } //Elastos
+}

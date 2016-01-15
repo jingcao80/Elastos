@@ -1,0 +1,21 @@
+;
+; Purpose: Drop/Pack List for SDK
+;
+; Format:  SrcFile/Folder or
+;          SrcFile/Folder [DestFolder]
+;
+Elastos.Runtime.eco
+Elastos.CoreLibrary.eco
+Elastos.Droid.System.eco
+Elastos.Droid.Core.eco
+;Elastos.Droid.Server.eco
+;Elastos.Droid.JavaProxy.eco
+;ServiceManager
+;ElApp_process
+;Elastos.Droid.Commands.Monkey.eco
+;Elastos.Droid.Commands.Am.eco
+;Eunit.eco
+;Elastos.Droid.Test.eco
+; AudioTrack.eco
+; Snowfox dir
+; XBMC dir

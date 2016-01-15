@@ -1,0 +1,27 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * An {AutoCloseable} whose close method may throw an IOException.
+     *
+     * @sa IOException
+     */
+    interface IFlushable {
+        /**
+         * Flushes the object by writing out any buffered data to the underlying
+         * output.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if there are any issues writing the data.
+         */
+        Flush();
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

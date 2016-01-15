@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:id="@+id/popup_element" 
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent" 
+    android:background="#444444" 
+    android:orientation="vertical" 
+    android:padding="10sp" >
+    
+    <TextView 
+        android:id="@+id/txtView" 
+        android:layout_width="fill_parent" 
+        android:layout_height="40px" 
+        android:layout_marginTop="100px" 
+        android:layout_marginBottom="20px" 
+        android:layout_marginLeft="20px" 
+        android:layout_marginRight="20px" 
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical"
+        android:textColor="#000000"
+        android:background="#FFFFFF"
+        android:text="Popup Window Demo!" />
+    
+    <Button 
+        android:id="@+id/btn_close_popup" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_marginTop="15px" 
+        android:layout_gravity="center" 
+        android:text="退出" /> 
+</LinearLayout>

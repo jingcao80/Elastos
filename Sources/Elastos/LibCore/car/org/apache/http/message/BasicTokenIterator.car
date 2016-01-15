@@ -1,0 +1,200 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHeader;
+    interface Org.Apache.Http.IRequestLine;
+    interface Org.Apache.Http.IStatusLine;
+    interface Org.Apache.Http.IProtocolVersion;
+    interface Org.Apache.Http.Message.IParserCursor;
+    interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Message {
+
+    /**
+     * Basic implementation of a {@link TokenIterator}.
+     * This implementation parses <tt>#token<tt> sequences as
+     * defined by RFC 2616, section 2.
+     * It extends that definition somewhat beyond US-ASCII.
+     *
+     * @version $Revision: 602520 $
+     */
+    /**
+     * @Involve
+     * interface ITokenIterator;
+     * interface IIterator
+     */
+    interface IBasicTokenIterator {
+
+        /** The HTTP separator characters. Defined in RFC 2616, section 2.2. */
+        // the order of the characters here is adjusted to put the
+        // most likely candidates at the beginning of the collection
+        //const String HTTP_SEPARATORS = " ,;=()<>@:\\\"/[]?{}\t";
+
+        /**
+         * Determines the next token.
+         * If found, the token is stored in {@link #currentToken}.
+         * The return value indicates the position after the token
+         * in {@link #currentHeader}. If necessary, the next header
+         * will be obtained from {@link #headerIt}.
+         * If not found, {@link #currentToken} is set to <code>null</code>.
+         *
+         * @param from      the position in the current header at which to
+         *                  start the search, -1 to search in the first header
+         *
+         * @return  the position after the found token in the current header, or
+         *          negative if there was no next token
+         *
+         * @throws ParseException   if an invalid header value is encountered
+         */
+        FindNext(
+            [in] Int32 from,
+            [out] Int32* pos);
+
+        /**
+         * Creates a new token to be returned.
+         * Called from {@link #findNext findNext} after the token is identified.
+         * The default implementation simply calls
+         * {@link java.lang.String#substring String.substring}.
+         * <br/>
+         * If header values are significantly longer than tokens, and some
+         * tokens are permanently referenced by the application, there can
+         * be problems with garbage collection. A substring will hold a
+         * reference to the full characters of the original string and
+         * therefore occupies more memory than might be expected.
+         * To avoid this, override this method and create a new string
+         * instead of a substring.
+         *
+         * @param value     the full header value from which to create a token
+         * @param start     the index of the first token character
+         * @param end       the index after the last token character
+         *
+         * @return  a string representing the token identified by the arguments
+         */
+        CreateToken(
+            [in] String value,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] String* str);
+
+        /**
+         * Determines the starting position of the next token.
+         * This method will iterate over headers if necessary.
+         *
+         * @param from      the position in the current header at which to
+         *                  start the search
+         *
+         * @return  the position of the token start in the current header,
+         *          negative if no token start could be found
+         */
+        FindTokenStart(
+            [in] Int32 from,
+            [out] Int32* pos);
+
+        /**
+         * Determines the position of the next token separator.
+         * Because of multi-header joining rules, the end of a
+         * header value is a token separator. This method does
+         * therefore not need to iterate over headers.
+         *
+         * @param from      the position in the current header at which to
+         *                  start the search
+         *
+         * @return  the position of a token separator in the current header,
+         *          or at the end
+         *
+         * @throws ParseException
+         *         if a new token is found before a token separator.
+         *         RFC 2616, section 2.1 explicitly requires a comma between
+         *         tokens for <tt>#</tt>.
+         */
+        FindTokenSeparator(
+            [in] Int32 from,
+            [out] Int32* pos);
+
+        /**
+         * Determines the ending position of the current token.
+         * This method will not leave the current header value,
+         * since the end of the header value is a token boundary.
+         *
+         * @param from      the position of the first character of the token
+         *
+         * @return  the position after the last character of the token.
+         *          The behavior is undefined if <code>from</code> does not
+         *          point to a token character in the current header value.
+         */
+        FindTokenEnd(
+            [in] Int32 from,
+            [out] Int32* pos);
+
+        /**
+         * Checks whether a character is a token separator.
+         * RFC 2616, section 2.1 defines comma as the separator for
+         * <tt>#token</tt> sequences. The end of a header value will
+         * also separate tokens, but that is not a character check.
+         *
+         * @param ch        the character to check
+         *
+         * @return  <code>true</code> if the character is a token separator,
+         *          <code>false</code> otherwise
+         */
+        IsTokenSeparator(
+            [in] Char32 ch,
+            [out] Boolean* result);
+
+        /**
+         * Checks whether a character is a whitespace character.
+         * RFC 2616, section 2.2 defines space and horizontal tab as whitespace.
+         * The optional preceeding line break is irrelevant, since header
+         * continuation is handled transparently when parsing messages.
+         *
+         * @param ch        the character to check
+         *
+         * @return  <code>true</code> if the character is whitespace,
+         *          <code>false</code> otherwise
+         */
+        IsWhitespace(
+            [in] Char32 ch,
+            [out] Boolean* result);
+
+        /**
+         * Checks whether a character is a valid token character.
+         * Whitespace, control characters, and HTTP separators are not
+         * valid token characters. The HTTP specification (RFC 2616, section 2.2)
+         * defines tokens only for the US-ASCII character set, this
+         * method extends the definition to other character sets.
+         *
+         * @param ch        the character to check
+         *
+         * @return  <code>true</code> if the character is a valid token start,
+         *          <code>false</code> otherwise
+         */
+        IsTokenChar(
+            [in] Char32 ch,
+            [out] Boolean* result);
+
+        /**
+         * Checks whether a character is an HTTP separator.
+         * The implementation in this class checks only for the HTTP separators
+         * defined in RFC 2616, section 2.2. If you need to detect other
+         * separators beyond the US-ASCII character set, override this method.
+         *
+         * @param ch        the character to check
+         *
+         * @return  <code>true</code> if the character is an HTTP separator
+         */
+        IsHttpSeparator(
+            [in] Char32 ch,
+            [out] Boolean* result);
+
+    }
+
+    } // namespace Message
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

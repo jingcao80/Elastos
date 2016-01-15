@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.Core.IStringBuffer;
+
+    namespace Elastos {
+    namespace IO {
+
+     /**
+     * @Involve
+     * interface Elastos.Core.IAppendable;
+     * interface IWriter;
+     */
+    interface IStringWriter {
+        /**
+         * Gets a reference to this writer's internal
+         *
+         *@sa StringBuffer
+         *
+         *Any changes made to the returned buffer are reflected in this writer.
+         *
+         * @return a reference to this writer's internal StringBuffer.
+         */
+        GetBuffer(
+            [out] IStringBuffer** buf);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

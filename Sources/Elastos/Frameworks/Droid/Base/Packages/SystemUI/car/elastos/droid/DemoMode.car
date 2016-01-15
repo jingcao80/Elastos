@@ -1,0 +1,31 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+
+    interface IDemoMode {
+        DispatchDemoCommand(
+            [in] String command,
+            [in] IBundle* args);
+
+        const String ACTION_DEMO = "com.android.systemui.demo";
+
+        const String COMMAND_ENTER = "enter";
+        const String COMMAND_EXIT = "exit";
+        const String COMMAND_CLOCK = "clock";
+        const String COMMAND_BATTERY = "battery";
+        const String COMMAND_NETWORK = "network";
+        const String COMMAND_BARS = "bars";
+        const String COMMAND_STATUS = "status";
+        const String COMMAND_NOTIFICATIONS = "notifications";
+    }
+
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

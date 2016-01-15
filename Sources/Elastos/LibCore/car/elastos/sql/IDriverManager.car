@@ -1,0 +1,199 @@
+module
+{
+    interface Elastos.IO.IPrintStream;
+    interface Elastos.IO.IPrintWriter;
+    interface Elastos.Utility.IProperties;
+    interface Elastos.Utility.IEnumeration;
+
+    namespace Elastos {
+    namespace Sql {
+
+    interface IDriverManager {
+        /**
+         * Removes a driver from the {@code DriverManager}'s registered driver list.
+         * This will only succeed when the caller's class loader loaded the driver
+         * that is to be removed. If the driver was loaded by a different class
+         * loader, the removal of the driver fails silently.
+         * <p>
+         * If the removal succeeds, the {@code DriverManager} will not use this
+         * driver in the future when asked to get a {@code Connection}.
+         *
+         * @param driver
+         *            the JDBC driver to remove.
+         * @throws SQLException
+         *             if there is a problem interfering with accessing the
+         *             database.
+         */
+        DeregisterDriver(
+            [in] IDriver * driver);
+
+        /**
+         * Attempts to establish a connection to the given database URL.
+         *
+         * @param url
+         *            a URL string representing the database target to connect with.
+         * @return a {@code Connection} to the database identified by the URL.
+         *         {@code null} if no connection can be established.
+         * @throws SQLException
+         *             if there is an error while attempting to connect to the
+         *             database identified by the URL.
+         */
+        GetConnection(
+            [in] String url,
+            [out] IConnection ** conn);
+
+        /**
+         * Attempts to establish a connection to the given database URL.
+         *
+         * @param url
+         *            a URL string representing the database target to connect with
+         * @param info
+         *            a set of properties to use as arguments to set up the
+         *            connection. Properties are arbitrary string/value pairs.
+         *            Normally, at least the properties {@code "user"} and {@code
+         *            "password"} should be passed, with appropriate settings for
+         *            the user ID and its corresponding password to get access to
+         *            the corresponding database.
+         * @return a {@code Connection} to the database identified by the URL.
+         *         {@code null} if no connection can be established.
+         * @throws SQLException
+         *             if there is an error while attempting to connect to the
+         *             database identified by the URL.
+         */
+        GetConnection(
+            [in] String url,
+            [in] IProperties * info,
+            [out] IConnection ** conn);
+
+        /**
+         * Attempts to establish a connection to the given database URL.
+         *
+         * @param url
+         *            a URL string representing the database target to connect with.
+         * @param user
+         *            a user ID used to login to the database.
+         * @param password
+         *            a password for the user ID to login to the database.
+         * @return a {@code Connection} to the database identified by the URL.
+         *         {@code null} if no connection can be established.
+         * @throws SQLException
+         *             if there is an error while attempting to connect to the
+         *             database identified by the URL.
+         */
+        GetConnection(
+            [in] String url,
+            [in] String user,
+            [in] String password,
+            [out] IConnection ** conn);
+
+        /**
+         * Tries to find a driver that can interpret the supplied URL.
+         *
+         * @param url
+         *            the URL of a database.
+         * @return a {@code Driver} that matches the provided URL. {@code null} if
+         *         no {@code Driver} understands the URL
+         * @throws SQLException
+         *             if there is any kind of problem accessing the database.
+         */
+        GetDriver(
+            [in] String url,
+            [out] IDriver ** driver);
+
+        /**
+         * Returns an {@code Enumeration} that contains all of the loaded JDBC
+         * drivers that the current caller can access.
+         *
+         * @return An {@code Enumeration} containing all the currently loaded JDBC
+         *         {@code Drivers}.
+         */
+        GetDrivers(
+            [out] IEnumeration ** enumeration);
+
+        /**
+         * Returns the login timeout when connecting to a database in seconds.
+         *
+         * @return the login timeout in seconds.
+         */
+        GetLoginTimeout(
+            [out] Int32 * value);
+
+        /**
+         * Gets the log {@code PrintStream} used by the {@code DriverManager} and
+         * all the JDBC Drivers.
+         *
+         * @deprecated use {@link #getLogWriter()} instead.
+         * @return the {@code PrintStream} used for logging activities.
+         */
+        // @Deprecated
+        GetLogStream(
+            [out] IPrintStream ** pntstream);
+
+        /**
+         * Retrieves the log writer.
+         *
+         * @return A {@code PrintWriter} object used as the log writer. {@code null}
+         *         if no log writer is set.
+         */
+        GetLogWriter(
+            [out] IPrintWriter ** pntwriter);
+
+        /**
+         * Prints a message to the current JDBC log stream. This is either the
+         * {@code PrintWriter} or (deprecated) the {@code PrintStream}, if set.
+         *
+         * @param message
+         *            the message to print to the JDBC log stream.
+         */
+        Println(
+            [in] String message);
+
+        /**
+         * Registers a given JDBC driver with the {@code DriverManager}.
+         * <p>
+         * A newly loaded JDBC driver class should register itself with the
+         * {@code DriverManager} by calling this method.
+         *
+         * @param driver
+         *            the {@code Driver} to register with the {@code DriverManager}.
+         * @throws SQLException
+         *             if a database access error occurs.
+         */
+        RegisterDriver(
+            [in] IDriver * driver);
+
+        /**
+         * Sets the login timeout when connecting to a database in seconds.
+         *
+         * @param seconds
+         *            seconds until timeout. 0 indicates wait forever.
+         */
+        SetLoginTimeout(
+            [in] Int32 seconds);
+
+        /**
+         * Sets the print stream to use for logging data from the {@code
+         * DriverManager} and the JDBC drivers.
+         *
+         * @deprecated Use {@link #setLogWriter} instead.
+         * @param out
+         *            the {@code PrintStream} to use for logging.
+         */
+        // @Deprecated
+        SetLogStream(
+            [in] IPrintStream * pntstream);
+
+        /**
+         * Sets the {@code PrintWriter} that is used by all loaded drivers, and also
+         * the {@code DriverManager}.
+         *
+         * @param out
+         *            the {@code PrintWriter} to be used.
+         */
+        SetLogWriter(
+            [in] IPrintWriter * pntwriter);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

@@ -1,0 +1,163 @@
+
+module
+{
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.IO.IPrintWriter;
+
+    interface Elastos.Droid.Graphics.IMatrix;
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Animation {
+
+    /**
+     * Defines the transformation to be applied at
+     * one point in time of an Animation.
+     *
+     */
+    interface ITransformation {
+        /**
+         * Indicates a transformation that has no effect (alpha = 1 and identity matrix.)
+         */
+        const Int32 TYPE_IDENTITY = 0x0;
+        /**
+         * Indicates a transformation that applies an alpha only (uses an identity matrix.)
+         */
+        const Int32 TYPE_ALPHA = 0x1;
+        /**
+         * Indicates a transformation that applies a matrix only (alpha = 1.)
+         */
+        const Int32 TYPE_MATRIX = 0x2;
+        /**
+         * Indicates a transformation that applies an alpha and a matrix.
+         */
+        const Int32 TYPE_BOTH = TYPE_ALPHA | TYPE_MATRIX;
+
+        /**
+         * Reset the transformation to a state that leaves the object
+         * being animated in an unmodified state. The transformation type is
+         * {@link #TYPE_BOTH} by default.
+         */
+        Clear();
+
+        /**
+         * Indicates the nature of this transformation.
+         *
+         * @return {@link #TYPE_ALPHA}, {@link #TYPE_MATRIX},
+         *         {@link #TYPE_BOTH} or {@link #TYPE_IDENTITY}.
+         */
+        GetTransformationType(
+            [out] Int32* type);
+
+        /**
+         * Sets the transformation type.
+         *
+         * @param transformationType One of {@link #TYPE_ALPHA},
+         *        {@link #TYPE_MATRIX}, {@link #TYPE_BOTH} or
+         *        {@link #TYPE_IDENTITY}.
+         */
+        SetTransformationType(
+            [in] Int32 transformationType);
+
+        /**
+         * Clones the specified transformation.
+         *
+         * @param t The transformation to clone.
+         */
+        Set(
+            [in] ITransformation* t);
+
+        /**
+         * Apply this Transformation to an existing Transformation, e.g. apply
+         * a scale effect to something that has already been rotated.
+         * @param t
+         */
+        Compose(
+            [in] ITransformation* t);
+
+        /**
+         * Like {@link #compose(Transformation)} but does this.postConcat(t) of
+         * the transformation matrix.
+         * @hide
+         */
+        PostCompose(
+            [in] ITransformation* t);
+
+        /**
+         * @return The 3x3 Matrix representing the trnasformation to apply to the
+         * coordinates of the object being animated
+         */
+        GetMatrix(
+            [out] IMatrix** matrix);
+
+        /**
+         * Sets the degree of transparency
+         * @param alpha 1.0 means fully opaqe and 0.0 means fully transparent
+         */
+        SetAlpha(
+            [in] Float alpha);
+
+        /**
+         * Sets the current Transform's clip rect
+         * @hide
+         */
+        SetClipRect(
+            [in] IRect* r);
+
+        /**
+         * Sets the current Transform's clip rect
+         * @hide
+         */
+        SetClipRect(
+            [in] Int32 l,
+            [in] Int32 t,
+            [in] Int32 r,
+            [in] Int32 b);
+
+        /**
+         * Returns the current Transform's clip rect
+         * @hide
+         */
+        GetClipRect(
+            [out] IRect** cr);
+
+        /**
+         * Returns whether the current Transform's clip rect is set
+         * @hide
+         */
+        HasClipRect(
+            [out] Boolean* has);
+
+        /**
+         * @return The degree of transparency
+         */
+        GetAlpha(
+            [out] Float* alpha);
+
+        /**
+         * Return a string representation of the transformation in a compact form.
+         */
+        ToShortString(
+            [out] String* result);
+
+        /**
+         * @hide
+         */
+        ToShortString(
+            [in] IStringBuilder* sb);
+
+        /**
+         * Print short string, to optimize dumping.
+         * @hide
+         */
+        PrintShortString(
+            [in] IPrintWriter* pw);
+    }
+
+    }   //namespace Animation
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

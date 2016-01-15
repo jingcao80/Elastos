@@ -1,0 +1,36 @@
+
+module
+{
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IEncoderCapabilities {
+        /**
+         * Returns the array of supported output file formats.
+         * @see android.media.MediaRecorder.OutputFormat
+         */
+        GetOutputFileFormats(
+            [out,callee] ArrayOf<Int32>* result);
+
+        /**
+         * Returns the capabilities of the supported video encoders.
+         * @see android.media.EncoderCapabilities.VideoEncoderCap
+         */
+        GetVideoEncoders(
+            [out] IList** result);
+
+        /**
+         * Returns the capabilities of the supported audio encoders.
+         * @see android.media.EncoderCapabilities.AudioEncoderCap
+         */
+        GetAudioEncoders(
+            [out] IList** result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,73 @@
+module
+{
+    interface Elastos.Text.IAttributedCharacterIteratorAttribute;
+
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * Identifies fields in formatted strings. If a {FieldPosition} is passed
+     * to the format method with such a parameter, then the indices will be set to
+     * the start and end indices of the field in the formatted string.
+     * <p>
+     * A FieldPosition can be created by using the integer constants in the
+     * various format classes (for example NumberFormat.INTEGER_FIELD) or one
+     * of the fields of type Format.Field.
+     * <p>
+     * If more than one field information is needed, the method formatToCharacterIterator(Object) should be used.
+     *
+     * @sa formatToCharacterIterator(Object)
+     */
+    interface IFieldPosition {
+
+        Clear();
+
+        /**
+         * Returns the index of the beginning of the field.
+         */
+        GetBeginIndex(
+            [out] Int32* index);
+
+        /**
+         * Returns the index one past the end of the field.
+         */
+        GetEndIndex(
+            [out] Int32* index);
+
+        /**
+         * Returns the field which is being identified.
+         */
+        GetField(
+            [out] Int32* field);
+
+        /**
+         * Returns the attribute which is being identified.
+         */
+        GetFieldAttribute(
+            [out] IAttributedCharacterIteratorAttribute** attribute);
+
+        /**
+         * Sets the index of the beginning of the field.
+         */
+        SetBeginIndex(
+            [in] Int32 index);
+
+        /**
+         * Sets the index of the end of the field.
+         */
+        SetEndIndex(
+            [in] Int32 index);
+
+        /**
+         * Returns the string representation of this field position.
+         *
+         * @return the string representation of this field position.
+         */
+        // @Override
+        ToString(
+            [out] String * str);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

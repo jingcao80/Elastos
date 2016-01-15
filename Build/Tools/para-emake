@@ -1,0 +1,616 @@
+#!/bin/bash
+set -o errexit
+set -o noclobber
+set -o errtrace
+set -o pipefail
+
+log_trace() {
+    echo -e " \e[90mT $@\e[0m"
+}
+
+log_info() {
+    echo -e " \e[32mI\e[0m $@"
+}
+
+log_warn() {
+    echo -e " \e[33mW\e[0m $@"
+}
+
+log_error() {
+    echo -e " \e[31mE\e[0m $@"
+}
+
+get_n_cpus() {
+    read n_cpus </sys/devices/system/cpu/online
+    let n_cpus=${n_cpus#*-}-${n_cpus%-*}+1
+    echo $n_cpus
+}
+
+lock_release() {
+    if [[ -z $lock_file ]] || [[ ! -f $lock_file ]]; then
+        return
+    fi
+
+    unlink $lock_file
+}
+
+lock_acquire() {
+    lock_file=/tmp/para-emake.lock
+    if ! (echo $$ >$lock_file) &>/dev/null; then
+        return 1
+    fi
+
+    cleanup_stack_push lock_release
+}
+
+lock_is_owner() {
+    if [[ -z $lock_file ]] || [[ ! -f $lock_file ]]; then
+        return 1
+    fi
+
+    read pid <$lock_file
+    [[ $$ == $pid ]]
+}
+
+lock_owner_is_alive() {
+    if [[ -z $lock_file ]] || [[ ! -f $lock_file ]]; then
+        return 1
+    fi
+
+    read pid <$lock_file
+    [[ -d /proc/$pid ]]
+}
+
+wait_for_high_load() {
+    while true; do
+        read curr_load </proc/loadavg
+        curr_load=${curr_load%/*}
+        curr_load=${curr_load##* }
+
+        [[ $curr_load -lt $opt_max_load ]] && return
+
+        log_info System Load Too High \($curr_load\), Wait...
+
+        wait || true
+    done
+}
+
+cleanup_stack_init() {
+    unset cleanup_jobs
+}
+
+cleanup_stack_push() {
+    cleanup_jobs[${#cleanup_jobs[@]}]="$@"
+}
+
+cleanup_stack_pop_and_drop() {
+    local -i index=${#cleanup_jobs[@]}-1
+    log_trace ${cleanup_jobs[$index]}
+    unset cleanup_jobs[$index]
+}
+
+cleanup_stack_pop() {
+    local -i index=${#cleanup_jobs[@]}-1
+    eval ${cleanup_jobs[$index]}
+    unset cleanup_jobs[$index]
+}
+
+cleanup_stack_is_empty() {
+    [[ 0 == ${#cleanup_jobs[@]} ]]
+}
+
+cleanup_stack_pop_all() {
+    while ! cleanup_stack_is_empty; do
+        cleanup_stack_pop
+    done
+}
+
+check_point_init() {
+    if [[ ! -d "$targets_path" ]]; then
+        log_info Targets directory doesn\'t exists, no check point needed
+        return
+    fi
+
+    if ! type mount.aufs &>/dev/null || ! type rsync &>/dev/null; then
+        echo please install aufs-tools and rsync first.
+        exit 1
+    fi
+
+    origin_targets_path="$XDK_ROOT/.Targets"
+    check_point_path="$XDK_ROOT/.CheckPoint"
+    mkdir -p "$origin_targets_path" "$check_point_path"
+    cleanup_stack_push "rm -rf '$origin_targets_path' '$check_point_path'"
+
+    if ! sudo -n mount --bind "$targets_path" "$origin_targets_path"; then
+        echo """Run following command to authorize yourself to run mount and umount without asking for password (recommended way)
+$ echo $(whoami) ALL= NOPASSWD: /bin/mount, /bin/umount | sudo tee /etc/sudoers.d/para-emake
+Or you can run para-emake with sudo (bad idea)"""
+        return 1
+    fi
+    cleanup_stack_push "sudo -n umount '$origin_targets_path'"
+
+    sudo -n mount -t aufs -o udba=none \
+        -o br:"$check_point_path":"$origin_targets_path"=ro \
+        none "$targets_path"
+    cleanup_stack_push "sudo -n umount '$targets_path'"
+
+    is_enabled dry_run || cleanup_stack_push check_point_commit
+}
+
+check_point_commit() {
+    if is_aborted; then
+        return
+    fi
+
+    pushd "$origin_targets_path" >/dev/null
+    rsync -ar --delete "$targets_path/" .
+    popd >/dev/null
+}
+
+dirs_hide() {
+    if [[ ! -f "$sources_path/$1/dirs" ]]; then
+        return
+    fi
+
+    mv "$sources_path/$1/"{,.}dirs
+    cleanup_stack_push "dirs_unhide $1"
+}
+
+dirs_unhide() {
+    [[ ! -f "$sources_path/$1/.dirs" ]] && return
+
+    mv "$sources_path/$1/"{.,}dirs
+}
+
+is_enabled() {
+    local opt_name="opt_$1"
+    [[ yes == ${!opt_name} ]]
+}
+
+is_disabled() {
+    local opt_name="opt_$1"
+    [[ yes != ${!opt_name} ]]
+}
+
+job_wait_for_all() {
+    while [[ $(jobs -rp) ]]; do
+        wait || true
+    done
+}
+
+show_help() {
+    echo """
+Usage: ${0##*/} [OPTIONS] CPU_PLATFROM [TARGET [TARGET] ...]
+Helper script which build Elastos in parallel.
+
+Available OPTIONs are
+    -c, --check-point   make build changes permanent if build succeededly, or
+                        drop it
+    -d, --dry-run       go through whole build process and drop the changes
+    -h, --help          This help message
+    -l, --max-load      limit system load. default: number of CPUs plus 1
+    -m, --make-opt      extra options for make. eg. -jN
+    -e, --ccache        enable ccache support
+    -x, --debug         enable debug trace
+
+Available build TARGETs list below. Multiple TARGETs can be speciified and
+will be executed in sequence. Default TARGET is build if no one specified.
+    build
+    clean
+    clobber
+    shell     enter interactive shell which is initialized for specific
+              CPU_PLATFORM to do variety kinds of operation"""
+    exit 0
+}
+
+parse_args() {
+    while [[ 0 != $# ]]; do
+        case "$1" in
+            -c | --check-point)
+                opt_check_point=yes
+                ;;
+            -d | --dry-run)
+                opt_dry_run=yes
+                ;;
+            -h | --help)
+                opt_help=yes
+                ;;
+            -l | --max-load)
+                shift
+                [[ $1 =~ [0-9]+ ]] || echo "--max-load expect a numberical argument"
+                opt_max_load=$1
+                ;;
+            -m | --make-opts)
+                shift
+                opt_make_opts="$1"
+                ;;
+            -e | --ccache)
+                opt_ccache=yes
+                ;;
+            -x | --debug)
+                opt_debug=yes
+                ;;
+            -s | --export)
+                shift
+                opt_export="$1"
+                echo $1
+                ;;
+            *)
+                if [[ -z "$target_desc" ]]; then
+                    target_desc="$1"
+                else
+                    build_targets[${#build_targets[@]}]="$1"
+                fi
+                ;;
+        esac
+
+        [[ 0 == $# ]] || shift
+    done
+    if [[ "$XDK_VERSION" = "rls" ]]; then
+        build_version=rls
+    fi
+    [[ 0 != ${#build_targets[@]} ]] || build_targets[0]=build
+    is_disabled help || show_help
+    is_disabled debug || set -x
+}
+
+para_emake_destroy() {
+    set +o errexit
+    trap '' EXIT INT
+
+    log_info Wait For Unfinished Jobs...
+    job_wait_for_all
+
+    if [[ $abort_reason ]]; then
+        log_error Aborted Due To $abort_reason
+    fi
+    local ELAPSED_TIME=$(( `date +%s`-$START_TIME ))
+    local HOURS=`echo $ELAPSED_TIME/3600 | bc`
+    local MINUTES=`echo $ELAPSED_TIME/60%60 | bc`
+    local SECONDS=`echo $ELAPSED_TIME%60 | bc`
+    echo "para-emake finished, elapsed time: $HOURS Hours, $MINUTES Minutes, $SECONDS Seconds."
+    cleanup_stack_pop_all
+}
+
+load_job_desc_file() {
+    local job_desc_path=$build_tools_path/
+    job_desc_path+=${target_desc/_/-}-paralist
+    if [[ ! -f "$job_desc_path" ]]; then
+        echo No paralist found: $job_desc_path
+        job_desc_path=${target_desc/_/-}-paralist
+        if [[ ! -f "$job_desc_path" ]]; then
+            echo No paralist found: $job_desc_path
+            exit 1
+        fi
+    fi
+
+    if [[ -n $opt_export ]]; then
+        if [[ -f ~/day_log/$target_desc"-compileError" ]]; then
+            rm ~/day_log/$target_desc"-compileError"
+        fi
+    fi
+
+    while read line; do
+        if [[ -z "$line" ]] || [[ '#' == ${line:0:1} ]]; then
+            continue
+        fi
+
+        job_desc[${#job_desc[@]}]="$line"
+    done <$job_desc_path
+}
+
+# prevent multiple instances of para-emake run concurrently
+para_emake_check_existence() {
+    if lock_acquire; then
+        return
+    fi
+
+    if lock_owner_is_alive; then
+        return 1
+    fi
+
+    echo Lock exists but the owner no longer exists. Acquire the lock forcefully \(yes/no\)?
+    read answer
+    if [[ yes != $answer ]]; then
+        exit 1
+    fi
+
+    if ! lock_release; then
+        echo Unable to acquire lock. If you are sure there is no other para-emake running, you can remove it manually.
+        exit 1
+    fi
+
+    lock_acquire
+}
+
+build_emake() {
+    cd "$src_path"
+    if [ -n "$opt_export" ]; then
+        export $opt_export
+    fi
+    local CLOSE_EMAKE_TIMES=1;emake $opt_make_opts
+}
+
+build_eco() {
+    local eco_ts_path="$mirror_path/$1.timestamp"
+    if [[ "$XDK_TARGETS/$1" -ot "$eco_ts_path" ]]; then
+        return
+    fi
+    lube -C"$1" -f -T header -T headercpp
+    sleep 1&&touch "$eco_ts_path"
+}
+
+build_car() {
+    local car_file_name="${1%.car}"
+    local cls_file="$car_file_name.cls"
+    local ext_cls_file="${car_file_name}Ex.cls"
+    local car_path="$src_path/$1"
+
+    if [[ "$car_path" -ot "$mirror_path/$cls_file" ]] ||
+       [[ "$car_path" -ot "$mirror_path/$ext_cls_file" ]]; then
+        return
+    fi
+
+    cleanup_stack_push "rm -f '$mirror_path/$cls_file' \
+                              '$mirror_path/$ext_cls_file'"
+    carc -n \
+        -u \
+	-a \
+        -I"$src_path" \
+        -c "$cls_file" \
+        -E "$ext_cls_file" \
+        "$car_path"
+    carc -I"$src_path" \
+        -d "$car_path"
+    lube -C"$ext_cls_file" \
+        -f \
+        -n \
+        -u \
+        -T header \
+        -T cls2abrg \
+        -T background
+    cleanup_stack_pop_and_drop
+}
+
+build() {
+    trap abort ERR
+    [[ -z $opt_export ]] || trap checkerror ERR
+    trap 'exit 130' TERM
+    trap cleanup_stack_pop_all EXIT
+
+    cleanup_stack_init
+
+    local src_path="$1"; shift
+    if [[ 0 == $# ]]; then
+        build_emake
+        return
+    fi
+
+    local mirror_path="$XDK_USER_OBJ/$XDK_BUILD_KIND/mirror/"
+    mirror_path+="${src_path#$sources_path/}"
+    [[ -d "$mirror_path" ]] || mkdir -p "$mirror_path"
+    cd "$mirror_path"
+
+    for file in "$@"; do
+        local -l ext="${file##*.}"
+        case $ext in
+            'car' | 'eco')
+                build_$ext "$file"
+                ;;
+            *)
+                log_error Unsupported File Type: $file
+                false
+                ;;
+        esac
+    done
+}
+
+build_sync() {
+    (build "$@")
+}
+
+build_async() {
+    build "$@" &
+}
+
+on_build_fail() {
+    abort "Build Failure"
+}
+
+on_user_interrupt() {
+    abort "User Interruption"
+}
+
+abort() {
+    is_aborted && return
+
+    if [[ $$ == $BASHPID ]]; then
+        trap '' TERM
+        if [[ -n $opt_export ]]; then
+            kill -TERM $$
+        else
+            kill -TERM 0
+        fi
+    else
+        kill -ABRT $$
+    fi
+
+    abort_reason="$1"
+    aborted=yes
+
+    exit 130
+}
+
+#This function is only used for the error handling of the test section
+checkerror() {
+    ret=1
+    echo "11">>~/day_log/$target_desc"-compileError"
+}
+
+is_aborted() {
+    [[ $aborted ]]
+}
+
+is_all_jobs_dispatched() {
+    [[ ${#job_desc[@]} == $job_desc_index ]]
+}
+
+run_once() {
+    local job_no=$1; shift
+
+    local run_type=$1; shift
+    case $run_type in
+        '-' | '=' | '<' | '>')
+            local src_dir="$1"; shift
+            ;;
+        *)
+            if [[ ! -d "$sources_path/$run_type" ]]; then
+                log_error Source directory not found @$job_desc_index: $run_type
+                if [[ -n $opt_export ]]; then
+                    return
+                else
+                    return 1
+                fi
+            fi
+
+            local src_dir="$run_type"
+            run_type='='
+            ;;
+    esac
+
+    local src_path="$sources_path/$src_dir"
+    if [[ ! -f "$src_path/sources" ]]; then
+        log_info "Skip Job ($(($job_no+1))/${#job_desc[@]}): $src_dir"
+        return
+    fi
+
+    log_info "Dispatching Job ($(($job_no+1))/${#job_desc[@]}): $src_dir"
+
+    dirs_hide "$src_dir"
+    ${pre_build_table[$run_type]}
+    ${build_table[$run_type]} "$src_path" "$@"
+}
+
+enable_ccache() {
+    export CCACHE_DIR="$targets_path/cache"
+    export CROSS_COMPILE="ccache $CROSS_COMPILE"
+}
+
+para_emake_init() {
+    if ! para_emake_check_existence; then
+        echo Another instance of para-emake are running
+        exit 1
+    fi
+
+    trap para_emake_destroy EXIT
+
+    build_tools_path=$(readlink -f ${BASH_SOURCE})
+    build_tools_path=${build_tools_path%/*}
+    if [[ -z "$XDK_ROOT" ]]; then
+        XDK_ROOT=${build_tools_path%/Build/Tools}
+    fi
+
+    sources_path="$XDK_ROOT/Sources"
+    if [[ ! -d "$sources_path" ]]; then
+        echo no Sources directory found in \$XDK_ROOT: $XDK_ROOT
+        exit 1
+    fi
+
+    setup_path="$XDK_ROOT/Setup"
+    if [[ -n $opt_export ]]; then
+        if [[ ! -f "$setup_path/Config/arm_android.sh" ]]; then
+            echo Unsupported Platform: arm_android
+            exit 1
+        fi
+    else
+        if [[ ! -f "$setup_path/Config/$target_desc.sh" ]]; then
+            echo Unsupported Platform: $target_desc
+            exit 1
+        fi
+    fi
+
+    targets_path="$XDK_ROOT/Targets"
+
+    pushd "$setup_path" >/dev/null
+    set -o allexport
+    if [[ -n "$opt_export" ]]; then
+        source $XDK_ROOT/Setup/SetEnv.sh arm_android
+    else
+        source $XDK_ROOT/Setup/SetEnv.sh $target_desc
+    fi
+    if [[ "$build_version" == "rls" ]]; then
+        chv rls
+    fi
+    set +o allexport
+    popd >/dev/null
+
+    if is_enabled ccache; then
+        enable_ccache
+    fi
+
+    local -i n_cpus=$(get_n_cpus)
+    : ${opt_max_load=$(( $n_cpus << 1 ))}
+    : ${opt_make_opts=-j$(( $n_cpus + 1 ))}
+
+    load_job_desc_file
+
+    unset PROMPT_COMMAND
+}
+
+para_emake_clobber() {
+    cd "$sources_dir"
+    emake clobber
+}
+
+para_emake_clean() {
+    emake clean
+}
+
+para_emake_build() {
+    local -A pre_build_table=(
+        ['<']=job_wait_for_all
+        ['>']=job_wait_for_all
+    )
+    local -A build_table=(
+        ['-']=build_sync
+        ['=']=build_async
+        ['>']=build_sync
+        ['<']=build_async
+    )
+
+    local job_desc_index=0
+    while ! is_all_jobs_dispatched && ! is_aborted; do
+        wait_for_high_load
+        run_once $job_desc_index ${job_desc[$job_desc_index]}
+        let ++job_desc_index
+    done
+}
+
+para_emake_process_targets() {
+    is_disabled check_point || check_point_init
+
+    trap on_user_interrupt INT
+    trap on_build_fail ABRT
+
+    local target
+    for target in "${build_targets[@]}"; do
+        if ! type para_emake_$target &>/dev/null; then
+            echo unsupported target: $target
+            exit 1
+        fi
+
+        # emake set & unset LD_LIBRARY_PATH every time which
+        # causes carc and lube failed to find libz.so if run these
+        # two command directly
+        LD_LIBRARY_PATH="$build_tools_path:$LD_LIBRARY_PATH" \
+        para_emake_$target
+    done
+}
+
+START_TIME=`date +%s`
+echo $$
+parse_args "$@"
+para_emake_init
+para_emake_process_targets
+echo "******************************"
+date

@@ -1,0 +1,471 @@
+
+module
+{
+    using interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+    /**
+     * This class describes all device configuration information that can impact
+     * the resources the application retrieves. This includes both user-specified
+     * configuration options (locale and scaling) as well as device configurations
+     * (such as input modes, screen size and screen orientation).
+     * <p>
+     * You can acquire this object from Resources, using getConfiguration(). Thus,
+     * from an activity, you can get it by chaining the request with getResources():
+     * {Configuration config = getResources().getConfiguration();}
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     * interface IComparable;
+     */
+    interface IConfiguration {
+        /**
+         * Constant used to to represent MNC (Mobile Network Code) zero.
+         * 0 cannot be used, since it is used to represent an undefined MNC.
+         */
+        const Int32 MNC_ZERO = 0xffff;
+
+        /** Constant for {@link #screenLayout}: bits that encode the size. */
+        const Int32 SCREENLAYOUT_SIZE_MASK = 0x0f;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+         * value indicating that no size has been set. */
+        const Int32 SCREENLAYOUT_SIZE_UNDEFINED = 0x00;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+         * value indicating the screen is at least approximately 320x426 dp units,
+         * corresponds to the
+         * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenSizeQualifier">small</a>
+         * resource qualifier.
+         * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+         * Multiple Screens</a> for more information. */
+        const Int32 SCREENLAYOUT_SIZE_SMALL = 0x01;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+         * value indicating the screen is at least approximately 320x470 dp units,
+         * corresponds to the
+         * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenSizeQualifier">normal</a>
+         * resource qualifier.
+         * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+         * Multiple Screens</a> for more information. */
+        const Int32 SCREENLAYOUT_SIZE_NORMAL = 0x02;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+         * value indicating the screen is at least approximately 480x640 dp units,
+         * corresponds to the
+         * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenSizeQualifier">large</a>
+         * resource qualifier.
+         * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+         * Multiple Screens</a> for more information. */
+        const Int32 SCREENLAYOUT_SIZE_LARGE = 0x03;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+         * value indicating the screen is at least approximately 720x960 dp units,
+         * corresponds to the
+         * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenSizeQualifier">xlarge</a>
+         * resource qualifier.
+         * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+         * Multiple Screens</a> for more information.*/
+        const Int32 SCREENLAYOUT_SIZE_XLARGE = 0x04;
+
+        /** Constant for {@link #screenLayout}: bits that encode the aspect ratio. */
+        const Int32 SCREENLAYOUT_LONG_MASK = 0x30;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LONG_MASK}
+         * value indicating that no size has been set. */
+        const Int32 SCREENLAYOUT_LONG_UNDEFINED = 0x00;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LONG_MASK}
+         * value that corresponds to the
+         * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenAspectQualifier">notlong</a>
+         * resource qualifier. */
+        const Int32 SCREENLAYOUT_LONG_NO = 0x10;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LONG_MASK}
+         * value that corresponds to the
+         * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenAspectQualifier">long</a>
+         * resource qualifier. */
+        const Int32 SCREENLAYOUT_LONG_YES = 0x20;
+
+        /** Constant for {@link #screenLayout}: bits that encode the layout direction. */
+        const Int32 SCREENLAYOUT_LAYOUTDIR_MASK = 0xC0;
+
+        /** Constant for {@link #screenLayout}: bits shift to get the layout direction. */
+        const Int32 SCREENLAYOUT_LAYOUTDIR_SHIFT = 6;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LAYOUTDIR_MASK}
+         * value indicating that no layout dir has been set. */
+        const Int32 SCREENLAYOUT_LAYOUTDIR_UNDEFINED = 0x00;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LAYOUTDIR_MASK}
+         * value indicating that a layout dir has been set to LTR. */
+        const Int32 SCREENLAYOUT_LAYOUTDIR_LTR = 0x01 << SCREENLAYOUT_LAYOUTDIR_SHIFT;
+
+        /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_LAYOUTDIR_MASK}
+         * value indicating that a layout dir has been set to RTL. */
+        const Int32 SCREENLAYOUT_LAYOUTDIR_RTL = 0x02 << SCREENLAYOUT_LAYOUTDIR_SHIFT;
+
+        /** Constant for {@link #screenLayout}: a value indicating that screenLayout is undefined */
+        const Int32 SCREENLAYOUT_UNDEFINED = SCREENLAYOUT_SIZE_UNDEFINED |
+                SCREENLAYOUT_LONG_UNDEFINED | SCREENLAYOUT_LAYOUTDIR_UNDEFINED;
+
+        /**
+         * Special flag we generate to indicate that the screen layout requires
+         * us to use a compatibility mode for apps that are not modern layout
+         * aware.
+         * @hide
+         */
+        const Int32 SCREENLAYOUT_COMPAT_NEEDED = 0x10000000;
+
+
+        const Int32 TOUCHSCREEN_UNDEFINED = 0;
+        const Int32 TOUCHSCREEN_NOTOUCH = 1;
+        const Int32 TOUCHSCREEN_STYLUS = 2;
+        const Int32 TOUCHSCREEN_FINGER = 3;
+
+        const Int32 KEYBOARD_UNDEFINED = 0;
+        const Int32 KEYBOARD_NOKEYS = 1;
+        const Int32 KEYBOARD_QWERTY = 2;
+        const Int32 KEYBOARD_12KEY = 3;
+
+        const Int32 KEYBOARDHIDDEN_UNDEFINED = 0;
+        const Int32 KEYBOARDHIDDEN_NO = 1;
+        const Int32 KEYBOARDHIDDEN_YES = 2;
+        /** Constant matching actual resource implementation. {@hide} */
+        const Int32 KEYBOARDHIDDEN_SOFT = 3;
+
+        const Int32 HARDKEYBOARDHIDDEN_UNDEFINED = 0;
+        const Int32 HARDKEYBOARDHIDDEN_NO = 1;
+        const Int32 HARDKEYBOARDHIDDEN_YES = 2;
+
+        const Int32 NAVIGATION_UNDEFINED = 0;
+        const Int32 NAVIGATION_NONAV = 1;
+        const Int32 NAVIGATION_DPAD = 2;
+        const Int32 NAVIGATION_TRACKBALL = 3;
+        const Int32 NAVIGATION_WHEEL = 4;
+
+        const Int32 NAVIGATIONHIDDEN_UNDEFINED = 0;
+        const Int32 NAVIGATIONHIDDEN_NO = 1;
+        const Int32 NAVIGATIONHIDDEN_YES = 2;
+
+        const Int32 ORIENTATION_UNDEFINED = 0;
+        const Int32 ORIENTATION_PORTRAIT = 1;
+        const Int32 ORIENTATION_LANDSCAPE = 2;
+        const Int32 ORIENTATION_SQUARE = 3;
+
+        const Int32 UI_MODE_TYPE_MASK = 0x0f;
+        const Int32 UI_MODE_TYPE_UNDEFINED = 0x00;
+        const Int32 UI_MODE_TYPE_NORMAL = 0x01;
+        const Int32 UI_MODE_TYPE_DESK = 0x02;
+        const Int32 UI_MODE_TYPE_CAR = 0x03;
+        const Int32 UI_MODE_TYPE_TELEVISION = 0x04;
+        const Int32 UI_MODE_TYPE_APPLIANCE = 0x05;
+        const Int32 UI_MODE_TYPE_WATCH = 0x06;
+
+        const Int32 UI_MODE_NIGHT_MASK = 0x30;
+        const Int32 UI_MODE_NIGHT_UNDEFINED = 0x00;
+        const Int32 UI_MODE_NIGHT_NO = 0x10;
+        const Int32 UI_MODE_NIGHT_YES = 0x20;
+
+        /**
+         * Default value for #screenWidthDp indicating that no width
+         * has been specified.
+         *
+         * @sa #screenWidthDp
+         */
+        const Int32 SCREEN_WIDTH_DP_UNDEFINED = 0;
+
+        /**
+         * Default value for #screenHeightDp indicating that no width
+         * has been specified.
+         *
+         * @sa #screenHeightDp
+         */
+        const Int32 SCREEN_HEIGHT_DP_UNDEFINED = 0;
+
+        /**
+         * Default value for #smallestScreenWidthDp indicating that no width
+         * has been specified.
+         *
+         * @sa #smallestScreenWidthDp
+         */
+        const Int32 SMALLEST_SCREEN_WIDTH_DP_UNDEFINED = 0;
+
+        /**
+         * Default value for #densityDpi indicating that no width
+         * has been specified.
+         *
+         * @sa #densityDpi
+         */
+        const Int32 DENSITY_DPI_UNDEFINED = 0;
+
+        /**
+         * Value for {@link #densityDpi} for resources that scale to any density (vector drawables).
+         * {@hide}
+         */
+        const Int32 DENSITY_DPI_ANY = 0xfffe;
+
+        /**
+         * Value for {@link #densityDpi} for resources that are not meant to be scaled.
+         * {@hide}
+         */
+        const Int32 DENSITY_DPI_NONE = 0xffff;
+
+
+        GetFontScale(
+            [out] Float* fontScale);
+
+        SetFontScale(
+            [in] Float fontScale);
+
+        GetMcc(
+            [out] Int32* mcc);
+
+        SetMcc(
+            [in] Int32 mcc);
+
+        GetMnc(
+            [out] Int32* mnc);
+
+        SetMnc(
+            [in] Int32 mnc);
+
+        GetLocale(
+            [out] ILocale** locale);
+
+        SetLocale(
+            [in] ILocale* locale);
+
+        IsUserSetLocale(
+            [out] Boolean* userSetLocale);
+
+        SetUserSetLocale(
+            [in] Boolean userSetLocale);
+
+        GetScreenLayout(
+            [out] Int32* layout);
+
+        SetScreenLayout(
+            [in] Int32 layout);
+
+        /**
+         * Check if the Configuration's current {@link #screenLayout} is at
+         * least the given size.
+         *
+         * @param size The desired size, either {@link #SCREENLAYOUT_SIZE_SMALL},
+         * {@link #SCREENLAYOUT_SIZE_NORMAL}, {@link #SCREENLAYOUT_SIZE_LARGE}, or
+         * {@link #SCREENLAYOUT_SIZE_XLARGE}.
+         * @return Returns true if the current screen layout size is at least
+         * the given size.
+         */
+        IsLayoutSizeAtLeast(
+            [in] Int32 size,
+            [out] Boolean* locale);
+
+        GetTouchscreen(
+            [out] Int32* touchscreen);
+
+        SetTouchscreen(
+            [in] Int32 touchscreen);
+
+        GetKeyboard(
+            [out] Int32* keyboard);
+
+        SetKeyboard(
+            [in] Int32 keyboard);
+
+        GetKeyboardHidden(
+            [out] Int32* keyboardHidden);
+
+        SetKeyboardHidden(
+            [in] Int32 keyboardHidden);
+
+        GetHardKeyboardHidden(
+            [out] Int32* hardKeyboardHidden);
+
+        SetHardKeyboardHidden(
+            [in] Int32 hardKeyboardHidden);
+
+        GetNavigation(
+            [out] Int32* navigation);
+
+        SetNavigation(
+            [in] Int32 navigation);
+
+        GetNavigationHidden(
+            [out] Int32* navigationHidden);
+
+        SetNavigationHidden(
+            [in] Int32 navigationHidden);
+
+        GetOrientation(
+            [out] Int32* orientation);
+
+        SetOrientation(
+            [in] Int32 orientation);
+
+        GetUiMode(
+            [out] Int32* uiMode);
+
+        SetUiMode(
+            [in] Int32 uiMode);
+
+        GetScreenWidthDp(
+            [out] Int32* screenWidthDp);
+
+        SetScreenWidthDp(
+            [in] Int32 screenWidthDp);
+
+        GetScreenHeightDp(
+            [out] Int32* screenHeightDp);
+
+        SetScreenHeightDp(
+            [in] Int32 screenHeightDp);
+
+        GetSmallestScreenWidthDp(
+            [out] Int32* smallestScreenWidthDp);
+
+        SetSmallestScreenWidthDp(
+            [in] Int32 smallestScreenWidthDp);
+
+        GetDensityDpi(
+            [out] Int32* densityDpi);
+
+        SetDensityDpi(
+            [in] Int32 densityDpi);
+
+        GetSeq(
+            [out] Int32* seq);
+
+        SetSeq(
+            [in] Int32 seq);
+
+        GetCompatScreenWidthDp(
+            [out] Int32 * dp);
+
+        SetCompatScreenWidthDp(
+            [in] Int32 dp);
+
+        GetCompatScreenHeightDp(
+            [out] Int32 * dp);
+
+        SetCompatScreenHeightDp(
+            [in] Int32 dp);
+
+        GetCompatSmallestScreenWidthDp(
+            [out] Int32 * dp);
+
+        SetCompatSmallestScreenWidthDp(
+            [in] Int32 dp);
+
+        SetTo(
+            [in] IConfiguration* source);
+
+        /**
+         * Set this object to the system defaults.
+         */
+        SetToDefaults();
+
+        /** {@hide} */
+        MakeDefault();
+
+        /**
+         * Copy the fields from delta into this Configuration object, keeping
+         * track of which ones have changed.  Any undefined fields in
+         * <var>delta</var> are ignored and not copied in to the current
+         * Configuration.
+         * @return Returns a bit mask of the changed fields, as per #diff.
+         *
+         * @sa #diff
+         */
+        UpdateFrom(
+            [in] IConfiguration* delta,
+            [out] Int32* changes);
+
+        /**
+         * Return a bit mask of the differences between this Configuration
+         * object and the given one.  Does not change the values of either.  Any
+         * undefined fields in <var>delta</var> are ignored.
+         * @return Returns a bit mask indicating which configuration
+         * values has changed, containing any combination of
+         * android.content.pm.ActivityInfo#CONFIG_FONT_SCALE PackageManager.ActivityInfo.CONFIG_FONT_SCALE,
+         * android.content.pm.ActivityInfo#CONFIG_MCC PackageManager.ActivityInfo.CONFIG_MCC,
+         * android.content.pm.ActivityInfo#CONFIG_MNC PackageManager.ActivityInfo.CONFIG_MNC,
+         * android.content.pm.ActivityInfo#CONFIG_LOCALE PackageManager.ActivityInfo.CONFIG_LOCALE,
+         * android.content.pm.ActivityInfo#CONFIG_TOUCHSCREEN PackageManager.ActivityInfo.CONFIG_TOUCHSCREEN,
+         * android.content.pm.ActivityInfo#CONFIG_KEYBOARD PackageManager.ActivityInfo.CONFIG_KEYBOARD,
+         * android.content.pm.ActivityInfo#CONFIG_NAVIGATION PackageManager.ActivityInfo.CONFIG_NAVIGATION,
+         * android.content.pm.ActivityInfo#CONFIG_ORIENTATION PackageManager.ActivityInfo.CONFIG_ORIENTATION, or
+         * android.content.pm.ActivityInfo#CONFIG_SCREEN_LAYOUT PackageManager.ActivityInfo.CONFIG_SCREEN_LAYOUT.
+         *
+         * @sa android.content.pm.ActivityInfo#CONFIG_FONT_SCALE PackageManager.ActivityInfo.CONFIG_FONT_SCALE
+         * @sa android.content.pm.ActivityInfo#CONFIG_MCC PackageManager.ActivityInfo.CONFIG_MCC
+         * @sa android.content.pm.ActivityInfo#CONFIG_MNC PackageManager.ActivityInfo.CONFIG_MNC
+         * @sa android.content.pm.ActivityInfo#CONFIG_LOCALE PackageManager.ActivityInfo.CONFIG_LOCALE
+         * @sa android.content.pm.ActivityInfo#CONFIG_TOUCHSCREEN PackageManager.ActivityInfo.CONFIG_TOUCHSCREEN
+         * @sa android.content.pm.ActivityInfo#CONFIG_KEYBOARD PackageManager.ActivityInfo.CONFIG_KEYBOARD
+         * @sa android.content.pm.ActivityInfo#CONFIG_NAVIGATION PackageManager.ActivityInfo.CONFIG_NAVIGATION
+         * @sa android.content.pm.ActivityInfo#CONFIG_ORIENTATION PackageManager.ActivityInfo.CONFIG_ORIENTATION
+         * @sa android.content.pm.ActivityInfo#CONFIG_SCREEN_LAYOUT PackageManager.ActivityInfo.CONFIG_SCREEN_LAYOUT
+         */
+        Diff(
+            [in] IConfiguration* delta,
+            [out] Int32* changed);
+
+        /**
+         * @hide Return true if the sequence of 'other' is better than this.  Assumes
+         * that 'this' is your current sequence and 'other' is a new one you have
+         * received some how and want to compare with what you have.
+         */
+        IsOtherSeqNewer(
+            [in] IConfiguration* other,
+            [out] Boolean* isBetter);
+
+        GetLayoutDirection(
+            [out] Int32* dir);
+
+        SetLayoutDirection(
+            [in] ILocale* locale);
+
+        Equals(
+            [in] IInterface* that,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IConfiguration* that,
+            [out] Boolean* result);
+
+        ToString(
+            [out] String* result);
+    }
+
+    interface IConfigurationHelper {
+        ResetScreenLayout(
+            [in] Int32 curLayout,
+            [out] Int32* layout);
+
+        ReduceScreenLayout(
+            [in] Int32 curLayout,
+            [in] Int32 longSizeDp,
+            [in] Int32 shortSizeDp,
+            [out] Int32* layout);
+
+        NeedNewResources(
+            [in] Int32 configChanges,
+            [in] Int32 interestingChanges,
+            [out] Boolean* value);
+
+        GetEmpty(
+            [out] IConfiguration** empty);
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

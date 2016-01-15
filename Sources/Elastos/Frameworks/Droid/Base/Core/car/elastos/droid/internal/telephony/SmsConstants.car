@@ -1,0 +1,79 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface ISmsConstants {
+
+        /** User data text encoding code unit size */
+        const Int32 ENCODING_UNKNOWN = 0;
+        const Int32 ENCODING_7BIT = 1;
+        const Int32 ENCODING_8BIT = 2;
+        const Int32 ENCODING_16BIT = 3;
+
+        /** The maximum number of payload septets per message */
+        const Int32 MAX_USER_DATA_SEPTETS = 160;
+
+        /**
+         * The maximum number of payload septets per message if a user data header
+         * is present.  This assumes the header only contains the
+         * CONCATENATED_8_BIT_REFERENCE element.
+         */
+        const Int32 MAX_USER_DATA_SEPTETS_WITH_HEADER = 153;
+
+        /**
+         * This value is not defined in global standard. Only in Korea, this is used.
+         */
+        const Int32 ENCODING_KSC5601 = 4;
+
+        /** The maximum number of payload bytes per message */
+        const Int32 MAX_USER_DATA_BYTES = 140;
+
+        /**
+         * The maximum number of payload bytes per message if a user data header
+         * is present.  This assumes the header only contains the
+         * CONCATENATED_8_BIT_REFERENCE element.
+         */
+        const Int32 MAX_USER_DATA_BYTES_WITH_HEADER = 134;
+
+        /**
+         * Indicates unknown format SMS message.
+         * @hide pending API council approval
+         */
+        const String FORMAT_UNKNOWN = "unknown";
+
+        /**
+         * Indicates a 3GPP format SMS message.
+         * @hide pending API council approval
+         */
+        const String FORMAT_3GPP = "3gpp";
+
+        /**
+         * Indicates a 3GPP2 format SMS message.
+         * @hide pending API council approval
+         */
+        const String FORMAT_3GPP2 = "3gpp2";
+
+    }
+
+    /**
+     * SMS Class enumeration.
+     * See TS 23.038.
+     */
+    enum MessageClass {
+        MessageClass_UNKNOWN,
+        MessageClass_CLASS_0,
+        MessageClass_CLASS_1,
+        MessageClass_CLASS_2,
+        MessageClass_CLASS_3
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

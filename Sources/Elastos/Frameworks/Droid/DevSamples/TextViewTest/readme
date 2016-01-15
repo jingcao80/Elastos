@@ -1,0 +1,10 @@
+
+1)generate R.java
+aapt package -f -m -J gen -S res -I /home/workspace/ElastosRDKforEmulator/Build/Emulator/android_sdk/platforms/android-17/android.jar -M AndroidManifest.xml
+
+2)generate *.apk
+aapt package -f -S res -A assets -I /home/workspace/ElastosRDKforEmulator/Build/Emulator/android_sdk/platforms/android-17/android.jar -M AndroidManifest.xml -F data/hello.apk
+
+3)generate anroid.jar
+cd Platform/Elastos/Framework/res
+aapt package -f -S res -A assets -x -M AndroidManifest.xml -F android.jar

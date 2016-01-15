@@ -1,0 +1,98 @@
+module
+{
+    interface Elastos.Droid.App.Backup.IRestoreObserver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Backup {
+
+    /**
+     * The interface through which an application interacts with the Android backup service to
+     * request backup and restore operations.
+     * Applications instantiate it using the constructor and issue calls through that instance.
+     * <p>
+     * When an application has made changes to data which should be backed up, a
+     * call to {@link #dataChanged()} will notify the backup service. The system
+     * will then schedule a backup operation to occur in the near future. Repeated
+     * calls to {@link #dataChanged()} have no further effect until the backup
+     * operation actually occurs.
+     * <p>
+     * A backup or restore operation for your application begins when the system launches the
+     * {@link android.app.backup.BackupAgent} subclass you've declared in your manifest. See the
+     * documentation for {@link android.app.backup.BackupAgent} for a detailed description
+     * of how the operation then proceeds.
+     * <p>
+     * Several attributes affecting the operation of the backup and restore mechanism
+     * can be set on the <code>
+     * <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+     * tag in your application's AndroidManifest.xml file.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about using BackupManager, read the
+     * <a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a> developer guide.</p></div>
+     *
+     * @attr ref android.R.styleable#AndroidManifestApplication_allowBackup
+     * @attr ref android.R.styleable#AndroidManifestApplication_backupAgent
+     * @attr ref android.R.styleable#AndroidManifestApplication_killAfterRestore
+     * @attr ref android.R.styleable#AndroidManifestApplication_restoreAnyVersion
+     */
+    interface IBackupManager {
+
+        /**
+         * Notifies the Android backup system that your application wishes to back up
+         * new changes to its data.  A backup operation using your application's
+         * {@link android.app.backup.BackupAgent} subclass will be scheduled when you
+         * call this method.
+         */
+        DataChanged();
+
+        /**
+         * Restore the calling application from backup.  The data will be restored from the
+         * current backup dataset if the application has stored data there, or from
+         * the dataset used during the last full device setup operation if the current
+         * backup dataset has no matching data.  If no backup data exists for this application
+         * in either source, a nonzero value will be returned.
+         *
+         * <p>If this method returns zero (meaning success), the OS will attempt to retrieve
+         * a backed-up dataset from the remote transport, instantiate the application's
+         * backup agent, and pass the dataset to the agent's
+         * android.app.backup.BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()
+         * method.
+         *
+         * @sa android.app.backup.BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()
+         *
+         * @param observer The RestoreObserver to receive callbacks during the restore
+         * operation. This must not be null.
+         *
+         * @sa RestoreObserver
+         *
+         * @return Zero on success; nonzero on error.
+         */
+        RequestRestore(
+            [in] IRestoreObserver* observer,
+            [out] Int32* result);
+    }
+
+    interface IBackupManagerHelper {
+        /**
+         * Convenience method for callers who need to indicate that some other package
+         * needs a backup pass.  This can be useful in the case of groups of packages
+         * that share a uid.
+         * <p>
+         * This method requires that the application hold the "android.permission.BACKUP"
+         * permission if the package named in the argument does not run under the same uid
+         * as the caller.
+         *
+         * @param packageName The package name identifying the application to back up.
+         */
+        DataChanged(
+            [in] String packageName);
+    }
+
+    } // namespace Backup
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

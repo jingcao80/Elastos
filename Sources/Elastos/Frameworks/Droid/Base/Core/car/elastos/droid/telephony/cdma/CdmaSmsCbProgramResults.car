@@ -1,0 +1,66 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+    namespace Cdma {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ICdmaSmsCbProgramResults {
+
+        /** Program result: success. */
+        const Int32 RESULT_SUCCESS                  = 0;
+
+        /** Program result: memory limit exceeded. */
+        const Int32 RESULT_MEMORY_LIMIT_EXCEEDED    = 1;
+
+        /** Program result: limit exceeded. */
+        const Int32 RESULT_CATEGORY_LIMIT_EXCEEDED  = 2;
+
+        /** Program result: category already opted in. */
+        const Int32 RESULT_CATEGORY_ALREADY_ADDED   = 3;
+
+        /** Program result: category already opted in. */
+        const Int32 RESULT_CATEGORY_ALREADY_DELETED = 4;
+
+        /** Program result: invalid MAX_MESSAGES. */
+        const Int32 RESULT_INVALID_MAX_MESSAGES     = 5;
+
+        /** Program result: invalid ALERT_OPTION. */
+        const Int32 RESULT_INVALID_ALERT_OPTION     = 6;
+
+        /** Program result: invalid service category name. */
+        const Int32 RESULT_INVALID_CATEGORY_NAME    = 7;
+
+        /** Program result: unspecified programming failure. */
+        const Int32 RESULT_UNSPECIFIED_FAILURE      = 8;
+
+        GetCategory(
+            [out] Int32* category);
+
+        GetLanguage(
+            [out] Int32* language);
+
+        GetCategoryResult(
+            [out] Int32* categoryresult);
+
+        SetCategory(
+            [in] Int32 category);
+
+        SetLanguage(
+            [in] Int32 language);
+
+        SetCategoryResult(
+            [in] Int32 categoryresult);
+    }
+
+    } // namespace Cdma
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,87 @@
+module oneway.eco
+{
+
+    interface IInterface;
+    interface IObject;
+    interface IAspect;
+    interface IClassObject;
+    interface IFoo;
+    interface IFoo2;
+    interface IBar;
+
+    typedef [dummytype] EGuid ClassID;
+    typedef [dummytype] Int32 AggregateType;
+    typedef [dummytype] EMuid InterfaceID;
+
+    interface IInterface {
+    }
+
+    interface IObject {
+        Aggregate(
+            [in] Int32 type, 
+            [in] IInterface * object);
+
+        GetDomain(
+            [out] IInterface ** object);
+
+        GetClassID(
+            [out] ClassID * clsid);
+    }
+
+    interface IAspect {
+        AspectAggregate(
+            [in] AggregateType type, 
+            [in] IInterface * object);
+
+        AspectGetDomain(
+            [out] IInterface ** object);
+
+        GetAspectID(
+            [out] ClassID * clsid);
+    }
+
+    interface IClassObject {
+        CreateObject(
+            [in] IInterface * outer, 
+            [in] InterfaceID riid, 
+            [out] IInterface ** object);
+
+        StayResident(
+            [in] Boolean bIsStayResident);
+    }
+
+    [
+        oneway
+    ]
+    interface IFoo {
+        [oneway]Foo1();
+
+        [oneway]Foo2();
+    }
+
+    [
+        local        oneway
+    ]
+    interface IFoo2 {
+        [oneway]Foo();
+    }
+
+    interface IBar {
+        [oneway]Bar1();
+
+        Bar2();
+
+        [oneway]Bar3();
+
+        [oneway]Bar4();
+    }
+
+    [
+
+    ]
+    class CFooBar {
+        interface IFoo;
+        interface IFoo2;
+        interface IBar;
+    }
+}

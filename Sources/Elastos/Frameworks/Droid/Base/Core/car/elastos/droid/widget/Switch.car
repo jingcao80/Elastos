@@ -1,0 +1,258 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Graphics.ITypeface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.Widget.ITextView
+     * extends Elastos.Droid.Widget.ICompoundButton
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.ICheckable
+     */
+    [local]
+    interface ISwitch {
+        /**
+         * Sets the switch text color, size, style, hint color, and highlight color
+         * from the specified TextAppearance resource.
+         *
+         * @attr ref android.R.styleable#Switch_switchTextAppearance
+         */
+        SetSwitchTextAppearance(
+            [in] IContext* ctx,
+            [in] Int32 resid);
+
+        /**
+         * Sets the typeface and style in which the text should be displayed on the
+         * switch, and turns on the fake bold and italic bits in the Paint if the
+         * Typeface that you provided does not have all the bits in the
+         * style that you specified.
+         */
+        SetSwitchTypeface(
+            [in] ITypeface* tf,
+            [in] Int32 style);
+
+        /**
+         * Sets the typeface in which the text should be displayed on the switch.
+         * Note that not all Typeface families actually have bold and italic
+         * variants, so you may need to use
+         * {@link #setSwitchTypeface(Typeface, Int32)} to get the appearance
+         * that you actually want.
+         *
+         * @attr ref android.R.styleable#TextView_typeface
+         * @attr ref android.R.styleable#TextView_textStyle
+         */
+        SetSwitchTypeface(
+            [in] ITypeface* tf);
+
+        /**
+         * Set the amount of horizontal padding between the switch and the associated text.
+         *
+         * @param pixels Amount of padding in pixels
+         *
+         * @attr ref android.R.styleable#Switch_switchPadding
+         */
+        SetSwitchPadding(
+            [in] Int32 pixels);
+
+        /**
+         * Get the amount of horizontal padding between the switch and the associated text.
+         *
+         * @return Amount of padding in pixels
+         *
+         * @attr ref android.R.styleable#Switch_switchPadding
+         */
+        GetSwitchPadding(
+            [out] Int32* padding);
+
+        /**
+         * Set the minimum width of the switch in pixels. The switch's width will be the maximum
+         * of this value and its measured width as determined by the switch drawables and text used.
+         *
+         * @param pixels Minimum width of the switch in pixels
+         *
+         * @attr ref android.R.styleable#Switch_switchMinWidth
+         */
+        SetSwitchMinWidth(
+            [in] Int32 pixels);
+
+        /**
+         * Get the minimum width of the switch in pixels. The switch's width will be the maximum
+         * of this value and its measured width as determined by the switch drawables and text used.
+         *
+         * @return Minimum width of the switch in pixels
+         *
+         * @attr ref android.R.styleable#Switch_switchMinWidth
+         */
+        GetSwitchMinWidth(
+            [out] Int32* width);
+
+        /**
+         * Set the horizontal padding around the text drawn on the switch itself.
+         *
+         * @param pixels Horizontal padding for switch thumb text in pixels
+         *
+         * @attr ref android.R.styleable#Switch_thumbTextPadding
+         */
+        SetThumbTextPadding(
+            [in] Int32 pixels);
+
+        /**
+         * Get the horizontal padding around the text drawn on the switch itself.
+         *
+         * @return Horizontal padding for switch thumb text in pixels
+         *
+         * @attr ref android.R.styleable#Switch_thumbTextPadding
+         */
+        GetThumbTextPadding(
+            [out] Int32* padding);
+
+        /**
+         * Set the drawable used for the track that the switch slides within.
+         *
+         * @param track Track drawable
+         *
+         * @attr ref android.R.styleable#Switch_track
+         */
+        SetTrackDrawable(
+            [in] IDrawable* track);
+
+        /**
+         * Set the drawable used for the track that the switch slides within.
+         *
+         * @param resId Resource ID of a track drawable
+         *
+         * @attr ref android.R.styleable#Switch_track
+         */
+        SetTrackResource(
+            [in] Int32 resId);
+
+        /**
+         * Get the drawable used for the track that the switch slides within.
+         *
+         * @return Track drawable
+         *
+         * @attr ref android.R.styleable#Switch_track
+         */
+        GetTrackDrawable(
+            [out] IDrawable** drawable);
+
+        /**
+         * Set the drawable used for the switch "thumb" - the piece that the user
+         * can physically touch and drag along the track.
+         *
+         * @param thumb Thumb drawable
+         *
+         * @attr ref android.R.styleable#Switch_thumb
+         */
+        SetThumbDrawable(
+            [in] IDrawable* thumb);
+
+        /**
+         * Set the drawable used for the switch "thumb" - the piece that the user
+         * can physically touch and drag along the track.
+         *
+         * @param resId Resource ID of a thumb drawable
+         *
+         * @attr ref android.R.styleable#Switch_thumb
+         */
+        SetThumbResource(
+            [in] Int32 resId);
+
+        /**
+         * Get the drawable used for the switch "thumb" - the piece that the user
+         * can physically touch and drag along the track.
+         *
+         * @return Thumb drawable
+         *
+         * @attr ref android.R.styleable#Switch_thumb
+         */
+        GetThumbDrawable(
+            [out] IDrawable** drawable);
+
+        /**
+         * Specifies whether the track should be split by the thumb. When true,
+         * the thumb's optical bounds will be clipped out of the track drawable,
+         * then the thumb will be drawn into the resulting gap.
+         *
+         * @param splitTrack Whether the track should be split by the thumb
+         *
+         * @attr ref android.R.styleable#Switch_splitTrack
+         */
+        SetSplitTrack(
+            [in] Boolean splitTrack);
+
+        /**
+         * Returns whether the track should be split by the thumb.
+         *
+         * @attr ref android.R.styleable#Switch_splitTrack
+         */
+        GetSplitTrack(
+            [out] Boolean* track);
+
+        /**
+         * Returns the text displayed when the button is in the checked state.
+         *
+         * @attr ref android.R.styleable#Switch_textOn
+         */
+        GetTextOn(
+            [out] ICharSequence** c);
+
+        /**
+         * Sets the text displayed when the button is in the checked state.
+         *
+         * @attr ref android.R.styleable#Switch_textOn
+         */
+        SetTextOn(
+            [in] ICharSequence* textOn);
+
+        /**
+         * Returns the text displayed when the button is not in the checked state.
+         *
+         * @attr ref android.R.styleable#Switch_textOff
+         */
+        GetTextOff(
+            [out] ICharSequence** off);
+
+        /**
+         * Sets the text displayed when the button is not in the checked state.
+         *
+         * @attr ref android.R.styleable#Switch_textOff
+         */
+        SetTextOff(
+            [in] ICharSequence* textOff);
+
+        /**
+         * Sets whether the on/off text should be displayed.
+         *
+         * @param showText {@code true} to display on/off text
+         * @attr ref android.R.styleable#Switch_showText
+         */
+        SetShowText(
+            [in] Boolean showText);
+
+        /**
+         * @return whether the on/off text should be displayed
+         * @attr ref android.R.styleable#Switch_showText
+         */
+        GetShowText(
+            [out] Boolean* showText);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

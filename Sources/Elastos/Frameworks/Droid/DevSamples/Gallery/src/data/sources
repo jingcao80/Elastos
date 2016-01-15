@@ -1,0 +1,24 @@
+TARGET_NAME = data
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../sources.inc
+INCLUDES += ../../
+
+IMPORTS = Elastos.Droid.Core.eco
+
+SOURCES += BucketHelper.cpp
+SOURCES += DataSourceHelper.cpp
+SOURCES += AsyncImageLoader.cpp
+#SOURCES += Path.cpp
+#SOURCES += PathMatcher.cpp
+#SOURCES += MediaObject.cpp
+#SOURCES += MediaDetails.cpp
+#SOURCES += MediaItem.cpp
+#SOURCES += LocalMediaItem.cpp
+#SOURCES += LocalImage.cpp
+#SOURCES += MediaSet.cpp
+#SOURCES += LocalAlbum.cpp
+#SOURCES += DataManager.cpp
+#SOURCES += MediaSource.cpp
+#SOURCES += LocalSource.cpp
+SOURCES += ImageCacheService.cpp

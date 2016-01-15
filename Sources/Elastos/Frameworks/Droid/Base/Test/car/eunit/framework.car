@@ -1,0 +1,81 @@
+
+module
+{
+    merge("framework/Errors.car");
+    merge("framework/IProtectable.car");
+    merge("framework/ITest.car");
+    merge("framework/ITestAnnotation.car");
+    merge("framework/ITestCase.car");
+    merge("framework/ITestFailure.car");
+    merge("framework/ITestListener.car");
+    merge("framework/ITestResult.car");
+    merge("framework/ITestSuite.car");
+
+    namespace Eunit {
+    namespace Framework {
+
+    class CTestFailure {
+        constructor(
+            [in] ITest* failedTest,
+            [in] ECode ecError,
+            [in] String message,
+            [in] String backtrace);
+
+        interface ITestFailure;
+    }
+
+    class CTestResult {
+        constructor();
+
+        interface ITestResult;
+    }
+
+    [deprecated, local]
+    class CTestSuite {
+        constructor();
+
+        /**
+         * Constructs a TestSuite from the given class. Adds all the methods
+         * starting with "test" as test cases to the suite.
+         * Parts of this method were written at 2337 meters in the Hueffihuette,
+         * Kanton Uri
+         */
+        constructor(
+            [in] IClassInfo* theClass);
+
+        /**
+         * Constructs a TestSuite from the given class with the given name.
+         * @see TestSuite#TestSuite(Class)
+         */
+        constructor(
+            [in] IClassInfo* theClass,
+            [in] String name);
+
+        /**
+         * Constructs an empty TestSuite.
+         */
+        constructor(
+            [in] String name);
+
+        /**
+         * Constructs a TestSuite from the given array of classes.
+         * @param classes {@link TestCase}s
+         */
+        constructor(
+            [in] ArrayOf<IClassInfo*>* classes);
+
+        /**
+         * Constructs a TestSuite from the given array of classes with the given name.
+         * @see TestSuite#TestSuite(Class[])
+         */
+        constructor(
+            [in] ArrayOf<IClassInfo*>* classes,
+            [in] String name);
+
+        interface ITest;
+        interface ITestSuite;
+    }
+
+    } // namespace Framework
+    } // namespace Eunit
+}

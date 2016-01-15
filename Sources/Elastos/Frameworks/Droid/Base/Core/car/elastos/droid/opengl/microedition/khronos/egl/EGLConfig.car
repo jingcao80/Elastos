@@ -1,0 +1,16 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Egl {
+
+    interface IEGLConfig {
+    }
+
+    } // namepsace Egl
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

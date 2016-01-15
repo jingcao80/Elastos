@@ -1,0 +1,84 @@
+
+module
+{
+    using interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * A simple object for retrieving the results of a DHCP request.
+     * Optimized (attempted) for that jni interface
+     * TODO - remove when DhcpInfo is deprecated.  Move the remaining api to LinkProperties.
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IStaticIpConfiguration;
+     * interface IParcelable;
+     */
+    interface IDhcpResults {
+        GetServerAddress(
+            [out] IInetAddress** result);
+
+        SetServerAddress(
+            [in] IInetAddress* serverAddress);
+
+        /** Vendor specific information (from RFC 2132). */
+        GetVendorInfo(
+            [out] String* result);
+
+        GetLeaseDuration(
+            [out] Int32* result);
+
+        /**
+         * Updates the DHCP fields that need to be retained from
+         * original DHCP request if the current renewal shows them
+         * being empty.
+         */
+        UpdateFromDhcpRequest(
+            [in] IDhcpResults* orig);
+
+        /**
+         * Test if this DHCP lease includes vendor hint that network link is
+         * metered, and sensitive to heavy data transfers.
+         */
+        HasMeteredHint(
+            [out] Boolean* result);
+
+        Clear();
+
+        // Utils for jni population - false on success
+        // Not part of the superclass because they're only used by the JNI iterface to the DHCP daemon.
+        SetIpAddress(
+            [in] String addrString,
+            [in] Int32 prefixLength,
+            [out] Boolean* result);
+
+        SetGateway(
+            [in] String addrString,
+            [out] Boolean* result);
+
+        AddDns(
+            [in] String addrString,
+            [out] Boolean* result);
+
+        SetServerAddress(
+            [in] String addrString,
+            [out] Boolean* result);
+
+        SetLeaseDuration(
+            [in] Int32 duration);
+
+        SetVendorInfo(
+            [in] String info);
+
+        SetDomains(
+            [in] String domains);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

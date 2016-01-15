@@ -1,0 +1,45 @@
+
+TARGET_NAME= animation
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+INCLUDES += $(PREBUILD_INC)/skia/utils
+INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/effects
+INCLUDES += $(PREBUILD_INC)/skia/images
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AnimationUtils.cpp
+SOURCES += CAnimationUtils.cpp
+SOURCES += Animation.cpp
+SOURCES += AnimationSet.cpp
+SOURCES += CAnimationSet.cpp
+SOURCES += AlphaAnimation.cpp
+SOURCES += CTransformation.cpp
+SOURCES += CAccelerateDecelerateInterpolator.cpp
+SOURCES += CAccelerateInterpolator.cpp
+SOURCES += CAnticipateInterpolator.cpp
+SOURCES += CAnticipateOvershootInterpolator.cpp
+SOURCES += CBounceInterpolator.cpp
+SOURCES += CCycleInterpolator.cpp
+SOURCES += CDecelerateInterpolator.cpp
+SOURCES += CLinearInterpolator.cpp
+SOURCES += COvershootInterpolator.cpp
+SOURCES += RotateAnimation.cpp
+SOURCES += ScaleAnimation.cpp
+SOURCES += TranslateAnimation.cpp
+SOURCES += CAlphaAnimation.cpp
+SOURCES += CRotateAnimation.cpp
+SOURCES += CScaleAnimation.cpp
+SOURCES += CTranslateAnimation.cpp
+SOURCES += LayoutAnimationController.cpp
+SOURCES += CLayoutAnimationController.cpp
+SOURCES += GridLayoutAnimationController.cpp
+SOURCES += CGridLayoutAnimationController.cpp
+SOURCES += CClipRectAnimation.cpp
+SOURCES += CPathInterpolator.cpp

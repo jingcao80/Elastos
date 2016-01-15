@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Droid.Location.IICountryListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * The API for detecting the country where the user is.
+     *
+     * {@hide}
+     */
+    interface IICountryDetector {
+        /**
+         * Start detecting the country that the user is in.
+         * @return the country if it is available immediately, otherwise null will be returned.
+         */
+        DetectCountry(
+            [out] ICountry** country);
+
+        /**
+         * Add a listener to receive the notification when the country is detected or changed.
+         */
+        AddCountryListener(
+            [in] IICountryListener* listener);
+
+        /**
+         * Remove the listener
+         */
+        RemoveCountryListener(
+            [in] IICountryListener* listener);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}

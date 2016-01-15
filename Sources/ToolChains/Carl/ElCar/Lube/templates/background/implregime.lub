@@ -1,0 +1,94 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+
+ECode _${name}::ObjectEnter(
+    /* [in] */ PInterface pObject)
+{
+    ECode ec;
+    
+    if (pObject == NULL) return E_INVALID_ARGUMENT;
+
+    ec = this->OnObjectEntering(pObject);
+    if (FAILED(ec)) return ec;
+$IF attrib is "aspect"
+
+$  WITH all aspects DO
+    ec = _CObject_AttachAspect(pObject, ECLSID_${name});
+    if (FAILED(ec)) {
+        goto ErrorExit;
+    }
+$  END DO ;; all aspects
+$END IF ;; attrib is "aspect"
+
+$IF lubeoption is not "inkernel"
+    _Impl_EnterProtectedZone();
+$END IF;; not InKernel
+    ec = this->OnObjectEntered(pObject);
+    IObject *pObj;
+    pObj = (IObject*)pObject->Probe(EIID_IObject);
+    assert(NULL != pObj);
+    pObj->Aggregate(AggrType_EnteredRegime, (PInterface)(PRegime)this);
+$IF lubeoption is not "inkernel"
+    _Impl_LeaveProtectedZone();
+$END IF;; not InKernel
+    if (FAILED(ec)) goto ErrorExit;
+    return NOERROR;
+
+ErrorExit:
+    return ec;
+}
+
+ECode _${name}::ObjectLeave(
+    /* [in] */ PInterface pObject)
+{
+    ECode ec;
+    
+    if (pObject == NULL) return E_INVALID_ARGUMENT;
+
+$IF lubeoption is not "inkernel"
+    _Impl_EnterProtectedZone();
+$END IF;; not inkernel
+    ec = this->OnObjectLeaving(pObject);
+$IF lubeoption is not "inkernel"
+    _Impl_LeaveProtectedZone();
+$END IF;; not inkernel
+    if (FAILED(ec)) return ec;
+$IF attrib is "aspect"
+
+$  WITH first aspect DO
+    ec = _CObject_DetachAspect(pObject, ECLSID_${name});
+    if (FAILED(ec)) return ec;
+$  END DO
+$END IF
+    IObject *pObj;
+    pObj = (IObject*)pObject->Probe(EIID_IObject);
+    assert(NULL != pObj);
+    pObj->Aggregate(AggrType_LeftRegime, (PInterface)(PRegime)this);
+    this->OnObjectLeft(pObject);
+    return NOERROR;
+}
+
+ECode _${name}::CreateObject(
+    /* [in] */ const ClassID & clsid,
+    /* [in] */ const InterfaceID & iid,
+    /* [out] */ PInterface * ppObject)
+{
+    PInterface pObject = NULL;
+
+    if (ppObject == NULL) return E_INVALID_ARGUMENT;
+
+    ECode ec = _CObject_CreateInstance(clsid, RGM_SAME_DOMAIN, iid, &pObject );
+    if (FAILED(ec)) return ec;
+
+    IObject *pObj = (IObject*)pObject->Probe(EIID_IObject);
+    if (NULL != pObj) {
+        ec = _CObject_EnterRegime(pObject, (IRegime*)this);
+        if (FAILED(ec)) pObject->Release();
+    }
+    *ppObject = pObject;
+
+    return ec;
+}

@@ -1,0 +1,475 @@
+module
+{
+    merge("app/AlertActivity.car");
+    merge("app/AlertController.car");
+    merge("app/ChooserActivity.car");
+    merge("app/DisableCarModeActivity.car");
+    merge("app/ExternalMediaFormatActivity.car");
+    merge("app/HeavyWeightSwitcherActivity.car");
+    merge("app/IntentForwarderActivity.car");
+    merge("app/LocalePicker.car");
+    merge("app/MediaRouteChooserDialog.car");
+    merge("app/MediaRouteChooserDialogFragment.car");
+    merge("app/MediaRouteControllerDialog.car");
+    merge("app/MediaRouteControllerDialogFragment.car");
+    merge("app/MediaRouteDialogPresenter.car");
+    merge("app/NetInitiatedActivity.car");
+    merge("app/PlatLogoActivity.car");
+    merge("app/ProcessMap.car");
+    merge("app/ProcessStats.car");
+    merge("app/ResolverActivity.car");
+    merge("app/RestrictionsPinActivity.car");
+    merge("app/ToolbarActionBar.car");
+    merge("app/WindowDecorActionBar.car");
+
+    interface Elastos.Droid.App.IActionBar;
+    interface Elastos.Droid.App.IActionBarOnNavigationListener;
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.App.IDialog;
+    interface Elastos.Droid.App.IDialogFragment;
+    interface Elastos.Droid.App.IFragment;
+    interface Elastos.Droid.App.IListFragment;
+    interface Elastos.Droid.Content.IComponentCallbacks;
+    interface Elastos.Droid.Content.IComponentCallbacks2;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContextWrapper;
+    interface Elastos.Droid.Content.IDialogInterface;
+    interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    interface Elastos.Droid.Internal.Widget.IActionBarVisibilityCallback;
+    interface Elastos.Droid.Text.ITextWatcher;
+    interface Elastos.Droid.Text.INoCopySpan;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.View.IContextThemeWrapper;
+    interface Elastos.Droid.View.ILayoutInflaterFactory;
+    interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    interface Elastos.Droid.View.IKeyEventCallback;
+    interface Elastos.Droid.View.IOnGlobalLayoutListener;
+    interface Elastos.Droid.View.IOnTouchModeChangeListener;
+    interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.View.IViewParent;
+    interface Elastos.Droid.View.IViewManager;
+    interface Elastos.Droid.View.IViewOnClickListener;
+    interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    interface Elastos.Droid.View.IWindow;
+    interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    interface Elastos.Droid.Widget.IAdapterView;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+    interface Elastos.Droid.Widget.IAbsListView;
+    interface Elastos.Droid.Widget.IFilterListener;
+    interface Elastos.Droid.Widget.IListView;
+    interface Elastos.Droid.Widget.IOnEditorActionListener;
+    interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback;
+    interface Elastos.Droid.Widget.IToolbar;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    [local]
+    class CAlertController {
+        constructor(
+            [in] IContext* ctx,
+            [in] IDialogInterface* di,
+            [in] IWindow* window);
+
+        interface IAlertController;
+    }
+
+    [local]
+    class CAlertControllerAlertParams {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IAlertControllerAlertParams;
+    }
+
+    class CChooserActivity {
+        constructor();
+
+        interface IChooserActivity;
+        interface IResolverActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IAdapterViewOnItemClickListener;
+    }
+
+    class CDisableCarModeActivity {
+        constructor();
+
+        interface IDisableCarModeActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CExternalMediaFormatActivity {
+        constructor();
+
+        interface IExternalMediaFormatActivity;
+        interface IAlertActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IDialogInterface;
+        interface IDialogInterfaceOnClickListener;
+    }
+
+    class CHeavyWeightSwitcherActivity {
+        constructor();
+
+        interface IHeavyWeightSwitcherActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CIntentForwarderActivity {
+        constructor();
+
+        interface IIntentForwarderActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CLocalePicker {
+        constructor();
+
+        interface ILocalePicker;
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    [local]
+    class CMediaRouteChooserDialog {
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme);
+
+        interface IMediaRouteChooserDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CMediaRouteChooserDialogFragment {
+        constructor();
+
+        interface IMediaRouteChooserDialogFragment;
+        interface IDialogFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+    }
+
+    [local]
+    class CMediaRouteControllerDialog {
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme);
+
+        interface IMediaRouteControllerDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CMediaRouteControllerDialogFragment {
+        constructor();
+
+        interface IMediaRouteControllerDialogFragment;
+        interface IDialogFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+    }
+
+    singleton class CMediaRouteDialogPresenter {
+        interface IMediaRouteDialogPresenter;
+    }
+
+    singleton class CLocalePickerHelper {
+        interface ILocalePickerHelper;
+    }
+
+    class CNavItemSelectedListener {
+        constructor(
+            [in] IActionBarOnNavigationListener* listener);
+
+        interface IAdapterViewOnItemSelectedListener;
+    }
+
+    class CNetInitiatedActivity {
+        constructor();
+
+        interface INetInitiatedActivity;
+        interface IAlertActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IDialogInterface;
+        interface IDialogInterfaceOnClickListener;
+    }
+
+    class CPlatLogoActivity {
+        constructor();
+
+        interface IPlatLogoActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CProcessMap {
+        constructor();
+
+        interface IProcessMap;
+    }
+
+    class CProcessStats {
+        constructor();
+
+        constructor(
+            [in] Boolean running);
+
+        interface IProcessStats;
+        interface IParcelable;
+    }
+
+    class CProcessStateHolder {
+        constructor(
+            [in] Int32 appVersion);
+
+        interface IProcessStateHolder;
+    }
+
+    [deprecated]
+    class CProcessDataCollection {
+        constructor(
+            [in] ArrayOf<Int32>* screenStates,
+            [in] ArrayOf<Int32>* memStates,
+            [in] ArrayOf<Int32>* procStates);
+
+        interface IProcessDataCollection;
+    }
+
+    [deprecated]
+    class CTotalMemoryUseCollection {
+        constructor(
+            [in] ArrayOf<Int32>* screenStates,
+            [in] ArrayOf<Int32>* memStates);
+
+        interface ITotalMemoryUseCollection;
+    }
+
+    singleton class CProcessStatsHelper {
+        interface IProcessStatsHelper;
+    }
+
+    class CResolverActivity {
+        constructor();
+
+        interface IResolverActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IAdapterViewOnItemClickListener;
+    }
+
+    [local]
+    class CRecycleListView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IRecycleListView;
+        interface IListView;
+        interface IAbsListView;
+        interface IAdapterView;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface ITextWatcher;
+        interface INoCopySpan;
+        interface IOnGlobalLayoutListener;
+        interface IFilterListener;
+        interface IOnTouchModeChangeListener;
+        interface IRemoteAdapterConnectionCallback;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    class CRestrictionsPinActivity {
+        constructor();
+
+        interface IRestrictionsPinActivity;
+        interface IAlertActivity;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IDialogInterface;
+        interface IDialogInterfaceOnClickListener;
+        interface IViewOnClickListener;
+        interface ITextWatcher;
+        interface INoCopySpan;
+        interface IOnEditorActionListener;
+    }
+
+    [local]
+    class CToolbarActionBar {
+        constructor(
+            [in] IToolbar* toolbar,
+            [in] ICharSequence* title,
+            [in] IWindowCallback* windowCallback);
+
+        interface IToolbarActionBar;
+        interface IActionBar;
+    }
+
+    [local]
+    class CWindowDecorActionBar {
+        constructor(
+            [in] IActivity* activity);
+
+        constructor(
+            [in] IDialog* dialog);
+
+        /**
+         * Only for edit mode.
+         * @hide
+         */
+        constructor(
+            [in] IView* layout);
+
+        interface IWindowDecorActionBar;
+        interface IActionBar;
+        interface IActionBarVisibilityCallback;
+    }
+
+    } // namespace App
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

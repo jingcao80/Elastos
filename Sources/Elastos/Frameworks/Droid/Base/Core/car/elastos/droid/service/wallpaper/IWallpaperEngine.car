@@ -1,0 +1,44 @@
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Wallpaper {
+
+    /**
+     * @hide
+     */
+     [oneway]
+    interface IIWallpaperEngine {
+        SetDesiredSize(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        SetDisplayPadding(
+            [in] IRect* padding);
+
+        SetVisibility(
+            [in] Boolean visible);
+
+        DispatchPointer(
+            [in] IMotionEvent* event);
+
+        DispatchWallpaperCommand(
+            [in] String action,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] IBundle* extras);
+
+        Destroy();
+    }
+
+    } //Wallpaper
+    } //Service
+    } //Droid
+    } //Elastos
+}

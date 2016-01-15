@@ -1,0 +1,52 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * Extended Key Usage Extension (OID == 2.5.29.37).
+     *
+     * The ASN.1 definition for Extended Key Usage Extension is:
+     *
+     * <pre>
+     *  id-ce-extKeyUsage OBJECT IDENTIFIER ::= { id-ce 37 }
+     *
+     *  ExtKeyUsageSyntax ::= SEQUENCE SIZE (1..MAX) OF KeyPurposeId
+     *
+     *  KeyPurposeId ::= OBJECT IDENTIFIER
+     * </pre>
+     * (as specified in RFC 3280  http://www.ietf.org/rfc/rfc3280.txt
+     */
+    interface IExtendedKeyUsage extends IExtensionValue {
+        /**
+         * Returns the list of string representation of OIDs corresponding
+         * to key purpose IDs.
+         */
+        GetExtendedKeyUsage(
+            [out] IList** extendedKeyUsage);
+    }
+
+    interface IExtendedKeyUsageHelper {
+        /**
+         * ASN.1 DER X.509 EDIPartyName encoder/decoder class.
+         */
+        GetASN1(
+            [out] IASN1Type** asn1);
+
+        SetASN1(
+            [in] IASN1Type* asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

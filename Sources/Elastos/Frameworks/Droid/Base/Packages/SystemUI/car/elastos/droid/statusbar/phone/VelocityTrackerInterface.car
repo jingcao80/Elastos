@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * An interface for a velocity tracker to delegate. To be implemented by different velocity tracking
+     * algorithms.
+     */
+    interface IVelocityTrackerInterface {
+
+        AddMovement(
+            [in] IMotionEvent* event);
+
+        ComputeCurrentVelocity(
+            [in] Int32 units);
+
+        GetXVelocity(
+            [out] Float* result);
+
+        GetYVelocity(
+            [out] Float* result);
+
+        Recycle();
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

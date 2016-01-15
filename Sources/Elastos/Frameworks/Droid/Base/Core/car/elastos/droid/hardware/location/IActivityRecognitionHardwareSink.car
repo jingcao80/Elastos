@@ -1,0 +1,29 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Location.IActivityChangedEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * Activity Recognition Hardware provider Sink interface.
+     * This interface can be used to implement sinks to receive activity notifications.
+     *
+     * @hide
+     */
+    interface IIActivityRecognitionHardwareSink {
+        /**
+         * Activity changed event.
+         */
+        OnActivityChanged(
+            [in] IActivityChangedEvent* event);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

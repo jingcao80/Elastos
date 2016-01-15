@@ -1,0 +1,36 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Trust {
+
+    /**
+     * Communication channel from the TrustAgentService back to TrustManagerService.
+     * @hide
+     */
+     [oneway]
+    interface IITrustAgentServiceCallback {
+        GrantTrust(
+            [in] ICharSequence* message,
+            [in] Int64 durationMs,
+            [in] Boolean initiatedByUser);
+
+        RevokeTrust();
+
+        SetManagingTrust(
+            [in] Boolean managingTrust);
+
+        OnSetTrustAgentFeaturesEnabledCompleted(
+            [in] Boolean result,
+            [in] IBinder* token);
+    }
+
+    } // namespace Trust
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,454 @@
+module
+{
+    interface Elastos.Math.IBigDecimal;
+    interface Elastos.Utility.ICalendar;
+    interface Elastos.Utility.IMap;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IReader;
+    interface Elastos.Net.IURL;
+    interface Elastos.Sql.IRef;
+    interface Elastos.Sql.IClob;
+    interface Elastos.Sql.IBlob;
+    interface Elastos.Sql.IArray;
+    interface Elastos.Sql.IRowId;
+    interface Elastos.Sql.INClob;
+    interface Elastos.Sql.ISQLXML;
+    interface Elastos.Sql.ITimestamp;
+    interface Elastos.Sql.ISQLDate;
+    interface Elastos.Sql.ITime;
+
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+    namespace JDBC {
+
+    /**
+      * @Involve
+      * interface Elastos.Sql.SQLite.JDBC.IJDBCStatement;
+      * interface Elastos.Sql.IStatement;
+      * interface Elastos.Sql.IWrapper;
+      */
+    interface IJDBCPreparedStatement {
+        RegisterOutputParameter(
+            [in] String parameterName,
+            [in] Int32 sqlType);
+
+        RegisterOutputParameter(
+            [in] String parameterName,
+            [in] Int32 sqlType,
+            [in] Int32 scale);
+
+        RegisterOutputParameter(
+            [in] String parameterName,
+            [in] Int32 sqlType,
+            [in] String typeName);
+
+        GetURL(
+            [in] Int32 parameterIndex,
+            [out] IURL ** url);
+
+        SetNull(
+            [in] String parameterName,
+            [in] Int32 sqlType);
+
+        SetBoolean(
+            [in] String parameterName,
+            [in] Boolean val);
+
+        SetByte(
+            [in] String parameterName,
+            [in] Byte val);
+
+        SetInt16(
+            [in] String parameterName,
+            [in] Int16 val);
+
+        SetInt32(
+            [in] String parameterName,
+            [in] Int32 val);
+
+        SetInt64(
+            [in] String parameterName,
+            [in] Int64 val);
+
+        SetFloat(
+            [in] String parameterName,
+            [in] Float val);
+
+        SetDouble(
+            [in] String parameterName,
+            [in] Double val);
+
+        SetBigDecimal(
+            [in] String parameterName,
+            [in] IBigDecimal * val);
+
+        SetString(
+            [in] String parameterName,
+            [in] String val);
+
+        SetBytes(
+            [in] String parameterName,
+            [in] ArrayOf<Byte> val);
+
+        SetDate(
+            [in] String parameterName,
+            [in] ISQLDate * val);
+
+        SetTime(
+            [in] String parameterName,
+            [in] ITime * val);
+
+        SetTimestamp(
+            [in] String parameterName,
+            [in] ITimestamp * val);
+
+        SetAsciiStream(
+            [in] String parameterName,
+            [in] IInputStream * s,
+            [in] Int32 length);
+
+        SetBinaryStream(
+            [in] String parameterName,
+            [in] IInputStream * s,
+            [in] Int32 length);
+
+        SetObject(
+            [in] String parameterName,
+            [in] IObject * val,
+            [in] Int32 targetSqlType,
+            [in] Int32 scale);
+
+        SetObject(
+            [in] String parameterName,
+            [in] IObject * val,
+            [in] Int32 targetSqlType);
+
+        SetObject(
+            [in] String parameterName,
+            [in] IObject * val);
+
+        SetCharacterStream(
+            [in] String parameterName,
+            [in] IReader * r,
+            [in] Int32 length);
+
+        SetDate(
+            [in] String parameterName,
+            [in] ISQLDate * val,
+            [in] ICalendar * cal);
+
+        SetTime(
+            [in] String parameterName,
+            [in] ITime * val,
+            [in] ICalendar * cal);
+
+        SetTimestamp(
+            [in] String parameterName,
+            [in] ITimestamp * val,
+            [in] ICalendar * cal);
+
+        SetNull(
+            [in] String parameterName,
+            [in] Int32 sqlType,
+            [in] String typeName);
+
+        GetString(
+            [in] String parameterName,
+            [out] String * str);
+
+        GetBoolean(
+            [in] String parameterName,
+            [out] Boolean * value);
+
+        GetByte(
+            [in] String parameterName,
+            [out] Byte * outbyte);
+
+        GetInt16(
+            [in] String parameterName,
+            [out] Int16 * value);
+
+        GetInt32(
+            [in] String parameterName,
+            [out] Int32 * value);
+
+        GetInt64(
+            [in] String parameterName,
+            [out] Int64 * value);
+
+        GetFloat(
+            [in] String parameterName,
+            [out] Float * value);
+
+        GetDouble(
+            [in] String parameterName,
+            [out] Double * value);
+
+        GetBytes(
+            [in] String parameterName,
+            [out, callee] ArrayOf<Byte> * outarray);
+
+        GetDate(
+            [in] String parameterName,
+            [out] ISQLDate ** thedate);
+
+        GetTime(
+            [in] String parameterName,
+            [out] ITime ** thetime);
+
+        GetTimestamp(
+            [in] String parameterName,
+            [out] ITimestamp ** timestamp);
+
+        GetObject(
+            [in] String parameterName,
+            [out] IObject ** theobject);
+
+        GetObject(
+            [in] Int32 parameterIndex,
+            [out] IObject ** theobject);
+
+        GetBigDecimal(
+            [in] String parameterName,
+            [out] IBigDecimal ** bigdecimal);
+
+        GetObject(
+            [in] String parameterName,
+            [in] IMap * map,
+            [out] IObject ** theobject);
+
+        GetObject(
+            [in] Int32 parameterIndex,
+            [in] IMap * map,
+            [out] IObject ** theobject);
+
+        GetRef(
+            [in] Int32 parameterIndex,
+            [out] IRef ** iref);
+
+        GetRef(
+            [in] String parameterName,
+            [out] IRef ** iref);
+
+        GetBlob(
+            [in] String parameterName,
+            [out] IBlob ** blob);
+
+        GetBlob(
+            [in] Int32 parameterIndex,
+            [out] IBlob ** blob);
+
+        GetClob(
+            [in] String parameterName,
+            [out] IClob ** clob);
+
+        GetClob(
+            [in] Int32 parameterIndex,
+            [out] IClob ** clob);
+
+        GetArray(
+            [in] String parameterName,
+            [out] IArray ** outarray);
+
+        GetArray(
+            [in] Int32 parameterIndex,
+            [out] IArray ** outarray);
+
+        GetDate(
+            [in] String parameterName,
+            [in] ICalendar * cal,
+            [out] ISQLDate ** thedate);
+
+        GetDate(
+            [in] Int32 parameterIndex,
+            [in] ICalendar * cal,
+            [out] ISQLDate ** thedate);
+
+        GetTime(
+            [in] String parameterName,
+            [in] ICalendar * cal,
+            [out] ITime ** thetime);
+
+        GetTime(
+            [in] Int32 parameterIndex,
+            [in] ICalendar * cal,
+            [out] ITime ** thetime);
+
+        GetTimestamp(
+            [in] String parameterName,
+            [in] ICalendar * cal,
+            [out] ITimestamp ** timestamp);
+
+        GetTimestamp(
+            [in] Int32 parameterIndex,
+            [in] ICalendar * cal,
+            [out] ITimestamp ** timestamp);
+
+        GetURL(
+            [in] String parameterName,
+            [out] IURL ** url);
+
+        SetRowId(
+            [in] Int32 parameterIndex,
+            [in] IRowId * x);
+
+        SetRowId(
+            [in] String parameterName,
+            [in] IRowId * x);
+
+        SetNString(
+            [in] Int32 parameterIndex,
+            [in] String value);
+
+        SetNString(
+            [in] String parameterName,
+            [in] String value);
+
+        SetNCharacterStream(
+            [in] Int32 parameterIndex,
+            [in] IReader * x,
+            [in] Int64 len);
+
+        SetNCharacterStream(
+            [in] String parameterName,
+            [in] IReader * x,
+            [in] Int64 len);
+
+        SetNClob(
+            [in] Int32 parameterIndex,
+            [in] INClob * value);
+
+        SetNClob(
+            [in] String parameterName,
+            [in] INClob * value);
+
+        SetClob(
+            [in] Int32 parameterIndex,
+            [in] IReader * x,
+            [in] Int64 len);
+
+        SetClob(
+            [in] String parameterName,
+            [in] IReader * x,
+            [in] Int64 len);
+
+        SetBlob(
+            [in] Int32 parameterIndex,
+            [in] IInputStream * x,
+            [in] Int64 len);
+
+        SetBlob(
+            [in] String parameterName,
+            [in] IInputStream * x,
+            [in] Int64 len);
+
+        SetNClob(
+            [in] Int32 parameterIndex,
+            [in] IReader * x,
+            [in] Int64 len);
+
+        SetNClob(
+            [in] String parameterName,
+            [in] IReader * x,
+            [in] Int64 len);
+
+        SetSQLXML(
+            [in] Int32 parameterIndex,
+            [in] ISQLXML * xml);
+
+        SetSQLXML(
+            [in] String parameterName,
+            [in] ISQLXML * xml);
+
+        SetAsciiStream(
+            [in] Int32 parameterIndex,
+            [in] IInputStream * x,
+            [in] Int64 len);
+
+        SetAsciiStream(
+            [in] String parameterName,
+            [in] IInputStream * x,
+            [in] Int64 len);
+
+        SetBinaryStream(
+            [in] Int32 parameterIndex,
+            [in] IInputStream * x,
+            [in] Int64 len);
+
+        SetBinaryStream(
+            [in] String parameterName,
+            [in] IInputStream * x,
+            [in] Int64 len);
+
+        SetCharacterStream(
+            [in] Int32 parameterIndex,
+            [in] IReader * x,
+            [in] Int64 len);
+
+        SetCharacterStream(
+            [in] String parameterName,
+            [in] IReader * x,
+            [in] Int64 len);
+
+        SetAsciiStream(
+            [in] Int32 parameterIndex,
+            [in] IInputStream * x);
+
+        SetAsciiStream(
+            [in] String parameterName,
+            [in] IInputStream * x);
+
+        SetBinaryStream(
+            [in] Int32 parameterIndex,
+            [in] IInputStream * x);
+
+        SetBinaryStream(
+            [in] String parameterName,
+            [in] IInputStream * x);
+
+        SetCharacterStream(
+            [in] Int32 parameterIndex,
+            [in] IReader * x);
+
+        SetCharacterStream(
+            [in] String parameterName,
+            [in] IReader * x);
+
+        SetNCharacterStream(
+            [in] Int32 parameterIndex,
+            [in] IReader * x);
+
+        SetNCharacterStream(
+            [in] String parameterName,
+            [in] IReader * x);
+
+        SetClob(
+            [in] Int32 parameterIndex,
+            [in] IReader * x);
+
+        SetClob(
+            [in] String parameterName,
+            [in] IReader * x);
+
+        SetBlob(
+            [in] Int32 parameterIndex,
+            [in] IInputStream * x);
+
+        SetBlob(
+            [in] String parameterName,
+            [in] IInputStream * x);
+
+        SetNClob(
+            [in] Int32 parameterIndex,
+            [in] IReader * x);
+
+        SetNClob(
+            [in] String parameterName,
+            [in] IReader * x);
+    }
+    } // namespace JDBC
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

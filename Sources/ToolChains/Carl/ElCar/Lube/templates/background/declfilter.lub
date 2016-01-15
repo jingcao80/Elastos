@@ -1,0 +1,23 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+
+protected:
+$WITH all interfaces DO
+$   IF attrib is "filter"
+$       WITH all parents_and_me DO
+$           WITH all methods DO
+    CARAPI ${name}WithPriority(Int32 cFlags$^
+$               WITH all parameters DO
+, ${type} ${prefixingname(parameter)}$^
+$               END DO ;; all parameters
+);
+
+$           END DO ;; all methods
+$       END DO ;; all parents_and_me
+$   END IF ;; attrib is "callback"
+$END DO ;; all interfaces
+$

@@ -1,0 +1,35 @@
+TARGET_NAME= charset
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/charset;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/charset/spi;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/icu;
+
+SOURCES = CharsetICU.cpp
+SOURCES += Charset.cpp
+SOURCES += CCharsetHelper.cpp
+SOURCES += CharsetDecoder.cpp
+SOURCES += CharsetEncoder.cpp
+SOURCES += CharsetEncoderICU.cpp
+SOURCES += CharsetDecoderICU.cpp
+SOURCES += CCoderResult.cpp
+SOURCES += CCoderResultHelper.cpp
+SOURCES += CCodingErrorAction.cpp
+SOURCES += CCodingErrorActionHelper.cpp
+SOURCES += CCharsets.cpp
+SOURCES += CModifiedUtf8.cpp
+SOURCES += StandardCharsets.cpp
+SOURCES += CStandardCharsets.cpp
+
+ELASTOS_LIBS += spi/spi.lib

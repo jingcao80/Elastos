@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkControllerDataUsageInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+    namespace Tiles {
+
+    /**
+     * Layout for the data usage detail in quick settings.
+     *
+     * @Involve
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface IView
+     * interface IViewParent
+     * interface IViewManager
+     * interface IViewGroup
+     * interface ILinearLayout
+     */
+    interface IDataUsageDetailView {
+        Bind(
+            [in] INetworkControllerDataUsageInfo* info);
+    }
+
+    } // namespace Tiles
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

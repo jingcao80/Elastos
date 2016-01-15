@@ -1,0 +1,19 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * @hide
+     */
+    [oneway]
+    interface INetworkActivityListener {
+        OnNetworkActive();
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}
+

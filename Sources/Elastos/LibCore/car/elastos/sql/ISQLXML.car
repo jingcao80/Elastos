@@ -1,0 +1,80 @@
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IReader;
+    interface Elastos.IO.IWriter;
+
+    namespace Elastos {
+    namespace Sql {
+
+    interface ISQLXML {
+        /**
+         * Frees any resources held by this object. After {@code free} is called, calling
+         * method other than {@code free} will throw {@code SQLException} (calling {@code free}
+         * repeatedly will do nothing).
+         * @throws SQLException
+         */
+        Free();
+
+        /**
+         * Returns a stream that can be used to read binary data from this SQL {@code XML} object.
+         * @throws SQLException if an error occurs accessing the data
+         */
+        GetBinaryStream(
+            [out] IInputStream** is);
+
+        /**
+         * Returns a stream that can be used to write binary data to this SQL {@code XML} object.
+         * @throws SQLException if an error occurs accessing the data
+         */
+        SetBinaryStream(
+            [out] IOutputStream** os);
+
+        /**
+         * Returns a reader that can be used to read character data from this SQL {@code XML} object.
+         * @throws SQLException if an error occurs accessing the data
+         */
+        GetCharacterStream(
+            [out] IReader** reader);
+
+        /**
+         * Returns a writer that can be used to write character data to this SQL {@code XML} object.
+         * @throws SQLException if an error occurs accessing the data
+         */
+        SetCharacterStream(
+            [out] IWriter** writer);
+
+        /**
+         * Returns this object's data as an XML string.
+         * @throws SQLException if an error occurs accessing the data
+         */
+        GetString(
+            [out] String* str);
+
+        /**
+         * Sets this object's data to the given XML string.
+         * @throws SQLException if an error occurs accessing the data
+         */
+        SetString(
+            [in] String value);
+        /**
+         * Returns a {@link Source} for reading this object's data.
+         * @throws SQLException if an error occurs accessing the data
+         */
+         GetSource(
+            [in] IInterface * sourceClass,
+            [out] IInterface ** oface);
+
+        /**
+         * Returns a {@link Result} for writing this object's data.
+         * @throws SQLException if an error occurs accessing the data
+         */
+        SetResult(
+            [in] IInterface * resultClass,
+            [out] IInterface ** oface);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

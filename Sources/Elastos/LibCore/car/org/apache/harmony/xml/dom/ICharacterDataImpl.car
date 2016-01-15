@@ -1,0 +1,36 @@
+
+module
+{
+    using interface Elastos.Core.IStringBuilder;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xml {
+    namespace Dom {
+
+    /**
+     * Provides a straightforward implementation of the corresponding W3C DOM
+     * interface. The class is used internally only, thus only notable members that
+     * are not in the original interface are documented (the W3C docs are quite
+     * extensive). Hope that's ok.
+     * <p>
+     * Some of the fields may have package visibility, so other classes belonging to
+     * the DOM implementation can easily access them while maintaining the DOM tree
+     * structure.
+     */
+
+    interface ICharacterDataImpl extends ILeafNodeImpl {
+        /**
+         * Appends this node's text content to the given builder.
+         */
+        AppendDataTo(
+            [in] IStringBuilder* stringBuilder);
+    }
+
+    } // namespace Dom
+    } // namespace Xml
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

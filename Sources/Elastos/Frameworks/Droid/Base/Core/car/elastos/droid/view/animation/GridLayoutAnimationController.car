@@ -1,0 +1,240 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Animation {
+
+    /**
+     * @Involve
+     * interface IAnimationParameters
+     */
+    interface IGridLayoutAnimationParameters
+    {
+        GetColumn(
+            [out] Int32* column);
+
+        SetColumn(
+            [in] Int32 column);
+
+        GetRow(
+            [out] Int32* row);
+
+        SetRow(
+            [in] Int32 row);
+
+        GetColumnsCount(
+            [out] Int32* columnCount);
+
+        SetColumnsCount(
+            [in] Int32 columnCount);
+
+        GetRowsCount(
+            [out] Int32* rowsCount);
+
+        SetRowsCount(
+            [in] Int32 rowsCount);
+    }
+
+    /**
+     * A layout animation controller is used to animated a grid layout's children.
+     *
+     * While {@link LayoutAnimationController} relies only on the index of the child
+     * in the view group to compute the animation delay, this class uses both the
+     * X and Y coordinates of the child within a grid.
+     *
+     * In addition, the animation direction can be controlled. The default direction
+     * is <code>DIRECTION_LEFT_TO_RIGHT | DIRECTION_TOP_TO_BOTTOM</code>. You can
+     * also set the animation priority to columns or rows. The default priority is
+     * none.
+     *
+     * Information used to compute the animation delay of each child are stored
+     * in an instance of
+     * {@link android.view.animation.GridLayoutAnimationController.AnimationParameters},
+     * itself stored in the {@link android.view.ViewGroup.LayoutParams} of the view.
+     *
+     * @see LayoutAnimationController
+     * @see android.widget.GridView
+     *
+     * @attr ref android.R.styleable#GridLayoutAnimation_columnDelay
+     * @attr ref android.R.styleable#GridLayoutAnimation_rowDelay
+     * @attr ref android.R.styleable#GridLayoutAnimation_direction
+     * @attr ref android.R.styleable#GridLayoutAnimation_directionPriority
+     */
+    /**
+     * @Involve
+     * interface ILayoutAnimationController
+     */
+    interface IGridLayoutAnimationController {
+        /**
+         * Animates the children starting from the left of the grid to the right.
+         */
+        const Int32 DIRECTION_LEFT_TO_RIGHT = 0x0;
+
+        /**
+         * Animates the children starting from the right of the grid to the left.
+         */
+        const Int32 DIRECTION_RIGHT_TO_LEFT = 0x1;
+
+        /**
+         * Animates the children starting from the top of the grid to the bottom.
+         */
+        const Int32 DIRECTION_TOP_TO_BOTTOM = 0x0;
+
+        /**
+         * Animates the children starting from the bottom of the grid to the top.
+         */
+        const Int32 DIRECTION_BOTTOM_TO_TOP = 0x2;
+
+        /**
+         * Bitmask used to retrieve the horizontal component of the direction.
+         */
+        const Int32 DIRECTION_HORIZONTAL_MASK = 0x1;
+
+        /**
+         * Bitmask used to retrieve the vertical component of the direction.
+         */
+        const Int32 DIRECTION_VERTICAL_MASK   = 0x2;
+
+        /**
+         * Rows and columns are animated at the same time.
+         */
+        const Int32 PRIORITY_NONE   = 0;
+
+        /**
+         * Columns are animated first.
+         */
+        const Int32 PRIORITY_COLUMN = 1;
+
+        /**
+         * Rows are animated first.
+         */
+        const Int32 PRIORITY_ROW    = 2;
+
+        /**
+         * Returns the delay by which the children's animation are offset from one
+         * column to the other. The delay is expressed as a fraction of the
+         * animation duration.
+         *
+         * @return a fraction of the animation duration
+         *
+         * @see #setColumnDelay(Float)
+         * @see #getRowDelay()
+         * @see #setRowDelay(Float)
+         */
+        GetColumnDelay(
+            [out] Float* columnDelay);
+
+        /**
+         * Sets the delay, as a fraction of the animation duration, by which the
+         * children's animations are offset from one column to the other.
+         *
+         * @param columnDelay a fraction of the animation duration
+         *
+         * @see #getColumnDelay()
+         * @see #getRowDelay()
+         * @see #setRowDelay(Float)
+         */
+        SetColumnDelay(
+            [in] Float columnDelay);
+
+        /**
+         * Returns the delay by which the children's animation are offset from one
+         * row to the other. The delay is expressed as a fraction of the
+         * animation duration.
+         *
+         * @return a fraction of the animation duration
+         *
+         * @see #setRowDelay(Float)
+         * @see #getColumnDelay()
+         * @see #setColumnDelay(Float)
+         */
+        GetRowDelay(
+            [out] Float* rowDelay);
+
+        /**
+         * Sets the delay, as a fraction of the animation duration, by which the
+         * children's animations are offset from one row to the other.
+         *
+         * @param rowDelay a fraction of the animation duration
+         *
+         * @see #getRowDelay()
+         * @see #getColumnDelay()
+         * @see #setColumnDelay(Float)
+         */
+        SetRowDelay(
+            [in] Float rowDelay);
+
+        /**
+         * Returns the direction of the animation. {@link #Int32 DIRECTION_HORIZONTAL_MASK}
+         * and {@link #DIRECTION_VERTICAL_MASK} can be used to retrieve the
+         * horizontal and vertical components of the direction.
+         *
+         * @return the direction of the animation
+         *
+         * @see #setDirection(Int32)
+         * @see #DIRECTION_BOTTOM_TO_TOP
+         * @see #DIRECTION_TOP_TO_BOTTOM
+         * @see #DIRECTION_LEFT_TO_RIGHT
+         * @see #Int32 DIRECTION_RIGHT_TO_LEFT
+         * @see #Int32 DIRECTION_HORIZONTAL_MASK
+         * @see #DIRECTION_VERTICAL_MASK
+         */
+        GetDirection(
+            [out] Int32* direction);
+
+        /**
+         * Sets the direction of the animation. The direction is expressed as an
+         * integer containing a horizontal and vertical component. For instance,
+         * <code>DIRECTION_BOTTOM_TO_TOP | Int32 DIRECTION_RIGHT_TO_LEFT</code>.
+         *
+         * @param direction the direction of the animation
+         *
+         * @see #getDirection()
+         * @see #DIRECTION_BOTTOM_TO_TOP
+         * @see #DIRECTION_TOP_TO_BOTTOM
+         * @see #DIRECTION_LEFT_TO_RIGHT
+         * @see #Int32 DIRECTION_RIGHT_TO_LEFT
+         * @see #Int32 DIRECTION_HORIZONTAL_MASK
+         * @see #DIRECTION_VERTICAL_MASK
+         */
+        SetDirection(
+            [in] Int32 direction);
+
+        /**
+         * Returns the direction priority for the animation. The priority can
+         * be either {@link #Int32 PRIORITY_NONE}, {@link #Int32 PRIORITY_COLUMN} or
+         * {@link #Int32 PRIORITY_ROW}.
+         *
+         * @return the priority of the animation direction
+         *
+         * @see #setDirectionPriority(Int32)
+         * @see #Int32 PRIORITY_COLUMN
+         * @see #Int32 PRIORITY_NONE
+         * @see #Int32 PRIORITY_ROW
+         */
+        GetDirectionPriority(
+            [out] Int32* directionPriority);
+
+        /**
+         * Specifies the direction priority of the animation. For instance,
+         * {@link #Int32 PRIORITY_COLUMN} will give priority to columns: the animation
+         * will first play on the column, then on the rows.Z
+         *
+         * @param directionPriority the direction priority of the animation
+         *
+         * @see #getDirectionPriority()
+         * @see #Int32 PRIORITY_COLUMN
+         * @see #Int32 PRIORITY_NONE
+         * @see #Int32 PRIORITY_ROW
+         */
+        SetDirectionPriority(
+            [in] Int32 directionPriority);
+    }
+
+    }   //namespace Animation
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

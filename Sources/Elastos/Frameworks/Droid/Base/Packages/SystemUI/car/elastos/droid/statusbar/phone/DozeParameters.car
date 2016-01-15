@@ -1,0 +1,72 @@
+
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    interface IPulseSchedule {
+
+        GetNextTime(
+            [in] Int64 now,
+            [in] Int64 notificationTime,
+            [out] Int64* result);
+    }
+
+    interface IDozeParameters {
+
+        Dump(
+            [in] IPrintWriter* pw);
+
+        GetDisplayStateSupported(
+            [out] Boolean* result);
+
+        GetPulseDuration(
+            [out] Int32* result);
+
+        GetPulseInDuration(
+            [out] Int32* result);
+
+        GetPulseVisibleDuration(
+            [out] Int32* result);
+
+        GetPulseOutDuration(
+            [out] Int32* result);
+
+        GetPulseOnSigMotion(
+            [out] Boolean* result);
+
+        GetVibrateOnSigMotion(
+            [out] Boolean* result);
+
+        GetPulseOnPickup(
+            [out] Boolean* result);
+
+        GetVibrateOnPickup(
+            [out] Boolean* result);
+
+        GetPulseOnNotifications(
+            [out] Boolean* result);
+
+        GetPulseSchedule(
+            [out] IPulseSchedule** result);
+
+        GetPulseScheduleResets(
+            [out] Int32* result);
+
+        GetPickupVibrationThreshold(
+            [out] Int32* result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

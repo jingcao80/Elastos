@@ -1,0 +1,83 @@
+
+module
+{
+    interface Elastos.Utility.IIterator;
+    interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+     * The interface to a valid policy tree node for the PKIX certification path
+     * validation algorithm.
+     * <p>
+     * Instances of this class are one of the outputs of the PKIX certification path
+     * validation algorithm.
+     */
+    interface IPolicyNode {
+        /**
+         * Returns the list of children of this node as an {@code Iterator}.
+         *
+         * @return the list of children of this node as an {@code Iterator}.
+         */
+        GetChildren(
+            [out] IIterator** children);
+
+        /**
+         * Returns the depth of this node in the policy tree.
+         * <p>
+         * the depth is zero based.
+         *
+         * @return the depth of this node in the policy tree.
+         */
+        GetDepth(
+            [out] Int32* depth);
+
+        /**
+         * Returns the expected policies for the next certificate to be valid.
+         *
+         * @return the expected policies.
+         */
+        GetExpectedPolicies(
+            [out] ISet** policies);
+
+        /**
+         * Returns the parent policy node.
+         *
+         * @return the parent policy node.
+         */
+        GetParent(
+            [out] IPolicyNode** parent);
+
+        /**
+         * Returns the policy qualifiers associated with the policy of this node.
+         *
+         * @return the policy qualifiers associated with the policy of this node.
+         */
+        GetPolicyQualifiers(
+            [out] ISet** qualifiers);
+
+        /**
+         * Returns the valid policy of this node.
+         *
+         * @return the valid policy of this node.
+         */
+        GetValidPolicy(
+            [out] String* policy);
+
+        /**
+         * Returns whether the certificate policy extension of the most recently
+         * processed certificate is marked as critical.
+         *
+         * @return {@code true} if the extension is marked as critical, otherwise
+         *         {@code false}.
+         */
+        IsCritical(
+            [out] Boolean* result);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

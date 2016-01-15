@@ -1,0 +1,83 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * This class represents information about a window from the
+     * window manager to another part of the system.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [local, deprecated]
+    interface IWindowInfo {
+        SetType(
+            [in] Int32 type);
+
+        SetLayer(
+            [in] Int32 layer);
+
+        SetToken(
+            [in] IBinder* token);
+
+        SetParentToken(
+            [in] IBinder* token);
+
+        SetFocused(
+            [in] Boolean focused);
+
+        SetBoundsInScreen(
+            [in] IRect* rect);
+
+        SetChildTokens(
+            [in] IList* tokens);
+
+        GetType(
+            [out] Int32* type);
+
+        GetLayer(
+            [out] Int32* layer);
+
+        GetToken(
+            [out] IBinder** token);
+
+        GetParentToken(
+            [out] IBinder** token);
+
+        GetFocused(
+            [out] Boolean* focused);
+
+        GetBoundsInScreen(
+            [out] IRect** rect);
+
+        GetChildTokens(
+            [out] IList** tokens);
+
+        Recycle();
+    }
+
+    [local]
+    interface IWindowInfoHelper {
+        Obtain(
+            [out] IWindowInfo** outInfo);
+
+        Obtain(
+            [in] IWindowInfo* other,
+            [out] IWindowInfo** outInfo);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

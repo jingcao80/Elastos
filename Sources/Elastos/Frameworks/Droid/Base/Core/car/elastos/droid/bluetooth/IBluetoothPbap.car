@@ -1,0 +1,36 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * System private API for Bluetooth pbap service
+         *
+         * {@hide}
+         */
+        interface IIBluetoothPbap {
+            GetState(
+                [out] Int32* state);
+
+            GetClient(
+                [out] IBluetoothDevice** client);
+
+            Connect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            Disconnect();
+
+            IsConnected(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* isConnected);
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

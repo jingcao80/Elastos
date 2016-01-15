@@ -1,0 +1,470 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IVibrator;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IInputDevice;
+    interface Elastos.Droid.View.IInputEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Input {
+
+    /**
+     * Listens for changes in input devices.
+     */
+    interface IInputDeviceListener {
+        /**
+         * Called whenever an input device has been added to the system.
+         * Use {@link InputManager#getInputDevice} to get more information about the device.
+         *
+         * @param deviceId The id of the input device that was added.
+         */
+        OnInputDeviceAdded(
+            [in] Int32 deviceId);
+
+        /**
+         * Called whenever an input device has been removed from the system.
+         *
+         * @param deviceId The id of the input device that was removed.
+         */
+        OnInputDeviceRemoved(
+            [in] Int32 deviceId);
+
+        /**
+         * Called whenever the properties of an input device have changed since they
+         * were last queried.  Use {@link InputManager#getInputDevice} to get
+         * a fresh {@link InputDevice} object with the new properties.
+         *
+         * @param deviceId The id of the input device that changed.
+         */
+        OnInputDeviceChanged(
+            [in] Int32 deviceId);
+    }
+
+    [deprecated, local]
+    interface IInputManager {
+        /**
+         * Broadcast Action: Query available keyboard layouts.
+         * <p>
+         * The input manager service locates available keyboard layouts
+         * by querying broadcast receivers that are registered for this action.
+         * An application can offer additional keyboard layouts to the user
+         * by declaring a suitable broadcast receiver in its manifest.
+         * </p><p>
+         * Here is an example broadcast receiver declaration that an application
+         * might include in its AndroidManifest.xml to advertise keyboard layouts.
+         * The meta-data specifies a resource that contains a description of each keyboard
+         * layout that is provided by the application.
+         * <pre><code>
+         * &lt;receiver android:name=".InputDeviceReceiver"
+         *         android:label="@string/keyboard_layouts_label">
+         *     &lt;intent-filter>
+         *         &lt;action android:name="android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS" />
+         *     &lt;/intent-filter>
+         *     &lt;meta-data android:name="android.hardware.input.metadata.KEYBOARD_LAYOUTS"
+         *             android:resource="@xml/keyboard_layouts" />
+         * &lt;/receiver>
+         * </code></pre>
+         * </p><p>
+         * In the above example, the <code>@xml/keyboard_layouts</code> resource refers to
+         * an XML resource whose root element is <code>&lt;keyboard-layouts></code> that
+         * contains zero or more <code>&lt;keyboard-layout></code> elements.
+         * Each <code>&lt;keyboard-layout></code> element specifies the name, label, and location
+         * of a key character map for a particular keyboard layout.  The label on the receiver
+         * is used to name the collection of keyboard layouts provided by this receiver in the
+         * keyboard layout settings.
+         * <pre></code>
+         * &lt;?xml version="1.0" encoding="utf-8"?>
+         * &lt;keyboard-layouts xmlns:android="http://schemas.android.com/apk/res/android">
+         *     &lt;keyboard-layout android:name="keyboard_layout_english_us"
+         *             android:label="@string/keyboard_layout_english_us_label"
+         *             android:keyboardLayout="@raw/keyboard_layout_english_us" />
+         * &lt;/keyboard-layouts>
+         * </p><p>
+         * The <code>android:name</code> attribute specifies an identifier by which
+         * the keyboard layout will be known in the package.
+         * The <code>android:label</code> attributes specifies a human-readable descriptive
+         * label to describe the keyboard layout in the user interface, such as "English (US)".
+         * The <code>android:keyboardLayout</code> attribute refers to a
+         * <a href="http://source.android.com/tech/input/key-character-map-files.html">
+         * key character map</a> resource that defines the keyboard layout.
+         * </p>
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_QUERY_KEYBOARD_LAYOUTS =
+                "android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS";
+
+        /**
+         * Metadata Key: Keyboard layout metadata associated with
+         * {@link #ACTION_QUERY_KEYBOARD_LAYOUTS}.
+         * <p>
+         * Specifies the resource id of a XML resource that describes the keyboard
+         * layouts that are provided by the application.
+         * </p>
+         */
+        const String META_DATA_KEYBOARD_LAYOUTS =
+                "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+
+        /**
+         * Pointer Speed: The minimum (slowest) pointer speed (-7).
+         * @hide
+         */
+        const Int32 MIN_POINTER_SPEED = -7;
+
+        /**
+         * Pointer Speed: The maximum (fastest) pointer speed (7).
+         * @hide
+         */
+        const Int32 MAX_POINTER_SPEED = 7;
+
+        /**
+         * Pointer Speed: The default pointer speed (0).
+         * @hide
+         */
+        const Int32 DEFAULT_POINTER_SPEED = 0;
+
+        /**
+         * Input Event Injection Synchronization Mode: None.
+         * Never blocks.  Injection is asynchronous and is assumed always to be successful.
+         * @hide
+         */
+        const Int32 INJECT_INPUT_EVENT_MODE_ASYNC = 0; // see InputDispatcher.h
+
+        /**
+         * Input Event Injection Synchronization Mode: Wait for result.
+         * Waits for previous events to be dispatched so that the input dispatcher can
+         * determine whether input event injection will be permitted based on the current
+         * input focus.  Does not wait for the input event to finish being handled
+         * by the application.
+         * @hide
+         */
+        const Int32 INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT = 1;  // see InputDispatcher.h
+
+        /**
+         * Input Event Injection Synchronization Mode: Wait for finish.
+         * Waits for the event to be delivered to the application and handled.
+         * @hide
+         */
+        const Int32 INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
+
+        /**
+         * Gets information about the input device with the specified id.
+         * @param id The device id.
+         * @return The input device or null if not found.
+         */
+        GetInputDevice(
+            [in] Int32 id,
+            [out] IInputDevice** device);
+
+        /**
+         * Gets information about the input device with the specified descriptor.
+         * @param descriptor The input device descriptor.
+         * @return The input device or null if not found.
+         * @hide
+         */
+        GetInputDeviceByDescriptor(
+            [in] String descriptor,
+            [out] IInputDevice** device);
+
+        /**
+         * Gets the ids of all input devices in the system.
+         * @return The input device ids.
+         */
+        GetInputDeviceIds(
+            [out, callee] ArrayOf<Int32>* deviceIds);
+
+        /**
+         * Registers an input device listener to receive notifications about when
+         * input devices are added, removed or changed.
+         *
+         * @param listener The listener to register.
+         * @param handler The handler on which the listener should be invoked, or null
+         * if the listener should be invoked on the calling thread's looper.
+         *
+         * @see #unregisterInputDeviceListener
+         */
+        RegisterInputDeviceListener(
+            [in] IInputDeviceListener* listener,
+            [in] IHandler* handler);
+
+        /**
+         * Unregisters an input device listener.
+         *
+         * @param listener The listener to unregister.
+         *
+         * @see #registerInputDeviceListener
+         */
+        UnregisterInputDeviceListener(
+            [in] IInputDeviceListener* listener);
+
+        /**
+         * Gets information about all supported keyboard layouts.
+         * <p>
+         * The input manager consults the built-in keyboard layouts as well
+         * as all keyboard layouts advertised by applications using a
+         * {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
+         * </p>
+         *
+         * @return A list of all supported keyboard layouts.
+         *
+         * @hide
+         */
+        GetKeyboardLayouts(
+            [out, callee] ArrayOf<IKeyboardLayout*>* layouts);
+
+        /**
+         * Gets the keyboard layout with the specified descriptor.
+         *
+         * @param keyboardLayoutDescriptor The keyboard layout descriptor, as returned by
+         * {@link KeyboardLayout#getDescriptor()}.
+         * @return The keyboard layout, or null if it could not be loaded.
+         *
+         * @hide
+         */
+        GetKeyboardLayout(
+            [in] String keyboardLayoutDescriptor,
+            [out] IKeyboardLayout** layout);
+
+        /**
+         * Gets the current keyboard layout descriptor for the specified input
+         * device.
+         *
+         * @param identifier Identifier for the input device
+         * @return The keyboard layout descriptor, or null if no keyboard layout has
+         *         been set.
+         * @hide
+         */
+        GetCurrentKeyboardLayoutForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [out] String* keyboardLayoutDescriptor);
+
+        /**
+         * Sets the current keyboard layout descriptor for the specified input
+         * device.
+         * <p>
+         * This method may have the side-effect of causing the input device in
+         * question to be reconfigured.
+         * </p>
+         *
+         * @param identifier The identifier for the input device.
+         * @param keyboardLayoutDescriptor The keyboard layout descriptor to use,
+         *            must not be null.
+         * @hide
+         */
+        SetCurrentKeyboardLayoutForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [in] String keyboardLayoutDescriptor);
+
+        /**
+         * Gets all keyboard layout descriptors that are enabled for the specified input device.
+         *
+         * @param identifier The identifier for the input device.
+         * @return The keyboard layout descriptors.
+         *
+         * @hide
+         */
+        GetKeyboardLayoutsForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [out, callee] ArrayOf<String>* keyboardLayoutDescriptors);
+
+        /**
+         * Adds the keyboard layout descriptor for the specified input device.
+         * <p>
+         * This method may have the side-effect of causing the input device in question
+         * to be reconfigured.
+         * </p>
+         *
+         * @param identifier The identifier for the input device.
+         * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to add.
+         *
+         * @hide
+         */
+        AddKeyboardLayoutForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [in] String keyboardLayoutDescriptor);
+
+        /**
+         * Removes the keyboard layout descriptor for the specified input device.
+         * <p>
+         * This method may have the side-effect of causing the input device in question
+         * to be reconfigured.
+         * </p>
+         *
+         * @param identifier The identifier for the input device.
+         * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to remove.
+         *
+         * @hide
+         */
+        RemoveKeyboardLayoutForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [in] String keyboardLayoutDescriptor);
+
+        /**
+         * Gets the TouchCalibration applied to the specified input device's coordinates.
+         *
+         * @param inputDeviceDescriptor The input device descriptor.
+         * @return The TouchCalibration currently assigned for use with the given
+         * input device. If none is set, an identity TouchCalibration is returned.
+         *
+         * @hide
+         */
+        GetTouchCalibration(
+            [in] String inputDeviceDescriptor,
+            [in] Int32 surfaceRotation,
+            [out] ITouchCalibration** result);
+
+        /**
+         * Sets the TouchCalibration to apply to the specified input device's coordinates.
+         * <p>
+         * This method may have the side-effect of causing the input device in question
+         * to be reconfigured. Requires {@link android.Manifest.permissions.SET_INPUT_CALIBRATION}.
+         * </p>
+         *
+         * @param inputDeviceDescriptor The input device descriptor.
+         * @param calibration The calibration to be applied
+         *
+         * @hide
+         */
+        SetTouchCalibration(
+            [in] String inputDeviceDescriptor,
+            [in] Int32 surfaceRotation,
+            [in] ITouchCalibration* calibration);
+
+        /**
+         * Gets the mouse pointer speed.
+         * <p>
+         * Only returns the permanent mouse pointer speed.  Ignores any temporary pointer
+         * speed set by {@link #tryPointerSpeed}.
+         * </p>
+         *
+         * @param context The application context.
+         * @return The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+         * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+         *
+         * @hide
+         */
+        GetPointerSpeed(
+            [in] IContext* ctx,
+            [out] Int32* speed);
+
+        /**
+         * Sets the mouse pointer speed.
+         * <p>
+         * Requires {@link android.Manifest.permissions.WRITE_SETTINGS}.
+         * </p>
+         *
+         * @param context The application context.
+         * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+         * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+         *
+         * @hide
+         */
+        SetPointerSpeed(
+            [in] IContext* ctx,
+            [in] Int32 speed);
+
+        /**
+         * Changes the mouse pointer speed temporarily, but does not save the setting.
+         * <p>
+         * Requires {@link android.Manifest.permission.SET_POINTER_SPEED}.
+         * </p>
+         *
+         * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+         * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+         *
+         * @hide
+         */
+        TryPointerSpeed(
+            [in] Int32 speed);
+
+        /**
+         * Queries the framework about whether any physical keys exist on the
+         * any keyboard attached to the device that are capable of producing the given
+         * array of key codes.
+         *
+         * @param keyCodes The array of key codes to query.
+         * @return A new array of the same size as the key codes array whose elements
+         * are set to true if at least one attached keyboard supports the corresponding key code
+         * at the same index in the key codes array.
+         *
+         * @hide
+         */
+        DeviceHasKeys(
+            [in] ArrayOf<Int32> keyCodes,
+            [out, callee] ArrayOf<Boolean>* results);
+
+        /**
+         * Queries the framework about whether any physical keys exist on the
+         * any keyboard attached to the device that are capable of producing the given
+         * array of key codes.
+         *
+         * @param id The id of the device to query.
+         * @param keyCodes The array of key codes to query.
+         * @return A new array of the same size as the key codes array whose elements are set to true
+         * if the given device could produce the corresponding key code at the same index in the key
+         * codes array.
+         *
+         * @hide
+         */
+        DeviceHasKeys(
+            [in] Int32 id,
+            [in] ArrayOf<Int32> keyCodes,
+            [out, callee] ArrayOf<Boolean>* result);
+
+        /**
+         * Injects an input event into the event system on behalf of an application.
+         * The synchronization mode determines whether the method blocks while waiting for
+         * input injection to proceed.
+         * <p>
+         * Requires {@link android.Manifest.permission.INJECT_EVENTS} to inject into
+         * windows that are owned by other applications.
+         * </p><p>
+         * Make sure you correctly set the event time and input source of the event
+         * before calling this method.
+         * </p>
+         *
+         * @param event The event to inject.
+         * @param mode The synchronization mode.  One of:
+         * {@link #INJECT_INPUT_EVENT_MODE_ASYNC},
+         * {@link #INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT}, or
+         * {@link #INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH}.
+         * @return True if input event injection succeeded.
+         *
+         * @hide
+         */
+        InjectInputEvent(
+            [in] IInputEvent* event,
+            [in] Int32 mode,
+            [out] Boolean* res);
+
+        /**
+         * Gets a vibrator service associated with an input device, assuming it has one.
+         * @return The vibrator, never null.
+         * @hide
+         */
+        GetInputDeviceVibrator(
+            [in] Int32 deviceId,
+            [out] IVibrator** vibrator);
+    }
+
+    [local]
+    interface IInputManagerHelper {
+        /**
+         * Gets an instance of the input manager.
+         *
+         * @return The input manager instance.
+         *
+         * @hide
+         */
+        GetInstance(
+            [out] IInputManager** manager);
+    }
+
+    } // namespace Input
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

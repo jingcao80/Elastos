@@ -1,0 +1,13 @@
+TARGET_NAME= Elastos.Droid.Test
+TARGET_TYPE= lib
+
+VPATH := $(MAKEDIR)/../src/droid/test
+
+EXPORT_LIBRARY= 1
+
+IMPORTS = Elastos.Droid.Test.eco
+
+SOURCES += ActivityInstrumentationTestCase2.cpp
+SOURCES += ActivityTestCase.cpp
+SOURCES += ElastosTestCase.cpp
+SOURCES += InstrumentationTestCase.cpp

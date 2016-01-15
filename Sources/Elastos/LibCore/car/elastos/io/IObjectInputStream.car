@@ -1,0 +1,318 @@
+module
+{
+    interface Elastos.IO.IObjectInputValidation;
+    interface Elastos.IO.IObjectStreamClass;
+
+    namespace Elastos {
+    namespace IO {
+
+    interface IObjectInputStreamGetField;
+
+    /**
+    * A specialized InputStream that is able to read (deserialize) Java objects as well as primitive data
+    * types (int, byte, char etc.). The data has typically been saved using an ObjectOutputStream.
+    * @implement Elastos.IO.IInpuStream
+    * @sa IObjectOutputStream
+    * @sa IObjectInput
+    * @sa ISerializable
+    * @sa IExternalizable
+    */
+     /**
+     * @Involve
+     * interface Elastos.IO.ICloseable;
+     * interface IInputStream;
+     */
+    interface IObjectInputStream {
+        /**
+         * Default method to read objects from this stream. Serializable fields
+         * defined in the object's class and superclasses are read from the source
+         * stream.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ClassNotFoundException | if the object's class cannot be found.
+         * IOException | if an I/O error occurs while reading the object data.
+         * NotActiveException | if this method is not called from {readObject()}.
+         * @see ObjectOutputStream#defaultWriteObject
+         */
+        DefaultReadObject();
+
+        /**
+         * Reads the persistent fields of the object that is currently being read
+         * from the source stream. The values read are stored in a GetField object
+         * that provides access to the persistent fields. This GetField object is
+         * then returned.
+         *
+         * @return the GetField object from which persistent fields can be accessed
+         *         by name.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ClassNotFoundException | if the class of an object being deserialized can not be found.
+         * IOException | if an error occurs while reading from this stream.
+         * NotActiveException | if this stream is currently not reading an object.
+         */
+        ReadFields(
+            [out] IObjectInputStreamGetField** fields);
+
+        /**
+         * Reads the next unshared object from the source stream.
+         *
+         * @return the new object read.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ClassNotFoundException | if the class of one of the objects in the object graph cannot be found.
+         * IOException | if an error occurs while reading from the source stream.
+         * @see ObjectOutputStream#writeUnshared
+         */
+        ReadUnshared(
+            [out] IInterface** obj);
+
+        /**
+         * Registers a callback for post-deserialization validation of objects. It
+         * allows to perform additional consistency checks before the {* readObject()} method of this class returns its result to the caller. This
+         * method can only be called from within the {readObject()} method of
+         * a class that implements "special" deserialization rules. It can be called
+         * multiple times. Validation callbacks are then done in order of decreasing
+         * priority, defined by {priority}.
+         *
+         * @param object
+         *            an object that can validate itself by receiving a callback.
+         * @param priority
+         *            the validator's priority.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * InvalidObjectException | if {object} is {null}.
+         * NotActiveException | if this stream is currently not reading objects. In that case, calling this method is not allowed.
+         * @see ObjectInputValidation#validateObject()
+         */
+        RegisterValidation(
+            [in] IObjectInputValidation* object,
+            [in] Int32 priority);
+    }
+
+    interface IObjectInputStreamGetField {
+        /**
+         * Gets the ObjectStreamClass that describes a field.
+         *
+         * @return the descriptor class for a serialized field.
+         */
+        GetObjectStreamClass(
+            [out] IObjectStreamClass** osClass);
+
+        /**
+         * Indicates if the field identified by {name} is defaulted. This
+         * means that it has no value in this stream.
+         *
+         * @param name
+         *            the name of the field to check.
+         * @return {true} if the field is defaulted, {false}
+         *         otherwise.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {name} does not identify a serializable field.
+         * IOException | if an error occurs while reading from the source input
+         *             stream.
+         */
+        IsDefaulted(
+            [in] String name,
+            [out] Boolean* isDefaulted);
+
+        /**
+         * Gets the value of the boolean field identified by {name} from
+         * the persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input stream.
+         * IllegalArgumentException | if the type of the field identified by {name} is not {boolean}.
+         */
+        Get(
+            [in] String name,
+            [in] Boolean defaultValue,
+            [out] Boolean* value);
+
+        /**
+         * Gets the value of the character field identified by {name} from
+         * the persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input stream.
+         * IllegalArgumentException | if the type of the field identified by {name} is not {char}.
+         */
+        GetChar(
+            [in] String name,
+            [in] Char32 defaultValue,
+            [out] Char32* value);
+
+        /**
+         * Gets the value of the byte field identified by {name} from the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input stream.
+         * IllegalArgumentException | if the type of the field identified by {name} is not {byte}.
+         */
+        GetByte(
+            [in] String name,
+            [in] Byte defaultValue,
+            [out] Byte* value);
+
+        /**
+         * Gets the value of the short field identified by {name} from the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input stream.
+         * IllegalArgumentException | if the type of the field identified by {name} is not {short}.
+         */
+        Get(
+            [in] String name,
+            [in] Int16 defaultValue,
+            [out] Int16* value);
+
+        /**
+         * Gets the value of the integer field identified by {name} from
+         * the persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input stream.
+         * IllegalArgumentException | if the type of the field identified by { name} is not {int}.
+         */
+        Get(
+            [in] String name,
+            [in] Int32 defaultValue,
+            [out] Int32* value);
+
+        /**
+         * Gets the value of the long field identified by {name} from the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input stream.
+         * IllegalArgumentException | if the type of the field identified by {name} is not {long}.
+         */
+        Get(
+            [in] String name,
+            [in] Int64 defaultValue,
+            [out] Int64* value);
+
+        /**
+         * Gets the value of the float field identified by {name} from the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input stream.
+         * IllegalArgumentException | if the type of the field identified by {float} is not {char}.
+         */
+        Get(
+            [in] String name,
+            [in] Float defaultValue,
+            [out] Float* value);
+
+        /**
+         * Gets the value of the double field identified by {name} from
+         * the persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input stream.
+         * IllegalArgumentException | if the type of the field identified by {name} is not {double}.
+         */
+        Get(
+            [in] String name,
+            [in] Double defaultValue,
+            [out] Double* value);
+
+        /**
+         * Gets the value of the object field identified by {name} from
+         * the persistent field.
+         *
+         * @param name
+         *            the name of the field to get.
+         * @param defaultValue
+         *            the default value that is used if the field does not have
+         *            a value when read from the source stream.
+         * @return the value of the field identified by {name}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while reading from the source input
+         *             stream.
+         * IllegalArgumentException | if the type of the field identified by {name} is not {Object}.
+         */
+        Get(
+            [in] String name,
+            [in] IInterface* defaultValue,
+            [out] IInterface** value);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

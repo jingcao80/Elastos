@@ -1,0 +1,58 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Helper class to handle situations where you want a view to have a larger touch area than its
+     * actual view bounds. The view whose touch area is changed is called the delegate view. This
+     * class should be used by an ancestor of the delegate. To use a TouchDelegate, first create an
+     * instance that specifies the bounds that should be mapped to the delegate and the delegate
+     * view itself.
+     * <p>
+     * The ancestor should then forward all of its touch events received in its
+     * {@link android.view.View#onTouchEvent(MotionEvent)} to {@link #onTouchEvent(MotionEvent)}.
+     * </p>
+     */
+    interface ITouchDelegate {
+        /**
+         * The touchable region of the View extends above its actual extent.
+         */
+        const Int32 ABOVE = 1;
+
+        /**
+         * The touchable region of the View extends below its actual extent.
+         */
+        const Int32 BELOW = 2;
+
+        /**
+         * The touchable region of the View extends to the left of its
+         * actual extent.
+         */
+        const Int32 TO_LEFT = 4;
+
+        /**
+         * The touchable region of the View extends to the right of its
+         * actual extent.
+         */
+        const Int32 TO_RIGHT = 8;
+
+
+        /**
+         * Will forward touch events to the delegate view if the event is within the bounds
+         * specified in the constructor.
+         *
+         * @param event The touch event to forward
+         * @return True if the event was forwarded to the delegate, false otherwise.
+         */
+        OnTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* res);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,17 @@
+module
+{
+//    const FAMILY_SERVER  = 0x70 - F0   // Elastos.Droid.Server exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Content exception codes (Family: 0x70 - F0)
+    const E_NATIVE_DAEMON_ARGUMENT_EXCEPTION           = 0xF0010000;
+    const E_NATIVE_DAEMON_FAILURE_EXCEPTION            = 0xF0020000;
+    const E_NATIVE_DAEMON_CONNECTOR_EXCEPTION          = 0xF0030000;
+
+    //==========================================================================
+    // Elastos PackageManager exception codes (Family: 0x71 - F1)
+    const E_PACKAGE_MANAGER_EXCEPTION          = 0xF1010000;
+}

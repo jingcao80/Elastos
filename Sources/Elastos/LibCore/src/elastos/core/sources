@@ -1,0 +1,71 @@
+
+TARGET_NAME= elastos.core
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += $(PREBUILD_INC)/fdlibm;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io/channels/spi;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility/regex;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/droid/system;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/icu;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/utility;
+
+SOURCES += core.cpp
+SOURCES += Thread.cpp
+SOURCES += NativeThread.cpp
+SOURCES += Object.cpp
+SOURCES += Singleton.cpp
+SOURCES += ClassLoader.cpp
+
+SOURCES += exportext.cpp
+SOURCES += CString.cpp
+SOURCES += CBoolean.cpp
+SOURCES += CByte.cpp
+SOURCES += CChar32.cpp
+SOURCES += CInteger16.cpp
+SOURCES += CInteger32.cpp
+SOURCES += CInteger64.cpp
+SOURCES += CFloat.cpp
+SOURCES += CDouble.cpp
+SOURCES += CArrayOf.cpp
+SOURCES += CThrowable.cpp
+SOURCES += Init.cpp
+
+SOURCES += ThreadGroup.cpp
+SOURCES += CThread.cpp
+SOURCES += CThreadGroup.cpp
+SOURCES += CPathClassLoader.cpp
+SOURCES += Os.cpp
+SOURCES += BlockGuard.cpp
+SOURCES += CBlockGuard.cpp
+SOURCES += CCloseGuard.cpp
+SOURCES += CCloseGuardHelper.cpp
+SOURCES += Enum.cpp
+SOURCES += CSystem.cpp
+
+SOURCES += Math.cpp
+SOURCES += StrictMath.cpp
+SOURCES += cbigint.cpp
+SOURCES += CoreUtils.cpp
+SOURCES += StringUtils.cpp
+SOURCES += HexStringParser.cpp
+SOURCES += StringToIntegral.cpp
+SOURCES += IntegralToString.cpp
+SOURCES += StringToReal.cpp
+SOURCES += RealToString.cpp
+SOURCES += Character.cpp
+SOURCES += AbstractStringBuilder.cpp
+SOURCES += StringBuffer.cpp
+SOURCES += StringBuilder.cpp
+SOURCES += CaseMapper.cpp
+

@@ -1,0 +1,45 @@
+
+module
+{
+    interface Elastos.Droid.View.IInputEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Provides a low-level mechanism for an application to send input events.
+     * @hide
+     */
+    interface IInputEventSender {
+        Dispose();
+
+        /**
+         * Called when an input event is finished.
+         *
+         * @param seq The input event sequence number.
+         * @param handled True if the input event was handled.
+         */
+        OnInputEventFinished(
+            [in] Int32 seq,
+            [in] Boolean handled);
+
+        /**
+         * Sends an input event.
+         * Must be called on the same Looper thread to which the sender is attached.
+         *
+         * @param seq The input event sequence number.
+         * @param event The input event to send.
+         * @return True if the entire event was sent successfully.  May return false
+         * if the input channel buffer filled before all samples were dispatched.
+         */
+        SendInputEvent(
+            [in] Int32 seq,
+            [in] IInputEvent* event,
+            [out] Boolean* result);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

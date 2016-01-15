@@ -1,0 +1,1120 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IPersistableBundle;
+    interface Elastos.Droid.Os.IStrictModeViolationInfo;
+    interface Elastos.Droid.Os.IDebugMemoryInfo;
+    interface Elastos.Droid.Content.IIntentSender;
+    interface Elastos.Droid.Content.IIIntentSender;
+    interface Elastos.Droid.Content.IIntentFilter;
+    interface Elastos.Droid.Content.IIntentReceiver;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IIContentProvider;
+    interface Elastos.Droid.Content.IServiceConnection;
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+    interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    interface Elastos.Droid.Content.Pm.IConfigurationInfo;
+    interface Elastos.Droid.Content.Pm.IIPackageDataObserver;
+    interface Elastos.Droid.Content.Pm.IUserInfo;
+    interface Elastos.Droid.Content.Pm.IProviderInfo;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.Graphics.IPoint;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.App.IIProcessObserver;
+    interface Elastos.Droid.App.IApplicationThread;
+    interface Elastos.Droid.App.INotification;
+    interface Elastos.Droid.App.IInstrumentationWatcher;
+    interface Elastos.Droid.App.IStopUserCallback;
+    interface Elastos.Droid.App.IUserSwitchObserver;
+    interface Elastos.Droid.App.IIServiceConnection;
+    interface Elastos.Droid.App.IActivityManagerWaitResult;
+    interface Elastos.Droid.App.IActivityManagerStackInfo;
+    interface Elastos.Droid.App.IContentProviderHolder;
+    interface Elastos.Droid.App.IProfilerInfo;
+    interface Elastos.Droid.App.IIUiAutomationConnection;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractor;
+    interface Elastos.Droid.App.IActivityContainerCallback;
+    interface Elastos.Droid.Service.Voice.IIVoiceInteractionSession;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+
+    /**
+     * System private API for talking with the activity manager service.  This
+     * provides calls from the application back to the activity manager.
+     *
+     * {@hide}
+     */
+    [deprecated]
+    interface IIActivityManager {
+        StartActivity(
+            [in] IApplicationThread* caller,
+            [in] String callingPackage,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IBinder* resultTo,
+            [in] String resultWho,
+            [in] Int32 requestCode,
+            [in] Int32 flags,
+            [in] IProfilerInfo* profileInfo,
+            [in] IBundle* options,
+            [out] Int32* result);
+
+        StartActivityAsUser(
+            [in] IApplicationThread* caller,
+            [in] String callingPackage,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IBinder* resultTo,
+            [in] String resultWho,
+            [in] Int32 requestCode,
+            [in] Int32 flags,
+            [in] IProfilerInfo* profileInfo,
+            [in] IBundle* options,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        StartActivityAsCaller(
+            [in] IApplicationThread* caller,
+            [in] String callingPackage,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IBinder* resultTo,
+            [in] String resultWho,
+            [in] Int32 requestCode,
+            [in] Int32 flags,
+            [in] IProfilerInfo* profilerInfo,
+            [in] IBundle* options,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        StartActivityAndWait(
+            [in] IApplicationThread* caller,
+            [in] String callingPackage,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IBinder* resultTo,
+            [in] String resultWho,
+            [in] Int32 requestCode,
+            [in] Int32 flags,
+            [in] IProfilerInfo* profileInfo,
+            [in] IBundle* options,
+            [in] Int32 userId,
+            [out] IActivityManagerWaitResult** result);
+
+        StartActivityWithConfig(
+            [in] IApplicationThread* caller,
+            [in] String callingPackage,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IBinder* resultTo,
+            [in] String resultWho,
+            [in] Int32 requestCode,
+            [in] Int32 startFlags,
+            [in] IConfiguration* newConfig,
+            [in] IBundle* options,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        StartActivityIntentSender(
+            [in] IApplicationThread* caller,
+            [in] IIntentSender* intent,
+            [in] IIntent* fillInIntent,
+            [in] String resolvedType,
+            [in] IBinder* resultTo,
+            [in] String resultWho,
+            [in] Int32 requestCode,
+            [in] Int32 flagsMask,
+            [in] Int32 flagsValues,
+            [in] IBundle* options,
+            [out] Int32* result);
+
+        StartVoiceActivity(
+            [in] String callingPackage,
+            [in] Int32 callingPid,
+            [in] Int32 callingUid,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IIVoiceInteractionSession* session,
+            [in] IIVoiceInteractor* interactor,
+            [in] Int32 flags,
+            [in] IProfilerInfo* profilerInfo,
+            [in] IBundle* options,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        StartNextMatchingActivity(
+            [in] IBinder* callingActivity,
+            [in] IIntent* intent,
+            [in] IBundle* options,
+            [out] Boolean* result);
+
+        StartActivityFromRecents(
+            [in] Int32 taskId,
+            [in] IBundle* options);
+
+        FinishActivity(
+            [in] IBinder* token,
+            [in] Int32 code,
+            [in] IIntent* data,
+            [in] Boolean finishTask,
+            [out] Boolean* result);
+
+        FinishSubActivity(
+            [in] IBinder* token,
+            [in] String resultWho,
+            [in] Int32 requestCode);
+
+        FinishActivityAffinity(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        FinishVoiceTask(
+            [in] IIVoiceInteractionSession* session);
+
+        ReleaseActivityInstance(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        ReleaseSomeActivities(
+            [in] IApplicationThread* app);
+
+        WillActivityBeVisible(
+            [in] IBinder* token,
+            [out] Boolean* visible);
+
+        RegisterReceiver(
+            [in] IApplicationThread* caller,
+            [in] String callerPackage,
+            [in] IIntentReceiver* receiver,
+            [in] IIntentFilter* filter,
+            [in] String requiredPermission,
+            [in] Int32 userId,
+            [out] IIntent** intent);
+
+        UnregisterReceiver(
+            [in] IIntentReceiver* receiver);
+
+        BroadcastIntent(
+            [in] IApplicationThread* caller,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IIntentReceiver* resultTo,
+            [in] Int32 resultCode,
+            [in] String resultData,
+            [in] IBundle* map,
+            [in] String requiredPermission,
+            [in] Int32 appOp,
+            [in] Boolean serialized,
+            [in] Boolean sticky,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        UnbroadcastIntent(
+            [in] IApplicationThread* caller,
+            [in] IIntent* intent,
+            [in] Int32 userId);
+
+        FinishReceiver(
+            [in] IBinder* who,
+            [in] Int32 resultCode,
+            [in] String resultData,
+            [in] IBundle* map,
+            [in] Boolean abortBroadcast);
+
+        AttachApplication(
+            [in] IApplicationThread* app);
+
+        ActivityResumed(
+            [in] IBinder* token);
+
+        ActivityIdle(
+            [in] IBinder* token,
+            [in] IConfiguration* config,
+            [in] Boolean stopProfiling);
+
+        ActivityPaused(
+            [in] IBinder* token);
+
+        ActivityStopped(
+            [in] IBinder* token,
+            [in] IBundle* state,
+            [in] IPersistableBundle* thumbnail,
+            [in] ICharSequence* description);
+
+        ActivitySlept(
+            [in] IBinder* token);
+
+        ActivityDestroyed(
+            [in] IBinder* token);
+
+        GetCallingPackage(
+            [in] IBinder* token,
+            [out] String* pkg);
+
+        GetCallingActivity(
+            [in] IBinder* token,
+            [out] IComponentName** activity);
+
+        GetAppTasks(
+            [in] String callingPackage,
+            [out] IList** list);
+
+        AddAppTask(
+            [in] IBinder* activityToken,
+            [in] IIntent* intent,
+            [in] IActivityManagerTaskDescription* description,
+            [in] IBitmap* thumbnail,
+            [out] Int32* result);
+
+        GetAppTaskThumbnailSize(
+            [out] IPoint** point);
+
+        GetTasks(
+            [in] Int32 maxNum,
+            [in] Int32 flags,
+            [out] IList** tasks);
+
+        GetRecentTasks(
+            [in] Int32 maxNum,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IList** tasks);
+
+        GetTaskThumbnail(
+            [in] Int32 taskId,
+            [out] IActivityManagerTaskThumbnail** taskThumbnails);
+
+        GetServices(
+            [in] Int32 maxNum,
+            [in] Int32 flags,
+            [out] IList** services);
+
+        GetProcessesInErrorState(
+            [out] IList** processes);
+
+        MoveTaskToFront(
+            [in] Int32 task,
+            [in] Int32 flags,
+            [in] IBundle* options);
+
+        MoveTaskToBack(
+            [in] Int32 task);
+
+        MoveActivityTaskToBack(
+            [in] IBinder* token,
+            [in] Boolean nonRoot,
+            [out] Boolean* result);
+
+        MoveTaskBackwards(
+            [in] Int32 task);
+
+        MoveTaskToStack(
+            [in] Int32 taskId,
+            [in] Int32 stackId,
+            [in] Boolean toTop);
+
+        ResizeStack(
+            [in] Int32 stackId,
+            [in] IRect* bounds);
+
+
+        GetAllStackInfos(
+            [out] IList** list);
+
+        GetStackInfo(
+            [in] Int32 stackId,
+            [out] IActivityManagerStackInfo** info);
+
+        IsInHomeStack(
+            [in] Int32 taskId,
+            [out] Boolean* result);
+
+        SetFocusedStack(
+            [in] Int32 stackId);
+
+        GetTaskForActivity(
+            [in] IBinder* token,
+            [in] Boolean onlyRoot,
+            [out] Int32* task);
+
+        GetContentProvider(
+            [in] IApplicationThread* caller,
+            [in] String name,
+            [in] Int32 userId,
+            [in] Boolean stable,
+            [out] IContentProviderHolder** contentProvider);
+
+        GetContentProviderExternal(
+            [in] String name,
+            [in] Int32 userId,
+            [in] IBinder* token,
+            [out] IContentProviderHolder** holder);
+
+        RemoveContentProvider(
+            [in] IBinder* connection,
+            [in] Boolean stable);
+
+        RemoveContentProviderExternal(
+            [in] String name,
+            [in] IBinder* token);
+
+        PublishContentProviders(
+            [in] IApplicationThread* caller,
+            [in] IList* providers);
+
+        RefContentProvider(
+            [in] IBinder* connection,
+            [in] Int32 stableDelta,
+            [in] Int32 unstableDelta,
+            [out] Boolean* result);
+
+        UnstableProviderDied(
+            [in] IBinder* connection);
+
+        AppNotRespondingViaProvider(
+            [in] IBinder* connection);
+
+        GetRunningServiceControlPanel(
+            [in] IComponentName* service,
+            [out] IPendingIntent** pendingIntent);
+
+        StartService(
+            [in] IApplicationThread* caller,
+            [in] IIntent* service,
+            [in] String resolvedType,
+            [in] Int32 userId,
+            [out] IComponentName** componentName);
+
+        StopService(
+            [in] IApplicationThread* caller,
+            [in] IIntent* service,
+            [in] String resolvedType,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        StopServiceToken(
+            [in] IComponentName* className,
+            [in] IBinder* token,
+            [in] Int32 startId,
+            [out] Boolean* result);
+
+        SetServiceForeground(
+            [in] IComponentName* className,
+            [in] IBinder* token,
+            [in] Int32 id,
+            [in] INotification* notification,
+            [in] Boolean keepNotification);
+
+        BindService(
+            [in] IApplicationThread* caller,
+            [in] IBinder* token,
+            [in] IIntent* service,
+            [in] String resolvedType,
+            [in] IIServiceConnection* connection,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        UnbindService(
+            [in] IIServiceConnection* connection,
+            [out] Boolean* result);
+
+        PublishService(
+            [in] IBinder* token,
+            [in] IIntent* intent,
+            [in] IBinder* service);
+
+        UnbindFinished(
+            [in] IBinder* token,
+            [in] IIntent* service,
+            [in] Boolean doRebind);
+
+        [oneway] ServiceDoneExecuting(
+            [in] IBinder* token,
+            [in] Int32 type,
+            [in] Int32 startId,
+            [in] Int32 res);
+
+        PeekService(
+            [in] IIntent* service,
+            [in] String resolvedType,
+            [out] IBinder** binder);
+
+        BindBackupAgent(
+            [in] IApplicationInfo* appInfo,
+            [in] Int32 backupRestoreMode,
+            [out] Boolean* result);
+
+        ClearPendingBackup();
+
+        BackupAgentCreated(
+            [in] String packageName,
+            [in] IBinder* agent);
+
+        UnbindBackupAgent(
+            [in] IApplicationInfo* appInfo);
+
+        KillApplicationProcess(
+            [in] String processName,
+            [in] Int32 uid);
+
+        StartInstrumentation(
+            [in] IComponentName* className,
+            [in] String profileFile,
+            [in] Int32 flags,
+            [in] IBundle* arguments,
+            [in] IInstrumentationWatcher* watcher,
+            [in] IIUiAutomationConnection* connection,
+            [in] Int32 userId,
+            [in] String abiOverride,
+            [out] Boolean* result);
+
+        FinishInstrumentation(
+            [in] IApplicationThread* target,
+            [in] Int32 resultCode,
+            [in] IBundle* results);
+
+        GetConfiguration(
+            [out] IConfiguration** config);
+
+        UpdateConfiguration(
+            [in] IConfiguration* values);
+
+        SetRequestedOrientation(
+            [in] IBinder* token,
+            [in] Int32 requestedOrientation);
+
+        GetRequestedOrientation(
+            [in] IBinder* token,
+            [out] Int32* orientation);
+
+        GetActivityClassForToken(
+            [in] IBinder* token,
+            [out] IComponentName** klass);
+
+        GetPackageForToken(
+            [in] IBinder* token,
+            [out] String* pkg);
+
+        GetIntentSender(
+            [in] Int32 type,
+            [in] String packageName,
+            [in] IBinder* token,
+            [in] String resultWho,
+            [in] Int32 requestCode,
+            [in] ArrayOf<IIntent*>* intents,
+            [in] ArrayOf<String>* resolvedTypes,
+            [in] Int32 flags,
+            [in] IBundle* options,
+            [in] Int32 userId,
+            [out] IIIntentSender** intentSender);
+
+        CancelIntentSender(
+            [in] IIIntentSender* sender);
+
+        ClearApplicationUserData(
+            [in] String packageName,
+            [in] IIPackageDataObserver* observer,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetPackageForIntentSender(
+            [in] IIIntentSender* sender,
+            [out] String* pkg);
+
+        GetUidForIntentSender(
+            [in] IIIntentSender* sender,
+            [out] Int32* result);
+
+        HandleIncomingUser(
+            [in] Int32 callingPid,
+            [in] Int32 callingUid,
+            [in] Int32 userId,
+            [in] Boolean allowAll,
+            [in] Boolean requireFull,
+            [in] String name,
+            [in] String callerPackage,
+            [out] Int32* result);
+
+        SetProcessLimit(
+            [in] Int32 max);
+
+        GetProcessLimit(
+            [out] Int32* limit);
+
+        SetProcessForeground(
+            [in] IBinder* token,
+            [in] Int32 pid,
+            [in] Boolean isForeground);
+
+        CheckPermission(
+            [in] String permission,
+            [in] Int32 pid,
+            [in] Int32 uid,
+            [out] Int32* result);
+
+        CheckUriPermission(
+            [in] IUri* uri,
+            [in] Int32 pid,
+            [in] Int32 uid,
+            [in] Int32 mode,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        GrantUriPermission(
+            [in] IApplicationThread* caller,
+            [in] String targetPkg,
+            [in] IUri* uri,
+            [in] Int32 mode,
+            [in] Int32 userId);
+
+        RevokeUriPermission(
+            [in] IApplicationThread* caller,
+            [in] IUri* uri,
+            [in] Int32 mode,
+            [in] Int32 userId);
+
+        TakePersistableUriPermission(
+            [in] IUri* uri,
+            [in] Int32 modeFlags,
+            [in] Int32 userId);
+
+        ReleasePersistableUriPermission(
+            [in] IUri* uri,
+            [in] Int32 modeFlags,
+            [in] Int32 userId);
+
+        GetPersistedUriPermissions(
+            [in] String packageName,
+            [in] Boolean incoming,
+            [out] IParceledListSlice** slice);
+
+        ShowWaitingForDebugger(
+            [in] IApplicationThread* who,
+            [in] Boolean waiting);
+
+        GetMemoryInfo(
+            [out] IActivityManagerMemoryInfo** outInfo);
+
+        KillBackgroundProcesses(
+            [in] String packageName,
+            [in] Int32 userId);
+
+        KillAllBackgroundProcesses();
+
+        ForceStopPackage(
+            [in] String packageName,
+            [in] Int32 userId);
+
+        // Note: probably don't want to allow applications access to these.
+        SetLockScreenShown(
+            [in] Boolean shown);
+
+        UnhandledBack();
+
+        OpenContentUri(
+            [in] IUri* uri,
+            [out] IParcelFileDescriptor** descriptor);
+
+        SetDebugApp(
+            [in] String packageName,
+            [in] Boolean waitForDebugger,
+            [in] Boolean persistent);
+
+        SetAlwaysFinish(
+            [in] Boolean enabled);
+
+        SetActivityController(
+            [in] IActivityController* watcher);
+
+        EnterSafeMode();
+
+        NoteWakeupAlarm(
+            [in] IIIntentSender* sender);
+
+        KillPids(
+            [in] ArrayOf<Int32>* pids,
+            [in] String reason,
+            [in] Boolean secure,
+            [out] Boolean* result);
+
+        KillProcessesBelowForeground(
+            [in] String reason,
+            [out] Boolean* result);
+
+        HandleApplicationCrash(
+            [in] IBinder* app,
+            [in] IApplicationErrorReportCrashInfo* crashInfo);
+
+        HandleApplicationWtf(
+            [in] IBinder* app,
+            [in] String tag,
+            [in] IApplicationErrorReportCrashInfo* crashInfo,
+            [out] Boolean* result);
+
+        // A StrictMode violation to be handled.  The violationMask is a
+        // subset of the original StrictMode policy bitmask, with only the
+        // bit violated and penalty bits to be executed by the
+        // ActivityManagerService remaining set.
+        HandleApplicationStrictModeViolation(
+            [in] IBinder* app,
+            [in] Int32 violationMask,
+            [in] IStrictModeViolationInfo* crashInfo);
+
+        /*
+         * This will deliver the specified signal to all the persistent processes. Currently only
+         * SIGUSR1 is delivered. All others are ignored.
+         */
+        SignalPersistentProcesses(
+            [in] Int32 signal);
+
+        // Retrieve running application processes in the system
+        GetRunningAppProcesses(
+            [out] IList** processes);
+
+        // Retrieve info of applications installed on external media that are currently
+        // running.
+        GetRunningExternalApplications(
+            [out] IList** applications);
+
+        // Get memory information about the calling process.
+        GetMyMemoryState(
+            [in] IActivityManagerRunningAppProcessInfo* outInfo);
+
+        // Get device configuration
+        GetDeviceConfigurationInfo(
+            [out] IConfigurationInfo** configInfo);
+
+        // Turn on/off profiling in a particular process.
+        ProfileControl(
+            [in] String process,
+            [in] Int32 userId,
+            [in] Boolean start,
+            [in] IParcelFileDescriptor* fd,
+            [in] Int32 profileType,
+            [out] Boolean* result);
+
+        Shutdown(
+            [in] Int32 timeout,
+            [out] Boolean* result);
+
+        StopAppSwitches();
+
+        ResumeAppSwitches();
+
+        KillApplicationWithAppId(
+            [in] String pkg,
+            [in] Int32 appid,
+            [in] String reason);
+
+        CloseSystemDialogs(
+            [in] String reason);
+
+        GetProcessMemoryInfo(
+            [in] ArrayOf<Int32>* pids,
+            [out, callee] ArrayOf<IDebugMemoryInfo*>* memoryInfo);
+
+        OverridePendingTransition(
+            [in] IBinder* token,
+            [in] String packageName,
+            [in] Int32 enterAnim,
+            [in] Int32 exitAnim);
+
+        IsUserAMonkey(
+            [out] Boolean* result);
+
+        SetUserIsMonkey(
+            [in] Boolean monkey);
+
+        FinishHeavyWeightApp();
+
+        ConvertFromTranslucent(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        ConvertToTranslucent(
+            [in] IBinder* token,
+            [in] IActivityOptions* options,
+            [out] Boolean* result);
+
+        NotifyActivityDrawn(
+            [in] IBinder* token);
+
+        GetActivityOptions(
+            [in] IBinder* token,
+            [out] IActivityOptions** options);
+
+        BootAnimationComplete();
+
+        SetImmersive(
+            [in] IBinder* token,
+            [in] Boolean immersive);
+
+        IsImmersive(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        IsTopActivityImmersive(
+            [out] Boolean* result);
+
+        IsTopOfTask(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        CrashApplication(
+            [in] Int32 uid,
+            [in] Int32 initialPid,
+            [in] String packageName,
+            [in] String message);
+
+        GetProviderMimeType(
+            [in] IUri* uri,
+            [in] Int32 userId,
+            [out] String* type);
+
+        NewUriPermissionOwner(
+            [in] String name,
+            [out] IBinder** binder);
+
+        GrantUriPermissionFromOwner(
+            [in] IBinder* owner,
+            [in] Int32 fromUid,
+            [in] String targetPkg,
+            [in] IUri* uri,
+            [in] Int32 mode,
+            [in] Int32 sourceUserId,
+            [in] Int32 targetUserId);
+
+        RevokeUriPermissionFromOwner(
+            [in] IBinder* owner,
+            [in] IUri* uri,
+            [in] Int32 mode,
+            [in] Int32 userId);
+
+        CheckGrantUriPermission(
+            [in] Int32 callingUid,
+            [in] String targetPkg,
+            [in] IUri* uri,
+            [in] Int32 modeFlags,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        // Cause the specified process to dump the specified heap.
+        DumpHeap(
+            [in] String process,
+            [in] Int32 userId,
+            [in] Boolean managed,
+            [in] String path,
+            [in] IParcelFileDescriptor* fd,
+            [out] Boolean* result);
+
+        StartActivities(
+            [in] IApplicationThread* caller,
+            [in] String callingPackage,
+            [in] ArrayOf<IIntent*>* intents,
+            [in] ArrayOf<String>* resolvedTypes,
+            [in] IBinder* resultTo,
+            [in] IBundle* options,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        GetFrontActivityScreenCompatMode(
+            [out] Int32* mode);
+
+        SetFrontActivityScreenCompatMode(
+            [in] Int32 mode);
+
+        GetPackageScreenCompatMode(
+            [in] String packageName,
+            [out] Int32* mode);
+
+        SetPackageScreenCompatMode(
+            [in] String packageName,
+            [in] Int32 mode);
+
+        GetPackageAskScreenCompat(
+            [in] String packageName,
+            [out] Boolean* result);
+
+        SetPackageAskScreenCompat(
+            [in] String packageName,
+            [in] Boolean ask);
+
+        // Multi-user APIs
+        SwitchUser(
+            [in] Int32 userid,
+            [out] Boolean* result);
+
+        StartUserInBackground(
+            [in] Int32 userid,
+            [out] Boolean* result);
+
+        StopUser(
+            [in] Int32 userid,
+            [in] IStopUserCallback* cb,
+            [out] Int32* result);
+
+        GetCurrentUser(
+            [out] IUserInfo** user);
+
+        IsUserRunning(
+            [in] Int32 userid,
+            [in] Boolean orStopping,
+            [out] Boolean* running);
+
+        GetRunningUserIds(
+            [out, callee] ArrayOf<Int32>* ids);
+
+        RemoveTask(
+            [in] Int32 taskId,
+            [in] Int32 flags,
+            [out] Boolean* removed);
+
+        RegisterProcessObserver(
+            [in] IIProcessObserver* observer);
+
+        UnregisterProcessObserver(
+            [in] IIProcessObserver* observer);
+
+        IsIntentSenderTargetedToPackage(
+            [in] IIIntentSender* sender,
+            [out] Boolean* result);
+
+        IsIntentSenderAnActivity(
+            [in] IIIntentSender* sender,
+            [out] Boolean* result);
+
+        GetIntentForIntentSender(
+            [in] IIIntentSender* sender,
+            [out] IIntent** intent);
+
+        GetTagForIntentSender(
+            [in] IIIntentSender* sender,
+            [in] String prefix,
+            [out] String* tag);
+
+        UpdatePersistentConfiguration(
+            [in] IConfiguration* values);
+
+        GetProcessPss(
+            [in] ArrayOf<Int32>* pids,
+            [out, callee] ArrayOf<Int64>* processPss);
+
+        ShowBootMessage(
+            [in] ICharSequence* msg,
+            [in] Boolean always);
+
+        ShouldUpRecreateTask(
+            [in] IBinder* token,
+            [in] String destAffinity,
+            [out] Boolean* result);
+
+        NavigateUpTo(
+            [in] IBinder* token,
+            [in] IIntent* target,
+            [in] Int32 resultCode,
+            [in] IIntent* resultData,
+            [out] Boolean* result);
+
+        // This is not public because you need to be very careful in how you
+        // manage your activity to make sure it is always the uid you expect.
+        GetLaunchedFromUid(
+            [in] IBinder* activityToken,
+            [out] Int32* result);
+
+        GetLaunchedFromPackage(
+            [in] IBinder* activityToken,
+            [out] String* result);
+
+        RegisterUserSwitchObserver(
+            [in] IUserSwitchObserver* observer);
+
+        UnregisterUserSwitchObserver(
+            [in] IUserSwitchObserver* observer);
+
+        RequestBugReport();
+
+        InputDispatchingTimedOut(
+            [in] Int32 pid,
+            [in] Boolean aboveSystem,
+            [in] String reason,
+            [out] Int64* value);
+
+        GetAssistContextExtras(
+            [in] Int32 requestType,
+            [out] IBundle** bundle);
+
+        ReportAssistContextExtras(
+            [in] IBinder* token,
+            [in] IBundle* extras);
+
+        LaunchAssistIntent(
+            [in] IIntent* intent,
+            [in] Int32 requestType,
+            [in] String hint,
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        KillUid(
+            [in] Int32 uid,
+            [in] String reason);
+
+        Hang(
+            [in] IBinder* who,
+            [in] Boolean allowRestart);
+
+        ReportActivityFullyDrawn(
+            [in] IBinder* token);
+
+        Restart();
+
+        PerformIdleMaintenance();
+
+        CreateActivityContainer(
+            [in] IBinder* parentActivityToken,
+            [in] IActivityContainerCallback* cb,
+            [out] IActivityContainer** container);
+
+        DeleteActivityContainer(
+            [in] IActivityContainer* container);
+
+        GetEnclosingActivityContainer(
+            [in] IBinder* activityToken,
+            [out] IActivityContainer** container);
+
+        GetHomeActivityToken(
+            [out] IBinder** result);
+
+        StartLockTaskModeOnCurrent();
+
+        StartLockTaskMode(
+            [in] Int32 taskId);
+
+        StartLockTaskMode(
+            [in] IBinder* token);
+
+        StopLockTaskMode();
+
+        StopLockTaskModeOnCurrent();
+
+        IsInLockTaskMode(
+            [out] Boolean* result);
+
+        SetTaskDescription(
+            [in] IBinder* token,
+            [in] IActivityManagerTaskDescription* values);
+
+        GetTaskDescriptionIcon(
+            [in] String filename,
+            [out] IBitmap** bitmap);
+
+        RequestVisibleBehind(
+            [in] IBinder* token,
+            [in] Boolean visible,
+            [out] Boolean* result);
+
+        IsBackgroundVisibleBehind(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        BackgroundResourcesReleased(
+            [in] IBinder* token);
+
+        NotifyLaunchTaskBehindComplete(
+            [in] IBinder* token);
+
+        NotifyEnterAnimationComplete(
+            [in] IBinder* token);
+
+        /*
+         * Private non-Binder interfaces
+         *
+         */
+        /* package */
+        TestIsSystemReady(
+            [out] Boolean* ready);
+    }
+
+    /** Information you can retrieve about a particular application. */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IContentProviderHolder {
+        GetProviderInfo(
+            [out] IProviderInfo** info);
+
+        SetProviderInfo(
+            [in] IProviderInfo* info);
+
+        GetContentProvider(
+            [out] IIContentProvider** provider);
+
+        SetContentProvider(
+            [in] IIContentProvider* provider);
+
+        GetConnection(
+            [out] IBinder** connection);
+
+        SetConnection(
+            [in] IBinder* connection);
+
+        GetNoReleaseNeeded(
+            [out] Boolean* noReleaseNeeded);
+
+        SetNoReleaseNeeded(
+            [in] Boolean noReleaseNeeded);
+    }
+
+    /** Information returned after waiting for an activity start. */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IActivityManagerWaitResult {
+        GetResult(
+            [out] Int32* result);
+
+        SetResult(
+            [in] Int32 result);
+
+        GetTimeout(
+            [out] Boolean* timeout);
+
+        SetTimeout(
+            [in] Boolean timeout);
+
+        GetWho(
+            [out] IComponentName** who);
+
+        SetWho(
+            [in] IComponentName* who);
+
+        GetThisTime(
+            [out] Int64* thisTime);
+
+        SetThisTime(
+            [in] Int64 thisTime);
+
+        GetTotalTime(
+            [out] Int64* totalTime);
+
+        SetTotalTime(
+            [in] Int64 totalTime);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

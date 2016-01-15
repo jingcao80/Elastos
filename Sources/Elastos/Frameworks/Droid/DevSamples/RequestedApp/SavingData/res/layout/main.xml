@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textColor="#000000"
+        android:text="[1]. SharedPreferences: Default value(-1)">
+    </TextView>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textColor="#000000"
+        android:id="@+id/sharedtext"
+        android:text="Not has SharedPreferences data.">
+    </TextView>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textColor="#000000"
+        android:id="@+id/internaltext"
+        android:text="path">
+    </TextView>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textColor="#000000"
+        android:id="@+id/externaltext"
+        android:text="path">
+    </TextView>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textColor="#000000"
+        android:text="[4]. SQL:">
+    </TextView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip">
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center_vertical"
+            android:textColor="#000000"
+            android:layout_weight="1"
+            android:id="@+id/adddata"
+            android:text="Add Data">
+        </Button>
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center_vertical"
+            android:textColor="#000000"
+            android:layout_weight="1"
+            android:id="@+id/deldata"
+            android:text="Delete Data">
+        </Button>
+    </LinearLayout>
+
+     <ListView
+        android:id="@+id/sqlListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+    </ListView>
+</LinearLayout>

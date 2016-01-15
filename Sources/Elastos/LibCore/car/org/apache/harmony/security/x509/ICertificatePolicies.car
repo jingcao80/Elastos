@@ -1,0 +1,57 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    interface Org.Apache.Harmony.Security.X509.IPolicyInformation;
+    interface Org.Apache.Harmony.Security.X509.ICertificatePolicies;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with Certificate Policies structure which is a part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *   certificatePolicies ::= SEQUENCE SIZE (1..MAX) OF PolicyInformation
+     * </pre>
+     */
+    interface ICertificatePolicies extends IExtensionValue {
+        /**
+         * Returns the values of policyInformation field of the structure.
+         */
+        GetPolicyInformations(
+            [out] IList** infomations);
+
+        AddPolicyInformation(
+            [in] IPolicyInformation* policyInformation,
+            [out] ICertificatePolicies** policies);
+    }
+
+    [deprecated]
+    interface ICertificatePoliciesHelper {
+        Decode(
+            [in] ArrayOf<Byte>* encoding,
+            [out] ICertificatePolicies** policies);
+
+        GetASN1(
+            [out] IASN1Type** asn1);
+
+        SetASN1(
+            [in] IASN1Type* asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

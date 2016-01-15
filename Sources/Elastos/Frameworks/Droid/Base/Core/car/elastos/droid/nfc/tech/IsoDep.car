@@ -1,0 +1,51 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Tech{
+
+    /**
+     * @Involve
+     * interace IBasicTagTechnology
+     */
+    [deprecated]
+    interface IIsoDep {
+        SetTimeout(
+            [in] Int32 timeout);
+
+        GetTimeout(
+            [out] Int32* timeout);
+
+        GetHistoricalBytes(
+            [out, callee] ArrayOf<Byte>* res);
+
+        GetHiLayerResponse(
+            [out, callee] ArrayOf<Byte>* res);
+
+        Transceive(
+            [in] ArrayOf<Byte>* date,
+            [out, callee] ArrayOf<Byte>* res);
+
+        GetMaxTransceiveLength(
+            [out] Int32* res);
+
+        IsExtendedLengthApduSupported(
+            [out] Boolean* res);
+    }
+
+    interface IIsoDepHelper {
+        GetIsoDep(
+            [in] ITag* tag,
+            [out] IIsoDep** dep);
+    }
+
+    }// namespace Tech
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

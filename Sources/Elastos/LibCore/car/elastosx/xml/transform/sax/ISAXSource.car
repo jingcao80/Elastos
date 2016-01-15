@@ -1,0 +1,61 @@
+
+module
+{
+    interface Org.Xml.Sax.IXMLReader;
+    interface Org.Xml.Sax.IInputSource;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Transform {
+    namespace Sax {
+
+    /**
+     * @Involve
+     * interface ISource;
+     */
+    interface ISAXSource {
+    /**
+     * If {@link javax.xml.transform.TransformerFactory#getFeature}
+     * returns true when passed this value as an argument,
+     * the Transformer supports Source input of this type.
+     */
+        const String FEATURE = "http://javax.xml.transform.sax.SAXSource/feature";
+
+    /**
+     * Set the XMLReader to be used for the Source.
+     *
+     * @param reader A valid XMLReader or XMLFilter reference.
+     */
+        SetXMLReader(
+            [in] IXMLReader* reader);
+
+    /**
+     * Get the XMLReader to be used for the Source.
+     *
+     * @return A valid XMLReader or XMLFilter reference, or null.
+     */
+        GetXMLReader(
+            [out] IXMLReader** reader);
+
+    /**
+     * Set the SAX InputSource to be used for the Source.
+     *
+     * @param inputSource A valid InputSource reference.
+     */
+        SetInputSource(
+            [in] IInputSource* inputSource);
+
+    /**
+     * Get the SAX InputSource to be used for the Source.
+     *
+     * @return A valid InputSource reference, or null.
+     */
+        GetInputSource(
+            [out] IInputSource** inputSource);
+    }
+
+    } // namespace Sax
+    } // namespace Transform
+    } // namespace Xml
+    } // namespace Elastosx
+}

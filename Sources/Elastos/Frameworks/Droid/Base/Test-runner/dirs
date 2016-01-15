@@ -1,0 +1,4 @@
+
+DIRS += inc
+DIRS += src/elastos
+#DIRS += lib

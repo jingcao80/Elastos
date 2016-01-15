@@ -1,0 +1,5 @@
+
+EXPORT_HEADERS += eunit/framework/Assert.h
+EXPORT_HEADERS += eunit/framework/TestCase.h
+EXPORT_HEADERS += eunit/runner/BaseTestRunner.h
+EXPORT_HEADERS += eunit/textui/ResultPrinter.h

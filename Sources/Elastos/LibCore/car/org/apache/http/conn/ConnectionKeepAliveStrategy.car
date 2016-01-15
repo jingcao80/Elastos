@@ -1,0 +1,57 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpResponse;
+    interface Org.Apache.Http.Protocol.IHttpContext;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+
+    /**
+     * Interface for deciding how long a connection can remain
+     * idle before being reused.
+     *
+     * @author <a href="mailto:sberlin at gmail.com">Sam Berlin</a>
+     *
+     *
+     * @version $Revision: $
+     *
+     * @since 4.0
+     */
+    interface IConnectionKeepAliveStrategy {
+
+        /**
+         * Returns the duration of time which this connection can be safely kept
+         * idle. If the connection is left idle for longer than this period of time,
+         * it MUST not reused. A value of 0 or less may be returned to indicate that
+         * there is no suitable suggestion.
+         *
+         * When coupled with a {@link ConnectionReuseStrategy}, if
+         * {@link ConnectionReuseStrategy#keepAlive(HttpResponse, HttpContext)
+         * returns true, this allows you to control how long the reuse will last. If
+         * keepAlive returns false, this should have no meaningful impact
+         *
+         * @param response
+         *            The last response received over the connection.
+         * @param context
+         *            the context in which the connection is being used.
+         *
+         * @return the duration in ms for which it is safe to keep the connection
+         *         idle, or <=0 if no suggested duration.
+         */
+        GetKeepAliveDuration(
+            [in] IHttpResponse* response,
+            [in] IHttpContext* context,
+            [out] Int64* duration);
+
+    }
+
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

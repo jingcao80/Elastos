@@ -1,0 +1,87 @@
+
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     *
+     * This class incapsulates the constants determining the types of handshake
+     * messages as defined in TLS 1.0 spec., 7.4. Handshake protocol.
+     * (http://www.ietf.org/rfc/rfc2246.txt)
+     *
+     */
+    interface IHandshake {
+        /**
+         *
+         * hello_request handshake type
+         */
+        const Byte HELLO_REQUEST = 0;
+
+        /**
+         *
+         * client_hello handshake type
+         */
+        const Byte CLIENT_HELLO = 1;
+
+        /**
+         *
+         * server_hello handshake type
+         */
+        const Byte SERVER_HELLO = 2;
+
+        /**
+         *
+         * certificate handshake type
+         */
+        const Byte CERTIFICATE = 11;
+
+        /**
+         *
+         * server_key_exchange  handshake type
+         */
+        const Byte SERVER_KEY_EXCHANGE = 12;
+
+        /**
+         *
+         * certificate_request handshake type
+         */
+        const Byte CERTIFICATE_REQUEST = 13;
+
+        /**
+         *
+         * server_hello_done handshake type
+         */
+        const Byte SERVER_HELLO_DONE = 14;
+
+        /**
+         *
+         * certificate_verify handshake type
+         */
+        const Byte CERTIFICATE_VERIFY = 15;
+
+        /**
+         *
+         * client_key_exchange handshake type
+         */
+        const Byte CLIENT_KEY_EXCHANGE = 16;
+
+        /**
+         *
+         * finished handshake type
+         */
+        const Byte FINISHED = 20;
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

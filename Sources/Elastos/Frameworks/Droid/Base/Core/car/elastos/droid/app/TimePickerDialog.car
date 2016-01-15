@@ -1,0 +1,55 @@
+
+module
+{
+    interface Elastos.Droid.Widget.ITimePicker;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * The callback interface used to indicate the user is done filling in
+     * the time (they clicked on the 'Done' button).
+     */
+    interface ITimePickerDialogOnTimeSetListener {
+
+        /**
+         * @param view The view associated with this listener.
+         * @param hourOfDay The hour that was set.
+         * @param minute The minute that was set.
+         */
+        OnTimeSet(
+            [in] ITimePicker* view,
+            [in] Int32 hourOfDay,
+            [in] Int32 minute);
+    }
+
+    /**
+     * A dialog that prompts the user for the time of day using a {@link TimePicker}.
+     *
+     * <p>See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
+     * guide.</p>
+     */
+    /**
+     * @Invovle
+     * interface IAlertDialog
+     * interface IDialogInterfaceOnClickListener
+     * interface ITimePickerOnTimeChangedListener
+     */
+    interface ITimePickerDialog {
+
+        /**
+         * Sets the current time.
+         *
+         * @param hourOfDay The current hour within the day.
+         * @param minuteOfHour The current minute within the hour.
+         */
+        UpdateTime(
+            [in] Int32 hourOfDay,
+            [in] Int32 minuteOfHour);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

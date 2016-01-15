@@ -1,0 +1,60 @@
+
+module
+{
+    interface Elastos.Droid.Content.IISyncContext;
+    interface Elastos.Droid.Accounts.IAccount;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Interface used by the SyncAdapter to indicate its progress.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Os.IBinder
+     */
+    [oneway]
+    interface IISyncAdapter {
+        /**
+         * Initiate a sync for this account. SyncAdapter-specific parameters may
+         * be specified in extras, which is guaranteed to not be null.
+         *
+         * @param syncContext the ISyncContext used to indicate the progress of the sync. When
+         *   the sync is finished (successfully or not) ISyncContext.onFinished() must be called.
+         * @param authority the authority that should be synced
+         * @param account the account that should be synced
+         * @param extras SyncAdapter-specific parameters
+         */
+        StartSync(
+            [in] IISyncContext* syncContext,
+            [in] String authority,
+            [in] IAccount* account,
+            [in] IBundle* extras);
+
+        /**
+         * Cancel the most recently initiated sync. Due to race conditions, this may arrive
+         * after the ISyncContext.onFinished() for that sync was called.
+         * @param syncContext the ISyncContext that was passed to {@link #startSync}
+         */
+        CancelSync(
+            [in] IISyncContext* syncContext);
+
+        /**
+         * Initialize the SyncAdapter for this account and authority.
+         *
+         * @param account the account that should be synced
+         * @param authority the authority that should be synced
+         */
+        Initialize(
+            [in] IAccount* account,
+            [in] String authority);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

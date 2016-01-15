@@ -1,0 +1,102 @@
+
+module
+{
+    merge("io/Exceptions.car");
+    merge("io/IAsynchronousCloseMonitor.car");
+    merge("io/IOs.car");
+    merge("io/IIoBridge.car");
+    merge("io/ILibcore.car");
+    merge("io/ISocketTagger.car");
+    merge("io/IBase64.car");
+    merge("io/IBufferIterator.car");
+    merge("io/IMemory.car");
+    merge("io/IMemoryMappedFile.car");
+    merge("io/ISizeOf.car");
+    merge("io/INioBufferIterator.car");
+    merge("io/IDeleteOnExit.car");
+    merge("io/IDropBox.car");
+    merge("io/IIoUtils.car");
+    merge("io/IStreams.car");
+    merge("io/IStrictLineReader.car");
+
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.Charset.ICharset;
+
+    namespace Libcore {
+    namespace IO {
+        singleton class CAsynchronousCloseMonitor {
+            interface IAsynchronousCloseMonitor;
+        }
+
+        singleton class CBase64 {
+            interface IBase64;
+        }
+
+        singleton class CLibcore {
+            interface ILibcore;
+        }
+
+        singleton class CIoBridge {
+            interface IIoBridge;
+        }
+
+        singleton class CSocketTaggerHelper {
+            interface ISocketTaggerHelper;
+        }
+
+        singleton class CStreams {
+            interface IStreams;
+        }
+
+        singleton class CDeleteOnExitHelper {
+            interface IDeleteOnExitHelper;
+        }
+
+        singleton class CDropBox {
+            interface IDropBox;
+        }
+
+        singleton class CMemory {
+            interface IMemory;
+        }
+
+        singleton class CIoUtils {
+            interface IIoUtils;
+        }
+
+        class CMemoryMappedFile {
+            constructor(
+                [in] Int64 address,
+                [in] Int64 size);
+
+            interface IMemoryMappedFile;
+            interface ICloseable;
+        }
+
+        class CStrictLineReader {
+            constructor(
+                [in] IInputStream* input);
+
+            constructor(
+                [in] IInputStream* input,
+                [in] Int32 capacity);
+
+            constructor(
+                [in] IInputStream* input,
+                [in] ICharset* Charset);
+
+            constructor(
+                [in] IInputStream* input,
+                [in] Int32 capacity,
+                [in] ICharset* Charset);
+
+            interface IStrictLineReader;
+            interface ICloseable;
+        }
+        class CPosix {
+            interface IOs;
+        }
+    }
+    }
+}

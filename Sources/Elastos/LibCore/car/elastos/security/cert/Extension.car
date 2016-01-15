@@ -1,0 +1,62 @@
+
+module
+{
+    interface Elastos.IO.IOutputStream;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+     * The Extension part of an X.509 certificate (as specified in <a
+     * href="http://www.ietf.org/rfc/rfc3280.txt">RFC 3280 &mdash; Internet X.509
+     * Public Key Infrastructure: Certificate and Certificate Revocation List (CRL)
+     * Profile</p>):
+     *
+     * <pre>
+     *  Extension  ::=  SEQUENCE  {
+     *       extnID      OBJECT IDENTIFIER,
+     *       critical    BOOLEAN DEFAULT FALSE,
+     *       extnValue   OCTET STRING
+     *  }
+     * </pre>
+     *
+     * @since 1.7
+     * @hide
+     */
+    interface IExtension {
+        /**
+         * Returns the OID (Object Identifier) for this extension encoded as a
+         * string (e.g., "2.5.29.15").
+         */
+        GetId(
+            [out] String* id);
+
+        /**
+         * Returns {@code true} if this extension is critical. If this is true and
+         * an implementation does not understand this extension, it must reject it.
+         * See RFC 3280 section 4.2 for more information.
+         */
+        IsCritical(
+            [out] Boolean* isCritical);
+
+        /**
+         * The DER-encoded value of this extension.
+         */
+        GetValue(
+            [out, callee] ArrayOf<Byte>* value);
+
+        /**
+         * Writes the DER-encoded extension to {@code out}.
+         *
+         * @throws IOException when there is an encoding error or error writing to
+         *             {@code out}
+         */
+        Encode(
+            [in] IOutputStream* outValue) /*throws IOException*/;
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

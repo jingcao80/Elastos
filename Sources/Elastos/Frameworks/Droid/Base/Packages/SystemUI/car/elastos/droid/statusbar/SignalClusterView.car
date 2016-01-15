@@ -1,0 +1,94 @@
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.ISecurityController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    // Intimately tied to the design of res/layout/signal_cluster_view.xml
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.ILinearLayout
+     * interface NetworkControllerImpl.ISignalCluster
+     * interface ISecurityControllerCallback
+     */
+    interface ISignalClusterView {
+
+        SetNetworkController(
+            [in] INetworkController* nc);
+
+        SetSecurityController(
+            [in] ISecurityController* sc);
+    }
+
+    /**
+     * The view representing the separation between important and less important notifications
+     */
+    /**
+     * @Involve
+     * interface IExpandableView
+     */
+    interface ISpeedBumpView {
+
+        PerformVisibilityAnimation(
+            [in] Boolean nowVisible,
+            [in] Int64 delay);
+
+        /**
+         * Animate the divider to a new visibility.
+         *
+         * @param nowVisible should it now be visible
+         * @param delay the delay after the animation should start
+         * @param onFinishedRunnable A runnable which should be run when the animation is
+         *        finished.
+         */
+        AnimateDivider(
+            [in] Boolean nowVisible,
+            [in] Int64 delay,
+            [in] IRunnable* onFinishedRunnable);
+
+        SetInvisible();
+    }
+
+    /**
+     * A common base class for all views in the notification stack scroller which don't have a
+     * background.
+     */
+    /**
+     * @Involve
+     * interface IExpandableView
+     */
+    interface IStackScrollerDecorView {
+        PerformVisibilityAnimation(
+            [in] Boolean nowVisible);
+
+        PerformVisibilityAnimation(
+            [in] Boolean nowVisible,
+            [in] IRunnable* onFinishedRunnable);
+
+        IsVisible(
+            [out] Boolean* visible);
+
+        SetInvisible();
+
+        CancelAnimation();
+
+        WillBeGone(
+            [out] Boolean* visible);
+
+        SetWillBeGone(
+            [in] Boolean willBeGone);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

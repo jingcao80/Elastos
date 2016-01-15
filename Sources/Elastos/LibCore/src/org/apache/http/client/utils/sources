@@ -1,0 +1,15 @@
+
+TARGET_NAME= utils
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+SOURCES = CloneUtils.cpp
+SOURCES += URIUtils.cpp
+SOURCES += URLEncodedUtils.cpp

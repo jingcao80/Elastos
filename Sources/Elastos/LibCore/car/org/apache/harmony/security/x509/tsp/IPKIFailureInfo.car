@@ -1,0 +1,88 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+    namespace Tsp {
+
+    /**
+       Corresponds to PKIFailureInfo structure.
+       See RFC 3161 -
+       Internet X.509 Public Key Infrastructure
+       Time-Stamp Protocol (TSP)
+       http://www.ietf.org/rfc/rfc3161.txt)
+
+       PKIFailureInfo ::= BIT STRING {
+       badAlg               (0),
+         -- unrecognized or unsupported Algorithm Identifier
+       badRequest           (2),
+         -- transaction not permitted or supported
+       badDataFormat        (5),
+         -- the data submitted has the wrong format
+       timeNotAvailable    (14),
+         -- the TSA's time source is not available
+       unacceptedPolicy    (15),
+         -- the requested TSA policy is not supported by the TSA
+       unacceptedExtension (16),
+         -- the requested extension is not supported by the TSA
+        addInfoNotAvailable (17)
+          -- the additional information requested could not be understood
+          -- or is not available
+        systemFailure       (25)
+          -- the request cannot be handled due to system failure  }
+
+        The value of PKIFailureInfo can take only one of the values,
+        so it is represented by an integer here.
+     */
+    enum PKIFailureInfo {
+        /**
+         *  Unrecognized algorithm ID
+         */
+        PKIFailureInfo_BAD_ALG = 0,
+
+        /**
+         *  Transaction is not supported
+         */
+        PKIFailureInfo_BAD_REQUEST = 2,
+
+        /**
+         *  Data format is wrong
+         */
+        PKIFailureInfo_BAD_DATA_FORMAT = 5,
+
+        /**
+         *  TSA cannot use the time source
+         */
+        PKIFailureInfo_TIME_NOT_AVAILABLE = 14,
+
+        /**
+         *  The policy is not supported
+         */
+        PKIFailureInfo_UNACCEPTED_POLICY = 15,
+
+        /**
+         *  The extension is not supported
+         */
+        PKIFailureInfo_UNACCEPTED_EXTENSION = 16,
+
+        /**
+         *  The requested additional info is not available
+         */
+        PKIFailureInfo_ADD_INFO_NOT_AVAILABLE = 17,
+
+        /**
+         *  System failure has occured
+         */
+        PKIFailureInfo_SYSTEM_FAILURE = 25,
+    }
+
+    } // namespace Tsp
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,34 @@
+
+module
+{
+    namespace Eunit {
+    namespace Framework {
+
+    interface ITest;
+
+    interface ITestFailure {
+        /**
+         * Gets the failed test.
+         */
+        FailedTest(
+            [out] ITest** test);
+
+        /**
+         * Gets the thrown exception.
+         */
+        ThrownException(
+            [out] ECode* ec);
+
+        Trace(
+            [out] String* traceStr);
+
+        ExceptionMessage(
+            [out] String* message);
+
+        IsFailure(
+            [out] Boolean* result);
+    }
+
+    } // namespace Framework
+    } // namespace Eunit
+}

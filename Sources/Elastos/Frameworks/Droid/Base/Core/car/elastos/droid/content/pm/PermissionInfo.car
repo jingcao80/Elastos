@@ -1,0 +1,181 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+
+    /**
+     * Information you can retrieve about a particular security permission known to
+     * the system. This corresponds to information collected from the
+     * AndroidManifest.xml's <permission> tags.
+     *
+     * @implements Elastos.Droid.Content.Pm.Elastos.Droid.Content.Pm.IPackageItemInfo
+     */
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.Pm.IPackageItemInfo
+     */
+    [local]
+    interface IPermissionInfo {
+        /**
+         * A normal application value for #protectionLevel corresponding
+         * to the <code>normal</code> value of
+         * android.R.attr#protectionLevel.
+         *
+         * @sa #protectionLevel
+         * @sa android.R.attr#protectionLevel
+         */
+        const Int32 PROTECTION_NORMAL = 0;
+
+        /**
+         * Dangerous value for #protectionLevel, corresponding
+         * to the <code>dangerous</code> value of
+         * android.R.attr#protectionLevel.
+         *
+         * @sa #protectionLevel
+         * @sa android.R.attr#protectionLevel
+         */
+        const Int32 PROTECTION_DANGEROUS = 1;
+
+        /**
+         * System-level value for #protectionLevel, corresponding
+         * to the <code>signature</code> value of
+         * android.R.attr#protectionLevel.
+         *
+         * @sa #protectionLevel
+         * @sa android.R.attr#protectionLevel
+         */
+        const Int32 PROTECTION_SIGNATURE = 2;
+
+        /**
+         * System-level value for #protectionLevel, corresponding
+         * to the <code>signatureOrSystem</code> value of
+         * android.R.attr#protectionLevel.
+         *
+         * @sa #protectionLevel
+         * @sa android.R.attr#protectionLevel
+         */
+        const Int32 PROTECTION_SIGNATURE_OR_SYSTEM = 3;
+
+        /**
+         * Additional flag for #protectionLevel, corresponding
+         * to the <code>system</code> value of
+         * android.R.attr#protectionLevel.
+         *
+         * @sa #protectionLevel
+         * @sa android.R.attr#protectionLevel
+         */
+        const Int32 PROTECTION_FLAG_SYSTEM = 0x10;
+
+        /**
+         * Additional flag for #protectionLevel, corresponding
+         * to the <code>development</code> value of
+         * android.R.attr#protectionLevel.
+         *
+         * @sa #protectionLevel
+         * @sa android.R.attr#protectionLevel
+         */
+        const Int32 PROTECTION_FLAG_DEVELOPMENT = 0x20;
+
+        /**
+         * Additional flag for {@link #protectionLevel}, corresponding
+         * to the <code>appop</code> value of
+         * {@link android.R.attr#protectionLevel}.
+         */
+        const Int32 PROTECTION_FLAG_APPOP = 0x40;
+
+        /**
+         * Mask for #protectionLevel: the basic protection type.
+         *
+         * @sa #protectionLevel
+         */
+        const Int32 PROTECTION_MASK_BASE = 0xf;
+
+        /**
+         * Mask for #protectionLevel: additional flag bits.
+         */
+        const Int32 PROTECTION_MASK_FLAGS = 0xf0;
+
+        /**
+         * Flag for #flags, corresponding to <code>costsMoney</code>
+         * value of android.R.attr#permissionFlags.
+         *
+         * @sa #flags
+         * @sa android.R.attr#permissionFlags
+         */
+        const Int32 FLAG_COSTS_MONEY = 1<<0;
+
+        /**
+         * Retrieve the textual description of this permission.  This
+         * will call back on the given PackageManager to load the description from
+         * the application.
+         *
+         * @param pm A PackageManager from which the label can be loaded; usually
+         * the PackageManager from which you originally retrieved this item.
+         *
+         * @return Returns a CharSequence containing the permission's description.
+         * If there is no description, null is returned.
+         */
+        LoadDescription(
+            [in] IPackageManager* cm,
+            [out] ICharSequence** des);
+
+        ToString(
+            [out] String* str);
+
+        GetProtectionLevel(
+            [out] Int32* level);
+
+        SetProtectionLevel(
+            [in] Int32 level);
+
+        GetGroup(
+            [out] String* group);
+
+        SetGroup(
+            [in] String group);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        GetDescriptionRes(
+            [out] Int32* desRes);
+
+        SetDescriptionRes(
+            [in] Int32 desRes);
+
+        GetNonLocalizedDescription(
+            [out] ICharSequence** des);
+
+        SetNonLocalizedDescription(
+            [in] ICharSequence* des);
+    }
+
+    interface IPermissionInfoHelper {
+        /** @hide */
+        FixProtectionLevel(
+            [in] Int32 level,
+            [out] Int32* pLevel);
+
+        /** @hide */
+        ProtectionToString(
+            [in] Int32 level,
+            [out] String* prot);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

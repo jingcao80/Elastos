@@ -1,0 +1,25 @@
+
+TARGET_NAME= conn
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+SOURCES = AbstractClientConnAdapter.cpp
+SOURCES += AbstractPooledConnAdapter.cpp
+SOURCES += AbstractPoolEntry.cpp
+SOURCES += DefaultClientConnection.cpp
+SOURCES += DefaultClientConnectionOperator.cpp
+SOURCES += DefaultHttpRoutePlanner.cpp
+SOURCES += DefaultResponseParser.cpp
+SOURCES += IdleConnectionHandler.cpp
+SOURCES += LoggingSessionInputBuffer.cpp
+SOURCES += LoggingSessionOutputBuffer.cpp
+SOURCES += ProxySelectorRoutePlanner.cpp
+SOURCES += SingleClientConnManager.cpp
+SOURCES += Wire.cpp

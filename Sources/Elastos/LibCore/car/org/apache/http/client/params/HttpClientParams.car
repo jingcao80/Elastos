@@ -1,0 +1,46 @@
+
+module
+{
+
+    interface Org.Apache.Http.Params.IHttpParams;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+    namespace Params {
+
+    interface IHttpClientParams {
+
+        IsRedirecting(
+            [in] IHttpParams* params,
+            [out] Boolean* isRedirecting);
+
+        SetRedirecting(
+            [in] IHttpParams* params,
+            [in] Boolean value);
+
+        IsAuthenticating(
+            [in] IHttpParams* params,
+            [out] Boolean* isAuthenticating);
+
+        SetAuthenticating(
+            [in] IHttpParams* params,
+            [in] Boolean value);
+
+        GetCookiePolicy(
+            [in] IHttpParams* params,
+            [out] String* cookiePolicy);
+
+        SetCookiePolicy(
+            [in] IHttpParams* params,
+            [in] String cookiePolicy);
+
+    }
+
+    } // namespace Params
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

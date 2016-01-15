@@ -1,0 +1,34 @@
+
+module
+{
+    interface Elastos.Droid.Location.ILocation;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * {@hide}
+     */
+    [oneway]
+    interface IILocationListener {
+        OnLocationChanged(
+            [in] ILocation* location);
+
+        OnStatusChanged(
+            [in] String provider,
+            [in] Int32 status,
+            [in] IBundle* extras);
+
+        OnProviderEnabled(
+            [in] String provider);
+
+        OnProviderDisabled(
+            [in] String provider);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}

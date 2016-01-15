@@ -1,0 +1,18 @@
+TARGET_NAME= net
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += CLegacyVpnInfo.cpp
+SOURCES += CLegacyVpnInfoHelper.cpp
+SOURCES += CNetworkStatsFactory.cpp
+SOURCES += CNetworkStatsFactoryHelper.cpp
+SOURCES += CVpnConfig.cpp
+SOURCES += CVpnConfigHelper.cpp
+SOURCES += CVpnProfile.cpp
+SOURCES += CVpnProfileHelper.cpp

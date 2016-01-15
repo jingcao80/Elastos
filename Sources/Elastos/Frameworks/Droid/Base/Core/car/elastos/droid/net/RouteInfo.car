@@ -1,0 +1,178 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcel;
+
+    using interface Elastos.Net.IInetAddress;
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Represents a network route.
+     * <p>
+     * This is used both to describe static network configuration and live network
+     * configuration information.
+     *
+     * A route contains three pieces of information:
+     * <ul>
+     * <li>a destination {@link IpPrefix} specifying the network destinations covered by this route.
+     *     If this is {@code null} it indicates a default route of the address family (IPv4 or IPv6)
+     *     implied by the gateway IP address.
+     * <li>a gateway {@link InetAddress} indicating the next hop to use.  If this is {@code null} it
+     *     indicates a directly-connected route.
+     * <li>an interface (which may be unspecified).
+     * </ul>
+     * Either the destination or the gateway may be {@code null}, but not both.  If the
+     * destination and gateway are both specified, they must be of the same address family
+     * (IPv4 or IPv6).
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IRouteInfo {
+        /** Unicast route. @hide */
+        const Int32 RTN_UNICAST = 1;
+
+        /** Unreachable route. @hide */
+        const Int32 RTN_UNREACHABLE = 7;
+
+        /** Throw route. @hide */
+        const Int32 RTN_THROW = 9;
+
+        /**
+         * Retrieves the destination address and prefix length in the form of an {@link IpPrefix}.
+         *
+         * @return {@link IpPrefix} specifying the destination.  This is never {@code null}.
+         */
+        GetDestination(
+            [out] IIpPrefix** result);
+
+        /**
+         * TODO: Convert callers to use IpPrefix and then remove.
+         * @hide
+         */
+        GetDestinationLinkAddress(
+            [out] ILinkAddress** result);
+
+        /**
+         * Retrieves the gateway or next hop {@link InetAddress} for this route.
+         *
+         * @return {@link InetAddress} specifying the gateway or next hop.  This may be
+         *                             {@code null} for a directly-connected route."
+         */
+        GetGateway(
+            [out] IInetAddress** result);
+
+        /**
+         * Retrieves the interface used for this route if specified, else {@code null}.
+         *
+         * @return The name of the interface used for this route.
+         */
+        GetInterface(
+            [out] String* result);
+
+        /**
+         * Retrieves the type of this route.
+         *
+         * @return The type of this route; one of the {@code RTN_xxx} constants defined in this class.
+         *
+         * @hide
+         */
+        GetType(
+            [out] Int32* result);
+
+        /**
+         * Indicates if this route is a default route (ie, has no destination specified).
+         *
+         * @return {@code true} if the destination has a prefix length of 0.
+         */
+        IsDefaultRoute(
+            [out] Boolean* result);
+
+        /**
+         * Indicates if this route is an IPv4 default route.
+         * @hide
+         */
+        IsIPv4Default(
+            [out] Boolean* result);
+
+        /**
+         * Indicates if this route is an IPv6 default route.
+         * @hide
+         */
+        IsIPv6Default(
+            [out] Boolean* result);
+
+        /**
+         * Indicates if this route is a host route (ie, matches only a single host address).
+         *
+         * @return {@code true} if the destination has a prefix length of 32 or 128 for IPv4 or IPv6,
+         * respectively.
+         * @hide
+         */
+        IsHostRoute(
+            [out] Boolean* result);
+
+        /**
+         * Indicates if this route has a next hop ({@code true}) or is directly-connected
+         * ({@code false}).
+         *
+         * @return {@code true} if a gateway is specified
+         * @hide
+         */
+        HasGateway(
+            [out] Boolean* result);
+
+        /**
+         * Determines whether the destination and prefix of this route includes the specified
+         * address.
+         *
+         * @param destination A {@link InetAddress} to test to see if it would match this route.
+         * @return {@code true} if the destination and prefix length cover the given address.
+         */
+        Matches(
+            [in] IInetAddress* destination,
+            [out] Boolean* result);
+    }
+
+    interface IRouteInfoHelper {
+        /**
+         * @hide
+         */
+        MakeHostRoute(
+            [in] IInetAddress* host,
+            [in] String iface,
+            [out] IRouteInfo** result);
+
+        /**
+         * @hide
+         */
+        MakeHostRoute(
+            [in] IInetAddress* host,
+            [in] IInetAddress* gateway,
+            [in] String iface,
+            [out] IRouteInfo** result);
+
+        /**
+         * Find the route from a Collection of routes that best matches a given address.
+         * May return null if no routes are applicable.
+         * @param routes a Collection of RouteInfos to chose from
+         * @param dest the InetAddress your trying to get to
+         * @return the RouteInfo from the Collection that best fits the given address
+         *
+         * @hide
+         */
+        SelectBestRoute(
+            [in] ICollection* routes,
+            [in] IInetAddress* dest,
+            [out] IRouteInfo** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,22 @@
+
+TARGET_NAME= params
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc;
+
+SOURCES = HttpAbstractParamBean.cpp
+SOURCES += HttpProtocolParams.cpp
+SOURCES += CHttpProtocolParams.cpp
+SOURCES += HttpConnectionParams.cpp
+SOURCES += CHttpConnectionParams.cpp
+SOURCES += AbstractHttpParams.cpp
+SOURCES += CBasicHttpParams.cpp
+SOURCES += CDefaultedHttpParams.cpp
+SOURCES += CHttpConnectionParamBean.cpp
+SOURCES += CHttpProtocolParamBean.cpp

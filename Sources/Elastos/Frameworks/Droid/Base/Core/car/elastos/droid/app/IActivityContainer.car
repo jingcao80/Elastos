@@ -1,0 +1,50 @@
+module
+{
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.View.IInputEvent;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IIIntentSender;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** @hide */
+    interface IActivityContainer {
+        AttachToDisplay(
+            [in] Int32 displayId);
+
+        SetSurface(
+            [in] ISurface* surface,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 density);
+
+        StartActivity(
+            [in] IIntent* intent,
+            [out] Int32* result);
+
+        StartActivityIntentSender(
+            [in] IIIntentSender* intentSender,
+            [out] Int32* result);
+
+        CheckEmbeddedAllowed(
+            [in] IIntent* intent);
+
+        CheckEmbeddedAllowedIntentSender(
+            [in] IIIntentSender* intentSender);
+
+        GetDisplayId(
+            [out] Int32* result);
+
+        InjectEvent(
+            [in] IInputEvent* event,
+            [out] Boolean* result);
+
+        ReleaseResources();
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,298 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/MonkeyEvent.car");
+    merge("car/MonkeyActivityEvent.car");
+    merge("car/MonkeyCommandEvent.car");
+    merge("car/MonkeyFlipEvent.car");
+    merge("car/MonkeyGetAppFrameRateEvent.car");
+    merge("car/MonkeyGetFrameRateEvent.car");
+    merge("car/MonkeyInstrumentationEvent.car");
+    merge("car/MonkeyKeyEvent.car");
+    merge("car/MonkeyMotionEvent.car");
+    merge("car/MonkeyNoopEvent.car");
+    merge("car/MonkeyPowerEvent.car");
+    merge("car/MonkeyRotationEvent.car");
+    merge("car/MonkeyThrottleEvent.car");
+    merge("car/MonkeyTouchEvent.car");
+    merge("car/MonkeyTrackballEvent.car");
+    merge("car/MonkeyWaitEvent.car");
+    merge("car/MonkeyEventQueue.car");
+    merge("car/MonkeyEventSource.car");
+    merge("car/MonkeySourceNetwork.car");
+    merge("car/MonkeySourceNetworkVars.car");
+    merge("car/MonkeySourceNetworkViews.car");
+    merge("car/MonkeySourceRandom.car");
+    merge("car/MonkeySourceRandomScript.car");
+    merge("car/MonkeySourceScript.car");
+    merge("car/MonkeyUtils.car");
+    merge("car/Monkey.car");
+    merge("car/MonkeyNetworkMonitor.car");
+
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Core.IRandom;
+    using interface Elastos.Droid.App.IActivityController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Monkey {
+
+
+    class CMonkeyActivityEvent {
+        constructor(
+            [in] IComponentName* app);
+
+        constructor(
+            [in] IComponentName* app,
+            [in] Int64 arg);
+
+        interface IMonkeyActivityEvent;
+    }
+
+    class CMonkeyCommandEvent {
+        constructor(
+            [in] String cmd);
+
+        interface IMonkeyCommandEvent;
+    }
+
+    class CMonkeyFlipEvent {
+        constructor(
+            [in] Boolean isKeyboardOpen);
+
+        interface IMonkeyFlipEvent;
+    }
+
+    class CMonkeyGetAppFrameRateEvent {
+        constructor(
+            [in] String status,
+            [in] String activityName,
+            [in] String testCaseName);
+
+        constructor(
+            [in] String status,
+            [in] String activityName);
+
+        constructor(
+            [in] String status);
+
+        interface IMonkeyGetAppFrameRateEvent;
+    }
+
+    class CMonkeyGetFrameRateEvent {
+        constructor(
+            [in] String status,
+            [in] String testCaseName);
+
+        constructor(
+            [in] String status);
+
+        interface IMonkeyGetFrameRateEvent;
+    }
+
+    class CMonkeyInstrumentationEvent {
+        constructor(
+            [in] String testCaseName,
+            [in] String runnerName);
+
+        interface IMonkeyInstrumentationEvent;
+    }
+
+    class CMonkeyKeyEvent {
+        constructor(
+            [in] Int32 action,
+            [in] Int32 keyCode);
+
+        constructor(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 keyCode,
+            [in] Int32 repeatCount,
+            [in] Int32 metaState,
+            [in] Int32 device,
+            [in] Int32 scanCode);
+
+        constructor(
+            [in] IKeyEvent *pKeyEvent);
+
+        interface IMonkeyKeyEvent;
+    }
+
+    class CMonkeyNoopEvent{
+        constructor();
+
+        interface IMonkeyNoopEvent;
+    }
+
+    class CMonkeyPowerEvent{
+        constructor(
+            [in] String powerLogTag,
+            [in] String powerTestResult);
+
+        constructor(
+            [in] String powerLogTag);
+
+        constructor();
+
+        interface IMonkeyPowerEvent;
+    }
+
+    class CMonkeyRotationEvent{
+        constructor(
+            [in] Int32 degree,
+            [in] Boolean persist);
+
+        interface IMonkeyRotationEvent;
+    }
+
+    class CMonkeyThrottleEvent{
+        constructor(
+            [in] Int64 throttle);
+
+        interface IMonkeyThrottleEvent;
+    }
+
+    class CMonkeyTouchEvent{
+        constructor(
+            [in] Int32 action);
+
+        interface IMonkeyTouchEvent;
+    }
+
+    class CMonkeyTrackballEvent{
+        constructor(
+            [in] Int32 action);
+
+        interface IMonkeyTrackballEvent;
+    }
+
+    class CMonkeyWaitEvent{
+        constructor(
+            [in] Int64 waitTime);
+
+        interface IMonkeyWaitEvent;
+    }
+
+    class CMonkeyEventQueue {
+        constructor(
+            [in] IRandom* random,
+            [in] Int64 throttle,
+            [in] Boolean randomizeThrottle);
+
+        interface IMonkeyEventQueue;
+    }
+
+    class CMonkeyCommandReturn {
+        constructor(
+            [in] Boolean success);
+
+        constructor(
+            [in] Boolean success,
+            [in] String message);
+
+        interface IMonkeyCommandReturn;
+    }
+
+    class CMonkeySourceNetwork {
+        constructor(
+            [in] Int32 port);
+
+        interface IMonkeySourceNetwork;
+    }
+
+    class CMonkeySourceNetworkVars {
+        interface IMonkeySourceNetworkVars;
+    }
+
+    class CMonkeySourceNetworkViews {
+        interface IMonkeySourceNetworkViews;
+    }
+
+    singleton class CMonkeySourceNetworkViewsHelper {
+        interface IMonkeySourceNetworkViewsHelper;
+    }
+
+    singleton class CMonkeyUtilsHelper {
+        interface IMonkeyUtilsHelper;
+    }
+
+    class CMonkeySourceRandom {
+        constructor(
+            [in] IRandom* random,
+            [in] IObjectContainer* mainApps,
+            [in] Int64 throttle,
+            [in] Boolean randomizeThrottle);
+
+        interface IMonkeySourceRandom;
+    }
+
+    singleton class CMonkeySourceRandomHelper {
+        interface IMonkeySourceRandomHelper;
+    }
+
+    [deprecated]
+    class CMonkeySourceRandomScript {
+        constructor(
+            [in] String setupFileName,
+            [in] ArrayOf<String>* scriptFileNames,
+            [in] Int64 throttle,
+            [in] Boolean randomizeThrottle,
+            [in] IRandom* random,
+            [in] Int64 profileWaitTime,
+            [in] Int64 deviceSleepTime,
+            [in] Boolean randomizeScript);
+
+        constructor(
+            [in] ArrayOf<String>* scriptFileNames,
+            [in] Int64 throttle,
+            [in] Boolean randomizeThrottle,
+            [in] IRandom* random,
+            [in] Int64 profileWaitTime,
+            [in] Int64 deviceSleepTime,
+            [in] Boolean randomizeScript);
+
+        interface IMonkeySourceRandomScript;
+    }
+
+    /**
+     * Creates a MonkeySourceScript instance.
+     *
+     * @param filename The filename of the script (on the device).
+     * @param throttle The amount of time in ms to sleep between events.
+     */
+    class CMonkeySourceScript {
+        constructor(
+            [in] IRandom* random,
+            [in] String filename,
+            [in] Int64 throttle,
+            [in] Boolean randomizeThrottle,
+            [in] Int64 profileWaitTime,
+            [in] Int64 deviceSleepTime);
+
+        interface IMonkeySourceScript;
+    }
+
+    singleton class CMonkey {
+        interface IMonkey;
+    }
+
+    class CMonkeyNetworkMonitor {
+        interface IMonkeyNetworkMonitor;
+    }
+
+    class CActivityController {
+        constructor(
+            [in] Handle32 monkey);
+
+        interface IActivityController;
+    }
+
+    } // namespace Monkey
+    } // namespace Commands
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,36 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * An implementation of Canvas on top of OpenGL ES 2.0.
+     */
+    /**
+     * @Involve
+     * interface IHardwareCanvas;
+     */
+    interface IGLES20Canvas {
+    }
+
+
+    /**
+     * An implementation of a GL canvas that records drawing operations.
+     * This is intended for use with a DisplayList. This class keeps a list of all the Paint and
+     * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
+     * the DisplayList is still holding a native reference to the memory.
+     */
+    /**
+     * @Involve
+     * interface IGLES20Canvas;
+     */
+    interface IGLES20RecordingCanvas {
+
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

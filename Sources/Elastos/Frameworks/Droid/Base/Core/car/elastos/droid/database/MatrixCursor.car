@@ -1,0 +1,76 @@
+module
+{
+    using interface Elastos.Utility.IIterable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+     * Builds a row, starting from the left-most column and adding one column
+     * value at a time. Follows the same ordering as the column names specified
+     * at cursor construction time.
+     */
+    interface IRowBuilder {
+        /**
+         * Sets the next column value in this row.
+         *
+         * @throws CursorIndexOutOfBoundsException if you try to add too many
+         *  values
+         * @return this builder to support chaining
+         */
+        Add(
+            [in] IInterface* columnValue);
+    }
+
+    /**
+     * A mutable cursor implementation backed by an array of {@code Object}s. Use
+     * {@link #newRow()} to add rows. Automatically expands internal capacity
+     * as needed.
+     *
+     * @Involve
+     * interface ICloseable;
+     * interface ICursor;
+     * interface ICrossProcessCursor;
+     * interface IAbstractCursor;
+     */
+    interface IMatrixCursor {
+        /**
+         * Adds a new row to the end and returns a builder for that row. Not safe
+         * for concurrent use.
+         *
+         * @return builder which can be used to set the column values for the new
+         *  row
+         */
+        NewRow(
+            [out] IRowBuilder** builder);
+
+        /**
+         * Adds a new row to the end with the given column values. Not safe
+         * for concurrent use.
+         *
+         * @throws IllegalArgumentException if {@code columnValues.length !=
+         *  columnNames.length}
+         * @param columnValues in the same order as the the column names specified
+         *  at cursor construction time
+         */
+        AddRow(
+            [in] ArrayOf<IInterface*> columnValues);
+
+        /**
+         * Adds a new row to the end with the given column values. Not safe
+         * for concurrent use.
+         *
+         * @throws IllegalArgumentException if {@code columnValues.size() !=
+         *  columnNames.length}
+         * @param columnValues in the same order as the the column names specified
+         *  at cursor construction time
+         */
+        AddRow(
+            [in] IIterable* columnValues);
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

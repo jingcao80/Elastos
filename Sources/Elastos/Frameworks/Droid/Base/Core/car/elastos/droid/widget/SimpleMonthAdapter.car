@@ -1,0 +1,38 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    using interface Elastos.Utility.ICalendar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * An adapter for a list of {@link android.widget.SimpleMonthView} items.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IBaseAdapter
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     * interface Elastos.Droid.Widget.IOnDayClickListener
+     */
+    interface ISimpleMonthAdapter {
+        /**
+         * Updates the selected day and related parameters.
+         *
+         * @param day The day to highlight
+         */
+        SetSelectedDay(
+            [in] ICalendar* day);
+
+        SetCalendarTextColor(
+            [in] IColorStateList* colors);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

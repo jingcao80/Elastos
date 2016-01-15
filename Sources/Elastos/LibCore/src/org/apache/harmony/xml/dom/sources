@@ -1,0 +1,30 @@
+
+TARGET_NAME= dom
+TARGET_TYPE= lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Xml/Dom
+
+SOURCES = CAttrImpl.cpp
+SOURCES += CCDATASectionImpl.cpp
+SOURCES += CCommentImpl.cpp
+SOURCES += CDOMConfigurationImpl.cpp
+SOURCES += CDOMErrorImpl.cpp
+SOURCES += CDOMImplementationImplHelper.cpp
+SOURCES += CDocumentFragmentImpl.cpp
+SOURCES += CDocumentImpl.cpp
+SOURCES += CDocumentImplHelper.cpp
+SOURCES += CDocumentTypeImpl.cpp
+SOURCES += CElementAttrNamedNodeMapImpl.cpp
+SOURCES += CElementImpl.cpp
+SOURCES += CEntityImpl.cpp
+SOURCES += CEntityReferenceImpl.cpp
+SOURCES += CNodeListImpl.cpp
+SOURCES += CNotationImpl.cpp
+SOURCES += CProcessingInstructionImpl.cpp
+SOURCES += CTextImpl.cpp
+SOURCES += CharacterDataImpl.cpp
+SOURCES += InnerNodeImpl.cpp
+SOURCES += LeafNodeImpl.cpp
+SOURCES += NodeImpl.cpp
+

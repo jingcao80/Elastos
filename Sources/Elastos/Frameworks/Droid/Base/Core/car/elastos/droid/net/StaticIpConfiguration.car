@@ -1,0 +1,85 @@
+
+module
+{
+    interface Elastos.Droid.Net.ILinkAddress;
+    interface Elastos.Droid.Os.IParcel;
+
+    using interface Elastos.Net.IInetAddress;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Class that describes static IP configuration.
+     *
+     * This class is different from LinkProperties because it represents
+     * configuration intent. The general contract is that if we can represent
+     * a configuration here, then we should be able to configure it on a network.
+     * The intent is that it closely match the UI we have for configuring networks.
+     *
+     * In contrast, LinkProperties represents current state. It is much more
+     * expressive. For example, it supports multiple IP addresses, multiple routes,
+     * stacked interfaces, and so on. Because LinkProperties is so expressive,
+     * using it to represent configuration intent as well as current state causes
+     * problems. For example, we could unknowingly save a configuration that we are
+     * not in fact capable of applying, or we could save a configuration that the
+     * UI cannot display, which has the potential for malicious code to hide
+     * hostile or unexpected configuration from the user: see, for example,
+     * http://b/12663469 and http://b/16893413 .
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IStaticIpConfiguration {
+        GetIpAddress(
+            [out] ILinkAddress** result);
+
+        SetIpAddress(
+            [in] ILinkAddress* ipAddress);
+
+        GetGateway(
+            [out] IInetAddress** result);
+
+        SetGateway(
+            [in] IInetAddress* gateway);
+
+        GetDnsServers(
+            [out] IArrayList** result);
+
+        GetDomains(
+            [out] String* result);
+
+        SetDomains(
+            [in] String domains);
+
+        Clear();
+
+        /**
+         * Returns the network routes specified by this object. Will typically include a
+         * directly-connected route for the IP address's local subnet and a default route.
+         */
+        GetRoutes(
+            [in] String iface,
+            [out] IList** result);
+
+        /**
+         * Returns a LinkProperties object expressing the data in this object. Note that the information
+         * contained in the LinkProperties will not be a complete picture of the link's configuration,
+         * because any configuration information that is obtained dynamically by the network (e.g.,
+         * IPv6 configuration) will not be included.
+         */
+        ToLinkProperties(
+            [in] String iface,
+            [out] ILinkProperties** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

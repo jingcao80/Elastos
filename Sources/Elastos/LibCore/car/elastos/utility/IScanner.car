@@ -1,0 +1,912 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Math.IBigDecimal;
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Utility.Regex.IPattern;
+    interface Elastos.Utility.Regex.IMatchResult;
+
+    namespace Elastos {
+    namespace Utility {
+    /**
+     * A parser that parses a text string of primitive types and strings with the
+     * help of regular expressions. It supports localized numbers and various
+     * radixes. The input is broken into tokens by the delimiter pattern, which is
+     * whitespace by default. The primitive types can be obtained via corresponding
+     * next* methods. If the token is not in a valid format, an
+     * {@code InputMismatchException} is thrown.
+     * <p>
+     * For example:
+     * <pre>
+     * Scanner s = new Scanner("1A true");
+     * System.out.println(s.nextInt(16));
+     * System.out.println(s.nextBoolean());
+     * </pre>
+     * <p>
+     * Yields the result: {@code 26 true}
+     * <p>A {@code Scanner} can also find or skip specific patterns without regard for the
+     * delimiter. All these methods and the various next* and hasNext* methods may
+     * block.
+     * <p>
+     * The {@code Scanner} class is not thread-safe.
+     */
+
+    /**
+     * @Involve
+     * interface IIterator;
+     */
+    interface IScanner {
+
+        /**
+         * Closes this {@code Scanner} and the underlying input if the input implements
+         * {@code Closeable}. If the {@code Scanner} has been closed, this method will have
+         * no effect. Any scanning operation called after calling this method will throw
+         * an {@code IllegalStateException}.
+         *
+         * @see Closeable
+         */
+        Close();
+
+        /**
+         * Returns the delimiter {@code Pattern} in use by this {@code Scanner}.
+         *
+         * @return the delimiter {@code Pattern} in use by this {@code Scanner}.
+         */
+        Delimiter(
+            [out] IPattern** outpat);
+
+        /**
+         * Tries to find the pattern in the input. Delimiters are ignored. If the
+         * pattern is found before line terminator, the matched string will be
+         * returned, and the {@code Scanner} will advance to the end of the matched string.
+         * Otherwise, {@code null} will be returned and the {@code Scanner} will not advance.
+         * When waiting for input, the {@code Scanner} may be blocked. All the
+         * input may be cached if no line terminator exists in the buffer.
+         *
+         * @param pattern
+         *            the pattern to find in the input.
+         * @return the matched string or {@code null} if the pattern is not found
+         *         before the next line terminator.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} is closed.
+         */
+        FindInLine(
+            [in] IPattern* pattern,
+            [out] String* str);
+
+        /**
+         * Compiles the pattern string and tries to find a substing matching it in the input data. The
+         * delimiter will be ignored. This is the same as invoking
+         * {@code findInLine(Pattern.compile(pattern))}.
+         *
+         * @param pattern
+         *            a string used to construct a pattern which is in turn used to
+         *            match a substring of the input data.
+         * @return the matched string or {@code null} if the pattern is not found
+         *         before the next line terminator.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} is closed.
+         * @see #findInLine(Pattern)
+         */
+        FindInLine(
+            [in] String pattern,
+            [out] String* str);
+
+        /**
+         * Tries to find the pattern in the input between the current position and the specified
+         * horizon. Delimiters are ignored. If the pattern is found, the matched
+         * string will be returned, and the {@code Scanner} will advance to the end of the
+         * matched string. Otherwise, null will be returned and {@code Scanner} will not
+         * advance. When waiting for input, the {@code Scanner} may be blocked.
+         * <p>
+         * The {@code Scanner}'s search will never go more than {@code horizon} code points from current
+         * position. The position of {@code horizon} does have an effect on the result of the
+         * match. For example, when the input is "123" and current position is at zero,
+         * <code>findWithinHorizon(Pattern.compile("\\p{Digit}{3}"), 2)</code>
+         * will return {@code null}, while
+         * <code>findWithinHorizon(Pattern.compile("\\p{Digit}{3}"), 3)</code>
+         * will return {@code "123"}. {@code horizon} is treated as a transparent,
+         * non-anchoring bound. (refer to
+         * {@link Matcher#useTransparentBounds(boolean)} and
+         * {@link Matcher#useAnchoringBounds(boolean)})
+         * <p>
+         * A {@code horizon} whose value is zero will be ignored and the whole input will be
+         * used for search. In this situation, all the input may be cached.
+         *
+         * @param pattern
+         *            the pattern used to scan.
+         * @param horizon
+         *            the search limit.
+         * @return the matched string or {@code null} if the pattern is not found
+         *         within the specified {@code horizon}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} is closed.
+         * @throws IllegalArgumentException
+         *             if {@code horizon} is less than zero.
+         */
+        FindWithinHorizon(
+            [in] IPattern* pattern,
+            [in] Int32 horizon,
+            [out] String* str);
+
+        /**
+         * Tries to find the pattern in the input between the current position and the specified
+         * {@code horizon}. Delimiters are ignored. This call is the same as invoking
+         * {@code findWithinHorizon(Pattern.compile(pattern))}.
+         *
+         * @param pattern
+         *            the pattern used to scan.
+         * @param horizon
+         *            the search limit.
+         * @return the matched string, or {@code null} if the pattern is not found
+         *         within the specified horizon.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} is closed.
+         * @throws IllegalArgumentException
+         *             if {@code horizon} is less than zero.
+         * @see #findWithinHorizon(Pattern, int)
+         */
+        FindWithinHorizon(
+            [in] String pattern,
+            [in] Int32 horizon,
+            [out] String* str);
+
+        /**
+         * Returns true if there is at least one more element, false otherwise.
+         * @see #next
+         */
+        HasNext(
+            [out] Boolean* result);
+
+        /**
+         * Returns whether this {@code Scanner} has one or more tokens remaining to parse
+         * and the next token matches the given pattern. This method will block if the data is
+         * still being read.
+         *
+         * @param pattern
+         *            the pattern to check for.
+         * @return {@code true} if this {@code Scanner} has more tokens and the next token
+         *         matches the pattern, {@code false} otherwise.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNext(
+            [in] IPattern* pattern,
+            [out] Boolean* value);
+
+        /**
+         * Returns {@code true} if this {@code Scanner} has one or more tokens remaining to parse
+         * and the next token matches a pattern compiled from the given string. This method will
+         * block if the data is still being read. This call is equivalent to
+         * {@code hasNext(Pattern.compile(pattern))}.
+         *
+         * @param pattern
+         *            the string specifying the pattern to scan for
+         * @return {@code true} if the specified pattern matches this {@code Scanner}'s
+         *         next token, {@code false} otherwise.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNext(
+            [in] String pattern,
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code BigDecimal}.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code BigDecimal}, otherwise {@code false.}
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextBigDecimal(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code BigInteger} in the default radix.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code BigInteger}, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextBigInteger(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code BigInteger} in the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into a
+         *            {@code BigInteger}.
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code BigInteger}, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextBigInteger(
+            [in] Int32 radix,
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code boolean} value.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code boolean} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextBoolean(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code byte} value in the default radix.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code byte} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextByte(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code byte} value in the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into a {@code byte}
+         *            value
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code byte} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextByte(
+            [in] Int32 radix,
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token translated into a valid {@code double}
+         * value.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code double} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextDouble(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code float} value.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code float} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextFloat(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid {@code int}
+         * value in the default radix.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code int} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed,
+         */
+        HasNextInt32(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid {@code int}
+         * value in the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into an {@code int}
+         *            value.
+         * @return {@code true} if the next token in this {@code Scanner}'s input can be
+         *         translated into a valid {@code int} value, otherwise
+         *         {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextInt32(
+            [in] Int32 radix,
+            [out] Boolean* value);
+
+        /**
+         * Returns whether there is a line terminator in the input.
+         * This method may block.
+         *
+         * @return {@code true} if there is a line terminator in the input,
+         *         otherwise, {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} is closed.
+         */
+        HasNextLine(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code long} value in the default radix.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code long} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextInt64(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code long} value in the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into a {@code long}
+         *            value.
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code long} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextInt64(
+            [in] Int32 radix,
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code short} value in the default radix.
+         *
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code short} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextInt16(
+            [out] Boolean* value);
+
+        /**
+         * Returns whether the next token can be translated into a valid
+         * {@code short} value in the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into a {@code short}
+         *            value.
+         * @return {@code true} if the next token can be translated into a valid
+         *         {@code short} value, otherwise {@code false}.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} has been closed.
+         */
+        HasNextInt16(
+            [in] Int32 radix,
+            [out] Boolean* value);
+
+        /**
+         * Returns the last {@code IOException} that was raised while reading from the underlying
+         * input.
+         *
+         * @return the last thrown {@code IOException}, or {@code null} if none was thrown.
+         */
+        IoException();
+
+        /**
+         * Return the {@code Locale} of this {@code Scanner}.
+         *
+         * @return the {@code Locale} of this {@code Scanner}.
+         */
+        GetLocale(
+            [out] ILocale** locale);
+
+        /**
+         * Returns the result of the last matching operation.
+         * <p>
+         * The next* and find* methods return the match result in the case of a
+         * successful match.
+         *
+         * @return the match result of the last successful match operation
+         * @throws IllegalStateException
+         *             if the match result is not available, of if the last match
+         *             was not successful.
+         */
+        GetMatch(
+            [out] IMatchResult** outmatch);
+
+        /**
+         * Returns the next token. The token will be both prefixed and suffixed by
+         * the delimiter that is currently being used (or a string that matches the
+         * delimiter pattern). This method will block if input is being read.
+         *
+         * @return the next complete token.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         */
+        Next(
+            [out] String* str);
+
+        /**
+         * Returns the next token if it matches the specified pattern. The token
+         * will be both prefixed and postfixed by the delimiter that is currently
+         * being used (or a string that matches the delimiter pattern). This method will block
+         * if input is being read.
+         *
+         * @param pattern
+         *            the specified pattern to scan.
+         * @return the next token.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token does not match the pattern given.
+         */
+        Next(
+            [in] IPattern* pattern,
+            [out] String* str);
+
+        /**
+         * Returns the next token if it matches the specified pattern. The token
+         * will be both prefixed and postfixed by the delimiter that is currently
+         * being used (or a string that matches the delimiter pattern). This method will block
+         * if input is being read. Calling this method is equivalent to
+         * {@code next(Pattern.compile(pattern))}.
+         *
+         * @param pattern
+         *            the string specifying the pattern to scan for.
+         * @return the next token.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token does not match the pattern given.
+         */
+        Next(
+            [in] String pattern,
+            [out] String* str);
+
+        /**
+         * Returns the next token as a {@code BigDecimal}. This method will block if input is
+         * being read. If the next token can be translated into a {@code BigDecimal}
+         * the following is done: All {@code Locale}-specific prefixes, group separators,
+         * and {@code Locale}-specific suffixes are removed. Then non-ASCII digits are
+         * mapped into ASCII digits via {@link Character#digit(char, int)}, and a
+         * negative sign (-) is added if the {@code Locale}-specific negative prefix or
+         * suffix was present. Finally the resulting string is passed to
+         * {@code BigDecimal(String) }.
+         *
+         * @return the next token as a {@code BigDecimal}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code BigDecimal}.
+         */
+        NextBigDecimal(
+            [out] IBigDecimal** outbig);
+
+        /**
+         * Returns the next token as a {@code BigInteger}. This method will block if input is
+         * being read. Equivalent to {@code nextBigInteger(DEFAULT_RADIX)}.
+         *
+         * @return the next token as {@code BigInteger}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code BigInteger}.
+         */
+        NextBigInteger(
+            [out] IBigInteger** outbig);
+
+        /**
+         * Returns the next token as a {@code BigInteger} with the specified radix.
+         * This method will block if input is being read. If the next token can be translated
+         * into a {@code BigInteger} the following is done: All {@code Locale}-specific
+         * prefixes, group separators, and {@code Locale}-specific suffixes are removed.
+         * Then non-ASCII digits are mapped into ASCII digits via
+         * {@link Character#digit(char, int)}, and a negative sign (-) is added if the
+         * {@code Locale}-specific negative prefix or suffix was present. Finally the
+         * resulting String is passed to {@link BigInteger#BigInteger(String, int)}}
+         * with the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into a
+         *            {@code BigInteger}.
+         * @return the next token as a {@code BigInteger}
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code BigInteger}.
+         */
+        NextBigInteger(
+            [in] Int32 radix,
+            [out] IBigInteger** outbig);
+
+        /**
+         * Returns the next token as a {@code boolean}. This method will block if input is
+         * being read.
+         *
+         * @return the next token as a {@code boolean}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code boolean} value.
+         */
+        NextBoolean(
+            [out] Boolean* value);
+
+        /**
+         * Returns the next token as a {@code byte}. This method will block if input is being
+         * read. Equivalent to {@code nextByte(DEFAULT_RADIX)}.
+         *
+         * @return the next token as a {@code byte}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code byte} value.
+         */
+        NextByte(
+            [out] Byte* value);
+
+        /**
+         * Returns the next token as a {@code byte} with the specified radix. Will
+         * block if input is being read. If the next token can be translated into a
+         * {@code byte} the following is done: All {@code Locale}-specific prefixes, group
+         * separators, and {@code Locale}-specific suffixes are removed. Then non-ASCII
+         * digits are mapped into ASCII digits via
+         * {@link Character#digit(char, int)}, and a negative sign (-) is added if the
+         * {@code Locale}-specific negative prefix or suffix was present. Finally the
+         * resulting String is passed to {@link Byte#parseByte(String, int)}} with
+         * the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into {@code byte} value.
+         * @return the next token as a {@code byte}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code byte} value.
+         */
+        // @SuppressWarnings("boxing")
+        NextByte(
+            [in] Int32 radix,
+            [out] Byte* value);
+
+        /**
+         * Returns the next token as a {@code double}. This method will block if input is being
+         * read. If the next token can be translated into a {@code double} the
+         * following is done: All {@code Locale}-specific prefixes, group separators, and
+         * {@code Locale}-specific suffixes are removed. Then non-ASCII digits are mapped
+         * into ASCII digits via {@link Character#digit(char, int)}, and a negative
+         * sign (-) is added if the {@code Locale}-specific negative prefix or suffix was
+         * present. Finally the resulting String is passed to
+         * {@link Double#parseDouble(String)}}. If the token matches the localized
+         * NaN or infinity strings, it is also passed to
+         * {@link Double#parseDouble(String)}}.
+         *
+         * @return the next token as a {@code double}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code double} value.
+         */
+        // @SuppressWarnings("boxing")
+        NextDouble(
+            [out] Double* value);
+
+        /**
+         * Returns the next token as a {@code float}. This method will block if input is being
+         * read. If the next token can be translated into a {@code float} the
+         * following is done: All {@code Locale}-specific prefixes, group separators, and
+         * {@code Locale}-specific suffixes are removed. Then non-ASCII digits are mapped
+         * into ASCII digits via {@link Character#digit(char, int)}, and a negative
+         * sign (-) is added if the {@code Locale}-specific negative prefix or suffix was
+         * present. Finally the resulting String is passed to
+         * {@link Float#parseFloat(String)}}.If the token matches the localized NaN
+         * or infinity strings, it is also passed to
+         * {@link Float#parseFloat(String)}}.
+         *
+         * @return the next token as a {@code float}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code float} value.
+         */
+        // @SuppressWarnings("boxing")
+        NextFloat(
+            [out] Float* value);
+
+        /**
+         * Returns the next token as an {@code int}. This method will block if input is being
+         * read. Equivalent to {@code nextInt(DEFAULT_RADIX)}.
+         *
+         * @return the next token as an {@code int}
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code int} value.
+         */
+        NextInt32(
+            [out] Int32* value);
+
+        /**
+         * Returns the next token as an {@code int} with the specified radix. This method will
+         * block if input is being read. If the next token can be translated into an
+         * {@code int} the following is done: All {@code Locale}-specific prefixes, group
+         * separators, and {@code Locale}-specific suffixes are removed. Then non-ASCII
+         * digits are mapped into ASCII digits via
+         * {@link Character#digit(char, int)}, and a negative sign (-) is added if the
+         * {@code Locale}-specific negative prefix or suffix was present. Finally the
+         * resulting String is passed to {@link Integer#parseInt(String, int)} with
+         * the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into an {@code int}
+         *            value.
+         * @return the next token as an {@code int}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code int} value.
+         */
+        // @SuppressWarnings("boxing")
+        NextInt32(
+            [in] Int32 radix,
+            [out] Int32* value);
+
+        /**
+         * Returns the skipped input and advances the {@code Scanner} to the beginning of
+         * the next line. The returned result will exclude any line terminator. When
+         * searching, if no line terminator is found, then a large amount of input
+         * will be cached. If no line at all can be found, a {@code NoSuchElementException}
+         * will be thrown.
+         *
+         * @return the skipped line.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} is closed.
+         * @throws NoSuchElementException
+         *             if no line can be found, e.g. when input is an empty string.
+         */
+        NextLine(
+            [out] String* str);
+
+        /**
+         * Returns the next token as a {@code long}. This method will block if input is being
+         * read. Equivalent to {@code nextLong(DEFAULT_RADIX)}.
+         *
+         * @return the next token as a {@code long}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code long} value.
+         */
+        NextInt64(
+            [out] Int64* value);
+
+        /**
+         * Returns the next token as a {@code long} with the specified radix. This method will
+         * block if input is being read. If the next token can be translated into a
+         * {@code long} the following is done: All {@code Locale}-specific prefixes, group
+         * separators, and {@code Locale}-specific suffixes are removed. Then non-ASCII
+         * digits are mapped into ASCII digits via
+         * {@link Character#digit(char, int)}, and a negative sign (-) is added if the
+         * {@code Locale}-specific negative prefix or suffix was present. Finally the
+         * resulting String is passed to {@link Long#parseLong(String, int)}} with
+         * the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into a {@code long}
+         *            value.
+         * @return the next token as a {@code long}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code long} value.
+         */
+        // @SuppressWarnings("boxing")
+        NextInt64(
+            [in] Int32 radix,
+            [out] Int64* value);
+
+        /**
+         * Returns the next token as a {@code short}. This method will block if input is being
+         * read. Equivalent to {@code nextShort(DEFAULT_RADIX)}.
+         *
+         * @return the next token as a {@code short}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code short} value.
+         */
+        NextInt16(
+            [out] Int16* value);
+
+        /**
+         * Returns the next token as a {@code short} with the specified radix. This method will
+         * block if input is being read. If the next token can be translated into a
+         * {@code short} the following is done: All {@code Locale}-specific prefixes, group
+         * separators, and {@code Locale}-specific suffixes are removed. Then non-ASCII
+         * digits are mapped into ASCII digits via
+         * {@link Character#digit(char, int)}, and a negative sign (-) is added if the
+         * {@code Locale}-specific negative prefix or suffix was present. Finally the
+         * resulting String is passed to {@link Short#parseShort(String, int)}}
+         * with the specified radix.
+         *
+         * @param radix
+         *            the radix used to translate the token into {@code short}
+         *            value.
+         * @return the next token as a {@code short}.
+         * @throws IllegalStateException
+         *             if this {@code Scanner} has been closed.
+         * @throws NoSuchElementException
+         *             if input has been exhausted.
+         * @throws InputMismatchException
+         *             if the next token can not be translated into a valid
+         *             {@code short} value.
+         */
+        // @SuppressWarnings("boxing")
+        NextInt16(
+            [in] Int32 radix,
+            [out] Int16* value);
+
+        /**
+         * Return the radix of this {@code Scanner}.
+         *
+         * @return the radix of this {@code Scanner}
+         */
+        Radix(
+            [out] Int32* value);
+
+        /**
+         * Tries to use specified pattern to match input starting from the current position.
+         * The delimiter will be ignored. If a match is found, the matched input will be
+         * skipped. If an anchored match of the specified pattern succeeds, the corresponding input
+         * will also be skipped. Otherwise, a {@code NoSuchElementException} will be thrown.
+         * Patterns that can match a lot of input may cause the {@code Scanner} to read
+         * in a large amount of input.
+         *
+         * @param pattern
+         *            used to skip over input.
+         * @return the {@code Scanner} itself.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} is closed.
+         * @throws NoSuchElementException
+         *             if the specified pattern match fails.
+         */
+        Skip(
+            [in] IPattern* pattern,
+            [out] IScanner** outscan);
+
+        /**
+         * Tries to use the specified string to construct a pattern and then uses
+         * the constructed pattern to match input starting from the current position. The
+         * delimiter will be ignored. This call is the same as invoke
+         * {@code skip(Pattern.compile(pattern))}.
+         *
+         * @param pattern
+         *            the string used to construct a pattern which in turn is used to
+         *            match input.
+         * @return the {@code Scanner} itself.
+         * @throws IllegalStateException
+         *             if the {@code Scanner} is closed.
+         */
+        Skip(
+            [in] String pattern,
+            [out] IScanner** outscan);
+
+        /**
+         * Returns a string representation of this {@code Scanner}. The information
+         * returned may be helpful for debugging. The format of the string is unspecified.
+         *
+         * @return a string representation of this {@code Scanner}.
+         */
+        ToString(
+            [out] String* str);
+
+        /**
+         * Sets the delimiting pattern of this {@code Scanner}.
+         *
+         * @param pattern
+         *            the delimiting pattern to use.
+         * @return this {@code Scanner}.
+         */
+        UseDelimiter(
+            [in] IPattern* pattern,
+            [out] IScanner** outscan);
+
+        /**
+         * Sets the delimiting pattern of this {@code Scanner} with a pattern compiled from
+         * the supplied string value.
+         *
+         * @param pattern
+         *            a string from which a {@code Pattern} can be compiled.
+         * @return this {@code Scanner}.
+         */
+        UseDelimiter(
+            [in] String pattern,
+            [out] IScanner** outscan);
+
+        /**
+         * Sets the {@code Locale} of this {@code Scanner} to a specified {@code Locale}.
+         *
+         * @param l
+         *            the specified {@code Locale} to use.
+         * @return this {@code Scanner}.
+         */
+        UseLocale(
+            [in] ILocale* l,
+            [out] IScanner** outscan);
+
+        /**
+         * Sets the radix of this {@code Scanner} to the specified radix.
+         *
+         * @param radix
+         *            the specified radix to use.
+         * @return this {@code Scanner}.
+         */
+        UseRadix(
+            [in] Int32 radix,
+            [out] IScanner** outscan);
+
+        /**
+         * Resets this scanner's delimiter, locale, and radix.
+         *
+         * @return this scanner
+         * @since 1.6
+         */
+        Reset();
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

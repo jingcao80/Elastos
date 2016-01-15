@@ -1,0 +1,34 @@
+module
+{
+
+    namespace Libcore{
+    namespace Utility{
+
+    interface ITzData {
+        GetAvailableIDs(
+            [out, callee] ArrayOf<String>* array);
+
+        GetAvailableIDs(
+            [in] Int32 rawOffset,
+            [out, callee] ArrayOf<String>* array);
+
+        GetVersion(
+            [out] String* v);
+
+        GetZoneTab(
+            [out] String* tab);
+
+        MakeTimeZone(
+            [in]  String id,
+            [out] IZoneInfo** tz);
+    }
+
+    interface IZoneInfoDB {
+        GetInstance(
+            [out] ITzData** instance);
+    }
+
+    } // namespace Utility
+    } // namespace Libcore
+}
+

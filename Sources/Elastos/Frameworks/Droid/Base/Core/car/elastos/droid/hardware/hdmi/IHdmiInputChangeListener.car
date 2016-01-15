@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+    /**
+     * Callback interface definition for TV to get informed of
+     * the input change event coming from other device.
+     *
+     * @hide
+     */
+    [oneway]
+    interface IIHdmiInputChangeListener {
+        OnChanged(
+            [in] IHdmiDeviceInfo* device);
+    }
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

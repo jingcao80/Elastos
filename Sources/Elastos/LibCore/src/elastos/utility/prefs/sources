@@ -1,0 +1,26 @@
+
+TARGET_NAME= prefs
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/prefs;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/utility;
+
+SOURCES = AbstractPreferences.cpp
+SOURCES += FilePreferencesFactoryImpl.cpp
+SOURCES += FilePreferencesImpl.cpp
+SOURCES += NodeChangeEvent.cpp
+SOURCES += NodeSet.cpp
+SOURCES += PreferenceChangeEvent.cpp
+SOURCES += Preferences.cpp
+SOURCES += XMLParser.cpp

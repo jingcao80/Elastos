@@ -1,0 +1,7 @@
+TARGET_NAME= googleremote
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+SOURCES = VmouseController.cpp

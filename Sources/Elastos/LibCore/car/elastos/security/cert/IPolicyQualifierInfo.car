@@ -1,0 +1,49 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface IPolicyQualifierInfo {
+        /**
+         * Returns a ASN.1 DER encoded copy of policy qualifier info.
+         *
+         * @return a ASN.1 DER encoded copy of policy qualifier info.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * Returns the identifier (an OID) of this policy qualifier info.
+         *
+         * @return the identifier of this policy qualifier info.
+         */
+        GetPolicyQualifierId(
+            [out] String* id);
+
+        /**
+         * Returns a ASN.1 DER encoded copy of the qualifier of this policy
+         * qualifier info.
+         *
+         * @return a ASN.1 DER encoded copy of the qualifier of this policy
+         *         qualifier info.
+         */
+        GetPolicyQualifier(
+            [out, callee] ArrayOf<Byte>* qualifier);
+
+        /**
+         * Returns a string representation of this {@code PolicyQualifierInfo}
+         * instance.
+         *
+         * @return a string representation of this {@code PolicyQualifierInfo}
+         *         instance.
+         */
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

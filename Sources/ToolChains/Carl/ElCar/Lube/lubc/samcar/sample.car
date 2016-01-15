@@ -1,0 +1,67 @@
+//==========================================================================
+// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+//==========================================================================
+
+//http://www.elastos.com/devtools/lube/sample.dll
+[
+version(1.2)
+]
+module
+{
+    enum AnimalState {
+        AnimalState_Eating   = 1,
+        AnimalState_Sleeping = 2,
+        AnimalState_PreyOn   = 3,
+        AnimalState_Playing  = 4,
+        AnimalState_Vacuity  = 5,
+    }
+
+    const BUFFER_SIZE = 314;
+
+	struct DailyBuild {
+	    Int32 days[BUFFER_SIZE];
+	    Int32 years[2];
+	}
+
+    typedef Int32 int;
+    typedef Int32* PINT;
+
+    interface IAnimal {
+        Vacuity();
+
+        Eat(int nFood);
+
+        Sleep(int nSeconds);
+
+        GetAttribs(PINT pAppetite, PINT pEnergy);
+
+        GetState(AnimalState *pState);
+    }
+
+    interface IDog extends IAnimal {
+        Snarl(PINT pVolume);
+
+        GnawBone(EzVar evBone);
+    }
+
+    interface ICat extends IAnimal {
+        Mouse(String esMouse);
+
+        CatchFish([in] BufferOf<Int32> eaFish);
+
+        CatchMice([out] int* ratio);
+    }
+
+    class CCat {
+        interface ICat;
+    }
+
+    class CDog {
+        interface IDog;
+    }
+
+    class CCatDog {
+        interface ICat;
+        interface IDog;
+    }
+}

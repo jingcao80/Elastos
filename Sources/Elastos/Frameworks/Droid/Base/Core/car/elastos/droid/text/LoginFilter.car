@@ -1,0 +1,63 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /*
+     * @Involve
+     * interface IInputFilter
+     */
+    interface ILoginFilter {
+        /**
+         * Called when we start processing filter.
+         */
+        OnStart();
+
+        /**
+         * Called whenever we encounter an invalid character.
+         * @param c the invalid character
+         */
+        OnInvalidCharacter(
+            [in] Char32 c);
+
+        /**
+         * Called when we're done processing filter
+         */
+        OnStop();
+
+        /**
+         * Returns whether or not we allow character c.
+         * Subclasses must override this method.
+         */
+        IsAllowed(
+            [in] Char32 c,
+            [out] Boolean* ret);
+    }
+
+    /*
+     * @Involve
+     * interface ILoginFilter
+     */
+    interface IUsernameFilterGMail {
+    }
+
+    /*
+     * @Involve
+     * interface ILoginFilter
+     */
+    interface IUsernameFilterGeneric {
+    }
+
+    /*
+     * @Involve
+     * interface ILoginFilter
+     */
+    interface IPasswordFilterGMail {
+    }
+
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

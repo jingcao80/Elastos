@@ -1,0 +1,236 @@
+
+module
+{
+    interface Elastos.Net.IURL;
+    interface Elastos.Net.IURLConnection;
+    interface Elastos.Net.IProxy;
+    interface Elastos.Net.IInetAddress;
+
+    namespace Elastos{
+    namespace Net{
+
+    interface IURLStreamHandler {
+        /**
+         * Establishes a new connection to the resource specified by the URL {@code
+         * u}. Since different protocols also have unique ways of connecting, it
+         * must be overwritten by the subclass.
+         *
+         * @param u
+         *            the URL to the resource where a connection has to be opened.
+         * @return the opened URLConnection to the specified resource.
+         * @throws IOException
+         *             if an I/O error occurs during opening the connection.
+         */
+        OpenConnection(
+            [in] IURL* u,
+            [out] IURLConnection** urlConnection);
+
+        /**
+         * Establishes a new connection to the resource specified by the URL {@code
+         * u} using the given {@code proxy}. Since different protocols also have
+         * unique ways of connecting, it must be overwritten by the subclass.
+         *
+         * @param u
+         *            the URL to the resource where a connection has to be opened.
+         * @param proxy
+         *            the proxy that is used to make the connection.
+         * @return the opened URLConnection to the specified resource.
+         * @throws IOException
+         *             if an I/O error occurs during opening the connection.
+         * @throws IllegalArgumentException
+         *             if any argument is {@code null} or the type of proxy is
+         *             wrong.
+         * @throws UnsupportedOperationException
+         *             if the protocol handler doesn't support this method.
+         */
+        OpenConnection(
+            [in] IURL* u,
+            [in] IProxy* proxy,
+            [out] IURLConnection** urlConnection);
+
+        /**
+         * Parses the clear text URL in {@code str} into a URL object. URL strings
+         * generally have the following format:
+         * <p>
+         * http://www.company.com/java/file1.java#reference
+         * <p>
+         * The string is parsed in HTTP format. If the protocol has a different URL
+         * format this method must be overridden.
+         *
+         * @param u
+         *            the URL to fill in the parsed clear text URL parts.
+         * @param str
+         *            the URL string that is to be parsed.
+         * @param start
+         *            the string position from where to begin parsing.
+         * @param end
+         *            the string position to stop parsing.
+         * @see #toExternalForm
+         * @see URL
+         */
+        ParseURL(
+            [in] IURL* u,
+            [in] String str,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * Sets the fields of the URL {@code u} to the values of the supplied
+         * arguments.
+         *
+         * @param u
+         *            the non-null URL object to be set.
+         * @param protocol
+         *            the protocol.
+         * @param host
+         *            the host name.
+         * @param port
+         *            the port number.
+         * @param file
+         *            the file component.
+         * @param ref
+         *            the reference.
+         * @deprecated use setURL(URL, String String, int, String, String, String,
+         *             String, String) instead.
+         */
+        SetURL(
+            [in] IURL* u,
+            [in] String protocol,
+            [in] String host,
+            [in] Int32 port,
+            [in] String file,
+            [in] String ref);
+
+        /**
+         * Sets the fields of the URL {@code u} to the values of the supplied
+         * arguments.
+         *
+         * @param u
+         *            the non-null URL object to be set.
+         * @param protocol
+         *            the protocol.
+         * @param host
+         *            the host name.
+         * @param port
+         *            the port number.
+         * @param authority
+         *            the authority.
+         * @param userInfo
+         *            the user info.
+         * @param file
+         *            the file component.
+         * @param query
+         *            the query.
+         * @param ref
+         *            the reference.
+         */
+        SetURL(
+            [in] IURL* u,
+            [in] String protocol,
+            [in] String host,
+            [in] Int32 port,
+            [in] String authority,
+            [in] String userInfo,
+            [in] String file,
+            [in] String query,
+            [in] String ref);
+
+        /**
+         * Returns the clear text representation of a given URL using HTTP format.
+         *
+         * @param url
+         *            the URL object to be converted.
+         * @return the clear text representation of the specified URL.
+         * @see #parseURL
+         * @see URL#toExternalForm()
+         */
+        ToExternalForm(
+            [in] IURL* url,
+            [out] String* s);
+
+        ToExternalForm(
+            [in] IURL* url,
+            [in] Boolean escapeIllegalCharacters,
+            [out] String* s);
+
+        /**
+         * Compares two URL objects whether they represent the same URL. Two URLs
+         * are equal if they have the same file, host, port, protocol, query, and
+         * reference components.
+         *
+         * @param url1
+         *            the first URL to compare.
+         * @param url2
+         *            the second URL to compare.
+         * @return {@code true} if the URLs are the same, {@code false} otherwise.
+         * @see #hashCode
+         */
+        Equals(
+            [in] IURL* url1,
+            [in] IURL* url2,
+            [out] Boolean* isEquals);
+
+        /**
+         * Returns the default port of the protocol used by the handled URL. The
+         * current implementation returns always {@code -1}.
+         *
+         * @return the appropriate default port number of the protocol.
+         */
+        GetDefaultPort(
+            [out] Int32* portNum);
+
+        /**
+         * Returns the host address of the given URL.
+         *
+         * @param url
+         *            the URL object where to read the host address from.
+         * @return the host address of the specified URL.
+         */
+        GetHostAddress(
+            [in] IURL* url,
+            [out] IInetAddress** hostAddress);
+
+        /**
+         * Returns the hashcode value for the given URL object.
+         *
+         * @param url
+         *            the URL to determine the hashcode.
+         * @return the hashcode of the given URL.
+         */
+        GetHashCode(
+            [in] IURL* url,
+            [out] Int32* code);
+
+        /**
+         * Compares two URL objects whether they refer to the same host.
+         *
+         * @param a the first URL to be compared.
+         * @param b the second URL to be compared.
+         * @return {@code true} if both URLs refer to the same host, {@code false}
+         *         otherwise.
+         */
+        HostsEqual(
+            [in] IURL* a,
+            [in] IURL* b,
+            [out] Boolean* isEqual);
+
+        /**
+         * Compares two URL objects whether they refer to the same file. In the
+         * comparison included are the URL components protocol, host, port and file.
+         *
+         * @param url1
+         *            the first URL to be compared.
+         * @param url2
+         *            the second URL to be compared.
+         * @return {@code true} if both URLs refer to the same file, {@code false}
+         *         otherwise.
+         */
+        SameFile(
+            [in] IURL* url1,
+            [in] IURL* url2,
+            [out] Boolean* isSame);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

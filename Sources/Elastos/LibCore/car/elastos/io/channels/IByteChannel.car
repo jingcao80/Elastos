@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+
+    /**
+     * A ByteChannel is both readable and writable.
+     * <p>
+     * The methods for the byte channel are precisely those defined by readable and
+     * writable byte channels.
+     *
+     * @see ReadableByteChannel
+     * @see WritableByteChannel
+     */
+     /**
+     * @Involve
+     * interface IReadableByteChannel;
+     * interface IWritableByteChannel;
+     */
+    interface IByteChannel {
+        // No methods defined.
+    }
+
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

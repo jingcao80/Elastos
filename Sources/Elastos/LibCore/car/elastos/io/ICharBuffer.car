@@ -1,0 +1,552 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * A buffer of chars.
+     * <p>
+     * A char buffer can be created in either one of the following ways:
+     * <ul>
+     * <li> Allocate a new char array and create a buffer
+     * based on it;</li>
+     *
+     * @sa #allocate(int) Allocate
+     * <li>Wrap an existing char array to create a new
+     * buffer;</li>
+     *
+     * @sa #wrap(char[]) Wrap
+     * <li>Wrap an existing char sequence to create a
+     * new buffer;</li>
+     *
+     * @sa #wrap(CharSequence) Wrap
+     * <li>Use ByteBuffer.asCharBuffer
+     * to create a char buffer based on a byte buffer.</li>
+     *
+     * @sa java.nio.ByteBuffer#asCharBuffer() ByteBuffer.asCharBuffer
+     * </ul>
+     */
+    /**
+     * implement Elastos.IO.IBuffer
+     */
+     /**
+     * @Involve
+     * interface IBuffer;
+     * interface IComparable;
+     * interface ICharSequence;
+     * interface IAppendable;
+     */
+    [deprecated]
+    interface ICharBuffer {
+
+        GetArray(
+            [out, callee] ArrayOf<Char32>* array);
+
+        /**
+         * Returns a read-only buffer that shares its content with this buffer.
+         * <p>
+         * The returned buffer is guaranteed to be a new instance, even if this
+         * buffer is read-only itself. The new buffer's position, limit, capacity
+         * and mark are the same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means this
+         * buffer's change of content will be visible to the new buffer. The two
+         * buffer's position, limit and mark are independent.
+         *
+         * @return a read-only version of this buffer.
+         */
+        AsReadOnlyBuffer(
+            [out] ICharBuffer** buffer);
+
+        /**
+         * Returns the character located at the specified index in the buffer. The
+         * index value is referenced from the current buffer position.
+         *
+         * @param index
+         *            the index referenced from the current buffer position. It must
+         *            not be less than zero but less than the value obtained from a
+         *            call to {remaining()}.
+         * @return the character located at the specified index (referenced from the
+         *         current position) in the buffer.
+         * @exception IndexOutOfBoundsException
+         *                if the index is invalid.
+         */
+        GetCharAt(
+            [in] Int32 index,
+            [out] Char32* value);
+
+        /**
+         * Compacts this char buffer.
+         * <p>
+         * The remaining chars will be moved to the head of the buffer,
+         * starting from position zero. Then the position is set to
+         * {remaining()}; the limit is set to capacity; the mark is cleared.
+         *
+         * @return this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Compact();
+
+        /**
+         * Returns a duplicated buffer that shares its content with this buffer.
+         * <p>
+         * The duplicated buffer's initial position, limit, capacity and mark are
+         * the same as this buffer's. The duplicated buffer's read-only property and
+         * byte order are the same as this buffer's, too.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a duplicated buffer that shares its content with this buffer.
+         */
+        Duplicate(
+            [out] ICharBuffer** buffer);
+
+        /**
+         * Returns the char at the current position and increases the position by 1.
+         *
+         * @return the char at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is equal or greater than limit.
+         */
+        Get(
+            [out] Char32* value);
+
+        /**
+         * Returns a char at the specified index; the position is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and less than limit.
+         * @return a char at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         */
+        Get(
+            [in] Int32 index,
+            [out] Char32* value);
+
+        /**
+         * Reads chars from the current position into the specified char array and
+         * increases the position by the number of chars read.
+         * <p>
+         * Calling this method has the same effect as
+         * {get(dst, 0, dst.length)}.
+         *
+         * @param dst
+         *            the destination char array.
+         * @return this buffer.
+         * @exception BufferUnderflowException
+         *                if {dst.length} is greater than {remaining()}.
+         */
+        Get(
+            [in] ArrayOf<Char32>* dst);
+
+        /**
+         * Reads chars from the current position into the specified char array,
+         * starting from the specified offset, and increases the position by the
+         * number of chars read.
+         *
+         * @param dstOffset
+         *            the target char array.
+         * @param off
+         *            the offset of the char array, must not be negative and not
+         *            greater than {dst.length}.
+         * @param charCount
+         *            The number of chars to read, must be no less than zero and no
+         *            greater than {dst.length - off}.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if either {off} or { len} is invalid.
+         * @exception BufferUnderflowException
+         *                if {len} is greater than {remaining()}.
+         */
+        Get(
+            [in] ArrayOf<Char32>* dst,
+            [in] Int32 dstOffset,
+            [in] Int32 charCount);
+
+        /**
+         * Indicates whether this buffer id direct. A direct buffer will try
+         * its best to take advantage of native memory APIs and it may not stay
+         * in the java heap, so it is not affected by garbage collection.
+         *
+         * A char buffer is direct if it is base on a byte buffer and the byte
+         * buffer is direct.
+         *
+         * @return true is this buffer is direct, false otherwise.
+         */
+
+        /**
+         * Returns the number of remaining chars.
+         *
+         * @return the number of remaining chars.
+         */
+        GetLength(
+            [out] Int32* number);
+
+        /**
+         * Returns the byte order used by this buffer when converting chars from/to
+         * bytes.
+         * <p>
+         * If this buffer is not based on a byte buffer, then this always returns
+         * the platform's native byte order.
+         *
+         * @return the byte order used by this buffer when converting chars from/to
+         *         bytes.
+         */
+        GetOrder(
+            [out] ByteOrder* byteOrder);
+
+        /**
+         * Writes the given char to the current position and increases the position
+         * by 1.
+         *
+         * @param c
+         *            the char to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is equal or greater than limit.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Char32 c);
+
+        /**
+         * Writes a char to the specified index of this buffer; the position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must be no less than zero and less than the limit.
+         * @param c
+         *            the char to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Int32 index,
+            [in] Char32 c);
+
+        /**
+         * Writes chars from the given char array to the current position and
+         * increases the position by the number of chars written.
+         * <p>
+         * Calling this method has the same effect as
+         * {put(src, 0, src.length)}.
+         *
+         * @param src
+         *            the source char array.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {remaining()} is less than {src.length}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Char32>* src);
+
+        /**
+         * Writes chars from the given char array, starting from the specified offset,
+         * to the current position and increases the position by the number of chars
+         * written.
+         *
+         * @param src
+         *            the source char array.
+         * @param srcOffset
+         *            the offset of char array, must not be negative and not greater
+         *            than {@code src.length}.
+         * @param charCount
+         *            the number of chars to write, must be no less than zero and no
+         *            greater than {@code src.length - srcOffset}.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {@code remaining()} is less than {@code charCount}.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code srcOffset} or {@code charCount} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Char32>* src,
+            [in] Int32 srcOffset,
+            [in] Int32 charCount);
+
+        /**
+         * Writes all the remaining chars of the {src} char buffer to this
+         * buffer's current position, and increases both buffers' position by the
+         * number of chars copied.
+         *
+         * @param src
+         *            the source char buffer.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {src.remaining()} is greater than this buffer's
+         *                {remaining()}.
+         * @exception IllegalArgumentException
+         *                if {src} is this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ICharBuffer* src);
+
+        /**
+         * Writes all chars of the given string to the current position of this
+         * buffer, and increases the position by the length of string.
+         * <p>
+         * Calling this method has the same effect as
+         * {put(str, 0, str.length())}.
+         *
+         * @param str
+         *            the string to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {remaining()} is less than the length of string.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] String str);
+
+        /**
+         * Writes chars of the given string to the current position of this buffer,
+         * and increases the position by the number of chars written.
+         *
+         * @param str
+         *            the string to write.
+         * @param start
+         *            the first char to write, must not be negative and not greater
+         *            than {str.length()}.
+         * @param end
+         *            the last char to write (excluding), must be less than
+         *            {start} and not greater than {str.length()}.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {remaining()} is less than {end - start}.
+         * @exception IndexOutOfBoundsException
+         *                if either {start} or {end} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] String str,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * Returns a sliced buffer that shares its content with this buffer.
+         * <p>
+         * The sliced buffer's capacity will be this buffer's {remaining()},
+         * and its zero position will correspond to this buffer's current position.
+         * The new buffer's position will be 0, limit will be its capacity, and its
+         * mark is cleared. The new buffer's read-only property and byte order are
+         * same as this buffer.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a sliced buffer that shares its content with this buffer.
+         */
+        Slice(
+            [out] ICharBuffer** buffer);
+
+        /**
+         * Returns a new char buffer representing a sub-sequence of this buffer's
+         * current remaining content.
+         * <p>
+         * The new buffer's position will be {position() + start}, limit will
+         * be {position() + end}, capacity will be the same as this buffer.
+         * The new buffer's read-only property and byte order are the same as this
+         * buffer.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @param start
+         *            the start index of the sub-sequence, referenced from the
+         *            current buffer position. Must not be less than zero and not
+         *            greater than the value obtained from a call to
+         *            {remaining()}.
+         * @param end
+         *            the end index of the sub-sequence, referenced from the current
+         *            buffer position. Must not be less than {start} and not
+         *            be greater than the value obtained from a call to
+         *            {remaining()}.
+         * @return a new char buffer represents a sub-sequence of this buffer's
+         *         current remaining content.
+         * @exception IndexOutOfBoundsException
+         *                if either {start} or {end} is invalid.
+         */
+        SubSequence(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] ICharSequence** csq);
+
+        /**
+         * Write the given char to the current position and increases
+         * the position by 1.
+         *
+         * @param c
+         *      the char to write.
+         * @return this buffer.
+         * implements ICharSequence::AppendChar, same as Append(Char32 c)
+         */
+        Append(
+            [in] Char32 c);
+
+        Append(
+            [in] ICharSequence* csq);
+
+        Append(
+            [in] ICharSequence* csq,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * Reads characters from this buffer and puts them into {@code target}. The
+         * number of chars that are copied is either the number of remaining chars
+         * in this buffer or the number of remaining chars in {@code target},
+         * whichever is smaller.
+         *
+         * @param target
+         *            the target char buffer.
+         * @throws IllegalArgumentException
+         *             if {@code target} is this buffer.
+         * @throws IOException
+         *             if an I/O error occurs.
+         * @throws ReadOnlyBufferException
+         *             if no changes may be made to the contents of {@code target}.
+         * @return the number of chars copied or -1 if there are no chars left to be
+         *         read from this buffer.
+         */
+        Read(
+            [in]  ICharBuffer* target,
+            [out] Int32* number);
+    }
+
+    /*
+     * A helper interface for generating CharBuffer object and export ICharBuffer
+     * interface.
+     */
+    [deprecated]
+    interface ICharBufferHelper {
+        /*
+         * Creates a char buffer based on a newly allocated char array.
+         *
+         * @param capacity:
+         *      The capacity of then new buffer;
+         *
+         * @param charBuffer:
+         *      The created char buffer interface;
+         *
+         * @Return NOERROR if successful;
+         * @Return E_ILLEGAL_ARGUMENT of capacity is less than zero.
+         */
+        Allocate(
+            [in] Int32 capacity,
+            [out] ICharBuffer** charBuf);
+
+        /*
+         * Creates a char buffer wrapping the given char array.
+         * Calling this interface has the same effect as
+         * wrap(array, 0, array.length);
+         *
+         * @param array:
+         *      The char array which the new buffer will be based on;
+         *
+         * @param charBuffer:
+         *      The created char buffer interface;
+         *
+         * @Return NOERROR if successful;
+         */
+        Wrap(
+            [in] ArrayOf<Char32>* array,
+            [out] ICharBuffer** charBuf);
+
+        /*
+         * Creates a new char buffer by wrapping the given char array.
+         *
+         * The new buffer's position will be 'start', limit will be
+         * 'start + len', capacity will be the length of the array.
+
+         * @Param array:
+         *      The char array which the new buffer will be based on;
+
+         * @Param start:
+         *      The start index, must not be the negative and not greater
+         *      than array's length;
+
+         * @Param charCount:
+         *      The length, must not be negative and not greater than
+         *      array' length - start;
+
+         * Return the char buffer is successful, or index out of bound error
+         * either 'start' or 'len' is invalid;
+         */
+        Wrap(
+            [in] ArrayOf<Char32>* array,
+            [in] Int32 start,
+            [in] Int32 charCount,
+            [out] ICharBuffer** charBuf);
+
+        /*
+         * Creates a new char buffer by wrapping the given char sequence.
+
+         * Calling this method has the same effect as
+         * WrapSequenceEx(charSequence, 0, charSequence.length);
+
+         * @Param charSequence:
+         *      The char sequence which the new buffer will be based on;
+
+         * @Param charBuf
+                the created char buffer;
+
+         * @Return NOERROR;
+         */
+        Wrap(
+            [in] ICharSequence* charSequence,
+            [out] ICharBuffer** charBuf);
+
+        /*
+         * Creates a new char buffer based by wrapping the given char sequence.
+
+         * The new buffer's positon will be 'start', limit will be 'end', capacity
+         * will be the length of the char sequence. The new buffer is read-only;
+
+         * @Param charSequence:
+         *      The char sequence which the new buffer will be based on;
+
+         * @Param start:
+         *      The start index, must not be the negative and not greater than
+         *      char sequence length;
+
+         * @Param end:
+         *      The end index, must be no less than 'start', and no greater than
+         *      sequence length;
+
+         * @Param charBuf:
+         *      The created char buffer;
+
+         * @Return NOERROR if successful or index out of bound error when either
+         * 'start' or 'end' is invalid;
+         */
+        Wrap(
+            [in] ICharSequence* cs,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] ICharBuffer** charBuf);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

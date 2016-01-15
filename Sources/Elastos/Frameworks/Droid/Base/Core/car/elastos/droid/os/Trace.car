@@ -1,0 +1,96 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface ITrace {
+        /**
+         * Writes a trace message to indicate that a given section of code has begun. This call must
+         * be followed by a corresponding call to {@link #endSection()} on the same thread.
+         *
+         * <p class="note"> At this time the vertical bar character '|', newline character '\n', and
+         * null character '\0' are used internally by the tracing mechanism.  If sectionName contains
+         * these characters they will be replaced with a space character in the trace.
+         *
+         * @param sectionName The name of the code section to appear in the trace.  This may be at
+         * most 127 Unicode code units long.
+         */
+        BeginSection(
+            [in] String sectionName);
+
+        /**
+         * Writes a trace message to indicate that a given section of code has ended. This call must
+         * be preceeded by a corresponding call to {@link #beginSection(String)}. Calling this method
+         * will mark the end of the most recently begun section of code, so care must be taken to
+         * ensure that beginSection / endSection pairs are properly nested and called from the same
+         * thread.
+         */
+        EndSection();
+
+        /**
+         * Writes a trace message to indicate that a given section of code has
+         * begun. Must be followed by a call to {@link #traceEnd} using the same
+         * tag.
+         *
+         * @param traceTag The trace tag.
+         * @param methodName The method name to appear in the trace.
+         *
+         * @hide
+         */
+        TraceBegin(
+            [in] Int64 traceTag,
+            [in] String sectionName);
+
+        /**
+         * Writes a trace message to indicate that the current method has ended.
+         * Must be called exactly once for each call to {@link #traceBegin} using the same tag.
+         *
+         * @param traceTag The trace tag.
+         *
+         * @hide
+         */
+        TraceEnd(
+            [in] Int64 traceTag);
+
+        /**
+         * Writes a trace message to indicate that a given section of code has
+         * begun. Must be followed by a call to {@link #asyncTraceEnd} using the same
+         * tag. Unlike {@link #traceBegin(long, String)} and {@link #traceEnd(long)},
+         * asynchronous events do not need to be nested. The name and cookie used to
+         * begin an event must be used to end it.
+         *
+         * @param traceTag The trace tag.
+         * @param methodName The method name to appear in the trace.
+         * @param cookie Unique identifier for distinguishing simultaneous events
+         *
+         * @hide
+         */
+        AsyncTraceBegin(
+            [in] Int64 traceTag,
+            [in] String sectionName,
+            [in] Int32 cookie);
+
+        /**
+         * Writes a trace message to indicate that the current method has ended.
+         * Must be called exactly once for each call to {@link #asyncTraceBegin(long, String, int)}
+         * using the same tag, name and cookie.
+         *
+         * @param traceTag The trace tag.
+         * @param methodName The method name to appear in the trace.
+         * @param cookie Unique identifier for distinguishing simultaneous events
+         *
+         * @hide
+         */
+        AsyncTraceEnd(
+            [in] Int64 traceTag,
+            [in] String sectionName,
+            [in] Int32 cookie);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module
+

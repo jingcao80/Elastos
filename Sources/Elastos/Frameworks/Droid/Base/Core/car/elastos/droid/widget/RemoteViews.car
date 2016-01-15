@@ -1,0 +1,794 @@
+
+module
+{
+    enum Elastos.Droid.Graphics.PorterDuffMode;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Graphics.IBitmap;
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IRemoteViewsOnClickHandler;
+
+    interface IMemoryUsageCounter {
+        Clear();
+
+        Increment(
+            [in] Int32 numBytes);
+
+        GetMemoryUsage(
+            [out] Int32* usage);
+
+        AddBitmapMemory(
+            [in] IBitmap* b);
+    }
+
+    interface IBitmapCache {
+        GetBitmapId(
+            [in] IBitmap* b,
+            [out] Int32* id);
+
+        GetBitmapForId(
+            [in] Int32 id,
+            [out] IBitmap** b);
+
+        WriteBitmapsToParcel(
+            [in] IParcel* dest);
+
+        Assimilate(
+            [in] IBitmapCache* bitmapCache);
+
+        AddBitmapMemory(
+            [in] IMemoryUsageCounter* memoryCounter);
+    }
+
+    [local]
+    interface IRemoteViewsAction {
+        Apply(
+             [in]  IView* root,
+             [in]  IViewGroup* rootParent,
+             [in]  IRemoteViewsOnClickHandler* handler);
+
+        /**
+         * Overridden by each class to report on it's own memory usage
+         */
+        UpdateMemoryUsageEstimate(
+             [in]  IMemoryUsageCounter* counter);
+
+        SetBitmapCache(
+             [in]  IBitmapCache* bitmapCache);
+
+        MergeBehavior(
+            [out] Int32* result);
+
+        GetActionName(
+            [out] String* name) ;
+
+        GetUniqueKey(
+            [out] String* key);
+    }
+
+    interface IMutablePair {
+        GetFirst(
+            [out] String* fir);
+
+        SetFirst(
+            [in] String fir);
+
+        GetSecond(
+            [out] String* sec);
+
+        SetSecond(
+            [in] String sec);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.ILayoutInflaterFilter
+     */
+    [local, parcelable]
+    interface IRemoteViews {
+        /**
+         * Merges the passed RemoteViews actions with this RemoteViews actions according to
+         * action-specific merge rules.
+         *
+         * @param newRv
+         *
+         * @hide
+         */
+        MergeRemoteViews(
+            [in] IRemoteViews* newRv);
+
+        Clone(
+            [out] IRemoteViews** views);
+
+        GetPackage(
+            [out] String* package);
+
+        /**
+         * Reutrns the layout id of the root layout associated with this RemoteViews. In the case
+         * that the RemoteViews has both a landscape and portrait root, this will return the layout
+         * id associated with the portrait layout.
+         *
+         * @return the layout id.
+         */
+        GetLayoutId(
+            [out] Int32* id);
+
+        /**
+         * Returns an estimate of the bitmap heap memory usage for this RemoteViews.
+         */
+        /** @hide */
+        EstimateMemoryUsage(
+            [out] Int32* usage);
+
+        /**
+         * Equivalent to calling {@link ViewGroup#addView(View)} after inflating the
+         * given {@link RemoteViews}. This allows users to build "nested"
+         * {@link RemoteViews}. In cases where consumers of {@link RemoteViews} may
+         * recycle layouts, use {@link #removeAllViews(Int32)} to clear any existing
+         * children.
+         *
+         * @param viewId The id of the parent {@link ViewGroup} to add child into.
+         * @param nestedView {@link RemoteViews} that describes the child.
+         */
+        AddView(
+            [in] Int32 viewId,
+            [in] IRemoteViews* nestedView);
+
+        /**
+         * Equivalent to calling {@link ViewGroup#removeAllViews()}.
+         *
+         * @param viewId The id of the parent {@link ViewGroup} to remove all
+         *            children from.
+         */
+        RemoveAllViews(
+            [in] Int32 viewId);
+
+        /**
+         * Equivalent to calling {@link AdapterViewAnimator#showNext()}
+         *
+         * @param viewId The id of the view on which to call {@link AdapterViewAnimator#showNext()}
+         */
+        ShowNext(
+            [in] Int32 viewId);
+
+        /**
+         * Equivalent to calling {@link AdapterViewAnimator#showPrevious()}
+         *
+         * @param viewId The id of the view on which to call {@link AdapterViewAnimator#showPrevious()}
+         */
+        ShowPrevious(
+            [in] Int32 viewId);
+
+        /**
+         * Equivalent to calling {@link AdapterViewAnimator#setDisplayedChild(Int32)}
+         *
+         * @param viewId The id of the view on which to call
+         *               {@link AdapterViewAnimator#setDisplayedChild(Int32)}
+         */
+        SetDisplayedChild(
+            [in] Int32 viewId,
+            [in] Int32 childIndex);
+
+        /**
+         * Equivalent to calling View.setVisibility
+         *
+         * @param viewId The id of the view whose visibility should change
+         * @param visibility The new visibility for the view
+         */
+        SetViewVisibility(
+            [in] Int32 viewId,
+            [in] Int32 visibility);
+
+        /**
+         * Equivalent to calling TextView.setText
+         *
+         * @param viewId The id of the view whose text should change
+         * @param text The new text for the view
+         */
+        SetTextViewText(
+            [in] Int32 viewId,
+            [in] ICharSequence* text);
+
+        /**
+         * Equivalent to calling {@link TextView#setTextSize(Int32, float)}
+         *
+         * @param viewId The id of the view whose text size should change
+         * @param units The units of size (e.g. COMPLEX_UNIT_SP)
+         * @param size The size of the text
+         */
+        SetTextViewTextSize(
+            [in] Int32 viewId,
+            [in] Int32 units,
+            [in] Float size);
+
+        /**
+         * Equivalent to calling
+         * {@link TextView#setCompoundDrawablesWithIntrinsicBounds(Int32, Int32, Int32, Int32)}.
+         *
+         * @param viewId The id of the view whose text should change
+         * @param left The id of a drawable to place to the left of the text, or 0
+         * @param top The id of a drawable to place above the text, or 0
+         * @param right The id of a drawable to place to the right of the text, or 0
+         * @param bottom The id of a drawable to place below the text, or 0
+         */
+        SetTextViewCompoundDrawables(
+            [in] Int32 viewId,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /**
+         * Equivalent to calling {@link
+         * TextView#setCompoundDrawablesRelativeWithIntrinsicBounds(Int32, Int32, Int32, Int32)}.
+         *
+         * @param viewId The id of the view whose text should change
+         * @param start The id of a drawable to place before the text (relative to the
+         * layout direction), or 0
+         * @param top The id of a drawable to place above the text, or 0
+         * @param end The id of a drawable to place after the text, or 0
+         * @param bottom The id of a drawable to place below the text, or 0
+         */
+        SetTextViewCompoundDrawablesRelative(
+            [in] Int32 viewId,
+            [in] Int32 start,
+            [in] Int32 top,
+            [in] Int32 end,
+            [in] Int32 bottom);
+
+        /**
+         * Equivalent to applying a color filter on one of the drawables in
+         * {@link android.widget.TextView#getCompoundDrawablesRelative()}.
+         *
+         * @param viewId The id of the view whose text should change.
+         * @param index  The index of the drawable in the array of
+         *               {@link android.widget.TextView#getCompoundDrawablesRelative()} to set the color
+         *               filter on. Must be in [0, 3].
+         * @param color  The color of the color filter. See
+         *               {@link Drawable#setColorFilter(int, android.graphics.PorterDuff.Mode)}.
+         * @param mode   The mode of the color filter. See
+         *               {@link Drawable#setColorFilter(int, android.graphics.PorterDuff.Mode)}.
+         * @hide
+         */
+        SetTextViewCompoundDrawablesRelativeColorFilter(
+            [in] Int32 viewId,
+            [in] Int32 index,
+            [in] Int32 color,
+            [in] PorterDuffMode mode);
+
+        /**
+         * Equivalent to calling ImageView.setImageResource
+         *
+         * @param viewId The id of the view whose drawable should change
+         * @param srcId The new resource id for the drawable
+         */
+        SetImageViewResource(
+            [in] Int32 viewId,
+            [in] Int32 srcId);
+
+        /**
+         * Equivalent to calling ImageView.setImageURI
+         *
+         * @param viewId The id of the view whose drawable should change
+         * @param uri The Uri for the image
+         */
+        SetImageViewUri(
+            [in] Int32 viewId,
+            [in] IUri* uri);
+
+        /**
+         * Equivalent to calling ImageView.setImageBitmap
+         *
+         * @param viewId The id of the view whose bitmap should change
+         * @param bitmap The new Bitmap for the drawable
+         */
+        SetImageViewBitmap(
+            [in] Int32 viewId,
+            [in] IBitmap* bitmap);
+
+        /**
+         * Equivalent to calling AdapterView.setEmptyView
+         *
+         * @param viewId The id of the view on which to set the empty view
+         * @param emptyViewId The view id of the empty view
+         */
+        SetEmptyView(
+            [in] Int32 viewId,
+            [in] Int32 emptyViewId);
+
+        /**
+         * Equivalent to calling {@link Chronometer#setBase Chronometer.setBase},
+         * {@link Chronometer#setFormat Chronometer.setFormat},
+         * and {@link Chronometer#start Chronometer.start()} or
+         * {@link Chronometer#stop Chronometer.stop()}.
+         *
+         * @param viewId The id of the {@link Chronometer} to change
+         * @param base The time at which the timer would have read 0:00.  This
+         *             time should be based off of
+         *             {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()}.
+         * @param format The Chronometer format string, or null to
+         *               simply display the timer value.
+         * @param started True if you want the clock to be started, false if not.
+         */
+        SetChronometer(
+            [in] Int32 viewId,
+            [in] Int64 base,
+            [in] String format,
+            [in] Boolean started);
+
+        /**
+         * Equivalent to calling {@link ProgressBar#setMax ProgressBar.setMax},
+         * {@link ProgressBar#setProgress ProgressBar.setProgress}, and
+         * {@link ProgressBar#setIndeterminate ProgressBar.setIndeterminate}
+         *
+         * If indeterminate is true, then the values for max and progress are ignored.
+         *
+         * @param viewId The id of the {@link ProgressBar} to change
+         * @param max The 100% value for the progress bar
+         * @param progress The current value of the progress bar.
+         * @param indeterminate True if the progress bar is indeterminate,
+         *                false if not.
+         */
+        SetProgressBar(
+            [in] Int32 viewId,
+            [in] Int32 max,
+            [in] Int32 progress,
+            [in] Boolean indeterminate);
+
+        /**
+         * Equivalent to calling
+         * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
+         * to launch the provided {@link PendingIntent}.
+         *
+         * When setting the on-click action of items within collections (eg. {@link ListView},
+         * {@link StackView} etc.), this method will not work. Instead, use {@link
+         * RemoteViews#setPendingIntentTemplate(Int32, PendingIntent) in conjunction with
+         * RemoteViews#setOnClickFillInIntent(Int32, Intent).
+         *
+         * @param viewId The id of the view that will trigger the {@link PendingIntent} when clicked
+         * @param pendingIntent The {@link PendingIntent} to send when user clicks
+         */
+        SetOnClickPendingIntent(
+            [in] Int32 viewId,
+            [in] IPendingIntent* pendingIntent);
+
+        /**
+         * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
+         * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+         * this method should be used to set a single PendingIntent template on the collection, and
+         * individual items can differentiate their on-click behavior using
+         * {@link RemoteViews#setOnClickFillInIntent(Int32, Intent)}.
+         *
+         * @param viewId The id of the collection who's children will use this PendingIntent template
+         *          when clicked
+         * @param pendingIntentTemplate The {@link PendingIntent} to be combined with extras specified
+         *          by a child of viewId and executed when that child is clicked
+         */
+        SetPendingIntentTemplate(
+            [in] Int32 viewId,
+            [in] IPendingIntent* pendingIntentTemplate);
+
+        /**
+         * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
+         * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+         * a single PendingIntent template can be set on the collection, see {@link
+         * RemoteViews#setPendingIntentTemplate(Int32, PendingIntent)}, and the individual on-click
+         * action of a given item can be distinguished by setting a fillInIntent on that item. The
+         * fillInIntent is then combined with the PendingIntent template in order to determine the final
+         * intent which will be executed when the item is clicked. This works as follows: any fields
+         * which are left blank in the PendingIntent template, but are provided by the fillInIntent
+         * will be overwritten, and the resulting PendingIntent will be used.
+         *
+         *
+         * of the PendingIntent template will then be filled in with the associated fields that are
+         * set in fillInIntent. See {@link Intent#fillIn(Intent, Int32)} for more details.
+         *
+         * @param viewId The id of the view on which to set the fillInIntent
+         * @param fillInIntent The intent which will be combined with the parent's PendingIntent
+         *        in order to determine the on-click behavior of the view specified by viewId
+         */
+        SetOnClickFillInIntent(
+            [in] Int32 viewId,
+            [in] IIntent* fillInIntent);
+
+        /**
+         * @hide
+         * Equivalent to calling a combination of {@link Drawable#setAlpha(Int32)},
+         * {@link Drawable#setColorFilter(Int32, android.graphics.PorterDuff.Mode)},
+         * and/or {@link Drawable#setLevel(Int32)} on the {@link Drawable} of a given
+         * view.
+         * <p>
+         * You can omit specific calls by marking their values with null or -1.
+         *
+         * @param viewId The id of the view that contains the target
+         *            {@link Drawable}
+         * @param targetBackground If true, apply these parameters to the
+         *            {@link Drawable} returned by
+         *            {@link android.view.View#getBackground()}. Otherwise, assume
+         *            the target view is an {@link ImageView} and apply them to
+         *            {@link ImageView#getDrawable()}.
+         * @param alpha Specify an alpha value for the drawable, or -1 to leave
+         *            unchanged.
+         * @param colorFilter Specify a color for a
+         *            {@link android.graphics.ColorFilter} for this drawable, or -1
+         *            to leave unchanged.
+         * @param mode Specify a PorterDuff mode for this drawable, or null to leave
+         *            unchanged.
+         * @param level Specify the level for the drawable, or -1 to leave
+         *            unchanged.
+         */
+        SetDrawableParameters(
+            [in] Int32 viewId,
+            [in] Boolean targetBackground,
+            [in] Int32 alpha,
+            [in] Int32 colorFilter,
+            [in] PorterDuffMode mode,
+            [in] Int32 level);
+
+        /**
+         * Equivalent to calling {@link android.widget.TextView#setTextColor(Int32)}.
+         *
+         * @param viewId The id of the view whose text color should change
+         * @param color Sets the text color for all the states (normal, selected,
+         *            focused) to be this color.
+         */
+        SetTextColor(
+            [in] Int32 viewId,
+            [in] Int32 color);
+
+        /**
+         * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
+         *
+         * @param appWidgetId The id of the app widget which contains the specified view. (This
+         *      parameter is ignored in this deprecated method)
+         * @param viewId The id of the {@link AbsListView}
+         * @param intent The intent of the service which will be
+         *            providing data to the RemoteViewsAdapter
+         * @deprecated This method has been deprecated. See
+         *      {@link android.widget.RemoteViews#setRemoteAdapter(Int32, Intent)}
+         */
+        SetRemoteAdapter(
+            [in] Int32 viewId,
+            [in] IIntent* intent);
+
+        //    @Deprecated
+        SetRemoteAdapter(
+            [in] Int32 appWidgetId,
+            [in] Int32 viewId,
+            [in] IIntent* intent);
+        /**
+         * Creates a simple Adapter for the viewId specified. The viewId must point to an AdapterView,
+         * ie. {@link ListView}, {@link GridView}, {@link StackView} or {@link AdapterViewAnimator}.
+         * This is a simpler but less flexible approach to populating collection widgets. Its use is
+         * encouraged for most scenarios, as long as the total memory within the list of RemoteViews
+         * is relatively small (ie. doesn't contain large or numerous Bitmaps, see {@link
+         * RemoteViews#setImageViewBitmap}). In the case of numerous images, the use of API is still
+         * possible by setting image URIs instead of Bitmaps, see {@link RemoteViews#setImageViewUri}.
+         *
+         * This API is supported in the compatibility library for previous API levels, see
+         * RemoteViewsCompat.
+         *
+         * @param viewId The id of the {@link AdapterView}
+         * @param list The list of RemoteViews which will populate the view specified by viewId.
+         * @param viewTypeCount The maximum number of unique layout id's used to construct the list of
+         *      RemoteViews. This count cannot change during the life-cycle of a given widget, so this
+         *      parameter should account for the maximum possible number of types that may appear in the
+         *      See {@link Adapter#getViewTypeCount()}.
+         *
+         * @hide
+         */
+        SetRemoteAdapter(
+            [in] Int32 viewId,
+            [in] IArrayList* list,
+            [in] Int32 viewTypeCount);
+
+        /**
+         * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(Int32, Int32)}.
+         *
+         * @param viewId The id of the view to change
+         * @param position Scroll to this adapter position
+         */
+        SetScrollPosition(
+            [in] Int32 viewId,
+            [in] Int32 position);
+
+        /**
+         * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(Int32, Int32)}.
+         *
+         * @param viewId The id of the view to change
+         * @param offset Scroll by this adapter position offset
+         */
+        SetRelativeScrollPosition(
+            [in] Int32 viewId,
+            [in] Int32 offset);
+
+        /**
+         * Equivalent to calling {@link android.view.View#setPadding(Int32, Int32, Int32, Int32)}.
+         *
+         * @param viewId The id of the view to change
+         * @param left the left padding in pixels
+         * @param top the top padding in pixels
+         * @param right the right padding in pixels
+         * @param bottom the bottom padding in pixels
+         */
+        SetViewPadding(
+            [in] Int32 viewId,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /**
+         * Call a method taking one Boolean on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetBoolean(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] Boolean value);
+
+        /**
+         * Call a method taking one byte on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetByte(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] Byte value);
+
+        /**
+         * Call a method taking one short on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetInt16(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] Int16 value);
+
+        /**
+         * Call a method taking one Int32 on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetInt32(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] Int32 value);
+
+        /**
+         * Call a method taking one long on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetInt64(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] Int64 value);
+
+        /**
+         * Call a method taking one float on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetFloat(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] Float value);
+
+        /**
+         * Call a method taking one double on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetDouble(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] Double value);
+
+        /**
+         * Call a method taking one char on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetChar(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] Char32 value);
+
+        /**
+         * Call a method taking one String on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetString(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] String value);
+
+        /**
+         * Call a method taking one CharSequence on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetCharSequence(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] ICharSequence* value);
+
+        /**
+         * Call a method taking one Uri on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetUri(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] IUri* value);
+
+        /**
+         * Call a method taking one Bitmap on a view in the layout for this RemoteViews.
+         * @more
+         * <p class="note">The bitmap will be flattened into the parcel if this object is
+         * sent across processes, so it may end up using a lot of memory, and may be fairly slow.</p>
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetBitmap(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] IBitmap* value);
+
+        /**
+         * Call a method taking one Bundle on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The value to pass to the method.
+         */
+        SetBundle(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] IBundle* value);
+
+        /**
+         * Call a method taking one Intent on a view in the layout for this RemoteViews.
+         *
+         * @param viewId The id of the view on which to call the method.
+         * @param methodName The name of the method to call.
+         * @param value The {@link android.content.Intent} to pass the method.
+         */
+        SetIntent(
+            [in] Int32 viewId,
+            [in] String methodName,
+            [in] IIntent* value);
+
+        /**
+         * Equivalent to calling View.setContentDescription(CharSequence).
+         *
+         * @param viewId The id of the view whose content description should change.
+         * @param contentDescription The new content description for the view.
+         */
+        SetContentDescription(
+            [in] Int32 viewId,
+            [in] ICharSequence* contentDescription);
+
+        /**
+         * Equivalent to calling View.setLabelFor(Int32).
+         *
+         * @param viewId The id of the view whose property to set.
+         * @param labeledId The id of a view for which this view serves as a label.
+         */
+        SetLabelFor(
+            [in] Int32 viewId,
+            [in] Int32 labeledId);
+
+        /**
+         * Inflates the view hierarchy represented by this object and applies
+         * all of the actions.
+         *
+         * <p><strong>Caller beware: this may throw</strong>
+         *
+         * @param context Default context to use
+         * @param parent Parent that the resulting view hierarchy will be attached to. This method
+         * does <strong>not</strong> attach the hierarchy. The caller should do so when appropriate.
+         * @return The inflated view hierarchy
+         */
+        Apply(
+            [in] IContext* ctx,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        /** @hide */
+        Apply(
+            [in] IContext* ctx,
+            [in] IViewGroup* parent,
+            [in] IRemoteViewsOnClickHandler* handler,
+            [out] IView** view);
+
+        /**
+         * Applies all of the actions to the provided view.
+         *
+         * <p><strong>Caller beware: this may throw</strong>
+         *
+         * @param v The view to apply the actions to.  This should be the result of
+         * the {@link #apply(Context,ViewGroup)} call.
+         */
+        Reapply(
+            [in] IContext* ctx,
+            [in] IView* v);
+
+        /** @hide */
+        Reapply(
+            [in] IContext* ctx,
+            [in] IView* v,
+            [in] IRemoteViewsOnClickHandler* handler);
+        /**
+         * Returns the number of actions in this RemoteViews. Can be used as a sequence number.
+         *
+         * @hide
+         */
+        GetSequenceNumber(
+            [out] Int32* num);
+
+        SetNotRoot();
+
+        SetIsWidgetCollectionChild(
+            [in] Boolean isWidgetCollectionChild);
+    }
+
+    [local]
+    interface IRemoteViewsOnClickHandler {
+        OnClickHandler(
+            [in] IView* view,
+            [in] IPendingIntent* pending,
+            [in] IIntent* fillInIntent,
+            [out] Boolean* succeed);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}
+

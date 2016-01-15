@@ -1,0 +1,106 @@
+
+module
+{
+    interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * This class represents a socket endpoint described by a IP address and
+     * a port number. It is a concrete implementation of SocketAddress for IP.
+     *
+     * @implements Elastos.Net.ISocketAddress
+     *
+     * @Involve
+     * interface Elastos.IO.ISerializable;
+     * interface Elastos.Net.ISocketAddress;
+     */
+    interface IInetSocketAddress {
+        /**
+         * Gets the port number of this socket.
+         *
+         * @return the socket endpoint port number.
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /**
+         * Sets the port number of this socket.
+         */
+        SetPort(
+            [in] Int32 port);
+
+        /**
+         * Gets the address of this socket.
+         *
+         * @return the socket endpoint address.
+         */
+        GetAddress(
+            [out] IInetAddress** address);
+
+        /**
+         * Sets the address of this socket.
+         */
+        SetAddress(
+            [in] IInetAddress* address);
+
+        /**
+         * Returns the hostname, doing a reverse lookup on the {InetAddress} if no
+         * hostname string was provided at construction time.
+         */
+        GetHostName(
+            [out] String* hostname);
+
+        /**
+         * Returns the hostname if known, or the result of {InetAddress.getHostAddress}.
+         * Unlike getHostName, this method will never cause a DNS lookup.
+         *
+         * @sa #getHostName
+         * @since 1.7
+         * @hide 1.7 - remember to add a link in the getHostName documentation!
+         */
+        GetHostString(
+            [out] String* hostString);
+
+        /**
+         * Returns whether this socket address is unresolved or not.
+         *
+         * @return {true} if this socket address is unresolved, {false}
+         *         otherwise.
+         */
+        IsUnresolved(
+            [out] Boolean* isUnresolved);
+    }
+
+
+    /**
+     * This class represents a socket endpoint described by a IP address and a port
+     * number. It is a concrete implementation of SocketAddress for IP.
+     */
+
+    interface IInetSocketAddressHelper {
+        /**
+         * Creates an {InetSocketAddress} without trying to resolve the
+         * hostname into an {InetAddress}. The address field is marked as
+         * unresolved.
+         *
+         * @param host
+         *            the specified hostname to which this socket is bound.
+         * @param port
+         *            the specified port number to which this socket is bound.
+         * @return the created InetSocketAddress instance.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the hostname {host} is {null} or the port is not in the range between 0 and 65535.
+         */
+        CreateUnresolved(
+            [in] String host,
+            [in] Int32 port,
+            [out] IInetSocketAddress** inetSocketAddress);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

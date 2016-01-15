@@ -1,0 +1,483 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IExpandableListView;
+
+    /** Used for being notified when a group is collapsed */
+    interface IExpandableListViewOnGroupCollapseListener {
+        /**
+         * Callback method to be invoked when a group in this expandable list has
+         * been collapsed.
+         *
+         * @param groupPosition The group position that was collapsed
+         */
+        OnGroupCollapse(
+            [in] Int32 groupPosition);
+    }
+
+    /** Used for being notified when a group is expanded */
+    interface IExpandableListViewOnGroupExpandListener {
+        /**
+         * Callback method to be invoked when a group in this expandable list has
+         * been expanded.
+         *
+         * @param groupPosition The group position that was expanded
+         */
+        OnGroupExpand(
+            [in] Int32 groupPosition);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when a group in this
+     * expandable list has been clicked.
+     */
+    [local]
+    interface IExpandableListViewOnGroupClickListener {
+        /**
+         * Callback method to be invoked when a group in this expandable list has
+         * been clicked.
+         *
+         * @param parent The ExpandableListConnector where the click happened
+         * @param v The view within the expandable list/ListView that was clicked
+         * @param groupPosition The group position IViewBaseSavedStatethat was clicked
+         * @param id The row id of the group that was clicked
+         * @return True if the click was handled
+         */
+        OnGroupClick(
+            [in] IExpandableListView* parent,
+            [in] IView* v,
+            [in] Int32 groupPosition,
+            [in] Int64 id,
+            [out] Boolean* handle);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when a child in this
+     * expandable list has been clicked.
+     */
+    [local]
+    interface IExpandableListViewOnChildClickListener {
+        /**
+         * Callback method to be invoked when a child in this expandable list has
+         * been clicked.IExpandableListContextMenuInfo
+         *
+         * @param parent The ExpandableListView where the click happened
+         * @param v The view within the expandable list/ListView that was clicked
+         * @param groupPosition The group position that contains the child that
+         * was clicked
+         * @param childPosition The child position within the group
+         * @param id The row id of the child that was clicked
+         * @return True if the click was handled
+         */
+        OnChildClick(
+            [in] IExpandableListView* parent,
+            [in] IView* v,
+            [in] Int32 groupPosition,
+            [in] Int32 childPosition,
+            [in] Int64 id,
+            [out] Boolean* handle);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IContextMenuInfo
+     */
+    [local]
+    interface IExpandableListContextMenuInfo {
+        SetTargetView(
+            [in] IView* targetView);
+
+        GetTargetView(
+            [out] IView** targetView);
+
+        SetPackedPosition(
+            [in] Int64 packedPosition);
+
+        GetPackedPosition(
+            [out] Int64* packedPosition);
+
+        SetId(
+            [in] Int64 id);
+
+        GetId(
+            [out] Int64* id);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface IExpandableListViewSavedState {
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsListView
+     * extends Elastos.Droid.Widget.IListView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IOnGlobalLayoutListener
+     * interface Elastos.Droid.View.IOnTouchModeChangeListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+
+    [local]
+    interface IExpandableListView {
+        /**
+         * The packed position represents a group.
+         */
+        const Int32 PACKED_POSITION_TYPE_GROUP = 0;
+
+        /**
+         * The packed position represents a child.
+         */
+        const Int32 PACKED_POSITION_TYPE_CHILD = 1;
+
+        /**
+         * The packed position represents a neither/null/no preference.
+         */
+        const Int32 PACKED_POSITION_TYPE_NULL = 2;
+
+        /**
+         * The value for a packed position that represents neither/null/no
+         * preference. This value is not otherwise possible since a group type
+         * (first bit 0) should not have a child position filled.
+         */
+        const Int64 PACKED_POSITION_VALUE_NULL = 0x00000000FFFFFFFF;
+
+        /**
+         * Denotes when a child indicator should inherit this bound from the generic
+         * indicator bounds
+         */
+        const Int32 CHILD_INDICATOR_INHERIT = -1;
+
+        OnRtlPropertiesChanged(
+            [in] Int32 layoutDirection);
+
+        SetChildDivider(
+            [in] IDrawable* childDivider);
+
+        /**
+         * Sets the adapter that provides data to this view.
+         * @param adapter The adapter that provides data to this view.
+         */
+        SetAdapter(
+            [in] IExpandableListAdapter* adapter);
+
+        /**
+         * Gets the adapter that provides data to this view.
+         * @return The adapter that provides data to this view.
+         */
+        GetExpandableListAdapter(
+            [out] IExpandableListAdapter** adapter);
+
+        /**
+         * Expand a group in the grouped list view
+         *
+         * @param groupPos the group to be expanded
+         * @return True if the group was expanded, false otherwise (if the group
+         *         was already expanded, this will return false)
+         */
+        ExpandGroup(
+            [in] Int32 groupPos,
+            [out] Boolean* expanded);
+
+        ExpandGroup(
+            [in] Int32 groupPos,
+            [in] Boolean animate,
+            [out] Boolean* expanded);
+
+        /**
+         * Collapse a group in the grouped list view
+         *
+         * @param groupPos position of the group to collapse
+         * @return True if the group was collapsed, false otherwise (if the group
+         *         was already collapsed, this will return false)
+         */
+        CollapseGroup(
+            [in] Int32 groupPos,
+            [out] Boolean* collapse);
+
+        SetOnGroupCollapseListener(
+            [in] IExpandableListViewOnGroupCollapseListener* onGroupCollapseListener);
+
+        SetOnGroupExpandListener(
+            [in] IExpandableListViewOnGroupExpandListener* onGroupExpandListener);
+
+        SetOnGroupClickListener(
+            [in] IExpandableListViewOnGroupClickListener* onGroupClickListener);
+
+        SetOnChildClickListener(
+            [in] IExpandableListViewOnChildClickListener* onChildClickListener);
+
+        /**
+         * Converts a flat list position (the raw position of an item (child or group)
+         * in the list) to an group and/or child position (represented in a
+         * packed position). This is useful in situations where the caller needs to
+         * use the underlying {@link ListView}'s methods. Use
+         * {@link ExpandableListView#getPackedPositionType} ,
+         * {@link ExpandableListView#getPackedPositionChild},
+         * {@link ExpandableListView#getPackedPositionGroup} to unpack.
+         *
+         * @param flatListPosition The flat list position to be converted.
+         * @return The group and/or child position for the given flat list position
+         *         in packed position representation. #PACKED_POSITION_VALUE_NULL if
+         *         the position corresponds to a header or a footer item.
+         */
+        GetExpandableListPosition(
+            [in] Int32 flatListPosition,
+            [out] Int64* position);
+
+        /**
+         * Converts a group and/or child position to a flat list position. This is
+         * useful in situations where the caller needs to use the underlying
+         * {@link ListView}'s methods.
+         *
+         * @param packedPosition The group and/or child positions to be converted in
+         *            packed position representation. Use
+         *            {@link #getPackedPositionForChild(Int32, Int32)} or
+         *            {@link #getPackedPositionForGroup(Int32)}.
+         * @return The flat list position for the given child or group.
+         */
+        GetFlatListPosition(
+            [in] Int64 packedPosition,
+            [out] Int32* position);
+
+        /**
+         * Gets the position of the currently selected group or child (along with
+         * its type). Can return {@link #PACKED_POSITION_VALUE_NULL} if no selection.
+         *
+         * @return A packed position containing the currently selected group or
+         *         child's position and type. #PACKED_POSITION_VALUE_NULL if no selection
+         *         or if selection is on a header or a footer item.
+         */
+        GetSelectedPosition(
+            [out] Int64* position);
+
+        /**
+         * Gets the ID of the currently selected group or child. Can return -1 if no
+         * selection.
+         *
+         * @return The ID of the currently selected group or child. -1 if no
+         *         selection.
+         */
+        GetSelectedId(
+            [out] Int64* id);
+
+        /**
+         * Sets the selection to the specified group.
+         * @param groupPosition The position of the group that should be selected.
+         */
+        SetSelectedGroup(
+            [in] Int32 groupPosition);
+
+        /**
+         * Sets the selection to the specified child. If the child is in a collapsed
+         * group, the group will only be expanded and child subsequently selected if
+         * shouldExpandGroup is set to true, otherwise the method will return false.
+         *
+         * @param groupPosition The position of the group that contains the child.
+         * @param childPosition The position of the child within the group.
+         * @param shouldExpandGroup Whether the child's group should be expanded if
+         *            it is collapsed.
+         * @return Whether the selection was successfully set on the child.
+         */
+        SetSelectedChild(
+            [in] Int32 groupPosition,
+            [in] Int32 childPosition,
+            [in] Boolean shouldExpandGroup,
+            [out] Boolean* res);
+
+        /**
+         * Whether the given group is currently expanded.
+         *
+         * @param groupPosition The group to check.
+         * @return Whether the group is currently expanded.
+         */
+        IsGroupExpanded(
+            [in] Int32 groupPosition,
+            [out] Boolean* expanded);
+
+        /**
+         * Sets the indicator to be drawn next to a child.
+         *
+         * @param childIndicator The drawable to be used as an indicator. If the
+         *            child is the last child for a group, the state
+         *            {@link android.R.attr#state_last} will be set.
+         */
+        SetChildIndicator(
+            [in] IDrawable* childIndicator);
+
+        /**
+         * Sets the drawing bounds for the child indicator. For either, you can
+         * specify {@link #CHILD_INDICATOR_INHERIT} to use inherit from the general
+         * indicator's bounds.
+         *
+         * @see #setIndicatorBounds(Int32, Int32)
+         * @param left The left position (relative to the left bounds of this View)
+         *            to start drawing the indicator.
+         * @param right The right position (relative to the left bounds of this
+         *            View) to end the drawing of the indicator.
+         */
+        SetChildIndicatorBounds(
+            [in] Int32 left,
+            [in] Int32 right);
+
+        /**
+         * Sets the relative drawing bounds for the child indicator. For either, you can
+         * specify {@link #CHILD_INDICATOR_INHERIT} to use inherit from the general
+         * indicator's bounds.
+         *
+         * @see #setIndicatorBounds(int, int)
+         * @param start The start position (relative to the start bounds of this View)
+         *            to start drawing the indicator.
+         * @param end The end position (relative to the end bounds of this
+         *            View) to end the drawing of the indicator.
+         */
+        SetChildIndicatorBoundsRelative(
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * Sets the indicator to be drawn next to a group.
+         *
+         * @param groupIndicator The drawable to be used as an indicator. If the
+         *            group is empty, the state {@link android.R.attr#state_empty} will be
+         *            set. If the group is expanded, the state
+         *            {@link android.R.attr#state_expanded} will be set.
+         */
+        SetGroupIndicator(
+            [in] IDrawable* groupIndicator);
+
+        /**
+         * Sets the drawing bounds for the indicators (at minimum, the group indicator
+         * is affected by this; the child indicator is affected by this if the
+         * child indicator bounds are set to inherit).
+         *
+         * @see #setChildIndicatorBounds(Int32, Int32)
+         * @param left The left position (relative to the left bounds of this View)
+         *            to start drawing the indicator.
+         * @param right The right position (relative to the left bounds of this
+         *            View) to end the drawing of the indicator.
+         */
+        SetIndicatorBounds(
+            [in] Int32 left,
+            [in] Int32 right);
+
+        /**
+         * Sets the relative drawing bounds for the indicators (at minimum, the group indicator
+         * is affected by this; the child indicator is affected by this if the
+         * child indicator bounds are set to inherit).
+         *
+         * @see #setChildIndicatorBounds(int, int)
+         * @param start The start position (relative to the start bounds of this View)
+         *            to start drawing the indicator.
+         * @param end The end position (relative to the end bounds of this
+         *            View) to end the drawing of the indicator.
+         */
+        SetIndicatorBoundsRelative(
+            [in] Int32 start,
+            [in] Int32 end);
+    }
+
+    interface IExpandableListViewHelper {
+        /**
+         * Gets the type of a packed position. See
+         * {@link #getPackedPositionForChild(Int32, Int32)}.
+         *
+         * @param packedPosition The packed position for which to return the type.
+         * @return The type of the position contained within the packed position,
+         *         either {@link #PACKED_POSITION_TYPE_CHILD}, {@link #PACKED_POSITION_TYPE_GROUP}, or
+         *         {@link #PACKED_POSITION_TYPE_NULL}.
+         */
+        GetPackedPositionType(
+            [in] Int64 packedPosition,
+            [out] Int32* type);
+
+        /**
+         * Gets the group position from a packed position. See
+         * {@link #getPackedPositionForChild(Int32, Int32)}.
+         *
+         * @param packedPosition The packed position from which the group position
+         *            will be returned.
+         * @return The group position portion of the packed position. If this does
+         *         not contain a group, returns -1.
+         */
+        GetPackedPositionGroup(
+            [in] Int64 packedPosition,
+            [out] Int32* position);
+
+        /**
+         * Gets the child position from a packed position that is of
+         * {@link #PACKED_POSITION_TYPE_CHILD} type (use {@link #getPackedPositionType(Int64)}).
+         * To get the group that this child belongs to, use
+         * {@link #getPackedPositionGroup(Int64)}. See
+         * {@link #getPackedPositionForChild(Int32, Int32)}.
+         *
+         * @param packedPosition The packed position from which the child position
+         *            will be returned.
+         * @return The child position portion of the packed position. If this does
+         *         not contain a child, returns -1.
+         */
+        GetPackedPositionChild(
+            [in] Int64 packedPosition,
+            [out] Int32* position);
+
+        /**
+         * Returns the packed position representation of a child's position.
+         * <p>
+         * In general, a packed position should be used in
+         * situations where the position given to/returned from an
+         * {@link ExpandableListAdapter} or {@link ExpandableListView} method can
+         * either be a child or group. The two positions are packed into a single
+         * Int64 which can be unpacked using
+         * {@link #getPackedPositionChild(Int64)},
+         * {@link #getPackedPositionGroup(Int64)}, and
+         * {@link #getPackedPositionType(Int64)}.
+         *
+         * @param groupPosition The child's parent group's position.
+         * @param childPosition The child position within the group.
+         * @return The packed position representation of the child (and parent group).
+         */
+        GetPackedPositionForChild(
+            [in] Int32 groupPosition,
+            [in] Int32 childPosition,
+            [out] Int64* position);
+
+        /**
+         * Returns the packed position representation of a group's position. See
+         * {@link #getPackedPositionForChild(Int32, Int32)}.
+         *
+         * @param groupPosition The child's parent group's position.
+         * @return The packed position representation of the group.
+         */
+        GetPackedPositionForGroup(
+            [in] Int32 groupPosition,
+            [out] Int64* position);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+

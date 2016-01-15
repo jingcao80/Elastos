@@ -1,0 +1,196 @@
+
+module
+{
+    interface Elastos.Droid.Telephony.ISubInfoRecord;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface IISub {
+        /**
+         * Get the SubInfoRecord according to an index
+         * @param subId The unique SubInfoRecord index in database
+         * @return SubInfoRecord, maybe null
+         */
+        GetSubInfoForSubscriber(
+            [in] Int64 subId,
+            [out] ISubInfoRecord** subir);
+
+        /**
+         * Get the SubInfoRecord according to an IccId
+         * @param iccId the IccId of SIM card
+         * @return SubInfoRecord, maybe null
+         */
+        GetSubInfoUsingIccId(
+            [in] String iccId,
+            [out, callee] ArrayOf<ISubInfoRecord*>* list);
+
+        /**
+         * Get the SubInfoRecord according to slotId
+         * @param slotId the slot which the SIM is inserted
+         * @return SubInfoRecord, maybe null
+         */
+        GetSubInfoUsingSlotId(
+            [in] Int32 slotId,
+            [out, callee] ArrayOf<ISubInfoRecord*>* list);
+
+        /**
+         * Get all the SubInfoRecord(s) in subinfo database
+         * @return Array list of all SubInfoRecords in database, include thsoe that were inserted before
+         */
+        GetAllSubInfoList(
+            [out, callee] ArrayOf<ISubInfoRecord*>* list);
+
+        /**
+         * Get the SubInfoRecord(s) of the currently inserted SIM(s)
+         * @return Array list of currently inserted SubInfoRecord(s)
+         */
+        GetActiveSubInfoList(
+            [out, callee] ArrayOf<ISubInfoRecord*>* list);
+
+        /**
+         * Get the SUB count of all SUB(s) in subinfo database
+         * @return all SIM count in database, include what was inserted before
+         */
+        GetAllSubInfoCount(
+            [out] Int32* result);
+
+        /**
+         * Get the count of active SUB(s)
+         * @return active SIM count
+         */
+        GetActiveSubInfoCount(
+            [out] Int32* result);
+
+        /**
+         * Add a new SubInfoRecord to subinfo database if needed
+         * @param iccId the IccId of the SIM card
+         * @param slotId the slot which the SIM is inserted
+         * @return the URL of the newly created row or the updated row
+         */
+        AddSubInfoRecord(
+            [in] String iccId,
+            [in] Int32 slotId,
+            [out] Int32* result);
+
+        /**
+         * Set SIM color by simInfo index
+         * @param color the color of the SIM
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         */
+        SetColor(
+            [in] Int32 color,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Set display name by simInfo index
+         * @param displayName the display name of SIM card
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         */
+        SetDisplayName(
+            [in] String displayName,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Set display name by simInfo index with name source
+         * @param displayName the display name of SIM card
+         * @param subId the unique SubInfoRecord index in database
+         * @param nameSource, 0: DEFAULT_SOURCE, 1: SIM_SOURCE, 2: USER_INPUT
+         * @return the number of records updated
+         */
+        SetDisplayNameUsingSrc(
+            [in] String displayName,
+            [in] Int64 subId,
+            [in] Int64 nameSource,
+            [out] Int32* result);
+
+        /**
+         * Set phone number by subId
+         * @param number the phone number of the SIM
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         */
+        SetDisplayNumber(
+            [in] String number,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Set number display format. 0: none, 1: the first four digits, 2: the last four digits
+         * @param format the display format of phone number
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         */
+        SetDisplayNumberFormat(
+            [in] Int32 format,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Set data roaming by simInfo index
+         * @param roaming 0:Don't allow data when roaming, 1:Allow data when roaming
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         */
+        SetDataRoaming(
+            [in] Int32 roaming,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        GetSlotId(
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        GetSubId(
+            [in] Int32 slotId,
+            [out, callee] ArrayOf<Int64>* array);
+
+        GetDefaultSubId(
+            [out] Int64* subId);
+
+        ClearSubInfo(
+            [out] Int32* result);
+
+        GetPhoneId(
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Get the default data subscription
+         * @return Id of the data subscription
+         */
+        GetDefaultDataSubId(
+            [out] Int64* subId);
+
+        SetDefaultDataSubId(
+            [in] Int64 subId);
+
+        GetDefaultVoiceSubId(
+            [out] Int64* subId);
+
+        SetDefaultVoiceSubId(
+            [in] Int64 subId);
+
+        GetDefaultSmsSubId(
+            [out] Int64* subId);
+
+        SetDefaultSmsSubId(
+            [in] Int64 subId);
+
+        ClearDefaultsForInactiveSubIds();
+
+        GetActiveSubIdList(
+            [out, callee] ArrayOf<Int64>* array);
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

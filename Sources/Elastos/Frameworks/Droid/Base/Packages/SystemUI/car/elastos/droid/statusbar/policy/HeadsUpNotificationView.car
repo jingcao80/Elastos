@@ -1,0 +1,67 @@
+module
+{
+    interface Elastos.Droid.View.IViewGroup;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.INotificationDataEntry;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneStatusBar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IFrameLayout
+     * interface ISwipeHelperCallback
+     * interface IExpandHelperCallback
+     * interface IViewTreeObserverOnComputeInternalInsetsListener
+     */
+    [local]
+    interface IHeadsUpNotificationView {
+        UpdateResources();
+
+        SetBar(
+            [in] IPhoneStatusBar* bar);
+
+        GetHolder(
+            [out] IViewGroup** group);
+
+        ShowNotification(
+            [in] INotificationDataEntry* headsUp);
+
+        IsShowing(
+            [out] String* key);
+
+        /** Discard the Heads Up notification. */
+        Clear();
+
+        /** Respond to dismissal of the Heads Up window. */
+        Dismiss();
+
+        /** Push any current Heads Up notification down into the shade. */
+        ReleaseResources();
+
+        ReleaseAndClose();
+
+        GetEntry(
+            [out] INotificationDataEntry** entry);
+
+        IsClearable(
+            [out] Boolean* result);
+
+        Escalate();
+
+        GetKey(
+            [out] String* key);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

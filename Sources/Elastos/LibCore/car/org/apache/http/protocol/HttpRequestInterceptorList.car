@@ -1,0 +1,98 @@
+
+module
+{
+
+    using interface Elastos.Utility.IList;
+
+    interface Org.Apache.Http.IHttpRequestInterceptor;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+    /**
+     * Provides access to an ordered list of request interceptors.
+     * Lists are expected to be built upfront and used read-only afterwards
+     * for {@link HttpProcessor processing}.
+     *
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     * @version $Revision: 554903 $
+     *
+     * @since 4.0
+     */
+    interface IHttpRequestInterceptorList {
+
+        /**
+         * Appends a request interceptor to this list.
+         *
+         * @param itcp      the request interceptor to add
+         */
+        AddRequestInterceptor(
+            [in] IHttpRequestInterceptor* itcp);
+
+        /**
+         * Inserts a request interceptor at the specified index.
+         *
+         * @param itcp      the request interceptor to add
+         * @param index     the index to insert the interceptor at
+         */
+        AddRequestInterceptor(
+            [in] IHttpRequestInterceptor* itcp,
+            [in] Int32 index);
+
+        /**
+         * Obtains the current size of this list.
+         *
+         * @return  the number of request interceptors in this list
+         */
+        GetRequestInterceptorCount(
+            [out] Int32* count);
+
+        /**
+         * Obtains a request interceptor from this list.
+         *
+         * @param index     the index of the interceptor to obtain,
+         *                  0 for first
+         *
+         * @return  the interceptor at the given index, or
+         *          <code>null</code> if the index is out of range
+         */
+        GetRequestInterceptor(
+            [in] Int32 index,
+            [out] IHttpRequestInterceptor** interceptor);
+
+        /**
+         * Removes all request interceptors from this list.
+         */
+        ClearRequestInterceptors();
+
+        /**
+         * Removes all request interceptor of the specified class
+         *
+         * @param clazz  the class of the instances to be removed.
+         */
+        RemoveRequestInterceptorByClass(
+            [in] IInterface* clazz /*Class clazz*/);
+
+        /**
+         * Sets the request interceptors in this list.
+         * This list will be cleared and re-initialized to contain
+         * all request interceptors from the argument list.
+         * If the argument list includes elements that are not request
+         * interceptors, the behavior is implementation dependent.
+         *
+         * @param itcps     the list of request interceptors
+         */
+        SetInterceptors(
+            [in] IList* itcps);
+
+    }
+
+    } // namespace Protocol
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,6 @@
+
+module
+{
+    merge("runner/IBaseTestRunner.car");
+    merge("runner/ITestSuiteLoader.car");
+}

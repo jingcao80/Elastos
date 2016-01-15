@@ -1,0 +1,398 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Hardware.ICameraSize;
+    interface Elastos.Droid.Hardware.ICameraArea;
+    interface Elastos.Droid.Hardware.IParameters;
+    interface Elastos.Droid.Hardware.ICameraFace;
+    interface Elastos.Droid.Hardware.Camera2.Params.IMeteringRectangle;
+    interface Elastos.Droid.Hardware.Camera2.Params.IFace;
+    interface Elastos.Droid.Hardware.Camera2.Legacy.IParameterUtilsZoomData;
+    interface Elastos.Droid.Hardware.Camera2.Legacy.IParameterUtilsMeteringData;
+    interface Elastos.Droid.Hardware.Camera2.Legacy.IParameterUtilsWeightedRectangle;
+    interface Elastos.Droid.Utility.ISize;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IPoint;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    interface IParameterUtilsZoomData {
+        /** Zoom index used by {@link Camera.Parameters#setZoom} */
+        GetZoomIndex(
+            [out] Int32* index);
+
+        /** Effective crop-region given the zoom index, coordinates relative to active-array */
+        GetPreviewCrop(
+            [out] IRect** rect);
+
+        /** Reported crop-region given the zoom index, coordinates relative to active-array */
+        GetReportedCrop(
+            [out] IRect** rect);
+    }
+
+    interface IParameterUtilsMeteringData {
+        /**
+         * The metering area scaled to the range of [-1000, 1000].
+         * <p>Values outside of this range are clipped to be within the range.</p>
+         */
+        GetMeteringArea(
+            [out] ICameraArea** area);
+
+        /**
+         * Effective preview metering region, coordinates relative to active-array.
+         *
+         * <p>Clipped to fit inside of the (effective) preview crop region.</p>
+         */
+        GetPreviewMetering(
+            [out] IRect** rect);
+
+        /**
+         * Reported metering region, coordinates relative to active-array.
+         *
+         * <p>Clipped to fit inside of the (reported) resulting crop region.</p>
+         */
+        GetReportedMetering(
+            [out] IRect** rect);
+    }
+
+    /**
+     * A weighted rectangle is an arbitrary rectangle (the coordinate system is unknown) with an
+     * arbitrary weight.
+     *
+     * <p>The user of this class must know what the coordinate system ahead of time; it's
+     * then possible to convert to a more concrete type such as a metering rectangle or a face.
+     * </p>
+     *
+     * <p>When converting to a more concrete type, out-of-range values are clipped; this prevents
+     * possible illegal argument exceptions being thrown at runtime.</p>
+     */
+    interface IParameterUtilsWeightedRectangle {
+
+        /**
+         * Convert to a metering rectangle, clipping any of the values to stay within range.
+         *
+         * <p>If values are clipped, a warning is printed to logcat.</p>
+         *
+         * @return a new metering rectangle
+         */
+        ToMetering(
+            [out] IMeteringRectangle** outmr);
+
+        /**
+         * Convert to a face; the rect is considered to be the bounds, and the weight
+         * is considered to be the score.
+         *
+         * <p>If the score is out of range of {@value Face#SCORE_MIN}, {@value Face#SCORE_MAX},
+         * the score is clipped first and a warning is printed to logcat.</p>
+         *
+         * <p>If the id is negative, the id is changed to 0 and a warning is printed to
+         * logcat.</p>
+         *
+         * <p>All other parameters are passed-through as-is.</p>
+         *
+         * @return a new face with the optional features set
+         */
+        ToFace(
+            [in] Int32 id,
+            [in] IPoint* leftEyePosition,
+            [in] IPoint* rightEyePosition,
+            [in] IPoint* mouthPosition,
+            [out] IFace** outface);
+
+        /**
+         * Convert to a face; the rect is considered to be the bounds, and the weight
+         * is considered to be the score.
+         *
+         * <p>If the score is out of range of {@value Face#SCORE_MIN}, {@value Face#SCORE_MAX},
+         * the score is clipped first and a warning is printed to logcat.</p>
+         *
+         * <p>All other parameters are passed-through as-is.</p>
+         *
+         * @return a new face without the optional features
+         */
+        ToFace(
+            [out] IFace** outface);
+
+        GetRect(
+            [out] IRect** rect);
+
+        GetWeight(
+            [out] Int32* weight);
+
+    }
+
+    /**
+     * Various utilities for dealing with camera API1 parameters.
+     */
+    interface IParameterUtils {
+        /** Upper/left minimal point of a normalized rectangle */
+        const Int32 NORMALIZED_RECTANGLE_MIN = -1000;
+        /** Lower/right maximal point of a normalized rectangle */
+        const Int32 NORMALIZED_RECTANGLE_MAX = 1000;
+
+        GetNORMALIZED_RECTANGLE_DEFAULT(
+            [out] IRect** rect);
+
+        GetCAMERA_AREA_DEFAULT(
+            [out] ICameraArea** area);
+
+        GetRECTANGLE_EMPTY(
+            [out] IRect** rect);
+
+        /**
+         * Convert a camera API1 size into a util size
+         */
+        ConvertSize(
+            [in] ICameraSize* size,
+            [out] ISize** outsize);
+
+        /**
+         * Convert a camera API1 list of sizes into a util list of sizes
+         */
+        ConvertSizeList(
+            [in] IList* sizeList,
+            [out] IList** outlist);
+
+        /**
+         * Convert a camera API1 list of sizes into an array of sizes
+         */
+        ConvertSizeListToArray(
+            [in] IList* sizeList,
+            [out, callee] ArrayOf<ISize*>* outarr);
+
+        /**
+         * Check if the camera API1 list of sizes contains a size with the given dimens.
+         */
+        ContainsSize(
+            [in] IList* sizeList,
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] Boolean* value);
+
+        /**
+         * Returns the largest supported picture size, as compared by its area.
+         */
+        GetLargestSupportedJpegSizeByArea(
+            [in] IParameters* params,
+            [out] ISize** outsize);
+
+        /**
+         * Convert a camera area into a human-readable string.
+         */
+        StringFromArea(
+            [in] ICameraArea* area,
+            [out] String* str);
+
+        /**
+         * Convert a camera area list into a human-readable string
+         * @param areaList a list of areas (null is ok)
+         */
+        StringFromAreaList(
+            [in] IList* areaList,
+            [out] String* str);
+
+        /**
+         * Calculate the closest zoom index for the user-requested crop region by rounding
+         * up to the closest (largest or equal) possible zoom crop.
+         *
+         * <p>If the requested crop region exceeds the size of the active array, it is
+         * shrunk to fit inside of the active array first.</p>
+         *
+         * <p>Since all api1 camera devices only support a discrete set of zooms, we have
+         * to translate the per-pixel-granularity requested crop region into a per-zoom-index
+         * granularity.</p>
+         *
+         * <p>Furthermore, since the zoom index and zoom levels also depends on the field-of-view
+         * of the preview, the current preview {@code streamSize} is also used.</p>
+         *
+         * <p>The calculated crop regions are then written to in-place to {@code reportedCropRegion}
+         * and {@code previewCropRegion}, in coordinates relative to the active array.</p>
+         *
+         * @param params non-{@code null} camera api1 parameters
+         * @param activeArray active array dimensions, in sensor space
+         * @param streamSize stream size dimensions, in pixels
+         * @param cropRegion user-specified crop region, in active array coordinates
+         * @param reportedCropRegion (out parameter) what the result for {@code cropRegion} looks like
+         * @param previewCropRegion (out parameter) what the visual preview crop is
+         * @return
+         *          the zoom index inclusively between 0 and {@code Parameters#getMaxZoom},
+         *          where 0 means the camera is not zoomed
+         *
+         * @throws NullPointerException if any of the args were {@code null}
+         */
+        GetClosestAvailableZoomCrop(
+            [in] IParameters* params,
+            [in] IRect* activeArray,
+            [in] ISize* streamSize,
+            [in] IRect* cropRegion,
+            [in] IRect* reportedCropRegion,
+            [in] IRect* previewCropRegion,
+            [out] Int32* value);
+
+        /**
+         * Get the available 'crop' (zoom) rectangles for this camera that will be reported
+         * via a {@code CaptureResult} when a zoom is requested.
+         *
+         * <p>These crops ignores the underlying preview buffer size, and will always be reported
+         * the same values regardless of what configuration of outputs is used.</p>
+         *
+         * <p>When zoom is supported, this will return a list of {@code 1 + #getMaxZoom} size,
+         * where each crop rectangle corresponds to a zoom ratio (and is centered at the middle).</p>
+         *
+         * <p>Each crop rectangle is changed to have the same aspect ratio as {@code streamSize},
+         * by shrinking the rectangle if necessary.</p>
+         *
+         * <p>To get the reported crop region when applying a zoom to the sensor, use {@code streamSize}
+         * = {@code activeArray size}.</p>
+         *
+         * @param params non-{@code null} camera api1 parameters
+         * @param activeArray active array dimensions, in sensor space
+         * @param streamSize stream size dimensions, in pixels
+         *
+         * @return a list of available zoom rectangles, sorted from least zoomed to most zoomed
+         */
+        GetAvailableZoomCropRectangles(
+            [in] IParameters* params,
+            [in] IRect* activeArray,
+            [out] IList** outlist);
+
+        /**
+         * Get the available 'crop' (zoom) rectangles for this camera.
+         *
+         * <p>This is the effective (real) crop that is applied by the camera api1 device
+         * when projecting the zoom onto the intermediate preview buffer. Use this when
+         * deciding which zoom ratio to apply.</p>
+         *
+         * <p>When zoom is supported, this will return a list of {@code 1 + #getMaxZoom} size,
+         * where each crop rectangle corresponds to a zoom ratio (and is centered at the middle).</p>
+         *
+         * <p>Each crop rectangle is changed to have the same aspect ratio as {@code streamSize},
+         * by shrinking the rectangle if necessary.</p>
+         *
+         * <p>To get the reported crop region when applying a zoom to the sensor, use {@code streamSize}
+         * = {@code activeArray size}.</p>
+         *
+         * @param params non-{@code null} camera api1 parameters
+         * @param activeArray active array dimensions, in sensor space
+         * @param streamSize stream size dimensions, in pixels
+         *
+         * @return a list of available zoom rectangles, sorted from least zoomed to most zoomed
+         */
+        GetAvailablePreviewZoomCropRectangles(
+            [in] IParameters* params,
+            [in] IRect* activeArray,
+            [in] ISize* previewSize,
+            [out] IList** outlist);
+
+        /**
+         * Get the largest possible zoom ratio (normalized to {@code 1.0f} and higher)
+         * that the camera can support.
+         *
+         * <p>If the camera does not support zoom, it always returns {@code 1.0f}.</p>
+         *
+         * @param params non-{@code null} camera api1 parameters
+         * @return normalized max zoom ratio, at least {@code 1.0f}
+         */
+        GetMaxZoomRatio(
+            [in] IParameters* params,
+            [out] Float* value);
+
+        /**
+         * Convert the user-specified crop region into zoom data; which can be used
+         * to set the parameters to a specific zoom index, or to report back to the user what the
+         * actual zoom was, or for other calculations requiring the current preview crop region.
+         *
+         * <p>None of the parameters are mutated.</p>
+         *
+         * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+         * @param cropRegion the user-specified crop region
+         * @param previewSize the current preview size (in pixels)
+         * @param params the current camera parameters (not mutated)
+         *
+         * @return the zoom index, and the effective/reported crop regions (relative to active array)
+         */
+        ConvertScalerCropRegion(
+            [in] IRect* activeArraySize,
+            [in] IRect* cropRegion,
+            [in] ISize* previewSize,
+            [in] IParameters* params,
+            [out] IParameterUtilsZoomData** outzd);
+
+        /**
+         * Calculate the actual/effective/reported normalized rectangle data from a metering
+         * rectangle.
+         *
+         * <p>If any of the rectangles are out-of-range of their intended bounding box,
+         * the {@link #RECTANGLE_EMPTY empty rectangle} is substituted instead
+         * (with a weight of {@code 0}).</p>
+         *
+         * <p>The metering rectangle is bound by the crop region (effective/reported respectively).
+         * The metering {@link Camera.Area area} is bound by {@code [-1000, 1000]}.</p>
+         *
+         * <p>No parameters are mutated; returns the new metering data.</p>
+         *
+         * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+         * @param meteringRect the user-specified metering rectangle
+         * @param zoomData the calculated zoom data corresponding to this request
+         *
+         * @return the metering area, the reported/effective metering rectangles
+         */
+        ConvertMeteringRectangleToLegacy(
+            [in] IRect* activeArray,
+            [in] IMeteringRectangle* meteringRect,
+            [in] IParameterUtilsZoomData* zoomData,
+            [out] IParameterUtilsMeteringData** outmd);
+
+        /**
+         * Convert the normalized camera area from [-1000, 1000] coordinate space
+         * into the active array-based coordinate space.
+         *
+         * <p>Values out of range are clipped to be within the resulting (reported) crop
+         * region. It is possible to have values larger than the preview crop.</p>
+         *
+         * <p>Weights out of range of [0, 1000] are clipped to be within the range.</p>
+         *
+         * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+         * @param zoomData the calculated zoom data corresponding to this request
+         * @param area the normalized camera area
+         *
+         * @return the weighed rectangle in active array coordinate space, with the weight
+         */
+        ConvertCameraAreaToActiveArrayRectangle(
+            [in] IRect* activeArray,
+            [in] IParameterUtilsZoomData* zoomData,
+            [in] ICameraArea* area,
+            [out] IParameterUtilsWeightedRectangle** outwr);
+
+        /**
+         * Convert an api1 face into an active-array based api2 face.
+         *
+         * <p>Out-of-ranges scores and ids will be clipped to be within range (with a warning).</p>
+         *
+         * @param face a non-{@code null} api1 face
+         * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+         * @param zoomData the calculated zoom data corresponding to this request
+         *
+         * @return a non-{@code null} api2 face
+         *
+         * @throws NullPointerException if the {@code face} was {@code null}
+         */
+        ConvertFaceFromLegacy(
+            [in] ICameraFace* face,
+            [in] IRect* activeArray,
+            [in] IParameterUtilsZoomData* zoomData,
+            [out] IFace** outface);
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

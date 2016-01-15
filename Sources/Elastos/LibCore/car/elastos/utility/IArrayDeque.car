@@ -1,0 +1,132 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * Resizable-array implementation of the {@link Deque} interface.  Array
+     * deques have no capacity restrictions; they grow as necessary to support
+     * usage.  They are not thread-safe; in the absence of external
+     * synchronization, they do not support concurrent access by multiple threads.
+     * Null elements are prohibited.  This class is likely to be faster than
+     * {@link Stack} when used as a stack, and faster than {@link LinkedList}
+     * when used as a queue.
+     *
+     * <p>Most <tt>ArrayDeque</tt> operations run in amortized constant time.
+     * Exceptions include {@link #remove(Object) remove}, {@link
+     * #removeFirstOccurrence removeFirstOccurrence}, {@link #removeLastOccurrence
+     * removeLastOccurrence}, {@link #contains contains}, {@link #iterator
+     * iterator.remove()}, and the bulk operations, all of which run in linear
+     * time.
+     *
+     * <p>The iterators returned by this class's <tt>iterator</tt> method are
+     * <i>fail-fast</i>: If the deque is modified at any time after the iterator
+     * is created, in any way except through the iterator's own <tt>remove</tt>
+     * method, the iterator will generally throw a {@link
+     * ConcurrentModificationException}.  Thus, in the face of concurrent
+     * modification, the iterator fails quickly and cleanly, rather than risking
+     * arbitrary, non-deterministic behavior at an undetermined time in the
+     * future.
+     *
+     * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
+     * as it is, generally speaking, impossible to make any hard guarantees in the
+     * presence of unsynchronized concurrent modification.  Fail-fast iterators
+     * throw <tt>ConcurrentModificationException</tt> on a best-effort basis.
+     * Therefore, it would be wrong to write a program that depended on this
+     * exception for its correctness: <i>the fail-fast behavior of iterators
+     * should be used only to detect bugs.</i>
+     *
+     * <p>This class and its iterator implement all of the
+     * <em>optional</em> methods of the {@link Collection} and {@link
+     * Iterator} interfaces.
+     *
+     * @author  Josh Bloch and Doug Lea
+     * @since   1.6
+     * @param <E> the type of elements held in this collection
+     */
+
+    /**
+     * @Involve
+     * interface IIterable;
+     * interface ICollection;
+     */
+    [deprecated]
+    interface IArrayDeque {
+
+        /**
+         * interfaces from ICollection
+         *
+         */
+        GetIterator(
+            [out] IIterator** it);
+
+        Add(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Add(
+            [in] IInterface* object);
+
+        AddAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] ICollection* collection);
+
+        Clear();
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        ContainsAll(
+            [in] ICollection* collection,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        Remove(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Remove(
+            [in] IInterface* object);
+
+        RemoveAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RemoveAll(
+            [in] ICollection* collection);
+
+        RetainAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RetainAll(
+            [in] ICollection* collection);
+
+        GetSize(
+            [out] Int32* size);
+
+        ToArray(
+            [out, callee] ArrayOf<IInterface*>* array);
+
+        ToArray(
+            [in] ArrayOf<IInterface*>* inArray,
+            [out, callee] ArrayOf<IInterface*>* outArray);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

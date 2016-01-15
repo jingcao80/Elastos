@@ -1,0 +1,26 @@
+
+TARGET_NAME= textservice
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+INCLUDES += $(PREBUILD_INC)/skia/utils
+INCLUDES += $(PREBUILD_INC)/skia/core
+endif
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += CSentenceSuggestionsInfo.cpp
+SOURCES += CSpellCheckerInfo.cpp
+SOURCES += CSpellCheckerSession.cpp
+SOURCES += CSpellCheckerSubtype.cpp
+SOURCES += CSuggestionsInfo.cpp
+SOURCES += CTextInfo.cpp
+SOURCES += CTextServicesManager.cpp
+SOURCES += SpellCheckerSession.cpp
+SOURCES += CSpellCheckerSessionListenerImpl.cpp
+SOURCES += CInternalListener.cpp

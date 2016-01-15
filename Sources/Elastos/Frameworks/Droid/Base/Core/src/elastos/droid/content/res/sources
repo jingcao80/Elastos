@@ -1,0 +1,29 @@
+TARGET_NAME= res
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+C_DEFINES += -DDROID_CORE
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = CAssetFileDescriptor.cpp
+SOURCES += CAssetFileDescriptorAutoCloseInputStream.cpp
+SOURCES += CAssetFileDescriptorAutoCloseOutputStream.cpp
+SOURCES += CAssetManager.cpp
+SOURCES += CAssetManagerHelper.cpp
+SOURCES += CColorStateList.cpp
+SOURCES += CColorStateListHelper.cpp
+SOURCES += CCompatibilityInfo.cpp
+SOURCES += CCompatibilityInfoHelper.cpp
+SOURCES += CConfiguration.cpp
+SOURCES += CConfigurationHelper.cpp
+SOURCES += CObbInfo.cpp
+SOURCES += CObbScanner.cpp
+SOURCES += CResources.cpp
+SOURCES += CResourcesHelper.cpp
+SOURCES += ResourcesKey.cpp
+SOURCES += StringBlock.cpp
+SOURCES += CTypedArray.cpp
+SOURCES += XmlBlock.cpp

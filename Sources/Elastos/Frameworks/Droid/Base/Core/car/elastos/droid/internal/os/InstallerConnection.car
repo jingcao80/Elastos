@@ -1,0 +1,58 @@
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    [local]
+    interface IInstallerConnection {
+        Transact(
+            [in] String cmd,
+            [out] String* result);
+
+        Execute(
+            [in] String cmd,
+            [out] Int32* result);
+
+        Dexopt(
+            [in] String apkPath,
+            [in] Int32 uid,
+            [in] Boolean isPublic,
+            [in] String instructionSet,
+            [out] Int32* result);
+
+        Dexopt(
+            [in] String apkPath,
+            [in] Int32 uid,
+            [in] Boolean isPublic,
+            [in] String pkgName,
+            [in] String instructionSet,
+            [in] Boolean vmSafeMode,
+            [out] Int32* result);
+
+        Patchoat(
+            [in] String apkPath,
+            [in] Int32 uid,
+            [in] Boolean isPublic,
+            [in] String instructionSet,
+            [out] Int32* result);
+
+        Patchoat(
+            [in] String apkPath,
+            [in] Int32 uid,
+            [in] Boolean isPublic,
+            [in] String pkgName,
+            [in] String instructionSet,
+            [out] Int32* result);
+
+        Disconnect();
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,70 @@
+module
+{
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.Media.Tv.ITvStreamConfig;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * TvInputService representing a physical port should connect to HAL through this interface.
+     * Framework will take care of communication among system services including TvInputManagerService,
+     * HdmiControlService, AudioService, etc.
+     *
+     * @hide
+     */
+    interface IITvInputHardware {
+        /**
+         * Make the input render on the surface according to the config. in case of HDMI, this will
+         * trigger CEC commands for adjusting active HDMI source. Returns true on success.
+         */
+        SetSurface(
+            [in] ISurface * surface,
+            [in] ITvStreamConfig * config,
+            [out] Boolean * result);
+
+        /**
+         * Set volume for this stream via AudioGain.
+         */
+        SetStreamVolume(
+            [in] Float volume);
+
+        /**
+         * Dispatch key event to HDMI service. The events would be automatically converted to
+         * HDMI CEC commands. If the hardware is not representing an HDMI port, this method will fail.
+         */
+        DispatchKeyEventToHdmi(
+            [in] IKeyEvent * event,
+            [out] Boolean * result);
+
+        /**
+         * Override default audio sink from audio policy. When override is on, it is
+         * TvInputService's responsibility to adjust to audio configuration change
+         * (for example, when the audio sink becomes unavailable or more desirable
+         * audio sink is detected).
+         *
+         * @param audioType one of AudioManager.DEVICE_* values. When it's * DEVICE_NONE, override
+         *        becomes off.
+         * @param audioAddress audio address of the overriding device.
+         * @param samplingRate desired sampling rate. Use default when it's 0.
+         * @param channelMask desired channel mask. Use default when it's
+         *        AudioFormat.CHANNEL_OUT_DEFAULT.
+         * @param format desired format. Use default when it's AudioFormat.ENCODING_DEFAULT.
+         */
+        OverrideAudioSink(
+            [in] Int32 audioType,
+            [in] String audioAddress,
+            [in] Int32 samplingRate,
+            [in] Int32 channelMask,
+            [in] Int32 format);
+
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

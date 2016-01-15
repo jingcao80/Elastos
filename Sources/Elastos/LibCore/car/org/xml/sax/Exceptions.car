@@ -1,0 +1,16 @@
+
+module
+{
+//    const FAMILY_XML = 0x41    // Framework Error codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Org.Xml.Sax XML error codes (Family: 0x41)
+    const E_SAX_EMPTYSTACK_EXCEPTION =                 0xC1010000;
+    const E_SAX_NOT_RECOGNIZED_EXCEPTION =             0xC1010001;
+    const E_SAX_EXCEPTION =                            0xC1010002;
+    const E_SAX_PARSE_EXCEPTION =                      0xC1010003;
+    const E_SAX_NOT_SUPPORTED_EXCEPTION =              0xC1010004;
+}

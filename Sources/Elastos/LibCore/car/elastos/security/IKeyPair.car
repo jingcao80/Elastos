@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.Security.IPrivateKey;
+    interface Elastos.Security.IPublicKey;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IKeyPair {
+        /**
+         * Returns the private key.
+         *
+         * @return the private key.
+         */
+        GetPrivate(
+            [out] IPrivateKey** prvKey);
+
+        /**
+         * Returns the public key.
+         *
+         * @return the public key.
+         */
+        GetPublic(
+            [out] IPublicKey** pubKey);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

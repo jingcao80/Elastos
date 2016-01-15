@@ -1,0 +1,37 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Params {
+
+    interface IHttpConnectionParamBean {
+
+        SetSoTimeout(
+            [in] Int32 soTimeout);
+
+        SetTcpNoDelay(
+            [in] Boolean tcpNoDelay);
+
+        SetSocketBufferSize(
+            [in] Int32 socketBufferSize);
+
+        SetLinger(
+            [in] Int32 linger);
+
+        SetConnectionTimeout(
+            [in] Int32 connectionTimeout);
+
+        SetStaleCheckingEnabled(
+            [in] Boolean staleCheckingEnabled);
+
+    }
+
+    } // namespace Params
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

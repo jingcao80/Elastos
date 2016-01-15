@@ -1,0 +1,15 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= userfunc
+TARGET_TYPE= lib
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES += $(MAKEDIR)/../inc;
+INCLUDES += $(MAKEDIR)/../../inc;
+INCLUDES += $(INCLUDESTEMP);
+
+SOURCES = prefix.cpp
+SOURCES += retype.cpp
+SOURCES += userfunc.cpp

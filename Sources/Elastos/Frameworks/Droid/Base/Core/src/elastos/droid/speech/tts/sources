@@ -1,0 +1,31 @@
+
+TARGET_NAME = tts
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = tts.cpp
+SOURCES += AbstractEventLogger.cpp
+SOURCES += BlockingAudioTrack.cpp
+SOURCES += CTtsEnginesHelper.cpp
+SOURCES += PlaybackQueueItem.cpp
+SOURCES += SynthesisPlaybackQueueItem.cpp
+SOURCES += TtsEngines.cpp
+SOURCES += AbstractSynthesisCallback.cpp
+SOURCES += EventLoggerV1.cpp
+SOURCES += PlaybackSynthesisCallback.cpp
+SOURCES += SynthesisRequest.cpp
+SOURCES += UtteranceProgressListener.cpp
+SOURCES += AudioPlaybackHandler.cpp
+SOURCES += EventLoggerV1.cpp
+SOURCES += SilencePlaybackQueueItem.cpp
+SOURCES += TextToSpeech.cpp
+SOURCES += AudioPlaybackQueueItem.cpp
+SOURCES += FileSynthesisCallback.cpp
+SOURCES += TextToSpeechService.cpp
+

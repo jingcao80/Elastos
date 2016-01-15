@@ -1,0 +1,37 @@
+TARGET_NAME= app
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += AlertActivity.cpp
+SOURCES += CAlertController.cpp
+SOURCES += CAlertControllerAlertParams.cpp
+SOURCES += ChooserActivity.cpp
+SOURCES += CLocalePickerHelper.cpp
+SOURCES += CMediaRouteDialogPresenter.cpp
+SOURCES += CProcessStatsHelper.cpp
+SOURCES += DisableCarModeActivity.cpp
+SOURCES += ExternalMediaFormatActivity.cpp
+SOURCES += HeavyWeightSwitcherActivity.cpp
+SOURCES += IntentForwarderActivity.cpp
+SOURCES += LocalePicker.cpp
+SOURCES += MediaRouteChooserDialog.cpp
+SOURCES += MediaRouteChooserDialogFragment.cpp
+SOURCES += MediaRouteControllerDialog.cpp
+SOURCES += MediaRouteControllerDialogFragment.cpp
+SOURCES += MediaRouteDialogPresenter.cpp
+SOURCES += NavItemSelectedListener.cpp
+SOURCES += NetInitiatedActivity.cpp
+SOURCES += PlatLogoActivity.cpp
+SOURCES += ProcessMap.cpp
+SOURCES += ProcessStats.cpp
+SOURCES += ResolverActivity.cpp
+SOURCES += RestrictionsPinActivity.cpp
+SOURCES += ToolbarActionBar.cpp
+SOURCES += WindowDecorActionBar.cpp
+SOURCES += App.cpp

@@ -1,0 +1,47 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Database.ICursor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IFilter;
+
+    [local]
+    interface ICursorFilterClient {
+        ConvertToString(
+            [in] ICursor* cursor,
+            [out] ICharSequence** charSequence);
+
+        RunQueryOnBackgroundThread(
+            [in] ICharSequence* constraint,
+            [out] ICursor** cursor);
+
+        GetCursor(
+            [out] ICursor** cursor);
+
+        ChangeCursor(
+            [in] ICursor* cursor);
+    }
+
+    /**
+     * <p>The CursorFilter delegates most of the work to the CursorAdapter.
+     * Subclasses should override these delegate methods to run the queries
+     * and convert the results into String that can be used by auto-completion
+     * widgets.</p>
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IFilter
+     */
+    interface ICursorFilter {
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

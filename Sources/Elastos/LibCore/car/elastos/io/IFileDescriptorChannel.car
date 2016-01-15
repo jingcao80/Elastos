@@ -1,0 +1,16 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace IO {
+
+    interface IFileDescriptorChannel
+    {
+        GetFD(
+            [out] IFileDescriptor** desc);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

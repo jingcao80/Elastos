@@ -1,0 +1,27 @@
+module {
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace Launcher {
+
+    interface IGeckoNetworkManager
+    {
+        Init();
+
+        Start();
+
+        Stop();
+
+        GetCurrentInformation(
+            [out,callee] ArrayOf<Double>* info);
+
+        EnableNotifications();
+
+        DisableNotifications();
+    }
+
+    } // namespace Launcher
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}

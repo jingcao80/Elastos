@@ -1,0 +1,18 @@
+TARGET_NAME= org.kxml2.io
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/org;
+INCLUDES += $(MAKEDIR)/../../../../inc/org/kxml2;
+INCLUDES += $(MAKEDIR)/../../../../inc/org/kxml2/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+
+SOURCES += CKXmlParser.cpp
+SOURCES += CKXmlSerializer.cpp

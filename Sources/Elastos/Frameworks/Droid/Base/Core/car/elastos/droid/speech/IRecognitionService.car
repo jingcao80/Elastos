@@ -1,0 +1,58 @@
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Speech.IIRecognitionListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+
+    /**
+    * A Service interface to speech recognition. Call startListening when
+    * you want to begin capturing audio; RecognitionService will automatically
+    * determine when the user has finished speaking, stream the audio to the
+    * recognition servers, and notify you when results are ready. In most of the cases,
+    * this class should not be used directly, instead use {@link SpeechRecognizer} for
+    * accessing recognition service.
+    * {@hide}
+    */
+    [oneway]
+    interface IIRecognitionService {
+        /**
+         * Starts listening for speech. Please note that the recognition service supports
+         * one listener only, therefore, if this function is called from two different threads,
+         * only the latest one will get the notifications
+         *
+         * @param recognizerIntent the intent from which the invocation occurred. Additionally,
+         *        this intent can contain extra parameters to manipulate the behavior of the recognition
+         *        client. For more information see {@link RecognizerIntent}.
+         * @param listener to receive callbacks, note that this must be non-null
+         */
+        StartListening(
+            [in] IIntent* recognizerIntent,
+            [in] IIRecognitionListener* listener);
+
+        /**
+         * Stops listening for speech. Speech captured so far will be recognized as
+         * if the user had stopped speaking at this point. The function has no effect unless it
+         * is called during the speech capturing.
+         *
+         * @param listener to receive callbacks, note that this must be non-null
+         */
+        StopListening(
+            [in] IIRecognitionListener* listener);
+
+        /**
+         * Cancels the speech recognition.
+         *
+         * @param listener to receive callbacks, note that this must be non-null
+         */
+        Cancel(
+            [in] IIRecognitionListener* listener);
+    }
+
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Security {
+    namespace Auth {
+    namespace Callback {
+
+    interface ICallbackHandler{
+        /**
+         * Handles the actual {@link Callback}. A {@code CallbackHandler} needs to
+         * implement this method. In the method, it is free to select which {@code
+         * Callback}s it actually wants to handle and in which way. For example, a
+         * console-based {@code CallbackHandler} might choose to sequentially ask
+         * the user for login and password, if it implements these {@code Callback}
+         * s, whereas a GUI-based one might open a single dialog window for both
+         * values. If a {@code CallbackHandler} is not able to handle a specific
+         * {@code Callback}, it needs to throw an
+         * {@link UnsupportedCallbackException}.
+         *
+         * @param callbacks
+         *            the array of {@code Callback}s that need handling
+         * @throws IOException
+         *             if an I/O related error occurs
+         * @throws UnsupportedCallbackException
+         *             if the {@code CallbackHandler} is not able to handle a
+         *             specific {@code Callback}
+         */
+        Handle(
+            [out, callee] ArrayOf<ICallback*>* cbs);
+    }
+
+    } // namespace Callback
+    } // namespace Auth
+    } // namespace Security
+    } // namespace Elastosx
+}

@@ -1,0 +1,34 @@
+
+module
+{
+    interface Elastos.Security.IProtectionDomain;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * Legacy security code; do not use.
+     */
+    [deprecated]
+    interface IDomainCombiner {
+        /**
+         * Returns a combination of the two provided {@code ProtectionDomain}
+         * arrays. Implementers can simply merge the two arrays into one, remove
+         * duplicates and perform other optimizations.
+         *
+         * @param current
+         *            the protection domains of the current execution thread
+         * @param assigned
+         *            the protection domains of the parent thread, may be {@code null}.
+         * @return a single {@code ProtectionDomain} array computed from the two
+         *         provided arrays.
+         */
+        Combine(
+            [in] ArrayOf<IProtectionDomain*>* current,
+            [in] ArrayOf<IProtectionDomain*>* assigned,
+            [out, callee] ArrayOf<IProtectionDomain*>* result);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

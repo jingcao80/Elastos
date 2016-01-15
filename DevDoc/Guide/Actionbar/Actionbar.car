@@ -1,0 +1,25 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace Actionbar {
+
+    class CActionBarActivity {
+        interface IActivity;
+    }
+
+    class CSecondBarActivity {
+        interface IActivity;
+    }
+
+    }//end namespace Actionbar
+    }//end namespace Elastos
+    }//end namespace Droid
+    }//end namespace DevSamples
+}
+

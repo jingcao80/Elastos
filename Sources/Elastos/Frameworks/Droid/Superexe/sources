@@ -1,0 +1,19 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+TARGET_NAME= Superexe
+TARGET_TYPE= ecx
+
+IMPORTS = Elastos.Droid.Server.eco
+
+ifneq "$(TEST_TYPE)" ""
+C_DEFINES += -DFOR_TEST
+endif
+
+SOURCES = main.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += -lm -llog -lmedia

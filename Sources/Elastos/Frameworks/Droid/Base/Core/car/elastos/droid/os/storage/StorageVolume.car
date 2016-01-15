@@ -1,0 +1,153 @@
+
+module
+{
+    using interface Elastos.IO.IFile;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+    namespace Storage {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IStorageVolume {
+        // StorageVolume extra for ACTION_MEDIA_REMOVED, ACTION_MEDIA_UNMOUNTED, ACTION_MEDIA_CHECKING,
+        // ACTION_MEDIA_NOFS, ACTION_MEDIA_MOUNTED, ACTION_MEDIA_SHARED, ACTION_MEDIA_UNSHARED,
+        // ACTION_MEDIA_BAD_REMOVAL, ACTION_MEDIA_UNMOUNTABLE and ACTION_MEDIA_EJECT broadcasts.
+        const String EXTRA_STORAGE_VOLUME = "storage_volume";
+
+        /**
+         * Returns the mount path for the volume.
+         *
+         * @return the mount path
+         */
+        GetPath(
+            [out] String* path);
+
+        GetPathFile(
+            [out] IFile** pathFile);
+
+        /**
+         * Returns a user visible description of the volume.
+         *
+         * @return the volume description
+         */
+        GetDescription(
+            [in] IContext* ctx,
+            [out] String* desc);
+
+        GetDescriptionId(
+            [out] Int32 * id);
+
+        IsPrimary(
+            [out] Boolean* isPrimary);
+
+        /**
+         * Returns true if the volume is removable.
+         *
+         * @return is removable
+         */
+        IsRemovable(
+            [out] Boolean* isRemovable);
+
+        /**
+         * Returns true if the volume is emulated.
+         *
+         * @return is removable
+         */
+        IsEmulated(
+            [out] Boolean* isEmulated);
+
+        /**
+         * Returns the MTP storage ID for the volume.
+         * this is also used for the storage_id column in the media provider.
+         *
+         * @return MTP storage ID
+         */
+        GetStorageId(
+            [out] Int32* id);
+
+        /**
+         * Do not call this unless you are MountService
+         */
+        SetStorageId(
+            [in] Int32 index);
+
+        /**
+         * Number of megabytes of space to leave unallocated by MTP.
+         * MTP will subtract this value from the free space it reports back
+         * to the host via GetStorageInfo, and will not allow new files to
+         * be added via MTP if there is less than this amount left free in the storage.
+         * If MTP has dedicated storage this value should be zero, but if MTP is
+         * sharing storage with the rest of the system, set this to a positive value
+         * to ensure that MTP activity does not result in the storage being
+         * too close to full.
+         *
+         * @return MTP reserve space
+         */
+        GetMtpReserveSpace(
+            [out] Int32* space);
+
+        /**
+         * Returns true if this volume can be shared via USB mass storage.
+         *
+         * @return whether mass storage is allowed
+         */
+        AllowMassStorage(
+            [out] Boolean* isAllowed);
+
+        /**
+         * Returns maximum file size for the volume, or zero if it is unbounded.
+         *
+         * @return maximum file size
+         */
+        GetMaxFileSize(
+            [out] Int64* size);
+
+        GetOwner(
+            [out] IUserHandle** owner);
+
+        SetUuid(
+            [in] String uuid);
+
+        GetUuid(
+            [out] String* uuid);
+
+        /**
+         * Parse and return volume UUID as FAT volume ID, or return -1 if unable to
+         * parse or UUID is unknown.
+         */
+        GetFatVolumeId(
+            [out] String* uuid);
+
+        SetUserLabel(
+            [in] String userLabel);
+
+        GetUserLabel(
+            [out] String* userLabel);
+
+        SetState(
+            [in] String state);
+
+        GetState(
+            [out] String* state);
+    }
+
+    interface IStorageVolumeHelper {
+        FromTemplate(
+            [in] IStorageVolume* templateObj,
+            [in] IFile* path,
+            [in] IUserHandle* userHandle,
+            [out] IStorageVolume** owner);
+    }
+
+    }//namespace Storage
+    }//namespace Os
+    }//namespace Droid
+    }//namespace Elastos
+}
+

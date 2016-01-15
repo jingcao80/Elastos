@@ -1,0 +1,26 @@
+
+module
+{
+    interface Elastos.Droid.Text.Style.ISpellCheckSpan;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface ISpellChecker {
+        CloseSession();
+
+        OnSpellCheckSpanRemoved(
+            [in] ISpellCheckSpan* spellCheckSpan);
+
+        OnSelectionChanged();
+
+        SpellCheck(
+            [in] Int32 start,
+            [in] Int32 end);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

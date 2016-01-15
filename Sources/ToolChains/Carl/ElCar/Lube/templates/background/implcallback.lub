@@ -1,0 +1,608 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+$WITH all interfaces DO
+$   IF attrib is "callback"
+$       WITH all parents_and_me DO
+$           WITH all methods DO
+
+${type} _${class.name}::CancelPending${name}()
+{
+    return _CancelPendingCallback(${class.name}_${name});
+}
+
+${type} _${class.name}::${name}($^
+$           WITH all parameters DO
+${type} ${prefixingname(parameter)}$^
+$     IF parameter is not last
+, $^
+$     END IF
+$           END DO ;; all parameters
+)
+{
+    return ${name}WithPriority(CallbackPriority_Normal$^
+$           WITH all parameters DO
+, $^
+${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+}
+
+${type} _${class.name}::${name}WithPriority(Int32 cFlags$^
+$           WITH all parameters DO
+, ${type} ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+)
+{
+    ECode ec, _lastec_ = NOERROR;
+$  IF interface.attrib is "filter"
+    Boolean _bFirst_ = !_Impl_CheckHelperInfoFlag(HELPER_CALLING_CALLBACK_FILTER);
+
+    if (_bFirst_) {
+        _Impl_SetHelperInfoFlag(HELPER_CALLING_CALLBACK_FILTER, TRUE);
+        ec = ${name}Filter(cFlags$^
+$           WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+        _Impl_SetHelperInfoFlag(HELPER_CALLING_CALLBACK_FILTER, FALSE);
+        return ec;
+    }
+$  END IF;; filter
+
+    ${interface.name}Callback *_pObj_;
+    DLinkNode * _pContext_;
+
+    SelfLock();
+
+    _pContext_ = m_curr${interface.name}.mCurrent;
+
+$  IF interface.attrib is "delegate"
+    Boolean bHasNoRegistered = TRUE;
+    cFlags |= CallbackEventFlag_SyncCall;
+$  END IF;;
+
+    m_curr${interface.name}.Reset();
+
+    while (NOERROR == m_curr${interface.name}.MoveNext()) {
+        if (m_curr${interface.name}.Current((PInterface *)&_pObj_) != NOERROR) {
+            break;
+        }
+        ec = _pObj_->${name}(cFlags$^
+$           WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+        if (FAILED(ec)) _lastec_ = ec;
+$  IF interface.attrib is "delegate"
+        bHasNoRegistered = FALSE;
+$  END IF;;
+    }
+
+    if (!m_curr${interface.name}.mHead.IsEmpty()) {
+        m_curr${interface.name}.mCurrent = _pContext_;
+    }
+
+    SelfUnlock();
+
+$  IF interface.attrib is "delegate"
+    if (bHasNoRegistered) return E_NO_DELEGATE_REGISTERED;
+
+$  END IF;;
+    return _lastec_;
+}
+
+${type} _${class.name}::Updating${name}($^
+$           WITH all parameters DO
+${type} ${prefixingname(parameter)}$^
+$     IF parameter is not last
+, $^
+$     END IF
+$           END DO ;; all parameters
+)
+{
+    return ${name}WithPriority(CallbackEventFlag_Duplicated | CallbackPriority_Normal$^
+$           WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+}
+
+${type} _${class.name}::Updating${name}WithPriority(Int32 cFlags$^
+$           WITH all parameters DO
+, ${type} ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+)
+{
+    return ${name}WithPriority(cFlags | CallbackEventFlag_Duplicated$^
+$           WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+}
+$           IF interface.attrib is "delegate"
+
+${type} _${class.name}::${name}WithTimeout($^
+$           WITH all parameters DO
+${type} ${prefixingname(parameter)}, $^
+$           END DO ;; all parameters
+UInt16 timeOut)
+{
+    return ${name}WithPriority(CallbackPriority_Normal | (timeOut << 16)$^
+$           WITH all parameters DO
+, $^
+${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+}
+
+${type} _${class.name}::${name}WithPriorityAndTimeout(Int32 cFlags$^
+$           WITH all parameters DO
+, ${type} ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+, UInt16 timeOut)
+{
+    return ${name}WithPriority(cFlags | (timeOut << 16)$^
+$           WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+}
+
+$           END IF;; delegate timeout
+$         IF class.attrib is "hasvirtual" and class.type is not "sink" and interface.attrib is not "delegate"
+${type} _CSandwich${class.name}::${name}($^
+$           WITH all parameters DO
+${type} ${prefixingname(parameter)}$^
+$     IF parameter is not last
+, $^
+$     END IF
+$           END DO ;; all parameters
+)
+{
+    ECode ec = NOERROR;
+    Boolean bChildCallParent = _Impl_CheckHelperInfoFlag(HELPER_CHILD_CALL_PARENT);
+    if (bChildCallParent) _Impl_SetHelperInfoFlag(HELPER_CHILD_CALL_PARENT, FALSE);
+
+    if (NULL != _m_pChildCallbackTrigger && (!bChildCallParent)) {
+        ec = _m_pChildCallbackTrigger->${name}WithPriority(CallbackPriority_Normal$^
+$            WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$            END DO ;; all parameters
+);
+        if (E_NOT_IMPLEMENTED != ec) return ec;
+    }
+    ec = _${class.name}::${name}($^
+$            WITH all parameters DO
+${prefixingname(parameter)}$^
+$              IF parameters is not last
+, $^
+$              END IF
+$            END DO ;; all parameters
+);
+
+    return ec;
+}
+
+${type} _CSandwich${class.name}::${name}WithPriority(Int32 cFlags$^
+$           WITH all parameters DO
+, ${type} ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+)
+{
+    ECode ec = NOERROR;
+    Boolean bChildCallParent = _Impl_CheckHelperInfoFlag(HELPER_CHILD_CALL_PARENT);
+    if (bChildCallParent) _Impl_SetHelperInfoFlag(HELPER_CHILD_CALL_PARENT, FALSE);
+
+    if (NULL != _m_pChildCallbackTrigger && (!bChildCallParent)) {
+        ec = _m_pChildCallbackTrigger->${name}WithPriority(cFlags$^
+$            WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$            END DO ;; all parameters
+);
+        if (E_NOT_IMPLEMENTED != ec) return ec;
+    }
+    ec = _${class.name}::${name}WithPriority(cFlags$^
+$            WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$            END DO ;; all parameters
+);
+
+    return ec;
+}
+
+${type} _CSandwich${class.name}::Updating${name}($^
+$           WITH all parameters DO
+${type} ${prefixingname(parameter)}$^
+$     IF parameter is not last
+, $^
+$     END IF
+$           END DO ;; all parameters
+)
+{
+    ECode ec = NOERROR;
+    Boolean bChildCallParent = _Impl_CheckHelperInfoFlag(HELPER_CHILD_CALL_PARENT);
+    if (bChildCallParent) _Impl_SetHelperInfoFlag(HELPER_CHILD_CALL_PARENT, FALSE);
+
+    if (NULL != _m_pChildCallbackTrigger && (!bChildCallParent)) {
+        ec = _m_pChildCallbackTrigger->${name}WithPriority(CallbackEventFlag_Duplicated$^
+$            WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$            END DO ;; all parameters
+);
+        if (E_NOT_IMPLEMENTED != ec) return ec;
+    }
+    ec = _${class.name}::Updating${name}($^
+$            WITH all parameters DO
+${prefixingname(parameter)}$^
+$              IF parameters is not last
+, $^
+$              END IF
+$            END DO ;; all parameters
+);
+
+    return ec;
+}
+
+${type} _CSandwich${class.name}::Updating${name}WithPriority(Int32 cFlags$^
+$           WITH all parameters DO
+, ${type} ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+)
+{
+    ECode ec = NOERROR;
+    Boolean bChildCallParent = _Impl_CheckHelperInfoFlag(HELPER_CHILD_CALL_PARENT);
+    if (bChildCallParent) _Impl_SetHelperInfoFlag(HELPER_CHILD_CALL_PARENT, FALSE);
+
+    if (NULL != _m_pChildCallbackTrigger && (!bChildCallParent)) {
+        ec = _m_pChildCallbackTrigger->${name}WithPriority(CallbackEventFlag_Duplicated | cFlags$^
+$            WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$            END DO ;; all parameters
+);
+        if (E_NOT_IMPLEMENTED != ec) return ec;
+    }
+    ec = _${class.name}::Updating${name}WithPriority(cFlags$^
+$            WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$            END DO ;; all parameters
+);
+
+    return ec;
+}
+$               END IF;; has virtual and class.type is not "sink"
+$           END DO ;; all methods
+$       END DO ;; all parents_and_me
+$   END IF ;; attrib is "callback"
+$END DO ;; all interfaces
+
+ECode _${name}::CancelAllPendingCallbacks()
+{
+    PInterface _pObj_;
+    DLinkNode * _pContext_;
+
+    Mutex::Autolock lock(_m_syncLock);
+
+    _pContext_ = m_currICallbackSink.mCurrent;
+
+    m_currICallbackSink.Reset();
+
+    while (NOERROR == m_currICallbackSink.MoveNext()) {
+        if (m_currICallbackSink.Current((PInterface *)&_pObj_) != NOERROR) {
+            break;
+        }
+        ((ICallbackSink*)_pObj_)->CancelAllPendingCallbacks();
+    }
+
+    if (!m_currICallbackSink.mHead.IsEmpty()) {
+        m_currICallbackSink.mCurrent = _pContext_;
+    }
+
+    return NOERROR;
+}
+
+ECode _${name}::_CancelPendingCallback(Int32 event)
+{
+    PInterface _pObj_;
+    DLinkNode * _pContext_;
+
+    Mutex::Autolock lock(_m_syncLock);
+
+    _pContext_ = m_currICallbackSink.mCurrent;
+
+    m_currICallbackSink.Reset();
+
+    while (NOERROR == m_currICallbackSink.MoveNext()) {
+        if (m_currICallbackSink.Current((PInterface *)&_pObj_) != NOERROR) {
+            break;
+        }
+        ((ICallbackSink*)_pObj_)->CancelPendingCallback(event);
+    }
+
+    if (!m_currICallbackSink.mHead.IsEmpty()) {
+        m_currICallbackSink.mCurrent = _pContext_;
+    }
+
+    return NOERROR;
+}
+
+ECode _${name}::_Connect(PInterface pSink)
+{
+    ECode ec;
+
+    ec = this->OnSinkConnecting(pSink);
+    if (FAILED(ec)) return ec;
+
+$WITH all interfaces DO
+$   IF attrib is "callback"
+    ${name}Callback *p${name} = NULL;
+$   END IF
+$END DO ;; all interfaces
+    ICallbackSink* pTmpSink = NULL;
+
+$WITH all interfaces DO
+$   IF attrib is "callback"
+    p${name} = ${name}Callback::Probe(pSink);
+    if (p${name}) {
+        ec = NOERROR;
+        p${name}->AddRef();
+    }
+    else ec = E_NO_INTERFACE;
+$       IF attrib is "local"
+    if (FAILED(ec) && (ec != E_NO_INTERFACE)) goto ErrorExit;
+    if (ec != E_NO_INTERFACE) {
+        ec = m_prep${name}.Add(p${name});
+        if (FAILED(ec)) goto ErrorExit;
+    }
+
+
+$       ELSE
+    if (FAILED(ec)) goto ErrorExit;
+    ec = m_prep${name}.Add(p${name});
+
+
+$       END IF ;; attrib is "local"
+$   END IF ;; attrib is "callback"
+$END DO ;; all interfaces
+
+    ec = NOERROR;
+    pTmpSink = ICallbackSink::Probe(pSink);
+    if (pTmpSink) pTmpSink->AddRef();
+    else ec = E_NO_INTERFACE;
+$ IF attrib is "local"
+    if (FAILED(ec) && (ec != E_NO_INTERFACE)) goto ErrorExit;
+    if (ec != E_NO_INTERFACE) {
+        ec = m_currICallbackSink.Add(pTmpSink);
+        if (FAILED(ec)) goto ErrorExit;
+    }
+$ ELSE
+    if (FAILED(ec)) goto ErrorExit;
+    ec = m_currICallbackSink.Add(pTmpSink);
+$ END IF ;; attrib is "local"
+
+    ec = this->OnSinkConnected(pSink);
+    if (FAILED(ec)) goto ErrorExit;
+    return NOERROR;
+
+ErrorExit:
+$WITH all interfaces DO
+$   IF attrib is "callback"
+    if (NULL != p${name}) {
+        m_prep${name}.Remove(p${name});
+        p${name}->Release();
+    }
+$   END IF ;; attrib is "callback"
+$END DO ;; all interfaces
+    if (pTmpSink) {
+        m_currICallbackSink.Remove(pTmpSink);
+        pTmpSink->Release();
+    }
+    return ec;
+}
+
+ECode _${name}::_AddConnection(PInterface pSink)
+{
+    ECode ec;
+
+    Mutex::Autolock lock(_m_syncLock);
+
+$WITH all interfaces DO
+$   IF attrib is "callback"
+    if (NOERROR == m_prep${name}.Remove(pSink)) {
+        ec = m_curr${name}.Add(pSink);
+        if (FAILED(ec)) pSink->Release();
+        return ec;
+    }
+$   END IF ;; attrib is "callback"
+$END DO ;; all interfaces
+
+    return E_CONNECT_CANNOTCONNECT;
+}
+
+ECode _${name}::_Disconnect(PInterface pSink)
+{
+    PInterface pObj;
+
+    {
+        Mutex::Autolock lock(_m_syncLock);
+
+$WITH all interfaces DO
+$   IF attrib is "callback"
+
+        pObj = ${name}Callback::Probe(pSink);
+        if (pObj) {
+            if (NOERROR == m_prep${name}.Remove(pObj) ||
+                NOERROR == m_curr${name}.Remove(pObj)) {
+                pObj->Release();
+            }
+        }
+
+$   END IF ;; attrib is "callback"
+$END DO ;; all interfaces
+
+        pObj = ICallbackSink::Probe(pSink);
+        if (!pObj) {
+            return E_NO_INTERFACE;
+        }
+        if (NOERROR != m_currICallbackSink.Remove(pObj)) {
+            return E_ACCESS_DENIED;
+        }
+        pObj->Release();
+    }
+
+    this->OnSinkDisconnected(pSink);
+    return NOERROR;
+}
+
+ECode _${name}::RemoveAllCallbacks()
+{
+    PInterface pObj;
+
+    Mutex::Autolock lock(_m_syncLock);
+
+$WITH all interfaces DO
+$   IF attrib is "callback"
+    m_prep${name}.Reset();
+    while (NOERROR == m_prep${name}.MoveNext()) {
+        if (m_prep${name}.Current(&pObj) != NOERROR) break;
+        pObj->Release();
+    }
+    m_prep${name}.Dispose();
+
+    m_curr${name}.Reset();
+    while (NOERROR == m_curr${name}.MoveNext()) {
+        if (m_curr${name}.Current(&pObj) != NOERROR) break;
+        pObj->Release();
+    }
+    m_curr${name}.Dispose();
+$   END IF ;; attrib is "callback"
+$END DO ;; all interfaces
+
+    m_currICallbackSink.Reset();
+    while (NOERROR == m_currICallbackSink.MoveNext()) {
+        if (m_currICallbackSink.Current(&pObj) != NOERROR) break;
+        pObj->Release();
+    }
+    m_currICallbackSink.Dispose();
+
+    return NOERROR;
+}
+
+UInt32 ${name}Connector::AddRef()
+{
+    return 0;
+}
+
+UInt32 ${name}Connector::Release()
+{
+    return 0;
+}
+
+PInterface ${name}Connector::Probe(REIID riid)
+{
+    return NULL;
+}
+
+ECode ${name}Connector::GetInterfaceID(IInterface *pObject, _ELASTOS InterfaceID *pIID)
+{
+    if ((NULL == pIID) || pObject != (IInterface*)this) return E_INVALID_ARGUMENT;
+
+    *pIID == EIID_CALLBACK_CONNECTOR;
+    return NOERROR;
+}
+
+ECode ${name}Connector::AcquireCallbackSink(ICallbackSink **ppICallbackSink)
+{
+    if (!ppICallbackSink) return E_INVALID_ARGUMENT;
+
+    if (!_m_pCBSink) {
+        ECode ec;
+
+        ${name}Sink *pSink;
+        ec = ${name}Sink::NewByFriend(&pSink);
+        if (FAILED(ec)) return ec;
+
+$IF class.type is "aspect"
+        ec = _m_pServer->AspectAggregate(AggrType_Connect, (ICallbackSink *)pSink);
+        if (FAILED(ec)) {
+            pSink->Release();
+            return ec;
+        }
+$ELSE
+        ec = _m_pServer->Aggregate(AggrType_Connect, (ICallbackSink *)pSink);
+        if (FAILED(ec)) {
+            pSink->Release();
+            return ec;
+        }
+$END IF
+
+$WITH all interfaces DO
+$   IF attrib is not "callback" and attrib is not "clsobj"
+$       IF interface is first
+        // Don't AddRef
+        pSink->_m_pServer = (IInterface*)_m_pServer;
+        pSink->_m_pConnector = (ICallbackConnector *)this;
+
+$       END IF ;; interface is first
+$   END IF ;; callback clsobj
+$   IF attrib is "callback"
+        m_b${name}Connected = FALSE;
+$   END IF
+$END DO
+
+        // Already AddRef
+        _m_pCBSink = pSink;
+    }
+
+    _m_pCBSink->AddRef();
+    *ppICallbackSink = _m_pCBSink;
+
+    return NOERROR;
+}
+
+ECode ${name}Connector::CheckCallbackSinkConnection(Int32 dwEvent)
+{
+    ECode ec;
+
+$WITH all interfaces DO
+$   IF attrib is "callback"
+    if (dwEvent > ${class.name}Sink_${name}Begin
+        && dwEvent < ${class.name}Sink_${name}End) {
+        if (m_b${name}Connected) return NOERROR;
+$      IF class.type is "aspect"
+        ec = _m_pServer->AspectAggregate(
+                AggrType_AddConnection, (${name}Callback *)_m_pCBSink);
+$      ELSE
+        ec = _m_pServer->Aggregate(
+                AggrType_AddConnection, (${name}Callback *)_m_pCBSink);
+$      END IF
+        if (SUCCEEDED(ec)) m_b${name}Connected = TRUE;
+        return ec;
+    }
+$   END IF ;; attrib is "callback"
+$END DO ;; all interfaces
+    return E_INVALID_ARGUMENT;
+}
+
+ECode ${name}Connector::DisconnectCallbackSink()
+{
+    if (_m_pCBSink) {
+#ifndef _DEBUG
+        _m_pCBSink->RemoveAllCallbacks();
+#endif // _DEBUG
+
+$IF class.type is "aspect"
+        _m_pServer->AspectAggregate(AggrType_Disconnect, (ICallbackSink *)_m_pCBSink);
+$ELSE
+        _m_pServer->Aggregate(AggrType_Disconnect, (ICallbackSink *)_m_pCBSink);
+$END IF
+        _m_pCBSink->_m_pServer = NULL;
+        _m_pCBSink->_m_pConnector = NULL;
+        _m_pCBSink->Release();
+        _m_pCBSink = NULL;
+    }
+    return NOERROR;
+}

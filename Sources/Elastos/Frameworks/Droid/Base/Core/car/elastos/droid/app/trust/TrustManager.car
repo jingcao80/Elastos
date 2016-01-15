@@ -1,0 +1,90 @@
+module
+{
+    interface Elastos.Droid.App.Trust.IITrustListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Trust {
+
+    interface ITrustListener {
+
+        /**
+         * Reports that the trust state has changed.
+         * @param enabled if true, the system believes the environment to be trusted.
+         * @param userId the user, for which the trust changed.
+         * @param initiatedByUser indicates that the user has explicitly initiated an action that
+         *                        proves the user is about to use the device.
+         */
+        OnTrustChanged(
+            [in] Boolean enabled,
+            [in] Int32 userId,
+            [in] Boolean initiatedByUser);
+
+        /**
+         * Reports that whether trust is managed has changed
+         * @param enabled if true, at least one trust agent is managing trust.
+         * @param userId the user, for which the state changed.
+         */
+        OnTrustManagedChanged(
+            [in] Boolean enabled,
+            [in] Int32 userId);
+    }
+
+    /**
+     * See {@link com.android.server.trust.TrustManagerService}
+     * @hide
+     */
+    interface ITrustManager {
+
+        /**
+         * Reports that user {@param userId} has tried to unlock the device.
+         *
+         * @param successful if true, the unlock attempt was successful.
+         *
+         * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+         */
+        ReportUnlockAttempt(
+            [in] Boolean successful,
+            [in] Int32 userId);
+
+        /**
+         * Reports that the list of enabled trust agents changed for user {@param userId}.
+         *
+         * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+         */
+        ReportEnabledTrustAgentsChanged(
+            [in] Int32 userId);
+
+        /**
+         * Reports that trust is disabled until credentials have been entered for user {@param userId}.
+         *
+         * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+         *
+         * @param userId either an explicit user id or {@link android.os.UserHandle#USER_ALL}
+         */
+        ReportRequireCredentialEntry(
+            [in] Int32 userId);
+
+        /**
+         * Registers a listener for trust events.
+         *
+         * Requires the {@link android.Manifest.permission#TRUST_LISTENER} permission.
+         */
+        RegisterTrustListener(
+            [in] ITrustListener* trustListener);
+
+        /**
+         * Unregisters a listener for trust events.
+         *
+         * Requires the {@link android.Manifest.permission#TRUST_LISTENER} permission.
+         */
+        UnregisterTrustListener(
+            [in] ITrustListener* trustListener);
+    }
+
+    } // namespace Trust
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

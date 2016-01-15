@@ -1,0 +1,67 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace StatusBar {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IStatusBarIcon {
+        GetIconPackage(
+            [out] String* pkg);
+
+        SetUser(
+            [in] IUserHandle* user);
+
+        GetUser(
+            [out] IUserHandle** user);
+
+        SetIconPackage(
+            [in] String pkg);
+
+        GetIconId(
+            [out] Int32* id);
+
+        SetIconId(
+            [in] Int32 id);
+
+        GetIconLevel(
+            [out] Int32* level);
+
+        SetIconLevel(
+            [in] Int32 level);
+
+        GetVisible(
+            [out] Boolean* visible);
+
+        SetVisible(
+            [in] Boolean visible);
+
+        GetNumber(
+            [out] Int32* number);
+
+        SetNumber(
+            [in] Int32 number);
+
+        GetContentDescription(
+            [out] ICharSequence** seq);
+
+        SetContentDescription(
+            [in] ICharSequence* seq);
+
+        Clone(
+            [out] IStatusBarIcon** object);
+    }
+
+    } // namespace StatusBar
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

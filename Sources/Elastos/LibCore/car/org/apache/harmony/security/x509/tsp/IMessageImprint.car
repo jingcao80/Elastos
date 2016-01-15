@@ -1,0 +1,37 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+    namespace Tsp {
+
+    /**
+     * As defined in Time-Stamp Protocol (TSP)
+     * (http://www.ietf.org/rfc/rfc3161.txt)
+     *
+     * MessageImprint ::= SEQUENCE  {
+     *      hashAlgorithm                AlgorithmIdentifier,
+     *      hashedMessage                OCTET STRING
+     * }
+     *
+     */
+    interface IMessageImprint {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
+    }
+
+    } // namespace Tsp
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

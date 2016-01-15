@@ -1,0 +1,714 @@
+module
+{
+    interface Elastos.Droid.Utility.IPrinter;
+    interface Elastos.Droid.App.IApplicationErrorReportCrashInfo;
+    interface Elastos.Droid.Os.IStrictModeSpan;
+    interface Elastos.Droid.Os.IStrictModeViolationInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * @Involve
+     * interface Elastos.Core.IBlockGuardPolicy
+     */
+    interface IAndroidBlockGuardPolicy {
+        ToString(
+            [out] String* str);
+
+        OnCustomSlowCall(
+            [in] String name);
+
+        SetPolicyMask(
+            [in] Int32 policyMask);
+
+        // Start handling a violation that just started and hasn't
+        // actually run yet (e.g. no disk write or network operation
+        // has yet occurred).  This sees if we're in an event loop
+        // thread and, if so, uses it to roughly measure how long the
+        // violation took.
+        // void StartHandlingViolationException(BlockGuard.BlockGuardPolicyException e);
+
+        // Attempts to fill in the provided ViolationInfo's
+        // durationMillis field if this thread has a Looper we can use
+        // to measure with.  We measure from the time of violation
+        // until the time the looper is idle again (right before
+        // the next epoll_wait)
+        HandleViolationWithTimingAttempt(
+            [in] IStrictModeViolationInfo* info);
+
+        // Note: It's possible (even quite likely) that the
+        // thread-local policy mask has changed from the time the
+        // violation fired and now (after the violating code ran) due
+        // to people who push/pop temporary policy in regions of code,
+        // hence the policy being passed around.
+        HandleViolation(
+            [in] IStrictModeViolationInfo* info);
+    }
+
+    interface IStrictModeThreadPolicy {
+        ToString(
+            [out] String* str);
+    }
+
+    /**
+     * Creates {@link ThreadPolicy} instances.  Methods whose names start
+     * with {@code detect} specify what problems we should look
+     * for.  Methods whose names start with {@code penalty} specify what
+     * we should do when we detect a problem.
+     *
+     * <p>You can call as many {@code detect} and {@code penalty}
+     * methods as you like. Currently order is insignificant: all
+     * penalties apply to all detected problems.
+     *
+     * <p>For example, detect everything and log anything that's found:
+     * <pre>
+     * StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+     *     .detectAll()
+     *     .penaltyLog()
+     *     .build();
+     * StrictMode.setThreadPolicy(policy);
+     * </pre>
+     */
+    interface IStrictModeThreadPolicyBuilder {
+        /**
+         * Detect everything that's potentially suspect.
+         *
+         * <p>As of the Gingerbread release this includes network and
+         * disk operations but will likely expand in future releases.
+         */
+        DetectAll();
+
+        /**
+         * Disable the detection of everything.
+         */
+        PermitAll();
+
+        /**
+         * Enable detection of network operations.
+         */
+        DetectNetwork();
+
+        /**
+         * Disable detection of network operations.
+         */
+        PermitNetwork();
+
+        /**
+         * Enable detection of disk reads.
+         */
+        DetectDiskReads();
+
+        /**
+         * Disable detection of disk reads.
+         */
+        PermitDiskReads();
+
+        /**
+         * Enable detection of slow calls.
+         */
+        DetectCustomSlowCalls();
+
+        /**
+         * Disable detection of slow calls.
+         */
+        PermitCustomSlowCalls();
+
+        /**
+         * Enable detection of disk writes.
+         */
+        DetectDiskWrites();
+
+        /**
+         * Disable detection of disk writes.
+         */
+        PermitDiskWrites();
+
+        /**
+         * Show an annoying dialog to the developer on detected
+         * violations, rate-limited to be only a little annoying.
+         */
+        PenaltyDialog();
+
+        /**
+         * Crash the whole process on violation.  This penalty runs at
+         * the end of all enabled penalties so you'll still get
+         * see logging or other violations before the process dies.
+         *
+         * <p>Unlike {@link #penaltyDeathOnNetwork}, this applies
+         * to disk reads, disk writes, and network usage if their
+         * corresponding detect flags are set.
+         */
+        PenaltyDeath();
+
+        /**
+         * Crash the whole process on any network usage.  Unlike
+         * {@link #penaltyDeath}, this penalty runs
+         * <em>before</em> anything else.  You must still have
+         * called {@link #detectNetwork} to enable this.
+         *
+         * <p>In the Honeycomb or later SDKs, this is on by default.
+         */
+        PenaltyDeathOnNetwork();
+
+        /**
+         * Flash the screen during a violation.
+         */
+        PenaltyFlashScreen();
+
+        /**
+         * Log detected violations to the system log.
+         */
+        PenaltyLog();
+
+        /**
+         * Enable detected violations log a stacktrace and timing data
+         * to the {@link android.os.DropBoxManager DropBox} on policy
+         * violation.  Intended mostly for platform integrators doing
+         * beta user field data collection.
+         */
+        PenaltyDropBox();
+
+        /**
+         * Construct the ThreadPolicy instance.
+         *
+         * <p>Note: if no penalties are enabled before calling
+         * <code>build</code>, {@link #penaltyLog} is implicitly
+         * set.
+         */
+        Build(
+            [out] IStrictModeThreadPolicy** policy);
+    }
+
+    /**
+     * {@link StrictMode} policy applied to all threads in the virtual machine's process.
+     *
+     * <p>The policy is enabled by {@link #setVmPolicy}.
+     */
+    interface IStrictModeVmPolicy {
+        ToString(
+            [out] String* str);
+    }
+
+    /**
+     * Creates {@link VmPolicy} instances.  Methods whose names start
+     * with {@code detect} specify what problems we should look
+     * for.  Methods whose names start with {@code penalty} specify what
+     * we should do when we detect a problem.
+     *
+     * <p>You can call as many {@code detect} and {@code penalty}
+     * methods as you like. Currently order is insignificant: all
+     * penalties apply to all detected problems.
+     *
+     * <p>For example, detect everything and log anything that's found:
+     * <pre>
+     * StrictMode.VmPolicy policy = new StrictMode.VmPolicy.Builder()
+     *     .detectAll()
+     *     .penaltyLog()
+     *     .build();
+     * StrictMode.setVmPolicy(policy);
+     * </pre>
+     */
+    interface IStrictModeVmPolicyBuilder {
+        /**
+         * Set an upper bound on how many instances of a class can be in memory
+         * at once.  Helps to prevent object leaks.
+         */
+        SetClassInstanceLimit(
+            [in] Handle32 klass,
+            [in] Int32 instanceLimit);
+
+        /**
+         * Detect leaks of {@link android.app.Activity} subclasses.
+         */
+        DetectActivityLeaks();
+
+        /**
+         * Detect everything that's potentially suspect.
+         *
+         * <p>In the Honeycomb release this includes leaks of
+         * SQLite cursors, Activities, and other closable objects
+         * but will likely expand in future releases.
+         */
+        DetectAll();
+        /**
+         * Detect when an
+         * {@link android.database.sqlite.SQLiteCursor} or other
+         * SQLite object is finalized without having been closed.
+         *
+         * <p>You always want to explicitly close your SQLite
+         * cursors to avoid unnecessary database contention and
+         * temporary memory leaks.
+         */
+        DetectLeakedSqlLiteObjects();
+
+        /**
+         * Detect when an {@link java.io.Closeable} or other
+         * object with a explict termination method is finalized
+         * without having been closed.
+         *
+         * <p>You always want to explicitly close such objects to
+         * avoid unnecessary resources leaks.
+         */
+        DetectLeakedClosableObjects();
+
+        /**
+         * Detect when a {@link BroadcastReceiver} or
+         * {@link ServiceConnection} is leaked during {@link Context}
+         * teardown.
+         */
+        DetectLeakedRegistrationObjects();
+
+        /**
+         * Crashes the whole process on violation.  This penalty runs at
+         * the end of all enabled penalties so yo you'll still get
+         * your logging or other violations before the process dies.
+         */
+        PenaltyDeath();
+
+        /**
+         * Log detected violations to the system log.
+         */
+        PenaltyLog();
+        /**
+         * Enable detected violations log a stacktrace and timing data
+         * to the {@link android.os.DropBoxManager DropBox} on policy
+         * violation.  Intended mostly for platform integrators doing
+         * beta user field data collection.
+         */
+        PenaltyDropBox();
+
+
+        /**
+         * Construct the VmPolicy instance.
+         *
+         * <p>Note: if no penalties are enabled before calling
+         * <code>build</code>, {@link #penaltyLog} is implicitly
+         * set.
+         */
+        Build(
+            [out] IStrictModeVmPolicy** policy);
+    }
+
+    [deprecated]
+    interface IStrictMode {
+        /**
+         * Boolean system property to disable strict mode checks outright.
+         * Set this to 'true' to force disable; 'false' has no effect on other
+         * enable/disable policy.
+         * @hide
+         */
+        const String DISABLE_PROPERTY = "persist.sys.strictmode.disable";
+
+        /**
+         * The boolean system property to control screen flashes on violations.
+         *
+         * @hide
+         */
+        const String VISUAL_PROPERTY = "persist.sys.strictmode.visual";
+
+        // Thread-policy:
+
+        /**
+         * @hide
+         */
+        const Int32 DETECT_DISK_WRITE = 0x01;  // for ThreadPolicy
+
+        /**
+          * @hide
+         */
+        const Int32 DETECT_DISK_READ = 0x02;  // for ThreadPolicy
+
+        /**
+         * @hide
+         */
+        const Int32 DETECT_NETWORK = 0x04;  // for ThreadPolicy
+
+        /**
+         * For StrictMode.noteSlowCall()
+         *
+         * @hide
+         */
+        const Int32 DETECT_CUSTOM = 0x08;  // for ThreadPolicy
+
+        // Process-policy:
+
+        /**
+         * Note, a "VM_" bit, not thread.
+         * @hide
+         */
+        const Int32 DETECT_VM_CURSOR_LEAKS = 0x200;  // for VmPolicy
+
+        /**
+         * Note, a "VM_" bit, not thread.
+         * @hide
+         */
+        const Int32 DETECT_VM_CLOSABLE_LEAKS = 0x400;  // for VmPolicy
+
+        /**
+         * Note, a "VM_" bit, not thread.
+         * @hide
+         */
+        const Int32 DETECT_VM_ACTIVITY_LEAKS = 0x800;  // for VmPolicy
+
+        /**
+         * @hide
+         */
+        const Int32 DETECT_VM_REGISTRATION_LEAKS = 0x2000;  // for VmPolicy
+
+        /**
+         * @hide
+         */
+        const Int32 PENALTY_LOG = 0x10;  // normal android.util.Log
+
+        // Used for both process and thread policy:
+
+        /**
+         * @hide
+         */
+        const Int32 PENALTY_DIALOG = 0x20;
+
+        /**
+         * Death on any detected violation.
+         *
+         * @hide
+         */
+        const Int32 PENALTY_DEATH = 0x40;
+
+        /**
+         * Death just for detected network usage.
+         *
+         * @hide
+         */
+        const Int32 PENALTY_DEATH_ON_NETWORK = 0x200;
+
+        /**
+         * Flash the screen during violations.
+         *
+         * @hide
+         */
+        const Int32 PENALTY_FLASH = 0x800;
+
+        /**
+         * @hide
+         */
+        const Int32 PENALTY_DROPBOX = 0x80;
+
+        /**
+         * Non-public penalty mode which overrides all the other penalty
+         * bits and signals that we're in a Binder call and we should
+         * ignore the other penalty bits and instead serialize back all
+         * our offending stack traces to the caller to ultimately handle
+         * in the originating process.
+         *
+         * This must be kept in sync with the constant in libs/binder/Parcel.cpp
+         *
+         * @hide
+         */
+        const Int32 PENALTY_GATHER = 0x100;
+
+        /**
+         * Sets the policy for what actions on the current thread should
+         * be detected, as well as the penalty if such actions occur.
+         *
+         * <p>Internally this sets a thread-local variable which is
+         * propagated across cross-process IPC calls, meaning you can
+         * catch violations when a system service or another process
+         * accesses the disk or network on your behalf.
+         *
+         * @param policy the policy to put into place
+         */
+        SetThreadPolicy(
+            [in] IStrictModeThreadPolicy* policy);
+
+        /**
+         * Returns the bitmask of the current thread's policy.
+         *
+         * @return the bitmask of all the DETECT_* and PENALTY_* bits currently enabled
+         *
+         * @hide
+         */
+        GetThreadPolicyMask(
+            [out] Int32* mask);
+
+        /**
+         * Returns the current thread's policy.
+         */
+        GetThreadPolicy(
+            [out] IStrictModeThreadPolicy** policy);
+
+        /**
+         * A convenience wrapper that takes the current
+         * {@link ThreadPolicy} from {@link #getThreadPolicy}, modifies it
+         * to permit both disk reads &amp; writes, and sets the new policy
+         * with {@link #setThreadPolicy}, returning the old policy so you
+         * can restore it at the end of a block.
+         *
+         * @return the old policy, to be passed to {@link #setThreadPolicy} to
+         *         restore the policy at the end of a block
+         */
+        AllowThreadDiskWrites(
+            [out] IStrictModeThreadPolicy** policy);
+
+        /**
+         * A convenience wrapper that takes the current
+         * {@link ThreadPolicy} from {@link #getThreadPolicy}, modifies it
+         * to permit disk reads, and sets the new policy
+         * with {@link #setThreadPolicy}, returning the old policy so you
+         * can restore it at the end of a block.
+         *
+         * @return the old policy, to be passed to setThreadPolicy to
+         *         restore the policy.
+         */
+        AllowThreadDiskReads(
+            [out] IStrictModeThreadPolicy** policy);
+
+        /**
+         * Enable DropBox logging for debug phone builds.
+         *
+         * @hide
+         */
+        ConditionallyEnableDebugLogging(
+            [out] Boolean* isLogging);
+
+        /**
+         * Used by the framework to make network usage on the main
+         * thread a fatal error.
+         *
+         * @hide
+         */
+        EnableDeathOnNetwork();
+
+        /**
+         * Called from Parcel.writeNoException()
+         */
+        HasGatheredViolations(
+            [out] Boolean* result);
+
+        /**
+         * Called from Parcel.writeException(), so we drop this memory and
+         * don't incorrectly attribute it to the wrong caller on the next
+         * Binder call on this thread.
+         */
+        ClearGatheredViolations();
+
+        /**
+         * @hide
+         */
+        ConditionallyCheckInstanceCounts();
+
+        /**
+         * Sets the policy for what actions in the VM process (on any
+         * thread) should be detected, as well as the penalty if such
+         * actions occur.
+         *
+         * @param policy the policy to put into place
+         */
+        SetVmPolicy(
+            [in] IStrictModeVmPolicy* policy);
+
+        /**
+         * Gets the current VM policy.
+         */
+        GetVmPolicy(
+            [out] IStrictModeVmPolicy** policy);
+
+        /**
+         * Enable the recommended StrictMode defaults, with violations just being logged.
+         *
+         * <p>This catches disk and network access on the main thread, as
+         * well as leaked SQLite cursors and unclosed resources.  This is
+         * simply a wrapper around {@link #setVmPolicy} and {@link
+         * #setThreadPolicy}.
+         */
+        EnableDefaults();
+
+        /**
+         * @hide
+         */
+        VmSqliteObjectLeaksEnabled(
+           [out] Boolean* isEnabled);
+
+        /**
+         * @hide
+         */
+        VmClosableObjectLeaksEnabled(
+            [out] Boolean* isEnabled);
+
+        /**
+         * @hide
+         */
+        VmRegistrationLeaksEnabled(
+            [out] Boolean* isEnabled);
+
+         /**
+         * @hide
+         */
+        OnSqliteObjectLeaked(
+            [in] String message/*,
+            [in] Throwable originStack*/);
+
+        /**
+         * @hide
+         */
+        OnWebViewMethodCalledOnWrongThread(
+            /*[in] Throwable originStack*/);
+
+        /**
+         * @hide
+         */
+        OnIntentReceiverLeaked(
+            /*[in] Throwable originStack*/);
+
+        /**
+         * @hide
+         */
+        OnServiceConnectionLeaked(
+            /*[in] Throwable originStack*/);
+
+        /**
+         * @hide
+         */
+        OnVmPolicyViolation(
+            [in] String message/*,
+            [in] Throwable originStack*/);
+
+        /**
+         * Called from Parcel.writeNoException()
+         */
+        WriteGatheredViolationsToParcel(
+            [in] IParcel* p);
+
+        /**
+         * Called from Parcel.readException() when the exception is EX_STRICT_MODE_VIOLATIONS,
+         * we here read back all the encoded violations.
+         */
+        ReadAndHandleBinderCallViolations(
+            [in] IParcel* p);
+
+        /**
+         * Enter a named critical span (e.g. an animation)
+         *
+         * <p>The name is an arbitary label (or tag) that will be applied
+         * to any strictmode violation that happens while this span is
+         * active.  You must call finish() on the span when done.
+         *
+         * <p>This will never return null, but on devices without debugging
+         * enabled, this may return a dummy object on which the finish()
+         * method is a no-op.
+         *
+         * <p>TODO: add CloseGuard to this, verifying callers call finish.
+         *
+         * @hide
+         */
+        EnterCriticalSpan(
+            [in] String name,
+            [out] IStrictModeSpan** span);
+
+        /**
+         * For code to note that it's slow.  This is a no-op unless the
+         * current thread's {@link android.os.StrictMode.ThreadPolicy} has
+         * {@link android.os.StrictMode.ThreadPolicy.Builder#detectCustomSlowCalls}
+         * enabled.
+         *
+         * @param name a short string for the exception stack trace that's
+         *             built if when this fires.
+         */
+        NoteSlowCall(
+            [in] String name);
+
+        /**
+         * @hide
+         */
+        NoteDiskRead();
+
+        /**
+         * @hide
+         */
+        NoteDiskWrite();
+
+        /**
+         * Returns an object that is used to track instances of activites.
+         * The activity should store a reference to the tracker object in one of its fields.
+         * @hide
+         */
+        TrackActivity(
+            [in] IInterface* instance,
+            [out] IInterface** act);
+
+        /**
+         * @hide
+         */
+        IncrementExpectedActivityCount(
+            [in] ClassID* klass);
+
+        /**
+         * @hide
+         */
+        DecrementExpectedActivityCount(
+            [in] ClassID* klass);
+    }
+
+    interface IStrictModeSpan{
+        /**
+         * To be called when the critical span is complete (i.e. the
+         * animation is done animating).  This can be called on any
+         * thread (even a different one from where the animation was
+         * taking place), but that's only a defensive implementation
+         * measure.  It really makes no sense for you to call this on
+         * thread other than that where you created it.
+         *
+         * @hide
+         */
+        Finish();
+    }
+
+    interface IStrictModeViolationInfo {
+        HashCode(
+            [out] Int32* code);
+
+        /**
+         * Save a ViolationInfo instance to a parcel.
+         */
+        WriteToParcel(
+            [in] IParcel* dest,
+            [in] Int32 flags);
+
+        /**
+         * Dump a ViolationInfo instance to a Printer.
+         */
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+
+        GetViolationUptimeMillis(
+            [out] Int64* millis);
+
+        GetViolationNumThisLoop(
+            [out] Int32* num);
+
+        GetNumAnimationsRunning(
+            [out] Int32* num);
+
+        GetBroadcastIntentAction(
+            [out] String* action);
+
+        GetDurationMillis(
+            [out] Int32* millis);
+
+        GetNumInstances(
+            [out] Int64* num);
+
+        GetTags(
+            [out,callee] ArrayOf<String>* tags);
+
+        GetCrashInfo(
+            [out] IApplicationErrorReportCrashInfo** info);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

@@ -1,0 +1,77 @@
+TARGET_NAME= widget
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += ToolbarWidgetWrapper.cpp
+SOURCES += CToolbarWidgetWrapper.cpp
+SOURCES += SwipeDismissLayout.cpp
+SOURCES += CSwipeDismissLayout.cpp
+SOURCES += SubtitleView.cpp
+SOURCES += CSubtitleView.cpp
+SOURCES += PreferenceImageView.cpp
+SOURCES += CPreferenceImageView.cpp
+SOURCES += LinearLayoutWithDefaultTouchRecepient.cpp
+SOURCES += CLinearLayoutWithDefaultTouchRecepient.cpp
+SOURCES += Smileys.cpp
+SOURCES += CSmileys.cpp
+SOURCES += CSmileysHelper.cpp
+SOURCES += TextProgressBar.cpp
+SOURCES += CTextProgressBar.cpp
+SOURCES += WeightedLinearLayout.cpp
+SOURCES += CWeightedLinearLayout.cpp
+SOURCES += WaveView.cpp
+SOURCES += CWaveView.cpp
+SOURCES += FaceUnlockView.cpp
+SOURCES += CFaceUnlockView.cpp
+SOURCES += AbsActionBarView.cpp
+SOURCES += CAbsActionBarView.cpp
+SOURCES += ActionBarContainer.cpp
+SOURCES += CActionBarContainer.cpp
+SOURCES += ActionBarContextView.cpp
+SOURCES += CActionBarContextView.cpp
+SOURCES += ActionBarOverlayLayout.cpp
+SOURCES += CActionBarOverlayLayout.cpp
+SOURCES += ActionBarView.cpp
+SOURCES += CActionBarView.cpp
+SOURCES += AutoScrollHelper.cpp
+SOURCES += CAbsListViewAutoScroller.cpp
+SOURCES += BackgroundFallback.cpp
+SOURCES += CBackgroundFallback.cpp
+SOURCES += ScrollingTabContainerView.cpp
+SOURCES += DrawableHolder.cpp
+SOURCES += CDrawableHolder.cpp
+SOURCES += EditableInputConnection.cpp
+SOURCES += CEditableInputConnection.cpp
+SOURCES += DialogTitle.cpp
+SOURCES += CDialogTitle.cpp
+SOURCES += PasswordEntryKeyboard.cpp
+SOURCES += CPasswordEntryKeyboard.cpp
+SOURCES += CLockPatternUtilsCacheHelper.cpp
+SOURCES += CLockPatternUtilsCache.cpp
+SOURCES += CLockPatternUtilsCacheObserver.cpp
+SOURCES += LockPatternView.cpp
+SOURCES += CLockPatternViewCellHelper.cpp
+SOURCES += LockPatternUtils.cpp
+SOURCES += PasswordEntryKeyboardHelper.cpp
+SOURCES += CPasswordEntryKeyboardHelper.cpp
+SOURCES += PasswordEntryKeyboardView.cpp
+SOURCES += CPasswordEntryKeyboardView.cpp
+SOURCES += PointerLocationView.cpp
+SOURCES += CPointerLocationView.cpp
+SOURCES += RotarySelector.cpp
+SOURCES += CRotarySelector.cpp
+SOURCES += ResolverDrawerLayout.cpp
+SOURCES += SizeAdaptiveLayout.cpp
+SOURCES += CAccessibleDateAnimator.cpp
+SOURCES += ExploreByTouchHelper.cpp
+SOURCES += CResolverDrawerLayout.cpp
+SOURCES += SlidingTab.cpp
+SOURCES += widgets.cpp
+
+ELASTOS_LIBS += multiwaveview/multiwaveview.lib

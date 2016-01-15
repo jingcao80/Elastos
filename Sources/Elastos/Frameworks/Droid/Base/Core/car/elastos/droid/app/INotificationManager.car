@@ -1,0 +1,172 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.App.IITransientNotification;
+    interface Elastos.Droid.App.INotification;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+    interface Elastos.Droid.Service.Notification.IStatusBarNotification;
+    interface Elastos.Droid.Service.Notification.IINotificationListener;
+    interface Elastos.Droid.Service.Notification.IZenModeConfig;
+    interface Elastos.Droid.Service.Notification.IIConditionProvider;
+    interface Elastos.Droid.Service.Notification.ICondition;
+    interface Elastos.Droid.Service.Notification.IIConditionListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** {@hide} */
+    [deprecated]
+    interface IINotificationManager {
+        CancelAllNotifications(
+            [in]String pkg,
+            [in] Int32 userId);
+
+        EnqueueToast(
+            [in] String pkg,
+            [in] IITransientNotification* cb,
+            [in] Int32 duration);
+
+        CancelToast(
+            [in] String pkg,
+            [in] IITransientNotification* cb);
+
+        EnqueueNotificationWithTag(
+            [in] String pkg,
+            [in] String opPkg,
+            [in] String tag,
+            [in] Int32 id,
+            [in] INotification* notification,
+            [in] ArrayOf<Int32>* inIdReceived,
+            [in] Int32 userId,
+            [out, callee] ArrayOf<Int32>* outIdReceived);
+
+        CancelNotificationWithTag(
+            [in] String pkg,
+            [in] String tag,
+            [in] Int32 id,
+            [in] Int32 userId);
+
+        SetNotificationsEnabledForPackage(
+            [in] String pkg,
+            [in] Boolean enabled);
+
+        AreNotificationsEnabledForPackage(
+            [in] String pkg,
+            [out] Boolean* res);
+
+        SetPackagePriority(
+            [in] String pkg,
+            [in] Int32 uid,
+            [in] Int32 priority);
+
+        GetPackagePriority(
+            [in] String pkg,
+            [in] Int32 uid,
+            [out] Int32* result);
+
+        SetPackageVisibilityOverride(
+            [in] String pkg,
+            [in] Int32 uid,
+            [in] Int32 visibility);
+
+        GetPackageVisibilityOverride(
+            [in] String pkg,
+            [in] Int32 uid,
+            [out] Int32* result);
+
+        // TODO: Remove this when callers have been migrated to the equivalent
+        // INotificationListener method.
+        GetActiveNotifications(
+            [in] String callingPkg,
+            [out, callee] ArrayOf<IStatusBarNotification*>* ns);
+
+        GetHistoricalNotifications(
+            [in] String callingPkg,
+            [in] Int32 count,
+            [out, callee] ArrayOf<IStatusBarNotification*>* ns);
+
+        RegisterListener(
+            [in] IINotificationListener* listener,
+            [in] IComponentName* component,
+            [in] Int32 userid);
+
+        UnregisterListener(
+            [in] IINotificationListener* listener,
+            [in] Int32 userid);
+
+        CancelNotificationFromListener(
+            [in] IINotificationListener* token,
+            [in] String pkg,
+            [in] String tag,
+            [in] Int32 id);
+
+        CancelNotificationsFromListener(
+            [in] IINotificationListener* token,
+            [in] ArrayOf<String>* keys);
+
+        GetActiveNotificationsFromListener(
+            [in] IINotificationListener* token,
+            [in] ArrayOf<String>* keys,
+            [in] Int32 trim,
+            [out] IParceledListSlice** slice);
+
+        RequestHintsFromListener(
+            [in] IINotificationListener* token,
+            [in] Int32 hints);
+
+        GetHintsFromListener(
+            [in] IINotificationListener* token,
+            [out] Int32* result);
+
+        RequestInterruptionFilterFromListener(
+            [in] IINotificationListener* token,
+            [in] Int32 interruptionFilter);
+
+        GetInterruptionFilterFromListener(
+            [in] IINotificationListener* token,
+            [out] Int32* result);
+
+        SetOnNotificationPostedTrimFromListener(
+            [in] IINotificationListener* token,
+            [in] Int32 trim);
+
+        GetEffectsSuppressor(
+            [out] IComponentName** name);
+
+        MatchesCallFilter(
+            [in] IBundle* extras,
+            [out] Boolean* result);
+
+        GetZenModeConfig(
+            [out] IZenModeConfig** config);
+
+        SetZenModeConfig(
+            [in] IZenModeConfig* config,
+            [out] Boolean* result);
+
+        [oneway] NotifyConditions(
+            [in] String pkg,
+            [in] IIConditionProvider* provider,
+            [in] ArrayOf<ICondition*>* conditions);
+
+        [oneway] RequestZenModeConditions(
+            [in] IIConditionListener* cb,
+            [in] Int32 relevance);
+
+        [oneway] SetZenModeCondition(
+            [in] ICondition* condition);
+
+        [oneway] SetAutomaticZenModeConditions(
+            [in] ArrayOf<IUri*>* conditionIds);
+
+        GetAutomaticZenModeConditions(
+            [out] ICondition** condition);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

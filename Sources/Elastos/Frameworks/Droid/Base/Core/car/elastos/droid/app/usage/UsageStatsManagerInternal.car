@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Usage {
+
+    /**
+     * UsageStatsManager local system service interface.
+     *
+     * {@hide} Only for use within the system server.
+     */
+    interface IUsageStatsManagerInternal {
+
+        /**
+         * Reports an event to the UsageStatsManager.
+         *
+         * @param component The component for which this event occurred.
+         * @param userId The user id to which the component belongs to.
+         * @param eventType The event that occurred. Valid values can be found at
+         * {@link UsageEvents}
+         */
+        ReportEvent(
+            [in] IComponentName* component,
+            [in] Int32 userId,
+            [in] Int32 eventType);
+
+        /**
+         * Reports a configuration change to the UsageStatsManager.
+         *
+         * @param config The new device configuration.
+         */
+        ReportConfigurationChange(
+            [in] IConfiguration* config,
+            [in] Int32 userId);
+
+        /**
+         * Prepares the UsageStatsService for shutdown.
+         */
+        PrepareShutdown();
+
+    }
+
+    } // namespace Usage
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

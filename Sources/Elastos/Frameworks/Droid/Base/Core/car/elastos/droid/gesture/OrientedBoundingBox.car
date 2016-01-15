@@ -1,0 +1,43 @@
+module
+{
+    interface Elastos.Droid.Graphics.IPath;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Gesture {
+
+    /**
+     * An oriented bounding box
+     */
+    interface IOrientedBoundingBox {
+        /**
+         * Currently used for debugging purpose only.
+         *
+         * @hide
+         */
+        ToPath(
+            [out] IPath** outPath);
+
+        GetSquareness(
+            [out] Float* squareness);
+
+        GetWidth(
+            [out] Float* width);
+
+        GetHeight(
+            [out] Float* height);
+
+        GetOrientation(
+            [out] Float* orientation);
+
+        GetCenterX(
+            [out] Float* centerX);
+
+        GetCenterY(
+            [out] Float*centerY);
+    }
+
+    } // namespace Gesture
+    } // namespace Droid
+    } // namespace Elastos
+}

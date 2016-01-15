@@ -1,0 +1,25 @@
+
+module
+{
+    interface Elastos.IO.IFile;
+
+    namespace Elastos {
+    namespace IO {
+
+    interface IFileFilter {
+        /**
+         * Indicating whether a specific file should be included in a pathname list.
+         *
+         * @param pathname
+         *            the abstract file to check.
+         * @return {true} if the file should be included, {false}
+         *         otherwise.
+         */
+        Accept(
+            [in] IFile* pathname,
+            [out] Boolean* succeeded);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

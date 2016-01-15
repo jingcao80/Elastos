@@ -1,0 +1,146 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.AppWidget.IAppWidgetProviderInfo;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IIntentSender;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Widget.IRemoteViews;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace AppWidget {
+
+    [deprecated]
+    interface IIAppWidgetService {
+        //
+        // for AppWidgetHost
+        //
+        StartListening(
+            [in] IIAppWidgetHost* host,
+            [in] String callingPackage,
+            [in] Int32 hostId,
+            [out] IList** updatedViews,
+            [out, callee] ArrayOf<Int32>* result);
+
+        StopListening(
+            [in] String callingPackage,
+            [in] Int32 hostId);
+
+        AllocateAppWidgetId(
+            [in] String callingPackage,
+            [in] Int32 hostId,
+            [out] Int32* result);
+
+        DeleteAppWidgetId(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId);
+
+        DeleteHost(
+            [in] String packageName,
+            [in] Int32 hostId);
+
+        DeleteAllHosts();
+
+        GetAppWidgetViews(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId,
+            [out] IRemoteViews** result);
+
+        GetAppWidgetIdsForHost(
+            [in] String callingPackage,
+            [in] Int32 hostId,
+            [out, callee] ArrayOf<Int32>* result);
+
+        CreateAppWidgetConfigIntentSender(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId,
+            [in] Int32 intentFlags,
+            [out] IIntentSender** result);
+
+        //
+        // for AppWidgetManager
+        //
+        UpdateAppWidgetIds(
+            [in] String callingPackage,
+            [in] ArrayOf<Int32>* appWidgetIds,
+            [in] IRemoteViews* views);
+
+        UpdateAppWidgetOptions(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId,
+            [in] IBundle* extras);
+
+        GetAppWidgetOptions(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId,
+            [out] IBundle** result);
+
+        PartiallyUpdateAppWidgetIds(
+            [in] String callingPackage,
+            [in] ArrayOf<Int32>* appWidgetIds,
+            [in] IRemoteViews* views);
+
+        UpdateAppWidgetProvider(
+            [in] IComponentName* provider,
+            [in] IRemoteViews* views);
+
+        NotifyAppWidgetViewDataChanged(
+            [in] String packageName,
+            [in] ArrayOf<Int32>* appWidgetIds,
+            [in] Int32 viewId);
+
+        GetInstalledProvidersForProfile(
+            [in] Int32 categoryFilter,
+            [in] Int32 profileId,
+            [out] IList** result);
+
+        GetAppWidgetInfo(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId,
+            [out] IAppWidgetProviderInfo** result);
+
+        HasBindAppWidgetPermission(
+            [in] String packageName,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        SetBindAppWidgetPermission(
+            [in] String packageName,
+            [in] Int32 userId,
+            [in] Boolean permission);
+
+        BindAppWidgetId(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId,
+            [in] Int32 providerProfileId,
+            [in] IComponentName* providerComponent,
+            [in] IBundle* options,
+            [out] Boolean* result);
+
+        BindRemoteViewsService(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId,
+            [in] IIntent* intent,
+            [in] IBinder* connection);
+
+        UnbindRemoteViewsService(
+            [in] String callingPackage,
+            [in] Int32 appWidgetId,
+            [in] IIntent* intent);
+
+        GetAppWidgetIds(
+            [in] IComponentName* providerComponent,
+            [out, callee] ArrayOf<Int32>* result);
+    }
+
+    }//namespace AppWidget
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

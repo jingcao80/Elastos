@@ -1,0 +1,52 @@
+module{
+    namespace Elastosx{
+    namespace Sql{
+
+    /**
+     * An interface for the creation of {@code ConnectionPoolDataSource} objects.
+     * Used internally within the package.
+     * <p>
+     * A class which implements the {@code ConnectionPoolDataSource} interface is
+     * typically registered with a JNDI naming service directory and is retrieved
+     * from there by name.
+     */
+    /**
+     * @Involve
+     * interface ICommonDataSource
+     */
+    interface IConnectionPoolDataSource {
+        /**
+         * Creates a connection to a database which can then be used as a pooled
+         * connection.
+         *
+         * @return a {@code PooledConnection} which represents the connection to the
+         *         database.
+         * @throws SQLException
+         *             if there is a problem accessing the database.
+         */
+        GetPooledConnection(
+            [out] IPooledConnection** pconn);
+
+        /**
+         * Creates a connection to a database, using the supplied user name and
+         * password, which can then be used as a pooled connection.
+         *
+         * @param theUser
+         *            the a user name for the database login.
+         * @param thePassword
+         *            the password associated with the user identified by {@code
+         *            theUser}.
+         * @return a {@code PooledConnection} object which represents the connection
+         *         to the database.
+         * @throws SQLException
+         *             if there is a problem accessing the database.
+         */
+        GetPooledConnection(
+            [in] String theUser,
+            [in] String thePassword,
+            [out] IPooledConnection** pconn);
+    }
+
+    } // namespace Sql
+    } // namespace Elastosx
+}

@@ -1,0 +1,48 @@
+module
+{
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IComponentCallbacks;
+    interface Elastos.Droid.Content.IComponentCallbacks2;
+    interface Elastos.Droid.View.IContextThemeWrapper;
+    interface Elastos.Droid.View.ILayoutInflaterFactory;
+    interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Droid.View.IKeyEventCallback;
+    interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Presents multiple options for handling the case where a sync was aborted because there
+     * were too many pending deletes. One option is to force the delete, another is to rollback
+     * the deletes, the third is to do nothing.
+     * @hide
+     */
+    class CSyncActivityTooManyDeletes {
+        constructor();
+
+        interface ISyncActivityTooManyDeletes;
+        interface IAdapterViewOnItemClickListener;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+
+}

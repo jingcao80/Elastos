@@ -1,0 +1,26 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Telephony.ICellSignalStrength
+     * interface IParcelable
+     */
+    interface ICellSignalStrengthGsm {
+
+        Initialize(
+            [in] Int32 ss,
+            [in] Int32 ber);
+
+        Copy(
+            [out] ICellSignalStrengthGsm** res);
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

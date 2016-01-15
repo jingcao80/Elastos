@@ -1,0 +1,162 @@
+
+module
+{
+    using interface Elastos.IO.IFile;
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.App.Backup.IBackupDataInput;
+    interface Elastos.Droid.App.Backup.IBackupDataOutput;
+    interface Elastos.Droid.App.Backup.IFullBackupDataOutput;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Backup {
+
+    /**
+     * Provides the central interface between an application and Android's data backup
+     * infrastructure. An application that wishes to participate in the backup and
+     * restore mechanism will declare a subclass of BackupAgent, implement the
+     * onBackup() and onRestore() methods, and provide the name of its backup agent
+     * class in its AndroidManifest.xml file via the <application> tag's
+     * android:backupAgent attribute.
+     *
+     * @sa BackupAgent
+     * @sa onBackup()
+     * @sa onRestore()
+     * @sa <application>
+     * <p>
+     * <strong>Developer Guides</strong>
+     * <p>
+     *For more information about using BackupAgent, read the Data Backup developer guide.
+     * <p>
+     * <strong>Basic Operation</strong>
+     * <p>
+     * When the application makes changes to data that it wishes to keep backed up, it
+     * should call the BackupManager.dataChanged() method. This notifies the Android
+     * Backup Manager that the application needs an opportunity to update its backup
+     * image. The Backup Manager, in turn, schedules a backup pass to be performed at
+     * an opportune time.
+     *
+     * @sa BackupManager.dataChanged()
+     * <p>
+     * Restore operations are typically performed only when applications are first
+     * installed on a device. At that time, the operating system checks to see whether
+     * there is a previously-saved data set available for the application being
+     * installed, and if so, begins an immediate restore pass to deliver the backup
+     * data as part of the installation process.
+     * <p>
+     * When a backup or restore pass is run, the application's process is launched (if
+     * not already running), the manifest-declared backup agent class (in the
+     * android:backupAgent attribute) is instantiated within that process, and the
+     * agent's onCreate() method is invoked. This prepares the agent instance to run
+     * the actual backup or restore logic. At this point the agent's onBackup() or
+     * onRestore() method will be invoked as appropriate for the operation being
+     * performed.
+     *
+     * @sa onCreate()
+     * @sa onBackup()
+     * @sa onRestore()
+     * <p>
+     * A backup data set consists of one or more "entities," flattened binary data
+     * records that are each identified with a key string unique within the data set.
+     * Adding a record to the active data set or updating an existing record is done by
+     * simply writing new entity data under the desired key. Deleting an entity from
+     * the data set is done by writing an entity under that key with header specifying
+     * a negative data size, and no actual entity data.
+     * <p>
+     * <strong>Helper Classes</strong>
+     * <p>
+     * An extensible agent based on convenient helper classes is available in
+     * BackupAgentHelper. That class is particularly suited to handling of simple file
+     * or SharedPreferences backup and restore.
+     *
+     * @sa BackupAgentHelper
+     * @sa SharedPreferences
+     *
+     * @sa BackupManager
+     * @sa BackupAgentHelper
+     * @sa BackupDataInput
+     * @sa BackupDataOutput
+     *
+     * @implements Elastos.Droid.App.Backup.Elastos.Droid.Content.IContextWrapper
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContextWrapper
+     */
+    interface IBackupAgent {
+        /** @hide */
+        const Int32 TYPE_EOF = 0;
+
+        /**
+         * During a full restore, indicates that the file system object being restored
+         * is an ordinary file.
+         */
+        const Int32 TYPE_FILE = 1;
+
+        /**
+         * During a full restore, indicates that the file system object being restored
+         * is a directory.
+         */
+        const Int32 TYPE_DIRECTORY = 2;
+
+        /** @hide */
+        const Int32 TYPE_SYMLINK = 3;
+
+        OnCreate();
+
+        OnDestroy();
+
+        OnBackup(
+            [in] IParcelFileDescriptor* oldState,
+            [in] IBackupDataOutput* data,
+            [in] IParcelFileDescriptor* newState);
+
+        OnRestore(
+            [in] IBackupDataInput* data,
+            [in] Int32 appVersionCode,
+            [in] IParcelFileDescriptor* newState);
+
+        /**
+         * The application's restore operation has completed.  This method is called after
+         * all available data has been delivered to the application for restore (via either
+         * the {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()} or
+         * {@link #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long) onRestoreFile()}
+         * callbacks).  This provides the app with a stable end-of-restore opportunity to
+         * perform any appropriate post-processing on the data that was just delivered.
+         *
+         * @see #onRestore(BackupDataInput, int, ParcelFileDescriptor)
+         * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
+         */
+        OnRestoreFinished();
+
+        OnFullBackup(
+            [in] IFullBackupDataOutput* data);
+
+        FullBackupFile(
+            [in] IFile* file,
+            [in] IFullBackupDataOutput* output);
+
+        OnRestoreFile(
+            [in] IParcelFileDescriptor* data,
+            [in] Int64 size,
+            [in] IFile* destination,
+            [in] Int32 type,
+            [in] Int64 mode,
+            [in] Int64 mtime);
+
+        OnBind(
+            [out] IBinder** binder);
+
+        Attach(
+            [in] IContext* ctx);
+    }
+
+    } // namespace Backup
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

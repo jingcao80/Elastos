@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.Droid.AppWidget.IAppWidgetProviderInfo;
+    interface Elastos.Droid.Widget.IRemoteViews;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace AppWidget {
+
+    [oneway]
+    interface IIAppWidgetHost {
+        UpdateAppWidget(
+            [in] Int32 appWidgetId,
+            [in] IRemoteViews* views);
+
+        ProviderChanged(
+            [in] Int32 appWidgetId,
+            [in] IAppWidgetProviderInfo* info);
+
+        ProvidersChanged();
+
+        ViewDataChanged(
+            [in] Int32 appWidgetId,
+            [in] Int32 viewId);
+    }
+
+    } //namespace AppWidget
+    } //namespace Internal
+    } //namespace Droid
+    } //namespace Elastos
+}

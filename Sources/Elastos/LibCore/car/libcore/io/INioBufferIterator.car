@@ -1,0 +1,23 @@
+
+module
+{
+    namespace Libcore {
+    namespace IO {
+
+    /**
+     * Iterates over big- or little-endian bytes on the native heap.
+     * See {@link MemoryMappedFile#bigEndianIterator} and {@link emoryMappedFile#littleEndianIterator}
+     *
+     * @hide don't make this public without adding bounds checking.
+     *
+     * @Involve
+     * interface IBufferIterator;
+     */
+
+    [deprecated]
+    interface INioBufferIterator {
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

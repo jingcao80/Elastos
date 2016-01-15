@@ -1,0 +1,59 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IViewOnClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    /**
+     * Media route chooser dialog fragment.
+     * <p>
+     * Creates a {@link MediaRouteChooserDialog}.  The application may subclass
+     * this dialog fragment to customize the media route chooser dialog.
+     * </p>
+     *
+     * TODO: Move this back into the API, as in the support library media router.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener
+     * interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener
+     * interface Elastos.Droid.App.IDialogFragment
+     */
+    [local]
+    interface IMediaRouteChooserDialogFragment {
+        GetRouteTypes(
+            [out] Int32* types);
+
+        SetRouteTypes(
+            [in] Int32 types);
+
+        SetExtendedSettingsClickListener(
+            [in] IViewOnClickListener* listener);
+
+        /**
+         * Called when the chooser dialog is being created.
+         * <p>
+         * Subclasses may override this method to customize the dialog.
+         * </p>
+         */
+        OnCreateChooserDialog(
+            [in] IContext* context,
+            [in] IBundle* savedInstanceState,
+            [out] IMediaRouteChooserDialog** dialog);
+    }
+
+    } //namespace App
+    } //namespace Internal
+    } //namespace Droid
+    } //namespace Elastos
+
+}

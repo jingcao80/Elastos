@@ -1,0 +1,68 @@
+
+module
+{
+    interface Elastos.Net.ICookiePolicy;
+    interface Elastos.Net.ICookieStore;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * This class provides a concrete implementation of CookieHandler. It separates
+     * the storage of cookies from the policy which decides to accept or deny
+     * cookies. The constructor can have two arguments: a CookieStore and a
+     * CookiePolicy. The former is in charge of cookie storage and the latter makes
+     * decision on acceptance/rejection.
+     *
+     * CookieHandler is in the center of cookie management. User can make use of
+     * CookieHandler.setDefault to set a CookieManager as the default one used.
+     *
+     * CookieManager.put uses CookiePolicy.shouldAccept to decide whether to put
+     * some cookies into a cookie store. Three built-in CookiePolicy is defined:
+     * ACCEPT_ALL, ACCEPT_NONE and ACCEPT_ORIGINAL_SERVER. Users can also customize
+     * the policy by implementing CookiePolicy. Any accepted HTTP cookie is stored
+     * in CookieStore and users can also have their own implementation. Up to now,
+     * Only add(URI, HttpCookie) and get(URI) are used by CookieManager. Other
+     * methods in this class may probably be used in a more complicated
+     * implementation.
+     *
+     * There are many ways to customize user's own HTTP cookie management:
+     *
+     * First, call CookieHandler.setDefault to set a new CookieHandler
+     * implementation. Second, call CookieHandler.getDefault to use CookieManager.
+     * The CookiePolicy and CookieStore used are customized. Third, use the
+     * customized CookiePolicy and the CookieStore.
+     *
+     * This implementation conforms to <a href="http://www.ietf.org/rfc/rfc2965.txt">RFC 2965</a> section 3.3.
+     *
+     * @since 1.6
+     *
+     * @Involve
+     * interface ICookieHandler;
+     */
+    interface ICookieManager {
+        /**
+         * Sets the cookie policy of this cookie manager.
+         *
+         * ACCEPT_ORIGINAL_SERVER is the default policy for CookieManager.
+         *
+         * @param cookiePolicy
+         *            the cookie policy. if null, the original policy will not be
+         *            changed.
+         */
+        SetCookiePolicy(
+            [in] ICookiePolicy* cookiePolicy);
+
+        /**
+         * Gets current cookie store.
+         *
+         * @return the cookie store currently used by cookie manager.
+         */
+        GetCookieStore(
+            [out] ICookieStore** cookieStore);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

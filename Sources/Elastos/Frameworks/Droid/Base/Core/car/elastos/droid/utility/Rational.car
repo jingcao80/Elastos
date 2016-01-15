@@ -1,0 +1,207 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+    /**
+     * <p>An immutable data type representation a rational number.</p>
+     *
+     * <p>Contains a pair of {@code int}s representing the numerator and denominator of a
+     * Rational number. </p>
+     */
+    /**
+     * @Involve
+     * interface INumber;
+     * interface IComparable;
+     */
+    interface IRational {
+        /**
+         * Gets the numerator of the rational.
+         *
+         * <p>The numerator will always return {@code 1} if this rational represents
+         * infinity (that is, the denominator is {@code 0}).</p>
+         */
+        GetNumerator(
+            [out] Int32* value);
+
+        /**
+         * Gets the denominator of the rational
+         *
+         * <p>The denominator may return {@code 0}, in which case the rational may represent
+         * positive infinity (if the numerator was positive), negative infinity (if the numerator
+         * was negative), or {@code NaN} (if the numerator was {@code 0}).</p>
+         *
+         * <p>The denominator will always return {@code 1} if the numerator is {@code 0}.
+         */
+        GetDenominator(
+            [out] Int32* value);
+
+        /**
+         * Indicates whether this rational is a <em>Not-a-Number (NaN)</em> value.
+         *
+         * <p>A {@code NaN} value occurs when both the numerator and the denominator are {@code 0}.</p>
+         *
+         * @return {@code true} if this rational is a <em>Not-a-Number (NaN)</em> value;
+         *         {@code false} if this is a (potentially infinite) number value
+         */
+        IsNaN(
+            [out] Boolean* value);
+
+        /**
+         * Indicates whether this rational represents an infinite value.
+         *
+         * <p>An infinite value occurs when the denominator is {@code 0} (but the numerator is not).</p>
+         *
+         * @return {@code true} if this rational is a (positive or negative) infinite value;
+         *         {@code false} if this is a finite number value (or {@code NaN})
+         */
+        IsInfinite(
+            [out] Boolean* value);
+
+        /**
+         * Indicates whether this rational represents a finite value.
+         *
+         * <p>A finite value occurs when the denominator is not {@code 0}; in other words
+         * the rational is neither infinity or {@code NaN}.</p>
+         *
+         * @return {@code true} if this rational is a (positive or negative) infinite value;
+         *         {@code false} if this is a finite number value (or {@code NaN})
+         */
+        IsFinite(
+            [out] Boolean* value);
+
+        /**
+         * Indicates whether this rational represents a zero value.
+         *
+         * <p>A zero value is a {@link #isFinite finite} rational with a numerator of {@code 0}.</p>
+         *
+         * @return {@code true} if this rational is finite zero value;
+         *         {@code false} otherwise
+         */
+        IsZero(
+            [out] Boolean* value);
+
+        /**
+         * <p>Compare this Rational to another object and see if they are equal.</p>
+         *
+         * <p>A Rational object can only be equal to another Rational object (comparing against any
+         * other type will return {@code false}).</p>
+         *
+         * <p>A Rational object is considered equal to another Rational object if and only if one of
+         * the following holds:</p>
+         * <ul><li>Both are {@code NaN}</li>
+         *     <li>Both are infinities of the same sign</li>
+         *     <li>Both have the same numerator and denominator in their reduced form</li>
+         * </ul>
+         *
+         * <p>A reduced form of a Rational is calculated by dividing both the numerator and the
+         * denominator by their greatest common divisor.</p>
+         *
+         * <pre>{@code
+         * (new Rational(1, 2)).equals(new Rational(1, 2)) == true   // trivially true
+         * (new Rational(2, 3)).equals(new Rational(1, 2)) == false  // trivially false
+         * (new Rational(1, 2)).equals(new Rational(2, 4)) == true   // true after reduction
+         * (new Rational(0, 0)).equals(new Rational(0, 0)) == true   // NaN.equals(NaN)
+         * (new Rational(1, 0)).equals(new Rational(5, 0)) == true   // both are +infinity
+         * (new Rational(1, 0)).equals(new Rational(-1, 0)) == false // +infinity != -infinity
+         * }</pre>
+         *
+         * @param obj a reference to another object
+         *
+         * @return A boolean that determines whether or not the two Rational objects are equal.
+         */
+        // @Override
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* value);
+
+        /**
+         * Return a string representation of this rational, e.g. {@code "1/2"}.
+         *
+         * <p>The following rules of conversion apply:
+         * <ul>
+         * <li>{@code NaN} values will return {@code "NaN"}
+         * <li>Positive infinity values will return {@code "Infinity"}
+         * <li>Negative infinity values will return {@code "-Infinity"}
+         * <li>All other values will return {@code "numerator/denominator"} where {@code numerator}
+         * and {@code denominator} are substituted with the appropriate numerator and denominator
+         * values.
+         * </ul></p>
+         */
+        // @Override
+        ToString(
+            [out] String* str);
+
+        /**
+         * <p>Convert to a floating point representation.</p>
+         *
+         * @return The floating point representation of this rational number.
+         * @hide
+         */
+        ToFloat(
+            [out] Float* value);
+
+        /**
+         * {@inheritDoc}
+         */
+        // @Override
+        GetHashCode(
+            [out] Int32* value);
+    }
+
+    interface IRationalHelper {
+
+        /**
+         * Calculates the greatest common divisor using Euclid's algorithm.
+         *
+         * <p><em>Visible for testing only.</em></p>
+         *
+         * @param numerator the numerator in a fraction
+         * @param denominator the denominator in a fraction
+         *
+         * @return An int value representing the gcd. Always positive.
+         * @hide
+         */
+        Gcd(
+            [in] Int32 numerator,
+            [in] Int32 denominator,
+            [out] Int32* value);
+
+        /**
+         * Parses the specified string as a rational value.
+         * <p>The ASCII characters {@code \}{@code u003a} (':') and
+         * {@code \}{@code u002f} ('/') are recognized as separators between
+         * the numerator and denumerator.</p>
+         * <p>
+         * For any {@code Rational r}: {@code Rational.parseRational(r.toString()).equals(r)}.
+         * However, the method also handles rational numbers expressed in the
+         * following forms:</p>
+         * <p>
+         * "<i>num</i>{@code /}<i>den</i>" or
+         * "<i>num</i>{@code :}<i>den</i>" {@code => new Rational(num, den);},
+         * where <i>num</i> and <i>den</i> are string integers potentially
+         * containing a sign, such as "-10", "+7" or "5".</p>
+         *
+         * <pre>{@code
+         * Rational.parseRational("3:+6").equals(new Rational(1, 2)) == true
+         * Rational.parseRational("-3/-6").equals(new Rational(1, 2)) == true
+         * Rational.parseRational("4.56") => throws NumberFormatException
+         * }</pre>
+         *
+         * @param string the string representation of a rational value.
+         * @return the rational value represented by {@code string}.
+         *
+         * @throws NumberFormatException if {@code string} cannot be parsed
+         * as a rational value.
+         * @throws NullPointerException if {@code string} was {@code null}
+         */
+        ParseRational(
+            [in] String string,
+            [out] IRational** outration);
+    }
+
+    } // namespace Utility
+    } // namepsace Droid
+    } // namespace Elastos
+}

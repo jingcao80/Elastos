@@ -1,0 +1,245 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.IRectF;
+    interface Elastos.Droid.Graphics.IMatrix;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * Positional information about the text insertion point and characters in the composition string.
+     *
+     * <p>This class encapsulates locations of the text insertion point and the composition string in
+     * the screen coordinates so that IMEs can render their UI components near where the text is
+     * actually inserted.</p>
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ICursorAnchorInfo {
+
+        /**
+         * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterBoundsFlags(int)}: the
+         * insertion marker or character bounds have at least one visible region.
+         */
+        const Int32 FLAG_HAS_VISIBLE_REGION = 0x01;
+
+        /**
+         * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterBoundsFlags(int)}: the
+         * insertion marker or character bounds have at least one invisible (clipped) region.
+         */
+        const Int32 FLAG_HAS_INVISIBLE_REGION = 0x02;
+
+        /**
+         * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterBoundsFlags(int)}: the
+         * insertion marker or character bounds is placed at right-to-left (RTL) character.
+         */
+        const Int32 FLAG_IS_RTL = 0x04;
+
+        /**
+         * Returns the index where the selection starts.
+         * @return {@code -1} if there is no selection.
+         */
+        GetSelectionStart(
+            [out] Int32* result);
+
+        /**
+         * Returns the index where the selection ends.
+         * @return {@code -1} if there is no selection.
+         */
+        GetSelectionEnd(
+            [out] Int32* result);
+
+        /**
+         * Returns the index where the composing text starts.
+         * @return {@code -1} if there is no composing text.
+         */
+        GetComposingTextStart(
+            [out] Int32* result);
+
+        /**
+         * Returns the entire composing text.
+         * @return {@code null} if there is no composition.
+         */
+        GetComposingText(
+            [out] ICharSequence** result);
+
+        /**
+         * Returns the flag of the insertion marker.
+         * @return the flag of the insertion marker. {@code 0} if no flag is specified.
+         */
+        GetInsertionMarkerFlags(
+            [out] Int32* result);
+
+        /**
+         * Returns the horizontal start of the insertion marker, in the local coordinates that will
+         * be transformed with {@link #getMatrix()} when rendered on the screen.
+         * @return x coordinate that is compatible with {@link Layout#getPrimaryHorizontal(int)}.
+         * Pay special care to RTL/LTR handling.
+         * {@code java.lang.Float.NaN} if not specified.
+         * @see Layout#getPrimaryHorizontal(int)
+         */
+        GetInsertionMarkerHorizontal(
+            [out] Float* result);
+
+        /**
+         * Returns the vertical top position of the insertion marker, in the local coordinates that
+         * will be transformed with {@link #getMatrix()} when rendered on the screen.
+         * @return y coordinate that is compatible with {@link Layout#getLineTop(int)}.
+         * {@code java.lang.Float.NaN} if not specified.
+         */
+        GetInsertionMarkerTop(
+            [out] Float* result);
+
+        /**
+         * Returns the vertical baseline position of the insertion marker, in the local coordinates
+         * that will be transformed with {@link #getMatrix()} when rendered on the screen.
+         * @return y coordinate that is compatible with {@link Layout#getLineBaseline(int)}.
+         * {@code java.lang.Float.NaN} if not specified.
+         */
+        GetInsertionMarkerBaseline(
+            [out] Float* result);
+
+        /**
+         * Returns the vertical bottom position of the insertion marker, in the local coordinates
+         * that will be transformed with {@link #getMatrix()} when rendered on the screen.
+         * @return y coordinate that is compatible with {@link Layout#getLineBottom(int)}.
+         * {@code java.lang.Float.NaN} if not specified.
+         */
+        GetInsertionMarkerBottom(
+            [out] Float* result);
+
+        /**
+         * Returns a new instance of {@link RectF} that indicates the location of the character
+         * specified with the index.
+         * @param index index of the character in a Java chars.
+         * @return the character bounds in local coordinates as a new instance of {@link RectF}.
+         */
+        GetCharacterBounds(
+            [in] Int32 index,
+            [out] IRectF** rect);
+
+        /**
+         * Returns the flags associated with the character bounds specified with the index.
+         * @param index index of the character in a Java chars.
+         * @return {@code 0} if no flag is specified.
+         */
+        GetCharacterBoundsFlags(
+            [in] Int32 index,
+            [out] Int32* result);
+
+        /**
+         * Returns a new instance of {@link android.graphics.Matrix} that indicates the transformation
+         * matrix that is to be applied other positional data in this class.
+         * @return a new instance (copy) of the transformation matrix.
+         */
+        GetMatrix(
+            [out] IMatrix** matrix);
+    }
+
+    /**
+     * Builder for {@link CursorAnchorInfo}. This class is not designed to be thread-safe.
+     */
+    interface ICursorAnchorInfoBuilder {
+        /**
+         * Sets the text range of the selection. Calling this can be skipped if there is no
+         * selection.
+         */
+        SetSelectionRange(
+            [in] Int32 newStart,
+            [in] Int32 newEnd);
+
+        /**
+         * Sets the text range of the composing text. Calling this can be skipped if there is
+         * no composing text.
+         * @param composingTextStart index where the composing text starts.
+         * @param composingText the entire composing text.
+         */
+        SetComposingText(
+            [in] Int32 composingTextStart,
+            [in] ICharSequence* composingText);
+
+        /**
+         * Sets the location of the text insertion point (zero width cursor) as a rectangle in
+         * local coordinates. Calling this can be skipped when there is no text insertion point;
+         * however if there is an insertion point, editors must call this method.
+         * @param horizontalPosition horizontal position of the insertion marker, in the local
+         * coordinates that will be transformed with the transformation matrix when rendered on the
+         * screen. This should be calculated or compatible with
+         * {@link Layout#getPrimaryHorizontal(int)}.
+         * @param lineTop vertical position of the insertion marker, in the local coordinates that
+         * will be transformed with the transformation matrix when rendered on the screen. This
+         * should be calculated or compatible with {@link Layout#getLineTop(int)}.
+         * @param lineBaseline vertical position of the insertion marker, in the local coordinates
+         * that will be transformed with the transformation matrix when rendered on the screen. This
+         * should be calculated or compatible with {@link Layout#getLineBaseline(int)}.
+         * @param lineBottom vertical position of the insertion marker, in the local coordinates
+         * that will be transformed with the transformation matrix when rendered on the screen. This
+         * should be calculated or compatible with {@link Layout#getLineBottom(int)}.
+         * @param flags flags of the insertion marker. See {@link #FLAG_HAS_VISIBLE_REGION} for
+         * example.
+         */
+        SetInsertionMarkerLocation(
+            [in] Float horizontalPosition,
+            [in] Float lineTop,
+            [in] Float lineBaseline,
+            [in] Float lineBottom,
+            [in] Int32 flags);
+
+        /**
+         * Adds the bounding box of the character specified with the index.
+         *
+         * @param index index of the character in Java chars units. Must be specified in
+         * ascending order across successive calls.
+         * @param left x coordinate of the left edge of the character in local coordinates.
+         * @param top y coordinate of the top edge of the character in local coordinates.
+         * @param right x coordinate of the right edge of the character in local coordinates.
+         * @param bottom y coordinate of the bottom edge of the character in local coordinates.
+         * @param flags flags for this character bounds. See {@link #FLAG_HAS_VISIBLE_REGION},
+         * {@link #FLAG_HAS_INVISIBLE_REGION} and {@link #FLAG_IS_RTL}. These flags must be
+         * specified when necessary.
+         * @throws IllegalArgumentException If the index is a negative value, or not greater than
+         * all of the previously called indices.
+         */
+        AddCharacterBounds(
+            [in] Int32 index,
+            [in] Float left,
+            [in] Float top,
+            [in] Float right,
+            [in] Float bottom,
+            [in] Int32 flags);
+
+        /**
+         * Sets the matrix that transforms local coordinates into screen coordinates.
+         * @param matrix transformation matrix from local coordinates into screen coordinates. null
+         * is interpreted as an identity matrix.
+         */
+        SetMatrix(
+            [in] IMatrix* matrix);
+
+        /**
+         * @return {@link CursorAnchorInfo} using parameters in this {@link Builder}.
+         * @throws IllegalArgumentException if one or more positional parameters are specified but
+         * the coordinate transformation matrix is not provided via {@link #setMatrix(Matrix)}.
+         */
+        Build(
+            [out] ICursorAnchorInfo** info);
+
+        /**
+         * Resets the internal state so that this instance can be reused to build another
+         * instance of {@link CursorAnchorInfo}.
+         */
+        Reset();
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,14 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$
+$TEMPLATE "public/public.lub"
+$TEMPLATE "header/header.lub"
+$TEMPLATE "header/header2.lub"
+$;;TEMPLATE "header/serverh.lub"
+$TEMPLATE "headercpp/headercpp.lub"
+$TEMPLATE "background/background.lub"
+$TEMPLATE "foreground/foreground.lub"
+$;;TEMPLATE "carusage/carusage.lub"

@@ -1,0 +1,38 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The parameter specification for generating an RSA key pair.
+     */
+    /**
+     * @Involve
+     * interface IAlgorithmParameterSpec
+     */
+    interface IRSAKeyGenParameterSpec {
+        /**
+         * Returns the size of the modulus (number of bits).
+         *
+         * @return the size of the modulus (number of bits).
+         */
+        GetKeysize(
+            [out] Int32* keySize);
+
+        /**
+         * Returns the value of the public exponent.
+         *
+         * @return the value of the public exponent.
+         */
+        GetPublicExponent(
+            [out] IBigInteger** pubExponent);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

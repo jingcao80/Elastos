@@ -1,0 +1,8 @@
+
+TARGET_NAME= internal
+TARGET_TYPE= lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Crypto/Internal
+
+SOURCES = CNullCipherSpi.cpp

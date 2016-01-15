@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    /**
+     * An Insets instance holds four integer offsets which describe changes to the four
+     * edges of a Rectangle. By convention, positive values move edges towards the
+     * centre of the rectangle.
+     * <p>
+     * Insets are immutable so may be treated as values.
+     *
+     * @hide
+     */
+    interface IInsets {
+        GetLeft(
+            [out] Int32* left);
+
+        GetTop(
+            [out] Int32* top);
+
+        GetRight(
+            [out] Int32* right);
+
+        GetBottom(
+            [out] Int32* bottom);
+    }
+
+    interface IInsetsHelper {
+        /**
+         * Return an Insets instance with the appropriate values.
+         *
+         * @param left the left inset
+         * @param top the top inset
+         * @param right the right inset
+         * @param bottom the bottom inset
+         *
+         * @return Insets instance with the appropriate values
+         */
+        Of(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [out] IInsets** insets);
+
+        /**
+         * Return an Insets instance with the appropriate values.
+         *
+         * @param r the rectangle from which to take the values
+         *
+         * @return an Insets instance with the appropriate values
+         */
+        Of(
+            [in] IRect* r,
+            [out] IInsets** insets);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

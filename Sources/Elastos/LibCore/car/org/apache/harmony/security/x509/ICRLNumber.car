@@ -1,0 +1,43 @@
+
+module
+{
+    using interface Elastos.Math.IBigInteger;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * CRL Entry's CRL Number Extension (OID = 2.5.29.20).
+     * <pre>
+     *   id-ce-cRLNumber OBJECT IDENTIFIER ::= { id-ce 20 }
+     *
+     *   CRLNumber ::= INTEGER (0..MAX)
+     * </pre>
+     * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     */
+    interface ICRLNumber extends IExtensionValue {
+        /**
+         * Returns the invalidity date.
+         */
+        GetNumber(
+            [out] IBigInteger** number);
+    }
+
+    interface ICRLNumberHelper {
+        GetASN1(
+            [out] IASN1Type** asn1);
+
+        SetASN1(
+            [in] IASN1Type* asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,103 @@
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    /**
+     * Listener that is invoked whenever a change occurs that might affect the rotation policy.
+     */
+    interface IRotationPolicyListener {
+        OnChange();
+    }
+
+    /**
+     * Provides helper functions for configuring the display rotation policy.
+     */
+    interface IRotationPolicy {
+        /**
+         * Gets whether the device supports rotation. In general such a
+         * device has an accelerometer and has the portrait and landscape
+         * features.
+         *
+         * @param context Context for accessing system resources.
+         * @return Whether the device supports rotation.
+         */
+        IsRotationSupported(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        /**
+         * Returns the orientation that will be used when locking the orientation from system UI
+         * with {@link #setRotationLock}.
+         *
+         * If the device only supports locking to its natural orientation, this will be either
+         * Configuration.ORIENTATION_PORTRAIT or Configuration.ORIENTATION_LANDSCAPE,
+         * otherwise Configuration.ORIENTATION_UNDEFINED if any orientation is lockable.
+         */
+        GetRotationLockOrientation(
+            [in] IContext* context,
+            [out] Int32* result);
+
+        /**
+         * Returns true if the rotation-lock toggle should be shown in system UI.
+         */
+        IsRotationLockToggleVisible(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        /**
+         * Returns true if rotation lock is enabled.
+         */
+        IsRotationLocked(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        /**
+         * Enables or disables rotation lock from the system UI toggle.
+         */
+        SetRotationLock(
+            [in] IContext* context,
+            [in] Boolean enabled);
+
+        /**
+         * Enables or disables natural rotation lock from Accessibility settings.
+         *
+         * If rotation is locked for accessibility, the system UI toggle is hidden to avoid confusion.
+         */
+        SetRotationLockForAccessibility(
+            [in] IContext* context,
+            [in] Boolean enabled);
+
+        /**
+         * Registers a listener for rotation policy changes affecting the caller's user
+         */
+        RegisterRotationPolicyListener(
+            [in] IContext* context,
+            [in] IRotationPolicyListener* listener);
+
+        /**
+         * Registers a listener for rotation policy changes affecting a specific user,
+         * or USER_ALL for all users.
+         */
+        RegisterRotationPolicyListener(
+            [in] IContext* context,
+            [in] IRotationPolicyListener* listener,
+            [in] Int32 userHandle);
+
+        /**
+         * Unregisters a listener for rotation policy changes.
+         */
+        UnregisterRotationPolicyListener(
+            [in] IContext* context,
+            [in] IRotationPolicyListener* listener);
+    }
+
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

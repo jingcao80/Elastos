@@ -1,0 +1,50 @@
+
+module
+{
+    interface Elastos.Droid.View.IViewOnClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.ILinearLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IZoomControls {
+        SetOnZoomInClickListener(
+            [in] IViewOnClickListener* listener);
+
+        SetOnZoomOutClickListener(
+            [in] IViewOnClickListener* listener);
+
+        /*
+         * Sets how fast you get zoom events when the user holds down the
+         * zoom in/out buttons.
+         */
+        SetZoomSpeed(
+            [in] Int64 speed);
+
+        Show();
+
+        Hide();
+
+        SetIsZoomInEnabled(
+            [in] Boolean isEnabled);
+
+        SetIsZoomOutEnabled(
+            [in] Boolean isEnabled);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,24 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");       // import 依赖库
+
+    using interface Elastos.Core.IThread;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Core.IComparable;
+    using interface Elastos.IO.IFileDescriptor;
+
+//    namespace Elastos {
+//    namespace HelloCar {
+
+    class CMyThread {
+        constructor(
+            [in] IFileDescriptor *ifd);         // 实现 IThread 的 CAR 类必须显式声明 constructor()
+
+        interface IThread;
+        interface IRunnable;                    // 实现 IThread 的 CAR 类必须同时实现 IRunnable
+    }
+
+//    } // HelloCar
+//    } // Elastos
+}

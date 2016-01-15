@@ -1,0 +1,43 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Message {
+
+    /**
+     * This class represents a context of a parsing operation:
+     * <ul>
+     *  <li>the current position the parsing operation is expected to start at</li>
+     *  <li>the bounds limiting the scope of the parsing operation</li>
+     * </ul>
+     *
+     * @author <a href="mailto:oleg at ural.com">Oleg Kalnichevski</a>
+     */
+    interface IParserCursor {
+
+        GetLowerBound(
+            [out] Int32* bound);
+
+        GetUpperBound(
+            [out] Int32* bound);
+
+        GetPos(
+            [out] Int32* pos);
+
+        UpdatePos(
+            [in] Int32 pos);
+
+        AtEnd(
+            [out] Boolean* atEnd);
+
+    }
+
+    } // namespace Message
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

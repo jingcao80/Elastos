@@ -1,0 +1,27 @@
+module {
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace Snowfox {
+
+    interface IGeckoNetworkManager
+    {
+        Init();
+
+        Start();
+
+        Stop();
+
+        GetCurrentInformation(
+            [out,callee] ArrayOf<Double>* info);
+
+        EnableNotifications();
+
+        DisableNotifications();
+    }
+
+    } // namespace Snowfox
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}

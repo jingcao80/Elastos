@@ -1,0 +1,139 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHeaderElement;
+    interface Org.Apache.Http.INameValuePair;
+    interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Message {
+
+    /**
+     * Basic implementation for formatting header value elements.
+     * Instances of this class are stateless and thread-safe.
+     * Derived classes are expected to maintain these properties.
+     *
+     * @author <a href="mailto:oleg at ural.com">Oleg Kalnichevski</a>
+     * @author and others
+     *
+     *
+     * <!-- empty lines above to avoid 'svn diff' context problems -->
+     * @version $Revision: 574185 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IHeaderValueFormatter;
+     */
+    [deprecated]
+    interface IBasicHeaderValueFormatter {
+
+        /**
+         * Special characters that can be used as separators in HTTP parameters.
+         * These special characters MUST be in a quoted string to be used within
+         * a parameter value .
+         */
+        // const String SEPARATORS = " ;,:@()<>\\\"/[]?={}\t";
+
+
+        /**
+         * Unsafe special characters that must be escaped using the backslash
+         * character
+         */
+        // const String UNSAFE_CHARS = "\"\\";
+
+        /**
+         * Estimates the length of formatted header elements.
+         *
+         * @param elems     the header elements to format, or <code>null</code>
+         *
+         * @return  a length estimate, in number of characters
+         */
+        EstimateElementsLen(
+            [in] ArrayOf<IHeaderElement*>* elems,
+            [out] Int32* length);
+
+        /**
+         * Estimates the length of a formatted header element.
+         *
+         * @param elem      the header element to format, or <code>null</code>
+         *
+         * @return  a length estimate, in number of characters
+         */
+        EstimateHeaderElementLen(
+            [in] IHeaderElement* elem,
+            [out] Int32* length);
+
+        /**
+         * Estimates the length of formatted parameters.
+         *
+         * @param nvps      the parameters to format, or <code>null</code>
+         *
+         * @return  a length estimate, in number of characters
+         */
+        EstimateParametersLen(
+            [in] ArrayOf<INameValuePair*>* nvps,
+            [out] Int32* length);
+
+        /**
+         * Estimates the length of a formatted name-value pair.
+         *
+         * @param nvp       the name-value pair to format, or <code>null</code>
+         *
+         * @return  a length estimate, in number of characters
+         */
+        EstimateNameValuePairLen(
+            [in] INameValuePair* nvp,
+            [out] Int32* length);
+
+        /**
+         * Actually formats the value of a name-value pair.
+         * This does not include a leading = character.
+         * Called from {@link #formatNameValuePair formatNameValuePair}.
+         *
+         * @param buffer    the buffer to append to, never <code>null</code>
+         * @param value     the value to append, never <code>null</code>
+         * @param quote     <code>true</code> to always format with quotes,
+         *                  <code>false</code> to use quotes only when necessary
+         */
+        DoFormatValue(
+            [in] ICharArrayBuffer* buffer,
+            [in] String value,
+            [in] Boolean quote);
+
+        /**
+         * Checks whether a character is a {@link #SEPARATORS separator}.
+         *
+         * @param ch        the character to check
+         *
+         * @return  <code>true</code> if the character is a separator,
+         *          <code>false</code> otherwise
+         */
+        IsSeparator(
+            [in] Char32 ch,
+            [out] Boolean* isSeparator);
+
+        /**
+         * Checks whether a character is {@link #UNSAFE_CHARS unsafe}.
+         *
+         * @param ch        the character to check
+         *
+         * @return  <code>true</code> if the character is unsafe,
+         *          <code>false</code> otherwise
+         */
+        IsUnsafe(
+            [in] Char32 ch,
+            [out] Boolean* isUnsafe);
+
+    }
+
+    } // namespace Message
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

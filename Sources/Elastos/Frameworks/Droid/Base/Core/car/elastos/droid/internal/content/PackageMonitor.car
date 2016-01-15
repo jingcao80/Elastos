@@ -1,0 +1,177 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Content {
+
+    /**
+     * Helper class for monitoring the state of packages: adding, removing,
+     * updating, and disappearing and reappearing on the SD card.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IBroadcastReceiver
+     */
+    [deprecated, local]
+    interface IPackageMonitor {
+        const Int32 PACKAGE_UNCHANGED = 0;
+        const Int32 PACKAGE_UPDATING = 1;
+        const Int32 PACKAGE_TEMPORARY_CHANGE = 2;
+        const Int32 PACKAGE_PERMANENT_CHANGE = 3;
+
+        Register(
+            [in] IContext* ctx,
+            [in] ILooper* thread,
+            [in] Boolean externalStorage);
+
+        Register(
+            [in] IContext* ctx,
+            [in] ILooper* thread,
+            [in] IUserHandle* user,
+            [in] Boolean externalStorage);
+
+        GetRegisteredHandler(
+            [out] IHandler** handler);
+
+        Unregister();
+
+        OnBeginPackageChanges();
+
+        /**
+         * Called when a package is really added (and not replaced).
+         */
+        OnPackageAdded(
+            [in] String packageName,
+            [in] Int32 uid);
+
+        /**
+         * Called when a package is really removed (and not replaced).
+         */
+        OnPackageRemoved(
+            [in] String packageName,
+            [in] Int32 uid);
+
+        /**
+         * Called when a package is really removed (and not replaced) for
+         * all users on the device.
+         */
+        OnPackageRemovedAllUsers(
+            [in] String packageName,
+            [in] Int32 uid);
+
+        OnPackageUpdateStarted(
+            [in] String packageName,
+            [in] Int32 uid);
+
+        OnPackageUpdateFinished(
+            [in] String packageName,
+            [in] Int32 uid);
+
+        /**
+         * Direct reflection of {@link Intent#ACTION_PACKAGE_CHANGED
+         * Intent.ACTION_PACKAGE_CHANGED} being received, informing you of
+         * changes to the enabled/disabled state of components in a package
+         * and/or of the overall package.
+         *
+         * @param packageName The name of the package that is changing.
+         * @param uid The user ID the package runs under.
+         * @param components Any components in the package that are changing.  If
+         * the overall package is changing, this will contain an entry of the
+         * package name itself.
+         * @return Return true to indicate you care about this change, which will
+         * result in {@link #onSomePackagesChanged()} being called later.  If you
+         * return false, no further callbacks will happen about this change.  The
+         * default implementation returns true if this is a change to the entire
+         * package.
+         */
+        OnPackageChanged(
+            [in] String packageName,
+            [in] Int32 uid,
+            [in] ArrayOf<String>* components,
+            [out] Boolean* result);
+
+        OnHandleForceStop(
+            [in] IIntent* intent,
+            [in] ArrayOf<String>* packages,
+            [in] Int32 uid,
+            [in] Boolean doit,
+            [out] Boolean* result);
+
+        OnHandleUserStop(
+            [in] IIntent* intent,
+            [in] Int32 userHandle);
+
+        OnUidRemoved(
+            [in] Int32 uid);
+
+        OnPackagesAvailable(
+            [in] ArrayOf<String>* packages);
+
+        OnPackagesUnavailable(
+            [in] ArrayOf<String>* packages);
+
+        /**
+         * Called when a package disappears for any reason.
+         */
+        OnPackageDisappeared(
+            [in] String packageName,
+            [in] Int32 reason);
+
+        /**
+         * Called when a package appears for any reason.
+         */
+        OnPackageAppeared(
+            [in] String packageName,
+            [in] Int32 reason);
+
+        /**
+         * Called when an existing package is updated or its disabled state changes.
+         */
+        OnPackageModified(
+            [in] String packageName);
+
+        DidSomePackagesChange(
+            [out] Boolean* isChanged);
+
+        IsPackageAppearing(
+            [in] String packageName,
+            [out] Int32* result);
+
+        AnyPackagesAppearing(
+            [out] Boolean* result);
+
+        IsPackageDisappearing(
+            [in] String packageName,
+            [out] Int32* result);
+
+        AnyPackagesDisappearing(
+            [out] Boolean* result);
+
+        IsReplacing(
+            [out] Boolean* result);
+
+        IsPackageModified(
+            [in] String packageName,
+            [out] Boolean* isModified);
+
+        OnSomePackagesChanged();
+
+        OnFinishPackageChanges();
+
+        GetChangingUserId(
+            [out] Int32* userId);
+    }
+
+    } // namespace Content
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

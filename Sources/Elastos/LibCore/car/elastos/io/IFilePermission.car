@@ -1,0 +1,65 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    interface IPermissionCollection;
+
+    interface IPermission {
+        GetName(
+            [out] String* name);
+
+        /**
+        * Returns a new PermissionCollection in which to place FilePermission
+        * objects.
+        *
+        * @return A new PermissionCollection object suitable for storing
+        *         FilePermission objects.
+        */
+        NewPermissionCollection(
+            [out] IPermissionCollection** object);
+
+        /**
+        * Returns the actions associated with this file permission.
+        *
+        * @return the actions associated with this file permission.
+        */
+        GetActions(
+            [out] String* actions);
+
+       /**
+        * Indicates whether the permission {p} is implied by this file
+        * permission. This is the case if {p} is an instance of
+        * {FilePermission}, if {p}'s actions are a subset of this
+        * file permission's actions and if {p}'s path is implied by this
+        * file permission's path.
+        *
+        * @param p
+        *            the permission to check.
+        * @return {true} if the argument permission is implied by the
+        *         receiver, and {false} if it is not.
+        */
+        Implies(
+            [in] IPermission* p,
+            [out] Boolean* result);
+    }
+
+    interface IPermissionCollection {
+    }
+    /**
+    * Legacy security code; do not use.
+    * @implement Elastos.IO.IPermission
+    */
+
+     /**
+     * @Involve
+     * interface IGuard
+     * interface IPermission;
+     */
+    interface IFilePermission {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

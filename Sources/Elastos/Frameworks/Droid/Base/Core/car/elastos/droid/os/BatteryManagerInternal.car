@@ -1,0 +1,49 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * Battery manager local system service interface.
+     *
+     * @hide Only for use within the system server.
+     */
+    interface IBatteryManagerInternal {
+        /**
+         * Returns true if the device is plugged into any of the specified plug types.
+         */
+        IsPowered(
+            [in] Int32 plugTypeSet,
+            [out] Boolean* res);
+
+        /**
+         * Returns the current plug type.
+         */
+        GetPlugType(
+            [out] Int32* type);
+
+        /**
+         * Returns battery level as a percentage.
+         */
+        GetBatteryLevel(
+            [out] Int32* level);
+
+        /**
+         * Returns whether we currently consider the battery level to be low.
+         */
+        GetBatteryLevelLow(
+            [out] Boolean* res);
+
+        /**
+         * Returns a non-zero value if an unsupported charger is attached.
+         */
+        GetInvalidCharger(
+            [out] Int32* charger);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

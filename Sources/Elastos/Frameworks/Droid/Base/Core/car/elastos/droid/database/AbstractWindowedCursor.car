@@ -1,0 +1,93 @@
+module
+{
+    interface Elastos.Droid.Database.ICursorWindow;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+     * A base class for Cursors that store their data in {@link CursorWindow}s.
+     * <p>
+     * The cursor owns the cursor window it uses.  When the cursor is closed,
+     * its window is also closed.  Likewise, when the window used by the cursor is
+     * changed, its old window is closed.  This policy of strict ownership ensures
+     * that cursor windows are not leaked.
+     * </p><p>
+     * Subclasses are responsible for filling the cursor window with data during
+     * {@link #onMove(int, int)}, allocating a new cursor window if necessary.
+     * During {@link #requery()}, the existing cursor window should be cleared and
+     * filled with new data.
+     * </p><p>
+     * If the contents of the cursor change or become invalid, the old window must be closed
+     * (because it is owned by the cursor) and set to null.
+     * </p>
+     *
+     * @Involve
+     * interface ICloseable;
+     * interface ICursor;
+     * interface ICrossProcessCursor;
+     * interface IAbstractCursor;
+     */
+    interface IAbstractWindowedCursor {
+        /**
+         * @deprecated Use {@link #getType}
+         */
+        //@Deprecated
+        IsBlob(
+            [in] Int32 columnIndex,
+            [out] Boolean* result);
+
+        /**
+         * @deprecated Use {@link #getType}
+         */
+        //@Deprecated
+        IsString(
+            [in] Int32 columnIndex,
+            [out] Boolean* result);
+
+        /**
+         * @deprecated Use {@link #getType}
+         */
+        //@Deprecated
+        IsInt64(
+            [in] Int32 columnIndex,
+            [out] Boolean* result);
+
+        /**
+         * @deprecated Use {@link #getType}
+         */
+        //@Deprecated
+        IsFloat(
+            [in] Int32 columnIndex,
+            [out] Boolean* result);
+
+        /**
+         * Sets a new cursor window for the cursor to use.
+         * <p>
+         * The cursor takes ownership of the provided cursor window; the cursor window
+         * will be closed when the cursor is closed or when the cursor adopts a new
+         * cursor window.
+         * </p><p>
+         * If the cursor previously had a cursor window, then it is closed when the
+         * new cursor window is assigned.
+         * </p>
+         *
+         * @param window The new cursor window, typically a remote cursor window.
+         */
+        SetWindow(
+            [in] ICursorWindow* window);
+
+        /**
+         * Returns true if the cursor has an associated cursor window.
+         *
+         * @return True if the cursor has an associated cursor window.
+         */
+        HasWindow(
+            [out] Boolean* result);
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,418 @@
+
+module
+{
+    interface Elastos.IO.Channels.IDatagramChannel;
+    interface Elastos.Net.IDatagramPacket;
+    interface Elastos.Net.IDatagramSocketImplFactory;
+    interface Elastos.Net.IInetAddress;
+    interface Elastos.Net.INetworkInterface;
+    interface Elastos.Net.ISocketAddress;
+    interface Elastos.IO.IFileDescriptor;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * This class implements a UDP socket for sending and receiving DatagramPacket.
+     * <p>
+     * A DatagramSocket object can be used for both endpoints of a connection
+     * for a packet delivery service.</p>
+     *
+     * @sa DatagramPacket
+     * @sa DatagramSocketImplFactory
+     */
+    /**
+     * @Involve
+     * interface ICloseable;
+     */
+    interface IDatagramSocket {
+        /**
+         * Closes this UDP datagram socket and all possibly associated channels.
+         */
+        // In the documentation jdk1.1.7a/guide/net/miscNet.html, this method is
+        // noted as not being synchronized.
+        Close();
+
+        /**
+         * Sets the DatagramSocket and its related DatagramSocketImpl state as if a successful close()
+         * took place, without actually performing an OS close().
+         *
+         * @hide used in java.nio
+         */
+        OnClose();
+
+        /**
+         * Connects this datagram socket to the address and port specified by {peer}.
+         * Future calls to send will use this as the default target, and receive
+         *
+         * @sa #send
+         * @sa #receive
+         * will only accept packets from this source.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs.
+         */
+        Connect(
+            [in] ISocketAddress* peer);
+
+        /**
+         * Connects this datagram socket to the specific {address} and {port}.
+         * Future calls to send will use this as the default target, and receive
+         *
+         * @sa #send
+         * @sa #receive
+         * will only accept packets from this source.
+         *
+         * <p>Beware: because it can't throw, this method silently ignores failures.
+         * Use connect(SocketAddress) instead.
+         *
+         * @sa #connect(SocketAddress)
+         */
+        Connect(
+            [in] IInetAddress* address,
+            [in] Int32 aPort);
+
+        /**
+         * Sets the DatagramSocket and its related DatagramSocketImpl state as if a successful connect()
+         * took place, without actually performing an OS connect().
+         *
+         * @hide used in java.nio
+         */
+        OnConnect(
+            [in] IInetAddress* remoteAddress,
+            [in] Int32 remotePort);
+
+        /**
+         * Disconnects this UDP datagram socket from the remote host. This method
+         * called on an unconnected socket does nothing.
+         */
+        Disconnect();
+
+        /**
+         * Sets the DatagramSocket and its related DatagramSocketImpl state as if a successful
+         * disconnect() took place, without actually performing a disconnect().
+         *
+         * @hide used in java.nio
+         */
+        OnDisconnect();
+
+        /**
+         * Gets the {InetAddress} instance representing the remote address to
+         * which this UDP datagram socket is connected.
+         *
+         * @return the remote address this socket is connected to or {null} if
+         *         this socket is not connected.
+         */
+        GetInetAddress(
+            [out] IInetAddress** address);
+
+        /**
+         * Gets the {InetAddress} instance representing the bound local
+         * address of this UDP datagram socket.
+         *
+         * @return the local address to which this socket is bound to or
+         *         {null} if this socket is closed.
+         */
+        GetLocalAddress(
+            [out] IInetAddress** address);
+
+        /**
+         * Gets the local port which this socket is bound to.
+         *
+         * @return the local port of this socket or {-1} if this socket is
+         *         closed and {0} if it is unbound.
+         */
+        GetLocalPort(
+            [out] Int32* port);
+
+        /**
+         * Gets the remote port which this socket is connected to.
+         *
+         * @return the remote port of this socket. The return value {-1}
+         *         indicates that this socket is not connected.
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /**
+         * Returns this socket's SocketOptions#SO_RCVBUF receive buffer size.
+         *
+         * @sa SocketOptions#SO_RCVBUF receive buffer size
+         */
+        GetReceiveBufferSize(
+            [out] Int32* size);
+
+        /**
+         * Returns this socket's SocketOptions#SO_SNDBUF send buffer size.
+         * @sa SocketOptions#SO_RCVBUF receive buffer size
+         */
+        GetSendBufferSize(
+            [out] Int32* size);
+
+        /**
+         * Gets the socket SocketOptions#SO_TIMEOUT receive timeout.
+         *
+         * @sa SocketOptions#SO_RCVBUF receive buffer size
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs while getting the option value.
+         */
+        GetSoTimeout(
+            [out] Int32* timeout);
+
+        /**
+         * Receives a packet from this socket and stores it in the argument
+         * {pack}. All fields of {pack} must be set according to the data
+         * received. If the received data is longer than the packet buffer size it
+         * is truncated. This method blocks until a packet is received or a timeout
+         * has expired.
+         *
+         * @param pack
+         *            the {DatagramPacket} to store the received data.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while receiving the packet.
+         */
+        Receive(
+            [in] IDatagramPacket* pack);
+
+        /**
+         * Sends a packet over this socket.
+         *
+         * @param pack
+         *            the {DatagramPacket} which has to be sent.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while sending the packet.
+         */
+        Send(
+            [in] IDatagramPacket* pack);
+
+        /**
+         * Sets the network interface used by this socket.  Any packets sent
+         * via this socket are transmitted via the specified interface.  Any
+         * packets received by this socket will come from the specified
+         * interface.  Broadcast datagrams received on this interface will
+         * be processed by this socket. This corresponds to Linux's SO_BINDTODEVICE.
+         *
+         * @hide used by GoogleTV for DHCP
+         */
+        SetNetworkInterface(
+            [in] INetworkInterface* netInterface);
+
+        /**
+         * Sets this socket's SocketOptions#SO_SNDBUF send buffer size.
+         *
+         * @sa SocketOptions#SO_SNDBUF send buffer size
+         */
+        SetSendBufferSize(
+            [in] Int32 size);
+
+        /**
+         * Sets this socket's SocketOptions#SO_SNDBUF receive buffer size.
+         *
+         * @sa SocketOptions#SO_SNDBUF send buffer size
+         */
+        SetReceiveBufferSize(
+            [in] Int32 size);
+
+        /**
+         * Sets the SocketOptions#SO_TIMEOUT read timeout in milliseconds for this socket.
+         *
+         * @sa SocketOptions#SO_TIMEOUT read timeout
+         * This receive timeout defines the period the socket will block waiting to
+         * receive data before throwing an {InterruptedIOException}. The value
+         * {0} (default) is used to set an infinite timeout. To have effect
+         * this option must be set before the blocking method was called.
+         *
+         * @param timeout the timeout in milliseconds or 0 for no timeout.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs while setting the option.
+         */
+        SetSoTimeout(
+            [in] Int32 timeout);
+
+        /**
+         * Binds this socket to the local address and port specified by
+         * {localAddr}. If this value is {null} any free port on a valid local
+         * address is used.
+         *
+         * @param localAddr
+         *            the local machine address and port to bind on.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the SocketAddress is not supported
+         * SocketException | if the socket is already bound or a problem occurs during binding.
+         */
+        Bind(
+            [in] ISocketAddress* localAddr);
+
+        /**
+         * Sets the DatagramSocket and its related DatagramSocketImpl state as if a successful bind()
+         * took place, without actually performing an OS bind().
+         *
+         * @hide used in java.nio
+         */
+        OnBind(
+            [in] IInetAddress* localAddress,
+            [in] Int32 localPort);
+
+        /**
+         * Returns true if this socket is bound to a local address. See bind.
+         *
+         * @sa #bind
+         */
+        IsBound(
+            [out] Boolean* isBound);
+
+        /**
+         * Returns true if this datagram socket is connected to a remote address.
+         * See connect.
+         *
+         * @sa #connect
+         */
+        IsConnected(
+            [out] Boolean* isConnected);
+
+        /**
+         * Returns the {SocketAddress} this socket is connected to, or null for an unconnected
+         * socket.
+         */
+        GetRemoteSocketAddress(
+            [out] ISocketAddress** address);
+
+        /**
+         * Returns the {SocketAddress} this socket is bound to, or null for an unbound socket.
+         */
+        GetLocalSocketAddress(
+            [out] ISocketAddress** address);
+
+        /**
+         * Sets the socket option {SocketOptions.SO_REUSEADDR}. This option
+         * has to be enabled if more than one UDP socket wants to be bound to the
+         * same address. That could be needed for receiving multicast packets.
+         * <p>
+         * There is an undefined behavior if this option is set after the socket is
+         * already bound.
+         *
+         * @param reuse
+         *            the socket option value to enable or disable this option.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if the socket is closed or the option could not be set.
+         */
+        SetReuseAddress(
+            [in] Boolean reuse);
+
+        /**
+         * Gets the state of the socket option {SocketOptions.SO_REUSEADDR}.
+         *
+         * @return {true} if the option is enabled, {false} otherwise.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if the socket is closed or the option is invalid.
+         */
+        GetReuseAddress(
+            [out] Boolean* reuse);
+
+        /**
+         * Sets the socket option {SocketOptions.SO_BROADCAST}. This option
+         * must be enabled to send broadcast messages.
+         *
+         * @param broadcast
+         *            the socket option value to enable or disable this option.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if the socket is closed or the option could not be set.
+         */
+        SetBroadcast(
+            [in] Boolean broadcast);
+
+        /**
+         * Gets the state of the socket option {SocketOptions.SO_BROADCAST}.
+         *
+         * @return {true} if the option is enabled, {false} otherwise.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if the socket is closed or the option is invalid.
+         */
+        GetBroadcast(
+            [out] Boolean* broadcast);
+
+        /**
+         * Sets the {@see SocketOptions#IP_TOS} value for every packet sent by this socket.
+         *
+         * SocketException | if the socket is closed or the option could not be set.
+         */
+        SetTrafficClass(
+            [in] Int32 value);
+
+        /**
+         * Returns this socket's {@see SocketOptions#IP_TOS} setting.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if the socket is closed or the option is invalid.
+         */
+        GetTrafficClass(
+            [out] Int32* value);
+
+        /**
+         * Gets the state of this socket.
+         *
+         * @return {true} if the socket is closed, {false} otherwise.
+         */
+        IsClosed(
+            [out] Boolean* isClosed);
+
+        /**
+         * Returns this socket's {DatagramChannel}, if one exists. A channel is
+         * available only if this socket wraps a channel. (That is, you can go from a
+         * channel to a socket and back again, but you can't go from an arbitrary socket to a channel.)
+         * In practice, this means that the socket must have been created by
+         * java.nio.channels.DatagramChannel#open.
+         *
+         * @sa java.nio.channels.DatagramChannel#open
+         */
+        GetChannel(
+            [out] IDatagramChannel** channel);
+
+        GetFileDescriptor(
+            [out] IFileDescriptor** fd);
+    }
+
+    interface IDatagramSocketHelper {
+        /**
+         * Sets the socket implementation factory. This may only be invoked once
+         * over the lifetime of the application. This factory is used to create
+         * a new datagram socket implementation.
+         *
+         * @param fac
+         *            the socket factory to use.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if the factory has already been set.
+         * @see DatagramSocketImplFactory
+         */
+        SetDatagramSocketImplFactory(
+            [in] IDatagramSocketImplFactory* fac);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

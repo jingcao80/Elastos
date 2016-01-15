@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     指定该桌面组件的基本配置信息：
+	minWidth：桌面小控件的最小宽度。
+	minWidth：桌面小控件的最小高度。
+	updatePeriodMillis：更新频率
+	initialLayout：初始时显示的布局
+
+-->
+<!--指定该Widget的布局界面为@layout/main-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/main"  
+    android:minHeight="30px"
+    android:minWidth="300px"
+    android:updatePeriodMillis="500"
+   />

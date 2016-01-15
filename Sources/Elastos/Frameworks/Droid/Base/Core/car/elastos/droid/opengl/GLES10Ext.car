@@ -1,0 +1,30 @@
+
+module
+{
+    using interface Elastos.IO.IInt32Buffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    [deprecated]
+    interface IGLES10Ext {
+        // C function GLbitfield glQueryMatrixxOES ( GLfixed *mantissa, GLint *exponent )
+        glQueryMatrixxOES(
+            [in] ArrayOf<Int32>* mantissa,
+            [in] Int32 mantissaOffset,
+            [in] ArrayOf<Int32>* exponent,
+            [in] Int32 exponentOffset,
+            [out] Int32* matrixx);
+
+        // C function GLbitfield glQueryMatrixxOES ( GLfixed *mantissa, GLint *exponent )
+        glQueryMatrixxOES(
+            [in] IInt32Buffer* mantissa,
+            [in] IInt32Buffer* exponent,
+            [out] Int32* matrixx);
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}

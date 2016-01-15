@@ -1,0 +1,108 @@
+module
+{
+    using interface Elastos.IO.IFile;
+
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface IRecoverySystemProgressListener {
+        /**
+         * Called periodically as the verification progresses.
+         *
+         * @param progress  the approximate percentage of the
+         *        verification that has been completed, ranging from 0
+         *        to 100 (inclusive).
+         */
+        OnProgress(
+            [in] Int32 progress);
+    }
+
+    /**
+     * RecoverySystem contains methods for interacting with the Android
+     * recovery system (the separate partition that can be used to install
+     * system updates, wipe user data, etc.)
+     */
+    [deprecated]
+    interface IRecoverySystem {
+        /**
+         * Verify the cryptographic signature of a system update package
+         * before installing it.  Note that the package is also verified
+         * separately by the installer once the device is rebooted into
+         * the recovery system.  This function will return only if the
+         * package was successfully verified; otherwise it will throw an
+         * exception.
+         *
+         * Verification of a package can take significant time, so this
+         * function should not be called from a UI thread.  Interrupting
+         * the thread while this function is in progress will result in a
+         * SecurityException being thrown (and the thread's interrupt flag
+         * will be cleared).
+         *
+         * @param packageFile  the package to be verified
+         * @param listener     an object to receive periodic progress
+         * updates as verification proceeds.  May be null.
+         * @param deviceCertsZipFile  the zip file of certificates whose
+         * public keys we will accept.  Verification succeeds if the
+         * package is signed by the private key corresponding to any
+         * public key in this file.  May be null to use the system default
+         * file (currently "/system/etc/security/otacerts.zip").
+         *
+         * @throws IOException if there were any errors reading the
+         * package or certs files.
+         * @throws GeneralSecurityException if verification failed
+         */
+        VerifyPackage(
+            [in] IFile* packageFile,
+            [in] IRecoverySystemProgressListener* listener,
+            [in] IFile* deviceCertsZipFile);
+
+        /**
+         * Reboots the device in order to install the given update
+         * package.
+         * Requires the {@link android.Manifest.permission#REBOOT} permission.
+         *
+         * @param context      the Context to use
+         * @param packageFile  the update package to install.  Must be on
+         * a partition mountable by recovery.  (The set of partitions
+         * known to recovery may vary from device to device.  Generally,
+         * /cache and /data are safe.)
+         *
+         * @throws IOException  if writing the recovery command file
+         * fails, or if the reboot itself fails.
+         */
+        InstallPackage(
+            [in] IContext* context,
+            [in] IFile* packageFile);
+
+        /**
+         * Reboots the device and wipes the user data and cache
+         * partitions.  This is sometimes called a "factory reset", which
+         * is something of a misnomer because the system partition is not
+         * restored to its factory state.  Requires the
+         * {@link android.Manifest.permission#REBOOT} permission.
+         *
+         * @param context  the Context to use
+         *
+         * @throws IOException  if writing the recovery command file
+         * fails, or if the reboot itself fails.
+         * @throws SecurityException if the current user is not allowed to wipe data.
+         */
+        RebootWipeUserData(
+            [in] IContext* context);
+
+        /**
+         * Reboot into the recovery system to wipe the /cache partition.
+         * @throws IOException if something goes wrong.
+         */
+        RebootWipeCache(
+            [in] IContext* context);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    [deprecated, local]
+    interface IZygote {
+        /*
+         * Bit values for "debugFlags" argument.  The definitions are duplicated
+         * in the native code.
+         */
+        /** enable debugging over JDWP */
+        const Int32 DEBUG_ENABLE_DEBUGGER   = 1;
+        /** enable JNI checks */
+        const Int32 DEBUG_ENABLE_CHECKJNI   = 1 << 1;
+        /** enable Java programming language "assert" statements */
+        const Int32 DEBUG_ENABLE_ASSERT     = 1 << 2;
+        /** disable the JIT compiler */
+        const Int32 DEBUG_ENABLE_SAFEMODE   = 1 << 3;
+        /** Enable logging of third-party JNI activity. */
+        const Int32 DEBUG_ENABLE_JNI_LOGGING = 1 << 4;
+
+        /** No external storage should be mounted. */
+        const Int32 MOUNT_EXTERNAL_NONE = 0;
+        /** Single-user external storage should be mounted. */
+        const Int32 MOUNT_EXTERNAL_SINGLEUSER = 1;
+        /** Multi-user external storage should be mounted. */
+        const Int32 MOUNT_EXTERNAL_MULTIUSER = 2;
+        /** All multi-user external storage should be mounted. */
+        const Int32 MOUNT_EXTERNAL_MULTIUSER_ALL = 3;
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

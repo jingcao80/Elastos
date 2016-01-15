@@ -1,0 +1,59 @@
+
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IExpandableView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Stack {
+
+    /**
+     * An stack state animator which handles animations to new StackScrollStates
+     */
+    [local]
+    interface IStackStateAnimator {
+
+        const Int32 ANIMATION_DURATION_STANDARD = 360;
+        const Int32 ANIMATION_DURATION_GO_TO_FULL_SHADE = 448;
+        const Int32 ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
+        const Int32 ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
+        const Int32 ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
+        const Int32 ANIMATION_DELAY_PER_ELEMENT_MANUAL = 32;
+        const Int32 ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE = 48;
+
+        IsRunning(
+            [out] Boolean* result);
+
+        StartAnimationForEvents(
+            [in] IArrayList* animationEvents,
+            [in] IStackScrollState* finalState,
+            [in] Int64 additionalDelay);
+
+        AnimateOverScrollToAmount(
+            [in] Float targetAmount,
+            [in] Boolean onTop,
+            [in] Boolean isRubberbanded);
+
+        CancelOverScrollAnimators(
+            [in] Boolean onTop);
+
+        /**
+         * Get the end value of the height animation running on a view or the actualHeight
+         * if no animation is running.
+         */
+        GetFinalActualHeight(
+            [in] IExpandableView* view);
+    }
+
+    } // namespace Stack
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,1627 @@
+module
+{
+    merge("content/AbstractThreadedSyncAdapter.car");
+    merge("content/AsyncQueryHandler.car");
+    merge("content/AsyncTaskLoader.car");
+    merge("content/BroadcastReceiver.car");
+    merge("content/ClipData.car");
+    merge("content/ClipDescription.car");
+    merge("content/ClipboardManager.car");
+    merge("content/ComponentCallbacks.car");
+    merge("content/ComponentCallbacks2.car");
+    merge("content/ComponentName.car");
+    merge("content/ContentInsertHandler.car");
+    merge("content/ContentProvider.car");
+    merge("content/ContentProviderClient.car");
+    merge("content/ContentProviderOperation.car");
+    merge("content/ContentProviderResult.car");
+    merge("content/ContentQueryMap.car");
+    merge("content/ContentResolver.car");
+    merge("content/ContentUris.car");
+    merge("content/ContentValues.car");
+    merge("content/Context.car");
+    merge("content/ContextWrapper.car");
+    merge("content/CursorEntityIterator.car");
+    merge("content/CursorLoader.car");
+    merge("content/DialogInterface.car");
+    merge("content/Entity.car");
+    merge("content/EntityIterator.car");
+    merge("content/IClipboard.car");
+    merge("content/IContentProvider.car");
+    merge("content/IContentService.car");
+    merge("content/IIntentReceiver.car");
+    merge("content/IIntentSender.car");
+    merge("content/IOnPrimaryClipChangedListener.car");
+    merge("content/IRestrictionsManager.car");
+    merge("content/ISyncAdapter.car");
+    merge("content/ISyncContext.car");
+    merge("content/ISyncServiceAdapter.car");
+    merge("content/ISyncStatusObserver.car");
+    merge("content/Intent.car");
+    merge("content/IntentFilter.car");
+    merge("content/IntentSender.car");
+    merge("content/Loader.car");
+    merge("content/MutableContextWrapper.car");
+    merge("content/PeriodicSync.car");
+    merge("content/RestrictionEntry.car");
+    merge("content/RestrictionsManager.car");
+    merge("content/SearchRecentSuggestionsProvider.car");
+    merge("content/ServiceConnection.car");
+    merge("content/SharedPreferences.car");
+    merge("content/SyncAdapterType.car");
+    merge("content/SyncAdaptersCache.car");
+    merge("content/SyncActivityTooManyDeletes.car");
+    merge("content/SyncContext.car");
+    merge("content/SyncInfo.car");
+    merge("content/SyncRequest.car");
+    merge("content/SyncResult.car");
+    merge("content/SyncStats.car");
+    merge("content/SyncStatusInfo.car");
+    merge("content/SyncStatusObserver.car");
+    merge("content/UndoManager.car");
+    merge("content/UndoOperation.car");
+    merge("content/UndoOwner.car");
+    merge("content/UriMatcher.car");
+    merge("content/UriPermission.car");
+
+    merge("content/pm/ActivityInfo.car");
+    merge("content/pm/ApplicationInfo.car");
+    merge("content/pm/ComponentInfo.car");
+    merge("content/pm/ConfigurationInfo.car");
+    merge("content/pm/ContainerEncryptionParams.car");
+    merge("content/pm/FeatureGroupInfo.car");
+    merge("content/pm/FeatureInfo.car");
+    merge("content/pm/ILauncherApps.car");
+    merge("content/pm/IOnAppsChangedListener.car");
+    merge("content/pm/IPackageDataObserver.car");
+    merge("content/pm/IPackageDeleteObserver.car");
+    merge("content/pm/IPackageDeleteObserver2.car");
+    merge("content/pm/IPackageInstallObserver.car");
+    merge("content/pm/IPackageInstallObserver2.car");
+    merge("content/pm/IPackageInstaller.car");
+    merge("content/pm/IPackageInstallerCallback.car");
+    merge("content/pm/IPackageInstallerSession.car");
+    merge("content/pm/IPackageManager.car");
+    merge("content/pm/IPackageMoveObserver.car");
+    merge("content/pm/IPackageStatsObserver.car");
+    merge("content/pm/InstrumentationInfo.car");
+    merge("content/pm/KeySet.car");
+    merge("content/pm/LabeledIntent.car");
+    merge("content/pm/LauncherActivityInfo.car");
+    merge("content/pm/LauncherApps.car");
+    merge("content/pm/LimitedLengthInputStream.car");
+    merge("content/pm/MacAuthenticatedInputStream.car");
+    merge("content/pm/ManifestDigest.car");
+    merge("content/pm/PackageCleanItem.car");
+    merge("content/pm/PackageInfo.car");
+    merge("content/pm/PackageInfoLite.car");
+    merge("content/pm/PackageInstaller.car");
+    merge("content/pm/PackageItemInfo.car");
+    merge("content/pm/PackageManager.car");
+    merge("content/pm/PackageStats.car");
+    merge("content/pm/ParceledListSlice.car");
+    merge("content/pm/PathPermission.car");
+    merge("content/pm/PermissionGroupInfo.car");
+    merge("content/pm/PermissionInfo.car");
+    merge("content/pm/ProviderInfo.car");
+    merge("content/pm/RegisteredServicesCache.car");
+    merge("content/pm/RegisteredServicesCacheListener.car");
+    merge("content/pm/ResolveInfo.car");
+    merge("content/pm/ServiceInfo.car");
+    merge("content/pm/Signature.car");
+    merge("content/pm/UserInfo.car");
+    merge("content/pm/VerificationParams.car");
+    merge("content/pm/VerifierDeviceIdentity.car");
+    merge("content/pm/VerifierInfo.car");
+    merge("content/pm/XmlSerializerAndParser.car");
+
+    merge("content/res/AssetFileDescriptor.car");
+    merge("content/res/AssetManager.car");
+    merge("content/res/ColorStateList.car");
+    merge("content/res/CompatibilityInfo.car");
+    merge("content/res/Configuration.car");
+    merge("content/res/ObbInfo.car");
+    merge("content/res/ObbScanner.car");
+    merge("content/res/Resources.car");
+    merge("content/res/ResourcesKey.car");
+    merge("content/res/TypedArray.car");
+    merge("content/res/XmlResourceParser.car");
+
+    using interface Elastos.Core.IComparator;
+    using interface Elastos.Core.IComparable;
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.IO.IFileInputStream;
+    using interface Elastos.IO.IFileOutputStream;
+    using interface Elastos.IO.IFilterInputStream;
+    using interface Elastos.IO.IOutputStream;
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IFlushable;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IObservable;
+    using interface Elastos.Security.IPublicKey;
+    using interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+    using interface Elastosx.Crypto.ISecretKey;
+    using interface Elastosx.Crypto.IMac;
+    using interface Org.Xml.Sax.IContentHandler;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.Os.IPatternMatcher;
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Database.IContentObserver;
+    interface Elastos.Droid.Accounts.IAccount;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.ILoader;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IIIntentSender;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Content.Pm.IIPackageInstaller;
+    interface Elastos.Droid.Content.Pm.IRegisteredServicesCache;
+    interface Elastos.Droid.Utility.IDisplayMetrics;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+        class CLoader {
+            /**
+             * Stores away the application context associated with context.
+             * Since Loaders can be used across multiple activities it's dangerous to
+             * store the context directly; always use {@link #getContext()} to retrieve
+             * the Loader's Context, don't use the constructor argument directly.
+             * The Context returned by {@link #getContext} is safe to use across
+             * Activity instances.
+             *
+             * @param context used to retrieve the application context.
+             */
+            constructor(
+                [in] IContext* ctx);
+
+            interface ILoader;
+        }
+
+        /**
+         * State for a result that is pending for a broadcast receiver.  Returned
+         * by {@link BroadcastReceiver#goAsync() goAsync()}
+         * while in {@link BroadcastReceiver#onReceive BroadcastReceiver.onReceive()}.
+         * This allows you to return from onReceive() without having the broadcast
+         * terminate; you must call {@link #finish()} once you are done with the
+         * broadcast.  This allows you to process the broadcast off of the main
+         * thread of your app.
+         *
+         * <p>Note on threading: the state inside of this class is not itself
+         * thread-safe, however you can use it from any thread if you properly
+         * sure that you do not have races.  Typically this means you will hand
+         * the entire object to another thread, which will be solely responsible
+         * for setting any results and finally calling {@link #finish()}.
+         */
+        class CPendingResult {
+            /** @hide */
+            constructor(
+                [in] Int32 resultCode,
+                [in] String resultData,
+                [in] IBundle* resultExtras,
+                [in] Int32 type,
+                [in] Boolean ordered,
+                [in] Boolean sticky,
+                [in] IBinder* token,
+                [in] Int32 userId);
+
+            interface IPendingResult;
+        }
+
+        [deprecated]
+        class CClipData {
+
+            constructor();
+
+            /**
+             * Create a new clip.
+             *
+             * @param label Label to show to the user describing this clip.
+             * @param mimeTypes An array of MIME types this data is available as.
+             * @param item The contents of the first item in the clip.
+             */
+            constructor(
+                [in] ICharSequence* label,
+                [in] ArrayOf<String>* mimeTypes,
+                [in] IClipDataItem* item);
+
+            /**
+             * Create a new clip.
+             *
+             * @param description The ClipDescription describing the clip contents.
+             * @param item The contents of the first item in the clip.
+             */
+            constructor(
+                [in] IClipDescription* description,
+                [in] IClipDataItem* item);
+
+            /**
+             * Create a new clip that is a copy of another clip.  This does a deep-copy
+             * of all items in the clip.
+             *
+             * @param other The existing ClipData that is to be copied.
+             */
+            constructor(
+                [in] IClipData* other);
+
+            interface IClipData;
+            interface IParcelable;
+        }
+
+        class CClipDataItem {
+            /**
+             * Create an Item consisting of a single block of (possibly styled) text.
+             */
+            constructor(
+                [in] ICharSequence* text);
+
+            /**
+             * Create an Item consisting of a single block of (possibly styled) text,
+             * with an alternative HTML formatted representation.  You <em>must</em>
+             * supply a plain text representation in addition to HTML text; coercion
+             * will not be done from HTML formated text into plain text.
+             */
+            constructor(
+                [in] ICharSequence* text,
+                [in] String htmlText);
+
+            /**
+             * Create an Item consisting of an arbitrary Intent.
+             */
+            constructor(
+                [in] IIntent* intent);
+
+            /**
+             * Create an Item consisting of an arbitrary URI.
+             */
+            constructor(
+                [in] IUri* uri);
+
+            /**
+             * Create a complex Item, containing multiple representations of
+             * text, Intent, and/or URI.
+             */
+            constructor(
+                [in] ICharSequence* text,
+                [in] IIntent* intent,
+                [in] IUri* uri);
+
+            /**
+             * Create a complex Item, containing multiple representations of
+             * text, HTML text, Intent, and/or URI.  If providing HTML text, you
+             * <em>must</em> supply a plain text representation as well; coercion
+             * will not be done from HTML formated text into plain text.
+             */
+            constructor(
+                [in] ICharSequence* text,
+                [in] String htmlText,
+                [in] IIntent* intent,
+                [in] IUri* uri);
+
+            interface IClipDataItem;
+        }
+
+        singleton class CClipDataHelper {
+            interface IClipDataHelper;
+        }
+
+        [deprecated]
+        class CClipDescription {
+            /**
+             * Create a new clip.
+             *
+             * @param label Label to show to the user describing this clip.
+             * @param mimeTypes An array of MIME types this data is available as.
+             */
+            constructor(
+                [in] ICharSequence* label,
+                [in] ArrayOf<String>* mimeTypes);
+
+            /**
+             * Create a copy of a ClipDescription.
+             */
+            constructor(
+                [in] IClipDescription* o);
+
+            constructor();
+
+            interface IClipDescription;
+            interface IParcelable;
+        }
+
+        singleton class CClipDescriptionHelper {
+            interface IClipDescriptionHelper;
+        }
+
+        [local]
+        class CClipboardManager {
+            /** {@hide} */
+            constructor(
+                [in] IContext* ctx);
+
+            interface IClipboardManager;
+            interface Elastos.Droid.Text.IClipboardManager;
+        }
+
+        /**
+         * Identifier for a specific application component
+         * ({@link android.app.Activity}, {@link android.app.Service},
+         * {@link android.content.BroadcastReceiver}, or
+         * {@link android.content.ContentProvider}) that is available.  Two
+         * pieces of information, encapsulated here, are required to identify
+         * a component: the package (a String) it exists in, and the class (a String)
+         * name inside of that package.
+         *
+         */
+        [local]
+        class CComponentName {
+            constructor();
+
+            /**
+             * Create a new component identifier.
+             *
+             * @param pkg The name of the package that the component exists in.  Can
+             * not be null.
+             * @param cls The name of the class inside of <var>pkg</var> that
+             * implements the component.  Can not be null.
+             */
+            constructor(
+                [in] String pkg,
+                [in] String cls);
+
+            /**
+             * Create a new component identifier from a Context and class name.
+             *
+             * @param pkg A Context for the package implementing the component,
+             * from which the actual package name will be retrieved.
+             * @param cls The name of the class inside of <var>pkg</var> that
+             * implements the component.
+             */
+            constructor(
+                [in] IContext* pkgCtx,
+                [in] String cls);
+
+            /**
+             * Create a new component identifier from a Context and Class object.
+             *
+             * @param pkg A Context for the package implementing the component, from
+             * which the actual package name will be retrieved.
+             * @param cls The Class object of the desired component, from which the
+             * actual class name will be retrieved.
+             */
+            constructor(
+                [in] IContext* pkg,
+                [in] IClassInfo* IClassInfo);
+
+            interface IComponentName;
+            interface IParcelable;
+            interface ICloneable;
+            interface IComparable;
+        }
+
+        singleton class CComponentNameHelper {
+            interface IComponentNameHelper;
+        }
+
+        singleton class CContentProviderHelper {
+            interface IContentProviderHelper;
+        }
+
+        class CContentProviderTransport {
+            constructor(
+                [in] IContentProvider* owner);
+
+            interface IContentProviderTransport;
+            interface IIContentProvider;
+            interface IBinder;
+        }
+
+        /**
+         * The public interface object used to interact with a {@link ContentProvider}. This is obtained by
+         * calling {@link ContentResolver#acquireContentProviderClient}. This object must be released
+         * using {@link #release} in order to indicate to the system that the {@link ContentProvider} is
+         * no longer needed and can be killed to free up resources.
+         *
+         * <p>Note that you should generally create a new ContentProviderClient instance
+         * for each thread that will be performing operations.  Unlike
+         * {@link ContentResolver}, the methods here such as {@link #query} and
+         * {@link #openFile} are not thread safe -- you must not call
+         * {@link #release()} on the ContentProviderClient those calls are made from
+         * until you are finished with the data they have returned.
+         */
+        class CContentProviderClient {
+            /**
+             * @hide
+             */
+            constructor(
+                [in] IContentResolver* resolver,
+                [in] IIContentProvider* provider,
+                [in] Boolean stable);
+
+            interface IContentProviderClient;
+        }
+
+        class CContentProviderOperation {
+            /**
+            * Creates a {@link ContentProviderOperation} by copying the contents of a
+            * {@link Builder}.
+            */
+            constructor(
+                [in] IContentProviderOperationBuilder* operationBuilder);
+
+            constructor();
+
+            interface IContentProviderOperation;
+            interface IParcelable;
+        }
+
+        class CContentProviderOperationBuilder {
+            interface IContentProviderOperationBuilder;
+        }
+
+        singleton class CContentProviderOperationHelper {
+            interface IContentProviderOperationHelper;
+        }
+
+        /**
+         * Contains the result of the application of a {@link ContentProviderOperation}. It is guaranteed
+         * to have exactly one of {@link #uri} or {@link #count} set.
+         */
+        class CContentProviderResult {
+            constructor(
+                [in] IUri* uri);
+
+            constructor(
+                [in] Int32 count);
+
+            constructor();
+
+            interface IContentProviderResult;
+            interface IParcelable;
+        }
+
+        /**
+         * Caches the contents of a cursor into a Map of String->ContentValues and optionally
+         * keeps the cache fresh by registering for updates on the content backing the cursor. The column of
+         * the database that is to be used as the key of the map is user-configurable, and the
+         * ContentValues contains all columns other than the one that is designated the key.
+         * <p>
+         * The cursor data is accessed by row key and column name via getValue().
+         */
+        class CContentQueryMap {
+
+            constructor(
+                [in] ICursor* cursor,
+                [in] String columnNameOfKey,
+                [in] Boolean keepUpdated,
+                [in] IHandler* handlerForUpdateNotifications);
+
+            interface IContentQueryMap;
+            interface IObservable;
+        }
+
+        /**
+         * This class is used to store a set of values that the {@link ContentResolver}
+         * can process.
+         */
+        class CContentValues {
+            /**
+             * Creates an empty set of values using the default initial size
+             */
+            constructor();
+
+            /**
+             * Creates an empty set of values using the given initial size
+             *
+             * @param size the initial size of the set of values
+             */
+            constructor(
+                [in] Int32 size);
+
+            /**
+             * Creates a set of values copied from the given set
+             *
+             * @param from the values to copy
+             */
+            constructor(
+                [in] IContentValues* from);
+
+            interface IContentValues;
+            interface IParcelable;
+        }
+
+        singleton class CContentUris {
+            interface IContentUris;
+        }
+
+        singleton class CContentResolverHelper {
+            interface IContentResolverHelper;
+        }
+
+        class CContentResolverOpenResourceIdResult {
+            constructor(
+                [in] IResources* res,
+                [in] Int32 id);
+
+            interface IContentResolverOpenResourceIdResult;
+        }
+
+        [local]
+        class CContextWrapper {
+            constructor(
+               [in] IContext* ctx);
+
+           interface IContextWrapper;
+           interface IContext;
+        }
+
+        [local]
+        class CLoaderForceLoadContentObserver {
+            constructor(
+                [in] ILoader* loader);
+
+            interface ILoaderForceLoadContentObserver;
+            interface IContentObserver;
+        }
+
+        [deprecated]
+        class CCursorLoader {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IUri* uri,
+                [in] ArrayOf<String>* projection,
+                [in] String selection,
+                [in] ArrayOf<String>* selectionArgs,
+                [in] String sortOrder);
+
+            interface ICursorLoader;
+            interface IAsyncTaskLoader;
+            interface ILoader;
+        }
+
+        class CDefaultDataHandler {
+            interface IContentInsertHandler;
+            interface IContentHandler;
+        }
+
+        /**
+         * A representation of a item using ContentValues. It contains one top level ContentValue
+         * plus a collection of Uri, ContentValues tuples as subvalues. One example of its use
+         * is in Contacts, where the top level ContentValue contains the columns from the RawContacts
+         * table and the subvalues contain a ContentValues object for each row from the Data table that
+         * corresponds to that RawContact. The uri refers to the Data table uri for each row.
+         */
+        class CEntity {
+            constructor(
+                [in] IContentValues* values);
+
+            interface IEntity;
+        }
+
+        class CEntityNamedContentValues {
+            constructor(
+                [in] IUri* uri,
+                [in] IContentValues* values);
+
+            interface IEntityNamedContentValues;
+        }
+
+        [local]
+        class CIntent {
+            constructor();
+
+            constructor(
+                [in] IIntent* intent);
+
+            constructor(
+                [in] IIntent* intent,
+                [in] Boolean all);
+
+            constructor(
+                [in] String action);
+
+            constructor(
+                [in] String action,
+                [in] IUri* uri);
+
+            constructor(
+                [in] IContext* packageContext,
+                [in] ClassID clsId);
+
+            constructor(
+                [in] String action,
+                [in] IUri* uri,
+                [in] IContext* packageContext,
+                [in] IClassInfo* clsinfo);
+
+            interface IIntent;
+            interface IParcelable;
+            interface ICloneable;
+        }
+
+        singleton class CIntentHelper {
+            interface IIntentHelper;
+        }
+
+        class CIntentFilterComparison {
+            constructor(
+                [in] IIntent* intent);
+
+            interface IIntentFilterComparison;
+        }
+
+        class CIntentFilter {
+            constructor();
+
+            constructor(
+                [in] String action);
+
+            constructor(
+                [in] String action,
+                [in] String dataType);
+
+            constructor(
+                [in] IIntentFilter* o);
+
+            interface IIntentFilter;
+            interface IParcelable;
+        }
+
+        singleton class CIntentFilterHelper {
+            interface IIntentFilterHelper;
+        }
+
+        class CIntentFilterAuthorityEntry {
+            constructor();
+
+            constructor(
+                [in] String host,
+                [in] String port);
+
+            interface IIntentFilterAuthorityEntry;
+            interface IParcelable;
+        }
+
+        /**
+         * Represents a shortcut/live folder icon resource.
+         *
+         * @see Intent#ACTION_CREATE_SHORTCUT
+         * @see Intent#EXTRA_SHORTCUT_ICON_RESOURCE
+         * @see android.provider.LiveFolders#ACTION_CREATE_LIVE_FOLDER
+         * @see android.provider.LiveFolders#EXTRA_LIVE_FOLDER_ICON
+         */
+        class CIntentShortcutIconResource {
+            constructor();
+
+            interface IIntentShortcutIconResource;
+            interface IParcelable;
+        }
+
+        singleton class CIntentShortcutIconResourceHelper {
+            interface IIntentShortcutIconResourceHelper;
+        }
+
+        class CIntentSender {
+            constructor();
+
+            constructor(
+                [in] IIIntentSender* intentSender);
+
+            constructor(
+                [in] IBinder* target);
+
+            interface IIntentSender;
+            interface IParcelable;
+        }
+
+        singleton class CIntentSenderHelper {
+            interface IIntentSenderHelper;
+        }
+
+        /**
+         * Special version of {@link ContextWrapper} that allows the base context to
+         * be modified after it is initially set.
+         */
+        [local]
+        class CMutableContextWrapper {
+            constructor(
+                [in] IContext* base);
+
+            interface IMutableContextWrapper;
+            interface IContextWrapper;
+            interface IContext;
+        }
+
+        class CPeriodicSync {
+            constructor();
+
+            /**
+             * Create a copy of a periodic sync.
+             * {@hide}
+             */
+            constructor(
+                [in] IPeriodicSync* other);
+
+            constructor(
+                [in] IAccount* account,
+                [in] String authority,
+                [in] IBundle* extras,
+                [in] Int64 period);
+
+            constructor(
+                [in] IAccount* account,
+                [in] String authority,
+                [in] IBundle* extras,
+                [in] Int64 periodInSeconds,
+                [in] Int64 flexTime);
+
+            interface IPeriodicSync;
+            interface IParcelable;
+        }
+
+        [deprecated]
+        class CRestrictionEntry {
+            constructor();
+
+            constructor(
+                [in] Int32 type,
+                [in] String key);
+
+            constructor(
+                [in] String key,
+                [in] String selectedString);
+
+            constructor(
+                [in] String key,
+                [in] Boolean selectedState);
+
+            constructor(
+                [in] String key,
+                [in] ArrayOf<String>* selectedStrings);
+
+            constructor(
+                [in] String key,
+                [in] Int32 selectedInt);
+
+            interface IRestrictionEntry;
+            interface IParcelable;
+        }
+
+        class CSyncAdaptersCache {
+            constructor(
+                [in] IContext* context);
+
+            interface ISyncAdaptersCache;
+            interface IRegisteredServicesCache;
+        }
+
+        class CRestrictionsManager {
+            interface IRestrictionsManager;
+        }
+
+        class CSyncAdapterType {
+            constructor();
+
+            constructor(
+                [in] String authority,
+                [in] String accountType,
+                [in] Boolean userVisible,
+                [in] Boolean supportsUploading);
+
+            /** @hide */
+            constructor(
+                [in] String authority,
+                [in] String accountType,
+                [in] Boolean userVisible,
+                [in] Boolean supportsUploading,
+                [in] Boolean isAlwaysSyncable,
+                [in] Boolean allowParallelSyncs,
+                [in] String settingsActivity);
+
+            interface ISyncAdapterType;
+            interface IParcelable;
+        }
+
+        singleton class CSyncAdapterTypeHelper {
+            interface ISyncAdapterTypeHelper;
+        }
+
+        class CSyncContext {
+            interface ISyncContext;
+        }
+
+        class CSyncInfo {
+            constructor();
+
+            constructor(
+                [in] ISyncInfo* other);
+
+            /** @hide */
+            constructor(
+                [in] Int32 authorityId,
+                [in] IAccount* account,
+                [in] String authority,
+                [in] Int64 startTime);
+
+            interface ISyncInfo;
+            interface IParcelable;
+        }
+
+        class CSyncRequest {
+            constructor();
+
+            interface ISyncRequest;
+            interface IParcelable;
+        }
+
+        class CSyncRequestBuilder {
+            constructor();
+
+            interface ISyncRequestBuilder;
+        }
+
+        class CSyncResult {
+            constructor();
+
+            constructor(
+                [in] Boolean syncAlreadyInProgress);
+
+            interface ISyncResult;
+            interface IParcelable;
+        }
+
+        singleton class CSyncResultHelper {
+
+            interface ISyncResultHelper;
+        }
+
+        class CSyncStats {
+            constructor();
+
+            interface ISyncStats;
+            interface IParcelable;
+        }
+
+        /** @hide */
+        class CSyncStatusInfo {
+            constructor();
+
+            constructor(
+                [in] Int32 authorityId);
+
+            constructor(
+                [in] ISyncStatusInfo* other);
+
+            interface ISyncStatusInfo;
+            interface IParcelable;
+        }
+
+        class CUriMatcher {
+            constructor(
+                [in] Int32 code);
+
+            interface IUriMatcher;
+        }
+
+        class CUriPermission {
+            constructor();
+
+            constructor(
+                [in] IUri* uri,
+                [in] Int32 modeFlags,
+                [in] Int64 persistedTime);
+
+            interface IUriPermission;
+            interface IParcelable;
+        }
+
+        class CSearchRecentSuggestionsProvider {
+            interface IContentProvider;
+        }
+
+    }//namespace Content
+    }//namespace Droid
+    }//namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    class CActivityInfo {
+        constructor();
+
+        constructor(
+            [in] IActivityInfo* other);
+
+        interface IActivityInfo;
+        interface IComponentInfo;
+        interface IPackageItemInfo;
+        interface IParcelable;
+    }
+
+    singleton class CActivityInfoHelper {
+        interface IActivityInfoHelper;
+    }
+
+    class CApplicationInfo {
+        constructor();
+
+        constructor(
+            [in] IApplicationInfo* other);
+
+        interface IApplicationInfo;
+        interface IPackageItemInfo;
+        interface IParcelable;
+    }
+
+    [local]
+    class CApplicationInfoDisplayNameComparator {
+        constructor(
+            [in] IPackageManager* pm);
+
+        interface IComparator;
+    }
+
+    class CComponentInfo {
+        constructor();
+
+        constructor(
+            [in] IComponentInfo* other);
+
+        interface IComponentInfo;
+        interface IPackageItemInfo;
+    }
+
+    class CConfigurationInfo {
+        constructor();
+
+        constructor(
+            [in] IConfigurationInfo* other);
+
+        interface IConfigurationInfo;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CContainerEncryptionParams {
+        constructor();
+
+        constructor(
+            [in] String encryptionAlgorithm,
+            [in] IAlgorithmParameterSpec* encryptionSpec,
+            [in] ISecretKey* encryptionKey);
+
+        constructor(
+            [in] String encryptionAlgorithm,
+            [in] IAlgorithmParameterSpec* encryptionSpec,
+            [in] ISecretKey* encryptionKey,
+            [in] String macAlgorithm,
+            [in] IAlgorithmParameterSpec* macSpec,
+            [in] ISecretKey* macKey,
+            [in] ArrayOf<Byte>* macTag,
+            [in] Int64 authenticatedDataStart,
+            [in] Int64 encryptedDataStart,
+            [in] Int64 dataEnd);
+
+        interface IContainerEncryptionParams;
+        interface IParcelable;
+    }
+
+    class CFeatureInfo {
+        constructor();
+
+        constructor(
+            [in] IFeatureInfo* other);
+
+        interface IFeatureInfo;
+        interface IParcelable;
+    }
+
+    class CFeatureGroupInfo {
+        constructor();
+
+        constructor(
+            [in] IFeatureGroupInfo* other);
+
+        interface IFeatureGroupInfo;
+        interface IParcelable;
+    }
+
+    class CInstrumentationInfo {
+        constructor();
+
+        constructor(
+            [in] IInstrumentationInfo* other);
+
+        interface IInstrumentationInfo;
+        interface IPackageItemInfo;
+        interface IParcelable;
+    }
+
+    class CLabeledIntent {
+
+         constructor(
+             [in] IIntent* origIntent,
+             [in] String sourcePackage,
+             [in] Int32 labelRes,
+             [in] Int32 icon);
+
+         constructor(
+             [in] IIntent* origIntent,
+             [in] String sourcePackage,
+             [in] ICharSequence* nonLocalizedLabel,
+             [in] Int32 icon);
+
+         constructor(
+             [in] String sourcePackage,
+             [in] Int32 labelRes,
+             [in] Int32 icon);
+
+         constructor(
+             [in] String sourcePackage,
+             [in] ICharSequence* nonLocalizedLabel,
+             [in] Int32 icon);
+
+         constructor();
+
+        interface ILabeledIntent;
+        interface IIntent;
+        interface ICloneable;
+        interface IParcelable;
+    }
+
+    [local]
+    class CLauncherActivityInfo {
+         constructor(
+             [in] IContext* context);
+
+         constructor(
+             [in] IContext* context,
+             [in] IResolveInfo* info,
+             [in] IUserHandle* user,
+             [in] Int64 firstInstallTime);
+
+        interface ILauncherActivityInfo;
+    }
+
+    [local]
+    class CLauncherApps {
+         constructor(
+             [in] IContext* context,
+             [in] IILauncherApps* service);
+
+        interface ILauncherApps;
+    }
+
+    class CLimitedLengthInputStream {
+        constructor(
+            [in] IInputStream* inStream,
+            [in] Int64 offset,
+            [in] Int64 length);
+
+        interface ILimitedLengthInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class CMacAuthenticatedInputStream {
+        constructor(
+            [in] IInputStream* inStream,
+            [in] IMac* mac);
+
+        interface IMacAuthenticatedInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+     [deprecated]
+     class CManifestDigest {
+         constructor();
+
+         constructor(
+             [in] ArrayOf<Byte>* digest);
+
+         interface IManifestDigest;
+         interface IParcelable;
+     }
+
+     /** @hide */
+     class CPackageCleanItem {
+         constructor();
+
+         constructor(
+             [in] Int32 userId,
+             [in] String packageName,
+             [in] Boolean andCode);
+
+         interface IPackageCleanItem;
+         interface IParcelable;
+     }
+
+    class CPackageInfo {
+        constructor();
+
+        interface IPackageInfo;
+        interface IParcelable;
+    }
+
+    class CPackageInfoLite {
+        constructor();
+
+        interface IPackageInfoLite;
+        interface IParcelable;
+    }
+
+    class CPackageItemInfo {
+        constructor();
+
+        constructor(
+            [in] IPackageItemInfo* orig);
+
+        interface IPackageItemInfo;
+    }
+
+    [local]
+    class CPackageItemInfoDisplayNameComparator {
+        constructor(
+            [in] IPackageManager* pm);
+
+        interface IComparator;
+    }
+
+//    singleton class CPackageManagerHelper {
+//        interface IPackageManagerHelper;
+//    }
+
+    class CPackageStats {
+        constructor();
+
+        constructor(
+            [in] String pkgName);
+
+        constructor(
+            [in] IPackageStats* pStats);
+
+        interface IPackageStats;
+        interface IParcelable;
+    }
+
+    [local]
+    class CPackageInstaller {
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IPackageManager* pm,
+            [in] IIPackageInstaller* installer,
+            [in] String installerPackageName,
+            [in] Int32 userId);
+
+        interface IPackageInstaller;
+    }
+
+    class CPackageInstallerSession {
+        constructor();
+
+        interface IPackageInstallerSession;
+        interface ICloseable;
+    }
+
+    class CPackageInstallerSessionParams {
+        constructor();
+
+        constructor(
+            [in] Int32 mode);
+
+        interface IPackageInstallerSessionParams;
+        interface IParcelable;
+    }
+
+    class CPackageInstallerSessionInfo {
+        constructor();
+
+        interface IPackageInstallerSessionInfo;
+        interface IParcelable;
+    }
+
+    class CParceledListSlice {
+        constructor();
+
+        constructor(
+            [in] IList* list);
+
+        interface IParceledListSlice;
+        interface IParcelable;
+    }
+
+    class CPathPermission {
+        constructor();
+
+        constructor(
+            [in] String pattern,
+            [in] Int32 type,
+            [in] String readPermission,
+            [in] String writePermission);
+
+        interface IPathPermission;
+        interface IPatternMatcher;
+        interface IParcelable;
+    }
+
+    [local]
+    class CPermissionGroupInfo {
+        constructor();
+
+        constructor(
+            [in] IPermissionGroupInfo* orig);
+
+        interface IPermissionGroupInfo;
+        interface IPackageItemInfo;
+        interface IParcelable;
+    }
+
+    [local]
+    class CPermissionInfo {
+        constructor();
+
+        constructor(
+            [in] IPermissionInfo* orig);
+
+        interface IPermissionInfo;
+        interface IPackageItemInfo;
+        interface IParcelable;
+    }
+
+    singleton class CPermissionInfoHelper {
+        interface IPermissionInfoHelper;
+    }
+
+    class CProviderInfo {
+        constructor();
+
+        constructor(
+            [in] IProviderInfo* orig);
+
+        interface IProviderInfo;
+        interface IParcelable;
+    }
+
+    class CRegisteredServicesCacheServiceInfo {
+        constructor(
+            [in] IInterface* type,
+            [in] IComponentName* componentName,
+            [in] Int32 uid);
+
+        interface IRegisteredServicesCacheServiceInfo;
+    }
+
+    [local]
+    class CResolveInfo {
+        constructor();
+
+        constructor(
+            [in] IResolveInfo* orig);
+
+        interface IResolveInfo;
+        interface IParcelable;
+    }
+
+    [local]
+    class CResolveInfoDisplayNameComparator {
+        constructor(
+            [in] IPackageManager* pm);
+
+        interface IComparator;
+    }
+
+    class CServiceInfo {
+        constructor();
+
+        constructor(
+            [in] IServiceInfo* orig);
+
+        interface IServiceInfo;
+        interface IComponentInfo;
+        interface IPackageItemInfo;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSignature {
+
+        constructor(
+            [in] ArrayOf<Byte>* signature);
+
+        constructor(
+            [in] String text);
+
+        constructor();
+
+        interface ISignature;
+        interface IParcelable;
+    }
+
+    singleton class CSignatureHelper {
+        interface ISignatureHelper;
+    }
+
+    class CUserInfo {
+        constructor();
+
+        constructor(
+            [in] IUserInfo* orig);
+
+        constructor(
+            [in] Int32 id,
+            [in] String name,
+            [in] Int32 flags);
+
+        constructor(
+            [in] Int32 id,
+            [in] String name,
+            [in] String iconPath,
+            [in] Int32 flags);
+
+        interface IUserInfo;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CVerificationParams {
+        constructor(
+            [in] IUri* verificationURI,
+            [in] IUri* originatingURI,
+            [in] IUri* referrer,
+            [in] Int32 originatingUid,
+            [in] IManifestDigest* manifestDigest);
+
+        constructor();
+
+        interface IVerificationParams;
+        interface IParcelable;
+    }
+
+    class CVerifierDeviceIdentity {
+        constructor(
+            [in] Int64 identity);
+
+        constructor();
+
+        interface IVerifierDeviceIdentity;
+        interface IParcelable;
+    }
+
+    singleton class CVerifierDeviceIdentityHelper {
+        interface IVerifierDeviceIdentityHelper;
+    }
+
+    class CVerifierInfo {
+        constructor(
+            [in] String packageName,
+            [in] IPublicKey* publicKey);
+
+        constructor();
+
+        interface IVerifierInfo;
+        interface IParcelable;
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res{
+
+    class CAssetFileDescriptor {
+
+        constructor(
+            [in] IParcelFileDescriptor* fd,
+            [in] Int64 startOffset,
+            [in] Int64 length);
+
+        constructor(
+            [in] IParcelFileDescriptor* fd,
+            [in] Int64 startOffset,
+            [in] Int64 length,
+            [in] IBundle* extras);
+
+        constructor();
+
+        interface IAssetFileDescriptor;
+        interface IParcelable;
+        interface ICloseable;
+    }
+
+    class CAssetFileDescriptorAutoCloseInputStream {
+        constructor(
+            [in] IAssetFileDescriptor* fd);
+
+        interface IAssetFileDescriptorAutoCloseInputStream;
+        interface IFileInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class CAssetFileDescriptorAutoCloseOutputStream {
+        constructor(
+            [in] IAssetFileDescriptor* fd);
+
+        interface IAssetFileDescriptorAutoCloseOutputStream;
+        interface IFileOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CAssetManager {
+
+        /**
+         * Create a new AssetManager containing only the basic system assets.
+         * Applications will not generally use this method, instead retrieving the
+         * appropriate asset manager with {@link Resources#getAssets}.    Not for
+         * use by applications.
+         * {@hide}
+         */
+        constructor();
+
+        constructor(
+            [in] Boolean isSystem);
+
+        interface IAssetManager;
+    }
+
+    singleton class CAssetManagerHelper{
+        interface IAssetManagerHelper;
+    }
+
+    [deprecated]
+    class CColorStateList {
+        constructor();
+
+        /**
+         * Creates a ColorStateList that returns the specified mapping from
+         * states to colors.
+         */
+        constructor(
+            [in] ArrayOf<Handle32>* states,
+            [in] ArrayOf<Int32>* colors);
+
+        interface IColorStateList;
+        interface IParcelable;
+    }
+
+    singleton class CColorStateListHelper{
+
+        interface IColorStateListHelper;
+    }
+
+    class CCompatibilityInfo {
+        constructor(
+            [in] IApplicationInfo* appInfo,
+            [in] Int32 screenLayout,
+            [in] Int32 sw,
+            [in] Boolean forceCompat);
+
+        constructor(
+            [in] Int32 compFlags,
+            [in] Int32 dens,
+            [in] Float scale,
+            [in] Float invertedScale);
+
+        constructor();
+
+        interface ICompatibilityInfo;
+        interface IParcelable;
+    }
+
+    singleton class CCompatibilityInfoHelper{
+        interface ICompatibilityInfoHelper;
+    }
+
+    class CConfiguration{
+        /**
+         * Construct an invalid Configuration.  You must call {@link #setToDefaults}
+         * for this object to be valid.  {@more}
+         */
+        constructor();
+
+        /**
+         * Makes a deep copy suitable for modification.
+         */
+        constructor(
+            [in] IConfiguration* o);
+
+        interface IConfiguration;
+        interface IParcelable;
+        interface IComparable;
+    }
+
+    singleton class CConfigurationHelper{
+        interface IConfigurationHelper;
+    }
+
+    class CObbInfo {
+        constructor();
+
+        interface IObbInfo;
+        interface IParcelable;
+    }
+
+    singleton class CObbScanner {
+        //Don't allow others to instantiate this class
+
+        interface IObbScanner;
+    }
+
+    class CResources{
+        constructor();
+
+         /**
+         * Create a new Resources object on top of an existing set of assets in an
+         * AssetManager.
+         *
+         * @param assets Previously created AssetManager.
+         * @param metrics Current display metrics to consider when
+         *                selecting/computing resource values.
+         * @param config Desired device configuration to consider when
+         *               selecting/computing resource values (optional).
+         */
+        constructor(
+            [in] IAssetManager* assets,
+            [in] IDisplayMetrics* metrics,
+            [in] IConfiguration* config);
+
+        /** hide */
+        constructor(
+            [in] IAssetManager* assets,
+            [in] IDisplayMetrics* metrics,
+            [in] IConfiguration* config,
+            [in] ICompatibilityInfo* compInfo,
+            [in] IBinder* token);
+
+        interface IResources;
+    }
+
+    singleton class CResourcesHelper {
+        interface IResourcesHelper;
+    }
+
+    [deprecated]
+    class CTypedArray{
+        constructor(
+            [in] IResources* resources,
+            [in] ArrayOf<Int32>* data,
+            [in] ArrayOf<Int32>* indices,
+            [in] Int32 len);
+
+        interface ITypedArray;
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namepsace Droid
+    } // namespace Elastos
+
+}
+

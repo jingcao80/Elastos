@@ -1,0 +1,25 @@
+
+TARGET_NAME= org.xml.sax
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/org
+INCLUDES += $(MAKEDIR)/../../../../inc/org/xml/sax
+INCLUDES += $(MAKEDIR)/../../../../inc/org/xml/sax/ext
+INCLUDES += $(MAKEDIR)/../../../../inc/org/xml/sax/helpers
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+
+SOURCES += CInputSource.cpp
+SOURCES += HandlerBase.cpp
+SOURCES += CHandlerBase.cpp
+
+ELASTOS_LIBS += ext/ext.lib
+ELASTOS_LIBS += helpers/helpers.lib

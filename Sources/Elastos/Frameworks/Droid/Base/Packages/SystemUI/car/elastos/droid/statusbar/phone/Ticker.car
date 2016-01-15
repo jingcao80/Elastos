@@ -1,0 +1,44 @@
+
+module
+{
+    using interface Elastos.Droid.Service.Notification.IStatusBarNotification;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    interface ITicker {
+        AddEntry(
+            [in] IStatusBarNotification* n);
+
+        RemoveEntry(
+            [in] IStatusBarNotification* n);
+
+        Halt();
+
+        ReflowText();
+
+        TickerStarting();
+
+        TickerDone();
+
+        TickerHalting();
+    }
+
+    interface ITickerHelper {
+
+        IsGraphicOrEmoji(
+            [in] Char32 c,
+            [out] Boolean* result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

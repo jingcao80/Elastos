@@ -1,0 +1,210 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "${fullname}.cpp"
+
+#include "${ClassFullPathOfClassObject(class)}.h"
+#include "${fullname}.h"
+
+extern "C" Int32 g_dllLockCount;
+
+${namespace}${name} _g_${ClassFullNameOfClassObj(class)}_ClsObj;
+
+${ClassNamespaceBegin(class)}$^
+
+PInterface ${name}::Probe(
+    /* [in] */ _ELASTOS REIID riid)
+{
+    if (EIID_IInterface == riid) {
+        return (_IInterface *)this;
+    }
+    else if (EIID_IClassObject == riid) {
+        return (IClassObject *)this;
+    }
+    else if (riid == EIID_I${ClassNameOfClassObj(name)}ClassObject) {
+        return (I${ClassNameOfClassObj(name)}ClassObject *)this;
+    }
+    else if (EIID_GENERIC_INFO == riid) {
+${GenericInfoQI(class)}
+    }
+
+    return NULL;
+}
+
+UInt32 ${name}::AddRef(void)
+{
+    atomic_inc(&g_dllLockCount);
+    return 2;
+}
+
+UInt32 ${name}::Release(void)
+{
+    atomic_dec(&g_dllLockCount);
+    return 1;
+}
+
+ECode ${name}::GetInterfaceID(
+    /* [in] */ IInterface *pObject,
+    /* [out] */ InterfaceID *pIID)
+{
+    if (NULL == pIID) return E_INVALID_ARGUMENT;
+
+    if (pObject == (IInterface *)(IObject *)this) {
+        *pIID = EIID_IObject;
+    }
+    else if (pObject == (IInterface *)(I${ClassNameOfClassObj(name)}ClassObject *)this) {
+        *pIID = EIID_I${ClassNameOfClassObj(name)}ClassObject;
+    }
+    else {
+        return E_INVALID_ARGUMENT;
+    }
+    return NOERROR;
+}
+
+ECode ${name}::Aggregate(
+    /* [in] */ AggregateType type,
+    /* [in] */ PInterface pObj)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ${name}::GetDomain(
+    /* [out] */ PInterface *ppObj)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ${name}::GetClassID(
+    /* [out] */ ClassID *pCLSID)
+{
+    if (NULL == pCLSID) return E_INVALID_ARGUMENT;
+
+    *pCLSID = ECLSID_${name};
+    return NOERROR;
+}
+
+ECode ${name}::GetHashCode(
+    _ELASTOS Int32 * pHashCode)
+{
+    if (NULL == pHashCode) return E_INVALID_ARGUMENT;
+    *pHashCode = (Int32)this;
+    return NOERROR;
+}
+
+ECode ${name}::Equals(
+    IInterface * pInterface,
+    _ELASTOS Boolean * pEquals)
+{
+    if (NULL == pEquals) return E_INVALID_ARGUMENT;
+    IObject * pObject = (IObject *)pInterface->Probe(EIID_IObject);
+    if (NULL == pObject) {
+        *pEquals = FALSE;
+        return NOERROR;
+    }
+
+    Int32 lhc, rhc;
+    this->GetHashCode(&lhc);
+    pObject->GetHashCode(&rhc);
+    *pEquals = (lhc ==rhc);
+    return NOERROR;
+}
+
+ECode ${name}::ToString(
+    _ELASTOS String * pInfo)
+{
+    if (NULL == pInfo) return E_INVALID_ARGUMENT;
+    Int32 hash;
+    GetHashCode(&hash);
+    String info;
+    info.AppendFormat("[%s:%p, hash:%d]", "${name}", this, hash);
+    *pInfo = info;
+    return NOERROR;
+}
+
+ECode ${name}::CreateObject(
+    /* [in] */ PInterface pOuter,
+    /* [in] */ _ELASTOS REIID riid,
+    /* [out] */ PInterface *ppObj)
+{
+$IF class.type is not "generic"
+$  IF HasDefaultConstructor(class) is true
+    ${ClassNameOfClassObj(class.name)} *pObj;
+    ECode ec;
+
+    ec = _${ClassNameOfClassObj(class.name)}CreateObject(&pObj);
+    if (FAILED(ec)) return ec;
+
+    *ppObj = pObj->Probe(riid);
+    if (NULL == *ppObj) {
+        pObj->Release();
+        return E_NO_INTERFACE;
+    }
+
+    return NOERROR;
+$  ELSE
+    return E_NO_DEFAULT_CTOR;
+$  END IF ;;
+$ELSE
+    return E_NOT_IMPLEMENTED;
+$END IF
+}
+
+ECode ${name}::StayResident(
+    /* [in] */ Boolean bIsStayResident)
+{
+    if (bIsStayResident) {
+        atomic_inc(&g_dllLockCount);
+    }
+    else {
+        atomic_dec(&g_dllLockCount);
+    }
+    return NOERROR;
+}
+
+$WITH all methods DO
+$ IF method.name is not "StayResident" and method.name is not "CreateObject"
+${type} ${class.name}::${name}($^
+$   WITH all parameters DO
+
+    /* [${attrib}] */ ${type} ${prefixingname(parameter)}$^
+$       IF parameter is not last
+,$^
+$       END IF
+$   END DO ;; all parameters
+)
+{
+$    IF class.type is not "generic"
+    ${ClassNameOfClassObj(class.name)} *pObj;
+    ECode ec = _${ClassNameOfClassObj(class.name)}CreateObject(
+$   WITH all parameters DO
+$       IF parameter is not last
+            ${prefixingname(parameter)},
+$       END IF
+$   END DO ;; all parameters
+            &pObj
+);
+$   WITH all parameters DO
+$       IF parameter is last
+    if (FAILED(ec)) {
+        *${prefixingname(parameter)} = NULL;
+        return ec;
+    }
+    *${prefixingname(parameter)} = pObj->Probe(EIID_IInterface);
+    return ec;
+$       END IF
+$   END DO ;; all parameters
+$    ELSE
+    return E_NOT_IMPLEMENTED;
+$    END IF ;; not "generic"
+}
+
+$END IF ;; not "StayResident" and not "CreateObject"
+$END DO ;; all methods
+$
+$IF type is "generic"
+$ImplOfGenericClassObjects(class)
+$END IF
+${ClassNamespaceEnd(class)}
+$END OUTPUT

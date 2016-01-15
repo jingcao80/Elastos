@@ -1,0 +1,60 @@
+module
+{
+    merge("sql/ICommonDataSource.car");
+    merge("sql/IConnectionEvent.car");
+    merge("sql/IConnectionEventListener.car");
+    merge("sql/IDataSource.car");
+    merge("sql/IStatementEvent.car");
+    merge("sql/IStatementEventListener.car");
+    merge("sql/IPooledConnection.car");
+    merge("sql/IConnectionPoolDataSource.car");
+    merge("sql/IRowSetEvent.car");
+    merge("sql/IRowSetListener.car");
+    merge("sql/IRowSet.car");
+    merge("sql/IRowSetMetaData.car");
+    merge("sql/IRowSetInternal.car");
+    merge("sql/IRowSetReader.car");
+    merge("sql/IRowSetWriter.car");
+
+    interface Elastos.Utility.IEventObject;
+    interface Elastos.Sql.IPreparedStatement;
+
+    namespace Elastosx {
+    namespace Sql {
+
+    class CConnectionEvent {
+        constructor(
+            [in] IPooledConnection* theConnection);
+
+        constructor(
+            [in] IPooledConnection* theConnection,
+            [in] ECode theException);
+
+        interface IConnectionEvent;
+        interface IEventObject;
+    }
+
+    class CRowSetEvent {
+        constructor(
+            [in] IRowSet* theSource);
+
+        interface IRowSetEvent;
+        interface IEventObject;
+    }
+
+    class CStatementEvent {
+        constructor(
+            [in] IPooledConnection* con,
+            [in] IPreparedStatement* statement,
+            [in] ECode theException);
+
+        constructor(
+            [in] IPooledConnection* con,
+            [in] IPreparedStatement* statement);
+
+        interface IStatementEvent;
+        interface IEventObject;
+     }
+    }// namespace Sql
+    }// namespace Elastosx
+}

@@ -1,0 +1,166 @@
+
+module
+{
+
+    interface Elastos.Droid.Telephony.IServiceState;
+    interface Elastos.Droid.Telephony.ISignalStrength;
+    interface Elastos.Droid.Telephony.ICellInfo;
+    interface Elastos.Droid.Telephony.IPreciseCallState;
+    interface Elastos.Droid.Telephony.IPreciseDataConnectionState;
+    interface Elastos.Droid.Telephony.IDataConnectionRealTimeInfo;
+    interface Elastos.Droid.Telephony.IVoLteServiceState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    [deprecated]
+    interface IPhoneStateListener {
+        const Int32 LISTEN_NONE = 0;
+        const Int32 LISTEN_SERVICE_STATE                            = 0x00000001;
+        const Int32 LISTEN_SIGNAL_STRENGTH                          = 0x00000002;
+        const Int32 LISTEN_MESSAGE_WAITING_INDICATOR                = 0x00000004;
+        const Int32 LISTEN_CALL_FORWARDING_INDICATOR                = 0x00000008;
+        const Int32 LISTEN_CELL_LOCATION                            = 0x00000010;
+        const Int32 LISTEN_CALL_STATE                               = 0x00000020;
+        const Int32 LISTEN_DATA_CONNECTION_STATE                    = 0x00000040;
+        const Int32 LISTEN_DATA_ACTIVITY                            = 0x00000080;
+        const Int32 LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
+        const Int32 LISTEN_OTASP_CHANGED                            = 0x00000200;
+        const Int32 LISTEN_CELL_INFO = 0x00000400;
+
+
+        /**
+         * Listen for precise changes and fails to the device calls (cellular).
+         * {@more}
+         * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+         * READ_PRECISE_PHONE_STATE}
+         *
+         * @hide
+         */
+        const Int32 LISTEN_PRECISE_CALL_STATE                       = 0x00000800;
+
+        /**
+         * Listen for precise changes and fails on the data connection (cellular).
+         * {@more}
+         * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+         * READ_PRECISE_PHONE_STATE}
+         *
+         * @see #onPreciseDataConnectionStateChanged
+         * @hide
+         */
+        const Int32 LISTEN_PRECISE_DATA_CONNECTION_STATE            = 0x00001000;
+
+        /**
+         * Listen for real time info for all data connections (cellular)).
+         * {@more}
+         * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+         * READ_PRECISE_PHONE_STATE}
+         *
+         * @see #onDataConnectionRealTimeInfoChanged(DataConnectionRealTimeInfo)
+         * @hide
+         */
+        const Int32 LISTEN_DATA_CONNECTION_REAL_TIME_INFO           = 0x00002000;
+
+        /**
+         * Listen for changes to LTE network state
+         *
+         * @see #onLteNetworkStateChanged
+         * @hide
+         */
+        const Int32 LISTEN_VOLTE_STATE                              = 0x00004000;
+
+        /**
+         * Listen for OEM hook raw event
+         *
+         * @see #onOemHookRawEvent
+         * @hide
+         */
+        const Int32 LISTEN_OEM_HOOK_RAW_EVENT                       = 0x00008000;
+
+        OnServiceStateChanged(
+            [in] IServiceState* serviceState);
+
+        OnSignalStrengthChanged(
+            [in] Int32 asu);
+
+        OnMessageWaitingIndicatorChanged(
+            [in] Boolean mwi);
+
+        OnCallForwardingIndicatorChanged(
+            [in] Boolean cfi);
+
+        OnCellLocationChanged(
+            [in] ICellLocation* location);
+
+        OnCallStateChanged(
+            [in] Int32 state,
+            [in] String incomingNumber);
+
+        OnDataConnectionStateChanged(
+            [in] Int32 state);
+
+        OnDataConnectionStateChanged(
+            [in] Int32 state,
+            [in] Int32 networkType);
+
+        OnDataActivity(
+            [in] Int32 direction);
+
+        OnSignalStrengthsChanged(
+            [in] ISignalStrength* signalStrength);
+
+        OnOtaspChanged(
+            [in] Int32 otaspMode);
+
+        OnCellInfoChanged(
+            [in] ArrayOf<ICellInfo*>* cellInfo);
+
+
+        /**
+         * Callback invoked when precise device call state changes.
+         *
+         * @hide
+         */
+        OnPreciseCallStateChanged(
+            [in] IPreciseCallState* callState);
+
+        /**
+         * Callback invoked when data connection state changes with precise information.
+         *
+         * @hide
+         */
+        OnPreciseDataConnectionStateChanged(
+            [in] IPreciseDataConnectionState* dataConnectionState);
+
+        /**
+         * Callback invoked when data connection state changes with precise information.
+         *
+         * @hide
+         */
+        OnDataConnectionRealTimeInfoChanged(
+            [in] IDataConnectionRealTimeInfo* dcRtInfo);
+
+        /**
+         * Callback invoked when the service state of LTE network
+         * related to the VoLTE service has changed.
+         * @param stateInfo is the current LTE network information
+         * @hide
+         */
+        OnVoLteServiceStateChanged(
+            [in] IVoLteServiceState* stateInfo);
+
+        /**
+         * Callback invoked when OEM hook raw event is received. Requires
+         * the READ_PRIVILEGED_PHONE_STATE permission.
+         * @param rawData is the byte array of the OEM hook raw data.
+         * @hide
+         */
+        OnOemHookRawEvent(
+            [in] ArrayOf<Byte>* rawData);
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

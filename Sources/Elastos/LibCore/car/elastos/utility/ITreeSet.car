@@ -1,0 +1,174 @@
+module
+{
+    interface Elastos.Core.IComparator;
+    interface Elastos.Utility.INavigableSet;
+    interface Elastos.Utility.IIterator;
+    interface Elastos.Utility.ISortedSet;
+
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * @Involve
+     * interface ICollection;
+     * interface Iterable;
+     * interface ISet;
+     * interface INavigableSet;
+     * interface ICloneable;
+     * interface ISerializable;
+     */
+    [deprecated]
+    interface ITreeSet {
+
+        /**
+         * interfaces from INavigableSet
+         *
+         */
+        GetLower(
+            [in] IInterface* e,
+            [out] IInterface** outface);
+        GetFloor(
+            [in] IInterface* e,
+            [out] IInterface** outface);
+
+        GetCeiling(
+            [in] IInterface* e,
+            [out] IInterface** outface);
+
+        GetHigher(
+            [in] IInterface* e,
+            [out] IInterface** outface);
+
+        PollFirst(
+            [out] IInterface** outface);
+
+        PollLast(
+            [out] IInterface** outface);
+
+        GetDescendingSet(
+            [out] INavigableSet** outnav);
+
+        GetDescendingIterator(
+            [out] IIterator** outiter);
+
+        GetSubSet(
+            [in] IInterface* fromElement,
+            [in] Boolean fromInclusive,
+            [in] IInterface* toElement,
+            [in] Boolean toInclusive,
+            [out] INavigableSet** outnav);
+
+        GetHeadSet(
+            [in] IInterface* toElement,
+            [in] Boolean inclusive,
+            [out] INavigableSet** outnav);
+
+        GetTailSet(
+            [in] IInterface* fromElement,
+            [in] Boolean inclusive,
+            [out] INavigableSet** outnav);
+
+
+        /**
+         * interfaces from ISortedSet
+         *
+         */
+        GetComparator(
+            [out] IComparator** outcom);
+
+        GetFirst(
+            [out] IInterface** outface);
+
+        GetHeadSet(
+            [in] IInterface* end,
+            [out] ISortedSet** outsort);
+
+        GetLast(
+            [out] IInterface** outface);
+
+        GetSubSet(
+            [in] IInterface* start,
+            [in] IInterface* end,
+            [out] ISortedSet** outsort);
+
+        GetTailSet(
+            [in] IInterface* start,
+            [out] ISortedSet** outsort);
+
+
+        /**
+         * interfaces from ICollection
+         *
+         */
+        GetIterator(
+            [out] IIterator** it);
+
+        Add(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Add(
+            [in] IInterface* object);
+
+        AddAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] ICollection* collection);
+
+        Clear();
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        ContainsAll(
+            [in] ICollection* collection,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        Remove(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Remove(
+            [in] IInterface* object);
+
+        RemoveAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RemoveAll(
+            [in] ICollection* collection);
+
+        RetainAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RetainAll(
+            [in] ICollection* collection);
+
+        GetSize(
+            [out] Int32* size);
+
+        ToArray(
+            [out, callee] ArrayOf<IInterface*>* array);
+
+        ToArray(
+            [in] ArrayOf<IInterface*>* inArray,
+            [out, callee] ArrayOf<IInterface*>* outArray);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

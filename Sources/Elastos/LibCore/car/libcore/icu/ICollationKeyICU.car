@@ -1,0 +1,17 @@
+module
+{
+
+    namespace Libcore {
+    namespace ICU {
+
+    /**
+     * @Involve
+     * interface IComparable;
+     * interface ICollationKey;
+     */
+    interface ICollationKeyICU {
+    }
+
+    } // namespace ICU
+    } // namespace Libcore
+}

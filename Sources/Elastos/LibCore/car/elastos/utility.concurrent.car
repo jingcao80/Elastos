@@ -1,0 +1,1013 @@
+
+module
+{
+    //======================================================
+    // Elastos.Utility.Concurrent
+    //======================================================
+    merge("utility/concurrent/atomic/IAtomicBoolean.car");
+    merge("utility/concurrent/atomic/IAtomicInteger32.car");
+    merge("utility/concurrent/atomic/IAtomicInteger32Array.car");
+    merge("utility/concurrent/atomic/IAtomicInteger32FieldUpdater.car");
+    merge("utility/concurrent/atomic/IAtomicInteger64.car");
+    merge("utility/concurrent/atomic/IAtomicInteger64Array.car");
+    merge("utility/concurrent/atomic/IAtomicInteger64FieldUpdater.car");
+    merge("utility/concurrent/atomic/IAtomicMarkableReference.car");
+    merge("utility/concurrent/atomic/IAtomicReference.car");
+    merge("utility/concurrent/atomic/IAtomicReferenceArray.car");
+    merge("utility/concurrent/atomic/IAtomicReferenceFieldUpdater.car");
+    merge("utility/concurrent/atomic/IAtomicStampedReference.car");
+    merge("utility/concurrent/atomic/IFences.car");
+
+    merge("utility/concurrent/locks/ILockSupport.car");
+    merge("utility/concurrent/locks/IAbstractQueuedInteger64Synchronizer.car");
+    merge("utility/concurrent/locks/IAbstractQueuedSynchronizer.car");
+    merge("utility/concurrent/locks/ICondition.car");
+    merge("utility/concurrent/locks/ILock.car");
+    merge("utility/concurrent/locks/IReadWriteLock.car");
+    merge("utility/concurrent/locks/IReentrantLock.car");
+    merge("utility/concurrent/locks/IReentrantReadWriteLock.car");
+
+    merge("utility/concurrent/Exceptions.car");
+    merge("utility/concurrent/IBlockingQueue.car");
+    merge("utility/concurrent/ICallable.car");
+    merge("utility/concurrent/ICompletionService.car");
+    merge("utility/concurrent/ICountDownLatch.car");
+    merge("utility/concurrent/IExecutor.car");
+    merge("utility/concurrent/IExecutors.car");
+    merge("utility/concurrent/IExecutorService.car");
+    merge("utility/concurrent/IAbstractExecutorService.car");
+    merge("utility/concurrent/IFuture.car");
+    merge("utility/concurrent/IRejectedExecutionHandler.car");
+    merge("utility/concurrent/IRunnableFuture.car");
+    merge("utility/concurrent/IThreadFactory.car");
+    merge("utility/concurrent/IThreadPoolExecutor.car");
+    merge("utility/concurrent/ITimeUnit.car");
+    merge("utility/concurrent/IArrayBlockingQueue.car");
+    merge("utility/concurrent/IBlockingDeque.car");
+    merge("utility/concurrent/IPriorityBlockingQueue.car");
+    merge("utility/concurrent/IConcurrentLinkedQueue.car");
+    merge("utility/concurrent/ICopyOnWriteArrayList.car");
+    merge("utility/concurrent/ICyclicBarrier.car");
+    merge("utility/concurrent/IDelayed.car");
+    merge("utility/concurrent/IDelayQueue.car");
+    merge("utility/concurrent/IExchanger.car");
+    merge("utility/concurrent/IForkJoinPool.car");
+    merge("utility/concurrent/IForkJoinWorkerThread.car");
+    merge("utility/concurrent/IForkJoinTask.car");
+    merge("utility/concurrent/IPhaser.car");
+    merge("utility/concurrent/IRunnableScheduledFuture.car");
+    merge("utility/concurrent/ISemaphore.car");
+    merge("utility/concurrent/ISynchronousQueue.car");
+    merge("utility/concurrent/IThreadLocalRandom.car");
+    merge("utility/concurrent/ITransferQueue.car");
+    merge("utility/concurrent/IConcurrentMap.car");
+    merge("utility/concurrent/IConcurrentHashMap.car");
+    merge("utility/concurrent/IConcurrentNavigableMap.car");
+    merge("utility/concurrent/IExecutorCompletionService.car");
+    merge("utility/concurrent/IScheduledExecutorService.car");
+    merge("utility/concurrent/IRecursiveAction.car");
+    merge("utility/concurrent/IRecursiveTask.car");
+    merge("utility/concurrent/IScheduledThreadPoolExecutor.car");
+    merge("utility/concurrent/ICountedCompleter.car");
+
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Core.IComparator;
+    interface Elastos.Core.IRunnable;
+    interface Elastos.Core.IThreadUncaughtExceptionHandler;
+    interface Elastos.IO.ISerializable;
+    interface Elastos.Utility.ICollection;
+    interface Elastos.Utility.IDeque;
+    interface Elastos.Utility.IIterable;
+    interface Elastos.Utility.IList;
+    interface Elastos.Utility.IMap;
+    interface Elastos.Utility.INavigableMap;
+    interface Elastos.Utility.INavigableSet;
+    interface Elastos.Utility.IQueue;
+    interface Elastos.Utility.IRandom;
+    interface Elastos.Utility.IRandomAccess;
+    interface Elastos.Utility.ISet;
+    interface Elastos.Utility.ISortedMap;
+    interface Elastos.Utility.ISortedSet;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+
+    class CCountDownLatch {
+        /**
+         * Constructs a {@code CountDownLatch} initialized with the given count.
+         *
+         * @param count the number of times {@link #countDown} must be invoked
+         *        before threads can pass through {@link #await}
+         * @throws IllegalArgumentException if {@code count} is negative
+         */
+        constructor(
+            [in] Int32 count);
+
+        interface ICountDownLatch;
+    }
+
+    class CExecutorCompletionService {
+        constructor(
+            [in] IExecutor* executor);
+
+        constructor(
+            [in] IExecutor* executor,
+            [in] IBlockingQueue* completionQueue);
+
+        interface ICompletionService;
+    }
+
+    singleton class CExecutors {
+        interface IExecutors;
+    }
+
+    class CFutureTask {
+        constructor(
+            [in] ICallable* callable);
+
+        constructor(
+            [in] IRunnable* runnable,
+            [in] IInterface* result);
+
+        interface IRunnableFuture;
+        interface IFuture;
+        interface IRunnable;
+    }
+
+    class CLinkedBlockingQueue {
+        constructor();
+
+        constructor(
+            [in] Int32 capacity);
+
+        constructor(
+            [in] ICollection* c);
+
+        interface IBlockingQueue;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+    }
+
+    class CThreadPoolExecutor {
+        /**
+         * Creates a new {@code ThreadPoolExecutor} with the given initial
+         * parameters and default thread factory and rejected execution handler.
+         * It may be more convenient to use one of the {@link Executors} factory
+         * methods instead of this general purpose constructor.
+         *
+         * @param corePoolSize the number of threads to keep in the pool, even
+         *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+         * @param maximumPoolSize the maximum number of threads to allow in the
+         *        pool
+         * @param keepAliveTime when the number of threads is greater than
+         *        the core, this is the maximum time that excess idle threads
+         *        will wait for new tasks before terminating.
+         * @param unit the time unit for the {@code keepAliveTime} argument
+         * @param workQueue the queue to use for holding tasks before they are
+         *        executed.  This queue will hold only the {@code Runnable}
+         *        tasks submitted by the {@code execute} method.
+         * @throws IllegalArgumentException if one of the following holds:<br>
+         *         {@code corePoolSize < 0}<br>
+         *         {@code keepAliveTime < 0}<br>
+         *         {@code maximumPoolSize <= 0}<br>
+         *         {@code maximumPoolSize < corePoolSize}
+         * @throws NullPointerException if {@code workQueue} is null
+         */
+        constructor(
+            [in] Int32 corePoolSize,
+            [in] Int32 maximumPoolSize,
+            [in] Int64 keepAliveTime,
+            [in] ITimeUnit* unit,
+            [in] IBlockingQueue* workQueue);
+
+        /**
+         * Creates a new {@code ThreadPoolExecutor} with the given initial
+         * parameters and default rejected execution handler.
+         *
+         * @param corePoolSize the number of threads to keep in the pool, even
+         *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+         * @param maximumPoolSize the maximum number of threads to allow in the
+         *        pool
+         * @param keepAliveTime when the number of threads is greater than
+         *        the core, this is the maximum time that excess idle threads
+         *        will wait for new tasks before terminating.
+         * @param unit the time unit for the {@code keepAliveTime} argument
+         * @param workQueue the queue to use for holding tasks before they are
+         *        executed.  This queue will hold only the {@code Runnable}
+         *        tasks submitted by the {@code execute} method.
+         * @param threadFactory the factory to use when the executor
+         *        creates a new thread
+         * @throws IllegalArgumentException if one of the following holds:<br>
+         *         {@code corePoolSize < 0}<br>
+         *         {@code keepAliveTime < 0}<br>
+         *         {@code maximumPoolSize <= 0}<br>
+         *         {@code maximumPoolSize < corePoolSize}
+         * @throws NullPointerException if {@code workQueue}
+         *         or {@code threadFactory} is null
+         */
+        constructor(
+            [in] Int32 corePoolSize,
+            [in] Int32 maximumPoolSize,
+            [in] Int64 keepAliveTime,
+            [in] ITimeUnit* unit,
+            [in] IBlockingQueue* workQueue,
+            [in] IThreadFactory* threadFactory);
+
+        /**
+         * Creates a new {@code ThreadPoolExecutor} with the given initial
+         * parameters and default thread factory.
+         *
+         * @param corePoolSize the number of threads to keep in the pool, even
+         *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+         * @param maximumPoolSize the maximum number of threads to allow in the
+         *        pool
+         * @param keepAliveTime when the number of threads is greater than
+         *        the core, this is the maximum time that excess idle threads
+         *        will wait for new tasks before terminating.
+         * @param unit the time unit for the {@code keepAliveTime} argument
+         * @param workQueue the queue to use for holding tasks before they are
+         *        executed.  This queue will hold only the {@code Runnable}
+         *        tasks submitted by the {@code execute} method.
+         * @param handler the handler to use when execution is blocked
+         *        because the thread bounds and queue capacities are reached
+         * @throws IllegalArgumentException if one of the following holds:<br>
+         *         {@code corePoolSize < 0}<br>
+         *         {@code keepAliveTime < 0}<br>
+         *         {@code maximumPoolSize <= 0}<br>
+         *         {@code maximumPoolSize < corePoolSize}
+         * @throws NullPointerException if {@code workQueue}
+         *         or {@code handler} is null
+         */
+        constructor(
+            [in] Int32 corePoolSize,
+            [in] Int32 maximumPoolSize,
+            [in] Int64 keepAliveTime,
+            [in] ITimeUnit* unit,
+            [in] IBlockingQueue* workQueue,
+            [in] IRejectedExecutionHandler* handler);
+
+        /**
+         * Creates a new {@code ThreadPoolExecutor} with the given initial
+         * parameters.
+         *
+         * @param corePoolSize the number of threads to keep in the pool, even
+         *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+         * @param maximumPoolSize the maximum number of threads to allow in the
+         *        pool
+         * @param keepAliveTime when the number of threads is greater than
+         *        the core, this is the maximum time that excess idle threads
+         *        will wait for new tasks before terminating.
+         * @param unit the time unit for the {@code keepAliveTime} argument
+         * @param workQueue the queue to use for holding tasks before they are
+         *        executed.  This queue will hold only the {@code Runnable}
+         *        tasks submitted by the {@code execute} method.
+         * @param threadFactory the factory to use when the executor
+         *        creates a new thread
+         * @param handler the handler to use when execution is blocked
+         *        because the thread bounds and queue capacities are reached
+         * @throws IllegalArgumentException if one of the following holds:<br>
+         *         {@code corePoolSize < 0}<br>
+         *         {@code keepAliveTime < 0}<br>
+         *         {@code maximumPoolSize <= 0}<br>
+         *         {@code maximumPoolSize < corePoolSize}
+         * @throws NullPointerException if {@code workQueue}
+         *         or {@code threadFactory} or {@code handler} is null
+         */
+        constructor(
+            [in] Int32 corePoolSize,
+            [in] Int32 maximumPoolSize,
+            [in] Int64 keepAliveTime,
+            [in] ITimeUnit* unit,
+            [in] IBlockingQueue* workQueue,
+            [in] IThreadFactory* threadFactory,
+            [in] IRejectedExecutionHandler* handler);
+
+        interface IThreadPoolExecutor;
+        interface IAbstractExecutorService;
+        interface IExecutorService;
+        interface IExecutor;
+    }
+
+    singleton class CTimeUnitHelper {
+        interface ITimeUnitHelper;
+    }
+
+    class CArrayBlockingQueue {
+        /**
+         * Creates an {@code ArrayBlockingQueue} with the given (fixed)
+         * capacity and default access policy.
+         *
+         * @param capacity the capacity of this queue
+         * @throws IllegalArgumentException if {@code capacity < 1}
+         */
+        constructor(
+            [in] Int32 capacity);
+
+        /**
+         * Creates an {@code ArrayBlockingQueue} with the given (fixed)
+         * capacity and the specified access policy.
+         *
+         * @param capacity the capacity of this queue
+         * @param fair if {@code true} then queue accesses for threads blocked
+         *        on insertion or removal, are processed in FIFO order;
+         *        if {@code false} the access order is unspecified.
+         * @throws IllegalArgumentException if {@code capacity < 1}
+         */
+        constructor(
+            [in] Int32 capacity,
+            [in] Boolean fair);
+
+        /**
+         * Creates an {@code ArrayBlockingQueue} with the given (fixed)
+         * capacity, the specified access policy and initially containing the
+         * elements of the given collection,
+         * added in traversal order of the collection's iterator.
+         *
+         * @param capacity the capacity of this queue
+         * @param fair if {@code true} then queue accesses for threads blocked
+         *        on insertion or removal, are processed in FIFO order;
+         *        if {@code false} the access order is unspecified.
+         * @param c the collection of elements to initially contain
+         * @throws IllegalArgumentException if {@code capacity} is less than
+         *         {@code c.size()}, or less than 1.
+         * @throws NullPointerException if the specified collection or any
+         *         of its elements are null
+         */
+        constructor(
+            [in] Int32 capacity,
+            [in] Boolean fair,
+            [in] ICollection* c);
+
+        interface IBlockingQueue;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+    }
+
+    class CConcurrentLinkedDeque {
+        constructor();
+
+        constructor(
+            [in] ICollection* c);
+
+        interface IDeque;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+    }
+
+    class CConcurrentLinkedQueue {
+        constructor();
+
+        constructor(
+            [in] ICollection* c);
+
+        interface IConcurrentLinkedQueue;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+    }
+
+    class CConcurrentSkipListMap {
+        constructor();
+
+        constructor(
+            [in] IComparator* comparator);
+
+        constructor(
+            [in] IMap* map);
+
+        constructor(
+            [in] ISortedMap* sortedMap);
+
+        interface INavigableMap;
+        interface ISortedMap;
+        interface IMap;
+        interface IConcurrentMap;
+        interface ISerializable;
+        interface ICloneable;
+    }
+
+    class CConcurrentSkipListSet {
+        constructor();
+
+        constructor(
+            [in] IComparator* comparator);
+
+        constructor(
+            [in] ICollection* c);
+
+        constructor(
+            [in] ISortedSet* s);
+
+        constructor(
+            [in] INavigableMap* m);
+
+        interface INavigableSet;
+        interface ISortedSet;
+        interface ISet;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+        interface ICloneable;
+    }
+
+    class CDelayQueue {
+        constructor();
+
+        constructor(
+            [in] ICollection* c);
+
+        interface IBlockingQueue;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+    }
+
+    class CExchanger {
+        constructor();
+
+        interface IExchanger;
+    }
+
+    class CThreadLocalRandom {
+        constructor();
+
+        interface IThreadLocalRandom;
+        interface IRandom;
+    }
+
+    singleton class CThreadLocalRandomHelper {
+        interface IThreadLocalRandomHelper;
+    }
+
+    class CForkJoinPool {
+        constructor();
+
+        constructor(
+            [in] Int32 parallelism);
+
+        constructor(
+            [in] Int32 parallelism,
+            [in] IForkJoinPoolForkJoinWorkerThreadFactory* factory,
+            [in] IThreadUncaughtExceptionHandler* handler,
+            [in] Boolean asyncMode);
+
+        constructor(
+            [in] Int32 parallelism,
+            [in] IForkJoinPoolForkJoinWorkerThreadFactory* factory,
+            [in] IThreadUncaughtExceptionHandler* handler,
+            [in] Int32 mode,
+            [in] String workerNamePrefix);
+
+        interface IForkJoinPool;
+        interface IAbstractExecutorService;
+        interface IExecutorService;
+        interface IExecutor;
+    }
+
+    singleton class CForkJoinTaskHelper {
+        interface IForkJoinTaskHelper;
+    }
+
+    class CLinkedBlockingDeque {
+        constructor();
+
+        constructor(
+            [in] Int32 capacity);
+
+        constructor(
+            [in] ICollection* c);
+
+        interface IBlockingDeque;
+        interface IBlockingQueue;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+    }
+
+    class CLinkedTransferQueue {
+        constructor();
+
+        constructor(
+            [in] ICollection* c);
+
+        interface ITransferQueue;
+        interface IBlockingQueue;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+    }
+
+    class CPhaser {
+        constructor();
+
+        constructor(
+            [in] Int32 parties);
+
+        constructor(
+            [in] IPhaser* parent);
+
+        constructor(
+            [in] IPhaser* parent,
+            [in] Int32 parties);
+
+        interface IPhaser;
+    }
+
+    [deprecated]
+    class CCopyOnWriteArrayList {
+        /**
+         * Creates an empty instance.
+         */
+        constructor();
+
+        /**
+         * Creates a new instance containing the elements of {@code collection}.
+         */
+        constructor(
+            [in] ICollection* collection);
+
+        /**
+         * Creates a new instance containing the elements of {@code array}.
+         */
+        constructor(
+            [in] ArrayOf<IInterface*>* array);
+
+        interface ICopyOnWriteArrayList;
+        interface IList;
+        interface ICollection;
+        interface IIterable;
+        interface IRandomAccess;
+        interface ICloneable;
+        interface ISerializable;
+    }
+
+    singleton class CCopyOnWriteArrayListHelper {
+        interface ICopyOnWriteArrayListHelper;
+    }
+
+    class CCopyOnWriteArraySet {
+        /**
+         * Creates an empty set.
+         */
+        constructor();
+
+        /**
+         * Creates a set containing all of the elements of the specified
+         * collection.
+         *
+         * @param c the collection of elements to initially contain
+         * @throws NullPointerException if the specified collection is null
+         */
+        constructor(
+            [in] ICollection* c);
+
+        interface ISet;
+        interface ISerializable;
+    }
+
+    class CConcurrentHashMap {
+        /**
+         * Creates a new, empty map with the specified initial
+         * capacity, load factor and concurrency level.
+         *
+         * @param initialCapacity the initial capacity. The implementation
+         * performs internal sizing to accommodate this many elements.
+         * @param loadFactor  the load factor threshold, used to control resizing.
+         * Resizing may be performed when the average number of elements per
+         * bin exceeds this threshold.
+         * @param concurrencyLevel the estimated number of concurrently
+         * updating threads. The implementation performs internal sizing
+         * to try to accommodate this many threads.
+         * @throws IllegalArgumentException if the initial capacity is
+         * negative or the load factor or concurrencyLevel are
+         * nonpositive.
+         */
+        // @SuppressWarnings("unchecked")
+        constructor(
+            [in] Int32 initialCapacity,
+            [in] Float loadFactor,
+            [in] Int32 concurrencyLevel);
+
+        /**
+         * Creates a new, empty map with the specified initial capacity
+         * and load factor and with the default concurrencyLevel (16).
+         *
+         * @param initialCapacity The implementation performs internal
+         * sizing to accommodate this many elements.
+         * @param loadFactor  the load factor threshold, used to control resizing.
+         * Resizing may be performed when the average number of elements per
+         * bin exceeds this threshold.
+         * @throws IllegalArgumentException if the initial capacity of
+         * elements is negative or the load factor is nonpositive
+         *
+         * @since 1.6
+         */
+        constructor(
+            [in] Int32 initialCapacity,
+            [in] Float loadFactor);
+
+        /**
+         * Creates a new, empty map with the specified initial capacity,
+         * and with default load factor (0.75) and concurrencyLevel (16).
+         *
+         * @param initialCapacity the initial capacity. The implementation
+         * performs internal sizing to accommodate this many elements.
+         * @throws IllegalArgumentException if the initial capacity of
+         * elements is negative.
+         */
+        constructor(
+            [in] Int32 initialCapacity);
+
+        /**
+         * Creates a new, empty map with a default initial capacity (16),
+         * load factor (0.75) and concurrencyLevel (16).
+         */
+        constructor();
+
+        /**
+         * Creates a new map with the same mappings as the given map.
+         * The map is created with a capacity of 1.5 times the number
+         * of mappings in the given map or 16 (whichever is greater),
+         * and a default load factor (0.75) and concurrencyLevel (16).
+         *
+         * @param m the map
+         */
+        constructor(
+            [in] IMap* m);
+
+        interface IConcurrentHashMap;
+        interface IConcurrentMap;
+        interface IMap;
+        interface ISerializable;
+    }
+
+    class CCyclicBarrier {
+        /**
+         * Creates a new {@code CyclicBarrier} that will trip when the
+         * given number of parties (threads) are waiting upon it, and which
+         * will execute the given barrier action when the barrier is tripped,
+         * performed by the last thread entering the barrier.
+         *
+         * @param parties the number of threads that must invoke {@link #await}
+         *        before the barrier is tripped
+         * @param barrierAction the command to execute when the barrier is
+         *        tripped, or {@code null} if there is no action
+         * @throws IllegalArgumentException if {@code parties} is less than 1
+         */
+        constructor(
+            [in] Int32 parties,
+            [in] IRunnable* barrierAction);
+
+        /**
+         * Creates a new {@code CyclicBarrier} that will trip when the
+         * given number of parties (threads) are waiting upon it, and
+         * does not perform a predefined action when the barrier is tripped.
+         *
+         * @param parties the number of threads that must invoke {@link #await}
+         *        before the barrier is tripped
+         * @throws IllegalArgumentException if {@code parties} is less than 1
+         */
+        constructor(
+            [in] Int32 parties);
+
+        interface ICyclicBarrier;
+    }
+
+    class CPriorityBlockingQueue {
+        /**
+         * Creates a {@code PriorityBlockingQueue} with the default
+         * initial capacity (11) that orders its elements according to
+         * their {@linkplain Comparable natural ordering}.
+         */
+        constructor();
+
+        /**
+         * Creates a {@code PriorityBlockingQueue} with the specified
+         * initial capacity that orders its elements according to their
+         * {@linkplain Comparable natural ordering}.
+         *
+         * @param initialCapacity the initial capacity for this priority queue
+         * @throws IllegalArgumentException if {@code initialCapacity} is less
+         *         than 1
+         */
+        constructor(
+            [in] Int32 initialCapacity);
+
+        /**
+         * Creates a {@code PriorityBlockingQueue} with the specified initial
+         * capacity that orders its elements according to the specified
+         * comparator.
+         *
+         * @param initialCapacity the initial capacity for this priority queue
+         * @param  comparator the comparator that will be used to order this
+         *         priority queue.  If {@code null}, the {@linkplain Comparable
+         *         natural ordering} of the elements will be used.
+         * @throws IllegalArgumentException if {@code initialCapacity} is less
+         *         than 1
+         */
+        constructor(
+            [in] Int32 initialCapacity,
+            [in] IComparator* comparator);
+
+        /**
+         * Creates a {@code PriorityBlockingQueue} containing the elements
+         * in the specified collection.  If the specified collection is a
+         * {@link SortedSet} or a {@link PriorityQueue},  this
+         * priority queue will be ordered according to the same ordering.
+         * Otherwise, this priority queue will be ordered according to the
+         * {@linkplain Comparable natural ordering} of its elements.
+         *
+         * @param  c the collection whose elements are to be placed
+         *         into this priority queue
+         * @throws ClassCastException if elements of the specified collection
+         *         cannot be compared to one another according to the priority
+         *         queue's ordering
+         * @throws NullPointerException if the specified collection or any
+         *         of its elements are null
+         */
+        constructor(
+            [in] ICollection* c);
+
+        interface IPriorityBlockingQueue;
+        interface IBlockingQueue;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+    }
+
+    class CSynchronousQueue {
+        /**
+         * Creates a {@code SynchronousQueue} with nonfair access policy.
+         */
+        constructor();
+
+        /**
+         * Creates a {@code SynchronousQueue} with the specified fairness policy.
+         *
+         * @param fair if true, waiting threads contend in FIFO order for
+         *        access; otherwise the order is unspecified.
+         */
+        constructor(
+            [in] Boolean fair);
+
+        interface ISynchronousQueue;
+        interface IBlockingQueue;
+        interface IQueue;
+        interface ICollection;
+        interface IIterable;
+        interface ISerializable;
+    }
+
+    class CScheduledThreadPoolExecutor {
+        /**
+         * Creates a new {@code ScheduledThreadPoolExecutor} with the
+         * given core pool size.
+         *
+         * @param corePoolSize the number of threads to keep in the pool, even
+         *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+         * @throws IllegalArgumentException if {@code corePoolSize < 0}
+         */
+        constructor(
+            [in] Int32 corePoolSize);
+
+        /**
+         * Creates a new {@code ScheduledThreadPoolExecutor} with the
+         * given initial parameters.
+         *
+         * @param corePoolSize the number of threads to keep in the pool, even
+         *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+         * @param threadFactory the factory to use when the executor
+         *        creates a new thread
+         * @throws IllegalArgumentException if {@code corePoolSize < 0}
+         * @throws NullPointerException if {@code threadFactory} is null
+         */
+        constructor(
+            [in] Int32 corePoolSize,
+            [in] IThreadFactory* threadFactory);
+
+        /**
+         * Creates a new ScheduledThreadPoolExecutor with the given
+         * initial parameters.
+         *
+         * @param corePoolSize the number of threads to keep in the pool, even
+         *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+         * @param handler the handler to use when execution is blocked
+         *        because the thread bounds and queue capacities are reached
+         * @throws IllegalArgumentException if {@code corePoolSize < 0}
+         * @throws NullPointerException if {@code handler} is null
+         */
+        constructor(
+            [in] Int32 corePoolSize,
+            [in] IRejectedExecutionHandler* handler);
+
+        /**
+         * Creates a new ScheduledThreadPoolExecutor with the given
+         * initial parameters.
+         *
+         * @param corePoolSize the number of threads to keep in the pool, even
+         *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+         * @param threadFactory the factory to use when the executor
+         *        creates a new thread
+         * @param handler the handler to use when execution is blocked
+         *        because the thread bounds and queue capacities are reached
+         * @throws IllegalArgumentException if {@code corePoolSize < 0}
+         * @throws NullPointerException if {@code threadFactory} or
+         *         {@code handler} is null
+         */
+        constructor(
+            [in] Int32 corePoolSize,
+            [in] IThreadFactory* threadFactory,
+            [in] IRejectedExecutionHandler* handler);
+
+        interface IScheduledThreadPoolExecutor;
+        interface IScheduledExecutorService;
+        interface IExecutorService;
+        interface IExecutor;
+    }
+
+    namespace Atomic {
+
+    class CAtomicBoolean {
+        /**
+         * Creates a new AtomicInteger with the given initial value.
+         *
+         * @param initialValue the initial value
+         */
+        constructor(
+            [in] Boolean initialValue);
+
+        /**
+         * Creates a new AtomicInteger with initial value {@code FALSE}.
+         */
+        constructor();
+
+        interface IAtomicBoolean;
+        interface ISerializable;
+    }
+
+    class CAtomicInteger32 {
+        /**
+         * Creates a new AtomicInteger with the given initial value.
+         *
+         * @param initialValue the initial value
+         */
+        constructor(
+            [in] Int32 initialValue);
+
+        /**
+         * Creates a new AtomicInteger with initial value {@code 0}.
+         */
+        constructor();
+
+        interface IAtomicInteger32;
+        interface ISerializable;
+    }
+
+    class CAtomicInteger32Array {
+        /**
+         * Creates a new AtomicInteger with the given initial value.
+         *
+         * @param initialValue the initial value
+         */
+        constructor(
+            [in] Int32 length);
+
+        /**
+         * Creates a new AtomicInteger with initial value {@code 0}.
+         */
+        constructor(
+            [in] ArrayOf<Int32> other);
+
+        interface IAtomicInteger32Array;
+        interface ISerializable;
+    }
+
+    class CAtomicInteger64 {
+        /**
+         * Creates a new AtomicInteger with the given initial value.
+         *
+         * @param initialValue the initial value
+         */
+        constructor(
+            [in] Int64 initialValue);
+
+        /**
+         * Creates a new AtomicInteger with initial value {@code 0}.
+         */
+        constructor();
+
+        interface IAtomicInteger64;
+        interface ISerializable;
+    }
+
+    class CAtomicInteger64Array {
+        constructor(
+            [in] Int32 length);
+
+        constructor(
+            [in] ArrayOf<Int64> other);
+
+        interface IAtomicInteger64Array;
+        interface ISerializable;
+    }
+
+    class CAtomicMarkableReference {
+        constructor(
+            [in] IInterface* initialRef,
+            [in] Boolean initialMark);
+
+        interface IAtomicMarkableReference;
+    }
+
+    class CAtomicReference {
+        constructor(
+            [in] IInterface* initialValue);
+
+        constructor();
+
+        interface IAtomicReference;
+        interface ISerializable;
+    }
+
+    class CAtomicReferenceArray {
+        constructor(
+            [in] Int32 length);
+
+        constructor(
+            [in] ArrayOf<IInterface*> array);
+
+        interface IAtomicReferenceArray;
+        interface ISerializable;
+    }
+
+    class CAtomicStampedReference {
+        constructor(
+            [in] IInterface* initialRef,
+            [in] Int32 initialStamp);
+
+        interface IAtomicStampedReference;
+    }
+
+    singleton class CFences {
+        interface IFences;
+    }
+
+    } // namespace Atomic
+
+    namespace Locks {
+
+    singleton class CLockSupport {
+        interface ILockSupport;
+    }
+
+    class CReentrantLock {
+        constructor();
+
+        constructor(
+            [in] Boolean fair);
+
+        interface IReentrantLock;
+        interface ILock;
+        interface ISerializable;
+    }
+
+    class CReentrantReadWriteLock {
+        constructor();
+
+        constructor(
+            [in] Boolean fair);
+
+        interface IReentrantReadWriteLock;
+        interface IReadWriteLock;
+        interface ISerializable;
+    }
+
+    } // namespace Locks
+
+    class CSemaphore {
+        constructor(
+            [in] Int32 permits);
+
+        constructor(
+            [in] Int32 permits,
+            [in] Boolean fair);
+
+        interface ISemaphore;
+        interface ISerializable;
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

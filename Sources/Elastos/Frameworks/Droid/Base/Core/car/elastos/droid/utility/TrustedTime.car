@@ -1,0 +1,49 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    interface ITrustedTime {
+        /**
+         * Force update with an external trusted time source, returning {@code true}
+         * when successful.
+         */
+        ForceRefresh(
+            [out] Boolean* isRefreshed);
+
+        /**
+         * Check if this instance has cached a response from a trusted time source.
+         */
+        HasCache(
+            [out] Boolean* hasCache);
+
+        /**
+         * Return time since last trusted time source contact, or
+         * {@link Long#MAX_VALUE} if never contacted.
+         */
+        GetCacheAge(
+            [out] Int64* cacheAge);
+
+        /**
+         * Return certainty of cached trusted time in milliseconds, or
+         * {@link Long#MAX_VALUE} if never contacted. Smaller values are more
+         * precise.
+         */
+        GetCacheCertainty(
+            [out] Int64* cacheCertainty);
+
+        /**
+         * Return current time similar to {@link System#currentTimeMillis()},
+         * possibly using a cached authoritative time source.
+         */
+        GetCurrentTimeMillis(
+            [out] Int64* currentTimeMillis);
+    }
+
+    } // namespace Utility
+    } // namepsace Droid
+    } // namespace Elastos
+}

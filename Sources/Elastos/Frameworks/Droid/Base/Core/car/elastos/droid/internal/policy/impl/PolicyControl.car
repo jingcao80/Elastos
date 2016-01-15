@@ -1,0 +1,49 @@
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+
+    interface Elastos.Droid.View.IWindowState;
+    interface Elastos.Droid.View.IWindowManagerLayoutParams;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+    namespace Impl {
+
+    [local]
+    interface IPolicyControl {
+        Dump(
+            [in] String prefix,
+            [in] IPrintWriter* pw);
+
+        GetSystemUiVisibility(
+            [in] IWindowState* win,
+            [in] IWindowManagerLayoutParams* attrs,
+            [out] Int32* res);
+
+        ReloadFromSetting(
+            [in] IContext* context);
+
+        DisableImmersiveConfirmation(
+            [in] String pkg,
+            [out] Boolean* res);
+
+        AdjustClearableFlags(
+            [in] IWindowState* win,
+            [in] Int32 clearableFlags,
+            [out] Int32* res);
+
+        GetWindowFlags(
+            [in] IWindowState* win,
+            [in] IWindowManagerLayoutParams* attrs,
+            [out] Int32* res);
+    }
+
+    } // namespace Impl
+    } // namespace Policy
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

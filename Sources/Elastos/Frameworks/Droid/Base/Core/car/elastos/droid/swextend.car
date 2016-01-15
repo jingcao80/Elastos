@@ -1,0 +1,17 @@
+module
+{
+    merge("swextend/gpio/Gpio.car");
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Swextend {
+
+    singleton class CGpio {
+        interface IGpio;
+    }
+
+    } // namespace Elastos
+    } // namespace Droid
+    } // namespace Swextend
+
+}

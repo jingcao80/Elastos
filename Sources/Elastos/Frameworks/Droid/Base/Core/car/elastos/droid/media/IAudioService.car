@@ -1,0 +1,320 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Media.AudioPolicy.IAudioPolicyConfig;
+    interface Elastos.Droid.Media.IIVolumeController;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IIAudioService {
+        AdjustSuggestedStreamVolume(
+            [in] Int32 direction,
+            [in] Int32 suggestedStreamType,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        AdjustStreamVolume(
+            [in] Int32 streamType,
+            [in] Int32 direction,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        AdjustMasterVolume(
+            [in] Int32 direction,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        SetStreamVolume(
+            [in] Int32 streamType,
+            [in] Int32 index,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        [oneway] SetRemoteStreamVolume(
+            [in] Int32 index);
+
+        SetMasterVolume(
+            [in] Int32 index,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        SetStreamSolo(
+            [in] Int32 streamType,
+            [in] Boolean state,
+            [in] IBinder* cb);
+
+        SetStreamMute(
+            [in] Int32 streamType,
+            [in] Boolean state,
+            [in] IBinder* cb);
+
+        IsStreamMute(
+            [in] Int32 streamType,
+            [out] Boolean* result);
+
+        ForceRemoteSubmixFullVolume(
+            [in] Boolean startForcing,
+            [in] IBinder* cb);
+
+        SetMasterMute(
+            [in] Boolean state,
+            [in] Int32 flags,
+            [in] String callingPackage,
+            [in] IBinder* cb);
+
+        IsMasterMute(
+            [out] Boolean* result);
+
+        GetStreamVolume(
+            [in] Int32 streamType,
+            [out] Int32* result);
+
+        GetMasterVolume(
+            [out] Int32* result);
+
+        GetStreamMaxVolume(
+            [in] Int32 streamType,
+            [out] Int32* result);
+
+        GetMasterMaxVolume(
+            [out] Int32* result);
+
+        GetLastAudibleStreamVolume(
+            [in] Int32 streamType,
+            [out] Int32* result);
+
+        GetLastAudibleMasterVolume(
+            [out] Int32* result);
+
+        SetMicrophoneMute(
+            [in] Boolean on,
+            [in] String callingPackage);
+
+        SetRingerMode(
+            [in] Int32 ringerMode,
+            [in] Boolean checkZen);
+
+        GetRingerMode(
+            [out] Int32* result);
+
+        SetVibrateSetting(
+            [in] Int32 vibrateType,
+            [in] Int32 vibrateSetting);
+
+        GetVibrateSetting(
+            [in] Int32 vibrateType,
+            [out] Int32* result);
+
+        ShouldVibrate(
+            [in] Int32 vibrateType,
+            [out] Boolean* result);
+
+        SetMode(
+            [in] Int32 mode,
+            [in] IBinder* cb);
+
+        GetMode(
+            [out] Int32* result);
+
+        [oneway] PlaySoundEffect(
+            [in] Int32 effectType);
+
+        [oneway] PlaySoundEffectVolume(
+            [in] Int32 effectType,
+            [in] Float volume);
+
+        LoadSoundEffects(
+            [out] Boolean* result);
+
+        [oneway] UnloadSoundEffects();
+
+        [oneway] ReloadAudioSettings();
+
+        [oneway] AvrcpSupportsAbsoluteVolume(
+            [in] String address,
+            [in] Boolean support);
+
+        SetSpeakerphoneOn(
+            [in] Boolean on);
+
+        IsSpeakerphoneOn(
+            [out] Boolean* result);
+
+        SetBluetoothScoOn(
+            [in] Boolean on);
+
+        IsBluetoothScoOn(
+            [out] Boolean* result);
+
+        SetBluetoothA2dpOn(
+            [in] Boolean on);
+
+        IsBluetoothA2dpOn(
+            [out] Boolean* result);
+
+        RequestAudioFocus(
+            [in] Int32 mainStreamType,
+            [in] Int32 durationHint,
+            [in] IBinder* cb,
+            [in] IIAudioFocusDispatcher* fd,
+            [in] String clientId,
+            [in] String callingPackageName,
+            [out] Int32* result);
+
+        AbandonAudioFocus(
+            [in] IIAudioFocusDispatcher* fd,
+            [in] String clientId,
+            [out] Int32* result);
+
+        UnregisterAudioFocusClient(
+            [in] String clientId);
+
+        GetCurrentAudioFocus(
+            [out] Int32* result);
+
+        /**
+         * Register an IRemoteControlDisplay.
+         * Success of registration is subject to a check on
+         *   the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission.
+         * Notify all IRemoteControlClient of the new display and cause the RemoteControlClient
+         * at the top of the stack to update the new display with its information.
+         * @param rcd the IRemoteControlDisplay to register. No effect if null.
+         * @param w the maximum width of the expected bitmap. Negative or zero values indicate this
+         *   display doesn't need to receive artwork.
+         * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
+         *   display doesn't need to receive artwork.
+         */
+        RegisterRemoteControlDisplay(
+            [in] IIRemoteControlDisplay* rcd,
+            [in] Int32 w,
+            [in] Int32 h,
+            [out] Boolean* result);
+
+        /**
+         * Like registerRemoteControlDisplay, but with success being subject to a check on
+         *   the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission, and if it fails,
+         *   success is subject to listenerComp being one of the ENABLED_NOTIFICATION_LISTENERS
+         *   components.
+         */
+        RegisterRemoteController(
+            [in] IIRemoteControlDisplay* rcd,
+            [in] Int32 w,
+            [in] Int32 h,
+            [in] IComponentName* listenerComp,
+            [out] Boolean* result);
+
+        /**
+         * Unregister an IRemoteControlDisplay.
+         * No effect if the IRemoteControlDisplay hasn't been successfully registered.
+         * @param rcd the IRemoteControlDisplay to unregister. No effect if null.
+         */
+        [oneway] UnregisterRemoteControlDisplay(
+            [in] IIRemoteControlDisplay* rcd);
+        /**
+         * Update the size of the artwork used by an IRemoteControlDisplay.
+         * @param rcd the IRemoteControlDisplay with the new artwork size requirement
+         * @param w the maximum width of the expected bitmap. Negative or zero values indicate this
+         *   display doesn't need to receive artwork.
+         * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
+         *   display doesn't need to receive artwork.
+         */
+        [oneway] RemoteControlDisplayUsesBitmapSize(
+            [in] IIRemoteControlDisplay* rcd,
+            [in] Int32 w,
+            [in] Int32 h);
+        /**
+         * Controls whether a remote control display needs periodic checks of the RemoteControlClient
+         * playback position to verify that the estimated position has not drifted from the actual
+         * position. By default the check is not performed.
+         * The IRemoteControlDisplay must have been previously registered for this to have any effect.
+         * @param rcd the IRemoteControlDisplay for which the anti-drift mechanism will be enabled
+         *     or disabled. Not null.
+         * @param wantsSync if true, RemoteControlClient instances which expose their playback position
+         *     to the framework will regularly compare the estimated playback position with the actual
+         *     position, and will update the IRemoteControlDisplay implementation whenever a drift is
+         *     detected.
+         */
+        [oneway] RemoteControlDisplayWantsPlaybackPositionSync(
+            [in] IIRemoteControlDisplay* rcd,
+            [in] Boolean wantsSync);
+
+        StartBluetoothSco(
+            [in] IBinder* cb,
+            [in] Int32 targetSdkVersion);
+
+        StartBluetoothScoVirtualCall(
+            [in] IBinder* cb);
+
+        StopBluetoothSco(
+            [in] IBinder* cb);
+
+        ForceVolumeControlStream(
+            [in] Int32 streamType,
+            [in] IBinder* cb);
+
+        SetRingtonePlayer(
+            [in] IIRingtonePlayer* player);
+
+        GetRingtonePlayer(
+            [out] IIRingtonePlayer** result);
+
+        GetMasterStreamType(
+            [out] Int32* result);
+
+        SetWiredDeviceConnectionState(
+            [in] Int32 device,
+            [in] Int32 state,
+            [in] String name);
+
+        SetBluetoothA2dpDeviceConnectionState(
+            [in] IBluetoothDevice* device,
+            [in] Int32 state,
+            [in] Int32 profile,
+            [out] Int32* result);
+
+        StartWatchingRoutes(
+            [in] IIAudioRoutesObserver* observer,
+            [out] IAudioRoutesInfo** result);
+
+        IsCameraSoundForced(
+            [out] Boolean* result);
+
+        SetVolumeController(
+            [in] IIVolumeController* controller);
+
+        NotifyVolumeControllerVisible(
+            [in] IIVolumeController* controller,
+            [in] Boolean visible);
+
+        IsStreamAffectedByRingerMode(
+            [in] Int32 streamType,
+            [out] Boolean* result);
+
+        DisableSafeMediaVolume();
+
+        SetHdmiSystemAudioSupported(
+            [in] Boolean on,
+            [out] Int32* result);
+
+        IsHdmiSystemAudioSupported(
+            [out] Boolean* result);
+
+        RegisterAudioPolicy(
+            [in] IAudioPolicyConfig* policyConfig,
+            [in] IBinder* cb,
+            [out] Boolean* result);
+
+        [oneway] UnregisterAudioPolicyAsync(
+            [in] IBinder* cb);
+
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

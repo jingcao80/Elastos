@@ -1,0 +1,77 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.View.IIWindow;
+    interface Elastos.Droid.View.Accessibility.IIAccessibilityManagerClient;
+    interface Elastos.Droid.AccessibilityService.IAccessibilityServiceInfo;
+    interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceClient;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    /**
+     * Callback for specifying the result for an asynchronous request made
+     * via calling a method on IAccessibilityInteractionConnectionCallback.
+     *
+     * @hide
+     */
+    interface IIAccessibilityManager {
+        AddClient(
+            [in] IIAccessibilityManagerClient* client,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        SendAccessibilityEvent(
+            [in] IAccessibilityEvent* uiEvent,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetInstalledAccessibilityServiceList(
+            [in] Int32 userId,
+            [out] IList** services);
+
+        GetEnabledAccessibilityServiceList(
+            [in] Int32 feedbackType,
+            [in] Int32 userId,
+            [out] IList** services);
+
+        Interrupt(
+            [in] Int32 userId);
+
+        AddAccessibilityInteractionConnection(
+            [in] IIWindow* windowToken,
+            [in] IIAccessibilityInteractionConnection* connection,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        RemoveAccessibilityInteractionConnection(
+            [in] IIWindow* windowToken);
+
+        RegisterUiTestAutomationService(
+            [in] IBinder* owner,
+            [in] IIAccessibilityServiceClient* client,
+            [in] IAccessibilityServiceInfo* info);
+
+        UnregisterUiTestAutomationService(
+            [in] IIAccessibilityServiceClient* client);
+
+        TemporaryEnableAccessibilityStateUntilKeyguardRemoved(
+            [in] IComponentName* service,
+            [in] Boolean touchExplorationEnabled);
+
+        GetWindowToken(
+            [in] Int32 windowId,
+            [out] IBinder** binder);
+    }
+
+    } // namespace Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

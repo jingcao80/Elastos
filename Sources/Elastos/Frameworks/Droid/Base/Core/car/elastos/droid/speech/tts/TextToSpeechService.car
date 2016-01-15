@@ -1,0 +1,185 @@
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+    namespace Tts {
+
+    /**
+     * Abstract base class for TTS engine implementations. The following methods
+     * need to be implemented:
+     * <ul>
+     * <li>{@link #onIsLanguageAvailable}</li>
+     * <li>{@link #onLoadLanguage}</li>
+     * <li>{@link #onGetLanguage}</li>
+     * <li>{@link #onSynthesizeText}</li>
+     * <li>{@link #onStop}</li>
+     * </ul>
+     * The first three deal primarily with language management, and are used to
+     * query the engine for it's support for a given language and indicate to it
+     * that requests in a given language are imminent.
+     *
+     * {@link #onSynthesizeText} is central to the engine implementation. The
+     * implementation should synthesize text as per the request parameters and
+     * return synthesized data via the supplied callback. This class and its helpers
+     * will then consume that data, which might mean queuing it for playback or writing
+     * it to a file or similar. All calls to this method will be on a single thread,
+     * which will be different from the main thread of the service. Synthesis must be
+     * synchronous which means the engine must NOT hold on to the callback or call any
+     * methods on it after the method returns.
+     *
+     * {@link #onStop} tells the engine that it should stop
+     * all ongoing synthesis, if any. Any pending data from the current synthesis
+     * will be discarded.
+     *
+     * {@link #onGetLanguage} is not required as of JELLYBEAN_MR2 (API 18) and later, it is only
+     * called on earlier versions of Android.
+     *
+     * API Level 20 adds support for Voice objects. Voices are an abstraction that allow the TTS
+     * service to expose multiple backends for a single locale. Each one of them can have a different
+     * features set. In order to fully take advantage of voices, an engine should implement
+     * the following methods:
+     * <ul>
+     * <li>{@link #onGetVoices()}</li>
+     * <li>{@link #onIsValidVoiceName(String)}</li>
+     * <li>{@link #onLoadVoice(String)}</li>
+     * <li>{@link #onGetDefaultVoiceNameFor(String, String, String)}</li>
+     * </ul>
+     * The first three methods are siblings of the {@link #onGetLanguage},
+     * {@link #onIsLanguageAvailable} and {@link #onLoadLanguage} methods. The last one,
+     * {@link #onGetDefaultVoiceNameFor(String, String, String)} is a link between locale and voice
+     * based methods. Since API level 21 {@link TextToSpeech#setLanguage} is implemented by
+     * calling {@link TextToSpeech#setVoice} with the voice returned by
+     * {@link #onGetDefaultVoiceNameFor(String, String, String)}.
+     *
+     * If the client uses a voice instead of a locale, {@link SynthesisRequest} will contain the
+     * requested voice name.
+     *
+     * The default implementations of Voice-related methods implement them using the
+     * pre-existing locale-based implementation.
+     */
+    //public abstract class
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.IService
+     */
+    interface  ITextToSpeechService {
+        /**
+         * Queries the service for a set of supported voices.
+         *
+         * Can be called on multiple threads.
+         *
+         * The default implementation tries to enumerate all available locales, pass them to
+         * {@link #onIsLanguageAvailable(String, String, String)} and create Voice instances (using
+         * the locale's BCP-47 language tag as the voice name) for the ones that are supported.
+         * Note, that this implementation is suitable only for engines that don't have multiple voices
+         * for a single locale. Also, this implementation won't work with Locales not listed in the
+         * set returned by the {@link Locale#getAvailableLocales()} method.
+         *
+         * @return A list of voices supported.
+         */
+        OnGetVoices(
+            [out] IList** voices);
+
+        /**
+         * Return a name of the default voice for a given locale.
+         *
+         * This method provides a mapping between locales and available voices. This method is
+         * used in {@link TextToSpeech#setLanguage}, which calls this method and then calls
+         * {@link TextToSpeech#setVoice} with the voice returned by this method.
+         *
+         * Also, it's used by {@link TextToSpeech#getDefaultVoice()} to find a default voice for
+         * the default locale.
+         *
+         * @param lang ISO-3 language code.
+         * @param country ISO-3 country code. May be empty or null.
+         * @param variant Language variant. May be empty or null.
+
+         * @return A name of the default voice for a given locale.
+         */
+        OnGetDefaultVoiceNameFor(
+            [in] String lang,
+            [in] String country,
+            [in] String variant,
+            [out] String* name);
+
+        /**
+         * Notifies the engine that it should load a speech synthesis voice. There is no guarantee
+         * that this method is always called before the voice is used for synthesis. It is merely
+         * a hint to the engine that it will probably get some synthesis requests for this voice
+         * at some point in the future.
+         *
+         * Will be called only on synthesis thread.
+         *
+         * The default implementation creates a Locale from the voice name (by interpreting the name as
+         * a BCP-47 tag for the locale), and passes it to
+         * {@link #onLoadLanguage(String, String, String)}.
+         *
+         * @param voiceName Name of the voice.
+         * @return {@link TextToSpeech#ERROR} or {@link TextToSpeech#SUCCESS}.
+         */
+        OnLoadVoice(
+            [in] String voiceName,
+            [out] Int32* voice);
+
+        /**
+         * Checks whether the engine supports a voice with a given name.
+         *
+         * Can be called on multiple threads.
+         *
+         * The default implementation treats the voice name as a language tag, creating a Locale from
+         * the voice name, and passes it to {@link #onIsLanguageAvailable(String, String, String)}.
+         *
+         * @param voiceName Name of the voice.
+         * @return {@link TextToSpeech#ERROR} or {@link TextToSpeech#SUCCESS}.
+         */
+        OnIsValidVoiceName(
+            [in] String voiceName,
+            [out] Int32* ret);
+    }
+
+    interface  ITextToSpeechSpeechItem {
+        /**
+         * Plays the speech item. Blocks until playback is finished.
+         * Must not be called more than once.
+         *
+         * Only called on the synthesis thread.
+         *
+         * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
+         */
+        Play();
+
+        /**
+         * Stops the speech item.
+         * Must not be called more than once.
+         *
+         * Can be called on multiple threads,  but not on the synthesis thread.
+         */
+        Stop();
+
+        GetCallerUid(
+            [out] Int32* ret);
+
+        GetCallerPid(
+            [out] Int32* ret);
+    }
+
+    interface IUtteranceProgressDispatcher {
+        DispatchOnStop();
+
+        DispatchOnSuccess();
+
+        DispatchOnStart();
+
+        DispatchOnError(
+            [in] Int32 errorCode);
+    }
+
+    } // namespace Tts
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

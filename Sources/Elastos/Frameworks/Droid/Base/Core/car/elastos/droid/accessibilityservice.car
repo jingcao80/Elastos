@@ -1,0 +1,59 @@
+
+module
+{
+    merge("accessibilityservice/AccessibilityServiceInfo.car");
+    merge("accessibilityservice/IAccessibilityServiceConnection.car");
+    merge("accessibilityservice/IAccessibilityServiceClient.car");
+    merge("accessibilityservice/AccessibilityService.car");
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Internal.Os.IHandlerCallerCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace AccessibilityService {
+
+    [local]
+    class CAccessibilityServiceClientWrapper {
+        constructor(
+            [in] IContext* ctx,
+            [in] ILooper* looper,
+            [in] IAccessibilityServiceCallbacks* cb);
+
+        interface IIAccessibilityServiceClient;
+        interface IBinder;
+        interface IHandlerCallerCallback;
+    }
+
+    [local]
+    class CAccessibilityServiceInfo {
+        constructor();
+
+        constructor(
+            [in] IResolveInfo* resolveInfo,
+            [in] IContext* ctx);
+
+        interface IAccessibilityServiceInfo;
+        interface IParcelable;
+    }
+
+    singleton class CAccessibilityServiceInfoHelper {
+        interface IAccessibilityServiceInfoHelper;
+    }
+
+    class CAccessibilityServiceInfoCapabilityInfo {
+        constructor(
+            [in] Int32 capability,
+            [in] Int32 titleResId,
+            [in] Int32 descResId);
+
+        interface IAccessibilityServiceInfoCapabilityInfo;
+    }
+
+    } //AccessibilityService
+    } //Droid
+    } //Elastos
+}

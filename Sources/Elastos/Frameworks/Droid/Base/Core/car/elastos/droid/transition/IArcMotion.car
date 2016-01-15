@@ -1,0 +1,126 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * A PathMotion that generates a curved path along an arc on an imaginary circle containing
+     * the two points. If the horizontal distance between the points is less than the vertical
+     * distance, then the circle's center point will be horizontally aligned with the end point. If the
+     * vertical distance is less than the horizontal distance then the circle's center point
+     * will be vertically aligned with the end point.
+     * <p>
+     * When the two points are near horizontal or vertical, the curve of the motion will be
+     * small as the center of the circle will be far from both points. To force curvature of
+     * the path, {@link #setMinimumHorizontalAngle(float)} and
+     * {@link #setMinimumVerticalAngle(float)} may be used to set the minimum angle of the
+     * arc between two points.
+     * </p>
+     * <p>This may be used in XML as an element inside a transition.</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *   &lt;arcMotion android:minimumHorizontalAngle="15"
+     *              android:minimumVerticalAngle="0"
+     *              android:maximumAngle="90"/>
+     * &lt;/changeBounds>}
+     * </pre>
+     */
+
+    /**
+     * involve interface IPathMotion
+     */
+    interface IArcMotion {
+
+        /**
+         * Sets the minimum arc along the circle between two points aligned near horizontally.
+         * When start and end points are close to horizontal, the calculated center point of the
+         * circle will be far from both points, giving a near straight path between the points.
+         * By setting a minimum angle, this forces the center point to be closer and give an
+         * exaggerated curve to the path.
+         * <p>The default value is 0.</p>
+         *
+         * @param angleInDegrees The minimum angle of the arc on a circle describing the Path
+         *                       between two nearly horizontally-separated points.
+         * @attr ref android.R.styleable#ArcMotion_minimumHorizontalAngle
+         */
+        SetMinimumHorizontalAngle(
+            [in] Float angleInDegrees);
+
+        /**
+         * Returns the minimum arc along the circle between two points aligned near horizontally.
+         * When start and end points are close to horizontal, the calculated center point of the
+         * circle will be far from both points, giving a near straight path between the points.
+         * By setting a minimum angle, this forces the center point to be closer and give an
+         * exaggerated curve to the path.
+         * <p>The default value is 0.</p>
+         *
+         * @return  The minimum arc along the circle between two points aligned near horizontally.
+         * @attr ref android.R.styleable#ArcMotion_minimumHorizontalAngle
+         */
+        GetMinimumHorizontalAngle(
+            [out] Float* result);
+
+        /**
+         * Sets the minimum arc along the circle between two points aligned near vertically.
+         * When start and end points are close to vertical, the calculated center point of the
+         * circle will be far from both points, giving a near straight path between the points.
+         * By setting a minimum angle, this forces the center point to be closer and give an
+         * exaggerated curve to the path.
+         * <p>The default value is 0.</p>
+         *
+         * @param angleInDegrees The minimum angle of the arc on a circle describing the Path
+         *                       between two nearly vertically-separated points.
+         * @attr ref android.R.styleable#ArcMotion_minimumVerticalAngle
+         */
+        SetMinimumVerticalAngle(
+            [in] Float angleInDegrees);
+
+        /**
+         * Returns the minimum arc along the circle between two points aligned near vertically.
+         * When start and end points are close to vertical, the calculated center point of the
+         * circle will be far from both points, giving a near straight path between the points.
+         * By setting a minimum angle, this forces the center point to be closer and give an
+         * exaggerated curve to the path.
+         * <p>The default value is 0.</p>
+         *
+         * @return The minimum angle of the arc on a circle describing the Path
+         *         between two nearly vertically-separated points.
+         * @attr ref android.R.styleable#ArcMotion_minimumVerticalAngle
+         */
+        GetMinimumVerticalAngle(
+            [out] Float* result);
+
+        /**
+         * Sets the maximum arc along the circle between two points. When start and end points
+         * have close to equal x and y differences, the curve between them is large. This forces
+         * the curved path to have an arc of at most the given angle.
+         * <p>The default value is 70 degrees.</p>
+         *
+         * @param angleInDegrees The maximum angle of the arc on a circle describing the Path
+         *                       between the start and end points.
+         * @attr ref android.R.styleable#ArcMotion_maximumAngle
+         */
+        SetMaximumAngle(
+            [in] Float angleInDegrees);
+
+        /**
+         * Returns the maximum arc along the circle between two points. When start and end points
+         * have close to equal x and y differences, the curve between them is large. This forces
+         * the curved path to have an arc of at most the given angle.
+         * <p>The default value is 70 degrees.</p>
+         *
+         * @return The maximum angle of the arc on a circle describing the Path
+         *         between the start and end points.
+         * @attr ref android.R.styleable#ArcMotion_maximumAngle
+         */
+        GetMaximumAngle(
+            [out] Float* result);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

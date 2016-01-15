@@ -1,0 +1,570 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Format {
+
+    /**
+     * An alternative to the {@link java.util.Calendar} and
+     * {@link java.util.GregorianCalendar} classes. An instance of the Time class represents
+     * a moment in time, specified with second precision. It is modelled after
+     * struct tm. This class is not thread-safe and does not consider leap seconds.
+     *
+     * <p>This class has a number of issues and it is recommended that
+     * {@link java.util.GregorianCalendar} is used instead.
+     *
+     * <p>Known issues:
+     * <ul>
+     *     <li>For historical reasons when performing time calculations all arithmetic currently takes
+     *     place using 32-bit integers. This limits the reliable time range representable from 1902
+     *     until 2037.See the wikipedia article on the
+     *     <a href="http://en.wikipedia.org/wiki/Year_2038_problem">Year 2038 problem</a> for details.
+     *     Do not rely on this behavior; it may change in the future.
+     *     </li>
+     *     <li>Calling {@link #switchTimezone(String)} on a date that cannot exist, such as a wall time
+     *     that was skipped due to a DST transition, will result in a date in 1969 (i.e. -1, or 1 second
+     *     before 1st Jan 1970 UTC).</li>
+     *     <li>Much of the formatting / parsing assumes ASCII text and is therefore not suitable for
+     *     use with non-ASCII scripts.</li>
+     * </ul>
+     */
+    interface ITime {
+
+        const String TIMEZONE_UTC = "UTC";
+
+        /**
+         * The Julian day of the epoch, that is, January 1, 1970 on the Gregorian
+         * calendar.
+         */
+        const Int32 EPOCH_JULIAN_DAY = 2440588;
+
+        /**
+         * The Julian day of the Monday in the week of the epoch, December 29, 1969
+         * on the Gregorian calendar.
+         */
+        const Int32 MONDAY_BEFORE_JULIAN_EPOCH = 2440585;//EPOCH_JULIAN_DAY - 3;
+
+        /*
+         * Define symbolic constants for accessing the fields in this class. Used in
+         * getActualMaximum().
+         */
+        const Int32 SECOND = 1;
+        const Int32 MINUTE = 2;
+        const Int32 HOUR = 3;
+        const Int32 MONTH_DAY = 4;
+        const Int32 MONTH = 5;
+        const Int32 YEAR = 6;
+        const Int32 WEEK_DAY = 7;
+        const Int32 YEAR_DAY = 8;
+        const Int32 WEEK_NUM = 9;
+
+        const Int32 SUNDAY = 0;
+        const Int32 MONDAY = 1;
+        const Int32 TUESDAY = 2;
+        const Int32 WEDNESDAY = 3;
+        const Int32 THURSDAY = 4;
+        const Int32 FRIDAY = 5;
+        const Int32 SATURDAY = 6;
+
+        /**
+         * Returns true if the time represented by this Time object occurs after
+         * the given time.
+         *
+         * @param that a given Time object to compare against
+         * @return true if this time is greater than the given time
+         */
+        After(
+            [in] ITime* that,
+            [out] Boolean* ret);
+
+        /**
+         * Returns true if the time represented by this Time object occurs before
+         * the given time.
+         *
+         * @param that a given Time object to compare against
+         * @return true if this time is less than the given time
+         */
+        Before(
+            [in] ITime* that,
+            [out] Boolean* ret);
+
+        /**
+         * Clears all values, setting the timezone to the given timezone. Sets isDst
+         * to a negative value to mean "unknown".
+         * @param timezoneId the timezone to use.
+         */
+        Clear(
+            [in] String timezone);
+
+        /**
+         * Print the current value given the format string provided. See man
+         * strftime for what means what. The final string must be less than 256
+         * characters.
+         * @param format a string containing the desired format.
+         * @return a String containing the current time expressed in the current locale.
+         */
+        Format(
+            [in] String format,
+            [out] String* ret);
+
+        /**
+         * Format according to RFC 2445 DATE-TIME type.
+         *
+         * <p>The same as format("%Y%m%dT%H%M%S"), or format("%Y%m%dT%H%M%SZ") for a Time with a
+         * timezone set to "UTC".
+         */
+        Format2445(
+            [out] String* ret);
+
+        /**
+         * Return a string in the RFC 3339 format.
+         * <p>
+         * If allDay is true, expresses the time as Y-M-D</p>
+         * <p>
+         * Otherwise, if the timezone is UTC, expresses the time as Y-M-D-T-H-M-S UTC</p>
+         * <p>
+         * Otherwise the time is expressed the time as Y-M-D-T-H-M-S +- GMT</p>
+         * @return string in the RFC 3339 format.
+         */
+        Format3339(
+            [in] Boolean allDay,
+            [out] String* ret);
+
+        /**
+         * Return the maximum possible value for the given field given the value of
+         * the other fields. Requires that it be normalized for MONTH_DAY and
+         * YEAR_DAY.
+         * @param field one of the constants for HOUR, MINUTE, SECOND, etc.
+         * @return the maximum value for the field.
+         */
+        GetActualMaximum(
+            [in] Int32 field,
+            [out] Int32* ret);
+
+        /**
+         * Computes the week number according to ISO 8601.  The current Time
+         * object must already be normalized because this method uses the
+         * yearDay and weekDay fields.
+         *
+         * <p>
+         * In IS0 8601, weeks start on Monday.
+         * The first week of the year (week 1) is defined by ISO 8601 as the
+         * first week with four or more of its days in the starting year.
+         * Or equivalently, the week containing January 4.  Or equivalently,
+         * the week with the year's first Thursday in it.
+         * </p>
+         *
+         * <p>
+         * The week number can be calculated by counting Thursdays.  Week N
+         * contains the Nth Thursday of the year.
+         * </p>
+         *
+         * @return the ISO week number.
+         */
+        GetWeekNumber(
+            [out] Int32* ret);
+
+        /**
+         * Ensures the values in each field are in range. For example if the
+         * current value of this calendar is March 32, normalize() will convert it
+         * to April 1. It also fills in weekDay, yearDay, isDst and gmtoff.
+         *
+         * <p>
+         * If "ignoreDst" is true, then this method sets the "isDst" field to -1
+         * (the "unknown" value) before normalizing.  It then computes the
+         * correct value for "isDst".
+         *
+         * <p>
+         * See {@link #toMillis(boolean)} for more information about when to
+         * use <tt>true</tt> or <tt>false</tt> for "ignoreDst".
+         *
+         * @return the UTC milliseconds since the epoch
+         */
+        Normalize(
+            [in] Boolean ignoreDst,
+            [out] Int64* ret);
+
+        /**
+         * Parses a date-time string in either the RFC 2445 format or an abbreviated
+         * format that does not include the "time" field.  For example, all of the
+         * following strings are valid:
+         *
+         * <ul>
+         *   <li>"20081013T160000Z"</li>
+         *   <li>"20081013T160000"</li>
+         *   <li>"20081013"</li>
+         * </ul>
+         *
+         * Returns whether or not the time is in UTC (ends with Z).  If the string
+         * ends with "Z" then the timezone is set to UTC.  If the date-time string
+         * included only a date and no time field, then the <code>allDay</code>
+         * field of this Time class is set to true and the <code>hour</code>,
+         * <code>minute</code>, and <code>second</code> fields are set to zero;
+         * otherwise (a time field was included in the date-time string)
+         * <code>allDay</code> is set to false. The fields <code>weekDay</code>,
+         * <code>yearDay</code>, and <code>gmtoff</code> are always set to zero,
+         * and the field <code>isDst</code> is set to -1 (unknown).  To set those
+         * fields, call {@link #normalize(boolean)} after parsing.
+         *
+         * To parse a date-time string and convert it to UTC milliseconds, do
+         * something like this:
+         *
+         * <pre>
+         *   Time time = new Time();
+         *   String date = "20081013T160000Z";
+         *   time.parse(date);
+         *   long millis = time.normalize(false);
+         * </pre>
+         *
+         * @param s the string to parse
+         * @return true if the resulting time value is in UTC time
+         * @throws android.util.TimeFormatException if s cannot be parsed.
+         */
+        Parse(
+            [in] String s,
+            [out] Boolean* ret);
+
+        /**
+         * Parse a time in RFC 3339 format.  This method also parses simple dates
+         * (that is, strings that contain no time or time offset).  For example,
+         * all of the following strings are valid:
+         *
+         * <ul>
+         *   <li>"2008-10-13T16:00:00.000Z"</li>
+         *   <li>"2008-10-13T16:00:00.000+07:00"</li>
+         *   <li>"2008-10-13T16:00:00.000-07:00"</li>
+         *   <li>"2008-10-13"</li>
+         * </ul>
+         *
+         * <p>
+         * If the string contains a time and time offset, then the time offset will
+         * be used to convert the time value to UTC.
+         * </p>
+         *
+         * <p>
+         * If the given string contains just a date (with no time field), then
+         * the {@link #allDay} field is set to true and the {@link #hour},
+         * {@link #minute}, and  {@link #second} fields are set to zero.
+         * </p>
+         *
+         * <p>
+         * Returns true if the resulting time value is in UTC time.
+         * </p>
+         *
+         * @param s the string to parse
+         * @return true if the resulting time value is in UTC time
+         * @throws android.util.TimeFormatException if s cannot be parsed.
+         */
+        Parse3339(
+             [in] String s,
+             [out] Boolean* ret);
+
+        /**
+         * Sets the fields in this Time object given the UTC milliseconds.  After
+         * this method returns, all the fields are normalized.
+         * This also sets the "isDst" field to the correct value.
+         *
+         * @param millis the time in UTC milliseconds since the epoch.
+         */
+        Set(
+            [in] Int64 millis);
+
+        /**
+         * Copy the value of that to this Time object. No normalization happens.
+         */
+        Set(
+            [in] ITime* that);
+
+        /**
+         * Sets the fields. Sets weekDay, yearDay and gmtoff to 0, and isDst to -1.
+         * Call {@link #normalize(boolean)} if you need those.
+         */
+        Set(
+            [in] Int32 second,
+            [in] Int32 minute,
+            [in] Int32 hour,
+            [in] Int32 monthDay,
+            [in] Int32 month,
+            [in] Int32 year);
+
+        /**
+         * Sets the date from the given fields.  Also sets allDay to true.
+         * Sets weekDay, yearDay and gmtoff to 0, and isDst to -1.
+         * Call {@link #normalize(boolean)} if you need those.
+         *
+         * @param monthDay the day of the month (in the range [1,31])
+         * @param month the zero-based month number (in the range [0,11])
+         * @param year the year
+         */
+        Set(
+            [in] Int32 monthDay,
+            [in] Int32 month,
+            [in] Int32 year);
+
+        /**
+         * <p>Sets the time from the given Julian day number, which must be based on
+         * the same timezone that is set in this Time object.  The "gmtoff" field
+         * need not be initialized because the given Julian day may have a different
+         * GMT offset than whatever is currently stored in this Time object anyway.
+         * After this method returns all the fields will be normalized and the time
+         * will be set to 12am at the beginning of the given Julian day.
+         * </p>
+         *
+         * <p>
+         * The only exception to this is if 12am does not exist for that day because
+         * of daylight saving time.  For example, Cairo, Eqypt moves time ahead one
+         * hour at 12am on April 25, 2008 and there are a few other places that
+         * also change daylight saving time at 12am.  In those cases, the time
+         * will be set to 1am.
+         * </p>
+         *
+         * @param julianDay the JuliUTCan day in the timezone for this Time object
+         * @return the UTC milliseconds for the beginning of the Julian day
+         */
+        SetJulianDay(
+            [in] Int32 julianDay,
+            [out] Int64* ret);
+
+        /**
+         * Sets the time of the given Time object to the current time.
+         */
+        SetToNow();
+
+        /**
+         * Convert this time object so the time represented remains the same, but is
+         * instead located in a different timezone. This method automatically calls
+         * normalize() in some cases
+         */
+        SwitchTimezone(
+            [in] String timezone);
+
+        /**
+         * Converts this time to milliseconds. Suitable for interacting with the
+         * standard java libraries. The time is in UTC milliseconds since the epoch.
+         * This does an implicit normalization to compute the milliseconds but does
+         * <em>not</em> change any of the fields in this Time object.  If you want
+         * to normalize the fields in this Time object and also get the milliseconds
+         * then use {@link #normalize(boolean)}.
+         *
+         * <p>
+         * If "ignoreDst" is false, then this method uses the current setting of the
+         * "isDst" field and will adjust the returned time if the "isDst" field is
+         * wrong for the given time.  See the sample code below for an example of
+         * this.
+         *
+         * <p>
+         * If "ignoreDst" is true, then this method ignores the current setting of
+         * the "isDst" field in this Time object and will instead figure out the
+         * correct value of "isDst" (as best it can) from the fields in this
+         * Time object.  The only case where this method cannot figure out the
+         * correct value of the "isDst" field is when the time is inherently
+         * ambiguous because it falls in the hour that is repeated when switching
+         * from Daylight-Saving Time to Standard Time.
+         *
+         * <p>
+         * Here is an example where <tt>toMillis(true)</tt> adjusts the time,
+         * assuming that DST changes at 2am on Sunday, Nov 4, 2007.
+         *
+         * <pre>
+         * Time time = new Time();
+         * time.set(4, 10, 2007);  // set the date to Nov 4, 2007, 12am
+         * time.normalize(false);       // this sets isDst = 1
+         * time.monthDay += 1;     // changes the date to Nov 5, 2007, 12am
+         * millis = time.toMillis(false);   // millis is Nov 4, 2007, 11pm
+         * millis = time.toMillis(true);    // millis is Nov 5, 2007, 12am
+         * </pre>
+         *
+         * <p>
+         * To avoid this problem, use <tt>toMillis(true)</tt>
+         * after adding or subtracting days or explicitly setting the "monthDay"
+         * field.  On the other hand, if you are adding
+         * or subtracting hours or minutes, then you should use
+         * <tt>toMillis(false)</tt>.
+         *
+         * <p>
+         * You should also use <tt>toMillis(false)</tt> if you want
+         * to read back the same milliseconds that you set with {@link #set(long)}
+         * or {@link #set(Time)} or after parsing a date string.
+         */
+        ToMillis(
+             [in] Boolean ignoreDst,
+             [out] Int64* ret);
+
+        /**
+         * Return the current time in YYYYMMDDTHHMMSS<tz> format
+         */
+        ToString(
+            [out] String* ret);
+
+        SetAllDay(
+            [in] Boolean bAllDay);
+
+        GetAllDay(
+            [out] Boolean* bAllDay);
+
+        SetSecond(
+            [in] Int32 second);
+
+        GetSecond(
+            [out] Int32* second);
+
+        SetMinute(
+            [in] Int32 minute);
+
+        GetMinute(
+            [out] Int32* minute);
+
+        SetHour(
+            [in] Int32 hour);
+
+        GetHour(
+            [out] Int32* hour);
+
+        SetMonthDay(
+            [in] Int32 monthDay);
+
+        GetMonthDay(
+            [out] Int32* monthDay);
+
+        SetMonth(
+            [in] Int32 month);
+
+        GetMonth(
+            [out] Int32* month);
+
+        SetYear(
+            [in] Int32 year);
+
+        GetYear(
+            [out] Int32* year);
+
+        SetWeekDay(
+            [in] Int32 weekDay);
+
+        GetWeekDay(
+            [out] Int32* weekDay);
+
+        SetYearDay(
+            [in] Int32 yearDay);
+
+        GetYearDay(
+            [out] Int32* yearDay);
+
+        SetIsDst(
+            [in] Int32 isDst);
+
+        GetIsDst(
+            [out] Int32* isDst);
+
+        SetGmtoff(
+            [in] Int64 gmtoff);
+
+        GetGmtoff(
+            [out] Int64* gmtoff);
+
+        SetTimeZone(
+            [in] String timezone);
+
+        GetTimeZone(
+            [out] String* timezone);
+    }
+
+    interface ITimeHelper {
+
+        /**
+         * Compare two {@code Time} objects and return a negative number if {@code
+         * a} is less than {@code b}, a positive number if {@code a} is greater than
+         * {@code b}, or 0 if they are equal.
+         *
+         * @param a first {@code Time} instance to compare
+         * @param b second {@code Time} instance to compare
+         * @throws NullPointerException if either argument is {@code null}
+         * @throws IllegalArgumentException if {@link #allDay} is true but {@code
+         *             hour}, {@code minute}, and {@code second} are not 0.
+         * @return a negative result if {@code a} is earlier, a positive result if
+         *         {@code a} is earlier, or 0 if they are equal.
+         */
+        Compare(
+            [in] ITime* a,
+            [in] ITime* b,
+            [out] Int32* ret);
+
+        /**
+         * Returns the timezone string that is currently set for the device.
+         */
+        GetCurrentTimezone(
+             [out] String* ret);
+
+        /**
+         * Computes the Julian day number for a point in time in a particular
+         * timezone. The Julian day for a given date is the same for every
+         * timezone. For example, the Julian day for July 1, 2008 is 2454649.
+         *
+         * <p>Callers must pass the time in UTC millisecond (as can be returned
+         * by {@link #toMillis(boolean)} or {@link #normalize(boolean)})
+         * and the offset from UTC of the timezone in seconds (as might be in
+         * {@link #gmtoff}).
+         *
+         * <p>The Julian day is useful for testing if two events occur on the
+         * same calendar date and for determining the relative time of an event
+         * from the present ("yesterday", "3 days ago", etc.).
+         *
+         * @param millis the time in UTC milliseconds
+         * @param gmtoff the offset from UTC in seconds
+         * @return the Julian day
+         */
+        GetJulianDay(
+            [in] Int64 millis,
+            [in] Int64 gmtoff,
+            [out] Int32* ret);
+
+        /**
+         * Takes a number of weeks since the epoch and calculates the Julian day of
+         * the Monday for that week. This assumes that the week containing the
+         * {@link #EPOCH_JULIAN_DAY} is considered week 0. It returns the Julian day
+         * for the Monday week weeks after the Monday of the week containing the
+         * epoch.
+         *
+         * @param week Number of weeks since the epoch
+         * @return The julian day for the Monday of the given week since the epoch
+         */
+        GetJulianMondayFromWeeksSinceEpoch(
+             [in] Int32 week,
+             [out] Int32* ret);
+
+        /**
+         * Returns the week since {@link #EPOCH_JULIAN_DAY} (Jan 1, 1970) adjusted
+         * for first day of week. This takes a julian day and the week start day and
+         * calculates which week since {@link #EPOCH_JULIAN_DAY} that day occurs in,
+         * starting at 0. *Do not* use this to compute the ISO week number for the
+         * year.
+         *
+         * @param julianDay The julian day to calculate the week number for
+         * @param firstDayOfWeek Which week day is the first day of the week, see
+         *            {@link #SUNDAY}
+         * @return Weeks since the epoch
+         */
+        GetWeeksSinceEpochFromJulianDay(
+            [in] Int32 julianDay,
+            [in] Int32 firstDayOfWeek,
+            [out] Int32* ret);
+
+        /**
+         * Returns true if the day of the given time is the epoch on the Julian Calendar
+         * (January 1, 1970 on the Gregorian calendar).
+         *
+         * @param time the time to test
+         * @return true if epoch.
+         */
+        IsEpoch(
+            [in] ITime* time,
+            [out] Boolean* ret);
+
+    }
+
+    }//namespace Format
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

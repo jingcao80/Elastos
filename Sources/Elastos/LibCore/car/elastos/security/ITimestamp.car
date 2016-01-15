@@ -1,0 +1,68 @@
+
+module
+{
+    interface Elastos.Security.Cert.ICertPath;
+    interface Elastos.Utility.IDate;
+    namespace Elastos {
+    namespace Security {
+        interface ITimestamp {
+            /**
+             * Compares the specified object with this {@code Timestamp} for equality
+             * and returns {@code true} if the specified object is equal, {@code false}
+             * otherwise. The given object is equal to this {@code Timestamp}, if it is
+             * an instance of {@code Timestamp}, the two timestamps have an equal date
+             * and time and their certificate paths are equal.
+             *
+             * @param obj
+             *            object to be compared for equality with this {@code
+             *            Timestamp}.
+             * @return {@code true} if the specified object is equal to this {@code
+             *         Timestamp}, otherwise {@code false}.
+             * @see #hashCode
+             */
+            Equals(
+                [in] PInterface obj,
+                [out] Boolean* result);
+
+            /**
+             * Returns the certificate path of this {@code Timestamp}.
+             *
+             * @return the certificate path of this {@code Timestamp}.
+             */
+            GetSignerCertPath(
+                [out] ICertPath** path);
+
+            /**
+             * Returns the date and time of this {@code Timestamp}.
+             *
+             * @return the date and time of this {@code Timestamp}.
+             */
+            GetTimestamp(
+                [out] IDate** dt);
+
+            /**
+             * Returns the hash code value for this {@code Timestamp}. Returns the same
+             * hash code for {@code Timestamp}s that are equal to each other as
+             * required by the general contract of {@link Object#hashCode}.
+             *
+             * @return the hash code value for this {@code Timestamp}.
+             * @see Object#equals(Object)
+             * @see Timestamp#equals(Object)
+             */
+            GetHashCode(
+                [out] Int32* hashCode);
+
+            /**
+             * Returns a string containing a concise, human-readable description of this
+             * {@code Timestamp}.
+             *
+             * @return a printable representation for this {@code Timestamp}.
+             */
+            ToString(
+                [out] String* strVal);
+
+        }
+
+    } //Security
+    } //Elastos
+}

@@ -1,0 +1,99 @@
+
+module
+{
+    interface Elastos.Utility.Zip.IZipEntry;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * Used to read (decompress) the data from zip files.
+     * <p>
+     * A zip file (or "archive") is a collection of (possibly) compressed files
+     .
+     * When reading from a ZipInputStream, you call getNextEntry() which
+     * returns a ZipEntry of metadata corresponding to the userdata that
+     * follows. When you appear to have hit the end of this stream (which is
+     * really just the end of the current entry's userdata), call getNextEntry
+     * again. When it returns null, there are no more entries in the input file.
+     *
+     * @sa getNextEntry()
+     * @sa ZipEntry
+     * <p>
+     * Although InflaterInputStream can only read compressed zip entries, this
+     * class can read non-compressed entries as well.
+     * <p>
+     * Use ZipFile if you need random access to entries by name, but use this
+     * class if you just want to iterate over all entries.
+     *
+     * @sa ZipFile
+     *
+     * <p><strong>Example</strong>
+     * <p>
+     * Using ZipInputStream is a little more complicated than GZIPInputStream because
+     * zip files are containers that can contain multiple files. This code pulls all
+     * the files out of a zip file, similar to the unzip(1) utility.
+     *
+     * @sa GZIPInputStream
+     * <pre>
+     * InputStream is = ...
+     * ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
+     * try {
+     * ZipEntry ze;
+     * while ((ze = zis.getNextEntry()) != null) {
+     *    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+     *    byte[] buffer = new byte[1024];
+     *    int count;
+     *    while ((count = zis.read(buffer)) != -1) {
+     *        baos.write(buffer, 0, count);
+     *    }
+     *    String filename = ze.getName();
+     *    byte[] bytes = baos.toByteArray();
+     *    // do something with 'filename' and 'bytes'...
+     * }
+     * } finally {
+     * zis.close();
+     * }
+     * </pre>
+     *
+     * @implements Elastos.Utility.Zip.IInflaterInputStream
+     */
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IInputStream;
+     * interface IFilterInputStream;
+     * interface IInflaterInputStream;
+     */
+    interface IZipInputStream {
+        /**
+         * Closes the current ZIP entry and positions to read the next entry.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an {IOException} occurs.
+         */
+        CloseEntry();
+
+        /**
+         * Reads the next entry from this {ZipInputStream} or {null} if
+         * no more entries are present.
+         *
+         * @return the next {ZipEntry} contained in the input stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an {IOException} occurs.
+         * @see ZipEntry
+         */
+        GetNextEntry(
+            [out] IZipEntry** entry);
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

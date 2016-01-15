@@ -1,0 +1,65 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Model {
+
+    /** Represents a grouping of tasks witihin a stack. */
+    interface ITaskGrouping {
+
+        /** Adds a new task to this group. */
+        AddTask(
+            [in] ITask* t);
+
+        /** Removes a task from this group. */
+        RemoveTask(
+            [in] ITask* t);
+
+        /** Returns the key of the next task in the group. */
+        GetNextTaskInGroup(
+            [in] ITask* t,
+            [out] ITaskKey** result);
+
+        /** Returns the key of the previous task in the group. */
+        GetPrevTaskInGroup(
+            [in] ITask* t,
+            [out] ITaskKey** result);
+
+        /** Gets the front task */
+        IsFrontMostTask(
+            [in] ITask* t,
+            [out] Boolean* result);
+
+        /** Finds the index of a given task in a group. */
+        IndexOf(
+            [in] ITask* t,
+            [out] Int32* result);
+
+        /** Returns whether a task is in this grouping. */
+        ContainsTask(
+            [in] ITask* t,
+            [out] Boolean* result);
+
+        /** Returns whether one task is above another in the group.  If they are not in the same group,
+         * this returns false. */
+        IsTaskAboveTask(
+            [in] ITask* t,
+            [in] ITask* below,
+            [out] Boolean* result);
+
+        /** Returns the number of tasks in this group. */
+        GetTaskCount(
+            [out] Int32* result);
+    }
+
+    } // namespace Model
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

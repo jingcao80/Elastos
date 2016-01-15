@@ -1,0 +1,27 @@
+
+module
+{
+
+    using interface Elastos.Net.IInetAddress;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Scheme {
+
+    interface IHostNameResolver {
+
+        Resolve(
+            [in] String hostname,
+            [out] IInetAddress** addr);
+
+    }
+
+    } // namespace Scheme
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

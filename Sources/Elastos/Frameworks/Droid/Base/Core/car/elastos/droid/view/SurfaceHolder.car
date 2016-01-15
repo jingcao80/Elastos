@@ -1,0 +1,296 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.View.ISurfaceHolder;
+    interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+        /**
+         * A client may implement this interface to receive information about
+         * changes to the surface.  When used with a {@link SurfaceView}, the
+         * Surface being held is only available between calls to
+         * {@link #surfaceCreated(SurfaceHolder)} and
+         * {@link #surfaceDestroyed(SurfaceHolder)}.  The Callback is set with
+         * {@link SurfaceHolder#addCallback SurfaceHolder.addCallback} method.
+         */
+        interface ISurfaceHolderCallback {
+            /**
+             * This is called immediately after the surface is first created.
+             * Implementations of this should start up whatever rendering code
+             * they desire.  Note that only one thread can ever draw into
+             * a {@link Surface}, so you should not draw into the Surface here
+             * if your normal rendering will be in another thread.
+             *
+             * @param holder The SurfaceHolder whose surface is being created.
+             */
+            SurfaceCreated(
+                [in] ISurfaceHolder* holder);
+
+            /**
+             * This is called immediately after any structural changes (format or
+             * size) have been made to the surface.  You should at this point update
+             * the imagery in the surface.  This method is always called at least
+             * once, after {@link #surfaceCreated}.
+             *
+             * @param holder The SurfaceHolder whose surface has changed.
+             * @param format The new PixelFormat of the surface.
+             * @param width The new width of the surface.
+             * @param height The new height of the surface.
+             */
+            SurfaceChanged(
+                [in] ISurfaceHolder* holder,
+                [in] Int32 format,
+                [in] Int32 width,
+                [in] Int32 height);
+
+            /**
+             * This is called immediately before a surface is being destroyed. After
+             * returning from this call, you should no longer try to access this
+             * surface.  If you have a rendering thread that directly accesses
+             * the surface, you must ensure that thread is no longer touching the
+             * Surface before returning from this function.
+             *
+             * @param holder The SurfaceHolder whose surface is being destroyed.
+             */
+            SurfaceDestroyed(
+                [in] ISurfaceHolder* holder);
+        }
+
+        /**
+         * Additional callbacks that can be received for {@link Callback}.
+         */
+        /**
+         * @Involve
+         * interface ISurfaceHolderCallback
+         */
+        interface ISurfaceHolderCallback2 {
+            /**
+             * Called when the application needs to redraw the content of its
+             * surface, after it is resized or for some other reason.  By not
+             * returning here until the redraw is complete, you can ensure that
+             * the user will not see your surface in a bad state (at its new
+             * size before it has been correctly drawn that way).  This will
+             * typically be preceeded by a call to {@link #surfaceChanged}.
+             *
+             * @param holder The SurfaceHolder whose surface has changed.
+             */
+            SurfaceRedrawNeeded(
+                [in] ISurfaceHolder* holder);
+        }
+
+        /**
+         * Abstract interface to someone holding a display surface.  Allows you to
+         * control the surface size and format, edit the pixels in the surface, and
+         * monitor changes to the surface.  This interface is typically available
+         * through the {@link SurfaceView} class.
+         *
+         * <p>When using this interface from a thread other than the one running
+         * its {@link SurfaceView}, you will want to carefully read the
+         * methods
+         * {@link #lockCanvas} and {@link Callback#surfaceCreated Callback.surfaceCreated()}.
+         */
+        interface ISurfaceHolder {
+            /** Surface type: creates a regular surface, usually in main, non
+             * contiguous, cached/buffered RAM. */
+            const Int32 SURFACE_TYPE_NORMAL = 0;
+
+            /** Surface type: creates a suited to be used with DMA engines and
+             * hardware accelerators.
+             * @deprecated this is ignored, this value is set automatically when needed.
+             */
+            const Int32 SURFACE_TYPE_HARDWARE = 1;
+
+            /** Surface type: creates a surface suited to be used with the GPU
+             * @deprecated this is ignored, this value is set automatically when needed.
+             */
+            const Int32 SURFACE_TYPE_GPU = 2;
+
+            /** @deprecated this is ignored, this value is set automatically when needed. */
+            const Int32 SURFACE_TYPE_PUSH_BUFFERS = 3;
+
+            /**
+             * Add a Callback interface for this holder.  There can several Callback
+             * interfaces associated to a holder.
+             *
+             * @param cback The new Callback interface.
+             */
+            AddCallback(
+                [in] ISurfaceHolderCallback* cback);
+
+            /**
+             * Removes a previously added Callback interface from this holder.
+             *
+             * @param cback The Callback interface to remove.
+             */
+            RemoveCallback(
+                [in] ISurfaceHolderCallback* cback);
+
+            /**
+             * Use this method to find out if the surface is in the process of being
+             * created from Callback methods. This is intended to be used with
+             * {@link Callback#surfaceChanged}.
+             *
+             * @param result true if the surface is in the process of being created.
+             */
+            IsCreating(
+                [out] Boolean* result);
+
+            /**
+             * Sets the surface's type.
+             *
+             * @deprecated this is ignored, this value is set automatically when needed.
+             */
+            SetType(
+                [in] Int32 type);
+
+            /**
+             * Make the surface a fixed size.  It will never change from this size.
+             * When working with a {link SurfaceView}, this must be called from the
+             * same thread running the SurfaceView's window.
+             *
+             * @param width The surface's width.
+             * @param height The surface's height.
+             */
+            SetFixedSize(
+                [in] Int32 width,
+                [in] Int32 height);
+
+            /**
+             * Allow the surface to resized based on layout of its container (this is
+             * the default).  When this is enabled, you should monitor
+             * {@link Callback#surfaceChanged} for changes to the size of the surface.
+             * When working with a {link SurfaceView}, this must be called from the
+             * same thread running the SurfaceView's window.
+             */
+            SetSizeFromLayout();
+
+            /**
+             * Set the desired PixelFormat of the surface.  The default is OPAQUE.
+             * When working with a {link SurfaceView}, this must be called from the
+             * same thread running the SurfaceView's window.
+             *
+             * @param format A constant from PixelFormat.
+             *
+             * @see android.graphics.PixelFormat
+             */
+            SetFormat(
+                [in] Int32 format);
+
+            /**
+             * Enable or disable option to keep the screen turned on while this
+             * surface is displayed.  The default is false, allowing it to turn off.
+             * This is safe to call from any thread.
+             *
+             * @param screenOn Supply to true to force the screen to stay on, false
+             * to allow it to turn off.
+             */
+            SetKeepScreenOn(
+                [in] Boolean screenOn);
+
+            /**
+             * Start editing the pixels in the surface.  The returned Canvas can be used
+             * to draw into the surface's bitmap.  A null is returned if the surface has
+             * not been created or otherwise can not be edited.  You will usually need
+             * to implement {@link Callback#surfaceCreated Callback.surfaceCreated}
+             * to find out when the Surface is available for use.
+             *
+             * <p>The content of the Surface is never preserved between unlockCanvas() and
+             * lockCanvas(), for this reason, every pixel within the Surface area
+             * must be written. The only exception to this rule is when a dirty
+             * rectangle is specified, in which case, non dirty pixels will be
+             * preserved.
+             *
+             * <p>If you call this repeatedly when the Surface is not ready (before
+             * {@link Callback#surfaceCreated Callback.surfaceCreated} or after
+             * {@link Callback#surfaceDestroyed Callback.surfaceDestroyed}), your calls
+             * will be throttled to a slow rate in order to avoid consuming CPU.
+             *
+             * <p>If null is not returned, this function internally holds a lock until
+             * the corresponding {@link #unlockCanvasAndPost} call, preventing
+             * {@link SurfaceView} from creating, destroying, or modifying the surface
+             * while it is being drawn.  This can be more convenience than accessing
+             * the Surface directly, as you do not need to do special synchronization
+             * with a drawing thread in {@link Callback#surfaceDestroyed
+             * Callback.surfaceDestroyed}.
+             *
+             * @param canvas Canvas Use to draw into the surface.
+             */
+            LockCanvas(
+                [out] ICanvas** canvas);
+
+            /**
+             * Just like {@link #lockCanvas()} but allows specification of a dirty rectangle.
+             * Every
+             * pixel within that rectangle must be written; however pixels outside
+             * the dirty rectangle will be preserved by the next call to lockCanvas().
+             *
+             * @see android.view.SurfaceHolder#lockCanvas
+             *
+             * @param dirty Area of the Surface that will be modified.
+             * @return Canvas Use to draw into the surface.
+             */
+            LockCanvas(
+                [in] IRect* dirty,
+                [out] ICanvas** canvas);
+
+            /**
+             * Finish editing pixels in the surface.  After this call, the surface's
+             * current pixels will be shown on the screen, but its content is lost,
+             * in particular there is no guarantee that the content of the Surface
+             * will remain unchanged when lockCanvas() is called again.
+             *
+             * @see #lockCanvas()
+             *
+             * @param canvas The Canvas previously returned by lockCanvas().
+             */
+            UnlockCanvasAndPost(
+                [in] ICanvas* canvas);
+
+            /**
+             * Retrieve the current size of the surface.  Note: do not modify the
+             * returned Rect.  This is only safe to call from the thread of
+             * {@link SurfaceView}'s window, or while inside of
+             * {@link #lockCanvas()}.
+             *
+             * @param rect Rect The surface's dimensions.  The left and top are always 0.
+             */
+            GetSurfaceFrame(
+                [out] IRect** rect);
+
+            /**
+             * Direct access to the surface object.  The Surface may not always be
+             * available -- for example when using a {@link SurfaceView} the holder's
+             * Surface is not created until the view has been attached to the window
+             * manager and performed a layout in order to determine the dimensions
+             * and screen position of the Surface.    You will thus usually need
+             * to implement {@link Callback#surfaceCreated Callback.surfaceCreated}
+             * to find out when the Surface is available for use.
+             *
+             * <p>Note that if you directly access the Surface from another thread,
+             * it is critical that you correctly implement
+             * {@link Callback#surfaceCreated Callback.surfaceCreated} and
+             * {@link Callback#surfaceDestroyed Callback.surfaceDestroyed} to ensure
+             * that thread only accesses the Surface while it is valid, and that the
+             * Surface does not get destroyed while the thread is using it.
+             *
+             * <p>This method is intended to be used by frameworks which often need
+             * direct access to the Surface object (usually to pass it to native code).
+             * When designing APIs always use SurfaceHolder to pass surfaces around
+             * as opposed to the Surface object itself. A rule of thumb is that
+             * application code should never have to call this method.
+             *
+             * @return Surface The surface.
+             */
+            GetSurface(
+                [out] ISurface** surface);
+        }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

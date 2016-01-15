@@ -1,0 +1,661 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.App.IFragment;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewOnClickListener;
+    interface Elastos.Droid.Preference.IPreferenceActivityHeader;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * This is the base class for an activity to show a hierarchy of preferences
+     * to the user.  Prior to {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * this class only allowed the display of a single set of preference; this
+     * functionality should now be found in the new {@link PreferenceFragment}
+     * class.  If you are using PreferenceActivity in its old mode, the documentation
+     * there applies to the deprecated APIs here.
+     *
+     * <p>This activity shows one or more headers of preferences, each of which
+     * is associated with a {@link PreferenceFragment} to display the preferences
+     * of that header.  The actual layout and display of these associations can
+     * however vary; currently there are two major approaches it may take:
+     *
+     * <ul>
+     * <li>On a small screen it may display only the headers as a single list
+     * when first launched.  Selecting one of the header items will re-launch
+     * the activity with it only showing the PreferenceFragment of that header.
+     * <li>On a large screen in may display both the headers and current
+     * PreferenceFragment together as panes.  Selecting a header item switches
+     * to showing the correct PreferenceFragment for that item.
+     * </ul>
+     *
+     * <p>Subclasses of PreferenceActivity should implement
+     * {@link #onBuildHeaders} to populate the header list with the desired
+     * items.  Doing this implicitly switches the class into its new "headers
+     * + fragments" mode rather than the old style of just showing a single
+     * preferences list.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For information about using {@code PreferenceActivity},
+     * read the <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>
+     * guide.</p>
+     * </div>
+     *
+     * <a name="SampleCode"></a>
+     * <h3>Sample Code</h3>
+     *
+     * <p>The following sample code shows a simple preference activity that
+     * has two different sets of preferences.  The implementation, consisting
+     * of the activity itself as well as its two preference fragments is:</p>
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/preference/PreferenceWithHeaders.java
+     *      activity}
+     *
+     * <p>The preference_headers resource describes the headers to be displayed
+     * and the fragments associated with them.  It is:
+     *
+     * {@sample development/samples/ApiDemos/res/xml/preference_headers.xml headers}
+     *
+     * <p>The first header is shown by Prefs1Fragment, which populates itself
+     * from the following XML resource:</p>
+     *
+     * {@sample development/samples/ApiDemos/res/xml/fragmented_preferences.xml preferences}
+     *
+     * <p>Note that this XML resource contains a preference screen holding another
+     * fragment, the Prefs1FragmentInner implemented here.  This allows the user
+     * to traverse down a hierarchy of preferences; pressing back will pop each
+     * fragment off the stack to return to the previous preferences.
+     *
+     * <p>See {@link PreferenceFragment} for information on implementing the
+     * fragments themselves.
+     */
+    /**
+     * @Involve
+     * interface IListActivity
+     * interface IPreferenceManagerOnPreferenceTreeClickListener
+     * interface IPreferenceFragmentOnPreferenceStartFragmentCallback
+     * interface IActivity
+     * interface IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IViewOnCreateContextMenuListener //undefined
+     * interface IComponentCallbacks2
+     * interface IComponentCallbacks
+     * interface IOnWindowDismissedCallback  //IOnWindowDismissedCallback
+     * interface IContextWrapper
+     * interface IContext
+     *
+     */
+     [local,deprecated]
+    interface IPreferenceActivity {
+        /**
+         * When starting this activity, the invoking Intent can contain this extra
+         * string to specify which fragment should be initially displayed.
+         * <p/>Starting from Key Lime Pie, when this argument is passed in, the PreferenceActivity
+         * will call isValidFragment() to confirm that the fragment class name is valid for this
+         * activity.
+         */
+        const String EXTRA_SHOW_FRAGMENT = ":android:show_fragment";
+
+        /**
+         * When starting this activity and using {@link #EXTRA_SHOW_FRAGMENT},
+         * this extra can also be specified to supply a Bundle of arguments to pass
+         * to that fragment when it is instantiated during the initial creation
+         * of PreferenceActivity.
+         */
+        const String EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":android:show_fragment_args";
+
+        /**
+         * When starting this activity and using {@link #EXTRA_SHOW_FRAGMENT},
+         * this extra can also be specify to supply the title to be shown for
+         * that fragment.
+         */
+        const String EXTRA_SHOW_FRAGMENT_TITLE = ":android:show_fragment_title";
+
+        /**
+         * When starting this activity and using {@link #EXTRA_SHOW_FRAGMENT},
+         * this extra can also be specify to supply the short title to be shown for
+         * that fragment.
+         */
+        const String EXTRA_SHOW_FRAGMENT_SHORT_TITLE = ":android:show_fragment_short_title";
+
+        /**
+         * When starting this activity, the invoking Intent can contain this extra
+         * boolean that the header list should not be displayed.  This is most often
+         * used in conjunction with {@link #EXTRA_SHOW_FRAGMENT} to launch
+         * the activity to display a specific fragment that the user has navigated
+         * to.
+         */
+        const String EXTRA_NO_HEADERS = ":android:no_headers";
+
+        /**
+         * Default value for {@link Header#id Header.id} indicating that no
+         * identifier value is set.  All other values (including those below -1)
+         * are valid.
+         */
+        const Int64 HEADER_ID_UNDEFINED = -1;
+
+        /**
+         * Returns true if this activity is currently showing the header list.
+         */
+        HasHeaders(
+            [out] Boolean* result);
+
+        /**
+         * Returns the Header list
+         * @hide
+         */
+        GetHeaders(
+            [out] IList** result);
+
+        /**
+         * Returns true if this activity is showing multiple panes -- the headers
+         * and a preference fragment.
+         */
+        IsMultiPane(
+            [out] Boolean* isMultiPane);
+
+        /**
+         * Called to determine if the activity should run in multi-pane mode.
+         * The default implementation returns true if the screen is large
+         * enough.
+         */
+        OnIsMultiPane(
+            [out] Boolean* result);
+
+        /**
+         * Called to determine whether the header list should be hidden.
+         * The default implementation returns the
+         * value given in {@link #EXTRA_NO_HEADERS} or false if it is not supplied.
+         * This is set to false, for example, when the activity is being re-launched
+         * to show a particular preference activity.
+         */
+        OnIsHidingHeaders(
+            [out] Boolean* result);
+
+        /**
+         * Called to determine the initial header to be shown.  The default
+         * implementation simply returns the fragment of the first header.  Note
+         * that the returned Header object does not actually need to exist in
+         * your header list -- whatever its fragment is will simply be used to
+         * show for the initial UI.
+         */
+        OnGetInitialHeader(
+            [out] IPreferenceActivityHeader** header);
+
+        /**
+         * Called after the header list has been updated ({@link #onBuildHeaders}
+         * has been called and returned due to {@link #invalidateHeaders()}) to
+         * specify the header that should now be selected.  The default implementation
+         * returns null to keep whatever header is currently selected.
+         */
+        OnGetNewHeader(
+            [out] IPreferenceActivityHeader** header);
+
+        /**
+         * Called when the activity needs its list of headers build.  By
+         * implementing this and adding at least one item to the list, you
+         * will cause the activity to run in its modern fragment mode.  Note
+         * that this function may not always be called; for example, if the
+         * activity has been asked to display a particular fragment without
+         * the header list, there is no need to build the headers.
+         *
+         * <p>Typical implementations will use {@link #loadHeadersFromResource}
+         * to fill in the list from a resource.
+         *
+         * @param target The list in which to place the headers.
+         */
+        OnBuildHeaders(
+            [in] IList* target);
+
+        /**
+         * Call when you need to change the headers being displayed.  Will result
+         * in onBuildHeaders() later being called to retrieve the new list.
+         */
+        InvalidateHeaders();
+
+        /**
+         * Parse the given XML file as a header description, adding each
+         * parsed Header into the target list.
+         *
+         * @param resid The XML resource to load and parse.
+         * @param target The list in which the parsed headers should be placed.
+         */
+        LoadHeadersFromResource(
+            [in] Int32 resid,
+            [in] IList* target);
+
+        /**
+         * Subclasses should override this method and verify that the given fragment is a valid type
+         * to be attached to this activity. The default implementation returns <code>true</code> for
+         * apps built for <code>android:targetSdkVersion</code> older than
+         * {@link android.os.Build.VERSION_CODES#KITKAT}. For later versions, it will throw an exception.
+         * @param fragmentName the class name of the Fragment about to be attached to this activity.
+         * @return true if the fragment class name is valid for this Activity and false otherwise.
+         */
+        IsValidFragment(
+            [in] String fragmentName,
+            [out] Boolean* ret);
+
+        /**
+         * Set a footer that should be shown at the bottom of the header list.
+         */
+        SetListFooter(
+            [in] IView* view);
+
+        /**
+         * Called when the user selects an item in the header list.  The default
+         * implementation will call either
+         * {@link #startWithFragment(String, Bundle, Fragment, int, int, int)}
+         * or {@link #switchToHeader(Header)} as appropriate.
+         *
+         * @param header The header that was selected.
+         * @param position The header's position in the list.
+         */
+        OnHeaderClick(
+            [in] IPreferenceActivityHeader* header,
+            [in] Int32 position);
+
+        /**
+         * Called by {@link #startWithFragment(String, Bundle, Fragment, int, int, int)} when
+         * in single-pane mode, to build an Intent to launch a new activity showing
+         * the selected fragment.  The default implementation constructs an Intent
+         * that re-launches the current activity with the appropriate arguments to
+         * display the fragment.
+         *
+         * @param fragmentName The name of the fragment to display.
+         * @param args Optional arguments to supply to the fragment.
+         * @param titleRes Optional resource ID of title to show for this item.
+         * @param shortTitleRes Optional resource ID of short title to show for this item.
+         * @return Returns an Intent that can be launched to display the given
+         * fragment.
+         */
+        OnBuildStartFragmentIntent(
+            [in] String fragmentName,
+            [in] IBundle* args,
+            [in] Int32 titleRes,
+            [in] Int32 shortTitleRes,
+            [out] IIntent** intent);
+
+        /**
+         * Like {@link #startWithFragment(String, Bundle, Fragment, int, int, int)}
+         * but uses a 0 titleRes.
+         */
+        StartWithFragment(
+            [in] String fragmentName,
+            [in] IBundle* args,
+            [in] IFragment* resultTo,
+            [in] Int32 resultRequestCode);
+
+        /**
+         * Start a new instance of this activity, showing only the given
+         * preference fragment.  When launched in this mode, the header list
+         * will be hidden and the given preference fragment will be instantiated
+         * and fill the entire activity.
+         *
+         * @param fragmentName The name of the fragment to display.
+         * @param args Optional arguments to supply to the fragment.
+         * @param resultTo Option fragment that should receive the result of
+         * the activity launch.
+         * @param resultRequestCode If resultTo is non-null, this is the request
+         * code in which to report the result.
+         * @param titleRes Resource ID of string to display for the title of
+         * this set of preferences.
+         * @param shortTitleRes Resource ID of string to display for the short title of
+         * this set of preferences.
+         */
+        StartWithFragment(
+            [in] String fragmentName,
+            [in] IBundle* args,
+            [in] IFragment* resultTo,
+            [in] Int32 resultRequestCode,
+            [in] Int32 titleRes,
+            [in] Int32 shortTitleRes);
+
+        /**
+         * Change the base title of the bread crumbs for the current preferences.
+         * This will normally be called for you.  See
+         * {@link android.app.FragmentBreadCrumbs} for more information.
+         */
+        ShowBreadCrumbs(
+            [in] ICharSequence* title,
+            [in] ICharSequence* shortTitle);
+
+        /**
+         * Should be called after onCreate to ensure that the breadcrumbs, if any, were created.
+         * This prepends a title to the fragment breadcrumbs and attaches a listener to any clicks
+         * on the parent entry.
+         * @param title the title for the breadcrumb
+         * @param shortTitle the short title for the breadcrumb
+         */
+        SetParentTitle(
+            [in] ICharSequence* title,
+            [in] ICharSequence* shortTitle,
+            [in] IViewOnClickListener* listener);
+
+        /**
+         * When in two-pane mode, switch the fragment pane to show the given
+         * preference fragment.
+         *
+         * @param fragmentName The name of the fragment to display.
+         * @param args Optional arguments to supply to the fragment.
+         */
+        SwitchToHeader(
+            [in] String fragmentName,
+            [in] IBundle* args);
+
+        /**
+         * When in two-pane mode, switch to the fragment pane to show the given
+         * preference fragment.
+         *
+         * @param header The new header to display.
+         */
+        SwitchToHeader(
+            [in] IPreferenceActivityHeader* header);
+
+        /**
+         * Start a new fragment.
+         *
+         * @param fragment The fragment to start
+         * @param push If true, the current fragment will be pushed onto the back stack.  If false,
+         * the current fragment will be replaced.
+         */
+        StartPreferenceFragment(
+            [in] IFragment* fragment,
+            [in] Boolean push);
+
+        /**
+         * Start a new fragment containing a preference panel.  If the preferences
+         * are being displayed in multi-pane mode, the given fragment class will
+         * be instantiated and placed in the appropriate pane.  If running in
+         * single-pane mode, a new activity will be launched in which to show the
+         * fragment.
+         *
+         * @param fragmentClass Full name of the class implementing the fragment.
+         * @param args Any desired arguments to supply to the fragment.
+         * @param titleRes Optional resource identifier of the title of this
+         * fragment.
+         * @param titleText Optional text of the title of this fragment.
+         * @param resultTo Optional fragment that result data should be sent to.
+         * If non-null, resultTo.onActivityResult() will be called when this
+         * preference panel is done.  The launched panel must use
+         * {@link #finishPreferencePanel(Fragment, int, Intent)} when done.
+         * @param resultRequestCode If resultTo is non-null, this is the caller's
+         * request code to be received with the resut.
+         */
+        StartPreferencePanel(
+            [in] String fragmentClass,
+            [in] IBundle* args,
+            [in] Int32 titleRes,
+            [in] ICharSequence* titleText,
+            [in] IFragment* resultTo,
+            [in] Int32 resultRequestCode);
+
+        /**
+         * Called by a preference panel fragment to finish itself.
+         *
+         * @param caller The fragment that is asking to be finished.
+         * @param resultCode Optional result code to send back to the original
+         * launching fragment.
+         * @param resultData Optional result data to send back to the original
+         * launching fragment.
+         */
+        FinishPreferencePanel(
+            [in] IFragment* caller,
+            [in] Int32 resultCode,
+            [in] IIntent* resultData);
+
+        /**
+         * Returns the {@link PreferenceManager} used by this activity.
+         * @return The {@link PreferenceManager}.
+         *
+         * @deprecated This function is not relevant for a modern fragment-based
+         * PreferenceActivity.
+         */
+        // @Deprecated
+        GetPreferenceManager(
+            [out] IPreferenceManager** result);
+
+        /**
+         * Sets the root of the preference hierarchy that this activity is showing.
+         *
+         * @param preferenceScreen The root {@link PreferenceScreen} of the preference hierarchy.
+         *
+         * @deprecated This function is not relevant for a modern fragment-based
+         * PreferenceActivity.
+         *
+         * @Deprecated
+         */
+        SetPreferenceScreen(
+            [in] IPreferenceScreen* preferenceScreen);
+
+        /**
+         * Gets the root of the preference hierarchy that this activity is showing.
+         *
+         * @return The {@link PreferenceScreen} that is the root of the preference
+         *         hierarchy.
+         *
+         * @deprecated This function is not relevant for a modern fragment-based
+         * PreferenceActivity.
+         *
+         * @Deprecated
+         */
+        GetPreferenceScreen(
+            [out] IPreferenceScreen** screen);
+
+        /**
+         * Adds preferences from activities that match the given {@link Intent}.
+         *
+         * @param intent The {@link Intent} to query activities.
+         *
+         * @deprecated This function is not relevant for a modern fragment-based
+         * PreferenceActivity.
+         *
+         * @Deprecated
+         */
+        AddPreferencesFromIntent(
+            [in] IIntent* intent);
+
+        /**
+         * Inflates the given XML resource and adds the preference hierarchy to the current
+         * preference hierarchy.
+         *
+         * @param preferencesResId The XML resource ID to inflate.
+         *
+         * @deprecated This function is not relevant for a modern fragment-based
+         * PreferenceActivity.
+         *
+         * @Deprecated
+         */
+        AddPreferencesFromResource(
+            [in] Int32 preferencesResId);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @deprecated This function is not relevant for a modern fragment-based
+         * PreferenceActivity.
+         *
+         * @Deprecated
+         */
+        OnPreferenceTreeClick(
+            [in] IPreferenceScreen* preferenceScreen,
+            [in] IPreference* preference,
+            [out] Boolean* result);
+
+        /**
+         * Finds a {@link Preference} based on its key.
+         *
+         * @param key The key of the preference to retrieve.
+         * @return The {@link Preference} with the key, or null.
+         * @see PreferenceGroup#findPreference(CharSequence)
+         *
+         * @deprecated This function is not relevant for a modern fragment-based
+         * PreferenceActivity.
+         *
+         * @Deprecated
+         */
+        FindPreference(
+            [in] String key,
+            [out] IPreference** preference);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IArrayAdapter
+     * interface Elastos.Droid.Widget.IBaseAdapter
+     * interface Elastos.Droid.Widget.IFilterable
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     */
+    interface IPreferenceActivityHeaderAdapter {
+
+    }
+
+    /**
+     * Description of a single Header item that the user can select.
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    [local, deprecated]
+    interface IPreferenceActivityHeader {
+        /**
+         * Return the currently set title.  If {@link #titleRes} is set,
+         * this resource is loaded from <var>res</var> and returned.  Otherwise
+         * {@link #title} is returned.
+         */
+        GetTitle(
+            [in] IResources* res,
+            [out] ICharSequence** title);
+
+        /**
+         * Return the currently set summary.  If {@link #summaryRes} is set,
+         * this resource is loaded from <var>res</var> and returned.  Otherwise
+         * {@link #summary} is returned.
+         */
+        GetSummary(
+            [in] IResources* res,
+            [out] ICharSequence** summary);
+
+        /**
+         * Return the currently set bread crumb title.  If {@link #breadCrumbTitleRes} is set,
+         * this resource is loaded from <var>res</var> and returned.  Otherwise
+         * {@link #breadCrumbTitle} is returned.
+         */
+        GetBreadCrumbTitle(
+            [in] IResources* res,
+            [out] ICharSequence** title);
+
+        /**
+         * Return the currently set bread crumb short title.  If
+         * {@link #breadCrumbShortTitleRes} is set,
+         * this resource is loaded from <var>res</var> and returned.  Otherwise
+         * {@link #breadCrumbShortTitle} is returned.
+         */
+        GetBreadCrumbShortTitle(
+            [in] IResources* res,
+            [out] ICharSequence** title);
+
+        GetId(
+            [out] Int64* id);
+
+        SetId(
+            [in] Int64 id);
+
+        GetTitleRes(
+            [out] Int32* titleRes);
+
+        SetTitleRes(
+            [in] Int32 titleRes);
+
+        GetTitle(
+            [out] ICharSequence** title);
+
+        SetTitle(
+            [in] ICharSequence* title);
+
+        GetSummaryRes(
+            [out] Int32* summaryRes);
+
+        SetSummaryRes(
+            [in] Int32 summaryRes);
+
+        GetSummary(
+            [out] ICharSequence** summary);
+
+        SetSummary(
+            [in] ICharSequence* summary);
+
+        GetBreadCrumbTitleRes(
+            [out] Int32* breadCrumbTitleRes);
+
+        SetBreadCrumbTitleRes(
+            [in] Int32 breadCrumbTitleRes);
+
+        GetBreadCrumbTitle(
+            [out] ICharSequence** breadCrumbTitle);
+
+        SetBreadCrumbTitle(
+            [in] ICharSequence* breadCrumbTitle);
+
+        GetBreadCrumbShortTitleRes(
+            [out] Int32* breadCrumbShortTitleRes);
+
+        SetBreadCrumbShortTitleRes(
+            [in] Int32 breadCrumbShortTitleRes);
+
+        GetBreadCrumbShortTitle(
+            [out] ICharSequence** breadCrumbShortTitle);
+
+        SetBreadCrumbShortTitle(
+            [in] ICharSequence* breadCrumbShortTitle);
+
+        GetIconRes(
+            [out] Int32* iconRes);
+
+        SetIconRes(
+            [in] Int32 iconRes);
+
+        GetFragment(
+            [out] String* fragment);
+
+        SetFragment(
+            [in] String fragment);
+
+        GetFragmentArguments(
+            [out] IBundle** fragmentArguments);
+
+        SetFragmentArguments(
+            [in] IBundle* fragmentArguments);
+
+        GetIntent(
+            [out] IIntent** intent);
+
+        SetIntent(
+            [in] IIntent* intent);
+
+        GetExtras(
+            [out] IBundle** extras);
+
+        SetExtras(
+            [in] IBundle* extras);
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}
+

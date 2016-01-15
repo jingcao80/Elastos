@@ -1,0 +1,73 @@
+module
+{
+    interface Elastos.Droid.Widget.ISeekBar;
+    interface Elastos.Droid.Preference.ISeekBarVolumizer;
+    interface Elastos.Droid.Preference.IVolumePreferenceVolumeStore;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    interface ISeekBarVolumizerCallback {
+        OnSampleStarting(
+            [in] ISeekBarVolumizer* sbv);
+    }
+
+    /**
+     * Turns a {@link SeekBar} into a volume control.
+     * @hide
+     *
+     * @Involve
+     * interface IHandlerCallback
+     * interface ISeekBarOnSeekBarChangeListener
+     */
+    interface ISeekBarVolumizer {
+        SetSeekBar(
+            [in] ISeekBar* seekBar);
+
+        PostStopSample();
+
+        Stop();
+
+        RevertVolume();
+
+        OnProgressChanged(
+            [in] ISeekBar* seekBar,
+            [in] Int32 progress,
+            [in] Boolean fromTouch);
+
+        PostSetVolume(
+            [in] Int32 progress);
+
+        OnStartTrackingTouch(
+            [in] ISeekBar* seekBar);
+
+        OnStopTrackingTouch(
+            [in] ISeekBar* seekBar);
+
+        IsSamplePlaying(
+            [out] Boolean* ret);
+
+        StartSample();
+
+        StopSample();
+
+        GetSeekBar(
+            [out] ISeekBar** bar);
+
+        ChangeVolumeBy(
+            [in] Int32 amount);
+
+        MuteVolume();
+
+        OnSaveInstanceState(
+            [in] IVolumePreferenceVolumeStore* volumeStore);
+
+        OnRestoreInstanceState(
+            [in] IVolumePreferenceVolumeStore* volumeStore);
+    }
+
+    } // Preference
+    } // Droid
+    } // Elastos
+}

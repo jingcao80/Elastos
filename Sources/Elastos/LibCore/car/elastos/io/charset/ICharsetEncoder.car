@@ -1,0 +1,469 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.IO.Charset.ICharset;
+    interface Elastos.IO.Charset.ICoderResult;
+    interface Elastos.IO.Charset.ICodingErrorAction;
+    interface Elastos.IO.IByteBuffer;
+    interface Elastos.IO.ICharBuffer;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Charset {
+
+    /**
+     * Transforms a sequence of 16-bit Java characters to a byte sequence in some encoding.
+     *
+     * <p>The input character sequence is a CharBuffer and the
+     * output byte sequence is a ByteBuffer.
+     *
+     * @sa java.nio.CharBuffer CharBuffer
+     * @sa java.nio.ByteBuffer ByteBuffer
+     * <p>Use encode(CharBuffer) to encode an entire {CharBuffer} to a
+     * new {ByteBuffer}, or encode(CharBuffer, ByteBuffer, boolean) for more
+     * control.
+     *
+     * @sa #encode(CharBuffer)
+     * @sa #encode(CharBuffer, ByteBuffer, boolean)
+     * When using the latter method, the entire operation proceeds as follows:
+     * <ol>
+     * <li>Invoke reset() to reset the encoder if this instance has been used before.</li>
+     *
+     * @sa #reset()
+     * <li>Invoke encode with the {endOfInput} parameter set to false until additional input is not needed (as signaled by the return value).
+     *
+     * @sa #encode(CharBuffer, ByteBuffer, boolean) encode
+     *
+     * The input buffer must be filled and the output buffer must be flushed between invocations.
+     * <p>The  encode method will  convert as many characters as possible, and the process won't  * stop until the input buffer has been exhausted, the output buffer has been filled, or an
+     * error has occurred. A CoderResult instance will be
+     * returned to indicate the current state. The caller should fill the input buffer, flush
+     * the output buffer, or recovering from an error and try again, accordingly.
+     *
+     * @sa #encode(CharBuffer, ByteBuffer, boolean) encode
+     * @sa CoderResult CoderResult
+     * </li>
+     * <li>Invoke encode for the last time with {endOfInput} set to true.</li>
+     *
+     * @sa #encode(CharBuffer, ByteBuffer, boolean) encode
+     * <li>Invoke flush(ByteBuffer) to flush remaining output.</li>
+     *
+     * @sa #flush(ByteBuffer)
+     * </ol>
+     *
+     * <p>There are two classes of encoding error: <i>malformed input</i>
+     * signifies that the input character sequence is not legal, while <i>unmappable character</i>
+     * signifies that the input is legal but cannot be mapped to a byte sequence (because the charset
+     * cannot represent the character, for example).
+     *
+     * <p>Errors can be handled in three ways. The default is to
+     * report the error to the caller. The alternatives are to ignore the error or replace
+     * the problematic input with the byte sequence returned by replacement. The disposition
+     * for each of the two kinds of error can be set independently using the onMalformedInput
+     * and onUnmappableCharacter methods.
+     *
+     * @sa CodingErrorAction#REPORT report
+     * @sa CodingErrorAction#IGNORE ignore
+     * @sa CodingErrorAction#REPLACE replace
+     * @sa #replacement
+     * @sa #onMalformedInput
+     * <p>The default replacement bytes depend on the charset but can be overridden using the
+     * replaceWith method.
+     *
+     * @sa #replaceWith
+     *
+     * <p>This class is abstract and encapsulates many common operations of the
+     * encoding process for all charsets. Encoders for a specific charset should
+     * extend this class and need only to implement the
+     * encodeLoop method for basic encoding. If a subclass maintains internal state, it should
+     * also override the
+     * implFlush and implReset methods.
+     *
+     * @sa #encodeLoop(CharBuffer, ByteBuffer) encodeLoop
+     * @sa #implFlush(ByteBuffer) implFlush
+     * @sa #implReset() implReset
+     * <p>This class is not thread-safe.
+     *
+     * @see java.nio.charset.Charset
+     * @see java.nio.charset.CharsetDecoder
+     */
+    [deprecated]
+	interface ICharsetEncoder {
+        /**
+         * Gets the average number of bytes created by this encoder for a single
+         * input character.
+         *
+         * @return the average number of bytes created by this encoder for a single
+         *         input character.
+         */
+        AverageBytesPerChar(
+            [out] Float* averageNumber);
+
+        /**
+         * Checks if the given character can be encoded by this encoder.
+         * <p>
+         * Note that this method can change the internal status of this encoder, so
+         * it should not be called when another encoding process is ongoing,
+         * otherwise it will throw an <code>IllegalStateException</code>.
+         * <p>
+         * This method can be overridden for performance improvement.
+         *
+         * @param c
+         *            the given encoder.
+         * @return true if given character can be encoded by this encoder.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if another encode process is ongoing so that the current internal status is neither RESET or FLUSH.
+         */
+        CanEncode(
+            [in] Char32 c,
+            [out] Boolean* result);
+
+        /**
+         * Checks if a given <code>CharSequence</code> can be encoded by this
+         * encoder.
+         *
+         * Note that this method can change the internal status of this encoder, so
+         * it should not be called when another encode process is ongoing, otherwise
+         * it will throw an <code>IllegalStateException</code>.
+         *
+         * This method can be overridden for performance improvement.
+         *
+         * @param sequence
+         *            the given <code>CharSequence</code>.
+         * @return true if the given <code>CharSequence</code> can be encoded by
+         *         this encoder.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if current internal status is neither RESET or FLUSH.
+         */
+        CanEncode(
+            [in] ICharSequence* sequence,
+            [out] Boolean* result);
+
+        /**
+         * Gets the <code>Charset</code> which this encoder uses.
+         *
+         * @return the <code>Charset</code> which this encoder uses.
+         */
+        GetCharset(
+            [out] ICharset** charset);
+
+        /**
+         * This is a facade method for the encoding operation.
+         * <p>
+         * This method encodes the remaining character sequence of the given
+         * character buffer into a new byte buffer. This method performs a complete
+         * encoding operation, resets at first, then encodes, and flushes at last.
+         * <p>
+         * This method should not be invoked if another encode operation is ongoing.
+         *
+         * @param in
+         *            the input buffer.
+         * @return a new <code>ByteBuffer</code> containing the bytes produced by
+         *         this encoding operation. The buffer's limit will be the position
+         *         of the last byte in the buffer, and the position will be zero.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if another encoding operation is ongoing.
+         * MalformedInputException | if an illegal input character sequence for this charset is encountered, and the action for malformed error is CodingErrorAction.REPORT.
+         * UnmappableCharacterException | if a legal but unmappable input character sequence for this charset is encountered, and the action for unmappable character error isCodingErrorAction.REPORT. Unmappable means the Unicode character sequence at the input buffer's current position cannot be mapped to a equivalent byte sequence.
+         * CharacterCodingException | if other exception happened during the encode operation.
+         *
+         * @sa CodingErrorAction#REPORT CodingErrorAction.REPORT
+         * @sa CodingErrorAction#REPORT CodingErrorAction.REPORT
+         */
+        Encode(
+            [in] ICharBuffer* charBuffer,
+            [out] IByteBuffer** byteBuffer);
+
+        /**
+         * Encodes characters starting at the current position of the given input
+         * buffer, and writes the equivalent byte sequence into the given output
+         * buffer from its current position.
+         * <p>
+         * The buffers' position will be changed with the reading and writing
+         * operation, but their limits and marks will be kept intact.
+         * <p>
+         * A <code>CoderResult</code> instance will be returned according to
+         * following rules:
+         * <ul>
+         * <li>A malformed input result indicates that some malformed input error was encountered, * and the erroneous characters start at the input buffer's position and their
+         * number can be got by result's length. This
+         * kind of result can be returned only if the malformed action is CodingErrorAction.REPORT.* </li>
+         *
+         * @sa CoderResult#malformedForLength(int) malformed input
+         * @sa CoderResult#length() length
+         * @sa CodingErrorAction#REPORT CodingErrorAction.REPORT
+         *
+         * <li>CoderResult.UNDERFLOW indicates that
+         * as many characters as possible in the input buffer have been encoded. If
+         * there is no further input and no characters left in the input buffer then
+         * this task is complete. If this is not the case then the client should
+         * call this method again supplying some more input characters.</li>
+         *
+         * @sa CoderResult#UNDERFLOW CoderResult.UNDERFLOW
+         * <li>CoderResult.OVERFLOW indicates that the
+         * output buffer has been filled, while there are still some characters
+         * remaining in the input buffer. This method should be invoked again with a
+         * non-full output buffer.</li>
+         *
+         * @sa CoderResult#OVERFLOW CoderResult.OVERFLOW
+         * <li>An unmappable character result indicates that some unmappable character error was  * encountered, and the erroneous characters start at the input buffer's position and
+         * their number can be got by result's length.
+         * This kind of result can be returned only on CodingErrorAction.REPORT.</li>
+         *
+         * {@sa CoderResult#unmappableForLength(int) unmappable character}
+         * {@sa CoderResult#length() length}
+         * {@sa CodingErrorAction#REPORT CodingErrorAction.REPORT}
+         * </ul>
+         * <p>
+         * The <code>endOfInput</code> parameter indicates if the invoker can
+         * provider further input. This parameter is true if and only if the
+         * characters in the current input buffer are all inputs for this encoding
+         * operation. Note that it is common and won't cause an error if the invoker
+         * sets false and then has no more input available, while it may cause an
+         * error if the invoker always sets true in several consecutive invocations.
+         * This would make the remaining input to be treated as malformed input.
+         * input.
+         * <p>
+         * This method invokes the encodeLoop method to
+         * implement the basic encode logic for a specific charset.
+         *
+         * @sa #encodeLoop(CharBuffer, ByteBuffer) encodeLoop
+         *
+         * @param in
+         *            the input buffer.
+         * @param out
+         *            the output buffer.
+         * @param endOfInput
+         *            true if all the input characters have been provided.
+         * @return a <code>CoderResult</code> instance indicating the result.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if the encoding operation has already started or no more input is needed in this encoding process.
+         * CoderMalfunctionError | if the encodeLoop method threw an <code>BufferUnderflowException</code> or <code>BufferUnderflowException</code>.
+         *
+         *@sa #encodeLoop(CharBuffer, ByteBuffer) encodeLoop
+         */
+        Encode(
+            [in] ICharBuffer* charBuffer,
+            [in /*in, out*/] IByteBuffer* byteBuffer,
+            [in] Boolean endOfInput,
+            [out] ICoderResult** result);
+
+
+        /**
+         * Encodes characters into bytes. This method is called by encode.
+         *
+         * @sa #encode(CharBuffer, ByteBuffer, boolean) encode
+         * <p>
+         * This method will implement the essential encoding operation, and it won't
+         * stop encoding until either all the input characters are read, the output
+         * buffer is filled, or some exception is encountered. Then it will
+         * return a <code>CoderResult</code> object indicating the result of the
+         * current encoding operation. The rule to construct the
+         * <code>CoderResult</code> is the same as for encode.
+         *
+         * @sa #encode(CharBuffer, ByteBuffer, boolean) encode
+         * When an exception is encountered in the encoding operation, most implementations
+         * of this method will return a relevant result object to the encode
+         *  method, and some performance optimized implementation may handle the exception and
+         * implement the error action itself.
+         *
+         * @sa #encode(CharBuffer, ByteBuffer, boolean) encode
+         * <p>
+         * The buffers are scanned from their current positions, and their positions
+         * will be modified accordingly, while their marks and limits will be
+         * intact. At most in.remaining() characters will be read, and out.remaining() bytes
+         * will be written.
+         *
+         * @sa CharBuffer#remaining() in.remaining()
+         * @sa ByteBuffer#remaining() out.remaining()
+         * <p>
+         * Note that some implementations may pre-scan the input buffer and return
+         * <code>CoderResult.UNDERFLOW</code> until it receives sufficient input.
+         * <p>
+         * @param in
+         *            the input buffer.
+         * @param out
+         *            the output buffer.
+         * @return a <code>CoderResult</code> instance indicating the result.
+         */
+        EncodeLoop(
+            [in] ICharBuffer* charBuffer,
+            [in /*in, out*/] IByteBuffer* byteBuffer,
+            [out] ICoderResult** result);
+
+        /**
+         * Flushes this encoder.
+         * <p>
+         * This method will call implFlush.
+         *
+         * @sa #implFlush(ByteBuffer) implFlush
+         * Some encoders may need to write some bytes to the output buffer when they have
+         * read all input characters, subclasses can overridden implFlush to perform writing action.
+         *
+         * @sa #implFlush(ByteBuffer) implFlush
+         * <p>
+         * The maximum number of written bytes won't larger than out.remaining().
+         *
+         * @sa ByteBuffer#remaining() out.remaining()
+         * If some encoder wants to
+         * write more bytes than the output buffer's available remaining space, then
+         * <code>CoderResult.OVERFLOW</code> will be returned, and this method
+         * must be called again with a byte buffer that has free space. Otherwise
+         * this method will return <code>CoderResult.UNDERFLOW</code>, which
+         * means one encoding process has been completed successfully.
+         * <p>
+         * During the flush, the output buffer's position will be changed
+         * accordingly, while its mark and limit will be intact.
+         *
+         * @param out
+         *            the given output buffer.
+         * @return <code>CoderResult.UNDERFLOW</code> or
+         *         <code>CoderResult.OVERFLOW</code>.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if this encoder hasn't read all input characters during one encoding process, which means neither after calling encode(CharBuffer) nor after calling  encode(CharBuffer, ByteBuffer, boolean) with {true} for the last boolean parameter.
+         *
+         * @sa #encode(CharBuffer) encode(CharBuffer)
+         * @sa #encode(CharBuffer, ByteBuffer, boolean) encode(CharBuffer, ByteBuffer, boolean)
+         */
+        Flush(
+            [in /*in, out*/] IByteBuffer* byteBuffer,
+            [out] ICoderResult** result);
+
+        /**
+         * Checks if the given argument is legal as this encoder's replacement byte
+         * array.
+         *
+         * The given byte array is legal if and only if it can be decode into
+         * sixteen bits Unicode characters.
+         *
+         * This method can be overridden for performance improvement.
+         *
+         * @param replacement
+         *            the given byte array to be checked.
+         * @return true if the the given argument is legal as this encoder's
+         *         replacement byte array.
+         */
+        IsLegalReplacement(
+            [in] ArrayOf<Byte>* replacement,
+            [out] Boolean* result);
+
+        /**
+         * Gets this encoder's <code>CodingErrorAction</code> when a malformed
+         * input error occurred during the encoding process.
+         *
+         * @return this encoder's <code>CodingErrorAction</code> when a malformed
+         *         input error occurred during the encoding process.
+         */
+        GetMalformedInputAction(
+            [out] ICodingErrorAction** errorAction);
+
+        /**
+         * Gets the maximum number of bytes which can be created by this encoder for
+         * one input character, must be positive.
+         *
+         * @return the maximum number of bytes which can be created by this encoder
+         *         for one input character, must be positive.
+         */
+        GetMaxBytesPerChar(
+            [out] Float* maxNumber);
+
+        /**
+         * Sets this encoder's action on malformed input error.
+         *
+         * This method will call the implOnMalformedInput  method with the given new action as    * argument.
+         *
+         * @sa #implOnMalformedInput(CodingErrorAction) implOnMalformedInput
+         * @param newAction
+         *            the new action on malformed input error.
+         * @return this encoder.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the given newAction is null.
+         */
+        OnMalformedInput(
+            [in] ICodingErrorAction* newAction);
+
+        /**
+         * Sets this encoder's action on unmappable character error.
+         *
+         * This method will call the implOnUnmappableCharacter
+         * method with the given new action as argument.
+         *
+         * @sa #implOnUnmappableCharacter(CodingErrorAction) implOnUnmappableCharacter
+         *
+         * @param newAction
+         *            the new action on unmappable character error.
+         * @return this encoder.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the given newAction is null.
+         */
+
+        OnUnmappableCharacter(
+            [in] ICodingErrorAction* newAction);
+
+        /**
+         * Gets the replacement byte array, which is never null or empty.
+         *
+         * @return the replacement byte array, cannot be null or empty.
+         */
+        GetReplacement(
+            [out, callee] ArrayOf<Byte>* replace);
+
+        /**
+         * Sets the new replacement value.
+         *
+         * This method first checks the given replacement's validity, then changes
+         * the replacement value and finally calls theimplReplaceWith method with the given
+         * new replacement as argument.
+         *
+         * @sa #implReplaceWith(byte[]) implReplaceWith
+         *
+         * @param replacement
+         *            the replacement byte array, cannot be null or empty, its
+         *            length cannot be larger than <code>maxBytesPerChar</code>,
+         *            and it must be legal replacement, which can be justified by
+         *            calling <code>isLegalReplacement(byte[] replacement)</code>.
+         * @return this encoder.
+         * IllegalArgumentException | if the given replacement cannot satisfy the requirement mentioned above.
+         */
+        ReplaceWith(
+            [in] ArrayOf<Byte>* replacement);
+
+        /**
+         * Resets this encoder. This method will reset the internal status and then
+         * calla <code>implReset()</code> to reset any status related to the
+         * specific charset.
+         *
+         * @return this encoder.
+         */
+        Reset();
+
+        /**
+         * Gets this encoder's <code>CodingErrorAction</code> when unmappable
+         * character occurred during encoding process.
+         *
+         * @return this encoder's <code>CodingErrorAction</code> when unmappable
+         *         character occurred during encoding process.
+         */
+        GetUnmappableCharacterAction(
+            [out] ICodingErrorAction** errorAction);
+    }
+
+    } // namespace Charset
+    } // namespace IO
+    } // namespace Elastos
+}

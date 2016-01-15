@@ -1,0 +1,23 @@
+
+TARGET_NAME= utils
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/asn1
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/utils
+
+#SOURCES = AlgNameMapper.cpp
+#SOURCES += CAlgNameMapperHelper.cpp
+#SOURCES += CArrayHelper.cpp
+SOURCES += CJarUtils.cpp
+#SOURCES += CObjectIdentifierInUtils.cpp
+#SOURCES += CObjectIdentifierInUtilsHelper.cpp
+SOURCES += WrappedX509Certificate.cpp

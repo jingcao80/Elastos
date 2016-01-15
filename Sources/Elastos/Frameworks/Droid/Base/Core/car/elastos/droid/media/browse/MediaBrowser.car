@@ -1,0 +1,217 @@
+module
+{
+    interface Elastos.Droid.Media.IMediaDescription;
+    interface Elastos.Droid.Media.Session.IMediaSessionToken;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Browse {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [local, parcelable]
+    interface IMediaBrowserMediaItem {
+        /**
+         * Flag: Indicates that the item has children of its own.
+         */
+        const Int32 FLAG_BROWSABLE = 1 << 0;
+
+        /**
+         * Flag: Indicates that the item is playable.
+         * <p>
+         * The id of this item may be passed to
+         * {@link MediaController.TransportControls#playFromMediaId(String, Bundle)}
+         * to start playing it.
+         * </p>
+         */
+        const Int32 FLAG_PLAYABLE = 1 << 1;
+
+        /**
+         * Gets the flags of the item.
+         */
+        GetFlags(
+            [out] Int32 * result);
+
+        /**
+         * Returns whether this item is browsable.
+         * @see #FLAG_BROWSABLE
+         */
+        IsBrowsable(
+            [out] Boolean * result);
+
+        /**
+         * Returns whether this item is playable.
+         * @see #FLAG_PLAYABLE
+         */
+        IsPlayable(
+            [out] Boolean * result);
+
+        /**
+         * Returns the description of the media.
+         */
+        GetDescription(
+            [out] IMediaDescription ** result);
+
+        /**
+         * Returns the media id for this item.
+         */
+        GetMediaId(
+            [out] String * result);
+
+    }
+
+
+    interface IMediaBrowserConnectionCallback {
+        /**
+         * Invoked after {@link MediaBrowser#connect()} when the request has successfully completed.
+         */
+        OnConnected();
+
+        /**
+         * Invoked when the client is disconnected from the media browser.
+         */
+        OnConnectionSuspended();
+
+        /**
+         * Invoked when the connection to the media browser failed.
+         */
+        OnConnectionFailed();
+    }
+
+    [local]
+    interface IMediaBrowserSubscriptionCallback {
+        /**
+         * Called when the list of children is loaded or updated.
+         */
+        OnChildrenLoaded(
+            [in] String parentId,
+            [in] IList * children);
+
+        /**
+         * Called when the id doesn't exist or other errors in subscribing.
+         * <p>
+         * If this is called, the subscription remains until {@link MediaBrowser#unsubscribe}
+         * called, because some errors may heal themselves.
+         * </p>
+         */
+        OnError(
+            [in] String id);
+    }
+
+    /**
+     * Browses media content offered by a link MediaBrowserService.
+     * <p>
+     * This object is not thread-safe. All calls should happen on the thread on which the browser
+     * was constructed.
+     * </p>
+     */
+    [local]
+    interface IMediaBrowser {
+        /**
+         * Connects to the media browse service.
+         * <p>
+         * The connection callback specified in the constructor will be invoked
+         * when the connection completes or fails.
+         * </p>
+         */
+        Connect();
+
+        /**
+         * Disconnects from the media browse service.
+         * After this, no more callbacks will be received.
+         */
+        Disconnect();
+
+        /**
+         * Returns whether the browser is connected to the service.
+         */
+        IsConnected(
+            [out] Boolean * result);
+
+        /**
+         * Gets the service component that the media browser is connected to.
+         */
+        GetServiceComponent(
+            [out] IComponentName ** result);
+
+        /**
+         * Gets the root id.
+         * <p>
+         * Note that the root id may become invalid or change when when the
+         * browser is disconnected.
+         * </p>
+         *
+         * @throws IllegalStateException if not connected.
+         */
+        GetRoot(
+            [out] String * result);
+
+        /**
+         * Gets any extras for the media service.
+         *
+         * @throws IllegalStateException if not connected.
+         */
+        GetExtras(
+            [out] IBundle ** result);
+
+        /**
+         * Gets the media session token associated with the media browser.
+         * <p>
+         * Note that the session token may become invalid or change when when the
+         * browser is disconnected.
+         * </p>
+         *
+         * @return The session token for the browser, never null.
+         *
+         * @throws IllegalStateException if not connected.
+         */
+         GetSessionToken(
+            [out] IMediaSessionToken ** result);
+
+        /**
+         * Queries for information about the media items that are contained within
+         * the specified id and subscribes to receive updates when they change.
+         * <p>
+         * The list of subscriptions is maintained even when not connected and is
+         * restored after reconnection.  It is ok to subscribe while not connected
+         * but the results will not be returned until the connection completes.
+         * </p><p>
+         * If the id is already subscribed with a different callback then the new
+         * callback will replace the previous one.
+         * </p>
+         *
+         * @param parentId The id of the parent media item whose list of children
+         * will be subscribed.
+         * @param callback The callback to receive the list of children.
+         */
+        Subscribe(
+            [in] String parentId,
+            [in] IMediaBrowserSubscriptionCallback * cb);
+
+        /**
+         * Unsubscribes for changes to the children of the specified media id.
+         * <p>
+         * The query callback will no longer be invoked for results associated with
+         * this id once this method returns.
+         * </p>
+         *
+         * @param parentId The id of the parent media item whose list of children
+         * will be unsubscribed.
+         */
+        Unsubscribe(
+            [in] String parentId);
+
+
+    }
+
+    } // namespace Browse
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

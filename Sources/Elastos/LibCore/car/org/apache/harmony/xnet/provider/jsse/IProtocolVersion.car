@@ -1,0 +1,106 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     *
+     * Represents Protocol Version
+     */
+    interface IProtocolVersion {
+        /**
+         * Protocol name
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Protocol version as byte array
+         */
+        GetVersion(
+            [out, callee] ArrayOf<Byte>* ver);
+    }
+
+    [deprecated]
+    interface IProtocolVersionHelper {
+        /**
+         * Protocols supported by this provider implementation
+         */
+        GetSupportedProtocols(
+            [out, callee] ArrayOf<String>* supportedProtocols);
+
+        /**
+         *
+         * Returns true if protocol version is supported
+         *
+         * @param version
+         */
+        IsSupported(
+            [in] ArrayOf<Byte>* ver,
+            [out] Boolean* isSupported);
+
+        /**
+         * Returns ProtocolVersion
+         *
+         * @param version
+         * @return
+         */
+        GetByVersion(
+            [in] ArrayOf<Byte>* ver,
+            [out] IProtocolVersion** vs);
+
+        /**
+         * Returns true if provider supports protocol version
+         *
+         * @param name
+         * @return
+         */
+        IsSupportedEx(
+            [in] String name,
+            [out] Boolean* isSupported);
+
+        /**
+         * Returns ProtocolVersion
+         *
+         * @param name
+         * @return
+         */
+        GetByName(
+            [in] String name,
+            [out] IProtocolVersion** ver);
+
+        /**
+         * Highest protocol version supported by provider implementation
+         *
+         * @param protocols
+         * @return
+         */
+        GetLatestVersion(
+            [in] ArrayOf<String>* protocols,
+            [out] IProtocolVersion** ver);
+
+        /**
+         * SSL 3.0 protocol version
+         */
+        GetSSLv3(
+            [out] IProtocolVersion** sslv3);
+
+        /**
+         * TLS 1.0 protocol version
+         */
+        GetTLSv1(
+            [out] IProtocolVersion** tlsv1);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

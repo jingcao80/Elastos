@@ -1,0 +1,148 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * A Utility class for handling for communicating between bearer-specific
+     * code and ConnectivityService.
+     *
+     * A bearer may have more than one NetworkAgent if it can simultaneously
+     * support separate networks (IMS / Internet / MMS Apns on cellular, or
+     * perhaps connections with different SSID or P2P for Wi-Fi).
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IHandler;
+     */
+    [deprecated]
+    interface INetworkAgent {
+        /**
+         * Sent by ConnectivityService to the NetworkAgent to inform it of
+         * suspected connectivity problems on its network.  The NetworkAgent
+         * should take steps to verify and correct connectivity.
+         */
+        const Int32 CMD_SUSPECT_BAD = 0x00081000;
+
+        /**
+         * Sent by the NetworkAgent (note the EVENT vs CMD prefix) to
+         * ConnectivityService to pass the current NetworkInfo (connection state).
+         * Sent when the NetworkInfo changes, mainly due to change of state.
+         * obj = NetworkInfo
+         */
+        const Int32 EVENT_NETWORK_INFO_CHANGED = 0x00081001;
+
+        /**
+         * Sent by the NetworkAgent to ConnectivityService to pass the current
+         * NetworkCapabilties.
+         * obj = NetworkCapabilities
+         */
+        const Int32 EVENT_NETWORK_CAPABILITIES_CHANGED = 0x00081002;
+
+        /**
+         * Sent by the NetworkAgent to ConnectivityService to pass the current
+         * NetworkProperties.
+         * obj = NetworkProperties
+         */
+        const Int32 EVENT_NETWORK_PROPERTIES_CHANGED = 0x00081003;
+
+        /* centralize place where base network score, and network score scaling, will be
+         * stored, so as we can consistently compare apple and oranges, or wifi, ethernet and LTE
+         */
+        const Int32 WIFI_BASE_SCORE = 60;
+
+        /**
+         * Sent by the NetworkAgent to ConnectivityService to pass the current
+         * network score.
+         * obj = network score Integer
+         */
+        const Int32 EVENT_NETWORK_SCORE_CHANGED = 0x00081004;
+
+        /**
+         * Sent by the NetworkAgent to ConnectivityService to add new UID ranges
+         * to be forced into this Network.  For VPNs only.
+         * obj = UidRange[] to forward
+         */
+        const Int32 EVENT_UID_RANGES_ADDED = 0x00081005;
+
+        /**
+         * Sent by the NetworkAgent to ConnectivityService to remove UID ranges
+         * from being forced into this Network.  For VPNs only.
+         * obj = UidRange[] to stop forwarding
+         */
+        const Int32 EVENT_UID_RANGES_REMOVED = 0x00081006;
+
+        /**
+         * Sent by ConnectivitySerice to the NetworkAgent to inform the agent of the
+         * networks status - whether we could use the network or could not, due to
+         * either a bad network configuration (no internet link) or captive portal.
+         *
+         * arg1 = either {@code VALID_NETWORK} or {@code INVALID_NETWORK}
+         */
+        const Int32 CMD_REPORT_NETWORK_STATUS = 0x00081007;
+
+        const Int32 VALID_NETWORK = 1;
+
+        const Int32 INVALID_NETWORK = 2;
+
+        /**
+         * Sent by the NetworkAgent to ConnectivityService to indicate this network was
+         * explicitly selected.  This should be sent before the NetworkInfo is marked
+         * CONNECTED so it can be given special treatment at that time.
+         */
+        const Int32 EVENT_SET_EXPLICITLY_SELECTED = 0x00081008;
+
+        /**
+         * Called by the bearer code when it has new LinkProperties data.
+         */
+        SendLinkProperties(
+            [in] ILinkProperties* linkProperties);
+
+        /**
+         * Called by the bearer code when it has new NetworkInfo data.
+         */
+        SendNetworkInfo(
+            [in] INetworkInfo* networkInfo);
+
+        /**
+         * Called by the bearer code when it has new NetworkCapabilities data.
+         */
+        SendNetworkCapabilities(
+            [in] INetworkCapabilities* networkCapabilities);
+
+        /**
+         * Called by the bearer code when it has a new score for this network.
+         */
+        SendNetworkScore(
+            [in] Int32 score);
+
+        /**
+         * Called by the VPN code when it wants to add ranges of UIDs to be routed
+         * through the VPN network.
+         */
+        AddUidRanges(
+            [in] ArrayOf<IUidRange*>* ranges);
+
+        /**
+         * Called by the VPN code when it wants to remove ranges of UIDs from being routed
+         * through the VPN network.
+         */
+        RemoveUidRanges(
+            [in] ArrayOf<IUidRange*>* ranges);
+
+        /**
+         * Called by the bearer to indicate this network was manually selected by the user.
+         * This should be called before the NetworkInfo is marked CONNECTED so that this
+         * Network can be given special treatment at that time.
+         */
+        ExplicitlySelected();
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

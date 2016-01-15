@@ -1,0 +1,51 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    [deprecated]
+    interface IRequestHandlerThread {
+        /**
+         * Ensure that the MessageQueue's idle handler gets run by poking the message queue;
+         * normally if the message queue is already idle, the idle handler won't get invoked.
+         *
+         * <p>Users of this handler thread should ignore this message.</p>
+         */
+        const Int32 MSG_POKE_IDLE_HANDLER = -1;
+
+        // Blocks until thread has started
+        WaitUntilStarted();
+
+        // May return null if the handler is not set up yet.
+        GetHandler(
+            [out] IHandler** outhand);
+
+        // Blocks until thread has started
+        WaitAndGetHandler(
+            [out] IHandler** outhand);
+
+        // Atomic multi-type message existence check
+        HasAnyMessages(
+            [in] ArrayOf<Int32>* what,
+            [out] Boolean* value);
+
+        // Atomic multi-type message remove
+        RemoveMessages(
+            [in] ArrayOf<Int32>* what);
+
+        // Blocks until thread is idling
+        WaitUntilIdle();
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

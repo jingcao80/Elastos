@@ -1,0 +1,27 @@
+module
+{
+    namespace Elastos {
+    namespace Text {
+
+    interface IAnnotation {
+        /**
+         * Returns the value of this annotation. The value may be {null}.
+         *
+         * @return the value of this annotation or {null}.
+         */
+        GetValue(
+            [out] IInterface** value);
+
+        /**
+         * Returns this annotation in string representation.
+         *
+         * @return the string representation of this annotation.
+         */
+        // @Override
+        ToString(
+            [out] String * str);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

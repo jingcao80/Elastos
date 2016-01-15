@@ -1,0 +1,100 @@
+module
+{
+    merge("server/net/NetlinkTracker.car");
+    merge("server/WidgetBackupProvider.car");
+    merge("server/AppWidgetBackupBridge.car");
+    merge("server/NetworkManagementSocketTagger.car");
+    merge("server/ResettableTimeout.car");
+
+    interface Elastos.Droid.App.Backup.IBackupAgent;
+    interface Elastos.Droid.App.Backup.IBackupAgentHelper;
+    interface Elastos.Droid.Content.IBroadcastReceiver;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContextWrapper;
+    interface Elastos.Droid.Net.IINetworkManagementEventObserver;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Server.Net.IDnsServerEntry;
+    interface Elastos.Droid.Server.Net.IDnsServerRepository;
+    interface Elastos.Droid.Server.Net.INetlinkTracker;
+    interface Elastos.Droid.Server.Net.INetlinkTrackerCallback;
+    using interface Elastos.Core.IComparable;
+    using interface Elastos.Net.IInetAddress;
+    using interface Libcore.IO.ISocketTagger;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+
+    class CBootReceiver {
+        constructor();
+
+        interface IBroadcastReceiver;
+    }
+
+    singleton class CAppWidgetBackupBridge {
+        interface IAppWidgetBackupBridge;
+    }
+
+    class CNetworkManagementSocketTagger {
+        constructor();
+
+        interface ISocketTagger;
+    }
+
+    singleton class CNetworkManagementSocketTaggerHelper {
+        interface INetworkManagementSocketTagger;
+    }
+
+    namespace Backup {
+
+        class CSystemBackupAgent {
+            constructor();
+
+            interface IBackupAgentHelper;
+            // interface IBackupAgent;
+            // interface IContextWrapper;
+            // interface IContext;
+        }
+
+    }// namespace Backup
+
+    namespace Net {
+
+        class CBaseNetworkObserver {
+            constructor();
+
+            interface IINetworkManagementEventObserver;
+            interface IBinder;
+        }
+
+        class CNetlinkTracker {
+            constructor(
+                [in] String iface,
+                [in] INetlinkTrackerCallback* cb);
+
+            interface IINetworkManagementEventObserver;
+            interface IBinder;
+            interface INetlinkTracker;
+        }
+
+        class CDnsServerEntry {
+            constructor(
+                [in] IInetAddress* address,
+                [in] Int64 expiry);
+
+            interface IComparable;
+            interface IDnsServerEntry;
+        }
+
+        class CDnsServerRepository {
+            constructor();
+
+            interface IDnsServerRepository;
+        }
+
+    }// namespace Net
+
+    }  // namespace Server
+    }  // namespace Droid
+    }  // namespace Elastos
+}

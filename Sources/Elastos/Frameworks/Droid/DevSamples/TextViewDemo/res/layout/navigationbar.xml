@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:background="#FF000000"
+    android:id="@+id/nav_buttons"
+    >
+    <ImageView android:id="@+id/menu"
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_sysbar_menu"
+        android:layout_weight="0"
+        />
+    <ImageView android:id="@+id/home"
+        android:layout_width="160dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_sysbar_home"
+        android:layout_weight="0"
+        />
+    <ImageView android:id="@+id/back"
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_sysbar_back"
+        android:layout_weight="0"
+        />
+</LinearLayout>

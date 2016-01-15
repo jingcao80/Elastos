@@ -1,0 +1,38 @@
+
+module
+{
+    using interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * This class contains extra parameters to pass to an IGeocodeProvider
+     * implementation from the Geocoder class.  Currently this contains the
+     * language, country and variant information from the Geocoder's locale
+     * as well as the Geocoder client's package name for geocoder server
+     * logging.  This information is kept in a separate class to allow for
+     * future expansion of the IGeocodeProvider interface.
+     *
+     * @hide
+     * @ Involve interface IParcelable
+     */
+    interface IGeocoderParams {
+        /**
+         * returns the Geocoder's locale
+         */
+        GetLocale(
+            [out] ILocale** locale);
+
+        /**
+         * returns the package name of the Geocoder's client
+         */
+        GetClientPackage(
+            [out] String* packeName);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}

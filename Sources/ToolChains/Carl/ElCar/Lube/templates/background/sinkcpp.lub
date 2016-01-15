@@ -1,0 +1,391 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "${name}.cpp"
+$
+#include "${name}.h"
+
+#define Delegate_Initialized        0x01
+#define Delegate_Registered         0x02
+
+${name}::${name}():
+    _CCallbackSink_(
+        &_m_pServer,
+        &_m_pConnector,
+        ${name}_MaxEvents,
+        _m_events), m_cRef(1)
+{
+    IncrementDllLockCount();
+    _m_pSink = (ICallbackSink*)this;
+}
+
+${name}::~${name}()
+{
+    assert(NULL == _m_pServer);
+    assert(NULL == _m_pConnector);
+
+    DecrementDllLockCount();
+}
+
+UInt32 ${name}::AddRef()
+{
+    return atomic_inc(&m_cRef);
+}
+
+UInt32 ${name}::Release()
+{
+    Int32 nRef = atomic_dec(&m_cRef);
+
+    if (0 == nRef) {
+        ((${name}*)this)->~${name}();
+        free(this);
+    }
+    assert(nRef >= 0);
+    return nRef;
+}
+
+PInterface ${name}::Probe(
+    _ELASTOS REIID riid)
+{
+$   WITH all interfaces DO
+$           IF interface is first
+$
+    if (EIID_IInterface == riid) {
+        return (IInterface *)(${name} *)this;
+    }
+$           END IF ;; interface is first
+$
+$           WITH all parents DO
+    else if (EIID_${name} == riid) {
+        return (${name} *)(${child.name} *)this;
+    }
+$           END DO ;; all parents
+$
+    else if (EIID_${name} == riid) {
+        return (${name} *)this;
+    }
+$
+$   END DO ;; all interfaces
+    else if (EIID_GENERIC_INFO == riid) {
+${GenericInfoQI(class)}
+    }
+
+    return NULL;
+}
+
+ECode ${name}::GetInterfaceID(
+    IInterface *pObject,
+    InterfaceID *pIID)
+{
+    if (pIID == NULL) return E_INVALID_ARGUMENT;
+
+$WITH all interfaces DO
+$   IF attrib is not "callback" and attrib is not "callbacksink" and attrib is not "delegatesink" and attrib is not "clsobj" and attrib is not "filter"
+$       IF interfaces is first
+    if (pObject == (IInterface*)(${name}*)this) {
+$       ELSE
+    else if (pObject == (IInterface*)(${name}*)this) {
+$       END IF
+        *pIID = EIID_${name};
+    }
+$   END IF ;; !callback and !callbacksink and !delegatesink and !clsobj and !filter
+$END DO ;; all interfaces
+    else {
+        return E_INVALID_ARGUMENT;
+    }
+    return NOERROR;
+}
+
+ECode ${name}::Aggregate(
+    AggregateType type,
+    PInterface pObj)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ${name}::GetDomain(IInterface** ppObj)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ${name}::GetClassID(ClassID* pCLSID)
+{
+    if (NULL == pCLSID) return E_INVALID_ARGUMENT;
+
+    *pCLSID = ECLSID_${name};
+    return NOERROR;
+}
+
+ECode ${name}::GetHashCode(
+    _ELASTOS Int32 * pHashCode)
+{
+    if (NULL == pHashCode) return E_INVALID_ARGUMENT;
+    *pHashCode = (Int32)this;
+    return NOERROR;
+}
+
+ECode ${name}::Equals(
+    IInterface * pInterface,
+    _ELASTOS Boolean * pEquals)
+{
+    if (NULL == pEquals) return E_INVALID_ARGUMENT;
+    IObject * pObject = (IObject *)pInterface->Probe(EIID_IObject);
+    if (NULL == pObject) {
+        *pEquals = FALSE;
+        return NOERROR;
+    }
+
+    Int32 lhc, rhc;
+    this->GetHashCode(&lhc);
+    pObject->GetHashCode(&rhc);
+    *pEquals = (lhc ==rhc);
+    return NOERROR;
+}
+
+ECode ${name}::ToString(
+    _ELASTOS String * pInfo)
+{
+    if (NULL == pInfo) return E_INVALID_ARGUMENT;
+    Int32 hash;
+    GetHashCode(&hash);
+    String info;
+    info.AppendFormat("[%s:%p, hash:%d]", "${name}", this, hash);
+    *pInfo = info;
+    return NOERROR;
+}
+
+void ${name}::InitializeEvents()
+{
+    _Impl_Memset(_m_EventsStatus, 0, sizeof(_m_EventsStatus));
+
+$WITH all interfaces DO
+$   IF interface.attrib is "delegate"
+$       WITH all methods DO
+    _m_EventsStatus[${ClassNameOfSink(class.name)}_${name}] = Delegate_Initialized;
+$       END DO;;
+$   END IF;;
+$END DO;;
+}
+
+ECode ${name}::InitializeSink()
+{
+#ifdef _DEBUG
+    _Impl_Memset(_m_cNestings, 0, sizeof(_m_cNestings));
+#endif // _DEBUG
+    _m_pServer = NULL;
+    _m_pConnector = NULL;
+
+    InitializeEvents();
+
+    return NOERROR;
+}
+
+ECode ${name}::AddCallback(
+    /* [in] */ Int32 nEvent,
+    /* [in] */ EventHandler handler)
+{
+    {
+        Mutex::Autolock lock(_m_lock);
+
+        if (_m_EventsStatus[nEvent] & Delegate_Registered) {
+            assert(0 && "E_DELEGATE_ALREADY_REGISTERED");
+            return E_DELEGATE_ALREADY_REGISTERED;
+        }
+
+        if (_m_EventsStatus[nEvent] & Delegate_Initialized) {
+            _m_EventsStatus[nEvent] |= Delegate_Registered;
+        }
+    }
+
+    return _AddCallback(nEvent, handler);
+}
+
+ECode ${name}::RemoveCallback(
+    /* [in] */ Int32 nEvent,
+    /* [in] */ EventHandler handler)
+{
+    {
+        Mutex::Autolock lock(_m_lock);
+
+        if (_m_EventsStatus[nEvent] & Delegate_Initialized) {
+            _m_EventsStatus[nEvent] &= ~Delegate_Registered;
+        }
+    }
+
+    return _RemoveCallback(nEvent, handler);
+}
+
+ECode ${name}::AcquireCallbackRendezvous(
+    /* [in] */ Int32 nEvent,
+    /* [out] */ ICallbackRendezvous** ppRendezvous)
+{
+    return _AcquireCallbackRendezvous(nEvent, ppRendezvous);
+}
+
+ECode ${name}::RemoveAllCallbacks()
+{
+    {
+        Mutex::Autolock lock(_m_lock);
+
+        InitializeEvents();
+    }
+
+    return _RemoveAllCallbacks();
+}
+
+ECode ${name}::CancelPendingCallback(Int32 nEventId)
+{
+    return _CancelPendingCallback(nEventId);
+}
+
+ECode ${name}::CancelAllPendingCallbacks()
+{
+    return _CancelAllPendingCallbacks();
+}
+
+$
+$WITH all interfaces DO
+$   IF name is not "ICallbackSink" and name is not "IObject" and attrib is not "clsobj" and attrib is not "handler" and attrib is not "async" and attrib is not "filter" and interface.attrib is not "delegate"
+$       WITH all parents_and_me DO
+$           WITH all methods DO
+// ${interface.name}
+ECode ${class.name}::Add${name}Callback(
+    EventHandler handler)
+{
+    return AddCallback(
+            ${ClassNameOfSink(class.name)}_${name},
+            handler);
+}
+
+ECode ${class.name}::Remove${name}Callback(
+    EventHandler handler)
+{
+    return RemoveCallback(
+            ${ClassNameOfSink(class.name)}_${name},
+            handler);
+}
+
+ECode ${class.name}::Acquire${name}Rendezvous(
+    ICallbackRendezvous** ppRendezvous)
+{
+    return AcquireCallbackRendezvous(
+            ${ClassNameOfSink(class.name)}_${name},
+            ppRendezvous);
+}
+
+$           END DO ;; all methods
+$       END DO ;; all parents_and_me
+$   END IF ;; name is not (ICallbackSink, clsobj, handler, filter)
+$END DO ;; all interfaces
+$
+$WITH all interfaces DO
+$   IF name is not "ICallbackSink" and name is not "IObject" and attrib is not "clsobj" and attrib is not "handler" and attrib is not "filter"
+$       WITH all parents_and_me DO
+$           WITH all methods DO
+
+${type} ${class.name}::${name}($^
+$           WITH all parameters DO
+
+    /* [${attrib}] */ ${type} ${prefixingname(parameter)}$^
+$               IF parameter is not last
+,$^
+$               END IF
+$           END DO ;; all parameters
+)
+{
+    CallbackContextContainer *_pEvent_;
+$           IF method.attrib is "WithCoalescence"
+    PVoid pCoalesceFunc = NULL;
+$           END IF
+    IParcel *pParams = NULL;
+    Int32 cFlags;
+    ECode ec = NOERROR;
+
+    Mutex::Autolock lock(_m_lock);
+
+#ifdef _DEBUG
+    if (_m_cNestings[${ClassNameOfSink(class.name)}_${name}]++ >= 128) {
+        assert("Dead-Nesting:${name}" && TRUE == FALSE);
+    }
+#endif // _DEUBG
+
+    _pEvent_ = &(_m_events[${ClassNameOfSink(class.name)}_${name}]);
+    _pEvent_->m_bEventOccured = TRUE;
+
+$           WITH all parameters DO
+$               IF parameter is first
+    cFlags = ${prefixingname(parameter)};
+$               END IF
+$           END DO ;; all parameters
+$
+$           IF interface.attrib is "async"
+    cFlags |= CallbackEventFlag_DirectCall;
+$           END IF
+$           IF method.attrib is "WithCoalescence"
+    pCoalesceFunc = (PVoid)${InterfaceNameOfSink(interface.name)}_${method.name}Coalescer;
+$           END IF
+
+$           IF HasParameters(method) is true
+    CCallbackParcel::New(&pParams);
+$               WITH all parameters DO
+$                   IF parameter is not first
+    ${ParcelParameter(parameter)}
+$                   END IF
+$               END DO
+$           END IF
+
+$           IF method.attrib is "WithCoalescence"
+    ec = _PostCallbackEvent(
+            _m_pServer, ${ClassNameOfSink(class.name)}_${name}, _pEvent_, cFlags, pCoalesceFunc, &pParams);
+$           ELSE
+    ec = _PostCallbackEvent(
+            _m_pServer, ${ClassNameOfSink(class.name)}_${name}, _pEvent_, cFlags, NULL, &pParams);
+$           END IF
+
+$           IF HasParameters(method) is true
+    pParams->Release();
+$           END IF
+
+#ifdef _DEBUG
+    _m_cNestings[${ClassNameOfSink(class.name)}_${name}]--;
+#endif
+
+    return ec;
+}
+$           END DO ;; all methods
+$       END DO ;; all parents_and_me
+$   END IF ;; name is not (ICallbackSink, clsobj, handler, filter)
+$END DO ;; all interfaces
+$
+
+CARAPI ${name}CreateObject(IInterface **ppObj)
+{
+    ECode ec = NOERROR;
+    ${name} *pObj = NULL;
+
+    void* pLocation = calloc(sizeof(${name}), 1);
+    if (!pLocation) {
+        ec = E_OUT_OF_MEMORY;
+        goto Exit;
+    }
+    pObj = (${name} *)new(pLocation) ${name};
+
+    ec = pObj->InitializeSink();
+    if (FAILED(ec)) goto Exit;
+    *ppObj = (_IInterface*)pObj;
+Exit:
+    if (FAILED(ec) && pObj) {
+        ((${name}*)pObj)->~${name}();
+        free(pObj);
+    }
+    return ec;
+}
+
+ECode ${class.name}::NewByFriend(${name} **ppNewObj)
+{
+    return ${name}CreateObject((IInterface **)ppNewObj);
+}
+
+$END OUTPUT

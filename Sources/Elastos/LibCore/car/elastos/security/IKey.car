@@ -1,0 +1,47 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * {@code Key} is the common interface for all keys.
+     *
+     * @see PublicKey
+     * @see PrivateKey
+     */
+    interface IKey {
+        /**
+         * Returns the name of the algorithm of this key. If the algorithm is
+         * unknown, {@code null} is returned.
+         *
+         * @return the name of the algorithm of this key or {@code null} if the
+         *         algorithm is unknown.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the name of the format used to encode this key, or {@code null}
+         * if it can not be encoded.
+         *
+         * @return the name of the format used to encode this key, or {@code null}
+         *         if it can not be encoded.
+         */
+        GetFormat(
+            [out] String* format);
+
+        /**
+         * Returns the encoded form of this key, or {@code null} if encoding is not
+         * supported by this key.
+         *
+         * @return the encoded form of this key, or {@code null} if encoding is not
+         *         supported by this key.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

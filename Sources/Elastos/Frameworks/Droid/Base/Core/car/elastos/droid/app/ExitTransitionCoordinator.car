@@ -1,0 +1,33 @@
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * This ActivityTransitionCoordinator is created in ActivityOptions#makeSceneTransitionAnimation
+     * to govern the exit of the Scene and the shared elements when calling an Activity as well as
+     * the reentry of the Scene when coming back from the called Activity.
+     */
+    /**
+     * @Involve
+     * interface IActivityTransitionCoordinator
+     */
+    interface IExitTransitionCoordinator {
+        ResetViews();
+
+        StartExit();
+
+        StartExit(
+            [in] Int32 resultCode,
+            [in] IIntent* data);
+
+        Stop();
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

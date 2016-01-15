@@ -1,0 +1,37 @@
+module
+{
+    interface Elastos.Droid.App.Trust.IITrustListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Trust {
+
+    /**
+     * System private API to comunicate with trust service.
+     *
+     * {@hide}
+     */
+    interface IITrustManager {
+        ReportUnlockAttempt(
+            [in] Boolean successful,
+            [in] Int32 userId);
+
+        ReportEnabledTrustAgentsChanged(
+            [in] Int32 userId);
+
+        ReportRequireCredentialEntry(
+            [in] Int32 userId);
+
+        RegisterTrustListener(
+            [in] IITrustListener* trustListener);
+
+        UnregisterTrustListener(
+            [in] IITrustListener* trustListener);
+    }
+
+    } // namespace Trust
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

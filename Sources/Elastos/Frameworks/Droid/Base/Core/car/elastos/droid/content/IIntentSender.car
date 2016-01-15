@@ -1,0 +1,25 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IIntentReceiver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /** @hide */
+    interface IIIntentSender {
+        Send(
+            [in] Int32 code,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IIntentReceiver* finishedReceiver,
+            [in] String requiredPermission,
+            [out] Int32* result);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,38 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace System {
+
+    /**
+     * Information returned by uname(2). Corresponds to C's
+     * {@code struct utsname} from
+     * <a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_utsname.h.html">&lt;sys/utsname.h&gt;</a>
+     */
+    interface IStructUtsname {
+        /** The OS name, such as "Linux". */
+        GetSysname(
+            [out] String* sysname);
+
+        /** The machine's unqualified name on some implementation-defined network. */
+        GetNodename(
+            [out] String* nodename);
+
+        /** The OS release, such as "2.6.35-27-generic". */
+        GetRelease(
+            [out] String* release);
+
+        /** The OS version, such as "#48-Ubuntu SMP Tue Feb 22 20:25:29 UTC 2011". */
+        GetVersion(
+            [out] String* ver);
+
+        /** The machine architecture, such as "armv7l" or "x86_64". */
+        GetMachine(
+            [out] String* machine);
+    }
+
+    } // namespace System
+    } // namespace Droid
+    } // namespace Elastos
+}

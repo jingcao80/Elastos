@@ -1,0 +1,28 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Cert {
+
+    /**
+     * X509 Certificate Factory Service Provider Interface Implementation.
+     * It supports CRLs and Certificates in (PEM) ASN.1 DER encoded form,
+     * and Certification Paths in PkiPath and PKCS7 formats.
+     * For Certificates and CRLs factory maintains the caching
+     * mechanisms allowing to speed up repeated Certificate/CRL
+     * generation.
+     * @see Cache
+     */
+    interface IX509CertFactoryImpl extends Elastos.Security.Cert.ICertificateFactorySpi {}
+
+    } // namespace Cert
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,87 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IPoint;
+    interface Elastos.Droid.Graphics.ICanvas;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+    namespace Multiwaveview {
+
+    interface IWaveManager {
+
+        SetRadius(
+            [in] Float r);
+
+        GetRadius(
+            [out] Float* result);
+
+        SetAlpha(
+            [in] Float a);
+
+        GetAlpha(
+            [out] Float* result);
+    }
+
+    interface IGlowManager {
+
+        SetX(
+            [in] Float x1);
+
+        GetX(
+            [out] Float* result);
+
+        SetY(
+            [in] Float y1);
+
+        GetY(
+            [out] Float* result);
+
+        SetAlpha(
+            [in] Float a);
+
+        GetAlpha(
+            [out] Float* result);
+
+        SetRadius(
+            [in] Float r);
+
+        GetRadius(
+            [out] Float* result);
+    }
+
+    interface IPointCloudPoint {
+    }
+
+    interface IPointCloud {
+
+        SetCenter(
+            [in] Float x,
+            [in] Float y);
+
+        MakePointCloud(
+            [in] Float innerRadius,
+            [in] Float outerRadius);
+
+        SetScale(
+            [in] Float scale);
+
+        GetScale(
+            [out] Float* result);
+
+        GetAlphaForPoint(
+            [in] IPointCloudPoint* point,
+            [out] Int32* result);
+
+        Draw(
+            [in] ICanvas* canvas);
+    }
+
+    } // namespace Multiwaveview
+    } // namespace Widget
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

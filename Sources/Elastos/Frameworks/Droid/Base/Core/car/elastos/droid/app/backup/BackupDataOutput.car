@@ -1,0 +1,101 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Backup {
+
+    /**
+    * Provides the structured interface through which a BackupAgent commits
+    * information to the backup data set, via its
+    * BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+    * onBackup() method.  Data written for backup is presented
+    * as a set of "entities," key/value pairs in which each binary data record "value" is
+    * named with a string "key."
+    *
+    * @sa BackupAgent
+    * @sa BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor) onBackup()
+    * <p>
+    * To commit a data record to the backup transport, the agent's
+    * {@sa BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+    * onBackup()} method first writes an "entity header" that supplies the key string for the record
+    * and the total size of the binary value for the record.  After the header has been
+    * written, the agent then writes the binary entity value itself.  The entity value can
+    * be written in multiple chunks if desired, as long as the total count of bytes written
+    * matches what was supplied to #writeEntityHeader(String, int) writeEntityHeader().
+    *
+    * @sa #writeEntityHeader(String, int) writeEntityHeader()
+    * <p>
+    * Entity key strings are considered to be unique within a given application's backup
+    * data set. If a backup agent writes a new entity under an existing key string, its value will
+    * replace any previous value in the transport's remote data store.  You can remove a record
+    * entirely from the remote data set by writing a new entity header using the
+    * existing record's key, but supplying a negative <code>dataSize</code> parameter.
+    * When you do so, the agent does not need to call #writeEntityData(byte[], int).
+    *
+    * @sa #writeEntityData(byte[], int)
+    * <h3>Example</h3>
+    * <p>
+    * Here is an example illustrating a way to back up the value of a String variable
+    * called <code>mStringToBackUp</code>:
+    * <pre>
+    * static final String MY_STRING_KEY = "storedstring";
+    *
+    * public void BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup(ParcelFileDescriptor oldState, BackupDataOutput data, ParcelFileDescriptor newState)
+    *         throws IOException {
+    *     ...
+    *     byte[] stringBytes = mStringToBackUp.getBytes();
+    *     data.writeEntityHeader(MY_STRING_KEY, stringBytes.length);
+    *     data.writeEntityData(stringBytes, stringBytes.length);
+    *     ...
+    * }</pre>
+    *
+    * @sa BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup(ParcelFileDescriptor oldState, BackupDataOutput data, ParcelFileDescriptor newState)
+    * @see BackupAgent
+    */
+    [deprecated]
+    interface IBackupDataOutput {
+        /**
+         * Mark the beginning of one record in the backup data stream. This must be called before
+         * #writeEntityData.
+         *
+         * @sa #writeEntityData
+         * @param key A string key that uniquely identifies the data record within the application
+         * @param dataSize The size in bytes of this record's data.  Passing a dataSize
+         *    of -1 indicates that the record under this key should be deleted.
+         * @return The number of bytes written to the backup stream
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if the write failed
+         */
+        WriteEntityHeader(
+            [in] String key,
+            [in] Int32 dataSize,
+            [out] Int32* writtenSize);
+
+        /**
+         * Write a chunk of data under the current entity to the backup transport.
+         * @param data A raw data buffer to send
+         * @param size The number of bytes to be sent in this chunk
+         * @return the number of bytes written
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if the write failed
+         */
+        WriteEntityData(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 size,
+            [out] Int32* writtenSize);
+
+        /** @hide */
+        SetKeyPrefix(
+            [in] String keyPrefix);
+    }
+
+    } // namespace Backup
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

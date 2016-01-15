@@ -1,0 +1,42 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Interfaces {
+
+    /**
+     * The interface for Digital Signature Algorithm (DSA) specific parameters.
+     */
+    interface IDSAParams {
+        /**
+         * Returns the base ({@code g}) value.
+         *
+         * @return the base ({@code g}) value.
+         */
+        GetG(
+            [out] IBigInteger** base);
+
+        /**
+         * Returns the prime ({@code p}) value.
+         *
+         * @return the prime ({@code p}) value.
+         */
+        GetP(
+            [out] IBigInteger** prime);
+
+        /**
+         * Returns the subprime ({@code q}) value.
+         *
+         * @return the subprime ({@code q}) value.
+         */
+        GetQ(
+            [out] IBigInteger** subprime);
+    }
+
+    } // namespace Interfaces
+    } // namespace Security
+    } // namespace Elastos
+}

@@ -1,0 +1,161 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     *  Class that represents useful attributes of generic network links
+     *  such as the upload/download throughput or packet error rate.
+     *  Generally speaking, you should be dealing with instances of
+     *  LinkQualityInfo subclasses, such as {@link android.net.#WifiLinkQualityInfo}
+     *  or {@link android.net.#MobileLinkQualityInfo} which provide additional
+     *  information.
+     *  @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface ILinkQualityInfo {
+        /**
+         * Represents a value that you can use to test if an integer field is set to a good value
+         */
+        const Int32 UNKNOWN_INT = 0x7FFFFFFF;               // Integer.MAX_VALUE;
+
+        /**
+         * Represents a value that you can use to test if a long field is set to a good value
+         */
+        const Int64 UNKNOWN_LONG = 0x7FFFFFFFFFFFFFFF;      // Long.MAX_VALUE;
+
+        const Int32 NORMALIZED_MIN_SIGNAL_STRENGTH = 0;
+
+        const Int32 NORMALIZED_MAX_SIGNAL_STRENGTH = 99;
+
+        const Int32 NORMALIZED_SIGNAL_STRENGTH_RANGE = 100; // NORMALIZED_MAX_SIGNAL_STRENGTH - ORMALIZED_MIN_SIGNAL_STRENGTH + 1;
+
+        /**
+         * returns the type of network this link is connected to
+         * @return network type as defined by {@link android.net.ConnectivityManager} or
+         * {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetNetworkType(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetNetworkType(
+            [in] Int32 networkType);
+
+        /**
+         * returns the signal strength normalized across multiple types of networks
+         * @return an integer value from 0 - 99 or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetNormalizedSignalStrength(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetNormalizedSignalStrength(
+            [in] Int32 normalizedSignalStrength);
+
+        /**
+         * returns the total number of packets sent or received in sample duration
+         * @return number of packets or {@link android.net.LinkQualityInfo#UNKNOWN_LONG}
+         */
+        GetPacketCount(
+            [out] Int64* result);
+
+        /**
+         * @hide
+         */
+        SetPacketCount(
+            [in] Int64 packetCount);
+
+        /**
+         * returns the total number of packets errors encountered in sample duration
+         * @return number of errors or {@link android.net.LinkQualityInfo#UNKNOWN_LONG}
+         */
+        GetPacketErrorCount(
+            [out] Int64* result);
+
+        /**
+         * @hide
+         */
+        SetPacketErrorCount(
+            [in] Int64 packetErrorCount);
+
+        /**
+         * returns the theoretical upload bandwidth of this network
+         * @return bandwidth in Kbps or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetTheoreticalTxBandwidth(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetTheoreticalTxBandwidth(
+            [in] Int32 theoreticalTxBandwidth);
+
+        /**
+         * returns the theoretical download bandwidth of this network
+         * @return bandwidth in Kbps or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetTheoreticalRxBandwidth(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetTheoreticalRxBandwidth(
+            [in] Int32 theoreticalRxBandwidth);
+
+        /**
+         * returns the theoretical latency of this network
+         * @return latency in milliseconds or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetTheoreticalLatency(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetTheoreticalLatency(
+            [in] Int32 theoreticalLatency);
+
+        /**
+         * returns the time stamp of the last sample
+         * @return milliseconds elapsed since start and sample time or
+         * {@link android.net.LinkQualityInfo#UNKNOWN_LONG}
+         */
+        GetLastDataSampleTime(
+            [out] Int64* result);
+
+        /**
+         * @hide
+         */
+        SetLastDataSampleTime(
+            [in] Int64 lastDataSampleTime);
+
+        /**
+         * returns the sample duration used
+         * @return duration in milliseconds or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetDataSampleDuration(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetDataSampleDuration(
+            [in] Int32 dataSampleDuration);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

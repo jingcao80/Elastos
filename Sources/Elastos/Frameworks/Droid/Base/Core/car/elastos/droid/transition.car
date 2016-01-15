@@ -1,0 +1,277 @@
+
+module
+{
+    merge("transition/IArcMotion.car");
+    merge("transition/IChangeBounds.car");
+    merge("transition/IChangeText.car");
+    merge("transition/IChangeTransform.car");
+    merge("transition/ICircularPropagation.car");
+    merge("transition/ICrossfade.car");
+    merge("transition/IPathMotion.car");
+    merge("transition/IPatternPathMotion.car");
+    merge("transition/IScene.car");
+    merge("transition/ISidePropagation.car");
+    merge("transition/ISlide.car");
+    merge("transition/ITransition.car");
+    merge("transition/ITransitionInflater.car");
+    merge("transition/ITransitionManager.car");
+    merge("transition/ITransitionPropagation.car");
+    merge("transition/ITransitionSet.car");
+    merge("transition/ITransitionUtils.car");
+    merge("transition/ITransitionValues.car");
+    merge("transition/ITranslationAnimationCreator.car");
+    merge("transition/IVisibility.car");
+    merge("transition/IVisibilityPropagation.car");
+    merge("transition/ITransitionValuesMaps.car");
+    merge("transition/IFade.car");
+
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.Graphics.IPath;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    class CArcMotion {
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IPathMotion;
+        interface IArcMotion;
+    }
+
+    class CAutoTransition {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ITransitionSet;
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    class CChangeBounds {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IChangeBounds;
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    class CChangeClipBounds {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    class CChangeImageTransform {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    class CChangeScroll {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    class CChangeText {
+
+        interface IChangeText;
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    class CChangeTransform {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IChangeTransform;
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    class CCircularPropagation {
+
+        interface ICircularPropagation;
+        interface IVisibilityPropagation;
+    }
+
+    class CCrossfade {
+
+        interface ICrossfade;
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    class CExplode {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ICloneable;
+        interface ITransition;
+        interface IVisibility;
+    }
+
+    class CFade {
+
+        constructor();
+
+        constructor(
+            [in] Int32 fadingMode);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ICloneable;
+        interface ITransition;
+        interface IVisibility;
+        interface IFade;
+    }
+
+    class CPatternPathMotion {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IPath* patternPath);
+
+        interface IPatternPathMotion;
+        interface IPathMotion;
+    }
+
+    class CRecolor {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    [local]
+    class CScene {
+
+        constructor(
+            [in] IViewGroup* sceneRoot);
+
+        constructor(
+            [in] IViewGroup* sceneRoot,
+            [in] IView* layout);
+
+        interface IScene;
+    }
+
+    singleton class CSceneHelper {
+        interface ISceneHelper;
+    }
+
+    class CSidePropagation {
+
+        interface ISidePropagation;
+        interface IVisibilityPropagation;
+    }
+
+    class CSlide {
+
+        constructor();
+
+        constructor(
+            [in] Int32 slideEdge);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ISlide;
+        interface IVisibility;
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    singleton class CTransitionInflaterHelper {
+        interface ITransitionInflaterHelper;
+    }
+
+    class CTransitionManager {
+
+        constructor();
+
+        interface ITransitionManager;
+    }
+
+    class CTransitionSet {
+
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ITransitionSet;
+        interface ITransition;
+        interface ICloneable;
+    }
+
+    singleton class CTransitionUtils {
+        interface ITransitionUtils;
+    }
+
+    class CTransitionValues {
+
+        interface ITransitionValues;
+    }
+
+    } // namespace Transition
+    } // namepsace Droid
+    } // namespace Elastos
+}

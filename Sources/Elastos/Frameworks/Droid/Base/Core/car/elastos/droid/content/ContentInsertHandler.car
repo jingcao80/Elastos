@@ -1,0 +1,45 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+    interface Elastos.Droid.Content.IContentResolver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Interface to insert data to ContentResolver
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Org.Xml.Sax.IContentHandler
+     */
+    interface IContentInsertHandler {
+        /**
+         * insert data from InputStream to ContentResolver
+         * @param contentResolver
+         * @param in InputStream
+         * @throws IOException
+         * @throws SAXException
+         */
+        Insert(
+            [in] IContentResolver* contentResolver,
+            [in] IInputStream* inStream);
+
+        /**
+         * insert data from String to ContentResolver
+         * @param contentResolver
+         * @param in input string
+         * @throws SAXException
+         */
+        Insert(
+            [in] IContentResolver* contentResolver,
+            [in] String inStr);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

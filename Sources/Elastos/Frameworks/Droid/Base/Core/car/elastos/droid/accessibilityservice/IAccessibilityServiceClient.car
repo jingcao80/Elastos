@@ -1,0 +1,41 @@
+
+module
+{
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceConnection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace AccessibilityService {
+
+    /**
+     * Top-level interface to an accessibility service component.
+     *
+     * @hide
+     */
+    [oneway]
+    interface IIAccessibilityServiceClient {
+        SetConnection(
+            [in] IIAccessibilityServiceConnection* connection,
+            [in] Int32 connectionId);
+
+        OnAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        OnInterrupt();
+
+        OnGesture(
+            [in] Int32 gesture);
+
+        ClearAccessibilityCache();
+
+        OnKeyEvent(
+            [in] IKeyEvent* event,
+            [in] Int32 sequence);
+    }
+
+    } // namespace AccessibilityService
+    } // namepsace Droid
+    } // namespace Elastos
+}

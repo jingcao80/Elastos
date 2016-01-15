@@ -1,0 +1,2 @@
+set solib-search-path ./obj/local/armeabi-v7a
+directory /home/jingcao/Workspace/XBMC_ORG/android-14/sysroot/usr/include /home/jingcao/Workspace/android-ndk-r8e/sources/android/native_app_glue /home/jingcao/Workspace/android-ndk-r8e/sources/cxx-stl/gnu-libstdc++/include/4.7 /home/jingcao/Workspace/XBMC_ORG  /opt/xbmc-deps/arm-linux-androideabi-android-14/include jni

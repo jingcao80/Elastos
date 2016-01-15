@@ -1,0 +1,21 @@
+
+module
+{
+    interface Elastos.Droid.Location.ICountry;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * {@hide}
+     */
+    interface IICountryListener {
+        OnCountryDetected(
+            [in] ICountry* country);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}

@@ -1,0 +1,75 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * CRL's Issuing Distribution Point Extension (OID = 2.5.29.28).
+     * <pre>
+     *   id-ce-issuingDistributionPoint OBJECT IDENTIFIER ::= { id-ce 28 }
+     *
+     *   issuingDistributionPoint ::= SEQUENCE {
+     *      distributionPoint          [0] DistributionPointName OPTIONAL,
+     *      onlyContainsUserCerts      [1] BOOLEAN DEFAULT FALSE,
+     *      onlyContainsCACerts        [2] BOOLEAN DEFAULT FALSE,
+     *      onlySomeReasons            [3] ReasonFlags OPTIONAL,
+     *      indirectCRL                [4] BOOLEAN DEFAULT FALSE,
+     *      onlyContainsAttributeCerts [5] BOOLEAN DEFAULT FALSE
+     *   }
+     * </pre>
+     * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     */
+    interface IIssuingDistributionPoint extends IExtensionValue {
+        /**
+         * Sets the value of onlyContainsUserCerts field of the structure.
+         */
+        SetOnlyContainsUserCerts(
+            [in] Boolean onlyContainsUserCerts);
+
+        /**
+         * Sets the value of onlyContainsCACerts field of the structure.
+         */
+        SetOnlyContainsCACerts(
+            [in] Boolean onlyContainsCACerts);
+
+        /**
+         * Sets the value of indirectCRL field of the structure.
+         */
+        SetIndirectCRL(
+            [in] Boolean indirectCRL);
+
+        /**
+         * Sets the value of onlyContainsAttributeCerts field of the structure.
+         */
+        SetOnlyContainsAttributeCerts(
+            [in] Boolean onlyContainsAttributeCerts);
+    }
+
+    [deprecated]
+    interface IIssuingDistributionPointHelper {
+        /**
+         * Creates the extension object on the base of its encoded form.
+         */
+        Decode(
+            [in] ArrayOf<Byte>* encoding,
+            [out] IIssuingDistributionPoint** object);
+
+        /**
+         * ASN.1 Encoder/Decoder.
+         */
+        GetASN1(
+            [out] IASN1Type** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

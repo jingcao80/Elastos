@@ -1,0 +1,2525 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IMatrix;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    interface IPointerCoords {
+        /**
+         * The X component of the pointer movement.
+         *
+         * @see MotionEvent#AXIS_X
+         */
+        SetX(
+            [in] Float value);
+
+        GetX(
+            [out] Float* value);
+
+        /**
+         * The Y component of the pointer movement.
+         *
+         * @see MotionEvent#AXIS_Y
+         */
+        SetY(
+            [in] Float value);
+
+        GetY(
+            [out] Float* value);
+
+        /**
+         * A normalized value that describes the pressure applied to the device
+         * by a finger or other tool.
+         * The pressure generally ranges from 0 (no pressure at all) to 1 (normal pressure),
+         * although values higher than 1 may be generated depending on the calibration of
+         * the input device.
+         *
+         * @see MotionEvent#AXIS_PRESSURE
+         */
+        SetPressure(
+            [in] Float value);
+
+        GetPressure(
+            [out] Float* value);
+
+        /**
+         * A normalized value that describes the approximate size of the pointer touch area
+         * in relation to the maximum detectable size of the device.
+         * It represents some approximation of the area of the screen being
+         * pressed; the actual value in pixels corresponding to the
+         * touch is normalized with the device specific range of values
+         * and scaled to a value between 0 and 1. The value of size can be used to
+         * determine fat touch events.
+         *
+         * @see MotionEvent#AXIS_SIZE
+         */
+        SetSize(
+            [in] Float value);
+
+        GetSize(
+            [out] Float* value);
+
+        /**
+         * The length of the major axis of an ellipse that describes the touch area at
+         * the point of contact.
+         * If the device is a touch screen, the length is reported in pixels, otherwise it is
+         * reported in device-specific units.
+         *
+         * @see MotionEvent#AXIS_TOUCH_MAJOR
+         */
+        SetTouchMajor(
+            [in] Float value);
+
+        GetTouchMajor(
+            [out] Float* value);
+
+        /**
+         * The length of the minor axis of an ellipse that describes the touch area at
+         * the point of contact.
+         * If the device is a touch screen, the length is reported in pixels, otherwise it is
+         * reported in device-specific units.
+         *
+         * @see MotionEvent#AXIS_TOUCH_MINOR
+         */
+        SetTouchMinor(
+            [in] Float value);
+
+        GetTouchMinor(
+            [out] Float* value);
+
+        /**
+         * The length of the major axis of an ellipse that describes the size of
+         * the approaching tool.
+         * The tool area represents the estimated size of the finger or pen that is
+         * touching the device independent of its actual touch area at the point of contact.
+         * If the device is a touch screen, the length is reported in pixels, otherwise it is
+         * reported in device-specific units.
+         *
+         * @see MotionEvent#AXIS_TOOL_MAJOR
+         */
+        SetToolMajor(
+            [in] Float value);
+
+        GetToolMajor(
+            [out] Float* value);
+
+        /**
+         * The length of the minor axis of an ellipse that describes the size of
+         * the approaching tool.
+         * The tool area represents the estimated size of the finger or pen that is
+         * touching the device independent of its actual touch area at the point of contact.
+         * If the device is a touch screen, the length is reported in pixels, otherwise it is
+         * reported in device-specific units.
+         *
+         * @see MotionEvent#AXIS_TOOL_MINOR
+         */
+        SetToolMinor(
+            [in] Float value);
+
+        GetToolMinor(
+            [out] Float* value);
+
+        /**
+         * The orientation of the touch area and tool area in radians clockwise from vertical.
+         * An angle of 0 radians indicates that the major axis of contact is oriented
+         * upwards, is perfectly circular or is of unknown orientation.  A positive angle
+         * indicates that the major axis of contact is oriented to the right.  A negative angle
+         * indicates that the major axis of contact is oriented to the left.
+         * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
+         * (finger pointing fully right).
+         *
+         * @see MotionEvent#AXIS_ORIENTATION
+         */
+        SetOrientation(
+            [in] Float value);
+
+        GetOrientation(
+            [out] Float* value);
+
+        /**
+         * Clears the contents of this object.
+         * Resets all axes to zero.
+         */
+        Clear();
+
+        /**
+         * Copies the contents of another pointer coords object.
+         *
+         * @param other The pointer coords object to copy.
+         */
+        CopyFrom(
+            [in] IPointerCoords* other);
+
+        /**
+         * Gets the value associated with the specified axis.
+         *
+         * @param axis The axis identifier for the axis value to retrieve.
+         * @return The value associated with the axis, or 0 if none.
+         *
+         * @see MotionEvent#AXIS_X
+         * @see MotionEvent#AXIS_Y
+         */
+        GetAxisValue(
+            [in] Int32 axis,
+            [out] Float* value);
+
+        /**
+         * Sets the value associated with the specified axis.
+         *
+         * @param axis The axis identifier for the axis value to assign.
+         * @param value The value to set.
+         *
+         * @see MotionEvent#AXIS_X
+         * @see MotionEvent#AXIS_Y
+         */
+        SetAxisValue(
+            [in] Int32 axis,
+            [in] Float value);
+    }
+
+    interface IPointerCoordsHelper {
+        /** @hide */
+        CreateArray(
+            [in] Int32 size,
+            [out, callee] ArrayOf<IPointerCoords*>* array);
+    }
+
+    /**
+     * Transfer object for pointer properties.
+     *
+     * Objects of this type can be used to specify the pointer id and tool type
+     * when creating new {@link MotionEvent} objects and to query pointer properties in bulk.
+     */
+    interface IPointerProperties {
+        /**
+         * The pointer id.
+         * Initially set to {@link #INVALID_POINTER_ID} (-1).
+         *
+         * @see MotionEvent#getPointerId(int)
+         */
+        SetId(
+            [in] Int32 id);
+
+        GetId(
+            [out] Int32* id);
+
+        /**
+         * The pointer tool type.
+         * Initially set to 0.
+         *
+         * @see MotionEvent#getToolType(int)
+         */
+        SetToolType(
+            [in] Int32 type);
+
+        GetToolType(
+            [out] Int32* type);
+
+        /**
+         * Resets the pointer properties to their initial values.
+         */
+        Clear();
+
+        /**
+         * Copies the contents of another pointer properties object.
+         *
+         * @param other The pointer properties object to copy.
+         */
+        CopyFrom(
+            [in] IPointerProperties* other);
+
+        Equals(
+            [in] IPointerProperties* other,
+            [out] Boolean* res);
+
+        Equals(
+            [in] IInterface* other,
+            [out] Boolean* res);
+
+        GetHashCode(
+            [out] Int32* hash);
+    }
+
+    interface IPointerPropertiesHelper {
+        /** @hide */
+        CreateArray(
+            [in] Int32 size,
+            [out, callee] ArrayOf<IPointerProperties*>* array);
+    }
+
+    /**
+     * @Involve
+     * interface IInputEvent
+     * interface IParcelable
+     */
+    [deprecated]
+    interface IMotionEvent {
+        /**
+         * An invalid pointer id.
+         *
+         * This value (-1) can be used as a placeholder to indicate that a pointer id
+         * has not been assigned or is not available.  It cannot appear as
+         * a pointer id inside a {@link MotionEvent}.
+         */
+        const Int32 INVALID_POINTER_ID = -1;
+
+        /**
+         * Bit mask of the parts of the action code that are the action itself.
+         */
+        const Int32 ACTION_MASK             = 0xff;
+
+        /**
+         * Constant for {@link #getActionMasked}: A pressed gesture has started, the
+         * motion contains the initial starting location.
+         * <p>
+         * This is also a good time to check the button state to distinguish
+         * secondary and tertiary button clicks and handle them appropriately.
+         * Use {@link #getButtonState} to retrieve the button state.
+         * </p>
+         */
+        const Int32 ACTION_DOWN             = 0;
+
+        /**
+         * Constant for {@link #getActionMasked}: A pressed gesture has finished, the
+         * motion contains the final release location as well as any intermediate
+         * points since the last down or move event.
+         */
+        const Int32 ACTION_UP               = 1;
+
+        /**
+         * Constant for {@link #getActionMasked}: A change has happened during a
+         * press gesture (between {@link #ACTION_DOWN} and {@link #ACTION_UP}).
+         * The motion contains the most recent point, as well as any intermediate
+         * points since the last down or move event.
+         */
+        const Int32 ACTION_MOVE             = 2;
+
+        /**
+         * Constant for {@link #getActionMasked}: The current gesture has been aborted.
+         * You will not receive any more points in it.  You should treat this as
+         * an up event, but not perform any action that you normally would.
+         */
+        const Int32 ACTION_CANCEL           = 3;
+
+        /**
+         * Constant for {@link #getActionMasked}: A movement has happened outside of the
+         * normal bounds of the UI element.  This does not provide a full gesture,
+         * but only the initial location of the movement/touch.
+         */
+        const Int32 ACTION_OUTSIDE          = 4;
+
+        /**
+         * Constant for {@link #getActionMasked}: A non-primary pointer has gone down.
+         * <p>
+         * Use {@link #getActionIndex} to retrieve the index of the pointer that changed.
+         * </p><p>
+         * The index is encoded in the {@link #ACTION_POINTER_INDEX_MASK} bits of the
+         * unmasked action returned by {@link #getAction}.
+         * </p>
+         */
+        const Int32 ACTION_POINTER_DOWN     = 5;
+
+        /**
+         * Constant for {@link #getActionMasked}: A non-primary pointer has gone up.
+         * <p>
+         * Use {@link #getActionIndex} to retrieve the index of the pointer that changed.
+         * </p><p>
+         * The index is encoded in the {@link #ACTION_POINTER_INDEX_MASK} bits of the
+         * unmasked action returned by {@link #getAction}.
+         * </p>
+         */
+        const Int32 ACTION_POINTER_UP       = 6;
+
+        /**
+         * Constant for {@link #getActionMasked}: A change happened but the pointer
+         * is not down (unlike {@link #ACTION_MOVE}).  The motion contains the most
+         * recent point, as well as any intermediate points since the last
+         * hover move event.
+         * <p>
+         * This action is always delivered to the window or view under the pointer.
+         * </p><p>
+         * This action is not a touch event so it is delivered to
+         * {@link View#onGenericMotionEvent(MotionEvent)} rather than
+         * {@link View#onTouchEvent(MotionEvent)}.
+         * </p>
+         */
+        const Int32 ACTION_HOVER_MOVE       = 7;
+
+        /**
+         * Constant for {@link #getActionMasked}: The motion event contains relative
+         * vertical and/or horizontal scroll offsets.  Use {@link #getAxisValue(int)}
+         * to retrieve the information from {@link #AXIS_VSCROLL} and {@link #AXIS_HSCROLL}.
+         * The pointer may or may not be down when this event is dispatched.
+         * <p>
+         * This action is always delivered to the window or view under the pointer, which
+         * may not be the window or view currently touched.
+         * </p><p>
+         * This action is not a touch event so it is delivered to
+         * {@link View#onGenericMotionEvent(MotionEvent)} rather than
+         * {@link View#onTouchEvent(MotionEvent)}.
+         * </p>
+         */
+        const Int32 ACTION_SCROLL           = 8;
+
+        /**
+         * Constant for {@link #getActionMasked}: The pointer is not down but has entered the
+         * boundaries of a window or view.
+         * <p>
+         * This action is always delivered to the window or view under the pointer.
+         * </p><p>
+         * This action is not a touch event so it is delivered to
+         * {@link View#onGenericMotionEvent(MotionEvent)} rather than
+         * {@link View#onTouchEvent(MotionEvent)}.
+         * </p>
+         */
+        const Int32 ACTION_HOVER_ENTER      = 9;
+
+        /**
+         * Constant for {@link #getActionMasked}: The pointer is not down but has exited the
+         * boundaries of a window or view.
+         * <p>
+         * This action is always delivered to the window or view that was previously under the pointer.
+         * </p><p>
+         * This action is not a touch event so it is delivered to
+         * {@link View#onGenericMotionEvent(MotionEvent)} rather than
+         * {@link View#onTouchEvent(MotionEvent)}.
+         * </p>
+         */
+        const Int32 ACTION_HOVER_EXIT       = 10;
+
+        /**
+         * Bits in the action code that represent a pointer index, used with
+         * {@link #ACTION_POINTER_DOWN} and {@link #ACTION_POINTER_UP}.  Shifting
+         * down by {@link #ACTION_POINTER_INDEX_SHIFT} provides the actual pointer
+         * index where the data for the pointer going up or down can be found; you can
+         * get its identifier with {@link #getPointerId(int)} and the actual
+         * data with {@link #getX(int)} etc.
+         *
+         * @see #getActionIndex
+         */
+        const Int32 ACTION_POINTER_INDEX_MASK  = 0xff00;
+
+        /**
+         * Bit shift for the action bits holding the pointer index as
+         * defined by {@link #ACTION_POINTER_INDEX_MASK}.
+         *
+         * @see #getActionIndex
+         */
+        const Int32 ACTION_POINTER_INDEX_SHIFT = 8;
+
+        /**
+         * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+         * data index associated with {@link #ACTION_POINTER_DOWN}.
+         */
+        //@Deprecated
+        const Int32 ACTION_POINTER_1_DOWN   = ACTION_POINTER_DOWN | 0x0000;
+
+        /**
+         * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+         * data index associated with {@link #ACTION_POINTER_DOWN}.
+         */
+        //@Deprecated
+        const Int32 ACTION_POINTER_2_DOWN   = ACTION_POINTER_DOWN | 0x0100;
+
+        /**
+         * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+         * data index associated with {@link #ACTION_POINTER_DOWN}.
+         */
+        //@Deprecated
+        const Int32 ACTION_POINTER_3_DOWN   = ACTION_POINTER_DOWN | 0x0200;
+
+        /**
+         * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+         * data index associated with {@link #ACTION_POINTER_UP}.
+         */
+        //@Deprecated
+        const Int32 ACTION_POINTER_1_UP     = ACTION_POINTER_UP | 0x0000;
+
+        /**
+         * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+         * data index associated with {@link #ACTION_POINTER_UP}.
+         */
+        //@Deprecated
+        const Int32 ACTION_POINTER_2_UP     = ACTION_POINTER_UP | 0x0100;
+
+        /**
+         * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+         * data index associated with {@link #ACTION_POINTER_UP}.
+         */
+        //@Deprecated
+        const Int32 ACTION_POINTER_3_UP     = ACTION_POINTER_UP | 0x0200;
+
+        /**
+         * @deprecated Renamed to {@link #ACTION_POINTER_INDEX_MASK} to match
+         * the actual data contained in these bits.
+         */
+        //@Deprecated
+        const Int32 ACTION_POINTER_ID_MASK  = 0xff00;
+
+        /**
+         * @deprecated Renamed to {@link #ACTION_POINTER_INDEX_SHIFT} to match
+         * the actual data contained in these bits.
+         */
+        //@Deprecated
+        const Int32 ACTION_POINTER_ID_SHIFT = 8;
+
+        /**
+         * This flag indicates that the window that received this motion event is partly
+         * or wholly obscured by another visible window above it.  This flag is set to true
+         * even if the event did not directly pass through the obscured area.
+         * A security sensitive application can check this flag to identify situations in which
+         * a malicious application may have covered up part of its content for the purpose
+         * of misleading the user or hijacking touches.  An appropriate response might be
+         * to drop the suspect touches or to take additional precautions to confirm the user's
+         * actual intent.
+         */
+        const Int32 FLAG_WINDOW_IS_OBSCURED = 0x1;
+
+        /**
+         * Private flag that indicates when the system has detected that this motion event
+         * may be inconsistent with respect to the sequence of previously delivered motion events,
+         * such as when a pointer move event is sent but the pointer is not down.
+         *
+         * @hide
+         * @see #isTainted
+         * @see #setTainted
+         */
+        const Int32 FLAG_TAINTED = 0x80000000;
+
+        /**
+         * Flag indicating the motion event intersected the top edge of the screen.
+         */
+        const Int32 EDGE_TOP = 0x00000001;
+
+        /**
+         * Flag indicating the motion event intersected the bottom edge of the screen.
+         */
+        const Int32 EDGE_BOTTOM = 0x00000002;
+
+        /**
+         * Flag indicating the motion event intersected the left edge of the screen.
+         */
+        const Int32 EDGE_LEFT = 0x00000004;
+
+        /**
+         * Flag indicating the motion event intersected the right edge of the screen.
+         */
+        const Int32 EDGE_RIGHT = 0x00000008;
+
+        /**
+         * Axis constant: X axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen, reports the absolute X screen position of the center of
+         * the touch contact area.  The units are display pixels.
+         * <li>For a touch pad, reports the absolute X surface position of the center of the touch
+         * contact area.  The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+         * to query the effective range of values.
+         * <li>For a mouse, reports the absolute X screen position of the mouse pointer.
+         * The units are display pixels.
+         * <li>For a trackball, reports the relative horizontal displacement of the trackball.
+         * The value is normalized to a range from -1.0 (left) to 1.0 (right).
+         * <li>For a joystick, reports the absolute X position of the joystick.
+         * The value is normalized to a range from -1.0 (left) to 1.0 (right).
+         * </ul>
+         * </p>
+         *
+         * @see #getX(int)
+         * @see #getHistoricalX(int, int)
+         * @see MotionEvent.PointerCoords#x
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_X = 0;
+
+        /**
+         * Axis constant: Y axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen, reports the absolute Y screen position of the center of
+         * the touch contact area.  The units are display pixels.
+         * <li>For a touch pad, reports the absolute Y surface position of the center of the touch
+         * contact area.  The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+         * to query the effective range of values.
+         * <li>For a mouse, reports the absolute Y screen position of the mouse pointer.
+         * The units are display pixels.
+         * <li>For a trackball, reports the relative vertical displacement of the trackball.
+         * The value is normalized to a range from -1.0 (up) to 1.0 (down).
+         * <li>For a joystick, reports the absolute Y position of the joystick.
+         * The value is normalized to a range from -1.0 (up or far) to 1.0 (down or near).
+         * </ul>
+         * </p>
+         *
+         * @see #getY(int)
+         * @see #getHistoricalY(int, int)
+         * @see MotionEvent.PointerCoords#y
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_Y = 1;
+
+        /**
+         * Axis constant: Pressure axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen or touch pad, reports the approximate pressure applied to the surface
+         * by a finger or other tool.  The value is normalized to a range from
+         * 0 (no pressure at all) to 1 (normal pressure), although values higher than 1
+         * may be generated depending on the calibration of the input device.
+         * <li>For a trackball, the value is set to 1 if the trackball button is pressed
+         * or 0 otherwise.
+         * <li>For a mouse, the value is set to 1 if the primary mouse button is pressed
+         * or 0 otherwise.
+         * </ul>
+         * </p>
+         *
+         * @see #getPressure(int)
+         * @see #getHistoricalPressure(int, int)
+         * @see MotionEvent.PointerCoords#pressure
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_PRESSURE = 2;
+
+        /**
+         * Axis constant: Size axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen or touch pad, reports the approximate size of the contact area in
+         * relation to the maximum detectable size for the device.  The value is normalized
+         * to a range from 0 (smallest detectable size) to 1 (largest detectable size),
+         * although it is not a linear scale.  This value is of limited use.
+         * To obtain calibrated size information, use
+         * {@link #AXIS_TOUCH_MAJOR} or {@link #AXIS_TOOL_MAJOR}.
+         * </ul>
+         * </p>
+         *
+         * @see #getSize(int)
+         * @see #getHistoricalSize(int, int)
+         * @see MotionEvent.PointerCoords#size
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_SIZE = 3;
+
+        /**
+         * Axis constant: TouchMajor axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen, reports the length of the major axis of an ellipse that
+         * represents the touch area at the point of contact.
+         * The units are display pixels.
+         * <li>For a touch pad, reports the length of the major axis of an ellipse that
+         * represents the touch area at the point of contact.
+         * The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+         * to query the effective range of values.
+         * </ul>
+         * </p>
+         *
+         * @see #getTouchMajor(int)
+         * @see #getHistoricalTouchMajor(int, int)
+         * @see MotionEvent.PointerCoords#touchMajor
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_TOUCH_MAJOR = 4;
+
+        /**
+         * Axis constant: TouchMinor axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen, reports the length of the minor axis of an ellipse that
+         * represents the touch area at the point of contact.
+         * The units are display pixels.
+         * <li>For a touch pad, reports the length of the minor axis of an ellipse that
+         * represents the touch area at the point of contact.
+         * The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+         * to query the effective range of values.
+         * </ul>
+         * </p><p>
+         * When the touch is circular, the major and minor axis lengths will be equal to one another.
+         * </p>
+         *
+         * @see #getTouchMinor(int)
+         * @see #getHistoricalTouchMinor(int, int)
+         * @see MotionEvent.PointerCoords#touchMinor
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_TOUCH_MINOR = 5;
+
+        /**
+         * Axis constant: ToolMajor axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen, reports the length of the major axis of an ellipse that
+         * represents the size of the approaching finger or tool used to make contact.
+         * <li>For a touch pad, reports the length of the major axis of an ellipse that
+         * represents the size of the approaching finger or tool used to make contact.
+         * The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+         * to query the effective range of values.
+         * </ul>
+         * </p><p>
+         * When the touch is circular, the major and minor axis lengths will be equal to one another.
+         * </p><p>
+         * The tool size may be larger than the touch size since the tool may not be fully
+         * in contact with the touch sensor.
+         * </p>
+         *
+         * @see #getToolMajor(int)
+         * @see #getHistoricalToolMajor(int, int)
+         * @see MotionEvent.PointerCoords#toolMajor
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_TOOL_MAJOR = 6;
+
+        /**
+         * Axis constant: ToolMinor axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen, reports the length of the minor axis of an ellipse that
+         * represents the size of the approaching finger or tool used to make contact.
+         * <li>For a touch pad, reports the length of the minor axis of an ellipse that
+         * represents the size of the approaching finger or tool used to make contact.
+         * The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+         * to query the effective range of values.
+         * </ul>
+         * </p><p>
+         * When the touch is circular, the major and minor axis lengths will be equal to one another.
+         * </p><p>
+         * The tool size may be larger than the touch size since the tool may not be fully
+         * in contact with the touch sensor.
+         * </p>
+         *
+         * @see #getToolMinor(int)
+         * @see #getHistoricalToolMinor(int, int)
+         * @see MotionEvent.PointerCoords#toolMinor
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_TOOL_MINOR = 7;
+
+        /**
+         * Axis constant: Orientation axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a touch screen or touch pad, reports the orientation of the finger
+         * or tool in radians relative to the vertical plane of the device.
+         * An angle of 0 radians indicates that the major axis of contact is oriented
+         * upwards, is perfectly circular or is of unknown orientation.  A positive angle
+         * indicates that the major axis of contact is oriented to the right.  A negative angle
+         * indicates that the major axis of contact is oriented to the left.
+         * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
+         * (finger pointing fully right).
+         * <li>For a stylus, the orientation indicates the direction in which the stylus
+         * is pointing in relation to the vertical axis of the current orientation of the screen.
+         * The range is from -PI radians to PI radians, where 0 is pointing up,
+         * -PI/2 radians is pointing left, -PI or PI radians is pointing down, and PI/2 radians
+         * is pointing right.  See also {@link #AXIS_TILT}.
+         * </ul>
+         * </p>
+         *
+         * @see #getOrientation(int)
+         * @see #getHistoricalOrientation(int, int)
+         * @see MotionEvent.PointerCoords#orientation
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_ORIENTATION = 8;
+
+        /**
+         * Axis constant: Vertical Scroll axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a mouse, reports the relative movement of the vertical scroll wheel.
+         * The value is normalized to a range from -1.0 (down) to 1.0 (up).
+         * </ul>
+         * </p><p>
+         * This axis should be used to scroll views vertically.
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_VSCROLL = 9;
+
+        /**
+         * Axis constant: Horizontal Scroll axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a mouse, reports the relative movement of the horizontal scroll wheel.
+         * The value is normalized to a range from -1.0 (left) to 1.0 (right).
+         * </ul>
+         * </p><p>
+         * This axis should be used to scroll views horizontally.
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_HSCROLL = 10;
+
+        /**
+         * Axis constant: Z axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute Z position of the joystick.
+         * The value is normalized to a range from -1.0 (high) to 1.0 (low).
+         * <em>On game pads with two analog joysticks, this axis is often reinterpreted
+         * to report the absolute X position of the second joystick instead.</em>
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_Z = 11;
+
+        /**
+         * Axis constant: X Rotation axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute rotation angle about the X axis.
+         * The value is normalized to a range from -1.0 (counter-clockwise) to 1.0 (clockwise).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_RX = 12;
+
+        /**
+         * Axis constant: Y Rotation axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute rotation angle about the Y axis.
+         * The value is normalized to a range from -1.0 (counter-clockwise) to 1.0 (clockwise).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_RY = 13;
+
+        /**
+         * Axis constant: Z Rotation axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute rotation angle about the Z axis.
+         * The value is normalized to a range from -1.0 (counter-clockwise) to 1.0 (clockwise).
+         * <em>On game pads with two analog joysticks, this axis is often reinterpreted
+         * to report the absolute Y position of the second joystick instead.</em>
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_RZ = 14;
+
+        /**
+         * Axis constant: Hat X axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute X position of the directional hat control.
+         * The value is normalized to a range from -1.0 (left) to 1.0 (right).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_HAT_X = 15;
+
+        /**
+         * Axis constant: Hat Y axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute Y position of the directional hat control.
+         * The value is normalized to a range from -1.0 (up) to 1.0 (down).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_HAT_Y = 16;
+
+        /**
+         * Axis constant: Left Trigger axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute position of the left trigger control.
+         * The value is normalized to a range from 0.0 (released) to 1.0 (fully pressed).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_LTRIGGER = 17;
+
+        /**
+         * Axis constant: Right Trigger axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute position of the right trigger control.
+         * The value is normalized to a range from 0.0 (released) to 1.0 (fully pressed).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_RTRIGGER = 18;
+
+        /**
+         * Axis constant: Throttle axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute position of the throttle control.
+         * The value is normalized to a range from 0.0 (fully open) to 1.0 (fully closed).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_THROTTLE = 19;
+
+        /**
+         * Axis constant: Rudder axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute position of the rudder control.
+         * The value is normalized to a range from -1.0 (turn left) to 1.0 (turn right).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_RUDDER = 20;
+
+        /**
+         * Axis constant: Wheel axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute position of the steering wheel control.
+         * The value is normalized to a range from -1.0 (turn left) to 1.0 (turn right).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_WHEEL = 21;
+
+        /**
+         * Axis constant: Gas axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute position of the gas (accelerator) control.
+         * The value is normalized to a range from 0.0 (no acceleration)
+         * to 1.0 (maximum acceleration).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GAS = 22;
+
+        /**
+         * Axis constant: Brake axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a joystick, reports the absolute position of the brake control.
+         * The value is normalized to a range from 0.0 (no braking) to 1.0 (maximum braking).
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_BRAKE = 23;
+
+        /**
+         * Axis constant: Distance axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a stylus, reports the distance of the stylus from the screen.
+         * A value of 0.0 indicates direct contact and larger values indicate increasing
+         * distance from the surface.
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_DISTANCE = 24;
+
+        /**
+         * Axis constant: Tilt axis of a motion event.
+         * <p>
+         * <ul>
+         * <li>For a stylus, reports the tilt angle of the stylus in radians where
+         * 0 radians indicates that the stylus is being held perpendicular to the
+         * surface, and PI/2 radians indicates that the stylus is being held flat
+         * against the surface.
+         * </ul>
+         * </p>
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int, int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_TILT = 25;
+
+        /**
+         * Axis constant: Generic 1 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_1 = 32;
+
+        /**
+         * Axis constant: Generic 2 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_2 = 33;
+
+        /**
+         * Axis constant: Generic 3 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_3 = 34;
+
+        /**
+         * Axis constant: Generic 4 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_4 = 35;
+
+        /**
+         * Axis constant: Generic 5 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_5 = 36;
+
+        /**
+         * Axis constant: Generic 6 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_6 = 37;
+
+        /**
+         * Axis constant: Generic 7 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_7 = 38;
+
+        /**
+         * Axis constant: Generic 8 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_8 = 39;
+
+        /**
+         * Axis constant: Generic 9 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_9 = 40;
+
+        /**
+         * Axis constant: Generic 10 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_10 = 41;
+
+        /**
+         * Axis constant: Generic 11 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_11 = 42;
+
+        /**
+         * Axis constant: Generic 12 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_12 = 43;
+
+        /**
+         * Axis constant: Generic 13 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_13 = 44;
+
+        /**
+         * Axis constant: Generic 14 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_14 = 45;
+
+        /**
+         * Axis constant: Generic 15 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_15 = 46;
+
+        /**
+         * Axis constant: Generic 16 axis of a motion event.
+         * The interpretation of a generic axis is device-specific.
+         *
+         * @see #getAxisValue(int, int)
+         * @see #getHistoricalAxisValue(int, int, int)
+         * @see MotionEvent.PointerCoords#getAxisValue(int)
+         * @see InputDevice#getMotionRange
+         */
+        const Int32 AXIS_GENERIC_16 = 47;
+
+        /**
+         * Button constant: Primary button (left mouse button).
+         *
+         * This button constant is not set in response to simple touches with a finger
+         * or stylus tip.  The user must actually push a button.
+         *
+         * @see #getButtonState
+         */
+        const Int32 BUTTON_PRIMARY = 1 << 0;
+
+        /**
+         * Button constant: Secondary button (right mouse button, stylus first button).
+         *
+         * @see #getButtonState
+         */
+        const Int32 BUTTON_SECONDARY = 1 << 1;
+
+        /**
+         * Button constant: Tertiary button (middle mouse button, stylus second button).
+         *
+         * @see #getButtonState
+         */
+        const Int32 BUTTON_TERTIARY = 1 << 2;
+
+        /**
+         * Button constant: Back button pressed (mouse back button).
+         * <p>
+         * The system may send a {@link KeyEvent#KEYCODE_BACK} key press to the application
+         * when this button is pressed.
+         * </p>
+         *
+         * @see #getButtonState
+         */
+        const Int32 BUTTON_BACK = 1 << 3;
+
+        /**
+         * Button constant: Forward button pressed (mouse forward button).
+         * <p>
+         * The system may send a {@link KeyEvent#KEYCODE_FORWARD} key press to the application
+         * when this button is pressed.
+         * </p>
+         *
+         * @see #getButtonState
+         */
+        const Int32 BUTTON_FORWARD = 1 << 4;
+
+        /**
+         * Tool type constant: Unknown tool type.
+         * This constant is used when the tool type is not known or is not relevant,
+         * such as for a trackball or other non-pointing device.
+         *
+         * @see #getToolType
+         */
+        const Int32 TOOL_TYPE_UNKNOWN = 0;
+
+        /**
+         * Tool type constant: The tool is a finger.
+         *
+         * @see #getToolType
+         */
+        const Int32 TOOL_TYPE_FINGER = 1;
+
+        /**
+         * Tool type constant: The tool is a stylus.
+         *
+         * @see #getToolType
+         */
+        const Int32 TOOL_TYPE_STYLUS = 2;
+
+        /**
+         * Tool type constant: The tool is a mouse or trackpad.
+         *
+         * @see #getToolType
+         */
+        const Int32 TOOL_TYPE_MOUSE = 3;
+
+        /**
+         * Tool type constant: The tool is an eraser or a stylus being used in an inverted posture.
+         *
+         * @see #getToolType
+         */
+        const Int32 TOOL_TYPE_ERASER = 4;
+
+        /**
+         * Applies a scale factor to all points within this event.
+         *
+         * This method is used to adjust touch events to simulate different density
+         * displays for compatibility mode.  The values returned by {@link #getRawX()},
+         * {@link #getRawY()}, {@link #getXPrecision()} and {@link #getYPrecision()}
+         * are also affected by the scale factor.
+         *
+         * @param scale The scale factor to apply.
+         * @hide
+        */
+        Scale(
+            [in] Float scale);
+
+        /**
+         * Return the kind of action being performed -- one of either
+         * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
+         * {@link #ACTION_CANCEL}.  Consider using {@link #getActionMasked}
+         * and {@link #getActionIndex} to retrieve the separate masked action
+         * and pointer index.
+         */
+        GetAction(
+            [out] Int32* action);
+
+        /**
+         * Return the masked action being performed, without pointer index
+         * information.  May be any of the actions: {@link #ACTION_DOWN},
+         * {@link #ACTION_MOVE}, {@link #ACTION_UP}, {@link #ACTION_CANCEL},
+         * {@link #ACTION_POINTER_DOWN}, or {@link #ACTION_POINTER_UP}.
+         * Use {@link #getActionIndex} to return the index associated with
+         * pointer actions.
+         */
+        GetActionMasked(
+            [out] Int32* actionMasked);
+
+        /**
+         * For {@link #ACTION_POINTER_DOWN} or {@link #ACTION_POINTER_UP}
+         * as returned by {@link #getActionMasked}, this returns the associated
+         * pointer index.  The index may be used with {@link #getPointerId(Int32)},
+         * {@link #getX(Int32)}, {@link #getY(Int32)}, {@link #getPressure(Int32)},
+         * and {@link #getSize(Int32)} to get information about the pointer that has
+         * gone down or up.
+         */
+        GetActionIndex(
+            [out] Int32* actionIndex);
+
+        /**
+         * Returns true if this motion event is a touch event.
+         * <p>
+         * Specifically excludes pointer events with action {@link #ACTION_HOVER_MOVE},
+         * {@link #ACTION_HOVER_ENTER}, {@link #ACTION_HOVER_EXIT}, or {@link #ACTION_SCROLL}
+         * because they are not actually touch events (the pointer is not down).
+         * </p>
+         * @return True if this motion event is a touch event.
+         * @hide
+         */
+        IsTouchEvent(
+            [out] Boolean* isTouchEvent);
+
+        /**
+         * Gets the motion event flags.
+         *
+         * @see #FLAG_WINDOW_IS_OBSCURED
+         */
+        GetFlags(
+            [out] Int32* flags);
+
+        /**
+         * Returns the time (in ms) when the user originally pressed down to start
+         * a stream of position events.
+         */
+        GetDownTime(
+            [out] Int64* downTime);
+
+        /**
+         * Sets the time (in ms) when the user originally pressed down to start
+         * a stream of position events.
+         *
+         * @hide
+         */
+        SetDownTime(
+            [in] Int64 downTime);
+
+        /**
+         * {@link #getX(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetX(
+            [out] Float* x);
+
+        /**
+         * {@link #getY(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetY(
+            [out] Float* y);
+
+        /**
+         * {@link #getPressure(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetPressure(
+            [out] Float* pressure);
+
+        /**
+         * {@link #getSize(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetSize(
+            [out] Float* size);
+
+        /**
+         * {@link #getTouchMajor(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetTouchMajor(
+            [out] Float* touchMajor);
+
+        /**
+         * {@link #getTouchMinor(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetTouchMinor(
+            [out] Float* touchMinor);
+
+        /**
+         * {@link #getToolMajor(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetToolMajor(
+            [out] Float* toolMajor);
+
+        /**
+         * {@link #getToolMinor(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetToolMinor(
+            [out] Float* toolMinor);
+
+        /**
+         * {@link #getOrientation(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetOrientation(
+            [out] Float* orientation);
+
+        /**
+         * {@link #getAxisValue(int)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         *
+         * @param axis The axis identifier for the axis value to retrieve.
+         *
+         * @see #AXIS_X
+         * @see #AXIS_Y
+         */
+        GetAxisValue(
+            [in] Int32 axis,
+            [out] Float* value);
+
+        /**
+         * The number of pointers of data contained in this event.  Always
+         * >= 1.
+         */
+        GetPointerCount(
+            [out] Int32* count);
+
+        /**
+         * Return the pointer identifier associated with a particular pointer
+         * data index is this event.  The identifier tells you the actual pointer
+         * number associated with the data, accounting for individual pointers
+         * going up and down since the start of the current gesture.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetPointerId(
+            [in] Int32 pointerIndex,
+            [out] Int32* pointerId);
+
+        /**
+         * Gets the tool type of a pointer for the given pointer index.
+         * The tool type indicates the type of tool used to make contact such
+         * as a finger or stylus, if known.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @return The tool type of the pointer.
+         *
+         * @see #TOOL_TYPE_UNKNOWN
+         * @see #TOOL_TYPE_FINGER
+         * @see #TOOL_TYPE_STYLUS
+         * @see #TOOL_TYPE_MOUSE
+         */
+        GetToolType(
+            [in] Int32 pointerIndex,
+            [out] Int32* toolType);
+
+        /**
+         * Given a pointer identifier, find the index of its data in the event.
+         *
+         * @param pointerId The identifier of the pointer to be found.
+         * @return Returns either the index of the pointer (for use with
+         * {@link #getX(Int32)} et al.), or -1 if there is no data available for
+         * that pointer identifier.
+         */
+        FindPointerIndex(
+            [in] Int32 pointerId,
+            [out] Int32* pointerIndex);
+
+        /**
+         * Returns the X coordinate of this event for the given pointer
+         * <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * Whole numbers are pixels; the
+         * value may have a fraction for input devices that are sub-pixel precise.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetX(
+            [in] Int32 pointerIndex,
+            [out] Float* x);
+
+        /**
+         * Returns the Y coordinate of this event for the given pointer
+         * <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * Whole numbers are pixels; the
+         * value may have a fraction for input devices that are sub-pixel precise.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetY(
+            [in] Int32 pointerIndex,
+            [out] Float* y);
+
+        /**
+         * Returns the current pressure of this event for the given pointer
+         * <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * The pressure generally
+         * ranges from 0 (no pressure at all) to 1 (normal pressure), however
+         * values higher than 1 may be generated depending on the calibration of
+         * the input device.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetPressure(
+            [in] Int32 pointerIndex,
+            [out] Float* pressure);
+
+        /**
+         * Returns a scaled value of the approximate size for the given pointer
+         * <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * This represents some approximation of the area of the screen being
+         * pressed; the actual value in pixels corresponding to the
+         * touch is normalized with the device specific range of values
+         * and scaled to a value between 0 and 1. The value of size can be used to
+         * determine fat touch events.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetSize(
+            [in] Int32 pointerIndex,
+            [out] Float* size);
+
+        /**
+         * Returns the length of the major axis of an ellipse that describes the touch
+         * area at the point of contact for the given pointer
+         * <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetTouchMajor(
+            [in] Int32 pointerIndex,
+            [out] Float* touchMajor);
+
+        /**
+         * Returns the length of the minor axis of an ellipse that describes the touch
+         * area at the point of contact for the given pointer
+         * <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetTouchMinor(
+            [in] Int32 pointerIndex,
+            [out] Float* touchMinor);
+
+        /**
+         * Returns the length of the major axis of an ellipse that describes the size of
+         * the approaching tool for the given pointer
+         * <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * The tool area represents the estimated size of the finger or pen that is
+         * touching the device independent of its actual touch area at the point of contact.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetToolMajor(
+            [in] Int32 pointerIndex,
+            [out] Float* toolMajor);
+
+        /**
+         * Returns the length of the minor axis of an ellipse that describes the size of
+         * the approaching tool for the given pointer
+         * <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * The tool area represents the estimated size of the finger or pen that is
+         * touching the device independent of its actual touch area at the point of contact.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetToolMinor(
+            [in] Int32 pointerIndex,
+            [out] Float* toolMinor);
+
+        /**
+         * Returns the orientation of the touch area and tool area in radians clockwise from vertical
+         * for the given pointer <em>index</em> (use {@link #getPointerId(Int32)} to find the pointer
+         * identifier for this index).
+         * An angle of 0 degrees indicates that the major axis of contact is oriented
+         * upwards, is perfectly circular or is of unknown orientation.  A positive angle
+         * indicates that the major axis of contact is oriented to the right.  A negative angle
+         * indicates that the major axis of contact is oriented to the left.
+         * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
+         * (finger pointing fully right).
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         */
+        GetOrientation(
+            [in] Int32 pointerIndex,
+            [out] Float* orientation);
+
+        /**
+         * Returns the value of the requested axis for the given pointer <em>index</em>
+         * (use {@link #getPointerId(int)} to find the pointer identifier for this index).
+         *
+         * @param axis The axis identifier for the axis value to retrieve.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @return The value of the axis, or 0 if the axis is not available.
+         *
+         * @see #AXIS_X
+         * @see #AXIS_Y
+         */
+        GetAxisValue(
+            [in] Int32 axis,
+            [in] Int32 pointerIndex,
+            [out] Float* value);
+
+        /**
+         * Populates a {@link PointerCoords} object with pointer coordinate data for
+         * the specified pointer index.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param outPointerCoords The pointer coordinate object to populate.
+         * Handle32 = PointerCoords*
+         */
+        GetPointerCoords(
+            [in] Int32 pointerIndex,
+            [in] IPointerCoords* outPointerCoords);
+
+        /**
+         * Populates a {@link PointerProperties} object with pointer properties for
+         * the specified pointer index.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param outPointerProperties The pointer properties object to populate.
+         *
+         * @see PointerProperties
+         */
+        GetPointerProperties(
+            [in] Int32 pointerIndex,
+            [in] IPointerProperties* outPointerProperties);
+
+        /**
+         * Returns the state of any meta / modifier keys that were in effect when
+         * the event was generated.  This is the same values as those
+         * returned by {@link KeyEvent#getMetaState() KeyEvent.getMetaState}.
+         *
+         * @return an integer in which each bit set to 1 represents a pressed
+         *         meta key
+         *
+         * @see KeyEvent#getMetaState()
+         */
+        GetMetaState(
+            [out] Int32* metaState);
+
+        /**
+         * Gets the state of all buttons that are pressed such as a mouse or stylus button.
+         *
+         * @return The button state.
+         *
+         * @see #BUTTON_PRIMARY
+         * @see #BUTTON_SECONDARY
+         * @see #BUTTON_TERTIARY
+         * @see #BUTTON_FORWARD
+         * @see #BUTTON_BACK
+         */
+        GetButtonState(
+            [out] Int32* buttonState);
+
+        /**
+         * Returns the original raw X coordinate of this event.  For touch
+         * events on the screen, this is the original location of the event
+         * on the screen, before it had been adjusted for the containing window
+         * and views.
+         *
+         * @see #getX(int)
+         * @see #AXIS_X
+         */
+        GetRawX(
+            [out] Float* rawX);
+
+        /**
+         * Returns the original raw Y coordinate of this event.  For touch
+         * events on the screen, this is the original location of the event
+         * on the screen, before it had been adjusted for the containing window
+         * and views.
+         *
+         * @see #getY(int)
+         * @see #AXIS_Y
+         */
+        GetRawY(
+            [out] Float* rawY);
+
+        /**
+         * Return the precision of the X coordinates being reported.  You can
+         * multiple this number with {@link #getX} to find the actual hardware
+         * value of the X coordinate.
+         * @return Returns the precision of X coordinates being reported.
+         */
+        GetXPrecision(
+            [out] Float* xPrecision);
+        /**
+         * Return the precision of the Y coordinates being reported.  You can
+         * multiple this number with {@link #getY} to find the actual hardware
+         * value of the Y coordinate.
+         * @return Returns the precision of Y coordinates being reported.
+         */
+        GetYPrecision(
+            [out] Float* yPrecision);
+
+        /**
+         * Returns the number of historical points in this event.  These are
+         * movements that have occurred between this event and the previous event.
+         * This only applies to ACTION_MOVE events -- all other actions will have
+         * a size of 0.
+         *
+         * @return Returns the number of historical points in the event.
+         */
+        GetHistorySize(
+            [out] Int32* historySize);
+
+        /**
+         * Returns the time that a historical movement occurred between this event
+         * and the previous event.  Only applies to ACTION_MOVE events.
+         *
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getEventTime
+         */
+        GetHistoricalEventTime(
+            [in] Int32 pos,
+            [out] Int64* hEventTime);
+
+        /**
+         * Returns the time that a historical movement occurred between this event
+         * and the previous event, in the {@link android.os.SystemClock#uptimeMillis} time base
+         * but with nanosecond (instead of millisecond) precision.
+         * <p>
+         * This only applies to ACTION_MOVE events.
+         * </p><p>
+         * The value is in nanosecond precision but it may not have nanosecond accuracy.
+         * </p>
+         *
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         * @return Returns the time that a historical movement occurred between this
+         * event and the previous event,
+         * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+         * nanosecond (instead of millisecond) precision.
+         *
+         * @see #getHistorySize
+         * @see #getEventTime
+         *
+         * @hide
+         */
+        GetHistoricalEventTimeNano(
+            [in] Int32 pos,
+            [out] Int64* eventTimeNano);
+
+        /**
+         * {@link #getHistoricalX(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalX(
+            [in] Int32 pos,
+            [out] Float* hX);
+
+        /**
+         * {@link #getHistoricalY(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalY(
+            [in] Int32 pos,
+            [out] Float* hY);
+
+        /**
+         * {@link #getHistoricalPressure(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalPressure(
+            [in] Int32 pos,
+            [out] Float* hPressure);
+
+        /**
+         * {@link #getHistoricalSize(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalSize(
+            [in] Int32 pos,
+            [out] Float* hSize);
+
+        /**
+         * {@link #getHistoricalTouchMajor(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalTouchMajor(
+            [in] Int32 pos,
+            [out] Float* hTouchMajor);
+
+        /**
+         * {@link #getHistoricalTouchMinor(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalTouchMinor(
+            [in] Int32 pos,
+            [out] Float* hTouchMinor);
+
+        /**
+         * {@link #getHistoricalToolMajor(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalToolMajor(
+            [in] Int32 pos,
+            [out] Float* hToolMajor);
+
+        /**
+         * {@link #getHistoricalToolMinor(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalToolMinor(
+            [in] Int32 pos,
+            [out] Float* hToolMinor);
+
+        /**
+         * {@link #getHistoricalOrientation(Int32)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         */
+        GetHistoricalOrientation(
+            [in] Int32 pos,
+            [out] Float* hOrientation);
+
+        /**
+         * {@link #getHistoricalAxisValue(int, int, int)} for the first pointer index (may be an
+         * arbitrary pointer identifier).
+         *
+         * @param axis The axis identifier for the axis value to retrieve.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getAxisValue(int)
+         * @see #AXIS_X
+         * @see #AXIS_Y
+         */
+        GetHistoricalAxisValue(
+            [in] Int32 axis,
+            [in] Int32 pos,
+            [out] Float* value);
+
+        /**
+         * Returns a historical X coordinate, as per {@link #getX(Int32)}, that
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getX
+         */
+        GetHistoricalX(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hX);
+
+        /**
+         * Returns a historical Y coordinate, as per {@link #getY(Int32)}, that
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getY
+         */
+        GetHistoricalY(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hY);
+
+        /**
+         * Returns a historical pressure coordinate, as per {@link #getPressure(Int32)},
+         * that occurred between this event and the previous event for the given
+         * pointer.  Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getPressure
+         */
+        GetHistoricalPressure(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hPressure);
+
+        /**
+         * Returns a historical size coordinate, as per {@link #getSize(Int32)}, that
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getSize
+         */
+        GetHistoricalSize(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hSize);
+
+        /**
+         * Returns a historical touch major axis coordinate, as per {@link #getTouchMajor(Int32)}, that
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getTouchMajor
+         */
+        GetHistoricalTouchMajor(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hTouchMajor);
+
+        /**
+         * Returns a historical touch minor axis coordinate, as per {@link #getTouchMinor(Int32)}, that
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getTouchMinor
+         */
+        GetHistoricalTouchMinor(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hTouchMinor);
+
+        /**
+         * Returns a historical tool major axis coordinate, as per {@link #getToolMajor(Int32)}, that
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getToolMajor
+         */
+        GetHistoricalToolMajor(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hToolMajor);
+
+        /**
+         * Returns a historical tool minor axis coordinate, as per {@link #getToolMinor(Int32)}, that
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getToolMinor
+         */
+        GetHistoricalToolMinor(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hToolMinorEx);
+
+        /**
+         * Returns a historical orientation coordinate, as per {@link #getOrientation(Int32)}, that
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         *
+         * @see #getHistorySize
+         * @see #getOrientation
+         */
+        GetHistoricalOrientation(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* hOrientation);
+
+        /**
+         * Returns the historical value of the requested axis, as per {@link #getAxisValue(int, int)},
+         * occurred between this event and the previous event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param axis The axis identifier for the axis value to retrieve.
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         * @return The value of the axis, or 0 if the axis is not available.
+         *
+         * @see #AXIS_X
+         * @see #AXIS_Y
+         */
+        GetHistoricalAxisValue(
+            [in] Int32 axis,
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [out] Float* value);
+
+        /**
+         * Populates a {@link PointerCoords} object with historical pointer coordinate data,
+         * as per {@link #getPointerCoords}, that occurred between this event and the previous
+         * event for the given pointer.
+         * Only applies to ACTION_MOVE events.
+         *
+         * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+         * (the first pointer that is down) to {@link #getPointerCount()}-1.
+         * @param pos Which historical value to return; must be less than
+         * {@link #getHistorySize}
+         * @param outPointerCoords The pointer coordinate object to populate.
+         * Handle32 = PointerCoords*
+         *
+         * @see #getHistorySize
+         * @see #getPointerCoords
+         */
+        GetHistoricalPointerCoords(
+            [in] Int32 pointerIndex,
+            [in] Int32 pos,
+            [in] IPointerCoords* outPointerCoords);
+
+        /**
+         * Returns a bitfield indicating which edges, if any, were touched by this
+         * MotionEvent. For touch events, clients can use this to determine if the
+         * user's finger was touching the edge of the display.
+         *
+         * @see #EDGE_LEFT
+         * @see #EDGE_TOP
+         * @see #EDGE_RIGHT
+         * @see #EDGE_BOTTOM
+         */
+        GetEdgeFlags(
+            [out] Int32* edgeFlags);
+
+        /**
+         * Sets the bitfield indicating which edges, if any, were touched by this
+         * MotionEvent.
+         *
+         * @see #getEdgeFlags()
+         */
+        SetEdgeFlags(
+            [in] Int32 flags);
+
+        /**
+         * Sets this event's action.
+         */
+        SetAction(
+            [in] Int32 action);
+
+        /**
+         * Adjust this event's location.
+         * @param deltaX Amount to add to the current X coordinate of the event.
+         * @param deltaY Amount to add to the current Y coordinate of the event.
+         */
+        OffsetLocation(
+            [in] Float deltaX,
+            [in] Float deltaY);
+
+        /**
+         * Set this event's location.  Applies {@link #offsetLocation} with a
+         * delta from the current location to the given new location.
+         *
+         * @param x New absolute X location.
+         * @param y New absolute Y location.
+         */
+        SetLocation(
+            [in] Float x,
+            [in] Float y);
+
+        /**
+         * Applies a transformation matrix to all of the points in the event.
+         *
+         * @param matrix The transformation matrix to apply.
+         */
+        Transform(
+            [in] IMatrix* matrix);
+
+        /**
+         * Add a new movement to the batch of movements in this event.  The event's
+         * current location, position and size is updated to the new values.
+         * The current values in the event are added to a list of historical values.
+         *
+         * Only applies to {@link #ACTION_MOVE} events.
+         *
+         * @param eventTime The time stamp (in ms) for this data.
+         * @param x The new X position.
+         * @param y The new Y position.
+         * @param pressure The new pressure.
+         * @param size The new size.
+         * @param metaState Meta key state.
+         */
+        AddBatch(
+            [in] Int64 eventTime,
+            [in] Float x,
+            [in] Float y,
+            [in] Float pressure,
+            [in] Float size,
+            [in] Int32 metaState);
+
+        /**
+         * Add a new movement to the batch of movements in this event.  The event's
+         * current location, position and size is updated to the new values.
+         * The current values in the event are added to a list of historical values.
+         *
+         * Only applies to {@link #ACTION_MOVE} events.
+         *
+         * @param eventTime The time stamp (in ms) for this data.
+         * @param pointerCoords The new pointer coordinates.
+         * @param metaState Meta key state.
+         */
+        AddBatch(
+            [in] Int64 eventTime,
+            [in] ArrayOf<IPointerCoords*>* pointerCoords,
+            [in] Int32 metaState);
+
+        /**
+         * Adds all of the movement samples of the specified event to this one if
+         * it is compatible.  To be compatible, the event must have the same device id,
+         * source, action, flags, pointer count, pointer properties.
+         *
+         * Only applies to {@link #ACTION_MOVE} or {@link #ACTION_HOVER_MOVE} events.
+         *
+         * @param event The event whose movements samples should be added to this one
+         * if possible.
+         * @return True if batching was performed or FALSE if batching was not possible.
+         * @hide
+         */
+        AddBatch(
+            [in] IMotionEvent* event,
+            [out] Boolean* res);
+
+        /**
+         * Returns TRUE if all points in the motion event are completely within the specified bounds.
+         * @hide
+         */
+        IsWithinBoundsNoHistory(
+            [in] Float left,
+            [in] Float top,
+            [in] Float right,
+            [in] Float bottom,
+            [out] Boolean* res);
+
+        /**
+         * Returns a new motion events whose points have been clamped to the specified bounds.
+         * @hide
+         */
+        ClampNoHistory(
+            [in] Float left,
+            [in] Float top,
+            [in] Float right,
+            [in] Float bottom,
+            [out] IMotionEvent** event);
+
+        /**
+         * Gets an integer where each pointer id present in the event is marked as a bit.
+         * @hide
+         */
+        GetPointerIdBits(
+            [out] Int32* idBits);
+
+        /**
+         * Splits a motion event such that it includes only a subset of pointer ids.
+         * @hide
+         */
+        Split(
+            [in] Int32 idBits,
+            [out] IMotionEvent** event);
+
+        /**
+         * Checks if a mouse or stylus button (or combination of buttons) is pressed.
+         * @param button Button (or combination of buttons).
+         * @return True if specified buttons are pressed.
+         *
+         * @see #BUTTON_PRIMARY
+         * @see #BUTTON_SECONDARY
+         * @see #BUTTON_TERTIARY
+         * @see #BUTTON_FORWARD
+         * @see #BUTTON_BACK
+         */
+        IsButtonPressed(
+            [in] Int32 button,
+            [out] Boolean* result);
+
+        // add for JNI
+        GetNative(
+            [out] Handle64* native);
+
+        SetNative(
+            [in] Handle64 native);
+    }
+
+    [deprecated]
+    interface IMotionEventHelper {
+        /**
+         * Create a new MotionEvent, filling in all of the basic values that
+         * define the motion.
+         *
+         * @param downTime The time (in ms) when the user originally pressed down to start
+         * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param eventTime The the time (in ms) when this specific event was generated.  This
+         * must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
+         * @param pointerCount The number of pointers that will be in this event.
+         * @param pointerProperties An array of <em>pointerCount</em> values providing
+         * a {@link PointerProperties} property object for each pointer, which must
+         * include the pointer identifier.
+         * @param pointerCoords An array of <em>pointerCount</em> values providing
+         * a {@link PointerCoords} coordinate object for each pointer.
+         * @param metaState The state of any meta / modifier keys that were in effect when
+         * the event was generated.
+         * @param buttonState The state of buttons that are pressed.
+         * @param xPrecision The precision of the X coordinate being reported.
+         * @param yPrecision The precision of the Y coordinate being reported.
+         * @param deviceId The id for the device that this event came from.  An id of
+         * zero indicates that the event didn't come from a physical device; other
+         * numbers are arbitrary and you shouldn't depend on the values.
+         * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
+         * MotionEvent.
+         * @param source The source of this event.
+         * @param flags The motion event flags.
+         */
+        Obtain(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 pointerCount,
+            [in] ArrayOf<IPointerProperties*>* pointerProperties,
+            [in] ArrayOf<IPointerCoords*>* pointerCoords,
+            [in] Int32 metaState,
+            [in] Int32 buttonState,
+            [in] Float xPrecision,
+            [in] Float yPrecision,
+            [in] Int32 deviceId,
+            [in] Int32 edgeFlags,
+            [in] Int32 source,
+            [in] Int32 flags,
+            [out] IMotionEvent** event);
+
+        /**
+         * Create a new MotionEvent, filling in all of the basic values that
+         * define the motion.
+         *
+         * @param downTime The time (in ms) when the user originally pressed down to start
+         * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param eventTime The the time (in ms) when this specific event was generated.  This
+         * must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
+         * @param pointerCount The number of pointers that will be in this event.
+         * @param pointerIds An array of <em>pointerCount</em> values providing
+         * an identifier for each pointer.
+         * @param pointerCoords An array of <em>pointerCount</em> values providing
+         * a {@link PointerCoords} coordinate object for each pointer.
+         * @param metaState The state of any meta / modifier keys that were in effect when
+         * the event was generated.
+         * @param xPrecision The precision of the X coordinate being reported.
+         * @param yPrecision The precision of the Y coordinate being reported.
+         * @param deviceId The id for the device that this event came from.  An id of
+         * zero indicates that the event didn't come from a physical device; other
+         * numbers are arbitrary and you shouldn't depend on the values.
+         * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
+         * MotionEvent.
+         * @param source The source of this event.
+         * @param flags The motion event flags.
+         *
+         * @deprecated Use {@link #obtain(long, long, int, int, PointerProperties[], PointerCoords[], int, int, float, float, int, int, int, int)}
+         * instead.
+         */
+        //@Deprecated
+        Obtain(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 pointerCount,
+            [in] ArrayOf<Int32>* pointerIds,
+            [in] ArrayOf<IPointerCoords*>* pointerCoords,
+            [in] Int32 metaState,
+            [in] Float xPrecision,
+            [in] Float yPrecision,
+            [in] Int32 deviceId,
+            [in] Int32 edgeFlags,
+            [in] Int32 source,
+            [in] Int32 flags,
+            [out] IMotionEvent** event);
+
+        /**
+         * Create a new MotionEvent, filling in all of the basic values that
+         * define the motion.
+         *
+         * @param downTime The time (in ms) when the user originally pressed down to start
+         * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param eventTime  The the time (in ms) when this specific event was generated.  This
+         * must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
+         * @param x The X coordinate of this event.
+         * @param y The Y coordinate of this event.
+         * @param pressure The current pressure of this event.  The pressure generally
+         * ranges from 0 (no pressure at all) to 1 (normal pressure), however
+         * values higher than 1 may be generated depending on the calibration of
+         * the input device.
+         * @param size A scaled value of the approximate size of the area being pressed when
+         * touched with the finger. The actual value in pixels corresponding to the finger
+         * touch is normalized with a device specific range of values
+         * and scaled to a value between 0 and 1.
+         * @param metaState The state of any meta / modifier keys that were in effect when
+         * the event was generated.
+         * @param xPrecision The precision of the X coordinate being reported.
+         * @param yPrecision The precision of the Y coordinate being reported.
+         * @param deviceId The id for the device that this event came from.  An id of
+         * zero indicates that the event didn't come from a physical device; other
+         * numbers are arbitrary and you shouldn't depend on the values.
+         * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
+         * MotionEvent.
+         */
+        Obtain(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Float x,
+            [in] Float y,
+            [in] Float pressure,
+            [in] Float size,
+            [in] Int32 metaState,
+            [in] Float xPrecision,
+            [in] Float yPrecision,
+            [in] Int32 deviceId,
+            [in] Int32 edgeFlags,
+            [out] IMotionEvent** event);
+
+        /**
+         * Create a new MotionEvent, filling in all of the basic values that
+         * define the motion.
+         *
+         * @param downTime The time (in ms) when the user originally pressed down to start
+         * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param eventTime  The the time (in ms) when this specific event was generated.  This
+         * must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
+         * @param pointerCount The number of pointers that are active in this event.
+         * @param x The X coordinate of this event.
+         * @param y The Y coordinate of this event.
+         * @param pressure The current pressure of this event.  The pressure generally
+         * ranges from 0 (no pressure at all) to 1 (normal pressure), however
+         * values higher than 1 may be generated depending on the calibration of
+         * the input device.
+         * @param size A scaled value of the approximate size of the area being pressed when
+         * touched with the finger. The actual value in pixels corresponding to the finger
+         * touch is normalized with a device specific range of values
+         * and scaled to a value between 0 and 1.
+         * @param metaState The state of any meta / modifier keys that were in effect when
+         * the event was generated.
+         * @param xPrecision The precision of the X coordinate being reported.
+         * @param yPrecision The precision of the Y coordinate being reported.
+         * @param deviceId The id for the device that this event came from.  An id of
+         * zero indicates that the event didn't come from a physical device; other
+         * numbers are arbitrary and you shouldn't depend on the values.
+         * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
+         * MotionEvent.
+         *
+         * @deprecated Use {@link #obtain(long, long, int, float, float, float, float, int, float, float, int, int)}
+         * instead.
+         */
+        //@Deprecated
+        Obtain(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 pointerCount,
+            [in] Float x,
+            [in] Float y,
+            [in] Float pressure,
+            [in] Float size,
+            [in] Int32 metaState,
+            [in] Float xPrecision,
+            [in] Float yPrecision,
+            [in] Int32 deviceId,
+            [in] Int32 edgeFlags,
+            [out] IMotionEvent** event);
+
+        /**
+         * Create a new MotionEvent, filling in a subset of the basic motion
+         * values.  Those not specified here are: device id (always 0), pressure
+         * and size (always 1), x and y precision (always 1), and edgeFlags (always 0).
+         *
+         * @param downTime The time (in ms) when the user originally pressed down to start
+         * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param eventTime  The the time (in ms) when this specific event was generated.  This
+         * must be obtained from {@link SystemClock#uptimeMillis()}.
+         * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
+         * @param x The X coordinate of this event.
+         * @param y The Y coordinate of this event.
+         * @param metaState The state of any meta / modifier keys that were in effect when
+         * the event was generated.
+         */
+        Obtain(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Float x,
+            [in] Float y,
+            [in] Int32 metaState,
+            [out] IMotionEvent** event);
+
+        /**
+         * Create a new MotionEvent, copying from an existing one.
+         */
+        Obtain(
+            [in] IMotionEvent* o,
+            [out] IMotionEvent** event);
+
+        /**
+         * Create a new MotionEvent, copying from an existing one, but not including
+         * any historical point information.
+         */
+        ObtainNoHistory(
+            [in] IMotionEvent* o,
+            [out] IMotionEvent** event);
+
+        /**
+         * Returns a string that represents the symbolic name of the specified unmasked action
+         * such as "ACTION_DOWN", "ACTION_POINTER_DOWN(3)" or an equivalent numeric constant
+         * such as "35" if unknown.
+         *
+         * @param action The unmasked action.
+         * @return The symbolic name of the specified action.
+         * @see #getAction()
+         */
+        ActionToString(
+            [in] Int32 action,
+            [out] String* str);
+
+        /**
+         * Returns a string that represents the symbolic name of the specified axis
+         * such as "AXIS_X" or an equivalent numeric constant such as "42" if unknown.
+         *
+         * @param axis The axis
+         * @return The symbolic name of the specified axis.
+         */
+        AxisToString(
+            [in] Int32 axis,
+            [out] String* str);
+
+        /**
+         * Gets an axis by its symbolic name such as "AXIS_X" or an
+         * equivalent numeric constant such as "42".
+         *
+         * @param symbolicName The symbolic name of the axis.
+         * @return The axis or -1 if not found.
+         * @see KeyEvent#keyCodeToString(int)
+         */
+        AxisFromString(
+            [in] String symbolicName,
+            [out] Int32* axis);
+
+        /**
+         * Returns a string that represents the symbolic name of the specified combined
+         * button state flags such as "0", "BUTTON_PRIMARY",
+         * "BUTTON_PRIMARY|BUTTON_SECONDARY" or an equivalent numeric constant such as "0x10000000"
+         * if unknown.
+         *
+         * @param buttonState The button state.
+         * @return The symbolic name of the specified combined button state flags.
+         * @hide
+         */
+        ButtonStateToString(
+            [in] Int32 buttonState,
+            [out] String* str);
+
+        /**
+         * Returns a string that represents the symbolic name of the specified tool type
+         * such as "TOOL_TYPE_FINGER" or an equivalent numeric constant such as "42" if unknown.
+         *
+         * @param toolType The tool type.
+         * @return The symbolic name of the specified tool type.
+         * @hide
+         */
+        ToolTypeToString(
+            [in] Int32 toolType,
+            [out] String* str);
+
+        CreateFromParcelBody(
+            [in] IParcel* dest,
+            [out] IMotionEvent** event);
+    }
+
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

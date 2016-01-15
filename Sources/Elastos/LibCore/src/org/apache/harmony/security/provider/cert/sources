@@ -1,0 +1,15 @@
+
+TARGET_NAME= cert
+TARGET_TYPE= lib
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/Org/Apache/Harmony/Security/Provider/Cert
+
+SOURCES = CCache.cpp
+SOURCES += CDRLCertFactory.cpp
+SOURCES += CX509CRLEntryImpl.cpp
+SOURCES += CX509CRLImpl.cpp
+SOURCES += CX509CertFactoryImpl.cpp
+SOURCES += CX509CertImpl.cpp
+SOURCES += CX509CertPathImpl.cpp
+SOURCES += CX509CertPathImplHelper.cpp

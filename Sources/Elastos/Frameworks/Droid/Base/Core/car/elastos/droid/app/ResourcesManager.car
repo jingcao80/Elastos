@@ -1,0 +1,58 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.Content.Res.ICompatibilityInfo;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.View.IDisplayAdjustments;
+    interface Elastos.Droid.Utility.IDisplayMetrics;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** @hide */
+    [deprecated, local]
+    interface IResourcesManager {
+        GetConfiguration(
+            [out] IConfiguration** config);
+
+        FlushDisplayMetricsLocked();
+
+        GetDisplayMetricsLocked(
+            [in] Int32 displayId,
+            [out] IDisplayMetrics** displayMetrics);
+
+        GetDisplayMetricsLocked(
+            [in] Int32 displayId,
+            [in] IDisplayAdjustments* daj,
+            [out] IDisplayMetrics** displayMetrics);
+
+        ApplyCompatConfiguration(
+            [in] Int32 displayDensity,
+            [in] IConfiguration* compatConfiguration,
+            [out] Boolean* result);
+
+        GetTopLevelResources(
+            [in] String resDir,
+            [in] ArrayOf<String>* splitResDirs,
+            [in] ArrayOf<String>* overlayDirs,
+            [in] ArrayOf<String>* libDirs,
+            [in] Int32 displayId,
+            [in] IConfiguration* overrideConfiguration,
+            [in] ICompatibilityInfo* compatInfo,
+            [in] IBinder* token,
+            [out] IResources** res);
+
+        ApplyConfigurationToResourcesLocked(
+            [in] IConfiguration* config,
+            [in] ICompatibilityInfo* compat,
+            [out] Boolean* result);
+    }
+
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

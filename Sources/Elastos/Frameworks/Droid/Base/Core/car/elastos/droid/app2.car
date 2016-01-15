@@ -1,0 +1,5 @@
+
+module
+{
+    merge("app/ITransientNotification.car");
+}

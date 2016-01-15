@@ -1,0 +1,197 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /** {@hide} */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiLinkLayerStats {
+        /** {@hide} */
+        GetStatus(
+            [out] Int32* result);
+
+        SetStatus(
+            [in] Int32 status);
+
+        /** {@hide} */
+        GetSSID(
+            [out] String* result);
+
+        SetSSID(
+            [in] String SSID);
+
+        /** {@hide} */
+        GetBSSID(
+            [out] String* result);
+
+        SetBSSID(
+            [in] String BSSID);
+
+        /** {@hide} */
+        GetBeacon_rx(
+            [out] Int32* result);
+
+        SetBeacon_rx(
+            [in] Int32 beacon_rx);
+
+        /** {@hide} */
+        GetRssi_mgmt(
+            [out] Int32* result);
+
+        SetRssi_mgmt(
+            [in] Int32 rssi_mgmt);
+
+        /* WME Best Effort Access Category (receive mpdu, transmit mpdu, lost mpdu, number of retries)*/
+        GetRxmpdu_be(
+            [out] Int64* result);
+
+        SetRxmpdu_be(
+            [in] Int64 rxmpdu_be);
+
+        /** {@hide} */
+        GetTxmpdu_be(
+            [out] Int64* result);
+
+        SetTxmpdu_be(
+            [in] Int64 txmpdu_be);
+
+        /** {@hide} */
+        GetLostmpdu_be(
+            [out] Int64* result);
+
+        SetLostmpdu_be(
+            [in] Int64 lostmpdu_be);
+
+        /** {@hide} */
+        GetRetries_be(
+            [out] Int64* result);
+
+        SetRetries_be(
+            [in] Int64 retries_be);
+
+        /* WME Background Access Category (receive mpdu, transmit mpdu, lost mpdu, number of retries) */
+        GetRxmpdu_bk(
+            [out] Int64* result);
+
+        SetRxmpdu_bk(
+            [in] Int64 rxmpdu_bk);
+
+        /** {@hide} */
+        GetTxmpdu_bk(
+            [out] Int64* result);
+
+        SetTxmpdu_bk(
+            [in] Int64 txmpdu_bk);
+
+        /** {@hide} */
+        GetLostmpdu_bk(
+            [out] Int64* result);
+
+        SetLostmpdu_bk(
+            [in] Int64 lostmpdu_bk);
+
+        /** {@hide} */
+        GetRetries_bk(
+            [out] Int64* result);
+
+        SetRetries_bk(
+            [in] Int64 retries_bk);
+
+        /* WME Video Access Category (receive mpdu, transmit mpdu, lost mpdu, number of retries) */
+        GetRxmpdu_vi(
+            [out] Int64* result);
+
+        SetRxmpdu_vi(
+            [in] Int64 rxmpdu_vi);
+
+        /** {@hide} */
+        GetTxmpdu_vi(
+            [out] Int64* result);
+
+        SetTxmpdu_vi(
+            [in] Int64 txmpdu_vi);
+
+        /** {@hide} */
+        GetLostmpdu_vi(
+            [out] Int64* result);
+
+        SetLostmpdu_vi(
+            [in] Int64 lostmpdu_vi);
+
+        /** {@hide} */
+        GetRetries_vi(
+            [out] Int64* result);
+
+        SetRetries_vi(
+            [in] Int64 retries_vi);
+
+        /* WME Voice Access Category (receive mpdu, transmit mpdu, lost mpdu, number of retries) */
+        GetRxmpdu_vo(
+            [out] Int64* result);
+
+        SetRxmpdu_vo(
+            [in] Int64 rxmpdu_vo);
+
+        /** {@hide} */
+        GetTxmpdu_vo(
+            [out] Int64* result);
+
+        SetTxmpdu_vo(
+            [in] Int64 txmpdu_vo);
+
+        /** {@hide} */
+        GetLostmpdu_vo(
+            [out] Int64* result);
+
+        SetLostmpdu_vo(
+            [in] Int64 lostmpdu_vo);
+
+        /** {@hide} */
+        GetRetries_vo(
+            [out] Int64* result);
+
+        SetRetries_vo(
+            [in] Int64 retries_vo);
+
+        /** {@hide} */
+        GetOn_time(
+            [out] Int32* result);
+
+        SetOn_time(
+            [in] Int32 on_time);
+
+        /** {@hide} */
+        GetTx_time(
+            [out] Int32* result);
+
+        SetTx_time(
+            [in] Int32 tx_time);
+
+        /** {@hide} */
+        GetRx_time(
+            [out] Int32* result);
+
+        SetRx_time(
+            [in] Int32 rx_time);
+
+        /** {@hide} */
+        GetOn_time_scan(
+            [out] Int32* result);
+
+        SetOn_time_scan(
+            [in] Int32 on_time_scan);
+
+        /** {@hide} */
+        GetPrintableSsid(
+            [out] String* result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

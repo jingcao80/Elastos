@@ -1,0 +1,162 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * System private API for talking with the alarm manager service.
+     *
+     * {@hide}
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [local]
+    interface IRemoteInput {
+        /** Label used to denote the clip data type used for remote input transport */
+        const String RESULTS_CLIP_LABEL = "android.remoteinput.results";
+
+        /** Extra added to a clip data intent object to hold the results bundle. */
+        const String EXTRA_RESULTS_DATA = "android.remoteinput.resultsData";
+
+        /**
+         * Get the key that the result of this input will be set in from the Bundle returned by
+         * {@link #getResultsFromIntent} when the {@link android.app.PendingIntent} is sent.
+         */
+        GetResultKey(
+            [out] String* key);
+
+        /**
+         * Get the label to display to users when collecting this input.
+         */
+        GetLabel(
+            [out] ICharSequence** seq);
+
+        /**
+         * Get possible input choices. This can be {@code null} if there are no choices to present.
+         */
+        GetChoices(
+            [out, callee] ArrayOf<ICharSequence*>* seq);
+
+        /**
+         * Get whether or not users can provide an arbitrary value for
+         * input. If you set this to {@code false}, users must select one of the
+         * choices in {@link #getChoices}. An {@link IllegalArgumentException} is thrown
+         * if you set this to false and {@link #getChoices} returns {@code null} or empty.
+         */
+        GetAllowFreeFormInput(
+            [out] Boolean* result);
+
+        /**
+         * Get additional metadata carried around with this remote input.
+         */
+        GetExtras(
+            [out] IBundle** result);
+    }
+
+    [deprecated, local]
+    interface IRemoteInputHelper {
+        /**
+         * Get the remote input results bundle from an intent. The returned Bundle will
+         * contain a key/value for every result key populated by remote input collector.
+         * Use the {@link Bundle#getCharSequence(String)} method to retrieve a value.
+         * @param intent The intent object that fired in response to an action or content intent
+         *               which also had one or more remote input requested.
+         */
+        GetResultsFromIntent(
+            [in] IIntent* intent,
+            [out] IBundle** bundle);
+
+        /**
+         * Populate an intent object with the results gathered from remote input. This method
+         * should only be called by remote input collection services when sending results to a
+         * pending intent.
+         * @param remoteInputs The remote inputs for which results are being provided
+         * @param intent The intent to add remote inputs to. The {@link ClipData}
+         *               field of the intent will be modified to contain the results.
+         * @param results A bundle holding the remote input results. This bundle should
+         *                be populated with keys matching the result keys specified in
+         *                {@code remoteInputs} with values being the result per key.
+         */
+        AddResultsToIntent(
+            [in] ArrayOf<IRemoteInput*>* remoteInputs,
+            [in] IIntent* intent,
+            [in] IBundle* results);
+    }
+
+    /**
+     * Builder class for {@link RemoteInput} objects.
+     */
+    [deprecated, local]
+    interface IRemoteInputBuilder {
+
+        /**
+         * Set a label to be displayed to the user when collecting this input.
+         * @param label The label to show to users when they input a response.
+         * @return this object for method chaining
+         */
+        SetLabel(
+            [in] ICharSequence* label);
+
+        /**
+         * Specifies choices available to the user to satisfy this input.
+         * @param choices an array of pre-defined choices for users input.
+         *        You must provide a non-null and non-empty array if
+         *        you disabled free form input using {@link #setAllowFreeFormInput}.
+         * @return this object for method chaining
+         */
+        SetChoices(
+            [in] ArrayOf<ICharSequence*>* choices);
+
+        /**
+         * Specifies whether the user can provide arbitrary values.
+         *
+         * @param allowFreeFormInput The default is {@code true}.
+         *         If you specify {@code false}, you must provide a non-null
+         *         and non-empty array to {@link #setChoices} or an
+         *         {@link IllegalArgumentException} is thrown.
+         * @return this object for method chaining
+         */
+        SetAllowFreeFormInput(
+            [in] Boolean allowFreeFormInput);
+
+        /**
+         * Merge additional metadata into this builder.
+         *
+         * <p>Values within the Bundle will replace existing extras values in this Builder.
+         *
+         * @see RemoteInput#getExtras
+         */
+        AddExtras(
+            [in] IBundle* extras);
+
+        /**
+         * Get the metadata Bundle used by this Builder.
+         *
+         * <p>The returned Bundle is shared with this Builder.
+         */
+        GetExtras(
+            [out] IBundle** result);
+
+        /**
+         * Combine all of the options that have been set and return a new {@link RemoteInput}
+         * object.
+         */
+         Build(
+            [out] IRemoteInput** ri);
+    }
+
+
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}
+

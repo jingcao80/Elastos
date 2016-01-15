@@ -1,0 +1,227 @@
+Index: 3dshow/js/tvshow.js
+===================================================================
+--- 3dshow/js/tvshow.js	(revision 139)
++++ 3dshow/js/tvshow.js	(working copy)
+@@ -1,5 +1,12 @@
+ TVUI.LETV=(function(){
+ 
++var oImgs=[
++	document.getElementById('app_tv_icons_00'),
++	document.getElementById('app_tv_icons_01'),
++	document.getElementById('app_tv_icons_02'),
++	document.getElementById('app_tv_icons_03')
++];
++
+ var bSleep = false;
+ 
+ var canvas;
+@@ -149,6 +156,16 @@
+ 		return;
+ 	}
+ 
++/*get current icon number*/
++var ia=Math.ceil(angle)%360;
++var cnt1=Math.max(Math.ceil(ia/90)-1,0);
++var cnt0=(cnt1+3)%4;
++if(TVUI.LETV.curcnt!=cnt1){
++	TVUI.LETV.curcnt=cnt1;
++	document.getElementById('app_tv_icons_0'+cnt1).src='3dshow/images/icons_01.png';
++	document.getElementById('app_tv_icons_0'+cnt0).src='3dshow/images/icons_00.png';
++}
++
+ 	// clear context
+ 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+ 
+@@ -339,7 +356,20 @@
+ 
+ _loadImg();
+ 
+-return _onload;
++//return _onload;
++return {
++	curcnt:-1,
++	videos:[
++		'video/oceans-clip.webm',
++		'video/The_Phantom_of_the_Opera_25th_Anniversary_DVD_(HD).webm',
++		'video/Mozilla_Firefox_Manifesto_v0.2_640.webm',
++		'video/big_buck_bunny_480p.webm'
++	],
+ 
++	getCurVideoName:function(){
++		return this.videos[this.curcnt];
++	}
++};
++
+ })();
+ 
+Index: index.htm
+===================================================================
+--- index.htm	(revision 139)
++++ index.htm	(working copy)
+@@ -14,7 +14,7 @@
+ <link rel="stylesheet" type="text/css" href="css/tvui.css" />
+ 
+         <link href="3dshow/css/main.css" rel="stylesheet" type="text/css" />
+- 
++
+ <style id="css_mod_com" type="text/css">
+ </style>
+ 
+@@ -91,7 +91,7 @@
+ 			<div id="app_wgt_datetime" class="btn_out">
+ 				<img id="app_wgt_datetime_img" src="datetime.png" style="display:none;width:100%;height:100%;padding:0px 2px;">
+ 
+-				
++
+ 			</div>
+ 		</div>
+ 	</div>
+@@ -162,7 +162,7 @@
+ 		</div>
+ 	</div>
+ 
+-	<div id="app_tv" class="app_tv grp_out">
++	<div id="app_tv" class="app_tv grp_out" cmd="cmd_app_tv">
+ 		<div style="position:absolute;width:100%;height:100%;">
+ 			<img src="img/ui_tv/bg_blue.jpg" style="width:100%;height:100%;">
+ 		</div>
+@@ -178,6 +178,14 @@
+ 			<div id="app_tv_top" style="position:absolute;left:0%;top:0%;width:100%;height:17%;background:rgba(255,255,255,0.4);border-bottom:2px solid rgba(255,255,255,0.2)">
+ 				<div style="left:2%;top:10%;font-size:48px;">Elastos TV</div>
+ 			</div>
++
++			<div id="app_tv_icons" style="position:absolute;left:60%;top:6%;width:25%;height:6%;overflow:hidden;">
++				<img id="app_tv_icons_00" src="3dshow/images/icons_00.png" style="width:15%;height:100%;margin-left:4%;">
++				<img id="app_tv_icons_01" src="3dshow/images/icons_00.png" style="width:15%;height:100%;margin-left:4%;">
++				<img id="app_tv_icons_02" src="3dshow/images/icons_00.png" style="width:15%;height:100%;margin-left:4%;">
++				<img id="app_tv_icons_03" src="3dshow/images/icons_00.png" style="width:15%;height:100%;margin-left:4%;">
++			</div>
++
+ 			<div id="app_tv_mid" style="display:none;position:absolute;left:2%;top:13%;width:96%;height:55%;background:green;overflow:hidden;">
+ 				<div id="app_tv_mid_00" style="position:absolute;left:0%;top:0%;width:25%;height:100%;">
+ 					<div id="app_tv_mid_00_img" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+@@ -529,11 +537,7 @@
+ 		<div style="left:20%;top:30%;width:60%;height:20%;font-size:64px;text-align:center;">ELASTOS&nbsp;MALL</div>
+ 	</div>
+ 	<div id="app_ic_multi" style="display:none;width:100%;height:100%;background:rgba(255,255,255,0.5);">
+-		<div style="left:20%;top:20%;width:60%;height:60%;font-size:64px;text-align:center;">
+-			<video id="my_video_1" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360" poster="my_video_poster.png" data-setup="{}">
+-				<source src="http://video-js.zencoder.com/oceans-clip.mp4" type='video/mp4'>
+-				<source src="http://video-js.zencoder.com/oceans-clip.webm" type='video/webm'>
+-			</video>
++		<div id="app_ic_multi_cont" style="left:0%;top:0%;width:100%;height:100%;font-size:64px;text-align:center;">
+ 		</div>
+ 
+ 	</div>
+@@ -816,7 +820,7 @@
+ 				</div>
+ 
+ 				<nav style="display:normal;">
+-	
++
+ 				<span class="dg-prev">&lt;</span>
+ 
+ 					<span class="dg-next">&gt;</span>
+@@ -887,7 +891,7 @@
+ 
+ 	<script type="text/javascript">
+ 		var o=document.getElementById('tvui_test01');
+-			
++
+ 		o.innerHTML=[
+ 			'<canvas id="tvui_test01_cvs" width="',
+ 			o.offsetWidth,
+@@ -954,9 +958,9 @@
+ 
+ 	//return;
+ 
+-	var s='Err:' + m + '\r\n'+'Line:' + l + '\r\n'+'URL:' + u + '\r\n';
++	//var s='Err:' + m + '\r\n'+'Line:' + l + '\r\n'+'URL:' + u + '\r\n';
+ 
+-	alert(s);
++	//alert(s);
+ 
+ };
+ 
+Index: js/tvui_cmd.js
+===================================================================
+--- js/tvui_cmd.js	(revision 139)
++++ js/tvui_cmd.js	(working copy)
+@@ -48,6 +48,56 @@
+ 
+ 		P.setCpo(P.IC_ELASTOSMALL);
+ 	},
++	_cmd_playVideo:function(sPID,sURI,sRetPage){
++		var bGenVideoTag=false;
++		var oCvsCont=$(sPID);
++		var sVID=sPID+'_video';
++
++		(function(){
++			var oVideo=$(sVID);
++			if(!oVideo){
++				if(!bGenVideoTag){
++					oCvsCont.innerHTML=[
++							'<video id="'+sVID+'" class="video-js vjs-default-skin" controls preload="auto" width="100%" height="100%" poster="my_video_poster.png" data-setup="{}">',
++							'	<source src="'+sURI+'" type="video/mp4">',
++							'	<source src="'+sURI+'" type="video/webm">',
++							'</video>'
++					].join('');
++
++					bGenVideoTag=true;
++				}
++
++				setTimeout(arguments.callee,50);
++				return;
++			}
++
++			function _onended(e){
++				P.setCpo(P.HOME);
++				setTimeout(
++					function(){
++						oVideo.removeEventListener('ended',_onended,false);
++						oCvsCont.innerHTML='';
++					},
++					1000
++				);
++			}
++
++			oVideo.addEventListener(
++				'ended',
++				_onended,
++				false
++			);
++
++			//oVideo.play();
++			oVideo.autoplay=true;
++
++			P.setCpo(P[sRetPage]);
++		})();
++	},
++	cmd_app_tv:function(){
++		//T._cmd_playVideo('app_ic_multi_cont','http://video-js.zencoder.com/oceans-clip.webm','IC_MULTI');
++		T._cmd_playVideo('app_ic_multi_cont',TVUI.LETV.getCurVideoName(),'IC_MULTI');
++	},
+ 	cmd_home_ic_multi:function(){
+ 		/*Multi Media Center*/
+ 
+@@ -70,6 +120,7 @@
+ 		if(TVUI.isCarReady()){try{
+ 			var launcher = elastos.createInstance("/data/data/com.elastos.runtime/elastos/Launcher/Launcher.eco:CLauncherHelper;1");
+ 			launcher.StartBrowser();
++            bDefault=false;
+ 		}catch(e){}}
+ 
+ 		bDefault&&T.cmd_showBrowser(true,false);
+Index: js/tvui_fps.js
+===================================================================
+--- js/tvui_fps.js	(revision 139)
++++ js/tvui_fps.js	(working copy)
+@@ -4,7 +4,7 @@
+ 	var _num=0;
+ 
+ 	var _freeTimes=0;
+-	var _maxFreeTimes=15;
++	var _maxFreeTimes=300;
+ 	//var _maxFreeTimes=300000000;
+ 
+ 	//var _loadingTimes=5;

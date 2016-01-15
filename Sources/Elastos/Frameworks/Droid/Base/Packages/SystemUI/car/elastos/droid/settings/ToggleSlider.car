@@ -1,0 +1,60 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBrightnessMirrorController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Settings {
+
+    interface IToggleSlider;
+
+    interface IListener {
+
+        OnInit(
+            [in] IToggleSlider* v);
+
+        OnChanged(
+            [in] IToggleSlider* v,
+            [in] Boolean tracking,
+            [in] Boolean checked,
+            [in] Int32 value);
+    }
+
+    /**
+     * @Involve
+     * interface IRelativeLayout
+     */
+    [local]
+    interface IToggleSlider {
+
+        SetMirror(
+            [in] IToggleSlider* toggleSlider);
+
+        SetMirrorController(
+            [in] IBrightnessMirrorController* c);
+
+        SetOnChangedListener(
+            [in] IListener* l);
+
+        SetChecked(
+            [in] Boolean checked);
+
+        IsChecked(
+            [out] Boolean* result);
+
+        SetMax(
+            [in] Int32 max);
+
+        SetValue(
+            [in] Int32 value);
+    }
+
+    } // namespace Settings
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,43 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/zoom_popup_bg"
+    android:gravity="center_vertical"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/zoom_start"
+        android:layout_width="46dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|right"
+        android:text="0"
+        android:textColor="@color/title_second_text"
+        android:textSize="@dimen/button_text_size" />
+
+    <SeekBar
+        android:id="@+id/zoom_seeker"
+        style="@android:attr/progressBarStyleHorizontal"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="false"
+        android:max="100"
+        android:maxHeight="6dp"
+        android:minHeight="6dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:progressDrawable="@drawable/zoom_seekbar_bg"
+        android:thumb="@drawable/zoom_seekbar_thumb"
+        android:thumbOffset="1dp" />
+
+    <TextView
+        android:id="@+id/zoom_end"
+        android:layout_width="46dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="400%"
+        android:textColor="@color/title_second_text"
+        android:textSize="@dimen/button_text_size" />
+
+</LinearLayout>

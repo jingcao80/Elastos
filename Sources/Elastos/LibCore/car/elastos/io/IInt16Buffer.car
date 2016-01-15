@@ -1,0 +1,325 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * A buffer of shorts.
+     * <p>
+     * A short buffer can be created in either of the following ways:
+     * <ul>
+     * <li>{@link #allocate(int) Allocate} a new short array and create a buffer
+     * based on it;</li>
+     * <li>{@link #wrap(short[]) Wrap} an existing short array to create a new
+     * buffer;</li>
+     * <li>Use {@link java.nio.ByteBuffer#asShortBuffer() ByteBuffer.asShortBuffer}
+     * to create a short buffer based on a byte buffer.</li>
+     * </ul>
+     */
+    /**
+     * @Involve
+     * interface IBuffer;
+     * interface IComparable;
+     */
+    [deprecated]
+    interface IInt16Buffer {
+        GetArray(
+            [out, callee] ArrayOf<Int16>* array);
+
+        /**
+         * Returns a read-only buffer that shares its content with this buffer.
+         * <p>
+         * The returned buffer is guaranteed to be a new instance, even if this
+         * buffer is read-only itself. The new buffer's position, limit, capacity
+         * and mark are the same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means this
+         * buffer's change of content will be visible to the new buffer. The two
+         * buffer's position, limit and mark are independent.
+         *
+         * @return a read-only version of this buffer.
+         */
+        AsReadOnlyBuffer(
+            [out] IInt16Buffer** buffer);
+
+        /**
+         * Compacts this short buffer.
+         * <p>
+         * The remaining shorts will be moved to the head of the buffer, starting
+         * from position zero. Then the position is set to {remaining()}; the
+         * limit is set to capacity; the mark is cleared.
+         *
+         * @return this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Compact();
+
+        /**
+         * Returns a duplicated buffer that shares its content with this buffer.
+         * <p>
+         * The duplicated buffer's position, limit, capacity and mark are the same
+         * as this buffer. The duplicated buffer's read-only property and byte order
+         * are the same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a duplicated buffer that shares its content with this buffer.
+         */
+        Duplicate(
+            [out] IInt16Buffer** buffer);
+
+        /**
+         * Returns the short at the current position and increases the position by
+         * 1.
+         *
+         * @return the short at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is equal or greater than limit.
+         */
+        Get(
+            [out] Int16* value);
+
+        /**
+         * Returns the short at the specified index; the position is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and less than limit.
+         * @return a short at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         */
+        Get(
+            [in] Int32 index,
+            [out] Int16* value);
+
+        /**
+         * Reads shorts from the current position into the specified short array and
+         * increases the position by the number of shorts read.
+         * <p>
+         * Calling this method has the same effect as
+         * {get(dst, 0, dst.length)}.
+         *
+         * @param dst
+         *            the destination short array.
+         * @return this buffer.
+         * @exception BufferUnderflowException
+         *                if {dst.length} is greater than {remaining()}.
+         */
+        Get(
+            [in] ArrayOf<Int16>* dst);
+
+        /**
+         * Reads shorts from the current position into the specified short array,
+         * starting from the specified offset, and increases the position by the
+         * number of shorts read.
+         *
+         * @param dst
+         *            the target short array.
+         * @param dstOffset
+         *            the offset of the short array, must not be negative and not
+         *            greater than {@code dst.length}.
+         * @param shortCount
+         *            the number of shorts to read, must be no less than zero and
+         *            not greater than {@code dst.length - dstOffset}.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code dstOffset} or {@code shortCount} is invalid.
+         * @exception BufferUnderflowException
+         *                if {@code shortCount} is greater than {@code remaining()}.
+         */
+        Get(
+            [in] ArrayOf<Int16>* dst,
+            [in] Int32 dstOffset,
+            [in] Int32 int16Count);
+
+        /**
+         * Returns the byte order used by this buffer when converting shorts from/to
+         * bytes.
+         * <p>
+         * If this buffer is not based on a byte buffer, then always return the
+         * platform's native byte order.
+         *
+         * @return the byte order used by this buffer when converting shorts from/to
+         *         bytes.
+         */
+        GetOrder(
+            [out] ByteOrder* byteOrder);
+
+        /**
+         * Writes the given short to the current position and increases the position
+         * by 1.
+         *
+         * @param s
+         *            the short to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is equal or greater than limit.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Int16 s);
+
+        /**
+         * Writes a short to the specified index of this buffer; the position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and less than the limit.
+         * @param s
+         *            the short to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Int32 index,
+            [in] Int16 s);
+
+        /**
+         * Writes shorts from the given short array to the current position and
+         * increases the position by the number of shorts written.
+         * <p>
+         * Calling this method has the same effect as
+         * {put(src, 0, src.length)}.
+         *
+         * @param src
+         *            the source short array.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {remaining()} is less than {src.length}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Int16>* src);
+
+        /**
+         * Writes shorts from the given short array, starting from the specified
+         * offset, to the current position and increases the position by the number
+         * of shorts written.
+         *
+         * @param src
+         *            the source short array.
+         * @param srcOffset
+         *            the offset of short array, must not be negative and not
+         *            greater than {@code src.length}.
+         * @param shortCount
+         *            the number of shorts to write, must be no less than zero and
+         *            not greater than {@code src.length - srcOffset}.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {@code remaining()} is less than {@code shortCount}.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code srcOffset} or {@code shortCount} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Int16>* src,
+            [in] Int32 srcOffset,
+            [in] Int32 int16Count);
+
+        /**
+         * Writes all the remaining shorts of the {src} short buffer to this
+         * buffer's current position, and increases both buffers' position by the
+         * number of shorts copied.
+         *
+         * @param src
+         *            the source short buffer.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {src.remaining()} is greater than this buffer's
+         *                {remaining()}.
+         * @exception IllegalArgumentException
+         *                if {src} is this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] IInt16Buffer* src);
+
+        /**
+         * Returns a sliced buffer that shares its content with this buffer.
+         * <p>
+         * The sliced buffer's capacity will be this buffer's {remaining()},
+         * and its zero position will correspond to this buffer's current position.
+         * The new buffer's position will be 0, limit will be its capacity, and its
+         * mark is cleared. The new buffer's read-only property and byte order are
+         * same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a sliced buffer that shares its content with this buffer.
+         */
+        Slice(
+            [out] IInt16Buffer** buffer);
+    }
+
+    [deprecated]
+    interface IInt16BufferHelper {
+        /**
+         * Creates a short buffer based on a newly allocated short array.
+         *
+         * @param capacity
+         *            the capacity of the new buffer.
+         * @return the created short buffer.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {capacity} is less than zero.
+         */
+        Allocate(
+            [in] Int32 capacity,
+            [out] IInt16Buffer** int16Buffer);
+
+        /**
+         * Creates a new short buffer by wrapping the given short array.
+         * <p>
+         * Calling this method has the same effect as
+         * {wrap(array, 0, array.length)}.
+         *
+         * @param array
+         *            the short array which the new buffer will be based on.
+         * @return the created short buffer.
+         */
+        Wrap(
+            [in] ArrayOf<Int16>* array,
+            [out] IInt16Buffer** int16Buffer);
+
+        /**
+         * Creates a new short buffer by wrapping the given short array.
+         * <p>
+         * The new buffer's position will be {start}, limit will be
+         * {start + shortCount}, capacity will be the length of the array.
+         *
+         * @param array
+         *            the short array which the new buffer will be based on.
+         * @param start
+         *            the start index, must not be negative and not greater than
+         *            {array.length}.
+         * @param shortCount
+         *            the length, must not be negative and not greater than
+         *            {array.length - start}.
+         * @return the created short buffer.
+         * @exception IndexOutOfBoundsException
+         *                if either {start} or {shortCount} is invalid.
+         */
+        Wrap(
+            [in] ArrayOf<Int16>* array,
+            [in] Int32 start,
+            [in] Int32 int16Count,
+            [out] IInt16Buffer** int16Buffer);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

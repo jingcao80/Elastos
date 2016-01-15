@@ -1,0 +1,124 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * This transition captures bitmap representations of target views before and
+     * after the scene change and fades between them.
+     *
+     * <p>Note: This transition is not compatible with {@link TextureView}
+     * or {@link SurfaceView}.</p>
+     *
+     * @hide
+     */
+
+    /**
+     * involve interface ITransition
+     */
+    interface ICrossfade {
+
+        /**
+         * Flag specifying that the fading animation should cross-fade
+         * between the old and new representation of all affected target
+         * views. This means that the old representation will fade out
+         * while the new one fades in. This effect may work well on views
+         * without solid backgrounds, such as TextViews.
+         *
+         * @see #setFadeBehavior(int)
+         */
+        const Int32 FADE_BEHAVIOR_CROSSFADE = 0;
+
+        /**
+         * Flag specifying that the fading animation should reveal the
+         * new representation of all affected target views. This means
+         * that the old representation will fade out, gradually
+         * revealing the new representation, which remains opaque
+         * the whole time. This effect may work well on views
+         * with solid backgrounds, such as ImageViews.
+         *
+         * @see #setFadeBehavior(int)
+         */
+        const Int32 FADE_BEHAVIOR_REVEAL = 1;
+
+        /**
+         * Flag specifying that the fading animation should first fade
+         * out the original representation completely and then fade in the
+         * new one. This effect may be more suitable than the other
+         * fade behaviors for views with.
+         *
+         * @see #setFadeBehavior(int)
+         */
+        const Int32 FADE_BEHAVIOR_OUT_IN = 2;
+
+        /**
+         * Flag specifying that the transition should not animate any
+         * changes in size between the old and new target views.
+         * This means that no scaling will take place as a result of
+         * this transition
+         *
+         * @see #setResizeBehavior(int)
+         */
+        const Int32 RESIZE_BEHAVIOR_NONE = 0;
+
+        /**
+         * Flag specifying that the transition should animate any
+         * changes in size between the old and new target views.
+         * This means that the animation will scale the start/end
+         * representations of affected views from the starting size
+         * to the ending size over the course of the animation.
+         * This effect may work well on images, but is not recommended
+         * for text.
+         *
+         * @see #setResizeBehavior(int)
+         */
+        const Int32 RESIZE_BEHAVIOR_SCALE = 1;
+
+        /**
+         * Sets the type of fading animation that will be run, one of
+         * {@link #FADE_BEHAVIOR_CROSSFADE} and {@link #FADE_BEHAVIOR_REVEAL}.
+         *
+         * @param fadeBehavior The type of fading animation to use when this
+         * transition is run.
+         */
+        SetFadeBehavior(
+            [in] Int32 fadeBehavior,
+            [out] ICrossfade** result);
+
+        /**
+         * Returns the fading behavior of the animation.
+         *
+         * @return This crossfade object.
+         * @see #setFadeBehavior(int)
+         */
+        GetFadeBehavior(
+            [out] Int32* result);
+
+        /**
+         * Sets the type of resizing behavior that will be used during the
+         * transition animation, one of {@link #RESIZE_BEHAVIOR_NONE} and
+         * {@link #RESIZE_BEHAVIOR_SCALE}.
+         *
+         * @param resizeBehavior The type of resizing behavior to use when this
+         * transition is run.
+         */
+        SetResizeBehavior(
+            [in] Int32 resizeBehavior,
+            [out] ICrossfade** result);
+
+        /**
+         * Returns the resizing behavior of the animation.
+         *
+         * @return This crossfade object.
+         * @see #setResizeBehavior(int)
+         */
+        GetResizeBehavior(
+            [out] Int32* result);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

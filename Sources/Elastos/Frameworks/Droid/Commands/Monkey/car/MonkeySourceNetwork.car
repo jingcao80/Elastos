@@ -1,0 +1,74 @@
+module
+{
+    interface Elastos.Droid.Commands.Monkey.IMonkeyEventSource;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Monkey {
+
+    interface IMonkeyCommandReturn {
+        /*
+         * hasMessage()
+        */
+        HasMessage(
+            [out] Boolean* result);
+
+        /*
+         * GetMessage
+        */
+        GetMessage(
+            [out] String* message);
+
+        /*
+         * WasSuccessful()
+        */
+        WasSuccessful(
+            [out] Boolean* result);
+    }
+
+    interface ICommandQueue {
+        /**
+         * Enqueue an event to be returned later.  This allows a
+         * command to return multiple events.  Commands using the
+         * command queue still have to return a valid event from their
+         * translateCommand method.  The returned command will be
+         * executed before anything put into the queue.
+         *
+         * @param e the event to be enqueued.
+         */
+        EnqueueEvent(
+            [in] IMonkeyEvent* e);
+    }
+
+    /**
+         * Translate the command line into a sequence of MonkeyEvents.
+         *
+         * @param command the command line.
+         * @param queue the command queue.
+         * @return MonkeyCommandReturn indicating what happened.
+    */
+    [deprecated]
+    interface IMonkeyCommand {
+        TranslateCommand(
+            [in] ArrayOf<String>* command,
+            [in] ICommandQueue* queue,
+            [out] IMonkeyCommandReturn** return);
+    }
+
+    interface IMonkeySourceNetwork extends IMonkeyEventSource {
+        //The version of the monkey network protocol
+        const Int32 MONKEY_NETWORK_VERSION = 2;
+
+        /*const IMonkeyCommandReturn* OK;
+        const IMonkeyCommandReturn* ERROR;
+        const IMonkeyCommandReturn* EARG;*/
+    }
+
+
+
+    } //namespace Monkey
+    } //namespace Commands
+    } //namespace Droid
+    } //namespace Elastos
+}

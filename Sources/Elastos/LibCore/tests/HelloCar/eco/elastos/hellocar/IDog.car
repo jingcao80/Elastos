@@ -1,0 +1,18 @@
+module
+{
+
+    namespace Elastos {
+    namespace HelloCar {
+
+    // 基类注释说明 IDog extends IAnimal
+    /**
+     * @Involve
+     * interface IAnimal;
+     */
+    interface IDog {
+        Bark();
+    }
+
+    } // HelloCar
+    } // Elastos
+}

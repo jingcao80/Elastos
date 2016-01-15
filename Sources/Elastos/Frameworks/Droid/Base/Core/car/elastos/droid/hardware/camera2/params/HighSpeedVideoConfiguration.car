@@ -1,0 +1,77 @@
+
+module
+{
+    interface Elastos.Droid.Utility.ISize;
+    interface Elastos.Droid.Graphics.IPoint;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Params {
+
+    /**
+     * Immutable class to store the available
+     * {@link CameraCharacteristics#CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS high speed video
+     *  configurations}
+     *
+     * @see CameraCharacteristics#CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS
+     *
+     * @hide
+     */
+    interface IHighSpeedVideoConfiguration {
+        /**
+         * Return the width of the high speed video configuration.
+         *
+         * @return width > 0
+         */
+        GetWidth(
+            [out] Int32* width);
+
+        /**
+         * Return the height of the high speed video configuration.
+         *
+         * @return height > 0
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * Return the minimum frame per second of the high speed video configuration.
+         *
+         * @return fpsMin > 0
+         */
+        GetFpsMin(
+            [out] Int32* min);
+
+        /**
+         * Return the maximum frame per second of the high speed video configuration.
+         *
+         * @return fpsMax >= 60
+         */
+        GetFpsMax(
+            [out] Int32* max);
+
+        /**
+         * Convenience method to return the size of this high speed video configuration.
+         *
+         * @return a Size with positive width and height
+         */
+        GetSize(
+            [out] ISize** size);
+
+        /**
+         * Convenience method to return the FPS range of this high speed video configuration.
+         *
+         * @return a Range with high bound >= 60
+         */
+        GetFpsRange(
+            [out] IInterface** range);
+    }
+
+    } // namespace Params
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

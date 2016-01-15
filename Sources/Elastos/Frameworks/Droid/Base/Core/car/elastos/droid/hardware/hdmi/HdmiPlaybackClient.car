@@ -1,0 +1,84 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+    /**
+     * Listener used by the client to get the result of one touch play operation.
+     */
+    interface IHdmiPlaybackClientOneTouchPlayCallback {
+        /**
+         * Called when the result of the feature one touch play is returned.
+         *
+         * @param result the result of the operation. {@link HdmiControlManager#RESULT_SUCCESS}
+         *         if successful.
+         */
+        OnComplete(
+            [in] Int32 result);
+    }
+
+    /**
+     * Listener used by the client to get display device status.
+     */
+    interface IHdmiPlaybackClientDisplayStatusCallback {
+        /**
+         * Called when display device status is reported.
+         *
+         * @param status display device status. It should be one of the following values.
+         *            <ul>
+         *            <li>{@link HdmiControlManager#POWER_STATUS_ON}
+         *            <li>{@link HdmiControlManager#POWER_STATUS_STANDBY}
+         *            <li>{@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_ON}
+         *            <li>{@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_STANDBY}
+         *            <li>{@link HdmiControlManager#POWER_STATUS_UNKNOWN}
+         *            </ul>
+         */
+        OnComplete(
+            [in] Int32 status);
+    }
+
+    /**
+     * HdmiPlaybackClient represents HDMI-CEC logical device of type Playback
+     * in the Android system which acts as a playback device such as set-top box.
+     * It provides with methods that control, get information from TV/Display device
+     * connected through HDMI bus.
+     *
+     * @hide
+     *
+     * @Involve
+     * interface IHdmiClient;
+     */
+     //@SystemApi
+    interface IHdmiPlaybackClient {
+        /**
+         * Perform the feature 'one touch play' from playback device to turn on display
+         * and switch the input.
+         *
+         * @param callback {@link OneTouchPlayCallback} object to get informed
+         *         of the result
+         */
+        OneTouchPlay(
+            [in] IHdmiPlaybackClientOneTouchPlayCallback* _callback);
+
+        //@Override
+        GetDeviceType(
+            [out] Int32* type);
+
+        /**
+         * Get the status of display device connected through HDMI bus.
+         *
+         * @param callback {@link DisplayStatusCallback} object to get informed
+         *         of the result
+         */
+        QueryDisplayStatus(
+            [in] IHdmiPlaybackClientDisplayStatusCallback* _callback);
+    }
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,72 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * A special subclass of Intent that can have a custom label/icon associated
+     * with it. Primarily for use with ACTION_CHOOSER.
+     * 
+     * @implements Elastos.Droid.Content.Pm.Elastos.Droid.Content.IIntent
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IIntent
+     */
+    interface ILabeledIntent {
+        /**
+         * Return the name of the package holding label and icon resources.
+         */
+        GetSourcePackage(
+            [out] String* sourcePackage);
+
+        /**
+         * Return any resource identifier that has been given for the label text.
+         */
+        GetLabelResource(
+            [out] Int32* labelRes);
+
+        /**
+         * Return any concrete text that has been given for the label text.
+         */
+        GetNonLocalizedLabel(
+            [out] ICharSequence** label);
+
+        /**
+         * Return any resource identifier that has been given for the label icon.
+         */
+        GetIconResource(
+            [out] Int32* iconRes);
+
+        /**
+         * Retrieve the label associated with this object.  If the object does
+         * not have a label, null will be returned, in which case you will probably
+         * want to load the label from the underlying resolved info for the Intent.
+         */
+        LoadLabel(
+            [in] IPackageManager* pm,
+            [out] ICharSequence** label);
+
+        /**
+         * Retrieve the icon associated with this object.  If the object does
+         * not have a icon, null will be returned, in which case you will probably
+         * want to load the icon from the underlying resolved info for the Intent.
+         */
+        LoadIcon(
+            [in] IPackageManager* pm,
+            [out] IDrawable** icon);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

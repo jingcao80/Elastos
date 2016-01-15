@@ -1,0 +1,16 @@
+
+TARGET_NAME= entity
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+SOURCES = EntityDeserializer.cpp
+SOURCES += EntitySerializer.cpp
+SOURCES += LaxContentLengthStrategy.cpp
+SOURCES += StrictContentLengthStrategy.cpp

@@ -1,0 +1,103 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpHost;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Routing {
+
+    /**
+     * Helps tracking the steps in establishing a route.
+     *
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version $Revision: 620254 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IRouteInfo;
+     */
+    interface IRouteTracker {
+
+        /**
+         * Tracks connecting to the target.
+         *
+         * @param secure    <code>true</code> if the route is secure,
+         *                  <code>false</code> otherwise
+         */
+        ConnectTarget(
+            [in] Boolean secure);
+
+        /**
+         * Tracks connecting to the first proxy.
+         *
+         * @param proxy     the proxy connected to
+         * @param secure    <code>true</code> if the route is secure,
+         *                  <code>false</code> otherwise
+         */
+        ConnectProxy(
+            [in] IHttpHost* proxy,
+            [in] Boolean secure);
+
+        /**
+         * Tracks tunnelling to the target.
+         *
+         * @param secure    <code>true</code> if the route is secure,
+         *                  <code>false</code> otherwise
+         */
+        TunnelTarget(
+            [in] Boolean secure);
+
+        /**
+         * Tracks tunnelling to a proxy in a proxy chain.
+         * This will extend the tracked proxy chain, but it does not mark
+         * the route as tunnelled. Only end-to-end tunnels are considered there.
+         *
+         * @param proxy     the proxy tunnelled to
+         * @param secure    <code>true</code> if the route is secure,
+         *                  <code>false</code> otherwise
+         */
+        TunnelProxy(
+            [in] IHttpHost* proxy,
+            [in] Boolean secure);
+
+        /**
+         * Tracks layering a protocol.
+         *
+         * @param secure    <code>true</code> if the route is secure,
+         *                  <code>false</code> otherwise
+         */
+        LayerProtocol(
+            [in] Boolean secure);
+
+        IsConnected(
+            [out] Boolean* isConnected);
+
+        /**
+         * Obtains the tracked route.
+         * If a route has been tracked, it is {@link #isConnected connected}.
+         * If not connected, nothing has been tracked so far.
+         *
+         * @return  the tracked route, or
+         *          <code>null</code> if nothing has been tracked so far
+         */
+        ToRoute(
+            [out] IHttpRoute** route);
+
+    }
+
+    } // namespace Routing
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

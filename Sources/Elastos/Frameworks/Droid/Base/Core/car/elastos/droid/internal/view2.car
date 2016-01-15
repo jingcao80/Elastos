@@ -1,0 +1,12 @@
+
+module
+{
+    merge("view/animation/NativeInterpolatorFactory.car");
+    merge("view/menu/MenuBuilder.car");
+    merge("view/menu/MenuPresenter.car");
+    merge("view/menu/BaseMenuPresenter.car");
+    merge("view/menu/MenuView.car");
+    merge("view/BaseIWindow.car");
+    merge("view/IInputContext.car");
+    merge("view/IInputMethodClient.car");
+}

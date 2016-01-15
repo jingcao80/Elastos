@@ -1,0 +1,38 @@
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Internal.Widget.IIRemoteViewsFactory;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.Internal.IRemoteViewsAdapterConnection
+     */
+    [local]
+    interface IRemoteViewsAdapterServiceConnection {
+        Bind(
+            [in] IContext* ctx,
+            [in] Int32 appWidgetId,
+            [in] IIntent* intent);
+
+        Unbind(
+            [in] IContext* ctx,
+            [in] Int32 appWidgetId,
+            [in] IIntent* intent);
+
+        GetRemoteViewsFactory(
+            [out] IIRemoteViewsFactory** factory);
+
+        IsConnected(
+            [out] Boolean* isConnected);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

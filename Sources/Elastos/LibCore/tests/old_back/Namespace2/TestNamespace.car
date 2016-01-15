@@ -1,0 +1,17 @@
+
+module
+{
+    merge("merge/MergeFile1.car");
+    merge("merge/MergeFile2.car");
+
+    namespace Elastos {
+    namespace Namespace2 {
+
+    class CFooBar {
+        interface IFoo;
+        interface IBar;
+    }
+
+    }
+    }
+}

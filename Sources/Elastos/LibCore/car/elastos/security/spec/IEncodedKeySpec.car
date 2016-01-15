@@ -1,0 +1,39 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The abstract key specification for a public or a private key in encoded
+     * format.
+     */
+    /**
+     * @Involve
+     * interface IKeySpec
+     */
+    interface IEncodedKeySpec {
+        /**
+         * Returns the encoded key bytes.
+         *
+         * @return the encoded key bytes.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * Returns the name of the encoding format of this encoded key
+         * specification.
+         *
+         * @return the name of the encoding format of this encoded key
+         *         specification.
+         */
+        GetFormat(
+            [out] String* format);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

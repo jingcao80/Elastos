@@ -1,0 +1,28 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Accounts {
+
+    /**
+     * The interface used to return responses from an {@link IAccountAuthenticator}
+     * @hide
+     */
+    interface IIAccountAuthenticatorResponse {
+        OnResult(
+            [in] IBundle* value);
+
+        OnRequestContinued();
+
+        OnError(
+            [in] Int32 errorCode,
+            [in] String errorMessage);
+    }
+
+    } // Accounts
+    } // Droid
+    } // Elastos
+}

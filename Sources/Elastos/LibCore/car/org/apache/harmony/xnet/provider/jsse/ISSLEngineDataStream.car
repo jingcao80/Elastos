@@ -1,0 +1,58 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.ISSLSession;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * This class provides the DataStream functionality
+     * implemented over the array of ByteBuffer instances.
+     * Among with the data chunks read functionality
+     * it provides the info about amount of consumed data.
+     * The source ByteBuffer objects can be replaced by other.
+     * So one instance of this wrapper can be reused for several
+     * data sources.
+     */
+    [deprecated]
+    interface ISSLEngineDataStream extends IDataStream {
+        /**
+        * Gets data from a pre-existing session for a given server host and port.
+        *
+        * @param host from {@link javax.net.ssl.SSLSession#getPeerHost()}
+        * @param port from {@link javax.net.ssl.SSLSession#getPeerPort()}
+        * @return the session data or null if none is cached
+        * @throws NullPointerException if host is null
+        */
+        GetSessionData(
+            [in] String host,
+            [in] Int32 port,
+            [out, callee] ArrayOf<Byte>* sessionData);
+
+        /**
+        * Stores session data for the given session.
+        *
+        * @param session to cache data for
+        * @param sessionData to cache
+        * @throws NullPointerException if session, result of
+        *  {@code session.getPeerHost()} or data is null
+        */
+        PutSessionData(
+            [in] ISSLSession* session,
+            [in] ArrayOf<Byte>* sessionData);
+    }
+
+
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

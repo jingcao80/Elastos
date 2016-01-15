@@ -1,0 +1,99 @@
+
+module
+{
+    using interface Eunit.Framework.ITestSuite;
+    using interface Elastos.Core.IClassLoader;
+    using interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Test {
+
+    [local]
+    interface IInstrumentationTestRunner {
+        /** @hide */
+        const String ARGUMENT_TEST_CLASS = "class";
+        /** @hide */
+        const String ARGUMENT_TEST_PACKAGE = "package";
+        /** @hide */
+        const String ARGUMENT_TEST_SIZE_PREDICATE = "size";
+        /** @hide */
+        const String ARGUMENT_DELAY_MSEC = "delay_msec";
+
+        /**
+         * This value, if stored with key {@link android.app.Instrumentation#REPORT_KEY_IDENTIFIER},
+         * identifies InstrumentationTestRunner as the source of the report.  This is sent with all
+         * status messages.
+         */
+        const String REPORT_VALUE_ID = "InstrumentationTestRunner";
+        /**
+         * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
+         * identifies the total number of tests that are being run.  This is sent with all status
+         * messages.
+         */
+        const String REPORT_KEY_NUM_TOTAL = "numtests";
+        /**
+         * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
+         * identifies the sequence number of the current test.  This is sent with any status message
+         * describing a specific test being started or completed.
+         */
+        const String REPORT_KEY_NUM_CURRENT = "current";
+        /**
+         * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
+         * identifies the name of the current test class.  This is sent with any status message
+         * describing a specific test being started or completed.
+         */
+        const String REPORT_KEY_NAME_CLASS = "class";
+        /**
+         * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
+         * identifies the name of the current test.  This is sent with any status message
+         * describing a specific test being started or completed.
+         */
+        const String REPORT_KEY_NAME_TEST = "test";
+
+        /**
+         * The test is starting.
+         */
+        const Int32 REPORT_VALUE_RESULT_START = 1;
+        /**
+         * The test completed successfully.
+         */
+        const Int32 REPORT_VALUE_RESULT_OK = 0;
+        /**
+         * The test completed with an error.
+         */
+        const Int32 REPORT_VALUE_RESULT_ERROR = -1;
+        /**
+         * The test completed with a failure.
+         */
+        const Int32 REPORT_VALUE_RESULT_FAILURE = -2;
+        /**
+         * If included in the status bundle sent to an IInstrumentationWatcher, this key
+         * identifies a stack trace describing an error or failure.  This is sent with any status
+         * message describing a specific test being completed.
+         */
+        const String REPORT_KEY_STACK = "stack";
+
+        /**
+         * Get the Bundle object that contains the arguments
+         *
+         * @return the Bundle object
+         * @hide
+         */
+        GetBundle(
+            [out] IBundle** bundle);
+
+        GetTestSuite(
+            [out] ITestSuite** suite);
+
+        GetAllTests(
+            [out] ITestSuite** suite);
+
+        GetLoader(
+            [out] IClassLoader** loader);
+    }
+
+    } // namespace Test
+    } // namespace Droid
+    } // namespace Elastos
+}

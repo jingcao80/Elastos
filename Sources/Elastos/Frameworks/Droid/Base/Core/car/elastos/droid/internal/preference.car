@@ -1,0 +1,65 @@
+module
+{
+    merge("preference/YesNoPreference.car");
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    interface Elastos.Droid.Preference.IDialogPreference;
+    interface Elastos.Droid.Preference.IPreference;
+    interface Elastos.Droid.Preference.IPreferenceBaseSavedState;
+    interface Elastos.Droid.Preference.IPreferenceManagerOnActivityDestroyListener;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.View.IAbsSavedState;
+    using interface Elastos.Core.IComparable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Preference {
+
+    class CYesNoPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx);
+
+        interface IYesNoPreference;
+        interface IDialogPreference;
+        interface IPreference;
+        interface IComparable;
+        interface IPreferenceManagerOnActivityDestroyListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogInterfaceOnClickListener;
+    }
+
+    class CYesNoPreferenceSavedState {
+        constructor();
+
+        constructor(
+            [in] IParcelable* superState);
+
+        interface IYesNoPreferenceSavedState;
+        interface IPreferenceBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
+    } // namespace Preference
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

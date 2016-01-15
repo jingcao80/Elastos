@@ -1,0 +1,61 @@
+
+module
+{
+    interface Elastos.Droid.Widget.IDatePickerController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Displays a selectable list of years.
+     */
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsListView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IOnGlobalLayoutListener
+     * interface Elastos.Droid.View.IOnTouchModeChangeListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.View.IAdapterViewOnItemClickListener
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.Widget.IOnDateChangedListener
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IYearPickerView {
+
+        Init(
+            [in] IDatePickerController* controller);
+
+        SetYearSelectedCircleColor(
+            [in] Int32 color);
+
+        GetYearSelectedCircleColor(
+            [out] Int32* color);
+
+        PostSetSelectionCentered(
+            [in] Int32 position);
+
+        PostSetSelectionFromTop(
+            [in] Int32 position,
+            [in] Int32 offset);
+
+        GetFirstPositionOffset(
+            [out] Int32* offset);
+
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

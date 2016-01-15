@@ -1,0 +1,56 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * The callback to indicate what is going on with the digits pressed.
+     */
+    interface IDoubleDigitManagerCallBack {
+        /**
+         * A digit was pressed, and there are no intermediate digits.
+         * @param digit The digit pressed.
+         * @return Whether the digit was accepted; how the user of this manager
+         *   tells us that the intermediate digit is acceptable as an
+         *   intermediate digit.
+         */
+        SingleDigitIntermediate(
+            [in] Int32 digit,
+            [out] Boolean* res);
+
+        /**
+         * A single digit was pressed, and it is 'the final answer'.
+         * - a single digit pressed, and the timeout expires.
+         * - a single digit pressed, and {@link #singleDigitIntermediate}
+         *   returned false.
+         * @param digit The digit.
+         */
+        SingleDigitFinal(
+            [in] Int32 digit);
+
+        /**
+         * The user pressed digit1, then digit2 within the timeout.
+         * @param digit1
+         * @param digit2
+         */
+        TwoDigitsFinal(
+            [in] Int32 digit1,
+            [in] Int32 digit2,
+            [out] Boolean* res);
+    }
+
+    interface IDoubleDigitManager {
+        /**
+         * Report to this manager that a digit was pressed.
+         * @param digit
+         */
+        ReportDigit(
+            [in] Int32 digit);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

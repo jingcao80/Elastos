@@ -1,0 +1,63 @@
+module
+{
+    interface Elastos.Droid.Widget.ISeekBar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * SavedState, a subclass of {@link BaseSavedState}, will store the state
+     * of MyPreference, a subclass of Preference.
+     * <p>
+     * It is important to always call through to super methods.
+     *
+     * @Involve
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     * interface IPreferenceBaseSavedState
+     */
+    interface ISeekBarPreferenceSavedState {
+        SetProgress(
+            [in] Int32 progress);
+
+        GetProgress(
+            [out] Int32* progress);
+
+        SetMax(
+            [in] Int32 max);
+
+        GetMax(
+            [out] Int32* max);
+    }
+
+    /**
+     * @hide
+     *
+     * @Involve
+     * interface ISeekBarOnSeekBarChangeListener
+     * interface IPreference
+     * interface IComparable
+     */
+    interface ISeekBarPreference {
+        SetMax(
+            [in] Int32 max);
+
+        SetProgress(
+            [in] Int32 progress);
+
+        GetProgress(
+            [out] Int32* progress);
+
+        /**
+         * Persist the seekBar's progress value if callChangeListener
+         * returns true, otherwise set the seekBar's progress to the stored value
+         */
+        SyncProgress(
+            [in] ISeekBar* seekBar);
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}

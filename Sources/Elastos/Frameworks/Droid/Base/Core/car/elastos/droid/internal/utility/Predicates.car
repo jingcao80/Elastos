@@ -1,0 +1,72 @@
+
+module
+{
+    using interface Elastos.Utility.IIterable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    /**
+     * Predicates contains static methods for creating the standard set of
+     * {@code Predicate} objects.
+     */
+    [local, deprecated]
+    interface IPredicates {
+        /**
+         * Returns a Predicate that evaluates to true iff each of its components
+         * evaluates to true.  The components are evaluated in order, and evaluation
+         * will be "short-circuited" as soon as the answer is determined.
+         */
+        And(
+            [in] ArrayOf<IPredicate*>* components,
+            [out] IPredicate** predicate);
+
+        /**
+         * Returns a Predicate that evaluates to true iff each of its components
+         * evaluates to true.  The components are evaluated in order, and evaluation
+         * will be "short-circuited" as soon as the answer is determined.  Does not
+         * defensively copy the iterable passed in, so future changes to it will alter
+         * the behavior of this Predicate. If components is empty, the returned
+         * Predicate will always evaluate to true.
+         */
+        And(
+            [in] IIterable* components,
+            [out] IPredicate** predicate);
+
+        /**
+         * Returns a Predicate that evaluates to true iff any one of its components
+         * evaluates to true.  The components are evaluated in order, and evaluation
+         * will be "short-circuited" as soon as the answer is determined.
+         */
+        Or(
+            [in] ArrayOf<IPredicate*>* components,
+            [out] IPredicate** predicate);
+
+        /**
+         * Returns a Predicate that evaluates to true iff any one of its components
+         * evaluates to true.  The components are evaluated in order, and evaluation
+         * will be "short-circuited" as soon as the answer is determined.  Does not
+         * defensively copy the iterable passed in, so future changes to it will alter
+         * the behavior of this Predicate. If components is empty, the returned
+         * Predicate will always evaluate to false.
+         */
+        Or(
+            [in] IIterable* components,
+            [out] IPredicate** predicate);
+
+        /**
+         * Returns a Predicate that evaluates to true iff the given Predicate
+         * evaluates to false.
+         */
+        Not(
+            [in] IPredicate* predicate,
+            [out] IPredicate** result);
+    }
+
+    } // namespace Utility
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

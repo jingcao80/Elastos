@@ -1,0 +1,25 @@
+module
+{
+    interface Elastos.Droid.Os.IBatteryPropertiesListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface IBatteryPropertiesRegistrar {
+
+        RegisterListener(
+            [in] IBatteryPropertiesListener* listener);
+
+        UnregisterListener(
+            [in] IBatteryPropertiesListener* listener);
+
+        GetProperty(
+            [in] Int32 id,
+            [out] IBatteryProperties** prop);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

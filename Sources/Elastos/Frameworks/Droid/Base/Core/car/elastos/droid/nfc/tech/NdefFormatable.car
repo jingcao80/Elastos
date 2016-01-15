@@ -1,0 +1,35 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.INdefMessage;
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Tech{
+
+    /**
+     * @Involve
+     * interace IBasicTagTechnology
+     */
+    interface INdefFormatable {
+        Format(
+            [in] INdefMessage* firstMessage);
+
+        FormatReadOnly(
+            [in] INdefMessage* firstMessage);
+    }
+
+    interface INdefFormatableHelper {
+        GetNdefFormatable(
+            [in] ITag* tag,
+            [out] INdefFormatable** fomatable);
+    }
+
+    }// namespace Tech
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

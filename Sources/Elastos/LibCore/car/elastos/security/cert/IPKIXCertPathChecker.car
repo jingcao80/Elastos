@@ -1,0 +1,74 @@
+
+module
+{
+    interface Elastos.Utility.ISet;
+    interface Elastos.Utility.ICollection;
+    interface Elastos.Security.Cert.ICertificate;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+      * @Involve
+      * interface Elastos.Core.ICloneable;
+      */
+    interface IPKIXCertPathChecker {
+        /**
+         * Initializes this {@code PKIXCertPathChecker} instance for specified
+         * <i>checking direction</i>.
+         *
+         * @param forward
+         *            the direction of the certification path processing, {@code
+         *            true} if the certificates are processed in forward direction
+         *            (from target to trusted CA), {@code false} if processed in
+         *            reverse direction (from trusted CA to target).
+         * @throws CertPathValidatorException
+         *             if initialization of this {@code PKIXCertPathChecker}
+         *             instance fails, or if it cannot process certificates in the
+         *             specified order.
+         */
+        Init(
+            [in] Boolean forward);
+
+        /**
+         * Returns whether this {@code PKIXCertPathChecker} instance supports
+         * <i>forward checking</i>.
+         *
+         * @return {@code true} if this {@code PKIXCertPathChecker} instance
+         *         supports forward checking, otherwise {@code false}.
+         */
+        IsForwardCheckingSupported(
+            [out] Boolean* result);
+
+        /**
+         * Returns the list of extensions of X.509 certificates that this {@code
+         * PKIXCertPathChecker} is able to process.
+         *
+         * @return the list of extensions of X.509 certificates that this {@code
+         *         PKIXCertPathChecker} is able to process, or {@code null} if there
+         *         are none.
+         */
+        GetSupportedExtensions(
+            [out] ISet** extensions);
+
+        /**
+         * Checks the specified certificate and removes the processed critical
+         * extensions from the specified list of X.509 extension <i>OID</i>s.
+         *
+         * @param cert
+         *            the certificate.
+         * @param unresolvedCritExts
+         *            the list of critical X.509 extension OID strings.
+         * @throws CertPathValidatorException
+         *             if check(s) fail on the specified certificate.
+         */
+        Check(
+            [in] ICertificate* cert,
+            [in] ICollection* unresolvedCritExts);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

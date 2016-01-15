@@ -1,0 +1,27 @@
+TARGET_NAME= elastos.math
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/math;
+
+SOURCES += NativeBN.cpp
+SOURCES += BigInt.cpp
+SOURCES += BitLevel.cpp
+SOURCES += Logical.cpp
+SOURCES += Primality.cpp
+SOURCES += Conversion.cpp
+SOURCES += Division.cpp
+SOURCES += Multiplication.cpp
+SOURCES += CBigDecimal.cpp
+SOURCES += CBigDecimalHelper.cpp
+SOURCES += CBigInteger.cpp
+SOURCES += CBigIntegerHelper.cpp
+SOURCES += CMathContext.cpp
+SOURCES += CMathContextHelper.cpp

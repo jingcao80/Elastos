@@ -1,0 +1,119 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    /**
+     * IDLE: ready to start data connection setup, default state
+     * INITING: state of issued setupDefaultPDP() but not finish yet
+     * CONNECTING: state of issued startPppd() but not finish yet
+     * SCANNING: data connection fails with one apn but other apns are available
+     *           ready to start data connection on other apns (before INITING)
+     * CONNECTED: IP connection is setup
+     * DISCONNECTING: Connection.disconnect() has been called, but PDP
+     *                context is not yet deactivated
+     * FAILED: data connection fail for all apns settings
+     *
+     * getDataConnectionState() maps State to DataState
+     *      FAILED or IDLE : DISCONNECTED
+     *      INITING or CONNECTING or SCANNING: CONNECTING
+     *      CONNECTED : CONNECTED or DISCONNECTING
+     */
+    enum DctConstantsState {
+        DctConstantsState_IDLE,
+        DctConstantsState_CONNECTING,
+        DctConstantsState_SCANNING,
+        DctConstantsState_CONNECTED,
+        DctConstantsState_DISCONNECTING,
+        DctConstantsState_FAILED,
+        DctConstantsState_RETRYING
+    }
+
+    enum DctConstantsActivity {
+        DctConstantsActivity_NONE,
+        DctConstantsActivity_DATAIN,
+        DctConstantsActivity_DATAOUT,
+        DctConstantsActivity_DATAINANDOUT,
+        DctConstantsActivity_DORMANT
+    }
+
+    [local]
+    interface IDctConstants {
+
+        /***** Event Codes *****/
+        const Int32 BASE = 0x00042000;
+        const Int32 EVENT_DATA_SETUP_COMPLETE = 0x00042000;/*BASE + 0;*/
+        const Int32 EVENT_RADIO_AVAILABLE = 0x00042001;/*BASE + 1;*/
+        const Int32 EVENT_RECORDS_LOADED = 0x00042002;/*BASE + 2;*/
+        const Int32 EVENT_TRY_SETUP_DATA = 0x00042003;/*BASE + 3;*/
+        const Int32 EVENT_DATA_STATE_CHANGED = 0x00042004;/*BASE + 4;*/
+        const Int32 EVENT_POLL_PDP = 0x00042005;/*BASE + 5;*/
+        const Int32 EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 0x00042006;/*BASE + 6;*/
+        const Int32 EVENT_VOICE_CALL_STARTED = 0x00042007;/*BASE + 7;*/
+        const Int32 EVENT_VOICE_CALL_ENDED = 0x00042008;/*BASE + 8;*/
+        const Int32 EVENT_DATA_CONNECTION_DETACHED = 0x00042009;/*BASE + 9;*/
+        const Int32 EVENT_LINK_STATE_CHANGED = 0x0004200A;/*BASE + 10;*/
+        const Int32 EVENT_ROAMING_ON = 0x0004200B;/*BASE + 11;*/
+        const Int32 EVENT_ROAMING_OFF = 0x0004200C;/*BASE + 12;*/
+        const Int32 EVENT_ENABLE_NEW_APN = 0x0004200D;/*BASE + 13;*/
+        const Int32 EVENT_RESTORE_DEFAULT_APN = 0x0004200E;/*BASE + 14;*/
+        const Int32 EVENT_DISCONNECT_DONE = 0x0004200F;/*BASE + 15;*/
+        const Int32 EVENT_DATA_CONNECTION_ATTACHED = 0x00042010;/*BASE + 16;*/
+        const Int32 EVENT_DATA_STALL_ALARM = 0x00042011;/*BASE + 17;*/
+        const Int32 EVENT_DO_RECOVERY = 0x00042012;/*BASE + 18;*/
+        const Int32 EVENT_APN_CHANGED = 0x00042013;/*BASE + 19;*/
+        const Int32 EVENT_CDMA_DATA_DETACHED = 0x00042014;/*BASE + 20;*/
+        const Int32 EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED = 0x00042015;/*BASE + 21;*/
+        const Int32 EVENT_PS_RESTRICT_ENABLED = 0x00042016;/*BASE + 22;*/
+        const Int32 EVENT_PS_RESTRICT_DISABLED = 0x00042017;/*BASE + 23;*/
+        const Int32 EVENT_CLEAN_UP_CONNECTION = 0x00042018;/*BASE + 24;*/
+        const Int32 EVENT_CDMA_OTA_PROVISION = 0x00042019;/*BASE + 25;*/
+        const Int32 EVENT_RESTART_RADIO = 0x0004201A;/*BASE + 26;*/
+        const Int32 EVENT_SET_INTERNAL_DATA_ENABLE = 0x0004201B;/*BASE + 27;*/
+        const Int32 EVENT_RESET_DONE = 0x0004201C;/*BASE + 28;*/
+        const Int32 EVENT_CLEAN_UP_ALL_CONNECTIONS = 0x0004201D;/*BASE + 29;*/
+        const Int32 CMD_SET_USER_DATA_ENABLE = 0x0004201E;/*BASE + 30;*/
+        const Int32 CMD_SET_DEPENDENCY_MET = 0x0004201F;/*BASE + 31;*/
+        const Int32 CMD_SET_POLICY_DATA_ENABLE = 0x00042020;/*BASE + 32;*/
+        const Int32 EVENT_ICC_CHANGED = 0x00042021;/*BASE + 33;*/
+        const Int32 EVENT_DISCONNECT_DC_RETRYING = 0x00042022;/*BASE + 34;*/
+        const Int32 EVENT_DATA_SETUP_COMPLETE_ERROR = 0x00042023;/*BASE + 35;*/
+        const Int32 CMD_SET_ENABLE_FAIL_FAST_MOBILE_DATA = 0x00042024;/*BASE + 36;*/
+        const Int32 CMD_ENABLE_MOBILE_PROVISIONING = 0x00042025;/*BASE + 37;*/
+        const Int32 CMD_IS_PROVISIONING_APN = 0x00042026;/*BASE + 38;*/
+        const Int32 EVENT_PROVISIONING_APN_ALARM = 0x00042027;/*BASE + 39;*/
+        const Int32 CMD_NET_STAT_POLL = 0x00042028;/*BASE + 40;*/
+        const Int32 EVENT_DATA_RAT_CHANGED = 0x00042029;/*BASE + 41;*/
+        const Int32 CMD_CLEAR_PROVISIONING_SPINNER = 0x0004202A;/*BASE + 42;*/
+
+        /***** Constants *****/
+
+        const Int32 APN_INVALID_ID = -1;
+        const Int32 APN_DEFAULT_ID = 0;
+        const Int32 APN_MMS_ID = 1;
+        const Int32 APN_SUPL_ID = 2;
+        const Int32 APN_DUN_ID = 3;
+        const Int32 APN_HIPRI_ID = 4;
+        const Int32 APN_IMS_ID = 5;
+        const Int32 APN_FOTA_ID = 6;
+        const Int32 APN_CBS_ID = 7;
+        const Int32 APN_IA_ID = 8;
+        const  Int32 APN_EMERGENCY_ID = 9;
+        const  Int32 APN_NUM_TYPES = 10;
+
+        const Int32 DISABLED = 0;
+        const Int32 ENABLED = 1;
+
+        const String APN_TYPE_KEY = "apnType";
+        const String PROVISIONING_URL_KEY = "provisioningUrl";
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

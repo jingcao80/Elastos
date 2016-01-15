@@ -1,0 +1,70 @@
+TARGET_NAME= SystemUI
+TARGET_TYPE= eco
+
+EXPORT_ALL_SYMBOLS = 1
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+IMPORTS += Elastos.CoreLibrary.eco
+
+SOURCES = SystemUI.car
+SOURCES += R.cpp
+SOURCES += Utils.cpp
+SOURCES += CBatteryMeterView.cpp
+SOURCES += BitmapHelper.cpp
+SOURCES += CBootReceiver.cpp
+SOURCES += CDessertCase.cpp
+//SOURCES += CDessertCaseDream.cpp
+SOURCES += CDessertCaseView.cpp
+//SOURCES += SystemUIR.cpp
+SOURCES += CExpandHelper.cpp
+SOURCES += FontSizeUtils.cpp
+SOURCES += CResetSessionDialog.cpp
+SOURCES += CGuestResumeSessionReceiver.cpp
+//SOURCES += CSwipeHelper.cpp
+//SOURCES += SearchPanelView.cpp
+//SOURCES += CSearchPanelView.cpp
+//SOURCES += UniverseBackground.cpp
+//SOURCES += CUniverseBackground.cpp
+SOURCES += CImageWallpaper.cpp
+//SOURCES += CRecentsActivityOne.cpp
+//SOURCES += CRecentsPreloadReceiver.cpp
+//SOURCES += WallpaperService.cpp
+//SOURCES += BaseSurfaceHolder.cpp
+//SOURCES += InputEventReceiver.cpp
+SOURCES += CSystemUIService.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+ELASTOS_LIBS += statusbar/statusbar.lib
+//ELASTOS_LIBS += recent/recent.lib
+//ELASTOS_LIBS += media/media.lib
+//ELASTOS_LIBS += doze/doze.lib
+//ELASTOS_LIBS += egg/egg.lib
+//ELASTOS_LIBS += keyguard/keyguard.lib
+//ELASTOS_LIBS += net/net.lib
+//ELASTOS_LIBS += power/power.lib
+//ELASTOS_LIBS += qs/qs.lib
+//ELASTOS_LIBS += recents/recents.lib
+//ELASTOS_LIBS += screenshot/screenshot.lib
+//ELASTOS_LIBS += settings/settings.lib
+//ELASTOS_LIBS += usb/usb.lib
+//ELASTOS_LIBS += volume/volume.lib
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
+
+APPPACK = 1
+APP_PACKAGE_NAME = com.android.systemui
+RES_NAMESPACE = Elastos.Droid.Packages.SystemUI
+EXTRA_RES_DIR = $(MAKEDIR)/../../../../../../Keyguard/res
+AAPT_FLAGS = --auto-add-overlay --extra-packages com.android.keyguard
+DIRRESOURCES += $(MAKEDIR)/res;

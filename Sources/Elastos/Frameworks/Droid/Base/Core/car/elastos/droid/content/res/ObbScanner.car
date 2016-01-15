@@ -1,0 +1,28 @@
+module
+{
+    interface Elastos.Droid.Content.Res.IObbInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+
+    /**
+     * Class to scan Opaque Binary Blob (OBB) files. Use this to get information
+     * about an OBB file for use in a program via ObbInfo.
+     *
+     * @sa ObbInfo
+     */
+
+    interface IObbScanner {
+        GetObbInfo(
+            [in] String filePath,
+            [out] IObbInfo** obbInfo);
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

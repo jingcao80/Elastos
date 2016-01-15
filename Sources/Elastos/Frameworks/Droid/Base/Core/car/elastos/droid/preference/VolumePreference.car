@@ -1,0 +1,70 @@
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IKeyEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface ISeekBarDialogPreference
+     * interface IPreferenceManagerOnActivityStopListener
+     * interface IViewOnKeyListener
+     * interface ISeekBarVolumizerCallback
+     * interface IDialogPreference
+     * interface IPreference
+     * interface IComparable
+     * interface IPreferenceManagerOnActivityDestroyListener
+     * interface IDialogInterfaceOnDismissListener
+     * interface IDialogInterfaceOnClickListener
+     */
+    [local]
+    interface IVolumePreference {
+        SetStreamType(
+            [in] Int32 streamType);
+
+        OnKey(
+            [in] IView* v,
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* ret);
+
+        OnActivityStop();
+    }
+
+    interface IVolumePreferenceVolumeStore {
+        GetVolume(
+            [out] Int32* volume);
+
+        GetOriginalVolume(
+            [out] Int32* volume);
+
+        SetVolume(
+            [in] Int32 volume);
+
+        SetOriginalVolume(
+            [in] Int32 volume);
+    }
+
+    /**
+     * @Involve
+     * interface IPreferenceBaseSavedState
+     * interface IAbsSavedState
+     * interface IParcelable
+     */
+    interface IVolumePreferenceSavedState {
+        SetVolumeStore(
+            [in] IVolumePreferenceVolumeStore* vs);
+
+        GetVolumeStore(
+            [out] IVolumePreferenceVolumeStore** vs);
+    }
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}

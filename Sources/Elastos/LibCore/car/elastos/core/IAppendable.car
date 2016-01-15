@@ -1,0 +1,83 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Core {
+
+    /**
+     * Declares methods to append characters or character sequences. Any class that
+     * implements this interface can receive data formatted by a
+     * {@link java.util.Formatter}. The appended character or character sequence
+     * should be valid according to the rules described in
+     * {@link Character Unicode Character Representation}.
+     * <p>
+     * {@code Appendable} itself does not guarantee thread safety. This
+     * responsibility is up to the implementing class.
+     * <p>
+     * Implementing classes can choose different exception handling mechanism. They
+     * can choose to throw exceptions other than {@code IOException} or they do not
+     * throw any exceptions at all and use error codes instead.
+     */
+    interface IAppendable {
+        /**
+         * Appends the specified character.
+         *
+         * @param c
+         *            the character to append.
+         * @return this {@code Appendable}.
+         * @throws IOException
+         *             if an I/O error occurs.
+         */
+        AppendChar(
+            [in] Char32 c);
+
+        /**
+         * Appends the character sequence {@code csq}. Implementation classes may
+         * not append the whole sequence, for example if the target is a buffer with
+         * limited size.
+         * <p>
+         * If {@code csq} is {@code null}, the characters "null" are appended.
+         *
+         * @param csq
+         *            the character sequence to append.
+         * @return this {@code Appendable}.
+         * @throws IOException
+         *             if an I/O error occurs.
+         */
+        Append(
+            [in] ICharSequence* csq);
+
+        /**
+         * Appends a subsequence of {@code csq}.
+         * <p>
+         * If {@code csq} is not {@code null} then calling this method is equivalent
+         * to calling {@code append(csq.subSequence(start, end))}.
+         * <p>
+         * If {@code csq} is {@code null}, the characters "null" are appended.
+         *
+         * @param csq
+         *            the character sequence to append.
+         * @param start
+         *            the first index of the subsequence of {@code csq} that is
+         *            appended.
+         * @param end
+         *            the last index of the subsequence of {@code csq} that is
+         *            appended.
+         * @return this {@code Appendable}.
+         * @throws IndexOutOfBoundsException
+         *             if {@code start < 0}, {@code end < 0}, {@code start > end}
+         *             or {@code end} is greater than the length of {@code csq}.
+         * @throws IOException
+         *             if an I/O error occurs.
+         */
+        Append(
+            [in] ICharSequence* csq,
+            [in] Int32 start,
+            [in] Int32 end);
+    }
+
+    } // namespace Core
+    } // namespace Elastos
+}

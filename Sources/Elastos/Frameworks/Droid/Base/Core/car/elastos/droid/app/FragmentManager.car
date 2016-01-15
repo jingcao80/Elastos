@@ -1,0 +1,607 @@
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IMenuItem;
+    interface Elastos.Droid.View.IMenuInflater;
+    interface Elastos.Droid.App.IFragment;
+    interface Elastos.Droid.App.IBackStackRecord;
+    interface Elastos.Droid.App.IFragmentManagerBackStackEntry;
+    interface Elastos.Droid.App.IFragmentManagerOnBackStackChangedListener;
+    interface Elastos.Droid.Animation.IAnimator;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * Interface for interacting with {@link Fragment} objects inside of an
+     * {@link Activity}
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about using fragments, read the
+     * <a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+     * </div>
+     *
+     * While the FragmentManager API was introduced in
+     * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, a version of the API
+     * at is also available for use on older platforms through
+     * {@link android.support.v4.app.FragmentActivity}.  See the blog post
+     * <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+     * Fragments For All</a> for more details.
+     */
+    [local, deprecated]
+    interface IFragmentManager {
+        /**
+         * Start a series of edit operations on the Fragments associated with
+         * this FragmentManager.
+         *
+         * <p>Note: A fragment transaction can only be created/committed prior
+         * to an activity saving its state.  If you try to commit a transaction
+         * after {@link Activity#onSaveInstanceState Activity.onSaveInstanceState()}
+         * (and prior to a following {@link Activity#onStart Activity.onStart}
+         * or {@link Activity#onResume Activity.onResume()}, you will get an error.
+         * This is because the framework takes care of saving your current fragments
+         * in the state, and if changes are made after the state is saved then they
+         * will be lost.</p>
+         */
+        BeginTransaction(
+            [out] IFragmentTransaction** transaction);
+
+        /** @hide -- remove once prebuilts are in. */
+        OpenTransaction(
+            [out] IFragmentTransaction** transaction);
+
+        /**
+         * After a {@link FragmentTransaction} is committed with
+         * {@link FragmentTransaction#commit FragmentTransaction.commit()}, it
+         * is scheduled to be executed asynchronously on the process's main thread.
+         * If you want to immediately executing any such pending operations, you
+         * can call this function (only from the main thread) to do so.  Note that
+         * all callbacks and other related behavior will be done from within this
+         * call, so be careful about where this is called from.
+         *
+         * @return Returns true if there were any pending transactions to be
+         * executed.
+         */
+        ExecutePendingTransactions(
+            [out] Boolean* executed);
+
+        /**
+         * Finds a fragment that was identified by the given id either when inflated
+         * from XML or as the container ID when added in a transaction.  This first
+         * searches through fragments that are currently added to the manager's
+         * activity; if no such fragment is found, then all fragments currently
+         * on the back stack associated with this ID are searched.
+         * @return The fragment if found or null otherwise.
+         */
+        FindFragmentById(
+            [in] Int32 id,
+            [out] IFragment** fragment);
+
+        /**
+         * Finds a fragment that was identified by the given tag either when inflated
+         * from XML or as supplied when added in a transaction.  This first
+         * searches through fragments that are currently added to the manager's
+         * activity; if no such fragment is found, then all fragments currently
+         * on the back stack are searched.
+         * @return The fragment if found or null otherwise.
+         */
+        FindFragmentByTag(
+            [in] String tag,
+            [out] IFragment** fragment);
+
+        /**
+         * Flag for {@link #popBackStack(String, int)}
+         * and {@link #popBackStack(int, int)}: If set, and the name or ID of
+         * a back stack entry has been supplied, then all matching entries will
+         * be consumed until one that doesn't match is found or the bottom of
+         * the stack is reached.  Otherwise, all entries up to but not including that entry
+         * will be removed.
+         */
+        const Int32 POP_BACK_STACK_INCLUSIVE = 1<<0;
+
+        /**
+         * Pop the top state off the back stack.  This function is asynchronous -- it
+         * enqueues the request to pop, but the action will not be performed until the
+         * application returns to its event loop.
+         */
+        PopBackStack();
+
+        /**
+         * Like {@link #popBackStack()}, but performs the operation immediately
+         * inside of the call.  This is like calling {@link #executePendingTransactions()}
+         * afterwards.
+         * @return Returns true if there was something popped, else false.
+         */
+        PopBackStackImmediate(
+            [out] Boolean* hasPopped);
+
+        /**
+         * Pop the last fragment transition from the manager's fragment
+         * back stack.  If there is nothing to pop, false is returned.
+         * This function is asynchronous -- it enqueues the
+         * request to pop, but the action will not be performed until the application
+         * returns to its event loop.
+         *
+         * @param name If non-null, this is the name of a previous back state
+         * to look for; if found, all states up to that state will be popped.  The
+         * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
+         * the named state itself is popped. If null, only the top state is popped.
+         * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+         */
+        PopBackStack(
+            [in] String name,
+            [in] Int32 flags);
+
+        /**
+         * Like {@link #popBackStack(String, int)}, but performs the operation immediately
+         * inside of the call.  This is like calling {@link #executePendingTransactions()}
+         * afterwards.
+         * @return Returns true if there was something popped, else false.
+         */
+        PopBackStackImmediate(
+            [in] String name,
+            [in] Int32 flags,
+            [out] Boolean* hasPopped);
+
+        /**
+         * Pop all back stack states up to the one with the given identifier.
+         * This function is asynchronous -- it enqueues the
+         * request to pop, but the action will not be performed until the application
+         * returns to its event loop.
+         *
+         * @param id Identifier of the stated to be popped. If no identifier exists,
+         * false is returned.
+         * The identifier is the number returned by
+         * {@link FragmentTransaction#commit() FragmentTransaction.commit()}.  The
+         * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
+         * the named state itself is popped.
+         * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+         */
+        PopBackStack(
+            [in] Int32 id,
+            [in] Int32 flags);
+
+        /**
+         * Like {@link #popBackStack(int, int)}, but performs the operation immediately
+         * inside of the call.  This is like calling {@link #executePendingTransactions()}
+         * afterwards.
+         * @return Returns true if there was something popped, else false.
+         */
+        PopBackStackImmediate(
+            [in] Int32 id,
+            [in] Int32 flags,
+            [out] Boolean* hasPopped);
+
+        /**
+         * Return the number of entries currently in the back stack.
+         */
+        GetBackStackEntryCount(
+            [out] Int32* count);
+
+        /**
+         * Return the BackStackEntry at index <var>index</var> in the back stack;
+         * entries start index 0 being the bottom of the stack.
+         */
+        GetBackStackEntryAt(
+            [in] Int32 index,
+            [out] IFragmentManagerBackStackEntry** bsEntry);
+
+        /**
+         * Add a new listener for changes to the fragment back stack.
+         */
+        AddOnBackStackChangedListener(
+            [in] IFragmentManagerOnBackStackChangedListener* listener);
+
+        /**
+         * Remove a listener that was previously added with
+         * {@link #addOnBackStackChangedListener(OnBackStackChangedListener)}.
+         */
+        RemoveOnBackStackChangedListener(
+            [in] IFragmentManagerOnBackStackChangedListener* listener);
+
+        /**
+         * Put a reference to a fragment in a Bundle.  This Bundle can be
+         * persisted as saved state, and when later restoring
+         * {@link #getFragment(Bundle, String)} will return the current
+         * instance of the same fragment.
+         *
+         * @param bundle The bundle in which to put the fragment reference.
+         * @param key The name of the entry in the bundle.
+         * @param fragment The Fragment whose reference is to be stored.
+         */
+        PutFragment(
+            [in] IBundle* bundle,
+            [in] String key,
+            [in] IFragment* fragment);
+
+        /**
+         * Retrieve the current Fragment instance for a reference previously
+         * placed with {@link #putFragment(Bundle, String, Fragment)}.
+         *
+         * @param bundle The bundle from which to retrieve the fragment reference.
+         * @param key The name of the entry in the bundle.
+         * @return Returns the current Fragment instance that is associated with
+         * the given reference.
+         */
+        GetFragment(
+            [in] IBundle* bundle,
+            [in] String key,
+            [out] IFragment** fragment);
+
+        /**
+         * Save the current instance state of the given Fragment.  This can be
+         * used later when creating a new instance of the Fragment and adding
+         * it to the fragment manager, to have it create itself to match the
+         * current state returned here.  Note that there are limits on how
+         * this can be used:
+         *
+         * <ul>
+         * <li>The Fragment must currently be attached to the FragmentManager.
+         * <li>A new Fragment created using this saved state must be the same class
+         * type as the Fragment it was created from.
+         * <li>The saved state can not contain dependencies on other fragments --
+         * that is it can't use {@link #putFragment(Bundle, String, Fragment)} to
+         * store a fragment reference because that reference may not be valid when
+         * this saved state is later used.  Likewise the Fragment's target and
+         * result code are not included in this state.
+         * </ul>
+         *
+         * @param f The Fragment whose state is to be saved.
+         * @return The generated state.  This will be null if there was no
+         * interesting state created by the fragment.
+         */
+        SaveFragmentInstanceState(
+            [in] IFragment* f,
+            [out] IFragmentSavedState** state);
+
+        /**
+         * Returns true if the final {@link Activity#onDestroy() Activity.onDestroy()}
+         * call has been made on the FragmentManager's Activity, so this instance is now dead.
+         */
+        IsDestroyed(
+            [out] Boolean* destroyed);
+
+        /**
+         * Print the FragmentManager's state into the given stream.
+         *
+         * @param prefix Text to print at the front of each line.
+         * @param fd The raw file descriptor that the dump is being sent to.
+         * @param writer A PrintWriter to which the dump is to be set.
+         * @param args Additional arguments to the dump request.
+         */
+        Dump(
+            [in] String prefix,
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* writer,
+            [in] ArrayOf<String>* args);
+
+        /**
+         * Invalidate the attached activity's options menu as necessary.
+         * This may end up being deferred until we move to the resumed state.
+         */
+        InvalidateOptionsMenu();
+    }
+
+    interface IFragmentManagerHelper {
+
+        /**
+         * Control whether the framework's internal fragment manager debugging
+         * logs are turned on.  If enabled, you will see output in logcat as
+         * the framework performs fragment operations.
+         */
+        EnableDebugLogging(
+            [in] Boolean enabled);
+    }
+
+    /**
+     * Representation of an entry on the fragment back stack, as created
+     * with {@link FragmentTransaction#addToBackStack(String)
+     * FragmentTransaction.addToBackStack()}.  Entries can later be
+     * retrieved with {@link FragmentManager#getBackStackEntryAt(int)
+     * FragmentManager.getBackStackEntry()}.
+     *
+     * <p>Note that you should never hold on to a BackStackEntry object;
+     * the identifier as returned by {@link #getId} is the only thing that
+     * will be persisted across activity instances.
+     */
+    interface IFragmentManagerBackStackEntry {
+        /**
+         * Return the unique identifier for the entry.  This is the only
+         * representation of the entry that will persist across activity
+         * instances.
+         */
+        GetId(
+            [out] Int32* id);
+
+        /**
+         * Get the name that was supplied to
+         * {@link FragmentTransaction#addToBackStack(String)
+         * FragmentTransaction.addToBackStack(String)} when creating this entry.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Return the full bread crumb title resource identifier for the entry,
+         * or 0 if it does not have one.
+         */
+        GetBreadCrumbTitleRes(
+            [out] Int32* res);
+
+        /**
+         * Return the short bread crumb title resource identifier for the entry,
+         * or 0 if it does not have one.
+         */
+        GetBreadCrumbShortTitleRes(
+            [out] Int32* res);
+
+        /**
+         * Return the full bread crumb title for the entry, or null if it
+         * does not have one.
+         */
+        GetBreadCrumbTitle(
+            [out] ICharSequence** title);
+
+        /**
+         * Return the short bread crumb title for the entry, or null if it
+         * does not have one.
+         */
+        GetBreadCrumbShortTitle(
+            [out] ICharSequence** title);
+    }
+
+    /**
+     * Interface to watch for changes to the back stack.
+     */
+    interface IFragmentManagerOnBackStackChangedListener {
+        /**
+         * Called whenever the contents of the back stack change.
+         */
+        OnBackStackChanged();
+    }
+
+    interface IFragmentManagerState {
+    }
+
+    /**
+     * Callbacks from FragmentManagerImpl to its container.
+     */
+    [local]
+    interface IFragmentContainer {
+        FindViewById(
+            [in] Int32 id,
+            [out] IView** view);
+
+        HasView(
+            [out] Boolean* result);
+    }
+
+    /**
+     * Container for fragments associated with an activity.
+     */
+    /**
+     * @Involve
+     * interface IFragmentManager
+     */
+    [local, deprecated]
+    interface IFragmentManagerImpl {
+
+        const String TARGET_REQUEST_CODE_STATE_TAG = "android:target_req_state";
+        const String TARGET_STATE_TAG = "android:target_state";
+        const String VIEW_STATE_TAG = "android:view_state";
+        const String USER_VISIBLE_HINT_TAG = "android:user_visible_hint";
+
+        LoadAnimator(
+            [in] IFragment* fragment,
+            [in] Int32 transit,
+            [in] Boolean enter,
+            [in] Int32 transitionStyle,
+            [out] IAnimator** animator);
+
+        PerformPendingDeferredStart(
+            [in] IFragment* f);
+
+        MoveToState(
+            [in] IFragment* f,
+            [in] Int32 newState,
+            [in] Int32 transit,
+            [in] Int32 transitionStyle,
+            [in] Boolean keepActive);
+
+        MoveToState(
+            [in] IFragment* f);
+
+        MoveToState(
+            [in] Int32 newState,
+            [in] Boolean always);
+
+        MoveToState(
+            [in] Int32 newState,
+            [in] Int32 transit,
+            [in] Int32 transitStyle,
+            [in] Boolean always);
+
+        StartPendingDeferredFragments();
+
+        MakeActive(
+            [in] IFragment* f);
+
+        MakeInactive(
+            [in] IFragment* f);
+
+        AddFragment(
+            [in] IFragment* fragment,
+            [in] Boolean moveToStateNow);
+
+        RemoveFragment(
+            [in] IFragment* fragment,
+            [in] Int32 transition,
+            [in] Int32 transitionStyle);
+
+        HideFragment(
+            [in] IFragment* fragment,
+            [in] Int32 transition,
+            [in] Int32 transitionStyle);
+
+        ShowFragment(
+            [in] IFragment* fragment,
+            [in] Int32 transition,
+            [in] Int32 transitionStyle);
+
+        DetachFragment(
+            [in] IFragment* fragment,
+            [in] Int32 transition,
+            [in] Int32 transitionStyle);
+
+        AttachFragment(
+            [in] IFragment* fragment,
+            [in] Int32 transition,
+            [in] Int32 transitionStyle);
+
+        FindFragmentById(
+            [in] Int32 id,
+            [out] IFragment** fragment);
+
+        FindFragmentByTag(
+            [in] String tag,
+            [out] IFragment** fragment);
+
+        FindFragmentByWho(
+            [in] String who,
+            [out] IFragment** fragment);
+
+        EnqueueAction(
+            [in] IRunnable* action,
+            [in] Boolean allowStateLoss);
+
+        AllocBackStackIndex(
+            [in] IBackStackRecord* bse,
+            [out] Int32* index);
+
+        SetBackStackIndex(
+            [in] Int32 index,
+            [in] IBackStackRecord* bse);
+
+        FreeBackStackIndex(
+            [in] Int32 index);
+
+        /**
+         * Only call from main thread!
+         */
+        ExecPendingActions(
+            [out] Boolean* result);
+
+        ReportBackStackChanged();
+
+        AddBackStackState(
+            [in] IBackStackRecord* state);
+
+        PopBackStackState(
+            [in] IHandler* handler,
+            [in] String name,
+            [in] Int32 id,
+            [in] Int32 flags,
+            [out] Boolean* result);
+
+        RetainNonConfig(
+            [out] IArrayList** retains);
+
+        SaveFragmentViewState(
+            [in] IFragment* f);
+
+        SaveFragmentBasicState(
+            [in] IFragment* f,
+            [out] IBundle** rst);
+
+        SaveAllState(
+            [out] IParcelable** state);
+
+        RestoreAllState(
+            [in] IParcelable* state,
+            [in] IArrayList* nonConfig);
+
+        AttachActivity(
+            [in] IActivity* activity,
+            [in] IFragmentContainer* container,
+            [in] IFragment* parent);
+
+        NoteStateNotSaved();
+
+        DispatchCreate();
+
+        DispatchActivityCreated();
+
+        DispatchStart();
+
+        DispatchResume();
+
+        DispatchPause();
+
+        DispatchStop();
+
+        DispatchDestroyView();
+
+        DispatchDestroy();
+
+        DispatchConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        DispatchLowMemory();
+
+        DispatchTrimMemory(
+            [in] Int32 level);
+
+        DispatchCreateOptionsMenu(
+            [in] IMenu* menu,
+            [in] IMenuInflater* inflater,
+            [out] Boolean* rst);
+
+        DispatchPrepareOptionsMenu(
+            [in] IMenu* menu,
+            [out] Boolean* rst);
+
+        DispatchOptionsItemSelected(
+            [in] IMenuItem* item,
+            [out] Boolean* rst);
+
+        DispatchContextItemSelected(
+            [in] IMenuItem* item,
+            [out] Boolean* rst);
+
+        DispatchOptionsMenuClosed(
+            [in] IMenu* menu);
+    }
+
+    interface IFragmentManagerImplHelper {
+        ReverseTransit(
+            [in] Int32 transit,
+            [out] Int32* reverse);
+
+        TransitToStyleIndex(
+            [in] Int32 transit,
+            [in] Boolean enter,
+            [out] Int32* index);
+
+        SetDEBUG(
+            [in] Boolean debug);
+
+        GetDEBUG(
+            [out] Boolean* debug);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

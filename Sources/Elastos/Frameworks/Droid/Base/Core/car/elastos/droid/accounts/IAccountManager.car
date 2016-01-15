@@ -1,0 +1,203 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Accounts.IAuthenticatorDescription;
+    interface Elastos.Droid.Accounts.IAccountManagerResponse;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Accounts {
+
+    /**
+     * Central application service that provides account management.
+     * @hide
+     */
+    [deprecated]
+    interface IIAccountManager {
+        GetPassword(
+            [in] IAccount* account,
+            [out] String* password);
+
+        GetUserData(
+            [in] IAccount* account,
+            [in] String key,
+            [out] String* userData);
+
+        GetAuthenticatorTypes(
+            [in] Int32 userId,
+            [out, callee] ArrayOf<IAuthenticatorDescription*>* types);
+
+        GetAccounts(
+            [in] String accountType,
+            [out, callee] ArrayOf<IAccount*>* accounts);
+
+        GetAccountsForPackage(
+            [in] String packageName,
+            [in] Int32 uid,
+            [out, callee] ArrayOf<IAccount*>* accounts);
+
+        GetAccountsByTypeForPackage(
+            [in] String type,
+            [in] String packageName,
+            [out, callee] ArrayOf<IAccount*>* accounts);
+
+        GetAccountsAsUser(
+            [in] String accountType,
+            [in] Int32 userId,
+            [out, callee] ArrayOf<IAccount*>* accounts);
+
+        HasFeatures(
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] ArrayOf<String> features);
+
+        GetAccountsByFeatures(
+            [in] IAccountManagerResponse* response,
+            [in] String accountType,
+            [in] ArrayOf<String>* features);
+
+        AddAccountExplicitly(
+            [in] IAccount* account,
+            [in] String password,
+            [in] IBundle* extras,
+            [out] Boolean* result);
+
+        RemoveAccount(
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account);
+
+        RemoveAccountAsUser(
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] Int32 userId);
+
+        InvalidateAuthToken(
+            [in] String accountType,
+            [in] String authToken);
+
+        PeekAuthToken(
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [out] String* token);
+
+        SetAuthToken(
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] String authToken);
+
+        SetPassword(
+            [in] IAccount* account,
+            [in] String password);
+
+        ClearPassword(
+            [in] IAccount* account);
+
+        SetUserData(
+            [in] IAccount* account,
+            [in] String key,
+            [in] String value);
+
+        UpdateAppPermission(
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] Int32 uid,
+            [in] Boolean value);
+
+        GetAuthToken(
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] Boolean notifyOnAuthFailure,
+            [in] Boolean expectActivityLaunch,
+            [in] IBundle* options);
+
+        AddAccount(
+            [in] IAccountManagerResponse* response,
+            [in] String accountType,
+            [in] String authTokenType,
+            [in] ArrayOf<String>* requiredFeatures,
+            [in] Boolean expectActivityLaunch,
+            [in] IBundle* options);
+
+        AddAccountAsUser(
+            [in] IAccountManagerResponse* response,
+            [in] String accountType,
+            [in] String authTokenType,
+            [in] ArrayOf<String>* requiredFeatures,
+            [in] Boolean expectActivityLaunch,
+            [in] IBundle* options,
+            [in] Int32 userId);
+
+        UpdateCredentials(
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] Boolean expectActivityLaunch,
+            [in] IBundle* options);
+
+        EditProperties(
+            [in] IAccountManagerResponse* response,
+            [in] String accountType,
+            [in] Boolean expectActivityLaunch);
+
+        ConfirmCredentialsAsUser(
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] IBundle* options,
+            [in] Boolean expectActivityLaunch,
+            [in] Int32 userId);
+
+        GetAuthTokenLabel(
+            [in] IAccountManagerResponse* response,
+            [in] String accountType,
+            [in] String authTokenType);
+
+        /* Shared accounts */
+        AddSharedAccountAsUser(
+            [in] IAccount* account,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetSharedAccountsAsUser(
+            [in] Int32 userId,
+            [out, callee] ArrayOf<IAccount*>* result);
+
+        RemoveSharedAccountAsUser(
+            [in] IAccount* account,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        /* Account renaming. */
+        RenameAccount(
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* accountToRename,
+            [in] String newName);
+
+        GetPreviousName(
+            [in] IAccount* account,
+            [out] String* result);
+
+        RenameSharedAccountAsUser(
+            [in] IAccount* accountToRename,
+            [in] String newName,
+            [in] Int32 userId,
+            [out] Boolean* result);
+    }
+
+    [local]
+    interface IIAccountManagerHelper {
+        /**
+         * This should only be called by system code. One should only call this after the service
+         * has started.
+         * @return a reference to the AccountManagerService instance
+         * @hide
+         */
+        GetSingleton(
+            [out] IIAccountManager** service);
+    }
+
+    } // Accounts
+    } // Droid
+    } // Elastos
+}

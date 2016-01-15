@@ -1,0 +1,62 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+    namespace Tsp {
+
+    /**
+     * As defined in Time-Stamp Protocol (TSP)
+     * (http://www.ietf.org/rfc/rfc3161.txt)
+     *
+     * PKIStatusInfo ::= SEQUENCE {
+     *    status PKIStatus,
+     *    statusString PKIFreeText OPTIONAL,
+     *    failInfo PKIFailureInfo OPTIONAL
+     * }
+     *
+     */
+    interface IPKIStatusInfo {
+        ToString(
+            [out] String* str);
+
+        /**
+         * @return Returns the failInfo.
+         */
+        GetFailInfo(
+            [out] Int32* failInfo);
+
+        /**
+         * @return Returns the pKIStatus.
+         */
+        GetStatus(
+            [out] PKIStatus* status);
+
+        /**
+         * @return Returns the statusString.
+         */
+        GetStatusString(
+            [out] IList** list);
+    }
+
+    interface IPKIStatusInfoHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
+    }
+
+    } // namespace Tsp
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

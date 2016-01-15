@@ -1,0 +1,54 @@
+
+module
+{
+
+    interface Elastos.Droid.Graphics.IMatrix;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * This view draws another View in an Overlay without changing the parent. It will not be drawn
+     * by its parent because its visibility is set to INVISIBLE, but will be drawn
+     * here using its render node. When the GhostView is set to INVISIBLE, the View it is
+     * shadowing will become VISIBLE and when the GhostView becomes VISIBLE, the shadowed
+     * view becomes INVISIBLE.
+     * @hide
+     */
+    interface IGhostView {
+        SetMatrix(
+            [in] IMatrix* matrix);
+    }
+
+    [local]
+    interface IGhostViewHelper {
+        CalculateMatrix(
+            [in] IView* view,
+            [in] IViewGroup* host,
+            [in] IMatrix* matrix);
+
+        AddGhost(
+            [in] IView* view,
+            [in] IViewGroup* viewGroup,
+            [in] IMatrix* matrix,
+            [out] IGhostView** v);
+
+        AddGhost(
+            [in] IView* view,
+            [in] IViewGroup* viewGroup,
+            [out] IGhostView** v);
+
+        RemoveGhost(
+            [in] IView* view);
+
+        GetGhost(
+            [in] IView* view,
+            [out] IGhostView** v);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}
+

@@ -1,0 +1,8 @@
+aapt
+   -0  specifies an additional extension for which such files will not
+       be stored compressed in the .apk.  An empty string means to not
+       compress any files at all.
+
+eg:
+aapt package -f -0 .dat -S res -A assets -I /home/wanli/RDKM1/ElastosRDK4_2_2/Build/Emulator/android_sdk/platforms/android-17/android.jar -M AndroidManifest.xml -F data/hello.apk
+

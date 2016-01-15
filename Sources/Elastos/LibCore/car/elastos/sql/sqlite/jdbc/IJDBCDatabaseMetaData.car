@@ -1,0 +1,22 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+    namespace JDBC {
+
+    /**
+      * @Involve
+      * interface Elastos.Sql.IDatabaseMetaData;
+      * interface Elastos.Sql.IWrapper;
+      */
+    interface IJDBCDatabaseMetaData {
+        GetSQLKeywords(
+            [out] String* str);
+    }
+
+    } // namespace JDBC
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

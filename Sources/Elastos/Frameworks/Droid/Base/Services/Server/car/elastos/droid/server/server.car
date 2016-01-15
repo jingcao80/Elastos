@@ -1,0 +1,1412 @@
+
+module
+{
+    merge("Exceptions.car");
+    merge("SystemServer.car");
+    merge("SystemService.car");
+    merge("SystemServiceManager.car");
+    merge("Watchdog.car");
+
+    merge("am/ActivityRecord.car");
+    merge("am/BroadcastFilter.car");
+    merge("am/PendingIntentRecord.car");
+    merge("am/ProcessMemInfo.car");
+    merge("am/ProcessRecord.car");
+    merge("am/ServiceRestarter.car");
+    merge("am/UriPermissionOwnerExternalToken.car");
+    merge("am/UserStartedState.car");
+
+    merge("connectivity/NetworkAgentInfo.car");
+
+    merge("content/SyncManager.car");
+    merge("content/SyncOperation.car");
+    merge("content/SyncStorageEngine.car");
+
+    merge("display/AutomaticBrightnessController.car");
+    merge("display/WifiDisplayController.car");
+    merge("display/DisplayAdapter.car");
+    merge("display/DisplayBlanker.car");
+    merge("display/OverlayDisplayWindow.car");
+    merge("display/RampAnimator.car");
+
+    merge("lights/LightsManager.car");
+
+    merge("notification/NotificationManagerInternal.car");
+
+    merge("net/NetworkPolicyManagerService.car");
+    merge("net/NetworkStatsService.car");
+
+    merge("twilight/TwilightListener.car");
+
+    merge("wallpaper/WallpaperManagerService.car");
+
+    // merge("StatusBarManagerService.car");
+    // merge("NetworkManagementService.car");
+    merge("power/SuspendBlocker.car");
+    merge("power/ScreenOnBlocker.car");
+    // merge("accessibility/EventStreamTransformation.car");
+    // merge("accessibility/ScreenMagnifier.car");
+    // merge("RecognitionManagerService.car");
+    // merge("DeviceStorageMonitorService.car");
+    // merge("dreams/DreamManagerService.car");
+    // merge("search/Searchables.car");
+
+    interface Elastos.Droid.Server.ISystemService;
+    interface Elastos.Droid.Server.Wallpaper.IWallpaperConnection;
+    interface Elastos.Droid.Server.Wallpaper.IWallpaperData;
+    interface Elastos.Droid.Server.Wallpaper.IWallpaperManagerService;
+
+    using interface Elastos.Droid.App.IIActivityManager;
+    using interface Elastos.Droid.App.IIWallpaperManager;
+    using interface Elastos.Droid.App.IStopUserCallback;
+    using interface Elastos.Droid.App.IWallpaperInfo;
+    using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.Os.IHandler;
+    using interface Elastos.Droid.Os.ILooper;
+    using interface Elastos.Droid.Os.IIUserManager;
+    using interface Elastos.Droid.Os.IIPowerManager;
+    using interface Elastos.Droid.Os.IIHardwareService;
+    using interface Elastos.Droid.Os.IISchedulingPolicyService;
+    using interface Elastos.Droid.Os.IINetworkManagementService;
+    using interface Elastos.Droid.Os.Storage.IIMountShutdownObserver;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IIClipboard;
+    using interface Elastos.Droid.Content.IIContentService;
+    using interface Elastos.Droid.Content.IIIntentSender;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Content.IISyncContext;
+
+    using interface Elastos.Droid.Content.IISyncStatusObserver;
+    using interface Elastos.Droid.Content.IIntentReceiver;
+    using interface Elastos.Droid.Content.IServiceConnection;
+    using interface Elastos.Droid.Content.Pm.IILauncherApps;
+    using interface Elastos.Droid.Content.Pm.IIPackageInstallObserver2;
+    using interface Elastos.Droid.Content.Pm.IIPackageInstaller;
+    using interface Elastos.Droid.Content.Pm.IIPackageInstallerSession;
+    using interface Elastos.Droid.Content.Pm.IIPackageManager;
+    using interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
+    using interface Elastos.Droid.Content.Pm.IPackageInstallerSessionParams;
+    using interface Elastos.Droid.Hardware.Display.IIDisplayManager;
+    using interface Elastos.Droid.Internal.App.IIProcessStats;
+    using interface Elastos.Droid.Internal.Os.IIParcelFileDescriptorFactory;
+    using interface Elastos.Droid.Media.Projection.IIMediaProjectionCallback;
+    using interface Elastos.Droid.Net.IIConnectivityManager;
+    using interface Elastos.Droid.Net.IINetworkManagementEventObserver;
+    using interface Elastos.Droid.Net.IINetworkPolicyManager;
+    using interface Elastos.Droid.Net.IINetworkStatsService;
+    using interface Elastos.Droid.Net.IINetworkPolicyListener;
+    using interface Elastos.Droid.Service.Wallpaper.IIWallpaperConnection;
+    using interface Elastos.Droid.Utility.ITrustedTime;
+    using interface Elastos.Droid.View.IApplicationToken;
+
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Core.IThread;
+    using interface Elastos.IO.IFile;
+    using interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+
+//     class CBootReceiver {
+//         interface IBroadcastReceiver;
+//     }
+
+//     class CMasterClearReceiver {
+//         interface IBroadcastReceiver;
+//     }
+
+//     [local]
+//     class CBrickReceiver {
+//         interface IBroadcastReceiver;
+//     }
+
+//     [local]
+//     class CSerialService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IISerialManager;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CDisplayManagerServiceAw {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] IIPowerManager* pm);
+
+//         interface IIDisplayManagerAw;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CAlarmManagerService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IIAlarmManager;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CBackupManagerService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IIBackupManager;
+//         interface IBinder;
+//     }
+
+//     class CSystemBackupAgent {
+//         interface IBackupAgentHelper;
+//     }
+
+//     [local]
+//     class CActiveRestoreSession {
+//         constructor(
+//             [in] String packageName,
+//             [in] String transport,
+//             [in] Handle32 host);
+
+//         interface IIRestoreSession;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CDiskStatsService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CUpdateLockService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IIUpdateLock;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CSamplingProfilerService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CCountryDetectorService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IICountryDetector;
+//         interface IBinder;
+//         interface IRunnable;
+//     }
+
+//     [local]
+//     class CEthernetService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IIEthernetManager;
+//     }
+
+//     [local]
+//     class CCommonTimeManagementService
+//     {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IBinder;
+//     }
+
+//     // [local]
+//     // class CPppoeService {
+//     //     constructor(
+//     //         [in] IContext* ctx,
+//     //         [in] IPppoeStateTracker* tracker);
+// //
+//     //     interface IIPppoeManager;
+//     // }
+
+//     [local]
+//     class CVibratorService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IInputDeviceListener;
+//         interface IVibratorService;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CStatusBarManagerService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] Handle32 windowManager);
+
+//         interface IIStatusBarService;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CNotificationManagerService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] Handle32 statusBar,
+//             [in] Handle32 lights);
+
+//         interface IINotificationManager;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CDeviceStorageMonitorService {
+//         constructor(
+//             [in] IContext* ctx);
+//
+//         interface IDeviceStorageMonitorService;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CUiModeManagerService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] Handle32 twilight);
+
+//         interface IIUiModeManager;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CBatteryService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] Handle32 lights);
+
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CDropBoxManagerService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] IFile* path);
+
+//         interface IDropBoxManagerService;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CNsdService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IINsdManager;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CThrottleService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] IINetworkManagementService* nmService,
+//             [in] ITrustedTime* time,
+//             [in] String iface);
+
+//         interface IIThrottleManager;
+//         interface IBinder;
+//     }
+
+//     class CWMSUserSwitchObserver {
+//         constructor(
+//             [in] Handle32 owner);
+
+//         interface IUserSwitchObserver;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CDevicePolicyManagerService {
+//         constructor(
+//             [in] IContext* context);
+
+//         interface IIDevicePolicyManager;
+//     }
+
+//     namespace Am {
+
+//     class CActivityManagerService {
+//         constructor();
+
+//         interface IIActivityManager;
+//         interface IBatteryCallback;
+//     }
+
+//     class CShutdownReceiver {
+//         constructor(
+//             [in] Handle32 host,
+//             [in] Handle32 uss);
+
+//         interface IIntentReceiver;
+//     }
+
+//     class CStoppingReceiver {
+//         constructor(
+//             [in] Handle32 host,
+//             [in] Handle32 uss,
+//             [in] IIntent* shutdownIntent,
+//             [in] IIntentReceiver* shutdownReceiver,
+//             [in] Int32 userId);
+
+//         interface IIntentReceiver;
+//     }
+
+//     class CBatteryStatsService {
+//         constructor(
+//             [in] String fileName);
+
+//         interface IIBatteryStats;
+//     }
+
+//     class CUsageStatsService {
+//         constructor(
+//             [in] String dir);
+
+//         interface IIUsageStats;
+//     }
+
+//     } // namespace Am
+
+//     namespace Dreams {
+
+//     [local]
+//     class CDreamManagerService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] IHandler* mainHandler);
+
+//         interface IDreamManagerService;
+//         interface IBinder;
+//     }
+
+//     } // namespace Dreams
+
+//     namespace Input {
+
+//     [local]
+//     class CInputManagerService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] IHandler* handler);
+
+//         interface IIInputManager;
+//         interface IDisplayManagerServiceInputManagerFuncs;
+//         //interface IWatchdogMonitor;
+//     }
+
+//     } // namespace Input
+
+//     namespace Location {
+
+//     [local]
+//     class CLocationManagerService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IILocationManager;
+//         interface IRunnable;
+//     }
+
+//     } //Location
+
+//     namespace Net {
+//         class CProcessObserver {
+//             constructor(
+//                 [in] Handle32 owner);
+
+//             interface IProcessObserver;
+//         }
+
+//         [local]
+//         class CNetworkPolicyManagerService {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IIActivityManager* activityManager,
+//                 [in] IIPowerManager* powerManager,
+//                 [in] INetworkStatsService* networkStats,
+//                 [in] IINetworkManagementService* networkManagement);
+
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IIActivityManager* activityManager,
+//                 [in] IIPowerManager* powerManager,
+//                 [in] INetworkStatsService* networkStats,
+//                 [in] IINetworkManagementService* networkManagement,
+//                 [in] ITrustedTime* time,
+//                 [in] IFile* systemDir,
+//                 [in] Boolean suppressDefaultPolicy);
+
+//             interface IINetworkPolicyManager;
+//         }
+
+//         [local]
+//         class CNetworkStatsService {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IINetworkManagementService* networkManager,
+//                 [in] IIAlarmManager* alarmManager);
+
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IINetworkManagementService* networkManager,
+//                 [in] IIAlarmManager* alarmManager,
+//                 [in] ITrustedTime* time,
+//                 [in] IFile* systemDir,
+//                 [in] Handle32 settings);
+
+//             interface INetworkStatsService;
+//         }
+
+//         class CNetworkStatsSession {
+//             constructor(
+//                 [in] Handle32 host);
+
+//             interface INetworkStatsSession;
+//         }
+
+//         class CNetworkPolicyManagerServiceAlertObserber {
+//             constructor(
+//                 [in] Handle32 owner);
+
+//             interface IINetworkManagementEventObserver;
+//         }
+
+//         class CNetworkStatsServiceAlertObserber {
+//             constructor(
+//                 [in] Handle32 owner);
+
+//             interface IINetworkManagementEventObserver;
+//         }
+
+//     } // namespace Net
+
+// //    namespace Updates {
+// //
+// //    class CCertPinInstallReceiver {
+// //        constructor();
+// //
+// //        interface IBroadcastReceiver;
+// //    }
+// //
+// //    class CConfigUpdateInstallReceiver {
+// //        constructor(
+// //            [in] String updateDir,
+// //            [in] String updateContentPath,
+// //            [in] String updateMetadataPath,
+// //            [in] String updateVersionPath));
+// //
+// //        interface IBroadcastReceiver;
+// //    }
+// //
+// //    class CSmsShortCodesInstallReceiver {
+// //        constructor();
+// //
+// //        interface IBroadcastReceiver;
+// //    }
+// //
+// //    } // namespace Updates
+
+//     namespace Usb {
+
+//     [local]
+//     class CUsbService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IIUsbManager;
+//     }
+
+//     } // namespace Usb
+
+//     namespace Search {
+
+//         [local]
+//         class CSearchManagerService {
+//             constructor(
+//                 [in] IContext* ctx);
+
+//             interface IISearchManager;
+//             interface IBinder;
+//         }
+//     }
+//     namespace Wm {
+
+//     [local]
+//     class CWindowManagerService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] Handle64 inputManager,
+//             [in] Boolean haveInputMethods,
+//             [in] Boolean showBootMsgs,
+//             [in] Boolean onlyCore);
+
+//         interface IIWindowManager;
+//         interface IWindowManagerPolicyWindowManagerFuncs;
+//         interface IBinder;
+//     }
+
+//     class CSession {
+//         constructor(
+//             [in] Handle64 service,
+//             [in] IInputMethodClient* client,
+//             [in] IIWindowSessionCallback* callback,
+//             [in] IInputContext* inputContext);
+
+//         interface IIWindowId;
+//         interface IProxyDeathRecipient;
+//     }
+
+//     class CWindowId {
+//         constructor(
+//             [in] IWindowState* host);
+
+//         interface IIWindowId;
+//     }
+
+//     } // Wm
+
+
+        singleton class CSystemServer {
+            interface ISystemServer;
+        }
+
+        class CNetworkPolicyListener {
+            constructor(
+                [in] IIConnectivityManager* connectivityService);
+
+            interface IINetworkPolicyListener;
+            interface IBinder;
+        }
+
+        class CDataActivityObserver {
+            constructor(
+                [in] IIConnectivityManager* connectivityService);
+
+            interface IINetworkManagementEventObserver;
+            interface IBinder;
+        }
+
+        [local]
+        class CConnectivityService {
+            constructor(
+                [in] IContext* ctx,
+                [in] IINetworkManagementService* netManager,
+                [in] IINetworkStatsService* statsService,
+                [in] IINetworkPolicyManager* policyManager);
+
+            interface IIConnectivityManager;
+            interface IBinder;
+        }
+
+//     [local]
+//     class CMountService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IMountService;
+//         interface INativeDaemonConnectorCallbacks;
+//     }
+
+//     [local]
+//     class CRecognitionManagerService {
+//         constructor(
+//             [in] IContext* ctx);
+//         interface IRecognitionManagerService;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CTextServicesManagerService {
+//         constructor(
+//             [in] IContext* ctx);
+//         interface IITextServicesManager;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CPrivacySettingsManagerService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//             interface IIPrivacySettingsManager;
+//     }
+
+//     [local]
+//     class CAppWidgetService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IIAppWidgetService;
+//         interface IBinder;
+//     }
+
+//     namespace Accessibility {
+//         [local]
+//         class CAccessibilityManagerService {
+//             constructor(
+//                 [in] IContext* ctx);
+
+//             interface IIAccessibilityManager;
+//         }
+
+//         class CAccessibilityServiceConnection {
+//             constructor(
+//                 [in] ILooper* looper,
+//                 [in] Int32 userId,
+//                 [in] IComponentName* componentName,
+//                 [in] IAccessibilityServiceInfo* accessibilityServiceInfo,
+//                 [in] Boolean isAutomation,
+//                 [in] IIAccessibilityManager* accessibilityManager);
+
+//             interface IIAccessibilityServiceConnection;
+//             interface IServiceConnection;
+//             interface IProxyDeathRecipient;
+//         }
+
+//         [local]
+//         class CAccessibilityInputFilter {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IIAccessibilityManager* service);
+
+//             interface IInputFilter;
+//             interface IEventStreamTransformation;
+//         }
+
+//         class CMagnificationSpec {
+//             constructor(
+//                 [in] Handle32 screenMagnifier);
+
+//             interface IMagnificationSpec;
+//         }
+
+//         class CMagnificationController {
+//             constructor(
+//                 [in] Handle32 screenMagnifier,
+//                 [in] Int32 animationDuration);
+
+//             interface IMagnificationController;
+//         }
+
+//         [local]
+//         class CViewportWindow {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IWindowManager* service,
+//                 [in] Handle32 displayProvider);
+
+//             interface IViewportWindow;
+//         }
+
+//     } // Accessibility
+
+
+//     namespace Accounts {
+
+//     /**
+//      * A system service that provides  account, password, and authtoken management for all
+//      * accounts on the device. Some of these calls are implemented with the help of the corresponding
+//      * {@link IAccountAuthenticator} services. This service is not accessed by users directly,
+//      * instead one uses an instance of {@link AccountManager}, which can be accessed as follows:
+//      *    AccountManager accountManager =
+//      *      (AccountManager)context.getSystemService(Context.ACCOUNT_SERVICE)
+//      * @hide
+//      */
+//     [local]
+//     class CAccountManagerService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IIAccountManager;
+//         interface IRegisteredServicesCacheListener;
+//     }
+
+//     [local]
+//     class CTestFeaturesSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] IAccount* account,
+//             [in] ArrayOf<String> features,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     [local]
+//     class CRemoveAccountSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] IAccount* account,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     [local]
+//     class CGetAccountsByTypeAndFeatureSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] String type,
+//             [in] ArrayOf<String> features,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     [local]
+//     class CGetAuthTokenLabelSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] String type,
+//             [in] String authTokenType,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     [local]
+//     class CGetAuthTokenSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] IAccount* account,
+//             [in] String authTokenType,
+//             [in] Boolean expectActivityLaunch,
+//             [in] IBundle* loginOptions,
+//             [in] Boolean notifyOnAuthFailure,
+//             [in] Boolean permissionGranted,
+//             [in] Boolean customTokens,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     [local]
+//     class CAddAcountSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] String accountType,
+//             [in] Boolean expectActivityLaunch,
+//             [in] String authTokenType,
+//             [in] ArrayOf<String> requiredFeatures,
+//             [in] IBundle* options,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     [local]
+//     class CConfirmCredentialsAsUserSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] Boolean expectActivityLaunch,
+//             [in] IAccount* account,
+//             [in] IBundle* options,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     [local]
+//     class CUpdateCredentialsSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] Boolean expectActivityLaunch,
+//             [in] IAccount* account,
+//             [in] String authTokenType,
+//             [in] IBundle* loginOptions,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     [local]
+//     class CEditPropertiesSession {
+//         constructor(
+//             [in] Handle32 accounts,
+//             [in] IAccountManagerResponse* response,
+//             [in] String type,
+//             [in] Boolean expectActivityLaunch,
+//             [in] IIAccountManager* host);
+
+//         interface IIAccountAuthenticatorResponse;
+//         interface IProxyDeathRecipient;
+//         interface IServiceConnection;
+//     }
+
+//     } // Accounts
+
+//     [local]
+//     class CWifiService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IIWifiManager;
+//     }
+
+//     [local]
+//     class CWifiDisplayManagerService {
+//         constructor(
+//             [in] IContext* ctx,
+//             [in] IIPowerManager* powerManagerService);
+
+//         interface IWifiDisplayManager;
+//     }
+
+//     [local]
+//     class CZigbeeService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IZigbeeService;
+//         interface IBinder;
+//     }
+
+//     [local]
+//     class CKortideRemoteService {
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface IKortideRemoteService;
+//         interface IBinder;
+//     }
+
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+
+//     namespace Elastos {
+//     namespace Droid {
+//     namespace Widget {
+//     namespace Internal {
+
+//     [local]
+//     class CLockSettingsService {
+
+//         constructor(
+//             [in] IContext* ctx);
+
+//         interface ILockSettings;
+//     }
+
+//     } // namespace Internal
+//     } // namespace Widget
+//     } // namespace Droid
+//     } // namespace Elastos
+
+
+    // namespace Elastos {
+    // namespace Droid {
+    // namespace Server {
+    // namespace Pm {
+
+    // [local]
+    // class CPackageManagerService {
+    //     constructor(
+    //         [in] IContext* ctx,
+    //         [in] Handle32 installer,
+    //         [in] Boolean factoryTest,
+    //         [in] Boolean onlyCore);
+
+    //     interface IIPackageManager;
+    //     interface IBinder;
+    // }
+
+    // class CParcelFileDescriptorFactory {
+    //     constructor(
+    //         [in] IFile* codeFile);
+
+    //     interface IIParcelFileDescriptorFactory;
+    //     interface IBinder;
+    // }
+
+    // class CResourcesChangedReceiver {
+    //     constructor(
+    //         [in] IIPackageManager* owner,
+    //         [in] ISet* keys,
+    //         [in] Boolean reportStatus);
+
+    //     interface IIntentReceiver;
+    //     interface IBinder;
+    // }
+
+    // class CPackageInstallObserver2 {
+    //     constructor(
+    //         [in] IIPackageManager* owner,
+    //         [in] IIPackageMoveObserver* observer);
+
+    //     interface IIPackageInstallObserver2;
+    //     interface IBinder;
+    // }
+
+    // class CKeySetHandle {
+    //     constructor();
+
+    //     interface IBinder;
+    // }
+
+    // [local]
+    // class CLauncherAppsImpl {
+    //     constructor(
+    //         [in] IContext* context);
+
+    //     interface IILauncherApps;
+    //     interface IBinder;
+    // }
+
+    // [local]
+    // class CPackageInstallerService {
+    //     constructor(
+    //         [in] IContext* ctx,
+    //         [in] IIPackageManager* pm,
+    //         [in] IFile* stagingDir);
+
+    //     interface IIPackageInstaller;
+    //     interface IBinder;
+    // }
+
+    // [local]
+    // class CPackageInstallerSession {
+    //     constructor(
+    //         [in] Handle64 cb,
+    //         [in] IContext* ctx,
+    //         [in] IIPackageManager* pm,
+    //         [in] ILooper* l,
+    //         [in] Int32 sessionId,
+    //         [in] Int32 userId,
+    //         [in] String installerPackageName,
+    //         [in] Int32 installerUid,
+    //         [in] IPackageInstallerSessionParams* params,
+    //         [in] Int64 createdMillis,
+    //         [in] IFile* stagingDir,
+    //         [in] String stageCid,
+    //         [in] Boolean prepared,
+    //         [in] Boolean sealed);
+
+    //     interface IIPackageInstallerSession;
+    //     interface IBinder;
+    // }
+
+    // class CLocalObserver {
+    //     constructor(
+    //         [in] IIPackageInstallerSession* session);
+
+    //     interface IIPackageInstallObserver2;
+    //     interface IBinder;
+    // }
+
+    // [local]
+    // class CUserManagerService {
+    //     constructor(
+    //         [in] IFile* dataDir,
+    //         [in] IFile* baseUserPath);
+
+    //     constructor(
+    //         [in] IContext* ctx,
+    //         [in] IIPackageManager* pm,
+    //         [in] IObject* installLock,
+    //         [in] IObject* packagesLock);
+
+    //     interface IIUserManager;
+    //     interface IBinder;
+    // }
+
+    // class CUserStopUserCallback {
+    //     constructor(
+    //         [in] IIUserManager* mUm);
+
+    //     interface IStopUserCallback;
+    //     interface IBinder;
+    // }
+
+    // } // namespace Pm
+    // } // namespace Server
+    // } // namepsace Droid
+    // } // namespace Elastos
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Wallpaper {
+
+        [local]
+        class CWallpaperManagerService  {
+            constructor(
+                [in] IContext* ctx);
+
+            interface IWallpaperManagerService;
+            interface IIWallpaperManager;
+            interface IBinder;
+         }
+
+        [local]
+        class CWallpaperConnection {
+            constructor(
+                [in] IWallpaperInfo* info,
+                [in] IWallpaperData* wallpaper);
+
+            interface IWallpaperConnection;
+            interface IIWallpaperConnection;
+            interface IServiceConnection;
+            interface IBinder;
+         }
+    } //namespace Wallpaper
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Connectivity {
+
+        class CTethering {
+            constructor(
+                [in] IContext* ctx,
+                [in] IINetworkManagementService* nmService,
+                [in] IINetworkStatsService* statsService,
+                [in] ILooper* looper);
+
+            interface IINetworkManagementEventObserver;
+            interface IBinder;
+        }
+
+        class CVpnObserver {
+            constructor(
+                [in] Handle32 owner);
+
+            interface IINetworkManagementEventObserver;
+            interface IBinder;
+        }
+
+        [local]
+        class CNat464Xlat {
+            constructor(
+                [in] IContext* context,
+                [in] IINetworkManagementService* nmService,
+                [in] IIConnectivityManager* connService,
+                [in] IHandler* handler);
+
+            interface IINetworkManagementEventObserver;
+            interface IBinder;
+        }
+
+    } // namespace Connectivity
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Content {
+
+    /**
+     * {@hide}
+     */
+    [local]
+    class CContentService {
+        constructor(
+            [in] IContext* ctx,
+            [in] Boolean factoryTest);
+
+        interface IIContentService;
+    }
+
+    class CSyncStatusObserver {
+        constructor(
+            [in] ISyncManager* syncMgr);
+
+        interface IISyncStatusObserver;
+    }
+
+    class CActiveSyncContext {
+        constructor(
+            [in] ISyncManager* syncMgr,
+            [in] ISyncOperation* syncOperation,
+            [in] Int64 historyRowId,
+            [in] Int32 syncAdapterUid);
+
+        interface IActiveSyncContext;
+        interface IISyncContext;
+        interface IBinder;
+        interface IServiceConnection;
+        interface IProxyDeathRecipient;
+    }
+
+    } // namespace Content
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Os {
+
+    class CSchedulingPolicyService {
+        constructor();
+
+        interface IISchedulingPolicyService;
+        interface IBinder;
+    }
+
+    } // namespace Os
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Display {
+
+    [local]
+    class CDisplayManagerService {
+        constructor(
+            [in] IContext* ctx);
+
+        interface ISystemService;
+    }
+
+    class CDisplayManagerBinderService {
+        constructor(
+            [in] ISystemService* displayManagerService);
+
+        interface IIDisplayManager;
+        interface IBinder;
+    }
+
+    class CMediaProjectionCallback {
+        constructor(
+            [in] IBinder* appToken,
+            [in] IObject* displayAdapter);
+
+        interface IIMediaProjectionCallback;
+        interface IBinder;
+    }
+
+    } // namespace Display
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Am {
+
+    [local]
+    class CActivityRecordToken {
+        constructor(
+            [in] IActivityRecord* activity);
+
+        interface IApplicationToken;
+        interface IBinder;
+    }
+
+    class CContentProviderConnection {
+        constructor(
+            [in] Handle32 provider,
+            [in] Handle32 client);
+
+        interface IBinder;
+    }
+
+    [local]
+    class CPendingAssistExtras {
+        constructor(
+            [in] IActivityRecord* activity,
+            [in] IBundle* extras,
+            [in] IIntent* intent,
+            [in] String hint,
+            [in] Int32 userHandle);
+
+        interface IBinder;
+        interface IRunnable;
+    }
+
+    class CPendingIntentRecord {
+        constructor(
+            [in] Handle32 owner,
+            [in] Handle32 k,
+            [in] Int32 u);
+
+        interface IPendingIntentRecord;
+        interface IIIntentSender;
+        interface IBinder;
+    }
+
+    class CProcessStatsService {
+        constructor(
+            [in] Handle32 am, //CActivityManagerService*
+            [in] IFile* file);
+
+        interface IIProcessStats;
+        interface IBinder;
+    }
+
+    class CServiceRecord {
+        interface IBinder;
+    }
+
+    class CUriPermissionOwnerExternalToken {
+        constructor(
+            [in] Handle32 owner);
+
+        interface IUriPermissionOwnerExternalToken;
+        interface IBinder;
+    }
+
+    } // namespace Am
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Clipboard {
+
+    [local]
+    class CClipboardService {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IIClipboard;
+        interface IBinder;
+    }
+
+    } // namespace Clipboard
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Net {
+
+    [local]
+    class CNetworkPolicyManagerService {
+        constructor(
+            [in] IContext* context,
+            [in] IIActivityManager* activityManager,
+            [in] IIPowerManager* powerManager,
+            [in] IINetworkStatsService* networkStats,
+            [in] IINetworkManagementService* networkManagement);
+
+        constructor(
+            [in] IContext* context,
+            [in] IIActivityManager* activityManager,
+            [in] IIPowerManager* powerManager,
+            [in] IINetworkStatsService* networkStats,
+            [in] IINetworkManagementService* networkManagement,
+            [in] ITrustedTime* time,
+            [in] IFile* systemDir,
+            [in] Boolean suppressDefaultPolicy);
+
+        interface IINetworkPolicyManager;
+        interface IBinder;
+        interface INetworkPolicyManagerService;
+    }
+
+    } // namespace Net
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Lights {
+
+    [local]
+    class CLegacyFlashlightHack {
+        constructor(
+            [in] ISystemService* service);
+
+        interface IIHardwareService;
+        interface IBinder;
+    }
+
+    } // namespace Lights
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Power {
+
+    [local]
+    class CPowerManagerServiceBinderService {
+        constructor(
+            [in] ISystemService* service);
+
+        interface IIPowerManager;
+        interface IBinder;
+    }
+
+    class CMountShutdownObserver {
+        constructor(
+            [in] IThread* host);
+
+        interface IIMountShutdownObserver;
+        interface IBinder;
+    }
+
+    } // Power
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+}

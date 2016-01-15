@@ -1,0 +1,237 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1SequenceOf;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Set;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1SetOf;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1StringType;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    [deprecated]
+    interface IBerInputStream {
+        /**
+         * Resets this stream to initial state.
+         *
+         * @param encoded a new bytes array to be decoded
+         * @throws IOException if an error occurs
+         */
+        Reset(
+            [in] ArrayOf<Byte>* encoded);
+
+        /**
+         * Decodes next encoded type.
+         * Initializes tag, length, tagOffset and contentOffset variables
+         *
+         * @return next decoded tag
+         * @throws IOException if error occured
+         */
+        Next(
+            [out] Int32* next);
+
+        /**
+         * Decodes ASN.1 bitstring type
+         */
+        ReadBitString();
+
+        /**
+        * Decodes ASN.1 Enumerated type
+        */
+        ReadEnumerated();
+
+        /**
+         * Decodes ASN.1 boolean type
+         */
+        ReadBoolean();
+
+        /**
+         * Decodes ASN.1 GeneralizedTime type
+         *
+         * @throws IOException if error occured
+         */
+        ReadGeneralizedTime();
+
+        /**
+         * Decodes ASN.1 UTCTime type
+         *
+         * @throws IOException if an I/O error occurs or the end of the stream is reached
+         */
+        ReadUTCTime();
+
+        /**
+         * Decodes ASN.1 Integer type
+         */
+        ReadInteger();
+
+        /**
+         * Decodes ASN.1 Octetstring type
+         */
+        ReadOctetString();
+
+        /**
+         * Decodes ASN.1 ObjectIdentifier type
+         */
+        ReadOID();
+
+        /**
+         * Decodes ASN.1 Sequence type
+         */
+        ReadSequence(
+            [in] IASN1Sequence* sequence);
+
+        /**
+         * Decodes ASN.1 SequenceOf type
+         */
+        ReadSequenceOf(
+            [in] IASN1SequenceOf* sequenceOf);
+
+        /**
+         * Decodes ASN.1 Set type
+         */
+        ReadSet(
+            [in] IASN1Set* set);
+
+        /**
+         * Decodes ASN.1 SetOf type
+         */
+        ReadSetOf(
+            [in] IASN1SetOf* setOf);
+
+        /**
+         * Decodes ASN.1 String type
+         *
+         * @throws IOException if an I/O error occurs or the end of the stream is reached
+         */
+        ReadString(
+            [in] IASN1StringType* type);
+
+        /**
+         * Returns encoded array.
+         *
+         * MUST be invoked after decoding corresponding ASN.1 notation
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * Returns internal buffer used for decoding
+         */
+        GetBuffer(
+            [out, callee] ArrayOf<Byte>* buffer);
+
+        GetLength(
+            [out] Int32* length);
+
+        /**
+         * Returns the current offset
+         */
+        GetOffset(
+            [out] Int32* offset);
+
+        /**
+         * Returns end offset for the current encoded type
+         */
+        GetEndOffset(
+            [out] Int32* endOffset);
+
+        /**
+         * Returns start offset for the current encoded type
+         */
+        GetTagOffset(
+            [out] Int32* tagOffset);
+
+        /**
+         * Sets verify mode.
+         */
+        SetVerify();
+
+        /**
+         * Reads the next encoded content from the encoded input stream.
+         * The method MUST be used for reading a primitive encoded content.
+         */
+        ReadContent();
+
+        /**
+         * Reallocates the buffer in order to make it
+         * exactly the size of data it contains
+         */
+        CompactBuffer();
+
+        Put(
+            [in] IInterface* key,
+            [in] IInterface* entry);
+
+        Get(
+            [in] IInterface* key,
+            [out] IInterface** entry);
+
+//        /** Current decoded tag */
+//        SetTag(
+//            [in] Int32 tag);
+//
+//        GetTag(
+//            [out] Int32* tag);
+//
+//        SetLength(
+//            [in] Int32 length);
+//
+//        /** Current decoded content */
+//        SetContent(
+//            [in] IInterface* content);
+//
+        GetContent(
+            [out] IInterface** content);
+
+//        GetTagOffSet(
+//            [out] Int32* tagOffset);
+//
+//        SetTagOffSet(
+//            [in] Int32 tagOffset);
+//
+        GetContentOffset(
+            [out] Int32* contentOffset);
+
+//        SetContentOffset(
+//            [in] Int32 contentOffset);
+//
+//        /** The last choice index */
+//        SetChoiceIndex(
+//            [in] Int32 choiceIndex);
+//
+//        GetChoiceIndex(
+//            [out] Int32* choiceIndex);
+//
+//        /** Keeps last decoded: year, month, day, hour, minute, second, millisecond */
+//        SetTimes(
+//            [in] ArrayOf<Int32>* times);
+//
+//        GetTimes(
+//            [out, callee] ArrayOf<Int32>* times);
+//
+//        SetOidElement(
+//            [in] Int32 oidElement);
+//
+//        GetOidElement(
+//            [out] Int32* oidElement);
+
+        GetVerify(
+            [out] Boolean* isVerify);
+    }
+
+    interface IBerInputStreamHelper {
+        GetLength(
+            [in] ArrayOf<Byte> encoding,
+            [out] Int32* length);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

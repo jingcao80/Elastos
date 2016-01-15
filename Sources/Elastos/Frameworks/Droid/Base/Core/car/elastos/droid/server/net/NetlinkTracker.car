@@ -1,0 +1,58 @@
+
+module
+{
+    interface Elastos.Droid.Net.ILinkProperties;
+    using interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Net {
+
+    interface INetlinkTracker {
+        GetLinkProperties(
+            [out] ILinkProperties** lp);
+
+        ClearLinkProperties();
+    }
+
+    interface INetlinkTrackerCallback {
+        Update();
+    }
+
+    interface IDnsServerEntry {
+        GetExpiry(
+            [out] Int64* expiry);
+
+        SetExpiry(
+            [in] Int64 expiry);
+
+        GetAddress(
+            [out] IInetAddress** address);
+
+        SetAddress(
+            [in] IInetAddress* address);
+    }
+
+    [deprecated]
+    interface IDnsServerRepository {
+        /** How many DNS servers we will use. 3 is suggested by RFC 6106. */
+        const Int32 NUM_CURRENT_SERVERS = 3;
+
+        /** How many DNS servers we'll keep track of, in total. */
+        const Int32 NUM_SERVERS = 12;
+
+        SetDnsServersOn(
+            [in] ILinkProperties* lp);
+
+        AddServers(
+            [in] Int64 lifetime,
+            [in] ArrayOf<String>* addresses,
+            [out] Boolean* isAdded);
+    }
+
+    } // namespace Net
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

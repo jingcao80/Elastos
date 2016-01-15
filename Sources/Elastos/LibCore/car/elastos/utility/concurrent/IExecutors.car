@@ -1,0 +1,322 @@
+
+module
+{
+    interface Elastos.Security.IPrivilegedAction;
+    interface Elastos.Security.IPrivilegedExceptionAction;
+    interface Elastos.Core.IRunnable;
+    interface Elastos.Utility.Concurrent.ICallable;
+    interface Elastos.Utility.Concurrent.IExecutorService;
+    interface Elastos.Utility.Concurrent.IThreadFactory;
+    interface Elastos.Utility.Concurrent.IScheduledExecutorService;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+
+    interface IExecutors {
+        /**
+         * Returns a {@link Callable} object that, when
+         * called, runs the given task and returns the given result.  This
+         * can be useful when applying methods requiring a
+         * <tt>Callable</tt> to an otherwise resultless action.
+         * @param task the task to run
+         * @param result the result to return
+         * @return a callable object
+         * @throws NullPointerException if task null
+         */
+        Callable(
+            [in] IRunnable* task,
+            [in] IInterface* result,
+            [out] ICallable** object);
+
+        /**
+         * Creates a thread pool that reuses a fixed number of threads
+         * operating off a shared unbounded queue.  At any point, at most
+         * {@code nThreads} threads will be active processing tasks.
+         * If additional tasks are submitted when all threads are active,
+         * they will wait in the queue until a thread is available.
+         * If any thread terminates due to a failure during execution
+         * prior to shutdown, a new one will take its place if needed to
+         * execute subsequent tasks.  The threads in the pool will exist
+         * until it is explicitly {@link ExecutorService#shutdown shutdown}.
+         *
+         * @param nThreads the number of threads in the pool
+         * @return the newly created thread pool
+         * @throws IllegalArgumentException if {@code nThreads <= 0}
+         */
+        NewFixedThreadPool(
+            [in] Int32 nThreads,
+            [out] IExecutorService** result);
+
+        /**
+         * Creates a thread pool that maintains enough threads to support
+         * the given parallelism level, and may use multiple queues to
+         * reduce contention. The parallelism level corresponds to the
+         * maximum number of threads actively engaged in, or available to
+         * engage in, task processing. The actual number of threads may
+         * grow and shrink dynamically. A work-stealing pool makes no
+         * guarantees about the order in which submitted tasks are
+         * executed.
+         *
+         * @param parallelism the targeted parallelism level
+         * @return the newly created thread pool
+         * @throws IllegalArgumentException if {@code parallelism <= 0}
+         * @since 1.8
+         * @hide
+         */
+        NewWorkStealingPool(
+            [in] Int32 parallelism,
+            [out] IExecutorService** result);
+
+        /**
+         * Creates a work-stealing thread pool using all
+         * {@link Runtime#availableProcessors available processors}
+         * as its target parallelism level.
+         * @return the newly created thread pool
+         * @since 1.8
+         * @hide
+         */
+        NewWorkStealingPool(
+            [out] IExecutorService** result);
+
+        /**
+         * Creates a thread pool that reuses a fixed number of threads
+         * operating off a shared unbounded queue, using the provided
+         * ThreadFactory to create new threads when needed.  At any point,
+         * at most {@code nThreads} threads will be active processing
+         * tasks.  If additional tasks are submitted when all threads are
+         * active, they will wait in the queue until a thread is
+         * available.  If any thread terminates due to a failure during
+         * execution prior to shutdown, a new one will take its place if
+         * needed to execute subsequent tasks.  The threads in the pool will
+         * exist until it is explicitly {@link ExecutorService#shutdown
+         * shutdown}.
+         *
+         * @param nThreads the number of threads in the pool
+         * @param threadFactory the factory to use when creating new threads
+         * @return the newly created thread pool
+         * @throws NullPointerException if threadFactory is null
+         * @throws IllegalArgumentException if {@code nThreads <= 0}
+         */
+        NewFixedThreadPool(
+            [in] Int32 nThreads,
+            [in] IThreadFactory* threadFactory,
+            [out] IExecutorService** result);
+
+        /**
+         * Creates an Executor that uses a single worker thread operating
+         * off an unbounded queue. (Note however that if this single
+         * thread terminates due to a failure during execution prior to
+         * shutdown, a new one will take its place if needed to execute
+         * subsequent tasks.)  Tasks are guaranteed to execute
+         * sequentially, and no more than one task will be active at any
+         * given time. Unlike the otherwise equivalent
+         * {@code newFixedThreadPool(1)} the returned executor is
+         * guaranteed not to be reconfigurable to use additional threads.
+         *
+         * @return the newly created single-threaded Executor
+         */
+        NewSingleThreadExecutor(
+            [out] IExecutorService** result);
+
+        /**
+         * Creates an Executor that uses a single worker thread operating
+         * off an unbounded queue, and uses the provided ThreadFactory to
+         * create a new thread when needed. Unlike the otherwise
+         * equivalent {@code newFixedThreadPool(1, threadFactory)} the
+         * returned executor is guaranteed not to be reconfigurable to use
+         * additional threads.
+         *
+         * @param threadFactory the factory to use when creating new
+         * threads
+         *
+         * @return the newly created single-threaded Executor
+         * @throws NullPointerException if threadFactory is null
+         */
+        NewSingleThreadExecutor(
+            [in] IThreadFactory* threadFactory,
+            [out] IExecutorService** result);
+
+        /**
+         * Creates a thread pool that creates new threads as needed, but
+         * will reuse previously constructed threads when they are
+         * available.  These pools will typically improve the performance
+         * of programs that execute many short-lived asynchronous tasks.
+         * Calls to {@code execute} will reuse previously constructed
+         * threads if available. If no existing thread is available, a new
+         * thread will be created and added to the pool. Threads that have
+         * not been used for sixty seconds are terminated and removed from
+         * the cache. Thus, a pool that remains idle for long enough will
+         * not consume any resources. Note that pools with similar
+         * properties but different details (for example, timeout parameters)
+         * may be created using {@link ThreadPoolExecutor} constructors.
+         *
+         * @return the newly created thread pool
+         */
+        NewCachedThreadPool(
+            [out] IExecutorService** result);
+
+        /**
+         * Creates a thread pool that creates new threads as needed, but
+         * will reuse previously constructed threads when they are
+         * available, and uses the provided
+         * ThreadFactory to create new threads when needed.
+         * @param threadFactory the factory to use when creating new threads
+         * @return the newly created thread pool
+         * @throws NullPointerException if threadFactory is null
+         */
+        NewCachedThreadPool(
+            [in] IThreadFactory* threadFactory,
+            [out] IExecutorService** result);
+
+        /**
+         * Creates a single-threaded executor that can schedule commands
+         * to run after a given delay, or to execute periodically.
+         * (Note however that if this single
+         * thread terminates due to a failure during execution prior to
+         * shutdown, a new one will take its place if needed to execute
+         * subsequent tasks.)  Tasks are guaranteed to execute
+         * sequentially, and no more than one task will be active at any
+         * given time. Unlike the otherwise equivalent
+         * {@code newScheduledThreadPool(1)} the returned executor is
+         * guaranteed not to be reconfigurable to use additional threads.
+         * @return the newly created scheduled executor
+         */
+        NewSingleThreadScheduledExecutor(
+            [out] IScheduledExecutorService** result);
+
+        /**
+         * Creates a single-threaded executor that can schedule commands
+         * to run after a given delay, or to execute periodically.  (Note
+         * however that if this single thread terminates due to a failure
+         * during execution prior to shutdown, a new one will take its
+         * place if needed to execute subsequent tasks.)  Tasks are
+         * guaranteed to execute sequentially, and no more than one task
+         * will be active at any given time. Unlike the otherwise
+         * equivalent {@code newScheduledThreadPool(1, threadFactory)}
+         * the returned executor is guaranteed not to be reconfigurable to
+         * use additional threads.
+         * @param threadFactory the factory to use when creating new
+         * threads
+         * @return a newly created scheduled executor
+         * @throws NullPointerException if threadFactory is null
+         */
+        NewSingleThreadScheduledExecutor(
+            [in] IThreadFactory* threadFactory,
+            [out] IScheduledExecutorService** result);
+
+        /**
+         * Creates a thread pool that can schedule commands to run after a
+         * given delay, or to execute periodically.
+         * @param corePoolSize the number of threads to keep in the pool,
+         * even if they are idle
+         * @return a newly created scheduled thread pool
+         * @throws IllegalArgumentException if {@code corePoolSize < 0}
+         */
+        NewScheduledThreadPool(
+            [in] Int32 corePoolSize,
+            [out] IScheduledExecutorService** result);
+
+        /**
+         * Creates a thread pool that can schedule commands to run after a
+         * given delay, or to execute periodically.
+         * @param corePoolSize the number of threads to keep in the pool,
+         * even if they are idle
+         * @param threadFactory the factory to use when the executor
+         * creates a new thread
+         * @return a newly created scheduled thread pool
+         * @throws IllegalArgumentException if {@code corePoolSize < 0}
+         * @throws NullPointerException if threadFactory is null
+         */
+        NewScheduledThreadPool(
+            [in] Int32 corePoolSize,
+            [in] IThreadFactory* threadFactory,
+            [out] IScheduledExecutorService** result);
+
+        /**
+         * Returns an object that delegates all defined {@link
+         * ExecutorService} methods to the given executor, but not any
+         * other methods that might otherwise be accessible using
+         * casts. This provides a way to safely "freeze" configuration and
+         * disallow tuning of a given concrete implementation.
+         * @param executor the underlying implementation
+         * @return an {@code ExecutorService} instance
+         * @throws NullPointerException if executor null
+         */
+        UnconfigurableExecutorService(
+            [in] IExecutorService* executor,
+            [out] IExecutorService** result);
+
+        /**
+         * Returns an object that delegates all defined {@link
+         * ScheduledExecutorService} methods to the given executor, but
+         * not any other methods that might otherwise be accessible using
+         * casts. This provides a way to safely "freeze" configuration and
+         * disallow tuning of a given concrete implementation.
+         * @param executor the underlying implementation
+         * @return a {@code ScheduledExecutorService} instance
+         * @throws NullPointerException if executor null
+         */
+        UnconfigurableScheduledExecutorService(
+            [in] IScheduledExecutorService* executor,
+            [out] IScheduledExecutorService** result);
+
+        /**
+         * Legacy security code; do not use.
+         */
+        PrivilegedThreadFactory(
+            [out] IThreadFactory** result);
+
+        /**
+         * Returns a {@link Callable} object that, when
+         * called, runs the given task and returns {@code null}.
+         * @param task the task to run
+         * @return a callable object
+         * @throws NullPointerException if task null
+         */
+        Callable(
+            [in] IRunnable* task,
+            [out] ICallable** result);
+
+        /**
+         * Returns a {@link Callable} object that, when
+         * called, runs the given privileged action and returns its result.
+         * @param action the privileged action to run
+         * @return a callable object
+         * @throws NullPointerException if action null
+         */
+        Callable(
+            [in] IPrivilegedAction* action,
+            [out] ICallable** result);
+
+        /**
+         * Returns a {@link Callable} object that, when
+         * called, runs the given privileged exception action and returns
+         * its result.
+         * @param action the privileged exception action to run
+         * @return a callable object
+         * @throws NullPointerException if action null
+         */
+        Callable(
+            [in] IPrivilegedExceptionAction* action,
+            [out] ICallable** result);
+
+        /**
+         * Legacy security code; do not use.
+         */
+        PrivilegedCallable(
+            [in] ICallable* callable,
+            [out] ICallable** result);
+
+        /**
+         * Legacy security code; do not use.
+         */
+        PrivilegedCallableUsingCurrentClassLoader(
+            [in] ICallable* callable,
+            [out] ICallable** result);
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

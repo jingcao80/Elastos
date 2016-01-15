@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.Qs.IQSPanel;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IKeyguardUserSwitcher;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * Container for image of the multi user switcher (tappable).
+     */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     * interface IViewOnClickListener
+     */
+    interface IMultiUserSwitch {
+        SetQsPanel(
+            [in] IQSPanel* qsPanel);
+
+        SetKeyguardUserSwitcher(
+            [in] IKeyguardUserSwitcher* keyguardUserSwitcher);
+
+        SetKeyguardMode(
+            [in] Boolean keyguardShowing);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

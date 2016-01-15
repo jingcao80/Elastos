@@ -1,0 +1,154 @@
+
+module
+{
+    interface Elastos.IO.IInputStream;
+
+    interface Elastos.Utility.Zip.IZipEntry;
+    interface Elastos.Utility.Zip.IInflater;
+    interface Elastos.Utility.IEnumeration;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * @Involve
+     * interface IInputStream;
+     */
+    interface IZipFileRAFStream {
+        Fill(
+            [in] IInflater* inflater,
+            [in] Int32 nativeEndBufSize,
+            [out] Int32* result);
+    }
+
+    /**
+    * This class provides random read access to a zip file. You pay more to read the
+    * zip file's central directory up front (from the constructor), but if you're
+    * using getEntry(String) to look up multiple files by name, you get the benefit of
+    * this index.
+    *
+    * @sa getEntry(String)
+    *
+    * <p>
+    * If you only want to iterate through all the files (using entries(), you should
+    * consider ZipInputStream, which provides stream-like read access to a zip file
+    * and has a lower up-front cost because you don't pay to build an in-memory index.
+    *
+    * @sa entries()
+    * @sa ZipInputStream
+    *
+    * <p>
+    * If you want to create a zip file, use ZipOutputStream. There is no API for
+    * updating an existing zip file.
+    *
+    * @sa ZipOutputStream
+    *
+    * @implements Elastos.Utility.Zip.IZipConstants
+    */
+
+    /**
+     * @Involve
+     * interface IZipConstants;
+     */
+    interface IZipFile {
+        /**
+         * Open ZIP file for read.
+         */
+        const Int32 OPEN_READ = 1;
+
+        /**
+         * Delete ZIP file when closed.
+         */
+        const Int32 OPEN_DELETE = 4;
+
+        /**
+         * Closes this ZIP file. This method is idempotent.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an IOException occurs.
+         */
+        Close();
+
+        /**
+         * Returns an enumeration of the entries. The entries are listed in the
+         * order in which they appear in the ZIP archive.
+         *
+         * @return the enumeration of the entries.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException |if this ZIP file has been closed.
+         */
+        GetEntries(
+            [out] IEnumeration** entries);
+
+        /**
+         * Gets the ZIP entry with the specified name from this {ZipFile}.
+         *
+         * @param entryName
+         *            the name of the entry in the ZIP file.
+         * @return a {ZipEntry} or {null} if the entry name does not
+         *         exist in the ZIP file.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if this ZIP file has been closed.
+         */
+        GetEntry(
+            [in] String entryName,
+            [out] IZipEntry** entry);
+
+        /**
+         * Returns an input stream on the data of the specified {ZipEntry}.
+         *
+         * @param entry
+         *            the ZipEntry.
+         * @return an input stream of the data contained in the {ZipEntry}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an {IOException} occurs.
+         * IllegalStateException | if this ZIP file has been closed.
+         */
+        GetInputStream(
+            [in] IZipEntry* entry,
+            [out] IInputStream** is);
+
+        /**
+         * Gets the file name of this {ZipFile}.
+         *
+         * @return the file name of this {ZipFile}.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns this file's comment, or null if it doesn't have one.
+         * See {@link ZipOutputStream#setComment}.
+         *
+         * @throws IllegalStateException if this zip file has been closed.
+         * @since 1.7
+         */
+        GetComment(
+            [out] String* name);
+
+        /**
+         * Returns the number of {ZipEntries} in this {ZipFile}.
+         *
+         * @return the number of entries in this file.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if this ZIP file has been closed.
+         */
+        GetSize(
+            [out] Int32* size);
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

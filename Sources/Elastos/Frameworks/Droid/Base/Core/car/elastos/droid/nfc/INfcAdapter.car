@@ -1,0 +1,108 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.IINfcCardEmulation;
+    interface Elastos.Droid.NFC.IINfcAdapterExtras;
+    interface Elastos.Droid.NFC.ITechListParcel;
+    interface Elastos.Droid.NFC.IINfcUnlockHandler;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Content.IIntentFilter;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+    /*
+     * Copyright (C) 2010 The Android Open Source Project
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    [deprecated]
+    interface IINfcAdapter {
+        GetNfcTagInterface(
+            [out] IINfcTag** tag);
+
+        GetNfcCardEmulationInterface(
+            [out] IINfcCardEmulation** emulation);
+
+        GetNfcAdapterExtrasInterface(
+            [in] String pkg,
+            [out] IINfcAdapterExtras** extras);
+
+        GetState(
+            [out] Int32* state);
+
+        Disable(
+            [in] Boolean saveState,
+            [out] Boolean* res);
+
+        Enable(
+            [out] Boolean* res);
+
+        EnableNdefPush(
+            [out] Boolean* res);
+
+        DisableNdefPush(
+            [out] Boolean* res);
+
+        IsNdefPushEnabled(
+            [out] Boolean* res);
+
+        PausePolling(
+            [in] Int32 timeoutInMs);
+
+        ResumePolling();
+
+        SetForegroundDispatch(
+            [in] IPendingIntent* intent,
+            [in] ArrayOf<IIntentFilter*>* filters,
+            [in] ITechListParcel* techLists);
+
+        SetAppCallback(
+            [in] IIAppCallback* cb);
+
+        [oneway]
+        InvokeBeam();
+
+        [oneway]
+        InvokeBeamInternal(
+            [in] IBeamShareData* shareData);
+
+        Dispatch(
+            [in] ITag* tag);
+
+        SetReaderMode (
+            [in] IBinder* b,
+            [in] IIAppCallback* cb,
+            [in] Int32 flags,
+            [in] IBundle* extras);
+
+        SetP2pModes(
+            [in] Int32 initatorModes,
+            [in] Int32 targetModes);
+
+        AddNfcUnlockHandler(
+            [in] IINfcUnlockHandler* unlockHandler,
+            [in] ArrayOf<Int32> techList);
+
+        RemoveNfcUnlockHandler(
+            [in] IINfcUnlockHandler* unlockHandler);
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

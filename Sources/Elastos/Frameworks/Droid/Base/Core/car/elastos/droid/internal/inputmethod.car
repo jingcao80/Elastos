@@ -1,0 +1,39 @@
+module
+{
+    merge("inputmethod/InputMethodSubtypeSwitchingController.car");
+    merge("inputmethod/InputMethodUtils.car");
+
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Utility.IHashMap;
+    using interface Elastos.Utility.IArrayList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace InputMethod {
+
+    singleton class CInputMethodSubtypeSwitchingControllerHelper {
+        interface IInputMethodSubtypeSwitchingControllerHelper;
+    }
+
+    singleton class CInputMethodUtils {
+        interface IInputMethodUtils;
+    }
+
+    class CInputMethodSettings {
+        constructor(
+            [in] IResources* res,
+            [in] IContentResolver* resolver,
+            [in] IHashMap* methodMap,
+            [in] IArrayList* methodList,
+            [in] Int32 userId);
+
+        interface IInputMethodSettings;
+    }
+
+    } // namespace InputMethod
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

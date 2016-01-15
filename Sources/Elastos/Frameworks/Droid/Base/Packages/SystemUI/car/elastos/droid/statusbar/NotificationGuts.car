@@ -1,0 +1,89 @@
+module
+{
+    using interface Elastos.Droid.View.Animation.IInterpolator;
+    using interface Elastos.Droid.Widget.ITextView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    /**
+     * The guts of a notification revealed when performing a long press.
+     */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     */
+    interface INotificationGuts {
+        SetActualHeight(
+            [in] Int32 actualHeight);
+
+        GetActualHeight(
+            [out] Int32* result);
+
+        SetClipTopAmount(
+            [in] Int32 clipTopAmount);
+    }
+
+    /**
+     * A view to display all the overflowing icons on Keyguard.
+     */
+    /**
+     * @Involve
+     * interface Systemui.Statusbar.Phone.IIconMerger
+     */
+    [local]
+    interface INotificationOverflowIconsView {
+        SetMoreText(
+            [in] ITextView* moreText);
+
+        AddNotification(
+            [in] INotificationDataEntry* notification);
+    }
+
+    /**
+     * Container view for overflowing notification icons on Keyguard.
+     */
+    /**
+     * @Involve
+     * interface IActivatableNotificationView
+     */
+    [local]
+    interface INotificationOverflowContainer {
+        GetIconsView(
+            [out] INotificationOverflowIconsView** view);
+    }
+
+    /**
+     * A view which can draw a scrim
+     */
+    /**
+     * @Involve
+     * interface IView
+     */
+    interface IScrimView {
+        SetDrawAsSrc(
+            [in] Boolean asSrc);
+
+        SetScrimColor(
+            [in] Int32 color);
+
+        GetScrimColor();
+
+        SetViewAlpha(
+            [in] Float alpha);
+
+        AnimateViewAlpha(
+            [in] Float alpha,
+            [in] Int64 durationOut,
+            [in] IInterpolator* interpolator);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

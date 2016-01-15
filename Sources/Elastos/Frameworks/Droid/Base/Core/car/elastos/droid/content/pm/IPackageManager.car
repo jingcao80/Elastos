@@ -1,0 +1,759 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.Pm.IPackageInfo;
+    interface Elastos.Droid.Content.Pm.IPermissionInfo;
+    interface Elastos.Droid.Content.Pm.IPermissionGroupInfo;
+    interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    interface Elastos.Droid.Content.Pm.IActivityInfo;
+    interface Elastos.Droid.Content.Pm.IServiceInfo;
+    interface Elastos.Droid.Content.Pm.IProviderInfo;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+    interface Elastos.Droid.Content.Pm.IKeySet;
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+    interface Elastos.Droid.Content.Pm.IInstrumentationInfo;
+    interface Elastos.Droid.Content.Pm.IIPackageInstallObserver;
+    interface Elastos.Droid.Content.Pm.IIPackageDeleteObserver;
+    interface Elastos.Droid.Content.Pm.IPackageCleanItem;
+    interface Elastos.Droid.Content.Pm.IVerificationParams;
+    interface Elastos.Droid.Content.Pm.IVerifierDeviceIdentity;
+    interface Elastos.Droid.Content.Pm.IIPackageStatsObserver;
+    interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IIntentFilter;
+    interface Elastos.Droid.Content.IIntentSender;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     *  See PackageManager for documentation on most of the APIs
+     *  here.
+     *
+     * @sa PackageManager
+     *
+     *  {@hide}
+     */
+    [deprecated]
+    interface IIPackageManager {
+        IsPackageAvailable(
+            [in] String packageName,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetPackageInfo(
+            [in] String packageName,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IPackageInfo** info);
+
+        GetPackageUid(
+            [in] String packageName,
+            [in] Int32 userId,
+            [out] Int32* uid);
+
+        GetPackageGids(
+            [in] String packageName,
+            [out, callee] ArrayOf<Int32>* gids);
+
+        CurrentToCanonicalPackageNames(
+            [in] ArrayOf<String> cuNames,
+            [out, callee] ArrayOf<String>* caNames);
+
+        CanonicalToCurrentPackageNames(
+            [in] ArrayOf<String> caNames,
+            [out, callee] ArrayOf<String>* cuNames);
+
+        GetPermissionInfo(
+            [in] String name,
+            [in] Int32 flags,
+            [out] IPermissionInfo** info);
+
+        QueryPermissionsByGroup(
+            [in] String group,
+            [in] Int32 flags,
+            [out] IList** infos);
+
+        GetPermissionGroupInfo(
+            [in] String name,
+            [in] Int32 flags,
+            [out] IPermissionGroupInfo** info);
+
+        GetAllPermissionGroups(
+            [in] Int32 flags,
+            [out] IList** infos);
+
+        GetApplicationInfo(
+            [in] String packageName,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IApplicationInfo** info);
+
+        GetActivityInfo(
+            [in] IComponentName* className,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IActivityInfo** info);
+
+        ActivitySupportsIntent(
+            [in] IComponentName* className,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [out] Boolean* result);
+
+        GetReceiverInfo(
+            [in] IComponentName* className,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IActivityInfo** info);
+
+        GetServiceInfo(
+            [in] IComponentName* className,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IServiceInfo** info);
+
+        GetProviderInfo(
+            [in] IComponentName* className,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IProviderInfo** info);
+
+        CheckPermission(
+            [in] String permName,
+            [in] String pkgName,
+            [out] Int32* result);
+
+        CheckUidPermission(
+            [in] String permName,
+            [in] Int32 uid,
+            [out] Int32* result);
+
+        AddPermission(
+            [in] IPermissionInfo* info,
+            [out] Boolean* result);
+
+        RemovePermission(
+            [in] String name);
+
+        GrantPermission(
+            [in] String packageName,
+            [in] String permissionName);
+
+        RevokePermission(
+            [in] String packageName,
+            [in] String permissionName);
+
+        IsProtectedBroadcast(
+            [in] String actionName,
+            [out] Boolean* result);
+
+        CheckSignatures(
+            [in] String pkg1,
+            [in] String pkg2,
+            [out] Int32* result);
+
+        CheckUidSignatures(
+            [in] Int32 uid1,
+            [in] Int32 uid2,
+            [out] Int32* result);
+
+        GetPackagesForUid(
+            [in] Int32 uid,
+            [out, callee] ArrayOf<String>* pkgs);
+
+        GetNameForUid(
+            [in] Int32 uid,
+            [out] String* name);
+
+        GetUidForSharedUser(
+            [in] String sharedUserName,
+            [out] Int32* uid);
+
+        GetFlagsForUid(
+            [in] Int32 uid,
+            [out] Int32* result);
+
+        IsUidPrivileged(
+            [in] Int32 uid,
+            [out] Boolean* result);
+
+        GetAppOpPermissionPackages(
+            [in] String permissionName,
+            [out, callee] ArrayOf<String>* result);
+
+        ResolveIntent(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IResolveInfo** info);
+
+        CanForwardTo(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 sourceUserId,
+            [in] Int32 targetUserId,
+            [out] Boolean* result);
+
+        QueryIntentActivities(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IList** infos);
+
+        QueryIntentActivityOptions(
+            [in] IComponentName* caller,
+            [in] ArrayOf<IIntent*>* specifics,
+            [in] ArrayOf<String>* specificTypes,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IList** infos);
+
+        QueryIntentReceivers(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IList** receivers);
+
+        ResolveService(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IResolveInfo** resolveInfo);
+
+        QueryIntentServices(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IList** infos);
+
+        QueryIntentContentProviders(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IList** infos);
+
+        /**
+         * This implements getInstalledPackages via a "last returned row"
+         * mechanism that is not exposed in the API. This is to get around the IPC
+         * limit that kicks in when flags are included that bloat up the data
+         * returned.
+         */
+        GetInstalledPackages(
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IParceledListSlice** slice);
+
+        /**
+         * This implements getPackagesHoldingPermissions via a "last returned row"
+         * mechanism that is not exposed in the API. This is to get around the IPC
+         * limit that kicks in when flags are included that bloat up the data
+         * returned.
+         */
+        GetPackagesHoldingPermissions(
+            [in] ArrayOf<String>* permissions,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IParceledListSlice** slice);
+
+        /**
+         * This implements getInstalledApplications via a "last returned row"
+         * mechanism that is not exposed in the API. This is to get around the IPC
+         * limit that kicks in when flags are included that bloat up the data
+         * returned.
+         */
+        GetInstalledApplications(
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IParceledListSlice** slice);
+
+        /**
+         * Retrieve all applications that are marked as persistent.
+         *
+         * @return A List&lt;applicationInfo> containing one entry for each persistent
+         *         application.
+         */
+        GetPersistentApplications(
+            [in] Int32 flags,
+            [out] IList** infos);
+
+        ResolveContentProvider(
+            [in] String name,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IProviderInfo** info);
+
+        /**
+         * Retrieve sync information for all content providers.
+         *
+         * @param outNames Filled in with a list of the root names of the content
+         *                 providers that can sync.
+         * @param outInfo Filled in with a list of the ProviderInfo for each
+         *                name in 'outNames'.
+         */
+        QuerySyncProviders(
+            [in/*, out */] IList* outNames,
+            [in/*, out */] IList* outInfo);
+
+        QueryContentProviders(
+            [in] String processName,
+            [in] Int32 uid,
+            [in] Int32 flags,
+            [out] IList** providers);
+
+        GetInstrumentationInfo(
+            [in] IComponentName* className,
+            [in] Int32 flags,
+            [out] IInstrumentationInfo** info);
+
+        QueryInstrumentation(
+            [in] String targetPackage,
+            [in] Int32 flags,
+            [out] IList** infos);
+
+        InstallPackage(
+            [in] String originPath,
+            [in] IIPackageInstallObserver2* observer,
+            [in] Int32 flags,
+            [in] String installerPackageName,
+            [in] IVerificationParams* verificationParams,
+            [in] String packageAbiOverride);
+
+        InstallPackageAsUser(
+            [in] String originPath,
+            [in] IIPackageInstallObserver2* observer,
+            [in] Int32 flags,
+            [in] String installerPackageName,
+            [in] IVerificationParams* verificationParams,
+            [in] String packageAbiOverride,
+            [in] Int32 userId);
+
+        FinishPackageInstall(
+            [in] Int32 token);
+
+        SetInstallerPackageName(
+            [in] String targetPackage,
+            [in] String installerPackageName);
+
+        /** @deprecated rawr, don't call AIDL methods directly! */
+        DeletePackageAsUser(
+            [in] String packageName,
+            [in] IIPackageDeleteObserver* observer,
+            [in] Int32 userId,
+            [in] Int32 flags);
+
+        /**
+         * Delete a package for a specific user.
+         *
+         * @param packageName The fully qualified name of the package to delete.
+         * @param observer a callback to use to notify when the package deletion in finished.
+         * @param userId the id of the user for whom to delete the package
+         * @param flags - possible values: {@link #DONT_DELETE_DATA}
+         */
+        DeletePackage(
+            [in] String packageName,
+            [in] IIPackageDeleteObserver2* observer,
+            [in] Int32 userId,
+            [in] Int32 flags);
+
+        GetInstallerPackageName(
+            [in] String packageName,
+            [out] String* pkgName);
+
+        AddPackageToPreferred(
+            [in] String packageName);
+
+        RemovePackageFromPreferred(
+            [in] String packageName);
+
+        GetPreferredPackages(
+            [in] Int32 flags,
+            [out] IList** infos);
+
+        ResetPreferredActivities(
+            [in] Int32 userId);
+
+        GetLastChosenActivity(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [out] IResolveInfo** info);
+
+        SetLastChosenActivity(
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] Int32 flags,
+            [in] IIntentFilter* filter,
+            [in] Int32 match,
+            [in] IComponentName* activity);
+
+        AddPreferredActivity(
+            [in] IIntentFilter* filter,
+            [in] Int32 match,
+            [in] ArrayOf<IComponentName*>* set,
+            [in] IComponentName* activity,
+            [in] Int32 userId);
+
+        ReplacePreferredActivity(
+            [in] IIntentFilter* filter,
+            [in] Int32 match,
+            [in] ArrayOf<IComponentName*>* set,
+            [in] IComponentName* activity,
+            [in] Int32 userId);
+
+        ClearPackagePreferredActivities(
+            [in] String packageName);
+
+        GetPreferredActivities(
+            [in/*, out */] IList* outFilters,
+            [in/*, out */] IList* outActivities,
+            [in] String packageName,
+            [out] Int32* value);
+
+        AddPersistentPreferredActivity(
+            [in] IIntentFilter* filter,
+            [in] IComponentName* activity,
+            [in] Int32 userId);
+
+        ClearPackagePersistentPreferredActivities(
+            [in] String packageName,
+            [in] Int32 userId);
+
+        AddCrossProfileIntentFilter(
+            [in] IIntentFilter* intentFilter,
+            [in] String ownerPackage,
+            [in] Int32 ownerUserId,
+            [in] Int32 sourceUserId,
+            [in] Int32 targetUserId,
+            [in] Int32 flags);
+
+        ClearCrossProfileIntentFilters(
+            [in] Int32 sourceUserId,
+            [in] String ownerPackage,
+            [in] Int32 ownerUserId);
+
+        /**
+         * Report the set of 'Home' activity candidates, plus (if any) which of them
+         * is the current "always use this one" setting.
+         */
+        GetHomeActivities(
+            [in] IList* outHomeCandidates,
+            [out] IComponentName** name);
+
+        /**
+         * As per android.content.pm.PackageManager#setComponentEnabledSetting.
+         *
+         * @sa android.content.pm.PackageManager#setComponentEnabledSetting
+         */
+        SetComponentEnabledSetting(
+            [in] IComponentName* componentName,
+            [in] Int32 newState,
+            [in] Int32 flags,
+            [in] Int32 userId);
+
+        /**
+         * As per android.content.pm.PackageManager#getComponentEnabledSetting.
+         *
+         * @sa android.content.pm.PackageManager#getComponentEnabledSetting
+         */
+        GetComponentEnabledSetting(
+            [in] IComponentName* componentName,
+            [in] Int32 userId,
+            [out] Int32* value);
+
+        /**
+         * As per android.content.pm.PackageManager#setApplicationEnabledSetting.
+         *
+         * @sa android.content.pm.PackageManager#setApplicationEnabledSetting
+         */
+        SetApplicationEnabledSetting(
+            [in] String packageName,
+            [in] Int32 newState,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [in] String callingPackage);
+
+        /**
+         * As per android.content.pm.PackageManager#getApplicationEnabledSetting.
+         *
+         * @sa android.content.pm.PackageManager#setApplicationEnabledSetting
+         */
+        GetApplicationEnabledSetting(
+            [in] String packageName,
+            [in] Int32 userId,
+            [out] Int32* value);
+
+        /**
+         * Set whether the given package should be considered stopped, making
+         * it not visible to implicit intents that filter out stopped packages.
+         */
+        SetPackageStoppedState(
+            [in] String packageName,
+            [in] Boolean stopped,
+            [in] Int32 userId);
+
+        /**
+         * Free storage by deleting LRU sorted list of cache files across
+         * all applications. If the currently available free storage
+         * on the device is greater than or equal to the requested
+         * free storage, no cache files are cleared. If the currently
+         * available storage on the device is less than the requested
+         * free storage, some or all of the cache files across
+         * all applications are deleted (based on last accessed time)
+         * to increase the free storage space on the device to
+         * the requested value. There is no guarantee that clearing all
+         * the cache files from all applications will clear up
+         * enough storage to achieve the desired value.
+         * @param freeStorageSize The number of bytes of storage to be
+         * freed by the system. Say if freeStorageSize is XX,
+         * and the current free storage is YY,
+         * if XX is less than YY, just return. if not free XX-YY number
+         * of bytes if possible.
+         * @param observer call back used to notify when
+         * the operation is completed
+         */
+        FreeStorageAndNotify(
+            [in] Int64 freeStorageSize,
+            [in] IIPackageDataObserver* observer);
+
+        /**
+         * Free storage by deleting LRU sorted list of cache files across
+         * all applications. If the currently available free storage
+         * on the device is greater than or equal to the requested
+         * free storage, no cache files are cleared. If the currently
+         * available storage on the device is less than the requested
+         * free storage, some or all of the cache files across
+         * all applications are deleted (based on last accessed time)
+         * to increase the free storage space on the device to
+         * the requested value. There is no guarantee that clearing all
+         * the cache files from all applications will clear up
+         * enough storage to achieve the desired value.
+         * @param freeStorageSize The number of bytes of storage to be
+         * freed by the system. Say if freeStorageSize is XX,
+         * and the current free storage is YY,
+         * if XX is less than YY, just return. if not free XX-YY number
+         * of bytes if possible.
+         * @param pi IntentSender call back used to
+         * notify when the operation is completed.May be null
+         * to indicate that no call back is desired.
+         */
+        FreeStorage(
+            [in] Int64 freeStorageSize,
+            [in] IIntentSender* pi);
+
+        /**
+         * Delete all the cache files in an applications cache directory
+         * @param packageName The package name of the application whose cache
+         * files need to be deleted
+         * @param observer a callback used to notify when the deletion is finished.
+         */
+        DeleteApplicationCacheFiles(
+            [in] String packageName,
+            [in] IIPackageDataObserver* observer);
+
+        /**
+         * Clear the user data directory of an application.
+         * @param packageName The package name of the application whose cache
+         * files need to be deleted
+         * @param observer a callback used to notify when the operation is completed.
+         */
+        ClearApplicationUserData(
+            [in] String packageName,
+            [in] IIPackageDataObserver* observer,
+            [in] Int32 userId);
+
+        /**
+         * Get package statistics including the code, data and cache size for
+         * an already installed package
+         * @param packageName The package name of the application
+         * @param userHandle Which user the size should be retrieved for
+         * @param observer a callback to use to notify when the asynchronous
+         * retrieval of information is complete.
+         */
+        GetPackageSizeInfo(
+            [in] String packageName,
+            [in] Int32 userHandle,
+            [in] IIPackageStatsObserver* observer);
+
+        /**
+         * Get a list of shared libraries that are available on the
+         * system.
+         */
+        GetSystemSharedLibraryNames(
+            [out, callee] ArrayOf<String>* names);
+
+        /**
+         * Get a list of features that are available on the
+         * system.
+         */
+        GetSystemAvailableFeatures(
+            [out, callee] ArrayOf<IFeatureInfo*>* infos);
+
+        HasSystemFeature(
+            [in] String name,
+            [out] Boolean* result);
+
+        EnterSafeMode();
+
+        IsSafeMode(
+            [out] Boolean* isSafeMode);
+
+        SystemReady();
+
+        HasSystemUidErrors(
+            [out] Boolean* result);
+
+        /**
+         * Ask the package manager to perform boot-time dex-opt of all
+         * existing packages.
+         */
+        PerformBootDexOpt();
+
+        /**
+         * Ask the package manager to perform dex-opt (if needed) on the given
+         * package and for the given instruction set if it already hasn't done
+         * so.
+         *
+         * If the supplied instructionSet is null, the package manager will use
+         * the packages default instruction set.
+         *
+         * In most cases, apps are dexopted in advance and this function will
+         * be a no-op.
+         */
+        PerformDexOptIfNeeded(
+            [in] String packageName,
+            [in] String instructionSet,
+            [out] Boolean* result);
+
+        ForceDexOpt(
+            [in] String packageName);
+
+        /**
+         * Update status of external media on the package manager to scan and
+         * install packages installed on the external media. Like say the
+         * MountService uses this to call into the package manager to update
+         * status of sdcard.
+         */
+        UpdateExternalMediaStatus(
+            [in] Boolean mounted,
+            [in] Boolean reportStatus);
+
+        NextPackageToClean(
+            [in] IPackageCleanItem* lastPackage,
+            [out] IPackageCleanItem** nextPackage);
+
+        MovePackage(
+            [in] String packageName,
+            [in] IIPackageMoveObserver* observer,
+            [in] Int32 flags);
+
+        AddPermissionAsync(
+            [in] IPermissionInfo* info,
+            [out] Boolean* result);
+
+        SetInstallLocation(
+            [in] Int32 loc,
+            [out] Boolean* result);
+
+        GetInstallLocation(
+            [out] Int32* location);
+
+        InstallExistingPackageAsUser(
+            [in] String packageName,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        VerifyPendingInstall(
+            [in] Int32 id,
+            [in] Int32 verificationCode);
+
+        ExtendVerificationTimeout(
+            [in] Int32 id,
+            [in] Int32 verificationCodeAtTimeout,
+            [in] Int64 millisecondsToDelay);
+
+        GetVerifierDeviceIdentity(
+            [out] IVerifierDeviceIdentity** identity);
+
+        IsFirstBoot(
+            [out] Boolean* result);
+
+        IsOnlyCoreApps(
+            [out] Boolean* result);
+
+        SetPermissionEnforced(
+            [in] String permission,
+            [in] Boolean enforced);
+
+        IsPermissionEnforced(
+            [in] String permission,
+            [out] Boolean* result);
+
+        /** Reflects current DeviceStorageMonitorService state */
+        IsStorageLow(
+            [out] Boolean* result);
+
+        SetApplicationHiddenSettingAsUser(
+            [in] String packageName,
+            [in] Boolean hide,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetApplicationHiddenSettingAsUser(
+            [in] String packageName,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetPackageInstaller(
+            [out] IIPackageInstaller** installer);
+
+        SetBlockUninstallForUser(
+            [in] String packageName,
+            [in] Boolean blockUninstall,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetBlockUninstallForUser(
+            [in] String packageName,
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetKeySetByAlias(
+            [in] String packageName,
+            [in] String alias,
+            [out] IKeySet** set);
+
+        GetSigningKeySet(
+            [in] String packageName,
+            [out] IKeySet** set);
+
+        IsPackageSignedByKeySet(
+            [in] String packageName,
+            [in] IKeySet* ks,
+            [out] Boolean* result);
+
+        IsPackageSignedByKeySetExactly(
+            [in] String packageName,
+            [in] IKeySet* ks,
+            [out] Boolean* result);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

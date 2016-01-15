@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Security.IPrincipal;
+    interface Elastos.Utility.IEnumeration;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Acl {
+
+    /**
+     * A {@code Principal} that represents a group of principals.
+     *
+     * @see Principal
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.IPrincipal
+     */
+    interface IGroup {
+        /**
+         * Adds a member to this group.
+         *
+         * @param user
+         *            the member to add.
+         * @return {@code true} if the member was added, {@code false} if it was already a member.
+         */
+        AddMember(
+            [in] IPrincipal* user,
+            [out] Boolean* result);
+
+        /**
+         * Removes a member from this group.
+         *
+         * @param user
+         *            the member to remove.
+         * @return {@code true} if the member was removed, {@code false} if it was not a member.
+         */
+        RemoveMember(
+            [in] IPrincipal* user,
+            [out] Boolean* result);
+
+        /**
+         * Returns whether the specified principal is a member of this group.
+         *
+         * @param member
+         *            the principal to check.
+         * @return {@code true} if the principal is a member, otherwise {@code false}.
+         */
+        IsMember(
+            [in] IPrincipal* member,
+            [out] Boolean* result);
+
+        /**
+         * Returns the members of this group.
+         *
+         * @return the members of this group.
+         */
+        GetMembers(
+            [out] IEnumeration** members);
+    }
+
+    } // namespace Acl
+    } // namespace Security
+    } // namespace Elastos
+}

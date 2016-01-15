@@ -1,0 +1,64 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Pm.IOnAppsChangedListener;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    [local]
+    interface IILauncherApps {
+        AddOnAppsChangedListener(
+            [in] IOnAppsChangedListener* listener);
+
+        RemoveOnAppsChangedListener(
+            [in] IOnAppsChangedListener* listener);
+
+        GetLauncherActivities(
+            [in] String packageName,
+            [in] IUserHandle* user,
+            [out] IList** list);
+
+        ResolveActivity(
+            [in] IIntent* intent,
+            [in] IUserHandle* user,
+            [out] IResolveInfo** info);
+
+        StartActivityAsUser(
+            [in] IComponentName* component,
+            [in] IRect* sourceBounds,
+            [in] IBundle* opts,
+            [in] IUserHandle* user);
+
+        ShowAppDetailsAsUser(
+            [in] IComponentName* component,
+            [in] IRect* sourceBounds,
+            [in] IBundle* opts,
+            [in] IUserHandle* user);
+
+        IsPackageEnabled(
+            [in] String packageName,
+            [in] IUserHandle* user,
+            [out] Boolean* result);
+
+        IsActivityEnabled(
+            [in] IComponentName* component,
+            [in] IUserHandle* user,
+            [out] Boolean* result);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastos.Security.IKeyPair;
+    interface Elastos.Security.ISecureRandom;
+    interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IKeyPairGeneratorSpi {
+        /**
+        * Computes and returns a new unique {@code KeyPair} each time this method
+        * is called.
+        *
+        * @return a new unique {@code KeyPair} each time this method is called.
+        */
+        GenerateKeyPair(
+            [out] IKeyPair** keyPair);
+
+        /**
+        * Initializes this {@code KeyPairGeneratorSpi} with the given key size and
+        * the given {@code SecureRandom}. The default parameter set will be used.
+        *
+        * @param keysize
+        *            the key size (number of bits).
+        * @param random
+        *            the source of randomness.
+        */
+        Initialize(
+            [in] Int32 keysize,
+            [in] ISecureRandom* random);
+
+        /**
+        *Initializes this {@code KeyPairGeneratorSpi} with the given {@code
+        * AlgorithmParameterSpec} and the given {@code SecureRandom}.
+        *
+        * @param params
+        *            the parameters to use.
+        * @param random
+        *            the source of randomness.
+        * @throws InvalidAlgorithmParameterException
+        *             if the specified parameters are not supported.
+        */
+        InitializeEx(
+            [in] IAlgorithmParameterSpec* params,
+            [in] ISecureRandom* random);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

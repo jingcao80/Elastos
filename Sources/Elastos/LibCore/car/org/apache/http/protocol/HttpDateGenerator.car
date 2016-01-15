@@ -1,0 +1,43 @@
+
+module
+{
+
+    using interface Elastos.Utility.ITimeZone;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+    /**
+     * Generates a date in the format required by the HTTP protocol.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 548066 $
+     *
+     * @since 4.0
+     */
+    interface IHttpDateGenerator {
+
+        /** Date format pattern used to generate the header in RFC 1123 format. */
+        const String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+        GetCurrentDate(
+            [out] String* date);
+
+    }
+
+    interface IHttpDateGeneratorHelper {
+
+        GetGMT(
+            [out] ITimeZone** timeZone);
+
+    }
+
+    } // namespace Protocol
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

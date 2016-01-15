@@ -1,0 +1,42 @@
+
+module
+{
+    interface Elastos.Droid.Accounts.IAccount;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Value type that contains information about a periodic sync.
+     */
+    interface IPeriodicSync {
+        /** The account to be synced */
+        GetAccount(
+            [out] IAccount** account);
+
+        /** The authority of the sync */
+        GetAuthority(
+            [out] String* authority);
+
+        /** Any extras that parameters that are to be passed to the sync adapter. */
+        GetExtras(
+            [out] IBundle** extras);
+
+        GetFlexTime(
+            [out] Int64* flexTime);
+
+        /** How frequently the sync should be scheduled, in seconds. */
+        GetPeriod(
+            [out] Int64* period);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* isEqual);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

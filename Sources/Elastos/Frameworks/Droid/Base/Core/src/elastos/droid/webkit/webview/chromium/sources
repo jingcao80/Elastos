@@ -1,0 +1,35 @@
+TARGET_NAME = chromium
+TARGET_TYPE = lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+INCLUDES += $(PREBUILD_INC)/skia/utils
+INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/bionic
+INCLUDES += $(PREBUILD_INC)/stlport
+
+
+SOURCES = ContentSettingsAdapter.cpp
+SOURCES += CookieManagerAdapter.cpp
+SOURCES += DrawGLFunctor.cpp
+SOURCES += FileChooserParamsAdapter.cpp
+SOURCES += GeolocationPermissionsAdapter.cpp
+SOURCES += GraphicsUtils.cpp
+SOURCES += ResourceRewriter.cpp
+SOURCES += UnimplementedWebViewApi.cpp
+SOURCES += WebBackForwardListChromium.cpp
+SOURCES += WebHistoryItemChromium.cpp
+SOURCES += WebIconDatabaseAdapter.cpp
+SOURCES += WebStorageAdapter.cpp
+SOURCES += WebViewChromium.cpp
+SOURCES += WebViewChromiumFactoryProvider.cpp
+SOURCES += CWebViewChromiumFactoryProvider.cpp
+SOURCES += WebViewContentsClientAdapter.cpp
+SOURCES += WebViewDatabaseAdapter.cpp
+SOURCES += GraphicBufferImpl.cpp
+SOURCES += PixelInfo.cpp

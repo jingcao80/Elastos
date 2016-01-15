@@ -1,0 +1,34 @@
+module
+{
+    interface Elastos.Core.IComparator;
+    interface Elastos.Utility.IIterable;
+    interface Elastos.Utility.IList;
+
+    namespace Libcore {
+    namespace Utility {
+
+    interface ICollectionUtils {
+    /**
+     * Returns an iterator over the values referenced by the elements of {@code
+     * iterable}.
+     *
+     * @param trim true to remove reference objects from the iterable after
+     *     their referenced values have been cleared.
+     */
+    DereferenceIterable(
+        [in] IIterable* iterable,
+        [in] Boolean trim,
+        [out] IIterable** outiter);
+
+    /**
+     * Sorts and removes duplicate elements from {@code list}. This method does
+     * not use {@link Object#equals}: only the comparator defines equality.
+     */
+    RemoveDuplicates(
+        [in] IList* list,
+        [in] IComparator* comparator);
+    }
+
+    } // namespace Utility
+    } // namespace Libcore
+}

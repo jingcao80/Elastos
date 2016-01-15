@@ -1,0 +1,24 @@
+module
+{
+    interface Elastos.Droid.App.Backup.IBackupDataOutput;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Backup {
+
+    /**
+     * Provides the interface through which a {@link BackupAgent} writes entire files
+     * to a full backup data set, via its {@link BackupAgent#onFullBackup(FullBackupDataOutput)}
+     * method.
+     */
+    interface IFullBackupDataOutput {
+        GetData(
+            [out] IBackupDataOutput** data);
+    }
+
+    } // namespace Backup
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

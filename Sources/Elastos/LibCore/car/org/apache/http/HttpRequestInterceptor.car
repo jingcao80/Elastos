@@ -1,0 +1,49 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpRequest;
+    interface Org.Apache.Http.Protocol.IHttpContext;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * Processes a request.
+     * Provides the ability to process a request before it is sent
+     * to the server or after it has received on the server side.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     *
+     * <!-- empty lines above to avoid 'svn diff' context problems -->
+     * @version $Revision: 618367 $
+     *
+     * @since 4.0
+     */
+    interface IHttpRequestInterceptor {
+
+        /**
+         * Processes a request.
+         * On the client side, this step is performed before the request is
+         * sent to the server. On the server side, this step is performed
+         * on incoming messages before the message body is evaluated.
+         *
+         * @param request   the request to preprocess
+         * @param context   the context for the request
+         *
+         * @throws IOException      in case of an IO problem
+         * @throws HttpException    in case of a protocol or other problem
+         */
+        Process(
+            [in] IHttpRequest* request,
+            [in] IHttpContext* context);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

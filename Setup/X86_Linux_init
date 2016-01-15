@@ -1,0 +1,3 @@
+source ~/.bashrc
+
+source ~/ElastosRDKforEmulator/Setup/SetEnv.sh x86_linux

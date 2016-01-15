@@ -1,0 +1,26 @@
+
+module
+{
+    interface Elastos.Droid.Os.IMessenger;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IIRttManager {
+        GetMessenger(
+            [out] IMessenger** result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}
+

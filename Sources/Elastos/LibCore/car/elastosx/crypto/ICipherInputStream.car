@@ -1,0 +1,26 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+
+    /**
+     * This class wraps an {@code InputStream} and a cipher so that {@code read()}
+     * methods return data that are read from the underlying {@code InputStream} and
+     * processed by the cipher.
+     * <p>
+     * The cipher must be initialized for the requested operation before being used
+     * by a {@code CipherInputStream}. For example, if a cipher initialized for
+     * decryption is used with a {@code CipherInputStream}, the {@code
+     * CipherInputStream} tries to read the data an decrypt them before returning.
+     */
+    /**
+     * @Involve
+     * interface Elastos.IO.IFilterInputStream
+     */
+    interface ICipherInputStream {
+    }
+
+    } // namespace Crypto
+    } // namespace Elastosx
+}

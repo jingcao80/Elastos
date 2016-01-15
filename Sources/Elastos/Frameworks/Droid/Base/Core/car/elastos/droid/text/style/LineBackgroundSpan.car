@@ -1,0 +1,37 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPaint;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * @Involve
+     * interface IParagraphStyle
+     */
+    interface ILineBackgroundSpan {
+        DrawBackground(
+            [in] ICanvas* c,
+            [in] IPaint* p,
+            [in] Int32 left,
+            [in] Int32 right,
+            [in] Int32 top,
+            [in] Int32 baseline,
+            [in] Int32 bottom,
+            [in] ICharSequence* text,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Int32 lnum);
+    }
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

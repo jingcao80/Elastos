@@ -1,0 +1,24 @@
+TARGET_NAME= org.json
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/org;
+INCLUDES += $(MAKEDIR)/../../../inc/org/json;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+
+SOURCES = JSON.cpp
+SOURCES += CJSON.cpp
+SOURCES += JSONArray.cpp
+SOURCES += JSONObject.cpp
+SOURCES += CJSONObjectHelper.cpp
+SOURCES += JSONStringer.cpp
+SOURCES += JSONTokener.cpp
+SOURCES += CJSONTokenerHelper.cpp
+SOURCES += json.cpp

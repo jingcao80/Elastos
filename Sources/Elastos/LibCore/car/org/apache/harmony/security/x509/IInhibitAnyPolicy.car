@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * InhibitAnyPolicy Certificate Extension (OID = 2.5.29.54)
+     * Its ASN.1 notation is as follows:
+     * <pre>
+     *  id-ce-inhibitAnyPolicy OBJECT IDENTIFIER ::=  { id-ce 54 }
+     *
+     *  InhibitAnyPolicy ::= SkipCerts
+     *
+     *  SkipCerts ::= INTEGER (0..MAX)
+     * </pre>
+     * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt).
+     */
+    interface IInhibitAnyPolicy extends IExtensionValue {}
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

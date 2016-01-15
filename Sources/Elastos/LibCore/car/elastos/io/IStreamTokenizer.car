@@ -1,0 +1,204 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    interface IStreamTokenizer{
+        /**
+         * The constant representing the end of the stream.
+         */
+        const Int32 TT_EOF = -1;
+
+        /**
+         * The constant representing the end of the line.
+         */
+        const Int32 TT_EOL = 10; // TT_EOL = '\n';
+
+        /**
+         * The constant representing a number token.
+         */
+        const Int32 TT_NUMBER = -2;
+
+        /**
+         * The constant representing a word token.
+         */
+        const Int32 TT_WORD = -3;
+
+        /**
+         * Returns the current line number.
+         *
+         * @return this tokenizer's current line number.
+         */
+        GetLineno(
+            [out] Int32* num);
+
+        /**
+         * Parses the next token from this tokenizer's source stream or reader. The
+         * type of the token is stored in the {ttype} field, additional
+         * information may be stored in the {nval} or {sval} fields.
+         *
+         * @return the value of {ttype}.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while parsing the next token.
+         */
+        GetNextToken(
+            [out] Int32* ttype);
+
+        /**
+         * Specifies that this tokenizer shall parse numbers.
+         */
+        ParseNumbers();
+
+        /**
+         * Indicates that the current token should be pushed back and returned again
+         * the next time {nextToken} is called.
+         */
+        PushBack();
+
+        /**
+         * Specifies that all characters shall be treated as ordinary characters.
+         */
+        ResetSyntax();
+
+        /**
+         * Specifies that the character {ch} shall be treated as a comment
+         * character.
+         *
+         * @param ch
+         *            the character to be considered a comment character.
+         */
+        SetCommentChar(
+            [in] Int32 ch);
+
+        /**
+         * Specifies whether the end of a line is significant and should be returned
+         * as {TT_EOF} in {ttype} by this tokenizer.
+         *
+         * @param flag
+         *            {true} if EOL is significant, {false} otherwise.
+         */
+        SetEolIsSignificant(
+            [in] Boolean flag);
+
+        /**
+         * Specifies whether word tokens should be converted to lower case when they
+         * are stored in {sval}.
+         *
+         * @param flag
+         *            {true} if {sval} should be converted to lower
+         *            case, {false} otherwise.
+         */
+        SetLowerCaseMode(
+            [in] Boolean flag);
+
+        /**
+         * Specifies that the character {ch} shall be treated as an ordinary
+         * character by this tokenizer. That is, it has no special meaning as a
+         * comment character, word component, white space, string delimiter or
+         * number.
+         *
+         * @param ch
+         *            the character to be considered an ordinary character.
+         */
+        SetOrdinaryChar(
+            [in] Int32 ch);
+
+        /**
+         * Specifies that the characters in the range from {low} to {hi}
+         * shall be treated as an ordinary character by this tokenizer. That is,
+         * they have no special meaning as a comment character, word component,
+         * white space, string delimiter or number.
+         *
+         * @param low
+         *            the first character in the range of ordinary characters.
+         * @param hi
+         *            the last character in the range of ordinary characters.
+         */
+        SetOrdinaryChars(
+            [in] Int32 low,
+            [in] Int32 hi);
+
+        /**
+         * Specifies that the character {ch} shall be treated as a quote
+         * character.
+         *
+         * @param ch
+         *            the character to be considered a quote character.
+         */
+        SetQuoteChar(
+            [in] Int32 ch);
+
+        /**
+         * Specifies whether "slash-slash" (C++-style) comments shall be recognized.
+         * This kind of comment ends at the end of the line.
+         *
+         * @param flag
+         *            {true} if {//} should be recognized as the start
+         *            of a comment, {false} otherwise.
+         */
+        SetSlashSlashComments(
+            [in] Boolean flag);
+
+        /**
+         * Specifies whether "slash-star" (C-style) comments shall be recognized.
+         * Slash-star comments cannot be nested and end when a star-slash
+         * combination is found.
+         *
+         * @param flag
+         *            {true} if {/*} should be recognized as the start
+         *            of a comment, {false} otherwise.
+         */
+        SetSlashStarComments(
+            [in] Boolean flag);
+
+        /**
+         * Specifies that the characters in the range from {low} to {hi}
+         * shall be treated as whitespace characters by this tokenizer.
+         *
+         * @param low
+         *            the first character in the range of whitespace characters.
+         * @param hi
+         *            the last character in the range of whitespace characters.
+         */
+        SetWhitespaceChars(
+            [in] Int32 low,
+            [in] Int32 hi);
+
+        /**
+         * Specifies that the characters in the range from {low} to {hi}
+         * shall be treated as word characters by this tokenizer. A word consists of
+         * a word character followed by zero or more word or number characters.
+         *
+         * @param low
+         *            the first character in the range of word characters.
+         * @param hi
+         *            the last character in the range of word characters.
+         */
+        SetWordChars(
+            [in] Int32 low,
+            [in] Int32 hi);
+
+        GetNval(
+            [out] Double* nval);
+
+        SetNval(
+            [in] Double nval);
+
+        GetSval(
+            [out] String* sval);
+
+        SetSval(
+            [in] String sval);
+
+        GetTtype(
+            [out] Int32* ttype);
+
+        SetTtype(
+            [in] Int32 ttype);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

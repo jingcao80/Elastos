@@ -1,0 +1,381 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.App.IFragment;
+    interface Elastos.Droid.Utility.IPair;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * API for performing a set of Fragment operations.
+     * <p>
+     * <h3>Developer Guides</h3>
+     * <p>
+     * For more information about using fragments, read the Fragments developer guide.
+     *
+     * @sa Fragments
+     */
+    [local, deprecated]
+    interface IFragmentTransaction {
+        /**
+         * Bit mask that is set for all enter transitions.
+         */
+        const Int32 TRANSIT_ENTER_MASK = 0x1000;
+
+        /**
+         * Bit mask that is set for all exit transitions.
+         */
+        const Int32 TRANSIT_EXIT_MASK = 0x2000;
+
+        /** Not set up for a transition. */
+        const Int32 TRANSIT_UNSET = -1;
+
+        /** No animation for transition. */
+        const Int32 TRANSIT_NONE = 0;
+
+        /** Fragment is being added onto the stack */
+        const Int32 TRANSIT_FRAGMENT_OPEN = 1 | TRANSIT_ENTER_MASK;
+
+        /** Fragment is being removed from the stack */
+        const Int32 TRANSIT_FRAGMENT_CLOSE = 2 | TRANSIT_EXIT_MASK;
+
+        /** Fragment should simply fade in or out; that is, no strong navigation associated
+         * with it except that it is appearing or disappearing for some reason. */
+        const Int32 TRANSIT_FRAGMENT_FADE = 3 | TRANSIT_ENTER_MASK;
+
+        /**
+         * Calls #add(int, Fragment, String) with a 0 containerViewId.
+         *
+         * @sa #add(int, Fragment, String)
+         */
+        Add(
+            [in] IFragment* fragment,
+            [in] String tag);
+
+        /**
+         * Calls #add(int, Fragment, String) with a null tag.
+         *
+         * @sa #add(int, Fragment, String)
+         */
+        Add(
+            [in] Int32 containerViewId,
+            [in] IFragment* fragment);
+
+        /**
+         * Add a fragment to the activity state.  This fragment may optionally
+         * also have its view (if Fragment#onCreateView Fragment.onCreateView
+         * returns non-null) into a container view of the activity.
+         *
+         * @sa Fragment#onCreateView Fragment.onCreateView
+         *
+         * @param containerViewId Optional identifier of the container this fragment is
+         * to be placed in.  If 0, it will not be placed in a container.
+         * @param fragment The fragment to be added.  This fragment must not already
+         * be added to the activity.
+         * @param tag Optional tag name for the fragment, to later retrieve the
+         * fragment with FragmentManager#findFragmentByTag(String)
+         * FragmentManager.findFragmentByTag(String).
+         *
+         * @sa FragmentManager#findFragmentByTag(String) FragmentManager.findFragmentByTag(String)
+         *
+         * @return Returns the same FragmentTransaction instance.
+         */
+        Add(
+            [in] Int32 containerViewId,
+            [in] IFragment* fragment,
+            [in] String tag);
+
+        /**
+         * Calls #replace(int, Fragment, String) with a null tag.
+         *
+         * @sa #replace(int, Fragment, String)
+         */
+        Replace(
+            [in] Int32 containerViewId,
+            [in] IFragment* fragment);
+
+        /**
+         * Replace an existing fragment that was added to a container.  This is
+         * essentially the same as calling #remove(Fragment) for all
+         * currently added fragments that were added with the same containerViewId
+         * and then #add(int, Fragment, String) with the same arguments
+         * given here.
+         *
+         * @sa #remove(Fragment)
+         * @sa #add(int, Fragment, String)
+         *
+         * @param containerViewId Identifier of the container whose fragment(s) are
+         * to be replaced.
+         * @param fragment The new fragment to place in the container.
+         * @param tag Optional tag name for the fragment, to later retrieve the
+         * fragment with FragmentManager#findFragmentByTag(String)
+         * FragmentManager.findFragmentByTag(String).
+         *
+         * @sa FragmentManager#findFragmentByTag(String) FragmentManager.findFragmentByTag(String)
+         *
+         * @return Returns the same FragmentTransaction instance.
+         */
+        Replace(
+            [in] Int32 containerViewId,
+            [in] IFragment* fragment,
+            [in] String tag);
+
+        /**
+         * Remove an existing fragment.  If it was added to a container, its view
+         * is also removed from that container.
+         *
+         * @param fragment The fragment to be removed.
+         *
+         * @return Returns the same FragmentTransaction instance.
+         */
+        Remove(
+            [in] IFragment* fragment);
+
+        /**
+         * Hides an existing fragment.  This is only relevant for fragments whose
+         * views have been added to a container, as this will cause the view to
+         * be hidden.
+         *
+         * @param fragment The fragment to be hidden.
+         *
+         * @return Returns the same FragmentTransaction instance.
+         */
+        Hide(
+            [in] IFragment* fragment);
+
+        /**
+         * Shows a previously hidden fragment.  This is only relevant for fragments whose
+         * views have been added to a container, as this will cause the view to
+         * be shown.
+         *
+         * @param fragment The fragment to be shown.
+         *
+         * @return Returns the same FragmentTransaction instance.
+         */
+        Show(
+            [in] IFragment* fragment);
+
+        /**
+         * Detach the given fragment from the UI.  This is the same state as
+         * when it is put on the back stack: the fragment is removed from
+         * the UI, however its state is still being actively managed by the
+         * fragment manager.  When going into this state its view hierarchy
+         * is destroyed.
+         *
+         * @param fragment The fragment to be detached.
+         *
+         * @return Returns the same FragmentTransaction instance.
+         */
+        Detach(
+            [in] IFragment* fragment);
+
+        /**
+         * Re-attach a fragment after it had previously been deatched from
+         * the UI with #detach(Fragment).  This
+         * causes its view hierarchy to be re-created, attached to the UI,
+         * and displayed.
+         *
+         * @sa #detach(Fragment)
+         *
+         * @param fragment The fragment to be attached.
+         *
+         * @return Returns the same FragmentTransaction instance.
+         */
+        Attach(
+            [in] IFragment* fragment);
+
+        /**
+         * @return <code>true</code> if this transaction contains no operations,
+         * <code>false</code> otherwise.
+         */
+        IsEmpty(
+            [out] Boolean* empty);
+
+        /**
+         * Set specific animation resources to run for the fragments that are
+         * entering and exiting in this transaction. These animations will not be
+         * played when popping the back stack.
+         */
+        SetCustomAnimations(
+            [in] Int32 enter,
+            [in] Int32 exit);
+
+        /**
+         * Set specific animation resources to run for the fragments that are
+         * entering and exiting in this transaction. The <code>popEnter</code>
+         * and <code>popExit</code> animations will be played for enter/exit
+         * operations specifically when popping the back stack.
+         */
+        SetCustomAnimations(
+            [in] Int32 enter,
+            [in] Int32 exit,
+            [in] Int32 popEnter,
+            [in] Int32 popExit);
+
+        /**
+         * Select a standard transition animation for this transaction.  May be
+         * one of #TRANSIT_NONE, #TRANSIT_FRAGMENT_OPEN,
+         * or #TRANSIT_FRAGMENT_CLOSE
+         *
+         * @sa #TRANSIT_NONE
+         * @sa #TRANSIT_FRAGMENT_OPEN
+         * @sa #TRANSIT_FRAGMENT_CLOSE
+         */
+        SetTransition(
+            [in] Int32 transit);
+
+        /**
+         * Used with to map a View from a removed or hidden Fragment to a View from a shown
+         * or added Fragment.
+         * @param sharedElement A View in a disappearing Fragment to match with a View in an
+         *                      appearing Fragment.
+         * @param name The transitionName for a View in an appearing Fragment to match to the shared
+         *             element.
+         */
+        AddSharedElement(
+            [in] IView* sharedElement,
+            [in] String name);;
+
+        /**
+         * TODO: remove from API
+         * @hide
+         */
+        SetSharedElement(
+            [in] IView* sharedElement,
+            [in] String name);
+
+        /**
+         * TODO: remove from API
+         * @hide
+         */
+        SetSharedElements(
+            [in] ArrayOf<IPair*>* sharedElements);//Pair<View, String>
+
+        /**
+         * Set a custom style resource that will be used for resolving transit
+         * animations.
+         */
+        SetTransitionStyle(
+            [in] Int32 styleRes);
+
+        /**
+         * Add this transaction to the back stack.  This means that the transaction
+         * will be remembered after it is committed, and will reverse its operation
+         * when later popped off the stack.
+         *
+         * @param name An optional name for this back stack state, or null.
+         */
+        AddToBackStack(
+            [in] String name);
+
+        /**
+         * Returns true if this FragmentTransaction is allowed to be added to the back
+         * stack. If this method would return false, #addToBackStack(String)
+         * will throw IllegalStateException.
+         *
+         * @sa #addToBackStack(String)
+         * @sa IllegalStateException
+         *
+         * @return True if #addToBackStack(String) is permitted on this transaction.
+         *
+         * @sa #addToBackStack(String)
+         */
+        IsAddToBackStackAllowed(
+            [out] Boolean* allowed);
+
+        /**
+         * Disallow calls to #addToBackStack(String). Any future calls to
+         * addToBackStack will throw IllegalStateException. If addToBackStack
+         * has already been called, this method will throw IllegalStateException.
+         *
+         * @sa #addToBackStack(String)
+         * @sa IllegalStateException
+         */
+        DisallowAddToBackStack();
+
+        /**
+         * Set the full title to show as a bread crumb when this transaction
+         * is on the back stack, as used by FragmentBreadCrumbs.
+         *
+         * @sa FragmentBreadCrumbs
+         *
+         * @param res A string resource containing the title.
+         */
+        SetBreadCrumbTitle(
+            [in] Int32 res);
+
+        /**
+         * Like #setBreadCrumbTitle(int) but taking a raw string; this
+         * method is <em>not</em> recommended, as the string can not be changed
+         * later if the locale changes.
+         *
+         * @sa #setBreadCrumbTitle(int)
+         */
+        SetBreadCrumbTitle(
+            [in] ICharSequence* text);
+
+        /**
+         * Set the short title to show as a bread crumb when this transaction
+         * is on the back stack, as used by FragmentBreadCrumbs.
+         *
+         * @sa FragmentBreadCrumbs
+         *
+         * @param res A string resource containing the title.
+         */
+        SetBreadCrumbShortTitle(
+            [in] Int32 res);
+
+        /**
+         * Like #setBreadCrumbShortTitle(int) but taking a raw string; this
+         * method is <em>not</em> recommended, as the string can not be changed
+         * later if the locale changes.
+         *
+         * @sa #setBreadCrumbShortTitle(int)
+         */
+        SetBreadCrumbShortTitle(
+            [in] ICharSequence* text);
+
+        /**
+         * Schedules a commit of this transaction.  The commit does
+         * not happen immediately; it will be scheduled as work on the main thread
+         * to be done the next time that thread is ready.
+         *
+         * <p class="note">A transaction can only be committed with this method
+         * prior to its containing activity saving its state.  If the commit is
+         * attempted after that point, an exception will be thrown.  This is
+         * because the state after the commit can be lost if the activity needs to
+         * be restored from its state.  See #commitAllowingStateLoss() for
+         * situations where it may be okay to lose the commit.</p>
+         *
+         * @sa #commitAllowingStateLoss()
+         *
+         * @return Returns the identifier of this transaction's back stack entry,
+         * if #addToBackStack(String) had been called.  Otherwise, returns
+         * a negative number.
+         *
+         * @sa #addToBackStack(String)
+         */
+        Commit(
+            [out] Int32* identifier);
+
+        /**
+         * Like #commit but allows the commit to be executed after an
+         * activity's state is saved.  This is dangerous because the commit can
+         * be lost if the activity needs to later be restored from its state, so
+         * this should only be used for cases where it is okay for the UI state
+         * to change unexpectedly on the user.
+         *
+         * @sa #commit
+         */
+        CommitAllowingStateLoss(
+            [out] Int32* res);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

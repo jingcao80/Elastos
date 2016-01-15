@@ -1,0 +1,7 @@
+
+DIRS += apache
+DIRS += json
+DIRS += xml
+DIRS += xmlpull
+DIRS += kxml2
+DIRS += w3c

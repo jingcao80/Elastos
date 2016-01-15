@@ -1,0 +1,429 @@
+
+module
+{
+    merge("telephony/CellIdentityCdma.car");
+    merge("telephony/CellIdentityGsm.car");
+    merge("telephony/CellIdentityLte.car");
+    merge("telephony/CellIdentityWcdma.car");
+    merge("telephony/CellInfo.car");
+    merge("telephony/CellInfoCdma.car");
+    merge("telephony/CellInfoGsm.car");
+    merge("telephony/CellInfoLte.car");
+    merge("telephony/CellInfoWcdma.car");
+    merge("telephony/CellLocation.car");
+    merge("telephony/CellSignalStrength.car");
+    merge("telephony/CellSignalStrengthCdma.car");
+    merge("telephony/CellSignalStrengthGsm.car");
+    merge("telephony/CellSignalStrengthLte.car");
+    merge("telephony/CellSignalStrengthWcdma.car");
+    merge("telephony/DataConnectionRealTimeInfo.car");
+    merge("telephony/DisconnectCause.car");
+    merge("telephony/IccOpenLogicalChannelResponse.car");
+    merge("telephony/NeighboringCellInfo.car");
+    merge("telephony/PhoneNumberFormattingTextWatcher.car");
+    merge("telephony/PhoneStateListener.car");
+    merge("telephony/PreciseCallState.car");
+    merge("telephony/PreciseDataConnectionState.car");
+    merge("telephony/PreciseDisconnectCause.car");
+    merge("telephony/ServiceState.car");
+    merge("telephony/SignalStrength.car");
+    merge("telephony/SubInfoRecord.car");
+    merge("telephony/SubscriptionManager.car");
+    merge("telephony/TelephonyManager.car");
+    merge("telephony/VoLteServiceState.car");
+
+    merge("telephony/cdma/CdmaCellLocation.car");
+    merge("telephony/cdma/CdmaSmsCbProgramData.car");
+    merge("telephony/cdma/CdmaSmsCbProgramResults.car");
+
+    merge("telephony/gsm/GsmCellLocation.car");
+
+
+    // interface Elastos.Droid.Content.IContext;
+    // interface Elastos.Droid.Internal.Telephony.ICallerInfo;
+    // interface Elastos.Droid.Internal.Telephony.ICallerInfoAsyncQuery;
+    // interface Elastos.Droid.Internal.Telephony.ICallerInfoAsyncQueryHelper;
+    // interface Elastos.Droid.Internal.Telephony.ICallerInfoHelper;
+    // interface Elastos.Droid.Internal.Telephony.IGsmAlphabet;
+    // interface Elastos.Droid.Internal.Telephony.IGsmAlphabetHelper;
+    // interface Elastos.Droid.Os.IBundle;
+
+    // namespace Elastos {
+    // namespace Droid {
+    // namespace Internal {
+    // namespace Telephony {
+
+    //     [local]
+    //     class CCallerInfo {
+
+    //         constructor();
+
+    //         interface ICallerInfo;
+    //     }
+
+    //     singleton class CCallerInfoHelper {
+
+    //         interface ICallerInfoHelper;
+
+    //     }
+
+    //     class CCallerInfoAsyncQuery {
+
+    //         constructor();
+
+    //         interface ICallerInfoAsyncQuery;
+    //     }
+
+    //     singleton class CCallerInfoAsyncQueryHelper {
+
+    //         interface ICallerInfoAsyncQueryHelper;
+
+    //     }
+
+    //     class CGsmAlphabet {
+
+    //         constructor();
+
+    //         interface IGsmAlphabet;
+    //     }
+
+    //     singleton class CGsmAlphabetHelper {
+
+    //         interface IGsmAlphabetHelper;
+
+    //     }
+
+    // } // namespace Telephony
+    // } // namespace Internal
+    // } // namespace Droid
+    // } // namespace Elastos
+
+
+    // namespace Elastos {
+    // namespace Droid {
+    // namespace Telephony {
+
+    //     class CNeighboringCellInfo {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 rssi,
+    //             [in] Int32 cid);
+
+    //         constructor(
+    //             [in] Int32 rssi,
+    //             [in] String location,
+    //             [in] Int32 radioType);
+
+    //         //constructor(
+    //         //    [in] Parcel);
+
+    //         interface INeighboringCellInfo;
+    //         interface IParcelable;
+
+    //     }
+
+    //     class CSignalStrength {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Boolean gsmFlag);
+
+    //         constructor(
+    //             [in] Int32 gsmSignalStrength,
+    //             [in] Int32 gsmBitErrorRate,
+    //             [in] Int32 cdmaDbm,
+    //             [in] Int32 cdmaEcio,
+    //             [in] Int32 evdoDbm,
+    //             [in] Int32 evdoEcio,
+    //             [in] Int32 evdoSnr,
+    //             [in] Int32 lteSignalStrength,
+    //             [in] Int32 lteRsrp,
+    //             [in] Int32 lteRsrq,
+    //             [in] Int32 lteRssnr,
+    //             [in] Int32 lteCqi,
+    //             [in] Boolean gsmFlag);
+
+    //         constructor(
+    //             [in] Int32 gsmSignalStrength,
+    //             [in] Int32 gsmBitErrorRate,
+    //             [in] Int32 cdmaDbm,
+    //             [in] Int32 cdmaEcio,
+    //             [in] Int32 evdoDbm,
+    //             [in] Int32 evdoEcio,
+    //             [in] Int32 evdoSnr,
+    //             [in] Boolean gsmFlag);
+
+    //         constructor(
+    //             [in] ISignalStrength* s);
+
+    //         //constructor(
+    //         //    [in] Parcel in);
+
+    //         interface IParcelable;
+    //         interface ISignalStrength;
+    //     }
+
+    //     class CServiceState {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] IServiceState* s);
+
+    //         interface IParcelable;
+    //         interface IServiceState;
+    //     }
+
+    //     singleton class CServiceStateHelper {
+
+    //         interface IServiceStateHelper;
+
+    //     }
+
+    //     class CCellIdentityCdma {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 nid,
+    //             [in] Int32 sid,
+    //             [in] Int32 bid,
+    //             [in] Int32 lon,
+    //             [in] Int32 lat);
+
+    //         constructor(
+    //             [in] ICellIdentityCdma* cid);
+
+    //         interface IParcelable;
+    //         interface ICellIdentityCdma;
+    //     }
+
+    //     class CCellIdentityGsm {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 mcc,
+    //             [in] Int32 mnc,
+    //             [in] Int32 lac,
+    //             [in] Int32 cid,
+    //             [in] Int32 psc);
+
+    //         constructor(
+    //             [in] ICellIdentityGsm* cid);
+
+    //         interface IParcelable;
+    //         interface ICellIdentityGsm;
+    //     }
+
+    //     class CCellIdentityLte {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 mcc,
+    //             [in] Int32 mnc,
+    //             [in] Int32 ci,
+    //             [in] Int32 pci,
+    //             [in] Int32 tac);
+
+    //         constructor(
+    //             [in] ICellIdentityLte* cid);
+
+    //         interface IParcelable;
+    //         interface ICellIdentityLte;
+    //     }
+
+    //     class CCellSignalStrengthCdma {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 cdmaDbm,
+    //             [in] Int32 cdmaEcio,
+    //             [in] Int32 evdoDbm,
+    //             [in] Int32 evdoEcio,
+    //             [in] Int32 evdoSnr);
+
+    //         constructor(
+    //             [in] ICellSignalStrengthCdma* s);
+
+    //         interface IParcelable;
+    //         interface ICellSignalStrengthCdma;
+    //     }
+
+    //     class CCellSignalStrengthGsm {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 ss,
+    //             [in] Int32 ber);
+
+    //         constructor(
+    //             [in] ICellSignalStrengthGsm* s);
+
+    //         interface IParcelable;
+    //         interface ICellSignalStrengthGsm;
+    //     }
+
+    //     class CCellSignalStrengthLte {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 signalStrength,
+    //             [in] Int32 rsrp,
+    //             [in] Int32 rsrq,
+    //             [in] Int32 rssnr,
+    //             [in] Int32 cqi,
+    //             [in] Int32 timingAdvance);
+
+    //         constructor(
+    //             [in] ICellSignalStrengthLte* s);
+
+    //         interface IParcelable;
+    //         interface ICellSignalStrengthLte;
+    //     }
+
+    //     class CCellInfoCdma {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] ICellInfoCdma* ci);
+
+    //         interface IParcelable;
+    //         interface ICellInfoCdma;
+    //     }
+
+    //     class CCellInfoGsm {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] ICellInfoGsm* ci);
+
+    //         interface IParcelable;
+    //         interface ICellInfoGsm;
+    //     }
+
+    //     class CCellInfoLte {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] ICellInfoLte* ci);
+
+    //         interface IParcelable;
+    //         interface ICellInfoLte;
+    //     }
+
+    //     singleton class CCellLocationHelper {
+
+    //         interface ICellLocationHelper;
+
+    //     }
+
+    //     class CPhoneNumberFormattingTextWatcher {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] String countryCode);
+
+    //         interface IPhoneNumberFormattingTextWatcher;
+    //     }
+
+    //     singleton class CPhoneNumberUtilsHelper {
+
+    //         interface IPhoneNumberUtilsHelper;
+
+    //     }
+
+    //     class CPhoneStateListener {
+
+    //         constructor();
+
+    //         interface IPhoneStateListener;
+    //     }
+
+    //     class CCdmaSmsCbProgramData {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 operation,
+    //             [in] Int32 category,
+    //             [in] Int32 language,
+    //             [in] Int32 maxMessages,
+    //             [in] Int32 alertOption,
+    //             [in] String categoryName);
+
+    //         interface IParcelable;
+    //         interface ICdmaSmsCbProgramData;
+    //     }
+
+    //     class CCdmaSmsCbProgramResults {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] Int32 category,
+    //             [in] Int32 language,
+    //             [in] Int32 categoryResult);
+
+    //         interface IParcelable;
+    //         interface ICdmaSmsCbProgramResults;
+    //     }
+
+    //     class CCdmaCellLocation {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] IBundle* bundle);
+
+    //         interface ICdmaCellLocation;
+    //     }
+
+    //     singleton class CCdmaCellLocationHelper {
+
+    //         interface ICdmaCellLocationHelper;
+
+    //     }
+
+    //     class CGsmCellLocation {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] IBundle* bundle);
+
+    //         interface IGsmCellLocation;
+    //     }
+
+    //     [local]
+    //     class CTelephonyManager {
+
+    //         constructor();
+
+    //         constructor(
+    //             [in] IContext* ctx);
+
+    //         interface ITelephonyManager;
+    //     }
+
+    //     singleton class CTelephonyManagerHelper {
+
+    //         interface ITelephonyManagerHelper;
+
+    //     }
+
+    // } // Telephony
+    // } // Droid
+    // } // Elastos
+}

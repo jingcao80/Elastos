@@ -1,0 +1,21 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+
+    [oneway]
+    interface IIKeyguardShowCallback {
+        OnShown(
+            [in] IBinder* windowToken);
+    }
+
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

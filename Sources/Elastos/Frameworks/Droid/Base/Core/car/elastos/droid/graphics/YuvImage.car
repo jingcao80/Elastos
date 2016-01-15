@@ -1,0 +1,80 @@
+
+module
+{
+    using interface Elastos.IO.IOutputStream;
+
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    /**
+     * YuvImage contains YUV data and provides a method that compresses a region of
+     * the YUV data to a Jpeg. The YUV data should be provided as a single byte
+     * array irrespective of the number of image planes in it.
+     * Currently only ImageFormat.NV21 and ImageFormat.YUY2 are supported.
+     *
+     * To compress a rectangle region in the YUV data, users have to specify the
+     * region by left, top, width and height.
+     */
+    interface IYuvImage {
+        /**
+         * Compress a rectangle region in the YuvImage to a jpeg.
+         * Only ImageFormat.NV21 and ImageFormat.YUY2
+         * are supported for now.
+         *
+         * @param rectangle The rectangle region to be compressed. The medthod checks if rectangle is
+         *                  inside the image. Also, the method modifies rectangle if the chroma pixels
+         *                  in it are not matched with the luma pixels in it.
+         * @param quality   Hint to the compressor, 0-100. 0 meaning compress for
+         *                  small size, 100 meaning compress for max quality.
+         * @param stream    OutputStream to write the compressed data.
+         * @return          True if the compression is successful.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if rectangle is invalid; quality is not within [0, 100]; or stream is null.
+         */
+        CompressToJpeg(
+            [in] IRect* rectangle,
+            [in] Int32 quality,
+            [in] IOutputStream* stream,
+            [out] Boolean* result);
+
+        /**
+         * @return the height of the image.
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * @return the number of row bytes in each image plane.
+         */
+        GetStrides(
+            [out, callee] ArrayOf<Int32>* strides);
+
+        /**
+         * @return the width of the image.
+         */
+        GetWidth(
+            [out] Int32* width);
+
+        /**
+         * @return the YUV data.
+         */
+        GetYuvData(
+            [out, callee] ArrayOf<Byte>* data);
+
+        /**
+         * @return the YUV format as defined in PixelFormat.
+     * @sa PixelFormat
+         */
+        GetYuvFormat(
+            [out] Int32* format);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

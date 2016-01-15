@@ -1,0 +1,103 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Tech{
+
+    /**
+     * @Involve
+     * interace IBasicTagTechnology
+     */
+    [deprecated]
+    interface IMifareClassic {
+        GetType(
+            [out] Int32* type);
+
+        GetSize(
+            [out] Int32* size);
+
+        IsEmulated(
+            [out] Boolean* emulated);
+
+        GetSectorCount(
+            [out] Int32* count);
+
+        GetBlockCount(
+            [out] Int32* count);
+
+        GetBlockCountInSector(
+            [in] Int32 sectorIndex,
+            [out] Int32* type);
+
+        BlockToSector(
+            [in] Int32 blockIndex,
+            [out] Int32* type);
+
+        SectorToBlock(
+            [in] Int32 sectorIndex,
+            [out] Int32* type);
+
+        AuthenticateSectorWithKeyA(
+            [in] Int32 sectorIndex,
+            [in] ArrayOf<Byte>* key,
+            [out] Boolean* res);
+
+        AuthenticateSectorWithKeyB(
+            [in] Int32 sectorIndex,
+            [in] ArrayOf<Byte>* key,
+            [out] Boolean* res);
+
+        ReadBlock(
+            [in] Int32 blockIndex,
+            [out, callee] ArrayOf<Byte>* src);
+
+        WriteBlock(
+            [in] Int32 blockIndex,
+            [out, callee] ArrayOf<Byte>* data);
+
+        Increment(
+            [in] Int32 blockIndex,
+            [in] Int32 value);
+
+        Decrement(
+            [in] Int32 blockIndex,
+            [in] Int32 value);
+
+        Transfer(
+            [in] Int32 blockIndex);
+
+        Restore(
+            [in] Int32 blockIndex);
+
+        Transceive(
+            [in] ArrayOf<Byte>* data,
+            [out, callee] ArrayOf<Byte>* res);
+
+        GetMaxTransceiveLength(
+            [out] Int32* len);
+
+        SetTimeout(
+            [in] Int32 timeout);
+
+        GetTimeout(
+            [out] Int32* timeout);
+
+
+    }
+
+    interface IMifareClassicHelper {
+        GetMifareClassic(
+            [in] ITag* tag,
+            [out] IMifareClassic** classic);
+    }
+
+    }// namespace Tech
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

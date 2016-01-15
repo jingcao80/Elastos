@@ -1,0 +1,18 @@
+
+TARGET_NAME= media
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE -DMTP_DEVICE -DMTP_HOST
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = CMediaBrowserServiceBrowserRoot.cpp
+SOURCES += MediaBrowserServiceResult.cpp
+SOURCES += CMediaBrowserServiceResult.cpp
+SOURCES += MediaBrowserService.cpp
+SOURCES += CMediaBrowserService.cpp
+

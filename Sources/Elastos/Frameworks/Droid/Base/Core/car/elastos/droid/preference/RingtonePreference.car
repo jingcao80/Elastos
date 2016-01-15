@@ -1,0 +1,129 @@
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * A {@link Preference} that allows the user to choose a ringtone from those on the device.
+     * The chosen ringtone's URI will be persisted as a string.
+     * <p>
+     * If the user chooses the "Default" item, the saved string will be one of
+     * {@link System#DEFAULT_RINGTONE_URI},
+     * {@link System#DEFAULT_NOTIFICATION_URI}, or
+     * {@link System#DEFAULT_ALARM_ALERT_URI}. If the user chooses the "Silent"
+     * item, the saved string will be an empty string.
+     *
+     * @attr ref android.R.styleable#RingtonePreference_ringtoneType
+     * @attr ref android.R.styleable#RingtonePreference_showDefault
+     * @attr ref android.R.styleable#RingtonePreference_showSilent
+     */
+    /**
+     * @Involve
+     * interface IPreference
+     * interface IComparable
+     * interface IPreferenceManagerOnActivityResultListener
+     */
+    [local]
+    interface IRingtonePreference {
+        /**
+         * Returns the sound type(s) that are shown in the picker.
+         *
+         * @return The sound type(s) that are shown in the picker.
+         * @see #setRingtoneType(int)
+         */
+        GetRingtoneType(
+            [out] Int32* type);
+
+        /**
+         * Sets the sound type(s) that are shown in the picker.
+         *
+         * @param type The sound type(s) that are shown in the picker.
+         * @see RingtoneManager#EXTRA_RINGTONE_TYPE
+         */
+        SetRingtoneType(
+            [in] Int32 type);
+
+        /**
+         * Returns whether to a show an item for the default sound/ringtone.
+         *
+         * @return Whether to show an item for the default sound/ringtone.
+         */
+        GetShowDefault(
+            [out] Boolean* showDefault);
+
+        /**
+         * Sets whether to show an item for the default sound/ringtone. The default
+         * to use will be deduced from the sound type(s) being shown.
+         *
+         * @param showDefault Whether to show the default or not.
+         * @see RingtoneManager#EXTRA_RINGTONE_SHOW_DEFAULT
+         */
+        SetShowDefault(
+            [in] Boolean showDefault);
+
+        /**
+         * Returns whether to a show an item for 'Silent'.
+         *
+         * @return Whether to show an item for 'Silent'.
+         */
+        GetShowSilent(
+            [out] Boolean* showSilent);
+
+        /**
+         * Sets whether to show an item for 'Silent'.
+         *
+         * @param showSilent Whether to show 'Silent'.
+         * @see RingtoneManager#EXTRA_RINGTONE_SHOW_SILENT
+         */
+        SetShowSilent(
+            [in] Boolean showSilent);
+
+        /**
+         * Prepares the intent to launch the ringtone picker. This can be modified
+         * to adjust the parameters of the ringtone picker.
+         *
+         * @param ringtonePickerIntent The ringtone picker intent that can be
+         *            modified by putting extras.
+         */
+        OnPrepareRingtonePickerIntent(
+            [in] IIntent* ringtonePickerIntent);
+
+        /**
+         * Called when a ringtone is chosen.
+         * <p>
+         * By default, this saves the ringtone URI to the persistent storage as a
+         * string.
+         *
+         * @param ringtoneUri The chosen ringtone's {@link Uri}. Can be null.
+         */
+        OnSaveRingtone(
+            [in] IUri* ringtoneUri);
+
+        /**
+         * Called when the chooser is about to be shown and the current ringtone
+         * should be marked. Can return null to not mark any ringtone.
+         * <p>
+         * By default, this restores the previous ringtone URI from the persistent
+         * storage.
+         *
+         * @return The ringtone to be marked as the current ringtone.
+         */
+        OnRestoreRingtone(
+            [out] IUri** ringtoneUri);
+
+        OnActivityResult(
+            [in] Int32 requestCode,
+            [in] Int32 resultCode,
+            [in] IIntent* data,
+            [out] Boolean* result);
+
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}

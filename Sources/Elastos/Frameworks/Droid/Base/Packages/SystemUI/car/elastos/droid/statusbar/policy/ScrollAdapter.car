@@ -1,0 +1,42 @@
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    /**
+     * A scroll adapter which can be queried for meta information about the scroll state
+     */
+    [local]
+    interface IScrollAdapter {
+        /**
+         * @return Whether the view returned by {@link #getHostView()} is scrolled to the top
+         */
+        IsScrolledToTop(
+            [out] Boolean* result);
+
+        /**
+         * @return Whether the view returned by {@link #getHostView()} is scrolled to the bottom
+         */
+        IsScrolledToBottom(
+            [out] Boolean* result);
+
+        /**
+         * @return The view in which the scrolling is performed
+         */
+        GetHostView(
+            [out] IView** view);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

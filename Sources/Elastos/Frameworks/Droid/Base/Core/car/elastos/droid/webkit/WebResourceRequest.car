@@ -1,0 +1,62 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * Encompasses parameters to the {@link WebViewClient#shouldInterceptRequest} method.
+     */
+    interface IWebResourceRequest {
+        /**
+         * Gets the URL for which the resource request was made.
+         *
+         * @return the URL for which the resource request was made.
+         */
+        GetUrl(
+            [out] IUri** uri);
+
+        /**
+         * Gets whether the request was made for the main frame.
+         *
+         * @return whether the request was made for the main frame. Will be false for iframes,
+         *         for example.
+         */
+        IsForMainFrame(
+            [out] Boolean* result);
+
+        /**
+         * Gets whether a gesture (such as a click) was associated with the request.
+         *
+         * @return whether a gesture was associated with the request.
+         */
+        HasGesture(
+            [out] Boolean* result);
+
+        /**
+         * Gets the method associated with the request, for example "GET".
+         *
+         * @return the method associated with the request.
+         */
+        GetMethod(
+            [out] String* method);
+
+        /**
+         * Gets the headers associated with the request. These are represented as a mapping of header
+         * name to header value.
+         *
+         * @return the headers associated with the request.
+         */
+        GetRequestHeaders(
+            [out] IMap** headers);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

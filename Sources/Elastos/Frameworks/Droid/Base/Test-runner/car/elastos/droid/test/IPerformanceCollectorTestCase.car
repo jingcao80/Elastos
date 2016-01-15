@@ -1,0 +1,18 @@
+
+module
+{
+    using interface Elastos.Droid.Os.IPerformanceResultsWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Test {
+
+    interface IPerformanceCollectorTestCase {
+        SetPerformanceResultsWriter(
+            [in] IPerformanceResultsWriter* writer);
+    }
+
+    } // namespace Test
+    } // namespace Droid
+    } // namespace Elastos
+}

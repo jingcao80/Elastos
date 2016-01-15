@@ -1,0 +1,23 @@
+
+module
+{
+
+    namespace Libcore {
+    namespace Net {
+    namespace Url {
+
+    /**
+     * This is the handler that is responsible for reading files from the file
+     * system.
+     *
+     * @Involve
+     * interface IURLStreamHandler;
+     */
+    interface IFileHandler {
+    }
+
+    } // namespace Url
+    } // namespace Net
+    } // namespace Libcore
+
+}

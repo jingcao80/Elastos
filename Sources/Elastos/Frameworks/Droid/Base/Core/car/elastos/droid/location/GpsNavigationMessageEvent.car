@@ -1,0 +1,34 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * A class implementing a container for data associated with a navigation message event.
+     * Events are delivered to registered instances of {@link Listener}.
+     *
+     * @hide
+     */
+    /**
+     * @Involve interface IParcelable
+     */
+    [local, deprecated]
+    interface IGpsNavigationMessageEvent {
+        // @NonNull
+        GetNavigationMessage(
+            [out] IGpsNavigationMessage** result);
+    }
+
+    [local, deprecated]
+    interface IGpsNavigationMessageEventListener {
+        OnGpsNavigationMessageReceived(
+            [in] IGpsNavigationMessageEvent* event);
+    }
+
+    } // namespace Location
+    } // namespace Droid
+    } // namespace Elastos
+}
+

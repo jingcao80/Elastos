@@ -1,0 +1,26 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Animation {
+
+    /**
+     * An animation that controls the scale of an object. You can specify the point
+     * to use for the center of scaling.
+     *
+     */
+    /**
+     * @Involve
+     * interface IAnimation
+     * interface Elastos.Core.ICloneable
+     */
+    interface IScaleAnimation {
+    }
+
+    }   //namespace Animation
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

@@ -1,0 +1,71 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+    /**
+     * State sets are arrays of positive ints where each element
+     * represents the state of a {@link android.view.View} (e.g. focused,
+     * selected, visible, etc.).  A {@link android.view.View} may be in
+     * one or more of those states.
+     *
+     * A state spec is an array of signed ints where each element
+     * represents a required (if positive) or an undesired (if negative)
+     * {@link android.view.View} state.
+     *
+     * Utils dealing with state sets.
+     *
+     * In theory we could encapsulate the state set and state spec arrays
+     * and not have static methods here but there is some concern about
+     * performance since these methods are called during view drawing.
+     */
+    [deprecated]
+    interface IStateSetHelper {
+        /**
+         * Return whether the stateSetOrSpec is matched by all StateSets.
+         *
+         * @param stateSetOrSpec a state set or state spec.
+         */
+        IsWildCard(
+            [in] ArrayOf<Int32>* stateSetOrSpec,
+            [out] Boolean* value);
+
+        /**
+         * Return whether the stateSet matches the desired stateSpec.
+         *
+         * @param stateSpec an array of required (if positive) or
+         *        prohibited (if negative) {@link android.view.View} states.
+         * @param stateSet an array of {@link android.view.View} states
+         */
+        StateSetMatches(
+            [in] ArrayOf<Int32>* stateSpec,
+            [in] ArrayOf<Int32>* stateSet,
+            [out] Boolean* value);
+
+        /**
+         * Return whether the state matches the desired stateSpec.
+         *
+         * @param stateSpec an array of required (if positive) or
+         *        prohibited (if negative) {@link android.view.View} states.
+         * @param state a {@link android.view.View} state
+         */
+        StateSetMatches(
+            [in] ArrayOf<Int32>* stateSpec,
+            [in] Int32 state,
+            [out] Boolean* value);
+
+        TrimStateSet(
+            [in] ArrayOf<Int32>* states,
+            [in] Int32 newSize,
+            [out, callee] ArrayOf<Int32>* outarr);
+
+        Dump(
+            [in] ArrayOf<Int32>* states,
+            [out] String* str);
+    }
+
+    } // namespace Utility
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,24 @@
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    [deprecated]
+    interface ILocalLog {
+        Log(
+            [in] String msg);
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+}

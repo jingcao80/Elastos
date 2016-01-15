@@ -1,0 +1,307 @@
+
+module
+{
+    merge("location/Address.car");
+    merge("location/Country.car");
+    merge("location/CountryListener.car");
+    merge("location/CountryDetector.car");
+    merge("location/Criteria.car");
+    merge("location/FusedBatchOptions.car");
+    merge("location/ElLocationManagerProxy.car");
+    merge("location/Geocoder.car");
+    merge("location/GeocoderParams.car");
+    merge("location/Geofence.car");
+    merge("location/GpsClock.car");
+    merge("location/GpsMeasurement.car");
+    merge("location/GpsSatellite.car");
+    merge("location/GpsStatus.car");
+    merge("location/ICountryDetector.car");
+    merge("location/ICountryListener.car");
+    merge("location/IGeocodeProvider.car");
+    merge("location/IGpsStatusListener.car");
+    merge("location/IGpsStatusProvider.car");
+    merge("location/LocationRequest.car");
+    merge("location/Location.car");
+    merge("location/ILocationListener.car");
+    merge("location/LocationListener.car");
+    merge("location/GpsMeasurementsEvent.car");
+    merge("location/IGpsMeasurementsListener.car");//
+    merge("location/GpsNavigationMessage.car");
+
+
+    merge("location/GpsNavigationMessageEvent.car");
+    merge("location/IGpsNavigationMessageListener.car");//
+    merge("location/ILocationManager.car");
+    merge("location/INetInitiatedListener.car");
+    merge("location/LocationManager.car");
+    merge("location/LocationProvider.car");
+    merge("location/IFusedGeofenceHardware.car");
+    merge("location/IFusedProvider.car");
+    merge("location/IGpsGeofenceHardware.car");
+    merge("location/IGeofenceProvider.car");
+
+    merge("location/LocalListenerHelper.car");
+    merge("location/SettingInjectorService.car");
+    merge("location/GpsMeasurementListenerTransport.car");
+    merge("location/GpsNavigationMessageListenerTransport.car");
+
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Location.IProviderProperties;
+    interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+        [deprecated]
+        class CAddress {
+            constructor(
+                [in] ILocale* locale);
+
+            interface IAddress;
+            interface IParcelable;
+        }
+
+        class CCountry {
+            constructor();
+
+            constructor(
+                [in] String countryIso,
+                [in] Int32 source);
+
+            constructor(
+                [in] ICountry* country);
+
+            interface ICountry;
+            interface IParcelable;
+        }
+
+        class CCountryDetector {
+            constructor(
+                [in] IICountryDetector* service);
+
+            interface ICountryDetector;
+        }
+
+        class CCriteria {
+            constructor();
+
+            constructor(
+                [in] ICriteria* criteria);
+
+            interface ICriteria;
+            interface IParcelable;
+        }
+
+        class CFusedBatchOptions {
+            constructor();
+
+            interface IFusedBatchOptions;
+            interface IParcelable;
+        }
+
+        [deprecated, local]
+        class CGeocoder {
+            constructor(
+                [in] IContext* ctx,
+                [in] ILocale* locale);
+
+            constructor(
+                [in] IContext* ctx);
+
+            interface IGeocoder;
+        }
+
+        singleton class CGeocoderHelper {
+
+            interface IGeocoderHelper;
+        }
+
+        [deprecated, local]
+        class CGeocoderParams {
+            constructor();
+
+            constructor(
+                [in] IContext* ctx,
+                [in] ILocale* locale);
+
+            interface IGeocoderParams;
+            interface IParcelable;
+        }
+
+        singleton class CGeofenceHelper {
+
+            interface IGeofenceHelper;
+        }
+
+        class CGpsClock {
+            constructor();
+
+            interface IGpsClock;
+            interface IParcelable;
+        }
+
+        class CGpsMeasurement {
+            constructor();
+
+            interface IGpsMeasurement;
+            interface IParcelable;
+        }
+
+        class CGpsSatellite {
+            constructor(
+                [in] Int32 prn);
+
+            interface IGpsSatellite;
+        }
+
+        class CGpsStatus {
+            constructor();
+
+            interface IGpsStatus;
+        }
+
+        class CLocation {
+            constructor(
+                [in] String provider);
+
+            constructor(
+                [in] ILocation* l);
+
+            interface ILocation;
+            interface IParcelable;
+        }
+
+        singleton class CLocationHelper {
+
+            interface ILocationHelper;
+        }
+
+        [deprecated, local]
+        class CLocationManager {
+            constructor(
+                [in] IContext* ctx,
+                [in] IILocationManager* service);
+
+            interface ILocationManager;
+        }
+
+        [local]
+        class CLocationManagerListenerTransport {
+            constructor(
+                [in] ILocationManager* host,
+                [in] ILocationListener* listener,
+                [in] ILooper* looper);
+
+            interface IILocationListener;
+            interface IBinder;
+        }
+
+        [local]
+        class CLocationManagerGpsStatusListenerTransport {
+            constructor(
+                [in] ILocationManager* host1,
+                [in] IGpsStatusListener* listener);
+
+            constructor(
+                [in] ILocationManager* host2,
+                [in] IGpsStatusNmeaListener* listener);
+
+            interface IIGpsStatusListener;
+            interface IBinder;
+        }
+
+        class CLocationProvider {
+            constructor(
+                [in] String name,
+                [in] IProviderProperties* properties);
+
+            interface ILocationProvider;
+        }
+
+        singleton class CLocationProviderHelper{
+            interface ILocationProviderHelper;
+        }
+
+        class CLocationRequest {
+            constructor();
+
+            constructor(
+                [in] ILocationRequest* src);
+
+            interface ILocationRequest;
+            interface IParcelable;
+        }
+
+        singleton class CLocationRequestHelper {
+            interface ILocationRequestHelper;
+        }
+
+        [local]
+        class CGpsMeasurementListenerTransport {
+            constructor(
+                [in] IContext* context,
+                [in] IILocationManager* locationManager);
+
+            interface ILocalListenerHelper;
+            interface IGpsMeasurementListenerTransport;
+        }
+
+        class CGpsMeasurementListenerTransportListenerTransport {
+            constructor(
+                [in] IGpsMeasurementListenerTransport* host);
+
+            interface IIGpsMeasurementsListener;
+            interface IBinder;
+        }
+
+        [deprecated]
+        class CGpsMeasurementsEvent {
+            constructor(
+                [in] IGpsClock* clock,
+                [in] ArrayOf<IGpsMeasurement*>* measurements);
+
+            interface IGpsMeasurementsEvent;
+            interface IParcelable;
+        }
+
+        [local]
+        class CGpsNavigationMessageListenerTransport {
+            constructor(
+                [in] IContext* context,
+                [in] IILocationManager* locationManager);
+
+            interface ILocalListenerHelper;
+            interface IGpsNavigationMessageListenerTransport;
+        }
+
+        class CGpsNavigationMessageListenerTransportListenerTransport {
+            constructor(
+                [in] IGpsNavigationMessageListenerTransport* host);
+
+            interface IIGpsNavigationMessageListener;
+            interface IBinder;
+        }
+
+        class CGpsNavigationMessage {
+            constructor();
+
+            interface IGpsNavigationMessage;
+            interface IParcelable;
+        }
+
+        class CGpsNavigationMessageEvent {
+            constructor(
+                [in] IGpsNavigationMessage* measurements);
+
+            interface IGpsNavigationMessageEvent;
+            interface IParcelable;
+        }
+
+    } // namespace Location
+    } // namepsace Droid
+    } // namespace Elastos
+
+}

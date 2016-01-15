@@ -1,0 +1,53 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IPath;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * This base class can be extended to provide motion along a Path to Transitions.
+     *
+     * <p>
+     * Transitions such as {@link android.transition.ChangeBounds} move Views, typically
+     * in a straight path between the start and end positions. Applications that desire to
+     * have these motions move in a curve can change how Views interpolate in two dimensions
+     * by extending PathMotion and implementing {@link #getPath(float, float, float, float)}.
+     * </p>
+     * <p>This may be used in XML as an element inside a transition.</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *     &lt;pathMotion class="my.app.transition.MyPathMotion"/>
+     * &lt;/changeBounds>
+     * }
+     * </pre>
+     */
+    interface IPathMotion {
+
+        /**
+         * Provide a Path to interpolate between two points <code>(startX, startY)</code> and
+         * <code>(endX, endY)</code>. This allows controlled curved motion along two dimensions.
+         *
+         * @param startX The x coordinate of the starting point.
+         * @param startY The y coordinate of the starting point.
+         * @param endX   The x coordinate of the ending point.
+         * @param endY   The y coordinate of the ending point.
+         * @return A Path along which the points should be interpolated. The returned Path
+         * must start at point <code>(startX, startY)</code>, typically using
+         * {@link android.graphics.Path#moveTo(float, float)} and end at <code>(endX, endY)</code>.
+         */
+        GetPath(
+            [in] Float startX,
+            [in] Float startY,
+            [in] Float endX,
+            [in] Float endY,
+            [out] IPath** result);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

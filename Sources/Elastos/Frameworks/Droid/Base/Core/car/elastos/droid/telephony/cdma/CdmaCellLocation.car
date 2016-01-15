@@ -1,0 +1,81 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+    namespace Cdma {
+
+    /**
+     * Represents the cell location on a CDMA phone.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Telephony.ICellLocation
+     */
+    interface ICdmaCellLocation {
+
+        /**
+         * @hide
+         */
+        const Int32 INVALID_LAT_LONG = 0x7FFFFFFF; //Integer.MAX_VALUE;
+
+        GetBaseStationId(
+            [out] Int32* baseStationId);
+
+        GetBaseStationLatitude(
+            [out] Int32* baseStationLatitude);
+
+        GetBaseStationLongitude(
+            [out] Int32* baseStationLongitude);
+
+        GetSystemId(
+            [out] Int32* systemid);
+
+        GetNetworkId(
+            [out] Int32* networkid);
+
+        SetStateInvalid();
+
+        SetCellLocationData(
+            [in] Int32 baseStationId,
+            [in] Int32 baseStationLatitude,
+            [in] Int32 baseStationLongitude);
+
+        SetCellLocationData(
+            [in] Int32 baseStationId,
+            [in] Int32 baseStationLatitude,
+            [in] Int32 baseStationLongitude,
+            [in] Int32 systemId,
+            [in] Int32 networkId);
+
+        /**
+         * Fill the cell location data into the intent notifier Bundle based on service state
+         *
+         * @param bundleToFill intent notifier Bundle
+         */
+        FillInNotifierBundle(
+            [in] IBundle* bundleToFill);
+
+        /**
+         * @hide
+         */
+        IsEmpty(
+            [out] Boolean* result);
+    }
+
+    interface ICdmaCellLocationHelper {
+
+        ConvertQuartSecToDecDegrees(
+            [in] Int32 quartSec,
+            [out] Double* val);
+
+    }
+
+    } // namespace Cdma
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

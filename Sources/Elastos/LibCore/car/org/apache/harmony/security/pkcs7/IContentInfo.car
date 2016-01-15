@@ -1,0 +1,64 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Pkcs7.ISignedData;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Pkcs7 {
+
+    /**
+     * As defined in PKCS #7: Cryptographic Message Syntax Standard
+     * (http://www.ietf.org/rfc/rfc2315.txt)
+     *
+     * ContentInfo ::= SEQUENCE {
+     *       contentType  ContentType,
+     *       content      [0] EXPLICIT ANY DEFINED BY contentType OPTIONAL
+     *     }
+     */
+    interface IContentInfo {
+        GetSignedData(
+            [out] ISignedData** signedData);
+
+        GetContent(
+            [out] IInterface** content);
+
+        GetContentType(
+            [out, callee] ArrayOf<Int32>* contentType);
+
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface IContentInfoHelper {
+        GetData(
+            [out, callee] ArrayOf<Int32>* data);
+
+        GetSignedData(
+            [out, callee] ArrayOf<Int32>* signedData);
+
+        GetEnvelopedData(
+            [out, callee] ArrayOf<Int32>* envelopedData);
+
+        GetSignedAndEnvelopedData(
+            [out, callee] ArrayOf<Int32>* signedAndEnvelopedData);
+
+        GetDigestedData(
+            [out, callee] ArrayOf<Int32>* digestedData);
+
+        GetEncryptedData(
+            [out, callee] ArrayOf<Int32>* encryptedData);
+
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace Pkcs7
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

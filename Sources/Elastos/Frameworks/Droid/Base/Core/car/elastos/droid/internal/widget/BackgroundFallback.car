@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Graphics.ICanvas;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * Helper class for drawing a fallback background in framework decor layouts.
+     * Useful for when an app has not set a window background but we're asked to draw
+     * an uncovered area.
+     */
+     [local]
+    interface IBackgroundFallback {
+
+        SetDrawable(
+            [in] IDrawable* d);
+
+        HasFallback(
+            [out] Boolean* hasFallback);
+
+        Draw(
+            [in] IViewGroup* root,
+            [in] ICanvas* c,
+            [in] IView* content);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}

@@ -1,0 +1,60 @@
+
+module
+{
+    interface Elastos.Security.IKeyStore;
+    interface Elastosx.Net.Ssl.IManagerFactoryParameters;
+
+    /**
+     * The <i>Service Provider Interface</i> (SPI) for the
+     * {@code KeyManagerFactory} class.
+     */
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    [deprecated]
+    interface IKeyManagerFactorySpi {
+        /**
+         * Initializes this instance with the specified key store and password.
+         *
+         * @param ks
+         *            the key store or {@code null} to use the default key store.
+         * @param password
+         *            the key store password.
+         * @throws KeyStoreException
+         *             if initializing this instance fails.
+         * @throws NoSuchAlgorithmException
+         *             if a required algorithm is not available.
+         * @throws UnrecoverableKeyException
+         *             if a key cannot be recovered.
+         */
+        EngineInit(
+            [in] IKeyStore* ks,
+            [in] ArrayOf<Char32>* password);
+
+        /**
+         * Initializes this instance with the specified factory parameters.
+         *
+         * @param spec
+         *            the factory parameters.
+         * @throws InvalidAlgorithmParameterException
+         *             if an error occurs.
+         */
+        EngineInit(
+            [in] IManagerFactoryParameters* spec);
+
+        /**
+         * Returns a list of key managers, one instance for each type of key in the
+         * key store.
+         *
+         * @return a list of key managers.
+         */
+        EngineGetKeyManagers(
+            [out, callee] ArrayOf<IKeyManager*>* managers);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

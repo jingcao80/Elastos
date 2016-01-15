@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Location.IIActivityRecognitionHardwareSink;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * Activity Recognition Hardware provider interface.
+     * This interface can be used to implement hardware based activity recognition.
+     *
+     * @hide
+     */
+    interface IIActivityRecognitionHardware {
+        /**
+         * Gets an array of supported activities by hardware.
+         */
+        GetSupportedActivities(
+            [out, callee] ArrayOf<String>* activities);
+
+        /**
+         * Returns true if the given activity is supported, false otherwise.
+         */
+        IsActivitySupported(
+            [in] String activityType,
+            [out] Boolean* supported);
+
+        /**
+         * Registers a sink with Hardware Activity-Recognition.
+         */
+        RegisterSink(
+            [in] IIActivityRecognitionHardwareSink* sink,
+            [out] Boolean* result);
+
+        /**
+         * Unregisters a sink with Hardware Activity-Recognition.
+         */
+        UnregisterSink(
+            [in] IIActivityRecognitionHardwareSink* sink,
+            [out] Boolean* result);
+
+        /**
+         * Enables tracking of a given activity/event type, if the activity is supported.
+         */
+        EnableActivityEvent(
+            [in] String activityType,
+            [in] Int32 eventType,
+            [in] Int64 reportLatencyNs,
+            [out] Boolean* result);
+
+        /**
+         * Disables tracking of a given activity/eventy type.
+         */
+        DisableActivityEvent(
+            [in] String activityType,
+            [in] Int32 eventType,
+            [out] Boolean* result);
+
+        /**
+         * Requests hardware for all the activity events detected up to the given point in time.
+         */
+        Flush(
+            [out] Boolean* result);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

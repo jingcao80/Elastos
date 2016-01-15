@@ -1,0 +1,89 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * This transition tracks changes to the text in TextView targets. If the text
+     * changes between the start and end scenes, the transition ensures that the
+     * starting text stays until the transition ends, at which point it changes
+     * to the end text.  This is useful in situations where you want to resize a
+     * text view to its new size before displaying the text that goes there.
+     *
+     * @hide
+     */
+
+    /**
+     * involve interface ITransition
+     */
+    interface IChangeText {
+
+        /**
+         * Flag specifying that the text in affected/changing TextView targets will keep
+         * their original text during the transition, setting it to the final text when
+         * the transition ends. This is the default behavior.
+         *
+         * @see #setChangeBehavior(int)
+         */
+        const Int32 CHANGE_BEHAVIOR_KEEP = 0;
+
+        /**
+         * Flag specifying that the text changing animation should first fade
+         * out the original text completely. The new text is set on the target
+         * view at the end of the fade-out animation. This transition is typically
+         * used with a later {@link #CHANGE_BEHAVIOR_IN} transition, allowing more
+         * flexibility than the {@link #CHANGE_BEHAVIOR_OUT_IN} by allowing other
+         * transitions to be run sequentially or in parallel with these fades.
+         *
+         * @see #setChangeBehavior(int)
+         */
+        const Int32 CHANGE_BEHAVIOR_OUT = 1;
+
+        /**
+         * Flag specifying that the text changing animation should fade in the
+         * end text into the affected target view(s). This transition is typically
+         * used in conjunction with an earlier {@link #CHANGE_BEHAVIOR_OUT}
+         * transition, possibly with other transitions running as well, such as
+         * a sequence to fade out, then resize the view, then fade in.
+         *
+         * @see #setChangeBehavior(int)
+         */
+        const Int32 CHANGE_BEHAVIOR_IN = 2;
+
+        /**
+         * Flag specifying that the text changing animation should first fade
+         * out the original text completely and then fade in the
+         * new text.
+         *
+         * @see #setChangeBehavior(int)
+         */
+        const Int32 CHANGE_BEHAVIOR_OUT_IN = 3;
+
+        /**
+         * Sets the type of changing animation that will be run, one of
+         * {@link #CHANGE_BEHAVIOR_KEEP}, {@link #CHANGE_BEHAVIOR_OUT},
+         * {@link #CHANGE_BEHAVIOR_IN}, and {@link #CHANGE_BEHAVIOR_OUT_IN}.
+         *
+         * @param changeBehavior The type of fading animation to use when this
+         * transition is run.
+         * @return this textChange object.
+         */
+        SetChangeBehavior(
+            [in] Int32 changeBehavior);
+
+        /**
+         * Returns the type of changing animation that will be run.
+         *
+         * @return either {@link #CHANGE_BEHAVIOR_KEEP}, {@link #CHANGE_BEHAVIOR_OUT},
+         * {@link #CHANGE_BEHAVIOR_IN}, or {@link #CHANGE_BEHAVIOR_OUT_IN}.
+         */
+        GetChangeBehavior(
+            [out] Int32* result);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

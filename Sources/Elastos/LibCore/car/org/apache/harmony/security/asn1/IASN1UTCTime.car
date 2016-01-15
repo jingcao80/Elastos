@@ -1,0 +1,49 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    /**
+     * @Involve
+     * interface IASN1Time
+     * interface IASN1StringType
+     * interface IASN1Type;
+     * interface IASN1Constants;
+     */
+    interface IASN1UTCTime {
+        /** Length for the pattern: YYMMDDhhmm'Z' */
+        const Int32 UTC_HM = 11;
+
+        /** Length for the pattern: YYMMDDhhmmss'Z' */
+        const Int32 UTC_HMS = 13;
+
+        /** Length for the pattern: YYMMDDhhmm('+'/'-')hhmm */
+        const Int32 UTC_LOCAL_HM = 15;
+
+        /** Length for the pattern: YYMMDDhhmmss('+'/'-')hhmm */
+        const Int32 UTC_LOCAL_HMS = 17;
+    }
+
+    interface IASN1UTCTimeHelper {
+        /**
+         * Returns ASN.1 UTCTime type default implementation
+         *
+         * The default implementation works with encoding
+         * that is represented as Date object.
+         *
+         * @return ASN.1 UTCTime type default implementation
+         */
+        GetInstance(
+            [out] IASN1UTCTime** instance);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

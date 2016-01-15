@@ -1,0 +1,175 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    interface Elastos.Droid.Text.Style.ISuggestionSpan;
+    interface Elastos.Droid.View.InputMethod.IInputMethodInfo;
+    interface Elastos.Droid.View.InputMethod.IInputMethodSubtype;
+    interface Elastos.Droid.View.InputMethod.IEditorInfo;
+    interface Elastos.Droid.Os.IResultReceiver;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Internal.View.IInputBindResult;
+    interface Elastos.Droid.Internal.View.IInputContext;
+    interface Elastos.Droid.Internal.View.IInputMethodClient;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    /**
+     * Public interface to the global input method manager, used by all client
+     * applications.
+     */
+    [local, parcelable, deprecated]
+    interface IIInputMethodManager {
+        GetInputMethodList(
+            [out] IList** infos);
+
+        GetEnabledInputMethodList(
+            [out] IList** infos);
+
+        GetEnabledInputMethodSubtypeList(
+            [in] IInputMethodInfo* imi,
+            [in] Boolean allowsImplicitlySelectedSubtypes,
+            [out] IList** infos);
+
+        GetLastInputMethodSubtype(
+            [out] IInputMethodSubtype** subType);
+
+        // TODO: We should change the return type from List to List<Parcelable>
+        // Currently there is a bug that aidl doesn't accept List<Parcelable>
+        GetShortcutInputMethodsAndSubtypes(
+            [out] IList** subtypes);
+
+        /* get the current inputcontext,used by tvremoteserver */
+        GetInputContext(
+            [out] IInputContext** ctx);
+
+        AddClient(
+            [in] IInputMethodClient* client,
+            [in] IInputContext* inputContext,
+            [in] Int32 uid,
+            [in] Int32 pid);
+
+        RemoveClient(
+            [in] IInputMethodClient* client);
+
+        StartInput(
+            [in] IInputMethodClient* client,
+            [in] IInputContext* inputContext,
+            [in] IEditorInfo* attribute,
+            [in] Int32 controlFlags,
+            [out] IInputBindResult** result);
+
+        FinishInput(
+            [in] IInputMethodClient* client);
+
+        ShowSoftInput(
+            [in] IInputMethodClient* client,
+            [in] Int32 flags,
+            [in] IResultReceiver* resultReceiver,
+            [out] Boolean* res);
+
+        HideSoftInput(
+            [in] IInputMethodClient* client,
+            [in] Int32 flags,
+            [in] IResultReceiver* resultReceiver,
+            [out] Boolean* res);
+
+        // Report that a window has gained focus.  If 'attribute' is non-null,
+        // this will also do a startInput.
+        WindowGainedFocus(
+            [in] IInputMethodClient* client,
+            [in] IBinder* windowToken,
+            [in] Int32 controlFlags,
+            [in] Int32 softInputMode,
+            [in] Int32 windowFlags,
+            [in] IEditorInfo* attribute,
+            [in] IInputContext* inputContext,
+            [out] IInputBindResult** result);
+
+        ShowInputMethodPickerFromClient(
+            [in] IInputMethodClient* client);
+
+        ShowInputMethodAndSubtypeEnablerFromClient(
+            [in] IInputMethodClient* client,
+            [in] String topId);
+
+        SetInputMethod(
+            [in] IBinder* token,
+            [in] String id);
+
+        SetInputMethodAndSubtype(
+            [in] IBinder* token,
+            [in] String id,
+            [in] IInputMethodSubtype* subtype);
+
+        HideMySoftInput(
+            [in] IBinder* token,
+            [in] Int32 flags);
+
+        ShowMySoftInput(
+            [in] IBinder* token,
+            [in] Int32 flags);
+
+        UpdateStatusIcon(
+            [in] IBinder* token,
+            [in] String capsuleName,
+            [in] Int32 iconId);
+
+        SetImeWindowStatus(
+            [in] IBinder* token,
+            [in] Int32 vis,
+            [in] Int32 backDisposition);
+
+        RegisterSuggestionSpansForNotification(
+            [in] ArrayOf<ISuggestionSpan*>* spans);
+
+        NotifySuggestionPicked(
+            [in] ISuggestionSpan* span,
+            [in] String originalString,
+            [in] Int32 index,
+            [out] Boolean* picked);
+
+        GetCurrentInputMethodSubtype(
+            [out] IInputMethodSubtype** subType);
+
+        SetCurrentInputMethodSubtype(
+            [in] IInputMethodSubtype* subtype,
+            [out] Boolean* result);
+
+        SwitchToLastInputMethod(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        SwitchToNextInputMethod(
+            [in] IBinder* token,
+            [in] Boolean onlyCurrentIme,
+            [out] Boolean* switched);
+
+        ShouldOfferSwitchingToNextInputMethod(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        SetInputMethodEnabled(
+            [in] String id,
+            [in] Boolean enabled,
+            [out] Boolean* res);
+
+        SetAdditionalInputMethodSubtypes(
+            [in] String id,
+            [in] ArrayOf<IInputMethodSubtype*>* subtypes);
+
+        GetInputMethodWindowVisibleHeight(
+            [out] Int32* height);
+
+        [oneway] NotifyUserAction(
+            [in] Int32 sequenceNumber);
+    }
+
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

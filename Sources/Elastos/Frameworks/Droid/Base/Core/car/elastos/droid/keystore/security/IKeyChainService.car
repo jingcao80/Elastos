@@ -1,0 +1,87 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace KeyStore {
+    namespace Security {
+
+    /**
+     * Caller is required to ensure that {@link KeyStore#unlock
+     * KeyStore.unlock} was successful.
+     *
+     * @hide
+     */
+     [deprecated]
+    interface IIKeyChainService {
+    // APIs used by KeyChain
+        RequestPrivateKey(
+            [in] String alias,
+            [out] String* key);
+
+        GetCertificate(
+            [in] String alias,
+            [out, callee] ArrayOf<Byte>* ret);
+
+    // APIs used by CertInstaller
+        InstallCaCertificate(
+            [in] ArrayOf<Byte>* caCertificate);
+
+    // APIs used by DevicePolicyManager
+        InstallKeyPair(
+            [in] ArrayOf<Byte>* privateKey,
+            [in] ArrayOf<Byte>* userCert,
+            [in] String alias,
+            [out] Boolean* ret);
+
+    // APIs used by Settings
+        DeleteCaCertificate(
+            [in] String alias,
+            [out] Boolean* ret);
+
+        Reset(
+            [out] Boolean* ret);
+
+        GetUserCaAliases(
+            [out] IParceledListSlice** slice);
+
+        GetSystemCaAliases(
+            [out] IParceledListSlice** slice);
+
+        ContainsCaAlias(
+            [in] String alias,
+            [out] Boolean* ret);
+
+        GetEncodedCaCertificate(
+            [in] String alias,
+            [in] Boolean includeDeletedSystem,
+            [out, callee] ArrayOf<Byte>* ret);
+
+        GetCaCertificateChainAliases(
+            [in] String rootAlias,
+            [in] Boolean  includeDeletedSystem,
+            [out] IList** aliases);
+
+    // APIs used by KeyChainActivity
+        SetGrant(
+            [in] Int32 uid,
+            [in] String alias,
+            [in] Boolean value);
+
+        HasGrant(
+            [in] Int32 uid,
+            [in] String alias,
+            [out] Boolean* ret);
+    }
+
+    }// namespace Security
+    }// namespace KeyStore
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+

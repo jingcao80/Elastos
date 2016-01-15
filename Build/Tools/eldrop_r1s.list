@@ -1,0 +1,20 @@
+;
+; Purpose: Drop/Pack List for R1S
+;
+; Format:  SrcFile/Folder or
+;          SrcFile/Folder [DestFolder]
+;
+framework.jar            /system/framework
+android.policy.jar       /system/framework
+libandroid_runtime.so    /system/lib
+../../Linux/usr/lib/libelchromium_net.so       /system/lib
+../../Linux/usr/lib/libelwebcore.so            /system/lib
+MediaProvider.apk               /system/app
+Browser.apk                     /system/app
+Calculator.apk                  /system/app
+DefaultContainerService.apk     /system/app
+DeskClock.apk                   /system/app
+DownloadProvider.apk            /system/app
+DownloadProviderUi.apk          /system/app
+FileManager.apk                 /system/app
+PackageInstaller.apk            /system/app

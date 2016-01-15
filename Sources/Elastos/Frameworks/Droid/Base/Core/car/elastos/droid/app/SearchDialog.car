@@ -1,0 +1,61 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.IComponentName;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * @Involve
+     * interface IDialog;
+     */
+    interface ISearchDialog {
+        Show(
+            [in] String initialQuery,
+            [in] Boolean selectInitialQuery,
+            [in] IComponentName* componentName,
+            [in] IBundle* appSearchData,
+            [out] Boolean* result);
+
+        /**
+         * Sets the search dialog to the 'working' state, which shows a working spinner in the
+         * right hand size of the text field.
+         *
+         * @param working true to show spinner, false to hide spinner
+         */
+        SetWorking(
+            [in] Boolean working);
+
+        /**
+         * Called after resources have changed, e.g. after screen rotation or locale change.
+         */
+        OnConfigurationChanged();
+
+        /**
+         * Launch a search for the text in the query text field.
+         */
+        LaunchQuerySearch();
+
+        /**
+         * Sets the list item selection in the AutoCompleteTextView's ListView.
+         */
+        SetListSelection(
+            [in] Int32 index);
+    }
+
+    /**
+     * @Involve
+     * interface ILinearLayout;
+     */
+    interface ISearchBar {
+        SetSearchDialog(
+            [in] ISearchDialog* dialog);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}
+

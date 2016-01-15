@@ -1,0 +1,27 @@
+
+module
+{
+    namespace Libcore {
+    namespace ICU {
+
+        /**
+         * Exposes icu4c's Transliterator.
+         */
+        interface ITransliterator {
+
+            /**
+             * Returns the ids of all known transliterators.
+             */
+            GetAvailableIDs(
+                [out, callee] ArrayOf<String>* ids);
+
+            /**
+             * Transliterates the specified string.
+             */
+            Transliterate(
+                [in] String s,
+                [out] String* rev);
+        }
+    } // ICU
+    } // namespace LibCore
+}

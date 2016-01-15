@@ -1,0 +1,55 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * APIs for Bluetooth A2DP service
+         *
+         * @hide
+         */
+        [deprecated]
+        interface IIBluetoothA2dp {
+            // Public API
+            Connect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            Disconnect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            // Mike TODO: Wait for list car interface
+            GetConnectedDevices(
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetDevicesMatchingConnectionStates(
+                [in] ArrayOf<Int32>* states,
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetConnectionState(
+                [in] IBluetoothDevice* device,
+                [out] Int32* state);
+
+            SetPriority(
+                [in] IBluetoothDevice* device,
+                [in] Int32 priority,
+                [out] Boolean* result);
+
+            GetPriority(
+                [in] IBluetoothDevice* device,
+                [out] Int32* priority);
+
+            IsA2dpPlaying(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* isA2dpPlaying);
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

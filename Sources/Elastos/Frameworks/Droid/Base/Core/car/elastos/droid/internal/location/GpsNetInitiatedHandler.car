@@ -1,0 +1,199 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Location {
+
+    /**
+     * Represents a geographical boundary, also known as a geofence.
+     *
+     * <p>Currently only circular geofences are supported and they do not support altitude changes.
+     *
+     * @hide
+     */
+    interface IGpsNiNotification {
+        GetNotificationId(
+            [out] Int32* notifacationId);
+
+        SetNotificationId(
+            [in] Int32 notifacationId);
+
+        GetNiType(
+            [out] Int32* niType);
+
+        SetNiType(
+            [in] Int32 niType);
+
+        GetNeedNotify(
+            [out] Boolean* needNotify);
+
+        SetNeedNotify(
+            [in] Boolean needNotify);
+
+        GetNeedVerify(
+            [out] Boolean* needVerify);
+
+        SetNeedVerify(
+            [in] Boolean needVerify);
+
+        GetPrivacyOverride(
+            [out] Boolean* privacyOverride);
+
+        SetPrivacyOverride(
+            [in] Boolean privacyOverride);
+
+        GetTimeOut(
+            [out] Int32* timeOut);
+
+        SetTimeOut(
+            [in] Int32 timeOut);
+
+        GetDefaultResponse(
+            [out] Int32* defaultResponse);
+
+        SetDefaultResponse(
+            [in] Int32 defaultResponse);
+
+        GetRequestorId(
+            [out] String* requestorId);
+
+        SetRequestorId(
+            [in] String requestorId);
+
+        GetText(
+            [out] String* text);
+
+        SetText(
+            [in] String text);
+
+        GetRequestorIdEncoding(
+            [out] Int32* requestorIdEncoding);
+
+        SetRequestorIdEncoding(
+            [in] Int32 requestorIdEncoding);
+
+        GetTextEncoding(
+            [out] Int32* textEncoding);
+
+        SetTextEncoding(
+            [in] Int32 textEncoding);
+
+        GetExtras(
+            [out] IBundle** extras);
+
+        SetExtras(
+            [in] IBundle* extras);
+    }
+
+    interface IGpsNiResponse {
+        /* User reponse, one of the values in GpsUserResponseType */
+        GetUserResponse(
+            [out] Int32* userResponse);
+
+        SetUserResponse(
+            [in] Int32 userResponse);
+
+        /* Optional extra data to pass with the user response */
+        GetExtras(
+            [out] IBundle** extras);
+
+        SetExtras(
+            [in] IBundle* extras);
+    }
+
+    interface IGpsNetInitiatedHandler {
+
+        const String ACTION_NI_VERIFY = "android.intent.action.NETWORK_INITIATED_VERIFY";
+
+        // string constants for defining data fields in NI Intent
+        const String NI_INTENT_KEY_NOTIF_ID = "notif_id";
+        const String NI_INTENT_KEY_TITLE = "title";
+        const String NI_INTENT_KEY_MESSAGE = "message";
+        const String NI_INTENT_KEY_TIMEOUT = "timeout";
+        const String NI_INTENT_KEY_DEFAULT_RESPONSE = "default_resp";
+
+        // the extra command to send NI response to GpsLocationProvider
+        const String NI_RESPONSE_EXTRA_CMD = "send_ni_response";
+
+        // the extra command parameter names in the Bundle
+        const String NI_EXTRA_CMD_NOTIF_ID = "notif_id";
+        const String NI_EXTRA_CMD_RESPONSE = "response";
+
+        // these need to match GpsNiType constants in gps_ni.h
+        const Int32 GPS_NI_TYPE_VOICE = 1;
+        const Int32 GPS_NI_TYPE_UMTS_SUPL = 2;
+        const Int32 GPS_NI_TYPE_UMTS_CTRL_PLANE = 3;
+        const Int32 GPS_NI_TYPE_EMERGENCY_SUPL = 4;
+
+        // these need to match GpsUserResponseType constants in gps_ni.h
+        const Int32 GPS_NI_RESPONSE_ACCEPT = 1;
+        const Int32 GPS_NI_RESPONSE_DENY = 2;
+        const Int32 GPS_NI_RESPONSE_NORESP = 3;
+        const Int32 GPS_NI_RESPONSE_IGNORE = 4;
+
+        // these need to match GpsNiNotifyFlags constants in gps_ni.h
+        const Int32 GPS_NI_NEED_NOTIFY = 0x0001;
+        const Int32 GPS_NI_NEED_VERIFY = 0x0002;
+        const Int32 GPS_NI_PRIVACY_OVERRIDE = 0x0004;
+
+        // these need to match GpsNiEncodingType in gps_ni.h
+        const Int32 GPS_ENC_NONE = 0;
+        const Int32 GPS_ENC_SUPL_GSM_DEFAULT = 1;
+        const Int32 GPS_ENC_SUPL_UTF8 = 2;
+        const Int32 GPS_ENC_SUPL_UCS2 = 3;
+        const Int32 GPS_ENC_UNKNOWN = -1;
+
+        SetSuplEsEnabled(
+            [in] Boolean isEnabled);
+
+        GetSuplEsEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Updates Location enabler based on location setting.
+         */
+        UpdateLocationMode();
+
+        /**
+         * Checks if user agreed to use location.
+         */
+        GetLocationEnabled(
+            [out] Boolean* result);
+
+        // Note: Currently, there are two mechanisms involved to determine if a
+        // phone is in emergency mode:
+        // 1. If the user is making an emergency call, this is provided by activly
+        //    monitoring the outgoing phone number;
+        // 2. If the device is in a emergency callback state, this is provided by
+        //    system properties.
+        // If either one of above exists, the phone is considered in an emergency
+        // mode. Because of this complexity, we need to be careful about how to set
+        // and clear the emergency state.
+        SetInEmergency(
+            [in] Boolean isInEmergency);
+
+        GetInEmergency(
+            [out] Boolean* result);
+
+        HandleNiNotification(
+            [in] IGpsNiNotification* notif);
+
+    }
+
+    interface IGpsNetInitiatedHandlerHelper {
+        GetDialogTitle(
+            [in] IGpsNiNotification* notif,
+            [in] IContext* context,
+            [out] String* title);
+    }
+
+    } //namespace Location
+    } //namespace Internal
+    } //namespace Droid
+    } //namespace Elastos
+}

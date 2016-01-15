@@ -1,0 +1,31 @@
+
+TARGET_NAME = libcore.net
+TARGET_TYPE = lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/libcore;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/net;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/net/http;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/net/event;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io/charset;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/net;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/text;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility;
+
+SOURCES += MimeUtils.cpp
+SOURCES += CMimeUtils.cpp
+SOURCES += UriCodec.cpp
+SOURCES += CUriCodecHelper.cpp
+
+ELASTOS_LIBS += event/event.lib
+ELASTOS_LIBS += http/http.lib
+ELASTOS_LIBS += url/url.lib

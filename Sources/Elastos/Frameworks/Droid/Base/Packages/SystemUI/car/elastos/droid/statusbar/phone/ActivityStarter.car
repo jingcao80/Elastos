@@ -1,0 +1,32 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * An interface to start activities. This is used to as a callback from the views to
+     * {@link PhoneStatusBar} to allow custom handling for starting the activity, i.e. dismissing the
+     * Keyguard.
+     */
+    interface IActivityStarter {
+
+        StartActivity(
+            [in] IIntent* intent,
+            [in] Boolean dismissShade);
+    }
+
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

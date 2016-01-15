@@ -1,0 +1,25 @@
+module
+{
+    interface Elastos.Droid.Internal.View.IIInputMethodSession;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    /**
+     * Helper interface for IInputMethod to allow the input method to notify the client when a new
+     * session has been created.
+     * {@hide}
+     */
+    [oneway]
+    interface IInputSessionCallback {
+        SessionCreated(
+            [in] IIInputMethodSession* session);
+    }
+
+    }//namespace View
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

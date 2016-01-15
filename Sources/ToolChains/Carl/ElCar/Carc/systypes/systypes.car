@@ -1,0 +1,89 @@
+//==========================================================================
+// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+//==========================================================================
+
+library
+{
+    typedef [dummytype] Byte UInt8;
+    typedef [dummytype] Int32 Address;
+
+    typedef [dummytype] EGuid ClassID;
+    typedef [dummytype] EMuid InterfaceID;
+    typedef [dummytype] InterfaceID EIID;
+
+    typedef [dummytype] Int32 MemorySize;
+
+    typedef [dummytype] Int32 Handle32;
+    typedef [dummytype] Int64 Handle64;
+
+    typedef [dummytype] Handle32* PHandle32;
+    typedef [dummytype] Handle64* PHandle64;
+
+    interface IInterface {
+    }
+
+    typedef [dummytype] IInterface * PInterface;
+
+    interface IObject extends IInterface {
+        Aggregate(
+            [in] Int32 type,
+            [in] IInterface *object);
+
+        GetDomain(
+            [out] IInterface **object);
+
+        GetClassID(
+            [out] ClassID *clsid);
+
+        GetHashCode(
+            [out] Int32 * pHashCode);
+
+        Equals(
+            [in] IInterface * pInterface,
+            [out] Boolean * pEquals);
+
+        ToString(
+            [out] String* pInfo);
+    }
+
+    typedef [dummytype] Int32 AggregateType;
+
+    interface IAspect extends IInterface {
+        AspectAggregate(
+            [in] AggregateType type,
+            [in] IInterface *object);
+
+        AspectGetDomain(
+            [out] IInterface **object);
+
+        GetAspectID(
+            [out] ClassID *clsid);
+    }
+
+    interface IClassObject extends IInterface {
+        CreateObject(
+            [in] IInterface *outer,
+            [in] InterfaceID riid,
+            [out] IInterface **object);
+
+        StayResident(
+            [in] Boolean bIsStayResident);
+    }
+
+    typedef [dummytype] IClassObject * PClassObject;
+
+    interface IProxyDeathRecipient extends IInterface {
+        ProxyDied();
+    }
+
+    interface IWeakReference extends IInterface {
+        Resolve(
+            [in] InterfaceID riid,
+            [out] IInterface** objectReference);
+    }
+
+    interface IWeakReferenceSource extends IInterface {
+        GetWeakReference(
+            [out] IWeakReference** weakReference);
+    }
+}

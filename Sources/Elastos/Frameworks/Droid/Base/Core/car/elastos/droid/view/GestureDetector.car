@@ -1,0 +1,183 @@
+
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * The listener that is used to notify when gestures occur.
+     * If you want to listen for all the different gestures then implement
+     * this interface. If you only want to listen for a subset it might
+     * be easier to extend {@link SimpleOnGestureListener}.
+     */
+    interface IGestureDetectorOnGestureListener {
+        /**
+         * Notified when a tap occurs with the down {@link MotionEvent}
+         * that triggered it. This will be triggered immediately for
+         * every down event. All other events should be preceded by this.
+         *
+         * @param e The down motion event.
+         */
+        OnDown(
+            [in] IMotionEvent* e,
+            [out] Boolean* res);
+
+        /**
+         * The user has performed a down {@link MotionEvent} and not performed
+         * a move or up yet. This event is commonly used to provide visual
+         * feedback to the user to let them know that their action has been
+         * recognized i.e. highlight an element.
+         *
+         * @param e The down motion event
+         */
+        OnShowPress(
+            [in] IMotionEvent* e);
+
+        /**
+         * Notified when a tap occurs with the up {@link MotionEvent}
+         * that triggered it.
+         *
+         * @param e The up motion event that completed the first tap
+         * @return true if the event is consumed, else false
+         */
+        OnSingleTapUp(
+            [in] IMotionEvent* e,
+            [out] Boolean* res);
+
+        /**
+         * Notified when a scroll occurs with the initial on down {@link MotionEvent} and the
+         * current move {@link MotionEvent}. The distance in x and y is also supplied for
+         * convenience.
+         *
+         * @param e1 The first down motion event that started the scrolling.
+         * @param e2 The move motion event that triggered the current onScroll.
+         * @param distanceX The distance along the X axis that has been scrolled since the last
+         *              call to onScroll. This is NOT the distance between {@code e1}
+         *              and {@code e2}.
+         * @param distanceY The distance along the Y axis that has been scrolled since the last
+         *              call to onScroll. This is NOT the distance between {@code e1}
+         *              and {@code e2}.
+         * @return true if the event is consumed, else false
+         */
+        OnScroll(
+            [in] IMotionEvent* e1,
+            [in] IMotionEvent* e2,
+            [in] Float distanceX,
+            [in] Float distanceY,
+            [out] Boolean* res);
+
+        /**
+         * Notified when a long press occurs with the initial on down {@link MotionEvent}
+         * that trigged it.
+         *
+         * @param e The initial on down motion event that started the longpress.
+         */
+        OnLongPress(
+            [in] IMotionEvent* e);
+
+        /**
+         * Notified of a fling event when it occurs with the initial on down {@link MotionEvent}
+         * and the matching up {@link MotionEvent}. The calculated velocity is supplied along
+         * the x and y axis in pixels per second.
+         *
+         * @param e1 The first down motion event that started the fling.
+         * @param e2 The move motion event that triggered the current onFling.
+         * @param velocityX The velocity of this fling measured in pixels per second
+         *              along the x axis.
+         * @param velocityY The velocity of this fling measured in pixels per second
+         *              along the y axis.
+         * @return true if the event is consumed, else false
+         */
+        OnFling(
+            [in] IMotionEvent* e1,
+            [in] IMotionEvent* e2,
+            [in] Float velocityX,
+            [in] Float velocityY,
+            [out] Boolean* res);
+    }
+
+    /**
+     * The listener that is used to notify when a double-tap or a confirmed
+     * single-tap occur.
+     */
+    interface IGestureDetectorOnDoubleTapListener {
+        /**
+         * Notified when a single-tap occurs.
+         * <p>
+         * Unlike {@link OnGestureListener#onSingleTapUp(MotionEvent)}, this
+         * will only be called after the detector is confident that the user's
+         * first tap is not followed by a second tap leading to a double-tap
+         * gesture.
+         *
+         * @param e The down motion event of the single-tap.
+         * @return true if the event is consumed, else false
+         */
+        OnSingleTapConfirmed(
+            [in] IMotionEvent* e,
+            [out] Boolean* res);
+
+        /**
+         * Notified when a double-tap occurs.
+         *
+         * @param e The down motion event of the first tap of the double-tap.
+         * @return true if the event is consumed, else false
+         */
+        OnDoubleTap(
+            [in] IMotionEvent* e,
+            [out] Boolean* res);
+
+        /**
+         * Notified when an event within a double-tap gesture occurs, including
+         * the down, move, and up events.
+         *
+         * @param e The motion event that occurred during the double-tap gesture.
+         * @return true if the event is consumed, else false
+         */
+        OnDoubleTapEvent(
+            [in] IMotionEvent* e,
+            [out] Boolean* res);
+    }
+
+    interface IGestureDetector {
+        /**
+         * Sets the listener which will be called for double-tap and related
+         * gestures.
+         *
+         * @param onDoubleTapListener the listener invoked for all the callbacks, or
+         *        null to stop listening for double-tap gestures.
+         */
+
+        SetOnDoubleTapListener(
+            [in] IGestureDetectorOnDoubleTapListener* onDoubleTapListener);
+
+        /**
+         * Set whether longpress is enabled, if this is enabled when a user
+         * presses and holds down you get a longpress event and nothing further.
+         * If it's disabled the user can press and hold down and then later
+         * moved their finger and you will get scroll events. By default
+         * longpress is enabled.
+         *
+         * @param isLongpressEnabled whether longpress should be enabled.
+         */
+
+        SetIsLongpressEnabled(
+            [in] Boolean isLongpressEnabled);
+
+        /**
+         * @return true if longpress is enabled, else false.
+         */
+
+        IsLongpressEnabled(
+            [out] Boolean* isEnable);
+
+        OnTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+    }
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

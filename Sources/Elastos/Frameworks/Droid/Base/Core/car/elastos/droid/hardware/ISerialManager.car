@@ -1,0 +1,25 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /** @hide */
+    interface IISerialManager {
+        /* Returns a list of all available serial ports */
+        GetSerialPorts(
+            [out, callee] ArrayOf<String>* ports);
+
+        /* Returns a file descriptor for the serial port. */
+        OpenSerialPort(
+            [in] String name,
+            [out] IParcelFileDescriptor** des);
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

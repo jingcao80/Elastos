@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNative;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    /**
+     * Provide legacy-specific implementations of camera2 CaptureRequest for legacy devices.
+     */
+    interface ILegacyResultMapper {
+        /**
+         * Generate capture result metadata from the legacy camera request.
+         *
+         * <p>This method caches and reuses the result from the previous call to this method if
+         * the {@code parameters} of the subsequent {@link LegacyRequest} passed to this method
+         * have not changed.</p>
+         *
+         * @param legacyRequest a non-{@code null} legacy request containing the latest parameters
+         * @param timestamp the timestamp to use for this result in nanoseconds.
+         *
+         * @return {@link CameraMetadataNative} object containing result metadata.
+         */
+        CachedConvertResultMetadata(
+            [in] ILegacyRequest* legacyRequest,
+            [in] Int64 timestamp,
+            [out] ICameraMetadataNative** outcmn);
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

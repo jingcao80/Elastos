@@ -1,0 +1,43 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The algorithm parameter specification for a <i>password based encryption</i>
+     * algorithm.
+     * <p>
+     * Password based encryption is described in <a
+     * href="http://www.ietf.org/rfc/rfc2898.txt">PKCS #5</a>.
+     *
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+     */
+    interface IPBEParameterSpec {
+
+        /**
+         * Returns a copy to the salt.
+         *
+         * @return a copy to the salt.
+         */
+        GetSalt(
+            [out, callee] ArrayOf<Byte> * salt);
+
+        /**
+         * Returns the iteration count.
+         *
+         * @return the iteration count.
+         */
+        GetIterationCount(
+            [out] Int32 * count);
+    }
+
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

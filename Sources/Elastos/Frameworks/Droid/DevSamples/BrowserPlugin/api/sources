@@ -1,0 +1,37 @@
+TARGET_NAME = libelsampleplugin
+TARGET_TYPE = so
+
+include $(MAKEDIR)/../../../sources.inc
+
+IMPORTS = Elastos.Droid.Core.eco
+
+INCLUDES += $(MAKEDIR)/../../../Base/Core/inc
+
+INCLUDES += $(PREBUILD_INC)/webkit/WebCore/bridge
+INCLUDES += $(PREBUILD_INC)/webkit/WebCore/plugins
+INCLUDES += $(PREBUILD_INC)/webkit/WebKit/elastos/plugins
+INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(MAKEDIR)/audio
+INCLUDES += $(MAKEDIR)/background
+INCLUDES += $(MAKEDIR)/hello
+
+SOURCES  = main.cpp
+SOURCES += PluginObject.cpp
+SOURCES += RenderingThread.cpp
+SOURCES += audio/AudioPlugin.cpp
+SOURCES += hello/HelloPlugin.cpp
+SOURCES += background/BackgroundPlugin.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+LINK_FLAGS += -L$(PREBUILD_LIB)
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+##LIBRARIES += $(XDK_USER_LIB)/Elastos.Droid.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lutils
+#-lnativehelper
+LIBRARIES += -lstdc++ -lEGL -lGLESv2 -lskia -landroid

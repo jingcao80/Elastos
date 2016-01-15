@@ -1,0 +1,31 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Utils {
+
+    /**
+     * @hide
+     *
+     * @invoke
+     * interface IParcelable
+     */
+    interface IBinderHolder {
+        GetBinder(
+            [out] IBinder** binder);
+
+        SetBinder(
+            [in] IBinder* binder);
+    }
+
+    } // namespace Utils
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

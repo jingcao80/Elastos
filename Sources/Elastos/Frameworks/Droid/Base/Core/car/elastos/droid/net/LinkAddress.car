@@ -1,0 +1,89 @@
+
+module
+{
+
+    using interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Identifies an IP address on a network link.
+     *
+     * A {@code LinkAddress} consists of:
+     * <ul>
+     * <li>An IP address and prefix length (e.g., {@code 2001:db8::1/64} or {@code 192.0.2.1/24}).
+     * The address must be unicast, as multicast addresses cannot be assigned to interfaces.
+     * <li>Address flags: A bitmask of {@code OsConstants.IFA_F_*} values representing properties
+     * of the address (e.g., {@code android.system.OsConstants.IFA_F_OPTIMISTIC}).
+     * <li>Address scope: One of the {@code OsConstants.IFA_F_*} values; defines the scope in which
+     * the address is unique (e.g.,
+     * {@code android.system.OsConstants.RT_SCOPE_LINK} or
+     * {@code android.system.OsConstants.RT_SCOPE_UNIVERSE}).
+     * </ul>
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface ILinkAddress {
+        /**
+         * Determines whether this {@code LinkAddress} and the provided {@code LinkAddress}
+         * represent the same address. Two {@code LinkAddresses} represent the same address
+         * if they have the same IP address and prefix length, even if their properties are
+         * different.
+         *
+         * @param other the {@code LinkAddress} to compare to.
+         * @return {@code true} if both objects have the same address and prefix length, {@code false}
+         * otherwise.
+         * @hide
+         */
+        IsSameAddressAs(
+            [in] ILinkAddress* other,
+            [out] Boolean* result);
+
+        /**
+         * Returns the {@link InetAddress} of this {@code LinkAddress}.
+         */
+        GetAddress(
+            [out] IInetAddress** result);
+
+        /**
+         * Returns the prefix length of this {@code LinkAddress}.
+         */
+        GetPrefixLength(
+            [out] Int32* result);
+
+        /**
+         * Returns the prefix length of this {@code LinkAddress}.
+         * TODO: Delete all callers and remove in favour of getPrefixLength().
+         * @hide
+         */
+        GetNetworkPrefixLength(
+            [out] Int32* result);
+
+        /**
+         * Returns the flags of this {@code LinkAddress}.
+         */
+        GetFlags(
+            [out] Int32* result);
+
+        /**
+         * Returns the scope of this {@code LinkAddress}.
+         */
+        GetScope(
+            [out] Int32* result);
+
+        /**
+         * Returns true if this {@code LinkAddress} is global scope and preferred.
+         * @hide
+         */
+        IsGlobalPreferred(
+            [out] Boolean* result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

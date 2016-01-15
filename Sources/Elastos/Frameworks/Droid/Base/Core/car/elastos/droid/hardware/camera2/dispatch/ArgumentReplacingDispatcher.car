@@ -1,0 +1,36 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Dispatch {
+
+    /**
+     * A dispatcher that replaces one argument with another; replaces any argument at an index
+     * with another argument.
+     *
+     * <p>For example, we can override an {@code void onSomething(int x)} calls to have {@code x} always
+     * equal to 1. Or, if using this with a duck typing dispatcher, we could even overwrite {@code x} to
+     * be something
+     * that's not an {@code int}.</p>
+     *
+     * @param <T>
+     *          source dispatch type, whose methods with {@link #dispatch} will be called
+     * @param <TArg>
+     *          argument replacement type, args in {@link #dispatch} matching {@code argumentIndex}
+     *          will be overriden to objects of this type
+     *
+     * @ invoke
+     * interface IDispatchable;
+     */
+    interface IArgumentReplacingDispatcher {
+    }
+
+    } // namespace Dispatch
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,95 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.IClipData;
+    interface Elastos.Droid.Content.IClipDescription;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Defines a listener callback that is invoked when the primary clip on the clipboard changes.
+     * Objects that want to register a listener call
+     * android.content.ClipboardManager#addPrimaryClipChangedListener(OnPrimaryClipChangedListener) addPrimaryClipChangedListener() with an
+     * object that implements OnPrimaryClipChangedListener.
+     *
+     * @sa android.content.ClipboardManager#addPrimaryClipChangedListener(OnPrimaryClipChangedListener) addPrimaryClipChangedListener()
+     *
+     */
+    interface IClipboardManagerOnPrimaryClipChangedListener {
+        /**
+         * Callback that is invoked by android.content.ClipboardManager when the primary
+         * clip changes.
+         *
+         * @sa android.content.ClipboardManager}
+         */
+        OnPrimaryClipChanged();
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Text.IClipboardManager
+     */
+    interface IClipboardManager{
+        /**
+         * Sets the current primary clip on the clipboard.  This is the clip that
+         * is involved in normal cut and paste operations.
+         *
+         * @param clip The clipped data item to set.
+         */
+        SetPrimaryClip(
+            [in] IClipData* clip);
+
+        /**
+         * Returns the current primary clip on the clipboard.
+         */
+        GetPrimaryClip(
+            [out] IClipData** clipData);
+
+        /**
+         * Returns a description of the current primary clip on the clipboard
+         * but not a copy of its data.
+         */
+        GetPrimaryClipDescription(
+            [out] IClipDescription** clipDescription);
+
+        /**
+         * Returns true if there is currently a primary clip on the clipboard.
+         */
+        HasPrimaryClip(
+            [out] Boolean* hasClip);
+
+        AddPrimaryClipChangedListener(
+            [in] IClipboardManagerOnPrimaryClipChangedListener* what);
+
+        RemovePrimaryClipChangedListener(
+            [in] IClipboardManagerOnPrimaryClipChangedListener* what);
+
+        /**
+         * Returns the text on the clipboard.  It will eventually be possible
+         * to store types other than text too, in which case this will return
+         * null if the type cannot be coerced to text.
+         */
+        GetText(
+            [out] ICharSequence** text);
+
+        /**
+         * Sets the contents of the clipboard to the specified text.
+         */
+        SetText(
+            [in] ICharSequence* text);
+
+        /**
+         * Returns true if the clipboard contains text; false otherwise.
+         */
+        HasText(
+            [out] Boolean* hasText);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

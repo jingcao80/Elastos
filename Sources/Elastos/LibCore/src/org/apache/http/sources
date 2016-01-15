@@ -1,0 +1,46 @@
+
+TARGET_NAME= org.apache.http
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc;
+
+SOURCES = CHttpHost.cpp
+SOURCES += ProtocolVersion.cpp
+SOURCES += CProtocolVersion.cpp
+SOURCES += CHttpVersion.cpp
+SOURCES += CHttpVersionHelper.cpp
+
+ELASTOS_LIBS += auth/auth.lib
+ELASTOS_LIBS += auth/params/params.lib
+ELASTOS_LIBS += client/entity/entity.lib
+ELASTOS_LIBS += client/methods/methods.lib
+ELASTOS_LIBS += client/params/params.lib
+ELASTOS_LIBS += client/protocol/protocol.lib
+ELASTOS_LIBS += client/utils/utils.lib
+ELASTOS_LIBS += conn/conn.lib
+ELASTOS_LIBS += conn/params/params.lib
+ELASTOS_LIBS += conn/routing/routing.lib
+ELASTOS_LIBS += conn/scheme/scheme.lib
+ELASTOS_LIBS += conn/ssl/ssl.lib
+ELASTOS_LIBS += conn/util/util.lib
+ELASTOS_LIBS += cookie/cookie.lib
+ELASTOS_LIBS += cookie/params/params.lib
+ELASTOS_LIBS += entity/entity.lib
+ELASTOS_LIBS += impl/impl.lib
+ELASTOS_LIBS += impl/auth/auth.lib
+ELASTOS_LIBS += impl/client/client.lib
+ELASTOS_LIBS += impl/conn/conn.lib
+ELASTOS_LIBS += impl/conn/tsccm/tsccm.lib
+ELASTOS_LIBS += impl/cookie/cookie.lib
+ELASTOS_LIBS += impl/entity/entity.lib
+ELASTOS_LIBS += impl/io/io.lib
+ELASTOS_LIBS += message/message.lib
+ELASTOS_LIBS += params/params.lib
+ELASTOS_LIBS += protocol/protocol.lib
+ELASTOS_LIBS += utility/util.lib

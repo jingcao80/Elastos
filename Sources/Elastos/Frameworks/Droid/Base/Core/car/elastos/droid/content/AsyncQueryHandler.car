@@ -1,0 +1,115 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * @Involve
+     * interface IHandler
+     */
+    [deprecated]
+    interface IAsyncQueryHandler {
+        /**
+         * This method begins an asynchronous query. When the query is done
+         * {@link #onQueryComplete} is called.
+         *
+         * @param token A token passed into {@link #onQueryComplete} to identify
+         *  the query.
+         * @param cookie An object that gets passed into {@link #onQueryComplete}
+         * @param uri The URI, using the content:// scheme, for the content to
+         *         retrieve.
+         * @param projection A list of which columns to return. Passing null will
+         *         return all columns, which is discouraged to prevent reading data
+         *         from storage that isn't going to be used.
+         * @param selection A filter declaring which rows to return, formatted as an
+         *         SQL WHERE clause (excluding the WHERE itself). Passing null will
+         *         return all rows for the given URI.
+         * @param selectionArgs You may include ?s in selection, which will be
+         *         replaced by the values from selectionArgs, in the order that they
+         *         appear in the selection. The values will be bound as Strings.
+         * @param orderBy How to order the rows, formatted as an SQL ORDER BY
+         *         clause (excluding the ORDER BY itself). Passing null will use the
+         *         default sort order, which may be unordered.
+         */
+        StartQuery(
+            [in] Int32 token,
+            [in] IInterface* cookie,
+            [in] IUri* uri,
+            [in] ArrayOf<String>* projection,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs,
+            [in] String orderBy);
+
+        /**
+         * Attempts to cancel operation that has not already started. Note that
+         * there is no guarantee that the operation will be canceled. They still may
+         * result in a call to on[Query/Insert/Update/Delete]Complete after this
+         * call has completed.
+         *
+         * @param token The token representing the operation to be canceled.
+         *  If multiple operations have the same token they will all be canceled.
+         */
+        CancelOperation(
+            [in] Int32 token);
+
+        /**
+         * This method begins an asynchronous insert. When the insert operation is
+         * done {@link #onInsertComplete} is called.
+         *
+         * @param token A token passed into {@link #onInsertComplete} to identify
+         *  the insert operation.
+         * @param cookie An object that gets passed into {@link #onInsertComplete}
+         * @param uri the Uri passed to the insert operation.
+         * @param initialValues the ContentValues parameter passed to the insert operation.
+         */
+        StartInsert(
+            [in] Int32 token,
+            [in] IInterface* cookie,
+            [in] IUri* uri,
+            [in] IContentValues* initialValues);
+
+        /**
+         * This method begins an asynchronous update. When the update operation is
+         * done {@link #onUpdateComplete} is called.
+         *
+         * @param token A token passed into {@link #onUpdateComplete} to identify
+         *  the update operation.
+         * @param cookie An object that gets passed into {@link #onUpdateComplete}
+         * @param uri the Uri passed to the update operation.
+         * @param values the ContentValues parameter passed to the update operation.
+         */
+        StartUpdate(
+            [in] Int32 token,
+            [in] IInterface* cookie,
+            [in] IUri* uri,
+            [in] IContentValues* values,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs);
+
+        /**
+         * This method begins an asynchronous delete. When the delete operation is
+         * done {@link #onDeleteComplete} is called.
+         *
+         * @param token A token passed into {@link #onDeleteComplete} to identify
+         *  the delete operation.
+         * @param cookie An object that gets passed into {@link #onDeleteComplete}
+         * @param uri the Uri passed to the delete operation.
+         * @param selection the where clause.
+         */
+        StartDelete(
+            [in] Int32 token,
+            [in] IInterface* cookie,
+            [in] IUri* uri,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

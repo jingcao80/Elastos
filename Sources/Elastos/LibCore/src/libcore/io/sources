@@ -1,0 +1,42 @@
+
+TARGET_NAME= libcore.io
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/libcore;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/io;
+INCLUDES += $(MAKEDIR)/../../../inc/corelibrary;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility;
+
+SOURCES = CAsynchronousCloseMonitor.cpp
+SOURCES += CPosix.cpp
+SOURCES += NetworkUtilities.cpp
+SOURCES += SocketTagger.cpp
+SOURCES += CBase64.cpp
+SOURCES += CLibcore.cpp
+SOURCES += CIoBridge.cpp
+SOURCES += CSocketTaggerHelper.cpp
+SOURCES += ForwardingOs.cpp
+SOURCES += ToStringArray.cpp
+SOURCES += BlockGuardOs.cpp
+SOURCES += CStreams.cpp
+SOURCES += DeleteOnExit.cpp
+SOURCES += CDeleteOnExitHelper.cpp
+SOURCES += CDropBox.cpp
+SOURCES += HeapBufferIterator.cpp
+SOURCES += Memory.cpp
+SOURCES += CMemory.cpp
+SOURCES += IoUtils.cpp
+SOURCES += CIoUtils.cpp
+SOURCES += NioBufferIterator.cpp
+SOURCES += CMemoryMappedFile.cpp
+SOURCES += CStrictLineReader.cpp

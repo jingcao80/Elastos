@@ -1,0 +1,23 @@
+TARGET_NAME= datatype
+TARGET_TYPE= lib
+
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/math;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml/datatype
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml/namespace
+
+SOURCES = CDatatypeConstants.cpp
+SOURCES += Duration.cpp
+SOURCES += XMLGregorianCalendar.cpp
+SOURCES += DatatypeFactory.cpp
+SOURCES += FactoryFinder.cpp
+SOURCES += CDatatypeFactoryHelper.cpp

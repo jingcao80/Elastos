@@ -1,0 +1,268 @@
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.Os.IWorkSource;
+//    interface Elastos.Droid.Telephony.ISignalStrength;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    interface IIBatteryStats {
+        // These first methods are also called by native code, so must
+        // be kept in sync with frameworks/native/include/binder/IBatteryStats.h
+        NoteStartSensor(
+            [in] Int32 uid,
+            [in] Int32 sensor);
+
+        NoteStopSensor(
+            [in] Int32 uid,
+            [in] Int32 sensor);
+
+        NoteStartVideo(
+            [in] Int32 uid);
+
+        NoteStopVideo(
+            [in] Int32 uid);
+
+        NoteStartAudio(
+            [in] Int32 uid);
+
+        NoteStopAudio(
+            [in] Int32 uid);
+
+        NoteResetVideo();
+
+        NoteResetAudio();
+
+        // Remaining methods are only used in Java.
+        GetStatistics(
+            [out, callee] ArrayOf<Byte>* result);
+
+        GetStatisticsStream(
+            [out] IParcelFileDescriptor** result);
+
+        // Return the computed amount of time remaining on battery, in milliseconds.
+        // Returns -1 if nothing could be computed.
+        ComputeBatteryTimeRemaining(
+            [out] Int64* result);
+
+        // Return the computed amount of time remaining to fully charge, in milliseconds.
+        // Returns -1 if nothing could be computed.
+        ComputeChargeTimeRemaining(
+            [out] Int64* result);
+
+        NoteEvent(
+            [in] Int32 code,
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteSyncStart(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteSyncFinish(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteJobStart(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteJobFinish(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteStartWakelock(
+            [in] Int32 uid,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] Boolean unimportantForLogging);
+
+        NoteStopWakelock(
+            [in] Int32 uid,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type);
+
+        NoteStartWakelockFromSource(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] Boolean unimportantForLogging);
+
+        NoteChangeWakelockFromSource(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String histyoryName,
+            [in] Int32 type,
+            [in] IWorkSource* newWs,
+            [in] Int32 newPid,
+            [in] String newName,
+            [in] String newHistoryName,
+            [in] Int32 newType,
+            [in] Boolean newUnimportantForLogging);
+
+        NoteStopWakelockFromSource(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type);
+
+        NoteVibratorOn(
+            [in] Int32 uid,
+            [in] Int64 durationMillis);
+
+        NoteVibratorOff(
+            [in] Int32 uid);
+
+        NoteFlashlightOn();
+
+        NoteFlashlightOff();
+
+        NoteStartGps(
+            [in] Int32 uid);
+
+        NoteStopGps(
+            [in] Int32 uid);
+
+        NoteScreenState(
+            [in] Int32 state);
+
+        NoteScreenBrightness(
+            [in] Int32 brightness);
+
+        NoteUserActivity(
+            [in] Int32 uid,
+            [in] Int32 event);
+
+        NoteInteractive(
+            [in] Boolean interactive);
+
+        NoteMobileRadioPowerState(
+            [in] Int32 powerState,
+            [in] Int64 timestampNs);
+
+        NotePhoneOn();
+
+        NotePhoneOff();
+
+//        NotePhoneSignalStrength(
+//            [in] ISignalStrength* signalStrength);
+
+        NotePhoneDataConnectionState(
+            [in] Int32 dataType,
+            [in] Boolean hasData);
+
+        NotePhoneState(
+            [in] Int32 phoneState);
+
+        NoteWifiOn();
+
+        NoteWifiOff();
+
+        NoteWifiRunning(
+            [in] IWorkSource* ws);
+
+        NoteWifiRunningChanged(
+            [in] IWorkSource* oldWs,
+            [in] IWorkSource* newWs);
+
+        NoteWifiStopped(
+            [in] IWorkSource* ws);
+
+        NoteWifiState(
+            [in] Int32 wifiState,
+            [in] String accessPoint);
+
+        NoteWifiSupplicantStateChanged(
+            [in] Int32 supplState,
+            [in] Boolean failedAuth);
+
+        NoteWifiRssiChanged(
+            [in] Int32 newRssi);
+
+        NoteBluetoothOn();
+
+        NoteBluetoothOff();
+
+        NoteBluetoothState(
+            [in] Int32 bluetoothState);
+
+        NoteFullWifiLockAcquired(
+            [in] Int32 uid);
+
+        NoteFullWifiLockReleased(
+            [in] Int32 uid);
+
+        NoteWifiScanStarted(
+            [in] Int32 uid);
+
+        NoteWifiScanStopped(
+            [in] Int32 uid);
+
+        NoteWifiMulticastEnabled(
+            [in] Int32 uid);
+
+        NoteWifiMulticastDisabled(
+            [in] Int32 uid);
+
+        NoteFullWifiLockAcquiredFromSource(
+            [in] IWorkSource* ws);
+
+        NoteFullWifiLockReleasedFromSource(
+            [in] IWorkSource* ws);
+
+        NoteWifiScanStartedFromSource(
+            [in] IWorkSource* ws);
+
+        NoteWifiScanStoppedFromSource(
+            [in] IWorkSource* ws);
+
+        NoteWifiBatchedScanStartedFromSource(
+            [in] IWorkSource* ws,
+            [in] Int32 csph);
+
+        NoteWifiBatchedScanStoppedFromSource(
+            [in] IWorkSource* ws);
+
+        NoteWifiMulticastEnabledFromSource(
+            [in] IWorkSource* ws);
+
+        NoteWifiMulticastDisabledFromSource(
+            [in] IWorkSource* ws);
+
+        NoteNetworkInterfaceType(
+            [in] String iface,
+            [in] Int32 type);
+
+        NoteNetworkStatsEnabled();
+
+        SetBatteryState(
+            [in] Int32 status,
+            [in] Int32 health,
+            [in] Int32 plugType,
+            [in] Int32 level,
+            [in] Int32 temp,
+            [in] Int32 volt);
+
+        GetAwakeTimeBattery(
+            [out] Int64* result);
+
+        GetAwakeTimePlugged(
+            [out] Int64* result);
+    }
+
+    }//namespace App
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

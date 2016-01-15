@@ -1,0 +1,158 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNativeKey;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNative;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+
+    interface ICaptureResultKey {
+        /**
+         * Return a camelCase, period separated name formatted like:
+         * {@code "root.section[.subsections].name"}.
+         *
+         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+         *
+         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+         *
+         * @return String representation of the key name
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Visible for CameraMetadataNative implementation only; do not use.
+         *
+         * TODO: Make this private or remove it altogether.
+         *
+         * @hide
+         */
+        GetNativeKey(
+            [out] ICameraMetadataNativeKey** key);
+    }
+
+    /**
+     * <p>The subset of the results of a single image capture from the image sensor.</p>
+     *
+     * <p>Contains a subset of the final configuration for the capture hardware (sensor, lens,
+     * flash), the processing pipeline, the control algorithms, and the output
+     * buffers.</p>
+     *
+     * <p>CaptureResults are produced by a {@link CameraDevice} after processing a
+     * {@link CaptureRequest}. All properties listed for capture requests can also
+     * be queried on the capture result, to determine the final values used for
+     * capture. The result also includes additional metadata about the state of the
+     * camera device during the capture.</p>
+     *
+     * <p>Not all properties returned by {@link CameraCharacteristics#getAvailableCaptureResultKeys()}
+     * are necessarily available. Some results are {@link CaptureResult partial} and will
+     * not have every key set. Only {@link TotalCaptureResult total} results are guaranteed to have
+     * every key available that was enabled by the request.</p>
+     *
+     * <p>{@link CaptureResult} objects are immutable.</p>
+     *
+     * @ invoke
+     * interface ICameraMetadata
+     *
+     */
+    interface ICaptureResult {
+        /**
+         * Returns a copy of the underlying {@link CameraMetadataNative}.
+         * @hide
+         */
+        GetNativeCopy(
+            [out] ICameraMetadataNative** native);
+
+        /**
+         * Get a capture result field value.
+         *
+         * <p>The field definitions can be found in {@link CaptureResult}.</p>
+         *
+         * <p>Querying the value for the same key more than once will return a value
+         * which is equal to the previous queried value.</p>
+         *
+         * @throws IllegalArgumentException if the key was not valid
+         *
+         * @param key The result field to read.
+         * @return The value of that key, or {@code null} if the field is not set.
+         */
+        Get(
+            [in] ICaptureResultKey* key,
+            [out] IInterface** outface);
+
+        /**
+         * Dumps the native metadata contents to logcat.
+         *
+         * <p>Visibility for testing/debugging only. The results will not
+         * include any synthesized keys, as they are invisible to the native layer.</p>
+         *
+         * @hide
+         */
+        DumpToLog();
+
+        /**
+         * Get the request associated with this result.
+         *
+         * <p>Whenever a request has been fully or partially captured, with
+         * {@link CameraCaptureSession.CaptureCallback#onCaptureCompleted} or
+         * {@link CameraCaptureSession.CaptureCallback#onCaptureProgressed}, the {@code result}'s
+         * {@code getRequest()} will return that {@code request}.
+         * </p>
+         *
+         * <p>For example,
+         * <code><pre>cameraDevice.capture(someRequest, new CaptureCallback() {
+         *     {@literal @}Override
+         *     void onCaptureCompleted(CaptureRequest myRequest, CaptureResult myResult) {
+         *         assert(myResult.getRequest.equals(myRequest) == true);
+         *     }
+         * }, null);
+         * </code></pre>
+         * </p>
+         *
+         * @return The request associated with this result. Never {@code null}.
+         */
+        GetRequest(
+            [out] ICaptureRequest** outcr);
+
+        /**
+         * Get the frame number associated with this result.
+         *
+         * <p>Whenever a request has been processed, regardless of failure or success,
+         * it gets a unique frame number assigned to its future result/failure.</p>
+         *
+         * <p>This value monotonically increments, starting with 0,
+         * for every new result or failure; and the scope is the lifetime of the
+         * {@link CameraDevice}.</p>
+         *
+         * @return The frame number
+         */
+        GetFrameNumber(
+            [out] Int64* value);
+
+        /**
+         * The sequence ID for this failure that was returned by the
+         * {@link CameraCaptureSession#capture} family of functions.
+         *
+         * <p>The sequence ID is a unique monotonically increasing value starting from 0,
+         * incremented every time a new group of requests is submitted to the CameraDevice.</p>
+         *
+         * @return int The ID for the sequence of requests that this capture result is a part of
+         *
+         * @see CameraDevice.CaptureCallback#onCaptureSequenceCompleted
+         * @see CameraDevice.CaptureCallback#onCaptureSequenceAborted
+         */
+        GetSequenceId(
+            [out] Int32* value);
+    }
+
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

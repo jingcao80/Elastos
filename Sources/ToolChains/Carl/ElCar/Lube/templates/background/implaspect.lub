@@ -1,0 +1,77 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+
+PInterface _${name}::_AspectProbe(_ELASTOS REIID riid)
+{
+    if (FALSE == _m_bAggregated) return NULL;
+
+$WITH all interfaces DO
+$   IF attrib is not "callback" and attrib is not "clsobj" and attrib is not "filter"
+$       IF interface is first
+$
+    if (EIID_IInterface == riid) {
+        return (IInterface *)(${name} *)this;
+    }
+$       END IF ;; interface is first
+$
+$       WITH all parents DO
+    else if (EIID_${name} == riid) {
+        return (${name} *)(${child.name} *)this;
+    }
+$       END DO ;; all parents
+$
+    else if (EIID_${name} == riid) {
+$ IF interface.attrib is "privileged"
+        ECode ec = _Impl_InsideProtectedZone();
+        if (FAILED(ec)) return NULL;
+$ END IF;;
+        return (${name} *)this;
+    }
+$
+$   END IF ;; !callback, !clsobj, !filter
+$END DO ;; all interfaces
+$
+    else if (EIID_GENERIC_INFO == riid) {
+${GenericInfoQI(class)}
+    }
+    else if ((_ELASTOS REIID)ECLSID_${name} == riid) {
+        return (IInterface *)(IAspect *)this;
+    }
+$   IF attrib is "hasparent" and super.type is not "generic"
+$     IF super.attrib is "hascallback"
+    else if (EIID_SUPER_CALLBACK_CONNECTOR == riid) {
+        if(NULL == _m_pSuper) return NULL;
+        return _m_pSuper->AspectProbe(
+                        EIID_CALLBACK_CONNECTOR);
+    }
+$     END IF ;; super.attrib is hascallback and not generic
+$   END IF
+
+    return NULL;
+}
+
+ECode _${name}::_Aggregate(PInterface pOuter)
+{
+    ECode ec;
+
+    if (NULL != _m_pOuter || NULL == pOuter) return E_CLASS_NO_AGGREGATION;
+
+    _m_syncLock = (Mutex*)pOuter->Probe(EIID_MUTEX_INFO);
+    if (!_m_syncLock) return E_NO_INTERFACE;
+
+    ec = ((IObject*)pOuter)->Aggregate(AggrType_AspectAttach, (IInterface *)(IAspect *)this);
+    if (FAILED(ec)) return ec;
+
+    _m_pOuter = (IObject*)pOuter;
+    _m_bAggregated = TRUE;
+
+    return NOERROR;
+}
+
+ECode _${name}::_Unaggregate(ClassID* pTargetClsId)
+{
+    return NOERROR;
+}

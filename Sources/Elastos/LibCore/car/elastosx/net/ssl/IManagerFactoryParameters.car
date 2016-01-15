@@ -1,0 +1,21 @@
+
+module
+{
+
+    /**
+     * The marker interface for key manager factory parameters. Its purpose is to
+     * group key manager factory parameters objects.
+     *
+     * @since 1.4
+     */
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    interface IManagerFactoryParameters {}
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

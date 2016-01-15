@@ -1,0 +1,34 @@
+module
+{
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * Changes the typeface family of the text to which the span is attached.
+     *
+     * @Involve
+     * interface IParcelable
+     * interface IParcelableSpan
+     * interface IUpdateAppearance
+     * interface IUpdateLayout
+     * interface ICharacterStyle
+     * interface IMetricAffectingSpan
+     */
+    interface ITypefaceSpan {
+        /**
+         * Returns the font family name.
+         */
+        GetFamily(
+            [out] String* ret);
+    }
+
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

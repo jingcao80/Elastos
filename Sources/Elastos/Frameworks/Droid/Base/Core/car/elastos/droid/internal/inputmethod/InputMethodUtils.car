@@ -1,0 +1,291 @@
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IHashMap;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.ILocale;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.App.IAppOpsManager;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.View.InputMethod.IInputMethodInfo;
+    interface Elastos.Droid.View.InputMethod.IInputMethodSubtype;
+    interface Elastos.Droid.Utility.IPair;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace InputMethod {
+
+    /**
+     * Utility class for putting and getting settings for InputMethod
+     * TODO: Move all putters and getters of settings to this class.
+     */
+    [local, deprecated]
+    interface IInputMethodSettings {
+        SetCurrentUserId(
+            [in] Int32 userId);
+
+        SetCurrentProfileIds(
+            [in] ArrayOf<Int32>* currentProfileIds);
+
+        IsCurrentProfile(
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        GetEnabledInputMethodListLocked(
+            [out] IList** list);
+
+        GetEnabledInputMethodAndSubtypeHashCodeListLocked(
+            [out] IList** list);
+
+        GetEnabledInputMethodSubtypeListLocked(
+            [in] IContext* context,
+            [in] IInputMethodInfo* imi,
+            [in] Boolean allowsImplicitlySelectedSubtypes,
+            [out] IList** list);
+
+        GetEnabledInputMethodSubtypeListLocked(
+            [in] IInputMethodInfo* imi,
+            [out] IList** list);
+
+        // At the initial boot, the settings for input methods are not set,
+        // so we need to enable IME in that case.
+        EnableAllIMEsIfThereIsNoEnabledIME();
+
+        GetEnabledInputMethodsAndSubtypeListLocked(
+            [out] IList** list);
+
+        AppendAndPutEnabledInputMethodLocked(
+            [in] String id,
+            [in] Boolean reloadInputMethodStr);
+
+        /**
+         * Build and put a string of EnabledInputMethods with removing specified Id.
+         * @return the specified id was removed or not.
+         */
+        BuildAndPutEnabledInputMethodsStrRemovingIdLocked(
+            [in] IStringBuilder* builder,
+            [in] IList* imsList,
+            [in] String id,
+            [out] Boolean* result);
+
+        GetEnabledInputMethodsStr(
+            [out] String* str);
+
+        GetLastInputMethodAndSubtypeLocked(
+            [out] IPair** pair);
+
+        GetLastSubtypeForInputMethodLocked(
+            [in] String imeId,
+            [out] String* str);
+
+        PutSelectedInputMethod(
+            [in] String imeId);
+
+        PutSelectedSubtype(
+            [in] Int32 subtypeId);
+
+        GetDisabledSystemInputMethods(
+            [out] String* str);
+
+        GetSelectedInputMethod(
+            [out] String* str);
+
+        IsSubtypeSelected(
+            [out] Boolean* result);
+
+        IsShowImeWithHardKeyboardEnabled(
+            [out] Boolean* result);
+
+        SetShowImeWithHardKeyboard(
+            [in] Boolean show);
+
+        GetCurrentUserId(
+            [out] Int32* userId);
+
+        GetSelectedInputMethodSubtypeId(
+            [in] String selectedImiId,
+            [out] Int32* subtypeId);
+
+        SaveCurrentInputMethodAndSubtypeToHistory(
+            [in] String curMethodId,
+            [in] IInputMethodSubtype* currentSubtype);
+
+        GetExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
+            [in] IContext* context,
+            [out] IHashMap** hashmap);
+    }
+
+    /**
+     * InputMethodManagerUtils contains some static methods that provides IME informations.
+     * This methods are supposed to be used in both the framework and the Settings application.
+     */
+    [local]
+    interface IInputMethodUtils {
+        const Boolean DEBUG = FALSE;
+        const Int32 NOT_A_SUBTYPE_ID = -1;
+        // const String SUBTYPE_MODE_ANY = NULL;
+        const String SUBTYPE_MODE_KEYBOARD = "keyboard";
+        const String SUBTYPE_MODE_VOICE = "voice";
+
+        // ----------------------------------------------------------------------
+        // Utilities for debug
+        GetStackTrace(
+            [out] String* str);
+
+        GetApiCallStack(
+            [out] String* str);
+        // ----------------------------------------------------------------------
+
+        IsSystemIme(
+            [in] IInputMethodInfo* inputMethod,
+            [out] Boolean* result);
+
+        /**
+         * @deprecated Use {@link Locale} returned from
+         * {@link #getFallbackLocaleForDefaultIme(ArrayList)} instead.
+         */
+        // @Deprecated
+        IsSystemImeThatHasEnglishKeyboardSubtype(
+            [in] IInputMethodInfo* imi,
+            [out] Boolean* result);
+
+        GetFallbackLocaleForDefaultIme(
+            [in] IArrayList* imis,
+            [in] IContext* context,
+            [out] ILocale** locale);
+
+        GetSystemLocaleFromContext(
+            [in] IContext* context,
+            [out] ILocale** locale);
+
+        GetDefaultEnabledImes(
+            [in] IContext* context,
+            [in] Boolean isSystemReady,
+            [in] IArrayList* imis,
+            [out] IArrayList** arrayList);
+
+        IsImeThatHasSubtypeOf(
+            [in] IInputMethodInfo* imi,
+            [in] ILocale* locale,
+            [in] Boolean ignoreCountry,
+            [in] String mode,
+            [out] Boolean* result);
+
+        /**
+         * @deprecated Use {@link #isSystemIme(InputMethodInfo)} and
+         * {@link InputMethodInfo#isDefault(Context)} and
+         * {@link #isImeThatHasSubtypeOf(InputMethodInfo, Locale, Boolean, String))} instead.
+         */
+        // @Deprecated
+        IsValidSystemDefaultIme(
+            [in] Boolean isSystemReady,
+            [in] IInputMethodInfo* imi,
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        ContainsSubtypeOf(
+            [in] IInputMethodInfo* imi,
+            [in] ILocale* locale,
+            [in] Boolean ignoreCountry,
+            [in] String mode,
+            [out] Boolean* result);
+
+        /**
+         * @deprecated Use {@link #containsSubtypeOf(InputMethodInfo, Locale, Boolean, String)} instead.
+         */
+        // @Deprecated
+        ContainsSubtypeOf(
+            [in] IInputMethodInfo* imi,
+            [in] String language,
+            [in] String mode,
+            [out] Boolean* result);
+
+        GetSubtypes(
+            [in] IInputMethodInfo* imi,
+            [out] IArrayList** arrayList);
+
+        GetOverridingImplicitlyEnabledSubtypes(
+            [in] IInputMethodInfo* imi,
+            [in] String mode,
+            [out] IArrayList** arrayList);
+
+        GetMostApplicableDefaultIME(
+            [in] IList* enabledImes,
+            [out] IInputMethodInfo** imi);
+
+        IsValidSubtypeId(
+            [in] IInputMethodInfo* imi,
+            [in] Int32 subtypeHashCode,
+            [out] Boolean* result);
+
+        GetSubtypeIdFromHashCode(
+            [in] IInputMethodInfo* imi,
+            [in] Int32 subtypeHashCode,
+            [out] Int32* hashCode);
+
+        /**
+         * Returns the language component of a given locale string.
+         * TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(languageTag)}
+         */
+        GetLanguageFromLocaleString(
+            [in] String locale,
+            [out] String* str);
+
+        /**
+         * If there are no selected subtypes, tries finding the most applicable one according to the
+         * given locale.
+         * @param subtypes this function will search the most applicable subtype in subtypes
+         * @param mode subtypes will be filtered by mode
+         * @param locale subtypes will be filtered by locale
+         * @param canIgnoreLocaleAsLastResort if this function can't find the most applicable subtype,
+         * it will return the first subtype matched with mode
+         * @return the most applicable subtypeId
+         */
+        FindLastResortApplicableSubtypeLocked(
+            [in] IResources* res,
+            [in] IList* subtypes,
+            [in] String mode,
+            [in] String locale,
+            [in] Boolean canIgnoreLocaleAsLastResort,
+            [out] IInputMethodSubtype** subtype);
+
+        CanAddToLastInputMethod(
+            [in] IInputMethodSubtype* subtype,
+            [out] Boolean* result);
+
+        SetNonSelectedSystemImesDisabledUntilUsed(
+            [in] IPackageManager* packageManager,
+            [in] IList* enabledImis);
+
+        GetImeAndSubtypeDisplayName(
+            [in] IContext* context,
+            [in] IInputMethodInfo* imi,
+            [in] IInputMethodSubtype* subtype,
+            [out] ICharSequence** displayName);
+
+        /**
+         * Returns true if a package name belongs to a UID.
+         *
+         * <p>This is a simple wrapper of {@link AppOpsManager#checkPackage(Int32, String)}.</p>
+         * @param appOpsManager the {@link AppOpsManager} object to be used for the validation.
+         * @param uid the UID to be validated.
+         * @param packageName the package name.
+         * @return {@code true} if the package name belongs to the UID.
+         */
+        CheckIfPackageBelongsToUid(
+            [in] IAppOpsManager* appOpsManager,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Boolean* result);
+    }
+
+    } // namespace InputMethod
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

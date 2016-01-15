@@ -1,0 +1,122 @@
+module
+{
+    merge("IRecognitionListener.car");
+    merge("IRecognitionService.car");
+    merge("RecognitionListener.car");
+    merge("RecognitionService.car");
+    merge("RecognizerIntent.car");
+    merge("RecognizerResultsIntent.car");
+    merge("SpeechRecognizer.car");
+
+    merge("srec/MicrophoneInputStream.car");
+    merge("srec/Recognizer.car");
+    merge("srec/UlawEncoderInputStream.car");
+    merge("srec/WaveHeader.car");
+
+    merge("tts/AbstractEventLogger.car");
+    merge("tts/ITextToSpeechCallback.car");
+    merge("tts/SynthesisCallback.car");
+    merge("tts/TextToSpeech.car");
+    merge("tts/TtsEngines.car");
+    merge("tts/Voice.car");
+    merge("tts/BlockingAudioTrack.car");
+    merge("tts/ITextToSpeechService.car");
+    merge("tts/SynthesisRequest.car");
+    merge("tts/TextToSpeechService.car");
+    merge("tts/UtteranceProgressListener.car");
+
+    using interface Elastos.Core.IBundle;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+
+    class CSpeechRecognizer {
+        constructor();
+
+        interface ISpeechRecognizer;
+    }
+
+    singleton class CSpeechRecognizerHelper {
+        interface ISpeechRecognizerHelper
+    }
+
+    singleton class CRecognizerIntentHelper {
+        interface IRecognizerIntent;
+    }
+
+    // tts
+    ////////////////////////////////////////////////////////////////////////
+
+    class CSynthesisRequest {
+        constructor();
+
+        constructor(
+            [in] String text,
+            [in] IBundle* params);
+
+        constructor(
+            [in] ICharSequence* text,
+            [in] IBundle* params);
+
+        interface ISynthesisRequest;
+    }
+
+    class CTextToSpeech {
+        constructor();
+
+        interface ITextToSpeech;
+    }
+
+    class CFileSynthesisCallback {
+        constructor();
+
+        interface ISynthesisCallback;
+    }
+
+    class CBlockingAudioTrack {
+        constructor();
+
+        interface IBlockingAudioTrack;
+    }
+
+    // srec
+    ////////////////////////////////////////////////////////////////////////
+
+    class CWaveHeader {
+        constructor();
+
+        interface IWaveHeader;
+    }
+
+    class CUlawEncoderInputStream {
+        constructor();
+
+        interface IUlawEncoderInputStream;
+    }
+
+    class CRecognizer {
+        constructor();
+
+        interface IRecognizer;
+    }
+
+    class CMicrophoneInputStream {
+        constructor();
+
+        interface IMicrophoneInputStream;
+    }
+
+    singleton class CRecognizerHelper {
+        interface IRecognizerHelper;
+    }
+
+    singleton class CUlawEncoderInputStreamHelper {
+        interface IUlawEncoderInputStreamHelper;
+    }
+
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+}

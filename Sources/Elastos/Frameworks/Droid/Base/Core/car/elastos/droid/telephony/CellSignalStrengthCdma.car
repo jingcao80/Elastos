@@ -1,0 +1,66 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface ICellSignalStrength
+     * interface IParcelable
+     */
+    interface ICellSignalStrengthCdma {
+
+        Initialize(
+            [in] Int32 cdmaDbm,
+            [in] Int32 cdmaEcio,
+            [in] Int32 evdoDbm,
+            [in] Int32 evdoEcio,
+            [in] Int32 evdoSnr);
+
+        Copy(
+            [out] ICellSignalStrengthCdma** css);
+
+        GetCdmaLevel(
+            [out] Int32* cdmaLevel);
+
+        GetEvdoLevel(
+            [out] Int32* evdoLevel);
+
+        GetCdmaDbm(
+            [out] Int32* cdmaDbm);
+
+        SetCdmaDbm(
+            [in] Int32 cdmaDbm);
+
+        GetCdmaEcio(
+            [out] Int32* cdmaEcio);
+
+        SetCdmaEcio(
+            [in] Int32 cdmaEcio);
+
+        GetEvdoDbm(
+            [out] Int32* evdoDbm);
+
+        SetEvdoDbm(
+            [in] Int32 evdoDbm);
+
+        GetEvdoEcio(
+            [out] Int32* evdoEcio);
+
+        SetEvdoEcio(
+            [in] Int32 evdoEcio);
+
+        GetEvdoSnr(
+            [out] Int32* evdoSnr);
+
+        SetEvdoSnr(
+            [in] Int32 evdoSnr);
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

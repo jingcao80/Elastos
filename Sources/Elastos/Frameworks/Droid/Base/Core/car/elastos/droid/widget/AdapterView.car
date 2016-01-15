@@ -1,0 +1,248 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Widget.IAdapter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IAdapterView;
+
+    /**
+     * Interface definition for a callback to be invoked when an item in this
+     * AdapterView has been clicked.
+     */
+    [local]
+    interface IAdapterViewOnItemClickListener {
+        /**
+         * Callback method to be invoked when an item in this AdapterView has
+         * been clicked.
+         * <p>
+         * Implementers can call getItemAtPosition(position) if they need
+         * to access the data associated with the selected item.
+         *
+         * @param parent The AdapterView where the click happened.
+         * @param view The view within the AdapterView that was clicked (this
+         *            will be a view provided by the adapter)
+         * @param position The position of the view in the adapter.
+         * @param id The row id of the item that was clicked.
+         */
+        OnItemClick(
+            [in] IAdapterView* parent,
+            [in] IView* view,
+            [in] Int32 position,
+            [in] Int64 id);
+    }
+
+    [local]
+    interface IAdapterContextMenuInfo {
+
+        GetTargetView(
+            [out] IView** targetView);
+
+        SetTargetView(
+            [in] IView* targetView);
+
+        GetPosition(
+            [out] Int32* position);
+
+        SetPosition(
+            [in] Int32 position);
+
+        GetId(
+            [out] Int64* id);
+
+        SetId(
+            [in] Int64 id);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when an item in this
+     * view has been clicked and held.
+     */
+    [local]
+    interface IAdapterViewOnItemLongClickListener {
+        /**
+         * Callback method to be invoked when an item in this view has been
+         * clicked and held.
+         *
+         * Implementers can call getItemAtPosition(position) if they need to access
+         * the data associated with the selected item.
+         *
+         * @param parent The AbsListView where the click happened
+         * @param view The view within the AbsListView that was clicked
+         * @param position The position of the view in the list
+         * @param id The row id of the item that was clicked
+         *
+         * @return TRUE if the callback consumed the Int64 click, FALSE otherwise
+         */
+        OnItemLongClick(
+            [in] IAdapterView* parent,
+            [in] IView* view,
+            [in] Int32 position,
+            [in] Int64 id,
+            [out] Boolean* result);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when
+     * an item in this view has been selected.
+     */
+    [local]
+    interface IAdapterViewOnItemSelectedListener {
+        /**
+         * Callback method to be invoked when an item in this view has been
+         * selected.
+         *
+         * Impelmenters can call getItemAtPosition(position) if they need to access the
+         * data associated with the selected item.
+         *
+         * @param parent The AdapterView where the selection happened
+         * @param view The view within the AdapterView that was clicked
+         * @param position The position of the view in the adapter
+         * @param id The row id of the item that is selected
+         */
+        OnItemSelected(
+            [in] IAdapterView* parent,
+            [in] IView* view,
+            [in] Int32 position,
+            [in] Int64 id);
+
+        /**
+         * Callback method to be invoked when the selection disappears from this
+         * view. The selection can disappear for instance when touch is activated
+         * or when the adapter becomes empty.
+         *
+         * @param parent The AdapterView that now contains no selected item.
+         */
+        OnNothingSelected(
+            [in] IAdapterView* parent);
+    }
+
+    /**
+     * An AdapterView is a view whose children are determined by an {@link Adapter}.
+     *
+     * <p>
+     * See {@link ListView}, {@link GridView}, {@link Spinner} and
+     *      {@link Gallery} for commonly used subclasses of AdapterView.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface IAdapterView {
+        /**
+         * The item view type returned by {@link Adapter#getItemViewType(Int32)} when
+         * the adapter does not want the item's view recycled.
+         */
+        const Int32 ITEM_VIEW_TYPE_IGNORE = -1;
+
+        /**
+         * The item view type returned by {@link Adapter#getItemViewType(Int32)} when
+         * the item is a header or footer.
+         */
+        const Int32 ITEM_VIEW_TYPE_HEADER_OR_FOOTER = -2;
+
+        /**
+         * Represents an invalid position. All valid positions are in the range 0 to 1 less than the
+         * number of items in the current adapter.
+         */
+        const Int32 INVALID_POSITION = -1;
+
+        /**
+         * Represents an empty or invalid row id
+         */
+        const Int64 INVALID_ROW_ID = 0x8000000000000000;//Long.MIN_VALUE;
+
+        SetOnItemClickListener(
+            [in] IAdapterViewOnItemClickListener* listener);
+
+        GetOnItemClickListener(
+            [out] IAdapterViewOnItemClickListener** listener);
+
+        PerformItemClick(
+            [in] IView* view,
+            [in] Int32 position,
+            [in] Int64 id,
+            [out] Boolean* result);
+
+        SetOnItemLongClickListener(
+            [in] IAdapterViewOnItemLongClickListener* listener);
+
+        GetOnItemLongClickListener(
+            [out] IAdapterViewOnItemLongClickListener** listener);
+
+        SetOnItemSelectedListener(
+            [in] IAdapterViewOnItemSelectedListener* listener);
+
+        GetOnItemSelectedListener(
+            [out] IAdapterViewOnItemSelectedListener** listener);
+
+        GetAdapter(
+            [out] IAdapter** adapter);
+
+        SetAdapter(
+            [in] IAdapter* adapter);
+
+        GetSelectedItemPosition(
+            [out] Int32* position);
+
+        GetSelectedItemId(
+            [out] Int64* itemId);
+
+        GetSelectedView(
+            [out] IView** view);
+
+        GetSelectedItem(
+            [out] IInterface** view);
+
+        GetCount(
+            [out] Int32* count);
+
+        GetPositionForView(
+            [in] IView* view,
+            [out] Int32* position);
+
+        GetFirstVisiblePosition(
+            [out] Int32* position);
+
+        GetLastVisiblePosition(
+            [out] Int32* position);
+
+        SetSelection(
+            [in] Int32 position);
+
+        SetEmptyView(
+            [in] IView* emptyView);
+
+        GetEmptyView(
+            [out] IView** view);
+
+        IsInFilterMode(
+            [out] Boolean* isInFilterMode);
+
+        CheckFocus();
+
+        GetItemAtPosition(
+            [in] Int32 position,
+            [out] IInterface** item);
+
+        GetItemIdAtPosition(
+            [in] Int32 position,
+            [out] Int64* itemId);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

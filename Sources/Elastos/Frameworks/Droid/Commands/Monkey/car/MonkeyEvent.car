@@ -1,0 +1,61 @@
+module
+{
+    using interface Elastos.Droid.App.IIActivityManager;
+    using interface Elastos.Droid.View.IIWindowManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Monkey {
+
+    interface IMonkeyEvent
+    {
+        const Int32 EVENT_TYPE_KEY = 0;
+        const Int32 EVENT_TYPE_TOUCH = 1;
+        const Int32 EVENT_TYPE_TRACKBALL = 2;
+        const Int32 EVENT_TYPE_ROTATION = 3;  // Screen rotation
+        const Int32 EVENT_TYPE_ACTIVITY = 4;
+        const Int32 EVENT_TYPE_FLIP = 5; // Keyboard flip
+        const Int32 EVENT_TYPE_THROTTLE = 6;
+        const Int32 EVENT_TYPE_NOOP = 7;
+
+        const Int32 INJECT_SUCCESS = 1;
+        const Int32 INJECT_FAIL = 0;
+
+        // error code for remote exception during injection
+        const Int32 INJECT_ERROR_REMOTE_EXCEPTION = -1;
+        // error code for security exception during injection
+        const Int32 INJECT_ERROR_SECURITY_EXCEPTION = -2;
+
+        /**
+         * @return event type
+         */
+        GetEventType(
+            [out] Int32* eventType);
+
+        /**
+         * @return true if it is safe to throttle after this event, and false otherwise.
+         */
+        IsThrottlable(
+            [out] Boolean* isThrottlable);
+
+        /**
+         * a method for injecting event
+         * @param iwm wires to current window manager
+         * @param iam wires to current activity manager
+         * @param verbose a log switch
+         * @return INJECT_SUCCESS if it goes through, and INJECT_FAIL if it fails
+         *         in the case of exceptions, return its corresponding error code
+         */
+        InjectEvent(
+            [in] IIWindowManager* iwm,
+            [in] IIActivityManager* iam,
+            [in] Int32 verbose,
+            [out] Int32* result);
+    }
+
+    } // namespace Monkey
+    } // namespace Commands
+    } // namespace Droid
+    } // namespace Elastos
+}

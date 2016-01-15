@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+  <section id="system">
+    <category id="input">
+      <group id="1">
+        <setting id="input.appleremotealwayson">
+          <level>1</level>
+        </setting>
+      </group>
+    </category>
+  </section>
+  <section id="videos">
+    <category id="videoplayer">
+      <group id="2">
+        <setting id="videoplayer.usevda" type="boolean" label="13429" help="36160">
+          <level>2</level>
+          <default>true</default>
+        </setting>
+      </group>
+    </category>
+  </section>
+</settings>
+
+

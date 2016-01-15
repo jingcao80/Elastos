@@ -1,0 +1,67 @@
+
+module
+{
+	using interface Elastos.Droid.Widget.IChronometer;
+
+    /**
+     * Container that links together a {@link ProgressBar} and {@link Chronometer}
+     * as children. It subscribes to {@link Chronometer#OnChronometerTickListener}
+     * and updates the {@link ProgressBar} based on a preset finishing time.
+     * <p>
+     * This widget expects to contain two children with specific ids
+     * {@link android.R.id.progress} and {@link android.R.id.text1}.
+     * <p>
+     * If the {@link Chronometer} {@link android.R.attr#layout_width} is
+     * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}, then the
+     * {@link android.R.attr#gravity} will be used to automatically move it with
+     * respect to the {@link ProgressBar} position. For example, if
+     * {@link android.view.Gravity#LEFT} then the {@link Chronometer} will be placed
+     * just ahead of the leading edge of the {@link ProgressBar} position.
+     */
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IRelativeLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface ITextProgressBar {
+        /**
+         * Set the expected termination time of the running {@link Chronometer}.
+         * This value is used to adjust the {@link ProgressBar} against the elapsed
+         * time.
+         * <p>
+         * Call this <b>after</b> adjusting the {@link Chronometer} base, if
+         * necessary.
+         *
+         * @param durationBase Use the {@link SystemClock#elapsedRealtime} time
+         *            base.
+         */
+        SetDurationBase(
+            [in] Int64 durationBase);
+
+		/**
+         * Callback when {@link Chronometer} changes, indicating that we should
+         * update the {@link ProgressBar} and change the layout if necessary.
+         */
+        OnChronometerTick(
+        	[in] IChronometer* chronometer);
+    }
+
+    } // namespace Widget
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}
+

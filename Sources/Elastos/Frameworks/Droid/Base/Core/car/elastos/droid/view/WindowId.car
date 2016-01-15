@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.View.IWindowIdFocusObserver;
+    interface Elastos.Droid.View.IIWindowId;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Safe identifier for a window.  This currently allows you to retrieve and observe
+     * the input focus state of the window.  Most applications will
+     * not use this, instead relying on the simpler (and more efficient) methods available
+     * on {@link View}.  This classes is useful when window input interactions need to be
+     * done across processes: the class itself is a Parcelable that can be passed to other
+     * processes for them to interact with your window, and it provides a limited safe API
+     * that doesn't allow the other process to negatively harm your window.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IWindowId {
+        /**
+         * Retrieve the current focus state of the associated window.
+         */
+        IsFocused(
+            [out] Boolean* result);
+
+        /**
+         * Start monitoring for changes in the focus state of the window.
+         */
+        RegisterFocusObserver(
+            [in] IWindowIdFocusObserver* observer);
+
+        /**
+         * Stop monitoring changes in the focus state of the window.
+         */
+        UnregisterFocusObserver(
+            [in] IWindowIdFocusObserver* observer);
+
+        /** @hide */
+        GetTarget(
+            [out] IIWindowId** id);
+    }
+
+    /**
+     * Subclass for observing changes to the focus state of an {@link WindowId}.
+     * You should use the same instance of this class for observing multiple
+     * {@link WindowId} objects, since this class is fairly heavy-weight -- the
+     * base class includes all of the mechanisms for connecting to and receiving updates
+     * from the window.
+     */
+    interface IWindowIdFocusObserver {
+
+        /**
+         * Called when one of the monitored windows gains input focus.
+         */
+        OnFocusGained(
+            [in] IWindowId* token);
+
+        /**
+         * Called when one of the monitored windows loses input focus.
+         */
+        OnFocusLost(
+            [in] IWindowId* token);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

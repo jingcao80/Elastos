@@ -1,0 +1,68 @@
+
+module
+{
+    interface Elastos.Droid.Location.IIGpsGeofenceHardware;
+    interface Elastos.Droid.Location.IIFusedGeofenceHardware;
+    interface Elastos.Droid.Hardware.Location.IGeofenceHardwareRequestParcelable;
+    interface Elastos.Droid.Hardware.Location.IIGeofenceHardwareCallback;
+    interface Elastos.Droid.Hardware.Location.IIGeofenceHardwareMonitorCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /** @hide */
+    [local]
+    interface IIGeofenceHardware {
+        SetGpsGeofenceHardware(
+            [in] IIGpsGeofenceHardware* service);
+
+        SetFusedGeofenceHardware(
+            [in] IIFusedGeofenceHardware* service);
+
+        GetMonitoringTypes(
+            [out, callee] ArrayOf<Int32>* types);
+
+        GetStatusOfMonitoringType(
+            [in] Int32 monitoringType,
+            [out] Int32* type);
+
+        AddCircularFence(
+            [in] Int32 monitoringType,
+            [in] IGeofenceHardwareRequestParcelable* request,
+            [in] IIGeofenceHardwareCallback* _callback,
+            [out] Boolean* result);
+
+        RemoveGeofence(
+            [in] Int32 id,
+            [in] Int32 monitoringType,
+            [out] Boolean* result);
+
+        PauseGeofence(
+            [in] Int32 id,
+            [in] Int32 monitoringType,
+            [out] Boolean* result);
+
+        ResumeGeofence(
+            [in] Int32 id,
+            [in] Int32 monitoringType,
+            [in] Int32 monitorTransitions,
+            [out] Boolean* result);
+
+        RegisterForMonitorStateChangeCallback(
+            [in] Int32 monitoringType,
+            [in] IIGeofenceHardwareMonitorCallback* _callback,
+            [out] Boolean* result);
+
+        UnregisterForMonitorStateChangeCallback(
+            [in] Int32 monitoringType,
+            [in] IIGeofenceHardwareMonitorCallback* _callback,
+            [out] Boolean* result);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

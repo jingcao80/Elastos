@@ -1,0 +1,27 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * {@code Type} enumerates the supported key types.
+     */
+    enum KeyRepType {
+        /**
+         * Type for secret keys.
+         */
+        KeyRepType_SECRET,
+        /**
+         * Type for public keys.
+         */
+        KeyRepType_PUBLIC,
+        /**
+         * Type for private keys.
+         */
+        KeyRepType_PRIVATE
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

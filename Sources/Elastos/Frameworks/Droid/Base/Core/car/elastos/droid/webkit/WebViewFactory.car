@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IPackageInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * Top level factory, used creating all the main WebView implementation classes.
+     *
+     * @hide
+     */
+    interface IWebViewFactory {
+
+        const String CHROMIUM_WEBVIEW_VMSIZE_SIZE_PROPERTY =
+                "persist.sys.webview.vmsize";
+
+        GetWebViewPackageName(
+            [out] String* packageName);
+
+        GetLoadedPackageInfo(
+            [out] IPackageInfo** packageInfo);
+
+        /**
+         * Perform any WebView loading preparations that must happen in the zygote.
+         * Currently, this means allocating address space to load the real JNI library later.
+         */
+        PrepareWebViewInZygote();
+
+        /**
+         * Perform any WebView loading preparations that must happen at boot from the system server,
+         * after the package manager has started or after an update to the webview is installed.
+         * This must be called in the system server.
+         * Currently, this means spawning the child processes which will create the relro files.
+         */
+        PrepareWebViewInSystemServer();
+
+        OnWebViewUpdateInstalled();
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

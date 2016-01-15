@@ -1,0 +1,639 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.View.IMenuItem;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IViewOnClickListener;
+    interface Elastos.Droid.Internal.View.Menu.IMenuBuilder;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
+    interface Elastos.Droid.Internal.View.Menu.IMenuBuilderCallback;
+    interface Elastos.Droid.Internal.Widget.IDecorToolbar;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Interface responsible for receiving menu item click events if the items themselves
+     * do not have individual item click listeners.
+     */
+     [local]
+    interface IToolbarOnMenuItemClickListener {
+        /**
+         * This method will be invoked when a menu item is clicked if the item itself did
+         * not already handle the event.
+         *
+         * @param item {@link MenuItem} that was clicked
+         * @return <code>true</code> if the event was handled, <code>false</code> otherwise.
+         */
+        OnMenuItemClick(
+            [in] IMenuItem* item,
+            [out] Boolean* rst);
+    }
+
+    /**
+     * Layout information for child views of Toolbars.
+     *
+     * <p>Toolbar.LayoutParams extends ActionBar.LayoutParams for compatibility with existing
+     * ActionBar API. See {@link android.app.Activity#setActionBar(Toolbar) Activity.setActionBar}
+     * for more info on how to use a Toolbar as your Activity's ActionBar.</p>
+     *
+     * @attr ref android.R.styleable#Toolbar_LayoutParams_layout_gravity
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.App.IActionBarLayoutParams
+     */
+     interface IToolbarLayoutParams {
+        const Int32 CUSTOM = 0;
+        const Int32 SYSTEM = 1;
+        const Int32 EXPANDED = 2;
+
+        GetViewType(
+            [out] Int32* viewType);
+
+        SetViewType(
+            [in] Int32 viewType);
+     }
+
+    /**
+     * @Involve
+     * interface IViewBaseSavedState
+     */
+    interface IToolbarSavedState {
+        GetExpandedMenuItemId(
+            [out] Int32* itemId);
+
+        IsOverflowOpen(
+            [out] Boolean* isOverflowOpen);
+    }
+
+
+    /**
+     * A standard toolbar for use within application content.
+     *
+     * <p>A Toolbar is a generalization of {@link android.app.ActionBar action bars} for use
+     * within application layouts. While an action bar is traditionally part of an
+     * {@link android.app.Activity Activity's} opaque window decor controlled by the framework,
+     * a Toolbar may be placed at any arbitrary level of nesting within a view hierarchy.
+     * An application may choose to designate a Toolbar as the action bar for an Activity
+     * using the {@link android.app.Activity#setActionBar(Toolbar) setActionBar()} method.</p>
+     *
+     * <p>Toolbar supports a more focused feature set than ActionBar. From start to end, a toolbar
+     * may contain a combination of the following optional elements:
+     *
+     * <ul>
+     *     <li><em>A navigation button.</em> This may be an Up arrow, navigation menu toggle, close,
+     *     collapse, done or another glyph of the app's choosing. This button should always be used
+     *     to access other navigational destinations within the container of the Toolbar and
+     *     its signified content or otherwise leave the current context signified by the Toolbar.</li>
+     *     <li><em>A branded logo image.</em> This may extend to the height of the bar and can be
+     *     arbitrarily wide.</li>
+     *     <li><em>A title and subtitle.</em> The title should be a signpost for the Toolbar's current
+     *     position in the navigation hierarchy and the content contained there. The subtitle,
+     *     if present should indicate any extended information about the current content.
+     *     If an app uses a logo image it should strongly consider omitting a title and subtitle.</li>
+     *     <li><em>One or more custom views.</em> The application may add arbitrary child views
+     *     to the Toolbar. They will appear at this position within the layout. If a child view's
+     *     {@link LayoutParams} indicates a {@link Gravity} value of
+     *     {@link Gravity#CENTER_HORIZONTAL CENTER_HORIZONTAL} the view will attempt to center
+     *     within the available space remaining in the Toolbar after all other elements have been
+     *     measured.</li>
+     *     <li><em>An {@link ActionMenuView action menu}.</em> The menu of actions will pin to the
+     *     end of the Toolbar offering a few
+     *     <a href="http://developer.android.com/design/patterns/actionbar.html#ActionButtons">
+     *         frequent, important or typical</a> actions along with an optional overflow menu for
+     *         additional actions.</li>
+     * </ul>
+     * </p>
+     *
+     * <p>In modern Android UIs developers should lean more on a visually distinct color scheme for
+     * toolbars than on their application icon. The use of application icon plus title as a standard
+     * layout is discouraged on API 21 devices and newer.</p>
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+     [local]
+    interface IToolbar {
+
+    /**
+     * Specifies the theme to use when inflating popup menus. By default, uses
+     * the same theme as the toolbar itself.
+     *
+     * @param resId theme used to inflate popup menus
+     * @see #getPopupTheme()
+     */
+    SetPopupTheme(
+        [in] Int32 resId);
+
+    /**
+     * @return resource identifier of the theme used to inflate popup menus, or
+     *         0 if menus are inflated against the toolbar theme
+     * @see #setPopupTheme(int)
+     */
+    GetPopupTheme(
+        [out] Int32* theme);
+
+    /**
+     * Set a logo drawable from a resource id.
+     *
+     * <p>This drawable should generally take the place of title text. The logo cannot be
+     * clicked. Apps using a logo should also supply a description using
+     * {@link #setLogoDescription(int)}.</p>
+     *
+     * @param resId ID of a drawable resource
+     */
+    SetLogo(
+        [in] Int32 resId);
+
+    /** @hide */
+    CanShowOverflowMenu(
+        [out] Boolean* showOverflowMenu);
+
+    /**
+     * Check whether the overflow menu is currently showing. This may not reflect
+     * a pending show operation in progress.
+     *
+     * @return true if the overflow menu is currently showing
+     */
+    IsOverflowMenuShowing(
+        [out] Boolean* isOverflowMenuShowing);
+
+    /** @hide */
+    IsOverflowMenuShowPending(
+        [out] Boolean* isOverflowMenuShowPending);
+
+    /**
+     * Show the overflow items from the associated menu.
+     *
+     * @return true if the menu was able to be shown, false otherwise
+     */
+    ShowOverflowMenu(
+        [out] Boolean* showOverflowMenu);
+
+    /**
+     * Hide the overflow items from the associated menu.
+     *
+     * @return true if the menu was able to be hidden, false otherwise
+     */
+    HideOverflowMenu(
+        [out] Boolean* hideOverflowMenu);
+
+    /** @hide */
+    SetMenu(
+        [in] IMenuBuilder* menu,
+        [in] IActionMenuPresenter* outerPresenter);
+
+    /**
+     * Dismiss all currently showing popup menus, including overflow or submenus.
+     */
+    DismissPopupMenus();
+
+    /** @hide */
+    IsTitleTruncated(
+        [out] Boolean* isTitleTruncated);
+
+    /**
+     * Set a logo drawable.
+     *
+     * <p>This drawable should generally take the place of title text. The logo cannot be
+     * clicked. Apps using a logo should also supply a description using
+     * {@link #setLogoDescription(int)}.</p>
+     *
+     * @param drawable Drawable to use as a logo
+     */
+    SetLogo(
+        [in] IDrawable* drawable);
+
+    /**
+     * Return the current logo drawable.
+     *
+     * @return The current logo drawable
+     * @see #setLogo(int)
+     * @see #setLogo(android.graphics.drawable.Drawable)
+     */
+    GetLogo(
+        [out] IDrawable** logo);
+
+    /**
+     * Set a description of the toolbar's logo.
+     *
+     * <p>This description will be used for accessibility or other similar descriptions
+     * of the UI.</p>
+     *
+     * @param resId String resource id
+     */
+    SetLogoDescription(
+        [in] Int32 resId);
+
+    /**
+     * Set a description of the toolbar's logo.
+     *
+     * <p>This description will be used for accessibility or other similar descriptions
+     * of the UI.</p>
+     *
+     * @param description Description to set
+     */
+    SetLogoDescription(
+        [in] ICharSequence* description);
+
+    /**
+     * Return the description of the toolbar's logo.
+     *
+     * @return A description of the logo
+     */
+    GetLogoDescription(
+        [out] ICharSequence** description);
+
+    /**
+     * Check whether this Toolbar is currently hosting an expanded action view.
+     *
+     * <p>An action view may be expanded either directly from the
+     * {@link android.view.MenuItem MenuItem} it belongs to or by user action. If the Toolbar
+     * has an expanded action view it can be collapsed using the {@link #collapseActionView()}
+     * method.</p>
+     *
+     * @return true if the Toolbar has an expanded action view
+     */
+    HasExpandedActionView(
+        [out] Boolean* hasExpandedActionView);
+
+    /**
+     * Collapse a currently expanded action view. If this Toolbar does not have an
+     * expanded action view this method has no effect.
+     *
+     * <p>An action view may be expanded either directly from the
+     * {@link android.view.MenuItem MenuItem} it belongs to or by user action.</p>
+     *
+     * @see #hasExpandedActionView()
+     */
+    CollapseActionView();
+
+    /**
+     * Returns the title of this toolbar.
+     *
+     * @return The current title.
+     */
+    GetTitle(
+        [out] ICharSequence** title);
+
+    /**
+     * Set the title of this toolbar.
+     *
+     * <p>A title should be used as the anchor for a section of content. It should
+     * describe or name the content being viewed.</p>
+     *
+     * @param resId Resource ID of a string to set as the title
+     */
+    SetTitle(
+        [in] Int32 resId);
+
+    /**
+     * Set the title of this toolbar.
+     *
+     * <p>A title should be used as the anchor for a section of content. It should
+     * describe or name the content being viewed.</p>
+     *
+     * @param title Title to set
+     */
+    SetTitle(
+        [in] ICharSequence* title);
+
+    /**
+     * Return the subtitle of this toolbar.
+     *
+     * @return The current subtitle
+     */
+    GetSubtitle(
+        [out] ICharSequence** subTitle);
+
+    /**
+     * Set the subtitle of this toolbar.
+     *
+     * <p>Subtitles should express extended information about the current content.</p>
+     *
+     * @param resId String resource ID
+     */
+    SetSubtitle(
+        [in] Int32 resId);
+
+    /**
+     * Set the subtitle of this toolbar.
+     *
+     * <p>Subtitles should express extended information about the current content.</p>
+     *
+     * @param subtitle Subtitle to set
+     */
+    SetSubtitle(
+        [in] ICharSequence* subtitle);
+
+    /**
+     * Sets the text color, size, style, hint color, and highlight color
+     * from the specified TextAppearance resource.
+     */
+    SetTitleTextAppearance(
+        [in] IContext* context,
+        [in] Int32 resId);
+
+    /**
+     * Sets the text color, size, style, hint color, and highlight color
+     * from the specified TextAppearance resource.
+     */
+    SetSubtitleTextAppearance(
+        [in] IContext* context,
+        [in] Int32 resId);
+
+    /**
+     * Sets the text color of the title, if present.
+     *
+     * @param color The new text color in 0xAARRGGBB format
+     */
+    SetTitleTextColor(
+        [in] Int32 color);
+
+    /**
+     * Sets the text color of the subtitle, if present.
+     *
+     * @param color The new text color in 0xAARRGGBB format
+     */
+    SetSubtitleTextColor(
+        [in] Int32 color);
+
+    /**
+     * Retrieve the currently configured content description for the navigation button view.
+     * This will be used to describe the navigation action to users through mechanisms such
+     * as screen readers or tooltips.
+     *
+     * @return The navigation button's content description
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationContentDescription
+     * @Nullable
+     */
+    GetNavigationContentDescription(
+        [out] ICharSequence** dsp);
+
+    /**
+     * Set a content description for the navigation button if one is present. The content
+     * description will be read via screen readers or other accessibility systems to explain
+     * the action of the navigation button.
+     *
+     * @param resId Resource ID of a content description string to set, or 0 to
+     *              clear the description
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationContentDescription
+     */
+    SetNavigationContentDescription(
+        [in] Int32 resId);
+
+    /**
+     * Set a content description for the navigation button if one is present. The content
+     * description will be read via screen readers or other accessibility systems to explain
+     * the action of the navigation button.
+     *
+     * @param description Content description to set, or <code>null</code> to
+     *                    clear the content description
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationContentDescription
+     */
+    SetNavigationContentDescription(
+        [in] ICharSequence* description);
+
+    /**
+     * Set the icon to use for the toolbar's navigation button.
+     *
+     * <p>The navigation button appears at the start of the toolbar if present. Setting an icon
+     * will make the navigation button visible.</p>
+     *
+     * <p>If you use a navigation icon you should also set a description for its action using
+     * {@link #setNavigationContentDescription(int)}. This is used for accessibility and
+     * tooltips.</p>
+     *
+     * @param resId Resource ID of a drawable to set
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationIcon
+     */
+    SetNavigationIcon(
+        [in] Int32 resId);
+
+    /**
+     * Set the icon to use for the toolbar's navigation button.
+     *
+     * <p>The navigation button appears at the start of the toolbar if present. Setting an icon
+     * will make the navigation button visible.</p>
+     *
+     * <p>If you use a navigation icon you should also set a description for its action using
+     * {@link #setNavigationContentDescription(int)}. This is used for accessibility and
+     * tooltips.</p>
+     *
+     * @param icon Drawable to set, may be null to clear the icon
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationIcon
+     */
+    SetNavigationIcon(
+        [in] IDrawable* icon);
+
+    /**
+     * Return the current drawable used as the navigation icon.
+     *
+     * @return The navigation icon drawable
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationIcon
+     * @Nullable
+     */
+    GetNavigationIcon(
+        [out] IDrawable** drawable);
+
+    /**
+     * Set a listener to respond to navigation events.
+     *
+     * <p>This listener will be called whenever the user clicks the navigation button
+     * at the start of the toolbar. An icon must be set for the navigation button to appear.</p>
+     *
+     * @param listener Listener to set
+     * @see #setNavigationIcon(android.graphics.drawable.Drawable)
+     */
+    SetNavigationOnClickListener(
+        [in] IViewOnClickListener* listener);
+
+    /**
+     * Return the Menu shown in the toolbar.
+     *
+     * <p>Applications that wish to populate the toolbar's menu can do so from here. To use
+     * an XML menu resource, use {@link #inflateMenu(int)}.</p>
+     *
+     * @return The toolbar's Menu
+     */
+    GetMenu(
+        [out] IMenu** menu);
+    /**
+     * Inflate a menu resource into this toolbar.
+     *
+     * <p>Inflate an XML menu resource into this toolbar. Existing items in the menu will not
+     * be modified or removed.</p>
+     *
+     * @param resId ID of a menu resource to inflate
+     */
+    InflateMenu(
+        [in] Int32 resId);
+
+    /**
+     * Set a listener to respond to menu item click events.
+     *
+     * <p>This listener will be invoked whenever a user selects a menu item from
+     * the action buttons presented at the end of the toolbar or the associated overflow.</p>
+     *
+     * @param listener Listener to set
+     */
+    SetOnMenuItemClickListener(
+        [in] IToolbarOnMenuItemClickListener* listener);
+
+    /**
+     * Set the content insets for this toolbar relative to layout direction.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @param contentInsetStart Content inset for the toolbar starting edge
+     * @param contentInsetEnd Content inset for the toolbar ending edge
+     *
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetLeft()
+     * @see #getContentInsetRight()
+     */
+    SetContentInsetsRelative(
+        [in] Int32 contentInsetStart,
+        [in] Int32 contentInsetEnd);
+
+    /**
+     * Get the starting content inset for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @return The starting content inset for this toolbar
+     *
+     * @see #setContentInsetsRelative(int, int)
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetLeft()
+     * @see #getContentInsetRight()
+     */
+    GetContentInsetStart(
+        [out] Int32* start);
+
+    /**
+     * Get the ending content inset for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @return The ending content inset for this toolbar
+     *
+     * @see #setContentInsetsRelative(int, int)
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetLeft()
+     * @see #getContentInsetRight()
+     */
+    GetContentInsetEnd(
+        [out] Int32* end);
+
+    /**
+     * Set the content insets for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @param contentInsetLeft Content inset for the toolbar's left edge
+     * @param contentInsetRight Content inset for the toolbar's right edge
+     *
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetLeft()
+     * @see #getContentInsetRight()
+     */
+    SetContentInsetsAbsolute(
+        [in] Int32 contentInsetLeft,
+        [in] Int32 contentInsetRight);
+
+    /**
+     * Get the left content inset for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @return The left content inset for this toolbar
+     *
+     * @see #setContentInsetsRelative(int, int)
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetRight()
+     */
+    GetContentInsetLeft(
+        [out] Int32* left);
+
+    /**
+     * Get the right content inset for this toolbar.
+     *
+     * <p>The content inset affects the valid area for Toolbar content other than
+     * the navigation button and menu. Insets define the minimum margin for these components
+     * and can be used to effectively align Toolbar content along well-known gridlines.</p>
+     *
+     * @return The right content inset for this toolbar
+     *
+     * @see #setContentInsetsRelative(int, int)
+     * @see #setContentInsetsAbsolute(int, int)
+     * @see #getContentInsetStart()
+     * @see #getContentInsetEnd()
+     * @see #getContentInsetLeft()
+     */
+    GetContentInsetRight(
+        [out] Int32* left);
+
+    /** @hide */
+    GetWrapper(
+        [out] IDecorToolbar** wrapper);
+
+    /**
+     * Force the toolbar to collapse to zero-height during measurement if
+     * it could be considered "empty" (no visible elements with nonzero measured size)
+     * @hide
+     */
+    SetCollapsible(
+        [in] Boolean collapsible);
+
+    /**
+     * Must be called before the menu is accessed
+     * @hide
+     */
+    SetMenuCallbacks(
+        [in] IMenuPresenterCallback* pcb,
+        [in] IMenuBuilderCallback* mcb);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

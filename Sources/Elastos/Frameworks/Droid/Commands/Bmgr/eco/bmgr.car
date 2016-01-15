@@ -1,0 +1,27 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+    using interface Elastos.Droid.App.Backup.IIRestoreObserver;
+    using interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Bmgr {
+
+    interface IWait {
+        WaitForCompletion();
+    }
+    class CRestoreObserver {
+        interface IIRestoreObserver;
+        interface IBinder;
+        interface IWait;
+    }
+
+    }
+    }
+    }
+    }
+
+
+}

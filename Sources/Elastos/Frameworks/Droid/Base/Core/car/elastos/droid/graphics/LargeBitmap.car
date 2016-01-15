@@ -1,0 +1,55 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    interface ILargeBitmap {
+        /**
+         * Decodes a rectangle region in the image specified by rect.
+         *
+         * @param rect The rectangle that specified the region to be decode.
+         * @param opts null-ok; Options that control downsampling.
+         *             inPurgeable is not supported.
+         * @return The decoded bitmap, or null if the image data could not be
+         *         decoded.
+         */
+        DecodeRegion(
+            [in] IRect* rect,
+            [in] IBitmapFactoryOptions* options,
+            [out] IBitmap** Bitmap);
+
+        /** Returns the original image's width */
+        GetWidth(
+            [out] Int32* width);
+
+        /** Returns the original image's height */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * Frees up the memory associated with this large bitmap, and mark the
+         * large bitmap as "dead", meaning it will throw an exception if decodeRegion(),
+         * getWidth() or getHeight() is called.
+         * This operation cannot be reversed, so it should only be called if you are
+         * sure there are no further uses for the large bitmap. This is an advanced call,
+         * and normally need not be called, since the normal GC process will free up this
+         * memory when there are no more references to this bitmap.
+         */
+        Recycle();
+
+        /**
+         * Returns true if this large bitmap has been recycled.
+         * If so, then it is an error to try use its method.
+         *
+         * @return true if the large bitmap has been recycled
+         */
+        IsRecycled(
+            [out] Boolean* result);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

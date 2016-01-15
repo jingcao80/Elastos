@@ -1,0 +1,79 @@
+module
+{
+    interface Elastos.Droid.View.IViewOnClickListener;
+    interface Elastos.Droid.Media.IMediaRouterRouteInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    /**
+     * This class implements the route chooser dialog for {@link MediaRouter}.
+     * <p>
+     * This dialog allows the user to choose a route that matches a given selector.
+     * </p>
+     *
+     * @see MediaRouteButton
+     * @see MediaRouteActionProvider
+     *
+     * TODO: Move this back into the API, as in the support library media router.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IDialogInterface
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IOnCreateContextMenuListener
+     * interface IOnWindowDismissedCallback
+     * interface IDialog
+     */
+    [local]
+    interface IMediaRouteChooserDialog {
+        /**
+         * Gets the media route types for filtering the routes that the user can
+         * select using the media route chooser dialog.
+         *
+         * @return The route types.
+         */
+        GetRouteTypes(
+            [out] Int32* types);
+
+        /**
+         * Sets the types of routes that will be shown in the media route chooser dialog
+         * launched by this button.
+         *
+         * @param types The route types to match.
+         */
+        SetRouteTypes(
+            [in] Int32 types);
+
+        SetExtendedSettingsClickListener(
+            [in] IViewOnClickListener* listener);
+
+        /**
+         * Returns true if the route should be included in the list.
+         * <p>
+         * The default implementation returns true for enabled non-default routes that
+         * match the route types.  Subclasses can override this method to filter routes
+         * differently.
+         * </p>
+         *
+         * @param route The route to consider, never null.
+         * @return True if the route should be included in the chooser dialog.
+         */
+        OnFilterRoute(
+            [in] IMediaRouterRouteInfo* route,
+            [out] Boolean* result);
+
+        /**
+         * Refreshes the list of routes that are shown in the chooser dialog.
+         */
+        RefreshRoutes();
+    }
+
+    } // namespace App
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,307 @@
+
+module
+{
+    using interface Elastos.IO.IInt32Buffer;
+    using interface Elastos.IO.IFloatBuffer;
+
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Opengles {
+
+    /**
+     * @Involve
+     * interface Elastosx.Microedition.Khronos.Opengles.IGL
+     */
+    [deprecated]
+    interface IGL11ExtensionPack {
+        const Int32 _GL_BLEND_DST_ALPHA                                  = 0x80CA;
+        const Int32 _GL_BLEND_DST_RGB                                    = 0x80C8;
+        const Int32 _GL_BLEND_EQUATION                                   = 0x8009;
+        const Int32 _GL_BLEND_EQUATION_ALPHA                             = 0x883D;
+        const Int32 _GL_BLEND_EQUATION_RGB                               = 0x8009;
+        const Int32 _GL_BLEND_SRC_ALPHA                                  = 0x80CB;
+        const Int32 _GL_BLEND_SRC_RGB                                    = 0x80C9;
+        const Int32 _GL_COLOR_ATTACHMENT0_OES                            = 0x8CE0;
+        const Int32 _GL_COLOR_ATTACHMENT1_OES                            = 0x8CE1;
+        const Int32 _GL_COLOR_ATTACHMENT2_OES                            = 0x8CE2;
+        const Int32 _GL_COLOR_ATTACHMENT3_OES                            = 0x8CE3;
+        const Int32 _GL_COLOR_ATTACHMENT4_OES                            = 0x8CE4;
+        const Int32 _GL_COLOR_ATTACHMENT5_OES                            = 0x8CE5;
+        const Int32 _GL_COLOR_ATTACHMENT6_OES                            = 0x8CE6;
+        const Int32 _GL_COLOR_ATTACHMENT7_OES                            = 0x8CE7;
+        const Int32 _GL_COLOR_ATTACHMENT8_OES                            = 0x8CE8;
+        const Int32 _GL_COLOR_ATTACHMENT9_OES                            = 0x8CE9;
+        const Int32 _GL_COLOR_ATTACHMENT10_OES                           = 0x8CEA;
+        const Int32 _GL_COLOR_ATTACHMENT11_OES                           = 0x8CEB;
+        const Int32 _GL_COLOR_ATTACHMENT12_OES                           = 0x8CEC;
+        const Int32 _GL_COLOR_ATTACHMENT13_OES                           = 0x8CED;
+        const Int32 _GL_COLOR_ATTACHMENT14_OES                           = 0x8CEE;
+        const Int32 _GL_COLOR_ATTACHMENT15_OES                           = 0x8CEF;
+        const Int32 _GL_DECR_WRAP                                        = 0x8508;
+        const Int32 _GL_DEPTH_ATTACHMENT_OES                             = 0x8D00;
+        const Int32 _GL_DEPTH_COMPONENT                                  = 0x1902;
+        const Int32 _GL_DEPTH_COMPONENT16                                = 0x81A5;
+        const Int32 _GL_DEPTH_COMPONENT24                                = 0x81A6;
+        const Int32 _GL_DEPTH_COMPONENT32                                = 0x81A7;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_OES           = 0x8CD1;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES           = 0x8CD0;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_OES = 0x8CD3;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_OES         = 0x8CD2;
+        const Int32 _GL_FRAMEBUFFER_BINDING_OES                          = 0x8CA6;
+        const Int32 _GL_FRAMEBUFFER_COMPLETE_OES                         = 0x8CD5;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES            = 0x8CD6;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES            = 0x8CD9;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_OES           = 0x8CDB;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES               = 0x8CDA;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES    = 0x8CD7;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_OES           = 0x8CDC;
+        const Int32 _GL_FRAMEBUFFER_OES                                  = 0x8D40;
+        const Int32 _GL_FRAMEBUFFER_UNSUPPORTED_OES                      = 0x8CDD;
+        const Int32 _GL_FUNC_ADD                                         = 0x8006;
+        const Int32 _GL_FUNC_REVERSE_SUBTRACT                            = 0x800B;
+        const Int32 _GL_FUNC_SUBTRACT                                    = 0x800A;
+        const Int32 _GL_INCR_WRAP                                        = 0x8507;
+        const Int32 _GL_INVALID_FRAMEBUFFER_OPERATION_OES                = 0x0506;
+        const Int32 _GL_MAX_COLOR_ATTACHMENTS_OES                        = 0x8CDF;
+        const Int32 _GL_MAX_CUBE_MAP_TEXTURE_SIZE                        = 0x851C;
+        const Int32 _GL_MAX_RENDERBUFFER_SIZE_OES                        = 0x84E8;
+        const Int32 _GL_MIRRORED_REPEAT                                  = 0x8370;
+        const Int32 _GL_NORMAL_MAP                                       = 0x8511;
+        const Int32 _GL_REFLECTION_MAP                                   = 0x8512;
+        const Int32 _GL_RENDERBUFFER_ALPHA_SIZE_OES                      = 0x8D53;
+        const Int32 _GL_RENDERBUFFER_BINDING_OES                         = 0x8CA7;
+        const Int32 _GL_RENDERBUFFER_BLUE_SIZE_OES                       = 0x8D52;
+        const Int32 _GL_RENDERBUFFER_DEPTH_SIZE_OES                      = 0x8D54;
+        const Int32 _GL_RENDERBUFFER_GREEN_SIZE_OES                      = 0x8D51;
+        const Int32 _GL_RENDERBUFFER_HEIGHT_OES                          = 0x8D43;
+        const Int32 _GL_RENDERBUFFER_INTERNAL_FORMAT_OES                 = 0x8D44;
+        const Int32 _GL_RENDERBUFFER_OES                                 = 0x8D41;
+        const Int32 _GL_RENDERBUFFER_RED_SIZE_OES                        = 0x8D50;
+        const Int32 _GL_RENDERBUFFER_STENCIL_SIZE_OES                    = 0x8D55;
+        const Int32 _GL_RENDERBUFFER_WIDTH_OES                           = 0x8D42;
+        const Int32 _GL_RGB5_A1                                          = 0x8057;
+        const Int32 _GL_RGB565_OES                                       = 0x8D62;
+        const Int32 _GL_RGB8                                             = 0x8051;
+        const Int32 _GL_RGBA4                                            = 0x8056;
+        const Int32 _GL_RGBA8                                            = 0x8058;
+        const Int32 _GL_STENCIL_ATTACHMENT_OES                           = 0x8D20;
+        const Int32 _GL_STENCIL_INDEX                                    = 0x1901;
+        const Int32 _GL_STENCIL_INDEX1_OES                               = 0x8D46;
+        const Int32 _GL_STENCIL_INDEX4_OES                               = 0x8D47;
+        const Int32 _GL_STENCIL_INDEX8_OES                               = 0x8D48;
+        const Int32 _GL_STR                                              = -1;
+        const Int32 _GL_TEXTURE_BINDING_CUBE_MAP                         = 0x8514;
+        const Int32 _GL_TEXTURE_CUBE_MAP                                 = 0x8513;
+        const Int32 _GL_TEXTURE_CUBE_MAP_NEGATIVE_X                      = 0x8516;
+        const Int32 _GL_TEXTURE_CUBE_MAP_NEGATIVE_Y                      = 0x8518;
+        const Int32 _GL_TEXTURE_CUBE_MAP_NEGATIVE_Z                      = 0x851A;
+        const Int32 _GL_TEXTURE_CUBE_MAP_POSITIVE_X                      = 0x8515;
+        const Int32 _GL_TEXTURE_CUBE_MAP_POSITIVE_Y                      = 0x8517;
+        const Int32 _GL_TEXTURE_CUBE_MAP_POSITIVE_Z                      = 0x8519;
+        const Int32 _GL_TEXTURE_GEN_MODE                                 = 0x2500;
+        const Int32 _GL_TEXTURE_GEN_STR                                  = 0x8D60;
+
+        glBindFramebufferOES(
+            [in] Int32 target,
+            [in] Int32 framebuffer);
+
+        glBindRenderbufferOES(
+            [in] Int32 target,
+            [in] Int32 renderbuffer);
+
+        glBlendEquation(
+            [in] Int32 mode);
+
+        glBlendEquationSeparate(
+            [in] Int32 modeRGB,
+            [in] Int32 modeAlpha);
+
+        glBlendFuncSeparate(
+            [in] Int32 srcRGB,
+            [in] Int32 dstRGB,
+            [in] Int32 srcAlpha,
+            [in] Int32 dstAlpha);
+
+        glCheckFramebufferStatusOES(
+            [in] Int32 target,
+            [out] Int32* status);
+
+        glDeleteFramebuffersOES(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* framebuffers,
+            [in] Int32 offset);
+
+        glDeleteFramebuffersOES(
+            [in] Int32 n,
+            [in] IInt32Buffer* framebuffers);
+
+        glDeleteRenderbuffersOES(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* renderbuffers,
+            [in] Int32 offset);
+
+        glDeleteRenderbuffersOES(
+            [in] Int32 n,
+            [in] IInt32Buffer* renderbuffers);
+
+        glFramebufferRenderbufferOES(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 renderbuffertarget,
+            [in] Int32 renderbuffer);
+
+        glFramebufferTexture2DOES(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 textarget,
+            [in] Int32 texture,
+            [in] Int32 level);
+
+        glGenerateMipmapOES(
+            [in] Int32 target);
+
+        glGenFramebuffersOES(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* framebuffers,
+            [in] Int32 offset);
+
+        glGenFramebuffersOES(
+            [in] Int32 n,
+            [in] IInt32Buffer* framebuffers);
+
+        glGenRenderbuffersOES(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* renderbuffers,
+            [in] Int32 offset);
+
+        glGenRenderbuffersOES(
+            [in] Int32 n,
+            [in] IInt32Buffer* renderbuffers);
+
+        glGetFramebufferAttachmentParameterivOES(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetFramebufferAttachmentParameterivOES(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetRenderbufferParameterivOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetRenderbufferParameterivOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetTexGenfv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glGetTexGenfv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glGetTexGeniv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetTexGeniv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetTexGenxv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetTexGenxv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glIsFramebufferOES(
+            [in] Int32 framebuffer,
+            [out] Boolean* result);
+
+        glIsRenderbufferOES(
+            [in] Int32 renderbuffer,
+            [out] Boolean* result);
+
+        glRenderbufferStorageOES(
+            [in] Int32 target,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        glTexGenf(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] Float param);
+
+        glTexGenfv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glTexGenfv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glTexGeni(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        glTexGeniv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glTexGeniv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glTexGenx(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        glTexGenxv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glTexGenxv(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+    }
+
+    } // namepsace Opengles
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

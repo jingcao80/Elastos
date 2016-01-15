@@ -1,0 +1,93 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Libcore {
+    namespace ICU {
+
+    interface INativeCollationHelper {
+
+        // Collator.
+        CloseCollator(
+            [in] Int64 address);
+
+        Compare(
+            [in] Int64 address,
+            [in] String source,
+            [in] String target ,
+            [out] Int32 * value);
+
+        GetAttribute(
+            [in] Int64 address,
+            [in] Int32 type,
+            [out] Int32 * value);
+
+        GetCollationElementIterator(
+            [in] Int64 address,
+            [in] String source,
+            [out] Int64 * value);
+
+        GetRules(
+            [in] Int64 address,
+            [out] String * str);
+
+        GetSortKey(
+            [in] Int64 address,
+            [in] String source,
+            [out, callee] ArrayOf<Byte> * outarray);
+
+        OpenCollator(
+            [in] ILocale* locale,
+            [out] Int64 * value);
+
+        OpenCollatorFromRules(
+            [in] String rules,
+            [in] Int32 normalizationMode,
+            [in] Int32 collationStrength,
+            [out] Int64 * value);
+
+        SafeClone(
+            [in] Int64 address,
+            [out] Int64 * value);
+
+        SetAttribute(
+            [in] Int64 address,
+            [in] Int32 type,
+            [in] Int32 value);
+
+        // CollationElementIterator.
+        CloseElements(
+            [in] Int64 address);
+
+        GetMaxExpansion(
+            [in] Int64 address,
+            [in] Int32 order,
+            [out] Int32 * value);
+
+        GetOffset(
+            [in] Int64 address,
+            [out] Int32 * value);
+
+        GetNext(
+            [in] Int64 address,
+            [out] Int32 * value);
+
+        GetPrevious(
+            [in] Int64 address,
+            [out] Int32 * value);
+
+        Reset(
+            [in] Int64 address);
+
+        SetOffset(
+            [in] Int64 address,
+            [in] Int32 offset);
+
+        SetText(
+            [in] Int64 address,
+            [in] String source);
+    }
+
+    } // namespace ICU
+    } // namespace Libcore
+}

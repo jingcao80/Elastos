@@ -1,0 +1,16 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IOpenSSLNativeReference
+     */
+    interface IOpenSSLDigestContext {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

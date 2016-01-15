@@ -1,0 +1,64 @@
+
+module
+{
+    interface Elastos.Core.IStringBuilder;
+    interface Elastos.IO.Charset.ICharset;
+
+    namespace Libcore {
+    namespace Net {
+
+    /**
+     * Encodes and decodes {@code application/x-www-form-urlencoded} content.
+     * Subclasses define exactly which characters are legal.
+     *
+     * <p>By default, UTF-8 is used to encode escaped characters. A single input
+     * character like "\u0080" may be encoded to multiple octets like %C2%80.
+     */
+    interface IUriCodec {
+        /**
+         * Throws if {@code s} is invalid according to this encoder.
+         */
+        Validate(
+            [in] String uri,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] String name,
+            [out] String* result);
+
+        Encode(
+            [in] String s,
+            [in] ICharset* charset,
+            [out] String* result);
+
+        AppendEncoded(
+            [in] IStringBuilder* builder,
+            [in] String s);
+
+        AppendPartiallyEncoded(
+            [in] IStringBuilder* builder,
+            [in] String s);
+    }
+
+    [deprecated]
+    interface IUriCodecHelper {
+
+        ValidateSimple(
+            [in] String s,
+            [in] String legal);
+
+        Decode(
+            [in]  String s,
+            [out] String* result);
+
+        Decode(
+            [in] String s,
+            [in] Boolean convertPlus,
+            [in] ICharset* charset,
+            [in] Boolean throwOnFailure,
+            [out] String* result);
+    }
+
+    } // namespace Net
+    } // namespace Libcore
+
+}

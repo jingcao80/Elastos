@@ -1,0 +1,17 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    interface ISQLWarning {
+
+        GetNextWarning(
+            [out] ISQLWarning ** sqlwar);
+
+        SetNextWarning(
+            [in] ISQLWarning * w);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

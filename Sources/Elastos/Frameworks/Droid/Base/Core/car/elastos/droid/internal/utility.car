@@ -1,0 +1,365 @@
+module
+{
+    merge("utility/AsyncChannel.car");
+    merge("utility/AsyncService.car");
+    merge("utility/BitwiseInputStream.car");
+    merge("utility/BitwiseOutputStream.car");
+    merge("utility/CharSequences.car");
+    merge("utility/DumpUtils.car");
+    merge("utility/FastMath.car");
+    merge("utility/FastPrintWriter.car");
+    merge("utility/FastXmlSerializer.car");
+    merge("utility/FileRotator.car");
+    merge("utility/HexDump.car");
+    merge("utility/IState.car");
+    merge("utility/IndentingPrintWriter.car");
+    merge("utility/JournaledFile.car");
+    merge("utility/LocalLog.car");
+    merge("utility/MemInfoReader.car");
+    merge("utility/NotificationColorUtil.car");
+    merge("utility/ParcelableString.car");
+    merge("utility/Preconditions.car");
+    merge("utility/Predicate.car");
+    merge("utility/Predicates.car");
+    merge("utility/ProcFileReader.car");
+    merge("utility/Protocol.car");
+    merge("utility/SizedInputStream.car");
+    merge("utility/StateMachine.car");
+    merge("utility/TypedProperties.car");
+    merge("utility/UserIcons.car");
+    merge("utility/VirtualRefBasePtr.car");
+    merge("utility/WithFramework.car");
+    merge("utility/XmlUtils.car");
+
+    interface Elastos.Droid.Utility.IPrinter;
+    using interface Elastos.Core.IAppendable;
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.IO.IFlushable;
+    using interface Elastos.IO.IFile;
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IOutputStream;
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.IO.ISerializable;
+    using interface Elastos.IO.IWriter;
+    using interface Elastos.Utility.IHashMap;
+    using interface Elastos.Utility.IMap;
+    using interface Org.Xmlpull.V1.IXmlSerializer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    class CAsyncChannel {
+        constructor();
+
+        interface IAsyncChannel;
+    }
+
+    [deprecated]
+    class CBitwiseInputStream {
+        /**
+         * Create object from byte array.
+         *
+         * @param buf a byte array containing data
+         */
+        constructor(
+            [in] ArrayOf<Byte>* buf);
+
+        interface IBitwiseInputStream;
+    }
+
+    class CBitwiseOutputStream {
+        /**
+         * Create object from hint at desired size.
+         *
+         * @param startingLength initial internal byte array length in bytes
+         */
+        constructor(
+            [in] Int32 startingLength);
+
+        interface IBitwiseOutputStream;
+    }
+
+    singleton class CCharSequences {
+        interface ICharSequences;
+    }
+
+    singleton class CDumpUtils {
+        interface IDumpUtils;
+    }
+
+    singleton class CFastMath {
+        interface IFastMath;
+    }
+
+    class CFastPrintWriter {
+        /**
+         * Constructs a new {@code PrintWriter} with {@code out} as its target
+         * stream. By default, the new Print writer does not automatically flush its
+         * contents to the target stream when a newline is encountered.
+         *
+         * @param out
+         *            the target output stream.
+         * @throws NullPointerException
+         *             if {@code out} is {@code NULL}.
+         */
+        constructor(
+            [in] IOutputStream* output);
+
+        /**
+         * Constructs a new {@code PrintWriter} with {@code out} as its target
+         * stream. The parameter {@code autoFlush} determines if the Print writer
+         * automatically flushes its contents to the target stream when a newline is
+         * encountered.
+         *
+         * @param out
+         *            the target output stream.
+         * @param autoFlush
+         *            indicates whether contents are flushed upon encountering a
+         *            newline sequence.
+         * @throws NullPointerException
+         *             if {@code out} is {@code NULL}.
+         */
+        constructor(
+            [in] IOutputStream* output,
+            [in] Boolean autoFlush);
+
+        /**
+         * Constructs a new {@code PrintWriter} with {@code out} as its target
+         * stream and a custom buffer size. The parameter {@code autoFlush} determines
+         * if the Print writer automatically flushes its contents to the target stream
+         * when a newline is encountered.
+         *
+         * @param out
+         *            the target output stream.
+         * @param autoFlush
+         *            indicates whether contents are flushed upon encountering a
+         *            newline sequence.
+         * @param bufferLen
+         *            specifies the size of the FastPrintWriter's internal buffer; the
+         *            default is 8192.
+         * @throws NullPointerException
+         *             if {@code out} is {@code NULL}.
+         */
+        constructor(
+            [in] IOutputStream* output,
+            [in] Boolean autoFlush,
+            [in] Int32 bufferLen);
+
+        /**
+         * Constructs a new {@code PrintWriter} with {@code wr} as its target
+         * writer. By default, the new Print writer does not automatically flush its
+         * contents to the target writer when a newline is encountered.
+         *
+         * <p>NOTE: Unlike PrintWriter, this version will still do buffering inside of
+         * FastPrintWriter before sending data to the Writer.  This means you must call
+         * flush() before retrieving any data from the Writer.</p>
+         *
+         * @param wr
+         *            the target writer.
+         * @throws NullPointerException
+         *             if {@code wr} is {@code NULL}.
+         */
+        constructor(
+            [in] IWriter* wr);
+
+        /**
+         * Constructs a new {@code PrintWriter} with {@code wr} as its target
+         * writer. The parameter {@code autoFlush} determines if the Print writer
+         * automatically flushes its contents to the target writer when a newline is
+         * encountered.
+         *
+         * @param wr
+         *            the target writer.
+         * @param autoFlush
+         *            indicates whether to flush contents upon encountering a
+         *            newline sequence.
+         * @throws NullPointerException
+         *             if {@code out} is {@code NULL}.
+         */
+        constructor(
+            [in] IWriter* wr,
+            [in] Boolean autoFlush);
+
+        /**
+         * Constructs a new {@code PrintWriter} with {@code wr} as its target
+         * writer and a custom buffer size. The parameter {@code autoFlush} determines
+         * if the Print writer automatically flushes its contents to the target writer
+         * when a newline is encountered.
+         *
+         * @param wr
+         *            the target writer.
+         * @param autoFlush
+         *            indicates whether to flush contents upon encountering a
+         *            newline sequence.
+         * @param bufferLen
+         *            specifies the size of the FastPrintWriter's internal buffer; the
+         *            default is 8192.
+         * @throws NullPointerException
+         *             if {@code wr} is {@code NULL}.
+         */
+        constructor(
+            [in] IWriter* wr,
+            [in] Boolean autoFlush,
+            [in] Int32 bufferLen);
+
+        /**
+         * Constructs a new {@code PrintWriter} with {@code pr} as its target
+         * printer and the default buffer size.  Because a {@link Printer} is line-base,
+         * autoflush is always enabled.
+         *
+         * @param pr
+         *            the target writer.
+         * @throws NullPointerException
+         *             if {@code pr} is {@code NULL}.
+         */
+        constructor(
+            [in] IPrinter* pr);
+
+        /**
+         * Constructs a new {@code PrintWriter} with {@code pr} as its target
+         * printer and a custom buffer size.  Because a {@link Printer} is line-base,
+         * autoflush is always enabled.
+         *
+         * @param pr
+         *            the target writer.
+         * @param bufferLen
+         *            specifies the size of the FastPrintWriter's internal buffer; the
+         *            default is 512.
+         * @throws NullPointerException
+         *             if {@code pr} is {@code NULL}.
+         */
+        constructor(
+            [in] IPrinter* pr,
+            [in] Int32 bufferLen);
+
+        interface IFastPrintWriter;
+        interface IPrintWriter;
+        interface IWriter;
+        interface IAppendable;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CFastXmlSerializer {
+        constructor();
+
+        interface IFastXmlSerializer;
+        interface IXmlSerializer;
+    }
+
+    class CFileRotator {
+        constructor(
+            [in] IFile* basePath,
+            [in] String prefix,
+            [in] Int64 rotateAgeMillis,
+            [in] Int64 deleteAgeMillis);
+
+        interface IFileRotator;
+    }
+
+
+    class CIndentingPrintWriter {
+        constructor(
+            [in] IWriter* writer,
+            [in] String indent);
+
+        constructor(
+            [in] IWriter* writer,
+            [in] String indent,
+            [in] Int32 wrapLength);
+
+        interface IIndentingPrintWriter;
+        interface IPrintWriter;
+        interface IWriter;
+        interface IAppendable;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CJournaledFile {
+        constructor(
+            [in] IFile* real,
+            [in] IFile* temp);
+
+        interface IJournaledFile;
+    }
+
+    class CLocalLog {
+        constructor(
+            [in] String tag);
+
+        interface ILocalLog;
+    }
+
+    class CMemInfoReader {
+        constructor();
+
+        interface IMemInfoReader;
+    }
+
+    singleton class CNotificationColorUtilHelper {
+        interface INotificationColorUtilHelper;
+    }
+
+    class CParcelableString{
+        constructor();
+
+        interface IParcelableString;
+        interface IParcelable;
+    }
+
+    singleton class CPreconditions {
+        interface IPreconditions;
+    }
+
+    class CProcFileReader {
+        constructor(
+            [in] IInputStream* stream);
+
+        constructor(
+            [in] IInputStream* stream,
+            [in] Int32 bufferSize);
+
+        interface IProcFileReader;
+        interface ICloseable;
+    }
+
+    class CSizedInputStream {
+        constructor(
+            [in] IInputStream* wrapped,
+            [in] Int64 length);
+
+        interface ISizedInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class CTypedProperties {
+        constructor();
+
+        interface ITypedProperties;
+        interface IHashMap;
+        interface IMap;
+        interface ICloneable;
+        interface ISerializable;
+    }
+
+    singleton class CUserIcons {
+        interface IUserIcons;
+    }
+
+    class CVirtualRefBasePtr{
+        constructor(
+            [in] Int64 ptr);
+
+        interface IVirtualRefBasePtr;
+    }
+
+    } // namespace Utility
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

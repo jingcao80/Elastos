@@ -1,0 +1,87 @@
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Widget.IEditText;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * A {@link Preference} that allows for string
+     * input.
+     * <p>
+     * It is a subclass of {@link DialogPreference} and shows the {@link EditText}
+     * in a dialog. This {@link EditText} can be modified either programmatically
+     * via {@link #getEditText()}, or through XML by setting any EditText
+     * attributes on the EditTextPreference.
+     * <p>
+     * This preference will store a string into the SharedPreferences.
+     * <p>
+     * See {@link android.R.styleable#EditText EditText Attributes}.
+     */
+    /**
+     * @Involve
+     * interface IDialogPreference
+     * interface IPreference
+     * interface IComparable
+     * interface IPreferenceManagerOnActivityDestroyListener
+     * interface IDialogInterfaceOnDismissListener
+     * interface IDialogInterfaceOnClickListener
+     */
+     [local]
+    interface IEditTextPreference {
+        /**
+         * Saves the text to the {@link SharedPreferences}.
+         *
+         * @param text The text to save
+         */
+        SetText(
+            [in] String text);
+
+        /**
+         * Gets the text from the {@link SharedPreferences}.
+         *
+         * @return The current preference value.
+         */
+        GetText(
+            [out] String* result);
+
+        /**
+         * Adds the EditText widget of this preference to the dialog's view.
+         *
+         * @param dialogView The dialog view.
+         */
+        OnAddEditTextToDialogView(
+            [in] IView* dialogView,
+            [in] IEditText* editText);
+
+        /**
+         * Returns the {@link EditText} widget that will be shown in the dialog.
+         *
+         * @return The {@link EditText} widget that will be shown in the dialog.
+         */
+        GetEditText(
+            [out] IEditText** result);
+    }
+
+    /**
+     * @Involve
+     * interface IPreferenceBaseSavedState
+     * interface IAbsSavedState
+     * interface IParcelable
+     */
+    [deprecated]
+    interface IEditTextPreferenceSavedState {
+        SetText(
+            [in] String* texts);
+
+        GetText(
+            [out] String* text);
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}
+

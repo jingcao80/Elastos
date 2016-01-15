@@ -1,0 +1,123 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    enum Elastos.Droid.Graphics.PorterDuffMode;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * An extension to TextView that supports the {@link android.widget.Checkable} interface.
+     * This is useful when used in a {@link android.widget.ListView ListView} where the it's
+     * {@link android.widget.ListView#setChoiceMode(int) setChoiceMode} has been set to
+     * something other than {@link android.widget.ListView#CHOICE_MODE_NONE CHOICE_MODE_NONE}.
+     *
+     * @attr ref android.R.styleable#CheckedTextView_checked
+     * @attr ref android.R.styleable#CheckedTextView_checkMark
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.ITextView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.ICheckable
+     */
+    interface ICheckedTextView {
+        /**
+         * Set the checkmark to a given Drawable, identified by its resourece id. This will be drawn
+         * when {@link #isChecked()} is true.
+         *
+         * @param resid The Drawable to use for the checkmark.
+         */
+        SetCheckMarkDrawable(
+            [in] Int32 resid);
+
+        /**
+         * Set the checkmark to a given Drawable. This will be drawn when {@link #isChecked()} is true.
+         *
+         * @param d The Drawable to use for the checkmark.
+         */
+        SetCheckMarkDrawable(
+            [in] IDrawable* d);
+
+        /**
+         * Gets the checkmark drawable
+         *
+         * @return The drawable use to represent the checkmark, if any.
+         *
+         * @see #setCheckMarkDrawable(Drawable)
+         * @see #setCheckMarkDrawable(int)
+         *
+         * @attr ref android.R.styleable#CheckedTextView_checkMark
+         */
+        GetCheckMarkDrawable(
+            [out] IDrawable** drawable);
+
+        /**
+         * Applies a tint to the check mark drawable. Does not modify the
+         * current tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+         * <p>
+         * Subsequent calls to {@link #setCheckMarkDrawable(Drawable)} will
+         * automatically mutate the drawable and apply the specified tint and
+         * tint mode using
+         * {@link Drawable#setTintList(ColorStateList)}.
+         *
+         * @param tint the tint to apply, may be {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#CheckedTextView_checkMarkTint
+         * @see #getCheckMarkTintList()
+         * @see Drawable#setTintList(ColorStateList)
+         */
+        SetCheckMarkTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * Returns the tint applied to the check mark drawable, if specified.
+         *
+         * @return the tint applied to the check mark drawable
+         * @attr ref android.R.styleable#CheckedTextView_checkMarkTint
+         * @see #setCheckMarkTintList(ColorStateList)
+         * @Nullable
+         */
+        GetCheckMarkTintList(
+            [out] IColorStateList** tint);
+
+        /**
+         * Specifies the blending mode used to apply the tint specified by
+         * {@link #setCheckMarkTintList(ColorStateList)} to the check mark
+         * drawable. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+         *
+         * @param tintMode the blending mode used to apply the tint, may be
+         *                 {@code null} to clear tint
+         * @attr ref android.R.styleable#CheckedTextView_checkMarkTintMode
+         * @see #setCheckMarkTintList(ColorStateList)
+         * @see Drawable#setTintMode(PorterDuff.Mode)
+         */
+        SetCheckMarkTintMode(
+            [in] PorterDuffMode tintMode);
+
+        /**
+         * Returns the blending mode used to apply the tint to the check mark
+         * drawable, if specified.
+         *
+         * @return the blending mode used to apply the tint to the check mark
+         *         drawable
+         * @attr ref android.R.styleable#CheckedTextView_checkMarkTintMode
+         * @see #setCheckMarkTintMode(PorterDuff.Mode)
+         * @Nullable
+         */
+        GetCheckMarkTintMode(
+            [out] PorterDuffMode* tintMode);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

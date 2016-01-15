@@ -1,0 +1,41 @@
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.Widget.IViewAnimator
+     * extends Elastos.Droid.Widget.IViewSwitcher
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface IImageSwitcher {
+
+        SetImageResource(
+            [in] Int32 resid);
+
+        SetImageURI(
+            [in] IUri* uri);
+
+        SetImageDrawable(
+            [in] IDrawable* drawable);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

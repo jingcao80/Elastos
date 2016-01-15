@@ -1,0 +1,91 @@
+module
+{
+
+    interface Elastos.IO.Charset.ICharset;
+    interface Elastos.IO.Charset.ICharsetDecoder;
+    interface Elastos.IO.Charset.ICharsetEncoder;
+
+    namespace Libcore {
+    namespace ICU {
+
+    [deprecated]
+    interface INativeConverterHelper {
+
+        Decode(
+            [in] Int64 converterHandle,
+            [in] ArrayOf<Byte>* input,
+            [in] Int32 inEnd,
+            [in] ArrayOf<Char32>* output,
+            [in] Int32 outEnd,
+            [in] ArrayOf<Int32>* data,
+            [in] Boolean flush,
+            [out] Int32* result);
+
+        Encode(
+            [in] Int64 converterHandle,
+            [in] ArrayOf<Char32>* input,
+            [in] Int32 inEnd,
+            [in] ArrayOf<Byte>* output,
+            [in] Int32 outEnd,
+            [in] ArrayOf<Int32>* data,
+            [in] Boolean flush,
+            [out] Int32* result);
+
+        OpenConverter(
+            [in] String charsetName,
+            [out] Int64* value);
+
+        CloseConverter(
+            [in] Int64 converterHandle);
+
+        ResetByteToChar(
+            [in] Int64 converterHandle);
+
+        ResetCharToByte(
+            [in] Int64 converterHandle);
+
+        GetSubstitutionBytes(
+            [in] Int64 converterHandle,
+            [out, callee] ArrayOf<Byte>* outarray);
+
+        GetMaxBytesPerChar(
+            [in] Int64 converterHandle,
+            [out] Int32* value);
+
+        GetMinBytesPerChar(
+            [in] Int64 converterHandle,
+            [out] Int32* value);
+
+        GetAveBytesPerChar(
+            [in] Int64 converterHandle,
+            [out] Float* value);
+
+        GetAveCharsPerByte(
+            [in] Int64 converterHandle,
+            [out] Float* value);
+
+        Contains(
+            [in] String converterName1,
+            [in] String converterName2,
+            [out] Boolean* value);
+
+        GetAvailableCharsetNames(
+            [out, callee] ArrayOf<String>* outarray);
+
+        CharsetForName(
+            [in] String charsetName,
+            [out] ICharset** outset);
+
+        SetCallbackDecode(
+            [in] Int64 converterHandle,
+            [in] ICharsetDecoder* decoder);
+
+        SetCallbackEncode(
+            [in] Int64 converterHandle,
+            [in] ICharsetEncoder* encoder);
+
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

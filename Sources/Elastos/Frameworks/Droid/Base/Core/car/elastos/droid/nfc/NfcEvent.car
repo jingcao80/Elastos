@@ -1,0 +1,31 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+    /**
+     * Wraps information associated with any NFC event.
+     *
+     * <p>Immutable object, with direct access to the (final) fields.
+     *
+     * <p>An {@link NfcEvent} object is usually included in callbacks from
+     * {@link NfcAdapter}. Check the documentation of the callback to see
+     * which fields may be set.
+     *
+     * <p>This wrapper object is used (instead of parameters
+     * in the callback) because it allows new fields to be added without breaking
+     * API compatibility.
+     *
+     * @see NfcAdapter.OnNdefPushCompleteCallback#onNdefPushComplete
+     * @see NfcAdapter.CreateNdefMessageCallback#createNdefMessage
+     */
+    interface INfcEvent {
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

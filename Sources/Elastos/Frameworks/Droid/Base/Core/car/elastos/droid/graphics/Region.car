@@ -1,0 +1,275 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IPath;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    enum RegionOp {
+        RegionOp_DIFFERENCE = 0x00,
+        RegionOp_INTERSECT = 0x01,
+        RegionOp_UNION = 0x02,
+        RegionOp_XOR = 0x03,
+        RegionOp_REVERSE_DIFFERENCE = 0x04,
+        RegionOp_REPLACE = 0x05,
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IRegion {
+        /**
+         * Return true if the region contains the specified point
+         */
+        Contains(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Boolean* result);
+
+        /**
+         * Return the boundary of the region as a new Path. If the region is empty,
+         * the path will also be empty.
+         */
+        GetBoundaryPath(
+            [out] IPath** path);
+
+        /**
+         * Set the path to the boundary of the region. If the region is empty, the
+         * path will also be empty.
+         */
+        GetBoundaryPath(
+            [in/*, out*/] IPath* path,
+            [out] Boolean* result);
+
+        /**
+         * Return a new Rect set to the bounds of the region. If the region is
+         * empty, the Rect will be set to [0, 0, 0, 0]
+         */
+        GetBounds(
+            [out] IRect** bounds);
+
+        /**
+         * Set the Rect to the bounds of the region. If the region is empty, the
+         * Rect will be set to [0, 0, 0, 0]
+         */
+        GetBounds(
+            [in/*, out*/] IRect* r,
+            [out] Boolean* result);
+
+        /**
+         * Return true if the region contains more than one rectangle
+         */
+        IsComplex(
+            [out] Boolean* isComplex);
+
+        /**
+         * Return true if this region is empty
+         */
+        IsEmpty(
+            [out] Boolean* isEmpty);
+
+        /**
+         * Return true if the region contains a single rectangle
+         */
+        IsRect(
+            [out] Boolean* isRect);
+
+        /**
+         * Perform the specified Op on this region and the specified rect. Return
+         * true if the result of the op is not empty.
+         */
+        Op(
+            [in] IRect* r,
+            [in] RegionOp op,
+            [out] Boolean* result);
+
+        /**
+         * Perform the specified Op on this region and the specified rect. Return
+         * true if the result of the op is not empty.
+         */
+        Op(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [in] RegionOp op,
+            [out] Boolean* result);
+
+        /**
+         * Perform the specified Op on this region and the specified region. Return
+         * true if the result of the op is not empty.
+         */
+        Op(
+            [in] IRegion* region,
+            [in] RegionOp op,
+            [out] Boolean* result);
+
+        /**
+         * Set this region to the result of performing the Op on the specified rect
+         * and region. Return true if the result is not empty.
+         */
+        Op(
+            [in] IRect* rect,
+            [in] IRegion* region,
+            [in] RegionOp op,
+            [out] Boolean* result);
+
+        /**
+         * Set this region to the result of performing the Op on the specified
+         * regions. Return true if the result is not empty.
+         */
+        Op(
+            [in] IRegion* region1,
+            [in] IRegion* region2,
+            [in] RegionOp op,
+            [out] Boolean* result);
+
+        /**
+         * Return true if the region is a single rectangle (not complex) and it
+         * contains the specified rectangle. Returning false is not a guarantee
+         * that the rectangle is not contained by this region, but return true is a
+         * guarantee that the rectangle is contained by this region.
+         */
+        QuickContains(
+            [in] IRect* r,
+            [out] Boolean* result);
+
+        /**
+         * Return true if the region is a single rectangle (not complex) and it
+         * contains the specified rectangle. Returning false is not a guarantee
+         * that the rectangle is not contained by this region, but return true is a
+         * guarantee that the rectangle is contained by this region.
+         */
+        QuickContains(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [out] Boolean* result);
+
+        /**
+         * Return true if the region is empty, or if the specified rectangle does
+         * not intersect the region. Returning false is not a guarantee that they
+         * intersect, but returning true is a guarantee that they do not.
+         */
+        QuickReject(
+            [in] IRect* r,
+            [out] Boolean* result);
+
+        /**
+         * Return true if the region is empty, or if the specified rectangle does
+         * not intersect the region. Returning false is not a guarantee that they
+         * intersect, but returning true is a guarantee that they do not.
+         */
+        QuickReject(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [out] Boolean* result);
+
+        /**
+         * Return true if the region is empty, or if the specified region does not
+         * intersect the region. Returning false is not a guarantee that they
+         * intersect, but returning true is a guarantee that they do not.
+         */
+        QuickReject(
+            [in] IRegion* rgn,
+            [out] Boolean* result);
+
+        /**
+         * Scale the region by the given scale amount. This re-constructs new region by
+         * scaling the rects that this region consists of. New rectis are computed by scaling
+         * coordinates by float, then rounded by roundf() function to integers. This may results
+         * in less internal rects if 0 < scale < 1. Zero and Negative scale result in
+         * an empty region. If this region is empty, do nothing.
+         *
+         * @hide
+         */
+        Scale(
+            [in] Float scale);
+
+        /**
+         * Set the dst region to the result of scaling this region by the given scale amount.
+         * If this region is empty, then dst will be set to empty.
+         * @hide
+         */
+        Scale(
+            [in] Float scale,
+            [in] IRegion* dst);
+
+        /**
+         * Set the region to the specified region.
+         */
+        Set(
+            [in] IRegion* src,
+            [out] Boolean* result);
+
+        /**
+         * Set the region to the specified rectangle
+         */
+        Set(
+            [in] IRect* r,
+            [out] Boolean* result);
+
+        /**
+         * Set the region to the specified rectangle
+         */
+        Set(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [out] Boolean* result);
+
+        /**
+         * Set the region to the empty region
+         */
+        SetEmpty();
+
+        /**
+         * Set the region to the area described by the path and clip.
+         * Return true if the resulting region is non-empty. This produces a region
+         * that is identical to the pixels that would be drawn by the path
+         * (with no antialiasing).
+         */
+        SetPath(
+            [in] IPath* path,
+            [in] IRegion* clip,
+            [out] Boolean* result);
+
+        /**
+         * Translate the region by [dx, dy]. If the region is empty, do nothing.
+         */
+        Translate(
+            [in] Int32 dx,
+            [in] Int32 dy);
+
+        /**
+         * Set the dst region to the result of translating this region by [dx, dy].
+         * If this region is empty, then dst will be set to empty.
+         */
+        Translate(
+            [in] Int32 dx,
+            [in] Int32 dy,
+            [in] IRegion* dst);
+
+        Union(
+            [in] IRect* r,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IRegion* region,
+            [out] Boolean* result);
+
+        GetNativeRegion(
+            [out] Handle32* region);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

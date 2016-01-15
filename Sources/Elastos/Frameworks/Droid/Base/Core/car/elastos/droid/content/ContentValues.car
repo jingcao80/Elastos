@@ -1,0 +1,343 @@
+
+module
+{
+    using interface Elastos.Core.IByte;
+    using interface Elastos.Core.IInteger16;
+    using interface Elastos.Core.IInteger32;
+    using interface Elastos.Core.IInteger64;
+    using interface Elastos.Core.IFloat;
+    using interface Elastos.Core.IDouble;
+    using interface Elastos.Core.IBoolean;
+    using interface Elastos.Core.IArrayOf;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * This class is used to store a set of values that the ContentResolver can process.
+     *
+     * @sa ContentResolver
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated]
+    interface IContentValues {
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashcode);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        Put(
+            [in] String key,
+            [in] String value);
+
+        Put(
+            [in] String key,
+            [in] ICharSequence* strVal);
+
+        /**
+         * Adds all values from the passed in ContentValues.
+         *
+         * @param other the ContentValues from which to copy
+         */
+        PutAll(
+            [in] IContentValues* contentvalues);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        PutByte(
+            [in] String key,
+            [in] Byte value);
+
+        Put(
+            [in] String key,
+            [in] IByte* byteVal);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        Put(
+            [in] String key,
+            [in] Int16 value);
+
+        Put(
+            [in] String key,
+            [in] IInteger16* shortVal);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        Put(
+            [in] String key,
+            [in] Int32 value);
+
+        Put(
+            [in] String key,
+            [in] IInteger32* intVal);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        Put(
+            [in] String key,
+            [in] Int64 value);
+
+        Put(
+            [in] String key,
+            [in] IInteger64* longVal);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        Put(
+            [in] String key,
+            [in] Float value);
+
+        Put(
+            [in] String key,
+            [in] IFloat* fval);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        Put(
+            [in] String key,
+            [in] Double value);
+
+        Put(
+            [in] String key,
+            [in] IDouble* dval);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        Put(
+            [in] String key,
+            [in] Boolean value);
+
+        Put(
+            [in] String key,
+            [in] IBoolean* bval);
+
+        /**
+         * Adds a value to the set.
+         *
+         * @param key the name of the value to put
+         * @param value the data for the value to put
+         */
+        Put(
+            [in] String key,
+            [in] ArrayOf<Byte>* value);
+
+        Put(
+            [in] String key,
+            [in] IArrayOf* arrayOfByte);
+
+        /**
+         * Adds a null value to the set.
+         *
+         * @param key the name of the value to make null
+         */
+        PutNull(
+            [in] String key);
+
+        /**
+         * Returns the number of values.
+         *
+         * @return the number of values
+         */
+        GetSize(
+            [out] Int32* size);
+
+        /**
+         * Remove a single value.
+         *
+         * @param key the name of the value to remove
+         */
+        Remove(
+            [in] String key);
+
+        /**
+         * Removes all values.
+         */
+        Clear();
+
+        /**
+         * Returns true if this object has the named value.
+         *
+         * @param key the value to check for
+         * @return {true} if the value is present, {false} otherwise
+         */
+        ContainsKey(
+            [in] String key,
+            [out] Boolean* result);
+
+        /**
+         * Gets a value. Valid value types are String, Boolean, and
+         * Number implementations.
+         *
+         * @sa String
+         * @sa Boolean
+         * @sa Number
+         *
+         * @param key the value to get
+         * @return the data for the value
+         */
+        Get(
+            [in] String key,
+            [out] IInterface** value);
+
+        /**
+         * Gets a value and converts it to a String.
+         *
+         * @param key the value to get
+         * @return the String for the value
+         */
+        GetAsString(
+            [in] String key,
+            [out] String* value);
+
+        /**
+         * Gets a value and converts it to a Long.
+         *
+         * @param key the value to get
+         * @return the Long value, or null if the value is missing or cannot be converted
+         */
+        GetAsInt64(
+            [in] String key,
+            [out] Int64* value);
+
+        /**
+         * Gets a value and converts it to an Integer.
+         *
+         * @param key the value to get
+         * @return the Integer value, or null if the value is missing or cannot be converted
+         */
+        GetAsInt32(
+            [in] String key,
+            [out] Int32* value);
+
+        /**
+         * Gets a value and converts it to a Short.
+         *
+         * @param key the value to get
+         * @return the Short value, or null if the value is missing or cannot be converted
+         */
+        GetAsInt16(
+            [in] String key,
+            [out] Int16* value);
+
+        /**
+         * Gets a value and converts it to a Byte.
+         *
+         * @param key the value to get
+         * @return the Byte value, or null if the value is missing or cannot be converted
+         */
+        GetAsByte(
+            [in] String key,
+            [out] Byte* value);
+
+        /**
+         * Gets a value and converts it to a Double.
+         *
+         * @param key the value to get
+         * @return the Double value, or null if the value is missing or cannot be converted
+         */
+        GetAsDouble(
+            [in] String key,
+            [out] Double* value);
+
+        /**
+         * Gets a value and converts it to a Float.
+         *
+         * @param key the value to get
+         * @return the Float value, or null if the value is missing or cannot be converted
+         */
+        GetAsFloat(
+            [in] String key,
+            [out] Float* value);
+
+        /**
+         * Gets a value and converts it to a Boolean.
+         *
+         * @param key the value to get
+         * @return the Boolean value, or null if the value is missing or cannot be converted
+         */
+        GetAsBoolean(
+            [in] String key,
+            [out] Boolean* value);
+
+        /**
+         * Gets a value that is a byte array. Note that this method will not convert
+         * any other types to byte arrays.
+         *
+         * @param key the value to get
+         * @return the byte[] value, or null is the value is missing or not a byte[]
+         */
+        GetAsByteArray(
+            [in] String key,
+            [out, callee] ArrayOf<Byte>* value);
+
+        /**
+         * Returns a set of all of the keys and values
+         *
+         * @return a set of all of the keys and values
+         */
+        GetValueSet(
+            [out] ISet** values);
+
+        /**
+         * Returns a set of all of the keys
+         *
+         * @return a set of all of the keys
+         */
+        GetKeySet(
+            [out] ISet** value);
+
+        /**
+         * Returns a string containing a concise, human-readable description of this object.
+         * @return a printable representation of this object.
+         */
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,138 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Identifier for a specific application component
+     * ({@link android.app.Activity}, {@link android.app.Service},
+     * {@link android.content.BroadcastReceiver}, or
+     * {@link android.content.ContentProvider}) that is available.  Two
+     * pieces of information, encapsulated here, are required to identify
+     * a component: the package (a String) it exists in, and the class (a String)
+     * name inside of that package.
+     *
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     * interface ICloneable
+     * interface IComparable
+     */
+    interface IComponentName {
+
+        /**
+         * Return the package name of this component.
+         */
+        GetPackageName(
+            [out] String* packageName);
+
+        /**
+         * Return the class name of this component.
+         */
+        GetClassName(
+            [out] String* className);
+
+        /**
+         * Return the class name, either fully qualified or in a shortened form
+         * (with a leading '.') if it is a suffix of the package.
+         */
+        GetShortClassName(
+            [out] String* shortClassName);
+
+        /**
+         * Return a String that unambiguously describes both the package and
+         * class names contained in the ComponentName.  You can later recover
+         * the ComponentName from this string through
+         * {@link #unflattenFromString(String)}.
+         *
+         * @return Returns a new String holding the package and class names.  This
+         * is represented as the package name, concatenated with a '/' and then the
+         * class name.
+         *
+         * @see #unflattenFromString(String)
+         */
+        FlattenToString(
+            [out] String* name);
+
+        /**
+         * The same as {@link #flattenToString()}, but abbreviates the class
+         * name if it is a suffix of the package.  The result can still be used
+         * with {@link #unflattenFromString(String)}.
+         *
+         * @return Returns a new String holding the package and class names.  This
+         * is represented as the package name, concatenated with a '/' and then the
+         * class name.
+         *
+         * @see #unflattenFromString(String)
+         */
+        FlattenToShortString(
+            [out] String* name);
+
+        /**
+         * Return string representation of this class without the class's name
+         * as a prefix.
+         */
+        ToShortString(
+            [out] String* name);
+
+        ToString(
+            [out] String* str);
+    }
+
+    interface IComponentNameHelper {
+        /**
+         * Recover a ComponentName from a String that was previously created with
+         * {@link #flattenToString()}.  It splits the string at the first '/',
+         * taking the part before as the package name and the part after as the
+         * class name.  As a special convenience (to use, for example, when
+         * parsing component names on the command line), if the '/' is immediately
+         * followed by a '.' then the final class name will be the concatenation
+         * of the package name with the string following the '/'.  Thus
+         * "com.foo/.Blah" becomes package="com.foo" class="com.foo.Blah".
+         *
+         * @param str The String that was returned by flattenToString().
+         * @return Returns a new ComponentName containing the package and class
+         * names that were encoded in <var>str</var>
+         *
+         * @see #flattenToString()
+         */
+        UnflattenFromString(
+            [in] String str,
+            [out] IComponentName** componentName);
+
+        /**
+         * Write a ComponentName to a Parcel, handling null pointers.  Must be
+         * read with {@link #readFromParcel(Parcel)}.
+         *
+         * @param c The ComponentName to be written.
+         * @param out The Parcel in which the ComponentName will be placed.
+         *
+         * @see #readFromParcel(Parcel)
+         */
+        WriteToParcel(
+            [in] IComponentName* cn,
+            [in] IParcel* dest);
+
+        /**
+         * Read a ComponentName from a Parcel that was previously written
+         * with {@link #writeToParcel(ComponentName, Parcel)}, returning either
+         * a null or new object as appropriate.
+         *
+         * @param in The Parcel from which to read the ComponentName
+         * @return Returns a new ComponentName matching the previously written
+         * object, or null if a null had been written.
+         *
+         * @see #writeToParcel(ComponentName, Parcel)
+         */
+        ReadFromParcel(
+            [in] IParcel* source,
+            [out] IComponentName** cn);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

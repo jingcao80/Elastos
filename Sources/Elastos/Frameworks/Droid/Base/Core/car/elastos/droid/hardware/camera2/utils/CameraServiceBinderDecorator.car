@@ -1,0 +1,42 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Utils {
+
+    /*
+    * @invoke
+    * IInterface IDecoratorListener
+    * IInterface ICameraBinderDecoratorListener
+    */
+    interface ICameraServiceBinderDecoratorListener {
+    }
+
+    /**
+     * Translate camera service status_t return values into exceptions.
+     *
+     * @see android.hardware.camera2.utils.CameraBinderDecorator#newInstance
+     * @hide
+     *
+     * @invoke
+     * interface ICameraBinderDecorator
+     */
+    interface ICameraServiceBinderDecorator {
+        GetBinder(
+            [out] IBinder** binder);
+
+        SetBinder(
+            [in] IBinder* binder);
+    }
+
+    } // namespace Utils
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

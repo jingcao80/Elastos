@@ -1,0 +1,31 @@
+module
+{
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * @Involve
+     * interface IUpdateAppearance
+     * interface IUpdateLayout
+     * interface ICharacterStyle
+     * interface IMetricAffectingSpan
+     * interface IReplacementSpan
+     * interface IDynamicDrawableSpan
+     */
+    interface IImageSpan {
+        /**
+         * Returns the source string that was saved during construction.
+         */
+        GetSource(
+            [out] String* ret);
+    }
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

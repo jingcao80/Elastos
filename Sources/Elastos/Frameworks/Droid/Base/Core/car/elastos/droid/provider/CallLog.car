@@ -1,0 +1,427 @@
+module {
+
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Telecom.IPhoneAccountHandle;
+    interface Elastos.Droid.Internal.Telephony.ICallerInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    /**
+     * The CallLog provider contains information about placed and received calls.
+     */
+    interface ICallLog {
+        const String AUTHORITY = "call_log";
+
+        /**
+         * The content:// style URL for this provider
+         */
+        GetCONTENT_URI(
+            [out] IUri** uri);
+    }
+
+    /**
+     * Contains the recent calls.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    [local]
+    interface ICalls{
+        /**
+         * Query parameter used to limit the number of call logs returned.
+         * <p>
+         * TYPE: integer
+         */
+        const String LIMIT_PARAM_KEY = "limit";
+
+        /**
+         * Query parameter used to specify the starting record to return.
+         * <p>
+         * TYPE: integer
+         */
+        const String OFFSET_PARAM_KEY = "offset";
+
+        /**
+         * An optional URI parameter which instructs the provider to allow the operation to be
+         * applied to voicemail records as well.
+         * <p>
+         * TYPE: Boolean
+         * <p>
+         * Using this parameter with a value of {@code true} will result in a security error if the
+         * calling package does not have appropriate permissions to access voicemails.
+         *
+         * @hide
+         */
+        const String ALLOW_VOICEMAILS_PARAM_KEY = "allow_voicemails";
+
+        /**
+         * An optional extra used with {@link #CONTENT_TYPE Calls.CONTENT_TYPE} and
+         * {@link Intent#ACTION_VIEW} to specify that the presented list of calls should be
+         * filtered for a particular call type.
+         *
+         * Applications implementing a call log UI should check for this extra, and display a
+         * filtered list of calls based on the specified call type. If not applicable within the
+         * application's UI, it should be silently ignored.
+         *
+         * <p>
+         * The following example brings up the call log, showing only missed calls.
+         * <pre>
+         * Intent intent = new Intent(Intent.ACTION_VIEW);
+         * intent.setType(CallLog.Calls.CONTENT_TYPE);
+         * intent.putExtra(CallLog.Calls.EXTRA_CALL_TYPE_FILTER, CallLog.Calls.MISSED_TYPE);
+         * startActivity(intent);
+         * </pre>
+         * </p>
+         */
+        const String EXTRA_CALL_TYPE_FILTER =
+                "android.provider.extra.CALL_TYPE_FILTER";
+
+        /**
+         * The default sort order for this table
+         */
+        const String DEFAULT_SORT_ORDER = "date DESC";
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} and {@link #CONTENT_FILTER_URI}
+         * providing a directory of calls.
+         */
+        const String CONTENT_TYPE = "vnd.android.cursor.dir/calls";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} sub-directory of a single
+         * call.
+         */
+        const String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/calls";
+
+        /**
+         * The type of the call (incoming, outgoing or missed).
+         * <P>Type: INTEGER (int)</P>
+         */
+        const String TYPE = "type";
+
+        /** Call log type for incoming calls. */
+        const Int32 INCOMING_TYPE = 1;
+        /** Call log type for outgoing calls. */
+        const Int32 OUTGOING_TYPE = 2;
+        /** Call log type for missed calls. */
+        const Int32 MISSED_TYPE = 3;
+        /**
+         * Call log type for voicemails.
+         * @hide
+         */
+        const Int32 VOICEMAIL_TYPE = 4;
+
+        /**
+         * Bit-mask describing features of the call (e.g. video).
+         *
+         * <P>Type: INTEGER (int)</P>
+         */
+        const String FEATURES = "features";
+
+        /** Call had video. */
+        const Int32 FEATURES_VIDEO = 0x1;
+
+        /**
+         * The phone number as the user entered it.
+         * <P>Type: TEXT</P>
+         */
+        const String NUMBER = "number";
+
+        /**
+         * The number presenting rules set by the network.
+         *
+         * <p>
+         * Allowed values:
+         * <ul>
+         * <li>{@link #PRESENTATION_ALLOWED}</li>
+         * <li>{@link #PRESENTATION_RESTRICTED}</li>
+         * <li>{@link #PRESENTATION_UNKNOWN}</li>
+         * <li>{@link #PRESENTATION_PAYPHONE}</li>
+         * </ul>
+         * </p>
+         *
+         * <P>Type: INTEGER</P>
+         */
+        const String NUMBER_PRESENTATION = "presentation";
+
+        /** Number is allowed to display for caller id. */
+        const Int32 PRESENTATION_ALLOWED = 1;
+        /** Number is blocked by user. */
+        const Int32 PRESENTATION_RESTRICTED = 2;
+        /** Number is not specified or unknown by network. */
+        const Int32 PRESENTATION_UNKNOWN = 3;
+        /** Number is a pay phone. */
+        const Int32 PRESENTATION_PAYPHONE = 4;
+
+        /**
+         * The ISO 3166-1 two letters country code of the country where the
+         * user received or made the call.
+         * <P>
+         * Type: TEXT
+         * </P>
+         *
+         * @hide
+         */
+        const String COUNTRY_ISO = "countryiso";
+
+        /**
+         * The date the call occured, in milliseconds since the epoch
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DATE = "date";
+
+        /**
+         * The duration of the call in seconds
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DURATION = "duration";
+
+        /**
+         * The data usage of the call in bytes.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String DATA_USAGE = "data_usage";
+
+        /**
+         * Whether or not the call has been acknowledged
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String NEW = "new";
+
+        /**
+         * The cached name associated with the phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: TEXT</P>
+         */
+        const String CACHED_NAME = "name";
+
+        /**
+         * The cached number type (Home, Work, etc) associated with the
+         * phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: INTEGER</P>
+         */
+        const String CACHED_NUMBER_TYPE = "numbertype";
+
+        /**
+         * The cached number label, for a custom number type, associated with the
+         * phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: TEXT</P>
+         */
+        const String CACHED_NUMBER_LABEL = "numberlabel";
+
+        /**
+         * URI of the voicemail entry. Populated only for {@link #VOICEMAIL_TYPE}.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        const String VOICEMAIL_URI = "voicemail_uri";
+
+        /**
+         * Transcription of the call or voicemail entry. This will only be populated for call log
+         * entries of type {@link #VOICEMAIL_TYPE} that have valid transcriptions.
+         */
+        const String TRANSCRIPTION = "transcription";
+
+        /**
+         * Whether this item has been read or otherwise consumed by the user.
+         * <p>
+         * Unlike the {@link #NEW} field, which requires the user to have acknowledged the
+         * existence of the entry, this implies the user has interacted with the entry.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        const String IS_READ = "is_read";
+
+        /**
+         * A geocoded location for the number associated with this call.
+         * <p>
+         * The string represents a city, state, or country associated with the number.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        const String GEOCODED_LOCATION = "geocoded_location";
+
+        /**
+         * The cached URI to look up the contact associated with the phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        const String CACHED_LOOKUP_URI = "lookup_uri";
+
+        /**
+         * The cached phone number of the contact which matches this entry, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        const String CACHED_MATCHED_NUMBER = "matched_number";
+
+        /**
+         * The cached normalized version of the phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        const String CACHED_NORMALIZED_NUMBER = "normalized_number";
+
+        /**
+         * The cached photo id of the picture associated with the phone number, if it exists.
+         * This value is not guaranteed to be current, if the contact information
+         * associated with this number has changed.
+         * <P>Type: INTEGER (long)</P>
+         * @hide
+         */
+        const String CACHED_PHOTO_ID = "photo_id";
+
+        /**
+         * The cached phone number, formatted with formatting rules based on the country the
+         * user was in when the call was made or received.
+         * This value is not guaranteed to be present, and may not be current if the contact
+         * information associated with this number
+         * has changed.
+         * <P>Type: TEXT</P>
+         */
+        const String CACHED_FORMATTED_NUMBER = "formatted_number";
+
+        /**
+         * The component name of the account in string form.
+         * <P>Type: TEXT</P>
+         */
+        const String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
+
+        /**
+         * The identifier of a account that is unique to a specified component.
+         * <P>Type: TEXT</P>
+         */
+        const String PHONE_ACCOUNT_ID = "subscription_id";
+
+        /**
+         * The identifier of a account that is unique to a specified component. Equivalent value
+         * to {@link #PHONE_ACCOUNT_ID}. For ContactsProvider internal use only.
+         * <P>Type: INTEGER</P>
+         *
+         * @hide
+         */
+        const String SUB_ID = "sub_id";
+
+        /**
+         * Adds a call to the call log.
+         *
+         * @param ci the CallerInfo object to get the target contact from.  Can be null
+         * if the contact is unknown.
+         * @param context the context used to get the ContentResolver
+         * @param number the phone number to be added to the calls db
+         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         *        is set by the network and denotes the number presenting rules for
+         *        "allowed", "payphone", "restricted" or "unknown"
+         * @param callType enumerated values for "incoming", "outgoing", or "missed"
+         * @param features features of the call (e.g. Video).
+         * @param accountHandle The accountHandle object identifying the provider of the call
+         * @param start time stamp for the call in milliseconds
+         * @param duration call duration in seconds
+         * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+         *                  the call.
+         * @result The URI of the call log entry belonging to the user that made or received this
+         *        call.
+         * {@hide}
+         */
+        AddCall(
+            [in] ICallerInfo* ci,
+            [in] IContext* context,
+            [in] String number,
+            [in] Int32 presentation,
+            [in] Int32 callType,
+            [in] Int32 features,
+            [in] IPhoneAccountHandle* handle,
+            [in] Int64 start,
+            [in] Int32 duration,
+            [in] Int64 dataUsage,
+            [out] IUri** uri);
+
+        /**
+         * Adds a call to the call log.
+         *
+         * @param ci the CallerInfo object to get the target contact from.  Can be null
+         * if the contact is unknown.
+         * @param context the context used to get the ContentResolver
+         * @param number the phone number to be added to the calls db
+         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         *        is set by the network and denotes the number presenting rules for
+         *        "allowed", "payphone", "restricted" or "unknown"
+         * @param callType enumerated values for "incoming", "outgoing", or "missed"
+         * @param features features of the call (e.g. Video).
+         * @param accountHandle The accountHandle object identifying the provider of the call
+         * @param start time stamp for the call in milliseconds
+         * @param duration call duration in seconds
+         * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+         *                  the call.
+         * @param addForAllUsers If true, the call is added to the call log of all currently
+         *        running users. The caller must have the MANAGE_USERS permission if this is true.
+         *
+         * @result The URI of the call log entry belonging to the user that made or received this
+         *        call.
+         * {@hide}
+         */
+        AddCall(
+            [in] ICallerInfo* ci,
+            [in] IContext* context,
+            [in] String number,
+            [in] Int32 presentation,
+            [in] Int32 callType,
+            [in] Int32 features,
+            [in] IPhoneAccountHandle* handle,
+            [in] Int64 start,
+            [in] Int32 duration,
+            [in] Int64 dataUsage,
+            [in] Boolean addForAllUsers,
+            [out] IUri** uri);
+
+        /**
+         * Query the call log database for the last dialed number.
+         * @param context Used to get the content resolver.
+         * @return The last phone number dialed (outgoing) or an empty
+         * string if none exist yet.
+         */
+        GetLastOutgoingCall(
+            [in] IContext* context,
+            [out] String* call);
+
+        /**
+         * The content:// style URL for this table
+         */
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        /**
+         * The content:// style URL for filtering this table on phone numbers
+         */
+        GetCONTENT_FILTER_URI(
+            [out] IUri** uri);
+
+        /**
+         * Content uri with {@link #ALLOW_VOICEMAILS_PARAM_KEY} set. This can directly be used to
+         * access call log entries that includes voicemail records.
+         *
+         * @hide
+         */
+        GetCONTENT_URI_WITH_VOICEMAIL(
+            [out] IUri** uri);
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+
+}

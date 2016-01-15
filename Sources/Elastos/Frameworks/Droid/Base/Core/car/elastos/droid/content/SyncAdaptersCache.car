@@ -1,0 +1,22 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Net.IUriBuilder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * @involve
+     * interface Elastos.Droid.Content.Pm.IRegisteredServicesCache
+     */
+    interface ISyncAdaptersCache {
+
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

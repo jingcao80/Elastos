@@ -1,0 +1,439 @@
+module
+{
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IResultReceiver;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Media.IRating;
+    interface Elastos.Droid.Media.IMediaDescription;
+    interface Elastos.Droid.Media.IAudioAttributes;
+    interface Elastos.Droid.Media.IVolumeProvider;
+    interface Elastos.Droid.Media.IMediaMetadata;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    /**
+     * Represents an ongoing session. This may be passed to apps by the session
+     * owner to allow them to create a {@link MediaController} to communicate with
+     * the session.
+     */
+    interface IMediaSessionToken {
+    }
+
+    /**
+     * Receives media buttons, transport controls, and commands from controllers
+     * and the system. A callback may be set using {@link #setCallback}.
+     */
+    interface IMediaSessionCallback {
+        /**
+         * Called when a controller has sent a command to this session.
+         * The owner of the session may handle custom commands but is not
+         * required to.
+         *
+         * @param command The command name.
+         * @param args Optional parameters for the command, may be null.
+         * @param cb A result receiver to which a result may be sent by the command, may be null.
+         */
+        OnCommand(
+            [in] String command,
+            [in] IBundle * arg,
+            [in] IResultReceiver * cb);
+
+        /**
+         * Called when a media button is pressed and this session has the
+         * highest priority or a controller sends a media button event to the
+         * session. The default behavior will call the relevant method if the
+         * action for it was set.
+         * <p>
+         * The intent will be of type {@link Intent#ACTION_MEDIA_BUTTON} with a
+         * KeyEvent in {@link Intent#EXTRA_KEY_EVENT}
+         *
+         * @param mediaButtonIntent an intent containing the KeyEvent as an
+         *            extra
+         * @return True if the event was handled, false otherwise.
+         */
+        OnMediaButtonEvent(
+            [in] IIntent * mediaButtonIntent,
+            [out] Boolean * result);
+
+        /**
+         * Override to handle requests to begin playback.
+         */
+        OnPlay();
+
+        /**
+         * Override to handle requests to play a specific mediaId that was
+         * provided by your app's {@link MediaBrowserService}.
+         */
+        OnPlayFromMediaId(
+            [in] String mediaId,
+            [in] IBundle * extras);
+
+        /**
+         * Override to handle requests to begin playback from a search query. An
+         * empty query indicates that the app may play any music. The
+         * implementation should attempt to make a smart choice about what to
+         * play.
+         */
+        OnPlayFromSearch(
+            [in] String query,
+            [in] IBundle * extras);
+
+        /**
+         * Override to handle requests to play an item with a given id from the
+         * play queue.
+         */
+        OnSkipToQueueItem(
+            [in] Int64 id);
+
+        /**
+         * Override to handle requests to pause playback.
+         */
+        OnPause();
+
+        /**
+         * Override to handle requests to skip to the next media item.
+         */
+        OnSkipToNext();
+
+        /**
+         * Override to handle requests to skip to the previous media item.
+         */
+        OnSkipToPrevious();
+
+        /**
+         * Override to handle requests to fast forward.
+         */
+        OnFastForward();
+
+        /**
+         * Override to handle requests to rewind.
+         */
+        OnRewind();
+
+        /**
+         * Override to handle requests to stop playback.
+         */
+        OnStop();
+
+        /**
+         * Override to handle requests to seek to a specific position in ms.
+         *
+         * @param pos New position to move to, in milliseconds.
+         */
+        OnSeekTo(
+            [in] Int64 pos);
+
+        /**
+         * Override to handle the item being rated.
+         *
+         * @param rating
+         */
+        OnSetRating(
+            [in] IRating * rating);
+
+        /**
+         * Called when a {@link MediaController} wants a {@link PlaybackState.CustomAction} to be
+         * performed.
+         *
+         * @param action The action that was originally sent in the
+         *               {@link PlaybackState.CustomAction}.
+         * @param extras Optional extras specified by the {@link MediaController}.
+         */
+        OnCustomAction(
+            [in] String action,
+            [in] IBundle * extras);
+    }
+
+    /**
+     * A single item that is part of the play queue. It contains a description
+     * of the item and its id in the queue.
+     */
+    interface IMediaSessionQueueItem {
+        /**
+         * This id is reserved. No items can be explicitly asigned this id.
+         */
+        const Int32 UNKNOWN_ID = -1;
+
+        /**
+         * Get the description for this item.
+         */
+        GetDescription(
+            [out] IMediaDescription ** result);
+
+        /**
+         * Get the queue id for this item.
+         */
+        GetQueueId(
+            [out] Int64 * result);
+    }
+
+    /**
+     * Allows interaction with media controllers, volume keys, media buttons, and
+     * transport controls.
+     * <p>
+     * A MediaSession should be created when an app wants to publish media playback
+     * information or handle media keys. In general an app only needs one session
+     * for all playback, though multiple sessions can be created to provide finer
+     * grain controls of media.
+     * <p>
+     * Once a session is created the owner of the session may pass its
+     * {@link #getSessionToken() session token} to other processes to allow them to
+     * create a {@link MediaController} to interact with the session.
+     * <p>
+     * To receive commands, media keys, and other events a {@link Callback} must be
+     * set with {@link #setCallback(Callback)} and {@link #setActive(Boolean)
+     * setActive(true)} must be called.
+     * <p>
+     * When an app is finished performing playback it must call {@link #release()}
+     * to clean up the session and notify any controllers.
+     * <p>
+     * MediaSession objects are thread safe.
+     */
+    interface IMediaSession {
+        /**
+         * Set this flag on the session to indicate that it can handle media button
+         * events.
+         */
+        const Int32 FLAG_HANDLES_MEDIA_BUTTONS = 1 << 0;
+
+        /**
+         * Set this flag on the session to indicate that it handles transport
+         * control commands through its {@link Callback}.
+         */
+        const Int32 FLAG_HANDLES_TRANSPORT_CONTROLS = 1 << 1;
+
+        /**
+         * System only flag for a session that needs to have priority over all other
+         * sessions. This flag ensures this session will receive media button events
+         * regardless of the current ordering in the system.
+         *
+         * @hide
+         */
+        const Int32 FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 16;
+
+        /**
+         * Set the callback to receive updates for the MediaSession. This includes
+         * media button events and transport controls. The caller's thread will be
+         * used to post updates.
+         * <p>
+         * Set the callback to null to stop receiving updates.
+         *
+         * @param callback The callback object
+         */
+        SetCallback(
+            [in] IMediaSessionCallback * cb);
+
+        /**
+         * Set the callback to receive updates for the MediaSession. This includes
+         * media button events and transport controls.
+         * <p>
+         * Set the callback to null to stop receiving updates.
+         *
+         * @param callback The callback to receive updates on.
+         * @param handler The handler that events should be posted on.
+         */
+        SetCallback(
+            [in] IMediaSessionCallback * cb,
+            [in] IHandler * handler);
+
+        /**
+         * Set an intent for launching UI for this Session. This can be used as a
+         * quick link to an ongoing media screen. The intent should be for an
+         * activity that may be started using {@link Activity#startActivity(Intent)}.
+         *
+         * @param pi The intent to launch to show UI for this Session.
+         */
+        SetSessionActivity(
+            [in] IPendingIntent * pi);
+
+        /**
+         * Set a pending intent for your media button receiver to allow restarting
+         * playback after the session has been stopped. If your app is started in
+         * this way an {@link Intent#ACTION_MEDIA_BUTTON} intent will be sent via
+         * the pending intent.
+         *
+         * @param mbr The {@link PendingIntent} to send the media button event to.
+         */
+        SetMediaButtonReceiver(
+            [in] IPendingIntent * mbr);
+
+        /**
+         * Set any flags for the session.
+         *
+         * @param flags The flags to set for this session.
+         */
+        SetFlags(
+            [in] Int32 flags);
+
+        /**
+         * Set the attributes for this session's audio. This will affect the
+         * system's volume handling for this session. If
+         * {@link #setPlaybackToRemote} was previously called it will stop receiving
+         * volume commands and the system will begin sending volume changes to the
+         * appropriate stream.
+         * <p>
+         * By default sessions use attributes for media.
+         *
+         * @param attributes The {@link AudioAttributes} for this session's audio.
+         */
+        SetPlaybackToLocal(
+            [in] IAudioAttributes * attributes);
+
+        /**
+         * Configure this session to use remote volume handling. This must be called
+         * to receive volume button events, otherwise the system will adjust the
+         * appropriate stream volume for this session. If
+         * {@link #setPlaybackToLocal} was previously called the system will stop
+         * handling volume changes for this session and pass them to the volume
+         * provider instead.
+         *
+         * @param volumeProvider The provider that will handle volume changes. May
+         *            not be null.
+         */
+        SetPlaybackToRemote(
+            [in] IVolumeProvider * volumeProvider);
+
+        /**
+         * Set if this session is currently active and ready to receive commands. If
+         * set to false your session's controller may not be discoverable. You must
+         * set the session to active before it can start receiving media button
+         * events or transport commands.
+         *
+         * @param active Whether this session is active or not.
+         */
+        SetActive(
+            [in] Boolean active);
+
+        /**
+         * Get the current active state of this session.
+         *
+         * @return True if the session is active, false otherwise.
+         */
+        IsActive(
+            [out] Boolean * result);
+
+        /**
+         * Send a proprietary event to all MediaControllers listening to this
+         * Session. It's up to the Controller/Session owner to determine the meaning
+         * of any events.
+         *
+         * @param event The name of the event to send
+         * @param extras Any extras included with the event
+         */
+        SendSessionEvent(
+            [in] String event,
+            [in] IBundle * extras);
+
+        /**
+         * This must be called when an app has finished performing playback. If
+         * playback is expected to start again shortly the session can be left open,
+         * but it must be released if your activity or service is being destroyed.
+         */
+        ReleaseResources();
+
+        /**
+         * Retrieve a token object that can be used by apps to create a
+         * {@link MediaController} for interacting with this session. The owner of
+         * the session is responsible for deciding how to distribute these tokens.
+         *
+         * @return A token that can be used to create a MediaController for this
+         *         session
+         */
+        GetSessionToken(
+            [out] IMediaSessionToken ** result);
+
+        /**
+         * Get a controller for this session. This is a convenience method to avoid
+         * having to cache your own controller in process.
+         *
+         * @return A controller for this session.
+         */
+        GetController(
+            [out] IMediaController ** result);
+
+        /**
+         * Update the current playback state.
+         *
+         * @param state The current state of playback
+         */
+        SetPlaybackState(
+            [in] IPlaybackState * state);
+
+        /**
+         * Update the current metadata. New metadata can be created using
+         * {@link android.media.MediaMetadata.Builder}.
+         *
+         * @param metadata The new metadata
+         */
+        SetMetadata(
+            [in] IMediaMetadata * metadata);
+
+        /**
+         * Update the list of items in the play queue. It is an ordered list and
+         * should contain the current item, and previous or upcoming items if they
+         * exist. Specify null if there is no current play queue.
+         * <p>
+         * The queue should be of reasonable size. If the play queue is unbounded
+         * within your app, it is better to send a reasonable amount in a sliding
+         * window instead.
+         *
+         * @param queue A list of items in the play queue.
+         */
+        SetQueue(
+            [in] IList * queue);
+
+        /**
+         * Set the title of the play queue. The UI should display this title along
+         * with the play queue itself.
+         * e.g. "Play Queue", "Now Playing", or an album name.
+         *
+         * @param title The title of the play queue.
+         */
+        SetQueueTitle(
+            [in] ICharSequence * title);
+
+        /**
+         * Set some extras that can be associated with the {@link MediaSession}. No assumptions should
+         * be made as to how a {@link MediaController} will handle these extras.
+         * Keys should be fully qualified (e.g. com.example.MY_EXTRA) to avoid conflicts.
+         *
+         * @param extras The extras associated with the {@link MediaSession}.
+         */
+        SetExtras(
+            [in] IBundle * extras);
+
+        /**
+         * Notify the system that the remote volume changed.
+         *
+         * @param provider The provider that is handling volume changes.
+         * @hide
+         */
+        NotifyRemoteVolumeChanged(
+            [in] IVolumeProvider * provider);
+
+    }
+
+    interface IMediaSessionHelper {
+        /**
+         * Return true if this is considered an active playback state.
+         *
+         * @hide
+         */
+        IsActiveState(
+            [in] Int32 state,
+            [out] Boolean * result);
+
+    }
+
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

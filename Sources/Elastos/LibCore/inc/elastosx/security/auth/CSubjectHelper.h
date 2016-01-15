@@ -1,0 +1,126 @@
+
+#ifndef __ELASTOSX_SECURITY_AUTH_CSUBJECTHELPER_H__
+#define __ELASTOSX_SECURITY_AUTH_CSUBJECTHELPER_H__
+
+#include "_Elastosx_Security_Auth_CSubjectHelper.h"
+#include "Singleton.h"
+
+using Elastos::Security::IPrivilegedAction;
+using Elastos::Security::IAccessControlContext;
+using Elastos::Security::IPrivilegedExceptionAction;
+using Elastos::Security::IAccessControlContext;
+using Elastos::Core::Singleton;
+
+namespace Elastosx {
+namespace Security {
+namespace Auth {
+
+CarClass(CSubjectHelper)
+    , public Singleton
+    , public ISubjectHelper
+{
+public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
+    /**
+     * Runs the code defined by {@code action} using the permissions granted to
+     * the {@code Subject} itself and to the code as well.
+     *
+     * @param subject
+     *            the distinguished {@code Subject}.
+     * @param action
+     *            the code to be run.
+     * @return the {@code Object} returned when running the {@code action}.
+     */
+    // @SuppressWarnings("unchecked")
+    CARAPI DoAs(
+        /* [in] */ ISubject *subject,
+        /* [in] */ IPrivilegedAction *action,
+        /* [out] */ IInterface **obj);
+
+    /**
+     * Run the code defined by {@code action} using the permissions granted to
+     * the {@code Subject} and to the code itself, additionally providing a more
+     * specific context.
+     *
+     * @param subject
+     *            the distinguished {@code Subject}.
+     * @param action
+     *            the code to be run.
+     * @param context
+     *            the specific context in which the {@code action} is invoked.
+     *            if {@code null} a new {@link AccessControlContext} is
+     *            instantiated.
+     * @return the {@code Object} returned when running the {@code action}.
+     */
+    // @SuppressWarnings("unchecked")
+    CARAPI DoAsPrivileged(
+        /* [in] */ ISubject *subject,
+        /* [in] */ IPrivilegedAction *action,
+        /* [in] */ IAccessControlContext *context,
+        /* [out] */ IInterface **obj);
+
+    /**
+     * Runs the code defined by {@code action} using the permissions granted to
+     * the subject and to the code itself.
+     *
+     * @param subject
+     *            the distinguished {@code Subject}.
+     * @param action
+     *            the code to be run.
+     * @return the {@code Object} returned when running the {@code action}.
+     * @throws PrivilegedActionException
+     *             if running the {@code action} throws an exception.
+     */
+    // @SuppressWarnings("unchecked")
+    CARAPI DoAs(
+        /* [in] */ ISubject *subject,
+        /* [in] */ IPrivilegedExceptionAction *action,
+        /* [out] */ IInterface **obj);
+
+    /**
+     * Runs the code defined by {@code action} using the permissions granted to
+     * the subject and to the code itself, additionally providing a more
+     * specific context.
+     *
+     * @param subject
+     *            the distinguished {@code Subject}.
+     * @param action
+     *            the code to be run.
+     * @param context
+     *            the specific context in which the {@code action} is invoked.
+     *            if {@code null} a new {@link AccessControlContext} is
+     *            instantiated.
+     * @return the {@code Object} returned when running the {@code action}.
+     * @throws PrivilegedActionException
+     *             if running the {@code action} throws an exception.
+     */
+    // @SuppressWarnings("unchecked")
+    CARAPI DoAsPrivileged(
+        /* [in] */ ISubject *subject,
+        /* [in] */ IPrivilegedExceptionAction *action,
+        /* [in] */ IAccessControlContext *context,
+        /* [out] */ IInterface **obj);
+
+    /**
+     * Returns the {@code Subject} that was last associated with the {@code
+     * context} provided as argument.
+     *
+     * @param context
+     *            the {@code context} that was associated with the
+     *            {@code Subject}.
+     * @return the {@code Subject} that was last associated with the {@code
+     *         context} provided as argument.
+     */
+    CARAPI GetSubject(
+        /* [in] */ IAccessControlContext *context,
+        /* [out] */ ISubject **subject);
+};
+
+} // namespace Auth
+} // namespace Security
+} // namespace Elastosx
+
+#endif // __ELASTOSX_SECURITY_AUTH_CSUBJECTHELPER_H__

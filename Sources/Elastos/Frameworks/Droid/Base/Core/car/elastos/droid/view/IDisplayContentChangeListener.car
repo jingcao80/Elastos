@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.View.IWindowInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Interface for observing content changes on a display.
+     *
+     * {@hide}
+     */
+    interface IDisplayContentChangeListener {
+        OnWindowTransition(
+            [in] Int32 displayId,
+            [in] Int32 transition,
+            [in] IWindowInfo* info);
+
+        OnRectangleOnScreenRequested(
+            [in] Int32 displayId,
+            [in] IRect* rectangle,
+            [in] Boolean immediate);
+
+        OnWindowLayersChanged(
+            [in] Int32 displayId);
+
+        OnRotationChanged(
+            [in] Int32 rotation);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,20 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    [deprecated]
+    interface IOpenSSLBIOInputStream {
+        /**
+         * Similar to a {@code readLine} method, but matches what OpenSSL expects
+         * from a {@code BIO_gets} method.
+         */
+        Gets(
+            [in] ArrayOf<Byte>* buffer,
+            [out] Int32* result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

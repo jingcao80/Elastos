@@ -1,0 +1,30 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    interface IEnumeration {
+        /**
+         * Returns whether this {@code Enumeration} has more elements.
+         *
+         * @return {@code true} if there are more elements, {@code false} otherwise.
+         * @see #nextElement
+         */
+        HasMoreElements(
+            [out] Boolean * value);
+
+        /**
+         * Returns the next element in this {@code Enumeration}.
+         *
+         * @return the next element..
+         * @throws NoSuchElementException
+         *             if there are no more elements.
+         * @see #hasMoreElements
+         */
+        GetNextElement(
+            [out] IInterface ** inter);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

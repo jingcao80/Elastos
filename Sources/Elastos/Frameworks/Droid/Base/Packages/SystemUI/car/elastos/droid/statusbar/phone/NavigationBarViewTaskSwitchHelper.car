@@ -1,0 +1,43 @@
+
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IBaseStatusBar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * @Involve
+     * interface IGestureDetectorSimpleOnGestureListener
+     */
+    interface INavigationBarViewTaskSwitchHelper {
+
+        SetBar(
+            [in] IBaseStatusBar* phoneStatusBar);
+
+        SetBarState(
+            [in] Boolean isVertical,
+            [in] Boolean isRTL);
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        OnTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

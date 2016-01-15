@@ -1,0 +1,28 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Cert {
+
+    /**
+     * This class is an implementation of X509Certificate. It wraps
+     * the instance of org.apache.harmony.security.x509.Certificate
+     * built on the base of provided ASN.1 DER encoded form of
+     * Certificate structure (as specified in RFC 3280
+     * http://www.ietf.org/rfc/rfc3280.txt).
+     * @see org.apache.harmony.security.x509.Certificate
+     * @see java.security.cert.X509Certificate
+     */
+    interface IX509CertImpl extends Elastos.Security.Cert.IX509Certificate {}
+
+    } // namespace Cert
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

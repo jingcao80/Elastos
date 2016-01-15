@@ -1,0 +1,125 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+    /**
+     * A random number generator isolated to the current thread.  Like the
+     * global {@link java.util.Random} generator used by the {@link
+     * java.lang.Math} class, a {@code ThreadLocalRandom} is initialized
+     * with an internally generated seed that may not otherwise be
+     * modified. When applicable, use of {@code ThreadLocalRandom} rather
+     * than shared {@code Random} objects in concurrent programs will
+     * typically encounter much less overhead and contention.  Use of
+     * {@code ThreadLocalRandom} is particularly appropriate when multiple
+     * tasks (for example, each a {@link ForkJoinTask}) use random numbers
+     * in parallel in thread pools.
+     *
+     * <p>Usages of this class should typically be of the form:
+     * {@code ThreadLocalRandom.current().nextX(...)} (where
+     * {@code X} is {@code Int}, {@code Long}, etc).
+     * When all usages are of this form, it is never possible to
+     * accidently share a {@code ThreadLocalRandom} across multiple threads.
+     *
+     * <p>This class also provides additional commonly used bounded random
+     * generation methods.
+     *
+     * @since 1.7
+     * @hide
+     * @author Doug Lea
+     */
+
+    /**
+     * @Involve
+     * interface IRandom;
+     */
+    interface IThreadLocalRandom {
+
+        /**
+         * Returns a pseudorandom, uniformly distributed value between the
+         * given least value (inclusive) and bound (exclusive).
+         *
+         * @param least the least value returned
+         * @param bound the upper bound (exclusive)
+         * @throws IllegalArgumentException if least greater than or equal
+         * to bound
+         * @return the next value
+         */
+        NextInt32(
+            [in] Int32 least,
+            [in] Int32 bound,
+            [out] Int32* value);
+
+        /**
+         * Returns a pseudorandom, uniformly distributed value
+         * between 0 (inclusive) and the specified value (exclusive).
+         *
+         * @param n the bound on the random number to be returned.  Must be
+         *        positive.
+         * @return the next value
+         * @throws IllegalArgumentException if n is not positive
+         */
+        NextInt64(
+            [in] Int64 n,
+            [out] Int64* value);
+
+        /**
+         * Returns a pseudorandom, uniformly distributed value between the
+         * given least value (inclusive) and bound (exclusive).
+         *
+         * @param least the least value returned
+         * @param bound the upper bound (exclusive)
+         * @return the next value
+         * @throws IllegalArgumentException if least greater than or equal
+         * to bound
+         */
+        NextInt64(
+            [in] Int64 least,
+            [in] Int64 bound,
+            [out] Int64* value);
+
+        /**
+         * Returns a pseudorandom, uniformly distributed {@code double} value
+         * between 0 (inclusive) and the specified value (exclusive).
+         *
+         * @param n the bound on the random number to be returned.  Must be
+         *        positive.
+         * @return the next value
+         * @throws IllegalArgumentException if n is not positive
+         */
+        NextDouble(
+            [in] Double n,
+            [out] Double* value);
+
+        /**
+         * Returns a pseudorandom, uniformly distributed value between the
+         * given least value (inclusive) and bound (exclusive).
+         *
+         * @param least the least value returned
+         * @param bound the upper bound (exclusive)
+         * @return the next value
+         * @throws IllegalArgumentException if least greater than or equal
+         * to bound
+         */
+        NextDouble(
+            [in] Double least,
+            [in] Double bound,
+            [out] Double* value);
+
+    }
+
+    interface IThreadLocalRandomHelper {
+        /**
+         * Returns the current thread's {@code ThreadLocalRandom}.
+         *
+         * @return the current thread's {@code ThreadLocalRandom}
+         */
+        GetCurrent(
+            [out] IThreadLocalRandom** threadloc);
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

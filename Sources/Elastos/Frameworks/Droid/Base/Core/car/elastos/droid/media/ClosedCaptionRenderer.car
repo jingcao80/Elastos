@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Droid.Text.ISpannableStringBuilder;
+    interface Elastos.Droid.View.Accessibility.ICaptioningManagerCaptionStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /** @hide */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Media.ISubtitleControllerRenderer
+     */
+    interface IClosedCaptionRenderer {
+    }
+
+    [deprecated]
+    interface IClosedCaptionRendererCCParserDisplayListener {
+        OnDisplayChanged(
+            [in] ArrayOf<ISpannableStringBuilder*>* styledTexts);
+
+        GetCaptionStyle(
+            [out] ICaptioningManagerCaptionStyle** result);
+    }
+
+    interface IClosedCaptionRendererMutableBackgroundColorSpan {
+        SetBackgroundColor(
+            [in] Int32 color);
+
+        GetBackgroundColor(
+            [out] Int32* result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

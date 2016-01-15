@@ -1,0 +1,29 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace Launcher {
+
+    interface ILauncherHelper {
+        LaunchApp(
+            [in] IIntent* intent);
+
+        CloseBootanimation();
+
+        LaunchApp2(
+            [in] String capsule,
+            [in] String action);
+
+        StartVideoViewDemo(
+            [in] String path);
+    }
+
+    } // Launcher
+    } // DevSamples
+    } // Droid
+    } // Elastos
+}

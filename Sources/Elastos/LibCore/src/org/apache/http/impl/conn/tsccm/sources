@@ -1,0 +1,22 @@
+
+TARGET_NAME= tsccm
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../../inc;
+
+SOURCES = AbstractConnPool.cpp
+SOURCES += BasicPoolEntry.cpp
+SOURCES += BasicPoolEntryRef.cpp
+SOURCES += BasicPooledConnAdapter.cpp
+SOURCES += ConnPoolByRoute.cpp
+SOURCES += RefQueueWorker.cpp
+SOURCES += RouteSpecificPool.cpp
+SOURCES += ThreadSafeClientConnManager.cpp
+SOURCES += WaitingThread.cpp
+SOURCES += WaitingThreadAborter.cpp

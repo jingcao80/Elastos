@@ -1,0 +1,133 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcel;
+
+    using interface Elastos.Net.IInetSocketAddress;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Describes a proxy configuration.
+     *
+     * Proxy configurations are already integrated within the Apache HTTP stack.
+     * So {@link URLConnection} and {@link HttpClient} will use them automatically.
+     *
+     * Other HTTP stacks will need to obtain the proxy info from
+     * {@link Proxy#PROXY_CHANGE_ACTION} broadcast as the extra {@link Proxy#EXTRA_PROXY_INFO}.
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IProxyInfo {
+        /**
+         *@hide
+         */
+        const String LOCAL_EXCL_LIST = "";
+
+        /**
+         *@hide
+         */
+        const Int32 LOCAL_PORT = -1;
+
+        /**
+         *@hide
+         */
+        const String LOCAL_HOST = "localhost";
+
+        /**
+         * @hide
+         */
+        GetSocketAddress(
+            [out] IInetSocketAddress** result);
+
+        /**
+         * Returns the URL of the current PAC script or null if there is
+         * no PAC script.
+         */
+        GetPacFileUrl(
+            [out] IUri** result);
+
+        /**
+         * When configured to use a Direct Proxy this returns the host
+         * of the proxy.
+         */
+        GetHost(
+            [out] String* result);
+
+        /**
+         * When configured to use a Direct Proxy this returns the port
+         * of the proxy
+         */
+        GetPort(
+            [out] Int32* result);
+
+        /**
+         * When configured to use a Direct Proxy this returns the list
+         * of hosts for which the proxy is ignored.
+         */
+        GetExclusionList(
+            [out, callee] ArrayOf<String>* result);
+
+        /**
+         * comma separated
+         * @hide
+         */
+        GetExclusionListAsString(
+            [out] String* result);
+
+        /**
+         * @hide
+         */
+        IsValid(
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        MakeProxy(
+            [out] Elastos.Net.IProxy** result);
+    }
+
+    interface IProxyInfoHelper {
+        /**
+         * Constructs a {@link ProxyInfo} object that points at a Direct proxy
+         * on the specified host and port.
+         */
+        BuildDirectProxy(
+            [in] String host,
+            [in] Int32 port,
+            [out] IProxyInfo** result);
+
+        /**
+         * Constructs a {@link ProxyInfo} object that points at a Direct proxy
+         * on the specified host and port.
+         *
+         * The proxy will not be used to access any host in exclusion list, exclList.
+         *
+         * @param exclList Hosts to exclude using the proxy on connections for.  These
+         *                 hosts can use wildcards such as *.example.com.
+         */
+        BuildDirectProxy(
+            [in] String host,
+            [in] Int32 port,
+            [in] IList* exclList,
+            [out] IProxyInfo** result);
+
+        /**
+         * Construct a {@link ProxyInfo} that will download and run the PAC script
+         * at the specified URL.
+         */
+        BuildPacProxy(
+            [in] IUri* pacUri,
+            [out] IProxyInfo** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

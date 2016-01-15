@@ -1,0 +1,64 @@
+module
+{
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    /**
+     * Walks through cursor positions at word boundaries. Internally uses
+     * {@link BreakIterator#getWordInstance()}, and caches {@link CharSequence}
+     * for performance reasons.
+     *
+     * Also provides methods to determine word boundaries.
+     * {@hide}
+     *
+     * @Involve
+     * interface ISelectionPositionIterator
+     */
+    interface IWordIterator {
+        SetCharSequence(
+            [in] ICharSequence* charSequence,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /** If <code>offset</code> is within a word, returns the index of the first character of that
+         * word, otherwise returns BreakIterator.DONE.
+         *
+         * The offsets that are considered to be part of a word are the indexes of its characters,
+         * <i>as well as</i> the index of its last character plus one.
+         * If offset is the index of a low surrogate character, BreakIterator.DONE will be returned.
+         *
+         * Valid range for offset is [0..textLength] (note the inclusive upper bound).
+         * The returned value is within [0..offset] or BreakIterator.DONE.
+         *
+         * @throws IllegalArgumentException is offset is not valid.
+         */
+        GetBeginning(
+            [in] Int32 offset,
+            [out] Int32* ret);
+
+        /** If <code>offset</code> is within a word, returns the index of the last character of that
+         * word plus one, otherwise returns BreakIterator.DONE.
+         *
+         * The offsets that are considered to be part of a word are the indexes of its characters,
+         * <i>as well as</i> the index of its last character plus one.
+         * If offset is the index of a low surrogate character, BreakIterator.DONE will be returned.
+         *
+         * Valid range for offset is [0..textLength] (note the inclusive upper bound).
+         * The returned value is within [offset..textLength] or BreakIterator.DONE.
+         *
+         * @throws IllegalArgumentException is offset is not valid.
+         */
+        GetEnd(
+            [in] Int32 offset,
+            [out] Int32* ret);
+    }
+
+    }//namespace Method
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

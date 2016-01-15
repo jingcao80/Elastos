@@ -1,0 +1,70 @@
+
+module
+{
+
+    interface Org.Apache.Http.Conn.IClientConnectionRequest;
+    interface Org.Apache.Http.Conn.IConnectionReleaseTrigger;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+    namespace Methods {
+
+    /**
+     * Interface representing an HTTP request that can be aborted by shutting
+     * down the underlying HTTP connection.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version   $Revision: 639600 $
+     *
+     * @since 4.0
+     */
+    interface IAbortableHttpRequest {
+
+        /**
+         * Sets the {@link ClientConnectionRequest} callback that can be
+         * used to abort a long-lived request for a connection.
+         * If the request is already aborted, throws an {@link IOException}.
+         *
+         * @see ClientConnectionManager
+         * @see ThreadSafeClientConnManager
+         */
+        SetConnectionRequest(
+            [in] IClientConnectionRequest* connRequest);
+
+        /**
+         * Sets the {@link ConnectionReleaseTrigger} callback that can
+         * be used to abort an active connection.
+         * Typically, this will be the {@link ManagedClientConnection} itself.
+         * If the request is already aborted, throws an {@link IOException}.
+         */
+        SetReleaseTrigger(
+            [in] IConnectionReleaseTrigger* releaseTrigger);
+
+        /**
+         * Aborts this http request. Any active execution of this method should
+         * return immediately. If the request has not started, it will abort after
+         * the next execution. Aborting this request will cause all subsequent
+         * executions with this request to fail.
+         *
+         * @see HttpClient#execute(HttpUriRequest)
+         * @see HttpClient#execute(org.apache.http.HttpHost,
+         *      org.apache.http.HttpRequest)
+         * @see HttpClient#execute(HttpUriRequest,
+         *      org.apache.http.protocol.HttpContext)
+         * @see HttpClient#execute(org.apache.http.HttpHost,
+         *      org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext)
+         */
+        Abort();
+
+    }
+
+    } // namespace Methods
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

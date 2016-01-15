@@ -1,0 +1,93 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Animation.IAnimator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * Per-child layout information associated with ViewSizeAdaptiveLayout.
+     *
+     * TODO extend to width and height
+     *
+     * @attr ref android.R.styleable#SizeAdaptiveLayout_Layout_layout_minHeight
+     * @attr ref android.R.styleable#SizeAdaptiveLayout_Layout_layout_maxHeight
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupLayoutParams
+     */
+    interface ISizeAdaptiveLayoutLayoutParams {
+        /**
+         * Constant value for maxHeight that indicates there is not maximum height.
+         */
+        const Int32 UNBOUNDED = 1;
+
+        /**
+         * Indicates the minimum valid height for the child.
+         */
+        SetMinHeight(
+            [in] Int32 mh);
+
+        GetMinHeight(
+            [out] Int32* mh);
+
+        /**
+         * Indicates the maximum valid height for the child.
+         */
+        SetMaxHeight(
+            [in] Int32 mh);
+
+        GetMaxHeight(
+            [out] Int32* mh);
+    }
+
+    /**
+     * A layout that switches between its children based on the requested layout height.
+     * Each child specifies its minimum and maximum valid height.  Results are undefined
+     * if children specify overlapping ranges.  A child may specify the maximum height
+     * as 'unbounded' to indicate that it is willing to be displayed arbitrarily tall.
+     *
+     * <p>
+     * See {@link SizeAdaptiveLayout.LayoutParams} for a full description of the
+     * layout parameters used by SizeAdaptiveLayout.
+     *
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface ISizeAdaptiveLayout {
+        /**
+         * Visible for testing
+         * @hide
+         */
+        GetTransitionAnimation(
+            [out] IAnimator** animator);
+
+        /**
+         * Visible for testing
+         * @hide
+         */
+        GetModestyPanel(
+            [out] IView** panel);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+
+

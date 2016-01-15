@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.Content.IISyncContext;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Interface used by the SyncAdapter to indicate its progress.
+     * @hide
+     */
+    [oneway]
+    interface IISyncServiceAdapter {
+        /**
+         * Initiate a sync. SyncAdapter-specific parameters may be specified in
+         * extras, which is guaranteed to not be null.
+         *
+         * @param syncContext the ISyncContext used to indicate the progress of the sync. When
+         *   the sync is finished (successfully or not) ISyncContext.onFinished() must be called.
+         * @param extras SyncAdapter-specific parameters.
+         *
+         */
+        StartSync(
+            [in] IISyncContext* syncContext,
+            [in] IBundle* extras);
+
+        /**
+         * Cancel the currently ongoing sync.
+         */
+        CancelSync(
+            [in] IISyncContext* syncContext);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

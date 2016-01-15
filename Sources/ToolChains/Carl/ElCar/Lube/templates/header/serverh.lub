@@ -1,0 +1,69 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}_server.h"
+$
+#ifndef __CAR_${Upper(name)}_H__
+#define __CAR_${Upper(name)}_H__
+
+#ifndef _NO_INCLIST
+#include <elastos.h>
+_ELASTOS_NAMESPACE_USING
+$WITH all libraries DO
+${CreateHFiles(name)}
+$
+$END DO
+#endif // !_NO_INCLIST
+$
+
+$TEMPLATE "decltype.lub"
+$
+$WITH all classes DO
+$   IF attrib is "hascallback" and type is not "generic"
+${ClassNamespaceBegin(class)}$^
+class ${name}Sink;
+class ${name}Connector : public ICallbackConnector
+{
+public:
+$      IF class.type is "aspect"
+    ${name}Connector(IAspect *pServer) : _m_pServer(pServer), _m_pCBSink(NULL) {}
+$      ELSE
+    ${name}Connector(IObject *pServer) : _m_pServer(pServer), _m_pCBSink(NULL) {}
+$      END IF
+
+    CARAPI_(_ELASTOS UInt32) AddRef();
+    CARAPI_(_ELASTOS UInt32) Release();
+    CARAPI_(PInterface) Probe(_ELASTOS REIID riid);
+    CARAPI GetInterfaceID(IInterface *pObject, _ELASTOS InterfaceID *pIID);
+
+    CARAPI AcquireCallbackSink(ICallbackSink **ppICallbackSink);
+
+    CARAPI DisconnectCallbackSink();
+
+    CARAPI CheckCallbackSinkConnection(_ELASTOS Int32 dwEvent);
+
+private:
+$      IF class.type is "aspect"
+    IAspect *_m_pServer;
+$      ELSE
+    IObject *_m_pServer;
+$      END IF
+    ${name}Sink *_m_pCBSink;
+
+$       WITH all interfaces DO
+$           IF attrib is "callback"
+    _ELASTOS Boolean m_b${name}Connected;
+$           END IF
+$       END DO ;; all interfaces
+};
+${ClassNamespaceEnd(class)}
+$   END IF ;; hascallback and !generic
+$END DO ;; all classes
+
+#include <_${name}.h>
+
+#endif // __CAR_${Upper(name)}_H__
+$
+$END OUTPUT

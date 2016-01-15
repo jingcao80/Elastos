@@ -1,0 +1,32 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    interface IAuthorizer {
+        /**
+         * Callback to authorize access.
+         *
+         * @param what integer indicating type of access
+         * @param arg1 first argument (table, view, index, or trigger name)
+         * @param arg2 second argument (file, table, or column name)
+         * @param arg3 third argument (database name)
+         * @param arg4 third argument (trigger name)
+         * @return Constants.SQLITE_OK for success, Constants.SQLITE_IGNORE
+         * for don't allow access but don't raise an error, Constants.SQLITE_DENY
+         * for abort SQL statement with error.
+         */
+        Authorize(
+            [in] Int32 what,
+            [in] String arg1,
+            [in] String arg2,
+            [in] String arg3,
+            [in] String arg4,
+            [out] Int32* code);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

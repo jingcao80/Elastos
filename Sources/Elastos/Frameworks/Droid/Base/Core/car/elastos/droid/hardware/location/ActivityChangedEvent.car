@@ -1,0 +1,29 @@
+
+module
+{
+    using interface Elastos.Utility.IIterable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * Enrollment information about the different available keyphrases.
+     *
+     * @hide
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IActivityChangedEvent {
+        //@NonNull
+        GetActivityRecognitionEvents(
+            [out] IIterable** result);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

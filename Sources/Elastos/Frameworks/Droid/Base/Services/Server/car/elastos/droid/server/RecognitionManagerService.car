@@ -1,0 +1,31 @@
+module
+{
+    interface Elastos.Droid.Content.IComponentName;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+
+    //interface IMyPackageMonitor extends Elastos.Droid.Internal.Content.IPackageMonitor {}
+
+    interface IRecognitionManagerService {
+        SystemReady();
+
+        FindAvailRecognizer(
+            [in] String prefPackage,
+            [in] Int32 userHandle,
+            [out] IComponentName** componentName);
+
+        GetCurRecognizer(
+            [in] Int32 userHandle,
+            [out] IComponentName** componentName);
+
+        SetCurRecognizer(
+            [in] IComponentName* comp,
+            [in] Int32 userHandle);
+    }
+
+    } // Server
+    } // Droid
+    } // Elastos
+}

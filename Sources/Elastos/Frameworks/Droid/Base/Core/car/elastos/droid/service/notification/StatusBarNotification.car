@@ -1,0 +1,110 @@
+
+module
+{
+    interface Elastos.Droid.App.INotification;
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Notification {
+
+    /**
+     * Class encapsulating a Notification. Sent by the NotificationManagerService to clients including
+     * the status bar and any {@link android.service.notification.NotificationListenerService}s.
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    interface IStatusBarNotification {
+        /**
+         * @hide
+         */
+        CloneLight(
+            [out] IStatusBarNotification** ret);
+
+        /** Convenience method to check the notification's flags for
+         * {@link Notification#FLAG_ONGOING_EVENT}.
+         */
+        IsOngoing(
+            [out] Boolean* ret);
+
+        /** Convenience method to check the notification's flags for
+         * either {@link Notification#FLAG_ONGOING_EVENT} or
+         * {@link Notification#FLAG_NO_CLEAR}.
+         */
+        IsClearable(
+            [out] Boolean* ret);
+
+        /**
+         * Returns a userHandle for the instance of the app that posted this notification.
+         *
+         * @deprecated Use {@link #getUser()} instead.
+         */
+        GetUserId(
+            [out] Int32* id);
+
+        /** The package of the app that posted the notification. */
+        GetPackageName(
+            [out] String* name);
+
+        /** The id supplied to {@link android.app.NotificationManager#notify(int,Notification)}. */
+        GetId(
+            [out] Int32* id);
+
+        /** The tag supplied to {@link android.app.NotificationManager#notify(int,Notification)},
+         * or null if no tag was specified. */
+        GetTag(
+            [out] String* tag);
+
+        /** The notifying app's calling uid. @hide */
+        GetUid(
+            [out] Int32* uid);
+
+        /** The package used for AppOps tracking. @hide */
+        GetOpPkg(
+            [out] String* pkg);
+
+        /** @hide */
+        GetInitialPid(
+            [out] Int32* pid);
+
+        /** The {@link android.app.Notification} supplied to
+         * {@link android.app.NotificationManager#notify(int,Notification)}. */
+        GetNotification(
+            [out] INotification** ret);
+
+        /**
+         * The {@link android.os.UserHandle} for whom this notification is intended.
+         */
+        GetUser(
+            [out] IUserHandle** ueser);
+
+        /** The time (in {@link System#currentTimeMillis} time) the notification was posted,
+         * which may be different than {@link android.app.Notification#when}.
+         */
+        GetPostTime(
+            [out] Int64* time);
+
+        /** @hide */
+        GetScore(
+            [out] Int32* score);
+
+        /**
+         * A unique instance key for this notification record.
+         */
+        GetKey(
+            [out] String* key);
+
+        /**
+         * A key that indicates the group with which this message ranks.
+         */
+        GetGroupKey(
+            [out] String* key);
+    }
+
+    } //Notification
+    } //Service
+    } //Droid
+    } //Elastos
+}

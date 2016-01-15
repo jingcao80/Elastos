@@ -1,0 +1,71 @@
+
+module
+{
+    interface Elastos.Droid.Net.ILinkAddress;
+
+    using interface Elastos.Utility.IIterable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Configuration details for a network interface.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IInterfaceConfiguration {
+        GetFlags(
+            [out] IIterable** result);
+
+        HasFlag(
+            [in] String flag,
+            [out] Boolean* result);
+
+        ClearFlag(
+            [in] String flag);
+
+        SetFlag(
+            [in] String flag);
+
+        /**
+         * Set flags to mark interface as up.
+         */
+        SetInterfaceUp();
+
+        /**
+         * Set flags to mark interface as down.
+         */
+        SetInterfaceDown();
+
+        GetLinkAddress(
+            [out] ILinkAddress** result);
+
+        SetLinkAddress(
+            [in] ILinkAddress* addr);
+
+        GetHardwareAddress(
+            [out] String* result);
+
+        SetHardwareAddress(
+            [in] String hwAddr);
+
+        /**
+         * This function determines if the interface is up and has a valid IP
+         * configuration (IP address has a non zero octet).
+         *
+         * Note: It is supposed to be quick and hence should not initiate
+         * any network activity
+         */
+        IsActive(
+            [out] Boolean* result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

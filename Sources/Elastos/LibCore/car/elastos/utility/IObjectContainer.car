@@ -1,0 +1,35 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    interface IObjectEnumerator;
+
+    interface IObjectContainer {
+        Add(
+            [in] IInterface* object);
+
+        Remove(
+            [in] IInterface* object);
+
+        GetObjectEnumerator(
+            [out] IObjectEnumerator** objects);
+
+        GetObjectCount(
+            [out] Int32* count);
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* contains);
+
+        ContainsAll(
+            [in] IObjectContainer* objectContainer,
+            [out] Boolean* contains);
+
+        Dispose();
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,179 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    interface IIDisplayManagerAw {
+
+        GetDisplayCount(
+            [out] Int32* rst);
+
+        GetDisplayOpenStatus(
+            [in] Int32 mDisplay,
+            [out] Boolean* rst);
+
+        GetDisplayHotPlugStatus(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        GetDisplayOutputType(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        GetDisplayOutputFormat(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        GetDisplayWidth(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        GetDisplayHeight(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        SetDisplayParameter(
+            [in] Int32 mDisplay,
+            [in] Int32 param0,
+            [in] Int32 param1,
+            [out] Int32* rst);
+
+        GetDisplayPixelFormat(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        SetDisplayMode(
+            [in] Int32 mode,
+            [out] Int32* rst);
+
+        GetDisplayMode(
+            [out] Int32* rst);
+
+        SetDisplayOutputType(
+            [in] Int32 mDisplay,
+            [in] Int32 type,
+            [in] Int32 format,
+            [out] Int32* rst);
+
+        OpenDisplay(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        CloseDisplay(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        SetDisplayMaster(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        GetDisplayMaster(
+            [out] Int32* rst);
+
+        GetMaxWidthDisplay(
+            [out] Int32* rst);
+
+        GetMaxHdmiMode(
+            [out] Int32* rst);
+
+        SetDisplayBacklightMode(
+            [in] Int32 mode,
+            [out] Int32* rst);
+
+        GetDisplayBacklightMode(
+            [out] Int32* rst);
+
+        IsSupportHdmiMode(
+            [in] Int32 mode,
+            [out] Int32* rst);
+
+        IsSupport3DMode(
+            [out] Int32* rst);
+
+        GetHdmiHotPlugStatus(
+            [out] Int32* rst);
+
+        GetTvHotPlugStatus(
+            [out] Int32* rst);
+
+        SetDisplayAreaPercent(
+            [in] Int32 displayno,
+            [in] Int32 percent,
+            [out] Int32* rst);
+
+        GetDisplayAreaPercent(
+            [in] Int32 displayno,
+            [out] Int32* rst);
+
+        SetDisplayBright(
+            [in] Int32 displayno,
+            [in] Int32 bright,
+            [out] Int32* rst);
+
+        GetDisplayBright(
+            [in] Int32 displayno,
+            [out] Int32* rst);
+
+        SetDisplayContrast(
+            [in] Int32 displayno,
+            [in] Int32 contrast,
+            [out] Int32* rst);
+
+        GetDisplayContrast(
+            [in] Int32 displayno,
+            [out] Int32* rst);
+
+        SetDisplaySaturation(
+            [in] Int32 displayno,
+            [in] Int32 saturation,
+            [out] Int32* rst);
+
+        GetDisplaySaturation(
+            [in] Int32 displayno,
+            [out] Int32* rst);
+
+        SetDisplayHue(
+            [in] Int32 displayno,
+            [in] Int32 hue,
+            [out] Int32* rst);
+
+        GetDisplayHue(
+            [in] Int32 displayno,
+            [out] Int32* rst);
+
+        StartWifiDisplaySend(
+            [in] Int32 mDisplay,
+            [in] Int32 mode,
+            [out] Int32* rst);
+
+        EndWifiDisplaySend(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        StartWifiDisplayReceive(
+            [in] Int32 mDisplay,
+            [in] Int32 mode,
+            [out] Int32* rst);
+
+        EndWifiDisplayReceive(
+            [in] Int32 mDisplay,
+            [out] Int32* rst);
+
+        UpdateSendClient(
+            [in] Int32 mode,
+            [out] Int32* rst);
+
+        Set3DLayerOffset(
+            [in] Int32 displayno,
+            [in] Int32 left,
+            [in] Int32 right,
+            [out] Int32* rst);
+
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

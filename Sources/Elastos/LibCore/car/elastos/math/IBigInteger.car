@@ -1,0 +1,558 @@
+
+module
+{
+    namespace Elastos {
+    namespace Math {
+
+    /**
+     * An immutable arbitrary-precision signed integer.
+     * <p><strong>
+     * Fast Cryptography</strong></p>
+     * <p>
+     * This implementation is efficient for operations traditionally used
+     * in cryptography, such as the generation of large prime numbers and computation of the modular inverse.</p>
+     * <p><strong>
+     * Slow Two's Complement Bitwise Operations</strong></p>
+     * <p>
+     * This API includes operations for bitwise operations in two's
+     * complement representation. Two's complement is not the internal
+     * representation used by this implementation, so such methods may be
+     * inefficient. Use BitSet for high-performance bitwise operations on arbitrarily-large sequences of bits. </p>
+     *
+     * @sa BitSet
+     * @implements Elastos.Math.Elastos.Core.INumber
+     *
+     * @Involve
+     * interface Elastos.IO.ISerializable;
+     * interface Elastos.Core.INumber;
+     * interface Elastos.Core.IComparable;
+     */
+
+    interface IBigInteger {
+        /**
+         * Returns the two's complement representation of this {BigInteger} in
+         * a byte array.
+         */
+        ToByteArray(
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns a {BigInteger} whose value is the absolute value of {this}.
+         */
+        Abs(
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is the {-this}.
+         */
+        Negate(
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this + value}.
+         */
+        Add(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this - value}.
+         */
+        Subtract(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns the sign of this {BigInteger}.
+         *
+         * @return {-1} if {this < 0}, {0} if {this == 0},
+         *     {1} if {this > 0}.
+         */
+        GetSignum(
+            [out] Int32* sign);
+
+        /**
+         * Returns a {BigInteger} whose value is {this >> n}. For
+         * negative arguments, the result is also negative. The shift distance may
+         * be negative which means that {this} is shifted left.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method on negative values is
+         * not recommended as the current implementation is not efficient.
+         *
+         * @param n shift distance
+         * @return {this >> n} if {n >= 0}; {this << (-n)}
+         *     otherwise
+         */
+        ShiftRight(
+            [in] Int32 n,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this << n}. The
+         * result is equivalent to {this * pow(2, n)} if n >= 0. The shift
+         * distance may be negative which means that {this} is shifted right.
+         * The result then corresponds to {floor(this / pow(2, -n))}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method on negative values is
+         * not recommended as the current implementation is not efficient.
+         *
+         * @param n shift distance.
+         * @return {this << n} if {n >= 0}; {this >> (-n)}.
+         *     otherwise
+         */
+        ShiftLeft(
+            [in] Int32 n,
+            [out] IBigInteger** result);
+
+        ShiftLeftOneBit(
+            [out] IBigInteger** result);
+
+        /**
+         * Returns the length of the value's two's complement representation without
+         * leading zeros for positive numbers / without leading ones for negative
+         * values.
+         *
+         * <p>The two's complement representation of {this} will be at least
+         * {bitLength() + 1} bits long.
+         *
+         * <p>The value will fit into an {int} if {bitLength() < 32} or
+         * into a {long} if {bitLength() < 64}.
+         *
+         * @return the length of the minimal two's complement representation for
+         *     {this} without the sign bit.
+         */
+        BitLength(
+            [out] Int32* length);
+
+        /**
+         * Tests whether the bit at position n in {this} is set. The result is
+         * equivalent to {this & pow(2, n) != 0}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         *
+         * @param n position where the bit in {this} has to be inspected.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ArithmeticException | if {n < 0}.
+         */
+        TestBit(
+            [in] Int32 n,
+            [out] Boolean* result);
+
+        /**
+         * Returns a {BigInteger} which has the same binary representation
+         * as {this} but with the bit at position n set. The result is
+         * equivalent to {this | pow(2, n)}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         *
+         * @param n position where the bit in {this} has to be set.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ArithmeticException | if {n < 0}.
+         */
+        SetBit(
+            [in] Int32 n,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} which has the same binary representation
+         * as {this} but with the bit at position n cleared. The result is
+         * equivalent to {this & ~pow(2, n)}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         *
+         * @param n position where the bit in {this} has to be cleared.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ArithmeticException | if {n < 0}.
+         */
+        ClearBit(
+            [in] Int32 n,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} which has the same binary representation
+         * as {this} but with the bit at position n flipped. The result is
+         * equivalent to {this ^ pow(2, n)}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         *
+         * @param n position where the bit in {this} has to be flipped.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ArithmeticException | if {n < 0}.
+         */
+        FlipBit(
+            [in] Int32 n,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns the position of the lowest set bit in the two's complement
+         * representation of this {BigInteger}. If all bits are zero (this==0)
+         * then -1 is returned as result.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         */
+        GetLowestSetBit(
+            [out] Int32* position);
+
+        /**
+         * Returns the number of bits in the two's complement representation of
+         * {this} which differ from the sign bit. If {this} is negative,
+         * the result is equivalent to the number of bits set in the two's
+         * complement representation of {-this - 1}.
+         *
+         * <p>Use {bitLength(0)} to find the length of the binary value in
+         * bits.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         */
+        BitCount(
+            [out] Int32* number);
+
+        /**
+         * Returns a {BigInteger} whose value is {~this}. The result
+         * of this operation is {-this-1}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         */
+        Not(
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this & value}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended
+         * as the current implementation is not efficient.
+         *
+         * @param value value to be and'ed with {this}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {value == null}.
+         */
+        And(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this | value}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         *
+         * @param value value to be or'ed with {this}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {value == null}.
+         */
+        Or(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this ^ value}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended as
+         * the current implementation is not efficient.
+         *
+         * @param value value to be xor'ed with {this}
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {value == null}
+         */
+        Xor(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this & ~value}.
+         * Evaluating {x.andNot(value)} returns the same result as {x.and(value.not())}.
+         *
+         * <p><b>Implementation Note:</b> Usage of this method is not recommended
+         * as the current implementation is not efficient.
+         *
+         * @param value value to be not'ed and then and'ed with {this}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {value == null}.
+         */
+        AndNot(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns the minimum of this {BigInteger} and {value}.
+         *
+         * @param value value to be used to compute the minimum with {this}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {value == null}.
+         */
+        Min(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns the maximum of this {BigInteger} and {value}.
+         *
+         * @param value value to be used to compute the maximum with {this}
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {value == null}
+         */
+        Max(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is greatest common divisor
+         * of {this} and {value}. If {this == 0} and
+         * {value == 0} then zero is returned, otherwise the result is positive.
+         *
+         * @param value value with which the greatest common divisor is computed.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {value == null}.
+         */
+        Gcd(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this * value}.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {value == null}.
+         */
+        Multiply(
+            [in] IBigInteger* value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {pow(this, exp)}.
+         *
+         * ArithmeticException | if {exp < 0}.
+         */
+        Pow(
+            [in] Int32 exp,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a two element {BigInteger} array containing
+         * {this / divisor} at index 0 and {this % divisor} at index 1.
+         *
+         * @param divisor value by which {this} is divided.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {divisor == null}.
+         * ArithmeticException | if {divisor == 0}.
+         * @see #divide
+         * @see #remainder
+         */
+        DivideAndRemainder(
+           [in] IBigInteger* divisor,
+           [out, callee] ArrayOf<IBigInteger*>* bigIntegerArray);
+
+        /**
+         * Returns a {BigInteger} whose value is {this / divisor}.
+         *
+         * @param divisor value by which {this} is divided.
+         * @return {this / divisor}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {divisor == null}.
+         * ArithmeticException | if {divisor == 0}.
+         */
+        Divide(
+            [in] IBigInteger* divisor,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this % divisor}.
+         * Regarding signs this methods has the same behavior as the % operator on
+         * ints: the sign of the remainder is the same as the sign of this.
+         *
+         * @param divisor value by which {this} is divided.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {divisor == null}.
+         * ArithmeticException | if {divisor == 0}.
+         */
+        Remainder(
+            [in] IBigInteger* divisor,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {1/this mod m}. The
+         * modulus {m} must be positive. The result is guaranteed to be in the
+         * interval {[0, m)} (0 inclusive, m exclusive). If {this} is
+         * not relatively prime to m, then an exception is thrown.
+         *
+         * @param m the modulus.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {m == null}
+         * ArithmeticException | if {m < 0 or} if {this} is not relatively prime to {m}
+         */
+        ModInverse(
+            [in] IBigInteger* divisor,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is
+         *{pow(this, exponent) mod m}. The modulus {m} must be positive. The
+         * result is guaranteed to be in the interval {[0, m)} (0 inclusive,
+         * m exclusive). If the exponent is negative, then
+         * {pow(this.modInverse(m), -exponent) mod m} is computed. The inverse of
+         * this only exists if {this} is relatively prime to m, otherwise an
+         * exception is thrown.
+         *
+         * @param exponent the exponent.
+         * @param m the modulus.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {m == null} or {exponent == null}.
+         * ArithmeticException | if {m < 0} or if {exponent<0} and this is not relatively prime to {m}.
+         */
+        ModPow(
+            [in] IBigInteger* exponent,
+            [in] IBigInteger* m,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a {BigInteger} whose value is {this mod m}. The
+         * modulus {m} must be positive. The result is guaranteed to be in the
+         * interval {[0, m)} (0 inclusive, m exclusive). The behavior of this
+         * function is not equivalent to the behavior of the % operator defined for
+         * the built-in {int}'s.
+         *
+         * @param m the modulus.
+         * @return {this mod m}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * NullPointerException | if {m == null}.
+         * ArithmeticException | if {m < 0}.
+         */
+        Mod(
+            [in] IBigInteger* m,
+            [out] IBigInteger** result);
+
+        /**
+         * Tests whether this {BigInteger} is probably prime. If {true}
+         * is returned, then this is prime with a probability beyond
+         * {1 - 1/pow(2, certainty)}. If {false} is returned, then this
+         * is definitely composite. If the argument {certainty} <= 0, then
+         * this method returns true.
+         *
+         * @param certainty tolerated primality uncertainty.
+         * @return {true}, if {this} is probably prime, {false}
+         *     otherwise.
+         */
+        IsProbablePrime(
+            [in] Int32 certainty,
+            [out] Boolean* result);
+
+        /**
+         * Returns the smallest integer x > {this} which is probably prime as
+         * a {BigInteger} instance. The probability that the returned
+         * {BigInteger} is prime is beyond {1 - 1/pow(2, 80)}.
+         *
+         * @return smallest integer > {this} which is probably prime.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ArithmeticException | if {this < 0}.
+         */
+        NextProbablePrime(
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a string containing a string representation of this
+         * {BigInteger} with base radix. If {radix < Character.MIN_RADIX} or
+         * {radix > Character.MAX_RADIX} then a decimal representation is
+         * returned. The characters of the string representation are generated with
+         * method {Character.forDigit}.
+         *
+         * @param radix base to be used for the string representation.
+         */
+        ToString(
+            [in] Int32 radix,
+            [out] String* string);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* result);
+    }
+
+    /**
+     * An immutable arbitrary-precision signed integer.
+     */
+
+    interface IBigIntegerHelper {
+        /** Returns a {BigInteger} whose value is equal to {value}. */
+        ValueOf(
+            [in] Int64 value,
+            [out] IBigInteger** result);
+
+        /**
+         * Returns a random positive {BigInteger} instance in the range
+         * {[0, pow(2, bitLength)-1]} which is probably prime. The probability that
+         * the returned {BigInteger} is prime is beyond {1 - 1/pow(2, 80)}.
+         *
+         * <p><b>Implementation Note:</b> Currently {random} is ignored.
+         *
+         * @param bitLength length of the new {BigInteger} in bits.
+         * @return probably prime random {BigInteger} instance.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {bitLength < 2}.
+         */
+//        ProbablePrime(
+//            [in] Int32 bitLength,
+//            [in] IRandom* unused,
+//            [out] IBigInteger** result);
+
+        GetMINUSOne(
+            [out] IBigInteger** result);
+
+        GetZERO(
+            [out] IBigInteger** result);
+
+        GetONE(
+            [out] IBigInteger** result);
+
+        GetTEN(
+            [out] IBigInteger** result);
+    }
+
+    } // namespace Math
+    } // namespace Elastos
+}

@@ -1,0 +1,55 @@
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace StatusBar {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IStatusBarIconList {
+        DefineSlots(
+            [in] ArrayOf<String> slots);
+
+        GetSlotIndex(
+            [in] String slot,
+            [out] Int32* index);
+
+        Size(
+            [out] Int32* value);
+
+        SetIcon(
+            [in] Int32 index,
+            [in] IStatusBarIcon* icon);
+
+        RemoveIcon(
+            [in] Int32 index);
+
+        GetSlot(
+            [in] Int32 index,
+            [out] String* slot);
+
+        GetIcon(
+            [in] Int32 index,
+            [out] IStatusBarIcon** icon);
+
+        GetViewIndex(
+            [in] Int32 index,
+            [out] Int32* viewIndex);
+
+        CopyFrom(
+            [in] IStatusBarIconList* that);
+
+        Dump(
+            [in] IPrintWriter* pw);
+    }
+
+    } // namespace StatusBar
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

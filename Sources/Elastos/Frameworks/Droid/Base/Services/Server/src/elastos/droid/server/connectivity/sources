@@ -1,0 +1,20 @@
+TARGET_NAME= connectivity
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
+
+C_DEFINES += -DDROID_SERVER
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+SOURCES = connectivity.cpp
+SOURCES += DataConnectionStats.cpp
+SOURCES += Nat464Xlat.cpp
+SOURCES += NetworkAgentInfo.cpp
+SOURCES += NetworkMonitor.cpp
+SOURCES += PacManager.cpp
+SOURCES += PermissionMonitor.cpp
+SOURCES += CTethering.cpp
+SOURCES += Vpn.cpp
+SOURCES += CVpnObserver.cpp

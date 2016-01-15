@@ -1,0 +1,106 @@
+
+module
+{
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Core.IAppendable;
+
+    namespace Elastos {
+    namespace Utility {
+
+    [deprecated]
+    interface IFormatter {
+        /**
+         * Writes a formatted string to the output destination of the {@code Formatter}.
+         *
+         * @param format
+         *            a format string.
+         * @param args
+         *            the arguments list used in the {@code format()} method. If there are
+         *            more arguments than those specified by the format string, then
+         *            the additional arguments are ignored.
+         * @return this {@code Formatter}.
+         * @throws IllegalFormatException
+         *             if the format string is illegal or incompatible with the
+         *             arguments, or if fewer arguments are sent than those required by
+         *             the format string, or any other illegal situation.
+         * @throws FormatterClosedException
+         *             if the {@code Formatter} has been closed.
+         */
+        Format(
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args);
+
+        /**
+         * Writes a formatted string to the output destination of the {@code Formatter}.
+         *
+         * @param l
+         *            the {@code Locale} used in the method. If {@code locale} is
+         *            {@code null}, then no localization will be applied. This
+         *            parameter does not change this Formatter's default {@code Locale}
+         *            as specified during construction, and only applies for the
+         *            duration of this call.
+         * @param format
+         *            a format string.
+         * @param args
+         *            the arguments list used in the {@code format()} method. If there are
+         *            more arguments than those specified by the format string, then
+         *            the additional arguments are ignored.
+         * @return this {@code Formatter}.
+         * @throws IllegalFormatException
+         *             if the format string is illegal or incompatible with the
+         *             arguments, or if fewer arguments are sent than those required by
+         *             the format string, or any other illegal situation.
+         * @throws FormatterClosedException
+         *             if the {@code Formatter} has been closed.
+         */
+        Format(
+            [in] ILocale* l,
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args);
+
+        /**
+         * Returns the {@code Locale} of the {@code Formatter}.
+         *
+         * @return the {@code Locale} for the {@code Formatter} or {@code null} for no {@code Locale}.
+         * @throws FormatterClosedException
+         *             if the {@code Formatter} has been closed.
+         */
+        GetLocale(
+            [out] ILocale** outlocale);
+
+        /**
+         * Returns the output destination of the {@code Formatter}.
+         *
+         * @return the output destination of the {@code Formatter}.
+         * @throws FormatterClosedException
+         *             if the {@code Formatter} has been closed.
+         */
+        GetOut(
+            [out] IAppendable** outapp);
+
+        /**
+         * Returns the content by calling the {@code toString()} method of the output
+         * destination.
+         *
+         * @return the content by calling the {@code toString()} method of the output
+         *         destination.
+         * @throws FormatterClosedException
+         *             if the {@code Formatter} has been closed.
+         */
+        ToString(
+            [out] String* str);
+
+        /**
+         * Returns the last {@code IOException} thrown by the {@code Formatter}'s output
+         * destination. If the {@code append()} method of the destination does not throw
+         * {@code IOException}s, the {@code ioException()} method will always return {@code null}.
+         *
+         * @return the last {@code IOException} thrown by the {@code Formatter}'s output
+         *         destination.
+         */
+        GetIoException();
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

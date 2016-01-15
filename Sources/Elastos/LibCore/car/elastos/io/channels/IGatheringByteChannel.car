@@ -1,0 +1,103 @@
+
+module
+{
+
+    interface Elastos.IO.IByteBuffer;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+
+    interface IWritableByteChannel;
+
+
+   /**
+    * The interface for channels that can write a set of buffers in a single
+    * operation. The corresponding interface for read operations is
+    * {@link ScatteringByteChannel}.
+    */
+    /**
+    * @Involve
+    * interface IChannel;
+    * interface IWritableByteChannel;
+    */
+    [deprecated]
+    interface IGatheringByteChannel {
+
+    /**
+     * Writes bytes from all the given buffers to a channel.
+     * <p>
+     * This method is equivalent to: {@code write(buffers, 0, buffers.length);}
+     *
+     * @param buffers
+     *            the buffers containing bytes to be written.
+     * @return the number of bytes actually written.
+     * @throws AsynchronousCloseException
+     *             if the channel is closed by another thread during this write
+     *             operation.
+     * @throws ClosedByInterruptException
+     *             if another thread interrupts the calling thread while the
+     *             operation is in progress. The interrupt state of the calling
+     *             thread is set and the channel is closed.
+     * @throws ClosedChannelException
+     *             if the channel is closed.
+     * @throws IndexOutOfBoundsException
+     *             if {@code offset < 0} or {@code length < 0}, or if
+     *             {@code offset + length} is greater than the size of
+     *             {@code buffers}.
+     * @throws IOException
+     *             if another I/O error occurs; details are in the message.
+     * @throws NonWritableChannelException
+     *             if the channel has not been opened in a mode that permits
+     *             writing.
+     */
+    Write(
+        [in] ArrayOf<IByteBuffer*>* buffers,
+        [out] Int64* ret);
+
+      /**
+     * Attempts to write all <code>remaining()</code> bytes from {@code length}
+     * byte buffers, in order, starting at {@code buffers[offset]}. The number
+     * of bytes actually written is returned.
+     * <p>
+     * If a write operation is in progress, subsequent threads will block until
+     * the write is completed and then contend for the ability to write.
+     *
+     * @param buffers
+     *            the array of byte buffers that is the source for bytes written
+     *            to the channel.
+     * @param offset
+     *            the index of the first buffer in {@code buffers }to get bytes
+     *            from.
+     * @param length
+     *            the number of buffers to get bytes from.
+     * @return the number of bytes actually written.
+     * @throws AsynchronousCloseException
+     *             if the channel is closed by another thread during this write
+     *             operation.
+     * @throws ClosedByInterruptException
+     *             if another thread interrupts the calling thread while the
+     *             operation is in progress. The interrupt state of the calling
+     *             thread is set and the channel is closed.
+     * @throws ClosedChannelException
+     *             if the channel is closed.
+     * @throws IndexOutOfBoundsException
+     *             if {@code offset < 0} or {@code length < 0}, or if
+     *             {@code offset + length} is greater than the size of
+     *             {@code buffers}.
+     * @throws IOException
+     *             if another I/O error occurs; details are in the message.
+     * @throws NonWritableChannelException
+     *             if the channel was not opened for writing.
+     */
+    Write(
+        [in] ArrayOf<IByteBuffer*>* buffers,
+        [in] Int32 offset,
+        [in] Int32 length,
+        [out] Int64* ret);
+    }
+
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

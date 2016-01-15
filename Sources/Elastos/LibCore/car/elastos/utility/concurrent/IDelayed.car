@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+
+    /**
+     * @Involve
+     * interface IComparable;
+     */
+    interface IDelayed {
+        /**
+         * Returns the remaining delay associated with this object, in the
+         * given time unit.
+         *
+         * @param unit the time unit
+         * @return the remaining delay; zero or negative values indicate
+         * that the delay has already elapsed
+         */
+        GetDelay(
+            [in] ITimeUnit* unit,
+            [out] Int64* value);
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

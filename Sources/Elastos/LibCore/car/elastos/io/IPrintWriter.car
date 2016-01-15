@@ -1,0 +1,303 @@
+
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     *Wraps either an existing OutputStream or an existing Writer and provides convenience methods for
+     *printing common data types in a human readable format. No IOException is thrown by this class.
+     *Instead, callers should use checkError() to see if a problem has occurred in this writer.
+     *
+     *@implements Elastos.IO.IWriter
+     *
+     */
+
+     /**
+     * @Involve
+     * interface Elastos.Core.IAppendable;
+     * interface IWriter;
+     */
+
+    [deprecated]
+    interface IPrintWriter {
+        /**
+         * Formats args according to the format string format, and writes the result
+         * to this stream. This method uses the user's default locale.
+         * See "<a href="../util/Locale.html#default_locale">Be wary of the default locale</a>".
+         * If automatic flushing is enabled then the buffer is flushed as well.
+         *
+         * @param format the format string (see {@sa java.util.Formatter#format})
+         * @param args
+         *            the list of arguments passed to the formatter. If there are
+         *            more arguments than required by format,
+         *            additional arguments are ignored.
+         * @return this writer.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalFormatException | if the format string is illegal or incompatible with the
+         *             arguments, if there are not enough arguments or if any other
+         *             error regarding the format string or arguments is detected.
+         * NullPointerException | if format == null
+         */
+        Format(
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args);
+
+        /**
+         * Writes a string formatted by an intermediate Formatter to the
+         * target using the specified locale, format string and arguments. If
+         * automatic flushing is enabled then this writer is flushed.
+         *
+         * @param l
+         *            the locale used in the method. No localization will be applied
+         *            if l is null.
+         * @param format the format string (see {@sa java.util.Formatter#format})
+         * @param args
+         *            the list of arguments passed to the formatter. If there are
+         *            more arguments than required by format,
+         *            additional arguments are ignored.
+         * @return this writer.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalFormatException | if the format string is illegal or incompatible with the
+         *                          arguments, if there are not enough arguments or if any other
+         *                          error regarding the format string or arguments is detected.
+         * NullPointerException  |  if format == null
+         */
+        Format(
+            [in] ILocale* l,
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args);
+
+        /**
+         * Prints a formatted string. The behavior of this method is the same as
+         * this writer's #format(String, Object...) method.
+         *
+         * <p>The Locale used is the user's default locale.
+         * See "<a href="../util/Locale.html#default_locale">Be wary of the default locale</a>".
+         *
+         * @param format the format string (see {@sa java.util.Formatter#format})
+         * @param args
+         *            the list of arguments passed to the formatter. If there are
+         *            more arguments than required by format,
+         *            additional arguments are ignored.
+         * @return this writer.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalFormatException | if the format string is illegal or incompatible with the
+         *                          arguments, if there are not enough arguments or if any other
+         *                          error regarding the format string or arguments is detected.
+         * NullPointerException  |  if format == null
+         */
+        Printf(
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args);
+
+        /**
+         * Prints a formatted string. The behavior of this method is the same as
+         * this writer's #format(Locale, String, Object...) method.
+         *
+         * @param l
+         *            the locale used in the method. No localization will be applied
+         *            if l is null.
+         * @param format the format string (see {@sa java.util.Formatter#format})
+         * @param args
+         *            the list of arguments passed to the formatter. If there are
+         *            more arguments than required by format,
+         *            additional arguments are ignored.
+         * @return this writer.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalFormatException | if the format string is illegal or incompatible with the
+         *                          arguments, if there are not enough arguments or if any other
+         *                          error regarding the format string or arguments is detected.
+         * NullPointerException  |  if format == null
+         */
+        Printf(
+            [in] ILocale* l,
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args);
+
+        /**
+         * Prints the string representation of the specified character array
+         * to the target.
+         *
+         * @param charArray
+         *            the character array to print to the target.
+         * @see #print(String)
+         */
+        Print(
+            [in] ArrayOf<Char32>* charArray);
+
+        /**
+         * Prints the string representation of the specified character to the
+         * target.
+         *
+         * @param ch
+         *            the character to print to the target.
+         * @see #print(String)
+         */
+        PrintChar(
+            [in] Char32 ch);
+
+        /**
+         * Prints the string representation of the specified double to the target.
+         *
+         * @param dnum
+         *            the double value to print to the target.
+         * @see #print(String)
+         */
+        Print(
+            [in] Double dnum);
+
+        /**
+         * Prints the string representation of the specified float to the target.
+         *
+         * @param fnum
+         *            the float value to print to the target.
+         * @see #print(String)
+         */
+        Print(
+            [in] Float fnum);
+
+        /**
+         * Prints the string representation of the specified integer to the target.
+         *
+         * @param inum
+         *            the integer value to print to the target.
+         * @see #print(String)
+         */
+        Print(
+            [in] Int32 inum);
+
+        /**
+         * Prints the string representation of the specified long to the target.
+         *
+         * @param lnum
+         *            the long value to print to the target.
+         * @see #print(String)
+         */
+        Print(
+            [in] Int64 lnum);
+
+        /**
+         * Prints the string representation of the specified object to the target.
+         *
+         * @param obj
+         *            the object to print to the target.
+         * @see #print(String)
+         */
+        Print(
+            [in] IInterface* obj);
+
+        /**
+         * Prints a string to the target. The string is converted to an array of
+         * bytes using the encoding chosen during the construction of this writer.
+         * The bytes are then written to the target with write(int).
+         * <p>
+         * If an I/O error occurs, this writer's error flag is set to true.
+         *
+         * @param str
+         *            the string to print to the target.
+         * @see #write(int)
+         */
+        Print(
+            [in] String str);
+
+        /**
+         * Prints the string representation of the specified boolean to the target.
+         *
+         * @param bool
+         *            the boolean value to print the target.
+         * @see #print(String)
+         */
+        Print(
+            [in] Boolean result);
+
+        /**
+         * Prints a newline. Flushes this writer if the autoFlush flag is set to true.
+         */
+        Println();
+
+        /**
+         * Prints the string representation of the character array chars followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         */
+        Println(
+            [in] ArrayOf<Char32>* chars);
+
+        /**
+         * Prints the string representation of the char c followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         */
+        PrintCharln(
+            [in] Char32 c);
+
+        /**
+         * Prints the string representation of the double d followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         */
+        Println(
+            [in] Double d);
+
+        /**
+         * Prints the string representation of the float f followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         */
+        Println(
+            [in] Float f);
+
+        /**
+         * Prints the string representation of the int i followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         */
+        Println(
+            [in] Int32 i);
+
+        /**
+         * Prints the string representation of the long l followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         */
+        Println(
+            [in] Int64 l);
+
+        /**
+         * Prints the string representation of the object o, or "null,
+         * followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         */
+        Println(
+            [in] IInterface* obj);
+
+        /**
+         * Prints the string representation of the string s followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         *
+         * <p>The string is converted to an array of bytes using the
+         * encoding chosen during the construction of this writer. The bytes are
+         * then written to the target with write(int). Finally, this writer
+         * is flushed if the autoFlush flag is set to true.
+         *
+         * <p>If an I/O error occurs, this writer's error flag is set to true.
+         */
+        Println(
+            [in] String str);
+
+        /**
+         * Prints the string representation of the boolean b followed by a newline.
+         * Flushes this writer if the autoFlush flag is set to true.
+         */
+        Println(
+            [in] Boolean b);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

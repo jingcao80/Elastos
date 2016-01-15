@@ -1,0 +1,37 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Logging {
+    /**
+     * An error reporting facility for {@link Handler} implementations to record any
+     * error that may happen during logging. {@code Handlers} should report errors
+     * to an {@code ErrorManager}, instead of throwing exceptions, which would
+     * interfere with the log issuer's execution.
+     */
+    interface IErrorManager {
+        /**
+         * Reports an error using the given message, exception and error code. This
+         * implementation will write out the message to {@link System#err} on the
+         * first call and all subsequent calls are ignored. A subclass of this class
+         * should override this method.
+         *
+         * @param message
+         *            the error message, which may be {@code null}.
+         * @param exception
+         *            the exception associated with the error, which may be
+         *            {@code null}.
+         * @param errorCode
+         *            the error code that identifies the type of error; see the
+         *            constant fields of this class for possible values.
+         */
+        Error(
+            [in] String message,
+            [in] ECode exception,
+            [in] Int32 errorCode);
+    }
+
+    } // namespace Logging
+    } // namespace Utility
+    } // namespace Elastos
+}

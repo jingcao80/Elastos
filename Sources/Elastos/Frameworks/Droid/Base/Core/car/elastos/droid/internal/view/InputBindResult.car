@@ -1,0 +1,40 @@
+module
+{
+    interface Elastos.Droid.View.IInputChannel;
+    interface Elastos.Droid.Internal.View.IIInputMethodSession;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    /**
+     * Bundle of information returned by input method manager about a successful
+     * binding to an input method.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IInputBindResult {
+        GetMethod(
+            [out] IIInputMethodSession** method);
+
+        GetChannel(
+            [out] IInputChannel** channel);
+
+        GetId(
+            [out] String* id);
+
+        GetSequence(
+            [out] Int32* sequence);
+
+        GetUserActionNotificationSequenceNumber(
+            [out] Int32* userActionNotificationSequenceNumber);
+    }
+
+    }//namespace View
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

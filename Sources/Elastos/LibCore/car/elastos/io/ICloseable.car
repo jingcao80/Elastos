@@ -1,0 +1,26 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * An {AutoCloseable} whose close method may throw an IOException.
+     *
+     * @sa IOException
+     */
+    interface ICloseable {
+        /**
+         * Closes the object and release any system resources it holds. If the
+         * object has already been closed, then invoking this method has no effect.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if any error occurs when closing the object.
+         */
+        Close();
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

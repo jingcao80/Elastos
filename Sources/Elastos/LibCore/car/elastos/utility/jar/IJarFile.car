@@ -1,0 +1,53 @@
+
+module
+{
+    interface Elastos.Utility.Jar.IJarEntry;
+    interface Elastos.Utility.Jar.IManifest;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    /**
+     * @Involve
+     * interface IZipConstants;
+     * interface IZipFile;
+     */
+    interface IJarFile {
+        /**
+        * The MANIFEST file name.
+        */
+        const String MANIFEST_NAME = "META-INF/MANIFEST.MF";
+
+        /**
+         * Return the {@code JarEntry} specified by its name or {@code null} if no
+         * such entry exists.
+         *
+         * @param name
+         *            the name of the entry in the JAR file.
+         * @return the JAR entry defined by the name.
+         */
+        GetJarEntry(
+            [in] String name,
+            [out] IJarEntry** jarEntry);
+
+        /**
+        * Returns the {@code Manifest} object associated with this {@code JarFile}
+        * or {@code null} if no MANIFEST entry exists.
+        *
+        * @return the MANIFEST.
+        * @throws IOException
+        *             if an error occurs reading the MANIFEST file.
+        * @throws IllegalStateException
+        *             if the jar file is closed.
+        * @see Manifest
+        */
+
+        GetManifest(
+            [out] IManifest** manifest);
+    }
+
+    } //Jar
+    } //Utility
+    } //Elastos
+}

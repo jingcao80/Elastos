@@ -1,0 +1,46 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Http {
+    namespace Multipart {
+
+    /**
+     * This class implements a part of a Multipart post object that
+     * consists of a file.
+     *
+     * @author <a href="mailto:mattalbright@yahoo.com">Matthew Albright</a>
+     * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
+     * @author <a href="mailto:adrian@ephox.com">Adrian Sutton</a>
+     * @author <a href="mailto:becke@u.washington.edu">Michael Becke</a>
+     * @author <a href="mailto:mdiggory@latte.harvard.edu">Mark Diggory</a>
+     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+     * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 2.0
+     *
+     */
+    /**
+     * @Involve
+     * interface IPart
+     * interface IPartBase
+     */
+    [local]
+    interface IFilePart {
+        /** Default content encoding of file attachments. */
+        const String DEFAULT_CONTENT_TYPE = "application/octet-stream";
+
+        /** Default charset of file attachments. */
+        const String DEFAULT_CHARSET = "ISO-8859-1";
+
+        /** Default transfer encoding of file attachments. */
+        const String DEFAULT_TRANSFER_ENCODING = "binary";
+    }
+
+    } // namespace Multipart
+    } // namespace Http
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

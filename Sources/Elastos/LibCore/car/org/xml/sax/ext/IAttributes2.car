@@ -1,0 +1,109 @@
+module
+{
+    namespace Org {
+    namespace Xml {
+    namespace Sax {
+    namespace Ext {
+
+
+    /**
+     * SAX2 extension to augment the per-attribute information
+     * provided though {@link Attributes}.
+     * If an implementation supports this extension, the attributes
+     * provided in {@link org.xml.sax.ContentHandler#startElement
+     * ContentHandler.startElement() } will implement this interface,
+     * and the <em>http://xml.org/sax/features/use-attributes2</em>
+     * feature flag will have the value <em>true</em>.
+     *
+     * <blockquote>
+     * <em>This module, both source code and documentation, is in the
+     * Public Domain, and comes with <strong>NO WARRANTY</strong>.</em>
+     * </blockquote>
+     *
+     * <p> XMLReader implementations are not required to support this
+     * information, and it is not part of core-only SAX2 distributions.</p>
+     *
+     * <p>Note that if an attribute was defaulted (<em>!isSpecified()</em>)
+     * it will of necessity also have been declared (<em>isDeclared()</em>)
+     * in the DTD.
+     * Similarly if an attribute's type is anything except CDATA, then it
+     * must have been declared.
+     * </p>
+     *
+     * @since SAX 2.0 (extensions 1.1 alpha)
+     * @author David Brownell
+     * @version TBS
+     */
+    /**
+      * @Involve
+      * interface Org.Xml.Sax.IAttributes;
+      */
+    interface IAttributes2 {
+
+        /*
+         * Returns the current value of the attribute's "declared" flag.
+         */
+        IsDeclared(
+            [in] Int32 index,
+            [out] Boolean* isDeclared);
+
+        /*
+         * Returns the current value of the attribute's "declared" flag.
+         */
+        IsDeclared(
+            [in] String uri,
+            [in] String localName,
+            [out] Boolean* isDeclared);
+
+        /*
+         * Returns the current value of the attribute's "declared" flag.
+         */
+        IsDeclared(
+            [in] String qName,
+            [out] Boolean* isDeclared);
+
+        /**
+         * Returns the current value of an attribute's "specified" flag.
+         *
+         * @param index The attribute index (zero-based).
+         * @return current flag value
+         * @exception java.lang.ArrayIndexOutOfBoundsException When the
+         *            supplied index does not identify an attribute.
+         */
+        IsSpecified(
+            [in] Int32 index,
+            [out] Boolean* isSpecified);
+
+        /**
+         * Returns the current value of an attribute's "specified" flag.
+         *
+         * @param uri The Namespace URI, or the empty string if
+         *        the name has no Namespace URI.
+         * @param localName The attribute's local name.
+         * @return current flag value
+         * @exception java.lang.IllegalArgumentException When the
+         *            supplied names do not identify an attribute.
+         */
+        IsSpecified(
+            [in] String uri,
+            [in] String localName,
+            [out] Boolean* isSpecified);
+
+        /**
+         * Returns the current value of an attribute's "specified" flag.
+         *
+         * @param qName The XML qualified (prefixed) name.
+         * @return current flag value
+         * @exception java.lang.IllegalArgumentException When the
+         *            supplied name does not identify an attribute.
+         */
+        IsSpecified(
+            [in] String qName,
+            [out] Boolean* isSpecified);
+    }
+
+    } // namespace Ext
+    } // namespace Sax
+    } // namespace Xml
+    } // namespace Org
+}

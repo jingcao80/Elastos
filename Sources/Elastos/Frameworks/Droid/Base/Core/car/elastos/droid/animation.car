@@ -1,0 +1,104 @@
+
+module
+{
+    merge("animation/Animator.car");
+    merge("animation/AnimatorInflater.car");
+    merge("animation/AnimatorSet.car");
+    merge("animation/Keyframe.car");
+    merge("animation/Keyframes.car");
+    merge("animation/PathKeyframes.car");
+    merge("animation/KeyframeSet.car");
+    merge("animation/TypeEvaluator.car");
+    merge("animation/TypeConverter.car");
+    merge("animation/BidirectionalTypeConverter.car");
+    merge("animation/TimeInterpolator.car");
+    merge("animation/ValueAnimator.car");
+    merge("animation/TimeAnimator.car");
+    merge("animation/LayoutTransition.car");
+    merge("animation/ObjectAnimator.car");
+    merge("animation/PropertyValuesHolder.car");
+    merge("animation/StateListAnimator.car");
+
+    using interface Elastos.Core.ICloneable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Animation {
+
+    class CAnimatorSet {
+        interface IAnimatorSet;
+        interface IAnimator;
+        interface ICloneable;
+    }
+
+    class CAnimatorSetBuilder {
+        constructor(
+            [in] IAnimatorSet* host,
+            [in] IAnimator* anim);
+
+        interface IAnimatorSetBuilder;
+    }
+
+    class CArgbEvaluator {
+        interface IArgbEvaluator;
+        interface ITypeEvaluator;
+    }
+
+    class CFloatEvaluator {
+        interface IFloatEvaluator;
+        interface ITypeEvaluator;
+    }
+
+    class CInt32Evaluator {
+        interface IInt32Evaluator;
+        interface ITypeEvaluator;
+    }
+
+    class CLayoutTransition {
+        constructor();
+
+        interface ILayoutTransition;
+    }
+
+    singleton class CKeyframeHelper {
+        interface IKeyframeHelper;
+    }
+
+    class CObjectAnimator {
+        constructor();
+
+        interface IObjectAnimator;
+        interface IValueAnimator;
+        interface IAnimator;
+        interface ICloneable;
+    }
+
+    singleton class CObjectAnimatorHelper {
+        interface IObjectAnimatorHelper;
+    }
+
+    singleton class CPropertyValuesHolderHelper {
+        interface IPropertyValuesHolderHelper;
+    }
+
+    class CTimeAnimator {
+        interface ITimeAnimator;
+        interface IValueAnimator;
+        interface IAnimator;
+        interface ICloneable;
+    }
+
+    class CValueAnimator {
+        interface IValueAnimator;
+        interface IAnimator;
+        interface ICloneable;
+    }
+
+    singleton class CValueAnimatorHelper {
+        interface IValueAnimatorHelper;
+    }
+
+    } // namespace Animation
+    } // namepsace Droid
+    } // namespace Elastos
+}

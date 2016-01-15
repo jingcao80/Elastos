@@ -1,0 +1,59 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * Represents a request for HTTP authentication. Instances of this class are
+     * created by the WebView and passed to
+     * {@link WebViewClient#onReceivedHttpAuthRequest}. The host application must
+     * call either {@link #proceed} or {@link #cancel} to set the WebView's
+     * response to the request.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Os.IHandler
+     */
+    interface IHttpAuthHandler {
+        /**
+         * Gets whether the credentials stored for the current host (i.e. the host
+         * for which {@link WebViewClient#onReceivedHttpAuthRequest} was called)
+         * are suitable for use. Credentials are not suitable if they have
+         * previously been rejected by the server for the current request.
+         *
+         * @return whether the credentials are suitable for use
+         * @see WebView#getHttpAuthUsernamePassword
+         */
+        UseHttpAuthUsernamePassword(
+            [out] Boolean* result);
+
+        /**
+         * Instructs the WebView to cancel the authentication request.
+         */
+        Cancel();
+
+        /**
+         * Instructs the WebView to proceed with the authentication with the given
+         * credentials. Credentials for use with this method can be retrieved from
+         * the WebView's store using {@link WebView#getHttpAuthUsernamePassword}.
+         */
+        Proceed(
+            [in] String username,
+            [in] String password);
+
+        /**
+         * Gets whether the prompt dialog should be suppressed.
+         *
+         * @return whether the prompt dialog should be suppressed
+         * @hide
+         */
+        SuppressDialog(
+            [out] Boolean* result);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

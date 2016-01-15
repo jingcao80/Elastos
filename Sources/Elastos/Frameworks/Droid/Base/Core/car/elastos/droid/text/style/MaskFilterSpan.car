@@ -1,0 +1,25 @@
+module
+{
+    interface Elastos.Droid.Graphics.IMaskFilter;
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * @Involve
+     * interface IUpdateAppearance
+     * interface ICharacterStyle
+     */
+    interface IMaskFilterSpan {
+        GetMaskFilter(
+            [out] IMaskFilter** ret);
+    }
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

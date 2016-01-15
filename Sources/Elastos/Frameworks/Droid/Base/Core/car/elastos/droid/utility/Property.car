@@ -1,0 +1,78 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    [local]
+    interface IProperty {
+
+        IsReadOnly(
+            [out] Boolean* readOnly);
+
+        Set(
+            [in] IInterface* obj,
+            [in] IInterface* value);
+
+        Get(
+            [in] IInterface* obj,
+            [out] IInterface** rst);
+
+        GetName(
+            [out] String* name);
+
+        GetType(
+            [out] ClassID* id);
+
+        IsWriteOnly(
+            [out] Boolean* writeOnly);
+
+        ForbiddenOperate(
+            [out] Boolean* forbidden);
+    }
+
+    [local]
+    interface IPropertyHelper {
+        Of(
+            [in] ClassID clsId,
+            [in] CarDataType dataType,
+            [in] String name,
+            [out] IProperty** property);
+
+    }
+
+    /**
+     * @Involve
+     * interface IProperty
+     */
+    interface IReflectiveProperty {
+    }
+
+    /**
+     * @Involve
+     * interface IProperty
+     */
+    interface IInt32Property {
+
+        SetValue(
+            [in] IInterface* obj,
+            [in] Int32 value);
+    }
+
+    /**
+     * @Involve
+     * interface IProperty
+     */
+    interface IFloatProperty {
+
+        SetValue(
+            [in] IInterface* obj,
+            [in] Float value);
+    }
+
+    } // namespace Utility
+    } // namepsace Droid
+    } // namespace Elastos
+}

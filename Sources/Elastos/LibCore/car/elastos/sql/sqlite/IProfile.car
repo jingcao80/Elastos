@@ -1,0 +1,23 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    interface IProfile {
+        /**
+         * Callback to profile (ie log) one SQL statement
+         * with its estimated execution time.
+         *
+         * @param stmt SQL statement string
+         * @param est  estimated execution time in milliseconds.
+         */
+        Profile(
+            [in] String stmt,
+            [in] Int64 est);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

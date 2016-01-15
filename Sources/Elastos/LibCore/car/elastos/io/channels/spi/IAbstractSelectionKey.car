@@ -1,0 +1,25 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+    namespace Spi {
+
+    /**
+     * {@code AbstractSelectionKey} is the base implementation class for selection keys.
+     * It implements validation and cancellation methods.
+     */
+    /**
+     * @Involve
+     * interface Elastos.IO.Channels.ISelectionKey;
+     */
+    interface IAbstractSelectionKey {
+    } // end interface
+
+    } // namespace Spi
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

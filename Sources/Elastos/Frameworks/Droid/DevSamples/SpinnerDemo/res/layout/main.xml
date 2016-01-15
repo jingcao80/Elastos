@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    >
+    <Spinner android:id="@+id/spinner"
+         android:layout_height="wrap_content"
+         android:layout_width="fill_parent"/>
+
+
+    <RadioGroup
+        android:id="@+id/radioSex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <RadioButton
+            android:id="@+id/radioMale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Man-男"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/radioFemale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Women-女" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/toastButton"
+        android:layout_width="200px"
+        android:layout_height="wrap_content"
+        android:text="Show Toast" />
+
+    <Button
+        android:id="@+id/hideButton"
+        android:layout_width="200px"
+        android:layout_height="wrap_content"
+        android:text="Hide Toast" />
+</LinearLayout>

@@ -1,0 +1,13 @@
+TARGET_NAME= Eunit
+TARGET_TYPE= lib
+
+VPATH := $(MAKEDIR)/../eunit:$(MAKEDIR)/../eunit/framework:$(MAKEDIR)/../eunit/runner:$(MAKEDIR)/../eunit/textui
+
+EXPORT_LIBRARY= 1
+
+IMPORTS = Eunit.eco
+
+SOURCES = BaseTestRunner.cpp
+SOURCES += ResultPrinter.cpp
+SOURCES += Assert.cpp
+SOURCES += TestCase.cpp

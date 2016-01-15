@@ -1,0 +1,45 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    [deprecated]
+    interface ICallback {
+        /**
+         * Reports column names of the query result.
+         * This method is invoked first (and once) when
+         * the SQLite engine returns the result set.<BR><BR>
+         *
+         * @param coldata string array holding the column names
+         */
+        Columns(
+            [in] ArrayOf<String> * coldata);
+
+        /**
+         * Reports type names of the columns of the query result.
+         * This is available from SQLite 2.6.0 on and needs
+         * the PRAGMA show_datatypes to be turned on.<BR><BR>
+         *
+         * @param types string array holding column types
+         */
+        Types(
+            [in] ArrayOf<String> * types);
+
+        /**
+         * Reports row data of the query result.
+         * This method is invoked for each row of the
+         * result set. If true is returned the running
+         * SQLite query is aborted.<BR><BR>
+         *
+         * @param rowdata string array holding the column values of the row
+         */
+        Newrow(
+            [in] ArrayOf<String> * rowdata,
+            [out] Boolean* value);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

@@ -1,0 +1,37 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Bundle of customized scan settings
+     *
+     * @see WifiManager#startCustomizedScan
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IScanSettings {
+        /** channel set to scan. this can be null or empty, indicating a full scan */
+        GetChannelSet(
+            [out] ICollection** result);
+
+        SetChannelSet(
+            [in] ICollection* channelSet);
+
+        /** check for validity */
+        IsValid(
+            [out] Boolean* result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

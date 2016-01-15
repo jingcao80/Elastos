@@ -1,0 +1,90 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IHashMap;
+
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * Implemented by the top-level decor layout for a window. DecorContentParent offers
+     * entry points for a number of title/window decor features.
+     */
+     [local]
+    interface IDecorContentParent {
+        SetWindowCallback(
+            [in] IWindowCallback* cb);
+
+        SetWindowTitle(
+            [in] ICharSequence* title);
+
+        GetTitle(
+            [out] ICharSequence** title);
+
+        InitFeature(
+            [in] Int32 windowFeature);
+
+        SetUiOptions(
+            [in] Int32 uiOptions);
+
+        HasIcon(
+            [out] Boolean* hasIcon);
+
+        HasLogo(
+            [out] Boolean* hasLogo);
+
+        SetIcon(
+            [in] Int32 resId);
+
+        SetIcon(
+            [in] IDrawable* d);
+
+        SetLogo(
+            [in] Int32 resId);
+
+        CanShowOverflowMenu(
+            [out] Boolean* canShowOverflowMen);
+
+        IsOverflowMenuShowing(
+            [out] Boolean* isOverflowMenuShow);
+
+        IsOverflowMenuShowPending(
+            [out] Boolean* isOverflowMenuShow);
+
+        ShowOverflowMenu(
+            [out] Boolean* showOverflowMenu);
+
+        HideOverflowMenu(
+            [out] Boolean* hideOverflowMenu);
+
+        SetMenuPrepared();
+
+        SetMenu(
+            [in] IMenu* menu,
+            [in] IMenuPresenterCallback* cb);
+
+        SaveToolbarHierarchyState(
+            [in] IHashMap* toolbarStates);
+
+        RestoreToolbarHierarchyState(
+            [in] IHashMap* toolbarStates);
+
+        DismissPopups();
+
+    }
+
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}

@@ -1,0 +1,124 @@
+
+module
+{
+    interface Elastos.Droid.Webkit.IGeolocationPermissions;
+    interface Elastos.Droid.Webkit.IValueCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * A callback interface used by the host application to set the Geolocation
+     * permission state for an origin.
+     */
+    interface IGeolocationPermissionsCallback {
+        /**
+         * Sets the Geolocation permission state for the supplied origin.
+         *
+         * @param origin the origin for which permissions are set
+         * @param allow whether or not the origin should be allowed to use the
+         *              Geolocation API
+         * @param retain whether the permission should be retained beyond the
+         *               lifetime of a page currently being displayed by a
+         *               WebView
+         */
+        Invoke(
+            [in] String origin,
+            [in] Boolean allow,
+            [in] Boolean retain);
+    }
+
+    /**
+     * This class is used to manage permissions for the WebView's Geolocation
+     * JavaScript API.
+     *
+     * Geolocation permissions are applied to an origin, which consists of the
+     * host, scheme and port of a URI. In order for web content to use the
+     * Geolocation API, permission must be granted for that content's origin.
+     *
+     * This class stores Geolocation permissions. An origin's permission state can
+     * be either allowed or denied. This class uses Strings to represent
+     * an origin.
+     *
+     * When an origin attempts to use the Geolocation API, but no permission state
+     * is currently set for that origin,
+     * {@link WebChromeClient#onGeolocationPermissionsShowPrompt(String,GeolocationPermissions.Callback) WebChromeClient.onGeolocationPermissionsShowPrompt()}
+     * is called. This allows the permission state to be set for that origin.
+     *
+     * The methods of this class can be used to modify and interrogate the stored
+     * Geolocation permissions at any time.
+     */
+    // Within WebKit, Geolocation permissions may be applied either temporarily
+    // (for the duration of the page) or permanently. This class deals only with
+    // permanent permissions.
+    interface IGeolocationPermissions {
+        /**
+         * Gets the set of origins for which Geolocation permissions are stored.
+         *
+         * @param callback a {@link ValueCallback} to receive the result of this
+         *                 request. This object's
+         *                 {@link ValueCallback#onReceiveValue(T) onReceiveValue()}
+         *                 method will be invoked asynchronously with a set of
+         *                 Strings containing the origins for which Geolocation
+         *                 permissions are stored.
+         */
+        // Note that we represent the origins as strings. These are created using
+        // WebCore::SecurityOrigin::toString(). As long as all 'HTML 5 modules'
+        // (Database, Geolocation etc) do so, it's safe to match up origins based
+        // on this string.
+        GetOrigins(
+            [in] IValueCallback* callBack);
+
+        /**
+         * Gets the Geolocation permission state for the specified origin.
+         *
+         * @param origin the origin for which Geolocation permission is requested
+         * @param callback a {@link ValueCallback} to receive the result of this
+         *                 request. This object's
+         *                 {@link ValueCallback#onReceiveValue(T) onReceiveValue()}
+         *                 method will be invoked asynchronously with a boolean
+         *                 indicating whether or not the origin can use the
+         *                 Geolocation API.
+         */
+        GetAllowed(
+            [in] String origin,
+            [in] IValueCallback* callBack);
+
+        /**
+         * Clears the Geolocation permission state for the specified origin.
+         *
+         * @param origin the origin for which Geolocation permissions are cleared
+         */
+        Clear(
+            [in] String origin);
+
+        /**
+         * Allows the specified origin to use the Geolocation API.
+         *
+         * @param origin the origin for which Geolocation API use is allowed
+         */
+        Allow(
+            [in] String origin);
+
+        /**
+         * Clears the Geolocation permission state for all origins.
+         */
+        ClearAll();
+    }
+
+    interface IGeolocationPermissionsHelper {
+        /**
+         * Gets the singleton instance of this class. This method cannot be
+         * called before the application instantiates a {@link WebView} instance.
+         *
+         * @return the singleton {@link GeolocationPermissions} instance
+         */
+        GetInstance(
+            [out] IGeolocationPermissions** instance);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

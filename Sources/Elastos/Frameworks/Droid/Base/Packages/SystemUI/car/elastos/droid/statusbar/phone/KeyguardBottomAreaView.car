@@ -1,0 +1,78 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IKeyguardAffordanceView;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IKeyguardIndicationController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IAccessibilityController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IFlashlightController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneStatusBar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
+     * text.
+     */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     * interface IViewOnClickListener
+     * interface IUnlockMethodCacheOnUnlockMethodChangedListener
+     * interface IAccessibilityControllerAccessibilityStateChangedCallback
+     * interface IViewOnLongClickListener
+     */
+    [local]
+    interface IKeyguardBottomAreaView {
+
+        SetActivityStarter(
+            [in] IActivityStarter* activityStarter);
+
+        SetFlashlightController(
+            [in] IFlashlightController* flashlightController);
+
+        SetAccessibilityController(
+            [in] IAccessibilityController* accessibilityController);
+
+        SetPhoneStatusBar(
+            [in] IPhoneStatusBar* phoneStatusBar);
+
+        LaunchCamera();
+
+        LaunchPhone();
+
+        GetPhoneView(
+            [out] IKeyguardAffordanceView** result);
+
+        GetCameraView(
+            [out] IKeyguardAffordanceView** result);
+
+        GetPhonePreview(
+            [out] IView** result);
+
+        GetCameraPreview(
+            [out] IView** result);
+
+        GetLockIcon(
+            [out] IKeyguardAffordanceView** result);
+
+        GetIndicationView(
+            [out] IView** result);
+
+        SetKeyguardIndicationController(
+            [in] IKeyguardIndicationController* keyguardIndicationController);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

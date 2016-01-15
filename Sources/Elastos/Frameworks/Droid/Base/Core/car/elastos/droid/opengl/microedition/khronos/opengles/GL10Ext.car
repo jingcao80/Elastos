@@ -1,0 +1,34 @@
+
+module
+{
+    using interface Elastos.IO.IInt32Buffer;
+
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Opengles {
+
+    /**
+     * @Involve
+     * interface Elastosx.Microedition.Khronos.Opengles.IGL
+     */
+    [deprecated]
+    interface IGL10Ext {
+        glQueryMatrixxOES(
+            [in] ArrayOf<Int32>* mantissa,
+            [in] Int32 mantissaOffset,
+            [in] ArrayOf<Int32>* exponent,
+            [in] Int32 exponentOffset,
+            [out] Int32* matrixxOES);
+
+        glQueryMatrixxOES(
+            [in] IInt32Buffer* mantissa,
+            [in] IInt32Buffer* exponent,
+            [out] Int32* matrixxOES);
+    }
+
+    } // namepsace Opengles
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

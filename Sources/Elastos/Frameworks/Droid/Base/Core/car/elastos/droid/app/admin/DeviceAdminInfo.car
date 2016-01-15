@@ -1,0 +1,233 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IArrayList;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+    using interface Org.Xmlpull.V1.IXmlSerializer;
+
+    interface Elastos.Droid.Utility.IPrinter;
+    interface Elastos.Droid.Content.Pm.IActivityInfo;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Admin {
+
+    /**
+     * This class is used to specify meta information of a device administrator component.
+     */
+    /**
+     * @Invovle
+     * interface IParcelable
+     */
+    [local]
+    interface IDeviceAdminInfo {
+        /**
+         * A type of policy that this device admin can use: device owner meta-policy
+         * for an admin that is designated as owner of the device.
+         *
+         * @hide
+         */
+        const Int32 USES_POLICY_DEVICE_OWNER = -2;
+
+        /**
+         * A type of policy that this device admin can use: profile owner meta-policy
+         * for admins that have been installed as owner of some user profile.
+         *
+         * @hide
+         */
+        const Int32 USES_POLICY_PROFILE_OWNER = -1;
+
+        /**
+         * A type of policy that this device admin can use: limit the passwords
+         * that the user can select, via DevicePolicyManager#setPasswordQuality
+         * and DevicePolicyManager#setPasswordMinimumLength.
+         *
+         * @sa DevicePolicyManager#setPasswordQuality
+         * @sa DevicePolicyManager#setPasswordMinimumLength
+         *
+         * <p>To control this policy, the device admin must have a "limit-password"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_POLICY_LIMIT_PASSWORD = 0;
+
+        /**
+         * A type of policy that this device admin can use: able to watch login
+         * attempts from the user, via DeviceAdminReceiver#ACTION_PASSWORD_FAILED,
+         * DeviceAdminReceiver#ACTION_PASSWORD_SUCCEEDED, and
+         * DevicePolicyManager#getCurrentFailedPasswordAttempts.
+         *
+         * @sa DeviceAdminReceiver#ACTION_PASSWORD_FAILED
+         * @sa DeviceAdminReceiver#ACTION_PASSWORD_SUCCEEDED
+         * @sa DevicePolicyManager#getCurrentFailedPasswordAttempts
+         *
+         * <p>To control this policy, the device admin must have a "watch-login"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_POLICY_WATCH_LOGIN = 1;
+
+        /**
+         * A type of policy that this device admin can use: able to reset the
+         * user's password via DevicePolicyManager#resetPassword.
+         *
+         * @sa DevicePolicyManager#resetPassword
+         *
+         * <p>To control this policy, the device admin must have a "reset-password"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_POLICY_RESET_PASSWORD = 2;
+
+        /**
+         * A type of policy that this device admin can use: able to force the device
+         * to lock via DevicePolicyManager#lockNow or limit the
+         * maximum lock timeout for the device via
+         * DevicePolicyManager#setMaximumTimeToLock.
+         *
+         * @sa DevicePolicyManager#lockNow
+         * @sa DevicePolicyManager#setMaximumTimeToLock
+         *
+         * <p>To control this policy, the device admin must have a "force-lock"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_POLICY_FORCE_LOCK = 3;
+
+        /**
+         * A type of policy that this device admin can use: able to factory
+         * reset the device, erasing all of the user's data, via
+         * DevicePolicyManager#wipeData.
+         *
+         * @sa DevicePolicyManager#wipeData
+         *
+         * <p>To control this policy, the device admin must have a "wipe-data"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_POLICY_WIPE_DATA = 4;
+
+        /**
+         * A type of policy that this device admin can use: able to specify the
+         * device Global Proxy, via DevicePolicyManager#setGlobalProxy.
+         *
+         * @sa DevicePolicyManager#setGlobalProxy
+         *
+         * <p>To control this policy, the device admin must have a "set-global-proxy"
+         * tag in the "uses-policies" section of its meta-data.
+         * @hide
+         */
+        const Int32 USES_POLICY_SETS_GLOBAL_PROXY = 5;
+
+        /**
+         * A type of policy that this device admin can use: force the user to
+         * change their password after an administrator-defined time limit.
+         *
+         * <p>To control this policy, the device admin must have an "expire-password"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_POLICY_EXPIRE_PASSWORD = 6;
+
+        /**
+         * A type of policy that this device admin can use: require encryption of stored data.
+         *
+         * <p>To control this policy, the device admin must have a "encrypted-storage"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_ENCRYPTED_STORAGE = 7;
+
+        /**
+         * A type of policy that this device admin can use: disables use of all device cameras.
+         *
+         * <p>To control this policy, the device admin must have a "disable-camera"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_POLICY_DISABLE_CAMERA = 8;
+
+        /**
+         * A type of policy that this device admin can use: disables use of keyguard widgets.
+         *
+         * <p>To control this policy, the device admin must have a "disable-keyguard-widgets"
+         * tag in the "uses-policies" section of its meta-data.
+         */
+        const Int32 USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9;
+
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+
+        GetPackageName(
+            [out] String* name);
+
+        GetReceiverName(
+            [out] String* name);
+
+        GetActivityInfo(
+            [out] IActivityInfo** info);
+
+        GetComponent(
+            [out] IComponentName** name);
+
+        LoadLabel(
+            [in] IPackageManager* pm,
+            [out] ICharSequence** label);
+
+        LoadDescription(
+            [in] IPackageManager* pm,
+            [out] ICharSequence** description);
+
+        LoadIcon(
+            [in] IPackageManager* pm,
+            [out] IDrawable** icon);
+
+        IsVisible(
+            [out] Boolean* visible);
+
+        UsesPolicy(
+            [in] Int32 policyIdent,
+            [out] Boolean* result);
+
+        GetTagForPolicy(
+            [in] Int32 policyIdent,
+            [out] String* tag);
+
+        GetUsedPolicies(
+            [out] IArrayList** policies);
+
+        ReadPoliciesFromXml(
+            [in] IXmlPullParser* parser);
+
+        WritePoliciesToXml(
+            [in] IXmlSerializer* dest);
+    }
+
+    interface IDeviceAdminInfoPolicyInfo {
+        GetIdent(
+            [out] Int32* ident);
+
+        SetIdent(
+            [in] Int32 ident);
+
+        GetTag(
+            [out] String* tag);
+
+        SetTag(
+            [in] String tag);
+
+        GetLabel(
+            [out] Int32* label);
+
+        SetLabel(
+            [in] Int32 label);
+
+        GetDescription(
+            [out] Int32* description);
+
+        SetDescription(
+            [in] Int32 description);
+    }
+
+    } // namespace Admin
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

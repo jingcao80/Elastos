@@ -1,0 +1,142 @@
+
+module
+{
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    interface IUserInfo {
+        /** 8 bits for user type */
+        const Int32 FLAG_MASK_USER_TYPE = 0x000000FF;
+
+        /**
+         * *************************** NOTE ***************************
+         * These flag values CAN NOT CHANGE because they are written
+         * directly to storage.
+         */
+
+        /**
+         * Primary user. Only one user can have this flag set. Meaning of this
+         * flag TBD.
+         */
+        const Int32 FLAG_PRIMARY = 0x00000001;
+
+        /**
+         * User with administrative privileges. Such a user can create and
+         * delete users.
+         */
+        const Int32 FLAG_ADMIN   = 0x00000002;
+
+        /**
+         * Indicates a guest user that may be transient.
+         */
+        const Int32 FLAG_GUEST   = 0x00000004;
+
+        /**
+         * Indicates the user has restrictions in privileges, in addition to those for normal users.
+         * Exact meaning TBD. For instance, maybe they can't install apps or administer WiFi access pts.
+         */
+        const Int32 FLAG_RESTRICTED = 0x00000008;
+
+        /**
+         * Indicates that this user has gone through its first-time initialization.
+         */
+        const Int32 FLAG_INITIALIZED = 0x00000010;
+
+        /**
+         * Indicates that this user is a profile of another user, for example holding a users
+         * corporate data.
+         */
+        const Int32 FLAG_MANAGED_PROFILE = 0x00000020;
+
+        /**
+         * Indicates that this user is disabled.
+         */
+        const Int32 FLAG_DISABLED = 0x00000040;
+
+        const Int32 NO_PROFILE_GROUP_ID = -1;
+
+        IsPrimary(
+            [out] Boolean* isPrimary);
+
+        IsAdmin(
+            [out] Boolean* isAdmin);
+
+        IsGuest(
+            [out] Boolean* result);
+
+        IsRestricted(
+            [out] Boolean* result);
+
+        IsManagedProfile(
+            [out] Boolean* result);
+
+        IsEnabled(
+            [out] Boolean* result);
+
+        SupportsSwitchTo(
+            [out] Boolean* result);
+
+        GetUserHandle(
+            [out] IUserHandle** userHandle);
+
+        ToString(
+            [out] String* str);
+
+        GetId(
+            [out] Int32* id);
+
+        SetId(
+            [in] Int32 id);
+
+        GetSerialNumber(
+            [out] Int32* serialNumber);
+
+        SetSerialNumber(
+            [in] Int32 serialNumber);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetIconPath(
+            [out] String* iconPath);
+
+        SetIconPath(
+            [in] String iconPath);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        GetCreationTime(
+            [out] Int64* creationTime);
+
+        SetCreationTime(
+            [in] Int64 creationTime);
+
+        GetLastLoggedInTime(
+            [out] Int64* lastLoggedInTime);
+
+        SetLastLoggedInTime(
+            [in] Int64 lastLoggedInTime);
+
+        GetPartial(
+            [out] Boolean* partial);
+
+        SetPartial(
+            [in] Boolean partial);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,134 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IPoint;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Utility.ISize;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Params {
+
+    /**
+     * An immutable class to represent a rectangle {@code (x, y, width, height)} with an additional
+     * weight component.
+     * <p>
+     * The rectangle is defined to be inclusive of the specified coordinates.
+     * </p>
+     * <p>
+     * When used with a {@link CaptureRequest}, the coordinate system is based on the active pixel
+     * array, with {@code (0,0)} being the top-left pixel in the
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE active pixel array}, and
+     * {@code (android.sensor.info.activeArraySize.width - 1,
+     * android.sensor.info.activeArraySize.height - 1)} being the bottom-right pixel in the active pixel
+     * array.
+     * </p>
+     * <p>
+     * The weight must range from {@value #METERING_WEIGHT_MIN} to {@value #METERING_WEIGHT_MAX}
+     * inclusively, and represents a weight for every pixel in the area. This means that a large
+     * metering area with the same weight as a smaller area will have more effect in the metering
+     * result. Metering areas can partially overlap and the camera device will add the weights in the
+     * overlap rectangle.
+     * </p>
+     * <p>
+     * If all rectangles have 0 weight, then no specific metering area needs to be used by the camera
+     * device. If the metering rectangle is outside the used android.scaler.cropRegion returned in
+     * capture result metadata, the camera device will ignore the sections outside the rectangle and
+     * output the used sections in the result metadata.
+     * </p>
+     */
+    interface IMeteringRectangle {
+        /**
+         * The minimum value of valid metering weight.
+         */
+        const Int32 METERING_WEIGHT_MIN = 0;
+
+        /**
+         * The maximum value of valid metering weight.
+         */
+        const Int32 METERING_WEIGHT_MAX = 1000;
+
+        /**
+         * Weights set to this value will cause the camera device to ignore this rectangle.
+         * If all metering rectangles are weighed with 0, the camera device will choose its own metering
+         * rectangles.
+         */
+        const Int32 METERING_WEIGHT_DONT_CARE = 0;
+
+        /**
+         * Return the X coordinate of the left side of the rectangle.
+         *
+         * @return x coordinate >= 0
+         */
+        GetX(
+            [out] Int32* value);
+
+        /**
+         * Return the Y coordinate of the upper side of the rectangle.
+         *
+         * @return y coordinate >= 0
+         */
+        GetY(
+            [out] Int32* value);
+
+        /**
+         * Return the width of the rectangle.
+         *
+         * @return width >= 0
+         */
+        GetWidth(
+            [out] Int32* value);
+
+        /**
+         * Return the height of the rectangle.
+         *
+         * @return height >= 0
+         */
+        GetHeight(
+            [out] Int32* value);
+
+        /**
+         * Return the metering weight of the rectangle.
+         *
+         * @return weight >= 0
+         */
+        GetMeteringWeight(
+            [out] Int32* value);
+
+        /**
+         * Convenience method to create the upper-left (X,Y) coordinate as a {@link Point}.
+         *
+         * @return a new {@code (x,y)} {@link Point} with both x,y >= 0
+         */
+        GetUpperLeftPoint(
+            [out] IPoint** outpoint);
+
+        /**
+         * Convenience method to create the size from this metering rectangle.
+         *
+         * <p>This strips away the X,Y,weight from the rectangle.</p>
+         *
+         * @return a new {@link Size} with non-negative width and height
+         */
+        GetSize(
+            [out] ISize** outsize);
+
+        /**
+         * Convenience method to create a {@link Rect} from this metering rectangle.
+         *
+         * <p>This strips away the weight from the rectangle.</p>
+         *
+         * @return a new {@link Rect} with non-negative x1, y1, x2, y2
+         */
+        GetRect(
+            [out] IRect** outrect);
+    }
+
+    } // namespace Params
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

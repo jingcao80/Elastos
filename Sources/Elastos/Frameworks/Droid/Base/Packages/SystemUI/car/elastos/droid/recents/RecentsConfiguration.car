@@ -1,0 +1,103 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Packages.SystemUI.Recents.Misc.ISystemServicesProxy;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+
+    /** A static Recents configuration for the current context
+     * NOTE: We should not hold any references to a Context from a static instance */
+    interface IRecentsConfiguration {
+
+        /** Updates the state, given the specified context */
+        Update(
+            [in] IContext* context);
+
+        /** Updates the system insets */
+        UpdateSystemInsets(
+            [in] IRect* insets);
+
+        /** Updates the search bar app widget */
+        UpdateSearchBarAppWidgetId(
+            [in] IContext* context,
+            [in] Int32 appWidgetId);
+
+        /** Updates the states that need to be re-read whenever we re-initialize. */
+        UpdateOnReinitialize(
+            [in] IContext* context,
+            [in] ISystemServicesProxy* ssp);
+
+        /** Called when the configuration has changed, and we want to reset any configuration specific
+         * members. */
+        UpdateOnConfigurationChange();
+
+        /** Returns whether the search bar app widget exists. */
+        HasSearchBarAppWidget(
+            [out] Boolean* result);
+
+        /** Returns whether the status bar scrim should be animated when shown for the first time. */
+        ShouldAnimateStatusBarScrim(
+            [out] Boolean* result);
+
+        /** Returns whether the status bar scrim should be visible. */
+        HasStatusBarScrim(
+            [out] Boolean* result);
+
+        /** Returns whether the nav bar scrim should be animated when shown for the first time. */
+        ShouldAnimateNavBarScrim(
+            [out] Boolean* result);
+
+        /** Returns whether the nav bar scrim should be visible. */
+        HasNavBarScrim(
+            [out] Boolean* result);
+
+        /** Returns whether the current layout is horizontal. */
+        HasHorizontalLayout(
+            [out] Boolean* result);
+
+        /**
+         * Returns the task stack bounds in the current orientation. These bounds do not account for
+         * the system insets.
+         */
+        GetTaskStackBounds(
+            [in] Int32 windowWidth,
+            [in] Int32 windowHeight,
+            [in] Int32 topInset,
+            [in] Int32 rightInset,
+            [in] IRect* taskStackBounds);
+
+        /**
+         * Returns the search bar bounds in the current orientation.  These bounds do not account for
+         * the system insets.
+         */
+        GetSearchBarBounds(
+            [in] Int32 windowWidth,
+            [in] Int32 windowHeight,
+            [in] Int32 topInset,
+            [in] IRect* searchBarSpaceBounds);
+    }
+
+    interface IRecentsConfigurationHelper {
+
+        /** Updates the configuration to the current context */
+        Reinitialize(
+            [in] IContext* context,
+            [in] ISystemServicesProxy* ssp);
+
+        /** Returns the current recents configuration */
+        GetInstance(
+            [out] IRecentsConfiguration** result);
+    }
+
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

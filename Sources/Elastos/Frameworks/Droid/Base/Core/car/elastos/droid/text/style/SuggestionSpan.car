@@ -1,0 +1,120 @@
+module
+{
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * Holds suggestion candidates for the text enclosed in this span.
+     *
+     * When such a span is edited in an EditText, double tapping on the text enclosed in this span will
+     * display a popup dialog listing suggestion replacement for that text. The user can then replace
+     * the original text by one of the suggestions.
+     *
+     * These spans should typically be created by the input method to provide correction and alternates
+     * for the text.
+     *
+     * @see TextView#isSuggestionsEnabled()
+     *
+     * @Involve
+     * interface IParcelable
+     * interface IParcelableSpan
+     * interface ICharacterStyle
+     */
+    [deprecated, local, parcelable]
+    interface ISuggestionSpan {
+
+        /**
+         * Sets this flag if the suggestions should be easily accessible with few interactions.
+         * This flag should be set for every suggestions that the user is likely to use.
+         */
+        const Int32 FLAG_EASY_CORRECT = 0x0001;
+
+        /**
+         * Sets this flag if the suggestions apply to a misspelled word/text. This type of suggestion is
+         * rendered differently to highlight the error.
+         */
+        const Int32 FLAG_MISSPELLED = 0x0002;
+
+        /**
+         * Sets this flag if the auto correction is about to be applied to a word/text
+         * that the user is typing/composing. This type of suggestion is rendered differently
+         * to indicate the auto correction is happening.
+         */
+        const Int32 FLAG_AUTO_CORRECTION = 0x0004;
+
+        const String ACTION_SUGGESTION_PICKED = "android.text.style.SUGGESTION_PICKED";
+        const String SUGGESTION_SPAN_PICKED_AFTER = "after";
+        const String SUGGESTION_SPAN_PICKED_BEFORE = "before";
+        const String SUGGESTION_SPAN_PICKED_HASHCODE = "hashcode";
+
+        const Int32 SUGGESTIONS_MAX_SIZE = 5;
+
+        /**
+         * @return an array of suggestion texts for this span
+         */
+        GetSuggestions(
+            [out,callee] ArrayOf<String>* ret);
+
+        /**
+         * @return the locale of the suggestions
+         */
+        GetLocale(
+            [out] String* ret);
+
+        /**
+         * @return The name of the class to notify. The class of the original IME package will receive
+         * a notification when the user selects one of the suggestions. The notification will include
+         * the original string, the suggested replacement string as well as the hashCode of this span.
+         * The class will get notified by an intent that has those information.
+         * This is an internal API because only the framework should know the class name.
+         *
+         * @hide
+         */
+        GetNotificationTargetClassName(
+            [out] String* ret);
+
+        GetFlags(
+            [out] Int32* ret);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        //@Override
+        Equals(
+            [in] IInterface* o,
+            [out] Boolean* ret);
+
+        //@Override
+        GetHashCode(
+            [out] Int32* ret);
+
+        /**
+         * @return The color of the underline for that span, or 0 if there is no underline
+         *
+         * @hide
+         */
+        GetUnderlineColor(
+            [out] Int32* ret);
+
+        /**
+         * Notifies a suggestion selection.
+         *
+         * @hide
+         */
+        NotifySelection(
+            [in] IContext* context,
+            [in] String original,
+            [in] Int32 index);
+    }
+
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

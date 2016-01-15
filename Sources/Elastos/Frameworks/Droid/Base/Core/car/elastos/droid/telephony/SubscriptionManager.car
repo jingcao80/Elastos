@@ -1,0 +1,511 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * SubscriptionManager is the application interface to SubscriptionController
+     * and provides information about the current Telephony Subscriptions.
+     *
+     * The android.Manifest.permission.READ_PHONE_STATE to retrieve the information, except
+     * getActiveSubIdList and getActiveSubIdCount for which no permission is needed.
+     *
+     * @hide - to be unhidden
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Provider.IBaseColumns
+     */
+    interface ISubscriptionManager {
+
+
+        /** An invalid phone identifier */
+        /** @hide - to be unhidden */
+        const Int32 INVALID_PHONE_ID = -1000;
+
+        /** Indicates the caller wants the default phone id. */
+        /** @hide - to be unhidden */
+        const Int32 DEFAULT_PHONE_ID = 0x7FFFFFFF;//Integer.MAX_VALUE;
+
+        /** An invalid slot identifier */
+        /** @hide - to be unhidden */
+        const Int32 INVALID_SLOT_ID = -1000;
+
+        /** Indicates the caller wants the default slot id. */
+        /** @hide */
+        const Int32 DEFAULT_SLOT_ID = 0x7FFFFFFF;//Integer.MAX_VALUE;
+
+        /** Indicates the user should be asked which sub to use. */
+        /** @hide */
+        const Int64 ASK_USER_SUB_ID = -1001;
+
+        /** An invalid subscription identifier */
+        const Int64 INVALID_SUB_ID = -1000;
+
+        /** Indicates the caller wants the default sub id. */
+        /** @hide - to be unhidden */
+        const Int64 DEFAULT_SUB_ID = 0x7FFFFFFFFFFFFFFF;//Long.MAX_VALUE;
+
+        /** @hide */
+        const Int32 DEFAULT_INT_VALUE = -100;
+
+        /** @hide */
+        const String DEFAULT_STRING_VALUE = "N/A";
+
+        /** @hide */
+        const Int32 EXTRA_VALUE_NEW_SIM = 1;
+
+        /** @hide */
+        const Int32 EXTRA_VALUE_REMOVE_SIM = 2;
+        /** @hide */
+        const Int32 EXTRA_VALUE_REPOSITION_SIM = 3;
+        /** @hide */
+        const Int32 EXTRA_VALUE_NOCHANGE = 4;
+
+        /** @hide */
+        const String INTENT_KEY_DETECT_STATUS = "simDetectStatus";
+        /** @hide */
+        const String INTENT_KEY_SIM_COUNT = "simCount";
+        /** @hide */
+        const String INTENT_KEY_NEW_SIM_SLOT = "newSIMSlot";
+        /** @hide */
+        const String INTENT_KEY_NEW_SIM_STATUS = "newSIMStatus";
+
+        /**
+         * The ICC ID of a SIM.
+         * <P>Type: TEXT (String)</P>
+         */
+        /** @hide */
+        const String ICC_ID = "icc_id";
+
+        /**
+         * <P>Type: INTEGER (int)</P>
+         */
+        /** @hide */
+        const String SIM_ID = "sim_id";
+
+        /** SIM is not inserted */
+        /** @hide - to be unhidden */
+        const Int32 SIM_NOT_INSERTED = -1;
+
+        /**
+         * TelephonyProvider column name for user displayed name.
+         * <P>Type: TEXT (String)</P>
+         */
+        /** @hide */
+        const String DISPLAY_NAME = "display_name";
+
+        /**
+         * Default name resource
+         * @hide
+         */
+        const Int32 DEFAULT_NAME_RES = 0x0104000e;//com.android.internal.R.string.unknownName;
+
+        /**
+         * TelephonyProvider column name for source of the user displayed name.
+         * <P>Type: INT (int)</P> with one of the NAME_SOURCE_XXXX values below
+         *
+         * @hide
+         */
+        const String NAME_SOURCE = "name_source";
+
+        /**
+         * The name_source is undefined
+         * @hide
+         */
+        const Int32 NAME_SOURCE_UNDEFINDED = -1;
+
+        /**
+         * The name_source is the default
+         * @hide
+         */
+        const Int32 NAME_SOURCE_DEFAULT_SOURCE = 0;
+
+        /**
+         * The name_source is from the SIM
+         * @hide
+         */
+        const Int32 NAME_SOURCE_SIM_SOURCE = 1;
+
+        /**
+         * The name_source is from the user
+         * @hide
+         */
+        const Int32 NAME_SOURCE_USER_INPUT = 2;
+
+        /**
+         * TelephonyProvider column name for the color of a SIM.
+         * <P>Type: INTEGER (int)</P>
+         */
+        /** @hide */
+        const String COLOR = "color";
+
+        /** @hide */
+        const Int32 COLOR_1 = 0;
+
+        /** @hide */
+        const Int32 COLOR_2 = 1;
+
+        /** @hide */
+        const Int32 COLOR_3 = 2;
+
+        /** @hide */
+        const Int32 COLOR_4 = 3;
+
+        /** @hide */
+        const Int32 COLOR_DEFAULT = COLOR_1;
+
+        /**
+         * TelephonyProvider column name for the phone number of a SIM.
+         * <P>Type: TEXT (String)</P>
+         */
+        /** @hide */
+        const String NUMBER = "number";
+
+        /**
+         * TelephonyProvider column name for the number display format of a SIM.
+         * <P>Type: INTEGER (int)</P>
+         */
+        /** @hide */
+        const String DISPLAY_NUMBER_FORMAT = "display_number_format";
+
+        /** @hide */
+        const Int32 DISPLAY_NUMBER_NONE = 0;
+
+        /** @hide */
+        const Int32 DISPLAY_NUMBER_FIRST = 1;
+
+        /** @hide */
+        const Int32 DISPLAY_NUMBER_LAST = 2;
+
+        /** @hide */
+        const Int32 DISLPAY_NUMBER_DEFAULT = DISPLAY_NUMBER_FIRST;
+
+        /**
+         * TelephonyProvider column name for permission for data roaming of a SIM.
+         * <P>Type: INTEGER (int)</P>
+         */
+        /** @hide */
+        const String DATA_ROAMING = "data_roaming";
+
+        /** @hide */
+        const Int32 DATA_ROAMING_ENABLE = 1;
+
+        /** @hide */
+        const Int32 DATA_ROAMING_DISABLE = 0;
+
+        /** @hide */
+        const Int32 DATA_ROAMING_DEFAULT = DATA_ROAMING_DISABLE;
+
+        /**
+         * TelephonyProvider column name for the MCC associated with a SIM.
+         * <P>Type: INTEGER (int)</P>
+         */
+        const String MCC = "mcc";
+
+        /**
+         * TelephonyProvider column name for the MNC associated with a SIM.
+         * <P>Type: INTEGER (int)</P>
+         */
+        const String MNC = "mnc";
+
+    }
+
+    interface ISubscriptionManagerHelper {
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        /**
+         * Get the SubInfoRecord associated with the subId
+         * @param subId The unique SubInfoRecord index in database
+         * @return SubInfoRecord, maybe null
+         * @hide - to be unhidden
+         */
+        GetSubInfoForSubscriber(
+            [in] Int64 subId,
+            [out] ISubInfoRecord** sir);
+
+        /**
+         * Get the SubInfoRecord according to an IccId
+         * @param iccId the IccId of SIM card
+         * @return SubInfoRecord List, maybe empty but not null
+         * @hide
+         */
+        GetSubInfoUsingIccId(
+            [in] String iccId,
+            [out] IList** ids);
+
+        /**
+         * Get the SubInfoRecord according to slotId
+         * @param slotId the slot which the SIM is inserted
+         * @return SubInfoRecord list, maybe empty but not null
+         * @hide - to be unhidden
+         */
+        GetSubInfoUsingSlotId(
+            [in] String slotId,
+            [out] IList** ids);
+
+        /**
+         * Get all the SubInfoRecord(s) in subInfo database
+         * @return List of all SubInfoRecords in database, include those that were inserted before
+         * maybe empty but not null.
+         * @hide
+         */
+        GetAllSubInfoList(
+            [out] IList** ids);
+
+        /**
+         * Get the SubInfoRecord(s) of the currently inserted SIM(s)
+         * @return Array list of currently inserted SubInfoRecord(s) maybe empty but not null
+         * @hide - to be unhidden
+         */
+        GetActiveSubInfoList(
+            [out] IList** ids);
+
+        /**
+         * Get the SUB count of all SUB(s) in subinfo database
+         * @return all SIM count in database, include what was inserted before
+         * @hide
+         */
+        GetAllSubInfoCount(
+            [out] Int32* count);
+
+        /**
+         * Get the count of active SUB(s)
+         * @return active SIM count
+         * @hide
+         */
+        GetActiveSubInfoCount(
+            [out] Int32* count);
+
+        /**
+         * Add a new SubInfoRecord to subinfo database if needed
+         * @param iccId the IccId of the SIM card
+         * @param slotId the slot which the SIM is inserted
+         * @return the URL of the newly created row or the updated row
+         * @hide
+         */
+        AddSubInfoRecord(
+            [in] String iccId,
+            [in] Int32 slotId,
+            [out] IUri** uri);
+
+        /**
+         * Set SIM color by simInfo index
+         * @param color the color of the SIM
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         * @hide
+         */
+        SetColor(
+            [in] Int32 color,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Set display name by simInfo index
+         * @param displayName the display name of SIM card
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         * @hide
+         */
+        SetDisplayName(
+            [in] String displayName,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Set display name by simInfo index with name source
+         * @param displayName the display name of SIM card
+         * @param subId the unique SubInfoRecord index in database
+         * @param nameSource 0: NAME_SOURCE_DEFAULT_SOURCE, 1: NAME_SOURCE_SIM_SOURCE,
+         *                   2: NAME_SOURCE_USER_INPUT, -1 NAME_SOURCE_UNDEFINED
+         * @return the number of records updated or -1 if invalid subId
+         * @hide
+         */
+        SetDisplayName(
+            [in] String displayName,
+            [in] Int64 subId,
+            [in] Int64 nameSource,
+            [out] Int32* result);
+
+        /**
+         * Set phone number by subId
+         * @param number the phone number of the SIM
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         * @hide
+         */
+        SetDisplayNumber(
+            [in] String number,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Set number display format. 0: none, 1: the first four digits, 2: the last four digits
+         * @param format the display format of phone number
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         * @hide
+         */
+        SetDisplayNumberFormat(
+            [in] Int32 format,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Set data roaming by simInfo index
+         * @param roaming 0:Don't allow data when roaming, 1:Allow data when roaming
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         * @hide
+         */
+        SetDataRoaming(
+            [in] Int32 roaming,
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * Get slotId associated with the subscription.
+         * @return slotId as a positive integer or a negative value if an error either
+         * SIM_NOT_INSERTED or INVALID_SLOT_ID.
+         * @hide - to be unhidden
+         */
+        GetSlotId(
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /** @hide */
+        GetSubId(
+            [in] Int32 slotId,
+            [out, callee] ArrayOf<Int64>* result);
+
+        /** @hide */
+        GetPhoneId(
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /**
+         * @return the "system" defaultSubId on a voice capable device this
+         * will be getDefaultVoiceSubId() and on a data only device it will be
+         * getDefaultDataSubId().
+         * @hide
+         */
+        GetDefaultSubId(
+            [out] Int64* result);
+
+        /** @hide */
+        GetDefaultVoiceSubId(
+            [out] Int64* result);
+
+        /** @hide */
+        SetDefaultVoiceSubId(
+            [in] Int64 id);
+
+        /** @hide */
+        GetDefaultVoiceSubInfo(
+            [out] ISubInfoRecord** result);
+
+        /** @hide */
+        GetDefaultVoicePhoneId(
+            [out] Int32* result);
+
+        /**
+         * @return subId of the DefaultSms subscription or the value INVALID_SUB_ID if an error.
+         * @hide - to be unhidden
+         */
+        GetDefaultSmsSubId(
+            [out] Int64* result);
+
+        /** @hide */
+        SetDefaultSmsSubId(
+            [in] Int64 result);
+
+        /** @hide */
+        GetDefaultSmsSubInfo(
+            [out] ISubInfoRecord** result);
+
+        /** @hide */
+        GetDefaultSmsPhoneId(
+            [out] Int32* result);
+
+        /** @hide */
+        GetDefaultDataSubId(
+            [out] Int64* result);
+
+        /** @hide */
+        SetDefaultDataSubId(
+            [in] Int64 result);
+
+        /** @hide */
+        GetDefaultDataSubInfo(
+            [out] ISubInfoRecord** result);
+
+        /** @hide */
+        GetDefaultDataPhoneId(
+            [out] Int32* result);
+
+        /** @hide */
+        ClearSubInfo();
+
+        //FIXME this is vulnerable to race conditions
+        /** @hide */
+        AllDefaultsSelected(
+            [out] Boolean* result);
+
+        /**
+         * If a default is set to subscription which is not active, this will reset that default back to
+         * INVALID_SUB_ID.
+         * @hide
+         */
+        ClearDefaultsForInactiveSubIds();
+
+        /**
+         * @return true if a valid subId else false
+         * @hide - to be unhidden
+         */
+        IsValidSubId(
+            [in] Int64 subId,
+            [out] Boolean* result);
+
+        /** @hide */
+        IsValidSlotId(
+            [in] Int32 slotId,
+            [out] Boolean* result);
+
+        /** @hide */
+        IsValidPhoneId(
+            [in] Int32 phoneId,
+            [out] Boolean* result);
+
+        /** @hide */
+        PutPhoneIdAndSubIdExtra(
+            [in] IIntent* intent,
+            [in] Int32 phoneId);
+
+        /** @hide */
+        PutPhoneIdAndSubIdExtra(
+            [in] IIntent* intent,
+            [in] Int32 phoneId,
+            [in] Int64 subId);
+
+        /**
+         * @return the list of subId's that are active,
+         *         is never null but the length maybe 0.
+         * @hide
+         */
+        GetActiveSubIdList(
+            [out, callee] ArrayOf<Int64>* result);
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

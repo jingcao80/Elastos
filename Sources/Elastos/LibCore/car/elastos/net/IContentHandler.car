@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Net.IURLConnection;
+
+    namespace Elastos {
+    namespace Net {
+
+    [deprecated]
+    interface IContentHandler {
+        /**
+         * Returns the object pointed by the specified URL connection {@code uConn}.
+         *
+         * @param uConn
+         *            URL connection that points to the desired object.
+         * @return object referred by {@code uConn}.
+         * @throws IOException
+         *             if an IO error occurs during the retrieval of the object
+         */
+        GetContent(
+            [in] IURLConnection* uConn,
+            [out] IInterface** obj);
+
+        /**
+         * Returns the object pointed by the specified URL connection {@code uConn}.
+         *
+         * @param uConn
+         *            URL connection that points to the desired object.
+         * @param types
+         *            list of acceptable content types.
+         * @return resource object pointed by this URL or {@code null} if the
+         *         content doesn't match one of the specified content types.
+         * @throws IOException
+         *             if an error occurred while obtaining the content.
+         */
+        // Class arg not generified in the spec.
+        GetContent(
+            [in] IURLConnection* uConn,
+            [in] ArrayOf<InterfaceID> * types,
+            [out] IInterface** obj);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

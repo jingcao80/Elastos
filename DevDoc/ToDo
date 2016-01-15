@@ -1,0 +1,22 @@
+ToDo issues
+===========================
+1, rename INTERFACE_ADDREF/ARRAY_ADDREF/INTERFACE_RELEASE/ARRAY_RELEASE to REFCOUNT_ADDREF/REFCOUNT_RELEASE.
+2, revise cmdef.h and frameworkdef.h, rename cmdef.h to coredef.h
+3, define Object base class
+   Object : public IObject, public ISynchronize, public IWeakReferenceSource, public ElRefBase {}
+    CObject : public Object {}
+4, make car object naked, and revise interface extension
+5, support interface method overload
+6, pthread_key_create(&key, threadDestructor)
+void XXX::threadDestructor(void *st)
+{
+    XXX* const self = static_cast<XXX*>(st);
+    self->Release();
+}
+7, 在AndroidManifest.xml里支持namespace，如 <activity android:name="Elastos.FrameworkTest.App.CPendingIntentStubActivity"
+    android:label="CPendingIntentStubActivity"/>
+8, eco头文件优化, 将类的静态方法定义从.h文件中转移到.cpp文件中, 如Elastos.Droid.Core.h
+9, change BufferOf to ArrayOf, and CString to String? in reflection
+10, review reflection implementation
+11, change IObjectContainer to IList, IVector and etc.
+12, classloader

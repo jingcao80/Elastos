@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * @Involve
+     * interface Elastos.IO.ICloseable
+     */
+    [deprecated]
+    interface IDataSource {
+        /**
+         * Reads data from the data source at the requested position
+         *
+         * @param offset where in the source to read
+         * @param buffer the buffer to read the data into
+         * @param size how many bytes to read
+         * @return the number of bytes read, or -1 if there was an error
+         */
+        ReadAt(
+            [in] Int64 offset,
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 size,
+            [out] Int32* result);
+
+        /**
+         * Gets the size of the data source.
+         *
+         * @return size of data source, or -1 if the length is unknown
+         */
+        GetSize(
+            [out] Int64* result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,26 @@
+module
+{
+    interface Elastos.Droid.Database.Sqlite.ISQLiteDatabase;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+     * An interface to let the apps define the actions to take when the following errors are detected
+     *   database corruption
+     */
+    interface IDatabaseErrorHandler {
+        /**
+         * defines the method to be invoked when database corruption is detected.
+         * @param dbObj the {@link SQLiteDatabase} object representing the database on which corruption
+         * is detected.
+         */
+        OnCorruption(
+            [in] ISQLiteDatabase* dbObj);
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

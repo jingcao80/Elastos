@@ -1,0 +1,5 @@
+
+DIRS += PortingLayer
+DIRS += Core/inc
+DIRS += Library
+DIRS += Core

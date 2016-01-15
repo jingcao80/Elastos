@@ -1,0 +1,79 @@
+
+module
+{
+    interface Elastos.Droid.Animation.IAnimatorUpdateListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Views {
+
+    /* An outline provider that has a clip and outline that can be animated. */
+    /**
+     * @Involve
+     * interface IViewOutlineProvider
+     */
+    interface IAnimateableViewBounds {
+
+        /** Sets the view outline alpha. */
+        SetAlpha(
+            [in] Float alpha);
+
+        /** Animates the top clip. */
+        AnimateClipTop(
+            [in] Int32 top,
+            [in] Int32 duration,
+            [in] IAnimatorUpdateListener* updateListener);
+
+        /** Sets the top clip. */
+        SetClipTop(
+            [in] Int32 top);
+
+        /** Returns the top clip. */
+        GetClipTop(
+            [out] Int32* result);
+
+        /** Animates the right clip. */
+        AnimateClipRight(
+            [in] Int32 right,
+            [in] Int32 duration);
+
+        /** Sets the right clip. */
+        SetClipRight(
+            [in] Int32 right);
+
+        /** Returns the right clip. */
+        GetClipRight(
+            [out] Int32* cr);
+
+        /** Animates the bottom clip. */
+        AnimateClipBottom(
+            [in] Int32 bottom,
+            [in] Int32 duration);
+
+        /** Sets the bottom clip. */
+        SetClipBottom(
+            [in] Int32 bottom);
+
+        /** Returns the bottom clip. */
+        GetClipBottom(
+            [out] Int32* cb);
+
+        /** Sets the outline bottom clip. */
+        SetOutlineClipBottom(
+            [in] Int32 bottom);
+
+        /** Gets the outline bottom clip. */
+        GetOutlineClipBottom(
+            [out] Int32* ocb);
+    }
+
+    } // namespace Views
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,75 @@
+
+module
+{
+    using interface Elastos.Utility.ICalendar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Controller class to communicate among the various components of the date picker dialog.
+     *
+     * @hide
+     */
+    interface IDatePickerController {
+        OnYearSelected(
+            [in] Int32 year);
+
+        OnDayOfMonthSelected(
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 day);
+
+        RegisterOnDateChangedListener(
+            [in] IOnDateChangedListener* listener);
+
+        UnregisterOnDateChangedListener(
+            [in] IOnDateChangedListener* listener);
+
+        GetSelectedDay(
+            [out] ICalendar** day);
+
+        SetFirstDayOfWeek(
+            [in] Int32 firstDayOfWeek);
+
+        GetFirstDayOfWeek(
+            [out] Int32* firstDayOfWeek);
+
+        GetMinYear(
+            [out] Int32* minYear);
+
+        GetMaxYear(
+            [out] Int32* maxYear);
+
+        GetMinMonth(
+            [out] Int32* minMonth);
+
+        GetMaxMonth(
+            [out] Int32* maxMonth);
+
+        GetMinDay(
+            [out] Int32* minDay);
+
+        GetMaxDay(
+            [out] Int32* maxDay);
+
+        SetMinDate(
+            [in] Int64 minDate);
+
+        GetMinDate(
+            [out] ICalendar** minDate);
+
+        SetMaxDate(
+            [in] Int64 maxDate);
+
+        GetMaxDate(
+            [out] ICalendar** maxDate);
+
+        TryVibrate();
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

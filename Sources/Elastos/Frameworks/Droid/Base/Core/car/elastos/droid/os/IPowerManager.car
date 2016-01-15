@@ -1,0 +1,112 @@
+module
+{
+    interface Elastos.Droid.Os.IWorkSource;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    [deprecated]
+    interface IIPowerManager
+    {
+        // WARNING: The first two methods must remain the first two methods because their
+        // transaction numbers must not change unless IPowerManager.cpp is also updated.
+        AcquireWakeLock(
+            [in] IBinder* lock,
+            [in] Int32 flags,
+            [in] String tag,
+            [in] String packageName,
+            [in] IWorkSource* ws,
+            [in] String historyTag);
+
+        AcquireWakeLockWithUid(
+            [in] IBinder* lock,
+            [in] Int32 flags,
+            [in] String tag,
+            [in] String packageName,
+            [in] Int32 uidtoblame);
+
+        ReleaseWakeLock(
+            [in] IBinder* lock,
+            [in] Int32 flags);
+
+        UpdateWakeLockUids(
+            [in] IBinder* lock,
+            [in] ArrayOf<Int32>* uids);
+
+        [oneway]
+        PowerHint(
+            [in] Int32 hintId,
+            [in] Int32 data);
+
+        UpdateWakeLockWorkSource(
+            [in] IBinder* lock,
+            [in] IWorkSource* ws,
+            [in] String historyTag);
+
+        IsWakeLockLevelSupported(
+            [in] Int32 level,
+            [out] Boolean* res);
+
+        UserActivity(
+            [in] Int64 eventTime,
+            [in] Int32 event,
+            [in] Int32 flags);
+
+        WakeUp(
+            [in] Int64 eventTime);
+
+        GoToSleep(
+            [in] Int64 eventTime,
+            [in] Int32 reason,
+            [in] Int32 flags);
+
+        Nap(
+            [in] Int64 eventTime);
+
+        IsInteractive(
+            [out] Boolean* result);
+
+        IsPowerSaveMode(
+            [out] Boolean* result);
+
+        SetPowerSaveMode(
+            [in] Boolean mode,
+            [out] Boolean* result);
+
+        Reboot(
+            [in] Boolean confirm,
+            [in] String reason,
+            [in] Boolean wait);
+
+        Shutdown(
+            [in] Boolean confirm,
+            [in] Boolean wait);
+
+        Crash(
+            [in] String message);
+
+        SetStayOnSetting(
+            [in] Int32 val);
+
+        SetMaximumScreenOffTimeoutFromDeviceAdmin(
+            [in] Int32 timeMs);
+
+        // temporarily overrides the screen brightness settings to allow the user to
+        // see the effect of a settings change without applying it immediately
+        SetTemporaryScreenBrightnessSettingOverride(
+            [in] Int32 brightness);
+
+        SetTemporaryScreenAutoBrightnessAdjustmentSettingOverride(
+            [in] Float adj);
+
+        // sets the attention light (used by phone app only)
+        SetAttentionLight(
+            [in] Boolean on,
+            [in] Int32 color);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

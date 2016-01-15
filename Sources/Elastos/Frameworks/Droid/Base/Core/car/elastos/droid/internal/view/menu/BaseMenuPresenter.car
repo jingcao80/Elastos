@@ -1,0 +1,62 @@
+module
+{
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Internal.View.Menu.IMenuItemImpl;
+    interface Elastos.Droid.Internal.View.Menu.IMenuItemView;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+
+    /**
+     * Base class for MenuPresenters that have a consistent container view and item
+     * views. Behaves similarly to an AdapterView in that existing item views will
+     * be reused if possible when items change.
+     */
+    /**
+     * @Involve
+     * interface IMenuPresenter
+     */
+    [local]
+    interface IBaseMenuPresenter {
+        GetCallback(
+            [out] IMenuPresenterCallback** clb);
+
+        CreateItemView(
+            [in] IViewGroup* parent,
+            [out] IMenuItemView** view);
+
+        GetItemView(
+            [in] IMenuItemImpl* item,
+            [in] IView* convertView,
+            [in] IViewGroup* parent,
+            [out] IView** v);
+
+        BindItemView(
+            [in] IMenuItemImpl* item,
+            [in] IMenuItemView* itemView);
+
+        ShouldIncludeItem(
+            [in] Int32 childIndex,
+            [in] IMenuItemImpl* item,
+            [out] Boolean* res);
+
+        SetId(
+            [in] Int32 id);
+
+        SetCallback(
+            [in] IMenuPresenterCallback* cb);
+    }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}
+

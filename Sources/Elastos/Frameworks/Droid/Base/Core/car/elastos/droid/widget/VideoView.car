@@ -1,0 +1,160 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Utility.IMap;
+
+    interface Elastos.Droid.Media.IMediaPlayerOnInfoListener;
+    interface Elastos.Droid.Media.IMediaPlayerOnErrorListener;
+    interface Elastos.Droid.Media.IMediaPlayerOnPreparedListener;
+    interface Elastos.Droid.Media.IMediaPlayerOnCompletionListener;
+    interface Elastos.Droid.Media.IMediaFormat;
+    interface Elastos.Droid.Widget.IMediaController;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Displays a video file.  The VideoView class
+     * can load images from various sources (such as resources or content
+     * providers), takes care of computing its measurement from the video so that
+     * it can be used in any layout manager, and provides various display options
+     * such as scaling and tinting.<p>
+     *
+     * <em>Note: VideoView does not retain its full state when going into the
+     * background.</em>  In particular, it does not restore the current play state,
+     * play position, selected tracks, or any subtitle tracks added via
+     * {@link #addSubtitleSource addSubtitleSource()}.  Applications should
+     * save and restore these on their own in
+     * {@link android.app.Activity#onSaveInstanceState} and
+     * {@link android.app.Activity#onRestoreInstanceState}.<p>
+     * Also note that the audio session id (from {@link #getAudioSessionId}) may
+     * change from its previously returned value when the VideoView is restored.
+     *
+     * @Involve
+     * extends Elastos.Droid.View.ISurfaceView
+     * extends Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.IMediaPlayerControl
+     * interface Elastos.Droid.Media.ISubtitleControllerAnchor
+     */
+    [local, deprecated]
+    interface IVideoView {
+        ResolveAdjustedSize(
+            [in] Int32 desiredSize,
+            [in] Int32 measureSpec,
+            [out] Int32* size);
+
+        /**
+         * Adds an external subtitle source file (from the provided input stream.)
+         *
+         * Note that a single external subtitle source may contain multiple or no
+         * supported tracks in it. If the source contained at least one track in
+         * it, one will receive an {@link MediaPlayer#MEDIA_INFO_METADATA_UPDATE}
+         * info message. Otherwise, if reading the source takes excessive time,
+         * one will receive a {@link MediaPlayer#MEDIA_INFO_SUBTITLE_TIMED_OUT}
+         * message. If the source contained no supported track (including an empty
+         * source file or null input stream), one will receive a {@link
+         * MediaPlayer#MEDIA_INFO_UNSUPPORTED_SUBTITLE} message. One can find the
+         * total number of available tracks using {@link MediaPlayer#getTrackInfo()}
+         * to see what additional tracks become available after this method call.
+         *
+         * @param is     input stream containing the subtitle data.  It will be
+         *               closed by the media framework.
+         * @param format the format of the subtitle track(s).  Must contain at least
+         *               the mime type ({@link MediaFormat#KEY_MIME}) and the
+         *               language ({@link MediaFormat#KEY_LANGUAGE}) of the file.
+         *               If the file itself contains the language information,
+         *               specify "und" for the language.
+         */
+        AddSubtitleSource(
+            [in] IInputStream* is,
+            [in] IMediaFormat* format);
+
+        /**
+         * Sets video path.
+         *
+         * @param path the path of the video.
+         */
+        SetVideoPath(
+            [in] String path);
+
+        /**
+         * Sets video URI.
+         *
+         * @param uri the URI of the video.
+         */
+        SetVideoURI(
+            [in] IUri* uri);
+
+        /**
+         * Sets video URI using specific headers.
+         *
+         * @param uri     the URI of the video.
+         * @param headers the headers for the URI request.
+         *                Note that the cross domain redirection is allowed by default, but that can be
+         *                changed with key/value pairs through the headers parameter with
+         *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
+         *                to disallow or allow cross domain redirection.
+         */
+        SetVideoURI(
+            [in] IUri* uri,
+            [in] IMap* headers);
+
+        StopPlayback();
+
+        SetMediaController(
+            [in] IMediaController* controller);
+
+        /**
+         * Register a callback to be invoked when the media file
+         * is loaded and ready to go.
+         *
+         * @param l The callback that will be run
+         */
+        SetOnPreparedListener(
+            [in] IMediaPlayerOnPreparedListener* l);
+
+         /**
+         * Register a callback to be invoked when the end of a media file
+         * has been reached during playback.
+         *
+         * @param l The callback that will be run
+         */
+        SetOnCompletionListener(
+            [in] IMediaPlayerOnCompletionListener* l);
+
+        /**
+         * Register a callback to be invoked when an error occurs
+         * during playback or setup.  If no listener is specified,
+         * or if the listener returned false, VideoView will inform
+         * the user of any errors.
+         *
+         * @param l The callback that will be run
+         */
+        SetOnErrorListener(
+            [in] IMediaPlayerOnErrorListener* l);
+
+        /**
+         * Register a callback to be invoked when an informational event
+         * occurs during playback or setup.
+         *
+         * @param l The callback that will be run
+         */
+        SetOnInfoListener(
+            [in] IMediaPlayerOnInfoListener* l);
+
+        Suspend();
+
+        Resume();
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

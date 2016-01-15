@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * Facilitates event communication between navigation bar and keyguard.  Currently used to
+     * control WidgetPager in keyguard to expose the camera widget.
+     *
+     */
+    interface IKeyguardTouchDelegate {
+
+        IsSecure(
+            [out] Boolean* result);
+
+        Dispatch(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        IsInputRestricted(
+            [out] Boolean* result);
+
+        IsShowingAndNotOccluded(
+            [out] Boolean* result);
+
+        ShowAssistant();
+
+        LaunchCamera();
+
+        Dismiss();
+    }
+
+    interface IOnKeyguardConnectionListener {
+
+        OnKeyguardServiceConnected(
+            [in] IKeyguardTouchDelegate* keyguardTouchDelegate);
+
+        OnKeyguardServiceDisconnected(
+            [in] IKeyguardTouchDelegate* keyguardTouchDelegate);
+    }
+
+    interface IKeyguardTouchDelegateHelper {
+
+        GetInstance(
+            [in] IContext* context,
+            [out] IKeyguardTouchDelegate** result);
+
+        AddListener(
+            [in] IOnKeyguardConnectionListener* listener);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

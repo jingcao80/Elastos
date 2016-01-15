@@ -1,0 +1,40 @@
+
+module
+{
+
+    interface Org.Apache.Http.IProtocolVersion;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * Represents a status line as returned from a HTTP server.
+     * See <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC2616</a>,
+     * section 6.1.
+     * Implementations are expected to be thread safe.
+     *
+     * @see HttpStatus
+     * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
+     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+     * @version $Id: StatusLine.java 573864 2007-09-08 15:53:25Z rolandw $
+     *
+     * @since 4.0
+     */
+    interface IStatusLine {
+
+        GetProtocolVersion(
+            [out] IProtocolVersion** ver);
+
+        GetStatusCode(
+            [out] Int32* code);
+
+        GetReasonPhrase(
+            [out] String* phrase);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

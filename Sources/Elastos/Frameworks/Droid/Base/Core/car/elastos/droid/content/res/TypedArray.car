@@ -1,0 +1,445 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Utility.ITypedValue;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+    /**
+     * Container for an array of values that were retrieved with
+     * {@sa Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
+     * or {@sa Resources#obtainAttributes}.  Be
+     * sure to call {@sa #recycle} when done with them.
+     *
+     * The indices used to retrieve values from this structure correspond to
+     * the positions of the attributes given to obtainStyledAttributes.
+     */
+    interface ITypedArray {
+        /**
+         * Return the number of values in this array.
+         */
+        GetLength(
+            [out] Int32* len);
+
+        /**
+         * Return the number of indices in the array that actually have data.
+         */
+        GetIndexCount(
+            [out] Int32* count);
+
+        /**
+         * Return an index in the array that has data.
+         *
+         * @param at The index you would like to returned, ranging from 0 to
+         * {@sa #getIndexCount()}.
+         *
+         * @return The index at the given offset, which can be used with
+         * {@sa #getValue} and related APIs.
+         */
+        GetIndex(
+            [in] Int32 at,
+            [out] Int32* index);
+
+        /**
+         * Return the Resources object this array was loaded from.
+         */
+        GetResources(
+            [out] IResources** res);
+
+        /**
+         * Retrieve the styled string value for the attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return CharSequence holding string data.  May be styled.  Returns
+         *         null if the attribute is not defined.
+         */
+        GetText(
+            [in] Int32 index,
+            [out] ICharSequence** csq);
+
+        /**
+         * Retrieve the string value for the attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return String holding string data.  Any styling information is
+         * removed.  Returns null if the attribute is not defined.
+         */
+        GetString(
+            [in] Int32 index,
+            [out] String* str);
+
+        /**
+         * Retrieve the string value for the attribute at <var>index</var>, but
+         * only if that string comes from an immediate value in an XML file.  That
+         * is, this does not allow references to string resources, string
+         * attributes, or conversions from other types.  As such, this method
+         * will only return strings for TypedArray objects that come from
+         * attributes in an XML file.
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return String holding string data.  Any styling information is
+         * removed.  Returns null if the attribute is not defined or is not
+         * an immediate string value.
+         */
+        GetNonResourceString(
+            [in] Int32 index,
+            [out] String* str);
+
+        /**
+         * @hide
+         * Retrieve the string value for the attribute at <var>index</var> that is
+         * not allowed to change with the given configurations.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param allowedChangingConfigs Bit mask of configurations from
+         * ActivityInfo that are allowed to change.
+         *
+         * @return String holding string data.  Any styling information is
+         * removed.  Returns null if the attribute is not defined.
+         */
+        GetNonConfigurationString(
+            [in] Int32 index,
+            [in] Int32 allowedChangingConfigs,
+            [out] String* str);
+
+        /**
+         * Retrieve the boolean value for the attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param defValue Value to return if the attribute is not defined.
+         *
+         * @return Attribute boolean value, or defValue if not defined.
+         */
+        GetBoolean(
+            [in] Int32 index,
+            [in] Boolean defValue,
+            [out] Boolean* value);
+
+        /**
+         * Retrieve the integer value for the attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param defValue Value to return if the attribute is not defined.
+         *
+         * @return Attribute int value, or defValue if not defined.
+         */
+        GetInt32(
+            [in] Int32 index,
+            [in] Int32 defValue,
+            [out] Int32* value);
+
+        /**
+         * Retrieve the float value for the attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return Attribute float value, or defValue if not defined..
+         */
+        GetFloat(
+            [in] Int32 index,
+            [in] Float defValue,
+            [out] Float* value);
+
+        /**
+         * Retrieve the color value for the attribute at <var>index</var>.  If
+         * the attribute references a color resource holding a complex
+         * {@sa android.content.res.ColorStateList}, then the default color from
+         * the set is returned.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param defValue Value to return if the attribute is not defined or
+         *                 not a resource.
+         *
+         * @return Attribute color value, or defValue if not defined.
+         */
+        GetColor(
+            [in] Int32 index,
+            [in] Int32 defValue,
+            [out] Int32* value);
+
+        /**
+         * Retrieve the ColorStateList for the attribute at <var>index</var>.
+         * The value may be either a single solid color or a reference to
+         * a color or complex {@sa android.content.res.ColorStateList} description.
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return ColorStateList for the attribute, or null if not defined.
+         */
+        GetColorStateList(
+            [in] Int32 index,
+            [out] IColorStateList** list);
+
+        /**
+         * Retrieve the integer value for the attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param defValue Value to return if the attribute is not defined or
+         *                 not a resource.
+         *
+         * @return Attribute integer value, or defValue if not defined.
+         */
+        GetInteger(
+            [in] Int32 index,
+            [in] Int32 defValue,
+            [out] Int32* value);
+
+        /**
+         * Retrieve a dimensional unit attribute at <var>index</var>.  Unit
+         * conversions are based on the current {@sa DisplayMetrics}
+         * associated with the resources this {@sa TypedArray} object
+         * came from.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param defValue Value to return if the attribute is not defined or
+         *                 not a resource.
+         *
+         * @return Attribute dimension value multiplied by the appropriate
+         * metric, or defValue if not defined.
+         *
+         * @see #getDimensionPixelOffset
+         * @see #getDimensionPixelSize
+         */
+        GetDimension(
+            [in] Int32 index,
+            [in] Float defValue,
+            [out] Float* value);
+
+        /**
+         * Retrieve a dimensional unit attribute at <var>index</var> for use
+         * as an offset in raw pixels.  This is the same as
+         * {@sa #getDimension}, except the returned value is converted to
+         * integer pixels for you.  An offset conversion involves simply
+         * truncating the base value to an integer.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param defValue Value to return if the attribute is not defined or
+         *                 not a resource.
+         *
+         * @return Attribute dimension value multiplied by the appropriate
+         * metric and truncated to integer pixels, or defValue if not defined.
+         *
+         * @see #getDimension
+         * @see #getDimensionPixelSize
+         */
+        GetDimensionPixelOffset(
+            [in] Int32 index,
+            [in] Int32 defValue,
+            [out] Int32* value);
+
+        /**
+         * Retrieve a dimensional unit attribute at <var>index</var> for use
+         * as a size in raw pixels.  This is the same as
+         * {@sa #getDimension}, except the returned value is converted to
+         * integer pixels for use as a size.  A size conversion involves
+         * rounding the base value, and ensuring that a non-zero base value
+         * is at least one pixel in size.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param defValue Value to return if the attribute is not defined or
+         *                 not a resource.
+         *
+         * @return Attribute dimension value multiplied by the appropriate
+         * metric and truncated to integer pixels, or defValue if not defined.
+         *
+         * @see #getDimension
+         * @see #getDimensionPixelOffset
+         */
+        GetDimensionPixelSize(
+            [in] Int32 index,
+            [in] Int32 defValue,
+            [out] Int32* value);
+
+        /**
+         * Special version of {@sa #getDimensionPixelSize} for retrieving
+         * {@sa android.view.ViewGroup}'s layout_width and layout_height
+         * attributes.  This is only here for performance reasons; applications
+         * should use {@sa #getDimensionPixelSize}.
+         *
+         * @param index Index of the attribute to retrieve.
+         * @param name Textual name of attribute for error reporting.
+         *
+         * @return Attribute dimension value multiplied by the appropriate
+         * metric and truncated to integer pixels.
+         */
+        GetLayoutDimension(
+            [in] Int32 index,
+            [in] String name,
+            [out] Int32* dimension);
+
+        /**
+         * Special version of {@sa #getDimensionPixelSize} for retrieving
+         * {@sa android.view.ViewGroup}'s layout_width and layout_height
+         * attributes.  This is only here for performance reasons; applications
+         * should use {@sa #getDimensionPixelSize}.
+         *
+         * @param index Index of the attribute to retrieve.
+         * @param defValue The default value to return if this attribute is not
+         * default or contains the wrong type of data.
+         *
+         * @return Attribute dimension value multiplied by the appropriate
+         * metric and truncated to integer pixels.
+         */
+        GetLayoutDimension(
+            [in] Int32 index,
+            [in] Int32 defValue,
+            [out] Int32* dimension);
+
+        /**
+         * Retrieve a fractional unit attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param base The base value of this fraction.  In other words, a
+         *             standard fraction is multiplied by this value.
+         * @param pbase The parent base value of this fraction.  In other
+         *             words, a parent fraction (nn%p) is multiplied by this
+         *             value.
+         * @param defValue Value to return if the attribute is not defined or
+         *                 not a resource.
+         *
+         * @return Attribute fractional value multiplied by the appropriate
+         * base value, or defValue if not defined.
+         */
+        GetFraction(
+            [in] Int32 index,
+            [in] Int32 base,
+            [in] Int32 pbase,
+            [in] Float defValue,
+            [out] Float* value);
+
+        /**
+         * Retrieve the resource identifier for the attribute at
+         * <var>index</var>.  Note that attribute resource as resolved when
+         * the overall {@sa TypedArray} object is retrieved.  As a
+         * result, this function will return the resource identifier of the
+         * final resource value that was found, <em>not</em> necessarily the
+         * original resource that was specified by the attribute.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param defValue Value to return if the attribute is not defined or
+         *                 not a resource.
+         *
+         * @return Attribute resource identifier, or defValue if not defined.
+         */
+        GetResourceId(
+            [in] Int32 index,
+            [in] Int32 defValue,
+            [out] Int32* value);
+
+        /**
+         * Retrieve the Drawable for the attribute at <var>index</var>.  This
+         * gets the resource ID of the selected attribute, and uses
+         * {@sa Resources#getDrawable Resources.getDrawable} of the owning
+         * Resources object to retrieve its Drawable.
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return Drawable for the attribute, or null if not defined.
+         */
+        GetDrawable(
+            [in] Int32 index,
+            [out] IDrawable** drawable);
+
+        /**
+         * Retrieve the CharSequence[] for the attribute at <var>index</var>.
+         * This gets the resource ID of the selected attribute, and uses
+         * {@sa Resources#getTextArray Resources.getTextArray} of the owning
+         * Resources object to retrieve its String[].
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return CharSequence[] for the attribute, or null if not defined.
+         */
+        GetTextArray(
+            [in] Int32 index,
+            [out, callee] ArrayOf<ICharSequence*>* array);
+
+        /**
+         * Retrieve the raw TypedValue for the attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         * @param outValue TypedValue object in which to place the attribute's
+         *                 data.
+         *
+         * @return Returns true if the value was retrieved, else false.
+         */
+        GetValue(
+            [in] Int32 index,
+            [in] ITypedValue* outValue,
+            [out] Boolean* value);
+
+        /**
+         * Returns the type of attribute at the specified index.
+         *
+         * @param index Index of attribute whose type to retrieve.
+         * @return Attribute type.
+         */
+        GetType(
+            [in] Int32 index,
+            [out] Int32* type);
+
+        /**
+         * Determines whether there is an attribute at <var>index</var>.
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return True if the attribute has a value, false otherwise.
+         */
+        HasValue(
+            [in] Int32 index,
+            [out] Boolean* hasValue);
+
+        /**
+         * Retrieve the raw TypedValue for the attribute at <var>index</var>
+         * and return a temporary object holding its data.  This object is only
+         * valid until the next call on to {@sa TypedArray}.
+         *
+         * @param index Index of attribute to retrieve.
+         *
+         * @return Returns a TypedValue object if the attribute is defined,
+         *         containing its data; otherwise returns null.  (You will not
+         *         receive a TypedValue whose type is TYPE_NULL.)
+         */
+        PeekValue(
+            [in] Int32 index,
+            [out] ITypedValue** value);
+
+        /**
+         * Returns a message about the parser state suitable for printing error messages.
+         */
+        GetPositionDescription(
+            [out] String* msg);
+
+        /**
+         * Give back a previously retrieved StyledAttributes, for later re-use.
+         */
+        Recycle();
+
+        /**
+         * Return a mask of the configuration parameters for which the values in
+         * this typed array may change.
+         *
+         * @return Returns a mask of the changing configuration parameters, as
+         *         defined by {@link android.content.pm.ActivityInfo}.
+         * @see android.content.pm.ActivityInfo
+         */
+        GetChangingConfigurations(
+            [out] Int32* value);
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

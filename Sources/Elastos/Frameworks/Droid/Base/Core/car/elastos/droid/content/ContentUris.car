@@ -1,0 +1,91 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Net.IUriBuilder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Utility methods useful for working with Uri objects that use the "content" (content://) scheme.
+     *
+     * @sa Uri
+     * Content URIs have the syntax
+     * content://authority/path/id
+     * content:
+     * <p>
+     * The scheme portion of the URI. This is always set to ContentResolver.SCHEME_CONTENT (value content://).
+     *
+     * @sa ContentResolver.SCHEME_CONTENT
+     * <p><em>authority</em>
+     * <p>
+     * A string that identifies the entire content provider. All the content URIs for
+     * the provider start with this string. To guarantee a unique authority, providers
+     * should consider using an authority that is the same as the provider class'
+     * package identifier.
+     * <p><em>path</em>
+     * <p>
+     * Zero or more segments, separated by a forward slash (/), that identify some
+     * subset of the provider's data. Most providers use the path part to identify
+     * individual tables. Individual segments in the path are often called
+     * "directories" although they do not refer to file directories. The right-most
+     * segment in a path is often called a "twig"
+     * <p><em>id</em>
+     * <p>
+     * A unique numeric identifier for a single row in the subset of data identified
+     * by the preceding path part. Most providers recognize content URIs that contain
+     * an id part and give them special handling. A table that contains a column
+     * named _ID often expects the id part to be a particular value for that column.
+     */
+    interface IContentUris {
+        /**
+         * Converts the last path segment to a long.
+         *
+         * <p>This supports a common convention for content URIs where an ID is
+         * stored in the last segment.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * UnsupportedOperationException | if this isn't a hierarchical URI
+         * NumberFormatException | if the last segment isn't a number
+         *
+         * @return the long conversion of the last segment or -1 if the path is
+         *  empty
+         */
+        ParseId(
+            [in] IUri* contentUri,
+            [out] Int64* id);
+
+        /**
+         * Appends the given ID to the end of the path.
+         *
+         * @param builder to append the ID to
+         * @param id to append
+         *
+         * @return the given builder
+         */
+        AppendId(
+            [in] IUriBuilder* builder,
+            [in] Int64 id);
+
+        /**
+         * Appends the given ID to the end of the path.
+         *
+         * @param contentUri to start with
+         * @param id to append
+         *
+         * @return a new URI with the given ID appended to the end of the path
+         */
+        WithAppendedId(
+            [in] IUri* contentUri,
+            [in] Int64 id,
+            [out] IUri** newUri);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

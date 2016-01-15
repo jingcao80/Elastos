@@ -1,0 +1,89 @@
+
+module
+{
+
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.NFC.Cardemulation.IAidGroup;
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+    /*
+     * Copyright (C) 2013 The Android Open Source Project
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    interface IINfcCardEmulation {
+        IsDefaultServiceForCategory(
+            [in] Int32 userHandle,
+            [in] IComponentName* service,
+            [in] String category,
+            [out] Boolean* res);
+
+        IsDefaultServiceForAid(
+            [in] Int32 userHandle,
+            [in] IComponentName* service,
+            [in] String aid,
+            [out] Boolean* res);
+
+        SetDefaultServiceForCategory(
+            [in] Int32 userHandle,
+            [in] IComponentName* service,
+            [in] String category,
+            [out] Boolean* res);
+
+        SetDefaultForNextTap(
+            [in] Int32 userHandle,
+            [in] IComponentName* service,
+            [out] Boolean* res);
+
+        RegisterAidGroupForService(
+            [in] Int32 userHandle,
+            [in] IComponentName* service,
+            [in] IAidGroup* aidGroup,
+            [out] Boolean* res);
+
+        GetAidGroupForService(
+            [in] Int32 userHandle,
+            [in] IComponentName* service,
+            [in] String category,
+            [out] IAidGroup** res);
+
+        RemoveAidGroupForService(
+            [in] Int32 userHandle,
+            [in] IComponentName* service,
+            [in] String category,
+            [out] Boolean* res);
+
+        GetServices(
+            [in] Int32 userHandle,
+            [in] String category,
+            [out] IList** res );
+
+        SetPreferredService(
+            [in] IComponentName* service,
+            [out] Boolean* res);
+
+        UnsetPreferredService(
+            [out] Boolean* res);
+
+        SupportsAidPrefixRegistration(
+            [out] Boolean* res);
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

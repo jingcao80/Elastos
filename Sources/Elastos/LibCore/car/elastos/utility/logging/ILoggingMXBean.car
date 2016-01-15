@@ -1,0 +1,77 @@
+module
+{
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Logging {
+    /**
+     * {@code LoggingMXBean} is the management interface for the logging sub-system.
+     * <p>
+     * The ObjectName for identifying the {@code LoggingMXBean} in a bean server is
+     * {@link LogManager#LOGGING_MXBEAN_NAME}.
+     * </p>
+     *
+     * @since 1.5
+     */
+    interface ILoggingMXBean {
+
+        /**
+         * Gets the string value of the logging level of a logger. An empty string
+         * is returned when the logger's level is defined by its parent. A
+         * {@code null} is returned if the specified logger does not exist.
+         *
+         * @param loggerName
+         *            the name of the logger lookup.
+         * @return a {@code String} if the logger is found, otherwise {@code null}.
+         * @see Level#getName()
+         */
+        GetLoggerLevel(
+            [in] String loggerName,
+            [out] String* str);
+
+        /**
+         * Gets a list of all currently registered logger names. This is performed
+         * using the {@link LogManager#getLoggerNames()}.
+         *
+         * @return a list of logger names.
+         */
+        GetLoggerNames(
+            [out] IList** obj);
+
+        /**
+         * Gets the name of the parent logger of a logger. If the logger doesn't
+         * exist then {@code null} is returned. If the logger is the root logger,
+         * then an empty {@code String} is returned.
+         *
+         * @param loggerName
+         *            the name of the logger to lookup.
+         * @return a {@code String} if the logger was found, otherwise {@code null}.
+         */
+        GetParentLoggerName(
+            [in] String loggerName,
+            [out] String* str);
+
+        /**
+         * Sets the log level of a logger. LevelName set to {@code null} means the
+         * level is inherited from the nearest non-null ancestor.
+         *
+         * @param loggerName
+         *            the name of the logger to set the level on, which must not be
+         *            {@code null}.
+         * @param levelName
+         *            the level to set on the logger, which may be {@code null}.
+         * @throws IllegalArgumentException
+         *             if {@code loggerName} is not a registered logger or if
+         *             {@code levelName} is not null and not valid.
+         * @see Level#parse(String)
+         */
+        SetLoggerLevel(
+            [in] String loggerName,
+            [in] String levelName);
+    }
+
+    } // namespace Logging
+    } // namespace Utility
+    } // namespace Elastos
+}

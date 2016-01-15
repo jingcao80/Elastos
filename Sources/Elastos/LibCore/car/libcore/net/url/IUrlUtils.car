@@ -1,0 +1,64 @@
+
+module
+{
+    namespace Libcore {
+    namespace Net {
+    namespace Url {
+
+    interface IUrlUtilsHelper {
+        /**
+         * Returns the path will relative path segments like ".." and "." resolved.
+         * The returned path will not necessarily start with a "/" character. This
+         * handles ".." and "." segments at both the beginning and end of the path.
+         *
+         * @param discardRelativePrefix true to remove leading ".." segments from
+         *     the path. This is appropriate for paths that are known to be
+         *     absolute.
+         */
+        CanonicalizePath(
+            [in] String path,
+            [in] Boolean discardRelativePrefix,
+            [out] String* str);
+
+        /**
+         * Returns a path that can be safely concatenated with {@code authority}. If
+         * the authority is null or empty, this can be any path. Otherwise the paths
+         * run together like {@code http://android.comindex.html}.
+         */
+        AuthoritySafePath(
+            [in] String authority,
+            [in] String path,
+            [out] String* str);
+
+        /**
+         * Returns the scheme prefix like "http" from the URL spec, or null if the
+         * spec doesn't start with a scheme. Scheme prefixes match this pattern:
+         * {@code alpha ( alpha | digit | '+' | '-' | '.' )* ':'}
+         */
+        GetSchemePrefix(
+            [in] String spec,
+            [out] String* str);
+
+        IsValidSchemeChar(
+            [in] Int32 index,
+            [in] Char32 c,
+            [out] Boolean* value);
+
+        /**
+         * Returns the index of the first char of {@code chars} in {@code string}
+         * bounded between {@code start} and {@code end}. This returns {@code end}
+         * if none of the characters exist in the requested range.
+         */
+        FindFirstOf(
+            [in] String string,
+            [in] String chars,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] Int32* value);
+    }
+
+    } // namespace Url
+    } // namespace Net
+    } // namespace Libcore
+
+}

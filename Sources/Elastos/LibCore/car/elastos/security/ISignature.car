@@ -1,0 +1,360 @@
+
+module
+{
+    interface Elastos.IO.IByteBuffer;
+    interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+
+    namespace Elastos {
+    namespace Security {
+
+    [deprecated]
+    interface ISignature {
+        /**
+         * Returns the provider associated with this {@code Signature}.
+         *
+         * @return the provider associated with this {@code Signature}.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Returns the name of the algorithm of this {@code Signature}.
+         *
+         * @return the name of the algorithm of this {@code Signature}.
+         */
+        GetAlgorithm(
+            [out] String* algo);
+
+        /**
+         * Initializes this {@code Signature} instance for signature verification,
+         * using the public key of the identity whose signature is going to be
+         * verified.
+         *
+         * @param publicKey
+         *            the public key.
+         * @throws InvalidKeyException
+         *             if {@code publicKey} is not valid.
+         */
+        InitVerify(
+            [in] IPublicKey* publicKey);
+
+        /**
+         * Initializes this {@code Signature} instance for signature verification,
+         * using the certificate of the identity whose signature is going to be
+         * verified.
+         * <p>
+         * If the given certificate is an instance of {@link X509Certificate} and
+         * has a key usage parameter that indicates, that this certificate is not to
+         * be used for signing, an {@code InvalidKeyException} is thrown.
+         *
+         * @param certificate
+         *            the certificate used to verify a signature.
+         * @throws InvalidKeyException
+         *             if the publicKey in the certificate is not valid or not to be
+         *             used for signing.
+         */
+        InitVerify(
+            [in] Elastos.Security.Cert.ICertificate* certificate);
+
+        /**
+         * Initializes this {@code Signature} instance for signing, using the
+         * private key of the identity whose signature is going to be generated.
+         *
+         * @param privateKey
+         *            the private key.
+         * @throws InvalidKeyException
+         *             if {@code privateKey} is not valid.
+         */
+        InitSign(
+            [in] IPrivateKey* privateKey);
+
+        /**
+         * Initializes this {@code Signature} instance for signing, using the
+         * private key of the identity whose signature is going to be generated and
+         * the specified source of randomness.
+         *
+         * @param privateKey
+         *            the private key.
+         * @param random
+         *            the {@code SecureRandom} to use.
+         * @throws InvalidKeyException
+         *             if {@code privateKey} is not valid.
+         */
+        InitSign(
+            [in] IPrivateKey* privateKey,
+            [in] ISecureRandom* random);
+
+        /**
+         * Generates and returns the signature of all updated data.
+         * <p>
+         * This {@code Signature} instance is reset to the state of its last
+         * initialization for signing and thus can be used for another signature
+         * from the same identity.
+         *
+         * @return the signature of all updated data.
+         * @throws SignatureException
+         *             if this {@code Signature} instance is not initialized
+         *             properly.
+         */
+        Sign(
+            [out, callee] ArrayOf<Byte>* sign);
+
+        /**
+         * Generates and stores the signature of all updated data in the provided
+         * {@code byte[]} at the specified position with the specified length.
+         * <p>
+         * This {@code Signature} instance is reset to the state of its last
+         * initialization for signing and thus can be used for another signature
+         * from the same identity.
+         *
+         * @param outbuf
+         *            the buffer to store the signature.
+         * @param offset
+         *            the index of the first byte in {@code outbuf} to store.
+         * @param len
+         *            the number of bytes allocated for the signature.
+         * @return the number of bytes stored in {@code outbuf}.
+         * @throws SignatureException
+         *             if this {@code Signature} instance is not initialized
+         *             properly.
+         * @throws IllegalArgumentException
+         *             if {@code offset} or {@code len} are not valid in respect to
+         *             {@code outbuf}.
+         */
+        Sign(
+            [in] ArrayOf<Byte>* outbuf,
+            [in] Int32 offset,
+            [in] Int32 len,
+            [out] Int32* num);
+
+        /**
+         * Indicates whether the given {@code signature} can be verified using the
+         * public key or a certificate of the signer.
+         * <p>
+         * This {@code Signature} instance is reset to the state of its last
+         * initialization for verifying and thus can be used to verify another
+         * signature of the same signer.
+         *
+         * @param signature
+         *            the signature to verify.
+         * @return {@code true} if the signature was verified, {@code false}
+         *         otherwise.
+         * @throws SignatureException
+         *             if this {@code Signature} instance is not initialized
+         *             properly.
+         */
+        Verify(
+            [in] ArrayOf<Byte>* signature,
+            [out] Boolean* isVerified);
+
+        /**
+         * Indicates whether the given {@code signature} starting at index {@code
+         * offset} with {@code length} bytes can be verified using the public key or
+         * a certificate of the signer.
+         * <p>
+         * This {@code Signature} instance is reset to the state of its last
+         * initialization for verifying and thus can be used to verify another
+         * signature of the same signer.
+         *
+         * @param signature
+         *            the {@code byte[]} containing the signature to verify.
+         * @param offset
+         *            the start index in {@code signature} of the signature.
+         * @param length
+         *            the number of bytes allocated for the signature.
+         * @return {@code true} if the signature was verified, {@code false}
+         *         otherwise.
+         * @throws SignatureException
+         *             if this {@code Signature} instance is not initialized
+         *             properly.
+         * @throws IllegalArgumentException
+         *             if {@code offset} or {@code length} are not valid in respect
+         *             to {@code signature}.
+         */
+        Verify(
+            [in] ArrayOf<Byte>* signature,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out] Boolean* isVerified);
+
+        /**
+         * Updates the data to be verified or to be signed, using the specified
+         * {@code byte}.
+         *
+         * @param b
+         *            the byte to update with.
+         * @throws SignatureException
+         *             if this {@code Signature} instance is not initialized
+         *             properly.
+         */
+        Update(
+            [in] Byte b);
+
+        /**
+         * Updates the data to be verified or to be signed, using the specified
+         * {@code byte[]}.
+         *
+         * @param data
+         *            the byte array to update with.
+         * @throws SignatureException
+         *             if this {@code Signature} instance is not initialized
+         *             properly.
+         */
+        Update(
+            [in] ArrayOf<Byte>* data);
+
+        /**
+         * Updates the data to be verified or to be signed, using the given {@code
+         * byte[]}, starting form the specified index for the specified length.
+         *
+         * @param data
+         *            the byte array to update with.
+         * @param off
+         *            the start index in {@code data} of the data.
+         * @param len
+         *            the number of bytes to use.
+         * @throws SignatureException
+         *             if this {@code Signature} instance is not initialized
+         *             properly.
+         */
+        Update(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 off,
+            [in] Int32 len);
+
+        /**
+         * Updates the data to be verified or to be signed, using the specified
+         * {@code ByteBuffer}.
+         *
+         * @param data
+         *            the {@code ByteBuffer} to update with.
+         * @throws SignatureException
+         *             if this {@code Signature} instance is not initialized
+         *             properly.
+         */
+        Update(
+            [in] IByteBuffer* data);
+
+        /**
+         * Sets the specified parameter to the given value.
+         *
+         * @param param
+         *            the name of the parameter.
+         * @param value
+         *            the parameter value.
+         * @throws InvalidParameterException
+         *             if the parameter is invalid, already set or is not allowed to
+         *             be changed.
+         * @deprecated Use {@link #setParameter(AlgorithmParameterSpec)}
+         */
+        //@Deprecated
+        SetParameter(
+            [in] String param,
+            [in] IInterface* value);
+
+        /**
+         * Sets the specified {@code AlgorithmParameterSpec}.
+         *
+         * @param params
+         *            the parameter to set.
+         * @throws InvalidAlgorithmParameterException
+         *             if the parameter is invalid, already set or is not allowed to
+         *             be changed.
+         */
+        SetParameter(
+            [in] IAlgorithmParameterSpec* params);
+
+        /**
+         * Returns the {@code AlgorithmParameters} of this {@link Signature}
+         * instance.
+         *
+         * @return the {@code AlgorithmParameters} of this {@link Signature}
+         *         instance, maybe {@code null}.
+         */
+        GetParameters(
+            [out] IAlgorithmParameters** param);
+
+        /**
+         * Returns the value of the parameter with the specified name.
+         *
+         * @param param
+         *            the name of the requested parameter value
+         * @return the value of the parameter with the specified name, maybe {@code
+         *         null}.
+         * @throws InvalidParameterException
+         *             if {@code param} is not a valid parameter for this {@code
+         *             Signature} or an other error occures.
+         * @deprecated There is no generally accepted parameter naming convention.
+         */
+        //Deprecated
+        GetParameter(
+            [in] String name,
+            [out] IInterface** param);
+    }
+
+    interface ISignatureHelper {
+        /**
+         * Returns a new instance of {@code Signature} that utilizes the specified
+         * algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @return a new instance of {@code Signature} that utilizes the specified
+         *         algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] ISignature** sign);
+
+        /**
+         * Returns a new instance of {@code Signature} that utilizes the specified
+         * algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @param provider
+         *            the name of the provider.
+         * @return a new instance of {@code Signature} that utilizes the specified
+         *         algorithm from the specified provider.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NoSuchProviderException
+         *             if the specified provider is not available.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] ISignature** sign);
+
+        /**
+         * Returns a new instance of {@code Signature} that utilizes the specified
+         * algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @param provider
+         *            the security provider.
+         * @return a new instance of {@code Signature} that utilizes the specified
+         *         algorithm from the specified provider.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         * @throws IllegalArgumentException if {@code provider == null}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] ISignature** sign);
+    }
+
+    } // end namespace Security
+    } // end namespace Elastos
+}

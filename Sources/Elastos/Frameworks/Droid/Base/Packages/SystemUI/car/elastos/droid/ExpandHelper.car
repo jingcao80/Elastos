@@ -1,0 +1,96 @@
+module
+{
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IExpandableView;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IScrollAdapter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+
+    [local]
+    interface IViewScaler {
+        SetView(
+            [in] IExpandableView* v);
+
+        SetHeight(
+            [in] Float h);
+
+        GetHeight(
+            [out] Float* rst);
+
+        GetNaturalHeight(
+            [in] Int32 maximum,
+            [out] Int32* naturalHeight);
+    }
+
+    [local]
+    interface IExpandHelperCallback {
+        GetChildAtRawPosition(
+            [in] Float x,
+            [in] Float y,
+            [out] IExpandableView** child);
+
+        GetChildAtPosition(
+            [in] Float x,
+            [in] Float y,
+            [out] IExpandableView** child);
+
+        CanChildBeExpanded(
+            [in] IView* v,
+            [out] Boolean* result);
+
+        SetUserExpandedChild(
+            [in] IView* v,
+            [in] Boolean userExpanded);
+
+        SetUserLockedChild(
+            [in] IView* v,
+            [in] Boolean userLocked);
+
+        ExpansionStateChanged(
+            [in] Boolean isExpanding);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.SystemUI.IGefingerpoken
+     */
+    [local]
+    interface IExpandHelper {
+
+        SetEventSource(
+            [in] IView* eventSource);
+
+        SetGravity(
+            [in] Int32 gravity);
+
+        SetScrollAdapter(
+            [in] IScrollAdapter* adapter);
+
+        SetEnabled(
+            [in] Boolean bval);
+
+        /**
+         * Use this to abort any pending expansions in progress.
+         */
+        Cancel();
+
+        /**
+         * Change the expansion mode to only observe movements and don't perform any resizing.
+         * This is needed when the expanding is finished and the scroller kicks in,
+         * performing an overscroll motion. We only want to shrink it again when we are not
+         * overscrolled.
+         *
+         * @param onlyMovements Should only movements be observed?
+         */
+        OnlyObserveMovements(
+            [in] Boolean onlyMovements);
+    }
+
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

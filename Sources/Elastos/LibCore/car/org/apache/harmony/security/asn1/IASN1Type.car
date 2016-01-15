@@ -1,0 +1,85 @@
+
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Org.Apache.Harmony.Security.Asn1.IBerInputStream;
+    interface Org.Apache.Harmony.Security.Asn1.IBerOutputStream;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    /**
+     * @Involve
+     * interface IASN1Constants;
+     */
+    [deprecated]
+    interface IASN1Type {
+        Decode(
+            [in] ArrayOf<Byte>* encoded,
+            [out] IInterface** object);
+
+        Decode(
+            [in] ArrayOf<Byte>* encoded,
+            [in] Int32 offset,
+            [in] Int32 encodingLen,
+            [out] IInterface** object);
+
+        Decode(
+            [in] IInputStream* is,
+            [out] IInterface** object);
+
+        Verify(
+            [in] ArrayOf<Byte>* encoded);
+
+        Verify(
+            [in] IInputStream* is);
+
+        Encode(
+            [in] IInterface* object,
+            [out, callee] ArrayOf<Byte>* encode);
+
+        Decode(
+            [in] IBerInputStream* bis,
+            [out] IInterface** object);
+
+        /**
+         * Tests provided identifier.
+         *
+         * @param identifier identifier to be verified
+         * @return true if identifier is associated with this ASN.1 type
+        */
+        CheckTag(
+            [in] Int32 identifier,
+            [out] Boolean* checkTag);
+
+        EncodeASN(
+            [in] IBerOutputStream* bos);
+
+        EncodeContent(
+            [in] IBerOutputStream* bos);
+
+        SetEncodingContent(
+            [in] IBerOutputStream* bos);
+
+        GetEncodedLength(
+            [in] IBerOutputStream* bos,
+            [out] Int32* length);
+
+        /** Integer representation of primitive identifier. */
+        GetId(
+            [out] Int32* id);
+
+        /** Integer representation of constructed identifier. */
+        GetConstrId(
+            [out] Int32* constrId);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

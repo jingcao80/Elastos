@@ -1,0 +1,80 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+    /**
+     * A class to encapsulate HDMI port information. Contains the capability of the ports such as
+     * HDMI-CEC, MHL, ARC(Audio Return Channel), and physical address assigned to each port.
+     *
+     * @hide
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+     //@SystemApi
+    interface IHdmiPortInfo {
+        /** HDMI port type: Input */
+        const Int32 PORT_INPUT = 0;
+
+        /** HDMI port type: Output */
+        const Int32 PORT_OUTPUT = 1;
+
+        /**
+         * Returns the port id.
+         *
+         * @return port id
+         */
+        GetId(
+            [out] Int32* id);
+
+        /**
+         * Returns the port type.
+         *
+         * @return port type
+         */
+        GetType(
+            [out] Int32* type);
+
+        /**
+         * Returns the port address.
+         *
+         * @return port address
+         */
+        GetAddress(
+            [out] Int32* address);
+
+        /**
+         * Returns {@code true} if the port supports HDMI-CEC signaling.
+         *
+         * @return {@code true} if the port supports HDMI-CEC signaling.
+         */
+        IsCecSupported(
+            [out] Boolean* result);
+
+        /**
+         * Returns {@code true} if the port supports MHL signaling.
+         *
+         * @return {@code true} if the port supports MHL signaling.
+         */
+        IsMhlSupported(
+            [out] Boolean* result);
+
+        /**
+         * Returns {@code true} if the port supports audio return channel.
+         *
+         * @return {@code true} if the port supports audio return channel
+         */
+        IsArcSupported(
+            [out] Boolean* result);
+    }
+
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

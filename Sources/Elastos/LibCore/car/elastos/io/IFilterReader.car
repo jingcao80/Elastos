@@ -1,0 +1,17 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+     /**
+     * @Involve
+     * interface IReadable;
+     * interface IReader;
+     */
+    interface IFilterReader {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

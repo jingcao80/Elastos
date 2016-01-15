@@ -1,0 +1,10 @@
+
+TARGET_NAME= runner
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../inc
+INCLUDES += ../
+
+C_DEFINES += -DEUNIT
+
+SOURCES = BaseTestRunner.cpp

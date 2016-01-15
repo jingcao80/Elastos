@@ -1,0 +1,32 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Database.ICursor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IFilterQueryProvider {
+        /**
+         * Runs a query with the specified constraint. This query is requested
+         * by the filter attached to this adapter.
+         *
+         * Contract: when constraint is null or empty, the original results,
+         * prior to any filtering, must be returned.
+         *
+         * @param constraint the constraint with which the query must
+         *        be filtered
+         *
+         * @return a Cursor representing the results of the new query
+         */
+        RunQuery(
+            [in] ICharSequence* constraint,
+            [out] ICursor** cursor);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

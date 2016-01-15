@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ActionBar</string>
+
+
+    <!-- Action bar item title -->
+    <string name="action_share">Share</string>
+    <string name="action_search">Search</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_help">Help</string>
+
+    <!-- Main activity list view data source -->
+    <string-array name="list_view_data_source_array">
+        <item>Split Action Bar(Theme.Custom)</item>
+        <item>Up navigation(Theme.Custom)</item>
+        <item>Theme.Holo</item>
+        <item>Theme.Holo.Light</item>
+        <item>Theme.Holo.Light.DarkActionBar</item>
+        <item>Theme.Custom</item>
+    </string-array>
+
+    <!-- Activity content -->
+    <string name="split_action_bar">Split Action Bar(Theme.Custom)</string>
+    <string name="up_navigation">Up navigation(Theme.Custom)</string>
+    <string name="theme_holo">Theme.Holo</string>
+    <string name="theme_holo_light">Theme.Holo.Light</string>
+    <string name="theme_holo_light_darkactionbar">Theme.Holo.Light.DarkActionBar</string>
+    <string name="theme_custom">Theme.Custom</string>
+</resources>

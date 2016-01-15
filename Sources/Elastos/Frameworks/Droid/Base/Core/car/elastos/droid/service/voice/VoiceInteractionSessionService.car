@@ -1,0 +1,36 @@
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Voice {
+
+    /**
+     * An active voice interaction session, initiated by a {@link VoiceInteractionService}.
+     *
+     * @Involve
+     * extends Elastos.Droid.Content.IContext
+     * extends Elastos.Droid.Content.IContextWrapper
+     * extends Elastos.Droid.App.IService
+     *
+     * interface Elastos.Droid.View.IWindowCallback
+     */
+    [local]
+    interface IVoiceInteractionSessionService {
+        OnNewSession(
+            [in] IBundle* args,
+            [out] IVoiceInteractionSession** session);
+
+        DoNewSession(
+            [in] IBinder* token,
+            [in] IBundle* args);
+    }
+
+    } // namespace Voice
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

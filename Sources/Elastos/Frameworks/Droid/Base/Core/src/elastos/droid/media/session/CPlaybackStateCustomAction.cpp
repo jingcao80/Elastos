@@ -1,0 +1,119 @@
+#include "Elastos.Droid.Os.h"
+#include "elastos/droid/media/session/CPlaybackStateCustomAction.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/Objects.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Objects;
+
+namespace Elastos {
+namespace Droid {
+namespace Media {
+namespace Session {
+
+CAR_INTERFACE_IMPL_2(CPlaybackStateCustomAction, Object, IPlaybackStateCustomAction, IParcelable)
+
+CAR_OBJECT_IMPL(CPlaybackStateCustomAction)
+
+CPlaybackStateCustomAction::CPlaybackStateCustomAction()
+    : mIcon(0)
+{
+}
+
+CPlaybackStateCustomAction::~CPlaybackStateCustomAction()
+{
+}
+
+ECode CPlaybackStateCustomAction::constructor(
+    /* [in] */ const String& action,
+    /* [in] */ ICharSequence * name,
+    /* [in] */ Int32 icon,
+    /* [in] */ IBundle * extras)
+{
+    mAction = action;
+    mName = name;
+    mIcon = icon;
+    mExtras = extras;
+    return NOERROR;
+}
+
+ECode CPlaybackStateCustomAction::ReadFromParcel(
+    /* [in] */ IParcel* source)
+{
+    source->ReadString(&mAction);
+    AutoPtr<IInterface> obj;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mName = ICharSequence::Probe(obj);
+    source->ReadInt32(&mIcon);
+    obj = NULL;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mExtras = IBundle::Probe(obj);
+    return NOERROR;
+}
+
+ECode CPlaybackStateCustomAction::WriteToParcel(
+    /* [in] */ IParcel* dest)
+{
+    dest->WriteString(mAction);
+    dest->WriteInterfacePtr(mName);
+    dest->WriteInt32(mIcon);
+    dest->WriteInterfacePtr(mExtras);
+    return NOERROR;
+}
+
+ECode CPlaybackStateCustomAction::GetAction(
+    /* [out] */ String * result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mAction;
+    return NOERROR;
+}
+
+ECode CPlaybackStateCustomAction::GetName(
+    /* [out] */ ICharSequence ** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mName;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode CPlaybackStateCustomAction::GetIcon(
+    /* [out] */ Int32 * result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mIcon;
+    return NOERROR;
+}
+
+ECode CPlaybackStateCustomAction::GetExtras(
+    /* [out] */ IBundle ** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mExtras;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode CPlaybackStateCustomAction::ToString(
+    /* [out] */ String * result)
+{
+    VALIDATE_NOT_NULL(result)
+    StringBuilder sb("Action:");
+    sb.Append(mAction);
+    String str;
+    mName->ToString(&str);
+    sb.Append(" mName=");
+    sb.Append(str);
+    sb.Append(", mIcon=");
+    sb.Append(mIcon);
+    // mExtras->ToString(&str);
+    // sb.Append(", mExtras=");
+    // sb.Append(str);
+    return sb.ToString(result);
+}
+
+} // namespace Session
+} // namespace Media
+} // namepsace Droid
+} // namespace Elastos

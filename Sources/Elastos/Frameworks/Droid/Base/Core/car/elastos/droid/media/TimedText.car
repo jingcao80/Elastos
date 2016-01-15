@@ -1,0 +1,36 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface ITimedText {
+        /**
+         * Get the characters in the timed text.
+         *
+         * @return the characters as a String object in the TimedText. Applications
+         * should stop rendering previous timed text at the current rendering region if
+         * a null is returned, until the next non-null timed text is received.
+         */
+        GetText(
+            [out] String* text);
+
+        /**
+         * Get the rectangle area or region for rendering the timed text as specified
+         * by a Rect object.
+         *
+         * @return the rectangle region to render the characters in the timed text.
+         * If no bounds information is available (a null is returned), render the
+         * timed text at the center bottom of the display.
+         */
+        GetBounds(
+            [out] IRect** bounds);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

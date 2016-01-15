@@ -1,0 +1,25 @@
+module
+{
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * An implementation of CharacterIterator for strings.
+     */
+
+    /**
+     * @Involve
+     * interface ICharacterIterator
+     */
+    interface IStringCharacterIterator {
+        /**
+         * Sets the source string to iterate over. The begin and end positions are
+         * set to the start and end of this string.
+         */
+        SetText(
+            [in] String value);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

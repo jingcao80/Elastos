@@ -1,0 +1,48 @@
+module
+{
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IFile;
+    interface Elastos.Utility.IProperties;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Prefs {
+    /**
+     * Utility class for the Preferences import/export from XML file.
+     */
+    interface IXMLParserHelper {
+        /***************************************************************************
+         * utilities for Preferences export
+         **************************************************************************/
+        ExportPrefs(
+            [in] IPreferences* prefs,
+            [in] IOutputStream* stream,
+            [in] Boolean withSubTree);
+
+        /***************************************************************************
+         * utilities for Preferences import
+         **************************************************************************/
+        ImportPrefs(
+            [in] IInputStream* input);
+
+        /**
+         * Returns the preferences from {@code xmlFile}. Returns empty properties if
+         * any errors occur.
+         */
+        ReadXmlPreferences(
+            [in] IFile* xmlFile,
+            [out] IProperties** outpro);
+
+        /**
+         * Writes the preferences to {@code xmlFile}.
+         */
+        WriteXmlPreferences(
+            [in] IFile* xmlFile,
+            [in] IProperties* properties);
+    }
+
+    } // namespace Prefs
+    } // namespace Utility
+    } // namespace Elastos
+}

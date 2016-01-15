@@ -1,0 +1,412 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IIterator;
+    using interface Elastos.Utility.ILocale;
+    using interface Elastos.Utility.IIterable;
+    using interface Elastos.Utility.Regex.IPattern;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    enum TextUtilsTruncateAt {
+        TextUtilsTruncateAt_NONE = -1,
+        TextUtilsTruncateAt_START,
+        TextUtilsTruncateAt_MIDDLE,
+        TextUtilsTruncateAt_END,
+        TextUtilsTruncateAt_MARQUEE,
+        /**
+         * @hide
+         */
+        TextUtilsTruncateAt_END_SMALL,
+    }
+
+    /**
+     * An interface for splitting strings according to rules that are opaque to the user of this
+     * interface. This also has less overhead than split, which uses regular expressions and
+     * allocates an array to hold the results.
+     *
+     * <p>The most efficient way to use this class is:
+     *
+     * <pre>
+     * // Once
+     * TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(delimiter);
+     *
+     * // Once per string to split
+     * splitter.setString(string);
+     * for (String s : splitter) {
+     *     ...
+     * }
+     * </pre>
+     *
+     * @Involve
+     * interface Elastos.Utility.IIterator
+     */
+    interface IStringSplitter {
+        SetString(
+            [in] String string);
+    }
+
+    /**
+     * A simple string splitter.
+     *
+     * <p>If the final character in the string to split is the delimiter then no empty string will
+     * be returned for the empty string after that delimeter. That is, splitting <tt>"a,b,"</tt> on
+     * comma will return <tt>"a", "b"</tt>, not <tt>"a", "b", ""</tt>.
+     *
+     * @Involve
+     * interface IStringSplitter
+     */
+    interface ISimpleStringSplitter {
+        SetString(
+            [in] String string);
+
+        GetIterator(
+            [out] IIterator** it);
+
+        HasNext(
+            [out] Boolean* result);
+
+        GetNext(
+            [out] IInterface** object);
+
+        GetNext(
+            [out] String* str);
+
+        Remove();
+    }
+
+    interface ITextUtilsEllipsizeCallback {
+        /**
+         * This method is called to report that the specified region of
+         * text was ellipsized away by a call to {@link #ellipsize}.
+         */
+        Ellipsized(
+            [in] Int32 start,
+            [in] Int32 end);
+    }
+
+    [deprecated]
+    interface ITextUtils {
+        /** @hide */
+        const Int32 ALIGNMENT_SPAN = 1;
+
+        /** @hide */
+        const Int32 FIRST_SPAN = 1; //ALIGNMENT_SPAN;
+
+        /** @hide */
+        const Int32 FOREGROUND_COLOR_SPAN = 2;
+
+        /** @hide */
+        const Int32 RELATIVE_SIZE_SPAN = 3;
+
+        /** @hide */
+        const Int32 SCALE_X_SPAN = 4;
+
+        /** @hide */
+        const Int32 STRIKETHROUGH_SPAN = 5;
+
+        /** @hide */
+        const Int32 UNDERLINE_SPAN = 6;
+
+        /** @hide */
+        const Int32 STYLE_SPAN = 7;
+
+        /** @hide */
+        const Int32 BULLET_SPAN = 8;
+
+        /** @hide */
+        const Int32 QUOTE_SPAN = 9;
+
+        /** @hide */
+        const Int32 LEADING_MARGIN_SPAN = 10;
+
+        /** @hide */
+        const Int32 URL_SPAN = 11;
+
+        /** @hide */
+        const Int32 BACKGROUND_COLOR_SPAN = 12;
+
+        /** @hide */
+        const Int32 TYPEFACE_SPAN = 13;
+
+        /** @hide */
+        const Int32 SUPERSCRIPT_SPAN = 14;
+
+        /** @hide */
+        const Int32 SUBSCRIPT_SPAN = 15;
+
+        /** @hide */
+        const Int32 ABSOLUTE_SIZE_SPAN = 16;
+
+        /** @hide */
+        const Int32 TEXT_APPEARANCE_SPAN = 17;
+
+        /** @hide */
+        const Int32 ANNOTATION = 18;
+
+        /** @hide */
+        const Int32 SUGGESTION_SPAN = 19;
+
+        /** @hide */
+        const Int32 SPELL_CHECK_SPAN = 20;
+
+        /** @hide */
+        const Int32 SUGGESTION_RANGE_SPAN = 21;
+
+        /** @hide */
+        const Int32 EASY_EDIT_SPAN = 22;
+
+        /** @hide */
+        const Int32 LOCALE_SPAN = 23;
+
+        /** @hide */
+        const Int32 TTS_SPAN = 24;
+        /** @hide */
+        const Int32 LAST_SPAN = 24; //TTS_SPAN;
+
+        /**
+         * Capitalization mode for {@link #getCapsMode}: capitalize all
+         * characters.  This value is explicitly defined to be the same as
+         * {@link InputType#TYPE_TEXT_FLAG_CAP_CHARACTERS}.
+         */
+        const Int32 CAP_MODE_CHARACTERS
+                = 0x00001000; //InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS;
+
+        /**
+         * Capitalization mode for {@link #getCapsMode}: capitalize the first
+         * character of all words.  This value is explicitly defined to be the same as
+         * {@link InputType#TYPE_TEXT_FLAG_CAP_WORDS}.
+         */
+        const Int32 CAP_MODE_WORDS
+                = 0x00002000; //InputType.TYPE_TEXT_FLAG_CAP_WORDS;
+
+        /**
+         * Capitalization mode for {@link #getCapsMode}: capitalize the first
+         * character of each sentence.  This value is explicitly defined to be the same as
+         * {@link InputType#TYPE_TEXT_FLAG_CAP_SENTENCES}.
+         */
+        const Int32 CAP_MODE_SENTENCES
+                = 0x00004000; //InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+
+        GetChars(
+            [in] ICharSequence* s,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] ArrayOf<Char32>* dest,
+            [in] Int32 destoff);
+
+        IndexOf(
+            [in] ICharSequence* s,
+            [in] Char32 ch,
+            [out] Int32* result);
+
+        IndexOf(
+            [in] ICharSequence* s,
+            [in] Char32 ch,
+            [in] Int32 start,
+            [out] Int32* result);
+
+        IndexOf(
+            [in] ICharSequence* s,
+            [in] Char32 ch,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] Int32* result);
+
+        LastIndexOf(
+            [in] ICharSequence* s,
+            [in] Char32 ch,
+            [out] Int32* result);
+
+        LastIndexOf(
+            [in] ICharSequence* s,
+            [in] Char32 ch,
+            [in] Int32 start,
+            [out] Int32* result);
+
+        LastIndexOf(
+            [in] ICharSequence* s,
+            [in] Char32 ch,
+            [in] Int32 start,
+            [in] Int32 last,
+            [out] Int32* result);
+
+        IndexOf(
+            [in] ICharSequence* s,
+            [in] ICharSequence* needle,
+            [out] Int32* result);
+
+        IndexOf(
+            [in] ICharSequence* s,
+            [in] ICharSequence* needle,
+            [in] Int32 start,
+            [out] Int32* result);
+
+        IndexOf(
+            [in] ICharSequence* s,
+            [in] ICharSequence* needle,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] Int32* result);
+
+        RegionMatches(
+            [in] ICharSequence* one,
+            [in] Int32 toffset,
+            [in] ICharSequence* two,
+            [in] Int32 ooffset,
+            [in] Int32 len,
+            [out] Boolean* result);
+
+        Substring(
+            [in] ICharSequence* source,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] String* result);
+
+        Join(
+            [in] ICharSequence* delimiter,
+            [in] ArrayOf<IInterface*>* tokens,
+            [out] String* result);
+
+        Join(
+            [in] ICharSequence* delimiter,
+            [in] IIterable* tokens,
+            [out] String* result);
+
+        Split(
+            [in] String text,
+            [in] String expression,
+            [out, callee] ArrayOf<String>* strs);
+
+        Split(
+            [in] String text,
+            [in] IPattern* pattern,
+            [out, callee] ArrayOf<String>* strs);
+
+        StringOrSpannedString(
+            [in] ICharSequence* source,
+            [out] ICharSequence** result);
+
+        IsEmpty(
+            [in] ICharSequence* str,
+            [out] Boolean* result);
+
+        IsEmpty(
+            [in] String str,
+            [out] Boolean* result);
+
+        GetTrimmedLength(
+            [in] ICharSequence* s,
+            [out] Int32* result);
+
+        Equals(
+            [in] ICharSequence* a,
+            [in] ICharSequence* b,
+            [out] Boolean* result);
+
+        Equals(
+            [in] String a,
+            [in] String b,
+            [out] Boolean* result);
+
+        GetReverse(
+            [in] ICharSequence* source,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] ICharSequence** result);
+
+        WriteToParcel(
+            [in] ICharSequence* cs,
+            [in] IParcel* p);
+
+        Replace(
+            [in] ICharSequence* temp,
+            [in] ArrayOf<String>* sources,
+            [in] ArrayOf<ICharSequence*>* destinations,
+            [out] ICharSequence** result);
+
+        ExpandTemplate(
+            [in] ICharSequence* temp,
+            [in] ArrayOf<ICharSequence*>* values,
+            [out] ICharSequence** result);
+
+        GetOffsetBefore(
+            [in] ICharSequence* text,
+            [in] Int32 offset,
+            [out] Int32* result);
+
+        GetOffsetAfter(
+            [in] ICharSequence* text,
+            [in] Int32 offset,
+            [out] Int32* result);
+
+        CopySpansFrom(
+            [in] ISpanned* source,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] InterfaceID kind,
+            [in] ISpannable* dest,
+            [in] Int32 destoff);
+
+        Ellipsize(
+            [in] ICharSequence* text,
+            [in] ITextPaint* p,
+            [in] Float avail,
+            [in] TextUtilsTruncateAt where,
+            [out] ICharSequence** result);
+
+        Ellipsize(
+            [in] ICharSequence* text,
+            [in] ITextPaint* paint,
+            [in] Float avail,
+            [in] TextUtilsTruncateAt where,
+            [in] Boolean preserveLength,
+            [in] ITextUtilsEllipsizeCallback* cb,
+            [out] ICharSequence** result);
+
+        CommaEllipsize(
+            [in] ICharSequence* text,
+            [in] ITextPaint* p,
+            [in] Float avail,
+            [in] String oneMore,
+            [in] String more,
+            [out] ICharSequence** result);
+
+        HtmlEncode(
+            [in] String s,
+            [out] String* result);
+
+        Concat(
+            [in] ArrayOf<ICharSequence*>* text,
+            [out] ICharSequence** result);
+
+        IsGraphic(
+            [in] ICharSequence* str,
+            [out] Boolean* result);
+
+        IsGraphic(
+            [in] Char32 c,
+            [out] Boolean* result);
+
+        IsDigitsOnly(
+            [in] ICharSequence* str,
+            [out] Boolean* result);
+
+        GetCapsMode(
+            [in] ICharSequence* cs,
+            [in] Int32 off,
+            [in] Int32 reqModes,
+            [out] Int32* result);
+
+        GetLayoutDirectionFromLocale(
+            [in] ILocale* locale,
+            [out] Int32* result);
+    }
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

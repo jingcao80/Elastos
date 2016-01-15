@@ -1,0 +1,121 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.Cert.ICertPathParameters;
+    interface Elastos.Security.Cert.ICertPathBuilderResult;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface ICertPathBuilder {
+        /**
+         * Returns the algorithm name of this instance.
+         *
+         * @return the algorithm name of this instance.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the provider of this instance.
+         *
+         * @return the provider of this instance.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Builds a certification path with the specified algorithm parameters.
+         *
+         * @param params
+         *            the algorithm parameters.
+         * @return the built certification path.
+         * @throws CertPathBuilderException
+         *             if the build fails.
+         * @throws InvalidAlgorithmParameterException
+         *             if the specified parameters cannot be used to build with this
+         *             builder.
+         * @see CertPathBuilderResult
+         */
+        Build(
+            [in] ICertPathParameters* params,
+            [out] ICertPathBuilderResult** result);
+    }
+
+    interface ICertPathBuilderHelper {
+        /**
+         * Creates a new {@code CertPathBuilder} instance with the specified
+         * algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm.
+         * @return a builder for the requested algorithm.
+         * @throws NullPointerException
+         *             if the algorithm is {@code null}.
+         * @throws NoSuchAlgorithmException
+         *             if no installed provider can provide the algorithm.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] ICertPathBuilder** builder);
+
+        /**
+         * Creates a new {@code CertPathBuilder} instance from the specified
+         * provider providing the specified algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm.
+         * @param provider
+         *            the name of the provider.
+         * @return a builder for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified provider cannot provide the algorithm.
+         * @throws NoSuchProviderException
+         *             if no provider with the specified name can be found.
+         * @throws NullPointerException
+         *             if algorithm is {@code null}.
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] ICertPathBuilder** builder);
+
+        /**
+         * Creates a new {@code CertPathBuilder} instance from the specified
+         * provider providing the specified algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm.
+         * @param provider
+         *            the provider.
+         * @return a builder for the requested algorithm
+         * @throws NoSuchAlgorithmException
+         *             if the specified provider cannot provide the algorithm.
+         * @throws IllegalArgumentException if {@code provider == null}
+         * @throws NullPointerException
+         *             if algorithm is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] ICertPathBuilder** builder);
+
+        /**
+         * Returns the default {@code CertPathBuilder} type from the <i>Security
+         * Properties</i>.
+         *
+         * @return the default {@code CertPathBuilder} type from the <i>Security
+         *         Properties</i>, or the string "{@code PKIX}" if it cannot be
+         *         determined.
+         */
+        GetDefaultType(
+            [out] String* type);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

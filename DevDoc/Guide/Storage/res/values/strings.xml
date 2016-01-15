@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Storage</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+
+    <string name="shared_preferences">perferences</string>
+    <string name="file">file</string>
+    <string name="database">DB</string>
+    
+    <string name="save">save</string>
+    <string name="show">show</string>
+</resources>

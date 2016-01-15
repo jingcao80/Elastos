@@ -1,0 +1,74 @@
+
+module
+{
+    interface Elastos.Security.Cert.IX509Certificate;
+    interface Elastos.Security.Cert.ICertificate;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The trust manager for X509 certificates to be used to perform authentication
+     * for secure sockets.
+     *
+     * @Involve
+     * interface Elastosx.Net.Ssl.ITrustManager
+     */
+    [deprecated, local]
+    interface IX509TrustManager {
+        /**
+         * Checks whether the specified certificate chain (partial or complete) can
+         * be validated and is trusted for client authentication for the specified
+         * authentication type.
+         *
+         * @param chain
+         *            the certificate chain to validate.
+         * @param authType
+         *            the authentication type used.
+         * @throws CertificateException
+         *             if the certificate chain can't be validated or isn't trusted.
+         * @throws IllegalArgumentException
+         *             if the specified certificate chain is empty or {@code null},
+         *             or if the specified authentication type is {@code null} or an
+         *             empty string.
+         */
+        CheckClientTrusted(
+            [in] ArrayOf<IX509Certificate*>* chain,
+            [in] String authType);
+
+        /**
+         * Checks whether the specified certificate chain (partial or complete) can
+         * be validated and is trusted for server authentication for the specified
+         * key exchange algorithm.
+         *
+         * @param chain
+         *            the certificate chain to validate.
+         * @param authType
+         *            the key exchange algorithm name.
+         * @throws CertificateException
+         *             if the certificate chain can't be validated or isn't trusted.
+         * @throws IllegalArgumentException
+         *             if the specified certificate chain is empty or {@code null},
+         *             or if the specified authentication type is {@code null} or an
+         *             empty string.
+         */
+        CheckServerTrusted(
+            [in] ArrayOf<ICertificate*>* chain,
+            [in] String authType);
+
+        /**
+         * Returns the list of certificate issuer authorities which are trusted for
+         * authentication of peers.
+         *
+         * @return the list of certificate issuer authorities which are trusted for
+         *         authentication of peers.
+         */
+        GetAcceptedIssuers(
+            [out, callee] ArrayOf<IX509Certificate*>* issuers);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

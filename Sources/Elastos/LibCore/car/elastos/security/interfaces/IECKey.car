@@ -1,0 +1,26 @@
+
+module
+{
+    interface Elastos.Security.Spec.IECParameterSpec;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Interfaces {
+
+    /**
+     * The base interface for Elliptic Curve (EC) public or private keys.
+     */
+    interface IECKey {
+        /**
+         * Returns the EC key parameters.
+         *
+         * @return the EC key parameters.
+         */
+        GetParams(
+            [out] IECParameterSpec** params);
+    }
+
+    } // namespace Interfaces
+    } // namespace Security
+    } // namespace Elastos
+}

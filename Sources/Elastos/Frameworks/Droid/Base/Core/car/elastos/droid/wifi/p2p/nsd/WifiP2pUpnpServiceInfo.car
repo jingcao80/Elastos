@@ -1,0 +1,69 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+    namespace Nsd {
+
+    /**
+     * A class for storing Upnp service information that is advertised
+     * over a Wi-Fi peer-to-peer setup.
+     *
+     * {@see android.net.wifi.p2p.WifiP2pManager#addLocalService}
+     * {@see android.net.wifi.p2p.WifiP2pManager#removeLocalService}
+     * {@see WifiP2pServiceInfo}
+     * {@see WifiP2pDnsSdServiceInfo}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     * interface IWifiP2pServiceInfo;
+     */
+    interface IWifiP2pUpnpServiceInfo {
+        /**
+         * UPnP version 1.0.
+         *
+         * <pre>Query Version should always be set to 0x10 if the query values are
+         * compatible with UPnP Device Architecture 1.0.
+         * @hide
+         */
+        const Int32 VERSION_1_0 = 0x10;
+    }
+
+    interface IWifiP2pUpnpServiceInfoHelper {
+        /**
+         * Create UPnP service information object.
+         *
+         * @param uuid a string representation of this UUID in the following format,
+         *  as per <a href="http://www.ietf.org/rfc/rfc4122.txt">RFC 4122</a>.<br>
+         *  e.g) 6859dede-8574-59ab-9332-123456789012
+         * @param device a string representation of this device in the following format,
+         * as per
+         * <a href="http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.1.pdf">
+         *  UPnP Device Architecture1.1</a><br>
+         *  e.g) urn:schemas-upnp-org:device:MediaServer:1
+         * @param services a string representation of this service in the following format,
+         * as per
+         * <a href="http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.1.pdf">
+         *  UPnP Device Architecture1.1</a><br>
+         *  e.g) urn:schemas-upnp-org:service:ContentDirectory:1
+         * @return UPnP service information object.
+         */
+        NewInstance(
+            [in] String uuid,
+            [in] String device,
+            [in] IList* services,
+            [out] IWifiP2pUpnpServiceInfo** result);
+    }
+
+    } // namespace Nsd
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}
+

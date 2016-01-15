@@ -1,0 +1,60 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+    interface Elastos.Droid.Webkit.ICacheManagerCacheResult;
+    interface Elastos.Droid.Webkit.IPluginData;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * @hide
+     * @deprecated This interface was inteded to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    //@Deprecated
+    interface IUrlInterceptHandler {
+
+        /**
+         * Given an URL, returns the CacheResult which contains the
+         * surrogate response for the request, or null if the handler is
+         * not interested.
+         *
+         * @param url URL string.
+         * @param headers The headers associated with the request. May be null.
+         * @return The CacheResult containing the surrogate response.
+         *
+         * @hide
+         * @deprecated Do not use, this interface is deprecated.
+         */
+        //@Deprecated
+        Service(
+            [in] String url,
+            [in] IMap* headers,
+            [out] ICacheManagerCacheResult** cacheResult);
+
+        /**
+         * Given an URL, returns the PluginData which contains the
+         * surrogate response for the request, or null if the handler is
+         * not interested.
+         *
+         * @param url URL string.
+         * @param headers The headers associated with the request. May be null.
+         * @return The PluginData containing the surrogate response.
+         *
+         * @hide
+         * @deprecated Do not use, this interface is deprecated.
+         */
+        //@Deprecated
+        GetPluginData(
+            [in] String url,
+            [in] IMap* headers,
+            [out] IPluginData** pluginData);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

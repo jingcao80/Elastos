@@ -1,0 +1,149 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Abstract Loader that provides an AsyncTask to do the work.  See
+     * Loader and android.app.LoaderManager for more details.
+     *
+     * @sa AsyncTask
+     * @sa Loader
+     * @sa android.app.LoaderManager
+     * <p>Here is an example implementation of an AsyncTaskLoader subclass that
+     * loads the currently installed applications from the package manager.  This
+     * implementation takes care of retrieving the application labels and sorting
+     * its result set from them, monitoring for changes to the installed
+     * applications, and rebuilding the list when a change in configuration requires
+     * this (such as a locale change).
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/LoaderCustom.java
+     *      loader}
+     *
+     * <p>An example implementation of a fragment that uses the above loader to show
+     * the currently installed applications in a list is below.
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/LoaderCustom.java
+     *      fragment}
+     *
+     * @param <D> the data type to be loaded.
+     *
+     * @implements Elastos.Droid.Content.Elastos.Droid.Content.ILoader
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.ILoader
+     */
+    interface IAsyncTaskLoader {
+        /**
+         * Set amount to throttle updates by.  This is the minimum time from
+         * when the last #loadInBackground() call has completed until
+         * a new load is scheduled.
+         *
+         * @sa #loadInBackground()
+         *
+         * @param delayMS Amount of delay, in milliseconds.
+         */
+        SetUpdateThrottle(
+            [in] Int64 delayMS);
+
+        /**
+         * Called if the task was canceled before it was completed.  Gives the class a chance
+         * to clean up post-cancellation and to properly dispose of the result.
+         *
+         * @param data The value that was returned by #loadInBackground, or null
+         * if the task threw OperationCanceledException.
+         *
+         * @sa #loadInBackground()
+         * @sa OperationCanceledException
+         */
+        OnCanceled(
+            [in] IInterface* data);
+
+        /**
+         * Called on a worker thread to perform the actual load and to return
+         * the result of the load operation.
+         *
+         * Implementations should not deliver the result directly, but should return them
+         * from this method, which will eventually end up calling #deliverResult on
+         * the UI thread.  If implementations need to process the results on the UI thread
+         * they may override #deliverResult and do so there.
+         *
+         * @sa #deliverResult
+         *
+         * To support cancellation, this method should periodically check the value of
+         * #isLoadInBackgroundCanceled and terminate when it returns true.
+         * Subclasses may also override #cancelLoadInBackground to interrupt the load
+         * directly instead of polling #isLoadInBackgroundCanceled.
+         *
+         * @sa #isLoadInBackgroundCanceled
+         * @sa #cancelLoadInBackground
+         *
+         * When the load is canceled, this method may either return normally or throw
+         * OperationCanceledException.  In either case, the Loader will
+         * call #onCanceled to perform post-cancellation cleanup and to dispose of the
+         * result object, if any.
+         *
+         * @sa OperationCanceledException
+         * @sa #onCanceled
+         * @sa Loader
+         *
+         * @return The result of the load operation.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * OperationCanceledException | if the load is canceled during execution.
+         *
+         * @see #isLoadInBackgroundCanceled
+         * @see #cancelLoadInBackground
+         * @see #onCanceled
+         */
+        LoadInBackground(
+            [out] IInterface** result);
+
+        /**
+         * Called on the main thread to abort a load in progress.
+         *
+         * Override this method to abort the current invocation of #loadInBackground
+         * that is running in the background on a worker thread.
+         *
+         * This method should do nothing if #loadInBackground has not started
+         * running or if it has already finished.
+         *
+         * @sa #loadInBackground
+         * @see #loadInBackground
+         */
+        CancelLoadInBackground();
+
+        /**
+         * Returns true if the current invocation of #loadInBackground is being canceled.
+         *
+         * @return True if the current invocation of #loadInBackground is being canceled.
+         *
+         * @sa #loadInBackground
+         *
+         * @see #loadInBackground
+         */
+        IsLoadInBackgroundCanceled(
+            [out] Boolean* isCanceled);
+
+        /**
+         * Locks the current thread until the loader completes the current load
+         * operation. Returns immediately if there is no load operation running.
+         * Should not be called from the UI thread: calling it from the UI
+         * thread would cause a deadlock.
+         * <p>
+         * Use for testing only.  <b>Never</b> call this from a UI thread.
+         *
+         * @hide
+         */
+        WaitForLoader();
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

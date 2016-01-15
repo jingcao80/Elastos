@@ -1,0 +1,156 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Net {
+
+    /**
+     * Parcel-like entity class for VPN profiles. To keep things simple, all
+     * fields are package private. Methods are provided for serialization, so
+     * storage can be implemented easily. Two rules are set for this class.
+     * First, all fields must be kept non-null. Second, always make a copy
+     * using clone() before modifying.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface ICloneable
+     * interface IParcelable
+     */
+    interface IVpnProfile {
+        // Match these constants with R.array.vpn_types.
+        const Int32 TYPE_PPTP = 0;
+        const Int32 TYPE_L2TP_IPSEC_PSK = 1;
+        const Int32 TYPE_L2TP_IPSEC_RSA = 2;
+        const Int32 TYPE_IPSEC_XAUTH_PSK = 3;
+        const Int32 TYPE_IPSEC_XAUTH_RSA = 4;
+        const Int32 TYPE_IPSEC_HYBRID_RSA = 5;
+        const Int32 TYPE_MAX = 5;
+
+        Encode(
+            [out, callee] ArrayOf<Byte>* value);
+
+        /**
+         * Test if profile is valid for lockdown, which requires IPv4 address for
+         * both server and DNS. Server hostnames would require using DNS before
+         * connection.
+         */
+        IsValidLockdownProfile(
+            [out] Boolean* isValid);
+
+        GetKey(
+            [out] String* key);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetType(
+            [out] Int32* type);
+
+        SetType(
+            [in] Int32 type);
+
+        GetServer(
+            [out] String* server);
+
+        SetServer(
+            [in] String server);
+
+        GetUsername(
+            [out] String* username);
+
+        SetUsername(
+            [in] String username);
+
+        GetPassword(
+            [out] String* password);
+
+        SetPassword(
+            [in] String password);
+
+        GetDnsServers(
+            [out] String* dnsServers);
+
+        SetDnsServers(
+            [in] String dnsServers);
+
+        GetSearchDomains(
+            [out] String* searchDomains);
+
+        SetSearchDomains(
+            [in] String searchDomains);
+
+        GetRoutes(
+            [out] String* routes);
+
+        SetRoutes(
+            [in] String routes);
+
+        GetMppe(
+            [out] Boolean* mppe);
+
+        SetMppe(
+            [in] Boolean mppe);
+
+        GetL2tpSecret(
+            [out] String* value);
+
+        SetL2tpSecret(
+            [in] String value);
+
+        GetIpsecIdentifier(
+            [out] String* ipsecIdentifier);
+
+        SetIpsecIdentifier(
+            [in] String ipsecIdentifier);
+
+        GetIpsecSecret(
+            [out] String* ipsecSecret);
+
+        SetIpsecSecret(
+            [in] String ipsecSecret);
+
+        GetIpsecUserCert(
+            [out] String* ipsecUserCert);
+
+        SetIpsecUserCert(
+            [in] String ipsecUserCert);
+
+        GetIpsecCaCert(
+            [out] String* ipsecCaCert);
+
+        SetIpsecCaCert(
+            [in] String ipsecCaCert);
+
+        GetIpsecServerCert(
+            [out] String* ipsecServerCert);
+
+        SetIpsecServerCert(
+            [in] String ipsecServerCert);
+
+        GetSaveLogin(
+            [out] Boolean* saveLogin);
+
+        SetSaveLogin(
+            [in] Boolean saveLogin);
+    }
+
+    [deprecated, local]
+    interface IVpnProfileHelper {
+        Decode(
+            [in] String key,
+            [in] ArrayOf<Byte>* value,
+            [out] IVpnProfile** profile);
+    }
+
+    } // namespace Net
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

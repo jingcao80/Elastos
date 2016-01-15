@@ -1,0 +1,16 @@
+
+module
+{
+//    const FAMILY_CORE = 0x2D    // Securityx exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastosx Security exception codes (Family: 0x2D)
+    const E_CERTIFICATE_ENCODING_EXCEPTION                  = 0xAD040000;
+    const E_CERTIFICATE_EXCEPTION                           = 0xAD050000;
+    const E_CERTIFICATE_EXPIRED_EXCEPTION                   = 0xAD060000;
+    const E_CERTIFICATE_NOT_YET_VALID_EXCEPTION             = 0xAD070000;
+    const E_CERTIFICATE_PARSING_EXCEPTION                   = 0xAD080000;
+}

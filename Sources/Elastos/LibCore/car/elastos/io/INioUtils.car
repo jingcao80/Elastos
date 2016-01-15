@@ -1,0 +1,53 @@
+
+module
+{
+    interface Elastos.IO.Channels.IFileChannel;
+
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * @hide internal use only
+     */
+
+    interface INioUtils {
+
+        FreeDirectBuffer(
+            [in] IByteBuffer* buffer);
+
+        /**
+         * Returns the int file descriptor from within the given FileChannel 'fc'.
+         */
+        GetFD(
+            [in] IFileChannel* fc,
+            [out] IFileDescriptor** outfd);
+
+        /**
+         * Helps bridge between io and nio.
+         */
+        NewFileChannel(
+            [in] ICloseable* ioObject,
+            [in] IFileDescriptor* fd,
+            [in] Int32 mode,
+            [out] IFileChannel** outchannel);
+
+        /**
+         * Exposes the array backing a non-direct ByteBuffer, even if the ByteBuffer is read-only.
+         * Normally, attempting to access the array backing a read-only buffer throws.
+         */
+        GetUnsafeArray(
+            [in] IByteBuffer* b,
+            [out, callee] ArrayOf<Byte>* outbyte);
+
+        /**
+         * Exposes the array offset for the array backing a non-direct ByteBuffer,
+         * even if the ByteBuffer is read-only.
+         */
+        GetUnsafeArrayOffset(
+            [in] IByteBuffer* b,
+            [out] Int32* value);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

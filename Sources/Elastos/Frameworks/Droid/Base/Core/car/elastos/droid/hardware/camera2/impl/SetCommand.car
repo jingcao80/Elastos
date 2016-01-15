@@ -1,0 +1,31 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Impl {
+
+    /**
+     * Setter interface for use with Command pattern metadata value setters.
+     */
+    interface ISetCommand {
+        /**
+         * Set the value in the given metadata.
+         *
+         * @param metadata {@link CameraMetadataNative} to set value in.
+         * @param value value to set.
+         * @param <T> type of the value to set.
+         */
+        SetValue(
+            [in] ICameraMetadataNative* metadata,
+            [in] IInterface* value);
+    }
+
+    } // namespace Impl
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

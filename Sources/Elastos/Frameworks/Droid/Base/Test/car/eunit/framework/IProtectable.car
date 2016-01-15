@@ -1,0 +1,21 @@
+
+module
+{
+    namespace Eunit {
+    namespace Framework {
+
+    /**
+     * A <em>Protectable</em> can be run and can throw a Throwable.
+     *
+     * @see TestResult
+     */
+    interface IProtectable {
+        /**
+         * Run the the following method protected.
+         */
+        Protect();
+    }
+
+    } // namespace Framework
+    } // namespace Eunit
+}

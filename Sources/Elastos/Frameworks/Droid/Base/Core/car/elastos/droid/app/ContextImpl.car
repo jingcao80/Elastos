@@ -1,0 +1,35 @@
+module
+{
+    using interface Elastos.IO.IFile;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContextWrapper
+     */
+    interface IReceiverRestrictedContext {
+
+    }
+
+    /**
+     * Common implementation of Context API, which provides the base
+     * context object for Activity and other application components.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     */
+    interface IContextImpl {
+        GetSharedPrefsFile(
+            [in] String name,
+            [out] IFile** file);
+
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

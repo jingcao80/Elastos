@@ -1,0 +1,27 @@
+TARGET_NAME = XBMC
+TARGET_TYPE = eco
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(MAKEDIR)/inc
+
+SOURCES  = XBMC.car
+SOURCES += CXBMCActivity.cpp
+SOURCES += ElAudioTrack.cpp
+SOURCES += XBMCCallbacks.cpp
+SOURCES += WifiNative.cpp
+SOURCES += Ethernet.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Droid.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -llog -licuuc -lutils -lcutils -lbinder -ldl -landroid_runtime -lhardware_legacy -lnetutils -lmedia
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+DIRRESOURCES += $(MAKEDIR)/data;
+DIRRESOURCES += $(MAKEDIR)/assets;
+DIRRESOURCES += $(MAKEDIR)/lib;

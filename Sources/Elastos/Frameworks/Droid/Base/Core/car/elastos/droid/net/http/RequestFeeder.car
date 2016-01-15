@@ -1,0 +1,45 @@
+
+module
+{
+    using interface Org.Apache.Http.IHttpHost;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IRequestFeeder {
+        GetRequest(
+            [out] IRequest** result);
+
+        GetRequest(
+            [in] IHttpHost* host,
+            [out] IRequest** result);
+
+        /**
+         * @return true if a request for this host is available
+         */
+        HaveRequest(
+            [in] IHttpHost* host,
+            [out] Boolean* result);
+
+        /**
+         * Put request back on head of queue
+         */
+        RequeueRequest(
+            [in] IRequest* request);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}
+

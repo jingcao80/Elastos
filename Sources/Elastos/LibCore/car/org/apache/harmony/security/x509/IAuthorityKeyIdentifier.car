@@ -1,0 +1,78 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.X509.IGeneralNames;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+    using interface Elastos.Math.IBigInteger;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with Authority Key Identifier Extension (OID = 2.5.29.35).
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *   id-ce-authorityKeyIdentifier OBJECT IDENTIFIER ::=  { id-ce 35 }
+     *
+     *   AuthorityKeyIdentifier ::= SEQUENCE {
+     *      keyIdentifier             [0] KeyIdentifier           OPTIONAL,
+     *      authorityCertIssuer       [1] GeneralNames            OPTIONAL,
+     *      authorityCertSerialNumber [2] CertificateSerialNumber OPTIONAL  }
+     *
+     *   KeyIdentifier ::= OCTET STRING
+     * </pre>
+     */
+    interface IAuthorityKeyIdentifier extends Org.Apache.Harmony.Security.X509.IExtensionValue {
+       /**
+         * The key identifier for the authority.
+         *
+         * @return key identifier or {@code null}
+        */
+        GetKeyIdentifier(
+            [out, callee] ArrayOf<Byte>* keyIdentifier);
+
+        /**
+         * The GeneralNames for this authority key identifier.
+         *
+         * @return names for the authority certificate issuer or {@code null}
+         */
+        GetAuthorityCertIssuer(
+            [out] IGeneralNames** issuer);
+
+        /**
+         * The serial number of the certificate identified by this authority key
+         * identifier.
+         *
+         * @return authority's certificate serial number or {@code null}
+         */
+        GetAuthorityCertSerialNumber(
+            [out] IBigInteger** number);
+    }
+
+    [deprecated]
+    interface IAuthorityKeyIdentifierHelper {
+        Decode(
+            [in] ArrayOf<Byte>* encoding,
+            [out] IAuthorityKeyIdentifier** keyIdentifier);
+
+        GetASN1(
+            [out] IASN1Type** asn1);
+
+        SetASN1(
+            [in] IASN1Type* asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

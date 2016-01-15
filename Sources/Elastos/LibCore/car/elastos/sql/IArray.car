@@ -1,0 +1,182 @@
+module
+{
+    interface Elastos.Utility.IMap;
+    interface Elastos.Sql.IResultSet;
+
+    namespace Elastos {
+    namespace Sql {
+
+    /**
+     * A Java representation of the SQL {@code ARRAY} type.
+     */
+    interface IArray {
+        /**
+         * Retrieves the contents of the SQL {@code ARRAY} value as a Java array
+         * object.
+         *
+         * @return A Java array containing the elements of this Array
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetArray(
+            [out] IInterface** arrayiter);
+
+        /**
+         * Returns part of the SQL {@code ARRAY} associated with this array,
+         * starting at a particular {@code index} and comprising up to {@code count}
+         * successive elements of the SQL array.
+         *
+         * @param index
+         *            the start position in the array where the values are
+         *            retrieved.
+         * @param count
+         *            the number of elements to retrieve.
+         * @return A Java array containing the desired set of elements from this Array
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetArray(
+            [in] Int64 index,
+            [in] Int32 count,
+            [out] IInterface** arrayiter);
+
+        /**
+         * Returns part of the SQL {@code ARRAY} associated with this array,
+         * starting at a particular {@code index} and comprising up to {@code count}
+         * successive elements of the SQL array.
+         *
+         * @param index
+         *            the start position in the array where the values are
+         *            retrieved.
+         * @param count
+         *            the number of elements to retrieve.
+         * @param map
+         *            the map defining the correspondence between SQL type names
+         *            and Java types.
+         * @return A Java array containing the desired set of elements from this Array
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetArray(
+            [in] Int64 index,
+            [in] Int32 count,
+            [in] IMap* sqlmap,
+            [out] IInterface** arrayiter);
+
+        /**
+         * Returns the data from the underlying SQL {@code ARRAY} as a Java array.
+         *
+         * @param map
+         *            the map defining the correspondence between SQL type names
+         *            and Java types.
+         * @return A Java array containing the elements of this array
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetArray(
+            [in] IMap* sqlmap,
+            [out] IInterface** arrayiter);
+
+        /**
+         * Returns the JDBC type of the entries in this array's underlying
+         * SQL array.
+         *
+         * @return An integer constant from the {@code java.sql.Types} class
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetBaseType(
+            [out] Int32* value);
+
+        /**
+         * Returns the SQL type name of the entries in this array's underlying
+         * SQL array.
+         *
+         * @return The database specific name or a fully-qualified SQL type name.
+         * @throws SQLException
+         *              if there is a database error.
+         */
+        GetBaseTypeName(
+            [out] String* value);
+
+        /**
+         * Returns a ResultSet object which holds the entries of the SQL {@code
+         * ARRAY} associated with this array.
+         *
+         * @return the elements of the array as a {@code ResultSet}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetResultSet(
+            [out] IResultSet** resultset);
+
+        /**
+         * Returns a {@code ResultSet} object that holds the entries of a subarray,
+         * beginning at a particular index and comprising up to {@code count}
+         * successive entries.
+         *
+         * @param index
+         *            the start position in the array where the values are
+         *            retrieved.
+         * @param count
+         *            the number of elements to retrieve.
+         * @return the elements of the array as a {@code ResultSet}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetResultSet(
+            [in] Int64 index,
+            [in] Int32 count,
+            [out] IResultSet** resultset);
+
+        /**
+         * Returns a {@code ResultSet} object that holds the entries of a subarray,
+         * beginning at a particular index and comprising up to {@code count}
+         * successive entries.
+         *
+         * @param index
+         *            the start position in the array where the values are
+         *            retrieved.
+         * @param count
+         *            the number of elements to retrieve.
+         * @param map
+         *            the map defining the correspondence between SQL type names
+         *            and Java types.
+         * @return the {@code ResultSet} the array's custom type values. if a
+         *         database error has occurred.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetResultSet(
+            [in] Int64 index,
+            [in] Int32 count,
+            [in] IMap* sqlmap,
+            [out] IResultSet** resultset);
+
+        /**
+         * Returns a {@code ResultSet} object which holds the entries of the SQL
+         * {@code ARRAY} associated with this array.
+         *
+         * @param map
+         *            the map defining the correspondence between SQL type names
+         *            and Java types.
+         * @return the array as a {@code ResultSet}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetResultSet(
+            [in] IMap* sqlmap,
+            [out] IResultSet** resultset);
+
+        /**
+         * Frees any resources held by this array. After {@code free} is called, calling
+         * method other than {@code free} will throw {@code SQLException} (calling {@code free}
+         * repeatedly will do nothing).
+         * @throws SQLException
+         */
+        Free();
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

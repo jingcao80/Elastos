@@ -1,0 +1,33 @@
+
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * This interface represents the ability of the input stream related classes to provide additional
+     * data to be read.
+     */
+    [deprecated]
+    interface IAppendable {
+        /**
+         * Provides the additional data to be read.
+         *
+         * @param src the source data to be appended.
+         */
+        Append(
+            [in] ArrayOf<Byte>* src);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

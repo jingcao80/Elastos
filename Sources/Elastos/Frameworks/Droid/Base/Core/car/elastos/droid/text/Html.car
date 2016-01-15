@@ -1,0 +1,157 @@
+
+module
+{
+    using interface Org.Xml.Sax.IXMLReader;
+    using interface Org.Xml.Sax.ILocator;
+    using interface Org.Xml.Sax.IAttributes;
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Text.ISpanned;
+    interface Elastos.Droid.Text.IEditable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * Retrieves images for HTML &lt;img&gt; tags.
+     */
+    //static
+    interface IHtmlImageGetter {
+        /**
+         * This methos is called when the HTML parser encounters an
+         * &lt;img&gt; tag.  The <code>source</code> argument is the
+         * string from the "src" attribute; the return value should be
+         * a Drawable representation of the image or <code>null</code>
+         * for a generic replacement image.  Make sure you call
+         * setBounds() on your Drawable if it doesn't already have
+         * its bounds set.
+         */
+        GetDrawable(
+            [in] String source,
+            [out] IDrawable** ret);
+    }
+
+    /**
+     * Is notified when HTML tags are encountered that the parser does
+     * not know how to interpret.
+     */
+    // static
+    interface IHtmlTagHandler {
+        /**
+         * This method will be called whenn the HTML parser encounters
+         * a tag that it does not know how to interpret.
+         */
+        HandleTag(
+            [in] Boolean opening,
+            [in] String tag,
+            [in] IEditable* output,
+            [in] IXMLReader* xmlReader);
+    }
+
+    /**
+     * This class processes HTML strings into displayable styled text.
+     * Not all HTML tags are supported.
+     */
+    interface IHtml {
+        /**
+         * Returns displayable styled text from the provided HTML string.
+         * Any &lt;img&gt; tags in the HTML will display as a generic
+         * replacement image which your program can then go through and
+         * replace with real images.
+         *
+         * <p>This uses TagSoup to handle real HTML, including all of the brokenness found in the wild.
+         */
+        // static
+        FromHtml(
+            [in] String source,
+            [out] ISpanned** ret);
+
+        /**
+         * Returns displayable styled text from the provided HTML string.
+         * Any &lt;img&gt; tags in the HTML will use the specified ImageGetter
+         * to request a representation of the image (use null if you don't
+         * want this) and the specified TagHandler to handle unknown tags
+         * (specify null if you don't want this).
+         *
+         * <p>This uses TagSoup to handle real HTML, including all of the brokenness found in the wild.
+         */
+        // static
+        FromHtml(
+            [in] String source,
+            [in] IHtmlImageGetter* imageGetter,
+            [in] IHtmlTagHandler* tagHandler,
+            [out] ISpanned** ret);
+
+        /**
+         * Returns an HTML representation of the provided Spanned text.
+         */
+        // static
+        ToHtml(
+            [in] ISpanned* text,
+            [out] String* ret);
+
+        /**
+         * Returns an HTML escaped representation of the given plain text.
+         */
+        // static
+        EscapeHtml(
+            [in] ICharSequence* text,
+            [out] String* ret);
+    }
+    /*
+     * @Involve
+     * interface IContentHandler
+     */
+    [deprecated]
+    interface IHtmlToSpannedConverter {
+        Convert(
+            [out] ISpanned** ret);
+
+        SetDocumentLocator(
+            [in] ILocator* locator);
+
+        StartDocument(); // throws SAXException
+
+        EndDocument(); // throws SAXException
+
+        StartPrefixMapping(
+            [in] String prefix,
+            [in] String uri); // throws SAXException
+
+        EndPrefixMapping(
+            [in] String prefix); // throws SAXException
+
+        StartElement(
+            [in] String uri,
+            [in] String localName,
+            [in] String qName,
+            [in] IAttributes* attributes); // throws SAXException
+
+        EndElement(
+            [in] String uri,
+            [in] String localName,
+            [in] String qName); // throws SAXException
+
+        Characters(
+            [in] ArrayOf<Char32>* ch,
+            [in] Int32 start,
+            [in] Int32 length); // throws SAXException
+
+        IgnorableWhitespace(
+            [in] ArrayOf<Char32>* ch,
+            [in] Int32 start,
+            [in] Int32 length); // throws SAXException
+
+        ProcessingInstruction(
+            [in] String target,
+            [in] String data); // throws SAXException
+
+        SkippedEntity(
+            [in] String name); // throws SAXException
+    }
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

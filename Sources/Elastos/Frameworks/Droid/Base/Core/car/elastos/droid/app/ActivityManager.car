@@ -1,0 +1,1957 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+    using interface Org.Xmlpull.V1.IXmlSerializer;
+
+    interface Elastos.Droid.App.IActivityManagerTaskThumbnail;
+    interface Elastos.Droid.App.IActivityManagerMemoryInfo;
+    interface Elastos.Droid.App.IActivityManagerRunningAppProcessInfo;
+    interface Elastos.Droid.App.IActivityManagerRecentTaskInfo;
+    interface Elastos.Droid.Utility.ISize;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Pm.IConfigurationInfo;
+    interface Elastos.Droid.Content.Pm.IIPackageDataObserver;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IDebugMemoryInfo;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+
+    /**
+     * Information you can retrieve about an ActivityStack in the system.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated]
+    interface IActivityManagerStackInfo {
+        GetStackId(
+            [out] Int32* result);
+
+        SetStackId(
+            [in] Int32 id);
+
+        GetBounds(
+            [out] IRect** rect);
+
+        SetBounds(
+            [in] IRect* rect);
+
+        GetTaskIds(
+            [out, callee] ArrayOf<Int32>* ids);
+
+        SetTaskId(
+            [in] ArrayOf<Int32>* ids);
+
+        GetTaskNames(
+            [out, callee] ArrayOf<String>* names);
+
+        SetTaskNames(
+            [in] ArrayOf<String>* names);
+
+        GetDisplayId(
+            [out] Int32* id);
+
+        SetDisplayId(
+            [in] Int32 id);
+
+        ToString(
+            [in] String prefix,
+            [out] String* result);
+    }
+
+    /**
+     * Information you can set and retrieve about the current activity within the recent task list.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IActivityManagerTaskDescription {
+        const String ATTR_TASKDESCRIPTION_PREFIX = "task_description_";
+
+        /**
+         * Sets the label for this task description.
+         * @hide
+         */
+        SetLabel(
+            [in] String label);
+
+        /**
+         * Sets the primary color for this task description.
+         * @hide
+         */
+        SetPrimaryColor(
+            [in] Int32 primaryColor);
+
+        /**
+         * Sets the icon for this task description.
+         * @hide
+         */
+        SetIcon(
+            [in] IBitmap* icon);
+
+        /**
+         * Moves the icon bitmap reference from an actual Bitmap to a file containing the
+         * bitmap.
+         * @hide
+         */
+        SetIconFilename(
+            [in] String iconFilename);
+
+        /**
+         * @return The label and description of the current state of this task.
+         */
+        GetLabel(
+            [out] String* label);
+
+        /**
+         * @return The icon that represents the current state of this task.
+         */
+        GetIcon(
+            [out] IBitmap** bm);
+
+        /** @hide */
+        GetIconFilename(
+            [out] String* name);
+
+        /** @hide */
+        GetInMemoryIcon(
+            [out] IBitmap** bm);
+
+        /**
+         * @return The color override on the theme's primary color.
+         */
+        GetPrimaryColor(
+            [out] Int32* color);
+
+        /** @hide */
+        SaveToXml(
+            [in] IXmlSerializer* xs);
+
+        /** @hide */
+        RestoreFromXml(
+            [in] String attrName,
+            [in] String attrValue);
+    }
+
+    /**
+     * The AppTask allows you to manage your own application's tasks.
+     * See {@link android.app.ActivityManager#getAppTasks()}
+     */
+    interface IActivityManagerAppTask {
+
+        /**
+         * Finishes all activities in this task and removes it from the recent tasks list.
+         */
+        FinishAndRemoveTask();
+
+        /**
+         * Get the RecentTaskInfo associated with this task.
+         *
+         * @return The RecentTaskInfo for this task, or null if the task no longer exists.
+         */
+        GetTaskInfo(
+            [out] IActivityManagerRecentTaskInfo** info);
+
+        /**
+         * Bring this task to the foreground.  If it contains activities, they will be
+         * brought to the foreground with it and their instances re-created if needed.
+         * If it doesn't contain activities, the root activity of the task will be
+         * re-launched.
+         */
+        MoveToFront();
+
+        /**
+         * Start an activity in this task.  Brings the task to the foreground.  If this task
+         * is not currently active (that is, its id < 0), then a new activity for the given
+         * Intent will be launched as the root of the task and the task brought to the
+         * foreground.  Otherwise, if this task is currently active and the Intent does not specify
+         * an activity to launch in a new task, then a new activity for the given Intent will
+         * be launched on top of the task and the task brought to the foreground.  If this
+         * task is currently active and the Intent specifies {@link Intent#FLAG_ACTIVITY_NEW_TASK}
+         * or would otherwise be launched in to a new task, then the activity not launched but
+         * this task be brought to the foreground and a new intent delivered to the top
+         * activity if appropriate.
+         *
+         * <p>In other words, you generally want to use an Intent here that does not specify
+         * {@link Intent#FLAG_ACTIVITY_NEW_TASK} or {@link Intent#FLAG_ACTIVITY_NEW_DOCUMENT},
+         * and let the system do the right thing.</p>
+         *
+         * @param intent The Intent describing the new activity to be launched on the task.
+         * @param options Optional launch options.
+         *
+         * @see Activity#startActivity(android.content.Intent, android.os.Bundle)
+         */
+        StartActivity(
+            [in] IContext* context,
+            [in] IIntent* intent,
+            [in] IBundle* options);
+
+        /**
+         * Modify the {@link Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} flag in the root
+         * Intent of this AppTask.
+         *
+         * @param exclude If true, {@link Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} will
+         * be set; otherwise, it will be cleared.
+         */
+        SetExcludeFromRecents(
+            [in] Boolean exclude);
+    }
+
+    /**
+     * Interact with the overall activities running in the system.
+     */
+    [local, deprecated]
+    interface IActivityManager {
+
+        /**
+         * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
+         * &lt;meta-data>}</a> name for a 'home' Activity that declares a package that is to be
+         * uninstalled in lieu of the declaring one.  The package named here must be
+         * signed with the same certificate as the one declaring the {@code &lt;meta-data>}.
+         */
+        const String META_HOME_ALTERNATE = "android.app.home.alternate";
+
+        /**
+         * Result for IActivityManager.startActivity: trying to start an activity under voice
+         * control when that activity does not support the VOICE category.
+         * @hide
+         */
+        const Int32 START_NOT_VOICE_COMPATIBLE = -7;
+
+        /**
+         * Result for IActivityManager.startActivity: an error where the
+         * start had to be canceled.
+         * @hide
+         */
+        const Int32 START_CANCELED = -6;
+
+        /**
+         * Result for IActivityManager.startActivity: an error where the
+         * thing being started is not an activity.
+         * @hide
+         */
+        const Int32 START_NOT_ACTIVITY = -5;
+
+        /**
+         * Result for IActivityManager.startActivity: an error where the
+         * caller does not have permission to start the activity.
+         * @hide
+         */
+        const Int32 START_PERMISSION_DENIED = -4;
+
+        /**
+         * Result for IActivityManager.startActivity: an error where the
+         * caller has requested both to forward a result and to receive
+         * a result.
+         * @hide
+         */
+        const Int32 START_FORWARD_AND_REQUEST_CONFLICT = -3;
+
+        /**
+         * Result for IActivityManager.startActivity: an error where the
+         * requested class is not found.
+         * @hide
+         */
+        const Int32 START_CLASS_NOT_FOUND = -2;
+
+        /**
+         * Result for IActivityManager.startActivity: an error where the
+         * given Intent could not be resolved to an activity.
+         * @hide
+         */
+        const Int32 START_INTENT_NOT_RESOLVED = -1;
+
+        /**
+         * Result for IActivityManaqer.startActivity: the activity was started
+         * successfully as normal.
+         * @hide
+         */
+        const Int32 START_SUCCESS = 0;
+
+        /**
+         * Result for IActivityManaqer.startActivity: the caller asked that the Intent not
+         * be executed if it is the recipient, and that is indeed the case.
+         * @hide
+         */
+        const Int32 START_RETURN_INTENT_TO_CALLER = 1;
+
+        /**
+         * Result for IActivityManaqer.startActivity: activity wasn't really started, but
+         * a task was simply brought to the foreground.
+         * @hide
+         */
+        const Int32 START_TASK_TO_FRONT = 2;
+
+        /**
+         * Result for IActivityManaqer.startActivity: activity wasn't really started, but
+         * the given Intent was given to the existing top activity.
+         * @hide
+         */
+        const Int32 START_DELIVERED_TO_TOP = 3;
+
+        /**
+         * Result for IActivityManaqer.startActivity: request was canceled because
+         * app switches are temporarily canceled to ensure the user's last request
+         * (such as pressing home) is performed.
+         * @hide
+         */
+        const Int32 START_SWITCHES_CANCELED = 4;
+
+        /**
+         * Result for IActivityManaqer.startActivity: a new activity was attempted to be started
+         * while in Lock Task Mode.
+         * @hide
+         */
+        const Int32 START_RETURN_LOCK_TASK_MODE_VIOLATION = 5;
+
+        /**
+         * Flag for IActivityManaqer.startActivity: do special start mode where
+         * a new activity is launched only if it is needed.
+         * @hide
+         */
+        const Int32 START_FLAG_ONLY_IF_NEEDED = 1<<0;
+
+        /**
+         * Flag for IActivityManaqer.startActivity: launch the app for
+         * debugging.
+         * @hide
+         */
+        const Int32 START_FLAG_DEBUG = 1<<1;
+
+        /**
+         * Flag for IActivityManaqer.startActivity: launch the app for
+         * OpenGL tracing.
+         * @hide
+         */
+        const Int32 START_FLAG_OPENGL_TRACES = 1<<2;
+
+        /**
+         * Result for IActivityManaqer.broadcastIntent: success!
+         * @hide
+         */
+        const Int32 BROADCAST_SUCCESS = 0;
+
+        /**
+         * Result for IActivityManaqer.broadcastIntent: attempt to broadcast
+         * a sticky intent without appropriate permission.
+         * @hide
+         */
+        const Int32 BROADCAST_STICKY_CANT_HAVE_PERMISSION = -1;
+
+        /**
+         * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+         * for a sendBroadcast operation.
+         * @hide
+         */
+        const Int32 INTENT_SENDER_BROADCAST = 1;
+
+        /**
+         * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+         * for a startActivity operation.
+         * @hide
+         */
+        const Int32 INTENT_SENDER_ACTIVITY = 2;
+
+        /**
+         * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+         * for an activity result operation.
+         * @hide
+         */
+        const Int32 INTENT_SENDER_ACTIVITY_RESULT = 3;
+
+        /**
+         * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+         * for a startService operation.
+         * @hide
+         */
+        const Int32 INTENT_SENDER_SERVICE = 4;
+
+        /** @hide User operation call: success! */
+        const Int32 USER_OP_SUCCESS = 0;
+
+        /** @hide User operation call: given user id is not known. */
+        const Int32 USER_OP_UNKNOWN_USER = -1;
+
+        /** @hide User operation call: given user id is the current user, can't be stopped. */
+        const Int32 USER_OP_IS_CURRENT = -2;
+
+        /** @hide Process is a persistent system process. */
+        const Int32 PROCESS_STATE_PERSISTENT = 0;
+
+        /** @hide Process is a persistent system process and is doing UI. */
+        const Int32 PROCESS_STATE_PERSISTENT_UI = 1;
+
+        /** @hide Process is hosting the current top activities.  Note that this covers
+         * all activities that are visible to the user. */
+        const Int32 PROCESS_STATE_TOP = 2;
+
+        /** @hide Process is important to the user, and something they are aware of. */
+        const Int32 PROCESS_STATE_IMPORTANT_FOREGROUND = 3;
+
+        /** @hide Process is important to the user, but not something they are aware of. */
+        const Int32 PROCESS_STATE_IMPORTANT_BACKGROUND = 4;
+
+        /** @hide Process is in the background running a backup/restore operation. */
+        const Int32 PROCESS_STATE_BACKUP = 5;
+
+        /** @hide Process is in the background, but it can't restore its state so we want
+         * to try to avoid killing it. */
+        const Int32 PROCESS_STATE_HEAVY_WEIGHT = 6;
+
+        /** @hide Process is in the background running a service.  Unlike oom_adj, this level
+         * is used for both the normal running in background state and the executing
+         * operations state. */
+        const Int32 PROCESS_STATE_SERVICE = 7;
+
+        /** @hide Process is in the background running a receiver.   Note that from the
+         * perspective of oom_adj receivers run at a higher foreground level, but for our
+         * prioritization here that is not necessary and putting them below services means
+         * many fewer changes in some process states as they receive broadcasts. */
+        const Int32 PROCESS_STATE_RECEIVER = 8;
+
+        /** @hide Process is in the background but hosts the home activity. */
+        const Int32 PROCESS_STATE_HOME = 9;
+
+        /** @hide Process is in the background but hosts the last shown activity. */
+        const Int32 PROCESS_STATE_LAST_ACTIVITY = 10;
+
+        /** @hide Process is being cached for later use and contains activities. */
+        const Int32 PROCESS_STATE_CACHED_ACTIVITY = 11;
+
+        /** @hide Process is being cached for later use and is a client of another cached
+         * process that contains activities. */
+        const Int32 PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 12;
+
+        /** @hide Process is being cached for later use and is empty. */
+        const Int32 PROCESS_STATE_CACHED_EMPTY = 13;
+
+        /**
+         * Screen compatibility mode: the application most always run in
+         * compatibility mode.
+         * @hide
+         */
+        const Int32 COMPAT_MODE_ALWAYS = -1;
+
+        /**
+         * Screen compatibility mode: the application can never run in
+         * compatibility mode.
+         * @hide
+         */
+        const Int32 COMPAT_MODE_NEVER = -2;
+
+        /**
+         * Screen compatibility mode: unknown.
+         * @hide
+         */
+        const Int32 COMPAT_MODE_UNKNOWN = -3;
+
+        /**
+         * Screen compatibility mode: the application currently has compatibility
+         * mode disabled.
+         * @hide
+         */
+        const Int32 COMPAT_MODE_DISABLED = 0;
+
+        /**
+         * Screen compatibility mode: the application currently has compatibility
+         * mode enabled.
+         * @hide
+         */
+        const Int32 COMPAT_MODE_ENABLED = 1;
+
+        /**
+         * Screen compatibility mode: request to toggle the application's
+         * compatibility mode.
+         * @hide
+         */
+        const Int32 COMPAT_MODE_TOGGLE = 2;
+
+        /**
+         * Flag for use with {@link #getRecentTasks}: return all tasks, even those
+         * that have set their
+         * {@link android.content.Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} flag.
+         */
+        const Int32 RECENT_WITH_EXCLUDED = 0x0001;
+
+        /**
+         * Provides a list that does not contain any
+         * recent tasks that currently are not available to the user.
+         */
+        const Int32 RECENT_IGNORE_UNAVAILABLE = 0x0002;
+
+        /**
+         * Provides a list that contains recent tasks for all
+         * profiles of a user.
+         * @hide
+         */
+        const Int32 RECENT_INCLUDE_PROFILES = 0x0004;
+
+        /**
+         * Ignores all tasks that are on the home stack.
+         * @hide
+         */
+        const Int32 RECENT_IGNORE_HOME_STACK_TASKS = 0x0008;
+
+        /**
+         * If set, the process of the root activity of the task will be killed
+         * as part of removing the task.
+         * @hide
+         */
+        const Int32 REMOVE_TASK_KILL_PROCESS = 0x0001;
+
+        /**
+         * Flag for {@link #moveTaskToFront(int, int)}: also move the "home"
+         * activity along with the task, so it is positioned immediately behind
+         * the task.
+         */
+        const Int32 MOVE_TASK_WITH_HOME = 0x00000001;
+
+        /**
+         * Flag for {@link #moveTaskToFront(int, int)}: don't count this as a
+         * user-instigated action, so the current activity will not receive a
+         * hint that the user is leaving.
+         */
+        const Int32 MOVE_TASK_NO_USER_ACTION = 0x00000002;
+
+
+        /** @hide */
+        GetFrontActivityScreenCompatMode(
+            [out] Int32* mode);
+
+        /** @hide */
+        SetFrontActivityScreenCompatMode(
+            [in] Int32 mode);
+
+        /** @hide */
+        GetPackageScreenCompatMode(
+            [in] String packageName,
+            [out] Int32* mode);
+
+        /** @hide */
+        SetPackageScreenCompatMode(
+            [in] String packageName,
+            [in] Int32 mode);
+
+        /** @hide */
+        GetPackageAskScreenCompat(
+            [in] String packageName,
+            [out] Boolean* ask);
+
+        /** @hide */
+        SetPackageAskScreenCompat(
+            [in] String packageName,
+            [in] Boolean ask);
+
+        /**
+         * Return the approximate per-application memory class of the current
+         * device.  This gives you an idea of how hard a memory limit you should
+         * impose on your application to let the overall system work best.  The
+         * returned value is in megabytes; the baseline Android memory class is
+         * 16 (which happens to be the Java heap limit of those devices); some
+         * device with more memory may return 24 or even higher numbers.
+         */
+        GetMemoryClass(
+            [out] Int32* klass);
+
+        /**
+         * Return the approximate per-application memory class of the current
+         * device when an application is running with a large heap.  This is the
+         * space available for memory-intensive applications; most applications
+         * should not need this amount of memory, and should instead stay with the
+         * #getMemoryClass() limit.  The returned value is in megabytes.
+         * This may be the same size as #getMemoryClass() on memory
+         * constrained devices, or it may be significantly larger on devices with
+         * a large amount of available RAM.
+         *
+         * @sa #getMemoryClass()
+         * @sa #getMemoryClass()
+         *
+         * <p>The is the size of the application's Dalvik heap if it has
+         * specified <code>android:largeHeap="true"</code> in its manifest.
+         */
+        GetLargeMemoryClass(
+            [out] Int32* klass);
+
+        /**
+         * Returns true if this is a low-RAM device.  Exactly whether a device is low-RAM
+         * is ultimately up to the device configuration, but currently it generally means
+         * something in the class of a 512MB device with about a 800x480 or less screen.
+         * This is mostly intended to be used by apps to determine whether they should turn
+         * off certain features that require more RAM.
+         */
+        IsLowRamDevice(
+            [out] Boolean* result);
+
+        /**
+         * Return a list of the tasks that the user has recently launched, with
+         * the most recent being first and older ones after in order.
+         *
+         * <p><b>Note: this method is only intended for debugging and presenting
+         * task management user interfaces</b>.  This should never be used for
+         * core logic in an application, such as deciding between different
+         * behaviors based on the information found here.  Such uses are
+         * <em>not</em> supported, and will likely break in the future.  For
+         * example, if multiple applications can be actively running at the
+         * same time, assumptions made about the meaning of the data here for
+         * purposes of control flow will be incorrect.</p>
+         *
+         * @param maxNum The maximum number of entries to return in the list.  The
+         * actual number returned may be smaller, depending on how many tasks the
+         * user has started and the maximum number the system can remember.
+         * @param flags Information about what to return.  May be any combination
+         * of #RECENT_WITH_EXCLUDED and #RECENT_IGNORE_UNAVAILABLE.
+         *
+         * @sa #RECENT_WITH_EXCLUDED
+         * @sa #RECENT_IGNORE_UNAVAILABLE
+         *
+         * @return Returns a list of RecentTaskInfo records describing each of
+         * the recent tasks.
+         *
+         * @throws SecurityException Throws SecurityException if the caller does
+         * not hold the android.Manifest.permission#GET_TASKS permission.
+         *
+         * @sa android.Manifest.permission#GET_TASKS
+         */
+        GetRecentTasks(
+            [in] Int32 maxNum,
+            [in] Int32 flags,
+            [out] IList** tasks);
+
+        /**
+         * Same as #getRecentTasks(int, int) but returns the recent tasks for a
+         * specific user. It requires holding
+         * the android.Manifest.permission#INTERACT_ACROSS_USERS_FULL permission.
+         *
+         * @sa #getRecentTasks(int, int)
+         * @sa android.Manifest.permission#INTERACT_ACROSS_USERS_FULL
+         *
+         * @param maxNum The maximum number of entries to return in the list.  The
+         * actual number returned may be smaller, depending on how many tasks the
+         * user has started and the maximum number the system can remember.
+         * @param flags Information about what to return.  May be any combination
+         * of #RECENT_WITH_EXCLUDED and #RECENT_IGNORE_UNAVAILABLE.
+         *
+         * @sa #RECENT_WITH_EXCLUDED
+         * @sa #RECENT_IGNORE_UNAVAILABLE
+         *
+         * @return Returns a list of RecentTaskInfo records describing each of
+         * the recent tasks.
+         *
+         * @throws SecurityException Throws SecurityException if the caller does
+         * not hold the android.Manifest.permission#GET_TASKS or the
+         * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL permissions.
+         *
+         * @sa android.Manifest.permission#GET_TASKS
+         * @sa android.Manifest.permission#INTERACT_ACROSS_USERS_FULL
+         * @hide
+         */
+        GetRecentTasksForUser(
+            [in] Int32 maxNum,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] IList** tasks);
+
+        /**
+         * Get the list of tasks associated with the calling application.
+         *
+         * @return The list of tasks associated with the application making this call.
+         * @throws SecurityException
+         */
+        GetAppTasks(
+            [out] IList** tasks);
+
+        /**
+         * Return the current design dimensions for {@link AppTask} thumbnails, for use
+         * with {@link #addAppTask}.
+         */
+        GetAppTaskThumbnailSize(
+            [out] ISize** size);
+
+        /**
+         * Add a new {@link AppTask} for the calling application.  This will create a new
+         * recents entry that is added to the <b>end</b> of all existing recents.
+         *
+         * @param activity The activity that is adding the entry.   This is used to help determine
+         * the context that the new recents entry will be in.
+         * @param intent The Intent that describes the recents entry.  This is the same Intent that
+         * you would have used to launch the activity for it.  In generally you will want to set
+         * both {@link Intent#FLAG_ACTIVITY_NEW_DOCUMENT} and
+         * {@link Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}; the latter is required since this recents
+         * entry will exist without an activity, so it doesn't make sense to not retain it when
+         * its activity disappears.  The given Intent here also must have an explicit ComponentName
+         * set on it.
+         * @param description Optional additional description information.
+         * @param thumbnail Thumbnail to use for the recents entry.  Should be the size given by
+         * {@link #getAppTaskThumbnailSize()}.  If the bitmap is not that exact size, it will be
+         * recreated in your process, probably in a way you don't like, before the recents entry
+         * is added.
+         *
+         * @return Returns the task id of the newly added app task, or -1 if the add failed.  The
+         * most likely cause of failure is that there is no more room for more tasks for your app.
+         */
+        AddAppTask(
+            [in] IActivity* activity,
+            [in] IIntent* intent,
+            [in] IActivityManagerTaskDescription* description,
+            [in] IBitmap* thumbnail,
+            [out] Int32* result);
+
+        /**
+         * Return a list of the tasks that are currently running, with
+         * the most recent being first and older ones after in order.  Note that
+         * "running" does not mean any of the task's code is currently loaded or
+         * activity -- the task may have been frozen by the system, so that it
+         * can be restarted in its previous state when next brought to the
+         * foreground.
+         *
+         * <p><b>Note: this method is only intended for debugging and presenting
+         * task management user interfaces</b>.  This should never be used for
+         * core logic in an application, such as deciding between different
+         * behaviors based on the information found here.  Such uses are
+         * <em>not</em> supported, and will likely break in the future.  For
+         * example, if multiple applications can be actively running at the
+         * same time, assumptions made about the meaning of the data here for
+         * purposes of control flow will be incorrect.</p>
+         *
+         * @param maxNum The maximum number of entries to return in the list.  The
+         * actual number returned may be smaller, depending on how many tasks the
+         * user has started.
+         *
+         * @return Returns a list of RunningTaskInfo records describing each of
+         * the running tasks.
+         *
+         * @throws SecurityException Throws SecurityException if the caller does
+         * not hold the android.Manifest.permission#GET_TASKS permission.
+         *
+         * @sa android.Manifest.permission#GET_TASKS
+         * @Deprecated
+         */
+        GetRunningTasks(
+            [in] Int32 maxNum,
+            [out] IList** tasks);
+
+        /**
+         * Completely remove the given task.
+         *
+         * @param taskId Identifier of the task to be removed.
+         * @param flags Additional operational flags.  May be 0 or
+         * #REMOVE_TASK_KILL_PROCESS.
+         *
+         * @sa #REMOVE_TASK_KILL_PROCESS
+         * @return Returns true if the given task was found and removed.
+         *
+         * @hide
+         */
+        RemoveTask(
+            [in] Int32 taskId,
+            [in] Int32 flags,
+            [out] Boolean* removed);
+
+        /** @hide */
+        GetTaskThumbnail(
+            [in] Int32 id,
+            [out] IActivityManagerTaskThumbnail** taskThumbnail);
+
+        /** @hide */
+        IsInHomeStack(
+            [in] Int32 taskId,
+            [out] Boolean* result);
+
+        /**
+         * Equivalent to calling #moveTaskToFront(int, int, Bundle)
+         * with a null options argument.
+         *
+         * @sa #moveTaskToFront(int, int, Bundle)
+         *
+         * @param taskId The identifier of the task to be moved, as found in
+         * RunningTaskInfo or RecentTaskInfo.
+         *
+         * @sa RunningTaskInfo
+         * @sa RecentTaskInfo
+         * @param flags Additional operational flags, 0 or more of
+         * #MOVE_TASK_WITH_HOME.
+         *
+         * @sa #MOVE_TASK_WITH_HOME
+         */
+        MoveTaskToFront(
+            [in] Int32 taskId,
+            [in] Int32 flags);
+
+        /**
+         * Ask that the task associated with a given task ID be moved to the
+         * front of the stack, so it is now visible to the user.  Requires that
+         * the caller hold permission android.Manifest.permission#REORDER_TASKS
+         * or a SecurityException will be thrown.
+         *
+         * @sa android.Manifest.permission#REORDER_TASKS
+         *
+         * @param taskId The identifier of the task to be moved, as found in
+         * RunningTaskInfo or RecentTaskInfo.
+         * @param flags Additional operational flags, 0 or more of
+         * #MOVE_TASK_WITH_HOME.
+         *
+         * @sa RunningTaskInfo
+         * @sa RecentTaskInfo
+         * @sa #MOVE_TASK_WITH_HOME
+         *
+         * @param options Additional options for the operation, either null or
+         * as per Context#startActivity(Intent, android.os.Bundle) Context.startActivity(Intent, Bundle).
+         *
+         * @sa Context#startActivity(Intent, android.os.Bundle) Context.startActivity(Intent, Bundle)
+         */
+        MoveTaskToFront(
+            [in] Int32 taskId,
+            [in] Int32 flags,
+            [in] IBundle* options);
+
+        /**
+         * Return a list of the services that are currently running.
+         *
+         * <p><b>Note: this method is only intended for debugging or implementing
+         * service management type user interfaces.</b></p>
+         *
+         * @param maxNum The maximum number of entries to return in the list.  The
+         * actual number returned may be smaller, depending on how many services
+         * are running.
+         *
+         * @return Returns a list of RunningServiceInfo records describing each of
+         * the running tasks.
+         */
+        GetRunningServices(
+            [in] Int32 maxNum,
+            [out] IList** runningServices);
+
+        /**
+         * Returns a PendingIntent you can start to show a control panel for the
+         * given running service.  If the service does not have a control panel,
+         * null is returned.
+         */
+        GetRunningServiceControlPanel(
+            [in] IComponentName* service,
+            [out] IPendingIntent** pendingIntent);
+
+        /**
+         * Return general information about the memory state of the system.  This
+         * can be used to help decide how to manage your own memory, though note
+         * that polling is not recommended and
+         * android.content.ComponentCallbacks2#onTrimMemory(int)
+         * ComponentCallbacks2.onTrimMemory(int) is the preferred way to do this.
+         * Also see #getMyMemoryState for how to retrieve the current trim
+         * level of your process as needed, which gives a better hint for how to
+         * manage its memory.
+         *
+         * @sa android.content.ComponentCallbacks2#onTrimMemory(int) ComponentCallbacks2.onTrimMemory(int)
+         * @sa #getMyMemoryState
+         *
+         */
+        GetMemoryInfo(
+            [out] IActivityManagerMemoryInfo** outInfo);
+
+        /**
+         * @hide
+         */
+        ClearApplicationUserData(
+            [in] String packageName,
+            [in] IIPackageDataObserver* observer,
+            [out] Boolean* result);
+
+        /**
+         * Permits an application to erase its own data from disk.  This is equivalent to
+         * the user choosing to clear the app's data from within the device settings UI.  It
+         * erases all dynamic data associated with the app -- its private data and data in its
+         * private area on external storage -- but does not remove the installed application
+         * itself, nor any OBB files.
+         *
+         * @return {@code true} if the application successfully requested that the application's
+         *     data be erased; {@code false} otherwise.
+         */
+        ClearApplicationUserData(
+            [out] Boolean* result);
+
+        /**
+         * Returns a list of any processes that are currently in an error condition.  The result
+         * will be null if all processes are running properly at this time.
+         *
+         * @return Returns a list of ProcessErrorStateInfo records, or null if there are no
+         * current error conditions (it will not return an empty list).  This list ordering is not
+         * specified.
+         */
+        GetProcessesInErrorState(
+            [out] IList** records);
+
+        /**
+         * Returns a list of application processes installed on external media
+         * that are running on the device.
+         *
+         * <p><b>Note: this method is only intended for debugging or building
+         * a user-facing process management UI.</b></p>
+         *
+         * @return Returns a list of ApplicationInfo records, or null if none
+         * This list ordering is not specified.
+         * @hide
+         */
+        GetRunningExternalApplications(
+            [out] IList** records);
+
+        /**
+         * Returns a list of application processes that are running on the device.
+         *
+         * <p><b>Note: this method is only intended for debugging or building
+         * a user-facing process management UI.</b></p>
+         *
+         * @return Returns a list of RunningAppProcessInfo records, or null if there are no
+         * running processes (it will not return an empty list).  This list ordering is not
+         * specified.
+         */
+        GetRunningAppProcesses(
+            [out] IList** records);
+
+        /**
+         * Return information about the memory usage of one or more processes.
+         *
+         * <p><b>Note: this method is only intended for debugging or building
+         * a user-facing process management UI.</b></p>
+         *
+         * @param pids The pids of the processes whose memory usage is to be
+         * retrieved.
+         * @return Returns an array of memory information, one for each
+         * requested pid.
+         */
+        GetProcessMemoryInfo(
+            [in] ArrayOf<Int32>* pids,
+            [out, callee] ArrayOf<IDebugMemoryInfo*>* memoryInfos);
+
+        /**
+         * @deprecated This is now just a wrapper for
+         * #killBackgroundProcesses(String); the previous behavior here
+         * is no longer available to applications because it allows them to
+         * break other applications by removing their alarms, stopping their
+         * services, etc.
+         *
+         * @sa #killBackgroundProcesses(String)
+         */
+        //@Deprecated
+        RestartPackage(
+            [in] String packageName);
+
+        /**
+         * Have the system immediately kill all background processes associated
+         * with the given package.  This is the same as the kernel killing those
+         * processes to reclaim memory; the system will take care of restarting
+         * these processes in the future as needed.
+         *
+         * <p>You must hold the permission
+         * android.Manifest.permission#KILL_BACKGROUND_PROCESSES to be able to
+         * call this method.
+         *
+         * @sa android.Manifest.permission#KILL_BACKGROUND_PROCESSES
+         *
+         * @param packageName The name of the package whose processes are to
+         * be killed.
+         */
+        KillBackgroundProcesses(
+            [in] String packageName);
+
+        /**
+         * Have the system perform a force stop of everything associated with
+         * the given application package.  All processes that share its uid
+         * will be killed, all services it has running stopped, all activities
+         * removed, etc.  In addition, a {@link Intent#ACTION_PACKAGE_RESTARTED}
+         * broadcast will be sent, so that any of its registered alarms can
+         * be stopped, notifications removed, etc.
+         *
+         * <p>You must hold the permission
+         * {@link android.Manifest.permission#FORCE_STOP_PACKAGES} to be able to
+         * call this method.
+         *
+         * @param packageName The name of the package to be stopped.
+         * @param userId The user for which the running package is to be stopped.
+         *
+         * @hide This is not available to third party applications due to
+         * it allowing them to break other applications by stopping their
+         * services, removing their alarms, etc.
+         */
+        ForceStopPackageAsUser(
+            [in] String packageName,
+            [in] Int32 userId);
+
+        /**
+         * @see #forceStopPackageAsUser(String, int)
+         * @hide
+         */
+        ForceStopPackage(
+            [in] String packageName);
+
+        /**
+         * Get the device configuration attributes.
+         */
+        GetDeviceConfigurationInfo(
+            [out] IConfigurationInfo** configurationInfo);
+
+        /**
+         * Get the preferred density of icons for the launcher. This is used when
+         * custom drawables are created (e.g., for shortcuts).
+         *
+         * @return density in terms of DPI
+         */
+        GetLauncherLargeIconDensity(
+            [out] Int32* density);
+
+        /**
+         * Get the preferred launcher icon size. This is used when custom drawables
+         * are created (e.g., for shortcuts).
+         *
+         * @return dimensions of square icons in terms of pixels
+         */
+        GetLauncherLargeIconSize(
+            [out] Int32* size);
+
+        /**
+         * @param userid the user's id. Zero indicates the default user
+         * @hide
+         */
+        SwitchUser(
+            [in] Int32 userid,
+            [out] Boolean* switched);
+
+        /**
+         * Return whether the given user is actively running.  This means that
+         * the user is in the "started" state, not "stopped" -- it is currently
+         * allowed to run code through scheduled alarms, receiving broadcasts,
+         * etc.  A started user may be either the current foreground user or a
+         * background user; the result here does not distinguish between the two.
+         * @param userid the user's id. Zero indicates the default user.
+         * @hide
+         */
+        IsUserRunning(
+            [in] Int32 userid,
+            [out] Boolean* isRunning);
+
+        /**
+         * Return whether currently in lock task mode.  When in this mode
+         * no new tasks can be created or switched to.
+         *
+         * @see Activity#startLockTask()
+         */
+         IsInLockTaskMode(
+            [out] Boolean* result);
+    }
+
+    interface IActivityManagerHelper {
+        /** @hide */
+        StaticGetMemoryClass(
+            [out] Int32* klass);
+
+        /** @hide */
+        StaticGetLargeMemoryClass(
+            [out] Int32* klass);
+
+        /** @hide */
+        IsLowRamDeviceStatic(
+            [out] Boolean* result);
+
+        /**
+         * Used by persistent processes to determine if they are running on a
+         * higher-end device so should be okay using hardware drawing acceleration
+         * (which tends to consume a lot more RAM).
+         * @hide
+         */
+        IsHighEndGfx(
+            [out] Boolean* result);
+
+        /**
+         * Return the maximum number of recents entries that we will maintain and show.
+         * @hide
+         */
+        GetMaxRecentTasksStatic(
+            [out] Int32* result);
+
+        /**
+         * Return the default limit on the number of recents that an app can make.
+         * @hide
+         */
+        GetDefaultAppRecentsLimitStatic(
+            [out] Int32* result);
+
+        /**
+         * Return the maximum limit on the number of recents that an app can make.
+         * @hide
+         */
+        GetMaxAppRecentsLimitStatic(
+            [out] Int32* result);
+
+        /**
+         * Return global memory state information for the calling process.  This
+         * does not fill in all fields of the RunningAppProcessInfo.  The
+         * only fields that will be filled in are
+         * RunningAppProcessInfo#pid,
+         * RunningAppProcessInfo#uid,
+         * RunningAppProcessInfo#lastTrimLevel,
+         * RunningAppProcessInfo#importance,
+         * RunningAppProcessInfo#lru, and
+         * RunningAppProcessInfo#importanceReasonCode.
+         *
+         * @sa RunningAppProcessInfo
+         * @sa RunningAppProcessInfo#pid
+         * @sa RunningAppProcessInfo#uid
+         * @sa RunningAppProcessInfo#lastTrimLevel
+         * @sa RunningAppProcessInfo#importance
+         * @sa RunningAppProcessInfo#lru
+         * @sa RunningAppProcessInfo#importanceReasonCode
+         */
+        GetMyMemoryState(
+            [in] IActivityManagerRunningAppProcessInfo* outInfo);
+
+        /**
+         * Returns "true" if the user interface is currently being messed with
+         * by a monkey.
+         */
+        IsUserAMonkey(
+            [out] Boolean* result);
+
+        /**
+         * Returns "true" if device is running in a test harness.
+         */
+        IsRunningInTestHarness(
+            [out] Boolean* result);
+
+        /** @hide */
+        CheckComponentPermission(
+            [in] String permission,
+            [in] Int32 uid,
+            [in] Int32 owningUid,
+            [in] Boolean exported,
+            [out] Int32* value);
+
+        /** @hide */
+        CheckUidPermission(
+            [in] String permission,
+            [in] Int32 uid,
+            [out] Int32* value);
+
+        /** @hide */
+        HandleIncomingUser(
+            [in] Int32 callingPid,
+            [in] Int32 callingUid,
+            [in] Int32 userId,
+            [in] Boolean allowAll,
+            [in] Boolean requireFull,
+            [in] String name,
+            [in] String callerPackage,
+            [out] Int32* value);
+
+        /** @hide */
+        GetCurrentUser(
+            [out] Int32* currentUser);
+    }
+
+    /**
+     * Information you can retrieve about tasks that the user has most recently
+     * started or visited.
+     */
+    /**
+     * @Invovle
+     * interface IParcelable
+     */
+    [local]
+    interface IActivityManagerRecentTaskInfo {
+        GetId(
+            [out] Int32* id);
+
+        SetId(
+            [in] Int32 id);
+
+        GetPersistentId(
+            [out] Int32* id);
+
+        SetPersistentId(
+            [in] Int32 id);
+
+        GetBaseIntent(
+            [out] IIntent** baseIntent);
+
+        SetBaseIntent(
+            [in] IIntent* baseIntent);
+
+        GetOrigActivity(
+            [out] IComponentName** origActivity);
+
+        SetOrigActivity(
+            [in] IComponentName* origActivity);
+
+        GetDescription(
+            [out] ICharSequence** description);
+
+        SetDescription(
+            [in] ICharSequence* description);
+
+        /**
+         * The recent activity values for the highest activity in the stack to have set the values.
+         * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
+         */
+        SetTaskDescription(
+            [in] IActivityManagerTaskDescription* description);
+
+        GetTaskDescription(
+            [out] IActivityManagerTaskDescription** description);
+
+        /**
+         * Task affiliation for grouping with other tasks.
+         */
+        GetAffiliatedTaskId(
+            [out] Int32* id);
+
+        SetAffiliatedTaskId(
+            [in] Int32 id);
+    }
+
+    /**
+     * Information you can retrieve about a particular task that is currently
+     * "running" in the system.  Note that a running task does not mean the
+     * given task actually has a process it is actively running in; it simply
+     * means that the user has gone to it and never closed it, but currently
+     * the system may have killed its process and is only holding on to its
+     * last state in order to restart it when the user returns.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IActivityManagerRunningTaskInfo {
+        /**
+         * A unique identifier for this task.
+         */
+        GetId(
+            [out] Int32* id);
+
+        SetId(
+            [in] Int32 id);
+
+        /**
+         * The component launched as the first activity in the task.  This can
+         * be considered the "application" of this task.
+         */
+        GetBaseActivity(
+            [out] IComponentName** baseActivity);
+
+        SetBaseActivity(
+            [in] IComponentName* baseActivity);
+
+        /**
+         * The activity component at the top of the history stack of the task.
+         * This is what the user is currently doing.
+         */
+        GetTopActivity(
+            [out] IComponentName** topActivity);
+
+        SetTopActivity(
+            [in] IComponentName* topActivity);
+
+        /**
+         * Thumbnail representation of the task's current state.  Currently
+         * always null.
+         */
+        GetThumbnail(
+            [out] IBitmap** thumbnail);
+
+        SetThumbnail(
+            [in] IBitmap* thumbnail);
+
+        /**
+         * Description of the task's current state.
+         */
+        GetDescription(
+            [out] ICharSequence** description);
+
+        SetDescription(
+            [in] ICharSequence* description);
+
+        /**
+         * Number of activities in this task.
+         */
+        GetNumActivities(
+            [out] Int32* num);
+
+        SetNumActivities(
+            [in] Int32 num);
+
+        /**
+         * Number of activities that are currently running (not stopped
+         * and persisted) in this task.
+         */
+        GetNumRunning(
+            [out] Int32* num);
+
+        SetNumRunning(
+            [in] Int32 num);
+    }
+
+    /** @hide */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IActivityManagerTaskThumbnail {
+        GetMainThumbnail(
+            [out] IBitmap** thumbnail);
+
+        SetMainThumbnail(
+            [in] IBitmap* thumbnail);
+
+        GetThumbnailFileDescriptor(
+            [out] IParcelFileDescriptor** num);
+
+        SetThumbnailFileDescriptor(
+            [in] IParcelFileDescriptor* num);
+    }
+
+    /**
+     * Information you can retrieve about a particular Service that is
+     * currently running in the system.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IActivityManagerRunningServiceInfo {
+        /**
+         * Bit for #flags: set if this service has been
+         * explicitly started.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_STARTED = 1 << 0;
+
+        /**
+         * Bit for #flags: set if the service has asked to
+         * run as a foreground process.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_FOREGROUND = 1 << 1;
+
+        /**
+         * Bit for #flags: set if the service is running in a
+         * core system process.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_SYSTEM_PROCESS = 1 << 2;
+
+        /**
+         * Bit for #flags: set if the service is running in a
+         * persistent process.
+         *
+         * @sa #flags
+         */
+        const Int32 FLAG_PERSISTENT_PROCESS = 1 << 3;
+
+        /**
+         * The service component.
+         */
+        GetService(
+            [out] IComponentName** service);
+
+        SetService(
+            [in] IComponentName* service);
+
+        /**
+         * If non-zero, this is the process the service is running in.
+         */
+        GetPid(
+            [out] Int32* pid);
+
+        SetPid(
+            [in] Int32 pid);
+
+        /**
+         * The UID that owns this service.
+         */
+        GetUid(
+            [out] Int32* uid);
+
+        SetUid(
+            [in] Int32 uid);
+
+        /**
+         * The name of the process this service runs in.
+         */
+        GetProcess(
+            [out] String* process);
+
+        SetProcess(
+            [in] String process);
+
+        /**
+         * Set to true if the service has asked to run as a foreground process.
+         */
+        GetForeground(
+            [out] Boolean* foreground);
+
+        SetForeground(
+            [in] Boolean foreground);
+
+        /**
+         * The time when the service was first made active, either by someone
+         * starting or binding to it.  This
+         * is in units of android.os.SystemClock#elapsedRealtime().
+         *
+         * @sa android.os.SystemClock#elapsedRealtime()
+         */
+        GetActiveSince(
+            [out] Int64* activeSince);
+
+        SetActiveSince(
+            [in] Int64 activeSince);
+
+        /**
+         * Set to true if this service has been explicitly started.
+         */
+        IsStarted(
+            [out] Boolean* started);
+
+        SetStarted(
+            [in] Boolean started);
+
+        /**
+         * Number of clients connected to the service.
+         */
+        GetClientCount(
+            [out] Int32* clientCount);
+
+        SetClientCount(
+            [in] Int32 clientCount);
+
+        /**
+         * Number of times the service's process has crashed while the service
+         * is running.
+         */
+        GetCrashCount(
+            [out] Int32* crashCount);
+
+        SetCrashCount(
+            [in] Int32 crashCount);
+
+        /**
+         * The time when there was last activity in the service (either
+         * explicit requests to start it or clients binding to it).  This
+         * is in units of android.os.SystemClock#uptimeMillis().
+         *
+         * @sa android.os.SystemClock#uptimeMillis()
+         */
+        GetLastActivityTime(
+            [out] Int64* time);
+
+        SetLastActivityTime(
+            [in] Int64 time);
+
+        /**
+         * If non-zero, this service is not currently running, but scheduled to
+         * restart at the given time.
+         */
+        GetRestarting(
+            [out] Int64* restarting);
+
+        SetRestarting(
+            [in] Int64 restarting);
+
+        /**
+         * Running flags.
+         */
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        /**
+         * For special services that are bound to by system code, this is
+         * the package that holds the binding.
+         */
+        GetClientPackage(
+            [out] String* clientPackage);
+
+        SetClientPackage(
+            [in] String clientPackage);
+
+        /**
+         * For special services that are bound to by system code, this is
+         * a string resource providing a user-visible label for who the
+         * client is.
+         */
+        GetClientLabel(
+            [out] Int32* clientLabel);
+
+        SetClientLabel(
+            [in] Int32 clientLabel);
+    }
+
+    /**
+     * Information you can retrieve about the available memory through
+     * ActivityManager#getMemoryInfo.
+     *
+     * @sa ActivityManager#getMemoryInfo
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IActivityManagerMemoryInfo {
+        /**
+         * The available memory on the system.  This number should not
+         * be considered absolute: due to the nature of the kernel, a significant
+         * portion of this memory is actually in use and needed for the overall
+         * system to run well.
+         */
+        GetAvailMem(
+            [out] Int64* availMem);
+
+        SetAvailMem(
+            [in] Int64 availMem);
+
+        /**
+         * The total memory accessible by the kernel.  This is basically the
+         * RAM size of the device, not including below-kernel fixed allocations
+         * like DMA buffers, RAM for the baseband CPU, etc.
+         */
+        GetTotalMem(
+            [out] Int64* totalMem);
+
+        SetTotalMem(
+            [in] Int64 totalMem);
+
+        /**
+         * The threshold of #availMem at which we consider memory to be
+         * low and start killing background services and other non-extraneous
+         * processes.
+         *
+         * @sa #availMem
+         */
+        GetThreshold(
+            [out] Int64* threshold);
+
+        SetThreshold(
+            [in] Int64 threshold);
+
+        /**
+         * Set to true if the system considers itself to currently be in a low
+         * memory situation.
+         */
+        GetLowMemory(
+            [out] Boolean* lowMemory);
+
+        SetLowMemory(
+            [in] Boolean lowMemory);
+
+        /** @hide */
+        GetHiddenAppThreshold(
+            [out] Int64* threshold);
+
+        SetHiddenAppThreshold(
+            [in] Int64 threshold);
+
+        /** @hide */
+        GetSecondaryServerThreshold(
+            [out] Int64* threshold);
+
+        SetSecondaryServerThreshold(
+            [in] Int64 threshold);
+
+        /** @hide */
+        GetVisibleAppThreshold(
+            [out] Int64* threshold);
+
+        SetVisibleAppThreshold(
+            [in] Int64 threshold);
+
+        /** @hide */
+        GetForegroundAppThreshold(
+            [out] Int64* threshold);
+
+        SetForegroundAppThreshold(
+            [in] Int64 threshold);
+    }
+
+    /**
+     * Information you can retrieve about any processes that are in an error condition.
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IActivityManagerProcessErrorStateInfo {
+        /**
+         * Condition codes
+         */
+        const Int32 NO_ERROR = 0;
+        const Int32 CRASHED = 1;
+        const Int32 NOT_RESPONDING = 2;
+
+        /**
+         * The condition that the process is in.
+         */
+        GetCondition(
+            [out] Int32* condition);
+
+        SetCondition(
+            [in] Int32 condition);
+
+        /**
+         * The process name in which the crash or error occurred.
+         */
+        GetProcessName(
+            [out] String* processName);
+
+        SetProcessName(
+            [in] String processName);
+
+        /**
+         * The pid of this process; 0 if none
+         */
+        GetPid(
+            [out] Int32* pid);
+
+        SetPid(
+            [in] Int32 pid);
+
+        /**
+         * The kernel user-ID that has been assigned to this process;
+         * currently this is not a unique ID (multiple applications can have
+         * the same uid).
+         */
+        GetUid(
+            [out] Int32* uid);
+
+        SetUid(
+            [in] Int32 uid);
+
+        /**
+         * The activity name associated with the error, if known.  May be null.
+         */
+        GetTag(
+            [out] String* tag);
+
+        SetTag(
+            [in] String tag);
+
+        /**
+         * A short message describing the error condition.
+         */
+        GetShortMsg(
+            [out] String* shortMsg);
+
+        SetShortMsg(
+            [in] String shortMsg);
+
+        /**
+         * A long message describing the error condition.
+         */
+        GetLongMsg(
+            [out] String* longMsg);
+
+        SetLongMsg(
+            [in] String longMsg);
+
+        /**
+         * The stack trace where the error originated.  May be null.
+         */
+        GetStackTrace(
+            [out] String* stackTrace);
+
+        SetStackTrace(
+            [in] String stackTrace);
+
+        /**
+         * to be deprecated: This value will always be null.
+         */
+        GetCrashData(
+            [out, callee] ArrayOf<Byte>* crashData);
+
+        SetCrashData(
+            [in] ArrayOf<Byte>* crashData);
+    }
+
+    /**
+     * Information you can retrieve about a running process.
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IActivityManagerRunningAppProcessInfo {
+        /**
+         * Constant for #flags: this is an app that is unable to
+         * correctly save its state when going to the background,
+         * so it can not be killed while in the background.
+         *
+         * @sa #flags
+         * @hide
+         */
+        const Int32 FLAG_CANT_SAVE_STATE = 1<<0;
+
+        /**
+         * Constant for #flags: this process is associated with a
+         * persistent system app.
+         *
+         * @sa #flags
+         * @hide
+         */
+        const Int32 FLAG_PERSISTENT = 1<<1;
+
+        /**
+         * Constant for #flags: this process is associated with a
+         * persistent system app.
+         *
+         * @sa #flags
+         * @hide
+         */
+        const Int32 FLAG_HAS_ACTIVITIES = 1<<2;
+
+        /**
+         * Constant for {@link #importance}: this process is running the
+         * foreground UI.
+         */
+        const Int32 IMPORTANCE_FOREGROUND = 100;
+
+        /**
+         * Constant for {@link #importance}: this process is running something
+         * that is actively visible to the user, though not in the immediate
+         * foreground.
+         */
+        const Int32 IMPORTANCE_VISIBLE = 200;
+
+        /**
+         * Constant for {@link #importance}: this process is running something
+         * that is considered to be actively perceptible to the user.  An
+         * example would be an application performing background music playback.
+         */
+        const Int32 IMPORTANCE_PERCEPTIBLE = 130;
+
+        /**
+         * Constant for {@link #importance}: this process is running an
+         * application that can not save its state, and thus can't be killed
+         * while in the background.
+         * @hide
+         */
+        const Int32 IMPORTANCE_CANT_SAVE_STATE = 170;
+
+        /**
+         * Constant for {@link #importance}: this process is contains services
+         * that should remain running.
+         */
+        const Int32 IMPORTANCE_SERVICE = 300;
+
+        /**
+         * Constant for {@link #importance}: this process process contains
+         * background code that is expendable.
+         */
+        const Int32 IMPORTANCE_BACKGROUND = 400;
+
+        /**
+         * Constant for {@link #importance}: this process is empty of any
+         * actively running code.
+         */
+        const Int32 IMPORTANCE_EMPTY = 500;
+
+        /**
+         * Constant for {@link #importance}: this process does not exist.
+         */
+        const Int32 IMPORTANCE_GONE = 1000;
+
+        /**
+         * Constant for {@link #importanceReasonCode}: nothing special has
+         * been specified for the reason for this level.
+         */
+        const Int32 REASON_UNKNOWN = 0;
+
+        /**
+         * Constant for #importanceReasonCode: one of the application's
+         * content providers is being used by another process.  The pid of
+         * the client process is in #importanceReasonPid and the
+         * target provider in this process is in
+         * #importanceReasonComponent.
+         *
+         * @sa #importanceReasonCode
+         * @sa #importanceReasonPid
+         * @sa #importanceReasonComponent
+         */
+        const Int32 REASON_PROVIDER_IN_USE = 1;
+
+        /**
+         * Constant for #importanceReasonCode: one of the application's
+         * content providers is being used by another process.  The pid of
+         * the client process is in #importanceReasonPid and the
+         * target provider in this process is in
+         * #importanceReasonComponent.
+         *
+         * @sa #importanceReasonCode
+         * @sa #importanceReasonPid
+         * @sa #importanceReasonComponent
+         */
+        const Int32 REASON_SERVICE_IN_USE = 2;
+
+        /**
+         * The name of the process that this object is associated with
+         */
+        GetProcessName(
+            [out] String* processName);
+
+        SetProcessName(
+            [in] String processName);
+
+        /**
+         * The pid of this process; 0 if none
+         */
+        GetPid(
+            [out] Int32* pid);
+
+        SetPid(
+            [in] Int32 pid);
+
+        /**
+         * The user id of this process.
+         */
+        GetUid(
+            [out] Int32* uid);
+
+        SetUid(
+            [in] Int32 uid);
+
+        /**
+         * All packages that have been loaded into the process.
+         */
+        GetPkgList(
+            [out, callee] ArrayOf<String>* pkgList);
+
+        SetPkgList(
+            [in] ArrayOf<String>* pkgList);
+
+        /**
+         * Flags of information.  May be any of#FLAG_CANT_SAVE_STATE.
+         *
+         * @sa #FLAG_CANT_SAVE_STATE
+         * @hide
+         */
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        /**
+         * Last memory trim level reported to the process: corresponds to
+         * the values supplied to android.content.ComponentCallbacks2#onTrimMemory(int) ComponentCallbacks2.onTrimMemory(int).
+         *
+         * @sa android.content.ComponentCallbacks2#onTrimMemory(int) ComponentCallbacks2.onTrimMemory(int)
+         */
+        GetLastTrimLevel(
+            [out] Int32* level);
+
+        SetLastTrimLevel(
+            [in] Int32 level);
+
+        /**
+         * The relative importance level that the system places on this
+         * process.  May be one of #IMPORTANCE_FOREGROUND,
+         * #IMPORTANCE_VISIBLE, #IMPORTANCE_SERVICE,
+         * #IMPORTANCE_BACKGROUND, or #IMPORTANCE_EMPTY.  These
+         * constants are numbered so that "more important" values are always
+         * smaller than "less important" values.
+         *
+         * @sa #IMPORTANCE_FOREGROUND
+         * @sa #IMPORTANCE_VISIBLE
+         * @sa #IMPORTANCE_SERVICE
+         * @sa #IMPORTANCE_BACKGROUND
+         * @sa #IMPORTANCE_EMPTY
+         */
+        GetImportance(
+            [out] Int32* importance);
+
+        SetImportance(
+            [in] Int32 importance);
+
+        /**
+         * An additional ordering within a particular #importance
+         * category, providing finer-grained information about the relative
+         * utility of processes within a category.  This number means nothing
+         * except that a smaller values are more recently used (and thus
+         * more important).  Currently an LRU value is only maintained for
+         * the #IMPORTANCE_BACKGROUND category, though others may
+         * be maintained in the future.
+         *
+         * @sa #importance
+         * @sa #IMPORTANCE_BACKGROUND
+         */
+        GetLru(
+            [out] Int32* lru);
+
+        SetLru(
+            [in] Int32 lru);
+
+        /**
+         * The reason for #importance, if any.
+         *
+         * @sa #importance
+         */
+        GetImportanceReasonCode(
+            [out] Int32* code);
+
+        SetImportanceReasonCode(
+            [in] Int32 code);
+
+        /**
+         * For the specified values of #importanceReasonCode, this
+         * is the process ID of the other process that is a client of this
+         * process.  This will be 0 if no other process is using this one.
+         *
+         * @sa #importanceReasonCode
+         */
+        GetImportanceReasonPid(
+            [out] Int32* pid);
+
+        SetImportanceReasonPid(
+            [in] Int32 pid);
+
+        /**
+         * For the specified values of #importanceReasonCode, this
+         * is the name of the component that is being used in this process.
+         *
+         * @sa #importanceReasonCode
+         */
+        GetImportanceReasonComponent(
+            [out] IComponentName** component);
+
+        SetImportanceReasonComponent(
+            [in] IComponentName* component);
+
+        /**
+         * When importanceReasonPid is non-0, this is the importance
+         * of the other pid. @hide
+         *
+         * @sa importanceReasonPid
+         */
+        GetImportanceReasonImportance(
+            [out] Int32* importance);
+
+        SetImportanceReasonImportance(
+            [in] Int32 importance);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

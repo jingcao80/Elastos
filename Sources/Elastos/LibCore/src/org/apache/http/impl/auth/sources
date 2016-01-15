@@ -1,0 +1,19 @@
+
+TARGET_NAME= auth
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+SOURCES = AuthSchemeBase.cpp
+SOURCES += RFC2617Scheme.cpp
+SOURCES += BasicScheme.cpp
+SOURCES += DigestScheme.cpp
+SOURCES += BasicSchemeFactory.cpp
+SOURCES += DigestSchemeFactory.cpp
+SOURCES += NTLMScheme.cpp

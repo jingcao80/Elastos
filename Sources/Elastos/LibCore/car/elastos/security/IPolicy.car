@@ -1,0 +1,69 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.ICodeSource;
+    interface Elastos.Security.IPermissionCollection;
+    interface Elastos.Security.IProtectionDomain;
+    interface Elastos.Security.IPermission;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IPolicyParameters {
+    }
+
+    interface IPolicy {
+        GetParameters(
+            [out] IPolicyParameters** parameters);
+
+        GetProvider(
+            [out] IProvider** provider);
+
+        GetType(
+            [out] String* type);
+
+        GetPermissions(
+            [in] ICodeSource* cs,
+            [out] IPermissionCollection** permissions);
+
+        Refresh();
+
+        GetPermissionsEx(
+            [in] IProtectionDomain* dom,
+            [out] IPermissionCollection** permissions);
+
+        Implies(
+            [in] IProtectionDomain* dom,
+            [in] IPermission* permission,
+            [out] Boolean* result);
+    }
+
+    interface IPolicyHelper {
+        GetInstance(
+            [in] String type,
+            [in] IPolicyParameters* params,
+            [out] IPolicy** instance);
+
+        GetInstanceEx(
+            [in] String type,
+            [in] IPolicyParameters* params,
+            [in] String provider,
+            [out] IPolicy** instance);
+
+        GetInstanceEx2(
+            [in] String type,
+            [in] IPolicyParameters* params,
+            [in] IProvider* provider,
+            [out] IPolicy** instance);
+
+        GetPolicy(
+            [out] IPolicy** policy);
+
+        SetPolicy(
+            [in] IPolicy* policy);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

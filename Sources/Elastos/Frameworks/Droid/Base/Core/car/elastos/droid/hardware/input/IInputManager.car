@@ -1,0 +1,104 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.View.IInputDevice;
+    interface Elastos.Droid.View.IInputEvent;
+    interface Elastos.Droid.Hardware.Input.IKeyboardLayout;
+    interface Elastos.Droid.Hardware.Input.IInputDevicesChangedListener;
+    interface Elastos.Droid.Hardware.Input.IInputDeviceIdentifier;
+    interface Elastos.Droid.Hardware.Input.ITouchCalibration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Input {
+
+    interface IIInputManager {
+        // Gets input device information.
+        GetInputDevice(
+            [in] Int32 deviceId,
+            [out] IInputDevice** device);
+
+        GetInputDeviceIds(
+            [out, callee] ArrayOf<Int32>* deviceIds);
+
+        // Reports whether the hardware supports the given keys; returns true if successful
+        HasKeys(
+            [in] Int32 deviceId,
+            [in] Int32 sourceMask,
+            [in] ArrayOf<Int32> keyCodes,
+            [out] ArrayOf<Boolean> keyExists,
+            [out] Boolean* res);
+
+        // Temporarily changes the pointer speed.
+        TryPointerSpeed(
+            [in] Int32 speed);
+
+        // Injects an input event into the system.  To inject into windows owned by other
+        // applications, the caller must have the INJECT_EVENTS permission.
+        InjectInputEvent(
+            [in] IInputEvent* ev,
+            [in] Int32 mode,
+            [out] Boolean* res);
+
+        // Calibrate input device position
+        GetTouchCalibrationForInputDevice(
+            [in] String inputDeviceDescriptor,
+            [in] Int32 rotation,
+            [out] ITouchCalibration** result);
+
+        SetTouchCalibrationForInputDevice(
+            [in] String inputDeviceDescriptor,
+            [in] Int32 rotation,
+            [in] ITouchCalibration* calibration);
+
+        // Keyboard layouts configuration.
+        GetKeyboardLayouts(
+            [out, callee] ArrayOf<IKeyboardLayout*>* layouts);
+
+        GetKeyboardLayout(
+            [in] String keyboardLayoutDescriptor,
+            [out] IKeyboardLayout** layout);
+
+        GetCurrentKeyboardLayoutForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [out] String* keyboardLayoutDescriptor);
+
+        SetCurrentKeyboardLayoutForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [in] String keyboardLayoutDescriptor);
+
+        GetKeyboardLayoutsForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [out, callee] ArrayOf<String>* keyboardLayoutDescriptors);
+
+        AddKeyboardLayoutForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [in] String keyboardLayoutDescriptor);
+
+        RemoveKeyboardLayoutForInputDevice(
+            [in] IInputDeviceIdentifier* identifier,
+            [in] String keyboardLayoutDescriptor);
+
+        // Registers an input devices changed listener.
+        RegisterInputDevicesChangedListener(
+            [in] IInputDevicesChangedListener* listener);
+
+        // Input device vibrator control.
+        Vibrate(
+            [in] Int32 deviceId,
+            [in] ArrayOf<Int64> pattern,
+            [in] Int32 repeat,
+            [in] IBinder* token);
+
+        CancelVibrate(
+            [in] Int32 deviceId,
+            [in] IBinder* token);
+    }
+
+    } // namespace Input
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

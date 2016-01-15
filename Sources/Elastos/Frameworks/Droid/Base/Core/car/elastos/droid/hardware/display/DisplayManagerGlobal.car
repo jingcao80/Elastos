@@ -1,0 +1,147 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.View.IDisplay;
+    interface Elastos.Droid.View.IDisplayInfo;
+    interface Elastos.Droid.View.IDisplayAdjustments;
+    interface Elastos.Droid.Media.Projection.IMediaProjection;
+    interface Elastos.Droid.Hardware.Display.IVirtualDisplayCallback;
+    interface Elastos.Droid.Hardware.Display.IIVirtualDisplayCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Display {
+
+    interface IDisplayManagerGlobal {
+        const Int32 EVENT_DISPLAY_ADDED = 1;
+        const Int32 EVENT_DISPLAY_CHANGED = 2;
+        const Int32 EVENT_DISPLAY_REMOVED = 3;
+
+        /**
+         * Get information about a particular logical display.
+         *
+         * @param displayId The logical display id.
+         * @return Information about the specified display, or NULL if it does not exist.
+         * This object belongs to an internal cache and should be treated as if it were immutable.
+         */
+        GetDisplayInfo(
+            [in] Int32 displayId,
+            [out] IDisplayInfo** displayInfo);
+
+        /**
+         * Gets all currently valid logical display ids.
+         *
+         * @return An array containing all display ids.
+         */
+        GetDisplayIds(
+            [out, callee] ArrayOf<Int32>* displayIds);
+
+        /**
+         * Gets information about a logical display.
+         *
+         * The display metrics may be adjusted to provide compatibility
+         * for legacy applications.
+         *
+         * @param displayId The logical display id.
+         * @param cih The compatibility info, or NULL if none is required.
+         * @return The display object, or NULL if there is no display with the given id.
+         */
+        GetCompatibleDisplay(
+            [in] Int32 displayId,
+            [in] IDisplayAdjustments* daj,
+            [out] IDisplay** display);
+
+        /**
+         * Gets information about a logical display without applying any compatibility metrics.
+         *
+         * @param displayId The logical display id.
+         * @return The display object, or NULL if there is no display with the given id.
+         */
+        GetRealDisplay(
+            [in] Int32 displayId,
+            [out] IDisplay** display);
+
+        /**
+         * Gets information about a logical display without applying any compatibility metrics.
+         *
+         * @param displayId The logical display id.
+         * @param IBinder the activity token for this display.
+         * @return The display object, or null if there is no display with the given id.
+         */
+        GetRealDisplay(
+            [in] Int32 displayId,
+            [in] IBinder* token,
+            [out] IDisplay** display);
+
+        RegisterDisplayListener(
+            [in] IDisplayListener* listener,
+            [in] IHandler* handler);
+
+        UnregisterDisplayListener(
+            [in] IDisplayListener* listener);
+
+        StartWifiDisplayScan();
+
+        StopWifiDisplayScan();
+
+        ConnectWifiDisplay(
+            [in] String deviceAddress);
+
+        PauseWifiDisplay();
+
+        ResumeWifiDisplay();
+
+        DisconnectWifiDisplay();
+
+        RenameWifiDisplay(
+            [in] String deviceAddress,
+            [in] String alias);
+
+        ForgetWifiDisplay(
+            [in] String deviceAddress);
+
+        GetWifiDisplayStatus(
+            [out] IWifiDisplayStatus** status);
+
+        CreateVirtualDisplay(
+            [in] IContext* context,
+            [in] IMediaProjection* projection,
+            [in] String name,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 densityDpi,
+            [in] ISurface* surface,
+            [in] Int32 flags,
+            [in] IVirtualDisplayCallback* cb,
+            [in] IHandler* handler,
+            [out] IVirtualDisplay** outvd);
+
+        SetVirtualDisplaySurface(
+            [in] IIVirtualDisplayCallback* token,
+            [in] ISurface* surface);
+
+        ResizeVirtualDisplay(
+            [in] IIVirtualDisplayCallback* token,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 densityDpi);
+
+        ReleaseVirtualDisplay(
+            [in] IIVirtualDisplayCallback* token);
+    }
+
+    interface IDisplayManagerGlobalHelper {
+        GetInstance(
+            [out] IDisplayManagerGlobal** global);
+    }
+
+    } // namespace Display
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

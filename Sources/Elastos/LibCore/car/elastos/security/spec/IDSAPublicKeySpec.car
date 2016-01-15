@@ -1,0 +1,54 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The parameters specifying a DSA public key.
+     */
+    /**
+     * @Involve
+     * interface IKeySpec
+     */
+    interface IDSAPublicKeySpec {
+        /**
+         * Returns the base {@code g}.
+         *
+         * @return the base {@code g}.
+         */
+        GetG(
+            [out] IBigInteger** g);
+
+        /**
+         * Returns the prime {@code p}.
+         *
+         * @return the prime {@code p}.
+         */
+        GetP(
+            [out] IBigInteger** p);
+
+        /**
+         * Returns the sub-prime {@code q}.
+         *
+         * @return the sub-prime {@code q}.
+         */
+        GetQ(
+            [out] IBigInteger** q);
+
+        /**
+         * Returns the public key value {@code y}.
+         *
+         * @return the public key value {@code y}.
+         */
+        GetY(
+            [out] IBigInteger** y);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

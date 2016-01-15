@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    [oneway, deprecated]
+    interface IOnAppsChangedListener {
+        OnPackageRemoved(
+            [in] IUserHandle* user,
+            [in] String packageName);
+
+        OnPackageAdded(
+            [in] IUserHandle* user,
+            [in] String packageName);
+
+        OnPackageChanged(
+            [in] IUserHandle* user,
+            [in] String packageName);
+
+        OnPackagesAvailable(
+            [in] IUserHandle* user,
+            [in] ArrayOf<String>* packageNames,
+            [in] Boolean* replacing);
+
+        OnPackagesUnavailable(
+            [in] IUserHandle* user,
+            [in] ArrayOf<String>* packageNames,
+            [in] Boolean replacing);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

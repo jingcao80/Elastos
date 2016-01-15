@@ -1,0 +1,15 @@
+
+TARGET_NAME = testThread
+TARGET_TYPE = ecx
+
+IMPORTS = Elastos.CoreLibrary.eco
+
+SOURCES = main.cpp
+SOURCES += MyThread.cpp
+SOURCES += MyRunnable.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += -lstdc++  -lm -ldl -llog -lz -lcutils -lutils -lbinder
+LIBRARIES += -licuuc -licui18n

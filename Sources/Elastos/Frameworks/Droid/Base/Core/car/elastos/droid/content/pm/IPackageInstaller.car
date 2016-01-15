@@ -1,0 +1,77 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IPackageInstallerSessionInfo;
+    interface Elastos.Droid.Content.Pm.IPackageInstallerCallback;
+    interface Elastos.Droid.Content.Pm.IIPackageInstallerSession;
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+    interface Elastos.Droid.Content.Pm.IPackageInstallerSessionParams;
+    interface Elastos.Droid.Content.IIntentSender;
+
+    interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /** {@hide} */
+    [oneway]
+    interface IIPackageInstaller {
+        CreateSession(
+            [in] IPackageInstallerSessionParams* params,
+            [in] String installerPackageName,
+            [in] Int32 userId,
+            [out] Int32* result);
+
+        UpdateSessionAppIcon(
+            [in] Int32 sessionId,
+            [in] IBitmap* appIcon);
+
+        UpdateSessionAppLabel(
+            [in] Int32 sessionId,
+            [in] String appLabel);
+
+        AbandonSession(
+            [in] Int32 sessionId);
+
+        OpenSession(
+            [in] Int32 sessionId,
+            [out] IIPackageInstallerSession** session);
+
+        GetSessionInfo(
+            [in] Int32 sessionId,
+            [out] IPackageInstallerSessionInfo** info);
+
+        GetAllSessions(
+            [in] Int32 userId,
+            [out] IParceledListSlice** slice);
+
+        GetMySessions(
+            [in] String installerPackageName,
+            [in] Int32 userId,
+            [out] IParceledListSlice** slice);
+
+        RegisterCallback(
+            [in] IPackageInstallerCallback* cb,
+            [in] Int32 userId);
+
+        UnregisterCallback(
+            [in] IPackageInstallerCallback* cb);
+
+        Uninstall(
+            [in] String packageName,
+            [in] Int32 flags,
+            [in] IIntentSender* statusReceiver,
+            [in] Int32 userId);
+
+        SetPermissionsResult(
+            [in] Int32 sessionId,
+            [in] Boolean accepted);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,43 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Choice;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X501 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the DirectoryString structure
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *   DirectoryString ::= CHOICE {
+     *        teletexString             TeletexString   (SIZE (1..MAX)),
+     *        printableString           PrintableString (SIZE (1..MAX)),
+     *        universalString           UniversalString (SIZE (1..MAX)),
+     *        utf8String              UTF8String      (SIZE (1..MAX)),
+     *        bmpString               BMPString       (SIZE (1..MAX))
+     *   }
+     * </pre>
+     */
+    interface IDirectoryString {
+        GetASN1(
+            [out] IASN1Choice** asn1);
+
+        SetASN1(
+            [in] IASN1Choice* asn1);
+    }
+
+    } // namespace X501
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,75 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRectF;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * An implementation of SparseArray specialized for {@link android.graphics.RectF}.
+     * <p>
+     * As this is a sparse array, it represents an array of {@link RectF} most of which are null. This
+     * class could be in some other packages like android.graphics or android.util but currently
+     * belong to android.view.inputmethod because this class is hidden and used only in input method
+     * framework.
+     * </p>
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ISparseRectFArray {
+
+        Get(
+            [in] Int32 index,
+            [out] IRectF** result);
+
+        GetFlags(
+            [in] Int32 index,
+            [in] Int32 valueIfKeyNotFound,
+            [out] Int32* result);
+    }
+
+    interface ISparseRectFArrayBuilder {
+
+        /**
+         * Puts the rectangle with an integer key.
+         * @param key the key to be associated with the rectangle. It must be greater than all
+         * existing keys that have been previously specified.
+         * @param left left of the rectangle.
+         * @param top top of the rectangle.
+         * @param right right of the rectangle.
+         * @param bottom bottom of the rectangle.
+         * @param flags an arbitrary integer value to be associated with this rectangle.
+         * @return the receiver object itself for chaining method calls.
+         * @throws IllegalArgumentException If the index is not greater than all of existing keys.
+         */
+        Append(
+            [in] Int32 key,
+            [in] Float left,
+            [in] Float top,
+            [in] Float right,
+            [in] Float bottom,
+            [in] Int32 flags);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        /**
+         * @return {@link SparseRectFArray} using parameters in this {@link SparseRectFArray}.
+         */
+        Build(
+            [out] ISparseRectFArray** result);
+
+        Reset();
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

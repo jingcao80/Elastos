@@ -1,0 +1,127 @@
+
+module
+{
+    using interface Elastos.IO.IBuffer;
+    using interface Elastos.IO.IInt16Buffer;
+    using interface Elastos.IO.IInt32Buffer;
+    using interface Elastos.IO.IFloatBuffer;
+
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Opengles {
+
+    /**
+     * @Involve
+     * interface Elastosx.Microedition.Khronos.Opengles.IGL
+     */
+    [deprecated]
+    interface IGL11Ext {
+        const Int32 _GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES = 0x8B9E;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_OES                = 0x8844;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_POINTER_OES        = 0x8849;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_SIZE_OES           = 0x8846;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_STRIDE_OES         = 0x8848;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_TYPE_OES           = 0x8847;
+        const Int32 _GL_MATRIX_PALETTE_OES                    = 0x8840;
+        const Int32 _GL_MAX_PALETTE_MATRICES_OES              = 0x8842;
+        const Int32 _GL_MAX_VERTEX_UNITS_OES                  = 0x86A4;
+        const Int32 _GL_TEXTURE_CROP_RECT_OES                 = 0x8B9D;
+        const Int32 _GL_WEIGHT_ARRAY_BUFFER_BINDING_OES       = 0x889E;
+        const Int32 _GL_WEIGHT_ARRAY_OES                      = 0x86AD;
+        const Int32 _GL_WEIGHT_ARRAY_POINTER_OES              = 0x86AC;
+        const Int32 _GL_WEIGHT_ARRAY_SIZE_OES                 = 0x86AB;
+        const Int32 _GL_WEIGHT_ARRAY_STRIDE_OES               = 0x86AA;
+        const Int32 _GL_WEIGHT_ARRAY_TYPE_OES                 = 0x86A9;
+
+        glCurrentPaletteMatrixOES(
+            [in] Int32 matrixpaletteindex);
+
+        glDrawTexfOES(
+            [in] Float x,
+            [in] Float y,
+            [in] Float z,
+            [in] Float width,
+            [in] Float height);
+
+        glDrawTexfvOES(
+            [in] ArrayOf<Float>* coords,
+            [in] Int32 offset);
+
+        glDrawTexfvOES(
+            [in] IFloatBuffer* coords);
+
+        glDrawTexiOES(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        glDrawTexivOES(
+            [in] ArrayOf<Int32>* coords,
+            [in] Int32 offset);
+
+        glDrawTexivOES(
+            [in] IInt32Buffer* coords);
+
+        glDrawTexsOES(
+            [in] Int16 x,
+            [in] Int16 y,
+            [in] Int16 z,
+            [in] Int16 width,
+            [in] Int16 height);
+
+        glDrawTexsvOES(
+            [in] ArrayOf<Int16>* coords,
+            [in] Int32 offset);
+
+        glDrawTexsvOES(
+            [in] IInt16Buffer* coords);
+
+        glDrawTexxOES(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        glDrawTexxvOES(
+            [in] ArrayOf<Int32>* coords,
+            [in] Int32 offset);
+
+        glDrawTexxvOES(
+            [in] IInt32Buffer* coords);
+
+        glLoadPaletteFromModelViewMatrixOES();
+
+        glMatrixIndexPointerOES(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] IBuffer* pointer);
+
+        glMatrixIndexPointerOES(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+
+        glWeightPointerOES(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] IBuffer* pointer);
+
+        glWeightPointerOES(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+    }
+
+    } // namepsace Opengles
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

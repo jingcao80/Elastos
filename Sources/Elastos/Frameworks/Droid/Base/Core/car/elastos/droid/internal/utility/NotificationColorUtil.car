@@ -1,0 +1,78 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    /**
+     * Helper class to process legacy (Holo) notifications to make them look like material notifications.
+     *
+     * @hide
+     */
+    [local]
+    interface INotificationColorUtil {
+        /**
+         * Checks whether a Bitmap is a small grayscale icon.
+         * Grayscale here means "very close to a perfect gray"; icon means "no larger than 64dp".
+         *
+         * @param bitmap The bitmap to test.
+         * @return True if the bitmap is grayscale; FALSE if it is color or too large to examine.
+         */
+        IsGrayscaleIcon(
+            [in] IBitmap* bitmap,
+            [out] Boolean* result);
+
+        /**
+         * Checks whether a Drawable is a small grayscale icon.
+         * Grayscale here means "very close to a perfect gray"; icon means "no larger than 64dp".
+         *
+         * @param d The drawable to test.
+         * @return True if the bitmap is grayscale; FALSE if it is color or too large to examine.
+         */
+        IsGrayscaleIcon(
+            [in] IDrawable* d,
+            [out] Boolean* result);
+
+        /**
+         * Checks whether a drawable with a resoure id is a small grayscale icon.
+         * Grayscale here means "very close to a perfect gray"; icon means "no larger than 64dp".
+         *
+         * @param context The context to load the drawable from.
+         * @return True if the bitmap is grayscale; FALSE if it is color or too large to examine.
+         */
+        IsGrayscaleIcon(
+            [in] IContext* context,
+            [in] Int32 drawableResId,
+            [out] Boolean* result);
+
+        /**
+         * Inverts all the grayscale colors set by {@link android.text.style.TextAppearanceSpan}s on
+         * the text.
+         *
+         * @param charSequence The text to process.
+         * @return The color inverted text.
+         */
+        InvertCharSequenceColors(
+            [in] ICharSequence* charSequence,
+            [out] ICharSequence** outCs);
+    }
+
+    [local]
+    interface INotificationColorUtilHelper {
+        GetInstance(
+            [in] IContext* context,
+            [out] INotificationColorUtil** instance);
+    }
+
+    } // namespace Utility
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

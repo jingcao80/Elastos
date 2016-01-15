@@ -1,0 +1,83 @@
+
+module
+{
+    interface Elastos.Droid.Net.INetworkPolicy;
+    interface Elastos.Droid.Net.INetworkTemplate;
+    interface Elastos.Droid.Net.INetworkState;
+    interface Elastos.Droid.Net.INetworkQuotaInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IINetworkPolicyManager {
+        /** Control UID policies. */
+        SetUidPolicy(
+            [in] Int32 uid,
+            [in] Int32 policy);
+
+        AddUidPolicy(
+            [in] Int32 uid,
+            [in] Int32 policy);
+
+        RemoveUidPolicy(
+            [in] Int32 uid,
+            [in] Int32 policy);
+
+        GetUidPolicy(
+            [in] Int32 uid,
+            [out] Int32* result);
+
+        GetUidsWithPolicy(
+            [in] Int32 policy,
+            [out, callee] ArrayOf<Int32>* result);
+
+        IsUidForeground(
+            [in] Int32 uid,
+            [out] Boolean* result);
+
+        GetPowerSaveAppIdWhitelist(
+            [out, callee] ArrayOf<Int32>* result);
+
+        RegisterListener(
+            [in] IINetworkPolicyListener* listener);
+
+        UnregisterListener(
+            [in] IINetworkPolicyListener* listener);
+
+        /** Control network policies atomically. */
+        SetNetworkPolicies(
+            [in] ArrayOf<INetworkPolicy*>* policies);
+
+        GetNetworkPolicies(
+            [out, callee] ArrayOf<INetworkPolicy*>* result);
+
+        /** Snooze limit on policy matching given template. */
+        SnoozeLimit(
+            [in] INetworkTemplate* templateObj);
+
+        /** Control if background data is restricted system-wide. */
+        SetRestrictBackground(
+            [in] Boolean restrictBackground);
+
+        GetRestrictBackground(
+            [out] Boolean* result);
+
+        GetNetworkQuotaInfo(
+            [in] INetworkState* state,
+            [out] INetworkQuotaInfo** result);
+
+        IsNetworkMetered(
+            [in] INetworkState* state,
+            [out] Boolean* result);
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

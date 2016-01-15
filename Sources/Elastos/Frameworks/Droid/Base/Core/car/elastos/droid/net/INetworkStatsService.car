@@ -1,0 +1,56 @@
+
+module
+{
+    interface Elastos.Droid.Net.IINetworkStatsSession;
+    interface Elastos.Droid.Net.INetworkStats;
+    interface Elastos.Droid.Net.INetworkTemplate;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    [deprecated]
+    interface IINetworkStatsService {
+        /** Start a statistics query session. */
+        OpenSession(
+            [out] IINetworkStatsSession** result);
+
+        /** Return network layer usage total for traffic that matches template. */
+        GetNetworkTotalBytes(
+            [in] INetworkTemplate* templateObj,
+            [in] Int64 start,
+            [in] Int64 end,
+            [out] Int64* result);
+
+        /** Return data layer snapshot of UID network usage. */
+        GetDataLayerSnapshotForUid(
+            [in] Int32 uid,
+            [out] INetworkStats** result);
+
+        /** Return set of any ifaces associated with mobile networks since boot. */
+        GetMobileIfaces(
+            [out, callee] ArrayOf<String>* result);
+
+        /** Increment data layer count of operations performed for UID and tag. */
+        IncrementOperationCount(
+            [in] Int32 uid,
+            [in] Int32 tag,
+            [in] Int32 operationCount);
+
+        /** Mark given UID as being in foreground for stats purposes. */
+        SetUidForeground(
+            [in] Int32 uid,
+            [in] Boolean uidForeground);
+
+        /** Force update of statistics. */
+        ForceUpdate();
+
+        /** Advise persistance threshold; may be overridden internally. */
+        AdvisePersistThreshold(
+            [in] Int64 thresholdBytes);
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

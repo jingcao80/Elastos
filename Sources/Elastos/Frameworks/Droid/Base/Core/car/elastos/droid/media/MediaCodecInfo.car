@@ -1,0 +1,659 @@
+
+module
+{
+    interface Elastos.Droid.Media.IMediaCodecInfoCodecCapabilities;
+    interface Elastos.Droid.Media.IMediaCodecInfoEncoderCapabilities;
+    interface Elastos.Droid.Media.IMediaCodecInfoVideoCapabilities;
+    interface Elastos.Droid.Media.IMediaFormat;
+    interface Elastos.Droid.Utility.IRange;
+    interface Elastos.Droid.Utility.ISize;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * A class that supports querying the audio capabilities of a codec.
+     */
+    interface IMediaCodecInfoAudioCapabilities {
+        /**
+         * Returns the range of supported bitrates in bits/second.
+         */
+        GetBitrateRange(
+            [out] IRange** result);
+
+        /**
+         * Returns the array of supported sample rates if the codec
+         * supports only discrete values.  Otherwise, it returns
+         * {@code null}.  The array is sorted in ascending order.
+         */
+        GetSupportedSampleRates(
+            [out, callee] ArrayOf<Int32>* result);
+
+        /**
+         * Returns the array of supported sample rate ranges.  The
+         * array is sorted in ascending order, and the ranges are
+         * distinct.
+         */
+        GetSupportedSampleRateRanges(
+            [out, callee] ArrayOf<IRange*>* result);
+
+        /**
+         * Returns the maximum number of input channels supported.  The codec
+         * supports any number of channels between 1 and this maximum value.
+         */
+        GetMaxInputChannelCount(
+            [out] Int32* result);
+
+        /** @hide */
+        Init(
+            [in] IMediaFormat* info,
+            [in] IMediaCodecInfoCodecCapabilities* parent);
+
+        /**
+         * Query whether the sample rate is supported by the codec.
+         */
+        IsSampleRateSupported(
+            [in] Int32 sampleRate,
+            [out] Boolean* result);
+
+        /** @hide */
+        SetDefaultFormat(
+            [in] IMediaFormat* format);
+
+        /** @hide */
+        SupportsFormat(
+            [in] IMediaFormat* format,
+            [out] Boolean* result);
+    }
+
+    interface IMediaCodecInfoAudioCapabilitiesHelper {
+        /** @hide */
+        Create(
+            [in] IMediaFormat* info,
+            [in] IMediaCodecInfoCodecCapabilities* parent,
+            [out] IMediaCodecInfoAudioCapabilities** result);
+    }
+
+    /**
+     * Encapsulates the capabilities of a given codec component.
+     * For example, what profile/level combinations it supports and what colorspaces
+     * it is capable of providing the decoded data in, as well as some
+     * codec-type specific capability flags.
+     * <p>You can get an instance for a given {@link MediaCodecInfo} object with
+     * {@link MediaCodecInfo#getCapabilitiesForType getCapabilitiesForType()}, passing a MIME type.
+     */
+    interface IMediaCodecInfoCodecCapabilities {
+        // from OMX_COLOR_FORMATTYPE
+        const Int32 COLOR_FormatMonochrome              = 1;
+        const Int32 COLOR_Format8bitRGB332              = 2;
+        const Int32 COLOR_Format12bitRGB444             = 3;
+        const Int32 COLOR_Format16bitARGB4444           = 4;
+        const Int32 COLOR_Format16bitARGB1555           = 5;
+        const Int32 COLOR_Format16bitRGB565             = 6;
+        const Int32 COLOR_Format16bitBGR565             = 7;
+        const Int32 COLOR_Format18bitRGB666             = 8;
+        const Int32 COLOR_Format18bitARGB1665           = 9;
+        const Int32 COLOR_Format19bitARGB1666           = 10;
+        const Int32 COLOR_Format24bitRGB888             = 11;
+        const Int32 COLOR_Format24bitBGR888             = 12;
+        const Int32 COLOR_Format24bitARGB1887           = 13;
+        const Int32 COLOR_Format25bitARGB1888           = 14;
+        const Int32 COLOR_Format32bitBGRA8888           = 15;
+        const Int32 COLOR_Format32bitARGB8888           = 16;
+        const Int32 COLOR_FormatYUV411Planar            = 17;
+        const Int32 COLOR_FormatYUV411PackedPlanar      = 18;
+        const Int32 COLOR_FormatYUV420Planar            = 19;
+        const Int32 COLOR_FormatYUV420PackedPlanar      = 20;
+        const Int32 COLOR_FormatYUV420SemiPlanar        = 21;
+        const Int32 COLOR_FormatYUV422Planar            = 22;
+        const Int32 COLOR_FormatYUV422PackedPlanar      = 23;
+        const Int32 COLOR_FormatYUV422SemiPlanar        = 24;
+        const Int32 COLOR_FormatYCbYCr                  = 25;
+        const Int32 COLOR_FormatYCrYCb                  = 26;
+        const Int32 COLOR_FormatCbYCrY                  = 27;
+        const Int32 COLOR_FormatCrYCbY                  = 28;
+        const Int32 COLOR_FormatYUV444Interleaved       = 29;
+        const Int32 COLOR_FormatRawBayer8bit            = 30;
+        const Int32 COLOR_FormatRawBayer10bit           = 31;
+        const Int32 COLOR_FormatRawBayer8bitcompressed  = 32;
+        const Int32 COLOR_FormatL2                      = 33;
+        const Int32 COLOR_FormatL4                      = 34;
+        const Int32 COLOR_FormatL8                      = 35;
+        const Int32 COLOR_FormatL16                     = 36;
+        const Int32 COLOR_FormatL24                     = 37;
+        const Int32 COLOR_FormatL32                     = 38;
+        const Int32 COLOR_FormatYUV420PackedSemiPlanar  = 39;
+        const Int32 COLOR_FormatYUV422PackedSemiPlanar  = 40;
+        const Int32 COLOR_Format18BitBGR666             = 41;
+        const Int32 COLOR_Format24BitARGB6666           = 42;
+        const Int32 COLOR_Format24BitABGR6666           = 43;
+
+        const Int32 COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
+        // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.
+        // In OMX this is called OMX_COLOR_FormatAndroidOpaque.
+        const Int32 COLOR_FormatSurface                   = 0x7F000789;
+        // This corresponds to YUV_420_888 format
+        const Int32 COLOR_FormatYUV420Flexible            = 0x7F420888;
+        const Int32 COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00;
+
+        /**
+         * <b>video decoder only</b>: codec supports seamless resolution changes.
+         */
+        const String FEATURE_AdaptivePlayback       = "adaptive-playback";
+
+        /**
+         * <b>video decoder only</b>: codec supports secure decryption.
+         */
+        const String FEATURE_SecurePlayback         = "secure-playback";
+
+        /**
+         * <b>video or audio decoder only</b>: codec supports tunneled playback.
+         */
+        const String FEATURE_TunneledPlayback       = "tunneled-playback";
+
+        /**
+         * Query codec feature capabilities.
+         * <p>
+         * These features are supported to be used by the codec.  These
+         * include optional features that can be turned on, as well as
+         * features that are always on.
+         */
+        IsFeatureSupported(
+            [in] String name,
+            [out] Boolean* result);
+
+        /**
+         * Query codec feature requirements.
+         * <p>
+         * These features are required to be used by the codec, and as such,
+         * they are always turned on.
+         */
+        IsFeatureRequired(
+            [in] String name,
+            [out] Boolean* result);
+
+        /** @hide */
+        ValidFeatures(
+            [out, callee] ArrayOf<String>* result);
+
+        /** @hide */
+        IsRegular(
+            [out] Boolean* result);
+
+        /**
+         * Query whether codec supports a given {@link MediaFormat}.
+         * @param format media format with optional feature directives.
+         * @throws IllegalArgumentException if format is not a valid media format.
+         * @return whether the codec capabilities support the given format
+         *         and feature requests.
+         */
+        IsFormatSupported(
+            [in] IMediaFormat* format,
+            [out] Boolean* result);
+
+        /**
+         * Returns a MediaFormat object with default values for configurations that have
+         * defaults.
+         */
+        GetDefaultFormat(
+            [out] IMediaFormat** result);
+
+        /**
+         * Returns the mime type for which this codec-capability object was created.
+         */
+        GetMimeType(
+            [out] String* result);
+
+        /**
+         * Returns the audio capabilities or {@code null} if this is not an audio codec.
+         */
+        GetAudioCapabilities(
+            [out] IMediaCodecInfoAudioCapabilities** result);
+
+        /**
+         * Returns the encoding capabilities or {@code null} if this is not an encoder.
+         */
+        GetEncoderCapabilities(
+            [out] IMediaCodecInfoEncoderCapabilities** result);
+
+        /**
+         * Returns the video capabilities or {@code null} if this is not a video codec.
+         */
+        GetVideoCapabilities(
+            [out] IMediaCodecInfoVideoCapabilities** result);
+
+        /** @hide */
+        Dup(
+            [out] IMediaCodecInfoCodecCapabilities** result);
+    }
+
+    interface IMediaCodecInfoCodecCapabilitiesHelper {
+        /**
+         * Retrieve the codec capabilities for a certain {@code mime type}, {@code
+         * profile} and {@code level}.  If the type, or profile-level combination
+         * is not understood by the framework, it returns null.
+         */
+        CreateFromProfileLevel(
+            [in] String mime,
+            [in] Int32 profile,
+            [in] Int32 level,
+            [out] IMediaCodecInfoCodecCapabilities** result);
+    }
+
+    /**
+     * A class that supports querying the video capabilities of a codec.
+     */
+    interface IMediaCodecInfoVideoCapabilities {
+        /**
+         * Returns the range of supported bitrates in bits/second.
+         */
+        GetBitrateRange(
+            [out] IRange** result);
+
+        /**
+         * Returns the range of supported video widths.
+         */
+        GetSupportedWidths(
+            [out] IRange** result);
+
+        /**
+         * Returns the range of supported video heights.
+         */
+        GetSupportedHeights(
+            [out] IRange** result);
+
+        /**
+         * Returns the alignment requirement for video width (in pixels).
+         *
+         * This is a power-of-2 value that video width must be a
+         * multiple of.
+         */
+        GetWidthAlignment(
+            [out] Int32* result);
+
+        /**
+         * Returns the alignment requirement for video height (in pixels).
+         *
+         * This is a power-of-2 value that video height must be a
+         * multiple of.
+         */
+        GetHeightAlignment(
+            [out] Int32* result);
+
+        /**
+         * Return the upper limit on the smaller dimension of width or height.
+         * <p></p>
+         * Some codecs have a limit on the smaller dimension, whether it be
+         * the width or the height.  E.g. a codec may only be able to handle
+         * up to 1920x1080 both in landscape and portrait mode (1080x1920).
+         * In this case the maximum width and height are both 1920, but the
+         * smaller dimension limit will be 1080. For other codecs, this is
+         * {@code Math.min(getSupportedWidths().getUpper(),
+         * getSupportedHeights().getUpper())}.
+         *
+         * @hide
+         */
+        GetSmallerDimensionUpperLimit(
+            [out] Int32* result);
+
+        /**
+         * Returns the range of supported frame rates.
+         * <p>
+         * This is not a performance indicator.  Rather, it expresses the
+         * limits specified in the coding standard, based on the complexities
+         * of encoding material for later playback at a certain frame rate,
+         * or the decoding of such material in non-realtime.
+         */
+        GetSupportedFrameRates(
+            [out] IRange** result);
+
+        /**
+         * Returns the range of supported video widths for a video height.
+         * @param height the height of the video
+         */
+        GetSupportedWidthsFor(
+            [in] Int32 height,
+            [out] IRange** result);
+
+        /**
+         * Returns the range of supported video heights for a video width
+         * @param width the width of the video
+         */
+        GetSupportedHeightsFor(
+            [in] Int32 width,
+            [out] IRange** result);
+
+        /**
+         * Returns the range of supported video frame rates for a video size.
+         * <p>
+         * This is not a performance indicator.  Rather, it expresses the limits specified in
+         * the coding standard, based on the complexities of encoding material of a given
+         * size for later playback at a certain frame rate, or the decoding of such material
+         * in non-realtime.
+         * @param width the width of the video
+         * @param height the height of the video
+         */
+        GetSupportedFrameRatesFor(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] IRange** result);
+
+        /**
+         * Returns whether a given video size ({@code width} and
+         * {@code height}) and {@code frameRate} combination is supported.
+         */
+        AreSizeAndRateSupported(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Double frameRate,
+            [out] Boolean* result);
+
+        /**
+         * Returns whether a given video size ({@code width} and
+         * {@code height}) is supported.
+         */
+        IsSizeSupported(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         * @throws java.lang.ClassCastException */
+        SupportsFormat(
+            [in] IMediaFormat* format,
+            [out] Boolean* result);
+
+        /** @hide */
+        Init(
+            [in] IMediaFormat* info,
+            [in] IMediaCodecInfoCodecCapabilities* parent);
+
+        /** @hide */
+        GetBlockSize(
+            [out] ISize** result);
+
+        /** @hide */
+        GetBlockCountRange(
+            [out] IRange** result);
+
+        /** @hide */
+        GetBlocksPerSecondRange(
+            [out] IRange** result);
+
+        /** @hide */
+        GetAspectRatioRange(
+            [in] Boolean blocks,
+            [out] IRange** result);
+    }
+
+    interface IMediaCodecInfoVideoCapabilitiesHelper {
+        /** @hide */
+        Create(
+            [in] IMediaFormat* info,
+            [in] IMediaCodecInfoCodecCapabilities* parent,
+            [out] IMediaCodecInfoVideoCapabilities** result);
+    }
+
+    /**
+     * A class that supports querying the encoding capabilities of a codec.
+     */
+    interface IMediaCodecInfoEncoderCapabilities {
+        /** Constant quality mode */
+        const Int32 BITRATE_MODE_CQ = 0;
+        /** Variable bitrate mode */
+        const Int32 BITRATE_MODE_VBR = 1;
+        /** Constant bitrate mode */
+        const Int32 BITRATE_MODE_CBR = 2;
+
+        /**
+         * Returns the supported range of quality values.
+         *
+         * @hide
+         */
+        GetQualityRange(
+            [out] IRange** result);
+
+        /**
+         * Returns the supported range of encoder complexity values.
+         * <p>
+         * Some codecs may support multiple complexity levels, where higher
+         * complexity values use more encoder tools (e.g. perform more
+         * intensive calculations) to improve the quality or the compression
+         * ratio.  Use a lower value to save power and/or time.
+         */
+        GetComplexityRange(
+            [out] IRange** result);
+
+        /**
+         * Query whether a bitrate mode is supported.
+         */
+        IsBitrateModeSupported(
+            [in] Int32 mode,
+            [out] Boolean* result);
+
+        /** @hide */
+        Init(
+            [in] IMediaFormat* info,
+            [in] IMediaCodecInfoCodecCapabilities* parent);
+
+        /** @hide */
+        SetDefaultFormat(
+            [in] IMediaFormat* format);
+
+        /** @hide */
+        SupportsFormat(
+            [in] IMediaFormat* format,
+            [out] Boolean* result);
+    }
+
+    interface IMediaCodecInfoEncoderCapabilitiesHelper {
+        /** @hide */
+        Create(
+            [in] IMediaFormat* info,
+            [in] IMediaCodecInfoCodecCapabilities* parent,
+            [out] IMediaCodecInfoEncoderCapabilities** result);
+    }
+
+    /**
+     * Encapsulates the profiles available for a codec component.
+     * <p>You can get a set of {@link MediaCodecInfo.CodecProfileLevel} objects for a given
+     * {@link MediaCodecInfo} object from the
+     * {@link MediaCodecInfo.CodecCapabilities#profileLevels} field.
+     */
+    interface IMediaCodecInfoCodecProfileLevel {
+        // from OMX_VIDEO_AVCPROFILETYPE
+        const Int32 AVCProfileBaseline = 0x01;
+        const Int32 AVCProfileMain     = 0x02;
+        const Int32 AVCProfileExtended = 0x04;
+        const Int32 AVCProfileHigh     = 0x08;
+        const Int32 AVCProfileHigh10   = 0x10;
+        const Int32 AVCProfileHigh422  = 0x20;
+        const Int32 AVCProfileHigh444  = 0x40;
+
+        // from OMX_VIDEO_AVCLEVELTYPE
+        const Int32 AVCLevel1       = 0x01;
+        const Int32 AVCLevel1b      = 0x02;
+        const Int32 AVCLevel11      = 0x04;
+        const Int32 AVCLevel12      = 0x08;
+        const Int32 AVCLevel13      = 0x10;
+        const Int32 AVCLevel2       = 0x20;
+        const Int32 AVCLevel21      = 0x40;
+        const Int32 AVCLevel22      = 0x80;
+        const Int32 AVCLevel3       = 0x100;
+        const Int32 AVCLevel31      = 0x200;
+        const Int32 AVCLevel32      = 0x400;
+        const Int32 AVCLevel4       = 0x800;
+        const Int32 AVCLevel41      = 0x1000;
+        const Int32 AVCLevel42      = 0x2000;
+        const Int32 AVCLevel5       = 0x4000;
+        const Int32 AVCLevel51      = 0x8000;
+        const Int32 AVCLevel52      = 0x10000;
+
+        // from OMX_VIDEO_H263PROFILETYPE
+        const Int32 H263ProfileBaseline             = 0x01;
+        const Int32 H263ProfileH320Coding           = 0x02;
+        const Int32 H263ProfileBackwardCompatible   = 0x04;
+        const Int32 H263ProfileISWV2                = 0x08;
+        const Int32 H263ProfileISWV3                = 0x10;
+        const Int32 H263ProfileHighCompression      = 0x20;
+        const Int32 H263ProfileInternet             = 0x40;
+        const Int32 H263ProfileInterlace            = 0x80;
+        const Int32 H263ProfileHighLatency          = 0x100;
+
+        // from OMX_VIDEO_H263LEVELTYPE
+        const Int32 H263Level10      = 0x01;
+        const Int32 H263Level20      = 0x02;
+        const Int32 H263Level30      = 0x04;
+        const Int32 H263Level40      = 0x08;
+        const Int32 H263Level45      = 0x10;
+        const Int32 H263Level50      = 0x20;
+        const Int32 H263Level60      = 0x40;
+        const Int32 H263Level70      = 0x80;
+
+        // from OMX_VIDEO_MPEG4PROFILETYPE
+        const Int32 MPEG4ProfileSimple              = 0x01;
+        const Int32 MPEG4ProfileSimpleScalable      = 0x02;
+        const Int32 MPEG4ProfileCore                = 0x04;
+        const Int32 MPEG4ProfileMain                = 0x08;
+        const Int32 MPEG4ProfileNbit                = 0x10;
+        const Int32 MPEG4ProfileScalableTexture     = 0x20;
+        const Int32 MPEG4ProfileSimpleFace          = 0x40;
+        const Int32 MPEG4ProfileSimpleFBA           = 0x80;
+        const Int32 MPEG4ProfileBasicAnimated       = 0x100;
+        const Int32 MPEG4ProfileHybrid              = 0x200;
+        const Int32 MPEG4ProfileAdvancedRealTime    = 0x400;
+        const Int32 MPEG4ProfileCoreScalable        = 0x800;
+        const Int32 MPEG4ProfileAdvancedCoding      = 0x1000;
+        const Int32 MPEG4ProfileAdvancedCore        = 0x2000;
+        const Int32 MPEG4ProfileAdvancedScalable    = 0x4000;
+        const Int32 MPEG4ProfileAdvancedSimple      = 0x8000;
+
+        // from OMX_VIDEO_MPEG4LEVELTYPE
+        const Int32 MPEG4Level0      = 0x01;
+        const Int32 MPEG4Level0b     = 0x02;
+        const Int32 MPEG4Level1      = 0x04;
+        const Int32 MPEG4Level2      = 0x08;
+        const Int32 MPEG4Level3      = 0x10;
+        const Int32 MPEG4Level4      = 0x20;
+        const Int32 MPEG4Level4a     = 0x40;
+        const Int32 MPEG4Level5      = 0x80;
+
+        // from OMX_AUDIO_AACPROFILETYPE
+        const Int32 AACObjectMain       = 1;
+        const Int32 AACObjectLC         = 2;
+        const Int32 AACObjectSSR        = 3;
+        const Int32 AACObjectLTP        = 4;
+        const Int32 AACObjectHE         = 5;
+        const Int32 AACObjectScalable   = 6;
+        const Int32 AACObjectERLC       = 17;
+        const Int32 AACObjectLD         = 23;
+        const Int32 AACObjectHE_PS      = 29;
+        const Int32 AACObjectELD        = 39;
+
+        // from OMX_VIDEO_VP8LEVELTYPE
+        const Int32 VP8Level_Version0 = 0x01;
+        const Int32 VP8Level_Version1 = 0x02;
+        const Int32 VP8Level_Version2 = 0x04;
+        const Int32 VP8Level_Version3 = 0x08;
+
+        // from OMX_VIDEO_VP8PROFILETYPE
+        const Int32 VP8ProfileMain = 0x01;
+
+        // from OMX_VIDEO_HEVCPROFILETYPE
+        const Int32 HEVCProfileMain   = 0x01;
+        const Int32 HEVCProfileMain10 = 0x02;
+
+        // from OMX_VIDEO_HEVCLEVELTYPE
+        const Int32 HEVCMainTierLevel1  = 0x1;
+        const Int32 HEVCHighTierLevel1  = 0x2;
+        const Int32 HEVCMainTierLevel2  = 0x4;
+        const Int32 HEVCHighTierLevel2  = 0x8;
+        const Int32 HEVCMainTierLevel21 = 0x10;
+        const Int32 HEVCHighTierLevel21 = 0x20;
+        const Int32 HEVCMainTierLevel3  = 0x40;
+        const Int32 HEVCHighTierLevel3  = 0x80;
+        const Int32 HEVCMainTierLevel31 = 0x100;
+        const Int32 HEVCHighTierLevel31 = 0x200;
+        const Int32 HEVCMainTierLevel4  = 0x400;
+        const Int32 HEVCHighTierLevel4  = 0x800;
+        const Int32 HEVCMainTierLevel41 = 0x1000;
+        const Int32 HEVCHighTierLevel41 = 0x2000;
+        const Int32 HEVCMainTierLevel5  = 0x4000;
+        const Int32 HEVCHighTierLevel5  = 0x8000;
+        const Int32 HEVCMainTierLevel51 = 0x10000;
+        const Int32 HEVCHighTierLevel51 = 0x20000;
+        const Int32 HEVCMainTierLevel52 = 0x40000;
+        const Int32 HEVCHighTierLevel52 = 0x80000;
+        const Int32 HEVCMainTierLevel6  = 0x100000;
+        const Int32 HEVCHighTierLevel6  = 0x200000;
+        const Int32 HEVCMainTierLevel61 = 0x400000;
+        const Int32 HEVCHighTierLevel61 = 0x800000;
+        const Int32 HEVCMainTierLevel62 = 0x1000000;
+        const Int32 HEVCHighTierLevel62 = 0x2000000;
+    }
+
+    /**
+     * Provides information about a given media codec available on the device. You can
+     * iterate through all codecs available by querying {@link MediaCodecList}. For example,
+     * here's how to find an encoder that supports a given MIME type:
+     * <pre>
+     * private static MediaCodecInfo selectCodec(String mimeType) {
+     *     int numCodecs = MediaCodecList.getCodecCount();
+     *     for (int i = 0; i &lt; numCodecs; i++) {
+     *         MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
+     *
+     *         if (!codecInfo.isEncoder()) {
+     *             continue;
+     *         }
+     *
+     *         String[] types = codecInfo.getSupportedTypes();
+     *         for (int j = 0; j &lt; types.length; j++) {
+     *             if (types[j].equalsIgnoreCase(mimeType)) {
+     *                 return codecInfo;
+     *             }
+     *         }
+     *     }
+     *     return null;
+     * }</pre>
+     *
+     */
+    interface IMediaCodecInfo {
+        /**
+         * Retrieve the codec name.
+         */
+        GetName(
+            [out] String* result);
+
+        /**
+         * Query if the codec is an encoder.
+         */
+        IsEncoder(
+            [out] Boolean* result);
+
+        /**
+         * Query the media types supported by the codec.
+         */
+        GetSupportedTypes(
+            [out, callee] ArrayOf<String>* result);
+
+        /**
+         * Enumerates the capabilities of the codec component. Since a single
+         * component can support data of a variety of types, the type has to be
+         * specified to yield a meaningful result.
+         * @param type The MIME type to query
+         */
+        GetCapabilitiesForType(
+            [in] String type,
+            [out] IMediaCodecInfoCodecCapabilities** result);
+
+        /** @hide */
+        MakeRegular(
+            [out] IMediaCodecInfo** result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

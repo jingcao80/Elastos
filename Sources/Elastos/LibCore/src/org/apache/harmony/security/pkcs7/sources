@@ -1,0 +1,23 @@
+
+TARGET_NAME= pkcs7
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/pkcs7
+
+#SOURCES = AuthenticatedAttributes.cpp
+SOURCES += ContentInfo.cpp
+SOURCES += CContentInfoHelper.cpp
+#SOURCES += CSignedData.cpp
+#SOURCES += CSignedDataHelper.cpp
+#SOURCES += CSignerInfo.cpp
+#SOURCES += CSignerInfoHelper.cpp

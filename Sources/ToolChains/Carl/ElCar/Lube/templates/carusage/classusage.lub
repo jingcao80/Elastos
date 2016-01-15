@@ -1,0 +1,13 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}_class.txt"
+$
+$WITH all classes DO
+$    IF type is not "clsobj" and type is not "sink" and type is not "generic" and type is not "regime" and type is not "aspect"
+$        TEMPLATE "objectusage.lub"
+$    END IF
+$END DO ;; all classes
+$END OUTPUT

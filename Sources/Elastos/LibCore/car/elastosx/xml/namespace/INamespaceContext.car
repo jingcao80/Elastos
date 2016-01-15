@@ -1,0 +1,28 @@
+module
+{
+    interface Elastos.Utility.IIterator;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Namespace {
+
+    interface INamespaceContext {
+
+        GetNamespaceURI(
+            [in] String prefix,
+            [out] String* uri);
+
+        GetPrefix(
+            [in] String namespaceURI,
+            [out] String* perfix);
+
+        GetPrefixes(
+            [in] String namespaceURI,
+            [out] IIterator** iterator);
+
+    }
+
+    } // namespace Namespace
+    } // namespace Xml
+    } // namespace Elastosx
+}

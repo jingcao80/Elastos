@@ -1,0 +1,10 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+DIRS = lubase
+DIRS += userfunc
+DIRS += lubc
+DIRS += templates
+DIRS += lube
+

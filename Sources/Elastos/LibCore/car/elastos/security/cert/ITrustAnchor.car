@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Security.IPublicKey;
+    interface Elastos.Security.Cert.IX509Certificate;
+    interface Elastosx.Security.Auth.X500.IX500Principal;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface ITrustAnchor {
+        /**
+         * Returns a copy of the name constraints in ASN.1 DER encoded form.
+         *
+         * @return a copy of the name constraints in ASN.1 DER encoded form.
+         */
+        GetNameConstraints(
+            [out, callee] ArrayOf<Byte>* nameConstraints);
+
+        /**
+         * Returns the certificate of this <i>trusted</i> certificate authority.
+         *
+         * @return the certificate of this CA or {@code null}, if the trust anchor
+         *         of this instance was not created with a certificate.
+         */
+        GetTrustedCert(
+            [out] IX509Certificate** cert);
+
+        /**
+         * Returns the name of the certificate authority as {@code X500Principal}.
+         *
+         * @return the name of the certificate authority or {@code null} if the
+         *         trust anchor of this instance was not created with a {@code
+         *         X500Principal}.
+         */
+        GetCA(
+            [out] IX500Principal** ca);
+
+        /**
+         * Returns the name of the certificate authority as {@code String} in RFC
+         * 2253 format.
+         *
+         * @return the name of the certificate authority as {@code String} in RFC
+         *         2253 format or {@code null} if the trust anchor of this instance
+         *         was not created with a CA name.
+         */
+        GetCAName(
+            [out] String* caName);
+
+        /**
+         * Returns the public key of the certificate authority.
+         *
+         * @return the public key of the certificate authority or {@code null} if
+         *         the trust anchor if this instance was not created with a public
+         *         key.
+         */
+        GetCAPublicKey(
+            [out] IPublicKey** key);
+
+        /**
+         * Returns a string representation of this {@code TrustAnchor} instance.
+         *
+         * @return a string representation of this {@code TrustAnchor} instance.
+         */
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

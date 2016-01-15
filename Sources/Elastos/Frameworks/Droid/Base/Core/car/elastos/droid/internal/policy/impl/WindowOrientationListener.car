@@ -1,0 +1,87 @@
+
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+    namespace Impl {
+
+    /**
+     * A special helper class used by the WindowManager
+     * for receiving notifications from the SensorManager when
+     * the orientation of the device has changed.
+     *
+     * NOTE: If changing anything here, please run the API demo
+     * "App/Activity/Screen Orientation" to ensure that all orientation
+     * modes still work correctly.
+     *
+     * You can also visualize the behavior of the WindowOrientationListener.
+     * Refer to frameworks/base/tools/orientationplot/README.txt for details.
+     *
+     * @hide
+     */
+    interface IWindowOrientationListener {
+        /**
+         * Enables the WindowOrientationListener so it will monitor the sensor and call
+         * {@link #onProposedRotationChanged(int)} when the device orientation changes.
+         */
+        Enable();
+
+        /**
+         * Disables the WindowOrientationListener.
+         */
+        Disable();
+
+        /**
+         * Sets the current rotation.
+         *
+         * @param rotation The current rotation.
+         */
+        SetCurrentRotation(
+            [in] Int32 rotation);
+
+        /**
+         * Gets the proposed rotation.
+         *
+         * This method only returns a rotation if the orientation listener is certain
+         * of its proposal.  If the rotation is indeterminate, returns -1.
+         *
+         * @return The proposed rotation, or -1 if unknown.
+         */
+         GetProposedRotation(
+             [out] Int32* res);
+
+        /**
+         * Returns true if sensor is enabled and false otherwise
+         */
+         CanDetectOrientation(
+             [out] Boolean* res);
+
+        /**
+         * Called when the rotation view of the device has changed.
+         *
+         * This method is called whenever the orientation becomes cert
+         * It is called each time the orientation determination transi
+         * uncertain to being certain again, even if it is the same or
+         *
+         * @param rotation The new orientation of the device, one of t
+         * @see android.view.Surface
+         */
+        OnProposedRotationChanged(
+            [in] Int32 rotation);
+
+        Dump(
+            [in] IPrintWriter* pw,
+            [in] String prefix);
+    }
+
+
+    } // Impl
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

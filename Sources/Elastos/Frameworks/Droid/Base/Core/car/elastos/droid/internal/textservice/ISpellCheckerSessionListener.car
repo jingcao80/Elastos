@@ -1,0 +1,31 @@
+
+module
+{
+    interface Elastos.Droid.View.TextService.ISuggestionsInfo;
+    interface Elastos.Droid.View.TextService.ISentenceSuggestionsInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Internal {
+    namespace TextService {
+
+    /**
+     *
+     * @hide
+     */
+    [oneway, deprecated]
+    interface IISpellCheckerSessionListener {
+        OnGetSuggestions(
+            [in] ArrayOf<ISuggestionsInfo*>* results);
+
+        OnGetSentenceSuggestions(
+            [in] ArrayOf<ISentenceSuggestionsInfo*>* result);
+    }
+
+    } // namespace TextService
+    } // namespace Internal
+    } // namespace View
+    } // namespace Droid
+    } // namespace Elastos
+}

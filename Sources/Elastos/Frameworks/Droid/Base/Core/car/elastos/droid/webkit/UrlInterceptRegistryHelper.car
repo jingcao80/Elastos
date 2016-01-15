@@ -1,0 +1,121 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+    interface Elastos.Droid.Webkit.IUrlInterceptHandler;
+    interface Elastos.Droid.Webkit.ICacheManagerCacheResult;
+    interface Elastos.Droid.Webkit.IPluginData;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * @hide
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    //@Deprecated
+    interface IUrlInterceptRegistryHelper {
+
+        /**
+         * set the flag to control whether url intercept is enabled or disabled
+         *
+         * @param disabled true to disable the cache
+         *
+         * @hide
+         * @deprecated This class was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        //synchronized
+        SetUrlInterceptDisabled(
+            [in] Boolean disabled);
+
+        /**
+         * get the state of the url intercept, enabled or disabled
+         *
+         * @return return if it is disabled
+         *
+         * @hide
+         * @deprecated This class was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        //synchronized
+        UrlInterceptDisabled(
+            [out] Boolean* disabled);
+
+        /**
+         * Register a new UrlInterceptHandler. This handler will be called
+         * before any that were previously registered.
+         *
+         * @param handler The new UrlInterceptHandler object
+         * @return true if the handler was not previously registered.
+         *
+         * @hide
+         * @deprecated This class was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        //synchronized
+        RegisterHandler(
+            [in] IUrlInterceptHandler* handler,
+            [out] Boolean* result);
+
+        /**
+         * Unregister a previously registered UrlInterceptHandler.
+         *
+         * @param handler A previously registered UrlInterceptHandler.
+         * @return true if the handler was found and removed from the list.
+         *
+         * @hide
+         * @deprecated This class was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        //synchronized
+        UnregisterHandler(
+            [in] IUrlInterceptHandler* handler,
+            [out] Boolean* result);
+
+        /**
+         * Given an url, returns the CacheResult of the first
+         * UrlInterceptHandler interested, or null if none are.
+         *
+         * @return A CacheResult containing surrogate content.
+         *
+         * @hide
+         * @deprecated This class was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        //synchronized
+        GetSurrogate(
+            [in] String url,
+            [in] IMap* headers,
+            [out] ICacheManagerCacheResult** cacheResult);
+
+        /**
+         * Given an url, returns the PluginData of the first
+         * UrlInterceptHandler interested, or null if none are or if
+         * intercepts are disabled.
+         *
+         * @return A PluginData instance containing surrogate content.
+         *
+         * @hide
+         * @deprecated This class was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        //synchronized
+        GetPluginData(
+            [in] String url,
+            [in] IMap* headers,
+            [out] IPluginData** pluginData);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,315 @@
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Internal.Os.IHandlerCaller;
+    interface Elastos.Droid.View.ISurfaceHolder;
+    interface Elastos.Droid.View.IWindowInsets;
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Service.Wallpaper.IIWallpaperConnection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Wallpaper {
+
+    interface IWallpaperCommand {}
+
+    /**
+     * @Involve
+     * interface IHandlerCallerCallback
+     * interface IIWallpaperEngine
+     */
+    [local, deprecated]
+    interface IIWallpaperEngineWrapper {
+        ReportShown();
+    }
+
+    /**
+     * Implements the internal {@link IWallpaperService} interface to convert
+     * incoming calls to it back to calls on an {@link WallpaperService}.
+     *
+     * @Involve
+     * interface IIWallpaperService
+     */
+    interface IIWallpaperServiceWrapper {}
+
+    /**
+     * The actual implementation of a wallpaper.  A wallpaper service may
+     * have multiple instances running (for example as a real wallpaper
+     * and as a preview), each of which is represented by its own Engine
+     * instance.  You must implement {@link WallpaperService#onCreateEngine()}
+     * to return your concrete Engine implementation.
+     */
+    [local, deprecated]
+    interface IWallpaperServiceEngine
+    {
+        /**
+         * Provides access to the surface in which this wallpaper is drawn.
+         */
+        GetSurfaceHolder(
+            [out] ISurfaceHolder** holder);
+
+        /**
+         * Convenience for {@link WallpaperManager#getDesiredMinimumWidth()
+         * WallpaperManager.getDesiredMinimumWidth()}, returning the width
+         * that the system would like this wallpaper to run in.
+         */
+        GetDesiredMinimumWidth(
+            [out] Int32* width);
+
+        /**
+         * Convenience for {@link WallpaperManager#getDesiredMinimumHeight()
+         * WallpaperManager.getDesiredMinimumHeight()}, returning the height
+         * that the system would like this wallpaper to run in.
+         */
+        GetDesiredMinimumHeight(
+            [out] Int32* height);
+
+        /**
+         * Return whether the wallpaper is currently visible to the user,
+         * this is the last value supplied to
+         * {@link #onVisibilityChanged(boolean)}.
+         */
+        IsVisible(
+            [out] Boolean* ret);
+
+        /**
+         * Returns true if this engine is running in preview mode -- that is,
+         * it is being shown to the user before they select it as the actual
+         * wallpaper.
+         */
+        IsPreview(
+            [out] Boolean* ret);
+
+        /**
+         * Control whether this wallpaper will receive raw touch events
+         * from the window manager as the user interacts with the window
+         * that is currently displaying the wallpaper.  By default they
+         * are turned off.  If enabled, the events will be received in
+         * {@link #onTouchEvent(MotionEvent)}.
+         */
+        SetTouchEventsEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Control whether this wallpaper will receive notifications when the wallpaper
+         * has been scrolled. By default, wallpapers will receive notifications, although
+         * the default static image wallpapers do not. It is a performance optimization to
+         * set this to false.
+         *
+         * @param enabled whether the wallpaper wants to receive offset notifications
+         */
+        SetOffsetNotificationsEnabled(
+            [in] Boolean enabled);
+
+
+        /** {@hide} */
+        SetFixedSizeAllowed(
+            [in] Boolean allowed);
+
+        /**
+         * Called once to initialize the engine.  After returning, the
+         * engine's surface will be created by the framework.
+         */
+        OnCreate(
+            [in] ISurfaceHolder* surfaceHolder);
+
+        /**
+         * Called right before the engine is going away.  After this the
+         * surface will be destroyed and this Engine object is no longer
+         * valid.
+         */
+        OnDestroy();
+
+        /**
+         * Called to inform you of the wallpaper becoming visible or
+         * hidden.  <em>It is very important that a wallpaper only use
+         * CPU while it is visible.</em>.
+         */
+        OnVisibilityChanged(
+            [in] Boolean visible);
+
+        /**
+         * Called with the current insets that are in effect for the wallpaper.
+         * This gives you the part of the overall wallpaper surface that will
+         * generally be visible to the user (ignoring position offsets applied to it).
+         *
+         * @param insets Insets to apply.
+         */
+        OnApplyWindowInsets(
+            [in] IWindowInsets* insets);
+
+        /**
+         * Called as the user performs touch-screen interaction with the
+         * window that is currently showing this wallpaper.  Note that the
+         * events you receive here are driven by the actual application the
+         * user is interacting with, so if it is slow you will get fewer
+         * move events.
+         */
+        OnTouchEvent(
+            [in] IMotionEvent* event);
+
+        /**
+         * Called to inform you of the wallpaper's offsets changing
+         * within its contain, corresponding to the container's
+         * call to {@link WallpaperManager#setWallpaperOffsets(IBinder, float, float)
+         * WallpaperManager.setWallpaperOffsets()}.
+         */
+        OnOffsetsChanged(
+            [in] Float xOffset,
+            [in] Float yOffset,
+            [in] Float xOffsetStep,
+            [in] Float yOffsetStep,
+            [in] Int32 xPixelOffset,
+            [in] Int32 yPixelOffset);
+
+        /**
+         * Process a command that was sent to the wallpaper with
+         * {@link WallpaperManager#sendWallpaperCommand}.
+         * The default implementation does nothing, and always returns null
+         * as the result.
+         *
+         * @param action The name of the command to perform.  This tells you
+         * what to do and how to interpret the rest of the arguments.
+         * @param x Generic integer parameter.
+         * @param y Generic integer parameter.
+         * @param z Generic integer parameter.
+         * @param extras Any additional parameters.
+         * @param resultRequested If true, the caller is requesting that
+         * a result, appropriate for the command, be returned back.
+         * @return If returning a result, create a Bundle and place the
+         * result data in to it.  Otherwise return null.
+         */
+        OnCommand(
+            [in] String action,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] IBundle* extras,
+            [in] Boolean resultRequested,
+            [out] IBundle** ret);
+
+        /**
+         * Called when an application has changed the desired virtual size of
+         * the wallpaper.
+         */
+        OnDesiredSizeChanged(
+            [in] Int32 desiredWidth,
+            [in] Int32 desiredHeight);
+
+        /**
+         * Convenience for {@link SurfaceHolder.Callback#surfaceChanged
+         * SurfaceHolder.Callback.surfaceChanged()}.
+         */
+        OnSurfaceChanged(
+            [in] ISurfaceHolder* holder,
+            [in] Int32 format,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * Convenience for {@link SurfaceHolder.Callback2#surfaceRedrawNeeded
+         * SurfaceHolder.Callback.surfaceRedrawNeeded()}.
+         */
+        OnSurfaceRedrawNeeded(
+            [in] ISurfaceHolder* holder);
+
+        /**
+         * Convenience for {@link SurfaceHolder.Callback#surfaceCreated
+         * SurfaceHolder.Callback.surfaceCreated()}.
+         */
+        OnSurfaceCreated(
+            [in] ISurfaceHolder* holder);
+
+        /**
+         * Convenience for {@link SurfaceHolder.Callback#surfaceDestroyed
+         * SurfaceHolder.Callback.surfaceDestroyed()}.
+         */
+        OnSurfaceDestroyed(
+            [in] ISurfaceHolder* holder);
+
+        UpdateSurface(
+            [in] Boolean forceRelayout,
+            [in] Boolean forceReport,
+            [in] Boolean redrawNeeded);
+
+        Attach(
+            [in] IIWallpaperEngineWrapper* wrapper);
+
+        DoDesiredSizeChanged(
+            [in] Int32 desiredWidth,
+            [in] Int32 desiredHeight);
+
+        DoDisplayPaddingChanged(
+            [in] IRect* padding);
+
+        DoVisibilityChanged(
+            [in] Boolean visible);
+
+        ReportVisibility();
+
+        DoOffsetsChanged(
+            [in] Boolean always);
+
+        DoCommand(
+            [in] IWallpaperCommand* cmd);
+
+        ReportSurfaceDestroyed();
+
+        Detach();
+    }
+
+    /**
+     * A wallpaper service is responsible for showing a live wallpaper behind
+     * applications that would like to sit on top of it.  This service object
+     * itself does very little -- its only purpose is to generate instances of
+     * {@link Engine} as needed.  Implementing a wallpaper thus
+     * involves subclassing from this, subclassing an Engine implementation,
+     * and implementing {@link #onCreateEngine()} to return a new instance of
+     * your engine.
+     *
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface IComponentCallbacks2
+     * interface IService
+     */
+    [local]
+    interface IWallpaperService {
+        /**
+         * The {@link Intent} that must be declared as handled by the service.
+         * To be supported, the service must also require the
+         * {@link android.Manifest.permission#BIND_WALLPAPER} permission so
+         * that other applications can not abuse it.
+         */
+        //@SdkConstant(SdkConstantType.SERVICE_ACTION)
+        const String SERVICE_INTERFACE = "android.service.wallpaper.WallpaperService";
+
+        /**
+         * Name under which a WallpaperService component publishes information
+         * about itself.  This meta-data must reference an XML resource containing
+         * a <code>&lt;{@link android.R.styleable#Wallpaper wallpaper}&gt;</code>
+         * tag.
+         */
+        const String SERVICE_META_DATA = "android.service.wallpaper";
+
+        /**
+         * Must be implemented to return a new instance of the wallpaper's engine.
+         * Note that multiple instances may be active at the same time, such as
+         * when the wallpaper is currently set as the active wallpaper and the user
+         * is in the wallpaper picker viewing a preview of it as well.
+         */
+        OnCreateEngine(
+            [out] IWallpaperServiceEngine** engine);
+    }
+
+    } //Wallpaper
+    } //Service
+    } //Droid
+    } //Elastos
+}

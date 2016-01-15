@@ -1,0 +1,175 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /**
+     * Reports power consumption values for various device activities. Reads values from an XML file.
+     * Customize the XML file for different devices.
+     * [hidden]
+     */
+    [local]
+    interface IPowerProfile {
+        /**
+         * No power consumption, or accounted for elsewhere.
+         */
+        const String POWER_NONE = "none";
+
+        /**
+         * Power consumption when CPU is in power collapse mode.
+         */
+        const String POWER_CPU_IDLE = "cpu.idle";
+
+        /**
+         * Power consumption when CPU is awake (when a wake lock is held).  This
+         * should be 0 on devices that can go into full CPU power collapse even
+         * when a wake lock is held.  Otherwise, this is the power consumption in
+         * addition to POWERR_CPU_IDLE due to a wake lock being held but with no
+         * CPU activity.
+         */
+        const String POWER_CPU_AWAKE = "cpu.awake";
+
+        /**
+         * Power consumption when CPU is in power collapse mode.
+         */
+        const String POWER_CPU_ACTIVE = "cpu.active";
+
+        /**
+         * Power consumption when WiFi driver is scanning for networks.
+         */
+        const String POWER_WIFI_SCAN = "wifi.scan";
+
+        /**
+         * Power consumption when WiFi driver is on.
+         */
+        const String POWER_WIFI_ON = "wifi.on";
+
+        /**
+         * Power consumption when WiFi driver is transmitting/receiving.
+         */
+        const String POWER_WIFI_ACTIVE = "wifi.active";
+
+        /**
+         * Power consumption when GPS is on.
+         */
+        const String POWER_GPS_ON = "gps.on";
+
+        /**
+         * Power consumption when Bluetooth driver is on.
+         */
+        const String POWER_BLUETOOTH_ON = "bluetooth.on";
+
+        /**
+         * Power consumption when Bluetooth driver is transmitting/receiving.
+         */
+        const String POWER_BLUETOOTH_ACTIVE = "bluetooth.active";
+
+        /**
+         * Power consumption when Bluetooth driver gets an AT command.
+         */
+        const String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
+
+        /**
+         * Power consumption when screen is on, not including the backlight power.
+         */
+        const String POWER_SCREEN_ON = "screen.on";
+
+        /**
+         * Power consumption when cell radio is on but not on a call.
+         */
+        const String POWER_RADIO_ON = "radio.on";
+
+        /**
+         * Power consumption when cell radio is hunting for a signal.
+         */
+        const String POWER_RADIO_SCANNING = "radio.scanning";
+
+        /**
+         * Power consumption when talking on the phone.
+         */
+        const String POWER_RADIO_ACTIVE = "radio.active";
+
+        /**
+         * Power consumption at full backlight brightness. If the backlight is at
+         * 50% brightness, then this should be multiplied by 0.5
+         */
+        const String POWER_SCREEN_FULL = "screen.full";
+
+        /**
+         * Power consumed by the audio hardware when playing back audio content. This is in addition
+         * to the CPU power, probably due to a DSP and / or amplifier.
+         */
+        const String POWER_AUDIO = "dsp.audio";
+
+        /**
+         * Power consumed by any media hardware when playing back video content. This is in addition
+         * to the CPU power, probably due to a DSP.
+         */
+        const String POWER_VIDEO = "dsp.video";
+
+        /**
+         * Power consumption when camera flashlight is on.
+         */
+        const String POWER_FLASHLIGHT = "camera.flashlight";
+
+        const String POWER_CPU_SPEEDS = "cpu.speeds";
+
+        /**
+         * Power consumed by wif batched scaning.  Broken down into bins by
+         * Channels Scanned per Hour.  May do 1-720 scans per hour of 1-100 channels
+         * for a range of 1-72,000.  Going logrithmic (1-8, 9-64, 65-512, 513-4096, 4097-)!
+         */
+        const String POWER_WIFI_BATCHED_SCAN = "wifi.batchedscan";
+
+        /**
+         * Battery capacity in milliAmpHour (mAh).
+         */
+        const String POWER_BATTERY_CAPACITY = "battery.capacity";
+
+        /**
+         * Returns the average current in mA consumed by the subsystem
+         * @param type the subsystem type
+         * @return the average current in milliAmps.
+         */
+        GetAveragePower(
+            [in] String type,
+            [out] Double* result);
+
+        /**
+         * Returns the average current in mA consumed by the subsystem for the given level.
+         * @param type the subsystem type
+         * @param level the level of power at which the subsystem is running. For instance, the
+         *  signal strength of the cell network between 0 and 4 (if there are 4 bars max.)
+         *  If there is no data for multiple levels, the level is ignored.
+         * @return the average current in milliAmps.
+         */
+        GetAveragePower(
+            [in] String type,
+            [in] Int32 level,
+            [out] Double* result);
+
+        /**
+         * Returns the battery capacity, if available, in milli Amp Hours. If not available,
+         * it returns zero.
+         * @return the battery capacity in mAh
+         */
+        GetBatteryCapacity(
+            [out] Double* result);
+
+        /**
+         * Returns the number of speeds that the CPU can be run at.
+         * @return
+         */
+        GetNumSpeedSteps(
+            [out] Int32* result);
+    }
+
+    }//namespace Os
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}
+

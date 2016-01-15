@@ -1,0 +1,119 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+
+    /**
+     * This class provides a base class for recognition service implementations. This class should be
+     * extended only in case you wish to implement a new speech recognizer. Please note that the
+     * implementation of this service is stateless.
+     */
+    //public abstract class
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.IService
+     */
+    interface IRecognitionService {
+        /**
+         * The {@link Intent} that must be declared as handled by the service.
+         */
+        //@SdkConstant(SdkConstantType.SERVICE_ACTION)
+        const String SERVICE_INTERFACE = "android.speech.RecognitionService";
+
+        /**
+         * Name under which a RecognitionService component publishes information about itself.
+         * This meta-data should reference an XML resource containing a
+         * <code>&lt;{@link android.R.styleable#RecognitionService recognition-service}&gt;</code> tag.
+         */
+        const String SERVICE_META_DATA = "android.speech";
+    }
+
+    /**
+     * This class receives callbacks from the speech recognition service and forwards them to the
+     * user. An instance of this class is passed to the
+     * {@link RecognitionService#onStartListening(Intent, Callback)} method. Recognizers may call
+     * these methods on any thread.
+     */
+    //public class
+    [deprecated]
+    interface IRecognitionServiceCallback {
+
+        /**
+         * The service should call this method when the user has started to speak.
+         */
+        BeginningOfSpeech();
+
+        /**
+         * The service should call this method when sound has been received. The purpose of this
+         * function is to allow giving feedback to the user regarding the captured audio.
+         *
+         * @param buffer a buffer containing a sequence of big-endian 16-bit integers representing a
+         *        single channel audio stream. The sample rate is implementation dependent.
+         */
+        BufferReceived(
+            [in] ArrayOf<Byte>* buffer);
+
+        /**
+         * The service should call this method after the user stops speaking.
+         */
+        EndOfSpeech();
+
+        /**
+         * The service should call this method when a network or recognition error occurred.
+         *
+         * @param error code is defined in {@link SpeechRecognizer}
+         */
+        Error(
+            [in] Int32 error);
+
+        /**
+         * The service should call this method when partial recognition results are available. This
+         * method can be called at any time between {@link #beginningOfSpeech()} and
+         * {@link #results(Bundle)} when partial results are ready. This method may be called zero,
+         * one or multiple times for each call to {@link SpeechRecognizer#startListening(Intent)},
+         * depending on the speech recognition service implementation.
+         *
+         * @param partialResults the returned results. To retrieve the results in
+         *        ArrayList&lt;String&gt; format use {@link Bundle#getStringArrayList(String)} with
+         *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
+         */
+        PartialResults(
+            [in] IBundle* partialResults);
+
+        /**
+         * The service should call this method when the endpointer is ready for the user to start
+         * speaking.
+         *
+         * @param params parameters set by the recognition service. Reserved for future use.
+         */
+        ReadyForSpeech(
+            [in] IBundle* params);
+
+        /**
+         * The service should call this method when recognition results are ready.
+         *
+         * @param results the recognition results. To retrieve the results in {@code
+         *        ArrayList&lt;String&gt;} format use {@link Bundle#getStringArrayList(String)} with
+         *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
+         */
+        Results(
+            [in] IBundle* results);
+
+        /**
+         * The service should call this method when the sound level in the audio stream has changed.
+         * There is no guarantee that this method will be called.
+         *
+         * @param rmsdB the new RMS dB value
+         */
+        RmsChanged(
+            [in] Float rmsdB);
+    }
+
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

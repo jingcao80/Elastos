@@ -1,0 +1,17 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+
+    namespace Org {
+    namespace XBMC {
+
+    class CXBMCActivity {
+        interface IActivity;
+    }
+
+    } // namespace XBMC
+    } // namespace Org
+}

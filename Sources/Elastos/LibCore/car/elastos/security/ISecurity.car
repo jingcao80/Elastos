@@ -1,0 +1,189 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Utility.IMap;
+    interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface ISecurity {
+        /**
+         * Returns value for the specified algorithm with the specified name.
+         *
+         * @param algName
+         *            the name of the algorithm.
+         * @param propName
+         *            the name of the property.
+         * @return value of the property.
+         * @deprecated Use {@link AlgorithmParameters} and {@link KeyFactory}
+         *             instead.
+         */
+        GetAlgorithmProperty(
+            [in] String algName,
+            [in] String propName,
+            [out] String* algProp);
+
+        /**
+         * Insert the given {@code Provider} at the specified {@code position}. The
+         * positions define the preference order in which providers are searched for
+         * requested algorithms.
+         *
+         * @param provider
+         *            the provider to insert.
+         * @param position
+         *            the position (starting from 1).
+         * @return the actual position or {@code -1} if the given {@code provider}
+         *         was already in the list. The actual position may be different
+         *         from the desired position.
+         */
+        InsertProviderAt(
+            [in] IProvider* provider,
+            [in] Int32 position,
+            [out] Int32* pos);
+
+        /**
+         * Adds the given {@code provider} to the collection of providers at the
+         * next available position.
+         *
+         * @param provider
+         *            the provider to be added.
+         * @return the actual position or {@code -1} if the given {@code provider}
+         *         was already in the list.
+         */
+
+        AddProvider(
+            [in] IProvider* provider,
+            [out] Int32* pos);
+
+        /**
+         * Removes the {@code Provider} with the specified name form the collection
+         * of providers. If the the {@code Provider} with the specified name is
+         * removed, all provider at a greater position are shifted down one
+         * position.
+         *
+         * <p>Returns silently if {@code name} is {@code null} or no provider with the
+         * specified name is installed.
+         *
+         * @param name
+         *            the name of the provider to remove.
+         */
+        RemoveProvider(
+            [in] String name);
+
+        /**
+         * Returns an array containing all installed providers. The providers are
+         * ordered according their preference order.
+         *
+         * @return an array containing all installed providers.
+         */
+        GetProviders(
+            [out, callee] ArrayOf<IProvider*>* providers);
+
+        /**
+         * Returns the {@code Provider} with the specified name. Returns {@code
+         * null} if name is {@code null} or no provider with the specified name is
+         * installed.
+         *
+         * @param name
+         *            the name of the requested provider.
+         * @return the provider with the specified name, maybe {@code null}.
+         */
+        GetProvider(
+            [in] String name,
+            [out] IProvider** provider);
+
+        /**
+         * Returns the array of providers which meet the user supplied string
+         * filter. The specified filter must be supplied in one of two formats:
+         * <nl>
+         * <li> CRYPTO_SERVICE_NAME.ALGORITHM_OR_TYPE
+         * <p>
+         * (for example: "MessageDigest.SHA")
+         * <li> CRYPTO_SERVICE_NAME.ALGORITHM_OR_TYPE
+         * ATTR_NAME:ATTR_VALUE
+         * <p>
+         * (for example: "Signature.MD2withRSA KeySize:512")
+         * </nl>
+         *
+         * @param filter
+         *            case-insensitive filter.
+         * @return the providers which meet the user supplied string filter {@code
+         *         filter}. A {@code null} value signifies that none of the
+         *         installed providers meets the filter specification.
+         * @throws InvalidParameterException
+         *             if an unusable filter is supplied.
+         * @throws NullPointerException
+         *             if {@code filter} is {@code null}.
+         */
+        GetProviders(
+            [in] String filter,
+            [out, callee] ArrayOf<IProvider*>* providers);
+
+        /**
+         * Returns the array of providers which meet the user supplied set of
+         * filters. The filter must be supplied in one of two formats:
+         * <nl>
+         * <li> CRYPTO_SERVICE_NAME.ALGORITHM_OR_TYPE
+         * <p>
+         * for example: "MessageDigest.SHA" The value associated with the key must
+         * be an empty string. <li> CRYPTO_SERVICE_NAME.ALGORITHM_OR_TYPE
+         * ATTR_NAME:ATTR_VALUE
+         * <p>
+         * for example: "Signature.MD2withRSA KeySize:512" where "KeySize:512" is
+         * the value of the filter map entry.
+         * </nl>
+         *
+         * @param filter
+         *            case-insensitive filter.
+         * @return the providers which meet the user supplied string filter {@code
+         *         filter}. A {@code null} value signifies that none of the
+         *         installed providers meets the filter specification.
+         * @throws InvalidParameterException
+         *             if an unusable filter is supplied.
+         * @throws NullPointerException
+         *             if {@code filter} is {@code null}.
+         */
+        GetProviders(
+            [in] IMap* filter,
+            [out, callee] ArrayOf<IProvider*>* providers);
+
+        /**
+         * Returns the value of the security property named by the argument.
+         *
+         * @param key
+         *            the name of the requested security property.
+         * @return the value of the security property.
+         */
+         GetProperty(
+            [in] String key,
+            [out] String* prop);
+
+        /**
+         * Sets the value of the specified security property.
+         */
+        SetProperty(
+            [in] String key,
+            [in] String value);
+
+        /**
+         * Returns a {@code Set} of all registered algorithms for the specified
+         * cryptographic service. {@code "Signature"}, {@code "Cipher"} and {@code
+         * "KeyStore"} are examples for such kind of services.
+         *
+         * @param serviceName
+         *            the case-insensitive name of the service.
+         * @return a {@code Set} of all registered algorithms for the specified
+         *         cryptographic service, or an empty {@code Set} if {@code
+         *         serviceName} is {@code null} or if no registered provider
+         *         provides the requested service.
+         */
+         GetAlgorithms(
+            [in] String serviceName,
+            [out] ISet** algs);
+    }
+
+    } // end namespace Security
+    } // end namespace Elastos
+}

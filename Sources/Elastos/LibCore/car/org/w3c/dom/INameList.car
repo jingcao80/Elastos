@@ -1,0 +1,73 @@
+module
+{
+    namespace Org {
+    namespace W3c {
+    namespace Dom {
+
+    /**
+     *  The <code>NameList</code> interface provides the abstraction of an ordered
+     * collection of parallel pairs of name and namespace values (which could be
+     * null values), without defining or constraining how this collection is
+     * implemented. The items in the <code>NameList</code> are accessible via an
+     * integral index, starting from 0.
+     * <p>See also the <a href='http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407'>Document Object Model (DOM) Level 3 Core Specification</a>.
+     * @since DOM Level 3
+     */
+    interface INameList {
+        /**
+         *  Returns the <code>index</code>th name item in the collection.
+         * @param index Index into the collection.
+         * @return  The name at the <code>index</code>th position in the
+         *   <code>NameList</code>, or <code>null</code> if there is no name for
+         *   the specified index or if the index is out of range.
+         */
+        GetName(
+            [in] Int32 index,
+            [out] String* str);
+
+        /**
+         *  Returns the <code>index</code>th namespaceURI item in the collection.
+         * @param index Index into the collection.
+         * @return  The namespace URI at the <code>index</code>th position in the
+         *   <code>NameList</code>, or <code>null</code> if there is no name for
+         *   the specified index or if the index is out of range.
+         */
+        GetNamespaceURI(
+            [in] Int32 index,
+            [out] String* str);
+
+        /**
+         *  The number of pairs (name and namespaceURI) in the list. The range of
+         * valid child node indices is 0 to <code>length-1</code> inclusive.
+         */
+        GetLength(
+            [out] Int32* value);
+
+        /**
+         *  Test if a name is part of this <code>NameList</code>.
+         * @param str  The name to look for.
+         * @return  <code>true</code> if the name has been found,
+         *   <code>false</code> otherwise.
+         */
+        Contains(
+            [in] String str,
+            [out] Boolean* value);
+
+        /**
+         *  Test if the pair namespaceURI/name is part of this
+         * <code>NameList</code>.
+         * @param namespaceURI  The namespace URI to look for.
+         * @param name  The name to look for.
+         * @return  <code>true</code> if the pair namespaceURI/name has been
+         *   found, <code>false</code> otherwise.
+         */
+        ContainsNS(
+            [in] String namespaceURI,
+            [in] String name,
+            [out] Boolean* value);
+    }
+
+    } // namespace Dom
+    } // namespace W3c
+    } // namespace Org
+}

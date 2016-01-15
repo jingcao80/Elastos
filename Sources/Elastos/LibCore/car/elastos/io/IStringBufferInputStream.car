@@ -1,0 +1,23 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+     * A specialized {@link InputStream} that reads bytes from a {@code String} in
+     * a sequential manner.
+     *
+     * @deprecated Use {@link StringReader} instead.
+     */
+    // @Deprecated
+     /**
+     * @Involve
+     * interface ICloseable;
+     * interface IInputStream;
+     */
+    interface IStringBufferInputStream {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

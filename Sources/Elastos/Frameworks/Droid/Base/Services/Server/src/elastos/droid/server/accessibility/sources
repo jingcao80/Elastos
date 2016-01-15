@@ -1,0 +1,20 @@
+TARGET_NAME= accessibility
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = GestureUtils.cpp
+SOURCES += CMagnificationSpec.cpp
+SOURCES += CMagnificationController.cpp
+SOURCES += ScreenMagnifier.cpp
+SOURCES += CViewportWindow.cpp
+SOURCES += TouchExplorer.cpp
+SOURCES += CAccessibilityInputFilter.cpp
+SOURCES += CAccessibilityServiceConnection.cpp
+SOURCES += CAccessibilityManagerService.cpp

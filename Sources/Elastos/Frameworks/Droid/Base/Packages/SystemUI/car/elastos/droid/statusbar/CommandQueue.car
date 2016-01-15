@@ -1,0 +1,164 @@
+module
+{
+    using interface Elastos.Droid.Internal.StatusBar.IStatusBarIcon;
+    using interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    interface ICommandQueueCallbacks {
+        AddIcon(
+            [in] String slot,
+            [in] Int32 index,
+            [in] Int32 viewIndex,
+            [in] IStatusBarIcon* icon);
+
+        UpdateIcon(
+            [in] String slot,
+            [in] Int32 index,
+            [in] Int32 viewIndex,
+            [in] IStatusBarIcon* old,
+            [in] IStatusBarIcon* icon);
+
+        RemoveIcon(
+            [in] String slot,
+            [in] Int32 index,
+            [in] Int32 viewIndex);
+
+        Disable(
+            [in] Int32 state);
+
+        AnimateExpandNotificationsPanel();
+
+        AnimateCollapsePanels(
+            [in] Int32 flags);
+
+        AnimateExpandSettingsPanel();
+
+        SetSystemUiVisibility(
+            [in] Int32 vis,
+            [in] Int32 mask);
+
+        TopAppWindowChanged(
+            [in] Boolean visible);
+
+        SetImeWindowStatus(
+            [in] IBinder* token,
+            [in] Int32 vis,
+            [in] Int32 backDisposition);
+
+        ShowRecentApps(
+            [in] Boolean triggeredFromAltTab);
+
+        HideRecentApps(
+            [in] Boolean triggeredFromAltTab,
+            [in] Boolean triggeredFromHomeKey);
+
+        ToggleRecentApps();
+
+        PreloadRecentApps();
+
+        CancelPreloadRecentApps();
+
+        ShowSearchPanel();
+
+        HideSearchPanel();
+
+        SetWindowState(
+            [in] Int32 window,
+            [in] Int32 state);
+
+        BuzzBeepBlinked();
+
+        NotificationLightOff();
+
+        NotificationLightPulse(
+            [in] Int32 argb,
+            [in] Int32 onMillis,
+            [in] Int32 offMillis);
+    }
+
+    /**
+     * This class takes the functions from IStatusBar that come in on
+     * binder pool threads and posts messages to get them onto the main
+     * thread, and calls onto Callbacks.  It also takes care of
+     * coalescing these calls so they don't stack up.  For the calls
+     * are coalesced, note that they are all idempotent.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Internal.StatusBar.IIStatusBar
+     */
+    interface ICommandQueue {
+        const Int32 FLAG_EXCLUDE_NONE = 0;
+        const Int32 FLAG_EXCLUDE_SEARCH_PANEL = 1;//1 << 0;
+        const Int32 FLAG_EXCLUDE_RECENTS_PANEL = 2;//1 << 1;
+        const Int32 FLAG_EXCLUDE_NOTIFICATION_PANEL = 4;//1 << 2;
+        const Int32 FLAG_EXCLUDE_INPUT_METHODS_PANEL = 8;//1 << 3;
+        const Int32 FLAG_EXCLUDE_COMPAT_MODE_PANEL = 16;//1 << 4;
+
+        SetIcon(
+            [in] Int32 index,
+            [in] IStatusBarIcon* icon);
+
+        RemoveIcon(
+            [in] Int32 index);
+
+        Disable(
+            [in] Int32 state);
+
+        AnimateExpandNotificationsPanel();
+
+        AnimateCollapsePanels();
+
+        AnimateExpandSettingsPanel();
+
+        SetSystemUiVisibility(
+            [in] Int32 vis,
+            [in] Int32 mask);
+
+        TopAppWindowChanged(
+            [in] Boolean menuVisible);
+
+        SetImeWindowStatus(
+            [in] IBinder* token,
+            [in] Int32 vis,
+            [in] Int32 backDisposition,
+            [in] Boolean showImeSwitcher);
+
+        ShowRecentApps(
+            [in] Boolean triggeredFromAltTab);
+
+        HideRecentApps(
+            [in] Boolean triggeredFromAltTab,
+            [in] Boolean triggeredFromHomeKey);
+
+        ToggleRecentApps();
+
+        PreloadRecentApps();
+
+        CancelPreloadRecentApps();
+
+        SetWindowState(
+            [in] Int32 window,
+            [in] Int32 state);
+
+        BuzzBeepBlinked();
+
+        NotificationLightOff();
+
+        NotificationLightPulse(
+            [in] Int32 argb,
+            [in] Int32 onMillis,
+            [in] Int32 offMillis);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

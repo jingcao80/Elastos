@@ -1,0 +1,64 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    interface IFileDescriptor {
+        /**
+         * Ensures that data which is buffered within the underlying implementation
+         * is written out to the appropriate device before returning.
+         */
+        Sync();
+
+        /**
+         * Tests whether this {FileDescriptor} is valid.
+         */
+        Valid(
+            [out] Boolean* isValid);
+
+        /**
+         * Returns the int fd. It's highly unlikely you should be calling this. Please discuss
+         * your needs with a libcore maintainer before using this method.
+         * @hide internal use only
+         */
+        GetInt(
+            [out] Int32* result);
+
+        /**
+         * Returns the int fd. It's highly unlikely you should be calling this. Please discuss
+         * your needs with a libcore maintainer before using this method.
+         * @hide internal use only
+         */
+        GetDescriptor(
+            [out] Int32* fd);
+
+        /**
+         * Sets the int fd. It's highly unlikely you should be calling this. Please discuss
+         * your needs with a libcore maintainer before using this method.
+         * @hide internal use only
+         */
+        SetDescriptor(
+            [in] Int32 fd);
+
+        /**
+         * @hide internal use only
+         */
+        IsSocket(
+            [out] Boolean* isSocket);
+    }
+
+    interface IFileDescriptorHelper {
+        GetInFile(
+            [out] IFileDescriptor** inFile);
+
+        GetOutFile(
+            [out] IFileDescriptor** outFile);
+
+        GetErrFile(
+            [out] IFileDescriptor** errFile);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

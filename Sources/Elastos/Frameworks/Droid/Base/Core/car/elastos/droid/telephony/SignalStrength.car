@@ -1,0 +1,307 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated]
+    interface ISignalStrength {
+
+        const Int32 SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+        const Int32 SIGNAL_STRENGTH_POOR = 1;
+        const Int32 SIGNAL_STRENGTH_MODERATE = 2;
+        const Int32 SIGNAL_STRENGTH_GOOD = 3;
+        const Int32 SIGNAL_STRENGTH_GREAT = 4;
+        const Int32 NUM_SIGNAL_STRENGTH_BINS = 5;
+        const Int32 INVALID = 0x7FFFFFFF;
+
+        /**
+         * Initialize gsm/cdma values, sets lte values to defaults.
+         *
+         * @param gsmSignalStrength
+         * @param gsmBitErrorRate
+         * @param cdmaDbm
+         * @param cdmaEcio
+         * @param evdoDbm
+         * @param evdoEcio
+         * @param evdoSnr
+         * @param gsm
+         *
+         * @hide
+         */
+        Initialize(
+            [in] Int32 gsmSignalStrength,
+            [in] Int32 gsmBitErrorRate,
+            [in] Int32 cdmaDbm,
+            [in] Int32 cdmaEcio,
+            [in] Int32 evdoDbm,
+            [in] Int32 evdoEcio,
+            [in] Int32 evdoSnr,
+            [in] Boolean gsm);
+
+        /**
+         * Initialize all the values
+         *
+         * @param gsmSignalStrength
+         * @param gsmBitErrorRate
+         * @param cdmaDbm
+         * @param cdmaEcio
+         * @param evdoDbm
+         * @param evdoEcio
+         * @param evdoSnr
+         * @param lteSignalStrength
+         * @param lteRsrp
+         * @param lteRsrq
+         * @param lteRssnr
+         * @param lteCqi
+         * @param gsm
+         *
+         * @hide
+         */
+        Initialize(
+            [in] Int32 gsmSignalStrength,
+            [in] Int32 gsmBitErrorRate,
+            [in] Int32 cdmaDbm,
+            [in] Int32 cdmaEcio,
+            [in] Int32 evdoDbm,
+            [in] Int32 evdoEcio,
+            [in] Int32 evdoSnr,
+            [in] Int32 lteSignalStrength,
+            [in] Int32 lteRsrp,
+            [in] Int32 lteRsrq,
+            [in] Int32 lteRssnr,
+            [in] Int32 lteCqi,
+            [in] Boolean gsm);
+
+        /**
+         * Validate the individual signal strength fields as per the range
+         * specified in ril.h
+         * Set to invalid any field that is not in the valid range
+         * Cdma, evdo, lte rsrp & rsrq values are sign converted
+         * when received from ril interface
+         *
+         * @return
+         *      Valid values for all signalstrength fields
+         * @hide
+         */
+        ValidateInput();
+
+        /**
+         * @param true - Gsm, Lte phones
+         *        false - Cdma phones
+         *
+         * Used by voice phone to set the isGsm
+         *        flag
+         * @hide
+         */
+        SetGsm(
+            [in] Boolean gsmFlag);
+
+        /**
+         * Get the GSM Signal Strength, valid values are (0-31, 99) as defined in TS
+         * 27.007 8.5
+         */
+        GetGsmSignalStrength(
+            [out] Int32* gsmSignalStrength);
+
+        /**
+         * Get the GSM bit error rate (0-7, 99) as defined in TS 27.007 8.5
+         */
+        GetGsmBitErrorRate(
+            [out] Int32* gsmBitErrorRate);
+
+        /**
+         * Get the CDMA RSSI value in dBm
+         */
+        GetCdmaDbm(
+            [out] Int32* cdmaDbm);
+
+        /**
+         * Get the CDMA Ec/Io value in dB*10
+         */
+        GetCdmaEcio(
+            [out] Int32* cdmaEcio);
+
+        /**
+         * Get the EVDO RSSI value in dBm
+         */
+        GetEvdoDbm(
+            [out] Int32* evdoDbm);
+
+        /**
+         * Get the EVDO Ec/Io value in dB*10
+         */
+        GetEvdoEcio(
+            [out] Int32* evdoEcio);
+
+        /**
+         * Get the signal to noise ratio. Valid values are 0-8. 8 is the highest.
+         */
+        GetEvdoSnr(
+            [out] Int32* evdoSnr);
+
+        /** @hide */
+        GetLteSignalStrength(
+            [out] Int32* lteSignalStrength);
+
+        /** @hide */
+        GetLteRsrp(
+            [out] Int32* lteRsrp);
+
+        /** @hide */
+        GetLteRsrq(
+            [out] Int32* lteRsrq);
+
+        /** @hide */
+        GetLteRssnr(
+            [out] Int32* lteRssnr);
+
+        /** @hide */
+        GetLteCqi(
+            [out] Int32* lteCqi);
+
+        /**
+         * Get signal level as an int from 0..4
+         *
+         * @hide
+         */
+        GetLevel(
+            [out] Int32* level);
+
+        /**
+         * Get the signal level as an asu value between 0..31, 99 is unknown
+         *
+         * @hide
+         */
+        GetAsuLevel(
+            [out] Int32* asuLevel);
+
+        /**
+         * Get the signal strength as dBm
+         *
+         * @hide
+         */
+        GetDbm(
+            [out] Int32* dbm);
+
+        /**
+         * Get Gsm signal strength as dBm
+         *
+         * @hide
+         */
+        GetGsmDbm(
+            [out] Int32* gsmDbm);
+
+        /**
+         * Get gsm as level 0..4
+         *
+         * @hide
+         */
+        GetGsmLevel(
+            [out] Int32* gsmLevel);
+
+        /**
+         * Get the gsm signal level as an asu value between 0..31, 99 is unknown
+         *
+         * @hide
+         */
+        GetGsmAsuLevel(
+            [out] Int32* gsmAsuLevel);
+
+        /**
+         * Get cdma as level 0..4
+         *
+         * @hide
+         */
+        GetCdmaLevel(
+            [out] Int32* cdmaLevel);
+
+        /**
+         * Get the cdma signal level as an asu value between 0..31, 99 is unknown
+         *
+         * @hide
+         */
+        GetCdmaAsuLevel(
+            [out] Int32* cdmaAsuLevel);
+
+        /**
+         * Get Evdo as level 0..4
+         *
+         * @hide
+         */
+        GetEvdoLevel(
+            [out] Int32* evdoLevel);
+
+        /**
+         * Get the evdo signal level as an asu value between 0..31, 99 is unknown
+         *
+         * @hide
+         */
+        GetEvdoAsuLevel(
+            [out] Int32* evdoAsuLevel);
+
+        /**
+         * Get LTE as dBm
+         *
+         * @hide
+         */
+        GetLteDbm(
+            [out] Int32* lteDbm);
+
+        /**
+         * Get LTE as level 0..4
+         *
+         * @hide
+         */
+        GetLteLevel(
+            [out] Int32* lteLevel);
+
+        /**
+         * Get the LTE signal level as an asu value between 0..97, 99 is unknown
+         * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
+         *
+         * @hide
+         */
+        GetLteAsuLevel(
+            [out] Int32* lteAsuLevel);
+
+        /**
+         * @return true if this is for GSM
+         */
+        IsGsm(
+            [out] Boolean* res);
+
+        FillInNotifierBundle(
+            [in] IBundle* m);
+    }
+
+    interface ISignalStrengthHelper {
+        GetSIGNAL_STRENGTH_NAMES(
+            [out, callee] ArrayOf<String>* names);
+
+        NewFromBundle(
+            [in] IBundle* m);
+
+        /**
+         * Make a SignalStrength object from the given parcel as passed up by
+         * the ril which does not have isGsm. isGsm will be changed by ServiceStateTracker
+         * so the default is a don't care.
+         *
+         * @hide
+         */
+        MakeSignalStrengthFromRilParcel(
+            [in] IParcel* parcel,
+            [out] ISignalStrength** ss);
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

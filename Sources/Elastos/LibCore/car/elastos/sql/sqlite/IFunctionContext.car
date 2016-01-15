@@ -1,0 +1,68 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    interface IFunctionContext {
+        /**
+         * Set function result from string.
+         *
+         * @param r result string
+         */
+        SetResult(
+            [in] String r);
+
+        /**
+         * Set function result from integer.
+         *
+         * @param r result integer
+         */
+        SetResult(
+            [in] Int32 r);
+
+        /**
+         * Set function result from double.
+         *
+         * @param r result double
+         */
+        SetResult(
+            [in] Double r);
+
+        /**
+         * Set function result from error message.
+         *
+         * @param r result string (error message)
+         */
+        SetError(
+            [in] String r);
+
+        /**
+         * Set function result from byte array.
+         * Only provided by SQLite3 databases.
+         *
+         * @param r result byte array
+         */
+        SetResult(
+            [in] ArrayOf<Byte> r);
+
+        /**
+         * Set function result as empty blob given size.
+         * Only provided by SQLite3 databases.
+         *
+         * @param n size for empty blob
+         */
+        SetResultZeroblob(
+            [in] Int32 n);
+
+        /**
+         * Retrieve number of rows for aggregate function.
+         */
+        Count(
+            [out] Int32* count);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

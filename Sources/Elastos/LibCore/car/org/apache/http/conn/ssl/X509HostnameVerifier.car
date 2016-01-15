@@ -1,0 +1,56 @@
+
+module
+{
+
+    using interface Elastosx.Net.Ssl.ISSLSocket;
+    using interface Elastos.Security.Cert.IX509Certificate;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace SSL {
+
+    /**
+     * @Involve
+     * interface IHostnameVerifier;
+     */
+    [deprecated]
+    interface IX509HostnameVerifier {
+
+        Verify(
+            [in] String host,
+            [in] ISSLSocket* ssl);
+
+        Verify(
+            [in] String host,
+            [in] IX509Certificate* cert);
+
+        /**
+         * Checks to see if the supplied hostname matches any of the supplied CNs
+         * or "DNS" Subject-Alts.  Most implementations only look at the first CN,
+         * and ignore any additional CNs.  Most implementations do look at all of
+         * the "DNS" Subject-Alts. The CNs or Subject-Alts may contain wildcards
+         * according to RFC 2818.
+         *
+         * @param cns         CN fields, in order, as extracted from the X.509
+         *                    certificate.
+         * @param subjectAlts Subject-Alt fields of type 2 ("DNS"), as extracted
+         *                    from the X.509 certificate.
+         * @param host        The hostname to verify.
+         * @throws SSLException If verification failed.
+         */
+        Verify(
+            [in] String host,
+            [in] ArrayOf<String>* cns,
+            [in] ArrayOf<String>* subjectAlts);
+
+    }
+
+    } // namespace SSL
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

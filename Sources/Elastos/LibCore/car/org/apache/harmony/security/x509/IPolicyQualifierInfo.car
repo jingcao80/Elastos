@@ -1,0 +1,43 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+    /**
+     * The class encapsulates the ASN.1 DER decoding work
+     * with PolicyQualifierInfo structure
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *    PolicyQualifierInfo ::= SEQUENCE {
+     *        policyQualifierId  PolicyQualifierId,
+     *        qualifier          ANY DEFINED BY policyQualifierId }
+     *
+     *    PolicyQualifierId ::=
+     *        OBJECT IDENTIFIER ( id-qt-cps | id-qt-unotice )
+     *
+     * </pre>
+     *
+     */
+    interface IPolicyQualifierInfoHelper {
+        // Contains only ASN1 DER decoder currently
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,35 @@
+
+module
+{
+    interface Elastos.Security.Cert.ICertificate;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface ICRL {
+        /**
+         * Returns the type of this CRL.
+         *
+         * @return the type of this CRL.
+         */
+        GetType(
+            [out] String* type);
+
+        /**
+         * Returns whether the specified certificate is revoked by this CRL.
+         *
+         * @param cert
+         *            the certificate to check.
+         * @return {@code true} if the certificate is revoked by this CRL, otherwise
+         *         {@code false}.
+         */
+        IsRevoked(
+            [in] ICertificate* cert,
+            [out] Boolean* result);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

@@ -1,0 +1,35 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+
+    /**
+     * Channels that implement this interface can be asynchronously closed and
+     * interrupted.
+     * <p>
+     * A channel that can be asynchronously closed permits that a thread blocked on
+     * an I/O operation (the I/O thread) can be released by another thread calling
+     * the channel's {@link #close()} method. The I/O thread will throw an
+     * {@link AsynchronousCloseException} and the channel will be closed.
+     * <p>
+     * A channel that is interruptible permits a thread blocked on an I/O operation
+     * (the I/O thread) to be interrupted by another thread (by invoking
+     * {@link Thread#interrupt()} on the I/O thread). When the I/O thread is
+     * interrupted it will throw a {@link ClosedByInterruptException}, it will have
+     * its interrupted status set and the channel will be closed. If the I/O thread
+     * attempts to make an I/O call with the interrupt status set the call will
+     * immediately fail with a {@link ClosedByInterruptException}.
+     */
+     /**
+     * @Involve
+     * interface Elastos.IO.Channels.IChannel;
+     */
+    interface IInterruptibleChannel {
+    }
+
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

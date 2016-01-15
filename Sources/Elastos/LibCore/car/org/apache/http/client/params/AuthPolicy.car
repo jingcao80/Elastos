@@ -1,0 +1,38 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+    namespace Params {
+
+    interface IAuthPolicy {
+
+        /**
+         * The NTLM scheme is a proprietary Microsoft Windows Authentication
+         * protocol (considered to be the most secure among currently supported
+         * authentication schemes).
+         */
+        const String NTLM = "NTLM";
+
+        /**
+         * Digest authentication scheme as defined in RFC2617.
+         */
+        const String DIGEST = "Digest";
+
+        /**
+         * Basic authentication scheme as defined in RFC2617 (considered inherently
+         * insecure, but most widely supported)
+         */
+        const String BASIC = "Basic";
+
+    }
+
+    } // namespace Params
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

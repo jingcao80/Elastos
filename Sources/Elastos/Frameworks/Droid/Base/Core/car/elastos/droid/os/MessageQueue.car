@@ -1,0 +1,93 @@
+module
+{
+    interface Elastos.Core.IRunnable;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IIdleHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface IMessageQueue {
+        /**
+         * Add a new {@link IdleHandler} to this message queue.  This may be
+         * removed automatically for you by returning false from
+         * {@link IdleHandler#queueIdle IdleHandler.queueIdle()} when it is
+         * invoked, or explicitly removing it with {@link #removeIdleHandler}.
+         *
+         * <p>This method is safe to call from any thread.
+         *
+         * @param handler The IdleHandler to be added.
+         */
+        AddIdleHandler(
+            [in] IIdleHandler* handler);
+
+        /**
+         * Remove an {@link IdleHandler} from the queue that was previously added
+         * with {@link #addIdleHandler}.  If the given object is not currently
+         * in the idle list, nothing is done.
+         *
+         * @param handler The IdleHandler to be removed.
+         */
+        RemoveIdleHandler(
+            [in] IIdleHandler* handler);
+
+        GetNext(
+            [out] IMessage** msg);
+
+        Quit(
+            [in] Boolean safe);
+
+        EnqueueSyncBarrier(
+            [in] Int64 when,
+            [out] Int32* result);
+
+        RemoveSyncBarrier(
+            [in] Int32 token);
+
+        EnqueueMessage(
+            [in] IMessage* msg,
+            [in] Int64 when,
+            [out] Boolean* result);
+
+        HasMessages(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        HasMessages(
+            [in] IHandler* h,
+            [in] IRunnable* r,
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        IsIdling(
+            [out] Boolean* value);
+
+        RemoveMessages(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* object);
+
+        RemoveMessages(
+            [in] IHandler* h,
+            [in] IRunnable* r,
+            [in] IInterface* object);
+
+        RemoveCallbacksAndMessages(
+            [in] IHandler* h,
+            [in] IInterface* object);
+
+        GetNativeMessageQueue(
+            [out] Handle32* queue);
+
+        GetMPtr(
+            [out] Int64* handle);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,64 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.View.Animation.IAnimation;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Animation {
+    /**
+     * Represents a group of Animations that should be played together.
+     * The transformation of each individual animation are composed
+     * together into a single transform.
+     * If AnimationSet sets any properties that its children also set
+     * (for example, duration or fillBefore), the values of AnimationSet
+     * override the child values.
+     *
+     * <p>The way that AnimationSet inherits behavior from Animation is important to
+     * understand. Some of the Animation attributes applied to AnimationSet affect the
+     * AnimationSet itself, some are pushed down to the children, and some are ignored,
+     * as follows:
+     * <ul>
+     *     <li>duration, repeatMode, fillBefore, fillAfter: These properties, when set
+     *     on an AnimationSet object, will be pushed down to all child animations.</li>
+     *     <li>repeatCount, fillEnabled: These properties are ignored for AnimationSet.</li>
+     *     <li>startOffset, shareInterpolator: These properties apply to the AnimationSet itself.</li>
+     * </ul>
+     * Starting with {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH},
+     * the behavior of these properties is the same in XML resources and at runtime (prior to that
+     * release, the values set in XML were ignored for AnimationSet). That is, calling
+     * <code>setDuration(500)</code> on an AnimationSet has the same effect as declaring
+     * <code>android:duration="500"</code> in an XML resource for an AnimationSet object.</p>
+     */
+    /**
+     * @Involve
+     * interface IAnimation
+     * interface ICloneable
+     */
+    [local]
+    interface IAnimationSet {
+        /**
+         * Add a child animation to this animation set.
+         * The transforms of the child animations are applied in the order
+         * that they were added
+         * @param a Animation to add.
+         */
+        AddAnimation(
+            [in] IAnimation* a);
+
+        /**
+         * @return All the child animations in this AnimationSet. Note that
+         * this may include other AnimationSets, which are not expanded.
+         */
+        GetAnimations(
+            [out] IList** animations);
+    }
+
+    }   //namespace Animation
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

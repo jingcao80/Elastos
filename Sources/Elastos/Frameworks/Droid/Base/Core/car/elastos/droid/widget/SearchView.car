@@ -1,0 +1,378 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.App.ISearchableInfo;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.IViewOnFocusChangeListener;
+    interface Elastos.Droid.View.IViewOnClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Callbacks for changes to the query text.
+     */
+    interface ISearchViewOnQueryTextListener {
+
+        /**
+         * Called when the user submits the query. This could be due to a key press on the
+         * keyboard or due to pressing a submit button.
+         * The listener can override the standard behavior by returning true
+         * to indicate that it has handled the submit request. Otherwise return false to
+         * let the SearchView handle the submission by launching any associated intent.
+         *
+         * @param query the query text that is to be submitted
+         *
+         * @return true if the query has been handled by the listener, false to let the
+         * SearchView perform the default action.
+         */
+        OnQueryTextSubmit(
+            [in] String query,
+            [out] Boolean* res);
+
+        /**
+         * Called when the query text is changed by the user.
+         *
+         * @param newText the new content of the query text field.
+         *
+         * @return false if the SearchView should perform the default action of showing any
+         * suggestions if available, true if the action was handled by the listener.
+         */
+        OnQueryTextChange(
+            [in] String newText,
+            [out] Boolean* res);
+    }
+
+    interface ISearchViewOnCloseListener {
+
+        /**
+         * The user is attempting to close the SearchView.
+         *
+         * @return true if the listener wants to override the default behavior of clearing the
+         * text field and dismissing it, false otherwise.
+         */
+        OnClose(
+            [out] Boolean* res);
+    }
+
+    /**
+     * Callback interface for selection events on suggestions. These callbacks
+     * are only relevant when a SearchableInfo has been specified by {@link #setSearchableInfo}.
+     */
+    interface ISearchViewOnSuggestionListener {
+
+        /**
+         * Called when a suggestion was selected by navigating to it.
+         * @param position the absolute position in the list of suggestions.
+         *
+         * @return true if the listener handles the event and wants to override the default
+         * behavior of possibly rewriting the query based on the selected item, false otherwise.
+         */
+        OnSuggestionSelect(
+            [in] Int32 position,
+            [out] Boolean* res);
+
+        /**
+         * Called when a suggestion was clicked.
+         * @param position the absolute position of the clicked item in the list of suggestions.
+         *
+         * @return true if the listener handles the event and wants to override the default
+         * behavior of launching any intent or submitting a search query specified on that item.
+         * Return false otherwise.
+         */
+        OnSuggestionClick(
+            [in] Int32 position,
+            [out] Boolean* res);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.ILinearLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+     [local]
+    interface ISearchView {
+        /**
+         * Sets the SearchableInfo for this SearchView. Properties in the SearchableInfo are used
+         * to display labels, hints, suggestions, create intents for launching search results screens
+         * and controlling other affordances such as a voice button.
+         *
+         * @param searchable a SearchableInfo can be retrieved from the SearchManager, for a specific
+         * activity or a global search provider.
+         */
+        SetSearchableInfo(
+            [in] ISearchableInfo* searchable);
+
+        /**
+         * Sets the APP_DATA for legacy SearchDialog use.
+         * @param appSearchData bundle provided by the app when launching the search dialog
+         * @hide
+         */
+        SetAppSearchData(
+            [in] IBundle* appSearchData);
+
+        /**
+         * Sets the IME options on the query text field.
+         *
+         * @see TextView#setImeOptions(Int32)
+         * @param imeOptions the options to set on the query text field
+         *
+         * @attr ref android.R.styleable#SearchView_imeOptions
+         */
+        SetImeOptions(
+            [in] Int32 imeOptions);
+
+        /**
+         * Returns the IME options set on the query text field.
+         * @return the ime options
+         * @see TextView#setImeOptions(Int32)
+         *
+         * @attr ref android.R.styleable#SearchView_imeOptions
+         */
+        GetImeOptions(
+            [out] Int32* imeOptions);
+
+        /**
+         * Sets the input type on the query text field.
+         *
+         * @see TextView#setInputType(Int32)
+         * @param inputType the input type to set on the query text field
+         *
+         * @attr ref android.R.styleable#SearchView_inputType
+         */
+        SetInputType(
+            [in] Int32 inputType);
+
+        /**
+         * Returns the input type set on the query text field.
+         * @return the input type
+         *
+         * @attr ref android.R.styleable#SearchView_inputType
+         */
+        GetInputType(
+            [out] Int32* type);
+
+        /**
+         * Sets a listener for user actions within the SearchView.
+         *
+         * @param listener the listener object that receives callbacks when the user performs
+         * actions in the SearchView such as clicking on buttons or typing a query.
+         */
+        SetOnQueryTextListener(
+            [in] ISearchViewOnQueryTextListener* listener);
+
+        /**
+         * Sets a listener to inform when the user closes the SearchView.
+         *
+         * @param listener the listener to call when the user closes the SearchView.
+         */
+        SetOnCloseListener(
+            [in] ISearchViewOnCloseListener* listener);
+
+        /**
+         * Sets a listener to inform when the focus of the query text field changes.
+         *
+         * @param listener the listener to inform of focus changes.
+         */
+        SetOnQueryTextFocusChangeListener(
+            [in] IViewOnFocusChangeListener* listener);
+
+        /**
+         * Sets a listener to inform when a suggestion is focused or clicked.
+         *
+         * @param listener the listener to inform of suggestion selection events.
+         */
+        SetOnSuggestionListener(
+            [in] ISearchViewOnSuggestionListener* listener);
+
+        /**
+         * Sets a listener to inform when the search button is pressed. This is only
+         * relevant when the text field is not visible by default. Calling {@link #setIconified
+         * setIconified(false)} can also cause this listener to be informed.
+         *
+         * @param listener the listener to inform when the search button is clicked or
+         * the text field is programmatically de-iconified.
+         */
+        SetOnSearchClickListener(
+            [in] IViewOnClickListener* listener);
+
+        /**
+         * Returns the query string currently in the text field.
+         *
+         * @return the query string
+         */
+        GetQuery(
+            [out] ICharSequence** str);
+
+        /**
+         * Sets a query string in the text field and optionally submits the query as well.
+         *
+         * @param query the query string. This replaces any query text already present in the
+         * text field.
+         * @param submit whether to submit the query right now or only update the contents of
+         * text field.
+         */
+        SetQuery(
+            [in] ICharSequence* query,
+            [in] Boolean submit);
+
+        /**
+         * Sets the hint text to display in the query text field. This overrides any hint specified
+         * in the SearchableInfo.
+         *
+         * @param hint the hint text to display
+         *
+         * @attr ref android.R.styleable#SearchView_queryHint
+         */
+        SetQueryHint(
+            [in] ICharSequence* hint);
+
+        /**
+         * Gets the hint text to display in the query text field.
+         * @return the query hint text, if specified, null otherwise.
+         *
+         * @attr ref android.R.styleable#SearchView_queryHint
+         */
+        GetQueryHint(
+            [out] ICharSequence** hint);
+
+        /**
+         * Sets the default or resting state of the search field. If true, a single search icon is
+         * shown by default and expands to show the text field and other buttons when pressed. Also,
+         * if the default state is iconified, then it collapses to that state when the close button
+         * is pressed. Changes to this property will take effect immediately.
+         *
+         * <p>The default value is true.</p>
+         *
+         * @param iconified whether the search field should be iconified by default
+         *
+         * @attr ref android.R.styleable#SearchView_iconifiedByDefault
+         */
+        SetIconifiedByDefault(
+            [in] Boolean iconified);
+
+        /**
+         * Returns the default iconified state of the search field.
+         * @return
+         *
+         * @attr ref android.R.styleable#SearchView_iconifiedByDefault
+         */
+        IsIconfiedByDefault(
+            [out] Boolean* res);
+
+        /**
+         * Iconifies or expands the SearchView. Any query text is cleared when iconified. This is
+         * a temporary state and does not override the default iconified state set by
+         * {@link #setIconifiedByDefault(Boolean)}. If the default state is iconified, then
+         * a false here will only be valid until the user closes the field. And if the default
+         * state is expanded, then a true here will only clear the text field and not close it.
+         *
+         * @param iconify a true value will collapse the SearchView to an icon, while a false will
+         * expand it.
+         */
+        SetIconified(
+            [in] Boolean iconify);
+
+        /**
+         * Returns the current iconified state of the SearchView.
+         *
+         * @return true if the SearchView is currently iconified, false if the search field is
+         * fully visible.
+         */
+        IsIconified(
+            [out] Boolean* res);
+
+        /**
+         * Enables showing a submit button when the query is non-empty. In cases where the SearchView
+         * is being used to filter the contents of the current activity and doesn't launch a separate
+         * results activity, then the submit button should be disabled.
+         *
+         * @param enabled true to show a submit button for submitting queries, false if a submit
+         * button is not required.
+         */
+        SetSubmitButtonEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Returns whether the submit button is enabled when necessary or never displayed.
+         *
+         * @return whether the submit button is enabled automatically when necessary
+         */
+        IsSubmitButtonEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Specifies if a query refinement button should be displayed alongside each suggestion
+         * or if it should depend on the flags set in the individual items retrieved from the
+         * suggestions provider. Clicking on the query refinement button will replace the text
+         * in the query text field with the text from the suggestion. This flag only takes effect
+         * if a SearchableInfo has been specified with {@link #setSearchableInfo(SearchableInfo)}
+         * and not when using a custom adapter.
+         *
+         * @param enable true if all items should have a query refinement button, false if only
+         * those items that have a query refinement flag set should have the button.
+         *
+         * @see SearchManager#SUGGEST_COLUMN_FLAGS
+         * @see SearchManager#FLAG_QUERY_REFINEMENT
+         */
+        SetQueryRefinementEnabled(
+            [in] Boolean isEnable);
+
+        /**
+         * Returns whether query refinement is enabled for all items or only specific ones.
+         * @return true if enabled for all items, false otherwise.
+         */
+        IsQueryRefinementEnabled(
+            [out] Boolean* res);
+
+        /**
+         * You can set a custom adapter if you wish. Otherwise the default adapter is used to
+         * display the suggestions from the suggestions provider associated with the SearchableInfo.
+         *
+         * @see #setSearchableInfo(SearchableInfo)
+         */
+        SetSuggestionsAdapter(
+            [in] ICursorAdapter* adapter);
+
+        /**
+         * Returns the adapter used for suggestions, if any.
+         * @return the suggestions adapter
+         */
+        GetSuggestionsAdapter(
+            [out] ICursorAdapter** adapter);
+
+        /**
+         * Makes the view at most this many pixels wide
+         *
+         * @attr ref android.R.styleable#SearchView_maxWidth
+         */
+        SetMaxWidth(
+            [in] Int32 maxpixels);
+
+        /**
+         * Gets the specified maximum width in pixels, if set. Returns zero if
+         * no maximum width was specified.
+         * @return the maximum width of the view
+         *
+         * @attr ref android.R.styleable#SearchView_maxWidth
+         */
+        GetMaxWidth(
+            [out] Int32* width);
+
+        OnTextFocusChanged();
+
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

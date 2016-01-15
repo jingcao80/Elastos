@@ -1,0 +1,10 @@
+
+TARGET_NAME= textui
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../inc
+INCLUDES += ../
+
+C_DEFINES += -DEUNIT
+
+SOURCES = ResultPrinter.cpp

@@ -1,0 +1,71 @@
+module
+{
+    using interface Elastos.Net.IInetSocketAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface ICommonTimeUtils {
+        /**
+         * Successful operation.
+         */
+        const Int32 SUCCESS = 0;
+        /**
+         * Unspecified error.
+         */
+        const Int32 ERROR = -1;
+        /**
+         * Operation failed due to bad parameter value.
+         */
+        const Int32 ERROR_BAD_VALUE = -4;
+        /**
+         * Operation failed due to dead remote object.
+         */
+        const Int32 ERROR_DEAD_OBJECT = -7;
+
+        TransactGetInt32(
+            [in] Int32 method_code,
+            [in] Int32 error_ret_val,
+            [out] Int32* result);
+
+        TransactSetInt32(
+            [in] Int32 method_code,
+            [in] Int32 val,
+            [out] Int32* result);
+
+        TransactGetInt64(
+            [in] Int32 method_code,
+            [in] Int64 error_ret_val,
+            [out] Int64* result);
+
+        TransactSetInt64(
+            [in] Int32 method_code,
+            [in] Int64 val,
+            [out] Int32* result);
+
+        TransactGetString(
+            [in] Int32 method_code,
+            [in] String error_ret_val,
+            [out] String* result);
+
+        TransactSetString(
+            [in] Int32 method_code,
+            [in] String val,
+            [out] Int32* result);
+
+        TransactGetSockaddr(
+            [in] Int32 method_code,
+            [out] IInetSocketAddress** result);
+
+        TransactSetSockaddr(
+            [in] Int32 method_code,
+            [in] IInetSocketAddress* addr,
+            [out] Int32* result);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

@@ -1,0 +1,95 @@
+module
+{
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.Menu.IBaseMenuPresenter;
+     *
+     * interface Elastos.Droid.Internal.View.Menu.IMenuPresenter;
+     * interface Elastos.Droid.View.ISubUiVisibilityListener;
+     */
+     [local]
+    interface IActionMenuPresenter {
+
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        SetWidthLimit(
+            [in] Int32 width,
+            [in] Boolean strict);
+
+        SetReserveOverflow(
+            [in] Boolean reserveOverflow);
+
+        SetItemLimit(
+            [in] Int32 itemCount);
+
+        SetExpandedActionViewsExclusive(
+            [in] Boolean isExclusive);
+        /**
+         * Display the overflow menu if one is present.
+         * @return true if the overflow menu was shown, false otherwise.
+         */
+        ShowOverflowMenu(
+            [out] Boolean* showOverflowMenu);
+
+
+        FilterLeftoverView(
+            [in] IViewGroup* parent,
+            [in] Int32 childIndex,
+            [out] Boolean* filterLeftoverView);
+
+        /**
+         * Hide the overflow menu if it is currently showing.
+         *
+         * @return true if the overflow menu was hidden, false otherwise.
+         */
+        HideOverflowMenu(
+            [out] Boolean* hideOverflowMenu);
+
+        /**
+         * Dismiss all popup menus - overflow and submenus.
+         * @return true if popups were dismissed, false otherwise. (This can be because none were open.)
+         */
+        DismissPopupMenus(
+            [out] Boolean* dismissPopupMenus);
+
+        /**
+         * Dismiss all submenu popups.
+         *
+         * @return true if popups were dismissed, false otherwise. (This can be because none were open.)
+         */
+        HideSubMenus(
+            [out] Boolean* hideSubMenus);
+
+        /**
+         * @return true if the overflow menu is currently showing
+         */
+        IsOverflowMenuShowing(
+            [out] Boolean* isOverflowMenuShowing);
+
+        IsOverflowMenuShowPending(
+            [out] Boolean* isOverflowMenuShowPending);
+
+        /**
+         * @return true if space has been reserved in the action menu for an overflow item.
+         */
+        IsOverflowReserved(
+            [out] Boolean* isOverflowReserved);
+
+        FlagActionItems(
+            [out] Boolean* flagActionItems);
+
+        SetMenuView(
+            [in] IActionMenuView* menuView);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

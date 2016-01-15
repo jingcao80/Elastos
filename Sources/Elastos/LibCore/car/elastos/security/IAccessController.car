@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Security.IPrivilegedAction;
+    interface Elastos.Security.IAccessControlContext;
+    interface Elastos.Security.IPrivilegedExceptionAction;
+    interface Elastos.Security.IPermission;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IAccessController {
+        /**
+         * Calls {@code action.run()}.
+         */
+        DoPrivileged(
+            [in] IPrivilegedAction* action,
+            [out] IInterface** result);
+
+        /**
+         * Calls {@code action.run()}.
+         */
+        DoPrivilegedEx(
+            [in] IPrivilegedAction* action,
+            [in] IAccessControlContext* context,
+            [out] IInterface** result);
+
+        /**
+         * Calls {@code action.run()}.
+         */
+        DoPrivilegedEx2(
+            [in] IPrivilegedExceptionAction* action,
+            [out] IInterface** result);
+
+        /**
+         * Calls {@code action.run()}.
+         */
+        DoPrivilegedEx3(
+            [in] IPrivilegedExceptionAction* action,
+            [in] IAccessControlContext* context,
+            [out] IInterface** result);
+
+        /**
+         * Calls {@code action.run()}.
+         */
+        DoPrivilegedWithCombiner(
+            [in] IPrivilegedAction* action,
+            [out] IInterface** result);
+
+        /**
+         * Calls {@code action.run()}.
+         */
+        DoPrivilegedWithCombinerEx(
+            [in] IPrivilegedExceptionAction* action,
+            [out] IInterface** result);
+
+        CheckPermission(
+            [in] IPermission* permission);
+
+        GetContext(
+            [out] IAccessControlContext** context);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

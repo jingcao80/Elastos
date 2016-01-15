@@ -1,0 +1,25 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+     * A convience class that lets you present an array of Cursors as a single linear Cursor.
+     * The schema of the cursors presented is entirely up to the creator of the MergeCursor, and
+     * may be different if that is desired. Calls to getColumns, getColumnIndex, etc will return the
+     * value for the row that the MergeCursor is currently pointing at.
+     *
+     * @Involve
+     * interface ICloseable
+     * interface ICursor
+     * interface ICrossProcessCursor
+     * interface IAbstractCursor
+     */
+    interface IMergeCursor {
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

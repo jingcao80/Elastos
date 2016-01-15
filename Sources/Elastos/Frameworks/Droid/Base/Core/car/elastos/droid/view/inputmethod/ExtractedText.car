@@ -1,0 +1,80 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * Information about text that has been extracted for use by an input method.
+     *
+     * This contains information about a portion of the currently edited text,
+     * that the IME should display into its own interface while in extracted mode.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IExtractedText {
+        /**
+         * Bit for {@link #flags}: set if the text being edited can only be on
+         * a single line.
+         */
+        const Int32 FLAG_SINGLE_LINE = 0x0001;
+
+        /**
+         * Bit for {@link #flags}: set if the editor is currently in selection mode.
+         */
+        const Int32 FLAG_SELECTING = 0x0002;
+
+        GetStartOffset(
+            [out] Int32* offset);
+
+        SetStartOffset(
+            [in] Int32 offset);
+
+        SetText(
+            [in] ICharSequence* text);
+
+        GetText(
+            [out] ICharSequence** text);
+
+        SetPartialStartOffset(
+            [in] Int32 offset);
+
+        GetPartialStartOffset(
+            [out] Int32* offset);
+
+        SetPartialEndOffset(
+            [in] Int32 offset);
+
+        GetPartialEndOffset(
+            [out] Int32* offset);
+
+        SetSelectionStart(
+            [in] Int32 value);
+
+        GetSelectionStart(
+            [out] Int32* value);
+
+        SetSelectionEnd(
+            [in] Int32 value);
+
+        GetSelectionEnd(
+            [out] Int32* value);
+
+        SetFlags(
+            [in] Int32 value);
+
+        GetFlags(
+            [out] Int32* value);
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,105 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Internal.Policy.IIKeyguardShowCallback;
+    interface Elastos.Droid.Internal.Policy.IIKeyguardExitCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+
+    interface IIKeyguardService {
+        IsShowing(
+            [out] Boolean* showing);
+
+        IsSecure(
+            [out] Boolean* secure);
+
+        IsShowingAndNotOccluded(
+            [out] Boolean* showingAndNotOcclude);
+
+        IsInputRestricted(
+            [out] Boolean* intpuRestricted);
+
+        IsDismissable(
+            [out] Boolean* dismissable);
+
+        [oneway] VerifyUnlock(
+            [in] IIKeyguardExitCallback* cb);
+
+        [oneway] KeyguardDone(
+            [in] Boolean authenticated,
+            [in] Boolean wakeup);
+
+        /**
+         * Sets the Keyguard as occluded when a window dismisses the Keyguard with flag
+         * FLAG_SHOW_ON_LOCK_SCREEN.
+         *
+         * @param isOccluded Whether the Keyguard is occluded by another window.
+         * @return See IKeyguardServiceConstants.KEYGUARD_SERVICE_SET_OCCLUDED_*. This is needed because
+         *         PhoneWindowManager needs to set these flags immediately and can't wait for the
+         *         Keyguard thread to pick it up. In the hidden case, PhoneWindowManager is solely
+         *         responsible to make sure that the flags are unset.
+         */
+        SetOccluded(
+            [in] Boolean isOccluded,
+            [out] Int32* result);
+
+        [oneway] Dismiss();
+
+        [oneway] OnDreamingStarted();
+
+        [oneway] OnDreamingStopped();
+
+        [oneway] OnScreenTurnedOff(
+            [in] Int32 reason);
+
+        [oneway] OnScreenTurnedOn(
+            [in] IIKeyguardShowCallback* cb);
+
+        [oneway] SetKeyguardEnabled(
+            [in] Boolean enabled);
+
+        [oneway] OnSystemReady();
+
+        [oneway] DoKeyguardTimeout(
+            [in] IBundle* options);
+
+        [oneway] SetCurrentUser(
+            [in] Int32 userId);
+
+        [oneway] ShowAssistant();
+
+        [oneway] Dispatch(
+            [in] IMotionEvent* event);
+
+        [oneway] LaunchCamera();
+
+        [oneway] OnBootCompleted();
+
+        /**
+         * Notifies that the activity behind has now been drawn and it's safe to remove the wallpaper
+         * and keyguard flag.
+         *
+         * @param startTime the start time of the animation in uptime milliseconds
+         * @param fadeoutDuration the duration of the exit animation, in milliseconds
+         */
+        [oneway] StartKeyguardExitAnimation(
+            [in] Int64 startTime,
+            [in] Int64 fadeoutDuration);
+
+        /**
+         * Notifies the Keyguard that the activity that was starting has now been drawn and it's safe
+         * to start the keyguard dismiss sequence.
+         */
+        [oneway] OnActivityDrawn();
+    }
+
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

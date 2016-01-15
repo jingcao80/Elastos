@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenglEarthDemo</string>
+    <string name="hello">Hello World, OpenglEarthDemo!</string>
+    <string name="planet_prompt">Choose a planet</string>
+</resources>

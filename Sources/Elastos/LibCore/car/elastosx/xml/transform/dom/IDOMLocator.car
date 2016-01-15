@@ -1,0 +1,29 @@
+
+module
+{
+    interface Org.W3c.Dom.INode;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Transform {
+    namespace Dom {
+
+    /**
+     * @Involve
+     * interface ISourceLocator;
+     */
+    interface IDOMLocator {
+        /**
+         * Return the node where the event occurred.
+         *
+         * @return The node that is the location for the event.
+         */
+        GetOriginatingNode(
+            [out] INode** node);
+    }
+
+    } // namespace Dom
+    } // namespace Transform
+    } // namespace Xml
+    } // namespace Elastosx
+}

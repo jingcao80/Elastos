@@ -1,0 +1,112 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * Interface for notifying clients of the result of scanning a
+     * requested media file.
+     */
+    interface IOnScanCompletedListener {
+        /**
+         * Called to notify the client when the media scanner has finished
+         * scanning a file.
+         * @param path the path to the file that has been scanned.
+         * @param uri the Uri for the file if the scanning operation succeeded
+         * and the file was added to the media database, or NULL if scanning failed.
+         */
+        OnScanCompleted(
+            [in] String path,
+            [in] IUri* uri);
+    }
+
+    /**
+     * An interface for notifying clients of MediaScannerConnection
+     * when a connection to the MediaScanner service has been established
+     * and when the scanning of a file has completed.
+     */
+    /**
+     * @Involve
+     * interface IOnScanCompletedListener
+     */
+    interface IMediaScannerConnectionClient {
+        /**
+         * Called to notify the client when a connection to the
+         * MediaScanner service has been established.
+         */
+        OnMediaScannerConnected();
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IServiceConnection
+     */
+    interface IMediaScannerConnection {
+        /**
+         * Initiates a connection to the media scanner service.
+         * {@link MediaScannerConnectionClient#onMediaScannerConnected()}
+         * will be called when the connection is established.
+         */
+        Connect();
+
+        /**
+         * Releases the connection to the media scanner service.
+         */
+        Disconnect();
+
+        /**
+         * Returns whether we are connected to the media scanner service
+         * @return true if we are connected, false otherwise
+         */
+        IsConnected(
+            [out] Boolean* result);
+
+        /**
+         * Requests the media scanner to scan a file.
+         * Success or failure of the scanning operation cannot be determined until
+         * {@link MediaScannerConnectionClient#onScanCompleted(String, Uri)} is called.
+         *
+         * @param path the path to the file to be scanned.
+         * @param mimeType  an optional mimeType for the file.
+         * If mimeType is NULL, then the mimeType will be inferred from the file extension.
+         */
+        ScanFile(
+            [in] String path,
+            [in] String mimeType);
+    }
+
+    [local,deprecated]
+    interface IMediaScannerConnectionHelper {
+        /**
+         * Convenience for constructing a {@link MediaScannerConnection}, calling
+         * {@link #connect} on it, and calling {@link #scanFile} with the given
+         * <var>path</var> and <var>mimeType</var> when the connection is
+         * established.
+         * @param context The caller's Context, required for establishing a connection to
+         * the media scanner service.
+         * Success or failure of the scanning operation cannot be determined until
+         * {@link MediaScannerConnectionClient#onScanCompleted(String, Uri)} is called.
+         * @param paths Array of paths to be scanned.
+         * @param mimeTypes Optional array of MIME types for each path.
+         * If mimeType is NULL, then the mimeType will be inferred from the file extension.
+         * @param callback Optional callback through which you can receive the
+         * scanned URI and MIME type; If NULL, the file will be scanned but
+         * you will not get a result back.
+         * @see scanFile(String, String)
+         */
+        ScanFile(
+            [in] IContext* ctx,
+            [in] ArrayOf<String>* paths,
+            [in] ArrayOf<String>* mimeTypes,
+            [in] IOnScanCompletedListener* cb);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

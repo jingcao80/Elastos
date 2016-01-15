@@ -1,0 +1,289 @@
+
+module
+{
+    interface Elastos.IO.IFileDescriptor;
+
+    interface Elastos.Net.IDatagramPacket;
+    interface Elastos.Net.IInetAddress;
+    interface Elastos.Net.INetworkInterface;
+    interface Elastos.Net.ISocketAddress;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * The abstract superclass for datagram and multicast socket implementations.
+     *
+     * @implements Elastos.Net.ISocketOptions
+     *
+     * @Involve
+     * interface Elastos.Net.ISocketOptions;
+     */
+    interface IDatagramSocketImpl {
+        /**
+         * Binds the datagram socket to the given localhost/port. Sockets must be
+         * bound prior to attempting to send or receive data.
+         *
+         * @param port
+         *            the port on the localhost to bind.
+         * @param addr
+         *            the address on the multihomed localhost to bind.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs while binding, for example, if the port has been already bound.
+         */
+        Bind(
+            [in] Int32 port,
+            [in] IInetAddress* addr);
+
+        /**
+         * Closes this socket.
+         */
+        Close();
+
+        /**
+         * This method allocates the socket descriptor in the underlying operating
+         * system.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs while creating the socket.
+         */
+        Create();
+
+        /**
+         * Gets the {FileDescriptor} of this datagram socket, which is invalid
+         * if the socket is closed or not bound.
+         *
+         * @return the current file descriptor of this socket.
+         */
+        GetFileDescriptor(
+            [out] IFileDescriptor** fd);
+
+        /**
+         * Returns the local port to which this socket is bound.
+         */
+        GetLocalPort(
+            [out] Int32* port);
+
+        /**
+         * Gets the time-to-live (TTL) for multicast packets sent on this socket.
+         *
+         * @return the time-to-live option as a byte value.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while getting the time-to-live option value.
+         * @deprecated Replaced by getTimeToLive
+         *
+         * @sa #getTimeToLive
+         * @see #getTimeToLive()
+         */
+        GetTTL(
+            [out] Byte* ttl);
+
+        /**
+         * Gets the time-to-live (TTL) for multicast packets sent on this socket.
+         * The TTL option defines how many routers a packet may be pass before it is
+         * discarded.
+         *
+         * @return the time-to-live option as an integer value.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while getting the time-to-live option value.
+         */
+        GetTimeToLive(
+            [out] Int32* option);
+
+        /**
+         * Adds this socket to the multicast group {addr}. A socket must join
+         * a group before being able to receive data. Further, a socket may be a
+         * member of multiple groups but may join any group only once.
+         *
+         * @param addr
+         *            the multicast group to which this socket has to be joined.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while joining the specified multicast group.
+         */
+        Join(
+            [in] IInetAddress* addr);
+
+        /**
+         * Adds this socket to the multicast group {addr}. A socket must join
+         * a group before being able to receive data. Further, a socket may be a
+         * member of multiple groups but may join any group only once.
+         *
+         * @param addr
+         *            the multicast group to which this socket has to be joined.
+         * @param netInterface
+         *            the local network interface which will receive the multicast
+         *            datagram packets.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while joining the specified multicast group.
+         */
+        JoinGroup(
+            [in] ISocketAddress* addr,
+            [in] INetworkInterface* netInterface);
+
+        /**
+         * Removes this socket from the multicast group {addr}.
+         *
+         * @param addr
+         *            the multicast group to be left.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while leaving the group or no multicast address was assigned.
+         */
+        Leave(
+            [in] IInetAddress* addr);
+
+        /**
+         * Removes this socket from the multicast group {addr}.
+         *
+         * @param addr
+         *            the multicast group to be left.
+         * @param netInterface
+         *            the local network interface on which this socket has to be
+         *            removed.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while leaving the group.
+         */
+        LeaveGroup(
+            [in] ISocketAddress* addr,
+            [in] INetworkInterface* netInterface);
+
+        /**
+         * Peeks at the incoming packet to this socket and returns the address of
+         * the {sender}. The method will block until a packet is received or
+         * timeout expires.
+         *
+         * @param sender
+         *            the origin address of a packet.
+         * @return the address of {sender} as an integer value.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error or a timeout occurs while reading the address.
+         */
+        Peek(
+            [in] IInetAddress* sender,
+            [out] Int32* addr);
+
+        /**
+         * Receives data and stores it in the supplied datagram packet {pack}.
+         * This call will block until either data has been received or, if a timeout
+         * is set, the timeout has expired. If the timeout expires an
+         * {InterruptedIOException} is thrown.
+         *
+         * @param pack
+         *            the datagram packet container to fill in the received data.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error or timeout occurs while receiving data.
+         */
+        Receive(
+            [in] IDatagramPacket* pack);
+
+        /**
+         * Sends the given datagram packet {pack}. The packet contains the
+         * data and the address and port information of the target host as well.
+         *
+         * @param pack
+         *            the datagram packet to be sent.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while sending the packet.
+         */
+        Send(
+            [in] IDatagramPacket* pack);
+
+        /**
+         * Sets the time-to-live (TTL) option for multicast packets sent on this
+         * socket.
+         *
+         * @param ttl
+         *            the time-to-live option value. Valid values are 0 &lt; ttl
+         *            &lt;= 255.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while setting the option.
+         */
+        SetTimeToLive(
+            [in] Int32 ttl);
+
+        /**
+         * Sets the time-to-live (TTL) option for multicast packets sent on this
+         * socket.
+         *
+         * @param ttl
+         *            the time-to-live option value. Valid values are 0 &lt; ttl
+         *            &lt;= 255.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while setting the option.
+         * @deprecated Replaced by setTimeToLive
+         *
+         * @sa #setTimeToLive
+         * @see #setTimeToLive(int)
+         */
+        SetTTL(
+            [in] Byte ttl);
+
+        /**
+         * Connects this socket to the specified remote address and port.
+         *
+         * @param inetAddr
+         *            the address of the target host which has to be connected.
+         * @param port
+         *            the port on the target host which has to be connected.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if the datagram socket cannot be connected to the specified remote address and port.
+         */
+        Connect(
+            [in] IInetAddress* inetAddr,
+            [in] Int32 port);
+
+        /**
+         * Disconnects this socket from the remote host.
+         */
+        Disconnect();
+
+        /**
+         * Receives data into the supplied datagram packet by peeking. The data is
+         * not removed from socket buffer and can be received again by another
+         * {peekData()} or {receive()} call. This call blocks until
+         * either data has been received or, if a timeout is set, the timeout has
+         * been expired.
+         *
+         * @param pack
+         *            the datagram packet used to store the data.
+         * @return the port the packet was received from.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while peeking at the data.
+         */
+        PeekData(
+            [in] IDatagramPacket* pack,
+            [out] Int32* port);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

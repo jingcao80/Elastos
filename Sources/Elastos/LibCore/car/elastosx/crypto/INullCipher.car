@@ -1,0 +1,20 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+
+    /**
+     * This class provides an identity cipher that does not transform the input data
+     * in any way. The <i>encrypted</i> data is identical to the <i>plain text</i>.
+     */
+    /**
+     * @Involve
+     * interface Elastosx.crypto.ICipher
+     */
+    interface INullCipher {
+    }
+
+    } // namespace Crypto
+    } // namespace Elastosx
+}

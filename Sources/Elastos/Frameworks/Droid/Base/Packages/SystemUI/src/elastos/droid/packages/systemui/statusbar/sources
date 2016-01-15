@@ -1,0 +1,25 @@
+TARGET_NAME = statusbar
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+#SOURCES = AnimatedImageView.cpp
+#SOURCES += CAnimatedImageView.cpp
+#SOURCES += BaseStatusBar.cpp
+#SOURCES += CCommandQueue.cpp
+#SOURCES += DelegateViewHelper.cpp
+#SOURCES += NotificationData.cpp
+#SOURCES += StatusBarIconView.cpp
+#SOURCES += CStatusBarIconView.cpp
+#SOURCES += SignalClusterView.cpp
+#SOURCES += CSignalClusterView.cpp
+#SOURCES += DoNotDisturb.cpp
+#SOURCES += LatestItemView.cpp
+#SOURCES += CLatestItemView.cpp
+#SOURCES += RotationToggle.cpp
+#SOURCES += CRotationToggle.cpp
+
+#ELASTOS_LIBS += policy/policy.lib
+ELASTOS_LIBS += phone/phone.lib
+#ELASTOS_LIBS += tablet/tablet.lib

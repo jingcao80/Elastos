@@ -1,0 +1,42 @@
+module {
+
+    interface Elastos.Droid.Os.IDropBoxManagerEntry;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /**
+     * "Backend" interface used by {@link android.os.DropBoxManager} to talk to the
+     * DropBoxManagerService that actually implements the drop box functionality.
+     *
+     * @see DropBoxManager
+     * @hide
+     */
+    interface IIDropBoxManagerService {
+        /**
+         * @see DropBoxManager#addText
+         * @see DropBoxManager#addData
+         * @see DropBoxManager#addFile
+         */
+        Add(
+            [in] IDropBoxManagerEntry* entry);
+
+        /** @see DropBoxManager#getNextEntry */
+        IsTagEnabled(
+            [in] String tag,
+            [out] Boolean* isTagEnabled);
+
+        /** @see DropBoxManager#getNextEntry */
+        GetNextEntry(
+            [in] String tag,
+            [in] Int64 millis,
+            [out] IDropBoxManagerEntry** nextEntry);
+    }
+
+    }//namespace Os
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

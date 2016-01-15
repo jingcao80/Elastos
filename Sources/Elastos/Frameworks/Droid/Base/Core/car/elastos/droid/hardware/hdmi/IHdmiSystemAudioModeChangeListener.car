@@ -1,0 +1,28 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+   /**
+     * Callback interface definition for HDMI client to get informed of
+     * "System Audio" mode change.
+     *
+     * @hide
+     */
+    [oneway]
+    interface IIHdmiSystemAudioModeChangeListener {
+        /**
+         * @param enabled true if the device gets activated
+         */
+        OnStatusChanged(
+            [in] Boolean enabled);
+    }
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

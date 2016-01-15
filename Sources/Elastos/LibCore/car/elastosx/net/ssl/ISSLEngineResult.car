@@ -1,0 +1,101 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    enum SSLEngineResult_HandshakeStatus {
+        /**
+         * No handshake in progress.
+         */
+        NOT_HANDSHAKING,
+
+        /**
+         * The handshake is finished.
+         */
+        FINISHED,
+        /**
+         * The results of one (or more) delegated tasks are needed to continue
+         * the handshake.
+         */
+        NEED_TASK,
+        /**
+         * The engine must send data to the remote side to continue the
+         * handshake.
+         */
+        NEED_WRAP,
+        /**
+         * The engine needs to receive data from the remote side to continue the
+         * handshake.
+         */
+        NEED_UNWRAP
+    }
+
+    enum SSLEngineResult_Status {
+        /**
+         * The size of the destination buffer is too small to hold the result of
+         * the current operation.
+         */
+        BUFFER_OVERFLOW,
+        /**
+         * There were not enough bytes available in the source buffer to
+         * complete the current operation.
+         */
+        BUFFER_UNDERFLOW,
+        /**
+         * The operation closed this side of the communication or was already
+         * closed.
+         */
+        CLOSED,
+        /**
+         * The operation completed successfully.
+         */
+        OK
+    }
+
+    /**
+     * The result object describing the state of the {@code SSLEngine} produced
+     * by the {@code wrap()} and {@code unwrap()} operations.
+     */
+    interface ISSLEngineResult {
+        /**
+         * Returns the return value of the {@code SSLEngine} operation.
+         *
+         * @return the return value of the {@code SSLEngine} operation.
+         */
+        GetStatus(
+            [out] enum SSLEngineResult_Status* status);
+
+        /**
+         * Returns the status of the current handshake.
+         *
+         * @return the status of the current handshake.
+         */
+        GetHandshakeStatus(
+            [out] enum SSLEngineResult_HandshakeStatus* status);
+
+        /**
+         * Returns the number of bytes retrieved from the source buffer(s).
+         *
+         * @return the number of bytes retrieved from the source buffer(s).
+         */
+        BytesConsumed(
+            [out] Int32* bytesConsumed);
+
+        /**
+         * Returns the number of bytes transferred to the destination buffer(s).
+         *
+         * @return the number of bytes transferred to the destination buffer(s).
+         */
+        BytesProduced(
+            [out] Int32* bytesProduced);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

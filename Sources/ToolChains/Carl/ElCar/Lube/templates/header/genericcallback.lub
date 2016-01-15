@@ -1,0 +1,83 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+$   WITH all interfaces DO
+$       IF attrib is "callback" and attrib is not "clsobj"
+$           WITH all parents_and_me DO
+$           	WITH all methods DO
+
+    static _ELASTOS ECode Add${name}Callback(
+            PInterface pServerObj,
+            _ELASTOS ECode (*pFunc)(_ELASTOS PVoid, PInterface$^
+$                   WITH all parameters DO
+, ${ParamNamespaceType(type)}$^
+$                   END DO
+),
+            _ELASTOS PVoid pUserData=NULL)
+    {
+        return ${interface.name}::Add${name}Callback(pServerObj, pFunc, pUserData);
+    }
+
+    static _ELASTOS ECode Remove${name}Callback(
+            PInterface pServerObj,
+            _ELASTOS ECode (*pFunc)(_ELASTOS PVoid, PInterface$^
+$                   WITH all parameters DO
+, ${ParamNamespaceType(type)}$^
+$                   END DO
+),
+            _ELASTOS PVoid pUserData=NULL)
+    {
+        return ${interface.name}::Remove${name}Callback(pServerObj, pFunc, pUserData);
+    }
+
+    static _ELASTOS ECode Acquire${name}Rendezvous(
+            PInterface pServerObj,
+            ICallbackRendezvous** ppRendezvous)
+    {
+        return ${interface.name}::Acquire${name}Rendezvous(pServerObj, ppRendezvous);
+    }
+
+    template <class T>
+    static _ELASTOS ECode Add${name}Callback(
+            PInterface pServerObj,
+            T *pThis,
+            _ELASTOS ECode (CARAPICALLTYPE T::*pFunc)(
+$                   IF interface.attrib is not "async"
+                        PInterface$^
+$                   END IF;; async
+$                   WITH all parameters DO
+, ${ParamNamespaceType(type)}$^
+$                   END DO
+))
+    {
+        return ${interface.name}::Add${name}Callback(pServerObj, pThis, pFunc);
+    }
+
+    template <class T>
+    static _ELASTOS ECode Remove${name}Callback(
+            PInterface pServerObj,
+            T *pThis,
+            _ELASTOS ECode (CARAPICALLTYPE T::*pFunc)(
+$                   IF interface.attrib is not "async"
+                        PInterface$^
+$                   END IF;; async
+$                   WITH all parameters DO
+, ${ParamNamespaceType(type)}$^
+$                   END DO
+))
+    {
+        return ${interface.name}::Remove${name}Callback(pServerObj, pThis, pFunc);
+    }
+
+$               END DO ;; all methods
+$           END DO ;; parents_and_me
+$       END IF ;; callback clsobj
+$   END DO ;; all interfaces
+
+    static _ELASTOS ECode RemoveAllCallbacks(PInterface pServerObj)
+    {
+        return _CObject_RemoveAllCallbacks(pServerObj);
+    }

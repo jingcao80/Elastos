@@ -1,0 +1,13 @@
+
+TARGET_NAME = testString
+TARGET_TYPE = ecx
+
+IMPORTS = Elastos.CoreLibrary.eco
+
+SOURCES = test.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += -lstdc++ -licuuc -licui18n -lm

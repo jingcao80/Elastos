@@ -1,0 +1,55 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the SubjectInfoAccessSyntax and AuthorityInfoAccessSyntax
+     * which are a part of X.509 framework
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     *  SubjectInfoAccessSyntax  ::=
+     *      SEQUENCE SIZE (1..MAX) OF AccessDescriptions
+
+     *  AuthorityInfoAccessSyntax  ::=
+     *      SEQUENCE SIZE (1..MAX) OF AccessDescriptions
+     *
+     *  AccessDescription  ::=  SEQUENCE {
+     *      accessMethod          OBJECT IDENTIFIER,
+     *      accessLocation        GeneralName  }
+     *
+     */
+    interface IInfoAccessSyntax extends IExtensionValue {
+        ToString(
+            [out] String* str);
+    }
+
+    [deprecated]
+    interface IInfoAccessSyntaxHelper {
+        Decode(
+            [in] ArrayOf<Byte>* encoding,
+            [out] IInfoAccessSyntax** syntax);
+        /**
+         * ASN.1 DER X.509 AuthorityInfoAccessSyntax and SubjectInfoAccessSyntax
+         * encoder/decoder class.
+         */
+        GetASN1(
+            [out] IASN1Type** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

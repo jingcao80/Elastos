@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.Server.IAppWidgetBackupBridge;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+
+    /**
+     * Runtime bridge between the Backup Manager Service and the App Widget Service,
+     * since those two modules are intentionally decoupled for modularity.
+     *
+     * @hide
+     */
+    [deprecated]
+    interface IAppWidgetBackupBridge {
+        Register(
+            [in] IWidgetBackupProvider* instance);
+
+        GetWidgetParticipants(
+            [in] Int32 userId,
+            [out] IList** wp);
+
+        GetWidgetState(
+            [in] String packageName,
+            [in] Int32 userId,
+            [out, callee] ArrayOf<Byte>* ws);
+
+        RestoreStarting(
+            [in] Int32 userId);
+
+        RestoreWidgetState(
+            [in] String packageName,
+            [in] ArrayOf<Byte>* restoredState,
+            [in] Int32 userId);
+
+        RestoreFinished(
+            [in] Int32 userId);
+    }
+
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

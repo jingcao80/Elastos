@@ -1,0 +1,65 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IPackageInfo;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+
+    /**
+     * This class contains the SecurityPermissions view implementation.
+     * Initially the package's advanced or dangerous security permissions
+     * are displayed under categorized
+     * groups. Clicking on the additional permissions presents
+     * extended information consisting of all groups and permissions.
+     * To use this view define a LinearLayout or any ViewGroup and add this
+     * view by instantiating AppSecurityPermissions and invoking getPermissionsView.
+     *
+     * {@hide}
+     */
+    [local]
+    interface IAppSecurityPermissions {
+
+        GetInstalledPackageInfo(
+            [out] IPackageInfo** info);
+
+        GetPermissionCount(
+            [out] Int32* count);
+
+        GetPermissionCount(
+            [in] Int32 which,
+            [out] Int32* count);
+
+        GetPermissionsView(
+            [out] IView** view);
+
+        GetPermissionsView(
+            [in] Int32 which,
+            [out] IView** view);
+    }
+
+    [local]
+    interface IAppSecurityPermissionsHelper {
+        /**
+         * Utility to retrieve a view displaying a single permission.  This provides
+         * the old UI layout for permissions; it is only here for the device admin
+         * settings to continue to use.
+         */
+        GetPermissionItemView(
+            [in] IContext* ctx,
+            [in] ICharSequence* grpName,
+            [in] ICharSequence* description,
+            [in] Boolean dangerous,
+            [out] IView** v);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

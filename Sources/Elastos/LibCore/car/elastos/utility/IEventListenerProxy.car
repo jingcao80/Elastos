@@ -1,0 +1,20 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    /**
+     * This abstract class provides a simple wrapper for objects of type {@code EventListener}.
+     */
+    interface IEventListenerProxy {
+        /**
+         * Returns the wrapped {@code EventListener}.
+         *
+         * @return the wrapped {@code EventListener}.
+         */
+        GetListener(
+            [out] IEventListener** evl);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

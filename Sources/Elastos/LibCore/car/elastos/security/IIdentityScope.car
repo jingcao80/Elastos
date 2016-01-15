@@ -1,0 +1,112 @@
+
+module
+{
+    interface Elastos.Security.IPrincipal;
+    interface Elastos.Security.IPublicKey;
+    interface Elastos.Utility.IEnumeration;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * @Involve
+     * interface IIdentity
+     */
+    interface IIdentityScope {
+        /**
+         * Returns the number of {@code Identity} objects in this scope.
+         *
+         * @return the number of {@code Identity} objects in this scope.
+         */
+        GetSize(
+            [out] Int32* size);
+
+        /**
+         * Returns the {@code Identity} with the specified name or {@code null} if
+         * no {@code Identity} with the specified name is present in this scope.
+         *
+         * @param name
+         *            the name of the {@code Identity} to be returned.
+         * @return the {@code Identity} with the specified name or {@code null} if
+         *         not present.
+         */
+        GetIdentity(
+            [in] String name,
+            [out] IIdentity** identity);
+
+        /**
+         * Returns the {@code Identity} with the name of the specified principal or
+         * {@code null} if no {@code Identity} with the name of the specified
+         * principal is present in this scope.
+         *
+         * @param principal
+         *            the {@code Principal} whose name is used to lookup the {@code
+         *            Identity} to be returned.
+         * @return the {@code Identity} with the specified name or {@code null} if
+         *         not present.
+         */
+        GetIdentityEx(
+            [in] IPrincipal* principal,
+            [out] IIdentity** identity);
+
+        /**
+         * Returns the {@code Identity} which is associated with the specified key
+         * or {@code null} if no {@code Identity} associated with the specified key
+         * is present in this scope.
+         *
+         * @param key
+         *            the {@code PublicKey} of the {@code Identity} to be returned.
+         * @return the {@code Identity} associated with the specified key or {@code
+         *         null} if not present.
+         */
+        GetIdentityEx2(
+            [in] IPublicKey* key,
+            [out] IIdentity** identity);
+
+        /**
+         * Adds an {@code Identity} to this {@code IdentityScope}.
+         *
+         * @param identity
+         *            the {@code Identity} to be added.
+         * @throws KeyManagementException
+         *             if the specified {@code Identity} is invalid or an identity
+         *             with the same key already exists.
+         */
+        AddIdentity(
+            [in] IIdentity* identity);
+
+        /**
+         * Removes an {@code Identity} from this {@code IdentityScope}.
+         *
+         * @param identity
+         *            the {@code Identity} to be removed.
+         * @throws KeyManagementException
+         *             if the {@code Identity} is not present in this scope.
+         */
+        RemoveIdentity(
+            [in] IIdentity* identity);
+
+        /**
+         * Returns an {@code Enumeration} over the {@code Identity} objects in this
+         * {@code IdentityScope}.
+         *
+         * @return an {@code Enumeration} over the {@code Identity} objects in this
+         *         {@code IdentityScope}.
+         */
+        Identities(
+            [out] IEnumeration** ids);
+    }
+
+    interface IIdentityScopeHelper {
+        /**
+         * Returns the system's scope.
+         *
+         * @return the system's scope.
+         */
+        GetSystemScope(
+            [out] IIdentityScope** scope);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

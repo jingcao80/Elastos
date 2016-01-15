@@ -1,0 +1,91 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    using interface Elastos.Utility.ICalendar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IOnDayClickListener;
+
+    /**
+     * A calendar-like view displaying a specified month and the appropriate selectable day numbers
+     * within the specified month.
+     *
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * implements interface Elastos.Droid.Graphics.IDrawableCallback
+     * implements interface Elastos.Droid.View.IKeyEventCallback
+     * implements interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     */
+    interface ISimpleMonthView {
+        SetTextColor(
+            [in] IColorStateList* colors);
+
+        SetOnDayClickListener(
+            [in] IOnDayClickListener* listener);
+
+        /**
+         * Sets all the parameters for displaying this week. Parameters have a default value and
+         * will only update if a new value is included, except for focus month, which will always
+         * default to no focus month if no value is passed in. The only required parameter is the
+         * week start.
+         *
+         * @param selectedDay the selected day of the month, or -1 for no selection.
+         * @param month the month.
+         * @param year the year.
+         * @param weekStart which day the week should start on. {@link Calendar#SUNDAY} through
+         *        {@link Calendar#SATURDAY}.
+         * @param enabledDayStart the first enabled day.
+         * @param enabledDayEnd the last enabled day.
+         */
+        SetMonthParams(
+            [in] Int32 selectedDay,
+            [in] Int32 month,
+            [in] Int32 year,
+            [in] Int32 weekStart,
+            [in] Int32 enabledDayStart,
+            [in] Int32 enabledDayEnd);
+
+        Reuse();
+
+        /**
+         * @return The date that has accessibility focus, or {@code null} if no date
+         *         has focus
+         */
+        GetAccessibilityFocus(
+            [out] ICalendar** calendar);
+
+        /**
+         * Clears accessibility focus within the view. No-op if the view does not
+         * contain accessibility focus.
+         */
+        ClearAccessibilityFocus();
+
+        /**
+         * Attempts to restore accessibility focus to the specified date.
+         *
+         * @param day The date which should receive focus
+         * @return {@code false} if the date is not valid for this month view, or
+         *         {@code true} if the date received focus
+         */
+        RestoreAccessibilityFocus(
+            [in] ICalendar* day,
+            [out] Boolean* result);
+    }
+
+    /**
+     * Handles callbacks when the user clicks on a time object.
+     */
+    interface IOnDayClickListener {
+        OnDayClick(
+            [in] ISimpleMonthView* view,
+            [in] ICalendar* day);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

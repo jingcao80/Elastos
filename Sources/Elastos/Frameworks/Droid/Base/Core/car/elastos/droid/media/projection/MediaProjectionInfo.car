@@ -1,0 +1,23 @@
+module
+{
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Projection {
+
+    [parcelable]
+    interface IMediaProjectionInfo {
+        GetPackageName(
+            [out] String * result);
+
+        GetUserHandle(
+            [out] IUserHandle ** result);
+    }
+
+    } // namespace Projection
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

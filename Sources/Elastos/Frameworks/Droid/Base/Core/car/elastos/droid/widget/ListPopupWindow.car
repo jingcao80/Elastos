@@ -1,0 +1,578 @@
+module
+{
+	interface Elastos.Droid.Widget.IPopupWindowOnDismissListener;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewOnTouchListener;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    using interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * A ListPopupWindow anchors itself to a host view and displays a
+     * list of choices.
+     *
+     * <p>ListPopupWindow contains a number of tricky behaviors surrounding
+     * positioning, scrolling parents to fit the dropdown, interacting
+     * sanely with the IME if present, and others.
+     *
+     * @see android.widget.AutoCompleteTextView
+     * @see android.widget.Spinner
+     */
+    [local]
+    interface IListPopupWindow {
+
+        /**
+         * The provided prompt view should appear above list content.
+         *
+         * @see #setPromptPosition(int)
+         * @see #getPromptPosition()
+         * @see #setPromptView(View)
+         */
+        const Int32 POSITION_PROMPT_ABOVE = 0;
+
+        /**
+         * The provided prompt view should appear below list content.
+         *
+         * @see #setPromptPosition(int)
+         * @see #getPromptPosition()
+         * @see #setPromptView(View)
+         */
+        const Int32 POSITION_PROMPT_BELOW = 1;
+
+        /**
+         * Alias for {@link ViewGroup.LayoutParams#MATCH_PARENT}.
+         * If used to specify a popup width, the popup will match the width of the anchor view.
+         * If used to specify a popup height, the popup will fill available space.
+         */
+        const Int32 MATCH_PARENT = -1;
+
+        /**
+         * Alias for {@link ViewGroup.LayoutParams#WRAP_CONTENT}.
+         * If used to specify a popup width, the popup will use the width of its content.
+         */
+        const Int32 WRAP_CONTENT = -2;
+
+        /**
+         * Mode for {@link #setInputMethodMode(int)}: the requirements for the
+         * input method should be based on the focusability of the popup.  That is
+         * if it is focusable than it needs to work with the input method, else
+         * it doesn't.
+         */
+        const Int32 INPUT_METHOD_FROM_FOCUSABLE =  0;
+
+        /**
+         * Mode for {@link #setInputMethodMode(int)}: this popup always needs to
+         * work with an input method, regardless of whether it is focusable.  This
+         * means that it will always be displayed so that the user can also operate
+         * the input method while it is shown.
+         */
+        const Int32 INPUT_METHOD_NEEDED = 1;
+
+        /**
+         * Mode for {@link #setInputMethodMode(int)}: this popup never needs to
+         * work with an input method, regardless of whether it is focusable.  This
+         * means that it will always be displayed to use as much space on the
+         * screen as needed, regardless of whether this covers the input method.
+         */
+        const Int32 INPUT_METHOD_NOT_NEEDED = 2;
+
+        /**
+         * Sets the adapter that provides the data and the views to represent the data
+         * in this popup window.
+         *
+         * @param adapter The adapter to use to create this window's content.
+         */
+        SetAdapter(
+            [in] IListAdapter* adapter);
+
+        /**
+         * Set where the optional prompt view should appear. The default is
+         * {@link #POSITION_PROMPT_ABOVE}.
+         *
+         * @param position A position constant declaring where the prompt should be displayed.
+         *
+         * @see #POSITION_PROMPT_ABOVE
+         * @see #POSITION_PROMPT_BELOW
+         */
+        SetPromptPosition(
+            [in] Int32 position);
+
+        /**
+         * @return Where the optional prompt view should appear.
+         *
+         * @see #POSITION_PROMPT_ABOVE
+         * @see #POSITION_PROMPT_BELOW
+         */
+        GetPromptPosition(
+            [out] Int32* position);
+
+        /**
+         * Set whether this window should be modal when shown.
+         *
+         * <p>If a popup window is modal, it will receive all touch and key input.
+         * If the user touches outside the popup window's content area the popup window
+         * will be dismissed.
+         *
+         * @param modal {@code true} if the popup window should be modal, {@code false} otherwise.
+         */
+        SetModal(
+            [in] Boolean modal);
+
+        /**
+         * Returns whether the popup window will be modal when shown.
+         *
+         * @return {@code true} if the popup window will be modal, {@code false} otherwise.
+         */
+        IsModal(
+            [out] Boolean* modal);
+
+        /**
+         * Forces outside touches to be ignored. Normally if {@link #isDropDownAlwaysVisible()} is
+         * false, we allow outside touch to dismiss the dropdown. If this is set to true, then we
+         * ignore outside touch even when the drop down is not set to always visible.
+         *
+         * @hide Used only by AutoCompleteTextView to handle some internal special cases.
+         */
+        SetForceIgnoreOutsideTouch(
+            [in] Boolean forceIgnoreOutsideTouch);
+
+        /**
+         * Sets whether the drop-down should remain visible under certain conditions.
+         *
+         * The drop-down will occupy the entire screen below {@link #getAnchorView} regardless
+         * of the size or content of the list.  {@link #getBackground()} will fill any space
+         * that is not used by the list.
+         *
+         * @param dropDownAlwaysVisible Whether to keep the drop-down visible.
+         *
+         * @hide Only used by AutoCompleteTextView under special conditions.
+         */
+        SetDropDownAlwaysVisible(
+            [in] Boolean dropDownAlwaysVisible);
+
+        /**
+         * @return Whether the drop-down is visible under special conditions.
+         *
+         * @hide Only used by AutoCompleteTextView under special conditions.
+         */
+        IsDropDownAlwaysVisible(
+            [out] Boolean* visible);
+
+        /**
+         * Sets the operating mode for the soft input area.
+         *
+         * @param mode The desired mode, see
+         *        {@link android.view.WindowManager.LayoutParams#softInputMode}
+         *        for the full list
+         *
+         * @see android.view.WindowManager.LayoutParams#softInputMode
+         * @see #getSoftInputMode()
+         */
+        SetSoftInputMode(
+            [in] Int32 mode);
+
+        /**
+         * Returns the current value in {@link #setSoftInputMode(Int32)}.
+         *
+         * @see #setSoftInputMode(Int32)
+         * @see android.view.WindowManager.LayoutParams#softInputMode
+         */
+        GetSoftInputMode(
+            [out] Int32* mode);
+
+        /**
+         * Sets a drawable to use as the list item selector.
+         *
+         * @param selector List selector drawable to use in the popup.
+         */
+        SetListSelector(
+            [in] IDrawable* selector);
+
+        /**
+         * @return The background drawable for the popup window.
+         */
+        GetBackground(
+            [out] IDrawable** d);
+
+        /**
+         * Sets a drawable to be the background for the popup window.
+         *
+         * @param d A drawable to set as the background.
+         */
+        SetBackgroundDrawable(
+            [in] IDrawable* d);
+
+        /**
+         * Set an animation style to use when the popup window is shown or dismissed.
+         *
+         * @param animationStyle Animation style to use.
+         */
+        SetAnimationStyle(
+            [in] Int32 animationStyle);
+
+        /**
+         * Returns the animation style that will be used when the popup window is
+         * shown or dismissed.
+         *
+         * @return Animation style that will be used.
+         */
+        GetAnimationStyle(
+            [out] Int32* style);
+
+        /**
+         * Returns the view that will be used to anchor this popup.
+         *
+         * @return The popup's anchor view
+         */
+        GetAnchorView(
+            [out] IView** view);
+
+        /**
+         * Sets the popup's anchor view. This popup will always be positioned relative to
+         * the anchor view when shown.
+         *
+         * @param anchor The view to use as an anchor.
+         */
+        SetAnchorView(
+            [in] IView* anchor);
+
+        /**
+         * @return The horizontal offset of the popup from its anchor in pixels.
+         */
+        GetHorizontalOffset(
+            [out] Int32* offset);
+
+        /**
+         * Set the horizontal offset of this popup from its anchor view in pixels.
+         *
+         * @param offset The horizontal offset of the popup from its anchor.
+         */
+        SetHorizontalOffset(
+            [in] Int32 offset);
+
+        /**
+         * @return The vertical offset of the popup from its anchor in pixels.
+         */
+        GetVerticalOffset(
+            [out] Int32* offset);
+
+        /**
+         * Set the vertical offset of this popup from its anchor view in pixels.
+         *
+         * @param offset The vertical offset of the popup from its anchor.
+         */
+        SetVerticalOffset(
+            [in] Int32 offset);
+
+        /**
+         * Set the gravity of the dropdown list. This is commonly used to
+         * set gravity to START or END for alignment with the anchor.
+         *
+         * @param gravity Gravity value to use
+         */
+        SetDropDownGravity(
+            [in] Int32 gravity);
+
+        /**
+         * @return The width of the popup window in pixels.
+         */
+        GetWidth(
+            [out] Int32* width);
+
+        /**
+         * Sets the width of the popup window in pixels. Can also be {@link #MATCH_PARENT}
+         * or {@link #WRAP_CONTENT}.
+         *
+         * @param width Width of the popup window.
+         */
+        SetWidth(
+            [in] Int32 width);
+
+        /**
+         * Sets the width of the popup window by the size of its content. The final width may be
+         * larger to accommodate styled window dressing.
+         *
+         * @param width Desired width of content in pixels.
+         */
+        SetContentWidth(
+            [in] Int32 width);
+
+        /**
+         * @return The height of the popup window in pixels.
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * Sets the height of the popup window in pixels. Can also be {@link #MATCH_PARENT}.
+         *
+         * @param height Height of the popup window.
+         */
+        SetHeight(
+            [in] Int32 height);
+
+        /**
+         * Sets a listener to receive events when a list item is clicked.
+         *
+         * @param clickListener Listener to register
+         *
+         * @see ListView#setOnItemClickListener(android.widget.AdapterView.OnItemClickListener)
+         */
+        SetOnItemClickListener(
+            [in] IAdapterViewOnItemClickListener* clickListener);
+
+        /**
+         * Sets a listener to receive events when a list item is selected.
+         *
+         * @param selectedListener Listener to register.
+         *
+         * @see ListView#setOnItemSelectedListener(android.widget.AdapterView.OnItemSelectedListener)
+         */
+        SetOnItemSelectedListener(
+            [in] IAdapterViewOnItemSelectedListener* selectedListener);
+
+        /**
+         * Set a view to act as a user prompt for this popup window. Where the prompt view will appear
+         * is controlled by {@link #setPromptPosition(Int32)}.
+         *
+         * @param prompt View to use as an informational prompt.
+         */
+        SetPromptView(
+            [in] IView* prompt);
+
+        /**
+         * Post a {@link #show()} call to the UI thread.
+         */
+        PostShow();
+
+        /**
+         * Show the popup list. If the list is already showing, this method
+         * will recalculate the popup's size and position.
+         */
+        Show();
+
+        /**
+         * Dismiss the popup window.
+         */
+        Dismiss();
+
+        /**
+         * Set a listener to receive a callback when the popup is dismissed.
+         *
+         * @param listener Listener that will be notified when the popup is dismissed.
+         */
+        SetOnDismissListener(
+            [in] IPopupWindowOnDismissListener* listener);
+
+        /**
+         * Control how the popup operates with an input method: one of
+         * {@link #INPUT_METHOD_FROM_FOCUSABLE}, {@link #INPUT_METHOD_NEEDED},
+         * or {@link #INPUT_METHOD_NOT_NEEDED}.
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to the {@link #show()}
+         * method.</p>
+         *
+         * @see #getInputMethodMode()
+         * @see #show()
+         */
+        SetInputMethodMode(
+            [in] Int32 mode);
+
+        /**
+         * Return the current value in {@link #setInputMethodMode(Int32)}.
+         *
+         * @see #setInputMethodMode(Int32)
+         */
+        GetInputMethodMode(
+            [out] Int32* mode);
+
+        /**
+         * Set the selected position of the list.
+         * Only valid when {@link #isShowing()} == {@code true}.
+         *
+         * @param position List position to set as selected.
+         */
+        SetSelection(
+            [in] Int32 position);
+
+        /**
+         * Clear any current list selection.
+         * Only valid when {@link #isShowing()} == {@code true}.
+         */
+        ClearListSelection();
+
+        /**
+         * @return {@code true} if the popup is currently showing, {@code false} otherwise.
+         */
+        IsShowing(
+            [out] Boolean* showing);
+
+        /**
+         * @return {@code true} if this popup is configured to assume the user does not need
+         * to interact with the IME while it is showing, {@code false} otherwise.
+         */
+        IsInputMethodNotNeeded(
+            [out] Boolean* needed);
+
+        /**
+         * Perform an item click operation on the specified list adapter position.
+         *
+         * @param position Adapter position for performing the click
+         * @return true if the click action could be performed, false if not.
+         *         (e.g. if the popup was not showing, this method would return false.)
+         */
+        PerformItemClick(
+            [in] Int32 position,
+            [out] Boolean* click);
+
+        /**
+         * @return The currently selected item or null if the popup is not showing.
+         */
+        GetSelectedItem(
+            [out] IInterface** item);
+
+        /**
+         * @return The position of the currently selected item or {@link ListView#INVALID_POSITION}
+         * if {@link #isShowing()} == {@code false}.
+         *
+         * @see ListView#getSelectedItemPosition()
+         */
+        GetSelectedItemPosition(
+            [out] Int32* position);
+
+        /**
+         * @return The ID of the currently selected item or {@link ListView#INVALID_ROW_ID}
+         * if {@link #isShowing()} == {@code false}.
+         *
+         * @see ListView#getSelectedItemId()
+         */
+        GetSelectedItemId(
+            [out] Int64* id);
+
+        /**
+         * @return The View for the currently selected item or null if
+         * {@link #isShowing()} == {@code false}.
+         *
+         * @see ListView#getSelectedView()
+         */
+        GetSelectedView(
+            [out] IView** view);
+
+        /**
+         * @return The {@link ListView} displayed within the popup window.
+         * Only valid when {@link #isShowing()} == {@code true}.
+         */
+        GetListView(
+            [out] IListView** view);
+
+        /**
+         * The maximum number of list items that can be visible and still have
+         * the list expand when touched.
+         *
+         * @param max Max number of items that can be visible and still allow the list to expand.
+         */
+        SetListItemExpandMax(
+            [in] Int32 max);
+
+        /**
+         * Filter key down events. By forwarding key down events to this function,
+         * views using non-modal ListPopupWindow can have it handle key selection of items.
+         *
+         * @param keyCode keyCode param passed to the host view's onKeyDown
+         * @param event event param passed to the host view's onKeyDown
+         * @return true if the event was handled, false if it was ignored.
+         *
+         * @see #setModal(Boolean)
+         */
+        OnKeyDown(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* res);
+
+        /**
+         * Filter key down events. By forwarding key up events to this function,
+         * views using non-modal ListPopupWindow can have it handle key selection of items.
+         *
+         * @param keyCode keyCode param passed to the host view's onKeyUp
+         * @param event event param passed to the host view's onKeyUp
+         * @return true if the event was handled, false if it was ignored.
+         *
+         * @see #setModal(Boolean)
+         */
+        OnKeyUp(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* res);
+
+        /**
+         * Filter pre-IME key events. By forwarding {@link View#onKeyPreIme(Int32, KeyEvent)}
+         * events to this function, views using ListPopupWindow can have it dismiss the popup
+         * when the back key is pressed.
+         *
+         * @param keyCode keyCode param passed to the host view's onKeyPreIme
+         * @param event event param passed to the host view's onKeyPreIme
+         * @return true if the event was handled, false if it was ignored.
+         *
+         * @see #setModal(Boolean)
+         */
+        OnKeyPreIme(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* res);
+
+        /**
+         * Returns an {@link OnTouchListener} that can be added to the source view
+         * to implement drag-to-open behavior. Generally, the source view should be
+         * the same view that was passed to {@link #setAnchorView}.
+         * <p>
+         * When the listener is set on a view, touching that view and dragging
+         * outside of its bounds will open the popup window. Lifting will select the
+         * currently touched list item.
+         * <p>
+         * Example usage:
+         * <pre>
+         * ListPopupWindow myPopup = new ListPopupWindow(context);
+         * myPopup.setAnchor(myAnchor);
+         * OnTouchListener dragListener = myPopup.createDragToOpenListener(myAnchor);
+         * myAnchor.setOnTouchListener(dragListener);
+         * </pre>
+         *
+         * @param src the view on which the resulting listener will be set
+         * @return a touch listener that controls drag-to-open behavior
+         */
+        CreateDragToOpenListener(
+            [in] IView* src,
+            [out] IViewOnTouchListener** l);
+    }
+
+    /**
+     * Abstract class that forwards touch events to a {@link ListPopupWindow}.
+     *
+     * @hide
+     */
+    [local]
+    interface IListPopupWindowForwardingListener {
+        /**
+         * Returns the popup to which this listener is forwarding events.
+         * <p>
+         * Override this to return the correct popup. If the popup is displayed
+         * asynchronously, you may also need to override
+         * {@link #onForwardingStopped} to prevent premature cancelation of
+         * forwarding.
+         *
+         * @return the popup to which this listener is forwarding events
+         */
+        GetPopup(
+        	[out] IListPopupWindow** result);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

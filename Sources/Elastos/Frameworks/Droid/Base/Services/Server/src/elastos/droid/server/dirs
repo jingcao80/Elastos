@@ -1,0 +1,25 @@
+
+
+DIRS += am
+DIRS += clipboard
+DIRS += connectivity
+DIRS += content
+DIRS += display
+DIRS += lights
+DIRS += net
+DIRS += os
+DIRS += power
+DIRS += wallpaper
+
+
+#DIRS = accessibility
+#DIRS += input
+#DIRS += location
+#DIRS += pm
+#DIRS += usb
+#DIRS += wm
+#DIRS += accounts
+#DIRS += dreams
+#DIRS += search
+#DIRS += zigbee
+#DIRS += remote

@@ -1,0 +1,469 @@
+
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IFileDescriptor;
+    interface Elastos.IO.Channels.ISocketChannel;
+
+    interface Elastos.Net.IInetAddress;
+    interface Elastos.Net.ISocketAddress;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * Provides a client-side TCP socket.
+     */
+    /**
+     * @Involve
+     * interface ICloseable;
+     */
+    interface ISocket {
+        /**
+         * Closes the socket. It is not possible to reconnect or rebind to this
+         * socket thereafter which means a new socket instance has to be created.
+         *
+         * @throws IOException
+         *             if an error occurs while closing the socket.
+         */
+        Close();
+
+        /**
+         * Sets the Socket and its related SocketImpl state as if a successful close() took place,
+         * without actually performing an OS close().
+         *
+         * @hide used in java.nio
+         */
+        OnClose();
+
+        /**
+         * Returns the IP address of the target host this socket is connected to, or null if this
+         * socket is not yet connected.
+         */
+        GetInetAddress(
+            [out] IInetAddress** address);
+
+        /**
+         * Returns an input stream to read data from this socket.
+         *
+         * @return the byte-oriented input stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while creating the input stream or the socket is in an invalid state.
+         */
+        GetInputStream(
+            [out] IInputStream** is);
+
+        /**
+         * Returns this socket's SocketOptions#SO_KEEPALIVE setting.
+         *
+         * @sa SocketOptions#SO_KEEPALIVE
+         */
+        GetKeepAlive(
+            [out] Boolean* keepAlive);
+
+        /**
+         * Returns the local IP address this socket is bound to, or {InetAddress.ANY} if
+         * the socket is unbound.
+         */
+        GetLocalAddress(
+            [out] IInetAddress** address);
+
+        /**
+         * Returns the local port this socket is bound to, or -1 if the socket is unbound.
+         */
+        GetLocalPort(
+            [out] Int32* localPort);
+
+        /**
+         * Returns an output stream to write data into this socket.
+         *
+         * @return the byte-oriented output stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while creating the output stream or the socket is in an invalid state.
+         */
+        GetOutputStream(
+            [out] IOutputStream** os);
+
+        /**
+         * Returns the port number of the target host this socket is connected to, or 0 if this socket
+         * is not yet connected.
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /**
+         * Returns this socket's SocketOptions#SO_LINGER linger timeout in seconds, or -1
+         * for no linger (i.e. {close} will return immediately).
+         *
+         * @sa SocketOptions#SO_LINGER linger
+         */
+        GetSoLinger(
+            [out] Int32* value);
+
+        /**
+         * Returns this socket's SocketOptions#SO_RCVBUF receive buffer size.
+         *
+         * @sa SocketOptions#SO_RCVBUF receive buffer size
+         */
+        GetReceiveBufferSize(
+            [out] Int32* size);
+
+        /**
+         * Returns this socket's SocketOptions#SO_SNDBUF send buffer size.
+         *
+         8 @sa SocketOptions#SO_SNDBUF send buffer size
+         */
+        GetSendBufferSize(
+            [out] Int32* size);
+
+        /**
+         * Returns this socket's SocketOptions#SO_TIMEOUT receive timeout.
+         *
+         8 @sa SocketOptions#SO_TIMEOUT receive timeout
+         */
+        GetSoTimeout(
+            [out] Int32* timeout);
+
+        /**
+         * Returns this socket's {SocketOptions#TCP_NODELAY} setting.
+         */
+        GetTcpNoDelay(
+            [out] Boolean* noDelay);
+
+        /**
+         * Sets this socket's SocketOptions#SO_KEEPALIVE option.
+         *
+         8 @sa SocketOptions#SO_KEEPALIVE
+         */
+        SetKeepAlive(
+            [in] Boolean keepAlive);
+
+        /**
+         * Sets this socket's SocketOptions#SO_SNDBUF send buffer size.
+         *
+         * @sa SocketOptions#SO_SNDBUF send buffer size
+         */
+        SetSendBufferSize(
+            [in] Int32 size);
+
+        /**
+         * Sets this socket's SocketOptions#SO_SNDBUF receive buffer size.
+         *
+         * @sa SocketOptions#SO_SNDBUF receive buffer size
+         */
+        SetReceiveBufferSize(
+            [in] Int32 size);
+
+        /**
+         * Sets this socket's SocketOptions#SO_LINGER linger timeout in seconds.
+         * If {on} is false, {timeout} is irrelevant.
+         *
+         * @sa SocketOptions#SO_LINGER linger
+         */
+        SetSoLinger(
+            [in] Boolean on,
+            [in] Int32 timeout);
+
+        /**
+         * Sets this socket's SocketOptions#SO_TIMEOUT read timeout in milliseconds.
+         *
+         * @sa SocketOptions#SO_TIMEOUT read timeout
+         * Use 0 for no timeout.
+         * To take effect, this option must be set before the blocking method was called.
+         */
+        SetSoTimeout(
+            [in] Int32 timeout);
+
+        /**
+         * Sets this socket's SocketOptions#TCP_NODELAY option.
+         *
+         * @sa SocketOptions#TCP_NODELAY
+         */
+        SetTcpNoDelay(
+            [in] Boolean on);
+
+        /**
+         * Closes the input stream of this socket. Any further data sent to this
+         * socket will be discarded. Reading from this socket after this method has
+         * been called will return the value {EOF}.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while closing the socket input stream.
+         * SocketException | if the input stream is already closed.
+         */
+        ShutdownInput();
+
+        /**
+         * Closes the output stream of this socket. All buffered data will be sent
+         * followed by the termination sequence. Writing to the closed output stream
+         * will cause an {IOException}.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while closing the socket output stream.
+         * SocketException | if the output stream is already closed.
+         */
+        ShutdownOutput();
+
+        /**
+         * Returns the local address and port of this socket as a SocketAddress or
+         * null if the socket is unbound. This is useful on multihomed
+         * hosts.
+         */
+        GetLocalSocketAddress(
+            [out] ISocketAddress** address);
+
+        /**
+         * Returns the remote address and port of this socket as a {
+         * SocketAddress} or null if the socket is not connected.
+         *
+         * @return the remote socket address and port.
+         */
+        GetRemoteSocketAddress(
+            [out] ISocketAddress** address);
+
+        /**
+         * Returns whether this socket is bound to a local address and port.
+         *
+         * @return {true} if the socket is bound to a local address, {
+         *         false} otherwise.
+         */
+        IsBound(
+            [out] Boolean* isBound);
+
+        /**
+         * Returns whether this socket is connected to a remote host.
+         *
+         * @return {true} if the socket is connected, {false} otherwise.
+         */
+        IsConnected(
+            [out] Boolean* isConnected);
+
+        /**
+         * Returns whether this socket is closed.
+         *
+         * @return {true} if the socket is closed, {false} otherwise.
+         */
+        IsClosed(
+            [out] Boolean* isClosed);
+
+        /**
+         * Binds this socket to the given local host address and port specified by
+         * the SocketAddress {localAddr}. If {localAddr} is set to
+         * {null}, this socket will be bound to an available local address on
+         * any free port.
+         *
+         * @param localAddr
+         *            the specific address and port on the local machine to bind to.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the given SocketAddress is invalid or not supported.
+         * IOException | if the socket is already bound or an error occurs while binding.
+         */
+        Bind(
+            [in] ISocketAddress* localAddr);
+
+        /**
+         * Sets the Socket and its related SocketImpl state as if a successful bind() took place,
+         * without actually performing an OS bind().
+         *
+         * @hide used in java.nio
+         */
+        OnBind(
+            [in] IInetAddress* localAddr,
+            [in] Int32 localPort);
+
+        /**
+         * Connects this socket to the given remote host address and port specified
+         * by the SocketAddress {remoteAddr}.
+         *
+         * @param remoteAddr
+         *            the address and port of the remote host to connect to.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the given SocketAddress is invalid or not supported.
+         * IOException | if the socket is already connected or an error occurs while connecting.
+         */
+        Connect(
+            [in] ISocketAddress* remoteAddr);
+
+        /**
+         * Connects this socket to the given remote host address and port specified
+         * by the SocketAddress {remoteAddr} with the specified timeout. The
+         * connecting method will block until the connection is established or an
+         * error occurred.
+         *
+         * @param remoteAddr
+         *            the address and port of the remote host to connect to.
+         * @param timeout
+         *            the timeout value in milliseconds or {0} for an infinite
+         *            timeout.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the given SocketAddress is invalid or not supported or the timeout value is negative.
+         * IOException | if the socket is already connected or an error occurs while connecting.
+         */
+        Connect(
+            [in] ISocketAddress* remoteAddr,
+            [in] Int32 timeout);
+
+        /**
+         * Sets the Socket and its related SocketImpl state as if a successful connect() took place,
+         * without actually performing an OS connect().
+         *
+         * @hide internal use only
+         */
+        OnConnect(
+            [in] ISocketAddress* remoteAddr,
+            [in] Int32 timeout);
+
+        /**
+         * Returns whether the incoming channel of the socket has already been
+         * closed.
+         *
+         * @return {true} if reading from this socket is not possible anymore,
+         *         {false} otherwise.
+         */
+        IsInputShutdown(
+            [out] Boolean* isInputShutdown);
+
+        /**
+         * Returns whether the outgoing channel of the socket has already been
+         * closed.
+         *
+         * @return {true} if writing to this socket is not possible anymore,
+         *         {false} otherwise.
+         */
+        IsOutputShutdown(
+            [out] Boolean* isOutputShutdown);
+
+        /**
+         * Sets this socket's SocketOptions#SO_REUSEADDR option.
+         *
+         * @sa SocketOptions#SO_REUSEADDR
+         */
+        SetReuseAddress(
+            [in] Boolean reuse);
+
+        /**
+         * Returns this socket's SocketOptions#SO_REUSEADDR setting.
+         *
+         * @sa SocketOptions#SO_REUSEADDR
+         */
+        GetReuseAddress(
+            [out] Boolean* reuse);
+
+        /**
+         * Sets this socket's SocketOptions#SO_OOBINLINE option.
+         *
+         * @sa SocketOptions#SO_OOBINLINE
+         */
+        SetOOBInline(
+            [in] Boolean oobinline);
+
+        /**
+         * Returns this socket's SocketOptions#SO_OOBINLINE setting.
+         *
+         * @sa SocketOptions#SO_OOBINLINE
+         */
+        GetOOBInline(
+            [out] Boolean* oobinline);
+
+        /**
+         * Sets this socket's SocketOptions#IP_TOS value for every packet sent by this socket.
+         *
+         * @sa SocketOptions#IP_TOS
+         */
+        SetTrafficClass(
+            [in] Int32 value);
+
+        /**
+         * Returns this socket's {@see SocketOptions#IP_TOS} setting.
+         */
+        GetTrafficClass(
+            [out] Int32* value);
+
+        /**
+         * Sends the given single byte data which is represented by the lowest octet
+         * of {value} as "TCP urgent data".
+         *
+         * @param value
+         *            the byte of urgent data to be sent.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while sending urgent data.
+         */
+        SendUrgentData(
+            [in] Int32 value);
+
+        /**
+         * Returns this socket's {SocketChannel}, if one exists. A channel is
+         * available only if this socket wraps a channel. (That is, you can go from a
+         * channel to a socket and back again, but you can't go from an arbitrary socket to a channel.)
+         * In practice, this means that the socket must have been created by
+         * java.nio.channels.ServerSocketChannel#accept or
+         * java.nio.channels.SocketChannel#open.
+         *
+         *
+         * @sa java.nio.channels.ServerSocketChannel#accept
+         * @sa java.nio.channels.SocketChannel#open
+         */
+        GetChannel(
+            [out] ISocketChannel** channel);
+
+        /**
+         * @hide internal use only
+         */
+        GetFileDescriptor(
+            [out] IFileDescriptor** fd);
+
+        /**
+         * Sets performance preferences for connectionTime, latency and bandwidth.
+         *
+         * <p>This method does currently nothing.
+         *
+         * @param connectionTime
+         *            the value representing the importance of a short connecting
+         *            time.
+         * @param latency
+         *            the value representing the importance of low latency.
+         * @param bandwidth
+         *            the value representing the importance of high bandwidth.
+         */
+        SetPerformancePreferences(
+            [in] Int32 connectionTime,
+            [in] Int32 latency,
+            [in] Int32 bandwidth);
+    }
+
+    interface ISocketHelper {
+        /**
+         * Sets the internal factory for creating socket implementations. This may
+         * only be executed once during the lifetime of the application.
+         *
+         * @param fac
+         *            the socket implementation factory to be set.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if the factory has been already set.
+         */
+        SetSocketImplFactory(
+            [in] ISocketImplFactory* fac);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

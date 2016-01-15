@@ -1,0 +1,114 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+
+    interface Elastos.Droid.Hardware.Camera2.ICaptureRequest;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    interface IRequestHolder;
+
+    interface IRequestHolderBuilder {
+        /**
+         * Build a new {@link RequestHolder} using with parameters generated from this
+         *      {@link Builder}.
+         *
+         * @param frameNumber the {@code framenumber} to generate in the {@link RequestHolder}.
+         * @return a {@link RequestHolder} constructed with the {@link Builder}'s parameters.
+         */
+        Build(
+            [in] Int64 frameNumber,
+            [out] IRequestHolder** holder);
+    }
+
+    /**
+     * Semi-immutable container for a single capture request and associated information,
+     * the only mutable characteristic of this container is whether or not is has been
+     * marked as "failed" using {@code #failRequest}.
+     */
+    interface IRequestHolder {
+
+        /**
+         * Return the request id for the contained {@link CaptureRequest}.
+         */
+        GetRequestId(
+            [out] Int32* value);
+
+        /**
+         * Returns true if the contained request is repeating.
+         */
+        IsRepeating(
+            [out] Boolean* value);
+
+        /**
+         * Return the subsequence id for this request.
+         */
+        GetSubsequeceId(
+            [out] Int32* value);
+
+        /**
+         * Returns the frame number for this request.
+         */
+        GetFrameNumber(
+            [out] Int64* value);
+
+        /**
+         * Returns the contained request.
+         */
+        GetRequest(
+            [out] ICaptureRequest** outcr);
+
+        /**
+         * Returns a read-only collection of the surfaces targeted by the contained request.
+         */
+        GetHolderTargets(
+            [out] ICollection** outcol);
+
+        /**
+         * Returns true if any of the surfaces targeted by the contained request require jpeg buffers.
+         */
+        HasJpegTargets(
+            [out] Boolean* value);
+
+        /**
+         * Returns true if any of the surfaces targeted by the contained request require a
+         * non-jpeg buffer type.
+         */
+        HasPreviewTargets(
+            [out] Boolean* value);
+
+        /**
+         * Return the number of jpeg-type surfaces targeted by this request.
+         */
+        NumJpegTargets(
+            [out] Int32* value);
+
+        /**
+         * Return the number of non-jpeg-type surfaces targeted by this request.
+         */
+        NumPreviewTargets(
+            [out] Int32* value);
+
+        /**
+         * Mark this request as failed.
+         */
+        FailRequest();
+
+        /**
+         * Return {@code true} if this request failed.
+         */
+        RequestFailed(
+            [out] Boolean* value);
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

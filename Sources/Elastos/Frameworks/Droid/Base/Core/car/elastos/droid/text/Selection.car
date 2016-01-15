@@ -1,0 +1,214 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Text.ISpannable;
+    interface Elastos.Droid.Text.ILayout;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /** {@hide} */
+    interface ISelectionPositionIterator {
+        const Int32 DONE = -1;//BreakIterator_DONE;
+
+        Preceding(
+            [in] Int32 position,
+            [out] Int32* result);
+
+        Following(
+            [in] Int32 position,
+            [out] Int32* result);
+    }
+
+    /**
+     * Utility class for manipulating cursors and selections in CharSequences.
+     * A cursor is a selection where the start and end are at the same offset.
+     */
+    interface ISelection {
+
+        /*
+         * Retrieving the selection
+         */
+
+        /**
+         * Return the offset of the selection anchor or cursor, or -1 if
+         * there is no selection or cursor.
+         */
+        GetSelectionStart(
+            [in] ICharSequence* text,
+            [out] Int32* start);
+
+        /**
+         * Return the offset of the selection edge or cursor, or -1 if
+         * there is no selection or cursor.
+         */
+        GetSelectionEnd(
+            [in] ICharSequence* text,
+            [out] Int32* end);
+
+        /*
+         * Setting the selection
+         */
+
+        // private static int pin(int value, int min, int max) {
+        //     return value < min ? 0 : (value > max ? max : value);
+        // }
+
+        /**
+         * Set the selection anchor to <code>start</code> and the selection edge
+         * to <code>stop</code>.
+         */
+        SetSelection(
+            [in] ISpannable* text,
+            [in] Int32 start,
+            [in] Int32 stop);
+
+        /**
+         * Move the cursor to offset <code>index</code>.
+         */
+        SetSelection2(
+            [in] ISpannable* text,
+            [in] Int32 index);
+
+        /**
+         * Select the entire text.
+         */
+        SelectAll(
+            [in] ISpannable* text);
+
+        /**
+         * Move the selection edge to offset <code>index</code>.
+         */
+        ExtendSelection(
+            [in] ISpannable* text,
+            [in] Int32 index);
+
+        /**
+         * Remove the selection or cursor, if any, from the text.
+         */
+        RemoveSelection(
+            [in] ISpannable* text);
+
+        /*
+         * Moving the selection within the layout
+         */
+
+        /**
+         * Move the cursor to the buffer offset physically above the current
+         * offset, to the beginning if it is on the top line but not at the
+         * start, or return false if the cursor is already on the top line.
+         */
+        MoveUp(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        /**
+         * Move the cursor to the buffer offset physically below the current
+         * offset, to the end of the buffer if it is on the bottom line but
+         * not at the end, or return false if the cursor is already at the
+         * end of the buffer.
+         */
+        MoveDown(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        /**
+         * Move the cursor to the buffer offset physically to the left of
+         * the current offset, or return false if the cursor is already
+         * at the left edge of the line and there is not another line to move it to.
+         */
+        MoveLeft(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        /**
+         * Move the cursor to the buffer offset physically to the right of
+         * the current offset, or return false if the cursor is already at
+         * at the right edge of the line and there is not another line
+         * to move it to.
+         */
+        MoveRight(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        /**
+         * Move the selection end to the buffer offset physically above
+         * the current selection end.
+         */
+        ExtendUp(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        /**
+         * Move the selection end to the buffer offset physically below
+         * the current selection end.
+         */
+        ExtendDown(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        /**
+         * Move the selection end to the buffer offset physically to the left of
+         * the current selection end.
+         */
+        ExtendLeft(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        /**
+         * Move the selection end to the buffer offset physically to the right of
+         * the current selection end.
+         */
+        ExtendRight(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        ExtendToLeftEdge(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        ExtendToRightEdge(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        MoveToLeftEdge(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        MoveToRightEdge(
+            [in] ISpannable* text,
+            [in] ILayout* layout,
+            [out] Boolean* result);
+
+        /*
+         * Public constants
+         */
+        GetSelectionStartObject(
+            [out] IInterface** start);
+
+        GetSelectionEndObject(
+            [out] IInterface** end);
+    }
+
+//    interface ISelectionHelper {
+//
+//    }
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

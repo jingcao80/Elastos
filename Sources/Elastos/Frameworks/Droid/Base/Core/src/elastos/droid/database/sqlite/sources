@@ -1,0 +1,31 @@
+TARGET_NAME = sqlite
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES =  SQLiteCommon.cpp
+SOURCES += SQLiteClosable.cpp
+SOURCES += SQLiteWrapper.cpp
+SOURCES += SQLiteProgram.cpp
+SOURCES += CSQLiteQuery.cpp
+SOURCES += CSQLiteStatement.cpp
+SOURCES += SQLiteDatabase.cpp
+SOURCES += CSQLiteDatabaseHelper.cpp
+SOURCES += SQLiteCursor.cpp
+SOURCES += SQLiteDebug.cpp
+SOURCES += SQLiteDirectCursorDriver.cpp
+SOURCES += SQLiteOpenHelper.cpp
+SOURCES += SQLiteQueryBuilder.cpp
+SOURCES += CSQLiteQueryBuilderHelper.cpp
+SOURCES += SQLiteConnection.cpp
+SOURCES += SQLiteConnectionPool.cpp
+SOURCES += SQLiteDatabaseConfiguration.cpp
+SOURCES += SQLiteCustomFunction.cpp
+SOURCES += SQLiteGlobal.cpp
+SOURCES += SQLiteSession.cpp
+SOURCES += sqlite.cpp

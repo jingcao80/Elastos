@@ -1,0 +1,554 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUrlQuerySanitizerValueSanitizer;
+
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     *
+     * Sanitizes the Query portion of a URL. Simple example:
+     * <code>
+     * UrlQuerySanitizer sanitizer = new UrlQuerySanitizer();
+     * sanitizer.setAllowUnregisteredParamaters(true);
+     * sanitizer.parseUrl("http://example.com/?name=Joe+User");
+     * String name = sanitizer.getValue("name"));
+     * // name now contains "Joe_User"
+     * </code>
+     *
+     * Register ValueSanitizers to customize the way individual
+     * parameters are sanitized:
+     * <code>
+     * UrlQuerySanitizer sanitizer = new UrlQuerySanitizer();
+     * sanitizer.registerParamater("name", UrlQuerySanitizer.createSpaceLegal());
+     * sanitizer.parseUrl("http://example.com/?name=Joe+User");
+     * String name = sanitizer.getValue("name"));
+     * // name now contains "Joe User". (The string is first decoded, which
+     * // converts the '+' to a ' '. Then the string is sanitized, which
+     * // converts the ' ' to an '_'. (The ' ' is converted because the default
+     * unregistered parameter sanitizer does not allow any special characters,
+     * and ' ' is a special character.)
+     * </code>
+     *
+     * There are several ways to create ValueSanitizers. In order of increasing
+     * sophistication:
+     * <ol>
+     * <li>Call one of the UrlQuerySanitizer.createXXX() methods.
+     * <li>Construct your own instance of
+     * UrlQuerySanitizer.IllegalCharacterValueSanitizer.
+     * <li>Subclass UrlQuerySanitizer.ValueSanitizer to define your own value
+     * sanitizer.
+     * </ol>
+     *
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IUrlQuerySanitizer {
+        /**
+         * Get the current value sanitizer used when processing
+         * unregistered parameter values.
+         * <p>
+         * <b>Note:</b> The default unregistered parameter value sanitizer is
+         * one that doesn't allow any special characters, similar to what
+         * is returned by calling createAllIllegal.
+         *
+         * @return the current ValueSanitizer used to sanitize unregistered
+         * parameter values.
+         */
+        GetUnregisteredParameterValueSanitizer(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Set the value sanitizer used when processing unregistered
+         * parameter values.
+         * @param sanitizer set the ValueSanitizer used to sanitize unregistered
+         * parameter values.
+         */
+        SetUnregisteredParameterValueSanitizer(
+            [in] IUrlQuerySanitizerValueSanitizer* sanitizer);
+
+        /**
+         * Parse the query parameters out of an encoded URL.
+         * Works by extracting the query portion from the URL and then
+         * calling parseQuery(). If there is no query portion it is
+         * treated as if the query portion is an empty string.
+         * @param url the encoded URL to parse.
+         */
+        ParseUrl(
+            [in] String url);
+
+        /**
+         * Parse a query. A query string is any number of parameter-value clauses
+         * separated by any non-zero number of ampersands. A parameter-value clause
+         * is a parameter followed by an equal sign, followed by a value. If the
+         * equal sign is missing, the value is assumed to be the empty string.
+         * @param query the query to parse.
+         */
+        ParseQuery(
+            [in] String query);
+
+        /**
+         * Get a set of all of the parameters found in the sanitized query.
+         * <p>
+         * Note: Do not modify this set. Treat it as a read-only set.
+         * @return all the parameters found in the current query.
+         */
+        GetParameterSet(
+            [out] ISet** result);
+
+        /**
+         * An array list of all of the parameter value pairs in the sanitized
+         * query, in the order they appeared in the query. May contain duplicate
+         * parameters.
+         * <p class="note"><b>Note:</b> Do not modify this list. Treat it as a read-only list.</p>
+         */
+        GetParameterList(
+            [out] IList** result);
+
+        /**
+         * Check if a parameter exists in the current sanitized query.
+         * @param parameter the unencoded name of a parameter.
+         * @return true if the paramater exists in the current sanitized queary.
+         */
+        HasParameter(
+            [in] String parameter,
+            [out] Boolean* result);
+
+        /**
+         * Get the value for a parameter in the current sanitized query.
+         * Returns null if the parameter does not
+         * exit.
+         * @param parameter the unencoded name of a parameter.
+         * @return the sanitized unencoded value of the parameter,
+         * or null if the parameter does not exist.
+         */
+        GetValue(
+            [in] String parameter,
+            [out] String* result);
+
+        /**
+         * Register a value sanitizer for a particular parameter. Can also be used
+         * to replace or remove an already-set value sanitizer.
+         * <p>
+         * Registering a non-null value sanitizer for a particular parameter
+         * makes that parameter a registered parameter.
+         * @param parameter an unencoded parameter name
+         * @param valueSanitizer the value sanitizer to use for a particular
+         * parameter. May be null in order to unregister that parameter.
+         * @see #getAllowUnregisteredParamaters()
+         */
+        RegisterParameter(
+            [in] String parameter,
+            [in] IUrlQuerySanitizerValueSanitizer* valueSanitizer);
+
+        /**
+         * Register a value sanitizer for an array of parameters.
+         * @param parameters An array of unencoded parameter names.
+         * @param valueSanitizer
+         * @see #registerParameter
+         */
+        RegisterParameters(
+            [in] ArrayOf<String>* parameters,
+            [in] IUrlQuerySanitizerValueSanitizer* valueSanitizer);
+
+        /**
+         * Set whether or not unregistered parameters are allowed. If they
+         * are not allowed, then they will be dropped when a query is sanitized.
+         * <p>
+         * Defaults to false.
+         * @param allowUnregisteredParamaters true to allow unregistered parameters.
+         * @see #getAllowUnregisteredParamaters()
+         */
+        SetAllowUnregisteredParamaters(
+            [in] Boolean allowUnregisteredParamaters);
+
+        /**
+         * Get whether or not unregistered parameters are allowed. If not
+         * allowed, they will be dropped when a query is parsed.
+         * @return true if unregistered parameters are allowed.
+         * @see #setAllowUnregisteredParamaters(boolean)
+         */
+        GetAllowUnregisteredParamaters(
+            [out] Boolean* result);
+
+        /**
+         * Set whether or not the first occurrence of a repeated parameter is
+         * preferred. True means the first repeated parameter is preferred.
+         * False means that the last repeated parameter is preferred.
+         * <p>
+         * The preferred parameter is the one that is returned when getParameter
+         * is called.
+         * <p>
+         * defaults to false.
+         * @param preferFirstRepeatedParameter True if the first repeated
+         * parameter is preferred.
+         * @see #getPreferFirstRepeatedParameter()
+         */
+        SetPreferFirstRepeatedParameter(
+            [in] Boolean preferFirstRepeatedParameter);
+
+        /**
+         * Get whether or not the first occurrence of a repeated parameter is
+         * preferred.
+         * @return true if the first occurrence of a repeated parameter is
+         * preferred.
+         * @see #setPreferFirstRepeatedParameter(boolean)
+         */
+        GetPreferFirstRepeatedParameter(
+            [out] Boolean* result);
+
+        /**
+         * Get the value sanitizer for a parameter. Returns null if there
+         * is no value sanitizer registered for the parameter.
+         * @param parameter the unescaped parameter
+         * @return the currently registered value sanitizer for this parameter.
+         * @see #registerParameter(String, android.net.UrlQuerySanitizer.ValueSanitizer)
+         */
+        GetValueSanitizer(
+            [in] String parameter,
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Get the effective value sanitizer for a parameter. Like getValueSanitizer,
+         * except if there is no value sanitizer registered for a parameter, and
+         * unregistered paramaters are allowed, then the default value sanitizer is
+         * returned.
+         * @param parameter an unescaped parameter
+         * @return the effective value sanitizer for a parameter.
+         */
+        GetEffectiveValueSanitizer(
+            [in] String parameter,
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Unescape an escaped string.
+         * <ul>
+         * <li>'+' characters are replaced by
+         * ' ' characters.
+         * <li>Valid "%xx" escape sequences are replaced by the
+         * corresponding unescaped character.
+         * <li>Invalid escape sequences such as %1z", are passed through unchanged.
+         * <ol>
+         * @param string the escaped string
+         * @return the unescaped string.
+         */
+        Unescape(
+            [in] String string,
+            [out] String* result);
+    }
+
+    interface IUrlQuerySanitizerHelper {
+        /**
+         * Return a value sanitizer that does not allow any special characters,
+         * and also does not allow script URLs.
+         * @return a value sanitizer
+         */
+        GetAllIllegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Return a value sanitizer that allows everything except Nul ('\0')
+         * characters. Script URLs are allowed.
+         * @return a value sanitizer
+         */
+        GetAllButNulLegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Return a value sanitizer that allows everything except Nul ('\0')
+         * characters, space (' '), and other whitespace characters.
+         * Script URLs are allowed.
+         * @return a value sanitizer
+         */
+        GetAllButWhitespaceLegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Return a value sanitizer that allows all the characters used by
+         * encoded URLs. Does not allow script URLs.
+         * @return a value sanitizer
+         */
+        GetUrlLegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Return a value sanitizer that allows all the characters used by
+         * encoded URLs and allows spaces, which are not technically legal
+         * in encoded URLs, but commonly appear anyway.
+         * Does not allow script URLs.
+         * @return a value sanitizer
+         */
+        GetUrlAndSpaceLegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Return a value sanitizer that does not allow any special characters
+         * except ampersand ('&'). Does not allow script URLs.
+         * @return a value sanitizer
+         */
+        GetAmpLegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Return a value sanitizer that does not allow any special characters
+         * except ampersand ('&') and space (' '). Does not allow script URLs.
+         * @return a value sanitizer
+         */
+        GetAmpAndSpaceLegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Return a value sanitizer that does not allow any special characters
+         * except space (' '). Does not allow script URLs.
+         * @return a value sanitizer
+         */
+        GetSpaceLegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+
+        /**
+         * Return a value sanitizer that allows any special characters
+         * except angle brackets ('<' and '>') and Nul ('\0').
+         * Allows script URLs.
+         * @return a value sanitizer
+         */
+        GetAllButNulAndAngleBracketsLegal(
+            [out] IUrlQuerySanitizerValueSanitizer** result);
+    }
+
+
+    /**
+     * A simple tuple that holds parameter-value pairs.
+     *
+     */
+    interface IUrlQuerySanitizerParameterValuePair {
+        /**
+         * The unencoded parameter
+         */
+        GetParameter(
+            [out] String* result);
+
+        SetParameter(
+            [in] String mParameter);
+
+        /**
+         * The unencoded value
+         */
+        GetValue(
+            [out] String* result);
+
+        SetValue(
+            [in] String mValue);
+    }
+
+    /**
+     * A functor used to sanitize a single query value.
+     *
+     */
+    interface IUrlQuerySanitizerValueSanitizer {
+        /**
+         * Sanitize an unencoded value.
+         * @param value
+         * @return the sanitized unencoded value
+         */
+        Sanitize(
+            [in] String value,
+            [out] String* result);
+    }
+
+    /**
+     * Sanitize values based on which characters they contain. Illegal
+     * characters are replaced with either space or '_', depending upon
+     * whether space is a legal character or not.
+     */
+    /**
+     * @Involved
+     * interface IUrlQuerySanitizerValueSanitizer;
+     */
+    interface IUrlQuerySanitizerIllegalCharacterValueSanitizer {
+        /**
+         * Allow space (' ') characters.
+         */
+        const Int32 SPACE_OK = 1 << 0;
+
+        /**
+         * Allow whitespace characters other than space. The
+         * other whitespace characters are
+         * '\t' '\f' '\n' '\r' and '\0x000b' (vertical tab)
+         */
+        const Int32 OTHER_WHITESPACE_OK = 1 << 1;
+
+        /**
+         * Allow characters with character codes 128 to 255.
+         */
+        const Int32 NON_7_BIT_ASCII_OK = 1 << 2;
+
+        /**
+         * Allow double quote characters. ('"')
+         */
+        const Int32 DQUOTE_OK = 1 << 3;
+
+        /**
+         * Allow single quote characters. ('\'')
+         */
+        const Int32 SQUOTE_OK = 1 << 4;
+
+        /**
+         * Allow less-than characters. ('<')
+         */
+        const Int32 LT_OK = 1 << 5;
+
+        /**
+         * Allow greater-than characters. ('>')
+         */
+        const Int32 GT_OK = 1 << 6;
+
+        /**
+         * Allow ampersand characters ('&')
+         */
+        const Int32 AMP_OK = 1 << 7;
+
+        /**
+         * Allow percent-sign characters ('%')
+         */
+        const Int32 PCT_OK = 1 << 8;
+
+        /**
+         * Allow nul characters ('\0')
+         */
+        const Int32 NUL_OK = 1 << 9;
+
+        /**
+         * Allow text to start with a script URL
+         * such as "javascript:" or "vbscript:"
+         */
+        const Int32 SCRIPT_URL_OK = 1 << 10;
+
+        /**
+         * Mask with all fields set to OK
+         */
+        const Int32 ALL_OK = 0x7ff;
+
+        /**
+         * Mask with both regular space and other whitespace OK
+         */
+        const Int32 ALL_WHITESPACE_OK = SPACE_OK | OTHER_WHITESPACE_OK;
+
+        /**
+         * <ul>
+         * <li>Deny all special characters.
+         * <li>Deny script URLs.
+         * </ul>
+         */
+        const Int32 ALL_ILLEGAL = 0;
+
+        /**
+         * <ul>
+         * <li>Allow all special characters except Nul. ('\0').
+         * <li>Allow script URLs.
+         * </ul>
+         */
+        const Int32 ALL_BUT_NUL_LEGAL = ALL_OK & ~NUL_OK;
+
+        /**
+         * <ul>
+         * <li>Allow all special characters except for:
+         * <ul>
+         *  <li>whitespace characters
+         *  <li>Nul ('\0')
+         * </ul>
+         * <li>Allow script URLs.
+         * </ul>
+         */
+        const Int32 ALL_BUT_WHITESPACE_LEGAL = 0x5fc;
+        // ALL_OK & ~(ALL_WHITESPACE_OK | NUL_OK);
+        // 0x7ff & ~(((1 << 0) | (1 << 1)) | (1 << 9));
+
+        /**
+         * <ul>
+         * <li>Allow characters used by encoded URLs.
+         * <li>Deny script URLs.
+         * </ul>
+         */
+        const Int32 URL_LEGAL = NON_7_BIT_ASCII_OK | SQUOTE_OK | AMP_OK | PCT_OK;
+
+        /**
+         * <ul>
+         * <li>Allow characters used by encoded URLs.
+         * <li>Allow spaces.
+         * <li>Deny script URLs.
+         * </ul>
+         */
+        const Int32 URL_AND_SPACE_LEGAL = URL_LEGAL | SPACE_OK;
+
+        /**
+         * <ul>
+         * <li>Allow ampersand.
+         * <li>Deny script URLs.
+         * </ul>
+         */
+        const Int32 AMP_LEGAL = AMP_OK;
+
+        /**
+         * <ul>
+         * <li>Allow ampersand.
+         * <li>Allow space.
+         * <li>Deny script URLs.
+         * </ul>
+         */
+        const Int32 AMP_AND_SPACE_LEGAL = AMP_OK | SPACE_OK;
+
+        /**
+         * <ul>
+         * <li>Allow space.
+         * <li>Deny script URLs.
+         * </ul>
+         */
+        const Int32 SPACE_LEGAL = SPACE_OK;
+
+        /**
+         * <ul>
+         * <li>Allow all but.
+         * <ul>
+         *  <li>Nul ('\0')
+         *  <li>Angle brackets ('<', '>')
+         * </ul>
+         * <li>Deny script URLs.
+         * </ul>
+         */
+        const Int32 ALL_BUT_NUL_AND_ANGLE_BRACKETS_LEGAL = 0x59f;
+        // ALL_OK & ~(NUL_OK | LT_OK | GT_OK);
+        // 0x7ff & ~((1 << 9) | (1 << 5) | (1 << 6));
+
+        /**
+         * Sanitize a value.
+         * <ol>
+         * <li>If script URLs are not OK, the will be removed.
+         * <li>If neither spaces nor other white space is OK, then
+         * white space will be trimmed from the beginning and end of
+         * the URL. (Just the actual white space characters are trimmed, not
+         * other control codes.)
+         * <li> Illegal characters will be replaced with
+         * either ' ' or '_', depending on whether a space is itself a
+         * legal character.
+         * </ol>
+         * @param value
+         * @return the sanitized value
+         */
+        Sanitize(
+            [in] String value,
+            [out] String* result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}
+

@@ -1,0 +1,43 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+
+    interface Org.Apache.Http.IHttpResponse;
+    interface Org.Apache.Http.Auth.IAuthScheme;
+    interface Org.Apache.Http.Protocol.IHttpContext;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+
+    /**
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     */
+    interface IAuthenticationHandler {
+
+        IsAuthenticationRequested(
+            [in] IHttpResponse* response,
+            [in] IHttpContext* context,
+            [out] Boolean* result);
+
+        GetChallenges(
+            [in] IHttpResponse* response,
+            [in] IHttpContext* context,
+            [out] IMap** callenges);
+
+        SelectScheme(
+            [in] IMap* challenges,
+            [in] IHttpResponse* response,
+            [in] IHttpContext* context,
+            [out] IAuthScheme** scheme);
+
+    }
+
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

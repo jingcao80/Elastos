@@ -1,0 +1,127 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * A TransitionSet is a parent of child transitions (including other
+     * TransitionSets). Using TransitionSets enables more complex
+     * choreography of transitions, where some sets play {@link #ORDERING_TOGETHER} and
+     * others play {@link #ORDERING_SEQUENTIAL}. For example, {@link AutoTransition}
+     * uses a TransitionSet to sequentially play a Fade(Fade.OUT), followed by
+     * a {@link ChangeBounds}, followed by a Fade(Fade.OUT) transition.
+     *
+     * <p>A TransitionSet can be described in a resource file by using the
+     * tag <code>transitionSet</code>, along with the standard
+     * attributes of {@link android.R.styleable#TransitionSet} and
+     * {@link android.R.styleable#Transition}. Child transitions of the
+     * TransitionSet object can be loaded by adding those child tags inside the
+     * enclosing <code>transitionSet</code> tag. For example, the following xml
+     * describes a TransitionSet that plays a Fade and then a ChangeBounds
+     * transition on the affected view targets:</p>
+     * <pre>
+     *     &lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+     *             android:ordering="sequential"&gt;
+     *         &lt;fade/&gt;
+     *         &lt;changeBounds/&gt;
+     *     &lt;/transitionSet&gt;
+     * </pre>
+     */
+
+    /**
+     * involve interface ITransition
+     */
+    [local]
+    interface ITransitionSet {
+
+        /**
+         * A flag used to indicate that the child transitions of this set
+         * should all start at the same time.
+         */
+        const Int32 ORDERING_TOGETHER = 0;
+
+        /**
+         * A flag used to indicate that the child transitions of this set should
+         * play in sequence; when one child transition ends, the next child
+         * transition begins. Note that a transition does not end until all
+         * instances of it (which are playing on all applicable targets of the
+         * transition) end.
+         */
+        const Int32 ORDERING_SEQUENTIAL = 1;
+
+        /**
+         * Sets the play order of this set's child transitions.
+         *
+         * @param ordering {@link #ORDERING_TOGETHER} to play this set's child
+         * transitions together, {@link #ORDERING_SEQUENTIAL} to play the child
+         * transitions in sequence.
+         * @return This transitionSet object.
+         */
+        SetOrdering(
+            [in] Int32 ordering);
+
+        /**
+         * Returns the ordering of this TransitionSet. By default, the value is
+         * {@link #ORDERING_TOGETHER}.
+         *
+         * @return {@link #ORDERING_TOGETHER} if child transitions will play at the same
+         * time, {@link #ORDERING_SEQUENTIAL} if they will play in sequence.
+         *
+         * @see #setOrdering(int)
+         */
+        GetOrdering(
+            [out] Int32* result);
+
+        /**
+         * Adds child transition to this set. The order in which this child transition
+         * is added relative to other child transitions that are added, in addition to
+         * the {@link #getOrdering() ordering} property, determines the
+         * order in which the transitions are started.
+         *
+         * <p>If this transitionSet has a {@link #getDuration() duration} set on it, the
+         * child transition will inherit that duration. Transitions are assumed to have
+         * a maximum of one transitionSet parent.</p>
+         *
+         * @param transition A non-null child transition to be added to this set.
+         * @return This transitionSet object.
+         */
+        AddTransition(
+            [in] ITransition* transition);
+
+        /**
+         * Returns the number of child transitions in the TransitionSet.
+         *
+         * @return The number of child transitions in the TransitionSet.
+         * @see #addTransition(Transition)
+         * @see #getTransitionAt(int)
+         */
+        GetTransitionCount(
+            [out] Int32* result);
+
+        /**
+         * Returns the child Transition at the specified position in the TransitionSet.
+         *
+         * @param index The position of the Transition to retrieve.
+         * @see #addTransition(Transition)
+         * @see #getTransitionCount()
+         */
+        GetTransitionAt(
+            [in] Int32 index,
+            [out] ITransition** result);
+
+        /**
+         * Removes the specified child transition from this set.
+         *
+         * @param transition The transition to be removed.
+         * @return This transitionSet object.
+         */
+        RemoveTransition(
+            [in] ITransition* transition);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

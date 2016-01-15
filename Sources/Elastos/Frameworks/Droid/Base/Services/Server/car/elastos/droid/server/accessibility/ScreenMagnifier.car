@@ -1,0 +1,130 @@
+module
+{
+    using interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Accessibility {
+
+    interface IMagnificationSpec
+    {
+        Initialize(
+            [in] Float scale,
+            [in] Float magnifiedRegionCenterX,
+            [in] Float magnifiedRegionCenterY);
+
+        UpdateFrom(
+            [in] IMagnificationSpec* other);
+
+        Reset();
+
+        SetScale(
+            [in] Float value);
+
+        SetMagnifiedRegionCenterX(
+            [in] Float value);
+
+        SetMagnifiedRegionCenterY(
+            [in] Float value);
+
+        SetScaledOffsetX(
+            [in] Float value);
+
+        SetScaledOffsetY(
+            [in] Float value);
+
+        GetScale(
+            [out] Float* value);
+
+        GetMagnifiedRegionCenterX(
+            [out] Float* value);
+
+        GetMagnifiedRegionCenterY(
+            [out] Float* value);
+
+        GetScaledOffsetX(
+            [out] Float* value);
+
+        GetScaledOffsetY(
+            [out] Float* value);
+    }
+
+    interface IMagnificationController
+    {
+        IsMagnifying(
+            [out] Boolean* result);
+
+        Reset(
+            [in] Boolean animate);
+
+        GetMagnifiedRegionBounds(
+            [out] IRect** rect);
+
+        GetScale(
+            [out] Float* value);
+
+        GetMagnifiedRegionCenterX(
+            [out] Float* value);
+
+        GetMagnifiedRegionCenterY(
+            [out] Float* value);
+
+        GetScaledOffsetX(
+            [out] Float* value);
+
+        GetScaledOffsetY(
+            [out] Float* value);
+
+        SetScale(
+            [in] Float scale,
+            [in] Float pivotX,
+            [in] Float pivotY,
+            [in] Boolean animate);
+
+        SetMagnifiedRegionCenter(
+            [in] Float centerX,
+            [in] Float centerY,
+            [in] Boolean animate);
+
+        SetScaleAndMagnifiedRegionCenter(
+            [in] Float scale,
+            [in] Float centerX,
+            [in] Float centerY,
+            [in] Boolean animate);
+
+        GetAccessibilityTransformation(
+            [out] IMagnificationSpec** spec);
+
+        SetAccessibilityTransformation(
+            [in] IMagnificationSpec* spec);
+    }
+
+    interface IViewportWindow {
+        IsShown(
+            [out] Boolean* result);
+
+        Show();
+
+        Hide();
+
+        GetAlpha(
+            [out] Int32* alpha);
+
+        SetAlpha(
+            [in] Int32 alpha);
+
+        GetBounds(
+            [out] IRect** bounds);
+
+        RotationChanged();
+
+        SetBounds(
+            [in] IRect* bounds);
+    }
+
+    } // namespace Accessibility
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

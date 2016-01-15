@@ -1,0 +1,39 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * Provides a the parameters for an instance of a {@link javax.crypto.Cipher}
+     * using Galois/Counter Mode (GCM). This is an Authenticated Encryption with
+     * Associated Data (AEAD) mode for a cipher which allows you to use the
+     * {@link javax.crypto.Cipher#updateAAD(byte[])} method to provide data that is
+     * transmitted in the clear but authenticated using a cryptographic Message
+     * Authentication Code (MAC).
+     *
+     * @since 1.7
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+     */
+    interface IGCMParameterSpec {
+        /**
+         * Returns the size of the tag in bits.
+         */
+        GetTLen(
+            [out] Int32 * bi);
+
+        /**
+         * Returns the Initial Vector (IV) used by this parameter spec.
+         */
+        GetIV(
+            [out, callee] ArrayOf<Byte> * bi);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

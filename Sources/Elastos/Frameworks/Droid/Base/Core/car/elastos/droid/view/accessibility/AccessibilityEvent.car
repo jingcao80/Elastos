@@ -1,0 +1,415 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    interface IAccessibilityRecord;
+
+    /**
+     * @Involve
+     * interface IAccessibilityRecord
+     * interface IParcelable
+     */
+    interface IAccessibilityEvent {
+        /**
+         * Invalid selection/focus position.
+         *
+         * @see #getCurrentItemIndex()
+         */
+        const Int32 INVALID_POSITION = -1;
+
+        /**
+         * Maximum length of the text fields.
+         *
+         * @see #getBeforeText()
+         * @see #getText()
+         * </br>
+         * Note: This constant is no longer needed since there
+         *       is no limit on the length of text that is contained
+         *       in an accessibility event anymore.
+         */
+        //@Deprecated
+        const Int32 MAX_TEXT_LENGTH = 500;
+
+        /**
+         * Represents the event of clicking on a {@link android.view.View} like
+         * {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc.
+         */
+        const Int32 TYPE_VIEW_CLICKED = 0x00000001;
+
+        /**
+         * Represents the event of long clicking on a {@link android.view.View} like
+         * {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc.
+         */
+        const Int32 TYPE_VIEW_LONG_CLICKED = 0x00000002;
+
+        /**
+         * Represents the event of selecting an item usually in the context of an
+         * {@link android.widget.AdapterView}.
+         */
+        const Int32 TYPE_VIEW_SELECTED = 0x00000004;
+
+        /**
+         * Represents the event of setting input focus of a {@link android.view.View}.
+         */
+        const Int32 TYPE_VIEW_FOCUSED = 0x00000008;
+
+        /**
+         * Represents the event of changing the text of an {@link android.widget.EditText}.
+         */
+        const Int32 TYPE_VIEW_TEXT_CHANGED = 0x00000010;
+
+        /**
+         * Represents the event of opening a {@link android.widget.PopupWindow},
+         * {@link android.view.Menu}, {@link android.app.Dialog}, etc.
+         */
+        const Int32 TYPE_WINDOW_STATE_CHANGED = 0x00000020;
+
+        /**
+         * Represents the event showing a {@link android.app.Notification}.
+         */
+        const Int32 TYPE_NOTIFICATION_STATE_CHANGED = 0x00000040;
+
+        /**
+         * Represents the event of a hover enter over a {@link android.view.View}.
+         */
+        const Int32 TYPE_VIEW_HOVER_ENTER = 0x00000080;
+
+        /**
+         * Represents the event of a hover exit over a {@link android.view.View}.
+         */
+        const Int32 TYPE_VIEW_HOVER_EXIT = 0x00000100;
+
+        /**
+         * Represents the event of starting a touch exploration gesture.
+         */
+        const Int32 TYPE_TOUCH_EXPLORATION_GESTURE_START = 0x00000200;
+
+        /**
+         * Represents the event of ending a touch exploration gesture.
+         */
+        const Int32 TYPE_TOUCH_EXPLORATION_GESTURE_END = 0x00000400;
+
+        /**
+         * Represents the event of changing the content of a window and more
+         * specifically the sub-tree rooted at the event's source.
+         */
+        const Int32 TYPE_WINDOW_CONTENT_CHANGED = 0x00000800;
+
+        /**
+         * Represents the event of scrolling a view.
+         */
+        const Int32 TYPE_VIEW_SCROLLED = 0x00001000;
+
+        /**
+         * Represents the event of changing the selection in an {@link android.widget.EditText}.
+         */
+        const Int32 TYPE_VIEW_TEXT_SELECTION_CHANGED = 0x00002000;
+
+        /**
+         * Represents the event of an application making an announcement.
+         */
+        const Int32 TYPE_ANNOUNCEMENT = 0x00004000;
+
+        /**
+         * Represents the event of gaining accessibility focus.
+         */
+        const Int32 TYPE_VIEW_ACCESSIBILITY_FOCUSED = 0x00008000;
+
+        /**
+         * Represents the event of clearing accessibility focus.
+         */
+        const Int32 TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED = 0x00010000;
+
+        /**
+         * Represents the event of traversing the text of a view at a given movement granularity.
+         */
+        const Int32 TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY = 0x00020000;
+
+        /**
+         * Represents the event of beginning gesture detection.
+         */
+        const Int32 TYPE_GESTURE_DETECTION_START = 0x00040000;
+
+        /**
+         * Represents the event of ending gesture detection.
+         */
+        const Int32 TYPE_GESTURE_DETECTION_END = 0x00080000;
+
+        /**
+         * Represents the event of the user starting to touch the screen.
+         */
+        const Int32 TYPE_TOUCH_INTERACTION_START = 0x00100000;
+
+        /**
+         * Represents the event of the user ending to touch the screen.
+         */
+        const Int32 TYPE_TOUCH_INTERACTION_END = 0x00200000;
+
+        /**
+         * Represents the event change in the windows shown on the screen.
+         */
+        const Int32 TYPE_WINDOWS_CHANGED = 0x00400000;
+
+        /**
+         * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+         * The type of change is not defined.
+         */
+        const Int32 CONTENT_CHANGE_TYPE_UNDEFINED = 0x00000000;
+
+        /**
+         * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+         * A node in the subtree rooted at the source node was added or removed.
+         */
+        const Int32 CONTENT_CHANGE_TYPE_SUBTREE = 0x00000001;
+
+        /**
+         * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+         * The node's text changed.
+         */
+        const Int32 CONTENT_CHANGE_TYPE_TEXT = 0x00000002;
+
+        /**
+         * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+         * The node's content description changed.
+         */
+        const Int32 CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
+
+        /**
+         * Mask for {@link AccessibilityEvent} all types.
+         *
+         * @see #TYPE_VIEW_CLICKED
+         * @see #TYPE_VIEW_LONG_CLICKED
+         * @see #TYPE_VIEW_SELECTED
+         * @see #TYPE_VIEW_FOCUSED
+         * @see #TYPE_VIEW_TEXT_CHANGED
+         * @see #TYPE_WINDOW_STATE_CHANGED
+         * @see #TYPE_NOTIFICATION_STATE_CHANGED
+         * @see #TYPE_VIEW_HOVER_ENTER
+         * @see #TYPE_VIEW_HOVER_EXIT
+         * @see #TYPE_TOUCH_EXPLORATION_GESTURE_START
+         * @see #TYPE_TOUCH_EXPLORATION_GESTURE_END
+         * @see #TYPE_WINDOW_CONTENT_CHANGED
+         * @see #TYPE_VIEW_SCROLLED
+         * @see #TYPE_VIEW_TEXT_SELECTION_CHANGED
+         * @see #TYPE_ANNOUNCEMENT
+         * @see #TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY
+         * @see #TYPE_GESTURE_DETECTION_START
+         * @see #TYPE_GESTURE_DETECTION_END
+         * @see #TYPE_TOUCH_INTERACTION_START
+         * @see #TYPE_TOUCH_INTERACTION_END
+         * @see #TYPE_WINDOWS_CHANGED
+         */
+        const Int32 TYPES_ALL_MASK = 0xFFFFFFFF;
+
+        /**
+         * Gets the number of records contained in the event.
+         *
+         * @return The number of records.
+         */
+        GetRecordCount(
+            [out] Int32* count);
+
+        /**
+         * Appends an {@link AccessibilityRecord} to the end of event records.
+         *
+         * @param record The record to append.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        AppendRecord(
+            [in] IAccessibilityRecord* record);
+
+        /**
+         * Gets the record at a given index.
+         *
+         * @param index The index.
+         * @return The record at the specified index.
+         */
+        GetRecord(
+            [in] Int32 index,
+            [out] IAccessibilityRecord** record);
+
+        /**
+         * Gets the event type.
+         *
+         * @return The event type.
+         */
+        GetEventType(
+            [out] Int32* type);
+
+        /**
+         * Sets the event type.
+         *
+         * @param eventType The event type.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetEventType(
+            [in] Int32 eventType);
+
+        /**
+         * Gets the bit mask of change types signaled by an
+         * {@link #TYPE_WINDOW_CONTENT_CHANGED} event. A single event may represent
+         * multiple change types.
+         *
+         * @return The bit mask of change types. One or more of:
+         *         <ul>
+         *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+         *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
+         *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
+         *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
+         *         </ul>
+         */
+        GetContentChangeTypes(
+            [out] Int32* types);
+
+        /**
+         * Sets the bit mask of node tree changes signaled by an
+         * {@link #TYPE_WINDOW_CONTENT_CHANGED} event.
+         *
+         * @param changeTypes The bit mask of change types.
+         * @throws IllegalStateException If called from an AccessibilityService.
+         * @see #getContentChangeTypes()
+         */
+        SetContentChangeTypes(
+            [in] Int32 changeTypes);
+
+        /**
+         * Gets the time in which this event was sent.
+         *
+         * @return The event time.
+         */
+        GetEventTime(
+            [out] Int64* time);
+
+        /**
+         * Sets the time in which this event was sent.
+         *
+         * @param eventTime The event time.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetEventTime(
+            [in] Int64 eventTime);
+
+        /**
+         * Gets the package name of the source.
+         *
+         * @return The package name.
+         */
+        GetPackageName(
+            [out] ICharSequence** packageName);
+
+        /**
+         * Sets the package name of the source.
+         *
+         * @param packageName The package name.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetPackageName(
+            [in] ICharSequence* packageName);
+
+        /**
+         * Sets the movement granularity that was traversed.
+         *
+         * @param granularity The granularity.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetMovementGranularity(
+            [in] Int32 granularity);
+
+        /**
+         * Gets the movement granularity that was traversed.
+         *
+         * @return The granularity.
+         */
+        GetMovementGranularity(
+            [out] Int32* granularity);
+
+        /**
+         * Sets the performed action that triggered this event.
+         * <p>
+         * Valid actions are defined in {@link AccessibilityNodeInfo}:
+         * <ul>
+         * <li>{@link AccessibilityNodeInfo#ACTION_ACCESSIBILITY_FOCUS}
+         * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_ACCESSIBILITY_FOCUS}
+         * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_FOCUS}
+         * <li>{@link AccessibilityNodeInfo#ACTION_CLEAR_SELECTION}
+         * <li>{@link AccessibilityNodeInfo#ACTION_CLICK}
+         * <li>etc.
+         * </ul>
+         *
+         * @param action The action.
+         * @throws IllegalStateException If called from an AccessibilityService.
+         * @see AccessibilityNodeInfo#performAction(int)
+         */
+        SetAction(
+            [in] Int32 action);
+
+        /**
+         * Gets the performed action that triggered this event.
+         *
+         * @return The action.
+         */
+        GetAction(
+            [out] Int32* action);
+    }
+
+    interface IAccessibilityEventHelper {
+        /**
+         * Returns a cached instance if such is available or a new one is
+         * instantiated with its type property set.
+         *
+         * @param eventType The event type.
+         * @return An instance.
+         */
+        Obtain(
+            [in] Int32 eventType,
+            [out] IAccessibilityEvent** event);
+
+        /**
+         * Returns a cached instance if such is available or a new one is
+         * created. The returned instance is initialized from the given
+         * <code>event</code>.
+         *
+         * @param event The other event.
+         * @return An instance.
+         */
+        Obtain(
+            [in] IAccessibilityEvent* otherEvent,
+            [out] IAccessibilityEvent** event);
+
+        /**
+         * Returns a cached instance if such is available or a new one is
+         * instantiated.
+         *
+         * @return An instance.
+         */
+        Obtain(
+            [out] IAccessibilityEvent** event);
+
+        /**
+         * Returns the string representation of an event type. For example,
+         * {@link #TYPE_VIEW_CLICKED} is represented by the string TYPE_VIEW_CLICKED.
+         *
+         * @param eventType The event type
+         * @return The string representation.
+         */
+        EventTypeToString(
+            [in] Int32 eventType,
+            [out] String* s);
+    }
+
+    } // namespace Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

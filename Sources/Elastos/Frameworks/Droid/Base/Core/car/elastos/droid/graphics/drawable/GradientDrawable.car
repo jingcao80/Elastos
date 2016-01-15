@@ -1,0 +1,357 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IColorStateList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+
+    /**
+     * Controls how the gradient is oriented relative to the drawable's bounds
+     */
+    enum GradientDrawableOrientation {
+        /** draw the gradient from the top to the bottom */
+        GradientDrawableOrientation_TOP_BOTTOM,
+        /** draw the gradient from the top-right to the bottom-left */
+        GradientDrawableOrientation_TR_BL,
+        /** draw the gradient from the right to the left */
+        GradientDrawableOrientation_RIGHT_LEFT,
+        /** draw the gradient from the bottom-right to the top-left */
+        GradientDrawableOrientation_BR_TL,
+        /** draw the gradient from the bottom to the top */
+        GradientDrawableOrientation_BOTTOM_TOP,
+        /** draw the gradient from the bottom-left to the top-right */
+        GradientDrawableOrientation_BL_TR,
+        /** draw the gradient from the left to the right */
+        GradientDrawableOrientation_LEFT_RIGHT,
+        /** draw the gradient from the top-left to the bottom-right */
+        GradientDrawableOrientation_TL_BR,
+    }
+
+    /**
+     * @Involve
+     * interface IDrawable
+     */
+    [deprecated]
+    interface IGradientDrawable {
+        /**
+         * Shape is a rectangle, possibly with rounded corners
+         */
+        const Int32 RECTANGLE = 0;
+
+        /**
+         * Shape is an ellipse
+         */
+        const Int32 OVAL = 1;
+
+        /**
+         * Shape is a line
+         */
+        const Int32 LINE = 2;
+
+        /**
+         * Shape is a ring.
+         */
+        const Int32 RING = 3;
+
+        /**
+         * Gradient is linear (default.)
+         */
+        const Int32 LINEAR_GRADIENT = 0;
+
+        /**
+         * Gradient is circular.
+         */
+        const Int32 RADIAL_GRADIENT = 1;
+
+        /**
+         * Gradient is a sweep.
+         */
+        const Int32 SWEEP_GRADIENT  = 2;
+
+        /**
+         * <p>Specify radii for each of the 4 corners. For each corner, the array
+         * contains 2 values, <code>[X_radius, Y_radius]</code>. The corners are ordered
+         * top-left, top-right, bottom-right, bottom-left. This property
+         * is honored only when the shape is of type {@link #RECTANGLE}.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param radii 4 pairs of X and Y radius for each corner, specified in pixels.
+         *              The length of this array must be >= 8
+         *
+         * @see #mutate()
+         * @see #setCornerRadii(float[])
+         * @see #setShape(int)
+         */
+        SetCornerRadii(
+            [in] ArrayOf<Float>* radii);
+
+        /**
+         * <p>Specify radius for the corners of the gradient. If this is > 0, then the
+         * drawable is drawn in a round-rectangle, rather than a rectangle. This property
+         * is honored only when the shape is of type {@link #RECTANGLE}.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param radius The radius in pixels of the corners of the rectangle shape
+         *
+         * @see #mutate()
+         * @see #setCornerRadii(float[])
+         * @see #setShape(int)
+         */
+        SetCornerRadius(
+            [in] Float radius);
+
+        /**
+         * <p>Set the stroke width and color for the drawable. If width is zero,
+         * then no stroke is drawn.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param width The width in pixels of the stroke
+         * @param color The color of the stroke
+         *
+         * @see #mutate()
+         * @see #setStroke(int, int, float, float)
+         */
+        SetStroke(
+            [in] Int32 width,
+            [in] Int32 color);
+
+        /**
+         * <p>Set the stroke width and color state list for the drawable. If width
+         * is zero, then no stroke is drawn.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param width The width in pixels of the stroke
+         * @param colorStateList The color state list of the stroke
+         *
+         * @see #mutate()
+         * @see #setStroke(int, ColorStateList, float, float)
+         */
+        SetStroke(
+            [in] Int32 width,
+            [in] IColorStateList* colorStateList);
+
+        /**
+         * <p>Set the stroke width and color for the drawable. If width is zero,
+         * then no stroke is drawn. This method can also be used to dash the stroke.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param width The width in pixels of the stroke
+         * @param color The color of the stroke
+         * @param dashWidth The length in pixels of the dashes, set to 0 to disable dashes
+         * @param dashGap The gap in pixels between dashes
+         *
+         * @see #mutate()
+         * @see #setStroke(int, int)
+         */
+        SetStroke(
+            [in] Int32 width,
+            [in] Int32 color,
+            [in] Float dashWidth,
+            [in] Float dashGap);
+
+        /**
+         * <p>Set the stroke width and color state list for the drawable. If width
+         * is zero, then no stroke is drawn. This method can also be used to dash
+         * the stroke.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param width The width in pixels of the stroke
+         * @param colorStateList The color state list of the stroke
+         * @param dashWidth The length in pixels of the dashes, set to 0 to disable dashes
+         * @param dashGap The gap in pixels between dashes
+         *
+         * @see #mutate()
+         * @see #setStroke(int, ColorStateList)
+         */
+        SetStroke(
+            [in] Int32 width,
+            [in] IColorStateList* colorStateList,
+            [in] Float dashWidth,
+            [in] Float dashGap);
+
+        /**
+         * <p>Sets the size of the shape drawn by this drawable.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param width The width of the shape used by this drawable
+         * @param height The height of the shape used by this drawable
+         *
+         * @see #mutate()
+         * @see #setGradientType(int)
+         */
+        SetSize(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * <p>Sets the type of shape used to draw the gradient.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param shape The desired shape for this drawable: {@link #LINE},
+         *              {@link #OVAL}, {@link #RECTANGLE} or {@link #RING}
+         *
+         * @see #mutate()
+         */
+        SetShape(
+            [in] Int32 shape);
+
+        /**
+         * <p>Sets the type of gradient used by this drawable..</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param gradient The type of the gradient: {@link #LINEAR_GRADIENT},
+         *                 {@link #RADIAL_GRADIENT} or {@link #SWEEP_GRADIENT}
+         *
+         * @see #mutate()
+         */
+        SetGradientType(
+            [in] Int32 gradient);
+
+        /**
+         * <p>Sets the center location of the gradient. The radius is honored only when
+         * the gradient type is set to {@link #RADIAL_GRADIENT} or {@link #SWEEP_GRADIENT}.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param x The x coordinate of the gradient's center
+         * @param y The y coordinate of the gradient's center
+         *
+         * @see #mutate()
+         * @see #setGradientType(int)
+         */
+        SetGradientCenter(
+            [in] Float x,
+            [in] Float y);
+
+        /**
+         * <p>Sets the radius of the gradient. The radius is honored only when the
+         * gradient type is set to {@link #RADIAL_GRADIENT}.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param gradientRadius The radius of the gradient in pixels
+         *
+         * @see #mutate()
+         * @see #setGradientType(int)
+         */
+        SetGradientRadius(
+            [in] Float gradientRadius);
+
+        /**
+         * Returns the radius of the gradient in pixels. The radius is valid only
+         * when the gradient type is set to {@link #RADIAL_GRADIENT}.
+         *
+         * @return Radius in pixels.
+         */
+        GetGradientRadius(
+            [out] Float* radius);
+
+        /**
+         * <p>Sets whether or not this drawable will honor its <code>level</code>
+         * property.</p>
+         * <p><strong>Note</strong>: changing this property will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing this property.</p>
+         *
+         * @param useLevel True if this drawable should honor its level, false otherwise
+         *
+         * @see #mutate()
+         * @see #setLevel(int)
+         * @see #getLevel()
+         */
+        SetUseLevel(
+            [in] Boolean useLevel);
+
+        /**
+         * Returns the orientation of the gradient defined in this drawable.
+         */
+        GetOrientation(
+            [out] GradientDrawableOrientation* orientation);
+
+        /**
+         * <p>Changes the orientation of the gradient defined in this drawable.</p>
+         * <p><strong>Note</strong>: changing orientation will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing the orientation.</p>
+         *
+         * @param orientation The desired orientation (angle) of the gradient
+         *
+         * @see #mutate()
+         */
+        SetOrientation(
+            [in] GradientDrawableOrientation orientation);
+
+        /**
+         * <p>Sets the colors used to draw the gradient. Each color is specified as an
+         * ARGB integer and the array must contain at least 2 colors.</p>
+         * <p><strong>Note</strong>: changing orientation will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing the orientation.</p>
+         *
+         * @param colors 2 or more ARGB colors
+         *
+         * @see #mutate()
+         * @see #setColor(int)
+         */
+        SetColors(
+            [in] ArrayOf<Int32>* argbs);
+
+        /**
+         * <p>Changes this drawbale to use a single color instead of a gradient.</p>
+         * <p><strong>Note</strong>: changing color will affect all instances
+         * of a drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing the color.</p>
+         *
+         * @param argb The color used to fill the shape
+         *
+         * @see #mutate()
+         * @see #setColors(int[])
+         */
+        SetColor(
+            [in] Int32 argb);
+
+        /**
+         * Changes this drawable to use a single color state list instead of a
+         * gradient. Calling this method with a null argument will clear the color
+         * and is equivalent to calling {@link #setColor(int)} with the argument
+         * {@link Color#TRANSPARENT}.
+         * <p>
+         * <strong>Note</strong>: changing color will affect all instances of a
+         * drawable loaded from a resource. It is recommended to invoke
+         * {@link #mutate()} before changing the color.</p>
+         *
+         * @param colorStateList The color state list used to fill the shape
+         * @see #mutate()
+         */
+        SetColor(
+            [in] IColorStateList* colorStateList);
+    }
+
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

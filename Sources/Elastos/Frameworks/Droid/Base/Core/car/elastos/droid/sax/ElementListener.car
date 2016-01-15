@@ -1,0 +1,21 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Sax {
+
+    /**
+     * Listens for the beginning and ending of elements.
+     */
+     /**
+        *@Involve
+        *interface IStartElementListener
+        *interface IEndElementListener
+        */
+    interface IElementListener {
+    }
+
+    } // namespace Sax
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,18 @@
+
+TARGET_NAME= crypto
+TARGET_TYPE= lib
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/Org/Apache/Harmony/Security/Provider/Crypto
+
+SOURCES = CCryptoProvider.cpp
+SOURCES += CDSAKeyFactoryImpl.cpp
+SOURCES += CDSAPrivateKeyImpl.cpp
+SOURCES += CDSAPublicKeyImpl.cpp
+SOURCES += CRandomBitsSupplierHelper.cpp
+SOURCES += CSHA1PRNG_SecureRandomImpl.cpp
+SOURCES += CSHA1_MessageDigestImpl.cpp
+SOURCES += CSHA1withDSA_SignatureImpl.cpp
+SOURCES += RandomBitsSupplier.cpp
+SOURCES += SHA1Impl.cpp
+SOURCES += ThreeIntegerSequence.cpp

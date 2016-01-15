@@ -1,0 +1,36 @@
+
+module
+{
+    using interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Soundtrigger {
+
+    /**
+     * A Voice Keyphrase metadata read from the enrollment application.
+     *
+     * @hide
+     */
+    interface IKeyphraseMetadata {
+        /**
+         * @return Indicates if we support the given phrase.
+         */
+        SupportsPhrase(
+            [in] String phrase,
+            [out] Boolean* result);
+
+        /**
+         * @return Indicates if we support the given locale.
+         */
+        SupportsLocale(
+            [in] ILocale* locale,
+            [out] Boolean* result);
+    }
+
+    } // namespace Soundtrigger
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

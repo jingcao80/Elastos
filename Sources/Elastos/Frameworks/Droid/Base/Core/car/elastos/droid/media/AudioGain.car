@@ -1,0 +1,121 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * The AudioGain describes a gain controller. Gain controllers are exposed by
+     * audio ports when the gain is configurable at this port's input or output.
+     * Gain values are expressed in millibels.
+     * A gain controller has the following attributes:
+     * - mode: defines modes of operation or features
+     *    MODE_JOINT: all channel gains are controlled simultaneously
+     *    MODE_CHANNELS: each channel gain is controlled individually
+     *    MODE_RAMP: ramps can be applied when gain changes
+     * - channel mask: indicates for which channels the gain can be controlled
+     * - min value: minimum gain value in millibel
+     * - max value: maximum gain value in millibel
+     * - default value: gain value after reset in millibel
+     * - step value: granularity of gain control in millibel
+     * - min ramp duration: minimum ramp duration in milliseconds
+     * - max ramp duration: maximum ramp duration in milliseconds
+     *
+     * This object is always created by the framework and read only by applications.
+     * Applications get a list of AudioGainDescriptors from AudioPortDescriptor.gains() and can build a
+     * valid gain configuration from AudioGain.buildConfig()
+     * @hide
+     */
+    [deprecated]
+    interface IAudioGain {
+
+    /**
+     * Bit of AudioGain.mode() field indicating that
+     * all channel gains are controlled simultaneously
+     */
+    const Int32 MODE_JOINT = 1;
+    /**
+     * Bit of AudioGain.mode() field indicating that
+     * each channel gain is controlled individually
+     */
+    const Int32 MODE_CHANNELS = 2;
+    /**
+     * Bit of AudioGain.mode() field indicating that
+     * ramps can be applied when gain changes. The type of ramp (linear, log etc...) is
+     * implementation specific.
+     */
+    const Int32 MODE_RAMP = 4;
+
+    /**
+     * Bit field indicating supported modes of operation
+     */
+    Mode(
+        [out] Int32* result);
+
+    /**
+     * Indicates for which channels the gain can be controlled
+     * (e.g. AudioFormat.CHANNEL_OUT_STEREO)
+     */
+    ChannelMask(
+        [out] Int32* result);
+
+    /**
+     * Minimum gain value in millibel
+     */
+    MinValue(
+        [out] Int32* result);
+
+    /**
+     * Maximum gain value in millibel
+     */
+    MaxValue(
+        [out] Int32* result);
+
+    /**
+     * Default gain value in millibel
+     */
+    DefaultValue(
+        [out] Int32* result);
+
+    /**
+     * Granularity of gain control in millibel
+     */
+    StepValue(
+        [out] Int32* result);
+
+    /**
+     * Minimum ramp duration in milliseconds
+     * 0 if MODE_RAMP not set
+     */
+    RampDurationMinMs(
+        [out] Int32* result);
+
+    /**
+     * Maximum ramp duration in milliseconds
+     * 0 if MODE_RAMP not set
+     */
+    RampDurationMaxMs(
+        [out] Int32* result);
+
+    /**
+     * Build a valid gain configuration for this gain controller for use by
+     * AudioPortDescriptor.setGain()
+     * @param mode: desired mode of operation
+     * @param channelMask: channels of which the gain should be modified.
+     * @param values: gain values for each channels.
+     * @param rampDurationMs: ramp duration if mode MODE_RAMP is set.
+     * ignored if MODE_JOINT.
+     */
+    BuildConfig(
+        [in] Int32 mode,
+        [in] Int32 channelMask,
+        [in] ArrayOf<Int32>* values,
+        [in] Int32 rampDurationMs,
+        [out] IAudioGainConfig** result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

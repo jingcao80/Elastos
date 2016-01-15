@@ -1,0 +1,26 @@
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IKeyEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+    namespace Impl {
+
+        /**
+          * @Involve
+          * interface Elastos.Droid.View.IWindowManagerPolicy
+         */
+        interface IPhoneWindowManager {
+            UpdateSettings();
+        }
+
+    } // namespace Impl
+    } // namespace Policy
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

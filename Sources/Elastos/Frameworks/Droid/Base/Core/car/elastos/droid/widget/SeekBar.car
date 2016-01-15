@@ -1,0 +1,74 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface ISeekBar;
+
+    /**
+     * A callback that notifies clients when the progress level has been
+     * changed. This includes changes that were initiated by the user through a
+     * touch gesture or arrow key/trackball as well as changes that were initiated
+     * programmatically.
+     */
+    interface ISeekBarOnSeekBarChangeListener {
+        /**
+         * Notification that the progress level has changed. Clients can use the fromUser parameter
+         * to distinguish user-initiated changes from those that occurred programmatically.
+         *
+         * @param seekBar The SeekBar whose progress has changed
+         * @param progress The current progress level. This will be in the range 0..max where max
+         *        was set by {@link ProgressBar#setMax(int)}. (The default value for max is 100.)
+         * @param fromUser True if the progress change was initiated by the user.
+         */
+        OnProgressChanged(
+            [in] ISeekBar* seekBar,
+            [in] Int32 progress,
+            [in] Boolean fromUser);
+
+        /**
+         * Notification that the user has started a touch gesture. Clients may want to use this
+         * to disable advancing the seekbar.
+         * @param seekBar The SeekBar in which the touch gesture began
+         */
+        OnStartTrackingTouch(
+            [in] ISeekBar* seekBar);
+
+        /**
+         * Notification that the user has finished a touch gesture. Clients may want to use this
+         * to re-enable advancing the seekbar.
+         * @param seekBar The SeekBar in which the touch gesture began
+         */
+        OnStopTrackingTouch(
+            [in] ISeekBar* seekBar);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IAbsSeekBar
+     * extends Elastos.Droid.Widget.IProgressBar
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface ISeekBar {
+        /**
+         * Sets a listener to receive notifications of changes to the SeekBar's progress level. Also
+         * provides notifications of when the user starts and stops a touch gesture within the SeekBar.
+         *
+         * @param l The seek bar notification listener
+         *
+         * @see SeekBar.OnSeekBarChangeListener
+         */
+        SetOnSeekBarChangeListener(
+            [in] ISeekBarOnSeekBarChangeListener* l);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

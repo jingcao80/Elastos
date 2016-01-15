@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SavingData</string>
+    <string name="shared">com.elastos.SavingData.shared</string>
+    <string name="only">com.elastos.SavingData.only</string>
+    <string name="key">com.elastos.SavingData.key</string>
+</resources>

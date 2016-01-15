@@ -1,0 +1,23 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The key specification for an encoded private key in ASN.1 format as defined
+     * in the PKCS#8 standard.
+     */
+    /**
+     * @Involve
+     * interface IEncodedKeySpec
+     * interface IKeySpec
+     */
+    interface IPKCS8EncodedKeySpec {
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

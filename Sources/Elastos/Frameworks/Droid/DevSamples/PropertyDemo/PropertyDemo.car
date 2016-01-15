@@ -1,0 +1,95 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace PropertyDemo {
+
+        interface ITestClass {
+            GetByteValue(
+                [out] Byte* value);
+
+            SetByteValue(
+                [in] Byte value);
+
+            GetChar8Value(
+                [out] Char8* value);
+
+            SetChar8Value(
+                [in] Char8 value);
+
+            GetChar16Value(
+                [out] Char16* value);
+
+            SetChar16Value(
+                [in] Char16 value);
+
+            GetBooleanValue(
+                [out] Boolean* value);
+
+            SetBooleanValue(
+                [in] Boolean value);
+
+            GetInt16Value(
+                [out] Int16* value);
+
+            SetInt16Value(
+                [in] Int16 value);
+
+            GetInt32Value(
+                [out] Int32* value);
+
+            SetInt32Value(
+                [in] Int32 value);
+
+            GetInt64Value(
+                [out] Int64* value);
+
+            SetInt64Value(
+                [in] Int64 value);
+
+            GetFloatValue(
+                [out] Float* value);
+
+            SetFloatValue(
+                [in] Float value);
+
+            GetDoubleValue(
+                [out] Double* value);
+
+            SetDoubleValue(
+                [in] Double value);
+
+            GetStringValue(
+                [out] String* value);
+
+            SetStringValue(
+                [in] String value);
+
+            GetCharSequenceValue(
+                [out] ICharSequence** value);
+
+            SetCharSequenceValue(
+                [in] ICharSequence* value);
+        }
+
+        class CActivityOne {
+            interface IActivity;
+        }
+
+        class CTestClass {
+            interface ITestClass;
+        }
+
+    } // namespace PropertyDemo
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+
+}

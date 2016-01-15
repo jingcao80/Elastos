@@ -1,0 +1,75 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IOnValueSelectedListener {
+        OnValueSelected(
+            [in] Int32 pickerIndex,
+            [in] Int32 newValue,
+            [in] Boolean autoAdvance);
+    }
+
+    interface IRadialTimePickerView {
+        Initialize(
+            [in] Int32 hour,
+            [in] Int32 minute,
+            [in] Boolean is24HourMode);
+
+        SetCurrentItemShowing(
+            [in] Int32 item,
+            [in] Boolean animate);
+
+        GetCurrentItemShowing(
+            [out] Int32* showing);
+
+        SetOnValueSelectedListener(
+            [in] IOnValueSelectedListener* listener);
+
+        /**
+         * Sets the current hour in 24-hour time.
+         *
+         * @param hour the current hour between 0 and 23 (inclusive)
+         */
+        SetCurrentHour(
+            [in] Int32 hour);
+
+        /**
+         * Returns the current hour in 24-hour time.
+         *
+         * @return the current hour between 0 and 23 (inclusive)
+         */
+        GetCurrentHour(
+            [out] Int32* hour);
+
+        SetCurrentMinute(
+            [in] Int32 minute);
+
+        // Returns minutes in 0-59 range
+        GetCurrentMinute(
+            [out] Int32* minute);
+
+        SetAmOrPm(
+            [in] Int32 val);
+
+        GetAmOrPm(
+            [out] Int32* val);
+
+        SwapAmPm();
+
+        ShowHours(
+            [in] Boolean animate);
+
+        ShowMinutes(
+            [in] Boolean animate);
+
+        SetInputEnabled(
+            [in] Boolean inputEnabled);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

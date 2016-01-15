@@ -1,0 +1,60 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+    namespace Tiles {
+
+    /**
+     * Quick settings tile: Rotation
+     * @Involve
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface ILinearLayout
+     */
+    interface IUserDetailItemView {
+        SetListening(
+            [in] Boolean listening);
+    }
+
+    [local]
+    interface IUserDetailItemViewHelper {
+        ConvertOrInflate(
+            [in] IContext* context,
+            [in] IView* convertView,
+            [in] IViewGroup* root,
+            [out] IUserDetailItemView** ret);
+
+        Bind(
+            [in] String name,
+            [in] IBitmap* picture);
+
+        Bind(
+            [in] String name,
+            [in] IDrawable* picture);
+    }
+
+    } // namespace Tiles
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

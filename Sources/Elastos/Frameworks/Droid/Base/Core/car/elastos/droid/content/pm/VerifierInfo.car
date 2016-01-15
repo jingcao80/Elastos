@@ -1,0 +1,39 @@
+
+module
+{
+    using interface Elastos.Security.IPublicKey;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Contains information about a package verifier as used by
+     * {@code PackageManagerService} during package verification.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IVerifierInfo {
+        GetPackageName(
+            [out] String* packageName);
+
+        SetPackageName(
+            [in] String packageName);
+
+        GetPublicKey(
+            [out] IPublicKey** publicKey);
+
+        SetPublicKey(
+            [in] IPublicKey* publicKey);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

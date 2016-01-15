@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Droid.Mtp.IMtpStorage;
+    interface Elastos.Droid.Mtp.IMtpServer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Mtp {
+
+    interface IMtpDatabase {
+        SetServer(
+            [in] IMtpServer * server);
+
+        AddStorage(
+            [in] IMtpStorage* storage);
+
+        RemoveStorage(
+            [in] IMtpStorage* storage);
+
+        GetNativeContext(
+            [out] Int64* nativeContext);
+    }
+    } // namespace mtp
+    } // namepsace Droid
+    } // namespace Elastos
+}

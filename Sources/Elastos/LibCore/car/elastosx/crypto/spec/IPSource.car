@@ -1,0 +1,48 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The source of the label <code>L</code> as specified in <a
+     * href="http://www.ietf.org/rfc/rfc3447.txt"> PKCS #1</a>.
+     */
+    interface IPSource {
+        /**
+         * Returns the source algorithm identifier.
+         *
+         * @return the source algorithm identifier.
+         */
+        GetAlgorithm(
+            [out] String * result);
+    }
+
+    /**
+     * The explicit specification of the parameter <code>P</code> used in the
+     * source algorithm.
+     */
+    interface IPSpecified {
+        /**
+         * Returns a copy of the value of the parameter <code>P</code>.
+         *
+         * @return a copy of the value of the parameter <code>P</code>
+         */
+        GetValue(
+            [out, callee] ArrayOf<Byte> * value);
+    }
+
+    interface IPSpecifiedHelper {
+        /**
+         * The instance of <code>PSpecified</code> with the default value
+         * <code>byte[0]</code> for <code>P</code>
+         */
+        GetDEFAULT(
+            [out] IPSpecified** result);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

@@ -1,0 +1,423 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Media.IMediaDescription;
+    interface Elastos.Droid.Media.IRating;
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * Contains metadata about an item, such as the title, artist, etc.
+     */
+    interface IMediaMetadata {
+        /**
+         * The title of the media.
+         */
+        const String METADATA_KEY_TITLE = "android.media.metadata.TITLE";
+
+        /**
+         * The artist of the media.
+         */
+        const String METADATA_KEY_ARTIST = "android.media.metadata.ARTIST";
+
+        /**
+         * The duration of the media in ms. A negative duration indicates that the
+         * duration is unknown (or infinite).
+         */
+        const String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
+
+        /**
+         * The album title for the media.
+         */
+        const String METADATA_KEY_ALBUM = "android.media.metadata.ALBUM";
+
+        /**
+         * The author of the media.
+         */
+        const String METADATA_KEY_AUTHOR = "android.media.metadata.AUTHOR";
+
+        /**
+         * The writer of the media.
+         */
+        const String METADATA_KEY_WRITER = "android.media.metadata.WRITER";
+
+        /**
+         * The composer of the media.
+         */
+        const String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
+
+        /**
+         * The compilation status of the media.
+         */
+        const String METADATA_KEY_COMPILATION = "android.media.metadata.COMPILATION";
+
+        /**
+         * The date the media was created or published. The format is unspecified
+         * but RFC 3339 is recommended.
+         */
+        const String METADATA_KEY_DATE = "android.media.metadata.DATE";
+
+        /**
+         * The year the media was created or published as a long.
+         */
+        const String METADATA_KEY_YEAR = "android.media.metadata.YEAR";
+
+        /**
+         * The genre of the media.
+         */
+        const String METADATA_KEY_GENRE = "android.media.metadata.GENRE";
+
+        /**
+         * The track number for the media.
+         */
+        const String METADATA_KEY_TRACK_NUMBER = "android.media.metadata.TRACK_NUMBER";
+
+        /**
+         * The number of tracks in the media's original source.
+         */
+        const String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
+
+        /**
+         * The disc number for the media's original source.
+         */
+        const String METADATA_KEY_DISC_NUMBER = "android.media.metadata.DISC_NUMBER";
+
+        /**
+         * The artist for the album of the media's original source.
+         */
+        const String METADATA_KEY_ALBUM_ARTIST = "android.media.metadata.ALBUM_ARTIST";
+
+        /**
+         * The artwork for the media as a {@link Bitmap}.
+         */
+        const String METADATA_KEY_ART = "android.media.metadata.ART";
+
+        /**
+         * The artwork for the media as a Uri formatted String. The artwork can be
+         * loaded using a combination of {@link ContentResolver#openInputStream} and
+         * {@link BitmapFactory#decodeStream}.
+         */
+        const String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
+
+        /**
+         * The artwork for the album of the media's original source as a
+         * {@link Bitmap}.
+         */
+        const String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
+
+        /**
+         * The artwork for the album of the media's original source as a Uri
+         * formatted String. The artwork can be loaded using a combination of
+         * {@link ContentResolver#openInputStream} and
+         * {@link BitmapFactory#decodeStream}.
+         */
+        const String METADATA_KEY_ALBUM_ART_URI = "android.media.metadata.ALBUM_ART_URI";
+
+        /**
+         * The user's rating for the media.
+         *
+         * @see Rating
+         */
+        const String METADATA_KEY_USER_RATING = "android.media.metadata.USER_RATING";
+
+        /**
+         * The overall rating for the media.
+         *
+         * @see Rating
+         */
+        const String METADATA_KEY_RATING = "android.media.metadata.RATING";
+
+        /**
+         * A title that is suitable for display to the user. This will generally be
+         * the same as {@link #METADATA_KEY_TITLE} but may differ for some formats.
+         * When displaying media described by this metadata this should be preferred
+         * if present.
+         */
+        const String METADATA_KEY_DISPLAY_TITLE = "android.media.metadata.DISPLAY_TITLE";
+
+        /**
+         * A subtitle that is suitable for display to the user. When displaying a
+         * second line for media described by this metadata this should be preferred
+         * to other fields if present.
+         */
+        const String METADATA_KEY_DISPLAY_SUBTITLE
+                = "android.media.metadata.DISPLAY_SUBTITLE";
+
+        /**
+         * A description that is suitable for display to the user. When displaying
+         * more information for media described by this metadata this should be
+         * preferred to other fields if present.
+         */
+        const String METADATA_KEY_DISPLAY_DESCRIPTION
+                = "android.media.metadata.DISPLAY_DESCRIPTION";
+
+        /**
+         * An icon or thumbnail that is suitable for display to the user. When
+         * displaying an icon for media described by this metadata this should be
+         * preferred to other fields if present. This must be a {@link Bitmap}.
+         */
+        const String METADATA_KEY_DISPLAY_ICON
+                = "android.media.metadata.DISPLAY_ICON";
+
+        /**
+         * A Uri formatted String for an icon or thumbnail that is suitable for
+         * display to the user. When displaying more information for media described
+         * by this metadata the display description should be preferred to other
+         * fields when present. The icon can be loaded using a combination of
+         * {@link ContentResolver#openInputStream} and
+         * {@link BitmapFactory#decodeStream}.
+         */
+        const String METADATA_KEY_DISPLAY_ICON_URI
+                = "android.media.metadata.DISPLAY_ICON_URI";
+
+        /**
+         * A String key for identifying the content. This value is specific to the
+         * service providing the content. If used, this should be a persistent
+         * unique key for the underlying content. It may be used with
+         * {@link MediaController.TransportControls#playFromMediaId(String, Bundle)}
+         * to initiate playback when provided by a {@link MediaBrowser} connected to
+         * the same app.
+         */
+        const String METADATA_KEY_MEDIA_ID = "android.media.metadata.MEDIA_ID";
+
+        /**
+         * Returns true if the given key is contained in the metadata
+         *
+         * @param key a String key
+         * @return true if the key exists in this metadata, false otherwise
+         */
+        ContainsKey(
+            [in] String key,
+            [out] Boolean* result);
+
+        /**
+         * Returns the value associated with the given key, or null if no mapping of
+         * the desired type exists for the given key or a null value is explicitly
+         * associated with the key.
+         *
+         * @param key The key the value is stored under
+         * @return a CharSequence value, or null
+         */
+        GetText(
+            [in] String key,
+            [out] ICharSequence** result);
+
+        /**
+         * Returns the text value associated with the given key as a String, or null
+         * if no mapping of the desired type exists for the given key or a null
+         * value is explicitly associated with the key. This is equivalent to
+         * calling {@link #getText getText().toString()} if the value is not null.
+         *
+         * @param key The key the value is stored under
+         * @return a String value, or null
+         */
+        GetString(
+            [in] String key,
+            [out] String* result);
+
+        /**
+         * Returns the value associated with the given key, or 0L if no long exists
+         * for the given key.
+         *
+         * @param key The key the value is stored under
+         * @return a long value
+         */
+        GetInt64(
+            [in] String key,
+            [out] Int64* result);
+
+        /**
+         * Returns a {@link Rating} for the given key or null if no rating exists
+         * for the given key.
+         *
+         * @param key The key the value is stored under
+         * @return A {@link Rating} or null
+         */
+        GetRating(
+            [in] String key,
+            [out] IRating** result);
+
+        /**
+         * Returns a {@link Bitmap} for the given key or null if no bitmap exists
+         * for the given key.
+         *
+         * @param key The key the value is stored under
+         * @return A {@link Bitmap} or null
+         */
+        GetBitmap(
+            [in] String key,
+            [out] IBitmap** result);
+
+        /**
+         * Returns the number of fields in this metadata.
+         *
+         * @return The number of fields in the metadata.
+         */
+        Size(
+            [out] Int32* result);
+
+        /**
+         * Returns a Set containing the Strings used as keys in this metadata.
+         *
+         * @return a Set of String keys
+         */
+        KeySet(
+            [out] ISet** result);
+
+        /**
+         * Returns a simple description of this metadata for display purposes.
+         *
+         * @return A simple description of this metadata.
+         */
+        GetDescription(
+            [out] IMediaDescription** result);
+    }
+
+    interface IMediaMetadataHelper {
+        /**
+         * Helper for getting the String key used by {@link MediaMetadata} from the
+         * integer key that {@link MediaMetadataEditor} uses.
+         *
+         * @param editorKey The key used by the editor
+         * @return The key used by this class or null if no mapping exists
+         * @hide
+         */
+        GetKeyFromMetadataEditorKey(
+            [in] Int32 editorKey,
+            [out] String* result);
+    }
+
+    interface IMediaMetadataBuilder {
+        /**
+         * Put a CharSequence value into the metadata. Custom keys may be used,
+         * but if the METADATA_KEYs defined in this class are used they may only
+         * be one of the following:
+         * <ul>
+         * <li>{@link #METADATA_KEY_TITLE}</li>
+         * <li>{@link #METADATA_KEY_ARTIST}</li>
+         * <li>{@link #METADATA_KEY_ALBUM}</li>
+         * <li>{@link #METADATA_KEY_AUTHOR}</li>
+         * <li>{@link #METADATA_KEY_WRITER}</li>
+         * <li>{@link #METADATA_KEY_COMPOSER}</li>
+         * <li>{@link #METADATA_KEY_DATE}</li>
+         * <li>{@link #METADATA_KEY_GENRE}</li>
+         * <li>{@link #METADATA_KEY_ALBUM_ARTIST}</li>
+         * <li>{@link #METADATA_KEY_ART_URI}</li>
+         * <li>{@link #METADATA_KEY_ALBUM_ART_URI}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_TITLE}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_SUBTITLE}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_DESCRIPTION}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_ICON_URI}</li>
+         * </ul>
+         *
+         * @param key The key for referencing this value
+         * @param value The CharSequence value to store
+         * @return The Builder to allow chaining
+         */
+        PutText(
+            [in] String key,
+            [in] ICharSequence* value);
+
+        /**
+         * Put a String value into the metadata. Custom keys may be used, but if
+         * the METADATA_KEYs defined in this class are used they may only be one
+         * of the following:
+         * <ul>
+         * <li>{@link #METADATA_KEY_TITLE}</li>
+         * <li>{@link #METADATA_KEY_ARTIST}</li>
+         * <li>{@link #METADATA_KEY_ALBUM}</li>
+         * <li>{@link #METADATA_KEY_AUTHOR}</li>
+         * <li>{@link #METADATA_KEY_WRITER}</li>
+         * <li>{@link #METADATA_KEY_COMPOSER}</li>
+         * <li>{@link #METADATA_KEY_DATE}</li>
+         * <li>{@link #METADATA_KEY_GENRE}</li>
+         * <li>{@link #METADATA_KEY_ALBUM_ARTIST}</li>
+         * <li>{@link #METADATA_KEY_ART_URI}</li>
+         * <li>{@link #METADATA_KEY_ALBUM_ART_URI}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_TITLE}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_SUBTITLE}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_DESCRIPTION}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_ICON_URI}</li>
+         * </ul>
+         *
+         * @param key The key for referencing this value
+         * @param value The String value to store
+         * @return The Builder to allow chaining
+         */
+        PutString(
+            [in] String key,
+            [in] String value);
+
+        /**
+         * Put a long value into the metadata. Custom keys may be used, but if
+         * the METADATA_KEYs defined in this class are used they may only be one
+         * of the following:
+         * <ul>
+         * <li>{@link #METADATA_KEY_DURATION}</li>
+         * <li>{@link #METADATA_KEY_TRACK_NUMBER}</li>
+         * <li>{@link #METADATA_KEY_NUM_TRACKS}</li>
+         * <li>{@link #METADATA_KEY_DISC_NUMBER}</li>
+         * <li>{@link #METADATA_KEY_YEAR}</li>
+         * </ul>
+         *
+         * @param key The key for referencing this value
+         * @param value The long value to store
+         * @return The Builder to allow chaining
+         */
+        PutLong(
+            [in] String key,
+            [in] Int64 value);
+
+        /**
+         * Put a {@link Rating} into the metadata. Custom keys may be used, but
+         * if the METADATA_KEYs defined in this class are used they may only be
+         * one of the following:
+         * <ul>
+         * <li>{@link #METADATA_KEY_RATING}</li>
+         * <li>{@link #METADATA_KEY_USER_RATING}</li>
+         * </ul>
+         *
+         * @param key The key for referencing this value
+         * @param value The Rating value to store
+         * @return The Builder to allow chaining
+         */
+        PutRating(
+            [in] String key,
+            [in] IRating* value);
+
+        /**
+         * Put a {@link Bitmap} into the metadata. Custom keys may be used, but
+         * if the METADATA_KEYs defined in this class are used they may only be
+         * one of the following:
+         * <ul>
+         * <li>{@link #METADATA_KEY_ART}</li>
+         * <li>{@link #METADATA_KEY_ALBUM_ART}</li>
+         * <li>{@link #METADATA_KEY_DISPLAY_ICON}</li>
+         * </ul>
+         *
+         * @param key The key for referencing this value
+         * @param value The Bitmap to store
+         * @return The Builder to allow chaining
+         */
+        PutBitmap(
+            [in] String key,
+            [in] IBitmap* value);
+
+        /**
+         * Creates a {@link MediaMetadata} instance with the specified fields.
+         *
+         * @return The new MediaMetadata instance
+         */
+        Build(
+            [out] IMediaMetadata** result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,366 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Contains methods to standard constants used in the UI for timeouts, sizes, and distances.
+     */
+    interface IViewConfiguration {
+        /**
+         * @return The width of the horizontal scrollbar and the height of the vertical
+         *         scrollbar in pixels
+         */
+        GetScaledScrollBarSize(
+            [out] Int32* scrollbarSize);
+
+        /**
+         * @return the length of the fading edges in pixels
+         */
+        GetScaledFadingEdgeLength(
+            [out] Int32* fadingEdgeLength);
+
+        /**
+         * @return Inset in pixels to look for touchable content when the user touches the edge of the
+         *         screen
+         */
+        GetScaledEdgeSlop(
+            [out] Int32* edgeSlop);
+
+        /**
+         * @return Distance a touch can wander before we think the user is scrolling in pixels
+         */
+        GetScaledTouchSlop(
+            [out] Int32* touchSlop);
+
+        /**
+         * @return Distance in pixels the first touch can wander before we do not consider this a
+         * potential double tap event
+         * @hide
+         */
+        GetScaledDoubleTapTouchSlop(
+            [out] Int32* doubleTapTouchSlop);
+
+        /**
+         * @return Distance a touch can wander before we think the user is scrolling a full page
+         *         in dips
+         */
+        GetScaledPagingTouchSlop(
+            [out] Int32* pagingTouchSlop);
+
+        /**
+         * @return Distance between the first touch and second touch to still be
+         *         considered a double tap
+         */
+        GetScaledDoubleTapSlop(
+            [out] Int32* doubleTapSlop);
+
+        /**
+         * @return Distance a touch must be outside the bounds of a window for it
+         * to be counted as outside the window for purposes of dismissing that
+         * window.
+         */
+        GetScaledWindowTouchSlop(
+            [out] Int32* windowTouchSlop);
+
+        /**
+         * @return Minimum velocity to initiate a fling, as measured in pixels per second.
+         */
+        GetScaledMinimumFlingVelocity(
+            [out] Int32* minimumFlingVelocity);
+
+        /**
+         * @return Maximum velocity to initiate a fling, as measured in pixels per second.
+         */
+        GetScaledMaximumFlingVelocity(
+            [out] Int32* maximumFlingVelocity);
+
+        /**
+         * The maximum drawing cache size expressed in bytes.
+         *
+         * @return the maximum size of View's drawing cache expressed in bytes
+         */
+        GetScaledMaximumDrawingCacheSize(
+            [out] Int32* maximumDrawingCacheSize);
+
+        /**
+         * @return The maximum distance a View should overscroll by when showing edge effects.
+         */
+        GetScaledOverscrollDistance(
+            [out] Int32* overscrollDistance);
+
+        /**
+         * @return The maximum distance a View should overfling by when showing edge effects.
+         */
+        GetScaledOverflingDistance(
+            [out] Int32* overflingDistance);
+
+        /**
+         * The amount of time a user needs to press the relevant key to bring up
+         * the global actions dialog.
+         *
+         * @return how long a user needs to press the relevant key to bring up
+         *   the global actions dialog.
+         * @hide
+         */
+        GetDeviceGlobalActionKeyTimeout(
+            [out] Int64* timeout);
+
+        /**
+         * Report if the device has a permanent menu key available to the user.
+         *
+         * <p>As of Android 3.0, devices may not have a permanent menu key available.
+         * Apps should use the action bar to present menu options to users.
+         * However, there are some apps where the action bar is inappropriate
+         * or undesirable. This method may be used to detect if a menu key is present.
+         * If not, applications should provide another on-screen affordance to access
+         * functionality.
+         *
+         * @return true if a permanent menu key is present, false otherwise.
+         */
+        HasPermanentMenuKey(
+            [out] Boolean* hasPermanentMenuKey);
+
+        /**
+         * @hide
+         * @return Whether or not marquee should use fading edges.
+         */
+        IsFadingMarqueeEnabled(
+            [out] Boolean* fadingMarqueeEnabled);
+    }
+
+    [local]
+    interface IViewConfigurationHelper  {
+        /**
+         * Returns a configuration for the specified context. The configuration depends on
+         * various parameters of the context, like the dimension of the display or the
+         * density of the display.
+         *
+         * @param context The application context used to initialize the view configuration.
+         */
+        Get(
+            [in] IContext* ctx,
+            [out] IViewConfiguration** viewConfig);
+
+        /**
+         * @return The width of the horizontal scrollbar and the height of the vertical
+         *         scrollbar in pixels
+         *
+         * @deprecated Use {@link #getScaledScrollBarSize()} instead.
+         */
+        GetScrollBarSize(
+            [out] Int32* scrollBarSize);
+
+        /**
+         * @return Duration of the fade when scrollbars fade away in milliseconds
+         */
+        GetScrollBarFadeDuration(
+            [out] Int32* scrollBarFadeDuration);
+
+        /**
+         * @return Default delay before the scrollbars fade in milliseconds
+         */
+        GetScrollDefaultDelay(
+            [out] Int32* scrollDefaultDelay);
+
+        /**
+         * @return the length of the fading edges in pixels
+         *
+         * @deprecated Use {@link #getScaledFadingEdgeLength()} instead.
+         */
+        GetFadingEdgeLength(
+            [out] Int32* fadingEdgeLength);
+
+        /**
+         * @return the duration in milliseconds of the pressed state in child
+         * components.
+         */
+        GetPressedStateDuration(
+            [out] Int32* pressedStateDuration);
+
+        /**
+         * @return the duration in milliseconds before a press turns into
+         * a Int64 press
+         */
+        GetLongPressTimeout(
+            [out] Int32* longPressTimeout);
+
+        /**
+         * @return the time before the first key repeat in milliseconds.
+         */
+        GetKeyRepeatTimeout(
+            [out] Int32* keyRepeatTimeout);
+
+        /**
+         * @return the time between successive key repeats in milliseconds.
+         */
+        GetKeyRepeatDelay(
+            [out] Int32* keyRepeatDelay);
+
+        /**
+         * @return the duration in milliseconds we will wait to see if a touch event
+         * is a tap or a scroll. If the user does not move within this interval, it is
+         * considered to be a tap.
+         */
+        GetTapTimeout(
+            [out] Int32* tapTimeout);
+
+        /**
+         * @return the duration in milliseconds we will wait to see if a touch event
+         * is a jump tap. If the user does not move within this interval, it is
+         * considered to be a tap.
+         */
+        GetJumpTapTimeout(
+            [out] Int32* jumpTapTimeout);
+
+        /**
+         * @return the duration in milliseconds between the first tap's up event and
+         * the second tap's down event for an interaction to be considered a
+         * double-tap.
+         */
+        GetDoubleTapTimeout(
+            [out] Int32* doubleTapTimeout);
+
+        /**
+         * @return the minimum duration in milliseconds between the first tap's
+         * up event and the second tap's down event for an interaction to be considered a
+         * double-tap.
+         *
+         * @hide
+         */
+        GetDoubleTapMinTime(
+            [out] Int32* doubleTapMinTime);
+
+        /**
+         * @return the maximum duration in milliseconds between a touch pad
+         * touch and release for a given touch to be considered a tap (click) as
+         * opposed to a hover movement gesture.
+         * @hide
+         */
+        GetHoverTapTimeout(
+            [out] Int32* hoverTapTimeout);
+
+        /**
+         * @return the maximum distance in pixels that a touch pad touch can move
+         * before being released for it to be considered a tap (click) as opposed
+         * to a hover movement gesture.
+         * @hide
+         */
+        GetHoverTapSlop(
+            [out] Int32* hoverTapSlop);
+
+        /**
+         * @return Inset in pixels to look for touchable content when the user touches the edge of the
+         *         screen
+         *
+         * @deprecated Use {@link #getScaledEdgeSlop()} instead.
+         */
+        GetEdgeSlop(
+            [out] Int32* edgeSlop);
+
+        /**
+         * @return Distance a touch can wander before we think the user is scrolling in pixels
+         *
+         * @deprecated Use {@link #getScaledTouchSlop()} instead.
+         */
+        GetTouchSlop(
+            [out] Int32* touchSlop);
+
+        /**
+         * @return Distance between the first touch and second touch to still be
+         *         considered a double tap
+         * @deprecated Use {@link #getScaledDoubleTapSlop()} instead.
+         * @hide The only client of this should be GestureDetector, which needs this
+         *       for clients that still use its deprecated constructor.
+         */
+        GetDoubleTapSlop(
+            [out] Int32* doubleTapSlop);
+
+        /**
+         * Interval for dispatching a recurring accessibility event in milliseconds.
+         * This interval guarantees that a recurring event will be send at most once
+         * during the {@link #getSendRecurringAccessibilityEventsInterval()} time frame.
+         *
+         * @return The delay in milliseconds.
+         *
+         * @hide
+         */
+        GetSendRecurringAccessibilityEventsInterval(
+            [out] Int64* sendRecurringAccessibilityEventsInterval);
+
+        /**
+         * @return Distance a touch must be outside the bounds of a window for it
+         * to be counted as outside the window for purposes of dismissing that
+         * window.
+         *
+         * @deprecated Use {@link #getScaledWindowTouchSlop()} instead.
+         */
+        GetWindowTouchSlop(
+            [out] Int32* windowTouchSlop);
+
+        /**
+         * @return Minimum velocity to initiate a fling, as measured in pixels per second.
+         *
+         * @deprecated Use {@link #getScaledMinimumFlingVelocity()} instead.
+         */
+        GetMinimumFlingVelocity(
+            [out] Int32* minimumFlingVelocity);
+
+        /**
+         * @return Maximum velocity to initiate a fling, as measured in pixels per second.
+         *
+         * @deprecated Use {@link #getScaledMaximumFlingVelocity()} instead.
+         */
+        GetMaximumFlingVelocity(
+            [out] Int32* maximumFlingVelocity);
+
+        /**
+         * The maximum drawing cache size expressed in bytes.
+         *
+         * @return the maximum size of View's drawing cache expressed in bytes
+         *
+         * @deprecated Use {@link #getScaledMaximumDrawingCacheSize()} instead.
+         */
+        GetMaximumDrawingCacheSize(
+            [out] Int32* maximumDrawingCacheSize);
+
+        /**
+         * The amount of time that the zoom controls should be
+         * displayed on the screen expressed in milliseconds.
+         *
+         * @return the time the zoom controls should be visible expressed
+         * in milliseconds.
+         */
+        GetZoomControlsTimeout(
+            [out] Int64* zoomControlsTimeout);
+
+        /**
+         * The amount of time a user needs to press the relevant key to bring up
+         * the global actions dialog.
+         *
+         * @return how long a user needs to press the relevant key to bring up
+         *   the global actions dialog.
+         * @deprecated This timeout should not be used by applications
+         */
+        //@Deprecated
+        GetGlobalActionKeyTimeout(
+            [out] Int64* globalActionKeyTimeout);
+
+        /**
+         * The amount of friction applied to scrolls and flings.
+         *
+         * @return A scalar dimensionless value representing the coefficient of
+         *         friction.
+         */
+        GetScrollFriction(
+            [out] Float* scrollFriction);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

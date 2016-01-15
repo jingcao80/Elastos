@@ -1,0 +1,84 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Utils {
+
+    /**
+     * Instance of this class represents ObjectIdentifier (OID).
+     *
+     * OID is represented as a sequence of subidentifier.
+     * Each subidentifier is represented as non negative integer value.
+     * There are at least 2 subidentifiers in the sequence.
+     *
+     * Valid values for first subidentifier are 0, 1 and 2.
+     * If the first subidentifier has 0 or 1 value the second
+     * subidentifier MUST be less then 40.
+     *
+     * @see <a href="http://asn1.elibel.tm.fr/en/standards/index.htm">ASN.1</a>
+     */
+    interface IObjectIdentifier {
+        /**
+         * Gets OID.
+         *
+         * @return oid
+         */
+        GetOid(
+            [out, callee] ArrayOf<Int32>* oid);
+
+        /**
+         * Gets OID's name.
+         *
+         * @return name
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Gets OID's group.
+         *
+         * @return group
+         */
+        GetGroup(
+            [out] IInterface** group);
+
+        /**
+         * Add "OID." to the beginning of string representation.
+         *
+         * @return oid as string
+         */
+        ToOIDString(
+            [out] String* str);
+    }
+
+    [deprecated]
+    interface IObjectIdentifierHelper {
+        /**
+         * Validates ObjectIdentifier (OID).
+         *
+         * @param oid - oid as array of integers
+         * @throws NullPointerException     - if oid is null
+         * @throws IllegalArgumentException - if oid is invalid
+         */
+         ValidateOid(
+            [in] ArrayOf<Int32>* oid);
+
+        /**
+         * Returns hash code for array of integers
+         *
+         * @param oid - array of integers
+         */
+        HashIntArray(
+            [in] ArrayOf<Int32>* array,
+            [out] Int32* hash);
+    }
+
+    } // namespace Utils
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

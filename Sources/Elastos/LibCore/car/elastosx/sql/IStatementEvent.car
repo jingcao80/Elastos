@@ -1,0 +1,33 @@
+module{
+    interface Elastos.Sql.IPreparedStatement;
+
+    namespace Elastosx{
+    namespace Sql{
+    /**
+     * A statement event that a PreparedStatement is closed
+     *
+     * @since 1.6
+     */
+    /**
+     * @Involve
+     * interface IEventObject
+     */
+    interface IStatementEvent {
+        /**
+         * Returns the statement of this event
+         */
+        GetStatement(
+            [out] IPreparedStatement** pstmt);
+
+        /**
+         * Returns the exception to be thrown
+         *
+         * @return the exception of this event
+         */
+        GetSQLException(
+            [out] Int32* sqlException);
+    }
+
+    } // namespace Sql
+    } // namespace Elastosx
+}

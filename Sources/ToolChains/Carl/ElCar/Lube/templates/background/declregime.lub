@@ -1,0 +1,23 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+public:
+    CARAPI ObjectEnter(
+        /* [in] */ PInterface pObject);
+
+    CARAPI ObjectLeave(
+        /* [in] */ PInterface pObject);
+
+    CARAPI CreateObject(
+        /* [in] */ const ClassID & clsid,
+        /* [in] */ const InterfaceID & iid,
+        /* [out] */ PInterface * ppObject);
+
+protected:
+    virtual CARAPI OnObjectEntering(PInterface pObj) { return NOERROR; }
+    virtual CARAPI OnObjectEntered(PInterface pObj) { return NOERROR; }
+    virtual CARAPI OnObjectLeaving(PInterface pObj) { return NOERROR; }
+    virtual CARAPI OnObjectLeft(PInterface pObj) { return NOERROR; }

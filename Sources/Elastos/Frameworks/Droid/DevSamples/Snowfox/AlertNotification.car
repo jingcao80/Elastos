@@ -1,0 +1,34 @@
+
+module
+{
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace Snowfox {
+
+    [local]
+    interface IAlertNotification extends Elastos.Droid.App.INotification {
+        IsProgressStyle(
+            [out] Boolean* isProgressStyle);
+
+        Show();
+
+        SetCustomIcon(
+            [in] IUri* aIconUri);
+
+        UpdateProgress(
+            [in] String aAlertText,
+            [in] Int32 aProgress,
+            [in] Int32 aProgressMax);
+    }
+
+    } // namespace Snowfox
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+
+}
+

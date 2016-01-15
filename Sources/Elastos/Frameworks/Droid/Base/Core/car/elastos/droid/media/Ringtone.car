@@ -1,0 +1,91 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Media.IAudioAttributes;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    [local]
+    interface IRingtone {
+        /**
+         * Sets the stream type where this ringtone will be played.
+         *
+         * @param streamType The stream, see {@link AudioManager}.
+         */
+        SetStreamType(
+            [in] Int32 streamType);
+
+        /**
+         * Gets the stream type where this ringtone will be played.
+         *
+         * @return The stream type, see {@link AudioManager}.
+         */
+        GetStreamType(
+            [out] Int32* type);
+
+        /**
+         * Sets the {@link AudioAttributes} for this ringtone.
+         * @param attributes the non-null attributes characterizing this ringtone.
+         */
+        SetAudioAttributes(
+            [in] IAudioAttributes * attributes);
+
+        /**
+         * Returns the {@link AudioAttributes} used by this object.
+         * @return the {@link AudioAttributes} that were set with
+         *     {@link #setAudioAttributes(AudioAttributes)} or the default attributes if none were set.
+         */
+        GetAudioAttributes(
+            [out] IAudioAttributes ** result);
+
+        /**
+         * Returns a human-presentable title for ringtone. Looks in media and DRM
+         * content providers. If not in either, uses the filename
+         *
+         * @param context A context used for querying.
+         */
+        GetTitle(
+            [in] IContext* ctx,
+            [out] String* title);
+
+        /**
+         * Set {@link Uri} to be used for ringtone playback. Attempts to open
+         * locally, otherwise will delegate playback to remote
+         * {@link IRingtonePlayer}.
+         *
+         * @hide
+         */
+        SetUri(
+            [in] IUri* uri);
+
+        /** {@hide} */
+        GetUri(
+            [out] IUri** uri);
+
+        /**
+         * Plays the ringtone.
+         */
+        Play();
+
+        /**
+         * Stops a playing ringtone.
+         */
+        Stop();
+
+        /**
+         * Whether this ringtone is currently playing.
+         *
+         * @return True if playing, FALSE otherwise.
+         */
+        IsPlaying(
+            [out] Boolean* isPlaying);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

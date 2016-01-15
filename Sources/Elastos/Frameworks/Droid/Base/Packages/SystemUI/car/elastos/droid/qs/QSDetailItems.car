@@ -1,0 +1,100 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    interface IQSDetailItemsItem {
+        SetIcon(
+            [in] Int32 icon);
+
+        SetLine1(
+            [in] String line);
+
+        SetLine2(
+            [in] String line);
+
+        SetTag(
+            [in] IInterface* tag);
+
+        SetCanDisconnect(
+            [in] Boolean discon);
+
+        GetIcon(
+            [out] Int32* icon);
+
+        GetLine1(
+            [out] String* line);
+
+        GetLine2(
+            [out] String* line);
+
+        GetTag(
+            [out] IInterface** tag);
+
+        GetCanDisconnect(
+            [out] Boolean* discon);
+    }
+
+    interface IQSDetailItemsCallback {
+        OnDetailItemClick(
+            [in] IQSDetailItemsItem* item);
+
+        OnDetailItemDisconnect(
+            [in] IQSDetailItemsItem* item);
+    }
+
+    /**
+     * Quick settings common detail view with line items.
+     *
+     * @Involve
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface IView
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup
+     * interface IFrameLayout
+     */
+    [deprecated]
+    interface IQSDetailItems {
+        SetTagSuffix(
+            [in] String suffix);
+
+        SetEmptyState(
+            [in] Int32 icon,
+            [in] Int32 text);
+
+        SetCallback(
+            [in] IQSDetailItemsCallback* _callback);
+
+        SetItems(
+            [in] ArrayOf<IQSDetailItemsItem*>* items);
+
+        SetItemsVisible(
+            [in] Boolean visible);
+    }
+
+    [local]
+    interface IQSDetailItemsHelper {
+        OnvertOrInflate(
+            [in] IContext* context,
+            [in] IView* convert,
+            [in] IViewGroup* parent,
+            [out] IQSDetailItems** ret);
+    }
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

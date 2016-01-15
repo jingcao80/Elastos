@@ -1,0 +1,9352 @@
+#include "R.h"
+namespace Elastos {
+namespace Droid {
+ 
+const int R::anim::accelerate_decelerate_interpolator=0x010a0004;
+const int R::anim::accelerate_interpolator=0x010a0005;
+const int R::anim::activity_close_enter=0x010a000d;
+const int R::anim::activity_close_exit=0x010a000e;
+const int R::anim::activity_open_enter=0x010a000f;
+const int R::anim::activity_open_exit=0x010a0010;
+const int R::anim::anticipate_interpolator=0x010a0007;
+const int R::anim::anticipate_overshoot_interpolator=0x010a0009;
+const int R::anim::app_starting_exit=0x010a0011;
+const int R::anim::bounce_interpolator=0x010a000a;
+const int R::anim::cycle_interpolator=0x010a000c;
+const int R::anim::decelerate_interpolator=0x010a0006;
+const int R::anim::dialog_enter=0x010a0012;
+const int R::anim::dialog_exit=0x010a0013;
+const int R::anim::dock_bottom_enter=0x010a0014;
+const int R::anim::dock_bottom_exit=0x010a0015;
+const int R::anim::dock_left_enter=0x010a0016;
+const int R::anim::dock_left_exit=0x010a0017;
+const int R::anim::dock_right_enter=0x010a0018;
+const int R::anim::dock_right_exit=0x010a0019;
+const int R::anim::dock_top_enter=0x010a001a;
+const int R::anim::dock_top_exit=0x010a001b;
+const int R::anim::fade_in=0x010a0000;
+const int R::anim::fade_out=0x010a0001;
+const int R::anim::fast_fade_in=0x010a001c;
+const int R::anim::fast_fade_out=0x010a001d;
+const int R::anim::grow_fade_in=0x010a001e;
+const int R::anim::grow_fade_in_center=0x010a001f;
+const int R::anim::grow_fade_in_from_bottom=0x010a0020;
+const int R::anim::input_method_enter=0x010a0021;
+const int R::anim::input_method_exit=0x010a0022;
+const int R::anim::input_method_extract_enter=0x010a0023;
+const int R::anim::input_method_extract_exit=0x010a0024;
+const int R::anim::input_method_fancy_enter=0x010a0025;
+const int R::anim::input_method_fancy_exit=0x010a0026;
+const int R::anim::keyguard_action_assist_enter=0x010a0027;
+const int R::anim::keyguard_action_assist_exit=0x010a0028;
+const int R::anim::keyguard_security_animate_in=0x010a0029;
+const int R::anim::keyguard_security_animate_out=0x010a002a;
+const int R::anim::keyguard_security_fade_in=0x010a002b;
+const int R::anim::keyguard_security_fade_out=0x010a002c;
+const int R::anim::linear_interpolator=0x010a000b;
+const int R::anim::lock_screen_behind_enter=0x010a002d;
+const int R::anim::lock_screen_enter=0x010a002e;
+const int R::anim::lock_screen_exit=0x010a002f;
+const int R::anim::lock_screen_wallpaper_behind_enter=0x010a0030;
+const int R::anim::options_panel_enter=0x010a0031;
+const int R::anim::options_panel_exit=0x010a0032;
+const int R::anim::overshoot_interpolator=0x010a0008;
+const int R::anim::push_down_in=0x010a0033;
+const int R::anim::push_down_in_no_alpha=0x010a0034;
+const int R::anim::push_down_out=0x010a0035;
+const int R::anim::push_down_out_no_alpha=0x010a0036;
+const int R::anim::push_up_in=0x010a0037;
+const int R::anim::push_up_out=0x010a0038;
+const int R::anim::recent_enter=0x010a0039;
+const int R::anim::recent_exit=0x010a003a;
+const int R::anim::recents_fade_in=0x010a003b;
+const int R::anim::recents_fade_out=0x010a003c;
+const int R::anim::screen_rotate_0_enter=0x010a003d;
+const int R::anim::screen_rotate_0_exit=0x010a003e;
+const int R::anim::screen_rotate_0_frame=0x010a003f;
+const int R::anim::screen_rotate_180_enter=0x010a0040;
+const int R::anim::screen_rotate_180_exit=0x010a0041;
+const int R::anim::screen_rotate_180_frame=0x010a0042;
+const int R::anim::screen_rotate_finish_enter=0x010a0043;
+const int R::anim::screen_rotate_finish_exit=0x010a0044;
+const int R::anim::screen_rotate_finish_frame=0x010a0045;
+const int R::anim::screen_rotate_minus_90_enter=0x010a0046;
+const int R::anim::screen_rotate_minus_90_exit=0x010a0047;
+const int R::anim::screen_rotate_minus_90_frame=0x010a0048;
+const int R::anim::screen_rotate_plus_90_enter=0x010a0049;
+const int R::anim::screen_rotate_plus_90_exit=0x010a004a;
+const int R::anim::screen_rotate_plus_90_frame=0x010a004b;
+const int R::anim::screen_rotate_start_enter=0x010a004c;
+const int R::anim::screen_rotate_start_exit=0x010a004d;
+const int R::anim::screen_rotate_start_frame=0x010a004e;
+const int R::anim::screen_user_enter=0x010a004f;
+const int R::anim::screen_user_exit=0x010a0050;
+const int R::anim::search_bar_enter=0x010a0051;
+const int R::anim::search_bar_exit=0x010a0052;
+const int R::anim::shrink_fade_out=0x010a0053;
+const int R::anim::shrink_fade_out_center=0x010a0054;
+const int R::anim::shrink_fade_out_from_bottom=0x010a0055;
+const int R::anim::slide_in_child_bottom=0x010a0056;
+const int R::anim::slide_in_left=0x010a0002;
+const int R::anim::slide_in_right=0x010a0057;
+const int R::anim::slide_in_up=0x010a0058;
+const int R::anim::slide_out_down=0x010a0059;
+const int R::anim::slide_out_left=0x010a005a;
+const int R::anim::slide_out_right=0x010a0003;
+const int R::anim::slow_fade_in=0x010a005b;
+const int R::anim::submenu_enter=0x010a005c;
+const int R::anim::submenu_exit=0x010a005d;
+const int R::anim::task_close_enter=0x010a005e;
+const int R::anim::task_close_exit=0x010a005f;
+const int R::anim::task_open_enter=0x010a0060;
+const int R::anim::task_open_exit=0x010a0061;
+const int R::anim::toast_enter=0x010a0062;
+const int R::anim::toast_exit=0x010a0063;
+const int R::anim::translucent_enter=0x010a0064;
+const int R::anim::translucent_exit=0x010a0065;
+const int R::anim::wallpaper_close_enter=0x010a0066;
+const int R::anim::wallpaper_close_exit=0x010a0067;
+const int R::anim::wallpaper_enter=0x010a0068;
+const int R::anim::wallpaper_exit=0x010a0069;
+const int R::anim::wallpaper_intra_close_enter=0x010a006a;
+const int R::anim::wallpaper_intra_close_exit=0x010a006b;
+const int R::anim::wallpaper_intra_open_enter=0x010a006c;
+const int R::anim::wallpaper_intra_open_exit=0x010a006d;
+const int R::anim::wallpaper_open_enter=0x010a006e;
+const int R::anim::wallpaper_open_exit=0x010a006f;
+const int R::anim::window_move_from_decor=0x010a0070;
+const int R::animator::fade_in=0x010b0000;
+const int R::animator::fade_out=0x010b0001;
+const int R::animator::fragment_close_enter=0x010b0002;
+const int R::animator::fragment_close_exit=0x010b0003;
+const int R::animator::fragment_fade_enter=0x010b0004;
+const int R::animator::fragment_fade_exit=0x010b0005;
+const int R::animator::fragment_open_enter=0x010b0006;
+const int R::animator::fragment_open_exit=0x010b0007;
+const int R::array::carrier_properties=0x01070038;
+const int R::array::common_nicknames=0x01070036;
+const int R::array::config_autoBrightnessButtonBacklightValues=0x0107002b;
+const int R::array::config_autoBrightnessKeyboardBacklightValues=0x0107002c;
+const int R::array::config_autoBrightnessLcdBacklightValues=0x0107002a;
+const int R::array::config_autoBrightnessLevels=0x01070029;
+const int R::array::config_cdma_dun_supported_types=0x01070020;
+const int R::array::config_data_usage_network_types=0x01070018;
+const int R::array::config_defaultNotificationVibePattern=0x01070032;
+const int R::array::config_keyboardTapVibePattern=0x01070025;
+const int R::array::config_locationProviderPackageNames=0x0107002d;
+const int R::array::config_longPressVibePattern=0x01070023;
+const int R::array::config_masterVolumeRamp=0x01070014;
+const int R::array::config_mobile_hotspot_provision_app=0x0107001e;
+const int R::array::config_notificationFallbackVibePattern=0x01070033;
+const int R::array::config_oemUsbModeOverride=0x01070031;
+const int R::array::config_protectedNetworks=0x01070016;
+const int R::array::config_safeModeDisabledVibePattern=0x01070026;
+const int R::array::config_safeModeEnabledVibePattern=0x01070027;
+const int R::array::config_scrollBarrierVibePattern=0x01070028;
+const int R::array::config_serialPorts=0x01070022;
+const int R::array::config_sms_enabled_locking_shift_tables=0x01070030;
+const int R::array::config_sms_enabled_single_shift_tables=0x0107002f;
+const int R::array::config_statusBarIcons=0x01070013;
+const int R::array::config_tether_bluetooth_regexs=0x0107001c;
+const int R::array::config_tether_dhcp_range=0x0107001d;
+const int R::array::config_tether_upstream_types=0x0107001f;
+const int R::array::config_tether_usb_regexs=0x01070019;
+const int R::array::config_tether_wifi_regexs=0x0107001a;
+const int R::array::config_tether_wimax_regexs=0x0107001b;
+const int R::array::config_twoDigitNumberPattern=0x0107002e;
+const int R::array::config_usbHostBlacklist=0x01070021;
+const int R::array::config_virtualKeyVibePattern=0x01070024;
+const int R::array::emailAddressTypes=0x01070000;
+const int R::array::imAddressTypes=0x01070037;
+const int R::array::imProtocols=0x01070001;
+const int R::array::lockscreen_direction_descriptions=0x0107000b;
+const int R::array::lockscreen_num_pad_klondike=0x01070012;
+const int R::array::lockscreen_target_descriptions_unlock_only=0x01070011;
+const int R::array::lockscreen_target_descriptions_when_silent=0x0107000a;
+const int R::array::lockscreen_target_descriptions_when_soundon=0x0107000d;
+const int R::array::lockscreen_target_descriptions_with_camera=0x0107000f;
+const int R::array::lockscreen_targets_unlock_only=0x01070010;
+const int R::array::lockscreen_targets_when_silent=0x01070009;
+const int R::array::lockscreen_targets_when_soundon=0x0107000c;
+const int R::array::lockscreen_targets_with_camera=0x0107000e;
+const int R::array::maps_starting_lat_lng=0x01070034;
+const int R::array::maps_starting_zoom=0x01070035;
+const int R::array::networkAttributes=0x01070015;
+const int R::array::organizationTypes=0x01070002;
+const int R::array::phoneTypes=0x01070003;
+const int R::array::postalAddressTypes=0x01070004;
+const int R::array::preloaded_color_state_lists=0x01070006;
+const int R::array::preloaded_drawables=0x01070005;
+const int R::array::radioAttributes=0x01070017;
+const int R::array::special_locale_codes=0x01070007;
+const int R::array::special_locale_names=0x01070008;
+const int R::attr::absListViewStyle=0x0101006a;
+const int R::attr::accessibilityEventTypes=0x01010380;
+const int R::attr::accessibilityFeedbackType=0x01010382;
+const int R::attr::accessibilityFlags=0x01010384;
+const int R::attr::accessibilityFocusedDrawable=0x010103f8;
+const int R::attr::accountPreferences=0x0101029f;
+const int R::attr::accountType=0x0101028f;
+const int R::attr::action=0x0101002d;
+const int R::attr::actionBarDivider=0x0101039b;
+const int R::attr::actionBarItemBackground=0x0101039c;
+const int R::attr::actionBarSize=0x010102eb;
+const int R::attr::actionBarSplitStyle=0x01010388;
+const int R::attr::actionBarStyle=0x010102ce;
+const int R::attr::actionBarTabBarStyle=0x010102f4;
+const int R::attr::actionBarTabStyle=0x010102f3;
+const int R::attr::actionBarTabTextStyle=0x010102f5;
+const int R::attr::actionBarWidgetTheme=0x01010397;
+const int R::attr::actionButtonStyle=0x010102d8;
+const int R::attr::actionDropDownStyle=0x010102d7;
+const int R::attr::actionLayout=0x010102fb;
+const int R::attr::actionMenuTextAppearance=0x01010360;
+const int R::attr::actionMenuTextColor=0x01010361;
+const int R::attr::actionModeBackground=0x010102db;
+const int R::attr::actionModeCloseButtonStyle=0x010102f7;
+const int R::attr::actionModeCloseDrawable=0x010102dc;
+const int R::attr::actionModeCopyDrawable=0x01010312;
+const int R::attr::actionModeCutDrawable=0x01010311;
+const int R::attr::actionModeFindDrawable=0x010103e2;
+const int R::attr::actionModePasteDrawable=0x01010313;
+const int R::attr::actionModePopupWindowStyle=0x010103e4;
+const int R::attr::actionModeSelectAllDrawable=0x0101037e;
+const int R::attr::actionModeShareDrawable=0x010103e1;
+const int R::attr::actionModeSplitBackground=0x0101039d;
+const int R::attr::actionModeStyle=0x01010394;
+const int R::attr::actionModeWebSearchDrawable=0x010103e3;
+const int R::attr::actionOverflowButtonStyle=0x010102f6;
+const int R::attr::actionProviderClass=0x01010389;
+const int R::attr::actionViewClass=0x010102fc;
+const int R::attr::activatedBackgroundIndicator=0x010102fd;
+const int R::attr::activityChooserViewStyle=0x010103e0;
+const int R::attr::activityCloseEnterAnimation=0x010100ba;
+const int R::attr::activityCloseExitAnimation=0x010100bb;
+const int R::attr::activityOpenEnterAnimation=0x010100b8;
+const int R::attr::activityOpenExitAnimation=0x010100b9;
+const int R::attr::addStatesFromChildren=0x010100f0;
+const int R::attr::adjustViewBounds=0x0101011e;
+const int R::attr::alertDialogButtonGroupStyle=0x010103d6;
+const int R::attr::alertDialogCenterButtons=0x010103d7;
+const int R::attr::alertDialogIcon=0x01010355;
+const int R::attr::alertDialogStyle=0x0101005d;
+const int R::attr::alertDialogTheme=0x01010309;
+const int R::attr::alignmentMode=0x0101037a;
+const int R::attr::allContactsName=0x010102cc;
+const int R::attr::allowBackup=0x01010280;
+const int R::attr::allowClearUserData=0x01010005;
+const int R::attr::allowMassStorage=0x01010446;
+const int R::attr::allowParallelSyncs=0x01010332;
+const int R::attr::allowScaling=0x0101042c;
+const int R::attr::allowSingleTap=0x01010259;
+const int R::attr::allowTaskReparenting=0x01010204;
+const int R::attr::alpha=0x0101031f;
+const int R::attr::alphabeticShortcut=0x010101e3;
+const int R::attr::alwaysDrawnWithCache=0x010100ef;
+const int R::attr::alwaysRetainTaskState=0x01010203;
+const int R::attr::alwaysTrackFinger=0x01010435;
+const int R::attr::angle=0x010101a0;
+const int R::attr::animateFirstView=0x010102d5;
+const int R::attr::animateLayoutChanges=0x010102f2;
+const int R::attr::animateOnClick=0x0101025c;
+const int R::attr::animation=0x010101cd;
+const int R::attr::animationCache=0x010100ed;
+const int R::attr::animationDuration=0x01010112;
+const int R::attr::animationOrder=0x010101ce;
+const int R::attr::animationResolution=0x0101031a;
+const int R::attr::antialias=0x0101011a;
+const int R::attr::anyDensity=0x0101026c;
+const int R::attr::apiKey=0x01010211;
+const int R::attr::aspect=0x01010438;
+const int R::attr::author=0x010102b4;
+const int R::attr::authorities=0x01010018;
+const int R::attr::autoAdvanceViewId=0x0101030f;
+const int R::attr::autoCompleteTextViewStyle=0x0101006b;
+const int R::attr::autoLink=0x010100b0;
+const int R::attr::autoStart=0x010102b5;
+const int R::attr::autoText=0x0101016a;
+const int R::attr::autoUrlDetect=0x0101028c;
+const int R::attr::background=0x010100d4;
+const int R::attr::backgroundDimAmount=0x01010032;
+const int R::attr::backgroundDimEnabled=0x0101021f;
+const int R::attr::backgroundSplit=0x0101038b;
+const int R::attr::backgroundStacked=0x0101038a;
+const int R::attr::backupAgent=0x0101027f;
+const int R::attr::baseline=0x0101031c;
+const int R::attr::baselineAlignBottom=0x01010122;
+const int R::attr::baselineAligned=0x01010126;
+const int R::attr::baselineAlignedChildIndex=0x01010127;
+const int R::attr::bitmap=0x0101043d;
+const int R::attr::borderBottom=0x01010408;
+const int R::attr::borderLeft=0x01010409;
+const int R::attr::borderRight=0x0101040a;
+const int R::attr::borderTop=0x01010407;
+const int R::attr::borderlessButtonStyle=0x0101032b;
+const int R::attr::bottom=0x010101b0;
+const int R::attr::bottomBright=0x010100cd;
+const int R::attr::bottomDark=0x010100c9;
+const int R::attr::bottomLeftRadius=0x010101ab;
+const int R::attr::bottomMedium=0x010100ce;
+const int R::attr::bottomOffset=0x01010257;
+const int R::attr::bottomRightRadius=0x010101ac;
+const int R::attr::breadCrumbShortTitle=0x01010304;
+const int R::attr::breadCrumbTitle=0x01010303;
+const int R::attr::bufferType=0x0101014e;
+const int R::attr::button=0x01010107;
+const int R::attr::buttonBarButtonStyle=0x0101032f;
+const int R::attr::buttonBarStyle=0x0101032e;
+const int R::attr::buttonStyle=0x01010048;
+const int R::attr::buttonStyleInset=0x0101004a;
+const int R::attr::buttonStyleSmall=0x01010049;
+const int R::attr::buttonStyleToggle=0x0101004b;
+const int R::attr::cacheColorHint=0x01010101;
+const int R::attr::calendarViewShown=0x0101034c;
+const int R::attr::calendarViewStyle=0x0101035d;
+const int R::attr::canRetrieveWindowContent=0x01010385;
+const int R::attr::candidatesTextStyleSpans=0x01010230;
+const int R::attr::cantSaveState=0x01010456;
+const int R::attr::capitalize=0x01010169;
+const int R::attr::centerBright=0x010100cc;
+const int R::attr::centerColor=0x0101020b;
+const int R::attr::centerDark=0x010100c8;
+const int R::attr::centerMedium=0x010100cf;
+const int R::attr::centerX=0x010101a2;
+const int R::attr::centerY=0x010101a3;
+const int R::attr::checkBoxPreferenceStyle=0x0101008f;
+const int R::attr::checkMark=0x01010108;
+const int R::attr::checkable=0x010101e5;
+const int R::attr::checkableBehavior=0x010101e0;
+const int R::attr::checkboxStyle=0x0101006c;
+const int R::attr::checked=0x01010106;
+const int R::attr::checkedButton=0x01010148;
+const int R::attr::checkedTextViewStyle=0x010103c8;
+const int R::attr::chevronDrawables=0x0101042f;
+const int R::attr::childDivider=0x01010111;
+const int R::attr::childIndicator=0x0101010c;
+const int R::attr::childIndicatorLeft=0x0101010f;
+const int R::attr::childIndicatorRight=0x01010110;
+const int R::attr::choiceMode=0x0101012b;
+const int R::attr::clearTaskOnLaunch=0x01010015;
+const int R::attr::clickColor=0x0101040f;
+const int R::attr::clickable=0x010100e5;
+const int R::attr::clipChildren=0x010100ea;
+const int R::attr::clipOrientation=0x0101020a;
+const int R::attr::clipToPadding=0x010100eb;
+const int R::attr::codes=0x01010242;
+const int R::attr::collapseColumns=0x0101014b;
+const int R::attr::color=0x010101a5;
+const int R::attr::colorActivatedHighlight=0x01010390;
+const int R::attr::colorBackground=0x01010031;
+const int R::attr::colorBackgroundCacheHint=0x010102ab;
+const int R::attr::colorFocusedHighlight=0x0101038f;
+const int R::attr::colorForeground=0x01010030;
+const int R::attr::colorForegroundInverse=0x01010206;
+const int R::attr::colorLongPressedHighlight=0x0101038e;
+const int R::attr::colorMultiSelectHighlight=0x01010391;
+const int R::attr::colorPressedHighlight=0x0101038d;
+const int R::attr::columnCount=0x01010377;
+const int R::attr::columnDelay=0x010101cf;
+const int R::attr::columnOrderPreserved=0x01010378;
+const int R::attr::columnWidth=0x01010117;
+const int R::attr::compatibleWidthLimitDp=0x01010365;
+const int R::attr::completionHint=0x01010172;
+const int R::attr::completionHintView=0x01010173;
+const int R::attr::completionThreshold=0x01010174;
+const int R::attr::configChanges=0x0101001f;
+const int R::attr::configure=0x0101025d;
+const int R::attr::constantSize=0x01010196;
+const int R::attr::content=0x0101025b;
+const int R::attr::contentAuthority=0x01010290;
+const int R::attr::contentDescription=0x01010273;
+const int R::attr::cropToPadding=0x01010123;
+const int R::attr::cursorVisible=0x01010152;
+const int R::attr::customNavigationLayout=0x010102d2;
+const int R::attr::customTokens=0x0101033b;
+const int R::attr::cycles=0x010101d4;
+const int R::attr::dashGap=0x010101a7;
+const int R::attr::dashWidth=0x010101a6;
+const int R::attr::data=0x0101002e;
+const int R::attr::datePickerStyle=0x0101035c;
+const int R::attr::dateTextAppearance=0x01010349;
+const int R::attr::debuggable=0x0101000f;
+const int R::attr::defaultValue=0x010101ed;
+const int R::attr::delay=0x010101cc;
+const int R::attr::dependency=0x010101ec;
+const int R::attr::descendantFocusability=0x010100f1;
+const int R::attr::description=0x01010020;
+const int R::attr::detachWallpaper=0x010102a6;
+const int R::attr::detailColumn=0x010102a3;
+const int R::attr::detailSocialSummary=0x010102a4;
+const int R::attr::detailsElementBackground=0x0101034e;
+const int R::attr::dial=0x01010102;
+const int R::attr::dialogCustomTitleDecorLayout=0x010103e8;
+const int R::attr::dialogIcon=0x010101f4;
+const int R::attr::dialogLayout=0x010101f7;
+const int R::attr::dialogMessage=0x010101f3;
+const int R::attr::dialogPreferenceStyle=0x01010091;
+const int R::attr::dialogTheme=0x01010308;
+const int R::attr::dialogTitle=0x010101f2;
+const int R::attr::dialogTitleDecorLayout=0x010103e9;
+const int R::attr::dialogTitleIconsDecorLayout=0x010103e7;
+const int R::attr::digit=0x01010453;
+const int R::attr::digits=0x01010166;
+const int R::attr::direction=0x010101d1;
+const int R::attr::directionDescriptions=0x010103a1;
+const int R::attr::directionPriority=0x010101d2;
+const int R::attr::disableChildrenWhenDisabled=0x01010412;
+const int R::attr::disableDependentsState=0x010101f1;
+const int R::attr::disabledAlpha=0x01010033;
+const int R::attr::displayOptions=0x010102d0;
+const int R::attr::dither=0x0101011c;
+const int R::attr::divider=0x01010129;
+const int R::attr::dividerHeight=0x0101012a;
+const int R::attr::dividerHorizontal=0x0101032c;
+const int R::attr::dividerPadding=0x0101032a;
+const int R::attr::dividerVertical=0x0101030a;
+const int R::attr::dotSize=0x0101044c;
+const int R::attr::drawSelectorOnTop=0x010100fc;
+const int R::attr::drawable=0x01010199;
+const int R::attr::drawableAlpha=0x01010406;
+const int R::attr::drawableBottom=0x0101016e;
+const int R::attr::drawableEnd=0x01010393;
+const int R::attr::drawableLeft=0x0101016f;
+const int R::attr::drawablePadding=0x01010171;
+const int R::attr::drawableRight=0x01010170;
+const int R::attr::drawableStart=0x01010392;
+const int R::attr::drawableTop=0x0101016d;
+const int R::attr::drawingCacheQuality=0x010100e8;
+const int R::attr::dropDownAnchor=0x01010263;
+const int R::attr::dropDownHeight=0x01010283;
+const int R::attr::dropDownHintAppearance=0x01010088;
+const int R::attr::dropDownHorizontalOffset=0x010102ac;
+const int R::attr::dropDownItemStyle=0x01010086;
+const int R::attr::dropDownListViewStyle=0x0101006d;
+const int R::attr::dropDownSelector=0x01010175;
+const int R::attr::dropDownSpinnerStyle=0x010102d6;
+const int R::attr::dropDownVerticalOffset=0x010102ad;
+const int R::attr::dropDownWidth=0x01010262;
+const int R::attr::dropdownListPreferredItemHeight=0x010103d4;
+const int R::attr::duplicateParentState=0x010100e9;
+const int R::attr::duration=0x01010198;
+const int R::attr::editTextBackground=0x01010352;
+const int R::attr::editTextColor=0x01010351;
+const int R::attr::editTextPreferenceStyle=0x01010092;
+const int R::attr::editTextStyle=0x0101006e;
+const int R::attr::editable=0x0101016b;
+const int R::attr::editorExtras=0x01010224;
+const int R::attr::ellipsize=0x010100ab;
+const int R::attr::ems=0x01010158;
+const int R::attr::emulated=0x01010444;
+const int R::attr::enabled=0x0101000e;
+const int R::attr::endColor=0x0101019e;
+const int R::attr::endYear=0x0101017d;
+const int R::attr::enterFadeDuration=0x0101030c;
+const int R::attr::entries=0x010100b2;
+const int R::attr::entryValues=0x010101f8;
+const int R::attr::errorMessageAboveBackground=0x010103d2;
+const int R::attr::errorMessageBackground=0x010103d1;
+const int R::attr::eventsInterceptionEnabled=0x0101027d;
+const int R::attr::excludeFromRecents=0x01010017;
+const int R::attr::exitFadeDuration=0x0101030d;
+const int R::attr::expandActivityOverflowButtonDrawable=0x01010425;
+const int R::attr::expandableListPreferredChildIndicatorLeft=0x01010052;
+const int R::attr::expandableListPreferredChildIndicatorRight=0x01010053;
+const int R::attr::expandableListPreferredChildPaddingLeft=0x0101004f;
+const int R::attr::expandableListPreferredItemIndicatorLeft=0x01010050;
+const int R::attr::expandableListPreferredItemIndicatorRight=0x01010051;
+const int R::attr::expandableListPreferredItemPaddingLeft=0x0101004e;
+const int R::attr::expandableListViewStyle=0x0101006f;
+const int R::attr::expandableListViewWhiteStyle=0x010102b6;
+const int R::attr::exported=0x01010010;
+const int R::attr::externalRouteEnabledDrawable=0x01010448;
+const int R::attr::extraTension=0x0101026b;
+const int R::attr::factor=0x010101d3;
+const int R::attr::fadeDuration=0x01010278;
+const int R::attr::fadeEnabled=0x0101027e;
+const int R::attr::fadeOffset=0x01010277;
+const int R::attr::fadeScrollbars=0x010102aa;
+const int R::attr::fadingEdge=0x010100df;
+const int R::attr::fadingEdgeLength=0x010100e0;
+const int R::attr::fastScrollAlwaysVisible=0x01010335;
+const int R::attr::fastScrollEnabled=0x01010226;
+const int R::attr::fastScrollOverlayPosition=0x0101033a;
+const int R::attr::fastScrollPreviewBackgroundLeft=0x01010337;
+const int R::attr::fastScrollPreviewBackgroundRight=0x01010338;
+const int R::attr::fastScrollTextColor=0x01010359;
+const int R::attr::fastScrollThumbDrawable=0x01010336;
+const int R::attr::fastScrollTrackDrawable=0x01010339;
+const int R::attr::feedbackCount=0x01010434;
+const int R::attr::fillAfter=0x010101bd;
+const int R::attr::fillBefore=0x010101bc;
+const int R::attr::fillEnabled=0x0101024f;
+const int R::attr::fillViewport=0x0101017a;
+const int R::attr::filter=0x0101011b;
+const int R::attr::filterTouchesWhenObscured=0x010102c4;
+const int R::attr::findOnPageNextDrawable=0x010103f9;
+const int R::attr::findOnPagePreviousDrawable=0x010103fa;
+const int R::attr::finishOnCloseSystemDialogs=0x010102a7;
+const int R::attr::finishOnTaskLaunch=0x01010014;
+const int R::attr::firstDayOfWeek=0x0101033d;
+const int R::attr::firstItemOffset=0x0101042a;
+const int R::attr::fitsSystemWindows=0x010100dd;
+const int R::attr::flipInterval=0x01010179;
+const int R::attr::focusable=0x010100da;
+const int R::attr::focusableInTouchMode=0x010100db;
+const int R::attr::focusedMonthDateColor=0x01010343;
+const int R::attr::fontFamily=0x010103ac;
+const int R::attr::footerDividersEnabled=0x0101022f;
+const int R::attr::foreground=0x01010109;
+const int R::attr::foregroundGravity=0x01010200;
+const int R::attr::foregroundInsidePadding=0x01010405;
+const int R::attr::format=0x01010105;
+const int R::attr::format12Hour=0x010103ca;
+const int R::attr::format24Hour=0x010103cb;
+const int R::attr::fragment=0x010102e3;
+const int R::attr::fragmentCloseEnterAnimation=0x010102e7;
+const int R::attr::fragmentCloseExitAnimation=0x010102e8;
+const int R::attr::fragmentFadeEnterAnimation=0x010102e9;
+const int R::attr::fragmentFadeExitAnimation=0x010102ea;
+const int R::attr::fragmentOpenEnterAnimation=0x010102e5;
+const int R::attr::fragmentOpenExitAnimation=0x010102e6;
+const int R::attr::frameDuration=0x01010421;
+const int R::attr::framesCount=0x01010422;
+const int R::attr::freezesText=0x0101016c;
+const int R::attr::fromAlpha=0x010101ca;
+const int R::attr::fromDegrees=0x010101b3;
+const int R::attr::fromXDelta=0x010101c6;
+const int R::attr::fromXScale=0x010101c2;
+const int R::attr::fromYDelta=0x010101c8;
+const int R::attr::fromYScale=0x010101c4;
+const int R::attr::fullBright=0x010100ca;
+const int R::attr::fullDark=0x010100c6;
+const int R::attr::functionalTest=0x01010023;
+const int R::attr::galleryItemBackground=0x0101004c;
+const int R::attr::galleryStyle=0x01010070;
+const int R::attr::gestureColor=0x01010275;
+const int R::attr::gestureOverlayViewStyle=0x010103db;
+const int R::attr::gestureStrokeAngleThreshold=0x0101027c;
+const int R::attr::gestureStrokeLengthThreshold=0x0101027a;
+const int R::attr::gestureStrokeSquarenessThreshold=0x0101027b;
+const int R::attr::gestureStrokeType=0x01010279;
+const int R::attr::gestureStrokeWidth=0x01010274;
+const int R::attr::glEsVersion=0x01010281;
+const int R::attr::glowDot=0x0101044e;
+const int R::attr::glowRadius=0x01010429;
+const int R::attr::gradientRadius=0x010101a4;
+const int R::attr::grantUriPermissions=0x0101001b;
+const int R::attr::gravity=0x010100af;
+const int R::attr::gridViewStyle=0x01010071;
+const int R::attr::groupIndicator=0x0101010b;
+const int R::attr::hand_hour=0x01010103;
+const int R::attr::hand_minute=0x01010104;
+const int R::attr::handle=0x0101025a;
+const int R::attr::handleDrawable=0x0101042e;
+const int R::attr::handleProfiling=0x01010022;
+const int R::attr::hapticFeedbackEnabled=0x0101025e;
+const int R::attr::hardwareAccelerated=0x010102d3;
+const int R::attr::hasCode=0x0101000c;
+const int R::attr::headerBackground=0x0101012f;
+const int R::attr::headerDividersEnabled=0x0101022e;
+const int R::attr::height=0x01010155;
+const int R::attr::hint=0x01010150;
+const int R::attr::homeAsUpIndicator=0x0101030b;
+const int R::attr::homeLayout=0x0101031d;
+const int R::attr::horizontalDivider=0x0101012d;
+const int R::attr::horizontalGap=0x0101023f;
+const int R::attr::horizontalProgressLayout=0x01010404;
+const int R::attr::horizontalScrollViewStyle=0x01010353;
+const int R::attr::horizontalSpacing=0x01010114;
+const int R::attr::host=0x01010028;
+const int R::attr::hotSpotX=0x0101043e;
+const int R::attr::hotSpotY=0x0101043f;
+const int R::attr::icon=0x01010002;
+const int R::attr::iconPreview=0x01010249;
+const int R::attr::iconifiedByDefault=0x010102fa;
+const int R::attr::id=0x010100d0;
+const int R::attr::ignoreGravity=0x010101ff;
+const int R::attr::imageButtonStyle=0x01010072;
+const int R::attr::imageWellStyle=0x01010073;
+const int R::attr::imeActionId=0x01010266;
+const int R::attr::imeActionLabel=0x01010265;
+const int R::attr::imeExtractEnterAnimation=0x01010268;
+const int R::attr::imeExtractExitAnimation=0x01010269;
+const int R::attr::imeFullscreenBackground=0x0101022c;
+const int R::attr::imeOptions=0x01010264;
+const int R::attr::imeSubtypeExtraValue=0x010102ee;
+const int R::attr::imeSubtypeLocale=0x010102ec;
+const int R::attr::imeSubtypeMode=0x010102ed;
+const int R::attr::immersive=0x010102c0;
+const int R::attr::importantForAccessibility=0x010103aa;
+const int R::attr::inAnimation=0x01010177;
+const int R::attr::includeFontPadding=0x0101015f;
+const int R::attr::includeInGlobalSearch=0x0101026e;
+const int R::attr::indeterminate=0x01010139;
+const int R::attr::indeterminateBehavior=0x0101013e;
+const int R::attr::indeterminateDrawable=0x0101013b;
+const int R::attr::indeterminateDuration=0x0101013d;
+const int R::attr::indeterminateOnly=0x0101013a;
+const int R::attr::indeterminateProgressStyle=0x01010318;
+const int R::attr::indicatorLeft=0x0101010d;
+const int R::attr::indicatorRight=0x0101010e;
+const int R::attr::inflatedId=0x010100f3;
+const int R::attr::initOrder=0x0101001a;
+const int R::attr::initialActivityCount=0x01010424;
+const int R::attr::initialKeyguardLayout=0x010103c2;
+const int R::attr::initialLayout=0x01010251;
+const int R::attr::innerRadius=0x0101025f;
+const int R::attr::innerRadiusRatio=0x0101019b;
+const int R::attr::inputMethod=0x01010168;
+const int R::attr::inputType=0x01010220;
+const int R::attr::insetBottom=0x010101ba;
+const int R::attr::insetLeft=0x010101b7;
+const int R::attr::insetRight=0x010101b8;
+const int R::attr::insetTop=0x010101b9;
+const int R::attr::installLocation=0x010102b7;
+const int R::attr::internalLayout=0x01010413;
+const int R::attr::internalMaxHeight=0x0101041d;
+const int R::attr::internalMaxWidth=0x0101041f;
+const int R::attr::internalMinHeight=0x0101041c;
+const int R::attr::internalMinWidth=0x0101041e;
+const int R::attr::interpolator=0x01010141;
+const int R::attr::isAlwaysSyncable=0x01010333;
+const int R::attr::isAuxiliary=0x0101037f;
+const int R::attr::isDefault=0x01010221;
+const int R::attr::isIndicator=0x01010147;
+const int R::attr::isModifier=0x01010246;
+const int R::attr::isRepeatable=0x01010248;
+const int R::attr::isScrollContainer=0x0101024e;
+const int R::attr::isSticky=0x01010247;
+const int R::attr::isolatedProcess=0x010103a9;
+const int R::attr::itemBackground=0x01010130;
+const int R::attr::itemIconDisabledAlpha=0x01010131;
+const int R::attr::itemPadding=0x0101032d;
+const int R::attr::itemTextAppearance=0x0101012c;
+const int R::attr::keepScreenOn=0x01010216;
+const int R::attr::key=0x010101e8;
+const int R::attr::keyBackground=0x01010233;
+const int R::attr::keyEdgeFlags=0x01010245;
+const int R::attr::keyHeight=0x0101023e;
+const int R::attr::keyIcon=0x0101024c;
+const int R::attr::keyLabel=0x0101024b;
+const int R::attr::keyOutputText=0x0101024a;
+const int R::attr::keyPreviewHeight=0x01010239;
+const int R::attr::keyPreviewLayout=0x01010237;
+const int R::attr::keyPreviewOffset=0x01010238;
+const int R::attr::keyTextColor=0x01010236;
+const int R::attr::keyTextSize=0x01010234;
+const int R::attr::keyWidth=0x0101023d;
+const int R::attr::keyboardLayout=0x010103ab;
+const int R::attr::keyboardMode=0x0101024d;
+const int R::attr::keyboardViewStyle=0x01010426;
+const int R::attr::keycode=0x010100c5;
+const int R::attr::killAfterRestore=0x0101029c;
+const int R::attr::label=0x01010001;
+const int R::attr::labelFor=0x010103c6;
+const int R::attr::labelTextSize=0x01010235;
+const int R::attr::largeHeap=0x0101035a;
+const int R::attr::largeScreens=0x01010286;
+const int R::attr::largestWidthLimitDp=0x01010366;
+const int R::attr::launchMode=0x0101001d;
+const int R::attr::layerType=0x01010354;
+const int R::attr::layout=0x010100f2;
+const int R::attr::layoutAnimation=0x010100ec;
+const int R::attr::layoutDirection=0x010103b2;
+const int R::attr::layout_above=0x01010184;
+const int R::attr::layout_alignBaseline=0x01010186;
+const int R::attr::layout_alignBottom=0x0101018a;
+const int R::attr::layout_alignEnd=0x010103ba;
+const int R::attr::layout_alignLeft=0x01010187;
+const int R::attr::layout_alignParentBottom=0x0101018e;
+const int R::attr::layout_alignParentEnd=0x010103bc;
+const int R::attr::layout_alignParentLeft=0x0101018b;
+const int R::attr::layout_alignParentRight=0x0101018d;
+const int R::attr::layout_alignParentStart=0x010103bb;
+const int R::attr::layout_alignParentTop=0x0101018c;
+const int R::attr::layout_alignRight=0x01010189;
+const int R::attr::layout_alignStart=0x010103b9;
+const int R::attr::layout_alignTop=0x01010188;
+const int R::attr::layout_alignWithParentIfMissing=0x01010192;
+const int R::attr::layout_below=0x01010185;
+const int R::attr::layout_centerHorizontal=0x01010190;
+const int R::attr::layout_centerInParent=0x0101018f;
+const int R::attr::layout_centerVertical=0x01010191;
+const int R::attr::layout_centerWithinArea=0x01010451;
+const int R::attr::layout_childType=0x01010450;
+const int R::attr::layout_column=0x0101014c;
+const int R::attr::layout_columnSpan=0x0101037d;
+const int R::attr::layout_gravity=0x010100b3;
+const int R::attr::layout_height=0x010100f5;
+const int R::attr::layout_margin=0x010100f6;
+const int R::attr::layout_marginBottom=0x010100fa;
+const int R::attr::layout_marginEnd=0x010103b6;
+const int R::attr::layout_marginLeft=0x010100f7;
+const int R::attr::layout_marginRight=0x010100f9;
+const int R::attr::layout_marginStart=0x010103b5;
+const int R::attr::layout_marginTop=0x010100f8;
+const int R::attr::layout_maxHeight=0x01010436;
+const int R::attr::layout_maxWidth=0x01010452;
+const int R::attr::layout_minHeight=0x01010437;
+const int R::attr::layout_removeBorders=0x0101040b;
+const int R::attr::layout_row=0x0101037b;
+const int R::attr::layout_rowSpan=0x0101037c;
+const int R::attr::layout_scale=0x01010193;
+const int R::attr::layout_span=0x0101014d;
+const int R::attr::layout_toEndOf=0x010103b8;
+const int R::attr::layout_toLeftOf=0x01010182;
+const int R::attr::layout_toRightOf=0x01010183;
+const int R::attr::layout_toStartOf=0x010103b7;
+const int R::attr::layout_weight=0x01010181;
+const int R::attr::layout_width=0x010100f4;
+const int R::attr::layout_x=0x0101017f;
+const int R::attr::layout_y=0x01010180;
+const int R::attr::left=0x010101ad;
+const int R::attr::leftToRight=0x0101044f;
+const int R::attr::lineSpacingExtra=0x01010217;
+const int R::attr::lineSpacingMultiplier=0x01010218;
+const int R::attr::lines=0x01010154;
+const int R::attr::linksClickable=0x010100b1;
+const int R::attr::listChoiceBackgroundIndicator=0x010102f0;
+const int R::attr::listChoiceIndicatorMultiple=0x0101021a;
+const int R::attr::listChoiceIndicatorSingle=0x01010219;
+const int R::attr::listDivider=0x01010214;
+const int R::attr::listDividerAlertDialog=0x01010305;
+const int R::attr::listItemLayout=0x01010402;
+const int R::attr::listLayout=0x010103ff;
+const int R::attr::listPopupWindowStyle=0x010102ff;
+const int R::attr::listPreferredItemHeight=0x0101004d;
+const int R::attr::listPreferredItemHeightLarge=0x01010386;
+const int R::attr::listPreferredItemHeightSmall=0x01010387;
+const int R::attr::listPreferredItemPaddingEnd=0x010103be;
+const int R::attr::listPreferredItemPaddingLeft=0x010103a3;
+const int R::attr::listPreferredItemPaddingRight=0x010103a4;
+const int R::attr::listPreferredItemPaddingStart=0x010103bd;
+const int R::attr::listSelector=0x010100fb;
+const int R::attr::listSeparatorTextViewStyle=0x01010208;
+const int R::attr::listViewStyle=0x01010074;
+const int R::attr::listViewWhiteStyle=0x01010075;
+const int R::attr::logo=0x010102be;
+const int R::attr::longClickable=0x010100e6;
+const int R::attr::loopViews=0x01010307;
+const int R::attr::magneticTargets=0x0101042b;
+const int R::attr::majorWeightMax=0x01010417;
+const int R::attr::majorWeightMin=0x01010415;
+const int R::attr::manageSpaceActivity=0x01010004;
+const int R::attr::mapViewStyle=0x0101008a;
+const int R::attr::marqueeRepeatLimit=0x0101021d;
+const int R::attr::max=0x01010136;
+const int R::attr::maxDate=0x01010340;
+const int R::attr::maxEms=0x01010157;
+const int R::attr::maxFileSize=0x01010447;
+const int R::attr::maxHeight=0x01010120;
+const int R::attr::maxItems=0x0101040d;
+const int R::attr::maxItemsPerRow=0x01010134;
+const int R::attr::maxLength=0x01010160;
+const int R::attr::maxLevel=0x010101b2;
+const int R::attr::maxLines=0x01010153;
+const int R::attr::maxRows=0x01010133;
+const int R::attr::maxSdkVersion=0x01010271;
+const int R::attr::maxWidth=0x0101011f;
+const int R::attr::measureAllChildren=0x0101010a;
+const int R::attr::measureWithLargestChild=0x010102d4;
+const int R::attr::mediaRouteButtonStyle=0x010103ad;
+const int R::attr::mediaRouteTypes=0x010103ae;
+const int R::attr::menuCategory=0x010101de;
+const int R::attr::mimeType=0x01010026;
+const int R::attr::minDate=0x0101033f;
+const int R::attr::minEms=0x0101015a;
+const int R::attr::minHeight=0x01010140;
+const int R::attr::minLevel=0x010101b1;
+const int R::attr::minLines=0x01010156;
+const int R::attr::minResizeHeight=0x01010396;
+const int R::attr::minResizeWidth=0x01010395;
+const int R::attr::minSdkVersion=0x0101020c;
+const int R::attr::minWidth=0x0101013f;
+const int R::attr::minorWeightMax=0x01010418;
+const int R::attr::minorWeightMin=0x01010416;
+const int R::attr::mode=0x0101017e;
+const int R::attr::moreIcon=0x01010135;
+const int R::attr::mountPoint=0x01010440;
+const int R::attr::mtpReserve=0x01010445;
+const int R::attr::multiChoiceItemLayout=0x01010400;
+const int R::attr::multiprocess=0x01010013;
+const int R::attr::name=0x01010003;
+const int R::attr::navigationMode=0x010102cf;
+const int R::attr::negativeButtonText=0x010101f6;
+const int R::attr::neverEncrypt=0x01010455;
+const int R::attr::nextFocusDown=0x010100e4;
+const int R::attr::nextFocusForward=0x0101033c;
+const int R::attr::nextFocusLeft=0x010100e1;
+const int R::attr::nextFocusRight=0x010100e2;
+const int R::attr::nextFocusUp=0x010100e3;
+const int R::attr::noHistory=0x0101022d;
+const int R::attr::normalScreens=0x01010285;
+const int R::attr::notificationTimeout=0x01010383;
+const int R::attr::numColumns=0x01010118;
+const int R::attr::numDots=0x0101044d;
+const int R::attr::numStars=0x01010144;
+const int R::attr::numberPickerStyle=0x010103de;
+const int R::attr::numeric=0x01010165;
+const int R::attr::numericShortcut=0x010101e4;
+const int R::attr::onClick=0x0101026f;
+const int R::attr::oneshot=0x01010197;
+const int R::attr::opacity=0x0101031e;
+const int R::attr::order=0x010101ea;
+const int R::attr::orderInCategory=0x010101df;
+const int R::attr::ordering=0x010102e2;
+const int R::attr::orderingFromXml=0x010101e7;
+const int R::attr::orientation=0x010100c4;
+const int R::attr::outAnimation=0x01010178;
+const int R::attr::outerRadius=0x01010431;
+const int R::attr::outerRingDrawable=0x01010427;
+const int R::attr::overScrollFooter=0x010102c3;
+const int R::attr::overScrollHeader=0x010102c2;
+const int R::attr::overScrollMode=0x010102c1;
+const int R::attr::overridesImplicitlyEnabledSubtype=0x010103a2;
+const int R::attr::packageNames=0x01010381;
+const int R::attr::padding=0x010100d5;
+const int R::attr::paddingBottom=0x010100d9;
+const int R::attr::paddingEnd=0x010103b4;
+const int R::attr::paddingLeft=0x010100d6;
+const int R::attr::paddingRight=0x010100d8;
+const int R::attr::paddingStart=0x010103b3;
+const int R::attr::paddingTop=0x010100d7;
+const int R::attr::pageSpacing=0x01010449;
+const int R::attr::panelBackground=0x0101005e;
+const int R::attr::panelColorBackground=0x01010061;
+const int R::attr::panelColorForeground=0x01010060;
+const int R::attr::panelFullBackground=0x0101005f;
+const int R::attr::panelMenuIsCompact=0x010103d8;
+const int R::attr::panelMenuListTheme=0x010103da;
+const int R::attr::panelMenuListWidth=0x010103d9;
+const int R::attr::panelTextAppearance=0x01010062;
+const int R::attr::parentActivityName=0x010103a7;
+const int R::attr::password=0x0101015c;
+const int R::attr::path=0x0101002a;
+const int R::attr::pathPattern=0x0101002c;
+const int R::attr::pathPrefix=0x0101002b;
+const int R::attr::permission=0x01010006;
+const int R::attr::permissionFlags=0x010103c7;
+const int R::attr::permissionGroup=0x0101000a;
+const int R::attr::permissionGroupFlags=0x010103c5;
+const int R::attr::persistent=0x0101000d;
+const int R::attr::persistentDrawingCache=0x010100ee;
+const int R::attr::phoneNumber=0x01010167;
+const int R::attr::pivotX=0x010101b5;
+const int R::attr::pivotY=0x010101b6;
+const int R::attr::pointDrawable=0x01010428;
+const int R::attr::pointerIconArrow=0x01010439;
+const int R::attr::pointerIconSpotAnchor=0x0101043c;
+const int R::attr::pointerIconSpotHover=0x0101043a;
+const int R::attr::pointerIconSpotTouch=0x0101043b;
+const int R::attr::pointerStyle=0x010103f7;
+const int R::attr::popupAnimationStyle=0x010102c9;
+const int R::attr::popupBackground=0x01010176;
+const int R::attr::popupCharacters=0x01010244;
+const int R::attr::popupKeyboard=0x01010243;
+const int R::attr::popupLayout=0x0101023b;
+const int R::attr::popupMenuStyle=0x01010300;
+const int R::attr::popupPromptView=0x01010411;
+const int R::attr::popupWindowStyle=0x01010076;
+const int R::attr::port=0x01010029;
+const int R::attr::positiveButtonText=0x010101f5;
+const int R::attr::preferenceCategoryStyle=0x0101008c;
+const int R::attr::preferenceFragmentStyle=0x010103e5;
+const int R::attr::preferenceFrameLayoutStyle=0x010103f5;
+const int R::attr::preferenceInformationStyle=0x0101008d;
+const int R::attr::preferenceLayoutChild=0x01010094;
+const int R::attr::preferencePanelStyle=0x010103e6;
+const int R::attr::preferenceScreenStyle=0x0101008b;
+const int R::attr::preferenceStyle=0x0101008e;
+const int R::attr::presentationTheme=0x010103c0;
+const int R::attr::preserveIconSpacing=0x0101040c;
+const int R::attr::previewImage=0x010102da;
+const int R::attr::primary=0x01010442;
+const int R::attr::primaryUserOnly=0x01010457;
+const int R::attr::priority=0x0101001c;
+const int R::attr::privateImeOptions=0x01010223;
+const int R::attr::process=0x01010011;
+const int R::attr::progress=0x01010137;
+const int R::attr::progressBarPadding=0x01010319;
+const int R::attr::progressBarStyle=0x01010077;
+const int R::attr::progressBarStyleHorizontal=0x01010078;
+const int R::attr::progressBarStyleInverse=0x01010287;
+const int R::attr::progressBarStyleLarge=0x0101007a;
+const int R::attr::progressBarStyleLargeInverse=0x01010289;
+const int R::attr::progressBarStyleSmall=0x01010079;
+const int R::attr::progressBarStyleSmallInverse=0x01010288;
+const int R::attr::progressBarStyleSmallTitle=0x0101020f;
+const int R::attr::progressDrawable=0x0101013c;
+const int R::attr::progressLayout=0x01010403;
+const int R::attr::prompt=0x0101017b;
+const int R::attr::propertyName=0x010102e1;
+const int R::attr::protectionLevel=0x01010009;
+const int R::attr::publicKey=0x010103a6;
+const int R::attr::queryActionMsg=0x010101db;
+const int R::attr::queryAfterZeroResults=0x01010282;
+const int R::attr::queryHint=0x01010358;
+const int R::attr::quickContactBadgeOverlay=0x010103dc;
+const int R::attr::quickContactBadgeStyleSmallWindowLarge=0x010102b3;
+const int R::attr::quickContactBadgeStyleSmallWindowMedium=0x010102b2;
+const int R::attr::quickContactBadgeStyleSmallWindowSmall=0x010102b1;
+const int R::attr::quickContactBadgeStyleWindowLarge=0x010102b0;
+const int R::attr::quickContactBadgeStyleWindowMedium=0x010102af;
+const int R::attr::quickContactBadgeStyleWindowSmall=0x010102ae;
+const int R::attr::quickContactWindowSize=0x01010414;
+const int R::attr::radioButtonStyle=0x0101007e;
+const int R::attr::radius=0x010101a8;
+const int R::attr::rating=0x01010145;
+const int R::attr::ratingBarStyle=0x0101007c;
+const int R::attr::ratingBarStyleIndicator=0x01010210;
+const int R::attr::ratingBarStyleSmall=0x0101007d;
+const int R::attr::readPermission=0x01010007;
+const int R::attr::removable=0x01010443;
+const int R::attr::repeatCount=0x010101bf;
+const int R::attr::repeatMode=0x010101c0;
+const int R::attr::reqFiveWayNav=0x01010232;
+const int R::attr::reqHardKeyboard=0x01010229;
+const int R::attr::reqKeyboardType=0x01010228;
+const int R::attr::reqNavigation=0x0101022a;
+const int R::attr::reqTouchScreen=0x01010227;
+const int R::attr::required=0x0101028e;
+const int R::attr::requiresFadingEdge=0x010103a5;
+const int R::attr::requiresSmallestWidthDp=0x01010364;
+const int R::attr::resOutColor=0x0101040e;
+const int R::attr::resizeMode=0x01010363;
+const int R::attr::resizeable=0x0101028d;
+const int R::attr::resource=0x01010025;
+const int R::attr::restoreAnyVersion=0x010102ba;
+const int R::attr::restoreNeedsApplication=0x0101029d;
+const int R::attr::right=0x010101af;
+const int R::attr::ringtonePreferenceStyle=0x01010093;
+const int R::attr::ringtoneType=0x010101f9;
+const int R::attr::rotation=0x01010326;
+const int R::attr::rotationX=0x01010327;
+const int R::attr::rotationY=0x01010328;
+const int R::attr::rowCount=0x01010375;
+const int R::attr::rowDelay=0x010101d0;
+const int R::attr::rowEdgeFlags=0x01010241;
+const int R::attr::rowHeight=0x01010132;
+const int R::attr::rowOrderPreserved=0x01010376;
+const int R::attr::saveEnabled=0x010100e7;
+const int R::attr::scaleGravity=0x010101fe;
+const int R::attr::scaleHeight=0x010101fd;
+const int R::attr::scaleType=0x0101011d;
+const int R::attr::scaleWidth=0x010101fc;
+const int R::attr::scaleX=0x01010324;
+const int R::attr::scaleY=0x01010325;
+const int R::attr::scheme=0x01010027;
+const int R::attr::screenDensity=0x010102cb;
+const int R::attr::screenOrientation=0x0101001e;
+const int R::attr::screenSize=0x010102ca;
+const int R::attr::scrollHorizontally=0x0101015b;
+const int R::attr::scrollIndicatorPaddingLeft=0x0101044a;
+const int R::attr::scrollIndicatorPaddingRight=0x0101044b;
+const int R::attr::scrollViewStyle=0x01010080;
+const int R::attr::scrollX=0x010100d2;
+const int R::attr::scrollY=0x010100d3;
+const int R::attr::scrollbarAlwaysDrawHorizontalTrack=0x01010068;
+const int R::attr::scrollbarAlwaysDrawVerticalTrack=0x01010069;
+const int R::attr::scrollbarDefaultDelayBeforeFade=0x010102a9;
+const int R::attr::scrollbarFadeDuration=0x010102a8;
+const int R::attr::scrollbarSize=0x01010063;
+const int R::attr::scrollbarStyle=0x0101007f;
+const int R::attr::scrollbarThumbHorizontal=0x01010064;
+const int R::attr::scrollbarThumbVertical=0x01010065;
+const int R::attr::scrollbarTrackHorizontal=0x01010066;
+const int R::attr::scrollbarTrackVertical=0x01010067;
+const int R::attr::scrollbars=0x010100de;
+const int R::attr::scrollingCache=0x010100fe;
+const int R::attr::searchButtonText=0x01010205;
+const int R::attr::searchDialogTheme=0x010103f4;
+const int R::attr::searchDropdownBackground=0x010103eb;
+const int R::attr::searchMode=0x010101d5;
+const int R::attr::searchResultListItemHeight=0x010103d3;
+const int R::attr::searchSettingsDescription=0x0101028a;
+const int R::attr::searchSuggestAuthority=0x010101d6;
+const int R::attr::searchSuggestIntentAction=0x010101d9;
+const int R::attr::searchSuggestIntentData=0x010101da;
+const int R::attr::searchSuggestPath=0x010101d7;
+const int R::attr::searchSuggestSelection=0x010101d8;
+const int R::attr::searchSuggestThreshold=0x0101026d;
+const int R::attr::searchViewCloseIcon=0x010103ec;
+const int R::attr::searchViewEditQuery=0x010103f0;
+const int R::attr::searchViewEditQueryBackground=0x010103f1;
+const int R::attr::searchViewGoIcon=0x010103ed;
+const int R::attr::searchViewSearchIcon=0x010103ee;
+const int R::attr::searchViewTextField=0x010103f2;
+const int R::attr::searchViewTextFieldRight=0x010103f3;
+const int R::attr::searchViewVoiceIcon=0x010103ef;
+const int R::attr::searchWidgetCorpusItemBackground=0x010103a8;
+const int R::attr::secondaryProgress=0x01010138;
+const int R::attr::seekBarStyle=0x0101007b;
+const int R::attr::segmentedButtonStyle=0x01010330;
+const int R::attr::selectAllOnFocus=0x0101015e;
+const int R::attr::selectable=0x010101e6;
+const int R::attr::selectableItemBackground=0x0101030e;
+const int R::attr::selectedDateVerticalBar=0x01010347;
+const int R::attr::selectedWeekBackgroundColor=0x01010342;
+const int R::attr::selectionDivider=0x01010419;
+const int R::attr::selectionDividerHeight=0x0101041a;
+const int R::attr::selectionDividersDistance=0x0101041b;
+const int R::attr::settingsActivity=0x01010225;
+const int R::attr::shadowColor=0x01010161;
+const int R::attr::shadowDx=0x01010162;
+const int R::attr::shadowDy=0x01010163;
+const int R::attr::shadowRadius=0x01010164;
+const int R::attr::shape=0x0101019a;
+const int R::attr::shareInterpolator=0x010101bb;
+const int R::attr::sharedUserId=0x0101000b;
+const int R::attr::sharedUserLabel=0x01010261;
+const int R::attr::shouldDisableView=0x010101ee;
+const int R::attr::showAsAction=0x010102d9;
+const int R::attr::showDefault=0x010101fa;
+const int R::attr::showDividers=0x01010329;
+const int R::attr::showOnLockScreen=0x010103c9;
+const int R::attr::showSilent=0x010101fb;
+const int R::attr::showWeekNumber=0x0101033e;
+const int R::attr::shownWeekCount=0x01010341;
+const int R::attr::shrinkColumns=0x0101014a;
+const int R::attr::singleChoiceItemLayout=0x01010401;
+const int R::attr::singleLine=0x0101015d;
+const int R::attr::singleUser=0x010103bf;
+const int R::attr::smallIcon=0x0101029e;
+const int R::attr::smallScreens=0x01010284;
+const int R::attr::smoothScrollbar=0x01010231;
+const int R::attr::snapMargin=0x01010433;
+const int R::attr::solidColor=0x0101034a;
+const int R::attr::soundEffectsEnabled=0x01010215;
+const int R::attr::spacing=0x01010113;
+const int R::attr::spinnerDropDownItemStyle=0x01010087;
+const int R::attr::spinnerItemStyle=0x01010089;
+const int R::attr::spinnerMode=0x010102f1;
+const int R::attr::spinnerStyle=0x01010081;
+const int R::attr::spinnersShown=0x0101034b;
+const int R::attr::splitMotionEvents=0x010102ef;
+const int R::attr::src=0x01010119;
+const int R::attr::stackFromBottom=0x010100fd;
+const int R::attr::stackViewStyle=0x010103dd;
+const int R::attr::starStyle=0x01010082;
+const int R::attr::startColor=0x0101019d;
+const int R::attr::startOffset=0x010101be;
+const int R::attr::startYear=0x0101017c;
+const int R::attr::stateNotNeeded=0x01010016;
+const int R::attr::state_above_anchor=0x010100aa;
+const int R::attr::state_accelerated=0x0101031b;
+const int R::attr::state_accessibility_focused=0x01010423;
+const int R::attr::state_activated=0x010102fe;
+const int R::attr::state_active=0x010100a2;
+const int R::attr::state_checkable=0x0101009f;
+const int R::attr::state_checked=0x010100a0;
+const int R::attr::state_drag_can_accept=0x01010368;
+const int R::attr::state_drag_hovered=0x01010369;
+const int R::attr::state_empty=0x010100a9;
+const int R::attr::state_enabled=0x0101009e;
+const int R::attr::state_expanded=0x010100a8;
+const int R::attr::state_first=0x010100a4;
+const int R::attr::state_focused=0x0101009c;
+const int R::attr::state_hovered=0x01010367;
+const int R::attr::state_last=0x010100a6;
+const int R::attr::state_long_pressable=0x0101023c;
+const int R::attr::state_middle=0x010100a5;
+const int R::attr::state_multiline=0x0101034d;
+const int R::attr::state_pressed=0x010100a7;
+const int R::attr::state_selected=0x010100a1;
+const int R::attr::state_single=0x010100a3;
+const int R::attr::state_window_focused=0x0101009d;
+const int R::attr::staticWallpaperPreview=0x01010331;
+const int R::attr::stepSize=0x01010146;
+const int R::attr::stopWithTask=0x0101036a;
+const int R::attr::storageDescription=0x01010441;
+const int R::attr::streamType=0x01010209;
+const int R::attr::stretchColumns=0x01010149;
+const int R::attr::stretchMode=0x01010116;
+const int R::attr::subtitle=0x010102d1;
+const int R::attr::subtitleTextStyle=0x010102f9;
+const int R::attr::subtypeExtraValue=0x0101039a;
+const int R::attr::subtypeId=0x010103c1;
+const int R::attr::subtypeLocale=0x01010399;
+const int R::attr::suggestActionMsg=0x010101dc;
+const int R::attr::suggestActionMsgColumn=0x010101dd;
+const int R::attr::summary=0x010101e9;
+const int R::attr::summaryColumn=0x010102a2;
+const int R::attr::summaryOff=0x010101f0;
+const int R::attr::summaryOn=0x010101ef;
+const int R::attr::supportsRtl=0x010103af;
+const int R::attr::supportsUploading=0x0101029b;
+const int R::attr::switchMinWidth=0x01010370;
+const int R::attr::switchPadding=0x01010371;
+const int R::attr::switchPreferenceStyle=0x0101036d;
+const int R::attr::switchStyle=0x010103f6;
+const int R::attr::switchTextAppearance=0x0101036e;
+const int R::attr::switchTextOff=0x0101036c;
+const int R::attr::switchTextOn=0x0101036b;
+const int R::attr::syncable=0x01010019;
+const int R::attr::tabLayout=0x01010410;
+const int R::attr::tabStripEnabled=0x010102bd;
+const int R::attr::tabStripLeft=0x010102bb;
+const int R::attr::tabStripRight=0x010102bc;
+const int R::attr::tabWidgetStyle=0x01010083;
+const int R::attr::tag=0x010100d1;
+const int R::attr::targetActivity=0x01010202;
+const int R::attr::targetClass=0x0101002f;
+const int R::attr::targetDescriptions=0x010103a0;
+const int R::attr::targetDrawables=0x0101042d;
+const int R::attr::targetPackage=0x01010021;
+const int R::attr::targetSdkVersion=0x01010270;
+const int R::attr::taskAffinity=0x01010012;
+const int R::attr::taskCloseEnterAnimation=0x010100be;
+const int R::attr::taskCloseExitAnimation=0x010100bf;
+const int R::attr::taskOpenEnterAnimation=0x010100bc;
+const int R::attr::taskOpenExitAnimation=0x010100bd;
+const int R::attr::taskToBackEnterAnimation=0x010100c2;
+const int R::attr::taskToBackExitAnimation=0x010100c3;
+const int R::attr::taskToFrontEnterAnimation=0x010100c0;
+const int R::attr::taskToFrontExitAnimation=0x010100c1;
+const int R::attr::tension=0x0101026a;
+const int R::attr::testOnly=0x01010272;
+const int R::attr::text=0x0101014f;
+const int R::attr::textAlignment=0x010103b1;
+const int R::attr::textAllCaps=0x0101038c;
+const int R::attr::textAppearance=0x01010034;
+const int R::attr::textAppearanceAutoCorrectionSuggestion=0x010103ce;
+const int R::attr::textAppearanceButton=0x01010207;
+const int R::attr::textAppearanceEasyCorrectSuggestion=0x010103c3;
+const int R::attr::textAppearanceInverse=0x01010035;
+const int R::attr::textAppearanceLarge=0x01010040;
+const int R::attr::textAppearanceLargeInverse=0x01010043;
+const int R::attr::textAppearanceLargePopupMenu=0x01010301;
+const int R::attr::textAppearanceListItem=0x0101039e;
+const int R::attr::textAppearanceListItemSmall=0x0101039f;
+const int R::attr::textAppearanceMedium=0x01010041;
+const int R::attr::textAppearanceMediumInverse=0x01010044;
+const int R::attr::textAppearanceMisspelledSuggestion=0x010103cd;
+const int R::attr::textAppearanceSearchResultSubtitle=0x010102a0;
+const int R::attr::textAppearanceSearchResultTitle=0x010102a1;
+const int R::attr::textAppearanceSmall=0x01010042;
+const int R::attr::textAppearanceSmallInverse=0x01010045;
+const int R::attr::textAppearanceSmallPopupMenu=0x01010302;
+const int R::attr::textCheckMark=0x01010046;
+const int R::attr::textCheckMarkInverse=0x01010047;
+const int R::attr::textColor=0x01010098;
+const int R::attr::textColorAlertDialogListItem=0x01010306;
+const int R::attr::textColorHighlight=0x01010099;
+const int R::attr::textColorHighlightInverse=0x0101034f;
+const int R::attr::textColorHint=0x0101009a;
+const int R::attr::textColorHintInverse=0x0101003f;
+const int R::attr::textColorLink=0x0101009b;
+const int R::attr::textColorLinkInverse=0x01010350;
+const int R::attr::textColorPrimary=0x01010036;
+const int R::attr::textColorPrimaryDisableOnly=0x01010037;
+const int R::attr::textColorPrimaryInverse=0x01010039;
+const int R::attr::textColorPrimaryInverseDisableOnly=0x0101028b;
+const int R::attr::textColorPrimaryInverseNoDisable=0x0101003d;
+const int R::attr::textColorPrimaryNoDisable=0x0101003b;
+const int R::attr::textColorSearchUrl=0x01010267;
+const int R::attr::textColorSecondary=0x01010038;
+const int R::attr::textColorSecondaryInverse=0x0101003a;
+const int R::attr::textColorSecondaryInverseNoDisable=0x0101003e;
+const int R::attr::textColorSecondaryNoDisable=0x0101003c;
+const int R::attr::textColorTertiary=0x01010212;
+const int R::attr::textColorTertiaryInverse=0x01010213;
+const int R::attr::textCursorDrawable=0x01010362;
+const int R::attr::textDirection=0x010103b0;
+const int R::attr::textEditNoPasteWindowLayout=0x01010315;
+const int R::attr::textEditPasteWindowLayout=0x01010314;
+const int R::attr::textEditSideNoPasteWindowLayout=0x0101035f;
+const int R::attr::textEditSidePasteWindowLayout=0x0101035e;
+const int R::attr::textEditSuggestionItemLayout=0x01010374;
+const int R::attr::textFilterEnabled=0x010100ff;
+const int R::attr::textIsSelectable=0x01010316;
+const int R::attr::textOff=0x01010125;
+const int R::attr::textOn=0x01010124;
+const int R::attr::textScaleX=0x01010151;
+const int R::attr::textSelectHandle=0x010102c7;
+const int R::attr::textSelectHandleLeft=0x010102c5;
+const int R::attr::textSelectHandleRight=0x010102c6;
+const int R::attr::textSelectHandleWindowStyle=0x010102c8;
+const int R::attr::textSize=0x01010095;
+const int R::attr::textStyle=0x01010097;
+const int R::attr::textSuggestionsWindowStyle=0x01010373;
+const int R::attr::textUnderlineColor=0x010103cf;
+const int R::attr::textUnderlineThickness=0x010103d0;
+const int R::attr::textView=0x01010454;
+const int R::attr::textViewStyle=0x01010084;
+const int R::attr::theme=0x01010000;
+const int R::attr::thickness=0x01010260;
+const int R::attr::thicknessRatio=0x0101019c;
+const int R::attr::thumb=0x01010142;
+const int R::attr::thumbOffset=0x01010143;
+const int R::attr::thumbTextPadding=0x01010372;
+const int R::attr::thumbnail=0x010102a5;
+const int R::attr::tileMode=0x01010201;
+const int R::attr::timePickerStyle=0x010103df;
+const int R::attr::timeZone=0x010103cc;
+const int R::attr::tint=0x01010121;
+const int R::attr::title=0x010101e1;
+const int R::attr::titleCondensed=0x010101e2;
+const int R::attr::titleTextStyle=0x010102f8;
+const int R::attr::toAlpha=0x010101cb;
+const int R::attr::toDegrees=0x010101b4;
+const int R::attr::toXDelta=0x010101c7;
+const int R::attr::toXScale=0x010101c3;
+const int R::attr::toYDelta=0x010101c9;
+const int R::attr::toYScale=0x010101c5;
+const int R::attr::toastFrameBackground=0x010103ea;
+const int R::attr::top=0x010101ae;
+const int R::attr::topBright=0x010100cb;
+const int R::attr::topDark=0x010100c7;
+const int R::attr::topLeftRadius=0x010101a9;
+const int R::attr::topOffset=0x01010258;
+const int R::attr::topRightRadius=0x010101aa;
+const int R::attr::track=0x0101036f;
+const int R::attr::transcriptMode=0x01010100;
+const int R::attr::transformPivotX=0x01010320;
+const int R::attr::transformPivotY=0x01010321;
+const int R::attr::translationX=0x01010322;
+const int R::attr::translationY=0x01010323;
+const int R::attr::type=0x010101a1;
+const int R::attr::typeface=0x01010096;
+const int R::attr::uiOptions=0x01010398;
+const int R::attr::uncertainGestureColor=0x01010276;
+const int R::attr::unfocusedMonthDateColor=0x01010344;
+const int R::attr::unselectedAlpha=0x0101020e;
+const int R::attr::updatePeriodMillis=0x01010250;
+const int R::attr::useDefaultMargins=0x01010379;
+const int R::attr::useIntrinsicSizeAsMinimum=0x01010310;
+const int R::attr::useLevel=0x0101019f;
+const int R::attr::userVisible=0x01010291;
+const int R::attr::value=0x01010024;
+const int R::attr::valueFrom=0x010102de;
+const int R::attr::valueTo=0x010102df;
+const int R::attr::valueType=0x010102e0;
+const int R::attr::variablePadding=0x01010195;
+const int R::attr::versionCode=0x0101021b;
+const int R::attr::versionName=0x0101021c;
+const int R::attr::verticalCorrection=0x0101023a;
+const int R::attr::verticalDivider=0x0101012e;
+const int R::attr::verticalGap=0x01010240;
+const int R::attr::verticalScrollbarPosition=0x01010334;
+const int R::attr::verticalSpacing=0x01010115;
+const int R::attr::vibrationDuration=0x01010432;
+const int R::attr::virtualButtonPressedDrawable=0x01010420;
+const int R::attr::visibility=0x010100dc;
+const int R::attr::visible=0x01010194;
+const int R::attr::vmSafeMode=0x010102b8;
+const int R::attr::voiceLanguage=0x01010255;
+const int R::attr::voiceLanguageModel=0x01010253;
+const int R::attr::voiceMaxResults=0x01010256;
+const int R::attr::voicePromptText=0x01010254;
+const int R::attr::voiceSearchMode=0x01010252;
+const int R::attr::wallpaperCloseEnterAnimation=0x01010295;
+const int R::attr::wallpaperCloseExitAnimation=0x01010296;
+const int R::attr::wallpaperIntraCloseEnterAnimation=0x01010299;
+const int R::attr::wallpaperIntraCloseExitAnimation=0x0101029a;
+const int R::attr::wallpaperIntraOpenEnterAnimation=0x01010297;
+const int R::attr::wallpaperIntraOpenExitAnimation=0x01010298;
+const int R::attr::wallpaperOpenEnterAnimation=0x01010293;
+const int R::attr::wallpaperOpenExitAnimation=0x01010294;
+const int R::attr::waveDrawable=0x01010430;
+const int R::attr::webTextViewStyle=0x010102b9;
+const int R::attr::webViewStyle=0x01010085;
+const int R::attr::weekDayTextAppearance=0x01010348;
+const int R::attr::weekNumberColor=0x01010345;
+const int R::attr::weekSeparatorLineColor=0x01010346;
+const int R::attr::weightSum=0x01010128;
+const int R::attr::widgetCategory=0x010103c4;
+const int R::attr::widgetLayout=0x010101eb;
+const int R::attr::width=0x01010159;
+const int R::attr::windowActionBar=0x010102cd;
+const int R::attr::windowActionBarOverlay=0x010102e4;
+const int R::attr::windowActionModeOverlay=0x010102dd;
+const int R::attr::windowAnimationStyle=0x010100ae;
+const int R::attr::windowBackground=0x01010054;
+const int R::attr::windowCloseOnTouchOutside=0x0101035b;
+const int R::attr::windowContentOverlay=0x01010059;
+const int R::attr::windowDisablePreview=0x01010222;
+const int R::attr::windowEnableSplitTouch=0x01010317;
+const int R::attr::windowEnterAnimation=0x010100b4;
+const int R::attr::windowExitAnimation=0x010100b5;
+const int R::attr::windowFixedHeightMajor=0x010103fe;
+const int R::attr::windowFixedHeightMinor=0x010103fc;
+const int R::attr::windowFixedWidthMajor=0x010103fb;
+const int R::attr::windowFixedWidthMinor=0x010103fd;
+const int R::attr::windowFrame=0x01010055;
+const int R::attr::windowFullscreen=0x0101020d;
+const int R::attr::windowHideAnimation=0x010100b7;
+const int R::attr::windowIsFloating=0x01010057;
+const int R::attr::windowIsTranslucent=0x01010058;
+const int R::attr::windowMinWidthMajor=0x01010356;
+const int R::attr::windowMinWidthMinor=0x01010357;
+const int R::attr::windowNoDisplay=0x0101021e;
+const int R::attr::windowNoTitle=0x01010056;
+const int R::attr::windowShowAnimation=0x010100b6;
+const int R::attr::windowShowWallpaper=0x01010292;
+const int R::attr::windowSoftInputMode=0x0101022b;
+const int R::attr::windowSplitActionBar=0x010103d5;
+const int R::attr::windowTitleBackgroundStyle=0x0101005c;
+const int R::attr::windowTitleSize=0x0101005a;
+const int R::attr::windowTitleStyle=0x0101005b;
+const int R::attr::writePermission=0x01010008;
+const int R::attr::x=0x010100ac;
+const int R::attr::xlargeScreens=0x010102bf;
+const int R::attr::y=0x010100ad;
+const int R::attr::yesNoPreferenceStyle=0x01010090;
+const int R::attr::zAdjustment=0x010101c1;
+const int R::bool_::ImsConnectedDefaultValue=0x0111000e;
+const int R::bool_::action_bar_embed_tabs=0x01110004;
+const int R::bool_::action_bar_embed_tabs_pre_jb=0x01110005;
+const int R::bool_::action_bar_expanded_action_views_exclusive=0x01110009;
+const int R::bool_::config_actionMenuItemAllCaps=0x0111003d;
+const int R::bool_::config_allowActionMenuItemTextWithIcon=0x0111003e;
+const int R::bool_::config_allowAllRotations=0x0111001d;
+const int R::bool_::config_alwaysUseCdmaRssi=0x0111003a;
+const int R::bool_::config_animateScreenLights=0x0111001b;
+const int R::bool_::config_annoy_dianne=0x01110019;
+const int R::bool_::config_automatic_brightness_available=0x01110018;
+const int R::bool_::config_batterySdCardAccessibility=0x01110022;
+const int R::bool_::config_bluetooth_adapter_quick_switch=0x0111002e;
+const int R::bool_::config_bluetooth_address_validation=0x0111002f;
+const int R::bool_::config_bluetooth_default_profiles=0x01110032;
+const int R::bool_::config_bluetooth_sco_off_call=0x0111002c;
+const int R::bool_::config_bluetooth_wide_band_speech=0x0111002d;
+const int R::bool_::config_built_in_sip_phone=0x01110034;
+const int R::bool_::config_camera_sound_forced=0x0111004b;
+const int R::bool_::config_carDockEnablesAccelerometer=0x01110020;
+const int R::bool_::config_cellBroadcastAppLinks=0x01110045;
+const int R::bool_::config_closeDialogWhenTouchOutside=0x01110014;
+const int R::bool_::config_deskDockEnablesAccelerometer=0x0111001f;
+const int R::bool_::config_disableMenuKeyInLockScreen=0x01110025;
+const int R::bool_::config_dontPreferApn=0x0111004c;
+const int R::bool_::config_dreamsActivatedOnDockByDefault=0x01110042;
+const int R::bool_::config_dreamsActivatedOnSleepByDefault=0x01110043;
+const int R::bool_::config_dreamsEnabledByDefault=0x01110041;
+const int R::bool_::config_dreamsSupported=0x01110040;
+const int R::bool_::config_duplicate_port_omadm_wappush=0x0111003b;
+const int R::bool_::config_enableLockBeforeUnlockScreen=0x01110026;
+const int R::bool_::config_enableLockScreenRotation=0x01110027;
+const int R::bool_::config_enableScreenshotChord=0x0111001c;
+const int R::bool_::config_enableWallpaperService=0x0111002b;
+const int R::bool_::config_enableWifiDisplay=0x01110047;
+const int R::bool_::config_enable_emergency_call_while_sim_locked=0x01110029;
+const int R::bool_::config_enable_puk_unlock_screen=0x01110028;
+const int R::bool_::config_intrusiveNotificationLed=0x01110024;
+const int R::bool_::config_lidControlsSleep=0x01110021;
+const int R::bool_::config_mms_content_disposition_support=0x01110039;
+const int R::bool_::config_reverseDefaultRotation=0x0111001e;
+const int R::bool_::config_safe_media_volume_enabled=0x01110049;
+const int R::bool_::config_sendAudioBecomingNoisy=0x01110012;
+const int R::bool_::config_sf_limitedAlpha=0x0111000d;
+const int R::bool_::config_sf_slowBlur=0x0111000f;
+const int R::bool_::config_showMenuShortcutsWhenKeyboardPresent=0x01110036;
+const int R::bool_::config_showNavigationBar=0x0111003c;
+const int R::bool_::config_sip_wifi_only=0x01110033;
+const int R::bool_::config_sms_capable=0x01110031;
+const int R::bool_::config_sms_utf8_support=0x01110038;
+const int R::bool_::config_storage_notification=0x01110044;
+const int R::bool_::config_swipeDisambiguation=0x0111002a;
+const int R::bool_::config_syncstorageengine_masterSyncAutomatically=0x01110046;
+const int R::bool_::config_telephony_use_own_number_for_voicemail=0x01110037;
+const int R::bool_::config_ui_enableFadingMarquee=0x01110013;
+const int R::bool_::config_unplugTurnsOnScreen=0x0111001a;
+const int R::bool_::config_useDevInputEventForAudioJack=0x01110048;
+const int R::bool_::config_useMasterVolume=0x01110010;
+const int R::bool_::config_useVolumeKeySounds=0x01110011;
+const int R::bool_::config_use_strict_phone_number_comparation=0x01110023;
+const int R::bool_::config_voice_capable=0x01110030;
+const int R::bool_::config_wifiDisplaySupportsProtectedBuffers=0x0111004a;
+const int R::bool_::config_wifi_background_scan_support=0x01110017;
+const int R::bool_::config_wifi_dual_band_support=0x01110015;
+const int R::bool_::config_wifi_p2p_support=0x01110016;
+const int R::bool_::config_wimaxEnabled=0x0111003f;
+const int R::bool_::kg_center_small_widgets_vertically=0x01110001;
+const int R::bool_::kg_enable_camera_default_widget=0x01110000;
+const int R::bool_::kg_share_status_area=0x0111000b;
+const int R::bool_::kg_show_ime_at_screen_on=0x01110003;
+const int R::bool_::kg_sim_puk_account_full_screen=0x0111000c;
+const int R::bool_::kg_top_align_page_shrink_on_bouncer_visible=0x01110002;
+const int R::bool_::lockscreen_isPortrait=0x0111004d;
+const int R::bool_::preferences_prefer_dual_pane=0x01110007;
+const int R::bool_::show_ongoing_ime_switcher=0x01110008;
+const int R::bool_::skip_restoring_network_selection=0x01110035;
+const int R::bool_::split_action_bar_is_narrow=0x01110006;
+const int R::bool_::target_honeycomb_needs_options_menu=0x0111000a;
+const int R::color::background_dark=0x0106000e;
+const int R::color::background_holo_dark=0x0106004a;
+const int R::color::background_holo_light=0x0106004b;
+const int R::color::background_light=0x0106000f;
+const int R::color::black=0x0106000c;
+const int R::color::bright_foreground_dark=0x0106001d;
+const int R::color::bright_foreground_dark_disabled=0x0106001f;
+const int R::color::bright_foreground_dark_inverse=0x01060021;
+const int R::color::bright_foreground_disabled_holo_dark=0x0106004e;
+const int R::color::bright_foreground_disabled_holo_light=0x0106004f;
+const int R::color::bright_foreground_holo_dark=0x0106004c;
+const int R::color::bright_foreground_holo_light=0x0106004d;
+const int R::color::bright_foreground_inverse_holo_dark=0x01060050;
+const int R::color::bright_foreground_inverse_holo_light=0x01060051;
+const int R::color::bright_foreground_light=0x0106001e;
+const int R::color::bright_foreground_light_disabled=0x01060020;
+const int R::color::bright_foreground_light_inverse=0x01060022;
+const int R::color::config_defaultNotificationColor=0x0106006b;
+const int R::color::darker_gray=0x01060000;
+const int R::color::dim_foreground_dark=0x01060023;
+const int R::color::dim_foreground_dark_disabled=0x01060024;
+const int R::color::dim_foreground_dark_inverse=0x01060025;
+const int R::color::dim_foreground_dark_inverse_disabled=0x01060026;
+const int R::color::dim_foreground_disabled_holo_dark=0x01060053;
+const int R::color::dim_foreground_disabled_holo_light=0x01060058;
+const int R::color::dim_foreground_holo_dark=0x01060052;
+const int R::color::dim_foreground_holo_light=0x01060057;
+const int R::color::dim_foreground_inverse_disabled_holo_dark=0x01060055;
+const int R::color::dim_foreground_inverse_disabled_holo_light=0x0106005a;
+const int R::color::dim_foreground_inverse_holo_dark=0x01060054;
+const int R::color::dim_foreground_inverse_holo_light=0x01060059;
+const int R::color::dim_foreground_light=0x01060028;
+const int R::color::dim_foreground_light_disabled=0x01060029;
+const int R::color::dim_foreground_light_inverse=0x0106002a;
+const int R::color::dim_foreground_light_inverse_disabled=0x0106002b;
+const int R::color::facelock_spotlight_mask=0x01060049;
+const int R::color::group_button_dialog_focused_holo_dark=0x01060061;
+const int R::color::group_button_dialog_focused_holo_light=0x01060063;
+const int R::color::group_button_dialog_pressed_holo_dark=0x01060060;
+const int R::color::group_button_dialog_pressed_holo_light=0x01060062;
+const int R::color::highlighted_text_dark=0x0106002d;
+const int R::color::highlighted_text_holo_dark=0x0106005c;
+const int R::color::highlighted_text_holo_light=0x0106005d;
+const int R::color::highlighted_text_light=0x0106002e;
+const int R::color::hint_foreground_dark=0x01060027;
+const int R::color::hint_foreground_holo_dark=0x01060056;
+const int R::color::hint_foreground_holo_light=0x0106005b;
+const int R::color::hint_foreground_light=0x0106002c;
+const int R::color::holo_blue_bright=0x0106001b;
+const int R::color::holo_blue_dark=0x01060013;
+const int R::color::holo_blue_light=0x01060012;
+const int R::color::holo_green_dark=0x01060015;
+const int R::color::holo_green_light=0x01060014;
+const int R::color::holo_orange_dark=0x01060019;
+const int R::color::holo_orange_light=0x01060018;
+const int R::color::holo_purple=0x0106001a;
+const int R::color::holo_red_dark=0x01060017;
+const int R::color::holo_red_light=0x01060016;
+const int R::color::keyguard_avatar_frame_color=0x01060067;
+const int R::color::keyguard_avatar_frame_pressed_color=0x0106006a;
+const int R::color::keyguard_avatar_frame_shadow_color=0x01060068;
+const int R::color::keyguard_avatar_nick_color=0x01060069;
+const int R::color::keyguard_text_color_decline=0x01060041;
+const int R::color::keyguard_text_color_normal=0x0106003d;
+const int R::color::keyguard_text_color_soundoff=0x0106003f;
+const int R::color::keyguard_text_color_soundon=0x01060040;
+const int R::color::keyguard_text_color_unlock=0x0106003e;
+const int R::color::kg_multi_user_text_active=0x01060046;
+const int R::color::kg_multi_user_text_inactive=0x01060047;
+const int R::color::kg_widget_pager_gradient=0x01060048;
+const int R::color::legacy_long_pressed_highlight=0x01060066;
+const int R::color::legacy_pressed_highlight=0x01060064;
+const int R::color::legacy_selected_highlight=0x01060065;
+const int R::color::lighter_gray=0x01060032;
+const int R::color::link_text_dark=0x0106002f;
+const int R::color::link_text_holo_dark=0x0106005e;
+const int R::color::link_text_holo_light=0x0106005f;
+const int R::color::link_text_light=0x01060030;
+const int R::color::lockscreen_clock_am_pm=0x01060044;
+const int R::color::lockscreen_clock_background=0x01060042;
+const int R::color::lockscreen_clock_foreground=0x01060043;
+const int R::color::lockscreen_owner_info=0x01060045;
+const int R::color::perms_costs_money=0x01060036;
+const int R::color::perms_dangerous_grp_color=0x01060033;
+const int R::color::perms_dangerous_perm_color=0x01060034;
+const int R::color::primary_text_dark=0x01060001;
+const int R::color::primary_text_dark_disable_only=0x0106006c;
+const int R::color::primary_text_dark_focused=0x0106006d;
+const int R::color::primary_text_dark_nodisable=0x01060002;
+const int R::color::primary_text_disable_only_holo_dark=0x0106006e;
+const int R::color::primary_text_disable_only_holo_light=0x0106006f;
+const int R::color::primary_text_focused_holo_dark=0x01060070;
+const int R::color::primary_text_holo_dark=0x01060071;
+const int R::color::primary_text_holo_light=0x01060072;
+const int R::color::primary_text_light=0x01060003;
+const int R::color::primary_text_light_disable_only=0x01060073;
+const int R::color::primary_text_light_nodisable=0x01060004;
+const int R::color::primary_text_nodisable_holo_dark=0x01060074;
+const int R::color::primary_text_nodisable_holo_light=0x01060075;
+const int R::color::safe_mode_text=0x0106001c;
+const int R::color::search_url_text=0x01060076;
+const int R::color::search_url_text_holo=0x01060077;
+const int R::color::search_url_text_normal=0x01060037;
+const int R::color::search_url_text_pressed=0x01060039;
+const int R::color::search_url_text_selected=0x01060038;
+const int R::color::search_widget_corpus_item_background=0x0106003a;
+const int R::color::secondary_text_dark=0x01060005;
+const int R::color::secondary_text_dark_nodisable=0x01060006;
+const int R::color::secondary_text_holo_dark=0x01060078;
+const int R::color::secondary_text_holo_light=0x01060079;
+const int R::color::secondary_text_light=0x01060007;
+const int R::color::secondary_text_light_nodisable=0x01060008;
+const int R::color::secondary_text_nodisable_holo_dark=0x0106007a;
+const int R::color::secondary_text_nodisable_holo_light=0x0106007b;
+const int R::color::secondary_text_nofocus=0x0106007c;
+const int R::color::shadow=0x01060035;
+const int R::color::sliding_tab_text_color_active=0x0106003b;
+const int R::color::sliding_tab_text_color_shadow=0x0106003c;
+const int R::color::suggestion_highlight_text=0x01060031;
+const int R::color::tab_indicator_text=0x01060009;
+const int R::color::tab_indicator_text_v4=0x0106007d;
+const int R::color::tertiary_text_dark=0x01060010;
+const int R::color::tertiary_text_holo_dark=0x0106007e;
+const int R::color::tertiary_text_holo_light=0x0106007f;
+const int R::color::tertiary_text_light=0x01060011;
+const int R::color::transparent=0x0106000d;
+const int R::color::white=0x0106000b;
+const int R::color::widget_edittext_dark=0x0106000a;
+const int R::dimen::accessibility_touch_slop=0x0105006b;
+const int R::dimen::action_bar_default_height=0x0105003a;
+const int R::dimen::action_bar_icon_vertical_padding=0x0105003b;
+const int R::dimen::action_bar_stacked_max_height=0x01050053;
+const int R::dimen::action_bar_stacked_tab_max_width=0x01050054;
+const int R::dimen::action_bar_subtitle_bottom_margin=0x0105003f;
+const int R::dimen::action_bar_subtitle_text_size=0x0105003d;
+const int R::dimen::action_bar_subtitle_top_margin=0x0105003e;
+const int R::dimen::action_bar_title_text_size=0x0105003c;
+const int R::dimen::action_button_min_width=0x01050052;
+const int R::dimen::activity_chooser_popup_min_width=0x01050047;
+const int R::dimen::alert_dialog_button_bar_height=0x01050039;
+const int R::dimen::alert_dialog_title_height=0x01050038;
+const int R::dimen::app_icon_size=0x01050000;
+const int R::dimen::config_minScalingSpan=0x01050009;
+const int R::dimen::config_minScalingTouchMajor=0x0105000a;
+const int R::dimen::config_prefDialogWidth=0x01050007;
+const int R::dimen::config_viewConfigurationTouchSlop=0x01050008;
+const int R::dimen::default_app_widget_padding_bottom=0x01050051;
+const int R::dimen::default_app_widget_padding_left=0x0105004e;
+const int R::dimen::default_app_widget_padding_right=0x01050050;
+const int R::dimen::default_app_widget_padding_top=0x0105004f;
+const int R::dimen::default_gap=0x01050048;
+const int R::dimen::dialog_fixed_height_major=0x0105002f;
+const int R::dimen::dialog_fixed_height_minor=0x01050030;
+const int R::dimen::dialog_fixed_width_major=0x0105002d;
+const int R::dimen::dialog_fixed_width_minor=0x0105002e;
+const int R::dimen::dialog_min_width_major=0x01050003;
+const int R::dimen::dialog_min_width_minor=0x01050004;
+const int R::dimen::dropdownitem_icon_width=0x0105004b;
+const int R::dimen::dropdownitem_text_padding_left=0x01050049;
+const int R::dimen::dropdownitem_text_padding_right=0x0105004a;
+const int R::dimen::face_unlock_height=0x01050046;
+const int R::dimen::fastscroll_overlay_size=0x01050015;
+const int R::dimen::fastscroll_thumb_height=0x01050017;
+const int R::dimen::fastscroll_thumb_width=0x01050016;
+const int R::dimen::glowpadview_glow_radius=0x01050020;
+const int R::dimen::glowpadview_inner_radius=0x01050022;
+const int R::dimen::glowpadview_snap_margin=0x01050021;
+const int R::dimen::glowpadview_target_placement_radius=0x0105001f;
+const int R::dimen::keyguard_avatar_frame_shadow_radius=0x01050071;
+const int R::dimen::keyguard_avatar_frame_stroke_width=0x01050070;
+const int R::dimen::keyguard_avatar_name_size=0x01050073;
+const int R::dimen::keyguard_avatar_size=0x01050072;
+const int R::dimen::keyguard_lockscreen_clock_font_size=0x01050040;
+const int R::dimen::keyguard_lockscreen_outerring_diameter=0x0105001e;
+const int R::dimen::keyguard_lockscreen_pin_margin_left=0x01050045;
+const int R::dimen::keyguard_lockscreen_status_line_clockfont_bottom_margin=0x01050044;
+const int R::dimen::keyguard_lockscreen_status_line_clockfont_top_margin=0x01050043;
+const int R::dimen::keyguard_lockscreen_status_line_font_right_margin=0x01050042;
+const int R::dimen::keyguard_lockscreen_status_line_font_size=0x01050041;
+const int R::dimen::keyguard_muliuser_selector_margin=0x0105006f;
+const int R::dimen::keyguard_pattern_unlock_clock_font_size=0x01050079;
+const int R::dimen::keyguard_pattern_unlock_status_line_font_size=0x0105007a;
+const int R::dimen::keyguard_security_height=0x0105006d;
+const int R::dimen::keyguard_security_view_margin=0x0105006e;
+const int R::dimen::keyguard_security_width=0x0105006c;
+const int R::dimen::kg_clock_top_margin=0x01050060;
+const int R::dimen::kg_edge_swipe_region_size=0x01050074;
+const int R::dimen::kg_emergency_button_shift=0x01050077;
+const int R::dimen::kg_key_horizontal_gap=0x01050061;
+const int R::dimen::kg_key_vertical_gap=0x01050062;
+const int R::dimen::kg_pin_key_height=0x01050063;
+const int R::dimen::kg_runway_lights_height=0x01050065;
+const int R::dimen::kg_runway_lights_top_margin=0x0105006a;
+const int R::dimen::kg_runway_lights_vertical_padding=0x01050066;
+const int R::dimen::kg_secure_padding_height=0x01050064;
+const int R::dimen::kg_security_panel_height=0x01050058;
+const int R::dimen::kg_security_view_height=0x01050059;
+const int R::dimen::kg_small_widget_height=0x01050076;
+const int R::dimen::kg_squashed_layout_threshold=0x01050075;
+const int R::dimen::kg_status_clock_font_size=0x0105005c;
+const int R::dimen::kg_status_date_font_size=0x0105005d;
+const int R::dimen::kg_status_line_font_right_margin=0x0105005f;
+const int R::dimen::kg_status_line_font_size=0x0105005e;
+const int R::dimen::kg_widget_pager_bottom_padding=0x01050069;
+const int R::dimen::kg_widget_pager_horizontal_padding=0x01050067;
+const int R::dimen::kg_widget_pager_top_padding=0x01050068;
+const int R::dimen::kg_widget_view_height=0x0105005b;
+const int R::dimen::kg_widget_view_width=0x0105005a;
+const int R::dimen::min_xlarge_screen_width=0x01050018;
+const int R::dimen::navigation_bar_height=0x0105000d;
+const int R::dimen::navigation_bar_height_landscape=0x0105000e;
+const int R::dimen::navigation_bar_height_portrait=0x0105007b;
+const int R::dimen::navigation_bar_width=0x0105000f;
+const int R::dimen::notification_large_icon_height=0x01050006;
+const int R::dimen::notification_large_icon_width=0x01050005;
+const int R::dimen::notification_subtext_size=0x01050057;
+const int R::dimen::notification_text_size=0x01050055;
+const int R::dimen::notification_title_text_size=0x01050056;
+const int R::dimen::password_keyboard_height=0x01050078;
+const int R::dimen::password_keyboard_horizontalGap=0x0105001c;
+const int R::dimen::password_keyboard_key_height_alpha=0x01050019;
+const int R::dimen::password_keyboard_key_height_numeric=0x0105001a;
+const int R::dimen::password_keyboard_spacebar_vertical_correction=0x0105001b;
+const int R::dimen::password_keyboard_verticalGap=0x0105001d;
+const int R::dimen::preference_breadcrumb_paddingLeft=0x0105002a;
+const int R::dimen::preference_breadcrumb_paddingRight=0x0105002b;
+const int R::dimen::preference_child_padding_side=0x01050035;
+const int R::dimen::preference_fragment_padding_bottom=0x01050028;
+const int R::dimen::preference_fragment_padding_side=0x01050029;
+const int R::dimen::preference_icon_minWidth=0x0105002c;
+const int R::dimen::preference_item_padding_inner=0x01050034;
+const int R::dimen::preference_item_padding_side=0x01050033;
+const int R::dimen::preference_screen_bottom_margin=0x01050026;
+const int R::dimen::preference_screen_header_padding_side=0x01050032;
+const int R::dimen::preference_screen_header_vertical_padding=0x01050031;
+const int R::dimen::preference_screen_side_margin=0x01050023;
+const int R::dimen::preference_screen_side_margin_negative=0x01050024;
+const int R::dimen::preference_screen_top_margin=0x01050025;
+const int R::dimen::preference_widget_width=0x01050027;
+const int R::dimen::search_view_preferred_width=0x01050037;
+const int R::dimen::search_view_text_min_width=0x01050036;
+const int R::dimen::status_bar_content_number_size=0x01050011;
+const int R::dimen::status_bar_edge_ignore=0x01050014;
+const int R::dimen::status_bar_height=0x0105000c;
+const int R::dimen::status_bar_icon_size=0x01050010;
+const int R::dimen::system_bar_height=0x01050012;
+const int R::dimen::system_bar_icon_size=0x01050013;
+const int R::dimen::textview_error_popup_default_width=0x0105004c;
+const int R::dimen::thumbnail_height=0x01050001;
+const int R::dimen::thumbnail_width=0x01050002;
+const int R::dimen::toast_y_offset=0x0105000b;
+const int R::dimen::volume_panel_top=0x0105004d;
+const int R::drawable::ab_bottom_solid_dark_holo=0x0108009e;
+const int R::drawable::ab_bottom_solid_inverse_holo=0x0108009f;
+const int R::drawable::ab_bottom_solid_light_holo=0x010800a0;
+const int R::drawable::ab_bottom_transparent_dark_holo=0x010800a1;
+const int R::drawable::ab_bottom_transparent_light_holo=0x010800a2;
+const int R::drawable::ab_share_pack_holo_dark=0x010800a3;
+const int R::drawable::ab_share_pack_holo_light=0x010800b4;
+const int R::drawable::ab_solid_dark_holo=0x010800b5;
+const int R::drawable::ab_solid_light_holo=0x010800b6;
+const int R::drawable::ab_solid_shadow_holo=0x010800b7;
+const int R::drawable::ab_stacked_solid_dark_holo=0x010800b8;
+const int R::drawable::ab_stacked_solid_inverse_holo=0x010800b9;
+const int R::drawable::ab_stacked_solid_light_holo=0x010800ba;
+const int R::drawable::ab_stacked_transparent_dark_holo=0x010800bb;
+const int R::drawable::ab_stacked_transparent_light_holo=0x010800bc;
+const int R::drawable::ab_transparent_dark_holo=0x010800bd;
+const int R::drawable::ab_transparent_light_holo=0x010800be;
+const int R::drawable::action_bar_background=0x010800bf;
+const int R::drawable::action_bar_divider=0x010800c0;
+const int R::drawable::activated_background=0x010800c1;
+const int R::drawable::activated_background_holo_dark=0x010800c2;
+const int R::drawable::activated_background_holo_light=0x010800c3;
+const int R::drawable::activated_background_light=0x010800c4;
+const int R::drawable::activity_picker_bg=0x010800c5;
+const int R::drawable::activity_picker_bg_activated=0x010800c6;
+const int R::drawable::activity_picker_bg_focused=0x010800c7;
+const int R::drawable::activity_title_bar=0x010800c8;
+const int R::drawable::alert_dark_frame=0x01080000;
+const int R::drawable::alert_light_frame=0x01080001;
+const int R::drawable::app_icon_background=0x010800c9;
+const int R::drawable::arrow_down_float=0x01080002;
+const int R::drawable::arrow_up_float=0x01080003;
+const int R::drawable::background_cache_hint_selector_holo_dark=0x010800ca;
+const int R::drawable::background_cache_hint_selector_holo_light=0x010800cb;
+const int R::drawable::background_holo_dark=0x010800cc;
+const int R::drawable::background_holo_light=0x010800cd;
+const int R::drawable::battery_charge_background=0x010800ce;
+const int R::drawable::blank_tile=0x010800cf;
+const int R::drawable::bottom_bar=0x0108009a;
+const int R::drawable::box=0x010800d0;
+const int R::drawable::btn_browser_zoom_fit_page=0x010800d1;
+const int R::drawable::btn_browser_zoom_page_overview=0x010800d2;
+const int R::drawable::btn_cab_done_default_holo_dark=0x010800d3;
+const int R::drawable::btn_cab_done_default_holo_light=0x010800d4;
+const int R::drawable::btn_cab_done_focused_holo_dark=0x010800d5;
+const int R::drawable::btn_cab_done_focused_holo_light=0x010800d6;
+const int R::drawable::btn_cab_done_holo_dark=0x010800d7;
+const int R::drawable::btn_cab_done_holo_light=0x010800d8;
+const int R::drawable::btn_cab_done_pressed_holo_dark=0x010800d9;
+const int R::drawable::btn_cab_done_pressed_holo_light=0x010800da;
+const int R::drawable::btn_check=0x010800db;
+const int R::drawable::btn_check_buttonless_off=0x010800dc;
+const int R::drawable::btn_check_buttonless_on=0x010800dd;
+const int R::drawable::btn_check_holo_dark=0x010800de;
+const int R::drawable::btn_check_holo_light=0x010800df;
+const int R::drawable::btn_check_label_background=0x010800e0;
+const int R::drawable::btn_check_off=0x010800e1;
+const int R::drawable::btn_check_off_disable=0x010800e2;
+const int R::drawable::btn_check_off_disable_focused=0x010800e3;
+const int R::drawable::btn_check_off_disable_focused_holo_dark=0x010800e4;
+const int R::drawable::btn_check_off_disable_focused_holo_light=0x010800e5;
+const int R::drawable::btn_check_off_disable_holo_dark=0x010800e6;
+const int R::drawable::btn_check_off_disable_holo_light=0x010800e7;
+const int R::drawable::btn_check_off_disabled_focused_holo_dark=0x010800e8;
+const int R::drawable::btn_check_off_disabled_focused_holo_light=0x010800e9;
+const int R::drawable::btn_check_off_disabled_holo_dark=0x010800ea;
+const int R::drawable::btn_check_off_disabled_holo_light=0x010800eb;
+const int R::drawable::btn_check_off_focused_holo_dark=0x010800ec;
+const int R::drawable::btn_check_off_focused_holo_light=0x010800ed;
+const int R::drawable::btn_check_off_holo=0x010800ee;
+const int R::drawable::btn_check_off_holo_dark=0x010800ef;
+const int R::drawable::btn_check_off_holo_light=0x010800f0;
+const int R::drawable::btn_check_off_normal_holo_dark=0x010800f1;
+const int R::drawable::btn_check_off_normal_holo_light=0x010800f2;
+const int R::drawable::btn_check_off_pressed=0x010800f3;
+const int R::drawable::btn_check_off_pressed_holo_dark=0x010800f4;
+const int R::drawable::btn_check_off_pressed_holo_light=0x010800f5;
+const int R::drawable::btn_check_off_selected=0x010800f6;
+const int R::drawable::btn_check_on=0x010800f7;
+const int R::drawable::btn_check_on_disable=0x010800f8;
+const int R::drawable::btn_check_on_disable_focused=0x010800f9;
+const int R::drawable::btn_check_on_disable_focused_holo_light=0x010800fa;
+const int R::drawable::btn_check_on_disable_holo_dark=0x010800fb;
+const int R::drawable::btn_check_on_disable_holo_light=0x010800fc;
+const int R::drawable::btn_check_on_disabled_focused_holo_dark=0x010800fd;
+const int R::drawable::btn_check_on_disabled_focused_holo_light=0x010800fe;
+const int R::drawable::btn_check_on_disabled_holo_dark=0x010800ff;
+const int R::drawable::btn_check_on_disabled_holo_light=0x01080100;
+const int R::drawable::btn_check_on_focused_holo_dark=0x01080101;
+const int R::drawable::btn_check_on_focused_holo_light=0x01080102;
+const int R::drawable::btn_check_on_holo=0x01080103;
+const int R::drawable::btn_check_on_holo_dark=0x01080104;
+const int R::drawable::btn_check_on_holo_light=0x01080105;
+const int R::drawable::btn_check_on_pressed=0x01080106;
+const int R::drawable::btn_check_on_pressed_holo_dark=0x01080107;
+const int R::drawable::btn_check_on_pressed_holo_light=0x01080108;
+const int R::drawable::btn_check_on_selected=0x01080109;
+const int R::drawable::btn_circle=0x0108010a;
+const int R::drawable::btn_circle_disable=0x0108010b;
+const int R::drawable::btn_circle_disable_focused=0x0108010c;
+const int R::drawable::btn_circle_normal=0x0108010d;
+const int R::drawable::btn_circle_pressed=0x0108010e;
+const int R::drawable::btn_circle_selected=0x0108010f;
+const int R::drawable::btn_close=0x01080110;
+const int R::drawable::btn_close_normal=0x01080111;
+const int R::drawable::btn_close_pressed=0x01080112;
+const int R::drawable::btn_close_selected=0x01080113;
+const int R::drawable::btn_code_lock_default=0x01080114;
+const int R::drawable::btn_code_lock_default_holo=0x01080115;
+const int R::drawable::btn_code_lock_touched=0x01080116;
+const int R::drawable::btn_code_lock_touched_holo=0x01080117;
+const int R::drawable::btn_default=0x01080004;
+const int R::drawable::btn_default_disabled_focused_holo_dark=0x01080118;
+const int R::drawable::btn_default_disabled_focused_holo_light=0x01080119;
+const int R::drawable::btn_default_disabled_holo=0x0108011a;
+const int R::drawable::btn_default_disabled_holo_dark=0x0108011b;
+const int R::drawable::btn_default_disabled_holo_light=0x0108011c;
+const int R::drawable::btn_default_focused_holo=0x0108011d;
+const int R::drawable::btn_default_focused_holo_dark=0x0108011e;
+const int R::drawable::btn_default_focused_holo_light=0x0108011f;
+const int R::drawable::btn_default_holo_dark=0x01080120;
+const int R::drawable::btn_default_holo_light=0x01080121;
+const int R::drawable::btn_default_normal=0x01080122;
+const int R::drawable::btn_default_normal_disable=0x01080123;
+const int R::drawable::btn_default_normal_disable_focused=0x01080124;
+const int R::drawable::btn_default_normal_holo=0x01080125;
+const int R::drawable::btn_default_normal_holo_dark=0x01080126;
+const int R::drawable::btn_default_normal_holo_light=0x01080127;
+const int R::drawable::btn_default_pressed=0x01080128;
+const int R::drawable::btn_default_pressed_holo=0x01080129;
+const int R::drawable::btn_default_pressed_holo_dark=0x0108012a;
+const int R::drawable::btn_default_pressed_holo_light=0x0108012b;
+const int R::drawable::btn_default_selected=0x0108012c;
+const int R::drawable::btn_default_small=0x01080005;
+const int R::drawable::btn_default_small_normal=0x0108012d;
+const int R::drawable::btn_default_small_normal_disable=0x0108012e;
+const int R::drawable::btn_default_small_normal_disable_focused=0x0108012f;
+const int R::drawable::btn_default_small_pressed=0x01080130;
+const int R::drawable::btn_default_small_selected=0x01080131;
+const int R::drawable::btn_default_transparent=0x01080132;
+const int R::drawable::btn_default_transparent_normal=0x01080133;
+const int R::drawable::btn_dialog=0x01080017;
+const int R::drawable::btn_dialog_disable=0x01080134;
+const int R::drawable::btn_dialog_normal=0x01080135;
+const int R::drawable::btn_dialog_pressed=0x01080136;
+const int R::drawable::btn_dialog_selected=0x01080137;
+const int R::drawable::btn_dropdown=0x01080006;
+const int R::drawable::btn_dropdown_disabled=0x01080138;
+const int R::drawable::btn_dropdown_disabled_focused=0x01080139;
+const int R::drawable::btn_dropdown_normal=0x0108013a;
+const int R::drawable::btn_dropdown_pressed=0x0108013b;
+const int R::drawable::btn_dropdown_selected=0x0108013c;
+const int R::drawable::btn_erase_default=0x0108013d;
+const int R::drawable::btn_erase_pressed=0x0108013e;
+const int R::drawable::btn_erase_selected=0x0108013f;
+const int R::drawable::btn_global_search=0x01080140;
+const int R::drawable::btn_global_search_normal=0x01080141;
+const int R::drawable::btn_group_disabled_holo_dark=0x01080142;
+const int R::drawable::btn_group_disabled_holo_light=0x01080143;
+const int R::drawable::btn_group_focused_holo_dark=0x01080144;
+const int R::drawable::btn_group_focused_holo_light=0x01080145;
+const int R::drawable::btn_group_holo_dark=0x01080146;
+const int R::drawable::btn_group_holo_light=0x01080147;
+const int R::drawable::btn_group_normal_holo_dark=0x01080148;
+const int R::drawable::btn_group_normal_holo_light=0x01080149;
+const int R::drawable::btn_group_pressed_holo_dark=0x0108014a;
+const int R::drawable::btn_group_pressed_holo_light=0x0108014b;
+const int R::drawable::btn_keyboard_key=0x0108014c;
+const int R::drawable::btn_keyboard_key_dark_normal_holo=0x0108014d;
+const int R::drawable::btn_keyboard_key_dark_normal_off_holo=0x0108014e;
+const int R::drawable::btn_keyboard_key_dark_normal_on_holo=0x0108014f;
+const int R::drawable::btn_keyboard_key_dark_pressed_holo=0x01080150;
+const int R::drawable::btn_keyboard_key_dark_pressed_off_holo=0x01080151;
+const int R::drawable::btn_keyboard_key_dark_pressed_on_holo=0x01080152;
+const int R::drawable::btn_keyboard_key_fulltrans=0x01080153;
+const int R::drawable::btn_keyboard_key_fulltrans_normal=0x01080154;
+const int R::drawable::btn_keyboard_key_fulltrans_normal_off=0x01080155;
+const int R::drawable::btn_keyboard_key_fulltrans_normal_on=0x01080156;
+const int R::drawable::btn_keyboard_key_fulltrans_pressed=0x01080157;
+const int R::drawable::btn_keyboard_key_fulltrans_pressed_off=0x01080158;
+const int R::drawable::btn_keyboard_key_fulltrans_pressed_on=0x01080159;
+const int R::drawable::btn_keyboard_key_ics=0x0108015a;
+const int R::drawable::btn_keyboard_key_light_normal_holo=0x0108015b;
+const int R::drawable::btn_keyboard_key_light_pressed_holo=0x0108015c;
+const int R::drawable::btn_keyboard_key_normal=0x0108015d;
+const int R::drawable::btn_keyboard_key_normal_off=0x0108015e;
+const int R::drawable::btn_keyboard_key_normal_on=0x0108015f;
+const int R::drawable::btn_keyboard_key_pressed=0x01080160;
+const int R::drawable::btn_keyboard_key_pressed_off=0x01080161;
+const int R::drawable::btn_keyboard_key_pressed_on=0x01080162;
+const int R::drawable::btn_keyboard_key_trans=0x01080163;
+const int R::drawable::btn_keyboard_key_trans_normal=0x01080164;
+const int R::drawable::btn_keyboard_key_trans_normal_off=0x01080165;
+const int R::drawable::btn_keyboard_key_trans_normal_on=0x01080166;
+const int R::drawable::btn_keyboard_key_trans_pressed=0x01080167;
+const int R::drawable::btn_keyboard_key_trans_pressed_off=0x01080168;
+const int R::drawable::btn_keyboard_key_trans_pressed_on=0x01080169;
+const int R::drawable::btn_keyboard_key_trans_selected=0x0108016a;
+const int R::drawable::btn_lock_normal=0x0108016b;
+const int R::drawable::btn_media_player=0x0108016c;
+const int R::drawable::btn_media_player_disabled=0x0108016d;
+const int R::drawable::btn_media_player_disabled_selected=0x0108016e;
+const int R::drawable::btn_media_player_pressed=0x0108016f;
+const int R::drawable::btn_media_player_selected=0x01080170;
+const int R::drawable::btn_minus=0x01080007;
+const int R::drawable::btn_minus_default=0x01080171;
+const int R::drawable::btn_minus_disable=0x01080172;
+const int R::drawable::btn_minus_disable_focused=0x01080173;
+const int R::drawable::btn_minus_pressed=0x01080174;
+const int R::drawable::btn_minus_selected=0x01080175;
+const int R::drawable::btn_plus=0x01080008;
+const int R::drawable::btn_plus_default=0x01080176;
+const int R::drawable::btn_plus_disable=0x01080177;
+const int R::drawable::btn_plus_disable_focused=0x01080178;
+const int R::drawable::btn_plus_pressed=0x01080179;
+const int R::drawable::btn_plus_selected=0x0108017a;
+const int R::drawable::btn_radio=0x01080009;
+const int R::drawable::btn_radio_holo_dark=0x0108017b;
+const int R::drawable::btn_radio_holo_light=0x0108017c;
+const int R::drawable::btn_radio_label_background=0x0108017d;
+const int R::drawable::btn_radio_off=0x0108017e;
+const int R::drawable::btn_radio_off_disabled_focused_holo_dark=0x0108017f;
+const int R::drawable::btn_radio_off_disabled_focused_holo_light=0x01080180;
+const int R::drawable::btn_radio_off_disabled_holo_dark=0x01080181;
+const int R::drawable::btn_radio_off_disabled_holo_light=0x01080182;
+const int R::drawable::btn_radio_off_focused_holo_dark=0x01080183;
+const int R::drawable::btn_radio_off_focused_holo_light=0x01080184;
+const int R::drawable::btn_radio_off_holo=0x01080185;
+const int R::drawable::btn_radio_off_holo_dark=0x01080186;
+const int R::drawable::btn_radio_off_holo_light=0x01080187;
+const int R::drawable::btn_radio_off_pressed=0x01080188;
+const int R::drawable::btn_radio_off_pressed_holo_dark=0x01080189;
+const int R::drawable::btn_radio_off_pressed_holo_light=0x0108018a;
+const int R::drawable::btn_radio_off_selected=0x0108018b;
+const int R::drawable::btn_radio_on=0x0108018c;
+const int R::drawable::btn_radio_on_disabled_focused_holo_dark=0x0108018d;
+const int R::drawable::btn_radio_on_disabled_focused_holo_light=0x0108018e;
+const int R::drawable::btn_radio_on_disabled_holo_dark=0x0108018f;
+const int R::drawable::btn_radio_on_disabled_holo_light=0x01080190;
+const int R::drawable::btn_radio_on_focused_holo_dark=0x01080191;
+const int R::drawable::btn_radio_on_focused_holo_light=0x01080192;
+const int R::drawable::btn_radio_on_holo=0x01080193;
+const int R::drawable::btn_radio_on_holo_dark=0x01080194;
+const int R::drawable::btn_radio_on_holo_light=0x01080195;
+const int R::drawable::btn_radio_on_pressed=0x01080196;
+const int R::drawable::btn_radio_on_pressed_holo_dark=0x01080197;
+const int R::drawable::btn_radio_on_pressed_holo_light=0x01080198;
+const int R::drawable::btn_radio_on_selected=0x01080199;
+const int R::drawable::btn_rating_star_off_disabled_focused_holo_dark=0x0108019a;
+const int R::drawable::btn_rating_star_off_disabled_focused_holo_light=0x0108019b;
+const int R::drawable::btn_rating_star_off_disabled_holo_dark=0x0108019c;
+const int R::drawable::btn_rating_star_off_disabled_holo_light=0x0108019d;
+const int R::drawable::btn_rating_star_off_focused_holo_dark=0x0108019e;
+const int R::drawable::btn_rating_star_off_focused_holo_light=0x0108019f;
+const int R::drawable::btn_rating_star_off_normal=0x010801a0;
+const int R::drawable::btn_rating_star_off_normal_holo_dark=0x010801a1;
+const int R::drawable::btn_rating_star_off_normal_holo_light=0x010801a2;
+const int R::drawable::btn_rating_star_off_pressed=0x010801a3;
+const int R::drawable::btn_rating_star_off_pressed_holo_dark=0x010801a4;
+const int R::drawable::btn_rating_star_off_pressed_holo_light=0x010801a5;
+const int R::drawable::btn_rating_star_off_selected=0x010801a6;
+const int R::drawable::btn_rating_star_on_disabled_focused_holo_dark=0x010801a7;
+const int R::drawable::btn_rating_star_on_disabled_focused_holo_light=0x010801a8;
+const int R::drawable::btn_rating_star_on_disabled_holo_dark=0x010801a9;
+const int R::drawable::btn_rating_star_on_disabled_holo_light=0x010801aa;
+const int R::drawable::btn_rating_star_on_focused_holo_dark=0x010801ab;
+const int R::drawable::btn_rating_star_on_focused_holo_light=0x010801ac;
+const int R::drawable::btn_rating_star_on_normal=0x010801ad;
+const int R::drawable::btn_rating_star_on_normal_holo_dark=0x010801ae;
+const int R::drawable::btn_rating_star_on_normal_holo_light=0x010801af;
+const int R::drawable::btn_rating_star_on_pressed=0x010801b0;
+const int R::drawable::btn_rating_star_on_pressed_holo_dark=0x010801b1;
+const int R::drawable::btn_rating_star_on_pressed_holo_light=0x010801b2;
+const int R::drawable::btn_rating_star_on_selected=0x010801b3;
+const int R::drawable::btn_search_dialog=0x010801b4;
+const int R::drawable::btn_search_dialog_default=0x010801b5;
+const int R::drawable::btn_search_dialog_pressed=0x010801b6;
+const int R::drawable::btn_search_dialog_selected=0x010801b7;
+const int R::drawable::btn_search_dialog_voice=0x010801b8;
+const int R::drawable::btn_search_dialog_voice_default=0x010801b9;
+const int R::drawable::btn_search_dialog_voice_pressed=0x010801ba;
+const int R::drawable::btn_search_dialog_voice_selected=0x010801bb;
+const int R::drawable::btn_square_overlay=0x010801bc;
+const int R::drawable::btn_square_overlay_disabled=0x010801bd;
+const int R::drawable::btn_square_overlay_disabled_focused=0x010801be;
+const int R::drawable::btn_square_overlay_normal=0x010801bf;
+const int R::drawable::btn_square_overlay_pressed=0x010801c0;
+const int R::drawable::btn_square_overlay_selected=0x010801c1;
+const int R::drawable::btn_star=0x0108000a;
+const int R::drawable::btn_star_big_off=0x0108000b;
+const int R::drawable::btn_star_big_off_disable=0x010801c2;
+const int R::drawable::btn_star_big_off_disable_focused=0x010801c3;
+const int R::drawable::btn_star_big_off_pressed=0x010801c4;
+const int R::drawable::btn_star_big_off_selected=0x010801c5;
+const int R::drawable::btn_star_big_on=0x0108000c;
+const int R::drawable::btn_star_big_on_disable=0x010801c6;
+const int R::drawable::btn_star_big_on_disable_focused=0x010801c7;
+const int R::drawable::btn_star_big_on_pressed=0x010801c8;
+const int R::drawable::btn_star_big_on_selected=0x010801c9;
+const int R::drawable::btn_star_holo_dark=0x010801ca;
+const int R::drawable::btn_star_holo_light=0x010801cb;
+const int R::drawable::btn_star_label_background=0x010801cc;
+const int R::drawable::btn_star_off_disabled_focused_holo_dark=0x010801cd;
+const int R::drawable::btn_star_off_disabled_focused_holo_light=0x010801ce;
+const int R::drawable::btn_star_off_disabled_holo_dark=0x010801cf;
+const int R::drawable::btn_star_off_disabled_holo_light=0x010801d0;
+const int R::drawable::btn_star_off_focused_holo_dark=0x010801d1;
+const int R::drawable::btn_star_off_focused_holo_light=0x010801d2;
+const int R::drawable::btn_star_off_normal_holo_dark=0x010801d3;
+const int R::drawable::btn_star_off_normal_holo_light=0x010801d4;
+const int R::drawable::btn_star_off_pressed_holo_dark=0x010801d5;
+const int R::drawable::btn_star_off_pressed_holo_light=0x010801d6;
+const int R::drawable::btn_star_on_disabled_focused_holo_dark=0x010801d7;
+const int R::drawable::btn_star_on_disabled_focused_holo_light=0x010801d8;
+const int R::drawable::btn_star_on_disabled_holo_dark=0x010801d9;
+const int R::drawable::btn_star_on_disabled_holo_light=0x010801da;
+const int R::drawable::btn_star_on_focused_holo_dark=0x010801db;
+const int R::drawable::btn_star_on_focused_holo_light=0x010801dc;
+const int R::drawable::btn_star_on_normal_holo_dark=0x010801dd;
+const int R::drawable::btn_star_on_normal_holo_light=0x010801de;
+const int R::drawable::btn_star_on_pressed_holo_dark=0x010801df;
+const int R::drawable::btn_star_on_pressed_holo_light=0x010801e0;
+const int R::drawable::btn_toggle=0x010801e1;
+const int R::drawable::btn_toggle_bg=0x010801e2;
+const int R::drawable::btn_toggle_holo_dark=0x010801e3;
+const int R::drawable::btn_toggle_holo_light=0x010801e4;
+const int R::drawable::btn_toggle_off=0x010801e5;
+const int R::drawable::btn_toggle_off_disabled_focused_holo_dark=0x010801e6;
+const int R::drawable::btn_toggle_off_disabled_focused_holo_light=0x010801e7;
+const int R::drawable::btn_toggle_off_disabled_holo_dark=0x010801e8;
+const int R::drawable::btn_toggle_off_disabled_holo_light=0x010801e9;
+const int R::drawable::btn_toggle_off_focused_holo_dark=0x010801ea;
+const int R::drawable::btn_toggle_off_focused_holo_light=0x010801eb;
+const int R::drawable::btn_toggle_off_normal_holo_dark=0x010801ec;
+const int R::drawable::btn_toggle_off_normal_holo_light=0x010801ed;
+const int R::drawable::btn_toggle_off_pressed_holo_dark=0x010801ee;
+const int R::drawable::btn_toggle_off_pressed_holo_light=0x010801ef;
+const int R::drawable::btn_toggle_on=0x010801f0;
+const int R::drawable::btn_toggle_on_disabled_focused_holo_dark=0x010801f1;
+const int R::drawable::btn_toggle_on_disabled_focused_holo_light=0x010801f2;
+const int R::drawable::btn_toggle_on_disabled_holo_dark=0x010801f3;
+const int R::drawable::btn_toggle_on_disabled_holo_light=0x010801f4;
+const int R::drawable::btn_toggle_on_focused_holo_dark=0x010801f5;
+const int R::drawable::btn_toggle_on_focused_holo_light=0x010801f6;
+const int R::drawable::btn_toggle_on_normal_holo_dark=0x010801f7;
+const int R::drawable::btn_toggle_on_normal_holo_light=0x010801f8;
+const int R::drawable::btn_toggle_on_pressed_holo_dark=0x010801f9;
+const int R::drawable::btn_toggle_on_pressed_holo_light=0x010801fa;
+const int R::drawable::btn_zoom_down=0x010801fb;
+const int R::drawable::btn_zoom_down_disabled=0x010801fc;
+const int R::drawable::btn_zoom_down_disabled_focused=0x010801fd;
+const int R::drawable::btn_zoom_down_normal=0x010801fe;
+const int R::drawable::btn_zoom_down_pressed=0x010801ff;
+const int R::drawable::btn_zoom_down_selected=0x01080200;
+const int R::drawable::btn_zoom_page=0x01080201;
+const int R::drawable::btn_zoom_page_normal=0x01080202;
+const int R::drawable::btn_zoom_page_press=0x01080203;
+const int R::drawable::btn_zoom_up=0x01080204;
+const int R::drawable::btn_zoom_up_disabled=0x01080205;
+const int R::drawable::btn_zoom_up_disabled_focused=0x01080206;
+const int R::drawable::btn_zoom_up_normal=0x01080207;
+const int R::drawable::btn_zoom_up_pressed=0x01080208;
+const int R::drawable::btn_zoom_up_selected=0x01080209;
+const int R::drawable::button_inset=0x0108020a;
+const int R::drawable::button_onoff_indicator_off=0x0108000e;
+const int R::drawable::button_onoff_indicator_on=0x0108000d;
+const int R::drawable::cab_background_bottom_holo_dark=0x0108020b;
+const int R::drawable::cab_background_bottom_holo_light=0x0108020c;
+const int R::drawable::cab_background_top_holo_dark=0x0108020d;
+const int R::drawable::cab_background_top_holo_light=0x0108020e;
+const int R::drawable::call_contact=0x0108020f;
+const int R::drawable::checkbox_off_background=0x0108000f;
+const int R::drawable::checkbox_on_background=0x01080010;
+const int R::drawable::clock_dial=0x01080210;
+const int R::drawable::clock_hand_hour=0x01080211;
+const int R::drawable::clock_hand_minute=0x01080212;
+const int R::drawable::code_lock_bottom=0x01080213;
+const int R::drawable::code_lock_left=0x01080214;
+const int R::drawable::code_lock_top=0x01080215;
+const int R::drawable::combobox_disabled=0x01080216;
+const int R::drawable::combobox_nohighlight=0x01080217;
+const int R::drawable::compass_arrow=0x01080218;
+const int R::drawable::compass_base=0x01080219;
+const int R::drawable::contact_header_bg=0x0108021a;
+const int R::drawable::create_contact=0x0108021b;
+const int R::drawable::dark_header=0x010800a5;
+const int R::drawable::dark_header_dither=0x0108021c;
+const int R::drawable::day_picker_week_view_dayline_holo=0x0108021d;
+const int R::drawable::default_wallpaper=0x0108021e;
+const int R::drawable::dialog_bottom_holo_dark=0x0108021f;
+const int R::drawable::dialog_bottom_holo_light=0x01080220;
+const int R::drawable::dialog_divider_horizontal_holo_dark=0x01080221;
+const int R::drawable::dialog_divider_horizontal_holo_light=0x01080222;
+const int R::drawable::dialog_divider_horizontal_light=0x01080223;
+const int R::drawable::dialog_frame=0x01080011;
+const int R::drawable::dialog_full_holo_dark=0x01080224;
+const int R::drawable::dialog_full_holo_light=0x01080225;
+const int R::drawable::dialog_holo_dark_frame=0x010800b2;
+const int R::drawable::dialog_holo_light_frame=0x010800b3;
+const int R::drawable::dialog_ic_close_focused_holo_dark=0x01080226;
+const int R::drawable::dialog_ic_close_focused_holo_light=0x01080227;
+const int R::drawable::dialog_ic_close_normal_holo_dark=0x01080228;
+const int R::drawable::dialog_ic_close_normal_holo_light=0x01080229;
+const int R::drawable::dialog_ic_close_pressed_holo_dark=0x0108022a;
+const int R::drawable::dialog_ic_close_pressed_holo_light=0x0108022b;
+const int R::drawable::dialog_middle_holo=0x0108022c;
+const int R::drawable::dialog_middle_holo_dark=0x0108022d;
+const int R::drawable::dialog_middle_holo_light=0x0108022e;
+const int R::drawable::dialog_top_holo_dark=0x0108022f;
+const int R::drawable::dialog_top_holo_light=0x01080230;
+const int R::drawable::divider_horizontal_bright=0x01080012;
+const int R::drawable::divider_horizontal_bright_opaque=0x01080231;
+const int R::drawable::divider_horizontal_dark=0x01080014;
+const int R::drawable::divider_horizontal_dark_opaque=0x01080232;
+const int R::drawable::divider_horizontal_dim_dark=0x01080015;
+const int R::drawable::divider_horizontal_holo_dark=0x01080233;
+const int R::drawable::divider_horizontal_holo_light=0x01080234;
+const int R::drawable::divider_horizontal_textfield=0x01080013;
+const int R::drawable::divider_strong_holo=0x01080235;
+const int R::drawable::divider_vertical_bright=0x01080236;
+const int R::drawable::divider_vertical_bright_opaque=0x01080237;
+const int R::drawable::divider_vertical_dark=0x01080238;
+const int R::drawable::divider_vertical_dark_opaque=0x01080239;
+const int R::drawable::divider_vertical_holo_dark=0x0108023a;
+const int R::drawable::divider_vertical_holo_light=0x0108023b;
+const int R::drawable::dropdown_disabled_focused_holo_dark=0x0108023c;
+const int R::drawable::dropdown_disabled_focused_holo_light=0x0108023d;
+const int R::drawable::dropdown_disabled_holo_dark=0x0108023e;
+const int R::drawable::dropdown_disabled_holo_light=0x0108023f;
+const int R::drawable::dropdown_focused_holo_dark=0x01080240;
+const int R::drawable::dropdown_focused_holo_light=0x01080241;
+const int R::drawable::dropdown_ic_arrow_disabled_focused_holo_dark=0x01080242;
+const int R::drawable::dropdown_ic_arrow_disabled_focused_holo_light=0x01080243;
+const int R::drawable::dropdown_ic_arrow_disabled_holo_dark=0x01080244;
+const int R::drawable::dropdown_ic_arrow_disabled_holo_light=0x01080245;
+const int R::drawable::dropdown_ic_arrow_focused_holo_dark=0x01080246;
+const int R::drawable::dropdown_ic_arrow_focused_holo_light=0x01080247;
+const int R::drawable::dropdown_ic_arrow_normal_holo_dark=0x01080248;
+const int R::drawable::dropdown_ic_arrow_normal_holo_light=0x01080249;
+const int R::drawable::dropdown_ic_arrow_pressed_holo_dark=0x0108024a;
+const int R::drawable::dropdown_ic_arrow_pressed_holo_light=0x0108024b;
+const int R::drawable::dropdown_normal_holo_dark=0x0108024c;
+const int R::drawable::dropdown_normal_holo_light=0x0108024d;
+const int R::drawable::dropdown_pressed_holo_dark=0x0108024e;
+const int R::drawable::dropdown_pressed_holo_light=0x0108024f;
+const int R::drawable::edit_query=0x01080250;
+const int R::drawable::edit_query_background=0x01080251;
+const int R::drawable::edit_query_background_normal=0x01080252;
+const int R::drawable::edit_query_background_pressed=0x01080253;
+const int R::drawable::edit_query_background_selected=0x01080254;
+const int R::drawable::edit_text=0x01080016;
+const int R::drawable::edit_text_holo_dark=0x01080255;
+const int R::drawable::edit_text_holo_light=0x01080256;
+const int R::drawable::editbox_background=0x01080018;
+const int R::drawable::editbox_background_focus_yellow=0x01080257;
+const int R::drawable::editbox_background_normal=0x01080019;
+const int R::drawable::editbox_dropdown_background=0x01080258;
+const int R::drawable::editbox_dropdown_background_dark=0x01080259;
+const int R::drawable::editbox_dropdown_dark_frame=0x0108001a;
+const int R::drawable::editbox_dropdown_light_frame=0x0108001b;
+const int R::drawable::emo_im_angel=0x0108025a;
+const int R::drawable::emo_im_cool=0x0108025b;
+const int R::drawable::emo_im_crying=0x0108025c;
+const int R::drawable::emo_im_embarrassed=0x0108025d;
+const int R::drawable::emo_im_foot_in_mouth=0x0108025e;
+const int R::drawable::emo_im_happy=0x0108025f;
+const int R::drawable::emo_im_kissing=0x01080260;
+const int R::drawable::emo_im_laughing=0x01080261;
+const int R::drawable::emo_im_lips_are_sealed=0x01080262;
+const int R::drawable::emo_im_money_mouth=0x01080263;
+const int R::drawable::emo_im_sad=0x01080264;
+const int R::drawable::emo_im_surprised=0x01080265;
+const int R::drawable::emo_im_tongue_sticking_out=0x01080266;
+const int R::drawable::emo_im_undecided=0x01080267;
+const int R::drawable::emo_im_winking=0x01080268;
+const int R::drawable::emo_im_wtf=0x01080269;
+const int R::drawable::emo_im_yelling=0x0108026a;
+const int R::drawable::expander_close_holo_dark=0x0108026b;
+const int R::drawable::expander_close_holo_light=0x0108026c;
+const int R::drawable::expander_group=0x0108026d;
+const int R::drawable::expander_group_holo_dark=0x0108026e;
+const int R::drawable::expander_group_holo_light=0x0108026f;
+const int R::drawable::expander_ic_maximized=0x01080270;
+const int R::drawable::expander_ic_minimized=0x01080271;
+const int R::drawable::expander_open_holo_dark=0x01080272;
+const int R::drawable::expander_open_holo_light=0x01080273;
+const int R::drawable::fastscroll_label_left_holo_dark=0x01080274;
+const int R::drawable::fastscroll_label_left_holo_light=0x01080275;
+const int R::drawable::fastscroll_label_right_holo_dark=0x01080276;
+const int R::drawable::fastscroll_label_right_holo_light=0x01080277;
+const int R::drawable::fastscroll_thumb_default_holo=0x01080278;
+const int R::drawable::fastscroll_thumb_holo=0x01080279;
+const int R::drawable::fastscroll_thumb_pressed_holo=0x0108027a;
+const int R::drawable::fastscroll_track_default_holo_dark=0x0108027b;
+const int R::drawable::fastscroll_track_default_holo_light=0x0108027c;
+const int R::drawable::fastscroll_track_holo_dark=0x0108027d;
+const int R::drawable::fastscroll_track_holo_light=0x0108027e;
+const int R::drawable::fastscroll_track_pressed_holo_dark=0x0108027f;
+const int R::drawable::fastscroll_track_pressed_holo_light=0x01080280;
+const int R::drawable::focused_application_background_static=0x01080281;
+const int R::drawable::frame_gallery_thumb=0x01080282;
+const int R::drawable::frame_gallery_thumb_pressed=0x01080283;
+const int R::drawable::frame_gallery_thumb_selected=0x01080284;
+const int R::drawable::gallery_item_background=0x01080285;
+const int R::drawable::gallery_selected_default=0x01080286;
+const int R::drawable::gallery_selected_focused=0x01080287;
+const int R::drawable::gallery_selected_pressed=0x01080288;
+const int R::drawable::gallery_thumb=0x0108001c;
+const int R::drawable::gallery_unselected_default=0x01080289;
+const int R::drawable::gallery_unselected_pressed=0x0108028a;
+const int R::drawable::grid_selector_background=0x0108028b;
+const int R::drawable::grid_selector_background_focus=0x0108028c;
+const int R::drawable::grid_selector_background_pressed=0x0108028d;
+const int R::drawable::highlight_disabled=0x0108028e;
+const int R::drawable::highlight_pressed=0x0108028f;
+const int R::drawable::highlight_selected=0x01080290;
+const int R::drawable::ic_ab_back_holo_dark=0x01080291;
+const int R::drawable::ic_ab_back_holo_light=0x01080292;
+const int R::drawable::ic_action_assist_focused=0x01080293;
+const int R::drawable::ic_action_assist_generic=0x01080294;
+const int R::drawable::ic_action_assist_generic_activated=0x01080295;
+const int R::drawable::ic_action_assist_generic_normal=0x01080296;
+const int R::drawable::ic_aggregated=0x01080297;
+const int R::drawable::ic_audio_alarm=0x01080298;
+const int R::drawable::ic_audio_alarm_mute=0x01080299;
+const int R::drawable::ic_audio_bt=0x0108029a;
+const int R::drawable::ic_audio_bt_mute=0x0108029b;
+const int R::drawable::ic_audio_notification=0x0108029c;
+const int R::drawable::ic_audio_notification_mute=0x0108029d;
+const int R::drawable::ic_audio_phone=0x0108029e;
+const int R::drawable::ic_audio_ring_notif=0x0108029f;
+const int R::drawable::ic_audio_ring_notif_mute=0x010802a0;
+const int R::drawable::ic_audio_ring_notif_vibrate=0x010802a1;
+const int R::drawable::ic_audio_vol=0x010802a2;
+const int R::drawable::ic_audio_vol_mute=0x010802a3;
+const int R::drawable::ic_btn_round_more=0x010802a4;
+const int R::drawable::ic_btn_round_more_disabled=0x010802a5;
+const int R::drawable::ic_btn_round_more_normal=0x010802a6;
+const int R::drawable::ic_btn_search=0x010802a7;
+const int R::drawable::ic_btn_search_go=0x010802a8;
+const int R::drawable::ic_btn_speak_now=0x010800a4;
+const int R::drawable::ic_btn_square_browser_zoom_fit_page=0x010802a9;
+const int R::drawable::ic_btn_square_browser_zoom_fit_page_disabled=0x010802aa;
+const int R::drawable::ic_btn_square_browser_zoom_fit_page_normal=0x010802ab;
+const int R::drawable::ic_btn_square_browser_zoom_page_overview=0x010802ac;
+const int R::drawable::ic_btn_square_browser_zoom_page_overview_disabled=0x010802ad;
+const int R::drawable::ic_btn_square_browser_zoom_page_overview_normal=0x010802ae;
+const int R::drawable::ic_bullet_key_permission=0x010802af;
+const int R::drawable::ic_cab_done_holo=0x010802b0;
+const int R::drawable::ic_cab_done_holo_dark=0x010802b1;
+const int R::drawable::ic_cab_done_holo_light=0x010802b2;
+const int R::drawable::ic_checkmark_holo_light=0x010802b3;
+const int R::drawable::ic_clear=0x010802b4;
+const int R::drawable::ic_clear_disabled=0x010802b5;
+const int R::drawable::ic_clear_holo_light=0x010802b6;
+const int R::drawable::ic_clear_normal=0x010802b7;
+const int R::drawable::ic_clear_search_api_disabled_holo_light=0x010802b8;
+const int R::drawable::ic_clear_search_api_holo_light=0x010802b9;
+const int R::drawable::ic_coins_s=0x010802ba;
+const int R::drawable::ic_commit=0x010802bb;
+const int R::drawable::ic_commit_search_api_holo_dark=0x010802bc;
+const int R::drawable::ic_commit_search_api_holo_light=0x010802bd;
+const int R::drawable::ic_contact_picture=0x010802be;
+const int R::drawable::ic_contact_picture_2=0x010802bf;
+const int R::drawable::ic_contact_picture_3=0x010802c0;
+const int R::drawable::ic_delete=0x0108001d;
+const int R::drawable::ic_dialog_alert=0x01080027;
+const int R::drawable::ic_dialog_alert_holo_dark=0x010802c1;
+const int R::drawable::ic_dialog_alert_holo_light=0x010802c2;
+const int R::drawable::ic_dialog_close_normal_holo=0x010802c3;
+const int R::drawable::ic_dialog_close_pressed_holo=0x010802c4;
+const int R::drawable::ic_dialog_dialer=0x01080028;
+const int R::drawable::ic_dialog_email=0x01080029;
+const int R::drawable::ic_dialog_focused_holo=0x010802c5;
+const int R::drawable::ic_dialog_info=0x0108009b;
+const int R::drawable::ic_dialog_map=0x0108002a;
+const int R::drawable::ic_dialog_time=0x010802c6;
+const int R::drawable::ic_dialog_usb=0x010802c7;
+const int R::drawable::ic_emergency=0x010802c8;
+const int R::drawable::ic_facial_backup=0x010802c9;
+const int R::drawable::ic_find_next_holo_dark=0x010802ca;
+const int R::drawable::ic_find_next_holo_light=0x010802cb;
+const int R::drawable::ic_find_previous_holo_dark=0x010802cc;
+const int R::drawable::ic_find_previous_holo_light=0x010802cd;
+const int R::drawable::ic_go=0x010802ce;
+const int R::drawable::ic_go_search_api_holo_light=0x010802cf;
+const int R::drawable::ic_input_add=0x0108002b;
+const int R::drawable::ic_input_delete=0x0108002c;
+const int R::drawable::ic_input_get=0x0108002d;
+const int R::drawable::ic_jog_dial_answer=0x010802d0;
+const int R::drawable::ic_jog_dial_answer_and_end=0x010802d1;
+const int R::drawable::ic_jog_dial_answer_and_hold=0x010802d2;
+const int R::drawable::ic_jog_dial_decline=0x010802d3;
+const int R::drawable::ic_jog_dial_sound_off=0x010802d4;
+const int R::drawable::ic_jog_dial_sound_on=0x010802d5;
+const int R::drawable::ic_jog_dial_unlock=0x010802d6;
+const int R::drawable::ic_jog_dial_vibrate_on=0x010802d7;
+const int R::drawable::ic_launcher_android=0x010802d8;
+const int R::drawable::ic_lock_airplane_mode=0x010802d9;
+const int R::drawable::ic_lock_airplane_mode_off=0x010802da;
+const int R::drawable::ic_lock_idle_alarm=0x0108002e;
+const int R::drawable::ic_lock_idle_charging=0x0108001e;
+const int R::drawable::ic_lock_idle_lock=0x0108001f;
+const int R::drawable::ic_lock_idle_low_battery=0x01080020;
+const int R::drawable::ic_lock_lock=0x0108002f;
+const int R::drawable::ic_lock_power_off=0x01080030;
+const int R::drawable::ic_lock_ringer_off=0x010802db;
+const int R::drawable::ic_lock_ringer_on=0x010802dc;
+const int R::drawable::ic_lock_silent_mode=0x01080031;
+const int R::drawable::ic_lock_silent_mode_off=0x01080032;
+const int R::drawable::ic_lock_silent_mode_vibrate=0x010802dd;
+const int R::drawable::ic_lockscreen_alarm=0x010802de;
+const int R::drawable::ic_lockscreen_camera=0x010802df;
+const int R::drawable::ic_lockscreen_camera_activated=0x010802e0;
+const int R::drawable::ic_lockscreen_camera_normal=0x010802e1;
+const int R::drawable::ic_lockscreen_emergencycall_normal=0x010802e2;
+const int R::drawable::ic_lockscreen_emergencycall_pressed=0x010802e3;
+const int R::drawable::ic_lockscreen_forgotpassword_normal=0x010802e4;
+const int R::drawable::ic_lockscreen_forgotpassword_pressed=0x010802e5;
+const int R::drawable::ic_lockscreen_glowdot=0x010802e6;
+const int R::drawable::ic_lockscreen_google_activated=0x010802e7;
+const int R::drawable::ic_lockscreen_google_focused=0x010802e8;
+const int R::drawable::ic_lockscreen_google_normal=0x010802e9;
+const int R::drawable::ic_lockscreen_handle=0x010802ea;
+const int R::drawable::ic_lockscreen_handle_normal=0x010802eb;
+const int R::drawable::ic_lockscreen_handle_pressed=0x010802ec;
+const int R::drawable::ic_lockscreen_ime=0x010802ed;
+const int R::drawable::ic_lockscreen_lock_normal=0x010802ee;
+const int R::drawable::ic_lockscreen_lock_pressed=0x010802ef;
+const int R::drawable::ic_lockscreen_outerring=0x010802f0;
+const int R::drawable::ic_lockscreen_player_background=0x010802f1;
+const int R::drawable::ic_lockscreen_search_activated=0x010802f2;
+const int R::drawable::ic_lockscreen_search_normal=0x010802f3;
+const int R::drawable::ic_lockscreen_silent=0x010802f4;
+const int R::drawable::ic_lockscreen_silent_activated=0x010802f5;
+const int R::drawable::ic_lockscreen_silent_focused=0x010802f6;
+const int R::drawable::ic_lockscreen_silent_normal=0x010802f7;
+const int R::drawable::ic_lockscreen_sim=0x010802f8;
+const int R::drawable::ic_lockscreen_soundon=0x010802f9;
+const int R::drawable::ic_lockscreen_soundon_activated=0x010802fa;
+const int R::drawable::ic_lockscreen_soundon_focused=0x010802fb;
+const int R::drawable::ic_lockscreen_soundon_normal=0x010802fc;
+const int R::drawable::ic_lockscreen_unlock=0x010802fd;
+const int R::drawable::ic_lockscreen_unlock_activated=0x010802fe;
+const int R::drawable::ic_lockscreen_unlock_normal=0x010802ff;
+const int R::drawable::ic_lockscreen_unlock_phantom=0x01080300;
+const int R::drawable::ic_maps_indicator_current_position=0x01080301;
+const int R::drawable::ic_maps_indicator_current_position_anim=0x01080302;
+const int R::drawable::ic_maps_indicator_current_position_anim1=0x01080303;
+const int R::drawable::ic_maps_indicator_current_position_anim2=0x01080304;
+const int R::drawable::ic_maps_indicator_current_position_anim3=0x01080305;
+const int R::drawable::ic_media_embed_play=0x01080306;
+const int R::drawable::ic_media_ff=0x01080021;
+const int R::drawable::ic_media_fullscreen=0x01080307;
+const int R::drawable::ic_media_group_collapse=0x01080308;
+const int R::drawable::ic_media_group_expand=0x01080309;
+const int R::drawable::ic_media_next=0x01080022;
+const int R::drawable::ic_media_pause=0x01080023;
+const int R::drawable::ic_media_play=0x01080024;
+const int R::drawable::ic_media_previous=0x01080025;
+const int R::drawable::ic_media_rew=0x01080026;
+const int R::drawable::ic_media_route_connecting_holo_dark=0x0108030a;
+const int R::drawable::ic_media_route_connecting_holo_light=0x0108030b;
+const int R::drawable::ic_media_route_disabled_holo_dark=0x0108030c;
+const int R::drawable::ic_media_route_disabled_holo_light=0x0108030d;
+const int R::drawable::ic_media_route_holo_dark=0x0108030e;
+const int R::drawable::ic_media_route_holo_light=0x0108030f;
+const int R::drawable::ic_media_route_off_holo_dark=0x01080310;
+const int R::drawable::ic_media_route_off_holo_light=0x01080311;
+const int R::drawable::ic_media_route_on_0_holo_dark=0x01080312;
+const int R::drawable::ic_media_route_on_0_holo_light=0x01080313;
+const int R::drawable::ic_media_route_on_1_holo_dark=0x01080314;
+const int R::drawable::ic_media_route_on_1_holo_light=0x01080315;
+const int R::drawable::ic_media_route_on_2_holo_dark=0x01080316;
+const int R::drawable::ic_media_route_on_2_holo_light=0x01080317;
+const int R::drawable::ic_media_route_on_holo_dark=0x01080318;
+const int R::drawable::ic_media_route_on_holo_light=0x01080319;
+const int R::drawable::ic_media_stop=0x0108031a;
+const int R::drawable::ic_media_video_poster=0x0108031b;
+const int R::drawable::ic_menu_account_list=0x0108031c;
+const int R::drawable::ic_menu_add=0x01080033;
+const int R::drawable::ic_menu_agenda=0x01080034;
+const int R::drawable::ic_menu_allfriends=0x0108031d;
+const int R::drawable::ic_menu_always_landscape_portrait=0x01080035;
+const int R::drawable::ic_menu_archive=0x0108031e;
+const int R::drawable::ic_menu_attachment=0x0108031f;
+const int R::drawable::ic_menu_back=0x01080320;
+const int R::drawable::ic_menu_block=0x01080321;
+const int R::drawable::ic_menu_blocked_user=0x01080322;
+const int R::drawable::ic_menu_btn_add=0x01080323;
+const int R::drawable::ic_menu_call=0x01080036;
+const int R::drawable::ic_menu_camera=0x01080037;
+const int R::drawable::ic_menu_cc=0x01080324;
+const int R::drawable::ic_menu_chat_dashboard=0x01080325;
+const int R::drawable::ic_menu_clear_playlist=0x01080326;
+const int R::drawable::ic_menu_close_clear_cancel=0x01080038;
+const int R::drawable::ic_menu_compass=0x01080039;
+const int R::drawable::ic_menu_compose=0x01080327;
+const int R::drawable::ic_menu_copy=0x01080328;
+const int R::drawable::ic_menu_copy_holo_dark=0x01080329;
+const int R::drawable::ic_menu_copy_holo_light=0x0108032a;
+const int R::drawable::ic_menu_crop=0x0108003a;
+const int R::drawable::ic_menu_cut=0x0108032b;
+const int R::drawable::ic_menu_cut_holo_dark=0x0108032c;
+const int R::drawable::ic_menu_cut_holo_light=0x0108032d;
+const int R::drawable::ic_menu_day=0x0108003b;
+const int R::drawable::ic_menu_delete=0x0108003c;
+const int R::drawable::ic_menu_directions=0x0108003d;
+const int R::drawable::ic_menu_edit=0x0108003e;
+const int R::drawable::ic_menu_emoticons=0x0108032e;
+const int R::drawable::ic_menu_end_conversation=0x0108032f;
+const int R::drawable::ic_menu_find=0x01080330;
+const int R::drawable::ic_menu_find_holo_dark=0x01080331;
+const int R::drawable::ic_menu_find_holo_light=0x01080332;
+const int R::drawable::ic_menu_forward=0x01080333;
+const int R::drawable::ic_menu_friendslist=0x01080334;
+const int R::drawable::ic_menu_gallery=0x0108003f;
+const int R::drawable::ic_menu_goto=0x01080335;
+const int R::drawable::ic_menu_help=0x01080040;
+const int R::drawable::ic_menu_help_holo_light=0x01080336;
+const int R::drawable::ic_menu_home=0x01080337;
+const int R::drawable::ic_menu_info_details=0x01080041;
+const int R::drawable::ic_menu_invite=0x01080338;
+const int R::drawable::ic_menu_login=0x01080339;
+const int R::drawable::ic_menu_manage=0x01080042;
+const int R::drawable::ic_menu_mapmode=0x01080043;
+const int R::drawable::ic_menu_mark=0x0108033a;
+const int R::drawable::ic_menu_month=0x01080044;
+const int R::drawable::ic_menu_more=0x01080045;
+const int R::drawable::ic_menu_moreoverflow=0x0108033b;
+const int R::drawable::ic_menu_moreoverflow_focused_holo_dark=0x0108033c;
+const int R::drawable::ic_menu_moreoverflow_focused_holo_light=0x0108033d;
+const int R::drawable::ic_menu_moreoverflow_holo_dark=0x0108033e;
+const int R::drawable::ic_menu_moreoverflow_holo_light=0x0108033f;
+const int R::drawable::ic_menu_moreoverflow_normal_holo_dark=0x01080340;
+const int R::drawable::ic_menu_moreoverflow_normal_holo_light=0x01080341;
+const int R::drawable::ic_menu_my_calendar=0x01080046;
+const int R::drawable::ic_menu_mylocation=0x01080047;
+const int R::drawable::ic_menu_myplaces=0x01080048;
+const int R::drawable::ic_menu_notifications=0x01080342;
+const int R::drawable::ic_menu_paste=0x01080343;
+const int R::drawable::ic_menu_paste_holo_dark=0x01080344;
+const int R::drawable::ic_menu_paste_holo_light=0x01080345;
+const int R::drawable::ic_menu_play_clip=0x01080346;
+const int R::drawable::ic_menu_preferences=0x01080049;
+const int R::drawable::ic_menu_recent_history=0x0108004a;
+const int R::drawable::ic_menu_refresh=0x01080347;
+const int R::drawable::ic_menu_report_image=0x0108004b;
+const int R::drawable::ic_menu_revert=0x0108004c;
+const int R::drawable::ic_menu_rotate=0x0108004d;
+const int R::drawable::ic_menu_save=0x0108004e;
+const int R::drawable::ic_menu_search=0x0108004f;
+const int R::drawable::ic_menu_search_holo_dark=0x01080348;
+const int R::drawable::ic_menu_search_holo_light=0x01080349;
+const int R::drawable::ic_menu_selectall_holo_dark=0x0108034a;
+const int R::drawable::ic_menu_selectall_holo_light=0x0108034b;
+const int R::drawable::ic_menu_send=0x01080050;
+const int R::drawable::ic_menu_set_as=0x01080051;
+const int R::drawable::ic_menu_settings_holo_light=0x0108034c;
+const int R::drawable::ic_menu_share=0x01080052;
+const int R::drawable::ic_menu_share_holo_dark=0x0108034d;
+const int R::drawable::ic_menu_share_holo_light=0x0108034e;
+const int R::drawable::ic_menu_slideshow=0x01080053;
+const int R::drawable::ic_menu_sort_alphabetically=0x0108009c;
+const int R::drawable::ic_menu_sort_by_size=0x0108009d;
+const int R::drawable::ic_menu_star=0x0108034f;
+const int R::drawable::ic_menu_start_conversation=0x01080350;
+const int R::drawable::ic_menu_stop=0x01080351;
+const int R::drawable::ic_menu_today=0x01080054;
+const int R::drawable::ic_menu_upload=0x01080055;
+const int R::drawable::ic_menu_upload_you_tube=0x01080056;
+const int R::drawable::ic_menu_view=0x01080057;
+const int R::drawable::ic_menu_week=0x01080058;
+const int R::drawable::ic_menu_zoom=0x01080059;
+const int R::drawable::ic_notification_clear_all=0x0108005a;
+const int R::drawable::ic_notification_ime_default=0x01080352;
+const int R::drawable::ic_notification_overlay=0x0108005b;
+const int R::drawable::ic_notify_wifidisplay=0x01080353;
+const int R::drawable::ic_partial_secure=0x0108005c;
+const int R::drawable::ic_popup_disk_full=0x0108005d;
+const int R::drawable::ic_popup_reminder=0x0108005e;
+const int R::drawable::ic_popup_sync=0x0108005f;
+const int R::drawable::ic_popup_sync_1=0x01080354;
+const int R::drawable::ic_popup_sync_2=0x01080355;
+const int R::drawable::ic_popup_sync_3=0x01080356;
+const int R::drawable::ic_popup_sync_4=0x01080357;
+const int R::drawable::ic_popup_sync_5=0x01080358;
+const int R::drawable::ic_popup_sync_6=0x01080359;
+const int R::drawable::ic_search=0x0108035a;
+const int R::drawable::ic_search_api_holo_light=0x0108035b;
+const int R::drawable::ic_search_category_default=0x01080060;
+const int R::drawable::ic_secure=0x01080061;
+const int R::drawable::ic_settings_language=0x0108035c;
+const int R::drawable::ic_sysbar_quicksettings=0x0108035d;
+const int R::drawable::ic_text_dot=0x0108035e;
+const int R::drawable::ic_vibrate=0x0108035f;
+const int R::drawable::ic_vibrate_small=0x01080360;
+const int R::drawable::ic_voice_search=0x01080361;
+const int R::drawable::ic_voice_search_api_holo_light=0x01080362;
+const int R::drawable::ic_volume=0x01080363;
+const int R::drawable::ic_volume_bluetooth_ad2p=0x01080364;
+const int R::drawable::ic_volume_bluetooth_in_call=0x01080365;
+const int R::drawable::ic_volume_off=0x01080366;
+const int R::drawable::ic_volume_off_small=0x01080367;
+const int R::drawable::ic_volume_small=0x01080368;
+const int R::drawable::icon_highlight_rectangle=0x01080369;
+const int R::drawable::icon_highlight_square=0x0108036a;
+const int R::drawable::ime_qwerty=0x0108036b;
+const int R::drawable::indicator_check_mark_dark=0x0108036c;
+const int R::drawable::indicator_check_mark_light=0x0108036d;
+const int R::drawable::indicator_code_lock_drag_direction_green_up=0x0108036e;
+const int R::drawable::indicator_code_lock_drag_direction_red_up=0x0108036f;
+const int R::drawable::indicator_code_lock_point_area_default=0x01080370;
+const int R::drawable::indicator_code_lock_point_area_default_holo=0x01080371;
+const int R::drawable::indicator_code_lock_point_area_green=0x01080372;
+const int R::drawable::indicator_code_lock_point_area_green_holo=0x01080373;
+const int R::drawable::indicator_code_lock_point_area_red=0x01080374;
+const int R::drawable::indicator_code_lock_point_area_red_holo=0x01080375;
+const int R::drawable::indicator_input_error=0x01080376;
+const int R::drawable::input_method_fullscreen_background=0x01080610;
+const int R::drawable::input_method_fullscreen_background_holo=0x01080611;
+const int R::drawable::intro_bg=0x01080377;
+const int R::drawable::item_background=0x01080378;
+const int R::drawable::item_background_activated_holo_dark=0x01080379;
+const int R::drawable::item_background_holo_dark=0x0108037a;
+const int R::drawable::item_background_holo_light=0x0108037b;
+const int R::drawable::jog_dial_arrow_long_left_green=0x0108037c;
+const int R::drawable::jog_dial_arrow_long_left_yellow=0x0108037d;
+const int R::drawable::jog_dial_arrow_long_middle_yellow=0x0108037e;
+const int R::drawable::jog_dial_arrow_long_right_red=0x0108037f;
+const int R::drawable::jog_dial_arrow_long_right_yellow=0x01080380;
+const int R::drawable::jog_dial_arrow_short_left=0x01080381;
+const int R::drawable::jog_dial_arrow_short_left_and_right=0x01080382;
+const int R::drawable::jog_dial_arrow_short_right=0x01080383;
+const int R::drawable::jog_dial_bg=0x01080384;
+const int R::drawable::jog_dial_dimple=0x01080385;
+const int R::drawable::jog_dial_dimple_dim=0x01080386;
+const int R::drawable::jog_tab_bar_left_answer=0x01080387;
+const int R::drawable::jog_tab_bar_left_end_confirm_gray=0x01080388;
+const int R::drawable::jog_tab_bar_left_end_confirm_green=0x01080389;
+const int R::drawable::jog_tab_bar_left_end_confirm_red=0x0108038a;
+const int R::drawable::jog_tab_bar_left_end_confirm_yellow=0x0108038b;
+const int R::drawable::jog_tab_bar_left_end_normal=0x0108038c;
+const int R::drawable::jog_tab_bar_left_end_pressed=0x0108038d;
+const int R::drawable::jog_tab_bar_left_generic=0x0108038e;
+const int R::drawable::jog_tab_bar_left_unlock=0x0108038f;
+const int R::drawable::jog_tab_bar_right_decline=0x01080390;
+const int R::drawable::jog_tab_bar_right_end_confirm_gray=0x01080391;
+const int R::drawable::jog_tab_bar_right_end_confirm_green=0x01080392;
+const int R::drawable::jog_tab_bar_right_end_confirm_red=0x01080393;
+const int R::drawable::jog_tab_bar_right_end_confirm_yellow=0x01080394;
+const int R::drawable::jog_tab_bar_right_end_normal=0x01080395;
+const int R::drawable::jog_tab_bar_right_end_pressed=0x01080396;
+const int R::drawable::jog_tab_bar_right_generic=0x01080397;
+const int R::drawable::jog_tab_bar_right_sound_off=0x01080398;
+const int R::drawable::jog_tab_bar_right_sound_on=0x01080399;
+const int R::drawable::jog_tab_left_answer=0x0108039a;
+const int R::drawable::jog_tab_left_confirm_gray=0x0108039b;
+const int R::drawable::jog_tab_left_confirm_green=0x0108039c;
+const int R::drawable::jog_tab_left_confirm_red=0x0108039d;
+const int R::drawable::jog_tab_left_confirm_yellow=0x0108039e;
+const int R::drawable::jog_tab_left_generic=0x0108039f;
+const int R::drawable::jog_tab_left_normal=0x010803a0;
+const int R::drawable::jog_tab_left_pressed=0x010803a1;
+const int R::drawable::jog_tab_left_unlock=0x010803a2;
+const int R::drawable::jog_tab_right_confirm_gray=0x010803a3;
+const int R::drawable::jog_tab_right_confirm_green=0x010803a4;
+const int R::drawable::jog_tab_right_confirm_red=0x010803a5;
+const int R::drawable::jog_tab_right_confirm_yellow=0x010803a6;
+const int R::drawable::jog_tab_right_decline=0x010803a7;
+const int R::drawable::jog_tab_right_generic=0x010803a8;
+const int R::drawable::jog_tab_right_normal=0x010803a9;
+const int R::drawable::jog_tab_right_pressed=0x010803aa;
+const int R::drawable::jog_tab_right_sound_off=0x010803ab;
+const int R::drawable::jog_tab_right_sound_on=0x010803ac;
+const int R::drawable::jog_tab_target_gray=0x010803ad;
+const int R::drawable::jog_tab_target_green=0x010803ae;
+const int R::drawable::jog_tab_target_red=0x010803af;
+const int R::drawable::jog_tab_target_yellow=0x010803b0;
+const int R::drawable::keyboard_accessory_bg_landscape=0x010803b1;
+const int R::drawable::keyboard_background=0x010803b2;
+const int R::drawable::keyboard_key_feedback=0x010803b3;
+const int R::drawable::keyboard_key_feedback_background=0x010803b4;
+const int R::drawable::keyboard_key_feedback_more_background=0x010803b5;
+const int R::drawable::keyboard_popup_panel_background=0x010803b6;
+const int R::drawable::keyboard_popup_panel_trans_background=0x010803b7;
+const int R::drawable::keyguard_expand_challenge_handle=0x010803b8;
+const int R::drawable::kg_add_widget=0x010803b9;
+const int R::drawable::kg_bouncer_bg_white=0x010803ba;
+const int R::drawable::kg_security_grip=0x010803bb;
+const int R::drawable::kg_security_lock=0x010803bc;
+const int R::drawable::kg_security_lock_focused=0x010803bd;
+const int R::drawable::kg_security_lock_normal=0x010803be;
+const int R::drawable::kg_security_lock_pressed=0x010803bf;
+const int R::drawable::kg_widget_bg_padded=0x010803c0;
+const int R::drawable::kg_widget_delete_drop_target=0x010803c1;
+const int R::drawable::light_header=0x010803c2;
+const int R::drawable::light_header_dither=0x010803c3;
+const int R::drawable::list_activated_holo=0x010803c4;
+const int R::drawable::list_divider_holo_dark=0x010803c5;
+const int R::drawable::list_divider_holo_light=0x010803c6;
+const int R::drawable::list_divider_horizontal_holo_dark=0x010803c7;
+const int R::drawable::list_focused_holo=0x010803c8;
+const int R::drawable::list_highlight=0x010803c9;
+const int R::drawable::list_highlight_active=0x010803ca;
+const int R::drawable::list_highlight_inactive=0x010803cb;
+const int R::drawable::list_longpressed_holo=0x010803cc;
+const int R::drawable::list_pressed_holo_dark=0x010803cd;
+const int R::drawable::list_pressed_holo_light=0x010803ce;
+const int R::drawable::list_section_divider_holo_dark=0x010803cf;
+const int R::drawable::list_section_divider_holo_light=0x010803d0;
+const int R::drawable::list_section_header_holo_dark=0x010803d1;
+const int R::drawable::list_section_header_holo_light=0x010803d2;
+const int R::drawable::list_selected_background=0x010803d3;
+const int R::drawable::list_selected_background_light=0x010803d4;
+const int R::drawable::list_selected_holo_dark=0x010803d5;
+const int R::drawable::list_selected_holo_light=0x010803d6;
+const int R::drawable::list_selector_activated_holo_dark=0x010803d7;
+const int R::drawable::list_selector_activated_holo_light=0x010803d8;
+const int R::drawable::list_selector_background=0x01080062;
+const int R::drawable::list_selector_background_default=0x010803d9;
+const int R::drawable::list_selector_background_default_light=0x010803da;
+const int R::drawable::list_selector_background_disabled=0x010803db;
+const int R::drawable::list_selector_background_disabled_light=0x010803dc;
+const int R::drawable::list_selector_background_focus=0x010803dd;
+const int R::drawable::list_selector_background_focused=0x010803de;
+const int R::drawable::list_selector_background_focused_light=0x010803df;
+const int R::drawable::list_selector_background_focused_selected=0x010803e0;
+const int R::drawable::list_selector_background_light=0x010803e1;
+const int R::drawable::list_selector_background_longpress=0x010803e2;
+const int R::drawable::list_selector_background_longpress_light=0x010803e3;
+const int R::drawable::list_selector_background_pressed=0x010803e4;
+const int R::drawable::list_selector_background_pressed_light=0x010803e5;
+const int R::drawable::list_selector_background_selected=0x010803e6;
+const int R::drawable::list_selector_background_selected_light=0x010803e7;
+const int R::drawable::list_selector_background_transition=0x010803e8;
+const int R::drawable::list_selector_background_transition_holo_dark=0x010803e9;
+const int R::drawable::list_selector_background_transition_holo_light=0x010803ea;
+const int R::drawable::list_selector_background_transition_light=0x010803eb;
+const int R::drawable::list_selector_disabled_holo_dark=0x010803ec;
+const int R::drawable::list_selector_disabled_holo_light=0x010803ed;
+const int R::drawable::list_selector_focused_holo_dark=0x010803ee;
+const int R::drawable::list_selector_focused_holo_light=0x010803ef;
+const int R::drawable::list_selector_holo_dark=0x010803f0;
+const int R::drawable::list_selector_holo_light=0x010803f1;
+const int R::drawable::list_selector_multiselect_holo_dark=0x010803f2;
+const int R::drawable::list_selector_multiselect_holo_light=0x010803f3;
+const int R::drawable::list_selector_pressed_holo_dark=0x010803f4;
+const int R::drawable::list_selector_pressed_holo_light=0x010803f5;
+const int R::drawable::load_average_background=0x010803f6;
+const int R::drawable::loading_tile=0x010803f7;
+const int R::drawable::loading_tile_android=0x010803f8;
+const int R::drawable::lockscreen_emergency_button=0x010803f9;
+const int R::drawable::lockscreen_forgot_password_button=0x010803fa;
+const int R::drawable::lockscreen_password_field_dark=0x010803fb;
+const int R::drawable::lockscreen_protection_pattern=0x010803fc;
+const int R::drawable::magnified_region_frame=0x010803fd;
+const int R::drawable::maps_google_logo=0x010803fe;
+const int R::drawable::media_button_background=0x010803ff;
+const int R::drawable::menu_background=0x01080400;
+const int R::drawable::menu_background_fill_parent_width=0x01080401;
+const int R::drawable::menu_dropdown_panel_holo_dark=0x01080402;
+const int R::drawable::menu_dropdown_panel_holo_light=0x01080403;
+const int R::drawable::menu_frame=0x01080063;
+const int R::drawable::menu_full_frame=0x01080064;
+const int R::drawable::menu_hardkey_panel_holo_dark=0x01080404;
+const int R::drawable::menu_hardkey_panel_holo_light=0x01080405;
+const int R::drawable::menu_selector=0x01080406;
+const int R::drawable::menu_separator=0x01080407;
+const int R::drawable::menu_submenu_background=0x01080408;
+const int R::drawable::menuitem_background=0x01080065;
+const int R::drawable::menuitem_background_focus=0x01080409;
+const int R::drawable::menuitem_background_pressed=0x0108040a;
+const int R::drawable::menuitem_background_solid=0x0108040b;
+const int R::drawable::menuitem_background_solid_focused=0x0108040c;
+const int R::drawable::menuitem_background_solid_pressed=0x0108040d;
+const int R::drawable::menuitem_checkbox=0x0108040e;
+const int R::drawable::menuitem_checkbox_on=0x0108040f;
+const int R::drawable::minitab_lt=0x01080410;
+const int R::drawable::minitab_lt_focus=0x01080411;
+const int R::drawable::minitab_lt_press=0x01080412;
+const int R::drawable::minitab_lt_selected=0x01080413;
+const int R::drawable::minitab_lt_unselected=0x01080414;
+const int R::drawable::minitab_lt_unselected_press=0x01080415;
+const int R::drawable::no_tile_128=0x01080416;
+const int R::drawable::no_tile_256=0x01080417;
+const int R::drawable::notification_bg=0x01080418;
+const int R::drawable::notification_bg_low=0x01080419;
+const int R::drawable::notification_bg_low_normal=0x0108041a;
+const int R::drawable::notification_bg_low_pressed=0x0108041b;
+const int R::drawable::notification_bg_normal=0x0108041c;
+const int R::drawable::notification_bg_normal_pressed=0x0108041d;
+const int R::drawable::notification_item_background_color=0x0108060c;
+const int R::drawable::notification_item_background_color_pressed=0x0108060d;
+const int R::drawable::notification_template_icon_bg=0x01080615;
+const int R::drawable::notification_template_icon_low_bg=0x01080616;
+const int R::drawable::notify_panel_notification_icon_bg=0x0108041e;
+const int R::drawable::notify_panel_notification_icon_bg_tile=0x0108041f;
+const int R::drawable::numberpicker_down_btn=0x01080420;
+const int R::drawable::numberpicker_down_disabled=0x01080421;
+const int R::drawable::numberpicker_down_disabled_focused=0x01080422;
+const int R::drawable::numberpicker_down_normal=0x01080423;
+const int R::drawable::numberpicker_down_pressed=0x01080424;
+const int R::drawable::numberpicker_down_selected=0x01080425;
+const int R::drawable::numberpicker_input=0x01080426;
+const int R::drawable::numberpicker_input_disabled=0x01080427;
+const int R::drawable::numberpicker_input_normal=0x01080428;
+const int R::drawable::numberpicker_input_pressed=0x01080429;
+const int R::drawable::numberpicker_input_selected=0x0108042a;
+const int R::drawable::numberpicker_selection_divider=0x0108042b;
+const int R::drawable::numberpicker_up_btn=0x0108042c;
+const int R::drawable::numberpicker_up_disabled=0x0108042d;
+const int R::drawable::numberpicker_up_disabled_focused=0x0108042e;
+const int R::drawable::numberpicker_up_normal=0x0108042f;
+const int R::drawable::numberpicker_up_pressed=0x01080430;
+const int R::drawable::numberpicker_up_selected=0x01080431;
+const int R::drawable::overscroll_edge=0x01080432;
+const int R::drawable::overscroll_glow=0x01080433;
+const int R::drawable::panel_background=0x01080434;
+const int R::drawable::panel_bg_holo_dark=0x01080435;
+const int R::drawable::panel_bg_holo_light=0x01080436;
+const int R::drawable::panel_picture_frame_background=0x01080437;
+const int R::drawable::panel_picture_frame_bg_focus_blue=0x01080438;
+const int R::drawable::panel_picture_frame_bg_normal=0x01080439;
+const int R::drawable::panel_picture_frame_bg_pressed_blue=0x0108043a;
+const int R::drawable::password_field_default=0x0108043b;
+const int R::drawable::password_keyboard_background_holo=0x0108043c;
+const int R::drawable::perm_group_accounts=0x0108043d;
+const int R::drawable::perm_group_affects_battery=0x0108043e;
+const int R::drawable::perm_group_app_info=0x0108043f;
+const int R::drawable::perm_group_audio_settings=0x01080440;
+const int R::drawable::perm_group_bluetooth=0x01080441;
+const int R::drawable::perm_group_bookmarks=0x01080442;
+const int R::drawable::perm_group_calendar=0x01080443;
+const int R::drawable::perm_group_camera=0x01080444;
+const int R::drawable::perm_group_device_alarms=0x01080445;
+const int R::drawable::perm_group_display=0x01080446;
+const int R::drawable::perm_group_location=0x01080447;
+const int R::drawable::perm_group_messages=0x01080448;
+const int R::drawable::perm_group_microphone=0x01080449;
+const int R::drawable::perm_group_network=0x0108044a;
+const int R::drawable::perm_group_personal_info=0x0108044b;
+const int R::drawable::perm_group_phone_calls=0x0108044c;
+const int R::drawable::perm_group_screenlock=0x0108044d;
+const int R::drawable::perm_group_shortrange_network=0x0108044e;
+const int R::drawable::perm_group_social_info=0x0108044f;
+const int R::drawable::perm_group_status_bar=0x01080450;
+const int R::drawable::perm_group_storage=0x01080451;
+const int R::drawable::perm_group_sync_settings=0x01080452;
+const int R::drawable::perm_group_system_clock=0x01080453;
+const int R::drawable::perm_group_system_tools=0x01080454;
+const int R::drawable::perm_group_user_dictionary=0x01080455;
+const int R::drawable::perm_group_user_dictionary_write=0x01080456;
+const int R::drawable::perm_group_voicemail=0x01080457;
+const int R::drawable::perm_group_wallpaper=0x01080458;
+const int R::drawable::picture_emergency=0x01080459;
+const int R::drawable::picture_frame=0x01080066;
+const int R::drawable::platlogo=0x0108045a;
+const int R::drawable::platlogo_alt=0x0108045b;
+const int R::drawable::pointer_arrow=0x0108045c;
+const int R::drawable::pointer_arrow_icon=0x0108045d;
+const int R::drawable::pointer_spot_anchor=0x0108045e;
+const int R::drawable::pointer_spot_anchor_icon=0x0108045f;
+const int R::drawable::pointer_spot_hover=0x01080460;
+const int R::drawable::pointer_spot_hover_icon=0x01080461;
+const int R::drawable::pointer_spot_touch=0x01080462;
+const int R::drawable::pointer_spot_touch_icon=0x01080463;
+const int R::drawable::popup_bottom_bright=0x01080464;
+const int R::drawable::popup_bottom_dark=0x01080465;
+const int R::drawable::popup_bottom_medium=0x01080466;
+const int R::drawable::popup_center_bright=0x01080467;
+const int R::drawable::popup_center_dark=0x01080468;
+const int R::drawable::popup_center_medium=0x01080469;
+const int R::drawable::popup_full_bright=0x0108046a;
+const int R::drawable::popup_full_dark=0x0108046b;
+const int R::drawable::popup_inline_error=0x0108046c;
+const int R::drawable::popup_inline_error_above=0x0108046d;
+const int R::drawable::popup_inline_error_above_holo_dark=0x0108046e;
+const int R::drawable::popup_inline_error_above_holo_light=0x0108046f;
+const int R::drawable::popup_inline_error_holo_dark=0x01080470;
+const int R::drawable::popup_inline_error_holo_light=0x01080471;
+const int R::drawable::popup_top_bright=0x01080472;
+const int R::drawable::popup_top_dark=0x01080473;
+const int R::drawable::presence_audio_away=0x010800af;
+const int R::drawable::presence_audio_busy=0x010800b0;
+const int R::drawable::presence_audio_online=0x010800b1;
+const int R::drawable::presence_away=0x01080067;
+const int R::drawable::presence_busy=0x01080068;
+const int R::drawable::presence_invisible=0x01080069;
+const int R::drawable::presence_offline=0x0108006a;
+const int R::drawable::presence_online=0x0108006b;
+const int R::drawable::presence_video_away=0x010800ac;
+const int R::drawable::presence_video_busy=0x010800ad;
+const int R::drawable::presence_video_online=0x010800ae;
+const int R::drawable::pressed_application_background_static=0x01080474;
+const int R::drawable::progress_bg_holo_dark=0x01080475;
+const int R::drawable::progress_bg_holo_light=0x01080476;
+const int R::drawable::progress_horizontal=0x0108006c;
+const int R::drawable::progress_horizontal_holo_dark=0x01080477;
+const int R::drawable::progress_horizontal_holo_light=0x01080478;
+const int R::drawable::progress_indeterminate_horizontal=0x0108006d;
+const int R::drawable::progress_indeterminate_horizontal_holo=0x01080479;
+const int R::drawable::progress_large=0x0108047a;
+const int R::drawable::progress_large_holo=0x0108047b;
+const int R::drawable::progress_large_white=0x0108047c;
+const int R::drawable::progress_medium=0x0108047d;
+const int R::drawable::progress_medium_holo=0x0108047e;
+const int R::drawable::progress_medium_white=0x0108047f;
+const int R::drawable::progress_primary_holo_dark=0x01080480;
+const int R::drawable::progress_primary_holo_light=0x01080481;
+const int R::drawable::progress_secondary_holo_dark=0x01080482;
+const int R::drawable::progress_secondary_holo_light=0x01080483;
+const int R::drawable::progress_small=0x01080484;
+const int R::drawable::progress_small_holo=0x01080485;
+const int R::drawable::progress_small_titlebar=0x01080486;
+const int R::drawable::progress_small_white=0x01080487;
+const int R::drawable::progressbar_indeterminate1=0x01080488;
+const int R::drawable::progressbar_indeterminate2=0x01080489;
+const int R::drawable::progressbar_indeterminate3=0x0108048a;
+const int R::drawable::progressbar_indeterminate_holo1=0x0108048b;
+const int R::drawable::progressbar_indeterminate_holo2=0x0108048c;
+const int R::drawable::progressbar_indeterminate_holo3=0x0108048d;
+const int R::drawable::progressbar_indeterminate_holo4=0x0108048e;
+const int R::drawable::progressbar_indeterminate_holo5=0x0108048f;
+const int R::drawable::progressbar_indeterminate_holo6=0x01080490;
+const int R::drawable::progressbar_indeterminate_holo7=0x01080491;
+const int R::drawable::progressbar_indeterminate_holo8=0x01080492;
+const int R::drawable::quickactions_arrowdown_left_holo_dark=0x01080493;
+const int R::drawable::quickactions_arrowdown_left_holo_light=0x01080494;
+const int R::drawable::quickactions_arrowdown_right_holo_dark=0x01080495;
+const int R::drawable::quickactions_arrowdown_right_holo_light=0x01080496;
+const int R::drawable::quickactions_arrowup_left_holo_dark=0x01080497;
+const int R::drawable::quickactions_arrowup_left_holo_light=0x01080498;
+const int R::drawable::quickactions_arrowup_left_right_holo_dark=0x01080499;
+const int R::drawable::quickactions_arrowup_right_holo_light=0x0108049a;
+const int R::drawable::quickcontact_badge_overlay_dark=0x0108049b;
+const int R::drawable::quickcontact_badge_overlay_focused_dark=0x0108049c;
+const int R::drawable::quickcontact_badge_overlay_focused_light=0x0108049d;
+const int R::drawable::quickcontact_badge_overlay_light=0x0108049e;
+const int R::drawable::quickcontact_badge_overlay_normal_dark=0x0108049f;
+const int R::drawable::quickcontact_badge_overlay_normal_light=0x010804a0;
+const int R::drawable::quickcontact_badge_overlay_pressed_dark=0x010804a1;
+const int R::drawable::quickcontact_badge_overlay_pressed_light=0x010804a2;
+const int R::drawable::radiobutton_off_background=0x0108006e;
+const int R::drawable::radiobutton_on_background=0x0108006f;
+const int R::drawable::rate_star_big_half=0x010804a3;
+const int R::drawable::rate_star_big_half_holo_dark=0x010804a4;
+const int R::drawable::rate_star_big_half_holo_light=0x010804a5;
+const int R::drawable::rate_star_big_off=0x010804a6;
+const int R::drawable::rate_star_big_off_holo_dark=0x010804a7;
+const int R::drawable::rate_star_big_off_holo_light=0x010804a8;
+const int R::drawable::rate_star_big_on=0x010804a9;
+const int R::drawable::rate_star_big_on_holo_dark=0x010804aa;
+const int R::drawable::rate_star_big_on_holo_light=0x010804ab;
+const int R::drawable::rate_star_med_half=0x010804ac;
+const int R::drawable::rate_star_med_half_holo_dark=0x010804ad;
+const int R::drawable::rate_star_med_half_holo_light=0x010804ae;
+const int R::drawable::rate_star_med_off=0x010804af;
+const int R::drawable::rate_star_med_off_holo_dark=0x010804b0;
+const int R::drawable::rate_star_med_off_holo_light=0x010804b1;
+const int R::drawable::rate_star_med_on=0x010804b2;
+const int R::drawable::rate_star_med_on_holo_dark=0x010804b3;
+const int R::drawable::rate_star_med_on_holo_light=0x010804b4;
+const int R::drawable::rate_star_small_half=0x010804b5;
+const int R::drawable::rate_star_small_half_holo_dark=0x010804b6;
+const int R::drawable::rate_star_small_half_holo_light=0x010804b7;
+const int R::drawable::rate_star_small_off=0x010804b8;
+const int R::drawable::rate_star_small_off_holo_dark=0x010804b9;
+const int R::drawable::rate_star_small_off_holo_light=0x010804ba;
+const int R::drawable::rate_star_small_on=0x010804bb;
+const int R::drawable::rate_star_small_on_holo_dark=0x010804bc;
+const int R::drawable::rate_star_small_on_holo_light=0x010804bd;
+const int R::drawable::ratingbar=0x010804be;
+const int R::drawable::ratingbar_full=0x010804bf;
+const int R::drawable::ratingbar_full_empty=0x010804c0;
+const int R::drawable::ratingbar_full_empty_holo_dark=0x010804c1;
+const int R::drawable::ratingbar_full_empty_holo_light=0x010804c2;
+const int R::drawable::ratingbar_full_filled=0x010804c3;
+const int R::drawable::ratingbar_full_filled_holo_dark=0x010804c4;
+const int R::drawable::ratingbar_full_filled_holo_light=0x010804c5;
+const int R::drawable::ratingbar_full_holo_dark=0x010804c6;
+const int R::drawable::ratingbar_full_holo_light=0x010804c7;
+const int R::drawable::ratingbar_holo_dark=0x010804c8;
+const int R::drawable::ratingbar_holo_light=0x010804c9;
+const int R::drawable::ratingbar_small=0x010804ca;
+const int R::drawable::ratingbar_small_holo_dark=0x010804cb;
+const int R::drawable::ratingbar_small_holo_light=0x010804cc;
+const int R::drawable::recent_dialog_background=0x010804cd;
+const int R::drawable::reticle=0x010804ce;
+const int R::drawable::safe_mode_background=0x0108060f;
+const int R::drawable::screen_background_dark=0x01080098;
+const int R::drawable::screen_background_dark_transparent=0x010800a9;
+const int R::drawable::screen_background_holo_dark=0x01080614;
+const int R::drawable::screen_background_holo_light=0x01080613;
+const int R::drawable::screen_background_light=0x01080099;
+const int R::drawable::screen_background_light_transparent=0x010800aa;
+const int R::drawable::screen_background_selector_dark=0x010804cf;
+const int R::drawable::screen_background_selector_light=0x010804d0;
+const int R::drawable::scrollbar_handle_accelerated_anim2=0x010804d1;
+const int R::drawable::scrollbar_handle_holo_dark=0x010804d2;
+const int R::drawable::scrollbar_handle_holo_light=0x010804d3;
+const int R::drawable::scrollbar_handle_horizontal=0x010804d4;
+const int R::drawable::scrollbar_handle_vertical=0x010804d5;
+const int R::drawable::scrubber_control_disabled_holo=0x010804d6;
+const int R::drawable::scrubber_control_focused_holo=0x010804d7;
+const int R::drawable::scrubber_control_normal_holo=0x010804d8;
+const int R::drawable::scrubber_control_pressed_holo=0x010804d9;
+const int R::drawable::scrubber_control_selector_holo=0x010804da;
+const int R::drawable::scrubber_primary_holo=0x010804db;
+const int R::drawable::scrubber_progress_horizontal_holo_dark=0x010804dc;
+const int R::drawable::scrubber_progress_horizontal_holo_light=0x010804dd;
+const int R::drawable::scrubber_secondary_holo=0x010804de;
+const int R::drawable::scrubber_track_holo_dark=0x010804df;
+const int R::drawable::scrubber_track_holo_light=0x010804e0;
+const int R::drawable::search_bar_default_color=0x0108060e;
+const int R::drawable::search_dropdown_background=0x010804e1;
+const int R::drawable::search_dropdown_dark=0x010804e2;
+const int R::drawable::search_dropdown_light=0x010804e3;
+const int R::drawable::search_plate=0x010804e4;
+const int R::drawable::search_plate_global=0x010804e5;
+const int R::drawable::search_spinner=0x010804e6;
+const int R::drawable::seek_thumb=0x010804e7;
+const int R::drawable::seek_thumb_normal=0x010804e8;
+const int R::drawable::seek_thumb_pressed=0x010804e9;
+const int R::drawable::seek_thumb_selected=0x010804ea;
+const int R::drawable::selected_day_background=0x01080612;
+const int R::drawable::settings_header=0x010804eb;
+const int R::drawable::settings_header_raw=0x010804ec;
+const int R::drawable::silent_mode_indicator=0x010804ed;
+const int R::drawable::spinner_16_inner_holo=0x010804ee;
+const int R::drawable::spinner_16_outer_holo=0x010804ef;
+const int R::drawable::spinner_20_inner_holo=0x010804f0;
+const int R::drawable::spinner_20_outer_holo=0x010804f1;
+const int R::drawable::spinner_48_inner_holo=0x010804f2;
+const int R::drawable::spinner_48_outer_holo=0x010804f3;
+const int R::drawable::spinner_76_inner_holo=0x010804f4;
+const int R::drawable::spinner_76_outer_holo=0x010804f5;
+const int R::drawable::spinner_ab_default_holo_dark=0x010804f6;
+const int R::drawable::spinner_ab_default_holo_light=0x010804f7;
+const int R::drawable::spinner_ab_disabled_holo_dark=0x010804f8;
+const int R::drawable::spinner_ab_disabled_holo_light=0x010804f9;
+const int R::drawable::spinner_ab_focused_holo_dark=0x010804fa;
+const int R::drawable::spinner_ab_focused_holo_light=0x010804fb;
+const int R::drawable::spinner_ab_holo_dark=0x010804fc;
+const int R::drawable::spinner_ab_holo_light=0x010804fd;
+const int R::drawable::spinner_ab_pressed_holo_dark=0x010804fe;
+const int R::drawable::spinner_ab_pressed_holo_light=0x010804ff;
+const int R::drawable::spinner_background=0x01080070;
+const int R::drawable::spinner_background_holo_dark=0x01080500;
+const int R::drawable::spinner_background_holo_light=0x01080501;
+const int R::drawable::spinner_black_16=0x01080502;
+const int R::drawable::spinner_black_20=0x01080503;
+const int R::drawable::spinner_black_48=0x01080504;
+const int R::drawable::spinner_black_76=0x01080505;
+const int R::drawable::spinner_default_holo_dark=0x01080506;
+const int R::drawable::spinner_default_holo_light=0x01080507;
+const int R::drawable::spinner_disabled_holo_dark=0x01080508;
+const int R::drawable::spinner_disabled_holo_light=0x01080509;
+const int R::drawable::spinner_dropdown_background=0x01080071;
+const int R::drawable::spinner_dropdown_background_down=0x0108050a;
+const int R::drawable::spinner_dropdown_background_up=0x0108050b;
+const int R::drawable::spinner_focused_holo_dark=0x0108050c;
+const int R::drawable::spinner_focused_holo_light=0x0108050d;
+const int R::drawable::spinner_normal=0x0108050e;
+const int R::drawable::spinner_press=0x0108050f;
+const int R::drawable::spinner_pressed_holo_dark=0x01080510;
+const int R::drawable::spinner_pressed_holo_light=0x01080511;
+const int R::drawable::spinner_select=0x01080512;
+const int R::drawable::spinner_white_16=0x01080513;
+const int R::drawable::spinner_white_48=0x01080514;
+const int R::drawable::spinner_white_76=0x01080515;
+const int R::drawable::star_big_off=0x01080073;
+const int R::drawable::star_big_on=0x01080072;
+const int R::drawable::star_off=0x01080075;
+const int R::drawable::star_on=0x01080074;
+const int R::drawable::stat_ecb_mode=0x01080516;
+const int R::drawable::stat_notify_call_mute=0x01080076;
+const int R::drawable::stat_notify_car_mode=0x01080517;
+const int R::drawable::stat_notify_chat=0x01080077;
+const int R::drawable::stat_notify_disabled=0x01080518;
+const int R::drawable::stat_notify_disk_full=0x01080519;
+const int R::drawable::stat_notify_email_generic=0x0108051a;
+const int R::drawable::stat_notify_error=0x01080078;
+const int R::drawable::stat_notify_gmail=0x0108051b;
+const int R::drawable::stat_notify_missed_call=0x0108007f;
+const int R::drawable::stat_notify_more=0x01080079;
+const int R::drawable::stat_notify_rssi_in_range=0x0108051c;
+const int R::drawable::stat_notify_sdcard=0x0108007a;
+const int R::drawable::stat_notify_sdcard_prepare=0x010800ab;
+const int R::drawable::stat_notify_sdcard_usb=0x0108007b;
+const int R::drawable::stat_notify_sim_toolkit=0x0108051d;
+const int R::drawable::stat_notify_sync=0x0108007c;
+const int R::drawable::stat_notify_sync_anim0=0x0108051e;
+const int R::drawable::stat_notify_sync_error=0x0108051f;
+const int R::drawable::stat_notify_sync_noanim=0x0108007d;
+const int R::drawable::stat_notify_voicemail=0x0108007e;
+const int R::drawable::stat_notify_wifi_in_range=0x01080520;
+const int R::drawable::stat_sys_adb=0x01080521;
+const int R::drawable::stat_sys_battery=0x01080522;
+const int R::drawable::stat_sys_battery_0=0x01080523;
+const int R::drawable::stat_sys_battery_10=0x01080524;
+const int R::drawable::stat_sys_battery_100=0x01080525;
+const int R::drawable::stat_sys_battery_15=0x01080526;
+const int R::drawable::stat_sys_battery_20=0x01080527;
+const int R::drawable::stat_sys_battery_28=0x01080528;
+const int R::drawable::stat_sys_battery_40=0x01080529;
+const int R::drawable::stat_sys_battery_43=0x0108052a;
+const int R::drawable::stat_sys_battery_57=0x0108052b;
+const int R::drawable::stat_sys_battery_60=0x0108052c;
+const int R::drawable::stat_sys_battery_71=0x0108052d;
+const int R::drawable::stat_sys_battery_80=0x0108052e;
+const int R::drawable::stat_sys_battery_85=0x0108052f;
+const int R::drawable::stat_sys_battery_charge=0x01080530;
+const int R::drawable::stat_sys_battery_charge_anim0=0x01080531;
+const int R::drawable::stat_sys_battery_charge_anim1=0x01080532;
+const int R::drawable::stat_sys_battery_charge_anim100=0x01080533;
+const int R::drawable::stat_sys_battery_charge_anim15=0x01080534;
+const int R::drawable::stat_sys_battery_charge_anim2=0x01080535;
+const int R::drawable::stat_sys_battery_charge_anim28=0x01080536;
+const int R::drawable::stat_sys_battery_charge_anim3=0x01080537;
+const int R::drawable::stat_sys_battery_charge_anim4=0x01080538;
+const int R::drawable::stat_sys_battery_charge_anim43=0x01080539;
+const int R::drawable::stat_sys_battery_charge_anim5=0x0108053a;
+const int R::drawable::stat_sys_battery_charge_anim57=0x0108053b;
+const int R::drawable::stat_sys_battery_charge_anim71=0x0108053c;
+const int R::drawable::stat_sys_battery_charge_anim85=0x0108053d;
+const int R::drawable::stat_sys_battery_unknown=0x0108053e;
+const int R::drawable::stat_sys_data_bluetooth=0x01080080;
+const int R::drawable::stat_sys_data_usb=0x0108053f;
+const int R::drawable::stat_sys_data_wimax_signal_3_fully=0x01080540;
+const int R::drawable::stat_sys_data_wimax_signal_disconnected=0x01080541;
+const int R::drawable::stat_sys_download=0x01080081;
+const int R::drawable::stat_sys_download_anim0=0x01080542;
+const int R::drawable::stat_sys_download_anim1=0x01080543;
+const int R::drawable::stat_sys_download_anim2=0x01080544;
+const int R::drawable::stat_sys_download_anim3=0x01080545;
+const int R::drawable::stat_sys_download_anim4=0x01080546;
+const int R::drawable::stat_sys_download_anim5=0x01080547;
+const int R::drawable::stat_sys_download_done=0x01080082;
+const int R::drawable::stat_sys_download_done_static=0x01080548;
+const int R::drawable::stat_sys_gps_on=0x01080549;
+const int R::drawable::stat_sys_headset=0x01080083;
+const int R::drawable::stat_sys_phone_call=0x01080084;
+const int R::drawable::stat_sys_phone_call_forward=0x01080085;
+const int R::drawable::stat_sys_phone_call_on_hold=0x01080086;
+const int R::drawable::stat_sys_r_signal_0_cdma=0x0108054a;
+const int R::drawable::stat_sys_r_signal_1_cdma=0x0108054b;
+const int R::drawable::stat_sys_r_signal_2_cdma=0x0108054c;
+const int R::drawable::stat_sys_r_signal_3_cdma=0x0108054d;
+const int R::drawable::stat_sys_r_signal_4_cdma=0x0108054e;
+const int R::drawable::stat_sys_ra_signal_0_cdma=0x0108054f;
+const int R::drawable::stat_sys_ra_signal_1_cdma=0x01080550;
+const int R::drawable::stat_sys_ra_signal_2_cdma=0x01080551;
+const int R::drawable::stat_sys_ra_signal_3_cdma=0x01080552;
+const int R::drawable::stat_sys_ra_signal_4_cdma=0x01080553;
+const int R::drawable::stat_sys_secure=0x01080554;
+const int R::drawable::stat_sys_signal_0_cdma=0x01080555;
+const int R::drawable::stat_sys_signal_1_cdma=0x01080556;
+const int R::drawable::stat_sys_signal_2_cdma=0x01080557;
+const int R::drawable::stat_sys_signal_3_cdma=0x01080558;
+const int R::drawable::stat_sys_signal_4_cdma=0x01080559;
+const int R::drawable::stat_sys_signal_evdo_0=0x0108055a;
+const int R::drawable::stat_sys_signal_evdo_1=0x0108055b;
+const int R::drawable::stat_sys_signal_evdo_2=0x0108055c;
+const int R::drawable::stat_sys_signal_evdo_3=0x0108055d;
+const int R::drawable::stat_sys_signal_evdo_4=0x0108055e;
+const int R::drawable::stat_sys_speakerphone=0x01080087;
+const int R::drawable::stat_sys_tether_bluetooth=0x0108055f;
+const int R::drawable::stat_sys_tether_general=0x01080560;
+const int R::drawable::stat_sys_tether_usb=0x01080561;
+const int R::drawable::stat_sys_tether_wifi=0x01080562;
+const int R::drawable::stat_sys_throttled=0x01080563;
+const int R::drawable::stat_sys_upload=0x01080088;
+const int R::drawable::stat_sys_upload_anim0=0x01080564;
+const int R::drawable::stat_sys_upload_anim1=0x01080565;
+const int R::drawable::stat_sys_upload_anim2=0x01080566;
+const int R::drawable::stat_sys_upload_anim3=0x01080567;
+const int R::drawable::stat_sys_upload_anim4=0x01080568;
+const int R::drawable::stat_sys_upload_anim5=0x01080569;
+const int R::drawable::stat_sys_upload_done=0x01080089;
+const int R::drawable::stat_sys_vp_phone_call=0x010800a7;
+const int R::drawable::stat_sys_vp_phone_call_on_hold=0x010800a8;
+const int R::drawable::stat_sys_warning=0x0108008a;
+const int R::drawable::status_bar_background=0x0108056a;
+const int R::drawable::status_bar_closed_default_background=0x0108060a;
+const int R::drawable::status_bar_header_background=0x0108056b;
+const int R::drawable::status_bar_item_app_background=0x0108008b;
+const int R::drawable::status_bar_item_app_background_normal=0x0108056c;
+const int R::drawable::status_bar_item_background=0x0108008c;
+const int R::drawable::status_bar_item_background_focus=0x0108056d;
+const int R::drawable::status_bar_item_background_normal=0x0108056e;
+const int R::drawable::status_bar_item_background_pressed=0x0108056f;
+const int R::drawable::status_bar_opened_default_background=0x0108060b;
+const int R::drawable::statusbar_background=0x01080570;
+const int R::drawable::submenu_arrow=0x01080571;
+const int R::drawable::submenu_arrow_nofocus=0x01080572;
+const int R::drawable::switch_bg_disabled_holo_dark=0x01080573;
+const int R::drawable::switch_bg_disabled_holo_light=0x01080574;
+const int R::drawable::switch_bg_focused_holo_dark=0x01080575;
+const int R::drawable::switch_bg_focused_holo_light=0x01080576;
+const int R::drawable::switch_bg_holo_dark=0x01080577;
+const int R::drawable::switch_bg_holo_light=0x01080578;
+const int R::drawable::switch_inner_holo_dark=0x01080579;
+const int R::drawable::switch_inner_holo_light=0x0108057a;
+const int R::drawable::switch_thumb_activated_holo_dark=0x0108057b;
+const int R::drawable::switch_thumb_activated_holo_light=0x0108057c;
+const int R::drawable::switch_thumb_disabled_holo_dark=0x0108057d;
+const int R::drawable::switch_thumb_disabled_holo_light=0x0108057e;
+const int R::drawable::switch_thumb_holo_dark=0x0108057f;
+const int R::drawable::switch_thumb_holo_light=0x01080580;
+const int R::drawable::switch_thumb_pressed_holo_dark=0x01080581;
+const int R::drawable::switch_thumb_pressed_holo_light=0x01080582;
+const int R::drawable::switch_track_holo_dark=0x01080583;
+const int R::drawable::switch_track_holo_light=0x01080584;
+const int R::drawable::sym_action_add=0x01080585;
+const int R::drawable::sym_action_call=0x0108008d;
+const int R::drawable::sym_action_chat=0x0108008e;
+const int R::drawable::sym_action_email=0x0108008f;
+const int R::drawable::sym_app_on_sd_unavailable_icon=0x01080586;
+const int R::drawable::sym_call_incoming=0x01080090;
+const int R::drawable::sym_call_missed=0x01080091;
+const int R::drawable::sym_call_outgoing=0x01080092;
+const int R::drawable::sym_contact_card=0x01080094;
+const int R::drawable::sym_def_app_icon=0x01080093;
+const int R::drawable::sym_keyboard_delete=0x01080587;
+const int R::drawable::sym_keyboard_delete_dim=0x01080588;
+const int R::drawable::sym_keyboard_delete_holo=0x01080589;
+const int R::drawable::sym_keyboard_enter=0x0108058a;
+const int R::drawable::sym_keyboard_feedback_delete=0x0108058b;
+const int R::drawable::sym_keyboard_feedback_ok=0x0108058c;
+const int R::drawable::sym_keyboard_feedback_return=0x0108058d;
+const int R::drawable::sym_keyboard_feedback_shift=0x0108058e;
+const int R::drawable::sym_keyboard_feedback_shift_locked=0x0108058f;
+const int R::drawable::sym_keyboard_feedback_space=0x01080590;
+const int R::drawable::sym_keyboard_num0_no_plus=0x01080591;
+const int R::drawable::sym_keyboard_num1=0x01080592;
+const int R::drawable::sym_keyboard_num2=0x01080593;
+const int R::drawable::sym_keyboard_num3=0x01080594;
+const int R::drawable::sym_keyboard_num4=0x01080595;
+const int R::drawable::sym_keyboard_num5=0x01080596;
+const int R::drawable::sym_keyboard_num6=0x01080597;
+const int R::drawable::sym_keyboard_num7=0x01080598;
+const int R::drawable::sym_keyboard_num8=0x01080599;
+const int R::drawable::sym_keyboard_num9=0x0108059a;
+const int R::drawable::sym_keyboard_ok=0x0108059b;
+const int R::drawable::sym_keyboard_ok_dim=0x0108059c;
+const int R::drawable::sym_keyboard_return=0x0108059d;
+const int R::drawable::sym_keyboard_return_holo=0x0108059e;
+const int R::drawable::sym_keyboard_shift=0x0108059f;
+const int R::drawable::sym_keyboard_shift_locked=0x010805a0;
+const int R::drawable::sym_keyboard_space=0x010805a1;
+const int R::drawable::tab_bottom_holo=0x010805a2;
+const int R::drawable::tab_bottom_left=0x010805a3;
+const int R::drawable::tab_bottom_left_v4=0x010805a4;
+const int R::drawable::tab_bottom_right=0x010805a5;
+const int R::drawable::tab_bottom_right_v4=0x010805a6;
+const int R::drawable::tab_focus=0x010805a7;
+const int R::drawable::tab_focus_bar_left=0x010805a8;
+const int R::drawable::tab_focus_bar_right=0x010805a9;
+const int R::drawable::tab_indicator=0x010805aa;
+const int R::drawable::tab_indicator_ab_holo=0x010805ab;
+const int R::drawable::tab_indicator_holo=0x010805ac;
+const int R::drawable::tab_indicator_v4=0x010805ad;
+const int R::drawable::tab_press=0x010805ae;
+const int R::drawable::tab_press_bar_left=0x010805af;
+const int R::drawable::tab_press_bar_right=0x010805b0;
+const int R::drawable::tab_pressed_holo=0x010805b1;
+const int R::drawable::tab_selected=0x010805b2;
+const int R::drawable::tab_selected_bar_left=0x010805b3;
+const int R::drawable::tab_selected_bar_left_v4=0x010805b4;
+const int R::drawable::tab_selected_bar_right=0x010805b5;
+const int R::drawable::tab_selected_bar_right_v4=0x010805b6;
+const int R::drawable::tab_selected_focused_holo=0x010805b7;
+const int R::drawable::tab_selected_holo=0x010805b8;
+const int R::drawable::tab_selected_pressed_holo=0x010805b9;
+const int R::drawable::tab_selected_v4=0x010805ba;
+const int R::drawable::tab_unselected=0x010805bb;
+const int R::drawable::tab_unselected_focused_holo=0x010805bc;
+const int R::drawable::tab_unselected_holo=0x010805bd;
+const int R::drawable::tab_unselected_pressed_holo=0x010805be;
+const int R::drawable::tab_unselected_v4=0x010805bf;
+const int R::drawable::text_cursor_holo_dark=0x010805c0;
+const int R::drawable::text_cursor_holo_light=0x010805c1;
+const int R::drawable::text_edit_paste_window=0x010805c2;
+const int R::drawable::text_edit_side_paste_window=0x010805c3;
+const int R::drawable::text_edit_suggestions_window=0x010805c4;
+const int R::drawable::text_select_handle_left=0x010805c5;
+const int R::drawable::text_select_handle_middle=0x010805c6;
+const int R::drawable::text_select_handle_right=0x010805c7;
+const int R::drawable::textfield_activated_holo_dark=0x010805c8;
+const int R::drawable::textfield_activated_holo_light=0x010805c9;
+const int R::drawable::textfield_bg_activated_holo_dark=0x010805ca;
+const int R::drawable::textfield_bg_default_holo_dark=0x010805cb;
+const int R::drawable::textfield_bg_disabled_focused_holo_dark=0x010805cc;
+const int R::drawable::textfield_bg_disabled_holo_dark=0x010805cd;
+const int R::drawable::textfield_bg_focused_holo_dark=0x010805ce;
+const int R::drawable::textfield_default=0x010805cf;
+const int R::drawable::textfield_default_holo_dark=0x010805d0;
+const int R::drawable::textfield_default_holo_light=0x010805d1;
+const int R::drawable::textfield_disabled=0x010805d2;
+const int R::drawable::textfield_disabled_focused_holo_dark=0x010805d3;
+const int R::drawable::textfield_disabled_focused_holo_light=0x010805d4;
+const int R::drawable::textfield_disabled_holo_dark=0x010805d5;
+const int R::drawable::textfield_disabled_holo_light=0x010805d6;
+const int R::drawable::textfield_disabled_selected=0x010805d7;
+const int R::drawable::textfield_focused_holo_dark=0x010805d8;
+const int R::drawable::textfield_focused_holo_light=0x010805d9;
+const int R::drawable::textfield_longpress_holo=0x010805da;
+const int R::drawable::textfield_multiline_activated_holo_dark=0x010805db;
+const int R::drawable::textfield_multiline_activated_holo_light=0x010805dc;
+const int R::drawable::textfield_multiline_default_holo_dark=0x010805dd;
+const int R::drawable::textfield_multiline_default_holo_light=0x010805de;
+const int R::drawable::textfield_multiline_disabled_focused_holo_dark=0x010805df;
+const int R::drawable::textfield_multiline_disabled_focused_holo_light=0x010805e0;
+const int R::drawable::textfield_multiline_disabled_holo_dark=0x010805e1;
+const int R::drawable::textfield_multiline_disabled_holo_light=0x010805e2;
+const int R::drawable::textfield_multiline_focused_holo_dark=0x010805e3;
+const int R::drawable::textfield_multiline_focused_holo_light=0x010805e4;
+const int R::drawable::textfield_pressed_holo=0x010805e5;
+const int R::drawable::textfield_search=0x010805e6;
+const int R::drawable::textfield_search_default=0x010805e7;
+const int R::drawable::textfield_search_default_holo_dark=0x010805e8;
+const int R::drawable::textfield_search_default_holo_light=0x010805e9;
+const int R::drawable::textfield_search_empty=0x010805ea;
+const int R::drawable::textfield_search_empty_default=0x010805eb;
+const int R::drawable::textfield_search_empty_pressed=0x010805ec;
+const int R::drawable::textfield_search_empty_selected=0x010805ed;
+const int R::drawable::textfield_search_pressed=0x010805ee;
+const int R::drawable::textfield_search_right_default_holo_dark=0x010805ef;
+const int R::drawable::textfield_search_right_default_holo_light=0x010805f0;
+const int R::drawable::textfield_search_right_selected_holo_dark=0x010805f1;
+const int R::drawable::textfield_search_right_selected_holo_light=0x010805f2;
+const int R::drawable::textfield_search_selected=0x010805f3;
+const int R::drawable::textfield_search_selected_holo_dark=0x010805f4;
+const int R::drawable::textfield_search_selected_holo_light=0x010805f5;
+const int R::drawable::textfield_searchview_holo_dark=0x010805f6;
+const int R::drawable::textfield_searchview_holo_light=0x010805f7;
+const int R::drawable::textfield_searchview_right_holo_dark=0x010805f8;
+const int R::drawable::textfield_searchview_right_holo_light=0x010805f9;
+const int R::drawable::textfield_selected=0x010805fa;
+const int R::drawable::title_bar=0x01080095;
+const int R::drawable::title_bar_medium=0x010805fb;
+const int R::drawable::title_bar_portrait=0x010805fc;
+const int R::drawable::title_bar_shadow=0x010805fd;
+const int R::drawable::title_bar_tall=0x010800a6;
+const int R::drawable::toast_frame=0x01080096;
+const int R::drawable::toast_frame_holo=0x010805fe;
+const int R::drawable::transportcontrol_bg=0x010805ff;
+const int R::drawable::unknown_image=0x01080600;
+const int R::drawable::unlock_default=0x01080601;
+const int R::drawable::unlock_halo=0x01080602;
+const int R::drawable::unlock_ring=0x01080603;
+const int R::drawable::unlock_wave=0x01080604;
+const int R::drawable::usb_android=0x01080605;
+const int R::drawable::usb_android_connected=0x01080606;
+const int R::drawable::view_accessibility_focused=0x01080607;
+const int R::drawable::vpn_connected=0x01080608;
+const int R::drawable::vpn_disconnected=0x01080609;
+const int R::drawable::zoom_plate=0x01080097;
+const int R::fraction::config_dimBehindFadeDuration=0x01120000;
+const int R::id::KEYCODE_0=0x0102008f;
+const int R::id::KEYCODE_1=0x01020090;
+const int R::id::KEYCODE_2=0x01020091;
+const int R::id::KEYCODE_3=0x01020092;
+const int R::id::KEYCODE_3D_MODE=0x01020156;
+const int R::id::KEYCODE_4=0x01020093;
+const int R::id::KEYCODE_5=0x01020094;
+const int R::id::KEYCODE_6=0x01020095;
+const int R::id::KEYCODE_7=0x01020096;
+const int R::id::KEYCODE_8=0x01020097;
+const int R::id::KEYCODE_9=0x01020098;
+const int R::id::KEYCODE_A=0x010200a5;
+const int R::id::KEYCODE_ALTERNATE=0x01020174;
+const int R::id::KEYCODE_ALT_LEFT=0x010200c1;
+const int R::id::KEYCODE_ALT_RIGHT=0x010200c2;
+const int R::id::KEYCODE_APOSTROPHE=0x010200d3;
+const int R::id::KEYCODE_APP_SWITCH=0x01020143;
+const int R::id::KEYCODE_ASSIST=0x01020163;
+const int R::id::KEYCODE_AT=0x010200d5;
+const int R::id::KEYCODE_AVR_INPUT=0x0102013e;
+const int R::id::KEYCODE_AVR_POWER=0x0102013d;
+const int R::id::KEYCODE_B=0x010200a6;
+const int R::id::KEYCODE_BACK=0x0102008c;
+const int R::id::KEYCODE_BACKSLASH=0x010200d1;
+const int R::id::KEYCODE_BOOKMARK=0x01020136;
+const int R::id::KEYCODE_BREAK=0x01020101;
+const int R::id::KEYCODE_BUTTON_1=0x01020144;
+const int R::id::KEYCODE_BUTTON_10=0x0102014d;
+const int R::id::KEYCODE_BUTTON_11=0x0102014e;
+const int R::id::KEYCODE_BUTTON_12=0x0102014f;
+const int R::id::KEYCODE_BUTTON_13=0x01020150;
+const int R::id::KEYCODE_BUTTON_14=0x01020151;
+const int R::id::KEYCODE_BUTTON_15=0x01020152;
+const int R::id::KEYCODE_BUTTON_16=0x01020153;
+const int R::id::KEYCODE_BUTTON_2=0x01020145;
+const int R::id::KEYCODE_BUTTON_3=0x01020146;
+const int R::id::KEYCODE_BUTTON_4=0x01020147;
+const int R::id::KEYCODE_BUTTON_5=0x01020148;
+const int R::id::KEYCODE_BUTTON_6=0x01020149;
+const int R::id::KEYCODE_BUTTON_7=0x0102014a;
+const int R::id::KEYCODE_BUTTON_8=0x0102014b;
+const int R::id::KEYCODE_BUTTON_9=0x0102014c;
+const int R::id::KEYCODE_BUTTON_A=0x010200e8;
+const int R::id::KEYCODE_BUTTON_B=0x010200e9;
+const int R::id::KEYCODE_BUTTON_C=0x010200ea;
+const int R::id::KEYCODE_BUTTON_L1=0x010200ee;
+const int R::id::KEYCODE_BUTTON_L2=0x010200f0;
+const int R::id::KEYCODE_BUTTON_MODE=0x010200f6;
+const int R::id::KEYCODE_BUTTON_R1=0x010200ef;
+const int R::id::KEYCODE_BUTTON_R2=0x010200f1;
+const int R::id::KEYCODE_BUTTON_SELECT=0x010200f5;
+const int R::id::KEYCODE_BUTTON_START=0x010200f4;
+const int R::id::KEYCODE_BUTTON_THUMBL=0x010200f2;
+const int R::id::KEYCODE_BUTTON_THUMBR=0x010200f3;
+const int R::id::KEYCODE_BUTTON_X=0x010200eb;
+const int R::id::KEYCODE_BUTTON_Y=0x010200ec;
+const int R::id::KEYCODE_BUTTON_Z=0x010200ed;
+const int R::id::KEYCODE_C=0x010200a7;
+const int R::id::KEYCODE_CALCULATOR=0x0102015a;
+const int R::id::KEYCODE_CALENDAR=0x01020158;
+const int R::id::KEYCODE_CALL=0x0102008d;
+const int R::id::KEYCODE_CAMERA=0x010200a3;
+const int R::id::KEYCODE_CAPS_LOCK=0x010200fb;
+const int R::id::KEYCODE_CAPTIONS=0x01020137;
+const int R::id::KEYCODE_CHANNEL_DOWN=0x0102012f;
+const int R::id::KEYCODE_CHANNEL_UP=0x0102012e;
+const int R::id::KEYCODE_CLEAR=0x010200a4;
+const int R::id::KEYCODE_COMMA=0x010200bf;
+const int R::id::KEYCODE_CONTACTS=0x01020157;
+const int R::id::KEYCODE_CTRL_LEFT=0x010200f9;
+const int R::id::KEYCODE_CTRL_RIGHT=0x010200fa;
+const int R::id::KEYCODE_D=0x010200a8;
+const int R::id::KEYCODE_DEL=0x010200cb;
+const int R::id::KEYCODE_DPAD_CENTER=0x0102009f;
+const int R::id::KEYCODE_DPAD_DOWN=0x0102009c;
+const int R::id::KEYCODE_DPAD_LEFT=0x0102009d;
+const int R::id::KEYCODE_DPAD_RIGHT=0x0102009e;
+const int R::id::KEYCODE_DPAD_UP=0x0102009b;
+const int R::id::KEYCODE_DVR=0x01020135;
+const int R::id::KEYCODE_E=0x010200a9;
+const int R::id::KEYCODE_EARLY_POWER=0x0102016b;
+const int R::id::KEYCODE_EISU=0x0102015c;
+const int R::id::KEYCODE_ENDCALL=0x0102008e;
+const int R::id::KEYCODE_ENTER=0x010200ca;
+const int R::id::KEYCODE_ENVELOPE=0x010200c9;
+const int R::id::KEYCODE_EQUALS=0x010200ce;
+const int R::id::KEYCODE_ESCAPE=0x010200f7;
+const int R::id::KEYCODE_EXPLORER=0x010200c8;
+const int R::id::KEYCODE_F=0x010200aa;
+const int R::id::KEYCODE_F1=0x0102010b;
+const int R::id::KEYCODE_F10=0x01020114;
+const int R::id::KEYCODE_F11=0x01020115;
+const int R::id::KEYCODE_F12=0x01020116;
+const int R::id::KEYCODE_F2=0x0102010c;
+const int R::id::KEYCODE_F3=0x0102010d;
+const int R::id::KEYCODE_F4=0x0102010e;
+const int R::id::KEYCODE_F5=0x0102010f;
+const int R::id::KEYCODE_F6=0x01020110;
+const int R::id::KEYCODE_F7=0x01020111;
+const int R::id::KEYCODE_F8=0x01020112;
+const int R::id::KEYCODE_F9=0x01020113;
+const int R::id::KEYCODE_FOCUS=0x010200d8;
+const int R::id::KEYCODE_FORWARD=0x01020105;
+const int R::id::KEYCODE_FORWARD_DEL=0x010200f8;
+const int R::id::KEYCODE_FUNCTION=0x010200ff;
+const int R::id::KEYCODE_G=0x010200ab;
+const int R::id::KEYCODE_GRAVE=0x010200cc;
+const int R::id::KEYCODE_GUIDE=0x01020134;
+const int R::id::KEYCODE_H=0x010200ac;
+const int R::id::KEYCODE_HEADSETHOOK=0x010200d7;
+const int R::id::KEYCODE_HENKAN=0x0102015e;
+const int R::id::KEYCODE_HOME=0x0102008b;
+const int R::id::KEYCODE_I=0x010200ad;
+const int R::id::KEYCODE_INFO=0x0102012d;
+const int R::id::KEYCODE_INSERT=0x01020104;
+const int R::id::KEYCODE_J=0x010200ae;
+const int R::id::KEYCODE_K=0x010200af;
+const int R::id::KEYCODE_KANA=0x01020162;
+const int R::id::KEYCODE_KATAKANA_HIRAGANA=0x0102015f;
+const int R::id::KEYCODE_L=0x010200b0;
+const int R::id::KEYCODE_LANGUAGE_SWITCH=0x01020154;
+const int R::id::KEYCODE_LEFT_BRACKET=0x010200cf;
+const int R::id::KEYCODE_M=0x010200b1;
+const int R::id::KEYCODE_MANNER_MODE=0x01020155;
+const int R::id::KEYCODE_MEDIA_CLOSE=0x01020108;
+const int R::id::KEYCODE_MEDIA_EJECT=0x01020109;
+const int R::id::KEYCODE_MEDIA_FAST_FORWARD=0x010200e2;
+const int R::id::KEYCODE_MEDIA_NEXT=0x010200df;
+const int R::id::KEYCODE_MEDIA_PAUSE=0x01020107;
+const int R::id::KEYCODE_MEDIA_PLAY=0x01020106;
+const int R::id::KEYCODE_MEDIA_PLAY_PAUSE=0x010200dd;
+const int R::id::KEYCODE_MEDIA_PREVIOUS=0x010200e0;
+const int R::id::KEYCODE_MEDIA_RECORD=0x0102010a;
+const int R::id::KEYCODE_MEDIA_REWIND=0x010200e1;
+const int R::id::KEYCODE_MEDIA_STOP=0x010200de;
+const int R::id::KEYCODE_MENU=0x010200da;
+const int R::id::KEYCODE_META_LEFT=0x010200fd;
+const int R::id::KEYCODE_META_RIGHT=0x010200fe;
+const int R::id::KEYCODE_MINUS=0x010200cd;
+const int R::id::KEYCODE_MOVE_END=0x01020103;
+const int R::id::KEYCODE_MOVE_HOME=0x01020102;
+const int R::id::KEYCODE_MUHENKAN=0x0102015d;
+const int R::id::KEYCODE_MUSIC=0x01020159;
+const int R::id::KEYCODE_MUTE=0x010200e3;
+const int R::id::KEYCODE_N=0x010200b2;
+const int R::id::KEYCODE_NOTIFICATION=0x010200db;
+const int R::id::KEYCODE_NUM=0x010200d6;
+const int R::id::KEYCODE_NUMPAD_0=0x01020118;
+const int R::id::KEYCODE_NUMPAD_1=0x01020119;
+const int R::id::KEYCODE_NUMPAD_2=0x0102011a;
+const int R::id::KEYCODE_NUMPAD_3=0x0102011b;
+const int R::id::KEYCODE_NUMPAD_4=0x0102011c;
+const int R::id::KEYCODE_NUMPAD_5=0x0102011d;
+const int R::id::KEYCODE_NUMPAD_6=0x0102011e;
+const int R::id::KEYCODE_NUMPAD_7=0x0102011f;
+const int R::id::KEYCODE_NUMPAD_8=0x01020120;
+const int R::id::KEYCODE_NUMPAD_9=0x01020121;
+const int R::id::KEYCODE_NUMPAD_ADD=0x01020125;
+const int R::id::KEYCODE_NUMPAD_COMMA=0x01020127;
+const int R::id::KEYCODE_NUMPAD_DIVIDE=0x01020122;
+const int R::id::KEYCODE_NUMPAD_DOT=0x01020126;
+const int R::id::KEYCODE_NUMPAD_ENTER=0x01020128;
+const int R::id::KEYCODE_NUMPAD_EQUALS=0x01020129;
+const int R::id::KEYCODE_NUMPAD_LEFT_PAREN=0x0102012a;
+const int R::id::KEYCODE_NUMPAD_MULTIPLY=0x01020123;
+const int R::id::KEYCODE_NUMPAD_RIGHT_PAREN=0x0102012b;
+const int R::id::KEYCODE_NUMPAD_SUBTRACT=0x01020124;
+const int R::id::KEYCODE_NUM_LOCK=0x01020117;
+const int R::id::KEYCODE_O=0x010200b3;
+const int R::id::KEYCODE_P=0x010200b4;
+const int R::id::KEYCODE_PAGE_DOWN=0x010200e5;
+const int R::id::KEYCODE_PAGE_UP=0x010200e4;
+const int R::id::KEYCODE_PERIOD=0x010200c0;
+const int R::id::KEYCODE_PICTSYMBOLS=0x010200e6;
+const int R::id::KEYCODE_PLUS=0x010200d9;
+const int R::id::KEYCODE_POUND=0x0102009a;
+const int R::id::KEYCODE_POWER=0x010200a2;
+const int R::id::KEYCODE_PROG_BLUE=0x01020142;
+const int R::id::KEYCODE_PROG_GRED=0x0102013f;
+const int R::id::KEYCODE_PROG_GREEN=0x01020140;
+const int R::id::KEYCODE_PROG_YELLOW=0x01020141;
+const int R::id::KEYCODE_Q=0x010200b5;
+const int R::id::KEYCODE_R=0x010200b6;
+const int R::id::KEYCODE_RIGHT_BRACKET=0x010200d0;
+const int R::id::KEYCODE_RO=0x01020161;
+const int R::id::KEYCODE_S=0x010200b7;
+const int R::id::KEYCODE_SCROLL_LOCK=0x010200fc;
+const int R::id::KEYCODE_SEARCH=0x010200dc;
+const int R::id::KEYCODE_SEMICOLON=0x010200d2;
+const int R::id::KEYCODE_SETTINGS=0x01020138;
+const int R::id::KEYCODE_SHIFT_LEFT=0x010200c3;
+const int R::id::KEYCODE_SHIFT_RIGHT=0x010200c4;
+const int R::id::KEYCODE_SLASH=0x010200d4;
+const int R::id::KEYCODE_SOFT_LEFT=0x01020089;
+const int R::id::KEYCODE_SOFT_RIGHT=0x0102008a;
+const int R::id::KEYCODE_SPACE=0x010200c6;
+const int R::id::KEYCODE_STAR=0x01020099;
+const int R::id::KEYCODE_STB_INPUT=0x0102013c;
+const int R::id::KEYCODE_STB_POWER=0x0102013b;
+const int R::id::KEYCODE_SWITCH_CHARSET=0x010200e7;
+const int R::id::KEYCODE_SYM=0x010200c7;
+const int R::id::KEYCODE_SYSRQ=0x01020100;
+const int R::id::KEYCODE_T=0x010200b8;
+const int R::id::KEYCODE_TAB=0x010200c5;
+const int R::id::KEYCODE_TV=0x01020132;
+const int R::id::KEYCODE_TV_BROWSER=0x01020173;
+const int R::id::KEYCODE_TV_INPUT=0x0102013a;
+const int R::id::KEYCODE_TV_POWER=0x01020139;
+const int R::id::KEYCODE_TV_REPEAT=0x0102016e;
+const int R::id::KEYCODE_TV_SHORTCUTKEY_3DMODE=0x01020166;
+const int R::id::KEYCODE_TV_SHORTCUTKEY_DISPAYMODE=0x01020167;
+const int R::id::KEYCODE_TV_SHORTCUTKEY_GLOBALSETUP=0x01020164;
+const int R::id::KEYCODE_TV_SHORTCUTKEY_SOURCE_LIST=0x01020165;
+const int R::id::KEYCODE_TV_SHORTCUTKEY_TVINFO=0x0102016a;
+const int R::id::KEYCODE_TV_SHORTCUTKEY_VIEWMODE=0x01020168;
+const int R::id::KEYCODE_TV_SHORTCUTKEY_VOICEMODE=0x01020169;
+const int R::id::KEYCODE_TV_SLEEP=0x0102016c;
+const int R::id::KEYCODE_TV_SOUND_CHANNEL=0x0102016d;
+const int R::id::KEYCODE_TV_SUBTITLE=0x0102016f;
+const int R::id::KEYCODE_TV_SWITCH=0x01020170;
+const int R::id::KEYCODE_TV_VTION=0x01020172;
+const int R::id::KEYCODE_TV_WASU=0x01020171;
+const int R::id::KEYCODE_U=0x010200b9;
+const int R::id::KEYCODE_UNKNOWN=0x01020088;
+const int R::id::KEYCODE_V=0x010200ba;
+const int R::id::KEYCODE_VOLUME_DOWN=0x010200a1;
+const int R::id::KEYCODE_VOLUME_MUTE=0x0102012c;
+const int R::id::KEYCODE_VOLUME_UP=0x010200a0;
+const int R::id::KEYCODE_W=0x010200bb;
+const int R::id::KEYCODE_WINDOW=0x01020133;
+const int R::id::KEYCODE_X=0x010200bc;
+const int R::id::KEYCODE_Y=0x010200bd;
+const int R::id::KEYCODE_YEN=0x01020160;
+const int R::id::KEYCODE_Z=0x010200be;
+const int R::id::KEYCODE_ZENKAKU_HANKAKU=0x0102015b;
+const int R::id::KEYCODE_ZOOM_IN=0x01020130;
+const int R::id::KEYCODE_ZOOM_OUT=0x01020131;
+const int R::id::accountPreferences=0x01020254;
+const int R::id::account_name=0x0102029c;
+const int R::id::account_row_icon=0x01020287;
+const int R::id::account_row_text=0x01020288;
+const int R::id::account_type=0x0102029b;
+const int R::id::action0=0x01020331;
+const int R::id::action1=0x01020333;
+const int R::id::action2=0x01020334;
+const int R::id::actionDone=0x0102006b;
+const int R::id::actionGo=0x01020067;
+const int R::id::actionNext=0x0102006a;
+const int R::id::actionNone=0x01020066;
+const int R::id::actionPrevious=0x0102006c;
+const int R::id::actionSearch=0x01020068;
+const int R::id::actionSend=0x01020069;
+const int R::id::actionUnspecified=0x01020065;
+const int R::id::action_bar=0x0102036c;
+const int R::id::action_bar_container=0x0102036b;
+const int R::id::action_bar_overlay_layout=0x0102036f;
+const int R::id::action_bar_subtitle=0x01020260;
+const int R::id::action_bar_title=0x0102025f;
+const int R::id::action_context_bar=0x0102036d;
+const int R::id::action_divider=0x0102033b;
+const int R::id::action_menu_divider=0x01020259;
+const int R::id::action_menu_presenter=0x0102025c;
+const int R::id::action_mode_bar=0x01020367;
+const int R::id::action_mode_bar_stub=0x01020366;
+const int R::id::action_mode_close_button=0x01020261;
+const int R::id::actions=0x01020332;
+const int R::id::activity_chooser_view_content=0x01020262;
+const int R::id::addToDictionary=0x0102002a;
+const int R::id::adjustNothing=0x01020037;
+const int R::id::adjustPan=0x01020036;
+const int R::id::adjustResize=0x01020035;
+const int R::id::adjustUnspecified=0x01020034;
+const int R::id::afterDescendants=0x01020195;
+const int R::id::alarm=0x01020201;
+const int R::id::alarm_status=0x010202f5;
+const int R::id::albumart=0x01020316;
+const int R::id::alertTitle=0x0102026a;
+const int R::id::alignBounds=0x01020086;
+const int R::id::alignMargins=0x01020087;
+const int R::id::all=0x01020083;
+const int R::id::allow_button=0x010202a1;
+const int R::id::alternative=0x010201fb;
+const int R::id::always=0x0102017f;
+const int R::id::alwaysScroll=0x010201b2;
+const int R::id::alwaysUse=0x01020275;
+const int R::id::amPm=0x010203a4;
+const int R::id::animation=0x01020192;
+const int R::id::anyRtl=0x0102018a;
+const int R::id::app_widget_container=0x010202c5;
+const int R::id::ask_checkbox=0x01020278;
+const int R::id::atThumb=0x01020039;
+const int R::id::authtoken_type=0x0102029d;
+const int R::id::auto_=0x0102017c;
+const int R::id::auto_fit=0x010201b9;
+const int R::id::back_button=0x01020356;
+const int R::id::background=0x01020000;
+const int R::id::backspace=0x010202ff;
+const int R::id::banner=0x010203b2;
+const int R::id::batteryInfo=0x010202e9;
+const int R::id::batteryInfoIcon=0x010202ea;
+const int R::id::batteryInfoSpacer=0x010202ec;
+const int R::id::batteryInfoText=0x010202eb;
+const int R::id::beforeDescendants=0x01020194;
+const int R::id::beginning=0x010201c1;
+const int R::id::behind=0x01020225;
+const int R::id::big_picture=0x0102033c;
+const int R::id::big_text=0x0102033a;
+const int R::id::blocksDescendants=0x01020196;
+const int R::id::body=0x0102035b;
+const int R::id::bold=0x0102003f;
+const int R::id::bottom=0x01020075;
+const int R::id::bottom_to_top=0x010201ea;
+const int R::id::breadcrumb_section=0x01020282;
+const int R::id::btn_next=0x01020319;
+const int R::id::btn_play=0x01020318;
+const int R::id::btn_prev=0x01020317;
+const int R::id::button0=0x0102035d;
+const int R::id::button1=0x01020019;
+const int R::id::button2=0x0102001a;
+const int R::id::button3=0x0102001b;
+const int R::id::button4=0x0102035e;
+const int R::id::button5=0x0102035f;
+const int R::id::button6=0x01020360;
+const int R::id::button7=0x01020361;
+const int R::id::buttonPanel=0x0102026c;
+const int R::id::button_always=0x01020364;
+const int R::id::button_bar=0x0102028a;
+const int R::id::button_once=0x01020365;
+const int R::id::buttons=0x0102029f;
+const int R::id::by_common=0x01020393;
+const int R::id::by_common_header=0x01020392;
+const int R::id::by_org=0x01020395;
+const int R::id::by_org_header=0x01020394;
+const int R::id::by_org_unit=0x01020397;
+const int R::id::by_org_unit_header=0x01020396;
+const int R::id::calendar_view=0x0102028f;
+const int R::id::cancel=0x01020286;
+const int R::id::cancel_button=0x010202fa;
+const int R::id::candidatesArea=0x0102001d;
+const int R::id::carrier=0x010202f7;
+const int R::id::center=0x0102007c;
+const int R::id::centerCrop=0x010201bf;
+const int R::id::centerInside=0x010201c0;
+const int R::id::center_horizontal=0x0102007a;
+const int R::id::center_vertical=0x01020078;
+const int R::id::challenge=0x01020212;
+const int R::id::characterPicker=0x01020285;
+const int R::id::characters=0x010201cb;
+const int R::id::check=0x0102032f;
+const int R::id::checkbox=0x01020001;
+const int R::id::chronometer=0x01020337;
+const int R::id::clamp=0x010201e1;
+const int R::id::clearDefaultHint=0x01020276;
+const int R::id::clip_horizontal=0x0102007f;
+const int R::id::clip_vertical=0x0102007e;
+const int R::id::clock_text=0x01020314;
+const int R::id::clock_view=0x01020313;
+const int R::id::closeButton=0x01020027;
+const int R::id::collapseActionView=0x010201fe;
+const int R::id::collapsing=0x010201d0;
+const int R::id::column=0x010201eb;
+const int R::id::columnWidth=0x010201b7;
+const int R::id::compat_checkbox=0x01020277;
+const int R::id::container=0x010201f8;
+const int R::id::content=0x01020002;
+const int R::id::contentPanel=0x0102026f;
+const int R::id::copy=0x01020021;
+const int R::id::copyUrl=0x01020023;
+const int R::id::costsMoney=0x0102021d;
+const int R::id::custom=0x0102002b;
+const int R::id::customPanel=0x01020271;
+const int R::id::cut=0x01020020;
+const int R::id::cycle=0x010201c3;
+const int R::id::dangerous=0x01020218;
+const int R::id::date=0x01020063;
+const int R::id::datePicker=0x01020290;
+const int R::id::datetime=0x01020062;
+const int R::id::day=0x0102028d;
+const int R::id::day_names=0x01020284;
+const int R::id::decimal=0x010201c8;
+const int R::id::decrement=0x01020349;
+const int R::id::defaultPosition=0x01020182;
+const int R::id::default_activity_button=0x01020265;
+const int R::id::default_loading_view=0x01020362;
+const int R::id::delete_button=0x010202d5;
+const int R::id::deny_button=0x010202a0;
+const int R::id::description=0x01020289;
+const int R::id::development=0x0102021b;
+const int R::id::dialog=0x010201cd;
+const int R::id::disableHome=0x0102020e;
+const int R::id::disabled=0x010201b1;
+const int R::id::divider=0x010203a6;
+const int R::id::dpad=0x01020242;
+const int R::id::dropdown=0x010201ce;
+const int R::id::edit=0x01020003;
+const int R::id::edit_query=0x01020374;
+const int R::id::editable=0x010201c5;
+const int R::id::edittext_container=0x01020351;
+const int R::id::eight=0x010203ae;
+const int R::id::email=0x01020081;
+const int R::id::emergencyCallButton=0x010202e1;
+const int R::id::emergency_call_button=0x010202b9;
+const int R::id::empty=0x01020004;
+const int R::id::end=0x01020044;
+const int R::id::enter_pin=0x01020304;
+const int R::id::enter_pin_section=0x010203bc;
+const int R::id::enter_puk=0x01020303;
+const int R::id::expandChallengeHandle=0x01020216;
+const int R::id::expand_activities_button=0x01020263;
+const int R::id::expand_button=0x0102032e;
+const int R::id::expand_button_divider=0x010203b7;
+const int R::id::expanded_menu=0x01020293;
+const int R::id::expires_on=0x0102039c;
+const int R::id::expires_on_header=0x0102039b;
+const int R::id::extended_settings=0x0102032d;
+const int R::id::extractArea=0x0102001c;
+const int R::id::face_unlock_area_view=0x010202bd;
+const int R::id::face_unlock_cancel_button=0x010202bf;
+const int R::id::feedbackAllMask=0x010201ad;
+const int R::id::feedbackAudible=0x010201aa;
+const int R::id::feedbackGeneric=0x010201ac;
+const int R::id::feedbackHaptic=0x010201a9;
+const int R::id::feedbackSpoken=0x010201a8;
+const int R::id::feedbackVisual=0x010201ab;
+const int R::id::ffwd=0x01020327;
+const int R::id::fill=0x0102007d;
+const int R::id::fillInIntent=0x01020256;
+const int R::id::fill_horizontal=0x0102007b;
+const int R::id::fill_parent=0x01020197;
+const int R::id::fill_vertical=0x01020079;
+const int R::id::find=0x010203c8;
+const int R::id::find_next=0x010203cb;
+const int R::id::find_prev=0x010203ca;
+const int R::id::finger=0x0102023d;
+const int R::id::fingerprints=0x0102039d;
+const int R::id::firstStrong=0x01020189;
+const int R::id::fitCenter=0x010201bd;
+const int R::id::fitEnd=0x010201be;
+const int R::id::fitStart=0x010201bc;
+const int R::id::fitXY=0x010201bb;
+const int R::id::five=0x010203ab;
+const int R::id::flagDefault=0x010201ae;
+const int R::id::flagForceAscii=0x01020073;
+const int R::id::flagIncludeNotImportantViews=0x010201af;
+const int R::id::flagNavigateNext=0x0102006f;
+const int R::id::flagNavigatePrevious=0x0102006e;
+const int R::id::flagNoAccessoryAction=0x01020071;
+const int R::id::flagNoEnterAction=0x01020072;
+const int R::id::flagNoExtractUi=0x01020070;
+const int R::id::flagNoFullscreen=0x0102006d;
+const int R::id::flagRequestTouchExplorationMode=0x010201b0;
+const int R::id::floatType=0x010201ed;
+const int R::id::floating=0x01020038;
+const int R::id::fontScale=0x01020239;
+const int R::id::forgotPatternButton=0x0102030a;
+const int R::id::forgot_password_button=0x010202ba;
+const int R::id::four=0x010203aa;
+const int R::id::fullSensor=0x0102022c;
+const int R::id::fullscreenArea=0x010202ab;
+const int R::id::glow_pad_view=0x010202c1;
+const int R::id::gone=0x01020177;
+const int R::id::grant_credentials_permission_message_footer=0x0102029e;
+const int R::id::grant_credentials_permission_message_header=0x01020298;
+const int R::id::gravity=0x0102018b;
+const int R::id::hard_keyboard_section=0x010202af;
+const int R::id::hard_keyboard_switch=0x010202b0;
+const int R::id::hardware=0x01020184;
+const int R::id::hdpi=0x0102024d;
+const int R::id::headerSimBad1=0x010202e7;
+const int R::id::headerSimBad2=0x010202e8;
+const int R::id::headerSimOk1=0x010202e5;
+const int R::id::headerSimOk2=0x010202e6;
+const int R::id::headerText=0x010202fc;
+const int R::id::headers=0x01020352;
+const int R::id::high=0x0102017e;
+const int R::id::hint=0x01020005;
+const int R::id::home=0x0102002c;
+const int R::id::homeAsUp=0x0102020b;
+const int R::id::home_screen=0x01020204;
+const int R::id::horizontal=0x01020084;
+const int R::id::hour=0x010203a2;
+const int R::id::icon=0x01020006;
+const int R::id::icon1=0x01020007;
+const int R::id::icon2=0x01020008;
+const int R::id::icon_menu=0x010202aa;
+const int R::id::icon_menu_presenter=0x0102025a;
+const int R::id::ifContentScrolls=0x01020180;
+const int R::id::ifRoom=0x010201fc;
+const int R::id::image=0x01020264;
+const int R::id::inbox_end_pad=0x01020346;
+const int R::id::inbox_more=0x01020345;
+const int R::id::inbox_text0=0x0102033e;
+const int R::id::inbox_text1=0x0102033f;
+const int R::id::inbox_text2=0x01020340;
+const int R::id::inbox_text3=0x01020341;
+const int R::id::inbox_text4=0x01020342;
+const int R::id::inbox_text5=0x01020343;
+const int R::id::inbox_text6=0x01020344;
+const int R::id::increment=0x01020347;
+const int R::id::index=0x01020330;
+const int R::id::infinite=0x010201e3;
+const int R::id::info=0x01020339;
+const int R::id::inherit=0x01020187;
+const int R::id::input=0x01020009;
+const int R::id::inputArea=0x0102001e;
+const int R::id::inputExtractAccessories=0x010202ac;
+const int R::id::inputExtractAction=0x010202ad;
+const int R::id::inputExtractEditButton=0x010202ae;
+const int R::id::inputExtractEditText=0x01020025;
+const int R::id::insideInset=0x01020179;
+const int R::id::insideOverlay=0x01020178;
+const int R::id::instructions=0x010202e4;
+const int R::id::intType=0x010201ee;
+const int R::id::integer=0x010201c6;
+const int R::id::internalEmpty=0x01020321;
+const int R::id::internalOnly=0x01020245;
+const int R::id::invisible=0x01020176;
+const int R::id::issued_on=0x0102039a;
+const int R::id::issued_on_header=0x01020399;
+const int R::id::issued_to_header=0x01020389;
+const int R::id::italic=0x01020040;
+const int R::id::key0=0x010202df;
+const int R::id::key1=0x010202d6;
+const int R::id::key2=0x010202d7;
+const int R::id::key3=0x010202d8;
+const int R::id::key4=0x010202d9;
+const int R::id::key5=0x010202da;
+const int R::id::key6=0x010202db;
+const int R::id::key7=0x010202dc;
+const int R::id::key8=0x010202dd;
+const int R::id::key9=0x010202de;
+const int R::id::keyPad=0x01020301;
+const int R::id::key_enter=0x010202e0;
+const int R::id::keyboard=0x01020230;
+const int R::id::keyboardHidden=0x01020231;
+const int R::id::keyboardView=0x01020026;
+const int R::id::keyguard=0x01020205;
+const int R::id::keyguard_account_view=0x010202b3;
+const int R::id::keyguard_add_widget=0x010202b7;
+const int R::id::keyguard_add_widget_view=0x010202b8;
+const int R::id::keyguard_bouncer_frame=0x010202bc;
+const int R::id::keyguard_click_area=0x01020291;
+const int R::id::keyguard_face_unlock_view=0x010202bb;
+const int R::id::keyguard_host_view=0x010202c2;
+const int R::id::keyguard_message_area=0x01020292;
+const int R::id::keyguard_multi_user_selector=0x010202cd;
+const int R::id::keyguard_password_view=0x010202ce;
+const int R::id::keyguard_pattern_view=0x010202d1;
+const int R::id::keyguard_pin_view=0x010202d3;
+const int R::id::keyguard_security_container=0x010202c6;
+const int R::id::keyguard_selector_fade_container=0x010202c0;
+const int R::id::keyguard_selector_view=0x0102030c;
+const int R::id::keyguard_selector_view_frame=0x0102030d;
+const int R::id::keyguard_sim_pin_view=0x0102030e;
+const int R::id::keyguard_sim_puk_view=0x0102030f;
+const int R::id::keyguard_status_area=0x01020310;
+const int R::id::keyguard_status_view=0x01020311;
+const int R::id::keyguard_status_view_face_palm=0x01020312;
+const int R::id::keyguard_transport_control=0x0102031a;
+const int R::id::keyguard_user_avatar=0x010202c9;
+const int R::id::keyguard_user_name=0x010202ca;
+const int R::id::keyguard_user_selector=0x010202cb;
+const int R::id::keyguard_users_grid=0x010202cc;
+const int R::id::keyguard_widget_pager_delete_target=0x010202c4;
+const int R::id::label=0x010202b2;
+const int R::id::landscape=0x01020223;
+const int R::id::large=0x01020249;
+const int R::id::launchRecognizer=0x010201f7;
+const int R::id::launchWebSearch=0x010201f6;
+const int R::id::layoutDirection=0x01020238;
+const int R::id::ldpi=0x0102024b;
+const int R::id::left=0x01020076;
+const int R::id::leftSpacer=0x0102026d;
+const int R::id::left_icon=0x0102024f;
+const int R::id::left_to_right=0x010201e7;
+const int R::id::line=0x010201d9;
+const int R::id::line1=0x01020336;
+const int R::id::line3=0x01020338;
+const int R::id::linear=0x010201db;
+const int R::id::list=0x0102000a;
+const int R::id::listContainer=0x01020320;
+const int R::id::listMode=0x01020207;
+const int R::id::list_footer=0x01020353;
+const int R::id::list_item=0x01020266;
+const int R::id::list_menu_presenter=0x0102025b;
+const int R::id::liveAudio=0x0102020f;
+const int R::id::locale=0x01020188;
+const int R::id::lockInstructions=0x010202f1;
+const int R::id::lockPattern=0x0102030b;
+const int R::id::lockPatternView=0x010202d2;
+const int R::id::lock_screen=0x01020253;
+const int R::id::login=0x010202b4;
+const int R::id::low=0x0102017d;
+const int R::id::ltr=0x01020185;
+const int R::id::main=0x010203b1;
+const int R::id::map=0x01020082;
+const int R::id::marquee=0x01020045;
+const int R::id::marquee_forever=0x010201cc;
+const int R::id::match_parent=0x01020198;
+const int R::id::matches=0x010203bb;
+const int R::id::matrix=0x010201ba;
+const int R::id::mcc=0x0102022d;
+const int R::id::mdpi=0x0102024c;
+const int R::id::mediacontroller_progress=0x0102032a;
+const int R::id::menu=0x01020250;
+const int R::id::message=0x0102000b;
+const int R::id::middle=0x01020043;
+const int R::id::minute=0x010203a3;
+const int R::id::mirror=0x010201e2;
+const int R::id::mnc=0x0102022e;
+const int R::id::modeLarge=0x010201d6;
+const int R::id::modeMedium=0x010201d5;
+const int R::id::modeSmall=0x010201d4;
+const int R::id::mode_normal=0x010203c5;
+const int R::id::monospace=0x0102003e;
+const int R::id::month=0x0102028c;
+const int R::id::month_name=0x01020283;
+const int R::id::mount_button=0x010203b3;
+const int R::id::multi_pane_challenge=0x010202c3;
+const int R::id::multiple=0x010201d3;
+const int R::id::multipleChoice=0x010201b4;
+const int R::id::multipleChoiceModal=0x010201b5;
+const int R::id::music=0x01020203;
+const int R::id::name=0x010203be;
+const int R::id::navigation=0x01020232;
+const int R::id::never=0x01020181;
+const int R::id::new_app_action=0x010202a8;
+const int R::id::new_app_description=0x010202a9;
+const int R::id::new_app_icon=0x010202a7;
+const int R::id::next=0x01020328;
+const int R::id::nextAlarmInfo=0x010202ed;
+const int R::id::nextAlarmSpacer=0x010202ef;
+const int R::id::nextAlarmText=0x010202ee;
+const int R::id::next_button=0x01020358;
+const int R::id::nine=0x010203af;
+const int R::id::no=0x01020191;
+const int R::id::no_applications_message=0x0102035c;
+const int R::id::no_permissions=0x01020280;
+const int R::id::nokeys=0x0102023e;
+const int R::id::nonav=0x01020241;
+const int R::id::none=0x01020041;
+const int R::id::normal=0x0102003b;
+const int R::id::nosensor=0x01020227;
+const int R::id::notification=0x01020200;
+const int R::id::notouch=0x0102023b;
+const int R::id::number=0x0102005d;
+const int R::id::numberDecimal=0x0102005f;
+const int R::id::numberPassword=0x01020060;
+const int R::id::numberSigned=0x0102005e;
+const int R::id::numberpicker_input=0x01020348;
+const int R::id::off=0x0102034e;
+const int R::id::ok=0x010202b6;
+const int R::id::old_app_action=0x010202a4;
+const int R::id::old_app_description=0x010202a5;
+const int R::id::old_app_icon=0x010202a3;
+const int R::id::one=0x010203a7;
+const int R::id::oneLine=0x010201cf;
+const int R::id::opaque=0x010201de;
+const int R::id::option1=0x01020295;
+const int R::id::option2=0x01020296;
+const int R::id::option3=0x01020297;
+const int R::id::orientation=0x01020233;
+const int R::id::original_app_icon=0x0102031d;
+const int R::id::original_message=0x0102031e;
+const int R::id::outsideInset=0x0102017b;
+const int R::id::outsideOverlay=0x0102017a;
+const int R::id::oval=0x010201d8;
+const int R::id::overflow_divider=0x0102033d;
+const int R::id::overflow_menu_presenter=0x0102025d;
+const int R::id::overlay_display_window_texture=0x0102034a;
+const int R::id::overlay_display_window_title=0x0102034b;
+const int R::id::owner_info=0x01020307;
+const int R::id::package_icon=0x0102034c;
+const int R::id::package_label=0x0102034d;
+const int R::id::packages_list=0x01020299;
+const int R::id::pageDeleteDropTarget=0x01020217;
+const int R::id::parentPanel=0x01020267;
+const int R::id::password=0x010202b5;
+const int R::id::passwordEntry=0x010202cf;
+const int R::id::paste=0x01020022;
+const int R::id::pause=0x01020326;
+const int R::id::perm_icon=0x0102027a;
+const int R::id::perm_money_icon=0x0102027c;
+const int R::id::perm_money_label=0x0102027d;
+const int R::id::perm_name=0x0102027b;
+const int R::id::permission_group=0x0102027e;
+const int R::id::permission_icon=0x0102029a;
+const int R::id::permission_list=0x0102027f;
+const int R::id::perms_list=0x01020281;
+const int R::id::personalInfo=0x0102021c;
+const int R::id::phone=0x01020061;
+const int R::id::pickers=0x0102028b;
+const int R::id::pinDel=0x010202f8;
+const int R::id::pinDisplay=0x010202fe;
+const int R::id::pinDisplayGroup=0x010202fd;
+const int R::id::pinEntry=0x010202d4;
+const int R::id::placeholder=0x01020387;
+const int R::id::popup_submenu_presenter=0x0102025e;
+const int R::id::portrait=0x01020224;
+const int R::id::preferExternal=0x01020246;
+const int R::id::prefs=0x01020355;
+const int R::id::prefs_frame=0x01020354;
+const int R::id::prev=0x01020324;
+const int R::id::primary=0x0102000c;
+const int R::id::progress=0x0102000d;
+const int R::id::progressContainer=0x0102031f;
+const int R::id::progress_circular=0x01020369;
+const int R::id::progress_horizontal=0x0102036a;
+const int R::id::progress_number=0x01020274;
+const int R::id::progress_percent=0x01020273;
+const int R::id::pukDel=0x01020306;
+const int R::id::pukDisplay=0x01020305;
+const int R::id::queryRewriteFromData=0x010201f3;
+const int R::id::queryRewriteFromText=0x010201f4;
+const int R::id::qwerty=0x0102023f;
+const int R::id::radial=0x010201dc;
+const int R::id::radio=0x01020323;
+const int R::id::radio_power=0x01020350;
+const int R::id::random=0x010201e6;
+const int R::id::reask_hint=0x01020279;
+const int R::id::rectangle=0x010201d7;
+const int R::id::repeat=0x010201c2;
+const int R::id::replace_app_icon=0x0102031b;
+const int R::id::replace_message=0x0102031c;
+const int R::id::resolver_grid=0x01020363;
+const int R::id::restart=0x010201e4;
+const int R::id::reverse=0x010201e5;
+const int R::id::reverseLandscape=0x0102022a;
+const int R::id::reversePortrait=0x0102022b;
+const int R::id::rew=0x01020325;
+const int R::id::right=0x01020077;
+const int R::id::rightSpacer=0x0102026e;
+const int R::id::right_container=0x01020368;
+const int R::id::right_icon=0x01020251;
+const int R::id::right_to_left=0x010201e8;
+const int R::id::ring=0x010201da;
+const int R::id::ringtone=0x010201ff;
+const int R::id::root=0x010202f2;
+const int R::id::row=0x010201ec;
+const int R::id::rowTypeId=0x01020257;
+const int R::id::rtl=0x01020186;
+const int R::id::sans=0x0102003c;
+const int R::id::screenLayout=0x01020234;
+const int R::id::screenLocked=0x01020309;
+const int R::id::screenLockedInfo=0x010202f0;
+const int R::id::screenSize=0x01020236;
+const int R::id::scrim=0x01020214;
+const int R::id::scrollView=0x01020270;
+const int R::id::scrolling=0x01020193;
+const int R::id::search_app_icon=0x01020372;
+const int R::id::search_badge=0x01020375;
+const int R::id::search_bar=0x01020371;
+const int R::id::search_button=0x01020376;
+const int R::id::search_close_btn=0x0102037b;
+const int R::id::search_edit_frame=0x01020377;
+const int R::id::search_go_btn=0x0102037d;
+const int R::id::search_mag_icon=0x01020378;
+const int R::id::search_plate=0x01020379;
+const int R::id::search_src_text=0x0102037a;
+const int R::id::search_view=0x01020373;
+const int R::id::search_voice_btn=0x0102037e;
+const int R::id::secondary=0x010201fa;
+const int R::id::secondaryProgress=0x0102000f;
+const int R::id::seekbar=0x01020359;
+const int R::id::selectAll=0x0102001f;
+const int R::id::selectTextMode=0x0102002d;
+const int R::id::select_all=0x010203c6;
+const int R::id::select_dialog_listview=0x0102037f;
+const int R::id::selectedIcon=0x0102000e;
+const int R::id::sensor=0x01020226;
+const int R::id::sensorLandscape=0x01020228;
+const int R::id::sensorPortrait=0x01020229;
+const int R::id::sentences=0x010201c9;
+const int R::id::sequentially=0x010201f0;
+const int R::id::serial_number=0x01020391;
+const int R::id::serial_number_header=0x01020390;
+const int R::id::serif=0x0102003d;
+const int R::id::seven=0x010203ad;
+const int R::id::sha1_fingerprint=0x010203a1;
+const int R::id::sha1_fingerprint_header=0x010203a0;
+const int R::id::sha256_fingerprint=0x0102039f;
+const int R::id::sha256_fingerprint_header=0x0102039e;
+const int R::id::share=0x010203c7;
+const int R::id::shortcut=0x01020322;
+const int R::id::showCustom=0x0102020d;
+const int R::id::showHome=0x0102020a;
+const int R::id::showSearchIconAsBadge=0x010201f2;
+const int R::id::showSearchLabelAsBadge=0x010201f1;
+const int R::id::showTitle=0x0102020c;
+const int R::id::showVoiceSearchButton=0x010201f5;
+const int R::id::signature=0x01020219;
+const int R::id::signatureOrSystem=0x0102021a;
+const int R::id::signed_=0x010201c7;
+const int R::id::silent=0x0102034f;
+const int R::id::single=0x010201d2;
+const int R::id::singleChoice=0x010201b3;
+const int R::id::singleInstance=0x01020221;
+const int R::id::singleTask=0x01020220;
+const int R::id::singleTop=0x0102021f;
+const int R::id::six=0x010203ac;
+const int R::id::skip_button=0x01020357;
+const int R::id::slider_group=0x010203b6;
+const int R::id::sliding_layout=0x010202c8;
+const int R::id::small=0x01020248;
+const int R::id::smallIcon=0x01020255;
+const int R::id::smallestScreenSize=0x01020237;
+const int R::id::sms_short_code_coins_icon=0x01020382;
+const int R::id::sms_short_code_confirm_message=0x01020380;
+const int R::id::sms_short_code_detail_layout=0x01020381;
+const int R::id::sms_short_code_detail_message=0x01020383;
+const int R::id::sms_short_code_remember_choice_checkbox=0x01020384;
+const int R::id::sms_short_code_remember_choice_text=0x01020385;
+const int R::id::sms_short_code_remember_undo_instruction=0x01020386;
+const int R::id::software=0x01020183;
+const int R::id::spacerBottom=0x01020302;
+const int R::id::spacerTop=0x010202e3;
+const int R::id::spacingWidth=0x010201b6;
+const int R::id::spacingWidthUniform=0x010201b8;
+const int R::id::spannable=0x010201c4;
+const int R::id::splashscreen=0x010203ba;
+const int R::id::splitActionBarWhenNarrow=0x01020247;
+const int R::id::split_action_bar=0x0102036e;
+const int R::id::spotlightMask=0x010202be;
+const int R::id::standard=0x0102021e;
+const int R::id::start=0x01020042;
+const int R::id::startSelectingText=0x01020028;
+const int R::id::stateAlwaysHidden=0x01020031;
+const int R::id::stateAlwaysVisible=0x01020033;
+const int R::id::stateHidden=0x01020030;
+const int R::id::stateUnchanged=0x0102002f;
+const int R::id::stateUnspecified=0x0102002e;
+const int R::id::stateVisible=0x01020032;
+const int R::id::status=0x01020294;
+const int R::id::status1=0x010202f6;
+const int R::id::status_bar_latest_event_content=0x01020335;
+const int R::id::stopSelectingText=0x01020029;
+const int R::id::stream_icon=0x010203b8;
+const int R::id::stylus=0x0102023c;
+const int R::id::submit_area=0x0102037c;
+const int R::id::summary=0x01020010;
+const int R::id::sweep=0x010201dd;
+const int R::id::switchInputMethod=0x01020024;
+const int R::id::switchWidget=0x0102035a;
+const int R::id::switch_ime_button=0x010202d0;
+const int R::id::switch_new=0x010202a6;
+const int R::id::switch_old=0x010202a2;
+const int R::id::system=0x010201f9;
+const int R::id::tabMode=0x01020208;
+const int R::id::tabcontent=0x01020011;
+const int R::id::tabhost=0x01020012;
+const int R::id::tabs=0x01020013;
+const int R::id::text=0x01020046;
+const int R::id::text1=0x01020014;
+const int R::id::text2=0x01020015;
+const int R::id::textAutoComplete=0x0102004b;
+const int R::id::textAutoCorrect=0x0102004a;
+const int R::id::textCapCharacters=0x01020047;
+const int R::id::textCapSentences=0x01020049;
+const int R::id::textCapWords=0x01020048;
+const int R::id::textEmailAddress=0x01020050;
+const int R::id::textEmailSubject=0x01020051;
+const int R::id::textEnd=0x0102018d;
+const int R::id::textFilter=0x01020059;
+const int R::id::textImeMultiLine=0x0102004d;
+const int R::id::textLongMessage=0x01020053;
+const int R::id::textMultiLine=0x0102004c;
+const int R::id::textNoSuggestions=0x0102004e;
+const int R::id::textPassword=0x01020056;
+const int R::id::textPersonName=0x01020054;
+const int R::id::textPhonetic=0x0102005a;
+const int R::id::textPostalAddress=0x01020055;
+const int R::id::textShortMessage=0x01020052;
+const int R::id::textStart=0x0102018c;
+const int R::id::textUri=0x0102004f;
+const int R::id::textVisiblePassword=0x01020057;
+const int R::id::textWebEditText=0x01020058;
+const int R::id::textWebEmailAddress=0x0102005b;
+const int R::id::textWebPassword=0x0102005c;
+const int R::id::three=0x010203a9;
+const int R::id::time=0x01020064;
+const int R::id::timeDisplayBackground=0x010202f3;
+const int R::id::timeDisplayForeground=0x010202f4;
+const int R::id::timePicker=0x010203a5;
+const int R::id::time_current=0x01020329;
+const int R::id::title=0x01020016;
+const int R::id::titleDivider=0x0102026b;
+const int R::id::titleDividerTop=0x01020272;
+const int R::id::title_container=0x01020252;
+const int R::id::title_separator=0x01020388;
+const int R::id::title_template=0x01020269;
+const int R::id::to_common=0x0102038b;
+const int R::id::to_common_header=0x0102038a;
+const int R::id::to_org=0x0102038d;
+const int R::id::to_org_header=0x0102038c;
+const int R::id::to_org_unit=0x0102038f;
+const int R::id::to_org_unit_header=0x0102038e;
+const int R::id::together=0x010201ef;
+const int R::id::toggle=0x01020017;
+const int R::id::top=0x01020074;
+const int R::id::topDisplayGroup=0x01020300;
+const int R::id::topHeader=0x010202e2;
+const int R::id::topPanel=0x01020268;
+const int R::id::top_action_bar=0x01020370;
+const int R::id::top_to_bottom=0x010201e9;
+const int R::id::touchscreen=0x0102022f;
+const int R::id::trackball=0x01020243;
+const int R::id::translucent=0x010201e0;
+const int R::id::transparent=0x010201df;
+const int R::id::transport=0x010202f9;
+const int R::id::transport_bg_protect=0x010202fb;
+const int R::id::transport_controls=0x01020315;
+const int R::id::twelvekey=0x01020240;
+const int R::id::two=0x010203a8;
+const int R::id::twoLine=0x010201d1;
+const int R::id::typeAllMask=0x010201a7;
+const int R::id::typeNotificationStateChanged=0x0102019f;
+const int R::id::typeTouchExplorationGestureEnd=0x010201a3;
+const int R::id::typeTouchExplorationGestureStart=0x010201a2;
+const int R::id::typeViewClicked=0x01020199;
+const int R::id::typeViewFocused=0x0102019c;
+const int R::id::typeViewHoverEnter=0x010201a0;
+const int R::id::typeViewHoverExit=0x010201a1;
+const int R::id::typeViewLongClicked=0x0102019a;
+const int R::id::typeViewScrolled=0x010201a5;
+const int R::id::typeViewSelected=0x0102019b;
+const int R::id::typeViewTextChanged=0x0102019d;
+const int R::id::typeViewTextSelectionChanged=0x010201a6;
+const int R::id::typeWindowContentChanged=0x010201a4;
+const int R::id::typeWindowStateChanged=0x0102019e;
+const int R::id::uiMode=0x01020235;
+const int R::id::unbounded=0x01020206;
+const int R::id::undefined=0x0102023a;
+const int R::id::unlock_widget=0x01020308;
+const int R::id::unmount_button=0x010203b4;
+const int R::id::unspecified=0x01020222;
+const int R::id::up=0x01020258;
+const int R::id::useLogo=0x01020209;
+const int R::id::user=0x01020210;
+const int R::id::userSwitcher=0x01020213;
+const int R::id::validity_header=0x01020398;
+const int R::id::value=0x010202b1;
+const int R::id::vertical=0x01020085;
+const int R::id::viewEnd=0x0102018f;
+const int R::id::viewStart=0x0102018e;
+const int R::id::view_flipper=0x010202c7;
+const int R::id::visible=0x01020175;
+const int R::id::visible_panel=0x010203b5;
+const int R::id::voice=0x01020202;
+const int R::id::volume_icon=0x0102032b;
+const int R::id::volume_slider=0x0102032c;
+const int R::id::web=0x01020080;
+const int R::id::websearch=0x010203c9;
+const int R::id::webview=0x010203b9;
+const int R::id::wheel=0x01020244;
+const int R::id::widget=0x01020211;
+const int R::id::widget_frame=0x01020018;
+const int R::id::widgets=0x01020215;
+const int R::id::wifi_p2p_wps_pin=0x010203bd;
+const int R::id::withText=0x010201fd;
+const int R::id::words=0x010201ca;
+const int R::id::wrap_content=0x0102003a;
+const int R::id::xhdpi=0x0102024e;
+const int R::id::xlarge=0x0102024a;
+const int R::id::year=0x0102028e;
+const int R::id::yes=0x01020190;
+const int R::id::zero=0x010203b0;
+const int R::id::zoomControls=0x010203c1;
+const int R::id::zoomIn=0x010203c3;
+const int R::id::zoomMagnify=0x010203c4;
+const int R::id::zoomOut=0x010203c2;
+const int R::id::zoom_fit_page=0x010203bf;
+const int R::id::zoom_page_overview=0x010203c0;
+const int R::integer::config_MaxConcurrentDownloadsAllowed=0x010e0032;
+const int R::integer::config_activityDefaultDur=0x010e0007;
+const int R::integer::config_activityShortDur=0x010e0006;
+const int R::integer::config_carDockKeepsScreenOn=0x010e0014;
+const int R::integer::config_carDockRotation=0x010e0011;
+const int R::integer::config_criticalBatteryWarningLevel=0x010e0018;
+const int R::integer::config_cursorWindowSize=0x010e0034;
+const int R::integer::config_datause_notification_type=0x010e002d;
+const int R::integer::config_datause_polling_period_sec=0x010e002a;
+const int R::integer::config_datause_threshold_bytes=0x010e002b;
+const int R::integer::config_datause_throttle_kbitsps=0x010e002c;
+const int R::integer::config_defaultNotificationLedOff=0x010e001d;
+const int R::integer::config_defaultNotificationLedOn=0x010e001c;
+const int R::integer::config_defaultUiModeType=0x010e0012;
+const int R::integer::config_defaultWallPaper_height=0x010e0039;
+const int R::integer::config_defaultWallPaper_width=0x010e0038;
+const int R::integer::config_deskDockKeepsScreenOn=0x010e0013;
+const int R::integer::config_deskDockRotation=0x010e0010;
+const int R::integer::config_downloadDataDirLowSpaceThreshold=0x010e0033;
+const int R::integer::config_downloadDataDirSize=0x010e0031;
+const int R::integer::config_lidKeyboardAccessibility=0x010e0015;
+const int R::integer::config_lidNavigationAccessibility=0x010e0016;
+const int R::integer::config_lidOpenRotation=0x010e000f;
+const int R::integer::config_lightSensorWarmupTime=0x010e0028;
+const int R::integer::config_lockSoundVolumeDb=0x010e0005;
+const int R::integer::config_longAnimTime=0x010e0002;
+const int R::integer::config_longPressOnHomeBehavior=0x010e0023;
+const int R::integer::config_longPressOnPowerBehavior=0x010e0017;
+const int R::integer::config_lowBatteryCloseWarningLevel=0x010e001b;
+const int R::integer::config_lowBatteryWarningLevel=0x010e001a;
+const int R::integer::config_maxResolverActivityColumns=0x010e0037;
+const int R::integer::config_max_pan_devices=0x010e000a;
+const int R::integer::config_mediumAnimTime=0x010e0001;
+const int R::integer::config_multiuserMaximumUsers=0x010e003a;
+const int R::integer::config_networkPolicyDefaultWarning=0x010e0036;
+const int R::integer::config_networkTransitionTimeout=0x010e0009;
+const int R::integer::config_notificationsBatteryFullARGB=0x010e0020;
+const int R::integer::config_notificationsBatteryLedOff=0x010e0022;
+const int R::integer::config_notificationsBatteryLedOn=0x010e0021;
+const int R::integer::config_notificationsBatteryLowARGB=0x010e001e;
+const int R::integer::config_notificationsBatteryMediumARGB=0x010e001f;
+const int R::integer::config_ntpTimeout=0x010e0035;
+const int R::integer::config_radioScanningTimeout=0x010e0008;
+const int R::integer::config_safe_media_volume_index=0x010e003b;
+const int R::integer::config_screenBrightnessDim=0x010e0027;
+const int R::integer::config_screenBrightnessSettingDefault=0x010e0026;
+const int R::integer::config_screenBrightnessSettingMaximum=0x010e0025;
+const int R::integer::config_screenBrightnessSettingMinimum=0x010e0024;
+const int R::integer::config_shortAnimTime=0x010e0000;
+const int R::integer::config_shutdownBatteryTemperature=0x010e0019;
+const int R::integer::config_soundEffectVolumeDb=0x010e0004;
+const int R::integer::config_virtualKeyQuietTimeMillis=0x010e0029;
+const int R::integer::config_wifi_driver_stop_delay=0x010e000e;
+const int R::integer::config_wifi_framework_scan_interval=0x010e000d;
+const int R::integer::config_wifi_scan_interval_p2p_connected=0x010e000c;
+const int R::integer::config_wifi_supplicant_scan_interval=0x010e000b;
+const int R::integer::db_connection_pool_size=0x010e002e;
+const int R::integer::db_journal_size_limit=0x010e002f;
+const int R::integer::db_wal_autocheckpoint=0x010e0030;
+const int R::integer::kg_carousel_angle=0x010e0041;
+const int R::integer::kg_glowpad_rotation_offset=0x010e0044;
+const int R::integer::kg_security_fade_duration=0x010e0043;
+const int R::integer::kg_security_flip_duration=0x010e0042;
+const int R::integer::kg_security_flipper_weight=0x010e0047;
+const int R::integer::kg_selector_gravity=0x010e0045;
+const int R::integer::kg_widget_region_weight=0x010e0046;
+const int R::integer::max_action_buttons=0x010e003c;
+const int R::integer::preference_fragment_scrollbarStyle=0x010e0040;
+const int R::integer::preference_screen_header_scrollbarStyle=0x010e003f;
+const int R::integer::preferences_left_pane_weight=0x010e003d;
+const int R::integer::preferences_right_pane_weight=0x010e003e;
+const int R::integer::status_bar_notification_info_maxnum=0x010e0003;
+const int R::interpolator::accelerate_cubic=0x010c0002;
+const int R::interpolator::accelerate_decelerate=0x010c0006;
+const int R::interpolator::accelerate_quad=0x010c0000;
+const int R::interpolator::accelerate_quint=0x010c0004;
+const int R::interpolator::anticipate=0x010c0007;
+const int R::interpolator::anticipate_overshoot=0x010c0009;
+const int R::interpolator::bounce=0x010c000a;
+const int R::interpolator::cycle=0x010c000c;
+const int R::interpolator::decelerate_cubic=0x010c0003;
+const int R::interpolator::decelerate_quad=0x010c0001;
+const int R::interpolator::decelerate_quint=0x010c0005;
+const int R::interpolator::linear=0x010c000b;
+const int R::interpolator::overshoot=0x010c0008;
+const int R::layout::action_bar_home=0x01090018;
+const int R::layout::action_bar_title_item=0x01090019;
+const int R::layout::action_menu_item_layout=0x0109001a;
+const int R::layout::action_menu_layout=0x0109001b;
+const int R::layout::action_mode_bar=0x0109001c;
+const int R::layout::action_mode_close_item=0x0109001d;
+const int R::layout::activity_chooser_view=0x0109001e;
+const int R::layout::activity_chooser_view_list_item=0x0109001f;
+const int R::layout::activity_list=0x01090020;
+const int R::layout::activity_list_item=0x01090000;
+const int R::layout::activity_list_item_2=0x01090021;
+const int R::layout::adaptive_notification_wrapper=0x01090022;
+const int R::layout::alert_dialog=0x01090023;
+const int R::layout::alert_dialog_holo=0x01090024;
+const int R::layout::alert_dialog_progress=0x01090025;
+const int R::layout::alert_dialog_progress_holo=0x01090026;
+const int R::layout::always_use_checkbox=0x01090027;
+const int R::layout::am_compat_mode_dialog=0x01090028;
+const int R::layout::app_permission_item=0x01090029;
+const int R::layout::app_permission_item_money=0x0109002a;
+const int R::layout::app_permission_item_old=0x0109002b;
+const int R::layout::app_perms_summary=0x0109002c;
+const int R::layout::auto_complete_list=0x0109002d;
+const int R::layout::breadcrumbs_in_fragment=0x0109002e;
+const int R::layout::browser_link_context_header=0x0109000e;
+const int R::layout::calendar_view=0x0109002f;
+const int R::layout::character_picker=0x01090030;
+const int R::layout::character_picker_button=0x01090031;
+const int R::layout::choose_account=0x01090032;
+const int R::layout::choose_account_row=0x01090033;
+const int R::layout::choose_account_type=0x01090034;
+const int R::layout::choose_type_and_account=0x01090035;
+const int R::layout::date_picker=0x01090036;
+const int R::layout::date_picker_dialog=0x01090037;
+const int R::layout::date_picker_holo=0x01090038;
+const int R::layout::default_navigation=0x01090039;
+const int R::layout::dialog_custom_title=0x0109003a;
+const int R::layout::dialog_custom_title_holo=0x0109003b;
+const int R::layout::dialog_title=0x0109003c;
+const int R::layout::dialog_title_holo=0x0109003d;
+const int R::layout::dialog_title_icons=0x0109003e;
+const int R::layout::dialog_title_icons_holo=0x0109003f;
+const int R::layout::expandable_list_content=0x01090001;
+const int R::layout::expanded_menu_layout=0x01090040;
+const int R::layout::fragment_bread_crumb_item=0x01090041;
+const int R::layout::fragment_bread_crumbs=0x01090042;
+const int R::layout::global_actions_item=0x01090043;
+const int R::layout::global_actions_silent_mode=0x01090044;
+const int R::layout::grant_credentials_permission=0x01090045;
+const int R::layout::heavy_weight_switcher=0x01090046;
+const int R::layout::icon_menu_item_layout=0x01090047;
+const int R::layout::icon_menu_layout=0x01090048;
+const int R::layout::input_method=0x01090049;
+const int R::layout::input_method_extract_view=0x0109004a;
+const int R::layout::input_method_switch_dialog_title=0x0109004b;
+const int R::layout::js_prompt=0x0109004c;
+const int R::layout::keyboard_key_preview=0x0109004d;
+const int R::layout::keyboard_popup_keyboard=0x0109004e;
+const int R::layout::keyguard=0x0109004f;
+const int R::layout::keyguard_account_view=0x01090050;
+const int R::layout::keyguard_add_widget=0x01090051;
+const int R::layout::keyguard_eca=0x010900ee;
+const int R::layout::keyguard_emergency_carrier_area=0x01090052;
+const int R::layout::keyguard_emergency_carrier_area_empty=0x01090053;
+const int R::layout::keyguard_face_unlock_view=0x01090054;
+const int R::layout::keyguard_glow_pad_container=0x01090055;
+const int R::layout::keyguard_glow_pad_view=0x01090056;
+const int R::layout::keyguard_host_view=0x01090057;
+const int R::layout::keyguard_message_area=0x01090058;
+const int R::layout::keyguard_message_area_large=0x01090059;
+const int R::layout::keyguard_multi_user_avatar=0x0109005a;
+const int R::layout::keyguard_multi_user_selector=0x0109005b;
+const int R::layout::keyguard_multi_user_selector_widget=0x0109005c;
+const int R::layout::keyguard_navigation=0x0109005d;
+const int R::layout::keyguard_password_view=0x0109005e;
+const int R::layout::keyguard_pattern_view=0x0109005f;
+const int R::layout::keyguard_pin_view=0x01090060;
+const int R::layout::keyguard_screen_glogin_unlock=0x01090061;
+const int R::layout::keyguard_screen_lock=0x01090062;
+const int R::layout::keyguard_screen_password_landscape=0x01090063;
+const int R::layout::keyguard_screen_password_portrait=0x01090064;
+const int R::layout::keyguard_screen_sim_pin_landscape=0x01090065;
+const int R::layout::keyguard_screen_sim_pin_portrait=0x01090066;
+const int R::layout::keyguard_screen_sim_puk_landscape=0x01090067;
+const int R::layout::keyguard_screen_sim_puk_portrait=0x01090068;
+const int R::layout::keyguard_screen_status_land=0x01090069;
+const int R::layout::keyguard_screen_status_port=0x0109006a;
+const int R::layout::keyguard_screen_tab_unlock=0x0109006b;
+const int R::layout::keyguard_screen_tab_unlock_land=0x0109006c;
+const int R::layout::keyguard_screen_unlock_landscape=0x0109006d;
+const int R::layout::keyguard_screen_unlock_portrait=0x0109006e;
+const int R::layout::keyguard_selector_view=0x0109006f;
+const int R::layout::keyguard_sim_pin_view=0x01090070;
+const int R::layout::keyguard_sim_puk_pin_account_navigation=0x01090071;
+const int R::layout::keyguard_sim_puk_pin_navigation=0x01090072;
+const int R::layout::keyguard_sim_puk_view=0x01090073;
+const int R::layout::keyguard_status_area=0x01090074;
+const int R::layout::keyguard_status_view=0x01090075;
+const int R::layout::keyguard_transport_control=0x01090076;
+const int R::layout::keyguard_transport_control_view=0x01090077;
+const int R::layout::keyguard_widget_pager=0x01090078;
+const int R::layout::keyguard_widget_remove_drop_target=0x01090079;
+const int R::layout::launch_warning=0x0109007a;
+const int R::layout::list_content=0x01090014;
+const int R::layout::list_content_simple=0x0109007b;
+const int R::layout::list_gestures_overlay=0x0109007c;
+const int R::layout::list_menu_item_checkbox=0x0109007d;
+const int R::layout::list_menu_item_icon=0x0109007e;
+const int R::layout::list_menu_item_layout=0x0109007f;
+const int R::layout::list_menu_item_radio=0x01090080;
+const int R::layout::locale_picker_item=0x01090081;
+const int R::layout::media_controller=0x01090082;
+const int R::layout::media_route_chooser_layout=0x01090083;
+const int R::layout::media_route_list_item=0x01090084;
+const int R::layout::media_route_list_item_checkable=0x01090085;
+const int R::layout::media_route_list_item_collapse_group=0x01090086;
+const int R::layout::media_route_list_item_section_header=0x01090087;
+const int R::layout::media_route_list_item_top_header=0x01090088;
+const int R::layout::menu_item=0x01090089;
+const int R::layout::notification_action=0x0109008a;
+const int R::layout::notification_action_list=0x0109008b;
+const int R::layout::notification_action_tombstone=0x0109008c;
+const int R::layout::notification_intruder_content=0x0109008d;
+const int R::layout::notification_template_base=0x0109008e;
+const int R::layout::notification_template_big_base=0x0109008f;
+const int R::layout::notification_template_big_picture=0x01090090;
+const int R::layout::notification_template_big_text=0x01090091;
+const int R::layout::notification_template_inbox=0x01090092;
+const int R::layout::notification_template_part_chronometer=0x01090093;
+const int R::layout::notification_template_part_time=0x01090094;
+const int R::layout::number_picker=0x01090095;
+const int R::layout::number_picker_with_selector_wheel=0x01090096;
+const int R::layout::overlay_display_window=0x01090097;
+const int R::layout::permissions_account_and_authtokentype=0x01090098;
+const int R::layout::permissions_package_list_item=0x01090099;
+const int R::layout::popup_menu_item_layout=0x0109009a;
+const int R::layout::power_dialog=0x0109009b;
+const int R::layout::preference=0x0109009c;
+const int R::layout::preference_category=0x01090002;
+const int R::layout::preference_category_holo=0x0109009d;
+const int R::layout::preference_child=0x0109009e;
+const int R::layout::preference_child_holo=0x0109009f;
+const int R::layout::preference_dialog_edittext=0x010900a0;
+const int R::layout::preference_header_item=0x010900a1;
+const int R::layout::preference_holo=0x010900a2;
+const int R::layout::preference_information=0x010900a3;
+const int R::layout::preference_information_holo=0x010900a4;
+const int R::layout::preference_list_content=0x010900a5;
+const int R::layout::preference_list_content_single=0x010900a6;
+const int R::layout::preference_list_fragment=0x010900a7;
+const int R::layout::preference_widget_checkbox=0x010900a8;
+const int R::layout::preference_widget_seekbar=0x010900a9;
+const int R::layout::preference_widget_switch=0x010900aa;
+const int R::layout::preferences=0x010900ab;
+const int R::layout::progress_dialog=0x010900ac;
+const int R::layout::progress_dialog_holo=0x010900ad;
+const int R::layout::recent_apps_dialog=0x010900ae;
+const int R::layout::recent_apps_icon=0x010900af;
+const int R::layout::remote_views_adapter_default_loading_view=0x010900b0;
+const int R::layout::resolve_list_item=0x010900b1;
+const int R::layout::resolver_grid=0x010900b2;
+const int R::layout::safe_mode=0x010900b3;
+const int R::layout::screen=0x010900b4;
+const int R::layout::screen_action_bar=0x010900b5;
+const int R::layout::screen_action_bar_overlay=0x010900b6;
+const int R::layout::screen_custom_title=0x010900b7;
+const int R::layout::screen_progress=0x010900b8;
+const int R::layout::screen_simple=0x010900b9;
+const int R::layout::screen_simple_overlay_action_mode=0x010900ba;
+const int R::layout::screen_title=0x010900bb;
+const int R::layout::screen_title_icons=0x010900bc;
+const int R::layout::search_bar=0x010900bd;
+const int R::layout::search_dropdown_item_1line=0x010900be;
+const int R::layout::search_dropdown_item_icons_2line=0x010900bf;
+const int R::layout::search_view=0x010900c0;
+const int R::layout::seekbar_dialog=0x010900c1;
+const int R::layout::select_dialog=0x010900c2;
+const int R::layout::select_dialog_holo=0x010900c3;
+const int R::layout::select_dialog_item=0x01090011;
+const int R::layout::select_dialog_item_holo=0x010900c4;
+const int R::layout::select_dialog_multichoice=0x01090013;
+const int R::layout::select_dialog_multichoice_holo=0x010900c5;
+const int R::layout::select_dialog_singlechoice=0x01090012;
+const int R::layout::select_dialog_singlechoice_holo=0x010900c6;
+const int R::layout::simple_dropdown_hint=0x010900c7;
+const int R::layout::simple_dropdown_item_1line=0x0109000a;
+const int R::layout::simple_dropdown_item_2line=0x010900c8;
+const int R::layout::simple_expandable_list_item_1=0x01090006;
+const int R::layout::simple_expandable_list_item_2=0x01090007;
+const int R::layout::simple_gallery_item=0x0109000b;
+const int R::layout::simple_list_item_1=0x01090003;
+const int R::layout::simple_list_item_2=0x01090004;
+const int R::layout::simple_list_item_2_single_choice=0x010900c9;
+const int R::layout::simple_list_item_activated_1=0x01090016;
+const int R::layout::simple_list_item_activated_2=0x01090017;
+const int R::layout::simple_list_item_checked=0x01090005;
+const int R::layout::simple_list_item_multiple_choice=0x01090010;
+const int R::layout::simple_list_item_single_choice=0x0109000f;
+const int R::layout::simple_selectable_list_item=0x01090015;
+const int R::layout::simple_spinner_dropdown_item=0x01090009;
+const int R::layout::simple_spinner_item=0x01090008;
+const int R::layout::sms_short_code_confirmation_dialog=0x010900ca;
+const int R::layout::ssl_certificate=0x010900cb;
+const int R::layout::status_bar_latest_event_content=0x010900cc;
+const int R::layout::status_bar_latest_event_ticker=0x010900cd;
+const int R::layout::status_bar_latest_event_ticker_large_icon=0x010900ce;
+const int R::layout::tab_content=0x010900cf;
+const int R::layout::tab_indicator=0x010900d0;
+const int R::layout::tab_indicator_holo=0x010900d1;
+const int R::layout::test_list_item=0x0109000c;
+const int R::layout::text_drag_thumbnail=0x010900d2;
+const int R::layout::text_edit_action_popup_text=0x010900d3;
+const int R::layout::text_edit_no_paste_window=0x010900d4;
+const int R::layout::text_edit_paste_window=0x010900d5;
+const int R::layout::text_edit_side_no_paste_window=0x010900d6;
+const int R::layout::text_edit_side_paste_window=0x010900d7;
+const int R::layout::text_edit_suggestion_item=0x010900d8;
+const int R::layout::text_edit_suggestions_window=0x010900d9;
+const int R::layout::textview_hint=0x010900da;
+const int R::layout::time_picker=0x010900db;
+const int R::layout::time_picker_dialog=0x010900dc;
+const int R::layout::time_picker_holo=0x010900dd;
+const int R::layout::transient_notification=0x010900de;
+const int R::layout::twelve_key_entry=0x010900df;
+const int R::layout::two_line_list_item=0x0109000d;
+const int R::layout::typing_filter=0x010900e0;
+const int R::layout::usb_storage_activity=0x010900e1;
+const int R::layout::volume_adjust=0x010900e2;
+const int R::layout::volume_adjust_item=0x010900e3;
+const int R::layout::web_runtime=0x010900e4;
+const int R::layout::web_text_view_dropdown=0x010900e5;
+const int R::layout::webview_find=0x010900e6;
+const int R::layout::webview_select_singlechoice=0x010900e7;
+const int R::layout::wifi_p2p_dialog=0x010900e8;
+const int R::layout::wifi_p2p_dialog_row=0x010900e9;
+const int R::layout::zoom_browser_accessory_buttons=0x010900ea;
+const int R::layout::zoom_container=0x010900eb;
+const int R::layout::zoom_controls=0x010900ec;
+const int R::layout::zoom_magnify=0x010900ed;
+const int R::menu::webview_copy=0x01140000;
+const int R::menu::webview_find=0x01140001;
+const int R::mipmap::sym_app_on_sd_unavailable_icon=0x010d0001;
+const int R::mipmap::sym_def_app_icon=0x010d0000;
+const int R::plurals::abbrev_in_num_days=0x01130010;
+const int R::plurals::abbrev_in_num_hours=0x0113000f;
+const int R::plurals::abbrev_in_num_minutes=0x0113000e;
+const int R::plurals::abbrev_in_num_seconds=0x0113000d;
+const int R::plurals::abbrev_num_days_ago=0x0113000c;
+const int R::plurals::abbrev_num_hours_ago=0x0113000b;
+const int R::plurals::abbrev_num_minutes_ago=0x0113000a;
+const int R::plurals::abbrev_num_seconds_ago=0x01130009;
+const int R::plurals::in_num_days=0x01130008;
+const int R::plurals::in_num_hours=0x01130007;
+const int R::plurals::in_num_minutes=0x01130006;
+const int R::plurals::in_num_seconds=0x01130005;
+const int R::plurals::last_num_days=0x01130003;
+const int R::plurals::matches_found=0x01130013;
+const int R::plurals::num_days_ago=0x01130004;
+const int R::plurals::num_hours_ago=0x01130002;
+const int R::plurals::num_minutes_ago=0x01130001;
+const int R::plurals::num_seconds_ago=0x01130000;
+const int R::plurals::wifi_available=0x01130011;
+const int R::plurals::wifi_available_detailed=0x01130012;
+const int R::raw::accessibility_gestures=0x01100000;
+const int R::raw::fallbackring=0x01100001;
+const int R::raw::incognito_mode_start_page=0x01100002;
+const int R::raw::loaderror=0x01100003;
+const int R::raw::nodomain=0x01100004;
+const int R::string::BaMmi=0x0104008b;
+const int R::string::CLIRDefaultOffNextCallOff=0x01040097;
+const int R::string::CLIRDefaultOffNextCallOn=0x01040096;
+const int R::string::CLIRDefaultOnNextCallOff=0x01040095;
+const int R::string::CLIRDefaultOnNextCallOn=0x01040094;
+const int R::string::CLIRPermanent=0x01040099;
+const int R::string::CfMmi=0x01040089;
+const int R::string::ClipMmi=0x01040087;
+const int R::string::ClirMmi=0x01040088;
+const int R::string::CndMmi=0x01040092;
+const int R::string::CnipMmi=0x0104008e;
+const int R::string::CnirMmi=0x0104008f;
+const int R::string::CwMmi=0x0104008a;
+const int R::string::DndMmi=0x01040093;
+const int R::string::Midnight=0x010403be;
+const int R::string::Noon=0x010403bc;
+const int R::string::PinMmi=0x0104008d;
+const int R::string::PwdMmi=0x0104008c;
+const int R::string::RestrictedChangedTitle=0x0104009a;
+const int R::string::RestrictedOnAll=0x010400a2;
+const int R::string::RestrictedOnAllVoice=0x0104009e;
+const int R::string::RestrictedOnData=0x0104009b;
+const int R::string::RestrictedOnEmergency=0x0104009c;
+const int R::string::RestrictedOnNormal=0x0104009d;
+const int R::string::RestrictedOnSms=0x0104009f;
+const int R::string::RestrictedOnVoiceData=0x010400a0;
+const int R::string::RestrictedOnVoiceSms=0x010400a1;
+const int R::string::RuacMmi=0x01040091;
+const int R::string::SetupCallDefault=0x0104052c;
+const int R::string::ThreeWCMmi=0x01040090;
+const int R::string::VideoView_error_button=0x01040010;
+const int R::string::VideoView_error_text_invalid_progressive_playback=0x01040015;
+const int R::string::VideoView_error_text_unknown=0x01040011;
+const int R::string::VideoView_error_title=0x01040012;
+const int R::string::abbrev_month=0x0104003f;
+const int R::string::abbrev_month_day=0x0104003e;
+const int R::string::abbrev_month_day_year=0x0104003a;
+const int R::string::abbrev_month_year=0x01040040;
+const int R::string::abbrev_wday_month_day_no_year=0x01040063;
+const int R::string::abbrev_wday_month_day_year=0x01040064;
+const int R::string::accept=0x01040412;
+const int R::string::accessibility_binding_label=0x010404a3;
+const int R::string::accessibility_enabled=0x01040567;
+const int R::string::action_bar_home_description=0x01040502;
+const int R::string::action_bar_up_description=0x01040503;
+const int R::string::action_menu_overflow_description=0x01040504;
+const int R::string::action_mode_done=0x010404c0;
+const int R::string::activity_chooser_view_dialog_title_default=0x01040526;
+const int R::string::activity_chooser_view_see_all=0x01040525;
+const int R::string::activity_list_empty=0x01040488;
+const int R::string::activity_resolver_use_always=0x0104052d;
+const int R::string::activity_resolver_use_once=0x0104052e;
+const int R::string::activitychooserview_choose_application=0x010404f2;
+const int R::string::adb_active_notification_message=0x01040455;
+const int R::string::adb_active_notification_title=0x01040454;
+const int R::string::addToDictionary=0x010403c4;
+const int R::string::add_account_button_label=0x010404da;
+const int R::string::add_account_label=0x010404d9;
+const int R::string::aerr_application=0x010403d4;
+const int R::string::aerr_process=0x010403d5;
+const int R::string::aerr_title=0x010403d3;
+const int R::string::allow=0x0104049d;
+const int R::string::alternate_eri_file=0x010404a6;
+const int R::string::alwaysUse=0x010403ce;
+const int R::string::android_system_label=0x010400f1;
+const int R::string::android_upgrading_apk=0x010403e8;
+const int R::string::android_upgrading_complete=0x010403ea;
+const int R::string::android_upgrading_starting_apps=0x010403e9;
+const int R::string::android_upgrading_title=0x010403e7;
+const int R::string::anr_activity_application=0x010403d7;
+const int R::string::anr_activity_process=0x010403d8;
+const int R::string::anr_application_process=0x010403d9;
+const int R::string::anr_process=0x010403da;
+const int R::string::anr_title=0x010403d6;
+const int R::string::autofill_address_line_1_label_re=0x01040350;
+const int R::string::autofill_address_line_1_re=0x0104034f;
+const int R::string::autofill_address_line_2_re=0x01040351;
+const int R::string::autofill_address_line_3_re=0x01040352;
+const int R::string::autofill_address_name_separator=0x01040348;
+const int R::string::autofill_address_summary_format=0x0104034b;
+const int R::string::autofill_address_summary_name_format=0x01040349;
+const int R::string::autofill_address_summary_separator=0x0104034a;
+const int R::string::autofill_address_type_same_as_re=0x01040358;
+const int R::string::autofill_address_type_use_my_re=0x01040359;
+const int R::string::autofill_area=0x0104037f;
+const int R::string::autofill_area_code_notext_re=0x01040372;
+const int R::string::autofill_area_code_re=0x01040365;
+const int R::string::autofill_attention_ignored_re=0x0104034c;
+const int R::string::autofill_billing_designator_re=0x0104035a;
+const int R::string::autofill_card_cvc_re=0x0104036b;
+const int R::string::autofill_card_ignored_re=0x0104036f;
+const int R::string::autofill_card_number_re=0x0104036c;
+const int R::string::autofill_city_re=0x01040356;
+const int R::string::autofill_company_re=0x0104034e;
+const int R::string::autofill_country_code_re=0x01040371;
+const int R::string::autofill_country_re=0x01040353;
+const int R::string::autofill_county=0x01040379;
+const int R::string::autofill_department=0x0104037c;
+const int R::string::autofill_district=0x0104037b;
+const int R::string::autofill_email_re=0x0104035c;
+const int R::string::autofill_emirate=0x01040380;
+const int R::string::autofill_expiration_date_re=0x0104036e;
+const int R::string::autofill_expiration_month_re=0x0104036d;
+const int R::string::autofill_fax_re=0x01040370;
+const int R::string::autofill_first_name_re=0x01040360;
+const int R::string::autofill_island=0x0104037a;
+const int R::string::autofill_last_name_re=0x01040363;
+const int R::string::autofill_middle_initial_re=0x01040361;
+const int R::string::autofill_middle_name_re=0x01040362;
+const int R::string::autofill_name_on_card_contextual_re=0x0104036a;
+const int R::string::autofill_name_on_card_re=0x01040369;
+const int R::string::autofill_name_re=0x0104035e;
+const int R::string::autofill_name_specific_re=0x0104035f;
+const int R::string::autofill_parish=0x0104037e;
+const int R::string::autofill_phone_extension_re=0x01040368;
+const int R::string::autofill_phone_prefix_re=0x01040366;
+const int R::string::autofill_phone_prefix_separator_re=0x01040373;
+const int R::string::autofill_phone_re=0x01040364;
+const int R::string::autofill_phone_suffix_re=0x01040367;
+const int R::string::autofill_phone_suffix_separator_re=0x01040374;
+const int R::string::autofill_postal_code=0x01040376;
+const int R::string::autofill_prefecture=0x0104037d;
+const int R::string::autofill_province=0x01040375;
+const int R::string::autofill_region_ignored_re=0x0104034d;
+const int R::string::autofill_shipping_designator_re=0x0104035b;
+const int R::string::autofill_state=0x01040377;
+const int R::string::autofill_state_re=0x01040357;
+const int R::string::autofill_this_form=0x01040346;
+const int R::string::autofill_username_re=0x0104035d;
+const int R::string::autofill_zip_4_re=0x01040355;
+const int R::string::autofill_zip_code=0x01040378;
+const int R::string::autofill_zip_code_re=0x01040354;
+const int R::string::back_button_label=0x010404b7;
+const int R::string::badPin=0x0104007e;
+const int R::string::badPuk=0x0104007f;
+const int R::string::beforeOneMonthDurationPast=0x010403a8;
+const int R::string::bluetooth_a2dp_audio_route_name=0x01040534;
+const int R::string::bugreport_message=0x010400e9;
+const int R::string::bugreport_title=0x010400e8;
+const int R::string::byteShort=0x0104006c;
+const int R::string::cancel=0x01040000;
+const int R::string::candidates_style=0x0104045f;
+const int R::string::capital_off=0x010403cc;
+const int R::string::capital_on=0x010403cb;
+const int R::string::car_mode_disable_notification_message=0x010404b4;
+const int R::string::car_mode_disable_notification_title=0x010404b3;
+const int R::string::cfTemplateForwarded=0x010400ba;
+const int R::string::cfTemplateForwardedTime=0x010400bb;
+const int R::string::cfTemplateNotForwarded=0x010400b9;
+const int R::string::cfTemplateRegistered=0x010400bc;
+const int R::string::cfTemplateRegisteredTime=0x010400bd;
+const int R::string::chooseActivity=0x010403d0;
+const int R::string::chooseUsbActivity=0x010403d1;
+const int R::string::choose_account_label=0x010404d8;
+const int R::string::chooser_wallpaper=0x010404a5;
+const int R::string::clearDefaultHintMsg=0x010403cf;
+const int R::string::common_last_name_prefixes=0x01040067;
+const int R::string::common_name=0x0104051a;
+const int R::string::common_name_conjunctions=0x01040068;
+const int R::string::common_name_prefixes=0x01040065;
+const int R::string::common_name_suffixes=0x01040066;
+const int R::string::config_datause_iface=0x0104001e;
+const int R::string::config_default_dns_server=0x0104001f;
+const int R::string::config_dreamsDefaultComponent=0x0104002c;
+const int R::string::config_ethernet_iface_regex=0x01040018;
+const int R::string::config_isoImagePath=0x01040025;
+const int R::string::config_ntpServer=0x01040026;
+const int R::string::config_tether_apndata=0x01040019;
+const int R::string::config_useragentprofile_url=0x01040024;
+const int R::string::config_wifi_p2p_device_type=0x0104001a;
+const int R::string::config_wimaxManagerClassname=0x01040029;
+const int R::string::config_wimaxNativeLibLocation=0x01040028;
+const int R::string::config_wimaxServiceClassname=0x0104002a;
+const int R::string::config_wimaxServiceJarLocation=0x01040027;
+const int R::string::config_wimaxStateTrackerClassname=0x0104002b;
+const int R::string::configure_input_methods=0x01040458;
+const int R::string::contentServiceSync=0x010400cf;
+const int R::string::contentServiceSyncNotificationTitle=0x010400d0;
+const int R::string::contentServiceTooManyDeletesNotificationDesc=0x010400d1;
+const int R::string::content_description_sliding_handle=0x010404f5;
+const int R::string::continue_to_enable_accessibility=0x01040566;
+const int R::string::copy=0x01040001;
+const int R::string::copyUrl=0x01040002;
+const int R::string::create_contact_using=0x01040499;
+const int R::string::cut=0x01040003;
+const int R::string::data_usage_3g_limit_snoozed_title=0x01040510;
+const int R::string::data_usage_3g_limit_title=0x0104050b;
+const int R::string::data_usage_4g_limit_snoozed_title=0x01040511;
+const int R::string::data_usage_4g_limit_title=0x0104050c;
+const int R::string::data_usage_limit_body=0x0104050f;
+const int R::string::data_usage_limit_snoozed_body=0x01040514;
+const int R::string::data_usage_mobile_limit_snoozed_title=0x01040512;
+const int R::string::data_usage_mobile_limit_title=0x0104050d;
+const int R::string::data_usage_restricted_body=0x01040516;
+const int R::string::data_usage_restricted_title=0x01040515;
+const int R::string::data_usage_warning_body=0x0104050a;
+const int R::string::data_usage_warning_title=0x01040509;
+const int R::string::data_usage_wifi_limit_snoozed_title=0x01040513;
+const int R::string::data_usage_wifi_limit_title=0x0104050e;
+const int R::string::date1_date2=0x01040042;
+const int R::string::date1_time1_date2_time2=0x0104004d;
+const int R::string::date_and_time=0x01040037;
+const int R::string::date_picker_decrement_day_button=0x010404e8;
+const int R::string::date_picker_decrement_month_button=0x010404e6;
+const int R::string::date_picker_decrement_year_button=0x010404ea;
+const int R::string::date_picker_dialog_title=0x01040430;
+const int R::string::date_picker_increment_day_button=0x010404e7;
+const int R::string::date_picker_increment_month_button=0x010404e5;
+const int R::string::date_picker_increment_year_button=0x010404e9;
+const int R::string::date_time=0x01040038;
+const int R::string::date_time_done=0x01040432;
+const int R::string::date_time_set=0x01040431;
+const int R::string::day=0x010403ae;
+const int R::string::days=0x010403af;
+const int R::string::db_default_journal_mode=0x01040021;
+const int R::string::db_default_sync_mode=0x01040022;
+const int R::string::db_wal_sync_mode=0x01040023;
+const int R::string::decline=0x01040413;
+const int R::string::defaultMsisdnAlphaTag=0x01040005;
+const int R::string::defaultVoiceMailAlphaTag=0x01040004;
+const int R::string::default_audio_route_category_name=0x01040533;
+const int R::string::default_audio_route_name=0x0104052f;
+const int R::string::default_audio_route_name_dock_speakers=0x01040531;
+const int R::string::default_audio_route_name_headphones=0x01040530;
+const int R::string::default_media_route_name_hdmi=0x01040532;
+const int R::string::default_text_encoding=0x01040069;
+const int R::string::default_wallpaper_component=0x0104001d;
+const int R::string::delete_=0x010403c2;
+const int R::string::deleteText=0x010403c5;
+const int R::string::deny=0x0104049e;
+const int R::string::description_direction_down=0x010404f7;
+const int R::string::description_direction_left=0x010404f8;
+const int R::string::description_direction_right=0x010404f9;
+const int R::string::description_direction_up=0x010404f6;
+const int R::string::description_target_camera=0x010404fb;
+const int R::string::description_target_search=0x010404fe;
+const int R::string::description_target_silent=0x010404fc;
+const int R::string::description_target_soundon=0x010404fd;
+const int R::string::description_target_unlock=0x010404fa;
+const int R::string::description_target_unlock_tablet=0x010404ff;
+const int R::string::dial_number_using=0x01040498;
+const int R::string::dialog_alert_title=0x01040014;
+const int R::string::display_manager_built_in_display_name=0x0104053b;
+const int R::string::display_manager_hdmi_display_name=0x0104053c;
+const int R::string::display_manager_overlay_display_name=0x0104053d;
+const int R::string::display_manager_overlay_display_title=0x0104053e;
+const int R::string::dlg_confirm_kill_storage_users_text=0x01040449;
+const int R::string::dlg_confirm_kill_storage_users_title=0x01040448;
+const int R::string::dlg_error_title=0x0104044a;
+const int R::string::dlg_ok=0x0104044b;
+const int R::string::double_tap_toast=0x01040345;
+const int R::string::editTextMenuTitle=0x010403c7;
+const int R::string::elapsed_time_short_format_h_mm_ss=0x010403c0;
+const int R::string::elapsed_time_short_format_mm_ss=0x010403bf;
+const int R::string::ellipsis=0x01040073;
+const int R::string::ellipsis_two_dots=0x01040074;
+const int R::string::emailTypeCustom=0x010402af;
+const int R::string::emailTypeHome=0x010402b0;
+const int R::string::emailTypeMobile=0x010402b3;
+const int R::string::emailTypeOther=0x010402b2;
+const int R::string::emailTypeWork=0x010402b1;
+const int R::string::emergency_call_dialog_number_for_display=0x010402e5;
+const int R::string::emergency_calls_only=0x01040300;
+const int R::string::emptyPhoneNumber=0x01040006;
+const int R::string::enable_accessibility_canceled=0x01040568;
+const int R::string::enable_explore_by_touch_warning_message=0x010403a6;
+const int R::string::enable_explore_by_touch_warning_title=0x010403a5;
+const int R::string::eventTypeAnniversary=0x010402ad;
+const int R::string::eventTypeBirthday=0x010402ac;
+const int R::string::eventTypeCustom=0x010402ab;
+const int R::string::eventTypeOther=0x010402ae;
+const int R::string::expires_on=0x01040520;
+const int R::string::ext2_media_badremoval_notification_message=0x0104047a;
+const int R::string::ext2_media_badremoval_notification_title=0x01040477;
+const int R::string::ext2_media_checking_notification_message=0x01040465;
+const int R::string::ext2_media_checking_notification_title=0x01040461;
+const int R::string::ext2_media_nofs_notification_message=0x0104046b;
+const int R::string::ext2_media_nofs_notification_title=0x01040467;
+const int R::string::ext2_media_nomedia_notification_message=0x01040486;
+const int R::string::ext2_media_nomedia_notification_title=0x01040483;
+const int R::string::ext2_media_safe_unmount_notification_message=0x01040480;
+const int R::string::ext2_media_safe_unmount_notification_title=0x0104047d;
+const int R::string::ext2_media_unmountable_notification_message=0x01040473;
+const int R::string::ext2_media_unmountable_notification_title=0x0104046f;
+const int R::string::ext_media_badremoval_notification_message=0x01040479;
+const int R::string::ext_media_badremoval_notification_title=0x01040476;
+const int R::string::ext_media_checking_notification_message=0x01040464;
+const int R::string::ext_media_checking_notification_title=0x01040460;
+const int R::string::ext_media_nofs_notification_message=0x0104046a;
+const int R::string::ext_media_nofs_notification_title=0x01040466;
+const int R::string::ext_media_nomedia_notification_message=0x01040485;
+const int R::string::ext_media_nomedia_notification_title=0x01040482;
+const int R::string::ext_media_safe_unmount_notification_message=0x0104047f;
+const int R::string::ext_media_safe_unmount_notification_title=0x0104047c;
+const int R::string::ext_media_unmountable_notification_message=0x01040472;
+const int R::string::ext_media_unmountable_notification_title=0x0104046e;
+const int R::string::external_storage_unplug_notification_message=0x01040443;
+const int R::string::external_storage_unplug_notification_title=0x01040442;
+const int R::string::extmedia_format_button_format=0x01040453;
+const int R::string::extmedia_format_message=0x01040452;
+const int R::string::extmedia_format_title=0x01040451;
+const int R::string::extract_edit_menu_button=0x01040508;
+const int R::string::faceunlock_multiple_failures=0x010402f0;
+const int R::string::factorytest_failed=0x0104033b;
+const int R::string::factorytest_no_action=0x0104033d;
+const int R::string::factorytest_not_system=0x0104033c;
+const int R::string::factorytest_reboot=0x0104033e;
+const int R::string::fast_scroll_alphabet=0x0104045d;
+const int R::string::fast_scroll_numeric_alphabet=0x0104045e;
+const int R::string::fcComplete=0x010400be;
+const int R::string::fcError=0x010400bf;
+const int R::string::fileSizeSuffix=0x01040072;
+const int R::string::find=0x010404ca;
+const int R::string::find_next=0x010404cc;
+const int R::string::find_on_page=0x010404bf;
+const int R::string::find_previous=0x010404cd;
+const int R::string::fingerprints=0x01040522;
+const int R::string::force_close=0x010403db;
+const int R::string::format_error=0x010404c3;
+const int R::string::full_wday_month_day_no_year=0x01040062;
+const int R::string::gadget_host_error_inflating=0x01040490;
+const int R::string::gigabyteShort=0x0104006f;
+const int R::string::global_action_bug_report=0x010400e7;
+const int R::string::global_action_lock=0x010400e5;
+const int R::string::global_action_power_off=0x010400e6;
+const int R::string::global_action_silent_mode_off_status=0x010400ec;
+const int R::string::global_action_silent_mode_on_status=0x010400eb;
+const int R::string::global_action_toggle_silent_mode=0x010400ea;
+const int R::string::global_actions=0x010400e4;
+const int R::string::global_actions_airplane_mode_off_status=0x010400ef;
+const int R::string::global_actions_airplane_mode_on_status=0x010400ee;
+const int R::string::global_actions_toggle_airplane_mode=0x010400ed;
+const int R::string::gpsNotifMessage=0x010404d0;
+const int R::string::gpsNotifTicker=0x010404ce;
+const int R::string::gpsNotifTitle=0x010404cf;
+const int R::string::gpsVerifNo=0x010404d2;
+const int R::string::gpsVerifYes=0x010404d1;
+const int R::string::grant_credentials_permission_message_footer=0x0104049b;
+const int R::string::grant_credentials_permission_message_header=0x0104049a;
+const int R::string::grant_permissions_header_text=0x0104049c;
+const int R::string::granularity_label_character=0x01040335;
+const int R::string::granularity_label_line=0x01040338;
+const int R::string::granularity_label_link=0x01040337;
+const int R::string::granularity_label_word=0x01040336;
+const int R::string::gsm_alphabet_default_charset=0x01040020;
+const int R::string::hardware=0x0104045a;
+const int R::string::heavy_weight_notification=0x010403eb;
+const int R::string::heavy_weight_notification_detail=0x010403ec;
+const int R::string::heavy_weight_switcher_text=0x010403ee;
+const int R::string::heavy_weight_switcher_title=0x010403ed;
+const int R::string::hour=0x010403b0;
+const int R::string::hour_ampm=0x01040339;
+const int R::string::hour_cap_ampm=0x0104033a;
+const int R::string::hour_minute_24=0x0104002d;
+const int R::string::hour_minute_ampm=0x0104002e;
+const int R::string::hour_minute_cap_ampm=0x0104002f;
+const int R::string::hours=0x010403b1;
+const int R::string::httpError=0x010400c1;
+const int R::string::httpErrorAuth=0x010400c4;
+const int R::string::httpErrorBadUrl=0x01040007;
+const int R::string::httpErrorConnect=0x010400c6;
+const int R::string::httpErrorFailedSslHandshake=0x010400ca;
+const int R::string::httpErrorFile=0x010400cb;
+const int R::string::httpErrorFileNotFound=0x010400cc;
+const int R::string::httpErrorIO=0x010400c7;
+const int R::string::httpErrorLookup=0x010400c2;
+const int R::string::httpErrorOk=0x010400c0;
+const int R::string::httpErrorProxyAuth=0x010400c5;
+const int R::string::httpErrorRedirectLoop=0x010400c9;
+const int R::string::httpErrorTimeout=0x010400c8;
+const int R::string::httpErrorTooManyRequests=0x010400cd;
+const int R::string::httpErrorUnsupportedAuthScheme=0x010400c3;
+const int R::string::httpErrorUnsupportedScheme=0x01040008;
+const int R::string::imProtocolAim=0x010402bd;
+const int R::string::imProtocolCustom=0x010402bc;
+const int R::string::imProtocolGoogleTalk=0x010402c2;
+const int R::string::imProtocolIcq=0x010402c3;
+const int R::string::imProtocolJabber=0x010402c4;
+const int R::string::imProtocolMsn=0x010402be;
+const int R::string::imProtocolNetMeeting=0x010402c5;
+const int R::string::imProtocolQq=0x010402c1;
+const int R::string::imProtocolSkype=0x010402c0;
+const int R::string::imProtocolYahoo=0x010402bf;
+const int R::string::imTypeCustom=0x010402b8;
+const int R::string::imTypeHome=0x010402b9;
+const int R::string::imTypeOther=0x010402bb;
+const int R::string::imTypeWork=0x010402ba;
+const int R::string::ime_action_default=0x01040497;
+const int R::string::ime_action_done=0x01040495;
+const int R::string::ime_action_go=0x01040491;
+const int R::string::ime_action_next=0x01040494;
+const int R::string::ime_action_previous=0x01040496;
+const int R::string::ime_action_search=0x01040492;
+const int R::string::ime_action_send=0x01040493;
+const int R::string::imei=0x01040085;
+const int R::string::inputMethod=0x010403c6;
+const int R::string::input_method_binding_label=0x010404a1;
+const int R::string::int_media_checking_notification_title=0x01040462;
+const int R::string::int_media_nofs_notification_message=0x0104046c;
+const int R::string::int_media_nofs_notification_title=0x01040468;
+const int R::string::int_media_unmountable_notification_message=0x01040474;
+const int R::string::int_media_unmountable_notification_title=0x01040470;
+const int R::string::invalidPin=0x01040081;
+const int R::string::invalidPuk=0x01040082;
+const int R::string::issued_by=0x0104051d;
+const int R::string::issued_on=0x0104051f;
+const int R::string::issued_to=0x01040519;
+const int R::string::js_dialog_before_unload=0x01040343;
+const int R::string::js_dialog_title=0x01040341;
+const int R::string::js_dialog_title_default=0x01040342;
+const int R::string::keyboard_headset_required_to_hear_password=0x01040500;
+const int R::string::keyboard_password_character_no_headset=0x01040501;
+const int R::string::keyboardview_keycode_alt=0x010404eb;
+const int R::string::keyboardview_keycode_cancel=0x010404ec;
+const int R::string::keyboardview_keycode_delete=0x010404ed;
+const int R::string::keyboardview_keycode_done=0x010404ee;
+const int R::string::keyboardview_keycode_enter=0x010404f1;
+const int R::string::keyboardview_keycode_mode_change=0x010404ef;
+const int R::string::keyboardview_keycode_shift=0x010404f0;
+const int R::string::keygaurd_accessibility_media_controls=0x01040326;
+const int R::string::keyguard_accessibility_add_widget=0x0104031e;
+const int R::string::keyguard_accessibility_camera=0x01040325;
+const int R::string::keyguard_accessibility_expand_lock_area=0x0104032a;
+const int R::string::keyguard_accessibility_face_unlock=0x0104032d;
+const int R::string::keyguard_accessibility_password_unlock=0x0104032f;
+const int R::string::keyguard_accessibility_pattern_area=0x01040330;
+const int R::string::keyguard_accessibility_pattern_unlock=0x0104032c;
+const int R::string::keyguard_accessibility_pin_unlock=0x0104032e;
+const int R::string::keyguard_accessibility_slide_area=0x01040331;
+const int R::string::keyguard_accessibility_slide_unlock=0x0104032b;
+const int R::string::keyguard_accessibility_status=0x01040324;
+const int R::string::keyguard_accessibility_unlock_area_collapsed=0x01040321;
+const int R::string::keyguard_accessibility_unlock_area_expanded=0x01040320;
+const int R::string::keyguard_accessibility_user_selector=0x01040323;
+const int R::string::keyguard_accessibility_widget=0x01040322;
+const int R::string::keyguard_accessibility_widget_deleted=0x01040329;
+const int R::string::keyguard_accessibility_widget_empty_slot=0x0104031f;
+const int R::string::keyguard_accessibility_widget_reorder_end=0x01040328;
+const int R::string::keyguard_accessibility_widget_reorder_start=0x01040327;
+const int R::string::keyguard_label_text=0x010402e4;
+const int R::string::keyguard_password_enter_password_code=0x010402e1;
+const int R::string::keyguard_password_enter_pin_code=0x010402dc;
+const int R::string::keyguard_password_enter_pin_password_code=0x010402e2;
+const int R::string::keyguard_password_enter_pin_prompt=0x010402df;
+const int R::string::keyguard_password_enter_puk_code=0x010402dd;
+const int R::string::keyguard_password_enter_puk_prompt=0x010402de;
+const int R::string::keyguard_password_entry_touch_hint=0x010402e0;
+const int R::string::keyguard_password_wrong_pin_code=0x010402e3;
+const int R::string::kg_emergency_call_label=0x01040542;
+const int R::string::kg_enter_confirm_pin_hint=0x0104054e;
+const int R::string::kg_failed_attempts_almost_at_login=0x01040562;
+const int R::string::kg_failed_attempts_almost_at_wipe=0x01040560;
+const int R::string::kg_failed_attempts_now_wiping=0x01040561;
+const int R::string::kg_forgot_pattern_button_text=0x01040543;
+const int R::string::kg_invalid_confirm_pin_hint=0x01040554;
+const int R::string::kg_invalid_puk=0x01040553;
+const int R::string::kg_invalid_sim_pin_hint=0x01040551;
+const int R::string::kg_invalid_sim_puk_hint=0x01040552;
+const int R::string::kg_login_account_recovery_hint=0x0104055b;
+const int R::string::kg_login_checking_password=0x0104055c;
+const int R::string::kg_login_instructions=0x01040556;
+const int R::string::kg_login_invalid_input=0x0104055a;
+const int R::string::kg_login_password_hint=0x01040558;
+const int R::string::kg_login_submit_button=0x01040559;
+const int R::string::kg_login_too_many_attempts=0x01040555;
+const int R::string::kg_login_username_hint=0x01040557;
+const int R::string::kg_password_instructions=0x0104054b;
+const int R::string::kg_password_wrong_pin_code=0x01040550;
+const int R::string::kg_pattern_instructions=0x01040548;
+const int R::string::kg_pin_instructions=0x0104054a;
+const int R::string::kg_puk_enter_pin_hint=0x0104054d;
+const int R::string::kg_puk_enter_puk_hint=0x0104054c;
+const int R::string::kg_reordering_delete_drop_target_text=0x01040564;
+const int R::string::kg_sim_pin_instructions=0x01040549;
+const int R::string::kg_sim_unlock_progress_dialog_message=0x0104054f;
+const int R::string::kg_text_message_separator=0x01040563;
+const int R::string::kg_too_many_failed_attempts_countdown=0x01040547;
+const int R::string::kg_too_many_failed_password_attempts_dialog_message=0x0104055e;
+const int R::string::kg_too_many_failed_pattern_attempts_dialog_message=0x0104055f;
+const int R::string::kg_too_many_failed_pin_attempts_dialog_message=0x0104055d;
+const int R::string::kg_wrong_password=0x01040545;
+const int R::string::kg_wrong_pattern=0x01040544;
+const int R::string::kg_wrong_pin=0x01040546;
+const int R::string::kilobyteShort=0x0104006d;
+const int R::string::last_month=0x010403a9;
+const int R::string::launchBrowserDefault=0x0104052b;
+const int R::string::launch_warning_original=0x010403e1;
+const int R::string::launch_warning_replace=0x010403e0;
+const int R::string::launch_warning_title=0x010403df;
+const int R::string::list_delimeter=0x01040529;
+const int R::string::loading=0x010403ca;
+const int R::string::locale_replacement=0x01040456;
+const int R::string::lock_pattern_view_aspect=0x0104006a;
+const int R::string::lockscreen_access_pattern_cell_added=0x0104031c;
+const int R::string::lockscreen_access_pattern_cleared=0x0104031b;
+const int R::string::lockscreen_access_pattern_detected=0x0104031d;
+const int R::string::lockscreen_access_pattern_start=0x0104031a;
+const int R::string::lockscreen_battery_short=0x010402f3;
+const int R::string::lockscreen_carrier_default=0x010402e6;
+const int R::string::lockscreen_charged=0x010402f2;
+const int R::string::lockscreen_emergency_call=0x010402eb;
+const int R::string::lockscreen_failed_attempts_almost_at_wipe=0x0104030a;
+const int R::string::lockscreen_failed_attempts_almost_glogin=0x01040309;
+const int R::string::lockscreen_failed_attempts_now_wiping=0x0104030b;
+const int R::string::lockscreen_forgot_pattern_button_text=0x0104030d;
+const int R::string::lockscreen_glogin_account_recovery_hint=0x01040315;
+const int R::string::lockscreen_glogin_checking_password=0x01040316;
+const int R::string::lockscreen_glogin_forgot_pattern=0x0104030e;
+const int R::string::lockscreen_glogin_instructions=0x01040310;
+const int R::string::lockscreen_glogin_invalid_input=0x01040314;
+const int R::string::lockscreen_glogin_password_hint=0x01040312;
+const int R::string::lockscreen_glogin_submit_button=0x01040313;
+const int R::string::lockscreen_glogin_too_many_attempts=0x0104030f;
+const int R::string::lockscreen_glogin_username_hint=0x01040311;
+const int R::string::lockscreen_instructions_when_pattern_disabled=0x010402e9;
+const int R::string::lockscreen_instructions_when_pattern_enabled=0x010402e8;
+const int R::string::lockscreen_low_battery=0x010402f4;
+const int R::string::lockscreen_missing_sim_instructions=0x010402f7;
+const int R::string::lockscreen_missing_sim_instructions_long=0x010402f8;
+const int R::string::lockscreen_missing_sim_message=0x010402f6;
+const int R::string::lockscreen_missing_sim_message_short=0x010402f5;
+const int R::string::lockscreen_network_locked_message=0x01040301;
+const int R::string::lockscreen_password_wrong=0x010402ef;
+const int R::string::lockscreen_pattern_correct=0x010402ed;
+const int R::string::lockscreen_pattern_instructions=0x010402ea;
+const int R::string::lockscreen_pattern_wrong=0x010402ee;
+const int R::string::lockscreen_permanent_disabled_sim_instructions=0x010402fa;
+const int R::string::lockscreen_permanent_disabled_sim_message_short=0x010402f9;
+const int R::string::lockscreen_plugged_in=0x010402f1;
+const int R::string::lockscreen_return_to_call=0x010402ec;
+const int R::string::lockscreen_screen_locked=0x010402e7;
+const int R::string::lockscreen_sim_locked_message=0x01040304;
+const int R::string::lockscreen_sim_puk_locked_instructions=0x01040303;
+const int R::string::lockscreen_sim_puk_locked_message=0x01040302;
+const int R::string::lockscreen_sim_unlock_progress_dialog_message=0x01040305;
+const int R::string::lockscreen_sound_off_label=0x01040319;
+const int R::string::lockscreen_sound_on_label=0x01040318;
+const int R::string::lockscreen_too_many_failed_attempts_countdown=0x0104030c;
+const int R::string::lockscreen_too_many_failed_attempts_dialog_message=0x01040306;
+const int R::string::lockscreen_too_many_failed_password_attempts_dialog_message=0x01040307;
+const int R::string::lockscreen_too_many_failed_pin_attempts_dialog_message=0x01040308;
+const int R::string::lockscreen_transport_next_description=0x010402fc;
+const int R::string::lockscreen_transport_pause_description=0x010402fd;
+const int R::string::lockscreen_transport_play_description=0x010402fe;
+const int R::string::lockscreen_transport_prev_description=0x010402fb;
+const int R::string::lockscreen_transport_stop_description=0x010402ff;
+const int R::string::lockscreen_unlock_label=0x01040317;
+const int R::string::low_internal_storage_view_text=0x010403c9;
+const int R::string::low_internal_storage_view_title=0x010403c8;
+const int R::string::low_memory=0x010400d2;
+const int R::string::me=0x010400d3;
+const int R::string::media_bad_removal=0x010404c4;
+const int R::string::media_checking=0x010404c5;
+const int R::string::media_removed=0x010404c6;
+const int R::string::media_route_button_content_description=0x01040536;
+const int R::string::media_route_chooser_grouping_done=0x01040535;
+const int R::string::media_route_status_available=0x01040539;
+const int R::string::media_route_status_connecting=0x01040538;
+const int R::string::media_route_status_not_available=0x0104053a;
+const int R::string::media_route_status_scanning=0x01040537;
+const int R::string::media_shared=0x010404c7;
+const int R::string::media_unknown_state=0x010404c8;
+const int R::string::megabyteShort=0x0104006e;
+const int R::string::meid=0x01040086;
+const int R::string::menu_delete_shortcut_label=0x0104039f;
+const int R::string::menu_enter_shortcut_label=0x0104039e;
+const int R::string::menu_space_shortcut_label=0x0104039d;
+const int R::string::midnight=0x010403bd;
+const int R::string::minute=0x010403b2;
+const int R::string::minutes=0x010403b3;
+const int R::string::mismatchPin=0x01040080;
+const int R::string::mmiComplete=0x0104007d;
+const int R::string::mmiError=0x01040075;
+const int R::string::mmiFdnError=0x01040076;
+const int R::string::month=0x0104003c;
+const int R::string::month_day=0x0104003b;
+const int R::string::month_day_year=0x01040035;
+const int R::string::month_year=0x0104003d;
+const int R::string::more_item_label=0x0104039b;
+const int R::string::needPuk=0x01040083;
+const int R::string::needPuk2=0x01040084;
+const int R::string::network_available_sign_in=0x01040408;
+const int R::string::network_available_sign_in_detailed=0x01040409;
+const int R::string::new_app_action=0x010403f1;
+const int R::string::new_app_description=0x010403f2;
+const int R::string::next_button_label=0x010404b8;
+const int R::string::no=0x01040009;
+const int R::string::noApplications=0x010403d2;
+const int R::string::no_file_chosen=0x010404b0;
+const int R::string::no_matches=0x010404be;
+const int R::string::no_permissions=0x01040435;
+const int R::string::no_recent_tasks=0x010400e3;
+const int R::string::noon=0x010403bb;
+const int R::string::notification_title=0x010400ce;
+const int R::string::number_picker_decrement_button=0x010404dc;
+const int R::string::number_picker_increment_button=0x010404db;
+const int R::string::number_picker_increment_scroll_action=0x010404de;
+const int R::string::number_picker_increment_scroll_mode=0x010404dd;
+const int R::string::numeric_date=0x01040032;
+const int R::string::numeric_date_format=0x01040033;
+const int R::string::numeric_date_template=0x01040034;
+const int R::string::numeric_md1_md2=0x01040043;
+const int R::string::numeric_md1_time1_md2_time2=0x01040048;
+const int R::string::numeric_mdy1_mdy2=0x01040045;
+const int R::string::numeric_mdy1_time1_mdy2_time2=0x0104004a;
+const int R::string::numeric_wday1_md1_time1_wday2_md2_time2=0x01040049;
+const int R::string::numeric_wday1_md1_wday2_md2=0x01040044;
+const int R::string::numeric_wday1_mdy1_time1_wday2_mdy2_time2=0x01040047;
+const int R::string::numeric_wday1_mdy1_wday2_mdy2=0x01040046;
+const int R::string::ok=0x0104000a;
+const int R::string::old_app_action=0x010403ef;
+const int R::string::old_app_description=0x010403f0;
+const int R::string::older=0x010403aa;
+const int R::string::oneMonthDurationPast=0x010403a7;
+const int R::string::open_permission_deny=0x01040399;
+const int R::string::orgTypeCustom=0x010402c8;
+const int R::string::orgTypeOther=0x010402c7;
+const int R::string::orgTypeWork=0x010402c6;
+const int R::string::org_name=0x0104051b;
+const int R::string::org_unit=0x0104051c;
+const int R::string::other_ext_media_badremoval_notification_message=0x0104047b;
+const int R::string::other_ext_media_badremoval_notification_title=0x01040478;
+const int R::string::other_ext_media_checking_notification_title=0x01040463;
+const int R::string::other_ext_media_nofs_notification_message=0x0104046d;
+const int R::string::other_ext_media_nofs_notification_title=0x01040469;
+const int R::string::other_ext_media_nomedia_notification_message=0x01040487;
+const int R::string::other_ext_media_nomedia_notification_title=0x01040484;
+const int R::string::other_ext_media_safe_unmount_notification_message=0x01040481;
+const int R::string::other_ext_media_safe_unmount_notification_title=0x0104047e;
+const int R::string::other_ext_media_unmountable_notification_message=0x01040475;
+const int R::string::other_ext_media_unmountable_notification_title=0x01040471;
+const int R::string::owner_name=0x0104056a;
+const int R::string::passwordIncorrect=0x0104007c;
+const int R::string::password_keyboard_label_alpha_key=0x01040333;
+const int R::string::password_keyboard_label_alt_key=0x01040334;
+const int R::string::password_keyboard_label_symbol_key=0x01040332;
+const int R::string::paste=0x0104000b;
+const int R::string::perm_costs_money=0x01040436;
+const int R::string::permdesc_accessCoarseLocation=0x010401ef;
+const int R::string::permdesc_accessContentProvidersExternally=0x01040392;
+const int R::string::permdesc_accessFineLocation=0x010401ed;
+const int R::string::permdesc_accessLocationExtraCommands=0x010401e9;
+const int R::string::permdesc_accessMockLocation=0x010401e7;
+const int R::string::permdesc_accessMtp=0x01040217;
+const int R::string::permdesc_accessNetworkState=0x01040245;
+const int R::string::permdesc_accessSurfaceFlinger=0x010401f1;
+const int R::string::permdesc_accessWifiState=0x01040251;
+const int R::string::permdesc_accessWimaxState=0x01040259;
+const int R::string::permdesc_accountManagerService=0x0104023b;
+const int R::string::permdesc_addVoicemail=0x01040388;
+const int R::string::permdesc_anyCodecForPlayback=0x010401bf;
+const int R::string::permdesc_asec_access=0x01040207;
+const int R::string::permdesc_asec_create=0x01040209;
+const int R::string::permdesc_asec_destroy=0x0104020b;
+const int R::string::permdesc_asec_mount_unmount=0x0104020d;
+const int R::string::permdesc_asec_rename=0x0104020f;
+const int R::string::permdesc_authenticateAccounts=0x0104023f;
+const int R::string::permdesc_backup=0x01040185;
+const int R::string::permdesc_batteryStats=0x01040181;
+const int R::string::permdesc_bindAccessibilityService=0x01040199;
+const int R::string::permdesc_bindDeviceAdmin=0x010401a3;
+const int R::string::permdesc_bindGadget=0x01040225;
+const int R::string::permdesc_bindInputMethod=0x01040197;
+const int R::string::permdesc_bindPackageVerifier=0x0104038e;
+const int R::string::permdesc_bindRemoteViews=0x010401a1;
+const int R::string::permdesc_bindTextService=0x0104019b;
+const int R::string::permdesc_bindVpnService=0x0104019d;
+const int R::string::permdesc_bindWallpaper=0x0104019f;
+const int R::string::permdesc_bluetooth=0x0104025d;
+const int R::string::permdesc_bluetoothAdmin=0x01040257;
+const int R::string::permdesc_brick=0x010401ff;
+const int R::string::permdesc_broadcastPackageRemoved=0x01040177;
+const int R::string::permdesc_broadcastSmsReceived=0x01040179;
+const int R::string::permdesc_broadcastSticky=0x010401d1;
+const int R::string::permdesc_broadcastWapPush=0x0104017b;
+const int R::string::permdesc_cache_filesystem=0x01040279;
+const int R::string::permdesc_callPhone=0x0104021b;
+const int R::string::permdesc_callPrivileged=0x0104021d;
+const int R::string::permdesc_camera=0x010401fd;
+const int R::string::permdesc_changeBackgroundDataSetting=0x0104024f;
+const int R::string::permdesc_changeComponentState=0x010401c3;
+const int R::string::permdesc_changeConfiguration=0x0104015b;
+const int R::string::permdesc_changeNetworkState=0x0104024b;
+const int R::string::permdesc_changeTetherState=0x0104024d;
+const int R::string::permdesc_changeWifiMulticastState=0x01040255;
+const int R::string::permdesc_changeWifiState=0x01040253;
+const int R::string::permdesc_changeWimaxState=0x0104025b;
+const int R::string::permdesc_checkinProperties=0x01040223;
+const int R::string::permdesc_clearAppCache=0x010401b9;
+const int R::string::permdesc_clearAppUserData=0x010401b1;
+const int R::string::permdesc_configureWifiDisplay=0x010401f5;
+const int R::string::permdesc_confirm_full_backup=0x01040187;
+const int R::string::permdesc_controlWifiDisplay=0x010401f7;
+const int R::string::permdesc_copyProtectedData=0x0104048c;
+const int R::string::permdesc_createNetworkSockets=0x01040247;
+const int R::string::permdesc_deleteCacheFiles=0x010401b3;
+const int R::string::permdesc_deletePackages=0x010401af;
+const int R::string::permdesc_devicePower=0x0104022d;
+const int R::string::permdesc_diagnostic=0x010401c1;
+const int R::string::permdesc_disableKeyguard=0x01040261;
+const int R::string::permdesc_dump=0x01040165;
+const int R::string::permdesc_enableCarMode=0x0104015d;
+const int R::string::permdesc_expandStatusBar=0x01040131;
+const int R::string::permdesc_factoryTest=0x0104022f;
+const int R::string::permdesc_filter_events=0x0104016d;
+const int R::string::permdesc_flashlight=0x01040213;
+const int R::string::permdesc_forceBack=0x01040163;
+const int R::string::permdesc_forceStopPackages=0x01040161;
+const int R::string::permdesc_freezeScreen=0x01040191;
+const int R::string::permdesc_getAccounts=0x0104023d;
+const int R::string::permdesc_getDetailedTasks=0x0104014f;
+const int R::string::permdesc_getPackageSize=0x010401b5;
+const int R::string::permdesc_getTasks=0x01040147;
+const int R::string::permdesc_grantRevokePermissions=0x010401c5;
+const int R::string::permdesc_hardware_test=0x01040219;
+const int R::string::permdesc_injectEvents=0x01040193;
+const int R::string::permdesc_installLocationProvider=0x010401eb;
+const int R::string::permdesc_installPackages=0x010401b7;
+const int R::string::permdesc_interactAcrossUsers=0x01040149;
+const int R::string::permdesc_interactAcrossUsersFull=0x0104014b;
+const int R::string::permdesc_internalSystemWindow=0x01040189;
+const int R::string::permdesc_killBackgroundProcesses=0x0104015f;
+const int R::string::permdesc_locationUpdates=0x01040221;
+const int R::string::permdesc_magnify_display=0x0104016f;
+const int R::string::permdesc_manageAccounts=0x01040241;
+const int R::string::permdesc_manageAppTokens=0x0104018f;
+const int R::string::permdesc_manageNetworkPolicy=0x0104027f;
+const int R::string::permdesc_manageUsb=0x01040215;
+const int R::string::permdesc_manageUsers=0x0104014d;
+const int R::string::permdesc_masterClear=0x01040235;
+const int R::string::permdesc_mediaStorageWrite=0x01040275;
+const int R::string::permdesc_modifyAudioSettings=0x010401f9;
+const int R::string::permdesc_modifyNetworkAccounting=0x01040281;
+const int R::string::permdesc_modifyPhoneState=0x01040227;
+const int R::string::permdesc_mount_format_filesystems=0x01040205;
+const int R::string::permdesc_mount_unmount_filesystems=0x01040203;
+const int R::string::permdesc_movePackage=0x010401bb;
+const int R::string::permdesc_nfc=0x0104025f;
+const int R::string::permdesc_packageVerificationAgent=0x0104038c;
+const int R::string::permdesc_performCdmaProvisioning=0x0104021f;
+const int R::string::permdesc_persistentActivity=0x010401ad;
+const int R::string::permdesc_pkgUsageStats=0x0104048a;
+const int R::string::permdesc_processOutgoingCalls=0x01040133;
+const int R::string::permdesc_readCalendar=0x010401e3;
+const int R::string::permdesc_readCallLog=0x010401d7;
+const int R::string::permdesc_readCellBroadcasts=0x0104013b;
+const int R::string::permdesc_readContacts=0x010401d3;
+const int R::string::permdesc_readDictionary=0x0104026d;
+const int R::string::permdesc_readFrameBuffer=0x010401f3;
+const int R::string::permdesc_readHistoryBookmarks=0x01040382;
+const int R::string::permdesc_readInputState=0x01040195;
+const int R::string::permdesc_readLogs=0x010401bd;
+const int R::string::permdesc_readNetworkUsageHistory=0x0104027d;
+const int R::string::permdesc_readPhoneState=0x01040229;
+const int R::string::permdesc_readProfile=0x010401db;
+const int R::string::permdesc_readSms=0x01040141;
+const int R::string::permdesc_readSocialStream=0x010401df;
+const int R::string::permdesc_readSyncSettings=0x01040263;
+const int R::string::permdesc_readSyncStats=0x01040267;
+const int R::string::permdesc_reboot=0x01040201;
+const int R::string::permdesc_receiveBootCompleted=0x010401cf;
+const int R::string::permdesc_receiveEmergencyBroadcast=0x01040139;
+const int R::string::permdesc_receiveMms=0x01040137;
+const int R::string::permdesc_receiveSms=0x01040135;
+const int R::string::permdesc_receiveWapPush=0x01040145;
+const int R::string::permdesc_recordAudio=0x010401fb;
+const int R::string::permdesc_removeTasks=0x01040153;
+const int R::string::permdesc_reorderTasks=0x01040151;
+const int R::string::permdesc_retrieve_window_content=0x01040167;
+const int R::string::permdesc_retrieve_window_info=0x0104016b;
+const int R::string::permdesc_route_media_output=0x0104048e;
+const int R::string::permdesc_runSetActivityWatcher=0x01040175;
+const int R::string::permdesc_sdcardAccessAll=0x01040277;
+const int R::string::permdesc_sdcardRead=0x01040271;
+const int R::string::permdesc_sdcardWrite=0x01040273;
+const int R::string::permdesc_sendSms=0x0104013d;
+const int R::string::permdesc_sendSmsNoConfirmation=0x0104013f;
+const int R::string::permdesc_serialPort=0x01040390;
+const int R::string::permdesc_setAlarm=0x01040386;
+const int R::string::permdesc_setAlwaysFinish=0x0104017f;
+const int R::string::permdesc_setAnimationScale=0x0104018d;
+const int R::string::permdesc_setDebugApp=0x01040159;
+const int R::string::permdesc_setKeyboardLayout=0x010401a9;
+const int R::string::permdesc_setOrientation=0x010401a5;
+const int R::string::permdesc_setPointerSpeed=0x010401a7;
+const int R::string::permdesc_setPreferredApplications=0x010401c7;
+const int R::string::permdesc_setProcessLimit=0x0104017d;
+const int R::string::permdesc_setScreenCompatibility=0x01040157;
+const int R::string::permdesc_setTime=0x01040237;
+const int R::string::permdesc_setTimeZone=0x01040239;
+const int R::string::permdesc_setWallpaper=0x01040231;
+const int R::string::permdesc_setWallpaperHints=0x01040233;
+const int R::string::permdesc_shutdown=0x01040171;
+const int R::string::permdesc_signalPersistentProcesses=0x010401ab;
+const int R::string::permdesc_startAnyActivity=0x01040155;
+const int R::string::permdesc_statusBar=0x0104012d;
+const int R::string::permdesc_statusBarService=0x0104012f;
+const int R::string::permdesc_stopAppSwitches=0x01040173;
+const int R::string::permdesc_subscribedFeedsRead=0x01040269;
+const int R::string::permdesc_subscribedFeedsWrite=0x0104026b;
+const int R::string::permdesc_systemAlertWindow=0x0104018b;
+const int R::string::permdesc_temporary_enable_accessibility=0x01040169;
+const int R::string::permdesc_updateBatteryStats=0x01040183;
+const int R::string::permdesc_updateLock=0x01040394;
+const int R::string::permdesc_useCredentials=0x01040243;
+const int R::string::permdesc_use_sip=0x0104027b;
+const int R::string::permdesc_vibrate=0x01040211;
+const int R::string::permdesc_wakeLock=0x0104022b;
+const int R::string::permdesc_writeApnSettings=0x01040249;
+const int R::string::permdesc_writeCalendar=0x010401e5;
+const int R::string::permdesc_writeCallLog=0x010401d9;
+const int R::string::permdesc_writeContacts=0x010401d5;
+const int R::string::permdesc_writeDictionary=0x0104026f;
+const int R::string::permdesc_writeGeolocationPermissions=0x0104038a;
+const int R::string::permdesc_writeGservices=0x010401cd;
+const int R::string::permdesc_writeHistoryBookmarks=0x01040384;
+const int R::string::permdesc_writeProfile=0x010401dd;
+const int R::string::permdesc_writeSecureSettings=0x010401cb;
+const int R::string::permdesc_writeSettings=0x010401c9;
+const int R::string::permdesc_writeSms=0x01040143;
+const int R::string::permdesc_writeSocialStream=0x010401e1;
+const int R::string::permdesc_writeSyncSettings=0x01040265;
+const int R::string::permgroupdesc_accounts=0x0104011f;
+const int R::string::permgroupdesc_affectsBattery=0x01040103;
+const int R::string::permgroupdesc_appInfo=0x01040115;
+const int R::string::permgroupdesc_audioSettings=0x01040101;
+const int R::string::permgroupdesc_bluetoothNetwork=0x010400ff;
+const int R::string::permgroupdesc_bookmarks=0x0104010b;
+const int R::string::permgroupdesc_calendar=0x01040105;
+const int R::string::permgroupdesc_camera=0x01040113;
+const int R::string::permgroupdesc_costMoney=0x010400f3;
+const int R::string::permgroupdesc_developmentTools=0x01040127;
+const int R::string::permgroupdesc_deviceAlarms=0x0104010d;
+const int R::string::permgroupdesc_dictionary=0x01040107;
+const int R::string::permgroupdesc_display=0x01040129;
+const int R::string::permgroupdesc_hardwareControls=0x01040121;
+const int R::string::permgroupdesc_location=0x010400fb;
+const int R::string::permgroupdesc_messages=0x010400f5;
+const int R::string::permgroupdesc_microphone=0x01040111;
+const int R::string::permgroupdesc_network=0x010400fd;
+const int R::string::permgroupdesc_personalInfo=0x010400f7;
+const int R::string::permgroupdesc_phoneCalls=0x01040123;
+const int R::string::permgroupdesc_socialInfo=0x010400f9;
+const int R::string::permgroupdesc_statusBar=0x0104011b;
+const int R::string::permgroupdesc_storage=0x0104012b;
+const int R::string::permgroupdesc_syncSettings=0x0104011d;
+const int R::string::permgroupdesc_systemClock=0x01040119;
+const int R::string::permgroupdesc_systemTools=0x01040125;
+const int R::string::permgroupdesc_voicemail=0x0104010f;
+const int R::string::permgroupdesc_wallpaper=0x01040117;
+const int R::string::permgroupdesc_writeDictionary=0x01040109;
+const int R::string::permgrouplab_accounts=0x0104011e;
+const int R::string::permgrouplab_affectsBattery=0x01040102;
+const int R::string::permgrouplab_appInfo=0x01040114;
+const int R::string::permgrouplab_audioSettings=0x01040100;
+const int R::string::permgrouplab_bluetoothNetwork=0x010400fe;
+const int R::string::permgrouplab_bookmarks=0x0104010a;
+const int R::string::permgrouplab_calendar=0x01040104;
+const int R::string::permgrouplab_camera=0x01040112;
+const int R::string::permgrouplab_costMoney=0x010400f2;
+const int R::string::permgrouplab_developmentTools=0x01040126;
+const int R::string::permgrouplab_deviceAlarms=0x0104010c;
+const int R::string::permgrouplab_dictionary=0x01040106;
+const int R::string::permgrouplab_display=0x01040128;
+const int R::string::permgrouplab_hardwareControls=0x01040120;
+const int R::string::permgrouplab_location=0x010400fa;
+const int R::string::permgrouplab_messages=0x010400f4;
+const int R::string::permgrouplab_microphone=0x01040110;
+const int R::string::permgrouplab_network=0x010400fc;
+const int R::string::permgrouplab_personalInfo=0x010400f6;
+const int R::string::permgrouplab_phoneCalls=0x01040122;
+const int R::string::permgrouplab_socialInfo=0x010400f8;
+const int R::string::permgrouplab_statusBar=0x0104011a;
+const int R::string::permgrouplab_storage=0x0104012a;
+const int R::string::permgrouplab_syncSettings=0x0104011c;
+const int R::string::permgrouplab_systemClock=0x01040118;
+const int R::string::permgrouplab_systemTools=0x01040124;
+const int R::string::permgrouplab_voicemail=0x0104010e;
+const int R::string::permgrouplab_wallpaper=0x01040116;
+const int R::string::permgrouplab_writeDictionary=0x01040108;
+const int R::string::permission_request_notification_title=0x0104049f;
+const int R::string::permission_request_notification_with_subtitle=0x010404a0;
+const int R::string::permlab_accessCoarseLocation=0x010401ee;
+const int R::string::permlab_accessContentProvidersExternally=0x01040391;
+const int R::string::permlab_accessFineLocation=0x010401ec;
+const int R::string::permlab_accessLocationExtraCommands=0x010401e8;
+const int R::string::permlab_accessMockLocation=0x010401e6;
+const int R::string::permlab_accessMtp=0x01040216;
+const int R::string::permlab_accessNetworkState=0x01040244;
+const int R::string::permlab_accessSurfaceFlinger=0x010401f0;
+const int R::string::permlab_accessWifiState=0x01040250;
+const int R::string::permlab_accessWimaxState=0x01040258;
+const int R::string::permlab_accountManagerService=0x0104023a;
+const int R::string::permlab_addVoicemail=0x01040387;
+const int R::string::permlab_anyCodecForPlayback=0x010401be;
+const int R::string::permlab_asec_access=0x01040206;
+const int R::string::permlab_asec_create=0x01040208;
+const int R::string::permlab_asec_destroy=0x0104020a;
+const int R::string::permlab_asec_mount_unmount=0x0104020c;
+const int R::string::permlab_asec_rename=0x0104020e;
+const int R::string::permlab_authenticateAccounts=0x0104023e;
+const int R::string::permlab_backup=0x01040184;
+const int R::string::permlab_batteryStats=0x01040180;
+const int R::string::permlab_bindAccessibilityService=0x01040198;
+const int R::string::permlab_bindDeviceAdmin=0x010401a2;
+const int R::string::permlab_bindGadget=0x01040224;
+const int R::string::permlab_bindInputMethod=0x01040196;
+const int R::string::permlab_bindPackageVerifier=0x0104038d;
+const int R::string::permlab_bindRemoteViews=0x010401a0;
+const int R::string::permlab_bindTextService=0x0104019a;
+const int R::string::permlab_bindVpnService=0x0104019c;
+const int R::string::permlab_bindWallpaper=0x0104019e;
+const int R::string::permlab_bluetooth=0x0104025c;
+const int R::string::permlab_bluetoothAdmin=0x01040256;
+const int R::string::permlab_brick=0x010401fe;
+const int R::string::permlab_broadcastPackageRemoved=0x01040176;
+const int R::string::permlab_broadcastSmsReceived=0x01040178;
+const int R::string::permlab_broadcastSticky=0x010401d0;
+const int R::string::permlab_broadcastWapPush=0x0104017a;
+const int R::string::permlab_cache_filesystem=0x01040278;
+const int R::string::permlab_callPhone=0x0104021a;
+const int R::string::permlab_callPrivileged=0x0104021c;
+const int R::string::permlab_camera=0x010401fc;
+const int R::string::permlab_changeBackgroundDataSetting=0x0104024e;
+const int R::string::permlab_changeComponentState=0x010401c2;
+const int R::string::permlab_changeConfiguration=0x0104015a;
+const int R::string::permlab_changeNetworkState=0x0104024a;
+const int R::string::permlab_changeTetherState=0x0104024c;
+const int R::string::permlab_changeWifiMulticastState=0x01040254;
+const int R::string::permlab_changeWifiState=0x01040252;
+const int R::string::permlab_changeWimaxState=0x0104025a;
+const int R::string::permlab_checkinProperties=0x01040222;
+const int R::string::permlab_clearAppCache=0x010401b8;
+const int R::string::permlab_clearAppUserData=0x010401b0;
+const int R::string::permlab_configureWifiDisplay=0x010401f4;
+const int R::string::permlab_confirm_full_backup=0x01040186;
+const int R::string::permlab_controlWifiDisplay=0x010401f6;
+const int R::string::permlab_copyProtectedData=0x0104048b;
+const int R::string::permlab_createNetworkSockets=0x01040246;
+const int R::string::permlab_deleteCacheFiles=0x010401b2;
+const int R::string::permlab_deletePackages=0x010401ae;
+const int R::string::permlab_devicePower=0x0104022c;
+const int R::string::permlab_diagnostic=0x010401c0;
+const int R::string::permlab_disableKeyguard=0x01040260;
+const int R::string::permlab_dump=0x01040164;
+const int R::string::permlab_enableCarMode=0x0104015c;
+const int R::string::permlab_expandStatusBar=0x01040130;
+const int R::string::permlab_factoryTest=0x0104022e;
+const int R::string::permlab_filter_events=0x0104016c;
+const int R::string::permlab_flashlight=0x01040212;
+const int R::string::permlab_forceBack=0x01040162;
+const int R::string::permlab_forceStopPackages=0x01040160;
+const int R::string::permlab_freezeScreen=0x01040190;
+const int R::string::permlab_getAccounts=0x0104023c;
+const int R::string::permlab_getDetailedTasks=0x0104014e;
+const int R::string::permlab_getPackageSize=0x010401b4;
+const int R::string::permlab_getTasks=0x01040146;
+const int R::string::permlab_grantRevokePermissions=0x010401c4;
+const int R::string::permlab_hardware_test=0x01040218;
+const int R::string::permlab_injectEvents=0x01040192;
+const int R::string::permlab_installLocationProvider=0x010401ea;
+const int R::string::permlab_installPackages=0x010401b6;
+const int R::string::permlab_interactAcrossUsers=0x01040148;
+const int R::string::permlab_interactAcrossUsersFull=0x0104014a;
+const int R::string::permlab_internalSystemWindow=0x01040188;
+const int R::string::permlab_killBackgroundProcesses=0x0104015e;
+const int R::string::permlab_locationUpdates=0x01040220;
+const int R::string::permlab_magnify_display=0x0104016e;
+const int R::string::permlab_manageAccounts=0x01040240;
+const int R::string::permlab_manageAppTokens=0x0104018e;
+const int R::string::permlab_manageNetworkPolicy=0x0104027e;
+const int R::string::permlab_manageUsb=0x01040214;
+const int R::string::permlab_manageUsers=0x0104014c;
+const int R::string::permlab_masterClear=0x01040234;
+const int R::string::permlab_mediaStorageWrite=0x01040274;
+const int R::string::permlab_modifyAudioSettings=0x010401f8;
+const int R::string::permlab_modifyNetworkAccounting=0x01040280;
+const int R::string::permlab_modifyPhoneState=0x01040226;
+const int R::string::permlab_mount_format_filesystems=0x01040204;
+const int R::string::permlab_mount_unmount_filesystems=0x01040202;
+const int R::string::permlab_movePackage=0x010401ba;
+const int R::string::permlab_nfc=0x0104025e;
+const int R::string::permlab_packageVerificationAgent=0x0104038b;
+const int R::string::permlab_performCdmaProvisioning=0x0104021e;
+const int R::string::permlab_persistentActivity=0x010401ac;
+const int R::string::permlab_pkgUsageStats=0x01040489;
+const int R::string::permlab_processOutgoingCalls=0x01040132;
+const int R::string::permlab_readCalendar=0x010401e2;
+const int R::string::permlab_readCallLog=0x010401d6;
+const int R::string::permlab_readCellBroadcasts=0x0104013a;
+const int R::string::permlab_readContacts=0x010401d2;
+const int R::string::permlab_readDictionary=0x0104026c;
+const int R::string::permlab_readFrameBuffer=0x010401f2;
+const int R::string::permlab_readHistoryBookmarks=0x01040381;
+const int R::string::permlab_readInputState=0x01040194;
+const int R::string::permlab_readLogs=0x010401bc;
+const int R::string::permlab_readNetworkUsageHistory=0x0104027c;
+const int R::string::permlab_readPhoneState=0x01040228;
+const int R::string::permlab_readProfile=0x010401da;
+const int R::string::permlab_readSms=0x01040140;
+const int R::string::permlab_readSocialStream=0x010401de;
+const int R::string::permlab_readSyncSettings=0x01040262;
+const int R::string::permlab_readSyncStats=0x01040266;
+const int R::string::permlab_reboot=0x01040200;
+const int R::string::permlab_receiveBootCompleted=0x010401ce;
+const int R::string::permlab_receiveEmergencyBroadcast=0x01040138;
+const int R::string::permlab_receiveMms=0x01040136;
+const int R::string::permlab_receiveSms=0x01040134;
+const int R::string::permlab_receiveWapPush=0x01040144;
+const int R::string::permlab_recordAudio=0x010401fa;
+const int R::string::permlab_removeTasks=0x01040152;
+const int R::string::permlab_reorderTasks=0x01040150;
+const int R::string::permlab_retrieve_window_content=0x01040166;
+const int R::string::permlab_retrieve_window_info=0x0104016a;
+const int R::string::permlab_route_media_output=0x0104048d;
+const int R::string::permlab_runSetActivityWatcher=0x01040174;
+const int R::string::permlab_sdcardAccessAll=0x01040276;
+const int R::string::permlab_sdcardRead=0x01040270;
+const int R::string::permlab_sdcardWrite=0x01040272;
+const int R::string::permlab_sendSms=0x0104013c;
+const int R::string::permlab_sendSmsNoConfirmation=0x0104013e;
+const int R::string::permlab_serialPort=0x0104038f;
+const int R::string::permlab_setAlarm=0x01040385;
+const int R::string::permlab_setAlwaysFinish=0x0104017e;
+const int R::string::permlab_setAnimationScale=0x0104018c;
+const int R::string::permlab_setDebugApp=0x01040158;
+const int R::string::permlab_setKeyboardLayout=0x010401a8;
+const int R::string::permlab_setOrientation=0x010401a4;
+const int R::string::permlab_setPointerSpeed=0x010401a6;
+const int R::string::permlab_setPreferredApplications=0x010401c6;
+const int R::string::permlab_setProcessLimit=0x0104017c;
+const int R::string::permlab_setScreenCompatibility=0x01040156;
+const int R::string::permlab_setTime=0x01040236;
+const int R::string::permlab_setTimeZone=0x01040238;
+const int R::string::permlab_setWallpaper=0x01040230;
+const int R::string::permlab_setWallpaperHints=0x01040232;
+const int R::string::permlab_shutdown=0x01040170;
+const int R::string::permlab_signalPersistentProcesses=0x010401aa;
+const int R::string::permlab_startAnyActivity=0x01040154;
+const int R::string::permlab_statusBar=0x0104012c;
+const int R::string::permlab_statusBarService=0x0104012e;
+const int R::string::permlab_stopAppSwitches=0x01040172;
+const int R::string::permlab_subscribedFeedsRead=0x01040268;
+const int R::string::permlab_subscribedFeedsWrite=0x0104026a;
+const int R::string::permlab_systemAlertWindow=0x0104018a;
+const int R::string::permlab_temporary_enable_accessibility=0x01040168;
+const int R::string::permlab_updateBatteryStats=0x01040182;
+const int R::string::permlab_updateLock=0x01040393;
+const int R::string::permlab_useCredentials=0x01040242;
+const int R::string::permlab_use_sip=0x0104027a;
+const int R::string::permlab_vibrate=0x01040210;
+const int R::string::permlab_wakeLock=0x0104022a;
+const int R::string::permlab_writeApnSettings=0x01040248;
+const int R::string::permlab_writeCalendar=0x010401e4;
+const int R::string::permlab_writeCallLog=0x010401d8;
+const int R::string::permlab_writeContacts=0x010401d4;
+const int R::string::permlab_writeDictionary=0x0104026e;
+const int R::string::permlab_writeGeolocationPermissions=0x01040389;
+const int R::string::permlab_writeGservices=0x010401cc;
+const int R::string::permlab_writeHistoryBookmarks=0x01040383;
+const int R::string::permlab_writeProfile=0x010401dc;
+const int R::string::permlab_writeSecureSettings=0x010401ca;
+const int R::string::permlab_writeSettings=0x010401c8;
+const int R::string::permlab_writeSms=0x01040142;
+const int R::string::permlab_writeSocialStream=0x010401e0;
+const int R::string::permlab_writeSyncSettings=0x01040264;
+const int R::string::perms_description_app=0x01040434;
+const int R::string::perms_new_perm_prefix=0x01040433;
+const int R::string::petabyteShort=0x01040071;
+const int R::string::phoneTypeAssistant=0x010402a9;
+const int R::string::phoneTypeCallback=0x0104029e;
+const int R::string::phoneTypeCar=0x0104029f;
+const int R::string::phoneTypeCompanyMain=0x010402a0;
+const int R::string::phoneTypeCustom=0x01040296;
+const int R::string::phoneTypeFaxHome=0x0104029b;
+const int R::string::phoneTypeFaxWork=0x0104029a;
+const int R::string::phoneTypeHome=0x01040297;
+const int R::string::phoneTypeIsdn=0x010402a1;
+const int R::string::phoneTypeMain=0x010402a2;
+const int R::string::phoneTypeMms=0x010402aa;
+const int R::string::phoneTypeMobile=0x01040298;
+const int R::string::phoneTypeOther=0x0104029d;
+const int R::string::phoneTypeOtherFax=0x010402a3;
+const int R::string::phoneTypePager=0x0104029c;
+const int R::string::phoneTypeRadio=0x010402a4;
+const int R::string::phoneTypeTelex=0x010402a5;
+const int R::string::phoneTypeTtyTdd=0x010402a6;
+const int R::string::phoneTypeWork=0x01040299;
+const int R::string::phoneTypeWorkMobile=0x010402a7;
+const int R::string::phoneTypeWorkPager=0x010402a8;
+const int R::string::policydesc_disableCamera=0x01040293;
+const int R::string::policydesc_disableKeyguardFeatures=0x01040295;
+const int R::string::policydesc_encryptedStorage=0x01040291;
+const int R::string::policydesc_expirePassword=0x0104028f;
+const int R::string::policydesc_forceLock=0x01040289;
+const int R::string::policydesc_limitPassword=0x01040283;
+const int R::string::policydesc_resetPassword=0x01040287;
+const int R::string::policydesc_setGlobalProxy=0x0104028d;
+const int R::string::policydesc_watchLogin=0x01040285;
+const int R::string::policydesc_wipeData=0x0104028b;
+const int R::string::policylab_disableCamera=0x01040292;
+const int R::string::policylab_disableKeyguardFeatures=0x01040294;
+const int R::string::policylab_encryptedStorage=0x01040290;
+const int R::string::policylab_expirePassword=0x0104028e;
+const int R::string::policylab_forceLock=0x01040288;
+const int R::string::policylab_limitPassword=0x01040282;
+const int R::string::policylab_resetPassword=0x01040286;
+const int R::string::policylab_setGlobalProxy=0x0104028c;
+const int R::string::policylab_watchLogin=0x01040284;
+const int R::string::policylab_wipeData=0x0104028a;
+const int R::string::postalTypeCustom=0x010402b4;
+const int R::string::postalTypeHome=0x010402b5;
+const int R::string::postalTypeOther=0x010402b7;
+const int R::string::postalTypeWork=0x010402b6;
+const int R::string::power_dialog=0x010400d4;
+const int R::string::power_off=0x010400d9;
+const int R::string::prepend_shortcut_label=0x0104039c;
+const int R::string::preposition_for_date=0x010403ab;
+const int R::string::preposition_for_time=0x010403ac;
+const int R::string::preposition_for_year=0x010403ad;
+const int R::string::progress_erasing=0x010404c2;
+const int R::string::progress_unmounting=0x010404c1;
+const int R::string::reboot_safemode_confirm=0x010400e1;
+const int R::string::reboot_safemode_title=0x010400e0;
+const int R::string::recent_tasks_title=0x010400e2;
+const int R::string::relationTypeAssistant=0x010402ca;
+const int R::string::relationTypeBrother=0x010402cb;
+const int R::string::relationTypeChild=0x010402cc;
+const int R::string::relationTypeCustom=0x010402c9;
+const int R::string::relationTypeDomesticPartner=0x010402cd;
+const int R::string::relationTypeFather=0x010402ce;
+const int R::string::relationTypeFriend=0x010402cf;
+const int R::string::relationTypeManager=0x010402d0;
+const int R::string::relationTypeMother=0x010402d1;
+const int R::string::relationTypeParent=0x010402d2;
+const int R::string::relationTypePartner=0x010402d3;
+const int R::string::relationTypeReferredBy=0x010402d4;
+const int R::string::relationTypeRelative=0x010402d5;
+const int R::string::relationTypeSister=0x010402d6;
+const int R::string::relationTypeSpouse=0x010402d7;
+const int R::string::relative_time=0x010403ba;
+const int R::string::replace=0x010403c1;
+const int R::string::report=0x010403dc;
+const int R::string::reset=0x010404b1;
+const int R::string::ringtone_default=0x01040402;
+const int R::string::ringtone_default_with_actual=0x01040403;
+const int R::string::ringtone_picker_title=0x01040405;
+const int R::string::ringtone_silent=0x01040404;
+const int R::string::ringtone_unknown=0x01040406;
+const int R::string::roamingText0=0x010400ab;
+const int R::string::roamingText1=0x010400ac;
+const int R::string::roamingText10=0x010400b5;
+const int R::string::roamingText11=0x010400b6;
+const int R::string::roamingText12=0x010400b7;
+const int R::string::roamingText2=0x010400ad;
+const int R::string::roamingText3=0x010400ae;
+const int R::string::roamingText4=0x010400af;
+const int R::string::roamingText5=0x010400b0;
+const int R::string::roamingText6=0x010400b1;
+const int R::string::roamingText7=0x010400b2;
+const int R::string::roamingText8=0x010400b3;
+const int R::string::roamingText9=0x010400b4;
+const int R::string::roamingTextSearching=0x010400b8;
+const int R::string::safeMode=0x010400f0;
+const int R::string::safe_media_volume_warning=0x01040565;
+const int R::string::same_month_md1_md2=0x0104005c;
+const int R::string::same_month_md1_time1_md2_time2=0x01040054;
+const int R::string::same_month_mdy1_mdy2=0x0104005f;
+const int R::string::same_month_mdy1_time1_mdy2_time2=0x01040058;
+const int R::string::same_month_wday1_md1_time1_wday2_md2_time2=0x01040056;
+const int R::string::same_month_wday1_md1_wday2_md2=0x0104005d;
+const int R::string::same_month_wday1_mdy1_time1_wday2_mdy2_time2=0x0104005a;
+const int R::string::same_month_wday1_mdy1_wday2_mdy2=0x0104005b;
+const int R::string::same_year_md1_md2=0x01040051;
+const int R::string::same_year_md1_time1_md2_time2=0x01040053;
+const int R::string::same_year_mdy1_mdy2=0x0104005e;
+const int R::string::same_year_mdy1_time1_mdy2_time2=0x01040057;
+const int R::string::same_year_wday1_md1_time1_wday2_md2_time2=0x01040055;
+const int R::string::same_year_wday1_md1_wday2_md2=0x01040052;
+const int R::string::same_year_wday1_mdy1_time1_wday2_mdy2_time2=0x01040059;
+const int R::string::same_year_wday1_mdy1_wday2_mdy2=0x01040060;
+const int R::string::save_password_label=0x01040344;
+const int R::string::save_password_message=0x01040395;
+const int R::string::save_password_never=0x01040398;
+const int R::string::save_password_notnow=0x01040396;
+const int R::string::save_password_remember=0x01040397;
+const int R::string::screen_compat_mode_hint=0x010403e4;
+const int R::string::screen_compat_mode_scale=0x010403e2;
+const int R::string::screen_compat_mode_show=0x010403e3;
+const int R::string::screen_lock=0x010400d8;
+const int R::string::search_go=0x0104000c;
+const int R::string::searchview_description_clear=0x010403a2;
+const int R::string::searchview_description_query=0x010403a1;
+const int R::string::searchview_description_search=0x010403a0;
+const int R::string::searchview_description_submit=0x010403a3;
+const int R::string::searchview_description_voice=0x010403a4;
+const int R::string::second=0x010403b4;
+const int R::string::seconds=0x010403b5;
+const int R::string::selectAll=0x0104000d;
+const int R::string::selectTextMode=0x01040016;
+const int R::string::select_character=0x0104041b;
+const int R::string::select_input_method=0x01040457;
+const int R::string::select_keyboard_layout_notification_message=0x0104045c;
+const int R::string::select_keyboard_layout_notification_title=0x0104045b;
+const int R::string::sendText=0x010403f3;
+const int R::string::sending=0x0104052a;
+const int R::string::serial_number=0x01040521;
+const int R::string::serviceClassData=0x010400a4;
+const int R::string::serviceClassDataAsync=0x010400a7;
+const int R::string::serviceClassDataSync=0x010400a8;
+const int R::string::serviceClassFAX=0x010400a5;
+const int R::string::serviceClassPAD=0x010400aa;
+const int R::string::serviceClassPacket=0x010400a9;
+const int R::string::serviceClassSMS=0x010400a6;
+const int R::string::serviceClassVoice=0x010400a3;
+const int R::string::serviceDisabled=0x01040079;
+const int R::string::serviceEnabled=0x01040077;
+const int R::string::serviceEnabledFor=0x01040078;
+const int R::string::serviceErased=0x0104007b;
+const int R::string::serviceNotProvisioned=0x01040098;
+const int R::string::serviceRegistered=0x0104007a;
+const int R::string::setup_autofill=0x01040347;
+const int R::string::sha1_fingerprint=0x01040524;
+const int R::string::sha256_fingerprint=0x01040523;
+const int R::string::share=0x010404c9;
+const int R::string::share_action_provider_share_with=0x01040527;
+const int R::string::shareactionprovider_share_with=0x010404f3;
+const int R::string::shareactionprovider_share_with_application=0x010404f4;
+const int R::string::short_format_month=0x01040061;
+const int R::string::shutdown_confirm=0x010400de;
+const int R::string::shutdown_confirm_question=0x010400df;
+const int R::string::shutdown_progress=0x010400dd;
+const int R::string::silent_mode=0x010400d5;
+const int R::string::silent_mode_ring=0x010400dc;
+const int R::string::silent_mode_silent=0x010400da;
+const int R::string::silent_mode_vibrate=0x010400db;
+const int R::string::sim_added_message=0x0104042d;
+const int R::string::sim_added_title=0x0104042c;
+const int R::string::sim_done_button=0x0104042b;
+const int R::string::sim_removed_message=0x0104042a;
+const int R::string::sim_removed_title=0x01040429;
+const int R::string::sim_restart_button=0x0104042e;
+const int R::string::sipAddressTypeCustom=0x010402d8;
+const int R::string::sipAddressTypeHome=0x010402d9;
+const int R::string::sipAddressTypeOther=0x010402db;
+const int R::string::sipAddressTypeWork=0x010402da;
+const int R::string::skip_button_label=0x010404b9;
+const int R::string::sms_control_message=0x0104041d;
+const int R::string::sms_control_no=0x0104041f;
+const int R::string::sms_control_title=0x0104041c;
+const int R::string::sms_control_yes=0x0104041e;
+const int R::string::sms_premium_short_code_details=0x01040422;
+const int R::string::sms_short_code_confirm_allow=0x01040423;
+const int R::string::sms_short_code_confirm_always_allow=0x01040427;
+const int R::string::sms_short_code_confirm_deny=0x01040424;
+const int R::string::sms_short_code_confirm_message=0x01040420;
+const int R::string::sms_short_code_confirm_never_allow=0x01040428;
+const int R::string::sms_short_code_details=0x01040421;
+const int R::string::sms_short_code_remember_choice=0x01040425;
+const int R::string::sms_short_code_remember_undo_instruction=0x01040426;
+const int R::string::smv_application=0x010403e5;
+const int R::string::smv_process=0x010403e6;
+const int R::string::ssl_certificate=0x01040517;
+const int R::string::ssl_certificate_is_valid=0x01040518;
+const int R::string::status_bar_device_locked=0x01040528;
+const int R::string::status_bar_notification_info_overflow=0x01040017;
+const int R::string::storage_internal=0x01040505;
+const int R::string::storage_sd_card=0x01040506;
+const int R::string::storage_usb=0x01040507;
+const int R::string::submit=0x010404b2;
+const int R::string::sync_binding_label=0x010404a2;
+const int R::string::sync_do_nothing=0x010404d7;
+const int R::string::sync_really_delete=0x010404d5;
+const int R::string::sync_too_many_deletes=0x010404d3;
+const int R::string::sync_too_many_deletes_desc=0x010404d4;
+const int R::string::sync_undo_deletes=0x010404d6;
+const int R::string::terabyteShort=0x01040070;
+const int R::string::tethered_notification_message=0x010404b6;
+const int R::string::tethered_notification_title=0x010404b5;
+const int R::string::textSelectionCABTitle=0x010403c3;
+const int R::string::text_copied=0x0104039a;
+const int R::string::throttle_warning_notification_message=0x010404bb;
+const int R::string::throttle_warning_notification_title=0x010404ba;
+const int R::string::throttled_notification_message=0x010404bd;
+const int R::string::throttled_notification_title=0x010404bc;
+const int R::string::time1_time2=0x01040041;
+const int R::string::time_date=0x01040039;
+const int R::string::time_of_day=0x01040036;
+const int R::string::time_picker_decrement_hour_button=0x010404e2;
+const int R::string::time_picker_decrement_minute_button=0x010404e0;
+const int R::string::time_picker_decrement_set_am_button=0x010404e4;
+const int R::string::time_picker_dialog_title=0x0104042f;
+const int R::string::time_picker_increment_hour_button=0x010404e1;
+const int R::string::time_picker_increment_minute_button=0x010404df;
+const int R::string::time_picker_increment_set_pm_button=0x010404e3;
+const int R::string::time_picker_separator=0x0104006b;
+const int R::string::time_wday=0x01040050;
+const int R::string::time_wday_date=0x0104004e;
+const int R::string::turn_off_radio=0x010400d7;
+const int R::string::turn_on_radio=0x010400d6;
+const int R::string::tutorial_double_tap_to_zoom_message_short=0x0104048f;
+const int R::string::twelve_hour_time_format=0x01040030;
+const int R::string::twenty_four_hour_time_format=0x01040031;
+const int R::string::unknownName=0x0104000e;
+const int R::string::untitled=0x0104000f;
+const int R::string::upload_file=0x010404af;
+const int R::string::usb_accessory_notification_title=0x0104044f;
+const int R::string::usb_cd_installer_notification_title=0x0104044e;
+const int R::string::usb_mtp_notification_title=0x0104044c;
+const int R::string::usb_notification_message=0x01040450;
+const int R::string::usb_ptp_notification_title=0x0104044d;
+const int R::string::usb_storage_activity_title=0x01040437;
+const int R::string::usb_storage_button_mount=0x0104043a;
+const int R::string::usb_storage_disconnect_notification_message=0x01040441;
+const int R::string::usb_storage_disconnect_notification_title=0x01040440;
+const int R::string::usb_storage_error_message=0x0104043b;
+const int R::string::usb_storage_message=0x01040439;
+const int R::string::usb_storage_notification_message=0x0104043d;
+const int R::string::usb_storage_notification_title=0x0104043c;
+const int R::string::usb_storage_stop_button_mount=0x01040446;
+const int R::string::usb_storage_stop_error_message=0x01040447;
+const int R::string::usb_storage_stop_message=0x01040445;
+const int R::string::usb_storage_stop_notification_message=0x0104043f;
+const int R::string::usb_storage_stop_notification_title=0x0104043e;
+const int R::string::usb_storage_stop_title=0x01040444;
+const int R::string::usb_storage_title=0x01040438;
+const int R::string::use_physical_keyboard=0x01040459;
+const int R::string::user_switched=0x01040569;
+const int R::string::validity_period=0x0104051e;
+const int R::string::volume_alarm=0x010403fa;
+const int R::string::volume_bluetooth_call=0x010403f9;
+const int R::string::volume_call=0x010403f8;
+const int R::string::volume_icon_description_bluetooth=0x010403fd;
+const int R::string::volume_icon_description_incall=0x010403ff;
+const int R::string::volume_icon_description_media=0x01040400;
+const int R::string::volume_icon_description_notification=0x01040401;
+const int R::string::volume_icon_description_ringer=0x010403fe;
+const int R::string::volume_music=0x010403f5;
+const int R::string::volume_music_hint_playing_through_bluetooth=0x010403f6;
+const int R::string::volume_music_hint_silent_ringtone_selected=0x010403f7;
+const int R::string::volume_notification=0x010403fb;
+const int R::string::volume_ringtone=0x010403f4;
+const int R::string::volume_unknown=0x010403fc;
+const int R::string::vpn_lockdown_connected=0x010404ac;
+const int R::string::vpn_lockdown_connecting=0x010404ab;
+const int R::string::vpn_lockdown_error=0x010404ad;
+const int R::string::vpn_lockdown_reset=0x010404ae;
+const int R::string::vpn_text=0x010404a9;
+const int R::string::vpn_text_long=0x010404aa;
+const int R::string::vpn_title=0x010404a7;
+const int R::string::vpn_title_long=0x010404a8;
+const int R::string::wait=0x010403dd;
+const int R::string::wallpaper_binding_label=0x010404a4;
+const int R::string::wday1_date1_time1_wday2_date2_time2=0x0104004b;
+const int R::string::wday1_date1_wday2_date2=0x0104004c;
+const int R::string::wday_date=0x0104004f;
+const int R::string::web_user_agent=0x0104033f;
+const int R::string::web_user_agent_target_content=0x01040340;
+const int R::string::webpage_unresponsive=0x010403de;
+const int R::string::websearch=0x010404cb;
+const int R::string::week=0x010403b6;
+const int R::string::weeks=0x010403b7;
+const int R::string::whichApplication=0x010403cd;
+const int R::string::widget_default_class_name=0x0104001c;
+const int R::string::widget_default_package_name=0x0104001b;
+const int R::string::wifi_available_sign_in=0x01040407;
+const int R::string::wifi_display_notification_disconnect=0x01040541;
+const int R::string::wifi_display_notification_message=0x01040540;
+const int R::string::wifi_display_notification_title=0x0104053f;
+const int R::string::wifi_p2p_dialog_title=0x0104040d;
+const int R::string::wifi_p2p_enabled_notification_message=0x01040411;
+const int R::string::wifi_p2p_enabled_notification_title=0x01040410;
+const int R::string::wifi_p2p_enter_pin_message=0x01040418;
+const int R::string::wifi_p2p_failed_message=0x0104040f;
+const int R::string::wifi_p2p_frequency_conflict_message=0x0104041a;
+const int R::string::wifi_p2p_from_message=0x01040416;
+const int R::string::wifi_p2p_invitation_sent_title=0x01040414;
+const int R::string::wifi_p2p_invitation_to_connect_title=0x01040415;
+const int R::string::wifi_p2p_show_pin_message=0x01040419;
+const int R::string::wifi_p2p_to_message=0x01040417;
+const int R::string::wifi_p2p_turnon_message=0x0104040e;
+const int R::string::wifi_tether_configure_ssid_default=0x0104040c;
+const int R::string::wifi_watchdog_network_disabled=0x0104040a;
+const int R::string::wifi_watchdog_network_disabled_detailed=0x0104040b;
+const int R::string::year=0x010403b8;
+const int R::string::years=0x010403b9;
+const int R::string::yes=0x01040013;
+const int R::style::ActiveWallpaperSettings=0x010302ef;
+const int R::style::AlertDialog=0x010301e0;
+const int R::style::AlertDialog_DeviceDefault=0x010302e7;
+const int R::style::AlertDialog_DeviceDefault_Light=0x010302e8;
+const int R::style::AlertDialog_Holo=0x01030297;
+const int R::style::AlertDialog_Holo_Light=0x01030298;
+const int R::style::Animation=0x01030000;
+const int R::style::Animation_Activity=0x01030001;
+const int R::style::Animation_DeviceDefault_Activity=0x010302e9;
+const int R::style::Animation_DeviceDefault_Dialog=0x010302ea;
+const int R::style::Animation_Dialog=0x01030002;
+const int R::style::Animation_Dream=0x010301f1;
+const int R::style::Animation_DropDownDown=0x010301e7;
+const int R::style::Animation_DropDownUp=0x010301e8;
+const int R::style::Animation_Holo=0x01030294;
+const int R::style::Animation_Holo_Activity=0x01030295;
+const int R::style::Animation_Holo_Dialog=0x01030296;
+const int R::style::Animation_InputMethod=0x01030056;
+const int R::style::Animation_InputMethodFancy=0x010301e9;
+const int R::style::Animation_LockScreen=0x010301e2;
+const int R::style::Animation_OptionsPanel=0x010301e3;
+const int R::style::Animation_PopupWindow=0x010301ee;
+const int R::style::Animation_PopupWindow_ActionMode=0x010301ef;
+const int R::style::Animation_RecentApplications=0x010301ed;
+const int R::style::Animation_SearchBar=0x010301ea;
+const int R::style::Animation_SubMenuPanel=0x010301e4;
+const int R::style::Animation_TextSelectHandle=0x01030236;
+const int R::style::Animation_Toast=0x01030004;
+const int R::style::Animation_Translucent=0x01030003;
+const int R::style::Animation_TypingFilter=0x010301e5;
+const int R::style::Animation_TypingFilterRestore=0x010301e6;
+const int R::style::Animation_VolumePanel=0x010301f0;
+const int R::style::Animation_Wallpaper=0x010301ec;
+const int R::style::Animation_ZoomButtons=0x010301eb;
+const int R::style::ButtonBar=0x01030058;
+const int R::style::DeviceDefault_ButtonBar=0x010301cf;
+const int R::style::DeviceDefault_ButtonBar_AlertDialog=0x010301d0;
+const int R::style::DeviceDefault_Light_ButtonBar=0x010301d2;
+const int R::style::DeviceDefault_Light_ButtonBar_AlertDialog=0x010301d3;
+const int R::style::DeviceDefault_Light_SegmentedButton=0x010301d4;
+const int R::style::DeviceDefault_SegmentedButton=0x010301d1;
+const int R::style::DialogWindowTitle=0x010301df;
+const int R::style::DialogWindowTitle_DeviceDefault=0x010302eb;
+const int R::style::DialogWindowTitle_DeviceDefault_Light=0x010302ec;
+const int R::style::DialogWindowTitle_Holo=0x0103029b;
+const int R::style::DialogWindowTitle_Holo_Light=0x0103029c;
+const int R::style::Holo=0x0103025a;
+const int R::style::Holo_ButtonBar=0x010300e5;
+const int R::style::Holo_ButtonBar_AlertDialog=0x010300e7;
+const int R::style::Holo_Light=0x0103025b;
+const int R::style::Holo_Light_ButtonBar=0x010300e6;
+const int R::style::Holo_Light_ButtonBar_AlertDialog=0x010300e8;
+const int R::style::Holo_Light_SegmentedButton=0x010300ea;
+const int R::style::Holo_SegmentedButton=0x010300e9;
+const int R::style::MediaButton=0x01030037;
+const int R::style::MediaButton_Ffwd=0x0103003b;
+const int R::style::MediaButton_Next=0x01030039;
+const int R::style::MediaButton_Pause=0x0103003d;
+const int R::style::MediaButton_Play=0x0103003a;
+const int R::style::MediaButton_Previous=0x01030038;
+const int R::style::MediaButton_Rew=0x0103003c;
+const int R::style::Pointer=0x0103029e;
+const int R::style::Preference=0x0103021b;
+const int R::style::Preference_Category=0x0103021e;
+const int R::style::Preference_CheckBoxPreference=0x0103021f;
+const int R::style::Preference_DeviceDefault=0x010302dd;
+const int R::style::Preference_DeviceDefault_Category=0x010302de;
+const int R::style::Preference_DeviceDefault_CheckBoxPreference=0x010302df;
+const int R::style::Preference_DeviceDefault_DialogPreference=0x010302e0;
+const int R::style::Preference_DeviceDefault_DialogPreference_EditTextPreference=0x010302e1;
+const int R::style::Preference_DeviceDefault_DialogPreference_YesNoPreference=0x010302e2;
+const int R::style::Preference_DeviceDefault_Information=0x010302e3;
+const int R::style::Preference_DeviceDefault_PreferenceScreen=0x010302e4;
+const int R::style::Preference_DeviceDefault_RingtonePreference=0x010302e5;
+const int R::style::Preference_DeviceDefault_SwitchPreference=0x010302e6;
+const int R::style::Preference_DialogPreference=0x01030222;
+const int R::style::Preference_DialogPreference_EditTextPreference=0x01030224;
+const int R::style::Preference_DialogPreference_YesNoPreference=0x01030223;
+const int R::style::Preference_Holo=0x01030226;
+const int R::style::Preference_Holo_Category=0x01030229;
+const int R::style::Preference_Holo_CheckBoxPreference=0x0103022a;
+const int R::style::Preference_Holo_DialogPreference=0x0103022d;
+const int R::style::Preference_Holo_DialogPreference_EditTextPreference=0x0103022f;
+const int R::style::Preference_Holo_DialogPreference_YesNoPreference=0x0103022e;
+const int R::style::Preference_Holo_Information=0x01030228;
+const int R::style::Preference_Holo_PreferenceScreen=0x0103022c;
+const int R::style::Preference_Holo_RingtonePreference=0x01030230;
+const int R::style::Preference_Holo_SwitchPreference=0x0103022b;
+const int R::style::Preference_Information=0x0103021d;
+const int R::style::Preference_PreferenceScreen=0x01030221;
+const int R::style::Preference_RingtonePreference=0x01030225;
+const int R::style::Preference_SwitchPreference=0x01030220;
+const int R::style::PreferenceFragment=0x0103021c;
+const int R::style::PreferenceFragment_Holo=0x01030227;
+const int R::style::PreferencePanel=0x01030231;
+const int R::style::PreferencePanel_Dialog=0x01030232;
+const int R::style::PreviewWallpaperSettings=0x010302f0;
+const int R::style::SegmentedButton=0x01030234;
+const int R::style::TextAppearance=0x0103003e;
+const int R::style::TextAppearance_AutoCorrectionSuggestion=0x010301fc;
+const int R::style::TextAppearance_DeviceDefault=0x010301ad;
+const int R::style::TextAppearance_DeviceDefault_DialogWindowTitle=0x010301b8;
+const int R::style::TextAppearance_DeviceDefault_Inverse=0x010301ae;
+const int R::style::TextAppearance_DeviceDefault_Large=0x010301af;
+const int R::style::TextAppearance_DeviceDefault_Large_Inverse=0x010301b0;
+const int R::style::TextAppearance_DeviceDefault_Light=0x010302d0;
+const int R::style::TextAppearance_DeviceDefault_Light_Inverse=0x010302d1;
+const int R::style::TextAppearance_DeviceDefault_Light_Large=0x010302d2;
+const int R::style::TextAppearance_DeviceDefault_Light_Large_Inverse=0x010302d3;
+const int R::style::TextAppearance_DeviceDefault_Light_Medium=0x010302d4;
+const int R::style::TextAppearance_DeviceDefault_Light_Medium_Inverse=0x010302d5;
+const int R::style::TextAppearance_DeviceDefault_Light_SearchResult_Subtitle=0x010302d6;
+const int R::style::TextAppearance_DeviceDefault_Light_SearchResult_Title=0x010302d7;
+const int R::style::TextAppearance_DeviceDefault_Light_Small=0x010302d8;
+const int R::style::TextAppearance_DeviceDefault_Light_Small_Inverse=0x010302d9;
+const int R::style::TextAppearance_DeviceDefault_Light_Widget_Button=0x010302da;
+const int R::style::TextAppearance_DeviceDefault_Light_Widget_PopupMenu_Large=0x010302db;
+const int R::style::TextAppearance_DeviceDefault_Light_Widget_PopupMenu_Small=0x010302dc;
+const int R::style::TextAppearance_DeviceDefault_Medium=0x010301b1;
+const int R::style::TextAppearance_DeviceDefault_Medium_Inverse=0x010301b2;
+const int R::style::TextAppearance_DeviceDefault_SearchResult_Subtitle=0x010301b6;
+const int R::style::TextAppearance_DeviceDefault_SearchResult_Title=0x010301b5;
+const int R::style::TextAppearance_DeviceDefault_Small=0x010301b3;
+const int R::style::TextAppearance_DeviceDefault_Small_Inverse=0x010301b4;
+const int R::style::TextAppearance_DeviceDefault_Widget=0x010301b9;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionBar_Menu=0x010301ce;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionBar_Subtitle=0x010301c7;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionBar_Subtitle_Inverse=0x010301cb;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionBar_Title=0x010301c6;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionBar_Title_Inverse=0x010301ca;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionMode_Subtitle=0x010301c9;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionMode_Subtitle_Inverse=0x010301cd;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionMode_Title=0x010301c8;
+const int R::style::TextAppearance_DeviceDefault_Widget_ActionMode_Title_Inverse=0x010301cc;
+const int R::style::TextAppearance_DeviceDefault_Widget_Button=0x010301ba;
+const int R::style::TextAppearance_DeviceDefault_Widget_DropDownHint=0x010301bf;
+const int R::style::TextAppearance_DeviceDefault_Widget_DropDownItem=0x010301c0;
+const int R::style::TextAppearance_DeviceDefault_Widget_EditText=0x010301c2;
+const int R::style::TextAppearance_DeviceDefault_Widget_IconMenu_Item=0x010301bb;
+const int R::style::TextAppearance_DeviceDefault_Widget_PopupMenu=0x010301c3;
+const int R::style::TextAppearance_DeviceDefault_Widget_PopupMenu_Large=0x010301c4;
+const int R::style::TextAppearance_DeviceDefault_Widget_PopupMenu_Small=0x010301c5;
+const int R::style::TextAppearance_DeviceDefault_Widget_TabWidget=0x010301bc;
+const int R::style::TextAppearance_DeviceDefault_Widget_TextView=0x010301bd;
+const int R::style::TextAppearance_DeviceDefault_Widget_TextView_PopupMenu=0x010301be;
+const int R::style::TextAppearance_DeviceDefault_Widget_TextView_SpinnerItem=0x010301c1;
+const int R::style::TextAppearance_DeviceDefault_WindowTitle=0x010301b7;
+const int R::style::TextAppearance_DialogWindowTitle=0x01030041;
+const int R::style::TextAppearance_EasyCorrectSuggestion=0x010301fa;
+const int R::style::TextAppearance_Holo=0x010300fb;
+const int R::style::TextAppearance_Holo_CalendarViewWeekDayView=0x01030242;
+const int R::style::TextAppearance_Holo_DialogWindowTitle=0x01030117;
+const int R::style::TextAppearance_Holo_Inverse=0x010300fc;
+const int R::style::TextAppearance_Holo_Large=0x010300fd;
+const int R::style::TextAppearance_Holo_Large_Inverse=0x010300fe;
+const int R::style::TextAppearance_Holo_Light=0x01030243;
+const int R::style::TextAppearance_Holo_Light_CalendarViewWeekDayView=0x01030259;
+const int R::style::TextAppearance_Holo_Light_DialogWindowTitle=0x01030258;
+const int R::style::TextAppearance_Holo_Light_Inverse=0x01030244;
+const int R::style::TextAppearance_Holo_Light_Large=0x01030245;
+const int R::style::TextAppearance_Holo_Light_Large_Inverse=0x01030248;
+const int R::style::TextAppearance_Holo_Light_Medium=0x01030246;
+const int R::style::TextAppearance_Holo_Light_Medium_Inverse=0x01030249;
+const int R::style::TextAppearance_Holo_Light_SearchResult=0x0103024b;
+const int R::style::TextAppearance_Holo_Light_SearchResult_Subtitle=0x0103024d;
+const int R::style::TextAppearance_Holo_Light_SearchResult_Title=0x0103024c;
+const int R::style::TextAppearance_Holo_Light_Small=0x01030247;
+const int R::style::TextAppearance_Holo_Light_Small_Inverse=0x0103024a;
+const int R::style::TextAppearance_Holo_Light_Widget=0x0103024e;
+const int R::style::TextAppearance_Holo_Light_Widget_ActionMode_Subtitle=0x01030256;
+const int R::style::TextAppearance_Holo_Light_Widget_ActionMode_Title=0x01030255;
+const int R::style::TextAppearance_Holo_Light_Widget_Button=0x0103024f;
+const int R::style::TextAppearance_Holo_Light_Widget_DropDownHint=0x01030254;
+const int R::style::TextAppearance_Holo_Light_Widget_EditText=0x01030250;
+const int R::style::TextAppearance_Holo_Light_Widget_PopupMenu=0x01030251;
+const int R::style::TextAppearance_Holo_Light_Widget_PopupMenu_Large=0x01030252;
+const int R::style::TextAppearance_Holo_Light_Widget_PopupMenu_Small=0x01030253;
+const int R::style::TextAppearance_Holo_Light_Widget_Switch=0x01030241;
+const int R::style::TextAppearance_Holo_Light_WindowTitle=0x01030257;
+const int R::style::TextAppearance_Holo_Medium=0x010300ff;
+const int R::style::TextAppearance_Holo_Medium_Inverse=0x01030100;
+const int R::style::TextAppearance_Holo_SearchResult=0x0103023e;
+const int R::style::TextAppearance_Holo_SearchResult_Subtitle=0x01030104;
+const int R::style::TextAppearance_Holo_SearchResult_Title=0x01030103;
+const int R::style::TextAppearance_Holo_Small=0x01030101;
+const int R::style::TextAppearance_Holo_Small_Inverse=0x01030102;
+const int R::style::TextAppearance_Holo_Widget=0x01030105;
+const int R::style::TextAppearance_Holo_Widget_ActionBar_Menu=0x01030120;
+const int R::style::TextAppearance_Holo_Widget_ActionBar_Subtitle=0x01030113;
+const int R::style::TextAppearance_Holo_Widget_ActionBar_Subtitle_Inverse=0x0103011d;
+const int R::style::TextAppearance_Holo_Widget_ActionBar_Title=0x01030112;
+const int R::style::TextAppearance_Holo_Widget_ActionBar_Title_Inverse=0x0103011c;
+const int R::style::TextAppearance_Holo_Widget_ActionMode=0x0103023f;
+const int R::style::TextAppearance_Holo_Widget_ActionMode_Subtitle=0x01030115;
+const int R::style::TextAppearance_Holo_Widget_ActionMode_Subtitle_Inverse=0x0103011f;
+const int R::style::TextAppearance_Holo_Widget_ActionMode_Title=0x01030114;
+const int R::style::TextAppearance_Holo_Widget_ActionMode_Title_Inverse=0x0103011e;
+const int R::style::TextAppearance_Holo_Widget_Button=0x01030106;
+const int R::style::TextAppearance_Holo_Widget_DropDownHint=0x0103010b;
+const int R::style::TextAppearance_Holo_Widget_DropDownItem=0x0103010c;
+const int R::style::TextAppearance_Holo_Widget_EditText=0x0103010e;
+const int R::style::TextAppearance_Holo_Widget_IconMenu_Item=0x01030107;
+const int R::style::TextAppearance_Holo_Widget_PopupMenu=0x0103010f;
+const int R::style::TextAppearance_Holo_Widget_PopupMenu_Large=0x01030110;
+const int R::style::TextAppearance_Holo_Widget_PopupMenu_Small=0x01030111;
+const int R::style::TextAppearance_Holo_Widget_Switch=0x01030240;
+const int R::style::TextAppearance_Holo_Widget_TabWidget=0x01030108;
+const int R::style::TextAppearance_Holo_Widget_TextView=0x01030109;
+const int R::style::TextAppearance_Holo_Widget_TextView_PopupMenu=0x0103010a;
+const int R::style::TextAppearance_Holo_Widget_TextView_SpinnerItem=0x0103010d;
+const int R::style::TextAppearance_Holo_WindowTitle=0x01030116;
+const int R::style::TextAppearance_Inverse=0x0103003f;
+const int R::style::TextAppearance_Large=0x01030042;
+const int R::style::TextAppearance_Large_Inverse=0x01030043;
+const int R::style::TextAppearance_Large_Inverse_NumberPickerInputText=0x01030219;
+const int R::style::TextAppearance_Medium=0x01030044;
+const int R::style::TextAppearance_Medium_Inverse=0x01030045;
+const int R::style::TextAppearance_MisspelledSuggestion=0x010301fb;
+const int R::style::TextAppearance_NumPadKey=0x010302a4;
+const int R::style::TextAppearance_NumPadKey_Klondike=0x010302a5;
+const int R::style::TextAppearance_SearchResult=0x01030218;
+const int R::style::TextAppearance_SearchResult_Subtitle=0x01030064;
+const int R::style::TextAppearance_SearchResult_Title=0x01030063;
+const int R::style::TextAppearance_SlidingTabActive=0x01030217;
+const int R::style::TextAppearance_SlidingTabNormal=0x01030216;
+const int R::style::TextAppearance_Small=0x01030046;
+const int R::style::TextAppearance_Small_CalendarViewWeekDayView=0x010301f8;
+const int R::style::TextAppearance_Small_Inverse=0x01030047;
+const int R::style::TextAppearance_StatusBar=0x010301f2;
+const int R::style::TextAppearance_StatusBar_EventContent=0x01030067;
+const int R::style::TextAppearance_StatusBar_EventContent_Emphasis=0x010301f7;
+const int R::style::TextAppearance_StatusBar_EventContent_Info=0x010301f5;
+const int R::style::TextAppearance_StatusBar_EventContent_Line2=0x010301f4;
+const int R::style::TextAppearance_StatusBar_EventContent_Time=0x010301f6;
+const int R::style::TextAppearance_StatusBar_EventContent_Title=0x01030068;
+const int R::style::TextAppearance_StatusBar_Icon=0x01030066;
+const int R::style::TextAppearance_StatusBar_Ticker=0x010301f3;
+const int R::style::TextAppearance_StatusBar_Title=0x01030065;
+const int R::style::TextAppearance_Suggestion=0x010301f9;
+const int R::style::TextAppearance_SuggestionHighlight=0x01030118;
+const int R::style::TextAppearance_Theme=0x01030040;
+const int R::style::TextAppearance_Theme_Dialog=0x01030048;
+const int R::style::TextAppearance_Theme_Dialog_AppError=0x01030215;
+const int R::style::TextAppearance_Widget=0x01030049;
+const int R::style::TextAppearance_Widget_ActionBar_Subtitle=0x0103023a;
+const int R::style::TextAppearance_Widget_ActionBar_Title=0x01030239;
+const int R::style::TextAppearance_Widget_ActionMode_Subtitle=0x0103023c;
+const int R::style::TextAppearance_Widget_ActionMode_Title=0x0103023b;
+const int R::style::TextAppearance_Widget_Button=0x0103004a;
+const int R::style::TextAppearance_Widget_DropDownHint=0x01030050;
+const int R::style::TextAppearance_Widget_DropDownItem=0x01030051;
+const int R::style::TextAppearance_Widget_EditText=0x0103004c;
+const int R::style::TextAppearance_Widget_IconMenu_Item=0x0103004b;
+const int R::style::TextAppearance_Widget_PopupMenu=0x0103023d;
+const int R::style::TextAppearance_Widget_PopupMenu_Large=0x01030080;
+const int R::style::TextAppearance_Widget_PopupMenu_Small=0x01030081;
+const int R::style::TextAppearance_Widget_TabWidget=0x0103004d;
+const int R::style::TextAppearance_Widget_TextView=0x0103004e;
+const int R::style::TextAppearance_Widget_TextView_PopupMenu=0x0103004f;
+const int R::style::TextAppearance_Widget_TextView_SpinnerItem=0x01030052;
+const int R::style::TextAppearance_WindowTitle=0x01030053;
+const int R::style::Theme=0x01030005;
+const int R::style::Theme_Black=0x01030008;
+const int R::style::Theme_Black_NoTitleBar=0x01030009;
+const int R::style::Theme_Black_NoTitleBar_Fullscreen=0x0103000a;
+const int R::style::Theme_DeviceDefault=0x01030128;
+const int R::style::Theme_DeviceDefault_Dialog=0x0103012e;
+const int R::style::Theme_DeviceDefault_Dialog_Alert=0x0103030e;
+const int R::style::Theme_DeviceDefault_Dialog_FixedSize=0x01030308;
+const int R::style::Theme_DeviceDefault_Dialog_MinWidth=0x0103012f;
+const int R::style::Theme_DeviceDefault_Dialog_NoActionBar=0x01030130;
+const int R::style::Theme_DeviceDefault_Dialog_NoActionBar_FixedSize=0x01030309;
+const int R::style::Theme_DeviceDefault_Dialog_NoActionBar_MinWidth=0x01030131;
+const int R::style::Theme_DeviceDefault_Dialog_NoFrame=0x01030312;
+const int R::style::Theme_DeviceDefault_Dialog_Presentation=0x0103030c;
+const int R::style::Theme_DeviceDefault_DialogWhenLarge=0x01030136;
+const int R::style::Theme_DeviceDefault_DialogWhenLarge_NoActionBar=0x01030137;
+const int R::style::Theme_DeviceDefault_InputMethod=0x0103013e;
+const int R::style::Theme_DeviceDefault_Light=0x0103012b;
+const int R::style::Theme_DeviceDefault_Light_DarkActionBar=0x0103013f;
+const int R::style::Theme_DeviceDefault_Light_Dialog=0x01030132;
+const int R::style::Theme_DeviceDefault_Light_Dialog_Alert=0x0103030f;
+const int R::style::Theme_DeviceDefault_Light_Dialog_FixedSize=0x0103030a;
+const int R::style::Theme_DeviceDefault_Light_Dialog_MinWidth=0x01030133;
+const int R::style::Theme_DeviceDefault_Light_Dialog_NoActionBar=0x01030134;
+const int R::style::Theme_DeviceDefault_Light_Dialog_NoActionBar_FixedSize=0x0103030b;
+const int R::style::Theme_DeviceDefault_Light_Dialog_NoActionBar_MinWidth=0x01030135;
+const int R::style::Theme_DeviceDefault_Light_Dialog_Presentation=0x0103030d;
+const int R::style::Theme_DeviceDefault_Light_DialogWhenLarge=0x01030138;
+const int R::style::Theme_DeviceDefault_Light_DialogWhenLarge_NoActionBar=0x01030139;
+const int R::style::Theme_DeviceDefault_Light_NoActionBar=0x0103012c;
+const int R::style::Theme_DeviceDefault_Light_NoActionBar_Fullscreen=0x0103012d;
+const int R::style::Theme_DeviceDefault_Light_Panel=0x0103013b;
+const int R::style::Theme_DeviceDefault_Light_SearchBar=0x01030311;
+const int R::style::Theme_DeviceDefault_NoActionBar=0x01030129;
+const int R::style::Theme_DeviceDefault_NoActionBar_Fullscreen=0x0103012a;
+const int R::style::Theme_DeviceDefault_Panel=0x0103013a;
+const int R::style::Theme_DeviceDefault_SearchBar=0x01030310;
+const int R::style::Theme_DeviceDefault_Wallpaper=0x0103013c;
+const int R::style::Theme_DeviceDefault_Wallpaper_NoTitleBar=0x0103013d;
+const int R::style::Theme_Dialog=0x0103000b;
+const int R::style::Theme_Dialog_Alert=0x010302f2;
+const int R::style::Theme_Dialog_AppError=0x010302fb;
+const int R::style::Theme_Dialog_NoFrame=0x010302f1;
+const int R::style::Theme_Dialog_RecentApplications=0x010302fc;
+const int R::style::Theme_ExpandedMenu=0x010302f8;
+const int R::style::Theme_GlobalSearchBar=0x010302f6;
+const int R::style::Theme_Holo=0x0103006b;
+const int R::style::Theme_Holo_CompactMenu=0x010302f9;
+const int R::style::Theme_Holo_Dialog=0x0103006f;
+const int R::style::Theme_Holo_Dialog_Alert=0x01030302;
+const int R::style::Theme_Holo_Dialog_FixedSize=0x010302ff;
+const int R::style::Theme_Holo_Dialog_MinWidth=0x01030070;
+const int R::style::Theme_Holo_Dialog_NoActionBar=0x01030071;
+const int R::style::Theme_Holo_Dialog_NoActionBar_FixedSize=0x01030300;
+const int R::style::Theme_Holo_Dialog_NoActionBar_MinWidth=0x01030072;
+const int R::style::Theme_Holo_Dialog_NoFrame=0x01030301;
+const int R::style::Theme_Holo_Dialog_Presentation=0x01030303;
+const int R::style::Theme_Holo_DialogWhenLarge=0x01030077;
+const int R::style::Theme_Holo_DialogWhenLarge_NoActionBar=0x01030078;
+const int R::style::Theme_Holo_InputMethod=0x0103007f;
+const int R::style::Theme_Holo_Light=0x0103006e;
+const int R::style::Theme_Holo_Light_CompactMenu=0x010302fa;
+const int R::style::Theme_Holo_Light_DarkActionBar=0x01030119;
+const int R::style::Theme_Holo_Light_Dialog=0x01030073;
+const int R::style::Theme_Holo_Light_Dialog_Alert=0x01030306;
+const int R::style::Theme_Holo_Light_Dialog_FixedSize=0x01030304;
+const int R::style::Theme_Holo_Light_Dialog_MinWidth=0x01030074;
+const int R::style::Theme_Holo_Light_Dialog_NoActionBar=0x01030075;
+const int R::style::Theme_Holo_Light_Dialog_NoActionBar_FixedSize=0x01030305;
+const int R::style::Theme_Holo_Light_Dialog_NoActionBar_MinWidth=0x01030076;
+const int R::style::Theme_Holo_Light_Dialog_Presentation=0x01030307;
+const int R::style::Theme_Holo_Light_DialogWhenLarge=0x01030079;
+const int R::style::Theme_Holo_Light_DialogWhenLarge_NoActionBar=0x0103007a;
+const int R::style::Theme_Holo_Light_NoActionBar=0x010300f0;
+const int R::style::Theme_Holo_Light_NoActionBar_Fullscreen=0x010300f1;
+const int R::style::Theme_Holo_Light_Panel=0x0103007c;
+const int R::style::Theme_Holo_Light_SearchBar=0x010302f5;
+const int R::style::Theme_Holo_NoActionBar=0x0103006c;
+const int R::style::Theme_Holo_NoActionBar_Fullscreen=0x0103006d;
+const int R::style::Theme_Holo_Panel=0x0103007b;
+const int R::style::Theme_Holo_SearchBar=0x010302f4;
+const int R::style::Theme_Holo_Wallpaper=0x0103007d;
+const int R::style::Theme_Holo_Wallpaper_NoTitleBar=0x0103007e;
+const int R::style::Theme_IconMenu=0x010302f7;
+const int R::style::Theme_InputMethod=0x01030054;
+const int R::style::Theme_Light=0x0103000c;
+const int R::style::Theme_Light_NoTitleBar=0x0103000d;
+const int R::style::Theme_Light_NoTitleBar_Fullscreen=0x0103000e;
+const int R::style::Theme_Light_Panel=0x0103005a;
+const int R::style::Theme_Light_WallpaperSettings=0x01030062;
+const int R::style::Theme_NoDisplay=0x01030055;
+const int R::style::Theme_NoTitleBar=0x01030006;
+const int R::style::Theme_NoTitleBar_Fullscreen=0x01030007;
+const int R::style::Theme_NoTitleBar_OverlayActionModes=0x0103006a;
+const int R::style::Theme_Panel=0x01030059;
+const int R::style::Theme_Panel_Volume=0x010302fe;
+const int R::style::Theme_SearchBar=0x010302f3;
+const int R::style::Theme_Toast=0x010302fd;
+const int R::style::Theme_Translucent=0x0103000f;
+const int R::style::Theme_Translucent_NoTitleBar=0x01030010;
+const int R::style::Theme_Translucent_NoTitleBar_Fullscreen=0x01030011;
+const int R::style::Theme_Wallpaper=0x0103005e;
+const int R::style::Theme_Wallpaper_NoTitleBar=0x0103005f;
+const int R::style::Theme_Wallpaper_NoTitleBar_Fullscreen=0x01030060;
+const int R::style::Theme_WallpaperSettings=0x01030061;
+const int R::style::Theme_WithActionBar=0x01030069;
+const int R::style::Widget=0x01030012;
+const int R::style::Widget_AbsListView=0x01030013;
+const int R::style::Widget_ActionBar=0x01030082;
+const int R::style::Widget_ActionBar_TabBar=0x010300f4;
+const int R::style::Widget_ActionBar_TabText=0x010300f3;
+const int R::style::Widget_ActionBar_TabView=0x010300f2;
+const int R::style::Widget_ActionButton=0x01030084;
+const int R::style::Widget_ActionButton_CloseMode=0x01030088;
+const int R::style::Widget_ActionButton_Overflow=0x01030087;
+const int R::style::Widget_ActionMode=0x01030238;
+const int R::style::Widget_ActivityChooserView=0x0103021a;
+const int R::style::Widget_AutoCompleteTextView=0x01030027;
+const int R::style::Widget_Button=0x01030014;
+const int R::style::Widget_Button_Inset=0x01030015;
+const int R::style::Widget_Button_NumPadKey=0x010302a3;
+const int R::style::Widget_Button_Small=0x01030016;
+const int R::style::Widget_Button_Toggle=0x01030017;
+const int R::style::Widget_Button_Transparent=0x010301ff;
+const int R::style::Widget_CalendarView=0x010300eb;
+const int R::style::Widget_CheckedTextView=0x01030203;
+const int R::style::Widget_CompoundButton=0x01030018;
+const int R::style::Widget_CompoundButton_CheckBox=0x01030019;
+const int R::style::Widget_CompoundButton_RadioButton=0x0103001a;
+const int R::style::Widget_CompoundButton_Star=0x0103001b;
+const int R::style::Widget_CompoundButton_Switch=0x01030214;
+const int R::style::Widget_DatePicker=0x010300ee;
+const int R::style::Widget_DeviceDefault=0x01030140;
+const int R::style::Widget_DeviceDefault_AbsListView=0x010302a6;
+const int R::style::Widget_DeviceDefault_ActionBar=0x0103016b;
+const int R::style::Widget_DeviceDefault_ActionBar_Solid=0x01030173;
+const int R::style::Widget_DeviceDefault_ActionBar_TabBar=0x01030172;
+const int R::style::Widget_DeviceDefault_ActionBar_TabText=0x01030171;
+const int R::style::Widget_DeviceDefault_ActionBar_TabView=0x01030170;
+const int R::style::Widget_DeviceDefault_ActionButton=0x01030166;
+const int R::style::Widget_DeviceDefault_ActionButton_CloseMode=0x0103016a;
+const int R::style::Widget_DeviceDefault_ActionButton_Overflow=0x01030167;
+const int R::style::Widget_DeviceDefault_ActionButton_TextButton=0x01030168;
+const int R::style::Widget_DeviceDefault_ActionMode=0x01030169;
+const int R::style::Widget_DeviceDefault_AutoCompleteTextView=0x01030147;
+const int R::style::Widget_DeviceDefault_Button=0x01030141;
+const int R::style::Widget_DeviceDefault_Button_Borderless=0x0103016c;
+const int R::style::Widget_DeviceDefault_Button_Borderless_Small=0x01030145;
+const int R::style::Widget_DeviceDefault_Button_Inset=0x01030143;
+const int R::style::Widget_DeviceDefault_Button_Small=0x01030142;
+const int R::style::Widget_DeviceDefault_Button_Toggle=0x01030144;
+const int R::style::Widget_DeviceDefault_CalendarView=0x0103016e;
+const int R::style::Widget_DeviceDefault_CheckedTextView=0x010301db;
+const int R::style::Widget_DeviceDefault_CompoundButton_CheckBox=0x01030148;
+const int R::style::Widget_DeviceDefault_CompoundButton_RadioButton=0x01030159;
+const int R::style::Widget_DeviceDefault_CompoundButton_Star=0x0103015d;
+const int R::style::Widget_DeviceDefault_CompoundButton_Switch=0x010302a9;
+const int R::style::Widget_DeviceDefault_DatePicker=0x0103016f;
+const int R::style::Widget_DeviceDefault_DropDownItem=0x01030161;
+const int R::style::Widget_DeviceDefault_DropDownItem_Spinner=0x01030162;
+const int R::style::Widget_DeviceDefault_EditText=0x0103014a;
+const int R::style::Widget_DeviceDefault_ExpandableListView=0x0103014b;
+const int R::style::Widget_DeviceDefault_ExpandableListView_White=0x010302aa;
+const int R::style::Widget_DeviceDefault_Gallery=0x010302ab;
+const int R::style::Widget_DeviceDefault_GestureOverlayView=0x010302ac;
+const int R::style::Widget_DeviceDefault_GridView=0x0103014c;
+const int R::style::Widget_DeviceDefault_HorizontalScrollView=0x0103015b;
+const int R::style::Widget_DeviceDefault_ImageButton=0x0103014d;
+const int R::style::Widget_DeviceDefault_ImageWell=0x010302ad;
+const int R::style::Widget_DeviceDefault_KeyboardView=0x010302ae;
+const int R::style::Widget_DeviceDefault_Light=0x01030174;
+const int R::style::Widget_DeviceDefault_Light_AbsListView=0x010302c1;
+const int R::style::Widget_DeviceDefault_Light_ActionBar=0x010301a3;
+const int R::style::Widget_DeviceDefault_Light_ActionBar_Solid=0x010301a7;
+const int R::style::Widget_DeviceDefault_Light_ActionBar_Solid_Inverse=0x010301a8;
+const int R::style::Widget_DeviceDefault_Light_ActionBar_TabBar=0x010301a6;
+const int R::style::Widget_DeviceDefault_Light_ActionBar_TabBar_Inverse=0x010301a9;
+const int R::style::Widget_DeviceDefault_Light_ActionBar_TabText=0x010301a5;
+const int R::style::Widget_DeviceDefault_Light_ActionBar_TabText_Inverse=0x010301ab;
+const int R::style::Widget_DeviceDefault_Light_ActionBar_TabView=0x010301a4;
+const int R::style::Widget_DeviceDefault_Light_ActionBar_TabView_Inverse=0x010301aa;
+const int R::style::Widget_DeviceDefault_Light_ActionButton=0x0103019f;
+const int R::style::Widget_DeviceDefault_Light_ActionButton_CloseMode=0x010301a2;
+const int R::style::Widget_DeviceDefault_Light_ActionButton_Overflow=0x010301a0;
+const int R::style::Widget_DeviceDefault_Light_ActionMode=0x010301a1;
+const int R::style::Widget_DeviceDefault_Light_ActionMode_Inverse=0x010301ac;
+const int R::style::Widget_DeviceDefault_Light_AutoCompleteTextView=0x0103017b;
+const int R::style::Widget_DeviceDefault_Light_Button=0x01030175;
+const int R::style::Widget_DeviceDefault_Light_Button_Borderless=0x010302c4;
+const int R::style::Widget_DeviceDefault_Light_Button_Borderless_Small=0x01030179;
+const int R::style::Widget_DeviceDefault_Light_Button_Inset=0x01030177;
+const int R::style::Widget_DeviceDefault_Light_Button_Small=0x01030176;
+const int R::style::Widget_DeviceDefault_Light_Button_Toggle=0x01030178;
+const int R::style::Widget_DeviceDefault_Light_CalendarView=0x0103019e;
+const int R::style::Widget_DeviceDefault_Light_CheckedTextView=0x010301dc;
+const int R::style::Widget_DeviceDefault_Light_CompoundButton_CheckBox=0x0103017c;
+const int R::style::Widget_DeviceDefault_Light_CompoundButton_RadioButton=0x01030190;
+const int R::style::Widget_DeviceDefault_Light_CompoundButton_Star=0x01030194;
+const int R::style::Widget_DeviceDefault_Light_DatePicker=0x010302c5;
+const int R::style::Widget_DeviceDefault_Light_DropDownItem=0x01030198;
+const int R::style::Widget_DeviceDefault_Light_DropDownItem_Spinner=0x01030199;
+const int R::style::Widget_DeviceDefault_Light_EditText=0x0103017e;
+const int R::style::Widget_DeviceDefault_Light_ExpandableListView=0x0103017f;
+const int R::style::Widget_DeviceDefault_Light_ExpandableListView_White=0x010302c6;
+const int R::style::Widget_DeviceDefault_Light_Gallery=0x010302c7;
+const int R::style::Widget_DeviceDefault_Light_GestureOverlayView=0x010302c8;
+const int R::style::Widget_DeviceDefault_Light_GridView=0x01030180;
+const int R::style::Widget_DeviceDefault_Light_HorizontalScrollView=0x01030192;
+const int R::style::Widget_DeviceDefault_Light_ImageButton=0x01030181;
+const int R::style::Widget_DeviceDefault_Light_ImageWell=0x010302c9;
+const int R::style::Widget_DeviceDefault_Light_ListPopupWindow=0x0103019b;
+const int R::style::Widget_DeviceDefault_Light_ListView=0x01030182;
+const int R::style::Widget_DeviceDefault_Light_ListView_DropDown=0x0103017d;
+const int R::style::Widget_DeviceDefault_Light_ListView_White=0x010302ca;
+const int R::style::Widget_DeviceDefault_Light_MediaRouteButton=0x010301d8;
+const int R::style::Widget_DeviceDefault_Light_NumberPicker=0x010302cb;
+const int R::style::Widget_DeviceDefault_Light_PopupMenu=0x0103019c;
+const int R::style::Widget_DeviceDefault_Light_PopupWindow=0x01030183;
+const int R::style::Widget_DeviceDefault_Light_PopupWindow_ActionMode=0x010302c3;
+const int R::style::Widget_DeviceDefault_Light_ProgressBar=0x01030184;
+const int R::style::Widget_DeviceDefault_Light_ProgressBar_Horizontal=0x01030185;
+const int R::style::Widget_DeviceDefault_Light_ProgressBar_Inverse=0x01030189;
+const int R::style::Widget_DeviceDefault_Light_ProgressBar_Large=0x01030188;
+const int R::style::Widget_DeviceDefault_Light_ProgressBar_Large_Inverse=0x0103018b;
+const int R::style::Widget_DeviceDefault_Light_ProgressBar_Small=0x01030186;
+const int R::style::Widget_DeviceDefault_Light_ProgressBar_Small_Inverse=0x0103018a;
+const int R::style::Widget_DeviceDefault_Light_ProgressBar_Small_Title=0x01030187;
+const int R::style::Widget_DeviceDefault_Light_RatingBar=0x0103018d;
+const int R::style::Widget_DeviceDefault_Light_RatingBar_Indicator=0x0103018e;
+const int R::style::Widget_DeviceDefault_Light_RatingBar_Small=0x0103018f;
+const int R::style::Widget_DeviceDefault_Light_ScrollView=0x01030191;
+const int R::style::Widget_DeviceDefault_Light_SeekBar=0x0103018c;
+const int R::style::Widget_DeviceDefault_Light_Spinner=0x01030193;
+const int R::style::Widget_DeviceDefault_Light_Spinner_DropDown=0x010302cc;
+const int R::style::Widget_DeviceDefault_Light_Spinner_DropDown_ActionBar=0x010302c2;
+const int R::style::Widget_DeviceDefault_Light_Tab=0x0103019d;
+const int R::style::Widget_DeviceDefault_Light_TabWidget=0x01030195;
+const int R::style::Widget_DeviceDefault_Light_TextSuggestionsPopupWindow=0x010302cf;
+const int R::style::Widget_DeviceDefault_Light_TextView=0x0103017a;
+const int R::style::Widget_DeviceDefault_Light_TextView_ListSeparator=0x010302cd;
+const int R::style::Widget_DeviceDefault_Light_TextView_SpinnerItem=0x0103019a;
+const int R::style::Widget_DeviceDefault_Light_TimePicker=0x010302ce;
+const int R::style::Widget_DeviceDefault_Light_WebTextView=0x01030196;
+const int R::style::Widget_DeviceDefault_Light_WebView=0x01030197;
+const int R::style::Widget_DeviceDefault_ListPopupWindow=0x01030164;
+const int R::style::Widget_DeviceDefault_ListView=0x0103014e;
+const int R::style::Widget_DeviceDefault_ListView_DropDown=0x01030149;
+const int R::style::Widget_DeviceDefault_ListView_White=0x010302af;
+const int R::style::Widget_DeviceDefault_MediaRouteButton=0x010301d7;
+const int R::style::Widget_DeviceDefault_NumberPicker=0x010302b0;
+const int R::style::Widget_DeviceDefault_PopupMenu=0x01030165;
+const int R::style::Widget_DeviceDefault_PopupWindow=0x0103014f;
+const int R::style::Widget_DeviceDefault_PopupWindow_ActionMode=0x010302a8;
+const int R::style::Widget_DeviceDefault_PreferenceFrameLayout=0x010302b1;
+const int R::style::Widget_DeviceDefault_ProgressBar=0x01030150;
+const int R::style::Widget_DeviceDefault_ProgressBar_Horizontal=0x01030151;
+const int R::style::Widget_DeviceDefault_ProgressBar_Inverse=0x010302b2;
+const int R::style::Widget_DeviceDefault_ProgressBar_Large=0x01030154;
+const int R::style::Widget_DeviceDefault_ProgressBar_Large_Inverse=0x010302b3;
+const int R::style::Widget_DeviceDefault_ProgressBar_Small=0x01030152;
+const int R::style::Widget_DeviceDefault_ProgressBar_Small_Inverse=0x010302b4;
+const int R::style::Widget_DeviceDefault_ProgressBar_Small_Title=0x01030153;
+const int R::style::Widget_DeviceDefault_QuickContactBadge_WindowLarge=0x010302b5;
+const int R::style::Widget_DeviceDefault_QuickContactBadge_WindowMedium=0x010302b6;
+const int R::style::Widget_DeviceDefault_QuickContactBadge_WindowSmall=0x010302b7;
+const int R::style::Widget_DeviceDefault_QuickContactBadgeSmall_WindowLarge=0x010302b8;
+const int R::style::Widget_DeviceDefault_QuickContactBadgeSmall_WindowMedium=0x010302b9;
+const int R::style::Widget_DeviceDefault_QuickContactBadgeSmall_WindowSmall=0x010302ba;
+const int R::style::Widget_DeviceDefault_RatingBar=0x01030156;
+const int R::style::Widget_DeviceDefault_RatingBar_Indicator=0x01030157;
+const int R::style::Widget_DeviceDefault_RatingBar_Small=0x01030158;
+const int R::style::Widget_DeviceDefault_ScrollView=0x0103015a;
+const int R::style::Widget_DeviceDefault_SeekBar=0x01030155;
+const int R::style::Widget_DeviceDefault_Spinner=0x0103015c;
+const int R::style::Widget_DeviceDefault_Spinner_DropDown=0x010302bb;
+const int R::style::Widget_DeviceDefault_Spinner_DropDown_ActionBar=0x010302a7;
+const int R::style::Widget_DeviceDefault_StackView=0x010302bc;
+const int R::style::Widget_DeviceDefault_Tab=0x0103016d;
+const int R::style::Widget_DeviceDefault_TabWidget=0x0103015e;
+const int R::style::Widget_DeviceDefault_TextSelectHandle=0x010302bd;
+const int R::style::Widget_DeviceDefault_TextSuggestionsPopupWindow=0x010302be;
+const int R::style::Widget_DeviceDefault_TextView=0x01030146;
+const int R::style::Widget_DeviceDefault_TextView_ListSeparator=0x010302bf;
+const int R::style::Widget_DeviceDefault_TextView_SpinnerItem=0x01030163;
+const int R::style::Widget_DeviceDefault_TimePicker=0x010302c0;
+const int R::style::Widget_DeviceDefault_WebTextView=0x0103015f;
+const int R::style::Widget_DeviceDefault_WebView=0x01030160;
+const int R::style::Widget_DropDownItem=0x0103002b;
+const int R::style::Widget_DropDownItem_Spinner=0x0103002c;
+const int R::style::Widget_EditText=0x01030023;
+const int R::style::Widget_ExpandableListView=0x01030024;
+const int R::style::Widget_ExpandableListView_White=0x01030206;
+const int R::style::Widget_FragmentBreadCrumbs=0x01030089;
+const int R::style::Widget_Gallery=0x01030035;
+const int R::style::Widget_GenericQuickContactBadge=0x0103020b;
+const int R::style::Widget_GestureOverlayView=0x010301fd;
+const int R::style::Widget_GestureOverlayView_White=0x010301fe;
+const int R::style::Widget_GridView=0x01030032;
+const int R::style::Widget_Holo=0x0103008a;
+const int R::style::Widget_Holo_AbsListView=0x01030260;
+const int R::style::Widget_Holo_ActionBar=0x010300b4;
+const int R::style::Widget_Holo_ActionBar_Solid=0x01030121;
+const int R::style::Widget_Holo_ActionBar_TabBar=0x010300f7;
+const int R::style::Widget_Holo_ActionBar_TabText=0x010300f6;
+const int R::style::Widget_Holo_ActionBar_TabView=0x010300f5;
+const int R::style::Widget_Holo_ActionButton=0x010300af;
+const int R::style::Widget_Holo_ActionButton_CloseMode=0x010300b3;
+const int R::style::Widget_Holo_ActionButton_Overflow=0x010300b0;
+const int R::style::Widget_Holo_ActionButton_TextButton=0x010300b1;
+const int R::style::Widget_Holo_ActionMode=0x010300b2;
+const int R::style::Widget_Holo_ActivityChooserView=0x01030267;
+const int R::style::Widget_Holo_AutoCompleteTextView=0x01030090;
+const int R::style::Widget_Holo_Button=0x0103008b;
+const int R::style::Widget_Holo_Button_Borderless=0x010300e2;
+const int R::style::Widget_Holo_Button_Borderless_Small=0x0103011a;
+const int R::style::Widget_Holo_Button_Inset=0x0103008d;
+const int R::style::Widget_Holo_Button_Small=0x0103008c;
+const int R::style::Widget_Holo_Button_Toggle=0x0103008e;
+const int R::style::Widget_Holo_ButtonBar=0x01030278;
+const int R::style::Widget_Holo_ButtonBar_Button=0x01030279;
+const int R::style::Widget_Holo_CalendarView=0x010300ec;
+const int R::style::Widget_Holo_CheckedTextView=0x010301d9;
+const int R::style::Widget_Holo_CompoundButton=0x01030261;
+const int R::style::Widget_Holo_CompoundButton_CheckBox=0x01030091;
+const int R::style::Widget_Holo_CompoundButton_RadioButton=0x010300a2;
+const int R::style::Widget_Holo_CompoundButton_Star=0x010300a6;
+const int R::style::Widget_Holo_CompoundButton_Switch=0x0103027a;
+const int R::style::Widget_Holo_DatePicker=0x010300ef;
+const int R::style::Widget_Holo_DropDownItem=0x010300aa;
+const int R::style::Widget_Holo_DropDownItem_Spinner=0x010300ab;
+const int R::style::Widget_Holo_EditText=0x01030093;
+const int R::style::Widget_Holo_ExpandableListView=0x01030094;
+const int R::style::Widget_Holo_ExpandableListView_White=0x01030262;
+const int R::style::Widget_Holo_Gallery=0x01030263;
+const int R::style::Widget_Holo_GestureOverlayView=0x01030264;
+const int R::style::Widget_Holo_GridView=0x01030095;
+const int R::style::Widget_Holo_HorizontalScrollView=0x010300a4;
+const int R::style::Widget_Holo_ImageButton=0x01030096;
+const int R::style::Widget_Holo_ImageWell=0x01030268;
+const int R::style::Widget_Holo_KeyboardView=0x01030271;
+const int R::style::Widget_Holo_Light=0x010300b5;
+const int R::style::Widget_Holo_Light_AbsListView=0x0103027f;
+const int R::style::Widget_Holo_Light_ActionBar=0x010300e1;
+const int R::style::Widget_Holo_Light_ActionBar_Solid=0x01030122;
+const int R::style::Widget_Holo_Light_ActionBar_Solid_Inverse=0x01030123;
+const int R::style::Widget_Holo_Light_ActionBar_TabBar=0x010300fa;
+const int R::style::Widget_Holo_Light_ActionBar_TabBar_Inverse=0x01030124;
+const int R::style::Widget_Holo_Light_ActionBar_TabText=0x010300f9;
+const int R::style::Widget_Holo_Light_ActionBar_TabText_Inverse=0x01030126;
+const int R::style::Widget_Holo_Light_ActionBar_TabView=0x010300f8;
+const int R::style::Widget_Holo_Light_ActionBar_TabView_Inverse=0x01030125;
+const int R::style::Widget_Holo_Light_ActionButton=0x010300dd;
+const int R::style::Widget_Holo_Light_ActionButton_CloseMode=0x010300e0;
+const int R::style::Widget_Holo_Light_ActionButton_Overflow=0x010300de;
+const int R::style::Widget_Holo_Light_ActionMode=0x010300df;
+const int R::style::Widget_Holo_Light_ActionMode_Inverse=0x01030127;
+const int R::style::Widget_Holo_Light_ActivityChooserView=0x01030286;
+const int R::style::Widget_Holo_Light_AutoCompleteTextView=0x010300bb;
+const int R::style::Widget_Holo_Light_Button=0x010300b6;
+const int R::style::Widget_Holo_Light_Button_Borderless=0x0103027b;
+const int R::style::Widget_Holo_Light_Button_Borderless_Small=0x0103011b;
+const int R::style::Widget_Holo_Light_Button_Inset=0x010300b8;
+const int R::style::Widget_Holo_Light_Button_Small=0x010300b7;
+const int R::style::Widget_Holo_Light_Button_Toggle=0x010300b9;
+const int R::style::Widget_Holo_Light_CalendarView=0x010300ed;
+const int R::style::Widget_Holo_Light_CheckedTextView=0x010301da;
+const int R::style::Widget_Holo_Light_CompoundButton_CheckBox=0x010300bc;
+const int R::style::Widget_Holo_Light_CompoundButton_RadioButton=0x010300d0;
+const int R::style::Widget_Holo_Light_CompoundButton_Star=0x010300d4;
+const int R::style::Widget_Holo_Light_CompoundButton_Switch=0x01030293;
+const int R::style::Widget_Holo_Light_DatePicker=0x01030285;
+const int R::style::Widget_Holo_Light_DropDownItem=0x010300d8;
+const int R::style::Widget_Holo_Light_DropDownItem_Spinner=0x010300d9;
+const int R::style::Widget_Holo_Light_EditText=0x010300be;
+const int R::style::Widget_Holo_Light_ExpandableListView=0x010300bf;
+const int R::style::Widget_Holo_Light_ExpandableListView_White=0x01030280;
+const int R::style::Widget_Holo_Light_Gallery=0x01030281;
+const int R::style::Widget_Holo_Light_GestureOverlayView=0x01030282;
+const int R::style::Widget_Holo_Light_GridView=0x010300c0;
+const int R::style::Widget_Holo_Light_HorizontalScrollView=0x010300d2;
+const int R::style::Widget_Holo_Light_ImageButton=0x010300c1;
+const int R::style::Widget_Holo_Light_ImageWell=0x01030287;
+const int R::style::Widget_Holo_Light_KeyboardView=0x0103028c;
+const int R::style::Widget_Holo_Light_ListPopupWindow=0x010300db;
+const int R::style::Widget_Holo_Light_ListView=0x010300c2;
+const int R::style::Widget_Holo_Light_ListView_DropDown=0x010300bd;
+const int R::style::Widget_Holo_Light_ListView_White=0x01030288;
+const int R::style::Widget_Holo_Light_MediaRouteButton=0x010301d6;
+const int R::style::Widget_Holo_Light_NumberPicker=0x01030283;
+const int R::style::Widget_Holo_Light_PopupMenu=0x010300dc;
+const int R::style::Widget_Holo_Light_PopupWindow=0x010300c3;
+const int R::style::Widget_Holo_Light_PopupWindow_ActionMode=0x01030289;
+const int R::style::Widget_Holo_Light_ProgressBar=0x010300c4;
+const int R::style::Widget_Holo_Light_ProgressBar_Horizontal=0x010300c5;
+const int R::style::Widget_Holo_Light_ProgressBar_Inverse=0x010300c9;
+const int R::style::Widget_Holo_Light_ProgressBar_Large=0x010300c8;
+const int R::style::Widget_Holo_Light_ProgressBar_Large_Inverse=0x010300cb;
+const int R::style::Widget_Holo_Light_ProgressBar_Small=0x010300c6;
+const int R::style::Widget_Holo_Light_ProgressBar_Small_Inverse=0x010300ca;
+const int R::style::Widget_Holo_Light_ProgressBar_Small_Title=0x010300c7;
+const int R::style::Widget_Holo_Light_QuickContactBadge_WindowLarge=0x0103028f;
+const int R::style::Widget_Holo_Light_QuickContactBadge_WindowMedium=0x0103028e;
+const int R::style::Widget_Holo_Light_QuickContactBadge_WindowSmall=0x0103028d;
+const int R::style::Widget_Holo_Light_QuickContactBadgeSmall_WindowLarge=0x01030292;
+const int R::style::Widget_Holo_Light_QuickContactBadgeSmall_WindowMedium=0x01030291;
+const int R::style::Widget_Holo_Light_QuickContactBadgeSmall_WindowSmall=0x01030290;
+const int R::style::Widget_Holo_Light_RatingBar=0x010300cd;
+const int R::style::Widget_Holo_Light_RatingBar_Indicator=0x010300ce;
+const int R::style::Widget_Holo_Light_RatingBar_Small=0x010300cf;
+const int R::style::Widget_Holo_Light_ScrollView=0x010300d1;
+const int R::style::Widget_Holo_Light_SeekBar=0x010300cc;
+const int R::style::Widget_Holo_Light_Spinner=0x010300d3;
+const int R::style::Widget_Holo_Light_Spinner_DropDown=0x0103028a;
+const int R::style::Widget_Holo_Light_Spinner_DropDown_ActionBar=0x0103028b;
+const int R::style::Widget_Holo_Light_Tab=0x010300e4;
+const int R::style::Widget_Holo_Light_TabWidget=0x010300d5;
+const int R::style::Widget_Holo_Light_TextSelectHandle=0x0103027d;
+const int R::style::Widget_Holo_Light_TextSuggestionsPopupWindow=0x0103027e;
+const int R::style::Widget_Holo_Light_TextView=0x010300ba;
+const int R::style::Widget_Holo_Light_TextView_ListSeparator=0x0103027c;
+const int R::style::Widget_Holo_Light_TextView_SpinnerItem=0x010300da;
+const int R::style::Widget_Holo_Light_TimePicker=0x01030284;
+const int R::style::Widget_Holo_Light_WebTextView=0x010300d6;
+const int R::style::Widget_Holo_Light_WebView=0x010300d7;
+const int R::style::Widget_Holo_ListPopupWindow=0x010300ad;
+const int R::style::Widget_Holo_ListView=0x01030097;
+const int R::style::Widget_Holo_ListView_DropDown=0x01030092;
+const int R::style::Widget_Holo_ListView_White=0x01030269;
+const int R::style::Widget_Holo_MediaRouteButton=0x010301d5;
+const int R::style::Widget_Holo_NumberPicker=0x01030265;
+const int R::style::Widget_Holo_PopupMenu=0x010300ae;
+const int R::style::Widget_Holo_PopupWindow=0x01030098;
+const int R::style::Widget_Holo_PopupWindow_ActionMode=0x0103026a;
+const int R::style::Widget_Holo_PreferenceFrameLayout=0x0103029d;
+const int R::style::Widget_Holo_ProgressBar=0x01030099;
+const int R::style::Widget_Holo_ProgressBar_Horizontal=0x0103009a;
+const int R::style::Widget_Holo_ProgressBar_Inverse=0x0103026b;
+const int R::style::Widget_Holo_ProgressBar_Large=0x0103009d;
+const int R::style::Widget_Holo_ProgressBar_Large_Inverse=0x0103026d;
+const int R::style::Widget_Holo_ProgressBar_Small=0x0103009b;
+const int R::style::Widget_Holo_ProgressBar_Small_Inverse=0x0103026c;
+const int R::style::Widget_Holo_ProgressBar_Small_Title=0x0103009c;
+const int R::style::Widget_Holo_QuickContactBadge_WindowLarge=0x01030274;
+const int R::style::Widget_Holo_QuickContactBadge_WindowMedium=0x01030273;
+const int R::style::Widget_Holo_QuickContactBadge_WindowSmall=0x01030272;
+const int R::style::Widget_Holo_QuickContactBadgeSmall_WindowLarge=0x01030277;
+const int R::style::Widget_Holo_QuickContactBadgeSmall_WindowMedium=0x01030276;
+const int R::style::Widget_Holo_QuickContactBadgeSmall_WindowSmall=0x01030275;
+const int R::style::Widget_Holo_RatingBar=0x0103009f;
+const int R::style::Widget_Holo_RatingBar_Indicator=0x010300a0;
+const int R::style::Widget_Holo_RatingBar_Small=0x010300a1;
+const int R::style::Widget_Holo_ScrollView=0x010300a3;
+const int R::style::Widget_Holo_SeekBar=0x0103009e;
+const int R::style::Widget_Holo_Spinner=0x010300a5;
+const int R::style::Widget_Holo_Spinner_DropDown=0x0103026e;
+const int R::style::Widget_Holo_Spinner_DropDown_ActionBar=0x0103026f;
+const int R::style::Widget_Holo_StackView=0x0103025c;
+const int R::style::Widget_Holo_Tab=0x010300e3;
+const int R::style::Widget_Holo_TabText=0x01030270;
+const int R::style::Widget_Holo_TabWidget=0x010300a7;
+const int R::style::Widget_Holo_TextSelectHandle=0x0103025e;
+const int R::style::Widget_Holo_TextSuggestionsPopupWindow=0x0103025f;
+const int R::style::Widget_Holo_TextView=0x0103008f;
+const int R::style::Widget_Holo_TextView_ListSeparator=0x0103025d;
+const int R::style::Widget_Holo_TextView_SpinnerItem=0x010300ac;
+const int R::style::Widget_Holo_TimePicker=0x01030266;
+const int R::style::Widget_Holo_WebTextView=0x010300a8;
+const int R::style::Widget_Holo_WebView=0x010300a9;
+const int R::style::Widget_HorizontalScrollView=0x01030209;
+const int R::style::Widget_ImageButton=0x01030026;
+const int R::style::Widget_ImageWell=0x01030025;
+const int R::style::Widget_KeyboardView=0x01030057;
+const int R::style::Widget_ListPopupWindow=0x01030085;
+const int R::style::Widget_ListView=0x0103002e;
+const int R::style::Widget_ListView_DropDown=0x01030030;
+const int R::style::Widget_ListView_Menu=0x01030031;
+const int R::style::Widget_ListView_White=0x0103002f;
+const int R::style::Widget_NumberPicker=0x01030207;
+const int R::style::Widget_PopupMenu=0x01030086;
+const int R::style::Widget_PopupWindow=0x01030036;
+const int R::style::Widget_PreferenceFrameLayout=0x010301e1;
+const int R::style::Widget_ProgressBar=0x0103001c;
+const int R::style::Widget_ProgressBar_Horizontal=0x0103001f;
+const int R::style::Widget_ProgressBar_Inverse=0x0103005b;
+const int R::style::Widget_ProgressBar_Large=0x0103001d;
+const int R::style::Widget_ProgressBar_Large_Inverse=0x0103005c;
+const int R::style::Widget_ProgressBar_Small=0x0103001e;
+const int R::style::Widget_ProgressBar_Small_Inverse=0x0103005d;
+const int R::style::Widget_ProgressBar_Small_Title=0x01030200;
+const int R::style::Widget_QuickContactBadge=0x0103020c;
+const int R::style::Widget_QuickContactBadge_WindowLarge=0x01030210;
+const int R::style::Widget_QuickContactBadge_WindowMedium=0x0103020f;
+const int R::style::Widget_QuickContactBadge_WindowSmall=0x0103020e;
+const int R::style::Widget_QuickContactBadgeSmall=0x0103020d;
+const int R::style::Widget_QuickContactBadgeSmall_WindowLarge=0x01030213;
+const int R::style::Widget_QuickContactBadgeSmall_WindowMedium=0x01030212;
+const int R::style::Widget_QuickContactBadgeSmall_WindowSmall=0x01030211;
+const int R::style::Widget_RatingBar=0x01030021;
+const int R::style::Widget_RatingBar_Indicator=0x01030201;
+const int R::style::Widget_RatingBar_Small=0x01030202;
+const int R::style::Widget_ScrollView=0x0103002d;
+const int R::style::Widget_SeekBar=0x01030020;
+const int R::style::Widget_Spinner=0x01030028;
+const int R::style::Widget_Spinner_DropDown=0x01030083;
+const int R::style::Widget_TabWidget=0x01030034;
+const int R::style::Widget_TextSelectHandle=0x01030235;
+const int R::style::Widget_TextSuggestionsPopupWindow=0x01030237;
+const int R::style::Widget_TextView=0x01030022;
+const int R::style::Widget_TextView_ListSeparator=0x01030204;
+const int R::style::Widget_TextView_ListSeparator_White=0x01030205;
+const int R::style::Widget_TextView_PopupMenu=0x01030029;
+const int R::style::Widget_TextView_SpinnerItem=0x0103002a;
+const int R::style::Widget_TimePicker=0x01030208;
+const int R::style::Widget_WebTextView=0x0103020a;
+const int R::style::Widget_WebView=0x01030033;
+const int R::style::WindowTitle=0x010301de;
+const int R::style::WindowTitle_DeviceDefault=0x010302ed;
+const int R::style::WindowTitle_Holo=0x0103029a;
+const int R::style::WindowTitleBackground=0x010301dd;
+const int R::style::WindowTitleBackground_DeviceDefault=0x010302ee;
+const int R::style::WindowTitleBackground_Holo=0x01030299;
+const int R::style::ZoomControls=0x01030233;
+const int R::style::wifi_item=0x0103029f;
+const int R::style::wifi_item_content=0x010302a1;
+const int R::style::wifi_item_label=0x010302a0;
+const int R::style::wifi_section=0x010302a2;
+const int R::xml::apns=0x010f0000;
+const int R::xml::autotext=0x010f0001;
+const int R::xml::eri=0x010f0002;
+const int R::xml::kg_password_kbd_numeric=0x010f0003;
+const int R::xml::password_kbd_extension=0x010f0004;
+const int R::xml::password_kbd_numeric=0x010f0005;
+const int R::xml::password_kbd_popup_template=0x010f0006;
+const int R::xml::password_kbd_qwerty=0x010f0007;
+const int R::xml::password_kbd_qwerty_shifted=0x010f0008;
+const int R::xml::password_kbd_symbols=0x010f0009;
+const int R::xml::password_kbd_symbols_shift=0x010f000a;
+const int R::xml::power_profile=0x010f000b;
+const int R::xml::preferred_time_zones=0x010f000c;
+const int R::xml::sms_short_codes=0x010f000d;
+const int R::xml::storage_list=0x010f000e;
+const int R::xml::time_zones_by_country=0x010f000f;
+const int R::styleable::AbsListView[] = {
+            0x010100fb, 0x010100fc, 0x010100fd, 0x010100fe,
+            0x010100ff, 0x01010100, 0x01010101, 0x0101012b,
+            0x01010226, 0x01010231, 0x01010335
+        };
+
+const int R::AbsListView_cacheColorHint = 6;
+const int R::AbsListView_choiceMode = 7;
+const int R::AbsListView_drawSelectorOnTop = 1;
+const int R::AbsListView_fastScrollAlwaysVisible = 10;
+const int R::AbsListView_fastScrollEnabled = 8;
+const int R::AbsListView_listSelector = 0;
+const int R::AbsListView_scrollingCache = 3;
+const int R::AbsListView_smoothScrollbar = 9;
+const int R::AbsListView_stackFromBottom = 2;
+const int R::AbsListView_textFilterEnabled = 4;
+const int R::AbsListView_transcriptMode = 5;
+const int R::styleable::AbsSpinner[] = {
+            0x010100b2
+        };
+
+const int R::AbsSpinner_entries = 0;
+const int R::styleable::AbsoluteLayout_Layout[] = {
+            0x0101017f, 0x01010180
+        };
+
+const int R::AbsoluteLayout_Layout_layout_x = 0;
+const int R::AbsoluteLayout_Layout_layout_y = 1;
+const int R::styleable::AccelerateInterpolator[] = {
+            0x010101d3
+        };
+
+const int R::AccelerateInterpolator_factor = 0;
+const int R::styleable::AccessibilityService[] = {
+            0x01010020, 0x01010225, 0x01010380, 0x01010381,
+            0x01010382, 0x01010383, 0x01010384, 0x01010385
+        };
+
+const int R::AccessibilityService_accessibilityEventTypes = 2;
+const int R::AccessibilityService_accessibilityFeedbackType = 4;
+const int R::AccessibilityService_accessibilityFlags = 6;
+const int R::AccessibilityService_canRetrieveWindowContent = 7;
+const int R::AccessibilityService_description = 0;
+const int R::AccessibilityService_notificationTimeout = 5;
+const int R::AccessibilityService_packageNames = 3;
+const int R::AccessibilityService_settingsActivity = 1;
+const int R::styleable::AccountAuthenticator[] = {
+            0x01010001, 0x01010002, 0x0101028f, 0x0101029e,
+            0x0101029f, 0x0101033b
+        };
+
+const int R::AccountAuthenticator_accountPreferences = 4;
+const int R::AccountAuthenticator_accountType = 2;
+const int R::AccountAuthenticator_customTokens = 5;
+const int R::AccountAuthenticator_icon = 1;
+const int R::AccountAuthenticator_label = 0;
+const int R::AccountAuthenticator_smallIcon = 3;
+const int R::styleable::ActionBar[] = {
+            0x01010002, 0x01010077, 0x010100d4, 0x01010129,
+            0x01010155, 0x010101e1, 0x010102be, 0x010102cf,
+            0x010102d0, 0x010102d1, 0x010102d2, 0x010102f8,
+            0x010102f9, 0x01010318, 0x01010319, 0x0101031d,
+            0x0101032d, 0x0101038a, 0x0101038b
+        };
+
+const int R::ActionBar_background = 2;
+const int R::ActionBar_backgroundSplit = 18;
+const int R::ActionBar_backgroundStacked = 17;
+const int R::ActionBar_customNavigationLayout = 10;
+const int R::ActionBar_displayOptions = 8;
+const int R::ActionBar_divider = 3;
+const int R::ActionBar_height = 4;
+const int R::ActionBar_homeLayout = 15;
+const int R::ActionBar_icon = 0;
+const int R::ActionBar_indeterminateProgressStyle = 13;
+const int R::ActionBar_itemPadding = 16;
+const int R::ActionBar_logo = 6;
+const int R::ActionBar_navigationMode = 7;
+const int R::ActionBar_progressBarPadding = 14;
+const int R::ActionBar_progressBarStyle = 1;
+const int R::ActionBar_subtitle = 9;
+const int R::ActionBar_subtitleTextStyle = 12;
+const int R::ActionBar_title = 5;
+const int R::ActionBar_titleTextStyle = 11;
+const int R::styleable::ActionBar_LayoutParams[] = {
+            0x010100b3
+        };
+
+const int R::ActionBar_LayoutParams_layout_gravity = 0;
+const int R::styleable::ActionMenuItemView[] = {
+            0x0101013f
+        };
+
+const int R::ActionMenuItemView_minWidth = 0;
+const int R::styleable::ActionMode[] = {
+            0x010100d4, 0x01010155, 0x010102f8, 0x010102f9,
+            0x0101038b
+        };
+
+const int R::ActionMode_background = 0;
+const int R::ActionMode_backgroundSplit = 4;
+const int R::ActionMode_height = 1;
+const int R::ActionMode_subtitleTextStyle = 3;
+const int R::ActionMode_titleTextStyle = 2;
+const int R::styleable::ActivityChooserView[] = {
+            0x01010424, 0x01010425
+        };
+
+const int R::ActivityChooserView_expandActivityOverflowButtonDrawable = 1;
+const int R::ActivityChooserView_initialActivityCount = 0;
+const int R::styleable::AdapterViewAnimator[] = {
+            0x01010177, 0x01010178, 0x010102d5, 0x01010307
+        };
+
+const int R::AdapterViewAnimator_animateFirstView = 2;
+const int R::AdapterViewAnimator_inAnimation = 0;
+const int R::AdapterViewAnimator_loopViews = 3;
+const int R::AdapterViewAnimator_outAnimation = 1;
+const int R::styleable::AdapterViewFlipper[] = {
+            0x01010179, 0x010102b5
+        };
+
+const int R::AdapterViewFlipper_autoStart = 1;
+const int R::AdapterViewFlipper_flipInterval = 0;
+const int R::styleable::AlertDialog[] = {
+            0x010100c6, 0x010100c7, 0x010100c8, 0x010100c9,
+            0x010100ca, 0x010100cb, 0x010100cc, 0x010100cd,
+            0x010100ce, 0x010100cf, 0x010100f2, 0x010103ff,
+            0x01010400, 0x01010401, 0x01010402, 0x01010403,
+            0x01010404
+        };
+
+const int R::AlertDialog_bottomBright = 7;
+const int R::AlertDialog_bottomDark = 3;
+const int R::AlertDialog_bottomMedium = 8;
+const int R::AlertDialog_centerBright = 6;
+const int R::AlertDialog_centerDark = 2;
+const int R::AlertDialog_centerMedium = 9;
+const int R::AlertDialog_fullBright = 4;
+const int R::AlertDialog_fullDark = 0;
+const int R::AlertDialog_horizontalProgressLayout = 16;
+const int R::AlertDialog_layout = 10;
+const int R::AlertDialog_listItemLayout = 14;
+const int R::AlertDialog_listLayout = 11;
+const int R::AlertDialog_multiChoiceItemLayout = 12;
+const int R::AlertDialog_progressLayout = 15;
+const int R::AlertDialog_singleChoiceItemLayout = 13;
+const int R::AlertDialog_topBright = 5;
+const int R::AlertDialog_topDark = 1;
+const int R::styleable::AlphaAnimation[] = {
+            0x010101ca, 0x010101cb
+        };
+
+const int R::AlphaAnimation_fromAlpha = 0;
+const int R::AlphaAnimation_toAlpha = 1;
+const int R::styleable::AnalogClock[] = {
+            0x01010102, 0x01010103, 0x01010104
+        };
+
+const int R::AnalogClock_dial = 0;
+const int R::AnalogClock_hand_hour = 1;
+const int R::AnalogClock_hand_minute = 2;
+const int R::styleable::AndroidManifest[] = {
+            0x0101000b, 0x0101021b, 0x0101021c, 0x01010261,
+            0x010102b7
+        };
+
+const int R::AndroidManifest_installLocation = 4;
+const int R::AndroidManifest_sharedUserId = 0;
+const int R::AndroidManifest_sharedUserLabel = 3;
+const int R::AndroidManifest_versionCode = 1;
+const int R::AndroidManifest_versionName = 2;
+const int R::styleable::AndroidManifestAction[] = {
+            0x01010003
+        };
+
+const int R::AndroidManifestAction_name = 0;
+const int R::styleable::AndroidManifestActivity[] = {
+            0x01010000, 0x01010001, 0x01010002, 0x01010003,
+            0x01010006, 0x0101000e, 0x01010010, 0x01010011,
+            0x01010012, 0x01010013, 0x01010014, 0x01010015,
+            0x01010016, 0x01010017, 0x0101001d, 0x0101001e,
+            0x0101001f, 0x01010020, 0x01010203, 0x01010204,
+            0x0101022b, 0x0101022d, 0x010102a7, 0x010102be,
+            0x010102c0, 0x010102d3, 0x01010398, 0x010103a7,
+            0x010103bf, 0x010103c9, 0x01010457
+        };
+
+const int R::AndroidManifestActivity_allowTaskReparenting = 19;
+const int R::AndroidManifestActivity_alwaysRetainTaskState = 18;
+const int R::AndroidManifestActivity_clearTaskOnLaunch = 11;
+const int R::AndroidManifestActivity_configChanges = 16;
+const int R::AndroidManifestActivity_description = 17;
+const int R::AndroidManifestActivity_enabled = 5;
+const int R::AndroidManifestActivity_excludeFromRecents = 13;
+const int R::AndroidManifestActivity_exported = 6;
+const int R::AndroidManifestActivity_finishOnCloseSystemDialogs = 22;
+const int R::AndroidManifestActivity_finishOnTaskLaunch = 10;
+const int R::AndroidManifestActivity_hardwareAccelerated = 25;
+const int R::AndroidManifestActivity_icon = 2;
+const int R::AndroidManifestActivity_immersive = 24;
+const int R::AndroidManifestActivity_label = 1;
+const int R::AndroidManifestActivity_launchMode = 14;
+const int R::AndroidManifestActivity_logo = 23;
+const int R::AndroidManifestActivity_multiprocess = 9;
+const int R::AndroidManifestActivity_name = 3;
+const int R::AndroidManifestActivity_noHistory = 21;
+const int R::AndroidManifestActivity_parentActivityName = 27;
+const int R::AndroidManifestActivity_permission = 4;
+const int R::AndroidManifestActivity_primaryUserOnly = 30;
+const int R::AndroidManifestActivity_process = 7;
+const int R::AndroidManifestActivity_screenOrientation = 15;
+const int R::AndroidManifestActivity_showOnLockScreen = 29;
+const int R::AndroidManifestActivity_singleUser = 28;
+const int R::AndroidManifestActivity_stateNotNeeded = 12;
+const int R::AndroidManifestActivity_taskAffinity = 8;
+const int R::AndroidManifestActivity_theme = 0;
+const int R::AndroidManifestActivity_uiOptions = 26;
+const int R::AndroidManifestActivity_windowSoftInputMode = 20;
+const int R::styleable::AndroidManifestActivityAlias[] = {
+            0x01010001, 0x01010002, 0x01010003, 0x01010006,
+            0x0101000e, 0x01010010, 0x01010020, 0x01010202,
+            0x010102be, 0x010103a7
+        };
+
+const int R::AndroidManifestActivityAlias_description = 6;
+const int R::AndroidManifestActivityAlias_enabled = 4;
+const int R::AndroidManifestActivityAlias_exported = 5;
+const int R::AndroidManifestActivityAlias_icon = 1;
+const int R::AndroidManifestActivityAlias_label = 0;
+const int R::AndroidManifestActivityAlias_logo = 8;
+const int R::AndroidManifestActivityAlias_name = 2;
+const int R::AndroidManifestActivityAlias_parentActivityName = 9;
+const int R::AndroidManifestActivityAlias_permission = 3;
+const int R::AndroidManifestActivityAlias_targetActivity = 7;
+const int R::styleable::AndroidManifestApplication[] = {
+            0x01010000, 0x01010001, 0x01010002, 0x01010003,
+            0x01010004, 0x01010005, 0x01010006, 0x0101000c,
+            0x0101000d, 0x0101000e, 0x0101000f, 0x01010011,
+            0x01010012, 0x01010020, 0x01010204, 0x01010272,
+            0x0101027f, 0x01010280, 0x0101029c, 0x0101029d,
+            0x010102b8, 0x010102ba, 0x010102be, 0x010102d3,
+            0x0101035a, 0x01010398, 0x010103af, 0x01010455,
+            0x01010456
+        };
+
+const int R::AndroidManifestApplication_allowBackup = 17;
+const int R::AndroidManifestApplication_allowClearUserData = 5;
+const int R::AndroidManifestApplication_allowTaskReparenting = 14;
+const int R::AndroidManifestApplication_backupAgent = 16;
+const int R::AndroidManifestApplication_cantSaveState = 28;
+const int R::AndroidManifestApplication_debuggable = 10;
+const int R::AndroidManifestApplication_description = 13;
+const int R::AndroidManifestApplication_enabled = 9;
+const int R::AndroidManifestApplication_hardwareAccelerated = 23;
+const int R::AndroidManifestApplication_hasCode = 7;
+const int R::AndroidManifestApplication_icon = 2;
+const int R::AndroidManifestApplication_killAfterRestore = 18;
+const int R::AndroidManifestApplication_label = 1;
+const int R::AndroidManifestApplication_largeHeap = 24;
+const int R::AndroidManifestApplication_logo = 22;
+const int R::AndroidManifestApplication_manageSpaceActivity = 4;
+const int R::AndroidManifestApplication_name = 3;
+const int R::AndroidManifestApplication_neverEncrypt = 27;
+const int R::AndroidManifestApplication_permission = 6;
+const int R::AndroidManifestApplication_persistent = 8;
+const int R::AndroidManifestApplication_process = 11;
+const int R::AndroidManifestApplication_restoreAnyVersion = 21;
+const int R::AndroidManifestApplication_restoreNeedsApplication = 19;
+const int R::AndroidManifestApplication_supportsRtl = 26;
+const int R::AndroidManifestApplication_taskAffinity = 12;
+const int R::AndroidManifestApplication_testOnly = 15;
+const int R::AndroidManifestApplication_theme = 0;
+const int R::AndroidManifestApplication_uiOptions = 25;
+const int R::AndroidManifestApplication_vmSafeMode = 20;
+const int R::styleable::AndroidManifestCategory[] = {
+            0x01010003
+        };
+
+const int R::AndroidManifestCategory_name = 0;
+const int R::styleable::AndroidManifestCompatibleScreensScreen[] = {
+            0x010102ca, 0x010102cb
+        };
+
+const int R::AndroidManifestCompatibleScreensScreen_screenDensity = 1;
+const int R::AndroidManifestCompatibleScreensScreen_screenSize = 0;
+const int R::styleable::AndroidManifestData[] = {
+            0x01010026, 0x01010027, 0x01010028, 0x01010029,
+            0x0101002a, 0x0101002b, 0x0101002c
+        };
+
+const int R::AndroidManifestData_host = 2;
+const int R::AndroidManifestData_mimeType = 0;
+const int R::AndroidManifestData_path = 4;
+const int R::AndroidManifestData_pathPattern = 6;
+const int R::AndroidManifestData_pathPrefix = 5;
+const int R::AndroidManifestData_port = 3;
+const int R::AndroidManifestData_scheme = 1;
+const int R::styleable::AndroidManifestGrantUriPermission[] = {
+            0x0101002a, 0x0101002b, 0x0101002c
+        };
+
+const int R::AndroidManifestGrantUriPermission_path = 0;
+const int R::AndroidManifestGrantUriPermission_pathPattern = 2;
+const int R::AndroidManifestGrantUriPermission_pathPrefix = 1;
+const int R::styleable::AndroidManifestInstrumentation[] = {
+            0x01010001, 0x01010002, 0x01010003, 0x01010021,
+            0x01010022, 0x01010023, 0x010102be
+        };
+
+const int R::AndroidManifestInstrumentation_functionalTest = 5;
+const int R::AndroidManifestInstrumentation_handleProfiling = 4;
+const int R::AndroidManifestInstrumentation_icon = 1;
+const int R::AndroidManifestInstrumentation_label = 0;
+const int R::AndroidManifestInstrumentation_logo = 6;
+const int R::AndroidManifestInstrumentation_name = 2;
+const int R::AndroidManifestInstrumentation_targetPackage = 3;
+const int R::styleable::AndroidManifestIntentFilter[] = {
+            0x01010001, 0x01010002, 0x0101001c, 0x010102be
+        };
+
+const int R::AndroidManifestIntentFilter_icon = 1;
+const int R::AndroidManifestIntentFilter_label = 0;
+const int R::AndroidManifestIntentFilter_logo = 3;
+const int R::AndroidManifestIntentFilter_priority = 2;
+const int R::styleable::AndroidManifestMetaData[] = {
+            0x01010003, 0x01010024, 0x01010025
+        };
+
+const int R::AndroidManifestMetaData_name = 0;
+const int R::AndroidManifestMetaData_resource = 2;
+const int R::AndroidManifestMetaData_value = 1;
+const int R::styleable::AndroidManifestOriginalPackage[] = {
+            0x01010003
+        };
+
+const int R::AndroidManifestOriginalPackage_name = 0;
+const int R::styleable::AndroidManifestPackageVerifier[] = {
+            0x01010003, 0x010103a6
+        };
+
+const int R::AndroidManifestPackageVerifier_name = 0;
+const int R::AndroidManifestPackageVerifier_publicKey = 1;
+const int R::styleable::AndroidManifestPathPermission[] = {
+            0x01010006, 0x01010007, 0x01010008, 0x0101002a,
+            0x0101002b, 0x0101002c
+        };
+
+const int R::AndroidManifestPathPermission_path = 3;
+const int R::AndroidManifestPathPermission_pathPattern = 5;
+const int R::AndroidManifestPathPermission_pathPrefix = 4;
+const int R::AndroidManifestPathPermission_permission = 0;
+const int R::AndroidManifestPathPermission_readPermission = 1;
+const int R::AndroidManifestPathPermission_writePermission = 2;
+const int R::styleable::AndroidManifestPermission[] = {
+            0x01010001, 0x01010002, 0x01010003, 0x01010009,
+            0x0101000a, 0x01010020, 0x010102be, 0x010103c7
+        };
+
+const int R::AndroidManifestPermission_description = 5;
+const int R::AndroidManifestPermission_icon = 1;
+const int R::AndroidManifestPermission_label = 0;
+const int R::AndroidManifestPermission_logo = 6;
+const int R::AndroidManifestPermission_name = 2;
+const int R::AndroidManifestPermission_permissionFlags = 7;
+const int R::AndroidManifestPermission_permissionGroup = 4;
+const int R::AndroidManifestPermission_protectionLevel = 3;
+const int R::styleable::AndroidManifestPermissionGroup[] = {
+            0x01010001, 0x01010002, 0x01010003, 0x0101001c,
+            0x01010020, 0x010102be, 0x010103c5
+        };
+
+const int R::AndroidManifestPermissionGroup_description = 4;
+const int R::AndroidManifestPermissionGroup_icon = 1;
+const int R::AndroidManifestPermissionGroup_label = 0;
+const int R::AndroidManifestPermissionGroup_logo = 5;
+const int R::AndroidManifestPermissionGroup_name = 2;
+const int R::AndroidManifestPermissionGroup_permissionGroupFlags = 6;
+const int R::AndroidManifestPermissionGroup_priority = 3;
+const int R::styleable::AndroidManifestPermissionTree[] = {
+            0x01010001, 0x01010002, 0x01010003, 0x010102be
+        };
+
+const int R::AndroidManifestPermissionTree_icon = 1;
+const int R::AndroidManifestPermissionTree_label = 0;
+const int R::AndroidManifestPermissionTree_logo = 3;
+const int R::AndroidManifestPermissionTree_name = 2;
+const int R::styleable::AndroidManifestProtectedBroadcast[] = {
+            0x01010003
+        };
+
+const int R::AndroidManifestProtectedBroadcast_name = 0;
+const int R::styleable::AndroidManifestProvider[] = {
+            0x01010001, 0x01010002, 0x01010003, 0x01010006,
+            0x01010007, 0x01010008, 0x0101000e, 0x01010010,
+            0x01010011, 0x01010013, 0x01010018, 0x01010019,
+            0x0101001a, 0x0101001b, 0x01010020, 0x010102be,
+            0x010103bf
+        };
+
+const int R::AndroidManifestProvider_authorities = 10;
+const int R::AndroidManifestProvider_description = 14;
+const int R::AndroidManifestProvider_enabled = 6;
+const int R::AndroidManifestProvider_exported = 7;
+const int R::AndroidManifestProvider_grantUriPermissions = 13;
+const int R::AndroidManifestProvider_icon = 1;
+const int R::AndroidManifestProvider_initOrder = 12;
+const int R::AndroidManifestProvider_label = 0;
+const int R::AndroidManifestProvider_logo = 15;
+const int R::AndroidManifestProvider_multiprocess = 9;
+const int R::AndroidManifestProvider_name = 2;
+const int R::AndroidManifestProvider_permission = 3;
+const int R::AndroidManifestProvider_process = 8;
+const int R::AndroidManifestProvider_readPermission = 4;
+const int R::AndroidManifestProvider_singleUser = 16;
+const int R::AndroidManifestProvider_syncable = 11;
+const int R::AndroidManifestProvider_writePermission = 5;
+const int R::styleable::AndroidManifestReceiver[] = {
+            0x01010001, 0x01010002, 0x01010003, 0x01010006,
+            0x0101000e, 0x01010010, 0x01010011, 0x01010020,
+            0x010102be, 0x010103bf
+        };
+
+const int R::AndroidManifestReceiver_description = 7;
+const int R::AndroidManifestReceiver_enabled = 4;
+const int R::AndroidManifestReceiver_exported = 5;
+const int R::AndroidManifestReceiver_icon = 1;
+const int R::AndroidManifestReceiver_label = 0;
+const int R::AndroidManifestReceiver_logo = 8;
+const int R::AndroidManifestReceiver_name = 2;
+const int R::AndroidManifestReceiver_permission = 3;
+const int R::AndroidManifestReceiver_process = 6;
+const int R::AndroidManifestReceiver_singleUser = 9;
+const int R::styleable::AndroidManifestService[] = {
+            0x01010001, 0x01010002, 0x01010003, 0x01010006,
+            0x0101000e, 0x01010010, 0x01010011, 0x01010020,
+            0x010102be, 0x0101036a, 0x010103a9, 0x010103bf
+        };
+
+const int R::AndroidManifestService_description = 7;
+const int R::AndroidManifestService_enabled = 4;
+const int R::AndroidManifestService_exported = 5;
+const int R::AndroidManifestService_icon = 1;
+const int R::AndroidManifestService_isolatedProcess = 10;
+const int R::AndroidManifestService_label = 0;
+const int R::AndroidManifestService_logo = 8;
+const int R::AndroidManifestService_name = 2;
+const int R::AndroidManifestService_permission = 3;
+const int R::AndroidManifestService_process = 6;
+const int R::AndroidManifestService_singleUser = 11;
+const int R::AndroidManifestService_stopWithTask = 9;
+const int R::styleable::AndroidManifestSupportsScreens[] = {
+            0x0101026c, 0x01010284, 0x01010285, 0x01010286,
+            0x0101028d, 0x010102bf, 0x01010364, 0x01010365,
+            0x01010366
+        };
+
+const int R::AndroidManifestSupportsScreens_anyDensity = 0;
+const int R::AndroidManifestSupportsScreens_compatibleWidthLimitDp = 7;
+const int R::AndroidManifestSupportsScreens_largeScreens = 3;
+const int R::AndroidManifestSupportsScreens_largestWidthLimitDp = 8;
+const int R::AndroidManifestSupportsScreens_normalScreens = 2;
+const int R::AndroidManifestSupportsScreens_requiresSmallestWidthDp = 6;
+const int R::AndroidManifestSupportsScreens_resizeable = 4;
+const int R::AndroidManifestSupportsScreens_smallScreens = 1;
+const int R::AndroidManifestSupportsScreens_xlargeScreens = 5;
+const int R::styleable::AndroidManifestUsesConfiguration[] = {
+            0x01010227, 0x01010228, 0x01010229, 0x0101022a,
+            0x01010232
+        };
+
+const int R::AndroidManifestUsesConfiguration_reqFiveWayNav = 4;
+const int R::AndroidManifestUsesConfiguration_reqHardKeyboard = 2;
+const int R::AndroidManifestUsesConfiguration_reqKeyboardType = 1;
+const int R::AndroidManifestUsesConfiguration_reqNavigation = 3;
+const int R::AndroidManifestUsesConfiguration_reqTouchScreen = 0;
+const int R::styleable::AndroidManifestUsesFeature[] = {
+            0x01010003, 0x01010281, 0x0101028e
+        };
+
+const int R::AndroidManifestUsesFeature_glEsVersion = 1;
+const int R::AndroidManifestUsesFeature_name = 0;
+const int R::AndroidManifestUsesFeature_required = 2;
+const int R::styleable::AndroidManifestUsesLibrary[] = {
+            0x01010003, 0x0101028e
+        };
+
+const int R::AndroidManifestUsesLibrary_name = 0;
+const int R::AndroidManifestUsesLibrary_required = 1;
+const int R::styleable::AndroidManifestUsesPermission[] = {
+            0x01010003
+        };
+
+const int R::AndroidManifestUsesPermission_name = 0;
+const int R::styleable::AndroidManifestUsesSdk[] = {
+            0x0101020c, 0x01010270, 0x01010271
+        };
+
+const int R::AndroidManifestUsesSdk_maxSdkVersion = 2;
+const int R::AndroidManifestUsesSdk_minSdkVersion = 0;
+const int R::AndroidManifestUsesSdk_targetSdkVersion = 1;
+const int R::styleable::AnimatedRotateDrawable[] = {
+            0x01010194, 0x01010199, 0x010101b5, 0x010101b6,
+            0x01010421, 0x01010422
+        };
+
+const int R::AnimatedRotateDrawable_drawable = 1;
+const int R::AnimatedRotateDrawable_frameDuration = 4;
+const int R::AnimatedRotateDrawable_framesCount = 5;
+const int R::AnimatedRotateDrawable_pivotX = 2;
+const int R::AnimatedRotateDrawable_pivotY = 3;
+const int R::AnimatedRotateDrawable_visible = 0;
+const int R::styleable::Animation[] = {
+            0x010100d4, 0x01010141, 0x01010198, 0x010101bc,
+            0x010101bd, 0x010101be, 0x010101bf, 0x010101c0,
+            0x010101c1, 0x0101024f, 0x010102a6
+        };
+
+const int R::Animation_background = 0;
+const int R::Animation_detachWallpaper = 10;
+const int R::Animation_duration = 2;
+const int R::Animation_fillAfter = 4;
+const int R::Animation_fillBefore = 3;
+const int R::Animation_fillEnabled = 9;
+const int R::Animation_interpolator = 1;
+const int R::Animation_repeatCount = 6;
+const int R::Animation_repeatMode = 7;
+const int R::Animation_startOffset = 5;
+const int R::Animation_zAdjustment = 8;
+const int R::styleable::AnimationDrawable[] = {
+            0x01010194, 0x01010195, 0x01010197
+        };
+
+const int R::AnimationDrawable_oneshot = 2;
+const int R::AnimationDrawable_variablePadding = 1;
+const int R::AnimationDrawable_visible = 0;
+const int R::styleable::AnimationDrawableItem[] = {
+            0x01010198, 0x01010199
+        };
+
+const int R::AnimationDrawableItem_drawable = 1;
+const int R::AnimationDrawableItem_duration = 0;
+const int R::styleable::AnimationSet[] = {
+            0x01010198, 0x010101bb, 0x010101bc, 0x010101bd,
+            0x010101be, 0x010101c0
+        };
+
+const int R::AnimationSet_duration = 0;
+const int R::AnimationSet_fillAfter = 3;
+const int R::AnimationSet_fillBefore = 2;
+const int R::AnimationSet_repeatMode = 5;
+const int R::AnimationSet_shareInterpolator = 1;
+const int R::AnimationSet_startOffset = 4;
+const int R::styleable::Animator[] = {
+            0x01010141, 0x01010198, 0x010101be, 0x010101bf,
+            0x010101c0, 0x010102de, 0x010102df, 0x010102e0
+        };
+
+const int R::Animator_duration = 1;
+const int R::Animator_interpolator = 0;
+const int R::Animator_repeatCount = 3;
+const int R::Animator_repeatMode = 4;
+const int R::Animator_startOffset = 2;
+const int R::Animator_valueFrom = 5;
+const int R::Animator_valueTo = 6;
+const int R::Animator_valueType = 7;
+const int R::styleable::AnimatorSet[] = {
+            0x010102e2
+        };
+
+const int R::AnimatorSet_ordering = 0;
+const int R::styleable::AnticipateInterpolator[] = {
+            0x0101026a
+        };
+
+const int R::AnticipateInterpolator_tension = 0;
+const int R::styleable::AnticipateOvershootInterpolator[] = {
+            0x0101026a, 0x0101026b
+        };
+
+const int R::AnticipateOvershootInterpolator_extraTension = 1;
+const int R::AnticipateOvershootInterpolator_tension = 0;
+const int R::styleable::AppWidgetProviderInfo[] = {
+            0x0101013f, 0x01010140, 0x01010250, 0x01010251,
+            0x0101025d, 0x010102da, 0x0101030f, 0x01010363,
+            0x01010395, 0x01010396, 0x010103c2, 0x010103c4
+        };
+
+const int R::AppWidgetProviderInfo_autoAdvanceViewId = 6;
+const int R::AppWidgetProviderInfo_configure = 4;
+const int R::AppWidgetProviderInfo_initialKeyguardLayout = 10;
+const int R::AppWidgetProviderInfo_initialLayout = 3;
+const int R::AppWidgetProviderInfo_minHeight = 1;
+const int R::AppWidgetProviderInfo_minResizeHeight = 9;
+const int R::AppWidgetProviderInfo_minResizeWidth = 8;
+const int R::AppWidgetProviderInfo_minWidth = 0;
+const int R::AppWidgetProviderInfo_previewImage = 5;
+const int R::AppWidgetProviderInfo_resizeMode = 7;
+const int R::AppWidgetProviderInfo_updatePeriodMillis = 2;
+const int R::AppWidgetProviderInfo_widgetCategory = 11;
+const int R::styleable::AutoCompleteTextView[] = {
+            0x01010172, 0x01010173, 0x01010174, 0x01010175,
+            0x01010220, 0x01010262, 0x01010263, 0x01010283,
+            0x010102ac, 0x010102ad
+        };
+
+const int R::AutoCompleteTextView_completionHint = 0;
+const int R::AutoCompleteTextView_completionHintView = 1;
+const int R::AutoCompleteTextView_completionThreshold = 2;
+const int R::AutoCompleteTextView_dropDownAnchor = 6;
+const int R::AutoCompleteTextView_dropDownHeight = 7;
+const int R::AutoCompleteTextView_dropDownHorizontalOffset = 8;
+const int R::AutoCompleteTextView_dropDownSelector = 3;
+const int R::AutoCompleteTextView_dropDownVerticalOffset = 9;
+const int R::AutoCompleteTextView_dropDownWidth = 5;
+const int R::AutoCompleteTextView_inputType = 4;
+const int R::styleable::BitmapDrawable[] = {
+            0x010100af, 0x01010119, 0x0101011a, 0x0101011b,
+            0x0101011c, 0x01010201
+        };
+
+const int R::BitmapDrawable_antialias = 2;
+const int R::BitmapDrawable_dither = 4;
+const int R::BitmapDrawable_filter = 3;
+const int R::BitmapDrawable_gravity = 0;
+const int R::BitmapDrawable_src = 1;
+const int R::BitmapDrawable_tileMode = 5;
+const int R::styleable::Button[] = {
+
+        };
+
+const int R::styleable::CalendarView[] = {
+            0x0101033d, 0x0101033e, 0x0101033f, 0x01010340,
+            0x01010341, 0x01010342, 0x01010343, 0x01010344,
+            0x01010345, 0x01010346, 0x01010347, 0x01010348,
+            0x01010349
+        };
+
+const int R::CalendarView_dateTextAppearance = 12;
+const int R::CalendarView_firstDayOfWeek = 0;
+const int R::CalendarView_focusedMonthDateColor = 6;
+const int R::CalendarView_maxDate = 3;
+const int R::CalendarView_minDate = 2;
+const int R::CalendarView_selectedDateVerticalBar = 10;
+const int R::CalendarView_selectedWeekBackgroundColor = 5;
+const int R::CalendarView_showWeekNumber = 1;
+const int R::CalendarView_shownWeekCount = 4;
+const int R::CalendarView_unfocusedMonthDateColor = 7;
+const int R::CalendarView_weekDayTextAppearance = 11;
+const int R::CalendarView_weekNumberColor = 8;
+const int R::CalendarView_weekSeparatorLineColor = 9;
+const int R::styleable::CheckBoxPreference[] = {
+            0x010101ef, 0x010101f0, 0x010101f1
+        };
+
+const int R::CheckBoxPreference_disableDependentsState = 2;
+const int R::CheckBoxPreference_summaryOff = 1;
+const int R::CheckBoxPreference_summaryOn = 0;
+const int R::styleable::CheckedTextView[] = {
+            0x01010106, 0x01010108
+        };
+
+const int R::CheckedTextView_checkMark = 1;
+const int R::CheckedTextView_checked = 0;
+const int R::styleable::Chronometer[] = {
+            0x01010105
+        };
+
+const int R::Chronometer_format = 0;
+const int R::styleable::ClipDrawable[] = {
+            0x010100af, 0x01010199, 0x0101020a
+        };
+
+const int R::ClipDrawable_clipOrientation = 2;
+const int R::ClipDrawable_drawable = 1;
+const int R::ClipDrawable_gravity = 0;
+const int R::styleable::ColorDrawable[] = {
+            0x010101a5
+        };
+
+const int R::ColorDrawable_color = 0;
+const int R::styleable::CompoundButton[] = {
+            0x01010106, 0x01010107
+        };
+
+const int R::CompoundButton_button = 1;
+const int R::CompoundButton_checked = 0;
+const int R::styleable::ContactsDataKind[] = {
+            0x01010002, 0x01010026, 0x010102a2, 0x010102a3,
+            0x010102a4, 0x010102cc
+        };
+
+const int R::ContactsDataKind_allContactsName = 5;
+const int R::ContactsDataKind_detailColumn = 3;
+const int R::ContactsDataKind_detailSocialSummary = 4;
+const int R::ContactsDataKind_icon = 0;
+const int R::ContactsDataKind_mimeType = 1;
+const int R::ContactsDataKind_summaryColumn = 2;
+const int R::styleable::CycleInterpolator[] = {
+            0x010101d4
+        };
+
+const int R::CycleInterpolator_cycles = 0;
+const int R::styleable::DatePicker[] = {
+            0x0101017c, 0x0101017d, 0x0101033f, 0x01010340,
+            0x0101034b, 0x0101034c, 0x01010413
+        };
+
+const int R::DatePicker_calendarViewShown = 5;
+const int R::DatePicker_endYear = 1;
+const int R::DatePicker_internalLayout = 6;
+const int R::DatePicker_maxDate = 3;
+const int R::DatePicker_minDate = 2;
+const int R::DatePicker_spinnersShown = 4;
+const int R::DatePicker_startYear = 0;
+const int R::styleable::DecelerateInterpolator[] = {
+            0x010101d3
+        };
+
+const int R::DecelerateInterpolator_factor = 0;
+const int R::styleable::DeviceAdmin[] = {
+            0x01010194
+        };
+
+const int R::DeviceAdmin_visible = 0;
+const int R::styleable::DialogPreference[] = {
+            0x010101f2, 0x010101f3, 0x010101f4, 0x010101f5,
+            0x010101f6, 0x010101f7
+        };
+
+const int R::DialogPreference_dialogIcon = 2;
+const int R::DialogPreference_dialogLayout = 5;
+const int R::DialogPreference_dialogMessage = 1;
+const int R::DialogPreference_dialogTitle = 0;
+const int R::DialogPreference_negativeButtonText = 4;
+const int R::DialogPreference_positiveButtonText = 3;
+const int R::styleable::Drawable[] = {
+            0x01010194
+        };
+
+const int R::Drawable_visible = 0;
+const int R::styleable::DrawableCorners[] = {
+            0x010101a8, 0x010101a9, 0x010101aa, 0x010101ab,
+            0x010101ac
+        };
+
+const int R::DrawableCorners_bottomLeftRadius = 3;
+const int R::DrawableCorners_bottomRightRadius = 4;
+const int R::DrawableCorners_radius = 0;
+const int R::DrawableCorners_topLeftRadius = 1;
+const int R::DrawableCorners_topRightRadius = 2;
+const int R::styleable::DrawableStates[] = {
+            0x0101009c, 0x0101009d, 0x0101009e, 0x0101009f,
+            0x010100a0, 0x010100a1, 0x010100a2, 0x010100a3,
+            0x010100a4, 0x010100a5, 0x010100a6, 0x010100a7,
+            0x010102fe, 0x0101031b, 0x01010367, 0x01010368,
+            0x01010369, 0x01010423
+        };
+
+const int R::DrawableStates_state_accelerated = 13;
+const int R::DrawableStates_state_accessibility_focused = 17;
+const int R::DrawableStates_state_activated = 12;
+const int R::DrawableStates_state_active = 6;
+const int R::DrawableStates_state_checkable = 3;
+const int R::DrawableStates_state_checked = 4;
+const int R::DrawableStates_state_drag_can_accept = 15;
+const int R::DrawableStates_state_drag_hovered = 16;
+const int R::DrawableStates_state_enabled = 2;
+const int R::DrawableStates_state_first = 8;
+const int R::DrawableStates_state_focused = 0;
+const int R::DrawableStates_state_hovered = 14;
+const int R::DrawableStates_state_last = 10;
+const int R::DrawableStates_state_middle = 9;
+const int R::DrawableStates_state_pressed = 11;
+const int R::DrawableStates_state_selected = 5;
+const int R::DrawableStates_state_single = 7;
+const int R::DrawableStates_state_window_focused = 1;
+const int R::styleable::Dream[] = {
+            0x01010225
+        };
+
+const int R::Dream_settingsActivity = 0;
+const int R::styleable::EditText[] = {
+
+        };
+
+const int R::styleable::ExpandableListChildIndicatorState[] = {
+            0x010100a6
+        };
+
+const int R::ExpandableListChildIndicatorState_state_last = 0;
+const int R::styleable::ExpandableListGroupIndicatorState[] = {
+            0x010100a8, 0x010100a9
+        };
+
+const int R::ExpandableListGroupIndicatorState_state_empty = 1;
+const int R::ExpandableListGroupIndicatorState_state_expanded = 0;
+const int R::styleable::ExpandableListView[] = {
+            0x0101010b, 0x0101010c, 0x0101010d, 0x0101010e,
+            0x0101010f, 0x01010110, 0x01010111
+        };
+
+const int R::ExpandableListView_childDivider = 6;
+const int R::ExpandableListView_childIndicator = 1;
+const int R::ExpandableListView_childIndicatorLeft = 4;
+const int R::ExpandableListView_childIndicatorRight = 5;
+const int R::ExpandableListView_groupIndicator = 0;
+const int R::ExpandableListView_indicatorLeft = 2;
+const int R::ExpandableListView_indicatorRight = 3;
+const int R::styleable::Extra[] = {
+            0x01010003, 0x01010024
+        };
+
+const int R::Extra_name = 0;
+const int R::Extra_value = 1;
+const int R::styleable::Fragment[] = {
+            0x01010003, 0x010100d0, 0x010100d1
+        };
+
+const int R::Fragment_id = 1;
+const int R::Fragment_name = 0;
+const int R::Fragment_tag = 2;
+const int R::styleable::FragmentAnimation[] = {
+            0x010102e5, 0x010102e6, 0x010102e7, 0x010102e8,
+            0x010102e9, 0x010102ea
+        };
+
+const int R::FragmentAnimation_fragmentCloseEnterAnimation = 2;
+const int R::FragmentAnimation_fragmentCloseExitAnimation = 3;
+const int R::FragmentAnimation_fragmentFadeEnterAnimation = 4;
+const int R::FragmentAnimation_fragmentFadeExitAnimation = 5;
+const int R::FragmentAnimation_fragmentOpenEnterAnimation = 0;
+const int R::FragmentAnimation_fragmentOpenExitAnimation = 1;
+const int R::styleable::FragmentBreadCrumbs[] = {
+            0x010100af
+        };
+
+const int R::FragmentBreadCrumbs_gravity = 0;
+const int R::styleable::FrameLayout[] = {
+            0x01010109, 0x0101010a, 0x01010200, 0x01010405
+        };
+
+const int R::FrameLayout_foreground = 0;
+const int R::FrameLayout_foregroundGravity = 2;
+const int R::FrameLayout_foregroundInsidePadding = 3;
+const int R::FrameLayout_measureAllChildren = 1;
+const int R::styleable::FrameLayout_Layout[] = {
+            0x010100b3
+        };
+
+const int R::FrameLayout_Layout_layout_gravity = 0;
+const int R::styleable::Gallery[] = {
+            0x010100af, 0x01010112, 0x01010113, 0x0101020e
+        };
+
+const int R::Gallery_animationDuration = 1;
+const int R::Gallery_gravity = 0;
+const int R::Gallery_spacing = 2;
+const int R::Gallery_unselectedAlpha = 3;
+const int R::styleable::GestureOverlayView[] = {
+            0x010100c4, 0x01010274, 0x01010275, 0x01010276,
+            0x01010277, 0x01010278, 0x01010279, 0x0101027a,
+            0x0101027b, 0x0101027c, 0x0101027d, 0x0101027e
+        };
+
+const int R::GestureOverlayView_eventsInterceptionEnabled = 10;
+const int R::GestureOverlayView_fadeDuration = 5;
+const int R::GestureOverlayView_fadeEnabled = 11;
+const int R::GestureOverlayView_fadeOffset = 4;
+const int R::GestureOverlayView_gestureColor = 2;
+const int R::GestureOverlayView_gestureStrokeAngleThreshold = 9;
+const int R::GestureOverlayView_gestureStrokeLengthThreshold = 7;
+const int R::GestureOverlayView_gestureStrokeSquarenessThreshold = 8;
+const int R::GestureOverlayView_gestureStrokeType = 6;
+const int R::GestureOverlayView_gestureStrokeWidth = 1;
+const int R::GestureOverlayView_orientation = 0;
+const int R::GestureOverlayView_uncertainGestureColor = 3;
+const int R::styleable::GlowPadView[] = {
+            0x010100af, 0x0101025f, 0x010103a0, 0x010103a1,
+            0x01010427, 0x01010428, 0x01010429, 0x0101042a,
+            0x0101042b, 0x0101042c, 0x0101042d, 0x0101042e,
+            0x01010431, 0x01010432, 0x01010433, 0x01010434,
+            0x01010435
+        };
+
+const int R::GlowPadView_allowScaling = 9;
+const int R::GlowPadView_alwaysTrackFinger = 16;
+const int R::GlowPadView_directionDescriptions = 3;
+const int R::GlowPadView_feedbackCount = 15;
+const int R::GlowPadView_firstItemOffset = 7;
+const int R::GlowPadView_glowRadius = 6;
+const int R::GlowPadView_gravity = 0;
+const int R::GlowPadView_handleDrawable = 11;
+const int R::GlowPadView_innerRadius = 1;
+const int R::GlowPadView_magneticTargets = 8;
+const int R::GlowPadView_outerRadius = 12;
+const int R::GlowPadView_outerRingDrawable = 4;
+const int R::GlowPadView_pointDrawable = 5;
+const int R::GlowPadView_snapMargin = 14;
+const int R::GlowPadView_targetDescriptions = 2;
+const int R::GlowPadView_targetDrawables = 10;
+const int R::GlowPadView_vibrationDuration = 13;
+const int R::styleable::GradientDrawable[] = {
+            0x0101011c, 0x01010194, 0x0101019a, 0x0101019b,
+            0x0101019c, 0x0101019f, 0x0101025f, 0x01010260
+        };
+
+const int R::GradientDrawable_dither = 0;
+const int R::GradientDrawable_innerRadius = 6;
+const int R::GradientDrawable_innerRadiusRatio = 3;
+const int R::GradientDrawable_shape = 2;
+const int R::GradientDrawable_thickness = 7;
+const int R::GradientDrawable_thicknessRatio = 4;
+const int R::GradientDrawable_useLevel = 5;
+const int R::GradientDrawable_visible = 1;
+const int R::styleable::GradientDrawableGradient[] = {
+            0x0101019d, 0x0101019e, 0x0101019f, 0x010101a0,
+            0x010101a1, 0x010101a2, 0x010101a3, 0x010101a4,
+            0x0101020b
+        };
+
+const int R::GradientDrawableGradient_angle = 3;
+const int R::GradientDrawableGradient_centerColor = 8;
+const int R::GradientDrawableGradient_centerX = 5;
+const int R::GradientDrawableGradient_centerY = 6;
+const int R::GradientDrawableGradient_endColor = 1;
+const int R::GradientDrawableGradient_gradientRadius = 7;
+const int R::GradientDrawableGradient_startColor = 0;
+const int R::GradientDrawableGradient_type = 4;
+const int R::GradientDrawableGradient_useLevel = 2;
+const int R::styleable::GradientDrawablePadding[] = {
+            0x010101ad, 0x010101ae, 0x010101af, 0x010101b0
+        };
+
+const int R::GradientDrawablePadding_bottom = 3;
+const int R::GradientDrawablePadding_left = 0;
+const int R::GradientDrawablePadding_right = 2;
+const int R::GradientDrawablePadding_top = 1;
+const int R::styleable::GradientDrawableSize[] = {
+            0x01010155, 0x01010159
+        };
+
+const int R::GradientDrawableSize_height = 0;
+const int R::GradientDrawableSize_width = 1;
+const int R::styleable::GradientDrawableSolid[] = {
+            0x010101a5
+        };
+
+const int R::GradientDrawableSolid_color = 0;
+const int R::styleable::GradientDrawableStroke[] = {
+            0x01010159, 0x010101a5, 0x010101a6, 0x010101a7
+        };
+
+const int R::GradientDrawableStroke_color = 1;
+const int R::GradientDrawableStroke_dashGap = 3;
+const int R::GradientDrawableStroke_dashWidth = 2;
+const int R::GradientDrawableStroke_width = 0;
+const int R::styleable::GridLayout[] = {
+            0x010100c4, 0x01010375, 0x01010376, 0x01010377,
+            0x01010378, 0x01010379, 0x0101037a
+        };
+
+const int R::GridLayout_alignmentMode = 6;
+const int R::GridLayout_columnCount = 3;
+const int R::GridLayout_columnOrderPreserved = 4;
+const int R::GridLayout_orientation = 0;
+const int R::GridLayout_rowCount = 1;
+const int R::GridLayout_rowOrderPreserved = 2;
+const int R::GridLayout_useDefaultMargins = 5;
+const int R::styleable::GridLayoutAnimation[] = {
+            0x010101cf, 0x010101d0, 0x010101d1, 0x010101d2
+        };
+
+const int R::GridLayoutAnimation_columnDelay = 0;
+const int R::GridLayoutAnimation_direction = 2;
+const int R::GridLayoutAnimation_directionPriority = 3;
+const int R::GridLayoutAnimation_rowDelay = 1;
+const int R::styleable::GridLayout_Layout[] = {
+            0x010100b3, 0x0101014c, 0x0101037b, 0x0101037c,
+            0x0101037d
+        };
+
+const int R::GridLayout_Layout_layout_column = 1;
+const int R::GridLayout_Layout_layout_columnSpan = 4;
+const int R::GridLayout_Layout_layout_gravity = 0;
+const int R::GridLayout_Layout_layout_row = 2;
+const int R::GridLayout_Layout_layout_rowSpan = 3;
+const int R::styleable::GridView[] = {
+            0x010100af, 0x01010114, 0x01010115, 0x01010116,
+            0x01010117, 0x01010118
+        };
+
+const int R::GridView_columnWidth = 4;
+const int R::GridView_gravity = 0;
+const int R::GridView_horizontalSpacing = 1;
+const int R::GridView_numColumns = 5;
+const int R::GridView_stretchMode = 3;
+const int R::GridView_verticalSpacing = 2;
+const int R::styleable::HorizontalScrollView[] = {
+            0x0101017a
+        };
+
+const int R::HorizontalScrollView_fillViewport = 0;
+const int R::styleable::Icon[] = {
+            0x01010002, 0x01010026
+        };
+
+const int R::Icon_icon = 0;
+const int R::Icon_mimeType = 1;
+const int R::styleable::IconDefault[] = {
+            0x01010002
+        };
+
+const int R::IconDefault_icon = 0;
+const int R::styleable::IconMenuView[] = {
+            0x01010132, 0x01010133, 0x01010134, 0x01010135,
+            0x0101040d
+        };
+
+const int R::IconMenuView_maxItems = 4;
+const int R::IconMenuView_maxItemsPerRow = 2;
+const int R::IconMenuView_maxRows = 1;
+const int R::IconMenuView_moreIcon = 3;
+const int R::IconMenuView_rowHeight = 0;
+const int R::styleable::ImageSwitcher[] = {
+
+        };
+
+const int R::styleable::ImageView[] = {
+            0x01010119, 0x0101011d, 0x0101011e, 0x0101011f,
+            0x01010120, 0x01010121, 0x01010122, 0x01010123,
+            0x0101031c, 0x01010406
+        };
+
+const int R::ImageView_adjustViewBounds = 2;
+const int R::ImageView_baseline = 8;
+const int R::ImageView_baselineAlignBottom = 6;
+const int R::ImageView_cropToPadding = 7;
+const int R::ImageView_drawableAlpha = 9;
+const int R::ImageView_maxHeight = 4;
+const int R::ImageView_maxWidth = 3;
+const int R::ImageView_scaleType = 1;
+const int R::ImageView_src = 0;
+const int R::ImageView_tint = 5;
+const int R::styleable::InputExtras[] = {
+
+        };
+
+const int R::styleable::InputMethod[] = {
+            0x01010221, 0x01010225
+        };
+
+const int R::InputMethod_isDefault = 0;
+const int R::InputMethod_settingsActivity = 1;
+const int R::styleable::InputMethodService[] = {
+            0x0101022c, 0x01010268, 0x01010269
+        };
+
+const int R::InputMethodService_imeExtractEnterAnimation = 1;
+const int R::InputMethodService_imeExtractExitAnimation = 2;
+const int R::InputMethodService_imeFullscreenBackground = 0;
+const int R::styleable::InputMethod_Subtype[] = {
+            0x01010001, 0x01010002, 0x010102ec, 0x010102ed,
+            0x010102ee, 0x0101037f, 0x010103a2, 0x010103c1
+        };
+
+const int R::InputMethod_Subtype_icon = 1;
+const int R::InputMethod_Subtype_imeSubtypeExtraValue = 4;
+const int R::InputMethod_Subtype_imeSubtypeLocale = 2;
+const int R::InputMethod_Subtype_imeSubtypeMode = 3;
+const int R::InputMethod_Subtype_isAuxiliary = 5;
+const int R::InputMethod_Subtype_label = 0;
+const int R::InputMethod_Subtype_overridesImplicitlyEnabledSubtype = 6;
+const int R::InputMethod_Subtype_subtypeId = 7;
+const int R::styleable::InsetDrawable[] = {
+            0x01010194, 0x01010199, 0x010101b7, 0x010101b8,
+            0x010101b9, 0x010101ba
+        };
+
+const int R::InsetDrawable_drawable = 1;
+const int R::InsetDrawable_insetBottom = 5;
+const int R::InsetDrawable_insetLeft = 2;
+const int R::InsetDrawable_insetRight = 3;
+const int R::InsetDrawable_insetTop = 4;
+const int R::InsetDrawable_visible = 0;
+const int R::styleable::Intent[] = {
+            0x01010021, 0x01010026, 0x0101002d, 0x0101002e,
+            0x0101002f
+        };
+
+const int R::Intent_action = 2;
+const int R::Intent_data = 3;
+const int R::Intent_mimeType = 1;
+const int R::Intent_targetClass = 4;
+const int R::Intent_targetPackage = 0;
+const int R::styleable::IntentCategory[] = {
+            0x01010003
+        };
+
+const int R::IntentCategory_name = 0;
+const int R::styleable::Keyboard[] = {
+            0x0101023d, 0x0101023e, 0x0101023f, 0x01010240
+        };
+
+const int R::Keyboard_horizontalGap = 2;
+const int R::Keyboard_keyHeight = 1;
+const int R::Keyboard_keyWidth = 0;
+const int R::Keyboard_verticalGap = 3;
+const int R::styleable::KeyboardLayout[] = {
+            0x01010001, 0x01010003, 0x010103ab
+        };
+
+const int R::KeyboardLayout_keyboardLayout = 2;
+const int R::KeyboardLayout_label = 0;
+const int R::KeyboardLayout_name = 1;
+const int R::styleable::KeyboardView[] = {
+            0x01010161, 0x01010164, 0x01010233, 0x01010234,
+            0x01010235, 0x01010236, 0x01010237, 0x01010238,
+            0x01010239, 0x0101023a, 0x0101023b, 0x01010426
+        };
+
+const int R::KeyboardView_keyBackground = 2;
+const int R::KeyboardView_keyPreviewHeight = 8;
+const int R::KeyboardView_keyPreviewLayout = 6;
+const int R::KeyboardView_keyPreviewOffset = 7;
+const int R::KeyboardView_keyTextColor = 5;
+const int R::KeyboardView_keyTextSize = 3;
+const int R::KeyboardView_keyboardViewStyle = 11;
+const int R::KeyboardView_labelTextSize = 4;
+const int R::KeyboardView_popupLayout = 10;
+const int R::KeyboardView_shadowColor = 0;
+const int R::KeyboardView_shadowRadius = 1;
+const int R::KeyboardView_verticalCorrection = 9;
+const int R::styleable::KeyboardViewPreviewState[] = {
+            0x0101023c
+        };
+
+const int R::KeyboardViewPreviewState_state_long_pressable = 0;
+const int R::styleable::Keyboard_Key[] = {
+            0x01010242, 0x01010243, 0x01010244, 0x01010245,
+            0x01010246, 0x01010247, 0x01010248, 0x01010249,
+            0x0101024a, 0x0101024b, 0x0101024c, 0x0101024d
+        };
+
+const int R::Keyboard_Key_codes = 0;
+const int R::Keyboard_Key_iconPreview = 7;
+const int R::Keyboard_Key_isModifier = 4;
+const int R::Keyboard_Key_isRepeatable = 6;
+const int R::Keyboard_Key_isSticky = 5;
+const int R::Keyboard_Key_keyEdgeFlags = 3;
+const int R::Keyboard_Key_keyIcon = 10;
+const int R::Keyboard_Key_keyLabel = 9;
+const int R::Keyboard_Key_keyOutputText = 8;
+const int R::Keyboard_Key_keyboardMode = 11;
+const int R::Keyboard_Key_popupCharacters = 2;
+const int R::Keyboard_Key_popupKeyboard = 1;
+const int R::styleable::Keyboard_Row[] = {
+            0x01010241, 0x0101024d
+        };
+
+const int R::Keyboard_Row_keyboardMode = 1;
+const int R::Keyboard_Row_rowEdgeFlags = 0;
+const int R::styleable::KeyguardGlowStripView[] = {
+            0x0101044c, 0x0101044d, 0x0101044e, 0x0101044f
+        };
+
+const int R::KeyguardGlowStripView_dotSize = 0;
+const int R::KeyguardGlowStripView_glowDot = 2;
+const int R::KeyguardGlowStripView_leftToRight = 3;
+const int R::KeyguardGlowStripView_numDots = 1;
+const int R::styleable::KeyguardSecurityViewFlipper_Layout[] = {
+            0x01010436, 0x01010452
+        };
+
+const int R::KeyguardSecurityViewFlipper_Layout_layout_maxHeight = 0;
+const int R::KeyguardSecurityViewFlipper_Layout_layout_maxWidth = 1;
+const int R::styleable::LayerDrawable[] = {
+            0x0101031e
+        };
+
+const int R::LayerDrawable_opacity = 0;
+const int R::styleable::LayerDrawableItem[] = {
+            0x010100d0, 0x01010199, 0x010101ad, 0x010101ae,
+            0x010101af, 0x010101b0
+        };
+
+const int R::LayerDrawableItem_bottom = 5;
+const int R::LayerDrawableItem_drawable = 1;
+const int R::LayerDrawableItem_id = 0;
+const int R::LayerDrawableItem_left = 2;
+const int R::LayerDrawableItem_right = 4;
+const int R::LayerDrawableItem_top = 3;
+const int R::styleable::LayoutAnimation[] = {
+            0x01010141, 0x010101cc, 0x010101cd, 0x010101ce
+        };
+
+const int R::LayoutAnimation_animation = 2;
+const int R::LayoutAnimation_animationOrder = 3;
+const int R::LayoutAnimation_delay = 1;
+const int R::LayoutAnimation_interpolator = 0;
+const int R::styleable::LevelListDrawableItem[] = {
+            0x01010199, 0x010101b1, 0x010101b2
+        };
+
+const int R::LevelListDrawableItem_drawable = 0;
+const int R::LevelListDrawableItem_maxLevel = 2;
+const int R::LevelListDrawableItem_minLevel = 1;
+const int R::styleable::LinearLayout[] = {
+            0x010100af, 0x010100c4, 0x01010126, 0x01010127,
+            0x01010128, 0x01010129, 0x010102d4, 0x01010329,
+            0x0101032a
+        };
+
+const int R::LinearLayout_baselineAligned = 2;
+const int R::LinearLayout_baselineAlignedChildIndex = 3;
+const int R::LinearLayout_divider = 5;
+const int R::LinearLayout_dividerPadding = 8;
+const int R::LinearLayout_gravity = 0;
+const int R::LinearLayout_measureWithLargestChild = 6;
+const int R::LinearLayout_orientation = 1;
+const int R::LinearLayout_showDividers = 7;
+const int R::LinearLayout_weightSum = 4;
+const int R::styleable::LinearLayout_Layout[] = {
+            0x010100b3, 0x010100f4, 0x010100f5, 0x01010181
+        };
+
+const int R::LinearLayout_Layout_layout_gravity = 0;
+const int R::LinearLayout_Layout_layout_height = 2;
+const int R::LinearLayout_Layout_layout_weight = 3;
+const int R::LinearLayout_Layout_layout_width = 1;
+const int R::styleable::ListPreference[] = {
+            0x010100b2, 0x010101f8
+        };
+
+const int R::ListPreference_entries = 0;
+const int R::ListPreference_entryValues = 1;
+const int R::styleable::ListView[] = {
+            0x010100b2, 0x01010129, 0x0101012a, 0x0101022e,
+            0x0101022f, 0x010102c2, 0x010102c3
+        };
+
+const int R::ListView_divider = 1;
+const int R::ListView_dividerHeight = 2;
+const int R::ListView_entries = 0;
+const int R::ListView_footerDividersEnabled = 4;
+const int R::ListView_headerDividersEnabled = 3;
+const int R::ListView_overScrollFooter = 6;
+const int R::ListView_overScrollHeader = 5;
+const int R::styleable::LockPatternView[] = {
+            0x01010438
+        };
+
+const int R::LockPatternView_aspect = 0;
+const int R::styleable::MapView[] = {
+            0x01010211
+        };
+
+const int R::MapView_apiKey = 0;
+const int R::styleable::MediaRouteButton[] = {
+            0x0101013f, 0x01010140, 0x010103ae, 0x01010448
+        };
+
+const int R::MediaRouteButton_externalRouteEnabledDrawable = 3;
+const int R::MediaRouteButton_mediaRouteTypes = 2;
+const int R::MediaRouteButton_minHeight = 1;
+const int R::MediaRouteButton_minWidth = 0;
+const int R::styleable::Menu[] = {
+
+        };
+
+const int R::styleable::MenuGroup[] = {
+            0x0101000e, 0x010100d0, 0x01010194, 0x010101de,
+            0x010101df, 0x010101e0
+        };
+
+const int R::MenuGroup_checkableBehavior = 5;
+const int R::MenuGroup_enabled = 0;
+const int R::MenuGroup_id = 1;
+const int R::MenuGroup_menuCategory = 3;
+const int R::MenuGroup_orderInCategory = 4;
+const int R::MenuGroup_visible = 2;
+const int R::styleable::MenuItem[] = {
+            0x01010002, 0x0101000e, 0x010100d0, 0x01010106,
+            0x01010194, 0x010101de, 0x010101df, 0x010101e1,
+            0x010101e2, 0x010101e3, 0x010101e4, 0x010101e5,
+            0x0101026f, 0x010102d9, 0x010102fb, 0x010102fc,
+            0x01010389
+        };
+
+const int R::MenuItem_actionLayout = 14;
+const int R::MenuItem_actionProviderClass = 16;
+const int R::MenuItem_actionViewClass = 15;
+const int R::MenuItem_alphabeticShortcut = 9;
+const int R::MenuItem_checkable = 11;
+const int R::MenuItem_checked = 3;
+const int R::MenuItem_enabled = 1;
+const int R::MenuItem_icon = 0;
+const int R::MenuItem_id = 2;
+const int R::MenuItem_menuCategory = 5;
+const int R::MenuItem_numericShortcut = 10;
+const int R::MenuItem_onClick = 12;
+const int R::MenuItem_orderInCategory = 6;
+const int R::MenuItem_showAsAction = 13;
+const int R::MenuItem_title = 7;
+const int R::MenuItem_titleCondensed = 8;
+const int R::MenuItem_visible = 4;
+const int R::styleable::MenuItemCheckedFocusedState[] = {
+            0x0101009c, 0x0101009f, 0x010100a0
+        };
+
+const int R::MenuItemCheckedFocusedState_state_checkable = 1;
+const int R::MenuItemCheckedFocusedState_state_checked = 2;
+const int R::MenuItemCheckedFocusedState_state_focused = 0;
+const int R::styleable::MenuItemCheckedState[] = {
+            0x0101009f, 0x010100a0
+        };
+
+const int R::MenuItemCheckedState_state_checkable = 0;
+const int R::MenuItemCheckedState_state_checked = 1;
+const int R::styleable::MenuItemUncheckedFocusedState[] = {
+            0x0101009c, 0x0101009f
+        };
+
+const int R::MenuItemUncheckedFocusedState_state_checkable = 1;
+const int R::MenuItemUncheckedFocusedState_state_focused = 0;
+const int R::styleable::MenuItemUncheckedState[] = {
+            0x0101009f
+        };
+
+const int R::MenuItemUncheckedState_state_checkable = 0;
+const int R::styleable::MenuView[] = {
+            0x010100ae, 0x0101012c, 0x0101012d, 0x0101012e,
+            0x0101012f, 0x01010130, 0x01010131, 0x0101040c
+        };
+
+const int R::MenuView_headerBackground = 4;
+const int R::MenuView_horizontalDivider = 2;
+const int R::MenuView_itemBackground = 5;
+const int R::MenuView_itemIconDisabledAlpha = 6;
+const int R::MenuView_itemTextAppearance = 1;
+const int R::MenuView_preserveIconSpacing = 7;
+const int R::MenuView_verticalDivider = 3;
+const int R::MenuView_windowAnimationStyle = 0;
+const int R::styleable::MipmapDrawableItem[] = {
+            0x01010199
+        };
+
+const int R::MipmapDrawableItem_drawable = 0;
+const int R::styleable::MultiPaneChallengeLayout[] = {
+            0x010100c4
+        };
+
+const int R::MultiPaneChallengeLayout_orientation = 0;
+const int R::styleable::MultiPaneChallengeLayout_Layout[] = {
+            0x010100b3, 0x01010436, 0x01010450, 0x01010451,
+            0x01010452
+        };
+
+const int R::MultiPaneChallengeLayout_Layout_layout_centerWithinArea = 3;
+const int R::MultiPaneChallengeLayout_Layout_layout_childType = 2;
+const int R::MultiPaneChallengeLayout_Layout_layout_gravity = 0;
+const int R::MultiPaneChallengeLayout_Layout_layout_maxHeight = 1;
+const int R::MultiPaneChallengeLayout_Layout_layout_maxWidth = 4;
+const int R::styleable::MultiSelectListPreference[] = {
+            0x010100b2, 0x010101f8
+        };
+
+const int R::MultiSelectListPreference_entries = 0;
+const int R::MultiSelectListPreference_entryValues = 1;
+const int R::styleable::MultiWaveView[] = {
+            0x010103a0, 0x010103a1, 0x0101042d, 0x0101042e,
+            0x0101042f, 0x01010430, 0x01010431, 0x01010432,
+            0x01010433, 0x01010434, 0x01010435
+        };
+
+const int R::MultiWaveView_alwaysTrackFinger = 10;
+const int R::MultiWaveView_chevronDrawables = 4;
+const int R::MultiWaveView_directionDescriptions = 1;
+const int R::MultiWaveView_feedbackCount = 9;
+const int R::MultiWaveView_handleDrawable = 3;
+const int R::MultiWaveView_outerRadius = 6;
+const int R::MultiWaveView_snapMargin = 8;
+const int R::MultiWaveView_targetDescriptions = 0;
+const int R::MultiWaveView_targetDrawables = 2;
+const int R::MultiWaveView_vibrationDuration = 7;
+const int R::MultiWaveView_waveDrawable = 5;
+const int R::styleable::NinePatchDrawable[] = {
+            0x01010119, 0x0101011c
+        };
+
+const int R::NinePatchDrawable_dither = 1;
+const int R::NinePatchDrawable_src = 0;
+const int R::styleable::NumPadKey[] = {
+            0x01010453, 0x01010454
+        };
+
+const int R::NumPadKey_digit = 0;
+const int R::NumPadKey_textView = 1;
+const int R::styleable::NumberPicker[] = {
+            0x0101034a, 0x01010413, 0x01010419, 0x0101041a,
+            0x0101041b, 0x0101041c, 0x0101041d, 0x0101041e,
+            0x0101041f, 0x01010420
+        };
+
+const int R::NumberPicker_internalLayout = 1;
+const int R::NumberPicker_internalMaxHeight = 6;
+const int R::NumberPicker_internalMaxWidth = 8;
+const int R::NumberPicker_internalMinHeight = 5;
+const int R::NumberPicker_internalMinWidth = 7;
+const int R::NumberPicker_selectionDivider = 2;
+const int R::NumberPicker_selectionDividerHeight = 3;
+const int R::NumberPicker_selectionDividersDistance = 4;
+const int R::NumberPicker_solidColor = 0;
+const int R::NumberPicker_virtualButtonPressedDrawable = 9;
+const int R::styleable::OvershootInterpolator[] = {
+            0x0101026a
+        };
+
+const int R::OvershootInterpolator_tension = 0;
+const int R::styleable::PagedView[] = {
+            0x01010449, 0x0101044a, 0x0101044b
+        };
+
+const int R::PagedView_pageSpacing = 0;
+const int R::PagedView_scrollIndicatorPaddingLeft = 1;
+const int R::PagedView_scrollIndicatorPaddingRight = 2;
+const int R::styleable::Pointer[] = {
+            0x01010439, 0x0101043a, 0x0101043b, 0x0101043c
+        };
+
+const int R::Pointer_pointerIconArrow = 0;
+const int R::Pointer_pointerIconSpotAnchor = 3;
+const int R::Pointer_pointerIconSpotHover = 1;
+const int R::Pointer_pointerIconSpotTouch = 2;
+const int R::styleable::PointerIcon[] = {
+            0x0101043d, 0x0101043e, 0x0101043f
+        };
+
+const int R::PointerIcon_bitmap = 0;
+const int R::PointerIcon_hotSpotX = 1;
+const int R::PointerIcon_hotSpotY = 2;
+const int R::styleable::PopupWindow[] = {
+            0x01010176, 0x010102c9
+        };
+
+const int R::PopupWindow_popupAnimationStyle = 1;
+const int R::PopupWindow_popupBackground = 0;
+const int R::styleable::PopupWindowBackgroundState[] = {
+            0x010100aa
+        };
+
+const int R::PopupWindowBackgroundState_state_above_anchor = 0;
+const int R::styleable::Preference[] = {
+            0x01010002, 0x0101000d, 0x0101000e, 0x010100f2,
+            0x010101e1, 0x010101e6, 0x010101e8, 0x010101e9,
+            0x010101ea, 0x010101eb, 0x010101ec, 0x010101ed,
+            0x010101ee, 0x010102e3
+        };
+
+const int R::Preference_defaultValue = 11;
+const int R::Preference_dependency = 10;
+const int R::Preference_enabled = 2;
+const int R::Preference_fragment = 13;
+const int R::Preference_icon = 0;
+const int R::Preference_key = 6;
+const int R::Preference_layout = 3;
+const int R::Preference_order = 8;
+const int R::Preference_persistent = 1;
+const int R::Preference_selectable = 5;
+const int R::Preference_shouldDisableView = 12;
+const int R::Preference_summary = 7;
+const int R::Preference_title = 4;
+const int R::Preference_widgetLayout = 9;
+const int R::styleable::PreferenceFrameLayout[] = {
+            0x01010407, 0x01010408, 0x01010409, 0x0101040a
+        };
+
+const int R::PreferenceFrameLayout_borderBottom = 1;
+const int R::PreferenceFrameLayout_borderLeft = 2;
+const int R::PreferenceFrameLayout_borderRight = 3;
+const int R::PreferenceFrameLayout_borderTop = 0;
+const int R::styleable::PreferenceFrameLayout_Layout[] = {
+            0x0101040b
+        };
+
+const int R::PreferenceFrameLayout_Layout_layout_removeBorders = 0;
+const int R::styleable::PreferenceGroup[] = {
+            0x010101e7
+        };
+
+const int R::PreferenceGroup_orderingFromXml = 0;
+const int R::styleable::PreferenceHeader[] = {
+            0x01010002, 0x010100d0, 0x010101e1, 0x010101e9,
+            0x010102e3, 0x01010303, 0x01010304
+        };
+
+const int R::PreferenceHeader_breadCrumbShortTitle = 6;
+const int R::PreferenceHeader_breadCrumbTitle = 5;
+const int R::PreferenceHeader_fragment = 4;
+const int R::PreferenceHeader_icon = 0;
+const int R::PreferenceHeader_id = 1;
+const int R::PreferenceHeader_summary = 3;
+const int R::PreferenceHeader_title = 2;
+const int R::styleable::ProgressBar[] = {
+            0x0101011f, 0x01010120, 0x01010136, 0x01010137,
+            0x01010138, 0x01010139, 0x0101013a, 0x0101013b,
+            0x0101013c, 0x0101013d, 0x0101013e, 0x0101013f,
+            0x01010140, 0x01010141, 0x0101031a
+        };
+
+const int R::ProgressBar_animationResolution = 14;
+const int R::ProgressBar_indeterminate = 5;
+const int R::ProgressBar_indeterminateBehavior = 10;
+const int R::ProgressBar_indeterminateDrawable = 7;
+const int R::ProgressBar_indeterminateDuration = 9;
+const int R::ProgressBar_indeterminateOnly = 6;
+const int R::ProgressBar_interpolator = 13;
+const int R::ProgressBar_max = 2;
+const int R::ProgressBar_maxHeight = 1;
+const int R::ProgressBar_maxWidth = 0;
+const int R::ProgressBar_minHeight = 12;
+const int R::ProgressBar_minWidth = 11;
+const int R::ProgressBar_progress = 3;
+const int R::ProgressBar_progressDrawable = 8;
+const int R::ProgressBar_secondaryProgress = 4;
+const int R::styleable::PropertyAnimator[] = {
+            0x010102e1
+        };
+
+const int R::PropertyAnimator_propertyName = 0;
+const int R::styleable::QuickContactBadge[] = {
+            0x01010414
+        };
+
+const int R::QuickContactBadge_quickContactWindowSize = 0;
+const int R::styleable::RadioGroup[] = {
+            0x010100c4, 0x01010148
+        };
+
+const int R::RadioGroup_checkedButton = 1;
+const int R::RadioGroup_orientation = 0;
+const int R::styleable::RatingBar[] = {
+            0x01010144, 0x01010145, 0x01010146, 0x01010147
+        };
+
+const int R::RatingBar_isIndicator = 3;
+const int R::RatingBar_numStars = 0;
+const int R::RatingBar_rating = 1;
+const int R::RatingBar_stepSize = 2;
+const int R::styleable::RecognitionService[] = {
+            0x01010225
+        };
+
+const int R::RecognitionService_settingsActivity = 0;
+const int R::styleable::RelativeLayout[] = {
+            0x010100af, 0x010101ff
+        };
+
+const int R::RelativeLayout_gravity = 0;
+const int R::RelativeLayout_ignoreGravity = 1;
+const int R::styleable::RelativeLayout_Layout[] = {
+            0x01010182, 0x01010183, 0x01010184, 0x01010185,
+            0x01010186, 0x01010187, 0x01010188, 0x01010189,
+            0x0101018a, 0x0101018b, 0x0101018c, 0x0101018d,
+            0x0101018e, 0x0101018f, 0x01010190, 0x01010191,
+            0x01010192, 0x010103b7, 0x010103b8, 0x010103b9,
+            0x010103ba, 0x010103bb, 0x010103bc
+        };
+
+const int R::RelativeLayout_Layout_layout_above = 2;
+const int R::RelativeLayout_Layout_layout_alignBaseline = 4;
+const int R::RelativeLayout_Layout_layout_alignBottom = 8;
+const int R::RelativeLayout_Layout_layout_alignEnd = 20;
+const int R::RelativeLayout_Layout_layout_alignLeft = 5;
+const int R::RelativeLayout_Layout_layout_alignParentBottom = 12;
+const int R::RelativeLayout_Layout_layout_alignParentEnd = 22;
+const int R::RelativeLayout_Layout_layout_alignParentLeft = 9;
+const int R::RelativeLayout_Layout_layout_alignParentRight = 11;
+const int R::RelativeLayout_Layout_layout_alignParentStart = 21;
+const int R::RelativeLayout_Layout_layout_alignParentTop = 10;
+const int R::RelativeLayout_Layout_layout_alignRight = 7;
+const int R::RelativeLayout_Layout_layout_alignStart = 19;
+const int R::RelativeLayout_Layout_layout_alignTop = 6;
+const int R::RelativeLayout_Layout_layout_alignWithParentIfMissing = 16;
+const int R::RelativeLayout_Layout_layout_below = 3;
+const int R::RelativeLayout_Layout_layout_centerHorizontal = 14;
+const int R::RelativeLayout_Layout_layout_centerInParent = 13;
+const int R::RelativeLayout_Layout_layout_centerVertical = 15;
+const int R::RelativeLayout_Layout_layout_toEndOf = 18;
+const int R::RelativeLayout_Layout_layout_toLeftOf = 0;
+const int R::RelativeLayout_Layout_layout_toRightOf = 1;
+const int R::RelativeLayout_Layout_layout_toStartOf = 17;
+const int R::styleable::RingtonePreference[] = {
+            0x010101f9, 0x010101fa, 0x010101fb
+        };
+
+const int R::RingtonePreference_ringtoneType = 0;
+const int R::RingtonePreference_showDefault = 1;
+const int R::RingtonePreference_showSilent = 2;
+const int R::styleable::RotarySelector[] = {
+            0x010100c4
+        };
+
+const int R::RotarySelector_orientation = 0;
+const int R::styleable::RotateAnimation[] = {
+            0x010101b3, 0x010101b4, 0x010101b5, 0x010101b6
+        };
+
+const int R::RotateAnimation_fromDegrees = 0;
+const int R::RotateAnimation_pivotX = 2;
+const int R::RotateAnimation_pivotY = 3;
+const int R::RotateAnimation_toDegrees = 1;
+const int R::styleable::RotateDrawable[] = {
+            0x01010194, 0x01010199, 0x010101b3, 0x010101b4,
+            0x010101b5, 0x010101b6
+        };
+
+const int R::RotateDrawable_drawable = 1;
+const int R::RotateDrawable_fromDegrees = 2;
+const int R::RotateDrawable_pivotX = 4;
+const int R::RotateDrawable_pivotY = 5;
+const int R::RotateDrawable_toDegrees = 3;
+const int R::RotateDrawable_visible = 0;
+const int R::styleable::ScaleAnimation[] = {
+            0x010101b5, 0x010101b6, 0x010101c2, 0x010101c3,
+            0x010101c4, 0x010101c5
+        };
+
+const int R::ScaleAnimation_fromXScale = 2;
+const int R::ScaleAnimation_fromYScale = 4;
+const int R::ScaleAnimation_pivotX = 0;
+const int R::ScaleAnimation_pivotY = 1;
+const int R::ScaleAnimation_toXScale = 3;
+const int R::ScaleAnimation_toYScale = 5;
+const int R::styleable::ScaleDrawable[] = {
+            0x01010199, 0x010101fc, 0x010101fd, 0x010101fe,
+            0x01010310
+        };
+
+const int R::ScaleDrawable_drawable = 0;
+const int R::ScaleDrawable_scaleGravity = 3;
+const int R::ScaleDrawable_scaleHeight = 2;
+const int R::ScaleDrawable_scaleWidth = 1;
+const int R::ScaleDrawable_useIntrinsicSizeAsMinimum = 4;
+const int R::styleable::ScrollView[] = {
+            0x0101017a
+        };
+
+const int R::ScrollView_fillViewport = 0;
+const int R::styleable::SearchView[] = {
+            0x0101011f, 0x01010220, 0x01010264, 0x010102fa,
+            0x01010358
+        };
+
+const int R::SearchView_iconifiedByDefault = 3;
+const int R::SearchView_imeOptions = 2;
+const int R::SearchView_inputType = 1;
+const int R::SearchView_maxWidth = 0;
+const int R::SearchView_queryHint = 4;
+const int R::styleable::Searchable[] = {
+            0x01010001, 0x01010002, 0x01010150, 0x010101d5,
+            0x010101d6, 0x010101d7, 0x010101d8, 0x010101d9,
+            0x010101da, 0x01010205, 0x01010220, 0x01010252,
+            0x01010253, 0x01010254, 0x01010255, 0x01010256,
+            0x01010264, 0x0101026d, 0x0101026e, 0x01010282,
+            0x0101028a, 0x0101028c
+        };
+
+const int R::Searchable_autoUrlDetect = 21;
+const int R::Searchable_hint = 2;
+const int R::Searchable_icon = 1;
+const int R::Searchable_imeOptions = 16;
+const int R::Searchable_includeInGlobalSearch = 18;
+const int R::Searchable_inputType = 10;
+const int R::Searchable_label = 0;
+const int R::Searchable_queryAfterZeroResults = 19;
+const int R::Searchable_searchButtonText = 9;
+const int R::Searchable_searchMode = 3;
+const int R::Searchable_searchSettingsDescription = 20;
+const int R::Searchable_searchSuggestAuthority = 4;
+const int R::Searchable_searchSuggestIntentAction = 7;
+const int R::Searchable_searchSuggestIntentData = 8;
+const int R::Searchable_searchSuggestPath = 5;
+const int R::Searchable_searchSuggestSelection = 6;
+const int R::Searchable_searchSuggestThreshold = 17;
+const int R::Searchable_voiceLanguage = 14;
+const int R::Searchable_voiceLanguageModel = 12;
+const int R::Searchable_voiceMaxResults = 15;
+const int R::Searchable_voicePromptText = 13;
+const int R::Searchable_voiceSearchMode = 11;
+const int R::styleable::SearchableActionKey[] = {
+            0x010100c5, 0x010101db, 0x010101dc, 0x010101dd
+        };
+
+const int R::SearchableActionKey_keycode = 0;
+const int R::SearchableActionKey_queryActionMsg = 1;
+const int R::SearchableActionKey_suggestActionMsg = 2;
+const int R::SearchableActionKey_suggestActionMsgColumn = 3;
+const int R::styleable::SeekBar[] = {
+            0x01010142, 0x01010143
+        };
+
+const int R::SeekBar_thumb = 0;
+const int R::SeekBar_thumbOffset = 1;
+const int R::styleable::SelectionModeDrawables[] = {
+            0x01010311, 0x01010312, 0x01010313, 0x0101037e
+        };
+
+const int R::SelectionModeDrawables_actionModeCopyDrawable = 1;
+const int R::SelectionModeDrawables_actionModeCutDrawable = 0;
+const int R::SelectionModeDrawables_actionModePasteDrawable = 2;
+const int R::SelectionModeDrawables_actionModeSelectAllDrawable = 3;
+const int R::styleable::ShapeDrawable[] = {
+            0x0101011c, 0x01010155, 0x01010159, 0x010101a5
+        };
+
+const int R::ShapeDrawable_color = 3;
+const int R::ShapeDrawable_dither = 0;
+const int R::ShapeDrawable_height = 1;
+const int R::ShapeDrawable_width = 2;
+const int R::styleable::ShapeDrawablePadding[] = {
+            0x010101ad, 0x010101ae, 0x010101af, 0x010101b0
+        };
+
+const int R::ShapeDrawablePadding_bottom = 3;
+const int R::ShapeDrawablePadding_left = 0;
+const int R::ShapeDrawablePadding_right = 2;
+const int R::ShapeDrawablePadding_top = 1;
+const int R::styleable::SizeAdaptiveLayout[] = {
+
+        };
+
+const int R::styleable::SizeAdaptiveLayout_Layout[] = {
+            0x01010436, 0x01010437
+        };
+
+const int R::SizeAdaptiveLayout_Layout_layout_maxHeight = 0;
+const int R::SizeAdaptiveLayout_Layout_layout_minHeight = 1;
+const int R::styleable::SlidingChallengeLayout_Layout[] = {
+            0x01010436, 0x01010450
+        };
+
+const int R::SlidingChallengeLayout_Layout_layout_childType = 1;
+const int R::SlidingChallengeLayout_Layout_layout_maxHeight = 0;
+const int R::styleable::SlidingDrawer[] = {
+            0x010100c4, 0x01010257, 0x01010258, 0x01010259,
+            0x0101025a, 0x0101025b, 0x0101025c
+        };
+
+const int R::SlidingDrawer_allowSingleTap = 3;
+const int R::SlidingDrawer_animateOnClick = 6;
+const int R::SlidingDrawer_bottomOffset = 1;
+const int R::SlidingDrawer_content = 5;
+const int R::SlidingDrawer_handle = 4;
+const int R::SlidingDrawer_orientation = 0;
+const int R::SlidingDrawer_topOffset = 2;
+const int R::styleable::SlidingTab[] = {
+            0x010100c4
+        };
+
+const int R::SlidingTab_orientation = 0;
+const int R::styleable::SpellChecker[] = {
+            0x01010001, 0x01010225
+        };
+
+const int R::SpellChecker_label = 0;
+const int R::SpellChecker_settingsActivity = 1;
+const int R::styleable::SpellChecker_Subtype[] = {
+            0x01010001, 0x01010399, 0x0101039a
+        };
+
+const int R::SpellChecker_Subtype_label = 0;
+const int R::SpellChecker_Subtype_subtypeExtraValue = 2;
+const int R::SpellChecker_Subtype_subtypeLocale = 1;
+const int R::styleable::Spinner[] = {
+            0x010100af, 0x01010175, 0x01010176, 0x0101017b,
+            0x01010262, 0x010102ac, 0x010102ad, 0x010102f1,
+            0x01010411, 0x01010412
+        };
+
+const int R::Spinner_disableChildrenWhenDisabled = 9;
+const int R::Spinner_dropDownHorizontalOffset = 5;
+const int R::Spinner_dropDownSelector = 1;
+const int R::Spinner_dropDownVerticalOffset = 6;
+const int R::Spinner_dropDownWidth = 4;
+const int R::Spinner_gravity = 0;
+const int R::Spinner_popupBackground = 2;
+const int R::Spinner_popupPromptView = 8;
+const int R::Spinner_prompt = 3;
+const int R::Spinner_spinnerMode = 7;
+const int R::styleable::StackView[] = {
+            0x0101040e, 0x0101040f
+        };
+
+const int R::StackView_clickColor = 1;
+const int R::StackView_resOutColor = 0;
+const int R::styleable::StateListDrawable[] = {
+            0x0101011c, 0x01010194, 0x01010195, 0x01010196,
+            0x0101030c, 0x0101030d
+        };
+
+const int R::StateListDrawable_constantSize = 3;
+const int R::StateListDrawable_dither = 0;
+const int R::StateListDrawable_enterFadeDuration = 4;
+const int R::StateListDrawable_exitFadeDuration = 5;
+const int R::StateListDrawable_variablePadding = 2;
+const int R::StateListDrawable_visible = 1;
+const int R::styleable::Storage[] = {
+            0x01010440, 0x01010441, 0x01010442, 0x01010443,
+            0x01010444, 0x01010445, 0x01010446, 0x01010447
+        };
+
+const int R::Storage_allowMassStorage = 6;
+const int R::Storage_emulated = 4;
+const int R::Storage_maxFileSize = 7;
+const int R::Storage_mountPoint = 0;
+const int R::Storage_mtpReserve = 5;
+const int R::Storage_primary = 2;
+const int R::Storage_removable = 3;
+const int R::Storage_storageDescription = 1;
+const int R::styleable::SuggestionSpan[] = {
+            0x010103cf, 0x010103d0
+        };
+
+const int R::SuggestionSpan_textUnderlineColor = 0;
+const int R::SuggestionSpan_textUnderlineThickness = 1;
+const int R::styleable::Switch[] = {
+            0x01010124, 0x01010125, 0x01010142, 0x0101036e,
+            0x0101036f, 0x01010370, 0x01010371, 0x01010372
+        };
+
+const int R::Switch_switchMinWidth = 5;
+const int R::Switch_switchPadding = 6;
+const int R::Switch_switchTextAppearance = 3;
+const int R::Switch_textOff = 1;
+const int R::Switch_textOn = 0;
+const int R::Switch_thumb = 2;
+const int R::Switch_thumbTextPadding = 7;
+const int R::Switch_track = 4;
+const int R::styleable::SwitchPreference[] = {
+            0x010101ef, 0x010101f0, 0x010101f1, 0x0101036b,
+            0x0101036c
+        };
+
+const int R::SwitchPreference_disableDependentsState = 2;
+const int R::SwitchPreference_summaryOff = 1;
+const int R::SwitchPreference_summaryOn = 0;
+const int R::SwitchPreference_switchTextOff = 4;
+const int R::SwitchPreference_switchTextOn = 3;
+const int R::styleable::SyncAdapter[] = {
+            0x01010225, 0x0101028f, 0x01010290, 0x01010291,
+            0x0101029b, 0x01010332, 0x01010333
+        };
+
+const int R::SyncAdapter_accountType = 1;
+const int R::SyncAdapter_allowParallelSyncs = 5;
+const int R::SyncAdapter_contentAuthority = 2;
+const int R::SyncAdapter_isAlwaysSyncable = 6;
+const int R::SyncAdapter_settingsActivity = 0;
+const int R::SyncAdapter_supportsUploading = 4;
+const int R::SyncAdapter_userVisible = 3;
+const int R::styleable::TabWidget[] = {
+            0x01010129, 0x010102bb, 0x010102bc, 0x010102bd,
+            0x01010410
+        };
+
+const int R::TabWidget_divider = 0;
+const int R::TabWidget_tabLayout = 4;
+const int R::TabWidget_tabStripEnabled = 3;
+const int R::TabWidget_tabStripLeft = 1;
+const int R::TabWidget_tabStripRight = 2;
+const int R::styleable::TableLayout[] = {
+            0x01010149, 0x0101014a, 0x0101014b
+        };
+
+const int R::TableLayout_collapseColumns = 2;
+const int R::TableLayout_shrinkColumns = 1;
+const int R::TableLayout_stretchColumns = 0;
+const int R::styleable::TableRow[] = {
+
+        };
+
+const int R::styleable::TableRow_Cell[] = {
+            0x0101014c, 0x0101014d
+        };
+
+const int R::TableRow_Cell_layout_column = 0;
+const int R::TableRow_Cell_layout_span = 1;
+const int R::styleable::TextAppearance[] = {
+            0x01010095, 0x01010096, 0x01010097, 0x01010098,
+            0x01010099, 0x0101009a, 0x0101009b, 0x0101038c,
+            0x010103ac
+        };
+
+const int R::TextAppearance_fontFamily = 8;
+const int R::TextAppearance_textAllCaps = 7;
+const int R::TextAppearance_textColor = 3;
+const int R::TextAppearance_textColorHighlight = 4;
+const int R::TextAppearance_textColorHint = 5;
+const int R::TextAppearance_textColorLink = 6;
+const int R::TextAppearance_textSize = 0;
+const int R::TextAppearance_textStyle = 2;
+const int R::TextAppearance_typeface = 1;
+const int R::styleable::TextClock[] = {
+            0x010103ca, 0x010103cb, 0x010103cc
+        };
+
+const int R::TextClock_format12Hour = 0;
+const int R::TextClock_format24Hour = 1;
+const int R::TextClock_timeZone = 2;
+const int R::styleable::TextSwitcher[] = {
+
+        };
+
+const int R::styleable::TextToSpeechEngine[] = {
+            0x01010225
+        };
+
+const int R::TextToSpeechEngine_settingsActivity = 0;
+const int R::styleable::TextView[] = {
+            0x0101000e, 0x01010034, 0x01010095, 0x01010096,
+            0x01010097, 0x01010098, 0x01010099, 0x0101009a,
+            0x0101009b, 0x010100ab, 0x010100af, 0x010100b0,
+            0x010100b1, 0x0101011f, 0x01010120, 0x0101013f,
+            0x01010140, 0x0101014e, 0x0101014f, 0x01010150,
+            0x01010151, 0x01010152, 0x01010153, 0x01010154,
+            0x01010155, 0x01010156, 0x01010157, 0x01010158,
+            0x01010159, 0x0101015a, 0x0101015b, 0x0101015c,
+            0x0101015d, 0x0101015e, 0x0101015f, 0x01010160,
+            0x01010161, 0x01010162, 0x01010163, 0x01010164,
+            0x01010165, 0x01010166, 0x01010167, 0x01010168,
+            0x01010169, 0x0101016a, 0x0101016b, 0x0101016c,
+            0x0101016d, 0x0101016e, 0x0101016f, 0x01010170,
+            0x01010171, 0x01010217, 0x01010218, 0x0101021d,
+            0x01010220, 0x01010223, 0x01010224, 0x01010264,
+            0x01010265, 0x01010266, 0x010102c5, 0x010102c6,
+            0x010102c7, 0x01010314, 0x01010315, 0x01010316,
+            0x0101035e, 0x0101035f, 0x01010362, 0x01010374,
+            0x0101038c, 0x01010392, 0x01010393, 0x010103ac
+        };
+
+const int R::TextView_autoLink = 11;
+const int R::TextView_autoText = 45;
+const int R::TextView_bufferType = 17;
+const int R::TextView_capitalize = 44;
+const int R::TextView_cursorVisible = 21;
+const int R::TextView_digits = 41;
+const int R::TextView_drawableBottom = 49;
+const int R::TextView_drawableEnd = 74;
+const int R::TextView_drawableLeft = 50;
+const int R::TextView_drawablePadding = 52;
+const int R::TextView_drawableRight = 51;
+const int R::TextView_drawableStart = 73;
+const int R::TextView_drawableTop = 48;
+const int R::TextView_editable = 46;
+const int R::TextView_editorExtras = 58;
+const int R::TextView_ellipsize = 9;
+const int R::TextView_ems = 27;
+const int R::TextView_enabled = 0;
+const int R::TextView_fontFamily = 75;
+const int R::TextView_freezesText = 47;
+const int R::TextView_gravity = 10;
+const int R::TextView_height = 24;
+const int R::TextView_hint = 19;
+const int R::TextView_imeActionId = 61;
+const int R::TextView_imeActionLabel = 60;
+const int R::TextView_imeOptions = 59;
+const int R::TextView_includeFontPadding = 34;
+const int R::TextView_inputMethod = 43;
+const int R::TextView_inputType = 56;
+const int R::TextView_lineSpacingExtra = 53;
+const int R::TextView_lineSpacingMultiplier = 54;
+const int R::TextView_lines = 23;
+const int R::TextView_linksClickable = 12;
+const int R::TextView_marqueeRepeatLimit = 55;
+const int R::TextView_maxEms = 26;
+const int R::TextView_maxHeight = 14;
+const int R::TextView_maxLength = 35;
+const int R::TextView_maxLines = 22;
+const int R::TextView_maxWidth = 13;
+const int R::TextView_minEms = 29;
+const int R::TextView_minHeight = 16;
+const int R::TextView_minLines = 25;
+const int R::TextView_minWidth = 15;
+const int R::TextView_numeric = 40;
+const int R::TextView_password = 31;
+const int R::TextView_phoneNumber = 42;
+const int R::TextView_privateImeOptions = 57;
+const int R::TextView_scrollHorizontally = 30;
+const int R::TextView_selectAllOnFocus = 33;
+const int R::TextView_shadowColor = 36;
+const int R::TextView_shadowDx = 37;
+const int R::TextView_shadowDy = 38;
+const int R::TextView_shadowRadius = 39;
+const int R::TextView_singleLine = 32;
+const int R::TextView_text = 18;
+const int R::TextView_textAllCaps = 72;
+const int R::TextView_textAppearance = 1;
+const int R::TextView_textColor = 5;
+const int R::TextView_textColorHighlight = 6;
+const int R::TextView_textColorHint = 7;
+const int R::TextView_textColorLink = 8;
+const int R::TextView_textCursorDrawable = 70;
+const int R::TextView_textEditNoPasteWindowLayout = 66;
+const int R::TextView_textEditPasteWindowLayout = 65;
+const int R::TextView_textEditSideNoPasteWindowLayout = 69;
+const int R::TextView_textEditSidePasteWindowLayout = 68;
+const int R::TextView_textEditSuggestionItemLayout = 71;
+const int R::TextView_textIsSelectable = 67;
+const int R::TextView_textScaleX = 20;
+const int R::TextView_textSelectHandle = 64;
+const int R::TextView_textSelectHandleLeft = 62;
+const int R::TextView_textSelectHandleRight = 63;
+const int R::TextView_textSize = 2;
+const int R::TextView_textStyle = 4;
+const int R::TextView_typeface = 3;
+const int R::TextView_width = 28;
+const int R::styleable::TextViewAppearance[] = {
+            0x01010034
+        };
+
+const int R::TextViewAppearance_textAppearance = 0;
+const int R::styleable::TextViewMultiLineBackgroundState[] = {
+            0x0101034d
+        };
+
+const int R::TextViewMultiLineBackgroundState_state_multiline = 0;
+const int R::styleable::Theme[] = {
+            0x01010030, 0x01010031, 0x01010032, 0x01010033,
+            0x01010034, 0x01010035, 0x01010036, 0x01010037,
+            0x01010038, 0x01010039, 0x0101003a, 0x0101003b,
+            0x0101003c, 0x0101003d, 0x0101003e, 0x0101003f,
+            0x01010040, 0x01010041, 0x01010042, 0x01010043,
+            0x01010044, 0x01010045, 0x01010046, 0x01010047,
+            0x01010048, 0x01010049, 0x0101004a, 0x0101004b,
+            0x0101004c, 0x0101004d, 0x0101004e, 0x0101004f,
+            0x01010050, 0x01010051, 0x01010052, 0x01010053,
+            0x01010054, 0x01010055, 0x01010056, 0x01010057,
+            0x01010058, 0x01010059, 0x0101005a, 0x0101005b,
+            0x0101005c, 0x0101005d, 0x0101005e, 0x0101005f,
+            0x01010060, 0x01010061, 0x01010062, 0x0101006a,
+            0x0101006b, 0x0101006c, 0x0101006d, 0x0101006e,
+            0x0101006f, 0x01010070, 0x01010071, 0x01010072,
+            0x01010073, 0x01010074, 0x01010075, 0x01010076,
+            0x01010077, 0x01010078, 0x01010079, 0x0101007a,
+            0x0101007b, 0x0101007c, 0x0101007d, 0x0101007e,
+            0x01010080, 0x01010081, 0x01010082, 0x01010083,
+            0x01010084, 0x01010085, 0x01010086, 0x01010087,
+            0x01010088, 0x01010089, 0x0101008a, 0x0101008b,
+            0x0101008c, 0x0101008d, 0x0101008e, 0x0101008f,
+            0x01010090, 0x01010091, 0x01010092, 0x01010093,
+            0x01010094, 0x010100ae, 0x01010206, 0x01010207,
+            0x01010208, 0x0101020d, 0x0101020f, 0x01010210,
+            0x01010212, 0x01010213, 0x01010214, 0x01010219,
+            0x0101021a, 0x0101021e, 0x0101021f, 0x01010222,
+            0x0101022b, 0x01010230, 0x01010267, 0x01010287,
+            0x01010288, 0x01010289, 0x0101028b, 0x01010292,
+            0x010102a0, 0x010102a1, 0x010102ab, 0x010102ae,
+            0x010102af, 0x010102b0, 0x010102b1, 0x010102b2,
+            0x010102b3, 0x010102b6, 0x010102b9, 0x010102c5,
+            0x010102c6, 0x010102c7, 0x010102c8, 0x010102cd,
+            0x010102ce, 0x010102d6, 0x010102d7, 0x010102d8,
+            0x010102db, 0x010102dc, 0x010102dd, 0x010102e4,
+            0x010102eb, 0x010102f0, 0x010102f3, 0x010102f4,
+            0x010102f5, 0x010102f6, 0x010102f7, 0x010102fd,
+            0x010102ff, 0x01010300, 0x01010301, 0x01010302,
+            0x01010305, 0x01010306, 0x01010308, 0x01010309,
+            0x0101030a, 0x0101030b, 0x0101030e, 0x01010311,
+            0x01010312, 0x01010313, 0x01010314, 0x01010315,
+            0x01010317, 0x0101032b, 0x0101032c, 0x0101032e,
+            0x0101032f, 0x01010330, 0x01010336, 0x01010337,
+            0x01010338, 0x01010339, 0x0101033a, 0x0101034e,
+            0x0101034f, 0x01010350, 0x01010351, 0x01010352,
+            0x01010353, 0x01010355, 0x01010359, 0x0101035b,
+            0x0101035c, 0x0101035d, 0x0101035e, 0x0101035f,
+            0x01010360, 0x01010361, 0x0101036d, 0x01010373,
+            0x01010374, 0x0101037e, 0x01010386, 0x01010387,
+            0x01010388, 0x0101038d, 0x0101038e, 0x0101038f,
+            0x01010390, 0x01010391, 0x01010394, 0x01010397,
+            0x0101039b, 0x0101039c, 0x0101039d, 0x0101039e,
+            0x0101039f, 0x010103a3, 0x010103a4, 0x010103a8,
+            0x010103ad, 0x010103bd, 0x010103be, 0x010103c0,
+            0x010103c3, 0x010103c8, 0x010103cd, 0x010103ce,
+            0x010103cf, 0x010103d0, 0x010103d1, 0x010103d2,
+            0x010103d3, 0x010103d4, 0x010103d5, 0x010103d6,
+            0x010103d7, 0x010103d8, 0x010103d9, 0x010103da,
+            0x010103db, 0x010103dc, 0x010103dd, 0x010103de,
+            0x010103df, 0x010103e0, 0x010103e1, 0x010103e2,
+            0x010103e3, 0x010103e4, 0x010103e5, 0x010103e6,
+            0x010103e7, 0x010103e8, 0x010103e9, 0x010103ea,
+            0x010103eb, 0x010103ec, 0x010103ed, 0x010103ee,
+            0x010103ef, 0x010103f0, 0x010103f1, 0x010103f2,
+            0x010103f3, 0x010103f4, 0x010103f5, 0x010103f6,
+            0x010103f7, 0x010103f8, 0x010103f9, 0x010103fa
+        };
+
+const int R::Theme_absListViewStyle = 51;
+const int R::Theme_accessibilityFocusedDrawable = 261;
+const int R::Theme_actionBarDivider = 204;
+const int R::Theme_actionBarItemBackground = 205;
+const int R::Theme_actionBarSize = 140;
+const int R::Theme_actionBarSplitStyle = 196;
+const int R::Theme_actionBarStyle = 132;
+const int R::Theme_actionBarTabBarStyle = 143;
+const int R::Theme_actionBarTabStyle = 142;
+const int R::Theme_actionBarTabTextStyle = 144;
+const int R::Theme_actionBarWidgetTheme = 203;
+const int R::Theme_actionButtonStyle = 135;
+const int R::Theme_actionDropDownStyle = 134;
+const int R::Theme_actionMenuTextAppearance = 188;
+const int R::Theme_actionMenuTextColor = 189;
+const int R::Theme_actionModeBackground = 136;
+const int R::Theme_actionModeCloseButtonStyle = 146;
+const int R::Theme_actionModeCloseDrawable = 137;
+const int R::Theme_actionModeCopyDrawable = 160;
+const int R::Theme_actionModeCutDrawable = 159;
+const int R::Theme_actionModeFindDrawable = 239;
+const int R::Theme_actionModePasteDrawable = 161;
+const int R::Theme_actionModePopupWindowStyle = 241;
+const int R::Theme_actionModeSelectAllDrawable = 193;
+const int R::Theme_actionModeShareDrawable = 238;
+const int R::Theme_actionModeSplitBackground = 206;
+const int R::Theme_actionModeStyle = 202;
+const int R::Theme_actionModeWebSearchDrawable = 240;
+const int R::Theme_actionOverflowButtonStyle = 145;
+const int R::Theme_activatedBackgroundIndicator = 147;
+const int R::Theme_activityChooserViewStyle = 237;
+const int R::Theme_alertDialogButtonGroupStyle = 227;
+const int R::Theme_alertDialogCenterButtons = 228;
+const int R::Theme_alertDialogIcon = 181;
+const int R::Theme_alertDialogStyle = 45;
+const int R::Theme_alertDialogTheme = 155;
+const int R::Theme_autoCompleteTextViewStyle = 52;
+const int R::Theme_backgroundDimAmount = 2;
+const int R::Theme_backgroundDimEnabled = 106;
+const int R::Theme_borderlessButtonStyle = 165;
+const int R::Theme_buttonBarButtonStyle = 168;
+const int R::Theme_buttonBarStyle = 167;
+const int R::Theme_buttonStyle = 24;
+const int R::Theme_buttonStyleInset = 26;
+const int R::Theme_buttonStyleSmall = 25;
+const int R::Theme_buttonStyleToggle = 27;
+const int R::Theme_calendarViewStyle = 185;
+const int R::Theme_candidatesTextStyleSpans = 109;
+const int R::Theme_checkBoxPreferenceStyle = 87;
+const int R::Theme_checkboxStyle = 53;
+const int R::Theme_checkedTextViewStyle = 217;
+const int R::Theme_colorActivatedHighlight = 200;
+const int R::Theme_colorBackground = 1;
+const int R::Theme_colorBackgroundCacheHint = 118;
+const int R::Theme_colorFocusedHighlight = 199;
+const int R::Theme_colorForeground = 0;
+const int R::Theme_colorForegroundInverse = 94;
+const int R::Theme_colorLongPressedHighlight = 198;
+const int R::Theme_colorMultiSelectHighlight = 201;
+const int R::Theme_colorPressedHighlight = 197;
+const int R::Theme_datePickerStyle = 184;
+const int R::Theme_detailsElementBackground = 175;
+const int R::Theme_dialogCustomTitleDecorLayout = 245;
+const int R::Theme_dialogPreferenceStyle = 89;
+const int R::Theme_dialogTheme = 154;
+const int R::Theme_dialogTitleDecorLayout = 246;
+const int R::Theme_dialogTitleIconsDecorLayout = 244;
+const int R::Theme_disabledAlpha = 3;
+const int R::Theme_dividerHorizontal = 166;
+const int R::Theme_dividerVertical = 156;
+const int R::Theme_dropDownHintAppearance = 80;
+const int R::Theme_dropDownItemStyle = 78;
+const int R::Theme_dropDownListViewStyle = 54;
+const int R::Theme_dropDownSpinnerStyle = 133;
+const int R::Theme_dropdownListPreferredItemHeight = 225;
+const int R::Theme_editTextBackground = 179;
+const int R::Theme_editTextColor = 178;
+const int R::Theme_editTextPreferenceStyle = 90;
+const int R::Theme_editTextStyle = 55;
+const int R::Theme_errorMessageAboveBackground = 223;
+const int R::Theme_errorMessageBackground = 222;
+const int R::Theme_expandableListPreferredChildIndicatorLeft = 34;
+const int R::Theme_expandableListPreferredChildIndicatorRight = 35;
+const int R::Theme_expandableListPreferredChildPaddingLeft = 31;
+const int R::Theme_expandableListPreferredItemIndicatorLeft = 32;
+const int R::Theme_expandableListPreferredItemIndicatorRight = 33;
+const int R::Theme_expandableListPreferredItemPaddingLeft = 30;
+const int R::Theme_expandableListViewStyle = 56;
+const int R::Theme_expandableListViewWhiteStyle = 125;
+const int R::Theme_fastScrollOverlayPosition = 174;
+const int R::Theme_fastScrollPreviewBackgroundLeft = 171;
+const int R::Theme_fastScrollPreviewBackgroundRight = 172;
+const int R::Theme_fastScrollTextColor = 182;
+const int R::Theme_fastScrollThumbDrawable = 170;
+const int R::Theme_fastScrollTrackDrawable = 173;
+const int R::Theme_findOnPageNextDrawable = 262;
+const int R::Theme_findOnPagePreviousDrawable = 263;
+const int R::Theme_galleryItemBackground = 28;
+const int R::Theme_galleryStyle = 57;
+const int R::Theme_gestureOverlayViewStyle = 232;
+const int R::Theme_gridViewStyle = 58;
+const int R::Theme_homeAsUpIndicator = 157;
+const int R::Theme_horizontalScrollViewStyle = 180;
+const int R::Theme_imageButtonStyle = 59;
+const int R::Theme_imageWellStyle = 60;
+const int R::Theme_listChoiceBackgroundIndicator = 141;
+const int R::Theme_listChoiceIndicatorMultiple = 104;
+const int R::Theme_listChoiceIndicatorSingle = 103;
+const int R::Theme_listDivider = 102;
+const int R::Theme_listDividerAlertDialog = 152;
+const int R::Theme_listPopupWindowStyle = 148;
+const int R::Theme_listPreferredItemHeight = 29;
+const int R::Theme_listPreferredItemHeightLarge = 194;
+const int R::Theme_listPreferredItemHeightSmall = 195;
+const int R::Theme_listPreferredItemPaddingEnd = 214;
+const int R::Theme_listPreferredItemPaddingLeft = 209;
+const int R::Theme_listPreferredItemPaddingRight = 210;
+const int R::Theme_listPreferredItemPaddingStart = 213;
+const int R::Theme_listSeparatorTextViewStyle = 96;
+const int R::Theme_listViewStyle = 61;
+const int R::Theme_listViewWhiteStyle = 62;
+const int R::Theme_mapViewStyle = 82;
+const int R::Theme_mediaRouteButtonStyle = 212;
+const int R::Theme_numberPickerStyle = 235;
+const int R::Theme_panelBackground = 46;
+const int R::Theme_panelColorBackground = 49;
+const int R::Theme_panelColorForeground = 48;
+const int R::Theme_panelFullBackground = 47;
+const int R::Theme_panelMenuIsCompact = 229;
+const int R::Theme_panelMenuListTheme = 231;
+const int R::Theme_panelMenuListWidth = 230;
+const int R::Theme_panelTextAppearance = 50;
+const int R::Theme_pointerStyle = 260;
+const int R::Theme_popupMenuStyle = 149;
+const int R::Theme_popupWindowStyle = 63;
+const int R::Theme_preferenceCategoryStyle = 84;
+const int R::Theme_preferenceFragmentStyle = 242;
+const int R::Theme_preferenceFrameLayoutStyle = 258;
+const int R::Theme_preferenceInformationStyle = 85;
+const int R::Theme_preferenceLayoutChild = 92;
+const int R::Theme_preferencePanelStyle = 243;
+const int R::Theme_preferenceScreenStyle = 83;
+const int R::Theme_preferenceStyle = 86;
+const int R::Theme_presentationTheme = 215;
+const int R::Theme_progressBarStyle = 64;
+const int R::Theme_progressBarStyleHorizontal = 65;
+const int R::Theme_progressBarStyleInverse = 111;
+const int R::Theme_progressBarStyleLarge = 67;
+const int R::Theme_progressBarStyleLargeInverse = 113;
+const int R::Theme_progressBarStyleSmall = 66;
+const int R::Theme_progressBarStyleSmallInverse = 112;
+const int R::Theme_progressBarStyleSmallTitle = 98;
+const int R::Theme_quickContactBadgeOverlay = 233;
+const int R::Theme_quickContactBadgeStyleSmallWindowLarge = 124;
+const int R::Theme_quickContactBadgeStyleSmallWindowMedium = 123;
+const int R::Theme_quickContactBadgeStyleSmallWindowSmall = 122;
+const int R::Theme_quickContactBadgeStyleWindowLarge = 121;
+const int R::Theme_quickContactBadgeStyleWindowMedium = 120;
+const int R::Theme_quickContactBadgeStyleWindowSmall = 119;
+const int R::Theme_radioButtonStyle = 71;
+const int R::Theme_ratingBarStyle = 69;
+const int R::Theme_ratingBarStyleIndicator = 99;
+const int R::Theme_ratingBarStyleSmall = 70;
+const int R::Theme_ringtonePreferenceStyle = 91;
+const int R::Theme_scrollViewStyle = 72;
+const int R::Theme_searchDialogTheme = 257;
+const int R::Theme_searchDropdownBackground = 248;
+const int R::Theme_searchResultListItemHeight = 224;
+const int R::Theme_searchViewCloseIcon = 249;
+const int R::Theme_searchViewEditQuery = 253;
+const int R::Theme_searchViewEditQueryBackground = 254;
+const int R::Theme_searchViewGoIcon = 250;
+const int R::Theme_searchViewSearchIcon = 251;
+const int R::Theme_searchViewTextField = 255;
+const int R::Theme_searchViewTextFieldRight = 256;
+const int R::Theme_searchViewVoiceIcon = 252;
+const int R::Theme_searchWidgetCorpusItemBackground = 211;
+const int R::Theme_seekBarStyle = 68;
+const int R::Theme_segmentedButtonStyle = 169;
+const int R::Theme_selectableItemBackground = 158;
+const int R::Theme_spinnerDropDownItemStyle = 79;
+const int R::Theme_spinnerItemStyle = 81;
+const int R::Theme_spinnerStyle = 73;
+const int R::Theme_stackViewStyle = 234;
+const int R::Theme_starStyle = 74;
+const int R::Theme_switchPreferenceStyle = 190;
+const int R::Theme_switchStyle = 259;
+const int R::Theme_tabWidgetStyle = 75;
+const int R::Theme_textAppearance = 4;
+const int R::Theme_textAppearanceAutoCorrectionSuggestion = 219;
+const int R::Theme_textAppearanceButton = 95;
+const int R::Theme_textAppearanceEasyCorrectSuggestion = 216;
+const int R::Theme_textAppearanceInverse = 5;
+const int R::Theme_textAppearanceLarge = 16;
+const int R::Theme_textAppearanceLargeInverse = 19;
+const int R::Theme_textAppearanceLargePopupMenu = 150;
+const int R::Theme_textAppearanceListItem = 207;
+const int R::Theme_textAppearanceListItemSmall = 208;
+const int R::Theme_textAppearanceMedium = 17;
+const int R::Theme_textAppearanceMediumInverse = 20;
+const int R::Theme_textAppearanceMisspelledSuggestion = 218;
+const int R::Theme_textAppearanceSearchResultSubtitle = 116;
+const int R::Theme_textAppearanceSearchResultTitle = 117;
+const int R::Theme_textAppearanceSmall = 18;
+const int R::Theme_textAppearanceSmallInverse = 21;
+const int R::Theme_textAppearanceSmallPopupMenu = 151;
+const int R::Theme_textCheckMark = 22;
+const int R::Theme_textCheckMarkInverse = 23;
+const int R::Theme_textColorAlertDialogListItem = 153;
+const int R::Theme_textColorHighlightInverse = 176;
+const int R::Theme_textColorHintInverse = 15;
+const int R::Theme_textColorLinkInverse = 177;
+const int R::Theme_textColorPrimary = 6;
+const int R::Theme_textColorPrimaryDisableOnly = 7;
+const int R::Theme_textColorPrimaryInverse = 9;
+const int R::Theme_textColorPrimaryInverseDisableOnly = 114;
+const int R::Theme_textColorPrimaryInverseNoDisable = 13;
+const int R::Theme_textColorPrimaryNoDisable = 11;
+const int R::Theme_textColorSearchUrl = 110;
+const int R::Theme_textColorSecondary = 8;
+const int R::Theme_textColorSecondaryInverse = 10;
+const int R::Theme_textColorSecondaryInverseNoDisable = 14;
+const int R::Theme_textColorSecondaryNoDisable = 12;
+const int R::Theme_textColorTertiary = 100;
+const int R::Theme_textColorTertiaryInverse = 101;
+const int R::Theme_textEditNoPasteWindowLayout = 163;
+const int R::Theme_textEditPasteWindowLayout = 162;
+const int R::Theme_textEditSideNoPasteWindowLayout = 187;
+const int R::Theme_textEditSidePasteWindowLayout = 186;
+const int R::Theme_textEditSuggestionItemLayout = 192;
+const int R::Theme_textSelectHandle = 129;
+const int R::Theme_textSelectHandleLeft = 127;
+const int R::Theme_textSelectHandleRight = 128;
+const int R::Theme_textSelectHandleWindowStyle = 130;
+const int R::Theme_textSuggestionsWindowStyle = 191;
+const int R::Theme_textUnderlineColor = 220;
+const int R::Theme_textUnderlineThickness = 221;
+const int R::Theme_textViewStyle = 76;
+const int R::Theme_timePickerStyle = 236;
+const int R::Theme_toastFrameBackground = 247;
+const int R::Theme_webTextViewStyle = 126;
+const int R::Theme_webViewStyle = 77;
+const int R::Theme_windowActionBar = 131;
+const int R::Theme_windowActionBarOverlay = 139;
+const int R::Theme_windowActionModeOverlay = 138;
+const int R::Theme_windowAnimationStyle = 93;
+const int R::Theme_windowBackground = 36;
+const int R::Theme_windowCloseOnTouchOutside = 183;
+const int R::Theme_windowContentOverlay = 41;
+const int R::Theme_windowDisablePreview = 107;
+const int R::Theme_windowEnableSplitTouch = 164;
+const int R::Theme_windowFrame = 37;
+const int R::Theme_windowFullscreen = 97;
+const int R::Theme_windowIsFloating = 39;
+const int R::Theme_windowIsTranslucent = 40;
+const int R::Theme_windowNoDisplay = 105;
+const int R::Theme_windowNoTitle = 38;
+const int R::Theme_windowShowWallpaper = 115;
+const int R::Theme_windowSoftInputMode = 108;
+const int R::Theme_windowSplitActionBar = 226;
+const int R::Theme_windowTitleBackgroundStyle = 44;
+const int R::Theme_windowTitleSize = 42;
+const int R::Theme_windowTitleStyle = 43;
+const int R::Theme_yesNoPreferenceStyle = 88;
+const int R::styleable::TimePicker[] = {
+            0x01010413
+        };
+
+const int R::TimePicker_internalLayout = 0;
+const int R::styleable::ToggleButton[] = {
+            0x01010033, 0x01010124, 0x01010125
+        };
+
+const int R::ToggleButton_disabledAlpha = 0;
+const int R::ToggleButton_textOff = 2;
+const int R::ToggleButton_textOn = 1;
+const int R::styleable::TranslateAnimation[] = {
+            0x010101c6, 0x010101c7, 0x010101c8, 0x010101c9
+        };
+
+const int R::TranslateAnimation_fromXDelta = 0;
+const int R::TranslateAnimation_fromYDelta = 2;
+const int R::TranslateAnimation_toXDelta = 1;
+const int R::TranslateAnimation_toYDelta = 3;
+const int R::styleable::TwoLineListItem[] = {
+            0x0101017e
+        };
+
+const int R::TwoLineListItem_mode = 0;
+const int R::styleable::VerticalSlider_Layout[] = {
+            0x01010193
+        };
+
+const int R::VerticalSlider_Layout_layout_scale = 0;
+const int R::styleable::View[] = {
+            0x01010063, 0x01010064, 0x01010065, 0x01010066,
+            0x01010067, 0x01010068, 0x01010069, 0x0101007f,
+            0x010100d0, 0x010100d1, 0x010100d2, 0x010100d3,
+            0x010100d4, 0x010100d5, 0x010100d6, 0x010100d7,
+            0x010100d8, 0x010100d9, 0x010100da, 0x010100db,
+            0x010100dc, 0x010100dd, 0x010100de, 0x010100df,
+            0x010100e0, 0x010100e1, 0x010100e2, 0x010100e3,
+            0x010100e4, 0x010100e5, 0x010100e6, 0x010100e7,
+            0x010100e8, 0x010100e9, 0x0101013f, 0x01010140,
+            0x01010215, 0x01010216, 0x0101024e, 0x0101025e,
+            0x0101026f, 0x01010273, 0x010102a8, 0x010102a9,
+            0x010102aa, 0x010102c1, 0x010102c4, 0x0101031f,
+            0x01010320, 0x01010321, 0x01010322, 0x01010323,
+            0x01010324, 0x01010325, 0x01010326, 0x01010327,
+            0x01010328, 0x01010334, 0x0101033c, 0x01010354,
+            0x010103a5, 0x010103aa, 0x010103b0, 0x010103b1,
+            0x010103b2, 0x010103b3, 0x010103b4, 0x010103c6
+        };
+
+const int R::View_alpha = 47;
+const int R::View_background = 12;
+const int R::View_clickable = 29;
+const int R::View_contentDescription = 41;
+const int R::View_drawingCacheQuality = 32;
+const int R::View_duplicateParentState = 33;
+const int R::View_fadeScrollbars = 44;
+const int R::View_fadingEdge = 23;
+const int R::View_fadingEdgeLength = 24;
+const int R::View_filterTouchesWhenObscured = 46;
+const int R::View_fitsSystemWindows = 21;
+const int R::View_focusable = 18;
+const int R::View_focusableInTouchMode = 19;
+const int R::View_hapticFeedbackEnabled = 39;
+const int R::View_id = 8;
+const int R::View_importantForAccessibility = 61;
+const int R::View_isScrollContainer = 38;
+const int R::View_keepScreenOn = 37;
+const int R::View_labelFor = 67;
+const int R::View_layerType = 59;
+const int R::View_layoutDirection = 64;
+const int R::View_longClickable = 30;
+const int R::View_minHeight = 35;
+const int R::View_minWidth = 34;
+const int R::View_nextFocusDown = 28;
+const int R::View_nextFocusForward = 58;
+const int R::View_nextFocusLeft = 25;
+const int R::View_nextFocusRight = 26;
+const int R::View_nextFocusUp = 27;
+const int R::View_onClick = 40;
+const int R::View_overScrollMode = 45;
+const int R::View_padding = 13;
+const int R::View_paddingBottom = 17;
+const int R::View_paddingEnd = 66;
+const int R::View_paddingLeft = 14;
+const int R::View_paddingRight = 16;
+const int R::View_paddingStart = 65;
+const int R::View_paddingTop = 15;
+const int R::View_requiresFadingEdge = 60;
+const int R::View_rotation = 54;
+const int R::View_rotationX = 55;
+const int R::View_rotationY = 56;
+const int R::View_saveEnabled = 31;
+const int R::View_scaleX = 52;
+const int R::View_scaleY = 53;
+const int R::View_scrollX = 10;
+const int R::View_scrollY = 11;
+const int R::View_scrollbarAlwaysDrawHorizontalTrack = 5;
+const int R::View_scrollbarAlwaysDrawVerticalTrack = 6;
+const int R::View_scrollbarDefaultDelayBeforeFade = 43;
+const int R::View_scrollbarFadeDuration = 42;
+const int R::View_scrollbarSize = 0;
+const int R::View_scrollbarStyle = 7;
+const int R::View_scrollbarThumbHorizontal = 1;
+const int R::View_scrollbarThumbVertical = 2;
+const int R::View_scrollbarTrackHorizontal = 3;
+const int R::View_scrollbarTrackVertical = 4;
+const int R::View_scrollbars = 22;
+const int R::View_soundEffectsEnabled = 36;
+const int R::View_tag = 9;
+const int R::View_textAlignment = 63;
+const int R::View_textDirection = 62;
+const int R::View_transformPivotX = 48;
+const int R::View_transformPivotY = 49;
+const int R::View_translationX = 50;
+const int R::View_translationY = 51;
+const int R::View_verticalScrollbarPosition = 57;
+const int R::View_visibility = 20;
+const int R::styleable::ViewAnimator[] = {
+            0x01010177, 0x01010178, 0x010102d5
+        };
+
+const int R::ViewAnimator_animateFirstView = 2;
+const int R::ViewAnimator_inAnimation = 0;
+const int R::ViewAnimator_outAnimation = 1;
+const int R::styleable::ViewDrawableStates[] = {
+            0x0101009c, 0x0101009d, 0x0101009e, 0x010100a1,
+            0x010100a7, 0x010102fe, 0x0101031b, 0x01010367,
+            0x01010368, 0x01010369
+        };
+
+const int R::ViewDrawableStates_state_accelerated = 6;
+const int R::ViewDrawableStates_state_activated = 5;
+const int R::ViewDrawableStates_state_drag_can_accept = 8;
+const int R::ViewDrawableStates_state_drag_hovered = 9;
+const int R::ViewDrawableStates_state_enabled = 2;
+const int R::ViewDrawableStates_state_focused = 0;
+const int R::ViewDrawableStates_state_hovered = 7;
+const int R::ViewDrawableStates_state_pressed = 4;
+const int R::ViewDrawableStates_state_selected = 3;
+const int R::ViewDrawableStates_state_window_focused = 1;
+const int R::styleable::ViewFlipper[] = {
+            0x01010179, 0x010102b5
+        };
+
+const int R::ViewFlipper_autoStart = 1;
+const int R::ViewFlipper_flipInterval = 0;
+const int R::styleable::ViewGroup[] = {
+            0x010100ea, 0x010100eb, 0x010100ec, 0x010100ed,
+            0x010100ee, 0x010100ef, 0x010100f0, 0x010100f1,
+            0x010102ef, 0x010102f2
+        };
+
+const int R::ViewGroup_addStatesFromChildren = 6;
+const int R::ViewGroup_alwaysDrawnWithCache = 5;
+const int R::ViewGroup_animateLayoutChanges = 9;
+const int R::ViewGroup_animationCache = 3;
+const int R::ViewGroup_clipChildren = 0;
+const int R::ViewGroup_clipToPadding = 1;
+const int R::ViewGroup_descendantFocusability = 7;
+const int R::ViewGroup_layoutAnimation = 2;
+const int R::ViewGroup_persistentDrawingCache = 4;
+const int R::ViewGroup_splitMotionEvents = 8;
+const int R::styleable::ViewGroup_Layout[] = {
+            0x010100f4, 0x010100f5
+        };
+
+const int R::ViewGroup_Layout_layout_height = 1;
+const int R::ViewGroup_Layout_layout_width = 0;
+const int R::styleable::ViewGroup_MarginLayout[] = {
+            0x010100f4, 0x010100f5, 0x010100f6, 0x010100f7,
+            0x010100f8, 0x010100f9, 0x010100fa, 0x010103b5,
+            0x010103b6
+        };
+
+const int R::ViewGroup_MarginLayout_layout_height = 1;
+const int R::ViewGroup_MarginLayout_layout_margin = 2;
+const int R::ViewGroup_MarginLayout_layout_marginBottom = 6;
+const int R::ViewGroup_MarginLayout_layout_marginEnd = 8;
+const int R::ViewGroup_MarginLayout_layout_marginLeft = 3;
+const int R::ViewGroup_MarginLayout_layout_marginRight = 5;
+const int R::ViewGroup_MarginLayout_layout_marginStart = 7;
+const int R::ViewGroup_MarginLayout_layout_marginTop = 4;
+const int R::ViewGroup_MarginLayout_layout_width = 0;
+const int R::styleable::ViewStub[] = {
+            0x010100f2, 0x010100f3
+        };
+
+const int R::ViewStub_inflatedId = 1;
+const int R::ViewStub_layout = 0;
+const int R::styleable::ViewSwitcher[] = {
+
+        };
+
+const int R::styleable::VolumePreference[] = {
+            0x01010209
+        };
+
+const int R::VolumePreference_streamType = 0;
+const int R::styleable::Wallpaper[] = {
+            0x01010020, 0x01010225, 0x010102a5, 0x010102b4
+        };
+
+const int R::Wallpaper_author = 3;
+const int R::Wallpaper_description = 0;
+const int R::Wallpaper_settingsActivity = 1;
+const int R::Wallpaper_thumbnail = 2;
+const int R::styleable::WallpaperPreviewInfo[] = {
+            0x01010331
+        };
+
+const int R::WallpaperPreviewInfo_staticWallpaperPreview = 0;
+const int R::styleable::WeightedLinearLayout[] = {
+            0x01010415, 0x01010416, 0x01010417, 0x01010418
+        };
+
+const int R::WeightedLinearLayout_majorWeightMax = 2;
+const int R::WeightedLinearLayout_majorWeightMin = 0;
+const int R::WeightedLinearLayout_minorWeightMax = 3;
+const int R::WeightedLinearLayout_minorWeightMin = 1;
+const int R::styleable::Window[] = {
+            0x01010032, 0x01010054, 0x01010055, 0x01010056,
+            0x01010057, 0x01010058, 0x01010059, 0x01010098,
+            0x010100ae, 0x0101020d, 0x0101021e, 0x0101021f,
+            0x01010222, 0x0101022b, 0x01010292, 0x010102cd,
+            0x010102dd, 0x010102e4, 0x01010317, 0x01010356,
+            0x01010357, 0x0101035b, 0x010103d5, 0x010103fb,
+            0x010103fc, 0x010103fd, 0x010103fe
+        };
+
+const int R::Window_backgroundDimAmount = 0;
+const int R::Window_backgroundDimEnabled = 11;
+const int R::Window_textColor = 7;
+const int R::Window_windowActionBar = 15;
+const int R::Window_windowActionBarOverlay = 17;
+const int R::Window_windowActionModeOverlay = 16;
+const int R::Window_windowAnimationStyle = 8;
+const int R::Window_windowBackground = 1;
+const int R::Window_windowCloseOnTouchOutside = 21;
+const int R::Window_windowContentOverlay = 6;
+const int R::Window_windowDisablePreview = 12;
+const int R::Window_windowEnableSplitTouch = 18;
+const int R::Window_windowFixedHeightMajor = 26;
+const int R::Window_windowFixedHeightMinor = 24;
+const int R::Window_windowFixedWidthMajor = 23;
+const int R::Window_windowFixedWidthMinor = 25;
+const int R::Window_windowFrame = 2;
+const int R::Window_windowFullscreen = 9;
+const int R::Window_windowIsFloating = 4;
+const int R::Window_windowIsTranslucent = 5;
+const int R::Window_windowMinWidthMajor = 19;
+const int R::Window_windowMinWidthMinor = 20;
+const int R::Window_windowNoDisplay = 10;
+const int R::Window_windowNoTitle = 3;
+const int R::Window_windowShowWallpaper = 14;
+const int R::Window_windowSoftInputMode = 13;
+const int R::Window_windowSplitActionBar = 22;
+const int R::styleable::WindowAnimation[] = {
+            0x010100b4, 0x010100b5, 0x010100b6, 0x010100b7,
+            0x010100b8, 0x010100b9, 0x010100ba, 0x010100bb,
+            0x010100bc, 0x010100bd, 0x010100be, 0x010100bf,
+            0x010100c0, 0x010100c1, 0x010100c2, 0x010100c3,
+            0x01010293, 0x01010294, 0x01010295, 0x01010296,
+            0x01010297, 0x01010298, 0x01010299, 0x0101029a
+        };
+
+const int R::WindowAnimation_activityCloseEnterAnimation = 6;
+const int R::WindowAnimation_activityCloseExitAnimation = 7;
+const int R::WindowAnimation_activityOpenEnterAnimation = 4;
+const int R::WindowAnimation_activityOpenExitAnimation = 5;
+const int R::WindowAnimation_taskCloseEnterAnimation = 10;
+const int R::WindowAnimation_taskCloseExitAnimation = 11;
+const int R::WindowAnimation_taskOpenEnterAnimation = 8;
+const int R::WindowAnimation_taskOpenExitAnimation = 9;
+const int R::WindowAnimation_taskToBackEnterAnimation = 14;
+const int R::WindowAnimation_taskToBackExitAnimation = 15;
+const int R::WindowAnimation_taskToFrontEnterAnimation = 12;
+const int R::WindowAnimation_taskToFrontExitAnimation = 13;
+const int R::WindowAnimation_wallpaperCloseEnterAnimation = 18;
+const int R::WindowAnimation_wallpaperCloseExitAnimation = 19;
+const int R::WindowAnimation_wallpaperIntraCloseEnterAnimation = 22;
+const int R::WindowAnimation_wallpaperIntraCloseExitAnimation = 23;
+const int R::WindowAnimation_wallpaperIntraOpenEnterAnimation = 20;
+const int R::WindowAnimation_wallpaperIntraOpenExitAnimation = 21;
+const int R::WindowAnimation_wallpaperOpenEnterAnimation = 16;
+const int R::WindowAnimation_wallpaperOpenExitAnimation = 17;
+const int R::WindowAnimation_windowEnterAnimation = 0;
+const int R::WindowAnimation_windowExitAnimation = 1;
+const int R::WindowAnimation_windowHideAnimation = 3;
+const int R::WindowAnimation_windowShowAnimation = 2;
+};
+};
+

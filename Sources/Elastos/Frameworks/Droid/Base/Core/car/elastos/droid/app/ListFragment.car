@@ -1,0 +1,59 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Widget.IListView;
+    interface Elastos.Droid.Widget.IListAdapter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     * interface IFragment
+     */
+    [local]
+    interface IListFragment {
+        OnListItemClick(
+            [in] IListView* l,
+            [in] IView* v,
+            [in] Int32 position,
+            [in] Int64 id);
+
+        SetListAdapter(
+            [in] IListAdapter* adapter);
+
+        SetSelection(
+            [in] Int32 position);
+
+        GetSelectedItemPosition(
+            [out] Int32* position);
+
+        GetSelectedItemId(
+            [out] Int64* id);
+
+        GetListView(
+            [out] IListView** listview);
+
+        SetEmptyText(
+            [in] ICharSequence* text);
+
+        SetListShown(
+            [in] Boolean shown);
+
+        SetListShownNoAnimation(
+            [in] Boolean shown);
+
+        GetListAdapter(
+            [out] IListAdapter** listadapter);
+    }
+
+    } //namespace App
+    } //namespace Droid
+    } //namespace Elastos
+}

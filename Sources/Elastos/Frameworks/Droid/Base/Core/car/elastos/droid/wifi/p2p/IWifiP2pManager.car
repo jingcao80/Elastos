@@ -1,0 +1,35 @@
+
+module
+{
+    interface Elastos.Droid.Os.IMessenger;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+
+    /**
+     * Interface that WifiP2pService implements
+     *
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IIWifiP2pManager {
+        GetMessenger(
+            [out] IMessenger** result);
+
+        GetP2pStateMachineMessenger(
+            [out] IMessenger** result);
+
+        SetMiracastMode(
+            [in] Int32 mode);
+    }
+
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

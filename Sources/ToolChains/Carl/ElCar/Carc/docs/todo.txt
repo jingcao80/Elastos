@@ -1,0 +1,9 @@
+//==========================================================================
+// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+//==========================================================================
+1) Do not permit aspect has callback interfaces.
+2) Do not permit callback interface has [out] parameters.
+
+3) Using checksum in uuid.
+4) Bugs: -F (dummy)
+5) Bugs: cppvan - EZCSTR("sldjf)")

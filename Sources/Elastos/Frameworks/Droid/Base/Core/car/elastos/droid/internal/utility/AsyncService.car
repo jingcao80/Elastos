@@ -1,0 +1,51 @@
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    interface IAsyncServiceInfo {
+    }
+
+    /**
+     * A service that receives Intents and IBinder transactions
+     * as messages via an AsyncChannel.
+     * <p>
+     * The Start Intent arrives as CMD_ASYNC_SERVICE_ON_START_INTENT with msg.arg1 = flags,
+     * msg.arg2 = startId, and msg.obj = intent.
+     * <p>
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IService
+     */
+    [local]
+    interface IAsyncService {
+        /** The command sent when a onStartCommand is invoked */
+        const Int32 CMD_ASYNC_SERVICE_ON_START_INTENT = 0x00ffffff;//IBinder::LAST_CALL_TRANSACTION;
+
+        /** The command sent when a onDestroy is invoked */
+        const Int32 CMD_ASYNC_SERVICE_DESTROY = 0x01000000;//IBinder::LAST_CALL_TRANSACTION + 1;
+
+        CreateHandler(
+            [out] IAsyncServiceInfo** asInfo);
+
+        /**
+         * Get the handler
+         */
+        GetHandler(
+            [out] IHandler** handler);
+    }
+
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

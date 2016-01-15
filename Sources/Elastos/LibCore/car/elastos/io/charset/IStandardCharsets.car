@@ -1,0 +1,33 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+    namespace Charset {
+    /**
+     * Convenient access to the most important built-in charsets.
+     * @since 1.7
+     */
+    interface IStandardCharsets {
+        GetISO_8859_1(
+            [out] ICharset** outcharset);
+
+        GetUS_ASCII(
+            [out] ICharset** outcharset);
+
+        GetUTF_8(
+            [out] ICharset** outcharset);
+
+        GetUTF_16(
+            [out] ICharset** outcharset);
+
+        GetUTF_16BE(
+            [out] ICharset** outcharset);
+
+        GetUTF_16LE(
+            [out] ICharset** outcharset);
+    }
+
+    } // namespace Charset
+    } // namespace IO
+    } // namespace Elastos
+}

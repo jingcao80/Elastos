@@ -1,0 +1,40 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Libcore {
+    namespace ICU {
+
+    interface INativePluralRules {
+
+        const Int32 ZERO  = 0;
+
+        const Int32 ONE   = 1;
+
+        const Int32 TWO   = 2;
+
+        const Int32 FEW   = 3;
+
+        const Int32 MANY  = 4;
+
+        const Int32 OTHER = 5;
+
+        /**
+         * Returns the constant defined in this class corresponding
+         * to the first rule that matches the given value.
+         */
+        QuantityForInt(
+            [in] Int32 value,
+            [out] Int32 * result);
+    }
+
+    interface INativePluralRulesHelper {
+
+        ForLocale(
+            [in] ILocale * locale,
+            [out] INativePluralRules ** outrules);
+    }
+
+    } // namespace ICU
+    } // namespace Libcore
+}

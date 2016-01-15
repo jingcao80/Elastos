@@ -1,0 +1,37 @@
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recent {
+
+    [local]
+    interface IRecentsCallback {
+        const Int32 SWIPE_LEFT = 0;
+        const Int32 SWIPE_RIGHT = 1;
+        const Int32 SWIPE_UP = 2;
+        const Int32 SWIPE_DOWN = 3;
+
+        HandleOnClick(
+            [in] IView* selectedView);
+
+        HandleSwipe(
+            [in] IView* selectedView);
+
+        HandleLongPress(
+            [in] IView* selectedView,
+            [in] IView* anchorView,
+            [in] IView* thumbnailView);
+
+        Dismiss();
+    }
+
+    } // namespace Recent
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

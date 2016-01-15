@@ -1,0 +1,43 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Xml {
+    namespace XPath {
+
+    interface IXPathFactoryFinder {
+    /**
+     * <p>Creates a new {@link XPathFactory} object for the specified
+     * schema language.</p>
+     *
+     * @param uri
+     *       Identifies the underlying object model.
+     *
+     * @return <code>null</code> if the callee fails to create one.
+     *
+     * @throws NullPointerException
+     *      If the parameter is null.
+     */
+        NewFactory(
+            [in] String uri,
+            [out] IXPathFactory** fty);
+
+    /**
+     * <p>Creates an instance of the specified and returns it.</p>
+     *
+     * @param className
+     *      fully qualified class name to be instantiated.
+     *
+     * @return null
+     *      if it fails. Error messages will be printed by this method.
+     */
+        CreateInstance(
+            [in] String className,
+            [out] IXPathFactory** fty);
+    }
+
+    } // namespace XPath
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

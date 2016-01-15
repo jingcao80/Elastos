@@ -1,0 +1,60 @@
+module
+{
+    interface Elastos.Droid.Content.Pm.IPackageInfoLite;
+    interface Elastos.Droid.Content.Res.IObbInfo;
+    interface Elastos.Droid.Internal.Os.IIParcelFileDescriptorFactory;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    interface IIMediaContainerService {
+        CopyPackageToContainer(
+            [in] String packagePath,
+            [in] String containerId,
+            [in] String key,
+            [in] Boolean isExternal,
+            [in] Boolean isForwardLocked,
+            [in] String abiOverride,
+            [out] String* result);
+
+        CopyPackage(
+            [in] String packagePath,
+            [in] IIParcelFileDescriptorFactory* target,
+            [out] Int32* result);
+
+        GetMinimalPackageInfo(
+            [in] String packagePath,
+            [in] Int32 flags,
+            [in] String abiOverride,
+            [out] IPackageInfoLite** result);
+
+        GetObbInfo(
+            [in] String filename,
+            [out] IObbInfo** result);
+
+        CalculateDirectorySize(
+            [in] String directory,
+            [out] Int64* result);
+
+        /** Return file system stats: [0] is total bytes, [1] is available bytes */
+        GetFileSystemStats(
+            [in] String path,
+            [out, callee] ArrayOf<Int64>* result);
+
+        ClearDirectory(
+            [in] String directory);
+
+        CalculateInstalledSize(
+            [in] String packagePath,
+            [in] Boolean isForwardLocked,
+            [in] String abiOverride,
+            [out] Int64* result);
+    }
+
+    }//namespace App
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

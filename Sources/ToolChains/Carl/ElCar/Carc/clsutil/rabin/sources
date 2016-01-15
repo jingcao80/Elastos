@@ -1,0 +1,11 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= rabin
+TARGET_TYPE = exe
+
+SOURCES = rabintables.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.CarRuntime.lib
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Runtime.lib

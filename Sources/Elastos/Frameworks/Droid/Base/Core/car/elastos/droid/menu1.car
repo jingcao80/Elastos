@@ -1,0 +1,5 @@
+module
+{
+    merge("view/menu/MenuBuilder.car");
+    merge("view/menu/MenuPresenter.car");
+}

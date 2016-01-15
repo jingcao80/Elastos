@@ -1,0 +1,70 @@
+
+module
+{
+    interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace System {
+
+    /**
+     * Information returned/taken by getaddrinfo(3). Corresponds to C's {@code struct addrinfo} from
+     * <a href="http://pubs.opengroup.org/onlinepubs/009695399/basedefs/netdb.h.html">&lt;netdb.h&gt;</a>
+     *
+     * TODO: we currently only _take_ a StructAddrinfo; getaddrinfo returns an InetAddress[].
+     */
+    interface IStructAddrinfo {
+        /** Flags describing the kind of lookup to be done. (Such as AI_ADDRCONFIG.) */
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        /** Desired address family for results. (Such as AF_INET6 for IPv6. AF_UNSPEC means "any".) */
+        GetFamily(
+            [out] Int32* family);
+
+        SetFamily(
+            [in] Int32 family);
+
+        /** Socket type. (Such as SOCK_DGRAM. 0 means "any".) */
+        GetSocktype(
+            [out] Int32* socktype);
+
+        SetSocktype(
+            [in] Int32 socktype);
+
+        /** Protocol. (Such as IPPROTO_IPV6 IPv6. 0 means "any".) */
+        GetProtocol(
+            [out] Int32* protocol);
+
+        SetProtocol(
+            [in] Int32 protocol);
+
+        /** Address length. (Not useful in Java.) */
+        GetAddrlen(
+            [out] Int32* addrlen);
+
+        /** Address. */
+        GetAddr(
+            [out] IInetAddress** addr);
+
+        SetAddr(
+            [in] IInetAddress* addr);
+
+        /** Canonical name of service location (if AI_CANONNAME provided in ai_flags). */
+        // public String ai_canonname;
+
+        /** Next element in linked list. */
+        GetNext(
+            [out] IStructAddrinfo** next);
+
+        SetNext(
+            [in] IStructAddrinfo* next);
+    }
+
+    } // namespace System
+    } // namespace Droid
+    } // namespace Elastos
+}

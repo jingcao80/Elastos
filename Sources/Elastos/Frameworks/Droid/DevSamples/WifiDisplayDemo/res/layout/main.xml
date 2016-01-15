@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <TextView
+        android:id="@+id/InfoTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="60px"
+        android:layout_weight="1"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical"
+        android:textColor="#000000"
+        android:text="WifiDisplayDemo"
+        android:background="#FFFFFF"
+    />
+
+    <RadioGroup
+        android:id="@+id/OnOffRadioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <RadioButton
+            android:id="@+id/OnButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ON"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/OffButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OFF" />
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/ScanButton"
+            android:layout_width="160px"
+            android:layout_height="50px"
+            android:text="Scan">
+        </Button>
+
+        <Button android:id="@+id/GetStatusButton"
+            android:layout_width="160px"
+            android:layout_height="50px"
+            android:text="Get Status">
+        </Button>
+
+        <Button android:id="@+id/RenameButton"
+            android:layout_width="160px"
+            android:layout_height="50px"
+            android:text="Rename">
+        </Button>
+
+        <Button android:id="@+id/ConnectButton"
+            android:layout_width="160px"
+            android:layout_height="50px"
+            android:text="ConnectButton">
+        </Button>
+
+        <Button android:id="@+id/DisconnectButton"
+            android:layout_width="160px"
+            android:layout_height="50px"
+            android:text="Disconnect">
+        </Button>
+
+        <Button android:id="@+id/ForgetButton"
+            android:layout_width="160px"
+            android:layout_height="50px"
+            android:text="Forget">
+        </Button>
+
+     </LinearLayout>
+
+     <ListView
+        android:id="@+id/DisplayListView"
+        android:layout_width="fill_parent"
+        android:layout_height="250px">
+    </ListView>
+
+</LinearLayout>

@@ -1,0 +1,82 @@
+module
+{
+    using interface Elastos.IO.IOutputStream;
+    using interface Elastos.IO.IInputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Http {
+    namespace Multipart {
+
+    /**
+     * Implements a request entity suitable for an HTTP multipart POST method.
+     * <p>
+     * The HTTP multipart POST method is defined in section 3.3 of
+     * <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC1867</a>:
+     * <blockquote>
+     * The media-type multipart/form-data follows the rules of all multipart
+     * MIME data streams as outlined in RFC 1521. The multipart/form-data contains
+     * a series of parts. Each part is expected to contain a content-disposition
+     * header where the value is "form-data" and a name attribute specifies
+     * the field name within the form, e.g., 'content-disposition: form-data;
+     * name="xxxxx"', where xxxxx is the field name corresponding to that field.
+     * Field names originally in non-ASCII character sets may be encoded using
+     * the method outlined in RFC 1522.
+     * </blockquote>
+     * </p>
+     * <p>This entity is designed to be used in conjunction with the
+     * {@link org.apache.http.HttpRequest} to provide
+     * multipart posts.  Example usage:</p>
+     * <pre>
+     *  File f = new File("/path/fileToUpload.txt");
+     *  HttpRequest request = new HttpRequest("http://host/some_path");
+     *  Part[] parts = {
+     *      new StringPart("param_name", "value"),
+     *      new FilePart(f.getName(), f)
+     *  };
+     *  filePost.setEntity(
+     *      new MultipartRequestEntity(parts, filePost.getParams())
+     *      );
+     *  HttpClient client = new HttpClient();
+     *  int status = client.executeMethod(filePost);
+     * </pre>
+     *
+     * @since 3.0
+     */
+    /**
+     * @Involve
+     * interface Org.Apache.Http.IHttpEntity;
+     * interface Org.Apache.Http.Entity.IAbstractHttpEntity
+     */
+    interface IMultipartEntity {
+        /**
+         * Sets the value to use as the multipart boundary.
+         * <p>
+         * This parameter expects a value if type {@link String}.
+         * </p>
+         */
+        const String MULTIPART_BOUNDARY = "http.method.multipart.boundary";
+
+        IsRepeatable(
+                [out] Boolean* isRepeatable);
+
+        WriteTo(
+            [in] IOutputStream* outStream);
+
+        GetContentLength(
+            [out] Int64* length);
+
+        GetContent(
+            [out] IInputStream** stream);
+
+        IsStreaming(
+            [out] Boolean* isStreaming);
+    }
+
+    } // namespace Multipart
+    } // namespace Http
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

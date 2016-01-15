@@ -1,0 +1,65 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Content.Pm.IManifestDigest;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Represents verification parameters used to verify packages to be installed.
+     *
+     * @deprecated callers should migrate to {@link PackageInstaller}.
+     * @hide
+     */
+    //@Deprecated
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IVerificationParams {
+        /** A constant used to indicate that a uid value is not present. */
+        const Int32 NO_UID = -1;
+
+        GetVerificationURI(
+            [out] IUri** uri);
+
+        GetOriginatingURI(
+            [out] IUri** uri);
+
+        GetReferrer(
+            [out] IUri** uri);
+
+        /** return NO_UID if not available */
+        GetOriginatingUid(
+            [out] Int32* uid);
+
+        GetManifestDigest(
+            [out] IManifestDigest** digest);
+
+        /** @return NO_UID when not set */
+        GetInstallerUid(
+            [out] Int32* uid);
+
+        SetInstallerUid(
+            [in] Int32 uid);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* isEquals);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

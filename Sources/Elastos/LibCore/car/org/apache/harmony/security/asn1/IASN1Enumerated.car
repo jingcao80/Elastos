@@ -1,0 +1,30 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    interface IASN1Enumerated extends IASN1Primitive {}
+
+    interface IASN1EnumeratedHelper {
+        /**
+         * Returns ASN.1 Enumerated type default implementation
+         *
+         * The default implementation works with encoding
+         * that is represented as byte array.
+         *
+         * @return ASN.1 Enumerated type default implementation
+         */
+        GetInstance(
+            [out] IASN1Enumerated** instance);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

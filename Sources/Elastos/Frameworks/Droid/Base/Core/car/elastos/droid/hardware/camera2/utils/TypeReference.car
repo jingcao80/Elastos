@@ -1,0 +1,123 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Utils {
+
+    /**
+     * Super type token; allows capturing generic types at runtime by forcing them to be reified.
+     *
+     * <p>Usage example: <pre>{@code
+     *      // using anonymous classes (preferred)
+     *      TypeReference&lt;Integer> intToken = new TypeReference&lt;Integer>() {{ }};
+     *
+     *      // using named classes
+     *      class IntTypeReference extends TypeReference&lt;Integer> {...}
+     *      TypeReference&lt;Integer> intToken = new IntTypeReference();
+     * }</p></pre>
+     *
+     * <p>Unlike the reference implementation, this bans nested TypeVariables; that is all
+     * dynamic types must equal to the static types.</p>
+     *
+     * <p>See <a href="http://gafter.blogspot.com/2007/05/limitation-of-super-type-tokens.html">
+     * http://gafter.blogspot.com/2007/05/limitation-of-super-type-tokens.html</a>
+     * for more details.</p>
+     */
+    [local]
+    interface ITypeReference {
+        /**
+         * Return the dynamic {@link Type} corresponding to the captured type {@code T}.
+         */
+        //Type GetType();
+
+        /**
+         * Returns the raw type of T.
+         *
+         * <p><ul>
+         * <li>If T is a Class itself, T itself is returned.
+         * <li>If T is a ParameterizedType, the raw type of the parameterized type is returned.
+         * <li>If T is a GenericArrayType, the returned type is the corresponding array class.
+         * For example: {@code List<Integer>[]} => {@code List[]}.
+         * <li>If T is a type variable or a wildcard type, the raw type of the first upper bound is
+         * returned. For example: {@code <X extends Foo>} => {@code Foo}.
+         * </ul>
+         *
+         * @return the raw type of {@code T}
+         */
+        //@SuppressWarnings("unchecked")
+        GetRawType(
+            [out] IClassInfo** classInfo);
+
+        /**
+         * Get the component type, e.g. {@code T} from {@code T[]}.
+         *
+         * @return component type, or {@code null} if {@code T} is not an array
+         */
+        GetComponentType(
+            [out] ITypeReference** reference);
+    }
+
+    [local]
+    interface ITypeReferenceHelper {
+        /**
+         * Create a specialized type reference from a dynamic class instance,
+         * bypassing the standard compile-time checks.
+         *
+         * <p>As with a regular type reference, the {@code klass} must not contain
+         * any type variables.</p>
+         *
+         * @param klass a non-{@code null} {@link Class} instance
+         *
+         * @return a type reference which captures {@code T} at runtime
+         *
+         * @throws IllegalArgumentException if {@code T} had any type variables
+         */
+        CreateSpecializedTypeReference(
+            [in] IClassInfo* klass,
+            [out] ITypeReference** reference);
+
+        /**
+         * Create a specialized type reference from a dynamic {@link Type} instance,
+         * bypassing the standard compile-time checks.
+         *
+         * <p>As with a regular type reference, the {@code type} must not contain
+         * any type variables.</p>
+         *
+         * @param type a non-{@code null} {@link Type} instance
+         *
+         * @return a type reference which captures {@code T} at runtime
+         *
+         * @throws IllegalArgumentException if {@code type} had any type variables
+         */
+        //CreateSpecializedTypeReference(
+        //    [in] Type type,
+        //    [out] ITypeReference** reference);
+
+        /**
+         * Check if the {@code type} contains a {@link TypeVariable} recursively.
+         *
+         * <p>Intuitively, a type variable is a type in a type expression that refers to a generic
+         * type which is not known at the definition of the expression (commonly seen when
+         * type parameters are used, e.g. {@code class Foo<T>}).</p>
+         *
+         * <p>See <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-4.html#jls-4.4">
+         * http://docs.oracle.com/javase/specs/jls/se7/html/jls-4.html#jls-4.4</a>
+         * for a more formal definition of a type variable</p>.
+         *
+         * @param type a type object ({@code null} is allowed)
+         * @return {@code true} if there were nested type variables; {@code false} otherwise
+         */
+        //ContainsTypeVariable(
+        //    [in] Type type,
+        //    [out] Boolean* result);
+    }
+
+    } // namespace Utils
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

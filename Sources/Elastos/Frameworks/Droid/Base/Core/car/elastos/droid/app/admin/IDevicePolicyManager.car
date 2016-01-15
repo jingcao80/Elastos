@@ -1,0 +1,566 @@
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IRemoteCallback;
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Net.IProxyInfo;
+    interface Elastos.Droid.Content.IIntentFilter;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IComponentName;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Admin {
+
+    /**
+     *Public interface for managing policies enforced on a device. Most clients of this
+     * class must have published a DeviceAdminReceiver that the user has currently enabled.
+     *
+     * @sa DeviceAdminReceiver
+     * <p>
+     * <strong>Developer Guides</strong>
+     * <p>
+     * For more information about managing policies for device adminstration, read the Device Administration developer guide.
+     *
+     * @sa Administration
+     */
+    [deprecated]
+    interface IIDevicePolicyManager {
+        SetPasswordQuality(
+            [in] IComponentName* who,
+            [in] Int32 quality,
+            [in] Int32 userHandle);
+
+        GetPasswordQuality(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordMinimumLength(
+            [in] IComponentName* who,
+            [in] Int32 length,
+            [in] Int32 userHandle);
+
+        GetPasswordMinimumLength(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordMinimumUpperCase(
+            [in] IComponentName* who,
+            [in] Int32 length,
+            [in] Int32 userHandle);
+
+        GetPasswordMinimumUpperCase(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordMinimumLowerCase(
+            [in] IComponentName* who,
+            [in] Int32 length,
+            [in] Int32 userHandle);
+
+        GetPasswordMinimumLowerCase(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordMinimumLetters(
+            [in] IComponentName* who,
+            [in] Int32 length,
+            [in] Int32 userHandle);
+
+        GetPasswordMinimumLetters(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordMinimumNumeric(
+            [in] IComponentName* who,
+            [in] Int32 length,
+            [in] Int32 userHandle);
+
+        GetPasswordMinimumNumeric(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordMinimumSymbols(
+            [in] IComponentName* who,
+            [in] Int32 length,
+            [in] Int32 userHandle);
+
+        GetPasswordMinimumSymbols(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordMinimumNonLetter(
+            [in] IComponentName* who,
+            [in] Int32 length,
+            [in] Int32 userHandle);
+
+        GetPasswordMinimumNonLetter(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordHistoryLength(
+            [in] IComponentName* who,
+            [in] Int32 length,
+            [in] Int32 userHandle);
+
+        GetPasswordHistoryLength(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetPasswordExpirationTimeout(
+            [in] IComponentName* who,
+            [in] Int64 expiration,
+            [in] Int32 userHandle);
+
+        GetPasswordExpirationTimeout(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int64* password);
+
+        GetPasswordExpiration(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int64* password);
+
+        IsActivePasswordSufficient(
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        GetCurrentFailedPasswordAttempts(
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        SetMaximumFailedPasswordsForWipe(
+            [in] IComponentName* admin,
+            [in] Int32 num,
+            [in] Int32 userHandle);
+
+        GetMaximumFailedPasswordsForWipe(
+            [in] IComponentName* admin,
+            [in] Int32 userHandle,
+            [out] Int32* password);
+
+        ResetPassword(
+            [in] String password,
+            [in] Int32 flags,
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        SetMaximumTimeToLock(
+            [in] IComponentName* who,
+            [in] Int64 timeMs,
+            [in] Int32 userHandle);
+
+        GetMaximumTimeToLock(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int64* time);
+
+        LockNow();
+
+        WipeData(
+            [in] Int32 flags,
+            [in] Int32 userHandle);
+
+        SetGlobalProxy(
+            [in] IComponentName* admin,
+            [in] String proxySpec,
+            [in] String exclusionList,
+            [in] Int32 userHandle,
+            [out] IComponentName** component);
+
+        GetGlobalProxyAdmin(
+            [in] Int32 userHandle,
+            [out] IComponentName** component);
+
+        SetRecommendedGlobalProxy(
+            [in] IComponentName* admin,
+            [in] IProxyInfo* proxyInfo);
+
+        SetStorageEncryption(
+            [in] IComponentName* who,
+            [in] Boolean encrypt,
+            [in] Int32 userHandle,
+            [out] Int32* value);
+
+        GetStorageEncryption(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        GetStorageEncryptionStatus(
+            [in] Int32 userHandle,
+            [out] Int32* st);
+
+        SetCameraDisabled(
+            [in] IComponentName* who,
+            [in] Boolean disabled,
+            [in] Int32 userHandle);
+
+        GetCameraDisabled(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        SetScreenCaptureDisabled(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [in] Boolean disabled);
+
+        GetScreenCaptureDisabled(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* result);
+
+        SetKeyguardDisabledFeatures(
+            [in] IComponentName* who,
+            [in] Int32 which,
+            [in] Int32 userHandle);
+
+        GetKeyguardDisabledFeatures(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [out] Int32* features);
+
+        SetActiveAdmin(
+            [in] IComponentName* policyReceiver,
+            [in] Boolean refreshing,
+            [in] Int32 userHandle);
+
+        IsAdminActive(
+            [in] IComponentName* policyReceiver,
+            [in] Int32 userHandle,
+            [out] Boolean* isActive);
+
+        GetActiveAdmins(
+            [in] Int32 userHandle,
+            [out] IList** admins);
+
+        PackageHasActiveAdmins(
+            [in] String packageName,
+            [in] Int32 userHandle,
+            [out] Boolean* hasActive);
+
+        GetRemoveWarning(
+            [in] IComponentName* policyReceiver,
+            [in] IRemoteCallback* result,
+            [in] Int32 userHandle);
+
+        RemoveActiveAdmin(
+            [in] IComponentName* policyReceiver,
+            [in] Int32 userHandle);
+
+        HasGrantedPolicy(
+            [in] IComponentName* policyReceiver,
+            [in] Int32 usesPolicy,
+            [in] Int32 userHandle,
+            [out] Boolean* hasGrant);
+
+        SetActivePasswordState(
+            [in] Int32 quality,
+            [in] Int32 length,
+            [in] Int32 letters,
+            [in] Int32 uppercase,
+            [in] Int32 lowercase,
+            [in] Int32 numbers,
+            [in] Int32 symbols,
+            [in] Int32 nonletter,
+            [in] Int32 userHandle);
+
+        ReportFailedPasswordAttempt(
+            [in] Int32 userHandle);
+
+        ReportSuccessfulPasswordAttempt(
+            [in] Int32 userHandle);
+
+        SetDeviceOwner(
+            [in] String packageName,
+            [in] String ownerName,
+            [out] Boolean* result);
+
+        IsDeviceOwner(
+            [in] String packageName,
+            [out] Boolean* result);
+
+        GetDeviceOwner(
+            [out] String* result);
+
+        GetDeviceOwnerName(
+            [out] String* result);
+
+        ClearDeviceOwner(
+            [in] String packageName);
+
+        SetProfileOwner(
+            [in] IComponentName* who,
+            [in] String ownerName,
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        GetProfileOwner(
+            [in] Int32 userHandle,
+            [out] IComponentName** name);
+
+        GetProfileOwnerName(
+            [in] Int32 userHandle,
+            [out] String* str);
+
+        SetProfileEnabled(
+            [in] IComponentName* who);
+
+        SetProfileName(
+            [in] IComponentName* who,
+            [in] String profileName);
+
+        ClearProfileOwner(
+            [in] IComponentName* who);
+
+        HasUserSetupCompleted(
+            [out] Boolean* result);
+
+        InstallCaCert(
+            [in] IComponentName* admin,
+            [in] ArrayOf<Byte>* certBuffer,
+            [out] Boolean* result);
+
+        UninstallCaCert(
+            [in] IComponentName* admin,
+            [in] String alias);
+
+        EnforceCanManageCaCerts(
+            [in] IComponentName* admin);
+
+        InstallKeyPair(
+            [in] IComponentName* who,
+            [in] ArrayOf<Byte>* privKeyBuffer,
+            [in] ArrayOf<Byte>* certBuffer,
+            [in] String alias,
+            [out] Boolean* result);
+
+        AddPersistentPreferredActivity(
+            [in] IComponentName* admin,
+            [in] IIntentFilter* filter,
+            [in] IComponentName* activity);
+
+        ClearPackagePersistentPreferredActivities(
+            [in] IComponentName* admin,
+            [in] String packageName);
+
+        SetApplicationRestrictions(
+            [in] IComponentName* who,
+            [in] String packageName,
+            [in] IBundle* settings);
+
+        GetApplicationRestrictions(
+            [in] IComponentName* who,
+            [in] String packageName,
+            [out] IBundle** bundle);
+
+        SetRestrictionsProvider(
+            [in] IComponentName* who,
+            [in] IComponentName* provider);
+
+        GetRestrictionsProvider(
+            [in] Int32 userHandle,
+            [out] IComponentName** name);
+
+        SetUserRestriction(
+            [in] IComponentName* who,
+            [in] String key,
+            [in] Boolean value);
+
+        AddCrossProfileIntentFilter(
+            [in] IComponentName* admin,
+            [in] IIntentFilter* filter,
+            [in] Int32 flags);
+
+        ClearCrossProfileIntentFilters(
+            [in] IComponentName* admin);
+
+        SetPermittedAccessibilityServices(
+            [in] IComponentName* admin,
+            [in] IList* packageList);
+
+        GetPermittedAccessibilityServices(
+            [in] IComponentName* admin,
+            [out] IList** result);
+
+        GetPermittedAccessibilityServicesForUser(
+            [in] Int32 userId,
+            [out] IList** result);
+
+        SetPermittedInputMethods(
+            [in] IComponentName* admin,
+            [in] IList* packageList,
+            [out] Boolean* result);
+
+        GetPermittedInputMethods(
+            [in] IComponentName* admin,
+            [out] IList** list);
+
+        GetPermittedInputMethodsForCurrentUser(
+            [out] IList** result);
+
+        SetApplicationHidden(
+            [in] IComponentName* admin,
+            [in] String packageName,
+            [in] Boolean bval,
+            [out] Boolean* result);
+
+        IsApplicationHidden(
+            [in] IComponentName* admin,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        CreateUser(
+            [in] IComponentName* who,
+            [in] String name,
+            [out] IUserHandle** result);
+
+        CreateAndInitializeUser(
+            [in] IComponentName* who,
+            [in] String name,
+            [in] String profileOwnerName,
+            [in] IComponentName* profileOwnerComponent,
+            [in] IBundle* adminExtras,
+            [out] IUserHandle** result);
+
+        RemoveUser(
+            [in] IComponentName* who,
+            [in] IUserHandle* userHandle,
+            [out] Boolean* result);
+
+        SwitchUser(
+            [in] IComponentName* who,
+            [in] IUserHandle* userHandle,
+            [out] Boolean* result);
+
+        EnableSystemApp(
+            [in] IComponentName* admin,
+            [in] String packageName);
+
+        EnableSystemAppWithIntent(
+            [in] IComponentName* admin,
+            [in] IIntent* intent,
+            [out] Int32* result);
+
+        SetAccountManagementDisabled(
+            [in] IComponentName* who,
+            [in] String accountType,
+            [in] Boolean disabled);
+
+        GetAccountTypesWithManagementDisabled(
+            [out, callee] ArrayOf<String>* result);
+
+        GetAccountTypesWithManagementDisabledAsUser(
+            [in] Int32 userId,
+            [out, callee] ArrayOf<String>* result);
+
+        SetLockTaskPackages(
+            [in] IComponentName* who,
+            [in] ArrayOf<String>* packages);
+
+        GetLockTaskPackages(
+            [in] IComponentName* who,
+            [out, callee] ArrayOf<String>* result);
+
+        IsLockTaskPermitted(
+            [in] String pkg,
+            [out] Boolean* result);
+
+        SetGlobalSetting(
+            [in] IComponentName* who,
+            [in] String setting,
+            [in] String value);
+
+        SetSecureSetting(
+            [in] IComponentName* who,
+            [in] String setting,
+            [in] String value);
+
+        SetMasterVolumeMuted(
+            [in] IComponentName* admin,
+            [in] Boolean on);
+        IsMasterVolumeMuted(
+            [in] IComponentName* admin,
+            [out] Boolean* result);
+
+        NotifyLockTaskModeChanged(
+            [in] Boolean isEnabled,
+            [in] String pkg,
+            [in] Int32 userId);
+
+        SetUninstallBlocked(
+            [in] IComponentName* admin,
+            [in] String packageName,
+            [in] Boolean uninstallBlocked);
+
+        IsUninstallBlocked(
+            [in] IComponentName* admin,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        SetCrossProfileCallerIdDisabled(
+            [in] IComponentName* who,
+            [in] Boolean disabled);
+
+        GetCrossProfileCallerIdDisabled(
+            [in] IComponentName* who,
+            [out] Boolean* result);
+
+        GetCrossProfileCallerIdDisabledForUser(
+            [in] Int32 userId,
+            [out] Boolean* result);
+
+        SetTrustAgentFeaturesEnabled(
+            [in] IComponentName* admin,
+            [in] IComponentName* agent,
+            [in] IList* features,
+            [in] Int32 userId);
+
+        GetTrustAgentFeaturesEnabled(
+            [in] IComponentName* admin,
+            [in] IComponentName* agent,
+            [in] Int32 userId,
+            [out] IList** list);
+
+        AddCrossProfileWidgetProvider(
+            [in] IComponentName* admin,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        RemoveCrossProfileWidgetProvider(
+            [in] IComponentName* admin,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        GetCrossProfileWidgetProviders(
+            [in] IComponentName* admin,
+            [out] IList** result);
+
+        SetAutoTimeRequired(
+            [in] IComponentName* who,
+            [in] Int32 userHandle,
+            [in] Boolean required);
+
+        GetAutoTimeRequired(
+            [out] Boolean* result);
+    }
+
+    } // namespace Admin
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

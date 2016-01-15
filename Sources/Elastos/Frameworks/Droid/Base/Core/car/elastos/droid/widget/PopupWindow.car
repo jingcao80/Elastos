@@ -1,0 +1,772 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.IViewOnTouchListener;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IPopupWindowOnDismissListener {
+        /**
+         * Called when this popup window is dismissed.
+         */
+        OnDismiss();
+    }
+
+    [local]
+    interface IPopupWindow {
+        /**
+         * Mode for {@link #setInputMethodMode(int)}: the requirements for the
+         * input method should be based on the focusability of the popup.  That is
+         * if it is focusable than it needs to work with the input method, else
+         * it doesn't.
+         */
+        const Int32 INPUT_METHOD_FROM_FOCUSABLE = 0;
+
+        /**
+         * Mode for {@link #setInputMethodMode(int)}: this popup always needs to
+         * work with an input method, regardless of whether it is focusable.  This
+         * means that it will always be displayed so that the user can also operate
+         * the input method while it is shown.
+         */
+        const Int32 INPUT_METHOD_NEEDED = 1;
+
+        /**
+         * Mode for {@link #setInputMethodMode(int)}: this popup never needs to
+         * work with an input method, regardless of whether it is focusable.  This
+         * means that it will always be displayed to use as much space on the
+         * screen as needed, regardless of whether this covers the input method.
+         */
+        const Int32 INPUT_METHOD_NOT_NEEDED = 2;
+
+        /**
+         * Return the drawable used as the popup window's background.
+         *
+         * @return the background drawable or {@code null} if not set
+         * @see #setBackgroundDrawable(Drawable)
+         * @attr ref android.R.styleable#PopupWindow_popupBackground
+         */
+        GetBackground(
+            [out] IDrawable** background);
+
+        /**
+         * Specifies the background drawable for this popup window. The background
+         * can be set to {@code null}.
+         *
+         * @param background the popup's background
+         * @see #getBackground()
+         * @attr ref android.R.styleable#PopupWindow_popupBackground
+         */
+        SetBackgroundDrawable(
+            [in] IDrawable* background);
+
+        /**
+         * @return the elevation for this popup window in pixels
+         * @see #setElevation(float)
+         * @attr ref android.R.styleable#PopupWindow_popupElevation
+         */
+        GetElevation(
+            [out] Float* elevation);
+
+        /**
+         * Specifies the elevation for this popup window.
+         *
+         * @param elevation the popup's elevation in pixels
+         * @see #getElevation()
+         * @attr ref android.R.styleable#PopupWindow_popupElevation
+         */
+        SetElevation(
+            [in] Float elevation);
+
+        /**
+         * <p>Return the animation style to use the popup appears and disappears</p>
+         *
+         * @return the animation style to use the popup appears and disappears
+         */
+        GetAnimationStyle(
+            [out] Int32* style);
+
+        /**
+         * Set the flag on popup to ignore cheek press eventt; by default this flag
+         * is set to false
+         * which means the pop wont ignore cheek press dispatch events.
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to one of
+         * the {@link #update()} methods.</p>
+         *
+         * @see #update()
+         */
+        SetIgnoreCheekPress();
+
+        /**
+         * <p>Change the animation style resource for this popup.</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to one of
+         * the {@link #update()} methods.</p>
+         *
+         * @param animationStyle animation style to use when the popup appears
+         *      and disappears.  Set to -1 for the default animation, 0 for no
+         *      animation, or a resource identifier for an explicit animation.
+         *
+         * @see #update()
+         */
+        SetAnimationStyle(
+            [in] Int32 animationStyle);
+
+        /**
+         * <p>Return the view used as the content of the popup window.</p>
+         *
+         * @return a {@link android.view.View} representing the popup's content
+         *
+         * @see #setContentView(android.view.View)
+         */
+        GetContentView(
+            [out] IView** contentView);
+
+        /**
+         * <p>Change the popup's content. The content is represented by an instance
+         * of {@link android.view.View}.</p>
+         *
+         * <p>This method has no effect if called when the popup is showing.  To
+         * apply it while a popup is showing, call </p>
+         *
+         * @param contentView the new content for the popup
+         *
+         * @see #getContentView()
+         * @see #isShowing()
+         */
+        SetContentView(
+            [in] IView* contentView);
+
+        /**
+         * Set a callback for all touch events being dispatched to the popup
+         * window.
+         */
+        SetTouchInterceptor(
+            [in] IViewOnTouchListener* l);
+
+        /**
+         * <p>Indicate whether the popup window can grab the focus.</p>
+         *
+         * @return true if the popup is focusable, false otherwise
+         *
+         * @see #setFocusable(boolean)
+         */
+        IsFocusable(
+            [out] Boolean* isFocusable);
+
+        /**
+         * <p>Changes the focusability of the popup window. When focusable, the
+         * window will grab the focus from the current focused widget if the popup
+         * contains a focusable {@link android.view.View}.  By default a popup
+         * window is not focusable.</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to one of
+         * the {@link #update()} methods.</p>
+         *
+         * @param focusable true if the popup should grab focus, false otherwise.
+         *
+         * @see #isFocusable()
+         * @see #isShowing()
+         * @see #update()
+         */
+         SetFocusable(
+             [in] Boolean focusable);
+
+         /**
+         * Return the current value in {@link #setInputMethodMode(int)}.
+         *
+         * @see #setInputMethodMode(int)
+         */
+        GetInputMethodMode(
+            [out] Int32* inputMethodMode);
+
+        /**
+         * Control how the popup operates with an input method: one of
+         * {@link #INPUT_METHOD_FROM_FOCUSABLE}, {@link #INPUT_METHOD_NEEDED},
+         * or {@link #INPUT_METHOD_NOT_NEEDED}.
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to one of
+         * the {@link #update()} methods.</p>
+         *
+         * @see #getInputMethodMode()
+         * @see #update()
+         */
+        SetInputMethodMode(
+            [in] Int32 mode);
+
+        /**
+         * Sets the operating mode for the soft input area.
+         *
+         * @param mode The desired mode, see
+         *        {@link android.view.WindowManager.LayoutParams#softInputMode}
+         *        for the full list
+         *
+         * @see android.view.WindowManager.LayoutParams#softInputMode
+         * @see #getSoftInputMode()
+         */
+        SetSoftInputMode(
+            [in] Int32 mode);
+
+        /**
+         * Returns the current value in {@link #setSoftInputMode(int)}.
+         *
+         * @see #setSoftInputMode(int)
+         * @see android.view.WindowManager.LayoutParams#softInputMode
+         */
+        GetSoftInputMode(
+            [out] Int32* softInputMode);
+
+        /**
+         * <p>Indicates whether the popup window receives touch events.</p>
+         *
+         * @return true if the popup is touchable, false otherwise
+         *
+         * @see #setTouchable(boolean)
+         */
+        IsTouchable(
+            [out] Boolean* touchable);
+
+        /**
+         * <p>Changes the touchability of the popup window. When touchable, the
+         * window will receive touch events, otherwise touch events will go to the
+         * window below it. By default the window is touchable.</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to one of
+         * the {@link #update()} methods.</p>
+         *
+         * @param touchable true if the popup should receive touch events, false otherwise
+         *
+         * @see #isTouchable()
+         * @see #isShowing()
+         * @see #update()
+         */
+        SetTouchable(
+            [in] Boolean touchable);
+
+        /**
+         * <p>Indicates whether the popup window will be informed of touch events
+         * outside of its window.</p>
+         *
+         * @return true if the popup is outside touchable, false otherwise
+         *
+         * @see #setOutsideTouchable(boolean)
+         */
+        IsOutsideTouchable(
+            [out] Boolean* touchable);
+
+        /**
+         * <p>Controls whether the pop-up will be informed of touch events outside
+         * of its window.  This only makes sense for pop-ups that are touchable
+         * but not focusable, which means touches outside of the window will
+         * be delivered to the window behind.  The default is false.</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to one of
+         * the {@link #update()} methods.</p>
+         *
+         * @param touchable true if the popup should receive outside
+         * touch events, false otherwise
+         *
+         * @see #isOutsideTouchable()
+         * @see #isShowing()
+         * @see #update()
+         */
+        SetOutsideTouchable(
+            [in] Boolean touchable);
+
+        /**
+         * <p>Indicates whether clipping of the popup window is enabled.</p>
+         *
+         * @return true if the clipping is enabled, false otherwise
+         *
+         * @see #setClippingEnabled(boolean)
+         */
+        IsClippingEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * <p>Allows the popup window to extend beyond the bounds of the screen. By default the
+         * window is clipped to the screen boundaries. Setting this to false will allow windows to be
+         * accurately positioned.</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to one of
+         * the {@link #update()} methods.</p>
+         *
+         * @param enabled false if the window should be allowed to extend outside of the screen
+         * @see #isShowing()
+         * @see #isClippingEnabled()
+         * @see #update()
+         */
+        SetClippingEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Clip this popup window to the screen, but not to the containing window.
+         *
+         * @param enabled True to clip to the screen.
+         * @hide
+         */
+        SetClipToScreenEnabled(
+            [in] Boolean enabled);
+
+        SetAllowScrollingAnchorParent(
+            [in] Boolean enabled);
+
+        /**
+         * <p>Indicates whether the popup window supports splitting touches.</p>
+         *
+         * @return true if the touch splitting is enabled, false otherwise
+         *
+         * @see #setSplitTouchEnabled(boolean)
+         * @hide
+         */
+        IsSplitTouchEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * <p>Allows the popup window to extend beyond the bounds of the screen. By default the
+         * window is clipped to the screen boundaries. Setting this to false will allow windows to be
+         * accurately positioned.</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown or through a manual call to one of
+         * the {@link #update()} methods.</p>
+         *
+         * @param enabled false if the window should be allowed to extend outside of the screen
+         * @see #isShowing()
+         * @see #isClippingEnabled()
+         * @see #update()
+         */
+        SetSplitTouchEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * <p>Indicates whether the popup window will be forced into using absolute screen coordinates
+         * for positioning.</p>
+         *
+         * @return true if the window will always be positioned in screen coordinates.
+         * @hide
+         */
+        IsLayoutInScreenEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * <p>Allows the popup window to force the flag
+         * {@link WindowManager.LayoutParams#FLAG_LAYOUT_IN_SCREEN}, overriding default behavior.
+         * This will cause the popup to be positioned in absolute screen coordinates.</p>
+         *
+         * @param enabled true if the popup should always be positioned in screen coordinates
+         * @hide
+         */
+        SetLayoutInScreenEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Allows the popup window to force the flag
+         * {@link WindowManager.LayoutParams#FLAG_LAYOUT_INSET_DECOR}, overriding default behavior.
+         * This will cause the popup to inset its content to account for system windows overlaying
+         * the screen, such as the status bar.
+         *
+         * <p>This will often be combined with {@link #setLayoutInScreenEnabled(boolean)}.
+         *
+         * @param enabled true if the popup's views should inset content to account for system windows,
+         *                the way that decor views behave for full-screen windows.
+         * @hide
+         */
+        SetLayoutInsetDecor(
+            [in] Boolean enabled);
+
+        /**
+         * Set the layout type for this window. Should be one of the TYPE constants defined in
+         * {@link WindowManager.LayoutParams}.
+         *
+         * @param layoutType Layout type for this window.
+         * @hide
+         */
+        SetWindowLayoutType(
+            [in] Int32 layoutType);
+
+        /**
+         * @return The layout type for this window.
+         * @hide
+         */
+        GetWindowLayoutType(
+            [out] Int32* layoutType);
+
+        /**
+         * Set whether this window is touch modal or if outside touches will be sent to
+         * other windows behind it.
+         * @hide
+         */
+        SetTouchModal(
+            [in] Boolean touchModal);
+
+        /**
+         * <p>Change the width and height measure specs that are given to the
+         * window manager by the popup.  By default these are 0, meaning that
+         * the current width or height is requested as an explicit size from
+         * the window manager.  You can supply
+         * {@link ViewGroup.LayoutParams#WRAP_CONTENT} or
+         * {@link ViewGroup.LayoutParams#MATCH_PARENT} to have that measure
+         * spec supplied instead, replacing the absolute width and height that
+         * has been set in the popup.</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown.</p>
+         *
+         * @param widthSpec an explicit width measure spec mode, either
+         * {@link ViewGroup.LayoutParams#WRAP_CONTENT},
+         * {@link ViewGroup.LayoutParams#MATCH_PARENT}, or 0 to use the absolute
+         * width.
+         * @param heightSpec an explicit height measure spec mode, either
+         * {@link ViewGroup.LayoutParams#WRAP_CONTENT},
+         * {@link ViewGroup.LayoutParams#MATCH_PARENT}, or 0 to use the absolute
+         * height.
+         */
+        SetWindowLayoutMode(
+            [in] Int32 widthSpec,
+            [in] Int32 heightSpec);
+
+        /**
+         * <p>Return this popup's height MeasureSpec</p>
+         *
+         * @return the height MeasureSpec of the popup
+         *
+         * @see #setHeight(int)
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * <p>Change the popup's height MeasureSpec</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown.</p>
+         *
+         * @param height the height MeasureSpec of the popup
+         *
+         * @see #getHeight()
+         * @see #isShowing()
+         */
+        SetHeight(
+            [in] Int32 height);
+
+        /**
+         * <p>Return this popup's width MeasureSpec</p>
+         *
+         * @return the width MeasureSpec of the popup
+         *
+         * @see #setWidth(int)
+         */
+        GetWidth(
+            [out] Int32* width);
+
+        /**
+         * <p>Change the popup's width MeasureSpec</p>
+         *
+         * <p>If the popup is showing, calling this method will take effect only
+         * the next time the popup is shown.</p>
+         *
+         * @param width the width MeasureSpec of the popup
+         *
+         * @see #getWidth()
+         * @see #isShowing()
+         */
+        SetWidth(
+            [in] Int32 width);
+
+        /**
+         * <p>Indicate whether this popup window is showing on screen.</p>
+         *
+         * @return true if the popup is showing, false otherwise
+         */
+        IsShowing(
+            [out] Boolean* isShowing);
+
+        /**
+         * <p>
+         * Display the content view in a popup window at the specified location. If the popup window
+         * cannot fit on screen, it will be clipped. See {@link android.view.WindowManager.LayoutParams}
+         * for more information on how gravity and the x and y parameters are related. Specifying
+         * a gravity of {@link android.view.Gravity#NO_GRAVITY} is similar to specifying
+         * <code>Gravity.LEFT | Gravity.TOP</code>.
+         * </p>
+         *
+         * @param parent a parent view to get the {@link android.view.View#getWindowToken()} token from
+         * @param gravity the gravity which controls the placement of the popup window
+         * @param x the popup's x location offset
+         * @param y the popup's y location offset
+         */
+        ShowAtLocation(
+            [in] IView* parent,
+            [in] Int32 gravity,
+            [in] Int32 x,
+            [in] Int32 y);
+
+        /**
+         * Display the content view in a popup window at the specified location.
+         *
+         * @param token Window token to use for creating the new window
+         * @param gravity the gravity which controls the placement of the popup window
+         * @param x the popup's x location offset
+         * @param y the popup's y location offset
+         *
+         * @hide Internal use only. Applications should use
+         *       {@link #showAtLocation(View, int, int, int)} instead.
+         */
+        ShowAtLocation(
+            [in] IBinder* token,
+            [in] Int32 gravity,
+            [in] Int32 x,
+            [in] Int32 y);
+
+        /**
+         * <p>Display the content view in a popup window anchored to the bottom-left
+         * corner of the anchor view. If there is not enough room on screen to show
+         * the popup in its entirety, this method tries to find a parent scroll
+         * view to scroll. If no parent scroll view can be scrolled, the bottom-left
+         * corner of the popup is pinned at the top left corner of the anchor view.</p>
+         *
+         * @param anchor the view on which to pin the popup window
+         *
+         * @see #dismiss()
+         */
+        ShowAsDropDown(
+            [in] IView* anchor);
+
+        /**
+         * <p>Display the content view in a popup window anchored to the bottom-left
+         * corner of the anchor view offset by the specified x and y coordinates.
+         * If there is not enough room on screen to show
+         * the popup in its entirety, this method tries to find a parent scroll
+         * view to scroll. If no parent scroll view can be scrolled, the bottom-left
+         * corner of the popup is pinned at the top left corner of the anchor view.</p>
+         * <p>If the view later scrolls to move <code>anchor</code> to a different
+         * location, the popup will be moved correspondingly.</p>
+         *
+         * @param anchor the view on which to pin the popup window
+         * @param xoff A horizontal offset from the anchor in pixels
+         * @param yoff A vertical offset from the anchor in pixels
+         *
+         * @see #dismiss()
+         */
+        ShowAsDropDown(
+            [in] IView* anchor,
+            [in] Int32 xoff,
+            [in] Int32 yoff);
+
+        /**
+         * <p>Display the content view in a popup window anchored to the bottom-left
+         * corner of the anchor view offset by the specified x and y coordinates.
+         * If there is not enough room on screen to show
+         * the popup in its entirety, this method tries to find a parent scroll
+         * view to scroll. If no parent scroll view can be scrolled, the bottom-left
+         * corner of the popup is pinned at the top left corner of the anchor view.</p>
+         * <p>If the view later scrolls to move <code>anchor</code> to a different
+         * location, the popup will be moved correspondingly.</p>
+         *
+         * @param anchor the view on which to pin the popup window
+         * @param xoff A horizontal offset from the anchor in pixels
+         * @param yoff A vertical offset from the anchor in pixels
+         * @param gravity Alignment of the popup relative to the anchor
+         *
+         * @see #dismiss()
+         */
+        ShowAsDropDown(
+            [in] IView* anchor,
+            [in] Int32 xoff,
+            [in] Int32 yoff,
+            [in] Int32 gravity);
+
+        /**
+         * Indicates whether the popup is showing above (the y coordinate of the popup's bottom
+         * is less than the y coordinate of the anchor) or below the anchor view (the y coordinate
+         * of the popup is greater than y coordinate of the anchor's bottom).
+         *
+         * The value returned
+         * by this method is meaningful only after {@link #showAsDropDown(android.view.View)}
+         * or {@link #showAsDropDown(android.view.View, int, int)} was invoked.
+         *
+         * @return True if this popup is showing above the anchor view, false otherwise.
+         */
+        IsAboveAnchor(
+            [out] Boolean* isAboveAnchor);
+
+        /**
+         * Returns the maximum height that is available for the popup to be
+         * completely shown. It is recommended that this height be the maximum for
+         * the popup's height, otherwise it is possible that the popup will be
+         * clipped.
+         *
+         * @param anchor The view on which the popup window must be anchored.
+         * @return The maximum available height for the popup to be completely
+         *         shown.
+         */
+        GetMaxAvailableHeight(
+            [in] IView* anchor,
+            [out] Int32* maxAvailableHeight);
+
+        /**
+         * Returns the maximum height that is available for the popup to be
+         * completely shown. It is recommended that this height be the maximum for
+         * the popup's height, otherwise it is possible that the popup will be
+         * clipped.
+         *
+         * @param anchor The view on which the popup window must be anchored.
+         * @param yOffset y offset from the view's bottom edge
+         * @return The maximum available height for the popup to be completely
+         *         shown.
+         */
+        GetMaxAvailableHeight(
+            [in] IView* anchor,
+            [in] Int32 yOffset,
+            [out] Int32* maxAvailableHeight);
+
+        /**
+         * Returns the maximum height that is available for the popup to be
+         * completely shown, optionally ignoring any bottom decorations such as
+         * the input method. It is recommended that this height be the maximum for
+         * the popup's height, otherwise it is possible that the popup will be
+         * clipped.
+         *
+         * @param anchor The view on which the popup window must be anchored.
+         * @param yOffset y offset from the view's bottom edge
+         * @param ignoreBottomDecorations if true, the height returned will be
+         *        all the way to the bottom of the display, ignoring any
+         *        bottom decorations
+         * @return The maximum available height for the popup to be completely
+         *         shown.
+         *
+         * @hide Pending API council approval.
+         */
+        GetMaxAvailableHeight(
+            [in] IView* anchor,
+            [in] Int32 yOffset,
+            [in] Boolean ignoreBottomDecorations,
+            [out] Int32* maxAvailableHeight);
+
+        /**
+         * <p>Dispose of the popup window. This method can be invoked only after
+         * {@link #showAsDropDown(android.view.View)} has been executed. Failing that, calling
+         * this method will have no effect.</p>
+         *
+         * @see #showAsDropDown(android.view.View)
+         */
+        Dismiss();
+
+        /**
+         * Set a callback for all touch events being dispatched to the popup
+         * window.
+         */
+        SetOnDismissListener(
+            [in] IPopupWindowOnDismissListener* l);
+
+        /**
+         * Updates the state of the popup window, if it is currently being displayed,
+         * from the currently set state.  This includes:
+         * {@link #setClippingEnabled(boolean)}, {@link #setFocusable(boolean)},
+         * {@link #setIgnoreCheekPress()}, {@link #setInputMethodMode(int)},
+         * {@link #setTouchable(boolean)}, and {@link #setAnimationStyle(int)}.
+         */
+        Update();
+
+        /**
+         * <p>Updates the dimension of the popup window. Calling this function
+         * also updates the window with the current popup state as described
+         * for {@link #update()}.</p>
+         *
+         * @param width the new width
+         * @param height the new height
+         */
+        Update(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * <p>Updates the position and the dimension of the popup window. Width and
+         * height can be set to -1 to update location only.  Calling this function
+         * also updates the window with the current popup state as
+         * described for {@link #update()}.</p>
+         *
+         * @param x the new x location
+         * @param y the new y location
+         * @param width the new width, can be -1 to ignore
+         * @param height the new height, can be -1 to ignore
+         */
+        Update(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * <p>Updates the position and the dimension of the popup window. Width and
+         * height can be set to -1 to update location only.  Calling this function
+         * also updates the window with the current popup state as
+         * described for {@link #update()}.</p>
+         *
+         * @param x the new x location
+         * @param y the new y location
+         * @param width the new width, can be -1 to ignore
+         * @param height the new height, can be -1 to ignore
+         * @param force reposition the window even if the specified position
+         *              already seems to correspond to the LayoutParams
+         */
+        Update(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Boolean force);
+
+        /**
+         * <p>Updates the position and the dimension of the popup window. Calling this
+         * function also updates the window with the current popup state as described
+         * for {@link #update()}.</p>
+         *
+         * @param anchor the popup's anchor view
+         * @param width the new width, can be -1 to ignore
+         * @param height the new height, can be -1 to ignore
+         */
+        Update(
+            [in] IView* anchor,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * <p>Updates the position and the dimension of the popup window. Width and
+         * height can be set to -1 to update location only.  Calling this function
+         * also updates the window with the current popup state as
+         * described for {@link #update()}.</p>
+         * <p>If the view later scrolls to move <code>anchor</code> to a different
+         * location, the popup will be moved correspondingly.</p>
+         *
+         * @param anchor the popup's anchor view
+         * @param xoff x offset from the view's left edge
+         * @param yoff y offset from the view's bottom edge
+         * @param width the new width, can be -1 to ignore
+         * @param height the new height, can be -1 to ignore
+         */
+        Update(
+            [in] IView* anchor,
+            [in] Int32 xoff,
+            [in] Int32 yoff,
+            [in] Int32 width,
+            [in] Int32 height);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

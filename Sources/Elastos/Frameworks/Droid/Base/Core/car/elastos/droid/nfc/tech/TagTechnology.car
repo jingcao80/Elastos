@@ -1,0 +1,34 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Tech{
+
+    /**
+     * @Involve
+     * interace ICloseable
+     */
+    interface ITagTechnology {
+        GetTag(
+            [out] ITag** tag);
+
+        Connect();
+
+        Reconnect();
+
+        Close();
+
+        IsConnected(
+            [out] Boolean* connected);
+    }
+
+    }// namespace Tech
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

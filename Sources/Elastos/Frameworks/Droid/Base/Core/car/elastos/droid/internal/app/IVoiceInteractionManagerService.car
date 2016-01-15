@@ -1,0 +1,115 @@
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractor;
+    interface Elastos.Droid.Hardware.Soundtrigger.IIRecognitionStatusCallback;
+    interface Elastos.Droid.Hardware.Soundtrigger.ISoundTriggerKeyphraseSoundModel;
+    interface Elastos.Droid.Hardware.Soundtrigger.ISoundTriggerModuleProperties;
+    interface Elastos.Droid.Hardware.Soundtrigger.ISoundTriggerRecognitionConfig;
+    interface Elastos.Droid.Service.Voice.IIVoiceInteractionService;
+    interface Elastos.Droid.Service.Voice.IIVoiceInteractionSession;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    interface IIVoiceInteractionManagerService {
+        StartSession(
+            [in] IIVoiceInteractionService* service,
+            [in] IBundle* sessionArgs);
+
+        DeliverNewSession(
+            [in] IBinder* token,
+            [in] IIVoiceInteractionSession* session,
+            [in] IIVoiceInteractor* interactor,
+            [out] Boolean* result);
+
+        StartVoiceActivity(
+            [in] IBinder* token,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [out] Int32* result);
+
+        Finish(
+            [in] IBinder* token);
+
+        /**
+         * Gets the registered Sound model for keyphrase detection for the current user.
+         * May be null if no matching sound model exists.
+         *
+         * @param keyphraseId The unique identifier for the keyphrase.
+         * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
+         */
+        GetKeyphraseSoundModel(
+            [in] Int32 keyphraseId,
+            [in] String bcp47Locale,
+            [out] ISoundTriggerKeyphraseSoundModel** soundModel);
+
+        /**
+         * Add/Update the given keyphrase sound model.
+         */
+        UpdateKeyphraseSoundModel(
+            [in] ISoundTriggerKeyphraseSoundModel* model,
+            [out] Int32* result);
+
+        /**
+         * Deletes the given keyphrase sound model for the current user.
+         *
+         * @param keyphraseId The unique identifier for the keyphrase.
+         * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
+         */
+        DeleteKeyphraseSoundModel(
+            [in] Int32 keyphraseId,
+            [in] String bcp47Locale,
+            [out] Int32* result);
+
+        /**
+         * Gets the properties of the DSP hardware on this device, null if not present.
+         */
+        GetDspModuleProperties(
+            [in] IIVoiceInteractionService* service,
+            [out] ISoundTriggerModuleProperties** properties);
+
+        /**
+         * Indicates if there's a keyphrase sound model available for the given keyphrase ID.
+         * This performs the check for the current user.
+         *
+         * @param service The current VoiceInteractionService.
+         * @param keyphraseId The unique identifier for the keyphrase.
+         * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
+         */
+        IsEnrolledForKeyphrase(
+            [in] IIVoiceInteractionService* service,
+            [in] Int32 keyphraseId,
+            [in] String bcp47Locale,
+            [out] Boolean* result);
+
+        /**
+         * Starts a recognition for the given keyphrase.
+         */
+        StartRecognition(
+            [in] IIVoiceInteractionService* service,
+            [in] Int32 keyphraseId,
+            [in] String bcp47Locale,
+            [in] IIRecognitionStatusCallback* cb,
+            [in] ISoundTriggerRecognitionConfig* recognitionConfig,
+            [out] Int32* result);
+
+        /**
+         * Stops a recognition for the given keyphrase.
+         */
+        StopRecognition(
+            [in] IIVoiceInteractionService* service,
+            [in] Int32 keyphraseId,
+            [in] IIRecognitionStatusCallback* cb,
+            [out] Int32* result);
+    }
+
+    } // namespace App
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

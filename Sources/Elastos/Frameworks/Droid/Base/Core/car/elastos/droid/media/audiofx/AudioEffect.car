@@ -1,0 +1,836 @@
+module
+{
+    using interface Elastos.Utility.IUUID;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Audiofx {
+
+    interface IAudioEffect;
+
+    /**
+     * The effect descriptor contains information on a particular effect implemented in the
+     * audio framework:<br>
+     * <ul>
+     *  <li>type: UUID corresponding to the OpenSL ES interface implemented by this effect</li>
+     *  <li>uuid: UUID for this particular implementation</li>
+     *  <li>connectMode: {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}</li>
+     *  <li>name: human readable effect name</li>
+     *  <li>implementor: human readable effect implementor name</li>
+     * </ul>
+     * The method {@link #queryEffects()} returns an array of Descriptors to facilitate effects
+     * enumeration.
+     */
+    interface IAudioEffectDescriptor {
+       GetType(
+           [out] IUUID** mtype);
+
+       SetType(
+           [in] IUUID* mtype);
+
+       GetUuid(
+           [out] IUUID** uuid);
+
+       SetUuid(
+           [in] IUUID* uuid);
+
+        GetConnectMode(
+            [out] String* connectMode);
+
+        SetConnectMode(
+            [in] String connectMode);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetImplementor(
+            [out] String* implementor);
+
+        SetImplementor(
+            [in] String implementor);
+    }
+
+    // ---------------------------------------------------------
+    // Interface definitions
+    // --------------------
+    /**
+     * The OnEnableStatusChangeListener interface defines a method called by the AudioEffect
+     * when a the enabled state of the effect engine was changed by the controlling application.
+     */
+    interface IAudioEffectOnEnableStatusChangeListener {
+        /**
+        * Called on the listener to notify it that the effect engine has been
+        * enabled or disabled.
+        * @param effect the effect on which the interface is registered.
+        * @param enabled new effect state.
+        */
+        OnEnableStatusChange(
+            [in] IAudioEffect* effect,
+            [in] Boolean enabled);
+    }
+
+    /**
+     * The OnControlStatusChangeListener interface defines a method called by the AudioEffect
+     * when a the control of the effect engine is gained or lost by the application
+     */
+    interface IAudioEffectOnControlStatusChangeListener {
+        /**
+         * Called on the listener to notify it that the effect engine control
+         * has been taken or returned.
+         * @param effect the effect on which the interface is registered.
+         * @param controlGranted true if the application has been granted control of the effect
+         * engine, false otherwise.
+         */
+        OnControlStatusChange(
+            [in] IAudioEffect* effect,
+            [in] Boolean controlGranted);
+    }
+
+    /**
+     * The OnParameterChangeListener interface defines a method called by the AudioEffect
+     * when a parameter is changed in the effect engine by the controlling application.
+     * @hide
+     */
+    [deprecated]
+    interface IAudioEffectOnParameterChangeListener {
+        /**
+         * Called on the listener to notify it that a parameter value has changed.
+         * @param effect the effect on which the interface is registered.
+         * @param status status of the set parameter operation.
+         * @param param ID of the modified parameter.
+         * @param value the new parameter value.
+         */
+        OnParameterChange(
+            [in] IAudioEffect* effect,
+            [in] Int32 status,
+            [in] ArrayOf<Byte>* param,
+            [in] ArrayOf<Byte>* value);
+    }
+
+    [deprecated]
+    interface IAudioEffect {
+
+        /**
+         * The following UUIDs define effect types corresponding to standard audio
+         * effects whose implementation and interface conform to the OpenSL ES
+         * specification. The definitions match the corresponding interface IDs in
+         * OpenSLES_IID.h
+         */
+
+        /**
+         * UUID for environmental reverb effect
+         * @hide
+         */
+        /*
+        public static final UUID EFFECT_TYPE_ENV_REVERB = UUID
+                .fromString("c2e5d5f0-94bd-4763-9cac-4e234d06839e");
+        */
+        const String EFFECT_TYPE_ENV_REVERB = "c2e5d5f0-94bd-4763-9cac-4e234d06839e";
+
+        /**
+         * UUID for preset reverb effect
+         * @hide
+         */
+        /*
+        public static final UUID EFFECT_TYPE_PRESET_REVERB = UUID
+                .fromString("47382d60-ddd8-11db-bf3a-0002a5d5c51b");
+        */
+        const String EFFECT_TYPE_PRESET_REVERB = "47382d60-ddd8-11db-bf3a-0002a5d5c51b";
+
+        /**
+         * UUID for equalizer effect
+         * @hide
+         */
+        /*
+        /*
+        public static final UUID EFFECT_TYPE_EQUALIZER = UUID
+                .fromString("0bed4300-ddd6-11db-8f34-0002a5d5c51b");
+        */
+        const String EFFECT_TYPE_EQUALIZER = "0bed4300-ddd6-11db-8f34-0002a5d5c51b";
+
+        /**
+         * UUID for bass boost effect
+         * @hide
+         */
+        /*
+        public static final UUID EFFECT_TYPE_BASS_BOOST = UUID
+                .fromString("0634f220-ddd4-11db-a0fc-0002a5d5c51b");
+        */
+        const String EFFECT_TYPE_BASS_BOOST = "0634f220-ddd4-11db-a0fc-0002a5d5c51b";
+
+        /**
+         * UUID for Automatic Gain Control (AGC) audio pre-processing
+         * @hide
+         */
+        /*
+        public static final UUID EFFECT_TYPE_AGC = UUID
+                .fromString("0a8abfe0-654c-11e0-ba26-0002a5d5c51b");
+        */
+        const String EFFECT_TYPE_AGC = "0a8abfe0-654c-11e0-ba26-0002a5d5c51b";
+
+        /**
+         * UUID for Acoustic Echo Canceler (AEC) audio pre-processing
+         * @hide
+         */
+        /*
+        public static final UUID EFFECT_TYPE_AEC = UUID
+                .fromString("7b491460-8d4d-11e0-bd61-0002a5d5c51b");
+        */
+        const String EFFECT_TYPE_AEC = "7b491460-8d4d-11e0-bd61-0002a5d5c51b";
+
+        /**
+         * UUID for Noise Suppressor (NS) audio pre-processing
+         * @hide
+         */
+        /*
+        public static final UUID EFFECT_TYPE_NS = UUID
+                .fromString("58b4b260-8e06-11e0-aa8e-0002a5d5c51b");
+        */
+        const String EFFECT_TYPE_NS = "58b4b260-8e06-11e0-aa8e-0002a5d5c51b";
+
+        /**
+         * UUID for Loudness Enhancer
+         */
+        /*
+        public static final UUID EFFECT_TYPE_LOUDNESS_ENHANCER = UUID
+                  .fromString("fe3199be-aed0-413f-87bb-11260eb63cf1");
+        */
+        const String EFFECT_TYPE_LOUDNESS_ENHANCER = "fe3199be-aed0-413f-87bb-11260eb63cf1";
+
+        /**
+         * UUID for virtualizer effect
+         * @hide
+         */
+        /*
+        public static final UUID EFFECT_TYPE_VIRTUALIZER = UUID
+                .fromString("37cc2c00-dddd-11db-8577-0002a5d5c51b");
+        */
+        const String EFFECT_TYPE_VIRTUALIZER = "37cc2c00-dddd-11db-8577-0002a5d5c51b";
+
+        /**
+         * Null effect UUID. Used when the UUID for effect type of
+         * @hide
+         */
+        /*
+        public static final UUID EFFECT_TYPE_NULL = UUID
+                .fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
+        */
+        const String EFFECT_TYPE_NULL = "ec7178ec-e5e1-4432-a3f4-4657e6795210";
+
+        /**
+         * State of an AudioEffect object that was not successfully initialized upon
+         * creation
+         * @hide
+         */
+        const Int32 STATE_UNINITIALIZED = 0;
+
+        /**
+         * State of an AudioEffect object that is ready to be used.
+         * @hide
+         */
+        const Int32 STATE_INITIALIZED = 1;
+
+        // to keep in sync with
+        // frameworks/base/include/media/AudioEffect.h
+        /**
+         * Event id for engine control ownership change notification.
+         * @hide
+         */
+        const Int32 NATIVE_EVENT_CONTROL_STATUS = 0;
+        /**
+         * Event id for engine state change notification.
+         * @hide
+         */
+        const Int32 NATIVE_EVENT_ENABLED_STATUS = 1;
+        /**
+         * Event id for engine parameter change notification.
+         * @hide
+         */
+        const Int32 NATIVE_EVENT_PARAMETER_CHANGED = 2;
+
+        /**
+         * Successful operation.
+         */
+        const Int32 SUCCESS = 0;
+        /**
+         * Unspecified error.
+         */
+        const Int32 ERROR = -1;
+        /**
+         * Internal opreation status. Not returned by any method.
+         */
+        const Int32 ALREADY_EXISTS = -2;
+        /**
+         * Operation failed due to bad object initialization.
+         */
+        const Int32 ERROR_NO_INIT = -3;
+        /**
+         * Operation failed due to bad parameter value.
+         */
+        const Int32 ERROR_BAD_VALUE = -4;
+        /**
+         * Operation failed because it was requested in wrong state.
+         */
+        const Int32 ERROR_INVALID_OPERATION = -5;
+        /**
+         * Operation failed due to lack of memory.
+         */
+        const Int32 ERROR_NO_MEMORY = -6;
+        /**
+         * Operation failed due to dead remote object.
+         */
+        const Int32 ERROR_DEAD_OBJECT = -7;
+
+        /**
+         * Effect connection mode is insert. Specifying an audio session ID when creating the effect
+         * will insert this effect after all players in the same audio session.
+         */
+        const String EFFECT_INSERT = "Insert";
+        /**
+         * Effect connection mode is auxiliary.
+         * <p>Auxiliary effects must be created on session 0 (global output mix). In order for a
+         * MediaPlayer or AudioTrack to be fed into this effect, they must be explicitely attached to
+         * this effect and a send level must be specified.
+         * <p>Use the effect ID returned by {@link #getId()} to designate this particular effect when
+         * attaching it to the MediaPlayer or AudioTrack.
+         */
+        const String EFFECT_AUXILIARY = "Auxiliary";
+        /**
+         * Effect connection mode is pre processing.
+         * The audio pre processing effects are attached to an audio input (AudioRecord).
+         * @hide
+         */
+        const String EFFECT_PRE_PROCESSING = "Pre Processing";
+
+        // -------------------------------------------------------------------------
+        // Audio Effect Control panel intents
+        // -------------------------------------------------------------------------
+
+        /**
+         *  Intent to launch an audio effect control panel UI.
+         *  <p>The goal of this intent is to enable separate implementations of music/media player
+         *  applications and audio effect control application or services.
+         *  This will allow platform vendors to offer more advanced control options for standard effects
+         *  or control for platform specific effects.
+         *  <p>The intent carries a number of extras used by the player application to communicate
+         *  necessary pieces of information to the control panel application.
+         *  <p>The calling application must use the
+         *  {@link android.app.Activity#startActivityForResult(Intent, int)} method to launch the
+         *  control panel so that its package name is indicated and used by the control panel
+         *  application to keep track of changes for this particular application.
+         *  <p>The {@link #EXTRA_AUDIO_SESSION} extra will indicate an audio session to which the
+         *  audio effects should be applied. If no audio session is specified, either one of the
+         *  follownig will happen:
+         *  <p>- If an audio session was previously opened by the calling application with
+         *  {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} intent, the effect changes will
+         *  be applied to that session.
+         *  <p>- If no audio session is opened, the changes will be stored in the package specific
+         *  storage area and applied whenever a new audio session is opened by this application.
+         *  <p>The {@link #EXTRA_CONTENT_TYPE} extra will help the control panel application
+         *  customize both the UI layout and the default audio effect settings if none are already
+         *  stored for the calling application.
+         */
+        //@SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        const String ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL =
+            "android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL";
+
+        /**
+         *  Intent to signal to the effect control application or service that a new audio session
+         *  is opened and requires audio effects to be applied.
+         *  <p>This is different from {@link #ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL} in that no
+         *  UI should be displayed in this case. Music player applications can broadcast this intent
+         *  before starting playback to make sure that any audio effect settings previously selected
+         *  by the user are applied.
+         *  <p>The effect control application receiving this intent will look for previously stored
+         *  settings for the calling application, create all required audio effects and apply the
+         *  effect settings to the specified audio session.
+         *  <p>The calling package name is indicated by the {@link #EXTRA_PACKAGE_NAME} extra and the
+         *  audio session ID by the {@link #EXTRA_AUDIO_SESSION} extra. Both extras are mandatory.
+         *  <p>If no stored settings are found for the calling application, default settings for the
+         *  content type indicated by {@link #EXTRA_CONTENT_TYPE} will be applied. The default settings
+         *  for a given content type are platform specific.
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION =
+            "android.media.action.OPEN_AUDIO_EFFECT_CONTROL_SESSION";
+
+        /**
+         *  Intent to signal to the effect control application or service that an audio session
+         *  is closed and that effects should not be applied anymore.
+         *  <p>The effect control application receiving this intent will delete all effects on
+         *  this session and store current settings in package specific storage.
+         *  <p>The calling package name is indicated by the {@link #EXTRA_PACKAGE_NAME} extra and the
+         *  audio session ID by the {@link #EXTRA_AUDIO_SESSION} extra. Both extras are mandatory.
+         *  <p>It is good practice for applications to broadcast this intent when music playback stops
+         *  and/or when exiting to free system resources consumed by audio effect engines.
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION =
+            "android.media.action.CLOSE_AUDIO_EFFECT_CONTROL_SESSION";
+
+        /**
+         * Contains the ID of the audio session the effects should be applied to.
+         * <p>This extra is for use with {@link #ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL},
+         * {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} and
+         * {@link #ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION} intents.
+         * <p>The extra value is of type int and is the audio session ID.
+         *  @see android.media.MediaPlayer#getAudioSessionId() for details on audio sessions.
+         */
+         const String EXTRA_AUDIO_SESSION = "android.media.extra.AUDIO_SESSION";
+
+        /**
+         * Contains the package name of the calling application.
+         * <p>This extra is for use with {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} and
+         * {@link #ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION} intents.
+         * <p>The extra value is a string containing the full package name.
+         */
+        const String EXTRA_PACKAGE_NAME = "android.media.extra.PACKAGE_NAME";
+
+        /**
+         * Indicates which type of content is played by the application.
+         * <p>This extra is for use with {@link #ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL} and
+         * {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} intents.
+         * <p>This information is used by the effect control application to customize UI and select
+         * appropriate default effect settings. The content type is one of the following:
+         * <ul>
+         *   <li>{@link #CONTENT_TYPE_MUSIC}</li>
+         *   <li>{@link #CONTENT_TYPE_MOVIE}</li>
+         *   <li>{@link #CONTENT_TYPE_GAME}</li>
+         *   <li>{@link #CONTENT_TYPE_VOICE}</li>
+         * </ul>
+         * If omitted, the content type defaults to {@link #CONTENT_TYPE_MUSIC}.
+         */
+        const String EXTRA_CONTENT_TYPE = "android.media.extra.CONTENT_TYPE";
+
+        /**
+         * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is music
+         */
+        const Int32 CONTENT_TYPE_MUSIC = 0;
+        /**
+         * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is video or movie
+         */
+        const Int32 CONTENT_TYPE_MOVIE = 1;
+        /**
+         * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is game audio
+         */
+        const Int32 CONTENT_TYPE_GAME = 2;
+        /**
+         * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is voice audio
+         */
+        const Int32 CONTENT_TYPE_VOICE = 3;
+
+        /**
+         * Releases the native AudioEffect resources. It is a good practice to
+         * release the effect engine when not in use as control can be returned to
+         * other applications or the native resources released.
+         */
+        ReleaseResources();
+
+        /**
+         * Get the effect descriptor.
+         *
+         * @see android.media.audiofx.AudioEffect.Descriptor
+         * @throws IllegalStateException
+         */
+        GetDescriptor(
+            [out] IAudioEffectDescriptor** descriptor);
+
+        // --------------------------------------------------------------------------
+        // Control methods
+        // --------------------
+
+        /**
+         * Enable or disable the effect.
+         * Creating an audio effect does not automatically apply this effect on the audio source. It
+         * creates the resources necessary to process this effect but the audio signal is still bypassed
+         * through the effect engine. Calling this method will make that the effect is actually applied
+         * or not to the audio content being played in the corresponding audio session.
+         *
+         * @param enabled the requested enable state
+         * @return {@link #SUCCESS} in case of success, {@link #ERROR_INVALID_OPERATION}
+         *         or {@link #ERROR_DEAD_OBJECT} in case of failure.
+         * @throws IllegalStateException
+         */
+        SetEnabled(
+            [in] Boolean enabled,
+            [out] Int32* result);
+
+        /**
+         * Set effect parameter. The setParameter method is provided in several
+         * forms addressing most common parameter formats. This form is the most
+         * generic one where the parameter and its value are both specified as an
+         * array of bytes. The parameter and value type and length are therefore
+         * totally free. For standard effect defined by OpenSL ES, the parameter
+         * format and values must match the definitions in the corresponding OpenSL
+         * ES interface.
+         *
+         * @param param the identifier of the parameter to set
+         * @param value the new value for the specified parameter
+         * @return {@link #SUCCESS} in case of success, {@link #ERROR_BAD_VALUE},
+         *         {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or
+         *         {@link #ERROR_DEAD_OBJECT} in case of failure
+         * @throws IllegalStateException
+         * @hide
+         */
+        SetParameter(
+            [in] ArrayOf<Byte>* param,
+            [in] ArrayOf<Byte>* value,
+            [out] Int32* result);
+
+        /**
+         * Set effect parameter. The parameter and its value are integers.
+         *
+         * @see #setParameter(byte[], byte[])
+         * @hide
+         */
+        SetParameter(
+            [in] Int32 param,
+            [in] Int32 value,
+            [out] Int32* result);
+
+        /**
+         * Set effect parameter. The parameter is an integer and the value is a
+         * short integer.
+         *
+         * @see #setParameter(byte[], byte[])
+         * @hide
+         */
+        SetParameter(
+            [in] Int32 param,
+            [in] Int16 value,
+            [out] Int32* result);
+
+        /**
+         * Set effect parameter. The parameter is an integer and the value is an
+         * array of bytes.
+         *
+         * @see #setParameter(byte[], byte[])
+         * @hide
+         */
+        SetParameter(
+            [in] Int32 param,
+            [in] ArrayOf<Byte>* value,
+            [out] Int32* result);
+
+        /**
+         * Set effect parameter. The parameter is an array of 1 or 2 integers and
+         * the value is also an array of 1 or 2 integers
+         *
+         * @see #setParameter(byte[], byte[])
+         * @hide
+         */
+        SetParameter(
+            [in] ArrayOf<Int32>* param,
+            [in] ArrayOf<Int32>* value,
+            [out] Int32* result);
+
+        /**
+         * Set effect parameter. The parameter is an array of 1 or 2 integers and
+         * the value is an array of 1 or 2 short integers
+         *
+         * @see #setParameter(byte[], byte[])
+         * @hide
+         */
+        SetParameter(
+            [in] ArrayOf<Int32>* param,
+            [in] ArrayOf<Int16>* value,
+            [out] Int32* result);
+
+        /**
+         * Set effect parameter. The parameter is an array of 1 or 2 integers and
+         * the value is an array of bytes
+         *
+         * @see #setParameter(byte[], byte[])
+         * @hide
+         */
+        SetParameter(
+            [in] ArrayOf<Int32>* param,
+            [in] ArrayOf<Byte>* value,
+            [out] Int32* result);
+
+        /**
+         * Get effect parameter. The getParameter method is provided in several
+         * forms addressing most common parameter formats. This form is the most
+         * generic one where the parameter and its value are both specified as an
+         * array of bytes. The parameter and value type and length are therefore
+         * totally free.
+         *
+         * @param param the identifier of the parameter to set
+         * @param value the new value for the specified parameter
+         * @return {@link #SUCCESS} in case of success, {@link #ERROR_BAD_VALUE},
+         *         {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or
+         *         {@link #ERROR_DEAD_OBJECT} in case of failure When called, value.length
+         *         indicates the maximum size of the returned parameters value. When
+         *         returning, value.length is updated with the actual size of the
+         *         returned value.
+         * @throws IllegalStateException
+         * @hide
+         */
+        GetParameter(
+            [in] ArrayOf<Byte>* param,
+            [in] ArrayOf<Byte>* value,
+            [out] Int32* status);
+
+        /**
+         * Get effect parameter. The parameter is an integer and the value is an
+         * array of bytes.
+         *
+         * @see #getParameter(byte[], byte[])
+         * @hide
+         */
+        GetParameter(
+            [in] Int32 param,
+            [in] ArrayOf<Byte>* value,
+            [out] Int32* status);
+
+        /**
+         * Get effect parameter. The parameter is an integer and the value is an
+         * array of 1 or 2 integers
+         *
+         * @see #getParameter(byte[], byte[])
+         * @hide
+         */
+        GetParameter(
+            [in] Int32 param,
+            [in] ArrayOf<Int32>* value,
+            [out] Int32* status);
+
+        /**
+         * Get effect parameter. The parameter is an integer and the value is an
+         * array of 1 or 2 short integers
+         *
+         * @see #getParameter(byte[], byte[])
+         * @hide
+         */
+        GetParameter(
+            [in] Int32 param,
+            [in] ArrayOf<Int16>* value,
+            [out] Int32* status);
+
+        /**
+         * Get effect parameter. The parameter is an array of 1 or 2 integers and
+         * the value is also an array of 1 or 2 integers
+         *
+         * @see #getParameter(byte[], byte[])
+         * @hide
+         */
+        GetParameter(
+            [in] ArrayOf<Int32>* param,
+            [in] ArrayOf<Int32>* value,
+            [out] Int32* status);
+
+        /**
+         * Get effect parameter. The parameter is an array of 1 or 2 integers and
+         * the value is an array of 1 or 2 short integers
+         *
+         * @see #getParameter(byte[], byte[])
+         * @hide
+         */
+        GetParameter(
+            [in] ArrayOf<Int32>* param,
+            [in] ArrayOf<Int16>* value,
+            [out] Int32* status);
+
+        /**
+         * Get effect parameter. The parameter is an array of 1 or 2 integers and
+         * the value is an array of bytes
+         *
+         * @see #getParameter(byte[], byte[])
+         * @hide
+         */
+        GetParameter(
+            [in] ArrayOf<Int32>* param,
+            [in] ArrayOf<Byte>* value,
+            [out] Int32* status);
+
+        /**
+         * Send a command to the effect engine. This method is intended to send
+         * proprietary commands to a particular effect implementation.
+         *
+         * @hide
+         */
+        Command(
+            [in] Int32 cmdCode,
+            [in] ArrayOf<Byte>* command,
+            [in] ArrayOf<Byte>* reply,
+            [out] Int32* result);
+
+        /**
+         * Returns effect unique identifier. This system wide unique identifier can
+         * be used to attach this effect to a MediaPlayer or an AudioTrack when the
+         * effect is an auxiliary effect (Reverb)
+         *
+         * @return the effect identifier.
+         * @throws IllegalStateException
+         */
+        GetId(
+            [out] Int32* Id);
+
+        /**
+         * Returns effect enabled state
+         *
+         * @return true if the effect is enabled, false otherwise.
+         * @throws IllegalStateException
+         */
+        GetEnabled(
+            [out] Boolean* getenable);
+
+        /**
+         * Checks if this AudioEffect object is controlling the effect engine.
+         *
+         * @return true if this instance has control of effect engine, false
+         *         otherwise.
+         * @throws IllegalStateException
+         */
+        HasControl(
+            [out] Boolean* control);
+
+        // --------------------------------------------------------------------------
+        // Initialization / configuration
+        // --------------------
+        /**
+         * Sets the listener AudioEffect notifies when the effect engine is enabled
+         * or disabled.
+         *
+         * @param listener
+         */
+        SetEnableStatusListener(
+            [in] IAudioEffectOnEnableStatusChangeListener* listener);
+
+         /**
+         * Sets the listener AudioEffect notifies when the effect engine control is
+         * taken or returned.
+         *
+         * @param listener
+         */
+        SetControlStatusListener(
+            [in] IAudioEffectOnControlStatusChangeListener* listener);
+
+        /**
+         * Sets the listener AudioEffect notifies when a parameter is changed.
+         *
+         * @param listener
+         * @hide
+         */
+        SetParameterListener(
+            [in] IAudioEffectOnParameterChangeListener* listener);
+
+        // ---------------------------------------------------------
+        // Utility methods
+        // ------------------
+
+        /**
+        * @hide
+        */
+        CheckState(
+            [in] String methodName);
+
+        /**
+         * @hide
+         */
+        CheckStatus(
+            [in] Int32 status);
+
+    }
+
+    [deprecated]
+    interface IAudioEffectHelper {
+        /**
+         * Query all effects available on the platform. Returns an array of
+         * {@link android.media.audiofx.AudioEffect.Descriptor} objects
+         *
+         * @throws IllegalStateException
+         */
+        QueryEffects(
+            [out, callee] ArrayOf<IAudioEffectDescriptor*>* descriptors);
+
+        /**
+         * Query all audio pre processing effects applied to the AudioRecord with the supplied
+         * audio session ID. Returns an array of {@link android.media.audiofx.AudioEffect.Descriptor}
+         * objects.
+         * @param audioSession system wide unique audio session identifier.
+         * @throws IllegalStateException
+         * @hide
+         */
+
+        QueryPreProcessings(
+            [in] Int32 audioSession,
+            [out, callee] ArrayOf<IAudioEffectDescriptor*>* descriptors);
+
+        /**
+         * Checks if the device implements the specified effect type.
+         * @param type the requested effect type.
+         * @return true if the device implements the specified effect type, false otherwise.
+         * @hide
+         */
+        IsEffectTypeAvailable(
+            [in] IUUID* type,
+            [out] Boolean* result);
+
+        IsError(
+            [in] Int32 status,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        ByteArrayToInt32(
+            [in] ArrayOf<Byte>* valueBuf,
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        ByteArrayToInt32(
+            [in] ArrayOf<Byte>* valueBuf,
+            [in] Int32 offset,
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        Int32ToByteArray(
+            [in] Int32 value,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * @hide
+         */
+        ByteArrayToInt16(
+            [in] ArrayOf<Byte>* valueBuf,
+            [out] Int16* result);
+
+        /**
+         * @hide
+         */
+        ByteArrayToInt16(
+            [in] ArrayOf<Byte>* valueBuf,
+            [in] Int32 offset,
+            [out] Int16* result);
+
+        /**
+         * @hide
+         */
+        Int16ToByteArray(
+            [in] Int16 value,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * @hide
+         */
+        ConcatArrays(
+            [in] ArrayOf<Byte>* array1,
+            [in] ArrayOf<Byte>* array2,
+            [out, callee] ArrayOf<Byte>* result);
+
+    }
+
+    } // namespace audiofx
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

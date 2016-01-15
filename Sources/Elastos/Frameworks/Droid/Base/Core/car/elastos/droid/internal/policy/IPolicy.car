@@ -1,0 +1,43 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IWindow;
+    interface Elastos.Droid.View.ILayoutInflater;
+    interface Elastos.Droid.View.IWindowManagerPolicy;
+    interface Elastos.Droid.View.IFallbackEventHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+
+    /**
+     * {@hide}
+     */
+    /* The implementation of this interface must be called Policy and contained
+     * within the com.android.internal.policy.impl package
+     */
+    [local]
+    interface IIPolicy {
+        MakeNewWindow(
+            [in] IContext* ctx,
+            [out] IWindow** window);
+
+        MakeNewLayoutInflater(
+            [in] IContext* ctx,
+            [out] ILayoutInflater** inflater);
+
+        MakeNewWindowManager(
+            [out] IWindowManagerPolicy** wm);
+
+        MakeNewFallbackEventHandler(
+            [in] IContext* ctx,
+            [out] IFallbackEventHandler** handler);
+    }
+
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

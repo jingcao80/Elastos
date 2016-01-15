@@ -1,0 +1,39 @@
+module
+{
+    using interface Elastos.Droid.Net.INetworkRequest;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Connectivity {
+
+    /**
+     * A bag class used by ConnectivityService for holding a collection of most recent
+     * information published by a particular NetworkAgent as well as the
+     * AsyncChannel/messenger for reaching that NetworkAgent and lists of NetworkRequests
+     * interested in using it.
+     */
+    interface INetworkAgentInfo {
+        AddRequest(
+            [in] INetworkRequest* networkRequest);
+
+        IsVPN(
+            [out] Boolean* result);
+
+        // Get the current score for this Network.  This may be modified from what the
+        // NetworkAgent sent, as it has modifiers applied to it.
+        GetCurrentScore(
+            [out] Int32* score);
+
+        SetCurrentScore(
+            [in] Int32 newScore);
+
+        Name(
+            [out] String* name);
+    }
+
+    } // namespace Connectivity
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

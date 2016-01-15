@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Utility.IIterator;
+
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * Instances of classes that implement this interface can be used with
+     * the enhanced for loop.
+     *
+     * @since 1.5
+     */
+    interface IIterable {
+        /**
+         * Returns an {@link Iterator} for the elements in this object.
+         *
+         * @return An {@code Iterator} instance.
+         */
+        GetIterator(
+            [out] IIterator** it);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

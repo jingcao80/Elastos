@@ -1,0 +1,39 @@
+
+
+module
+{
+    using interface Elastos.Security.IPrivateKey;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    interface IOpenSSLEngine {
+        GetPrivateKeyById(
+            [in] String id,
+            [out] IPrivateKey** key);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* isEqual);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+    }
+
+    interface IOpenSSLEngineHelper {
+        GetInstance(
+            [in] String engine,
+            [out] IOpenSSLEngine** instance);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

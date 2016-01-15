@@ -1,0 +1,107 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Graphics.ICanvas;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+    namespace Multiwaveview {
+
+    [deprecated]
+    interface ITargetDrawable
+    {
+        SetDrawable(
+            [in] IResources* res,
+            [in] Int32 resId);
+
+        SetState(
+            [in] ArrayOf<Int32>* state);
+
+        HasState(
+            [in] ArrayOf<Int32>* state,
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the drawable is a StateListDrawable and is in the focused state.
+         *
+         * @return
+         */
+        IsActive(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if this target is enabled. Typically an enabled target contains a valid
+         * drawable in a valid state. Currently all targets with valid drawables are valid.
+         *
+         * @return
+         */
+        IsEnabled(
+            [out] Boolean* result);
+
+        SetX(
+            [in] Float x);
+
+        SetY(
+            [in] Float y);
+
+        SetScaleX(
+            [in] Float x);
+
+        SetScaleY(
+            [in] Float y);
+
+        SetAlpha(
+            [in] Float alpha);
+
+        GetX(
+            [out] Float* result);
+
+        GetY(
+            [out] Float* result);
+
+        GetScaleX(
+            [out] Float* result);
+
+        GetScaleY(
+            [out] Float* result);
+
+        GetAlpha(
+            [out] Float* result);
+
+        SetPositionX(
+            [in] Float x);
+
+        SetPositionY(
+            [in] Float y);
+
+        GetPositionX(
+            [out] Float* result);
+
+        GetPositionY(
+            [out] Float* result);
+
+        GetWidth(
+            [out] Int32* result);
+
+        GetHeight(
+            [out] Int32* result);
+
+        Draw(
+            [in] ICanvas* canvas);
+
+        SetEnabled(
+            [in] Boolean enabled);
+
+        GetResourceId(
+            [out] Int32* result);
+    }
+
+    } // namespace Multiwaveview
+    } // namespace Widget
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

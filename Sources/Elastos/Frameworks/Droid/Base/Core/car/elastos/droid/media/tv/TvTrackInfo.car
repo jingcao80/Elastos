@@ -1,0 +1,168 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Encapsulates the format of tracks played in {@link TvInputService}.
+     */
+    interface ITvTrackInfo {
+        /**
+         * The type value for audio tracks.
+         */
+        const Int32 TYPE_AUDIO = 0;
+
+        /**
+         * The type value for video tracks.
+         */
+        const Int32 TYPE_VIDEO = 1;
+
+        /**
+         * The type value for subtitle tracks.
+         */
+        const Int32 TYPE_SUBTITLE = 2;
+
+        /**
+         * Returns the type of the track. The type should be one of the followings:
+         * {@link #TYPE_AUDIO}, {@link #TYPE_VIDEO} and {@link #TYPE_SUBTITLE}.
+         */
+        GetType(
+            [out] Int32 * result);
+
+        /**
+         * Returns the ID of the track.
+         */
+        GetId(
+            [out] String * result);
+
+        /**
+         * Returns the language information encoded by either ISO 639-1 or ISO 639-2/T. If the language
+         * is unknown or could not be determined, the corresponding value will be {@code null}.
+         */
+        GetLanguage(
+            [out] String * result);
+
+        /**
+         * Returns the audio channel count. Valid only for {@link #TYPE_AUDIO} tracks.
+         */
+        GetAudioChannelCount(
+            [out] Int32 * result);
+
+        /**
+         * Returns the audio sample rate, in the unit of Hz. Valid only for {@link #TYPE_AUDIO} tracks.
+         */
+        GetAudioSampleRate(
+            [out] Int32 * result);
+
+        /**
+         * Returns the width of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
+         * tracks.
+         */
+        GetVideoWidth(
+            [out] Int32 * result);
+
+        /**
+         * Returns the height of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
+         * tracks.
+         */
+        GetVideoHeight(
+            [out] Int32 * result);
+
+        /**
+         * Returns the frame rate of the video, in the unit of fps (frames per second). Valid only for
+         * {@link #TYPE_VIDEO} tracks.
+         */
+        GetVideoFrameRate(
+            [out] Float * result);
+
+        /**
+         * Returns the extra information about the current track.
+         */
+        GetExtra(
+            [out] IBundle ** result);
+
+    }
+
+    /**
+     * A builder class for creating {@link TvTrackInfo} objects.
+     */
+    interface ITvTrackInfoBuilder {
+        /**
+         * Sets the language information of the current track.
+         *
+         * @param language The language string encoded by either ISO 639-1 or ISO 639-2/T.
+         */
+        SetLanguage(
+            [in] String language);
+
+        /**
+         * Sets the audio channel count. Valid only for {@link #TYPE_AUDIO} tracks.
+         *
+         * @param audioChannelCount The audio channel count.
+         */
+        SetAudioChannelCount(
+            [in] Int32 audioChannelCount);
+
+        /**
+         * Sets the audio sample rate, in the unit of Hz. Valid only for {@link #TYPE_AUDIO}
+         * tracks.
+         *
+         * @param audioSampleRate The audio sample rate.
+         */
+        SetAudioSampleRate(
+            [in] Int32 audioSampleRate);
+
+        /**
+         * Sets the width of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
+         * tracks.
+         *
+         * @param videoWidth The width of the video.
+         */
+        SetVideoWidth(
+            [in] Int32 videoWidth);
+
+        /**
+         * Sets the height of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
+         * tracks.
+         *
+         * @param videoHeight The height of the video.
+         */
+        SetVideoHeight(
+            [in] Int32 videoHeight);
+
+        /**
+         * Sets the frame rate of the video, in the unit fps (frames per rate). Valid only for
+         * {@link #TYPE_VIDEO} tracks.
+         *
+         * @param videoFrameRate The frame rate of the video.
+         */
+        SetVideoFrameRate(
+            [in] Float videoFrameRate);
+
+        /**
+         * Sets the extra information about the current track.
+         *
+         * @param extra The extra information.
+         */
+        SetExtra(
+            [in] IBundle * extra);
+
+        /**
+         * Creates a {@link TvTrackInfo} instance with the specified fields.
+         *
+         * @return The new {@link TvTrackInfo} instance
+         */
+        Build(
+            [out] ITvTrackInfo ** result);
+
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

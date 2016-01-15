@@ -1,0 +1,37 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.IX509TrustManager;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * The instances of this class encapsulate all the info
+     * about enabled cipher suites and protocols,
+     * as well as the information about client/server mode of
+     * ssl socket, whether it require/want client authentication or not,
+     * and controls whether new SSL sessions may be established by this
+     * socket or not.
+     */
+    interface ISSLParametersImplHelper {
+        /**
+         * Gets the default trust manager.
+         *
+         * TODO: Move this to a published API under dalvik.system.
+         */
+        GetDefaultTrustManager(
+            [out] IX509TrustManager** manager);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

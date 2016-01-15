@@ -1,0 +1,223 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * This interface is used to make sure that the text entered in this TextView complies to
+     * a certain format.  Since there is no foolproof way to prevent the user from leaving
+     * this View with an incorrect value in it, all we can do is try to fix it ourselves
+     * when this happens.
+     */
+    interface IValidator {
+        /**
+         * Validates the specified text.
+         *
+         * @return TRUE If the text currently in the text editor is valid.
+         *
+         * @see #fixText(CharSequence)
+         */
+        IsValid(
+            [in] ICharSequence* text,
+            [out] Boolean* valid);
+
+        /**
+         * Corrects the specified text to make it valid.
+         *
+         * @param invalidText A string that doesn't pass validation: isValid(invalidText)
+         *        returns FALSE
+         *
+         * @return A string based on invalidText such as invoking isValid() on it returns TRUE.
+         *
+         * @see #isValid(CharSequence)
+         */
+        FixText(
+            [in] ICharSequence* invalidText,
+            [out] ICharSequence** text);
+    }
+
+    /**
+     * Listener to respond to the AutoCompleteTextView's completion list being dismissed.
+     * @see AutoCompleteTextView#setOnDismissListener(OnDismissListener)
+     */
+    interface IAutoCompleteTextViewOnDismissListener {
+        /**
+         * This method will be invoked whenever the AutoCompleteTextView's list
+         * of completion options has been dismissed and is no longer available
+         * for user interaction.
+         */
+        OnDismiss();
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IView
+     * extends Elastos.Droid.Widget.ITextView
+     * extends Elastos.Droid.Widget.IEditText
+     *
+     * interface Elastos.Droid.View.IOnPreDrawListener
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+
+    [local]
+    interface IAutoCompleteTextView {
+        SetCompletionHint(
+            [in] ICharSequence* hint);
+
+        GetCompletionHint(
+            [out] ICharSequence** hint);
+
+        GetDropDownWidth(
+            [out] Int32* width);
+
+        SetDropDownWidth(
+            [in] Int32 width);
+
+        GetDropDownHeight(
+            [out] Int32* height);
+
+        SetDropDownHeight(
+            [in] Int32 height);
+
+        GetDropDownAnchor(
+            [out] Int32* id);
+
+        SetDropDownAnchor(
+            [in] Int32 id);
+
+        GetDropDownBackground(
+            [out] IDrawable** drawable);
+
+        SetDropDownBackgroundDrawable(
+            [in] IDrawable* d);
+
+        SetDropDownBackgroundResource(
+            [in] Int32 id);
+
+        SetDropDownVerticalOffset(
+            [in] Int32 offset);
+
+        GetDropDownVerticalOffset(
+            [out] Int32* offset);
+
+        SetDropDownHorizontalOffset(
+            [in] Int32 offset);
+
+        GetDropDownHorizontalOffset(
+            [out] Int32* offset);
+
+        SetDropDownAnimationStyle(
+            [in] Int32 animationStyle);
+
+        GetDropDownAnimationStyle(
+            [out] Int32* style);
+
+        IsDropDownAlwaysVisible(
+            [out] Boolean* visible);
+
+        SetDropDownAlwaysVisible(
+            [in] Boolean dropDownAlwaysVisible);
+
+        IsDropDownDismissedOnCompletion(
+            [out] Boolean* dropDownDismissedOnCompletion);
+
+        SetDropDownDismissedOnCompletion(
+            [in] Boolean dropDownDismissedOnCompletion);
+
+        GetThreshold(
+            [out] Int32* threshold);
+
+        SetThreshold(
+            [in] Int32 threshold);
+
+        SetOnItemClickListener(
+            [in] IAdapterViewOnItemClickListener* listener);
+
+        SetOnItemSelectedListener(
+            [in] IAdapterViewOnItemSelectedListener* listener);
+
+        GetOnItemClickListener(
+            [out] IAdapterViewOnItemClickListener** l);
+
+        GetOnItemSelectedListener(
+            [out] IAdapterViewOnItemSelectedListener** l);
+
+        GetItemClickListener(
+            [out] IAdapterViewOnItemClickListener** l);
+
+        GetItemSelectedListener(
+            [out] IAdapterViewOnItemSelectedListener** l);
+
+        SetOnDismissListener(
+            [in] IAutoCompleteTextViewOnDismissListener* dismissListener);
+
+        GetAdapter(
+            [out] IListAdapter** adapter);
+
+        SetAdapter(
+            [in] IListAdapter* adapter);
+
+        EnoughToFilter(
+            [out] Boolean* result);
+
+        IsPopupShowing(
+            [out] Boolean* result);
+
+        ClearListSelection();
+
+        SetListSelection(
+            [in] Int32 position);
+
+        GetListSelection(
+            [out] Int32* selection);
+
+        PerformCompletion();
+
+        IsPerformingCompletion(
+            [out] Boolean* result);
+
+        DismissDropDown();
+
+        ShowDropDownAfterLayout();
+
+        EnsureImeVisible(
+            [in] Boolean visible);
+
+        IsInputMethodNotNeeded(
+            [out] Boolean* needed);
+
+        ShowDropDown();
+
+        SetForceIgnoreOutsideTouch(
+            [in] Boolean forceIgnoreOutsideTouch);
+
+        SetValidator(
+            [in] IValidator* validator);
+
+        GetValidator(
+            [out] IValidator** validator);
+
+        PerformValidation();
+
+        SetText(
+            [in] ICharSequence* text,
+            [in] Boolean filter);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

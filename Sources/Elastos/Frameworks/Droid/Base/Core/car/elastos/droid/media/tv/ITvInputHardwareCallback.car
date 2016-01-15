@@ -1,0 +1,26 @@
+module
+{
+    interface Elastos.Droid.Media.Tv.ITvStreamConfig;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * @hide
+     */
+    [deprecated]
+    interface IITvInputHardwareCallback {
+        OnReleased();
+
+        OnStreamConfigChanged(
+            [in] ArrayOf<ITvStreamConfig*> * configs);
+
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

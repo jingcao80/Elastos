@@ -1,0 +1,42 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+    namespace Charset {
+
+    interface ICodingErrorAction {
+
+    }
+
+    /**
+     * Used to indicate what kind of actions to take in case of encoding/decoding
+     * errors. Currently three actions are defined: {IGNORE}, {REPLACE}
+     * and {REPORT}.
+     */
+    interface ICodingErrorActionHelper {
+        /**
+         * Denotes the action to ignore any errors.
+         */
+        GetIGNORE(
+            [out] ICodingErrorAction** ignore);
+
+        /**
+         * Denotes the action to fill in the output with a replacement character
+         * when malformed input or an unmappable character is encountered.
+         */
+        GetREPLACE(
+            [out] ICodingErrorAction** replace);
+
+        /**
+         * Denotes the action to report the encountered error in an appropriate
+         * manner, for example to throw an exception or return an informative
+         * result.
+         */
+        GetREPORT(
+            [out] ICodingErrorAction** report);
+    }
+
+    } // namespace Charset
+    } // namespace IO
+    } // namespace Elastos
+}

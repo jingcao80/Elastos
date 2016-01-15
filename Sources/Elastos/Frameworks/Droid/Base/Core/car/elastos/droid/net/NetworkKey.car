@@ -1,0 +1,48 @@
+
+module
+{
+    interface Elastos.Droid.Net.IWifiKey;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Information which identifies a specific network.
+     *
+     * @hide
+     */
+    // @SystemApi
+    // NOTE: Ideally, we would abstract away the details of what identifies a network of a specific
+    // type, so that all networks appear the same and can be scored without concern to the network type
+    // itself. However, because no such cross-type identifier currently exists in the Android framework,
+    // and because systems might obtain information about networks from sources other than Android
+    // devices, we need to provide identifying details about each specific network type (wifi, cell,
+    // etc.) so that clients can pull out these details depending on the type of network.
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface INetworkKey {
+        /** A wifi network, for which {@link #wifiKey} will be populated. */
+        const Int32 TYPE_WIFI =  1;
+
+        /**
+         * The type of this network.
+         * @see #TYPE_WIFI
+         */
+        GetType(
+            [out] Int32* result);
+
+        /**
+         * Information identifying a Wi-Fi network. Only set when {@link #type} equals
+         * {@link #TYPE_WIFI}.
+         */
+        GetWifiKey(
+            [out] IWifiKey** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

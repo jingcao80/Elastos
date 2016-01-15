@@ -1,0 +1,31 @@
+
+module
+{
+    [oneway]
+    interface IFoo {
+        Foo1();
+
+        Foo2();
+    }
+
+    [local, oneway]
+    interface IFoo2 {
+        Foo();
+    }
+
+    interface IBar {
+        [oneway] Bar1();
+
+        Bar2();
+
+        [oneway,] Bar3();
+
+        [, oneway] Bar4();
+    }
+
+    class CFooBar {
+        interface IFoo;
+        interface IFoo2;
+        interface IBar;
+    }
+}

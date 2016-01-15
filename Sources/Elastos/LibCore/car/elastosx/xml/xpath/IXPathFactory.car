@@ -1,0 +1,133 @@
+
+module
+{
+    interface Elastos.Core.IClassLoader;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace XPath {
+
+    interface IXPathFactory {
+    /**
+     * <p>The default property name according to the JAXP spec.</p>
+     */
+        const String DEFAULT_PROPERTY_NAME = "javax.xml.xpath.XPathFactory";
+
+    /**
+     * <p>Default Object Model URI.</p>
+     */
+        const String DEFAULT_OBJECT_MODEL_URI = "http://java.sun.com/jaxp/xpath/dom";
+
+
+    /**
+     * <p>Is specified object model supported by this <code>XPathFactory</code>?</p>
+     *
+     * @param objectModel Specifies the object model which the returned <code>XPathFactory</code> will understand.
+     *
+     * @return <code>true</code> if <code>XPathFactory</code> supports <code>objectModel</code>, else <code>false</code>.
+     *
+     * @throws NullPointerException If <code>objectModel</code> is <code>null</code>.
+     * @throws IllegalArgumentException If <code>objectModel.length() == 0</code>.
+     */
+        IsObjectModelSupported(
+            [in] String objectModel,
+            [out] Boolean* state);
+
+    /**
+     * <p>Set a feature for this <code>XPathFactory</code> and <code>XPath</code>s created by this factory.</p>
+     *
+     * <p>
+     * Feature names are fully qualified {@link java.net.URI}s.
+     * Implementations may define their own features.
+     * An {@link XPathFactoryConfigurationException} is thrown if this <code>XPathFactory</code> or the <code>XPath</code>s
+     *  it creates cannot support the feature.
+     * It is possible for an <code>XPathFactory</code> to expose a feature value but be unable to change its state.
+     * </p>
+     *
+     * <p>
+     * All implementations are required to support the {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING} feature.
+     * When the feature is <code>true</code>, any reference to  an external function is an error.
+     * Under these conditions, the implementation must not call the {@link XPathFunctionResolver}
+     * and must throw an {@link XPathFunctionException}.
+     * </p>
+     *
+     * @param name Feature name.
+     * @param value Is feature state <code>true</code> or <code>false</code>.
+     *
+     * @throws XPathFactoryConfigurationException if this <code>XPathFactory</code> or the <code>XPath</code>s
+     *   it creates cannot support this feature.
+     * @throws NullPointerException if <code>name</code> is <code>null</code>.
+     */
+        SetFeature(
+            [in] String name,
+            [in] Boolean value);
+
+    /**
+     * <p>Get the state of the named feature.</p>
+     *
+     * <p>
+     * Feature names are fully qualified {@link java.net.URI}s.
+     * Implementations may define their own features.
+     * An {@link XPathFactoryConfigurationException} is thrown if this <code>XPathFactory</code> or the <code>XPath</code>s
+     * it creates cannot support the feature.
+     * It is possible for an <code>XPathFactory</code> to expose a feature value but be unable to change its state.
+     * </p>
+     *
+     * @param name Feature name.
+     *
+     * @return State of the named feature.
+     *
+     * @throws XPathFactoryConfigurationException if this <code>XPathFactory</code> or the <code>XPath</code>s
+     *   it creates cannot support this feature.
+     * @throws NullPointerException if <code>name</code> is <code>null</code>.
+     */
+        GetFeature(
+            [in] String name,
+            [out] Boolean* feature);
+
+    /**
+     * <p>Establish a default variable resolver.</p>
+     *
+     * <p>Any <code>XPath</code> objects constructed from this factory will use
+     * the specified resolver by default.</p>
+     *
+     * <p>A <code>NullPointerException</code> is thrown if <code>resolver</code> is <code>null</code>.</p>
+     *
+     * @param resolver Variable resolver.
+     *
+     *  @throws NullPointerException If <code>resolver</code> is <code>null</code>.
+     */
+        SetXPathVariableResolver(
+            [in] IXPathVariableResolver* resolver);
+
+    /**
+       * <p>Establish a default function resolver.</p>
+       *
+       * <p>Any <code>XPath</code> objects constructed from this factory will use
+       * the specified resolver by default.</p>
+       *
+       * <p>A <code>NullPointerException</code> is thrown if <code>resolver</code> is <code>null</code>.</p>
+       *
+       * @param resolver XPath function resolver.
+       *
+       * @throws NullPointerException If <code>resolver</code> is <code>null</code>.
+       */
+        SetXPathFunctionResolver(
+            [in] IXPathFunctionResolver* resolver);
+
+    /**
+    * <p>Return a new <code>XPath</code> using the underlying object
+    * model determined when the <code>XPathFactory</code> was instantiated.</p>
+    *
+    * @return New instance of an <code>XPath</code>.
+    */
+        NewXPath(
+            [out] IXPath** path);
+
+    }
+
+    } // namespace XPath
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

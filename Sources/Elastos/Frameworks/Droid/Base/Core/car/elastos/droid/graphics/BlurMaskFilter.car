@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    enum BlurMaskFilterBlur {
+        BlurMaskFilterBlur_NORMAL = 0,  //!< blur inside and outside of the original border
+        BlurMaskFilterBlur_SOLID = 1,   //!< include the original mask, blur outside
+        BlurMaskFilterBlur_OUTER = 2,   //!< just blur outside the original border
+        BlurMaskFilterBlur_INNER = 3,   //!< just blur inside the original border
+    }
+
+    /**
+     * This takes a mask, and blurs its edge by the specified radius. Whether or
+     * or not to include the original mask, and whether the blur goes outside,
+     * inside, or straddles, the original mask's border, is controlled by the
+     * Blur enum.
+     */
+
+     /**
+      * MaskFilter is the base class for object that perform transformations on an
+      * alpha-channel mask before drawing it. A subclass of MaskFilter may be installed
+      * into a Paint. Blur and emboss are implemented as subclasses of MaskFilter.
+      *
+      * @implements Elastos.Droid.Graphics.IMaskFilter
+      */
+
+    /**
+     * @Involve
+     * interface IMaskFilter
+     */
+    interface IBlurMaskFilter{
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,43 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+    using interface Elastos.Utility.IDate;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * CRL Entry's Invalidity Date Extension (OID = 2.5.29.24).
+     * <pre>
+     *   id-ce-invalidityDate OBJECT IDENTIFIER ::= { id-ce 24 }
+     *
+     *   invalidityDate ::=  GeneralizedTime
+     * </pre>
+     * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     */
+    interface IInvalidityDate extends IExtensionValue {
+        /**
+         * Returns the invalidity date.
+         */
+        GetDate(
+            [out] IDate** date);
+    }
+
+    interface IInvalidityDateHelper {
+        /**
+         * ASN.1 Encoder/Decoder.
+         */
+        GetASN1(
+            [out] IASN1Type** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

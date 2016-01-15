@@ -1,0 +1,195 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    /**
+      * @Involve
+      * interface Elastos.Sql.IWrapper;
+      */
+    interface IParameterMetaData {
+        /**
+         * Indicates that the parameter mode is {@code IN}.
+         */
+        const Int32 parameterModeIn = 1;
+
+        /**
+         * Indicates that the parameter mode is {@code INOUT}.
+         */
+        const Int32 parameterModeInOut = 2;
+
+        /**
+         * Indicates that the parameter mode is {@code OUT}.
+         */
+        const Int32 parameterModeOut = 4;
+
+        /**
+         * Indicates that the parameter mode is not known.
+         */
+        const Int32 parameterModeUnknown = 0;
+
+        /**
+         * Indicates that a parameter is not permitted to be {@code NULL}.
+         */
+        const Int32 parameterNoNulls = 0;
+
+        /**
+         * Indicates that a parameter is permitted to be {@code NULL}.
+         */
+        const Int32 parameterNullable = 1;
+
+        /**
+         * Indicates that whether a parameter is allowed to be {@code null} or not
+         * is not known.
+         */
+        const Int32 parameterNullableUnknown = 2;
+
+        /**
+         * Gets the fully-qualified name of the Java class which should be passed as
+         * a parameter to the method {@code PreparedStatement.setObject}.
+         *
+         * @param paramIndex
+         *            the index number of the parameter, where the first parameter
+         *            has index 1.
+         * @return the fully qualified Java class name of the parameter with the
+         *         specified index. This class name is used for custom mapping
+         *         between SQL types and Java objects.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetParameterClassName(
+            [in] Int32 paramIndex,
+            [out] String* name);
+
+        /**
+         * Gets the number of parameters in the {@code PreparedStatement} for which
+         * this {@code ParameterMetaData} contains information.
+         *
+         * @return the number of parameters.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetParameterCount(
+            [out] Int32* count);
+
+        /**
+         * Gets the mode of the specified parameter. Can be one of:
+         * <ul>
+         * <li>ParameterMetaData.parameterModeIn</li>
+         * <li>ParameterMetaData.parameterModeOut</li>
+         * <li>ParameterMetaData.parameterModeInOut</li>
+         * <li>ParameterMetaData.parameterModeUnknown</li>
+         * </ul>
+         *
+         * @param paramIndex
+         *            the index number of the parameter, where the first parameter
+         *            has index 1.
+         * @return the parameter's mode.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetParameterMode(
+            [in] Int32 paramIndex,
+            [out] Int32* mode);
+
+        /**
+         * Gets the SQL type of a specified parameter.
+         *
+         * @param paramIndex
+         *            the index number of the parameter, where the first parameter
+         *            has index 1.
+         * @return the SQL type of the parameter as defined in {@code
+         *         java.sql.Types}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetParameterType(
+            [in] Int32 paramIndex,
+            [out] Int32* type);
+
+        /**
+         * Gets the database-specific type name of a specified parameter.
+         *
+         * @param paramIndex
+         *            the index number of the parameter, where the first parameter
+         *            has index 1.
+         * @return the type name for the parameter as used by the database. A
+         *         fully-qualified name is returned if the parameter is a <i>User
+         *         Defined Type</i> (UDT).
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetParameterTypeName(
+            [in] Int32 paramIndex,
+            [out] String* name);
+
+        /**
+         * Gets the number of decimal digits for a specified parameter.
+         *
+         * @param paramIndex
+         *            the index number of the parameter, where the first parameter
+         *            has index 1.
+         * @return the number of decimal digits ("the precision") for the parameter.
+         *         {@code 0} if the parameter is not a numeric type.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetPrecision(
+            [in] Int32 paramIndex,
+            [out] Int32* precision);
+
+        /**
+         * Gets the number of digits after the decimal point for a specified
+         * parameter.
+         *
+         * @param paramIndex
+         *            the index number of the parameter, where the first parameter
+         *            has index 1.
+         * @return the number of digits after the decimal point ("the scale") for
+         *         the parameter. {@code 0} if the parameter is not a numeric type.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetScale(
+            [in] Int32 paramIndex,
+            [out] Int32* number);
+
+        /**
+         * Gets whether {@code null} values are allowed for the specified parameter.
+         * The returned value is one of:
+         * <ul>
+         * <li>ParameterMetaData.parameterNoNulls</li>
+         * <li>ParameterMetaData.parameterNullable</li>
+         * <li>ParameterMetaData.parameterNullableUnknown</li>
+         * </ul>
+         *
+         * @param paramIndex
+         *            the index number of the parameter, where the first parameter
+         *            has index 1.
+         * @return the int code indicating the nullability of the parameter.
+         * @throws SQLException
+         *             if a database error is encountered.
+         */
+        IsNullable(
+            [in] Int32 paramIndex,
+            [out] Int32* isNullability);
+
+        /**
+         * Gets whether values for the specified parameter can be signed numbers.
+         *
+         * @param paramIndex
+         *            the index number of the parameter, where the first parameter
+         *            has index 1.
+         * @return {@code true} if values can be signed numbers for this parameter,
+         *         {@code false} otherwise.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        IsSigned(
+            [in] Int32 paramIndex,
+            [out] Boolean* isSigned);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

@@ -1,0 +1,5 @@
+DIRS = gfx
+DIRS += interpolators
+DIRS += base
+DIRS += gl
+DIRS += autofill

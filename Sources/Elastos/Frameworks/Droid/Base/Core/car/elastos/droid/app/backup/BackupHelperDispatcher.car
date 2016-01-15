@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.Droid.App.Backup.IBackupHelper;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Backup {
+
+    /** @hide */
+    interface IBackupHelperDispatcher {
+        AddHelper(
+            [in] String keyPrefix,
+            [in] IBackupHelper* helper);
+
+        PerformBackup(
+            [in] IParcelFileDescriptor* oldState,
+            [in] IBackupDataOutput* data,
+            [in] IParcelFileDescriptor* newState);
+
+        PerformRestore(
+            [in] IBackupDataInput* input,
+            [in] Int32 appVersionCode,
+            [in] IParcelFileDescriptor* newState);
+    }
+
+    } // namespace Backup
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

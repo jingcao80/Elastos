@@ -1,0 +1,105 @@
+
+module
+{
+    interface Elastos.Security.Cert.ICertificate;
+    interface Elastos.Security.IPrincipal;
+    interface Elastosx.Security.Cert.IX509Certificate;
+    interface Elastosx.Net.Ssl.ISSLSocket;
+    interface Elastosx.Net.Ssl.ISSLSession;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The event object encapsulating the information about a completed SSL
+     * handshake on a SSL connection.
+     *
+     * @Involve
+     * interface Elastos.Utility.IEventObject;
+     */
+    interface IHandshakeCompletedEvent {
+        /**
+         * Returns the SSL session associated with this event.
+         *
+         * @return the SSL session associated with this event.
+         */
+        GetSession(
+            [out] ISSLSession** session);
+
+        /**
+         * Returns the name of the cipher suite negotiated during this handshake.
+         *
+         * @return the name of the cipher suite negotiated during this handshake.
+         */
+        GetCipherSuite(
+            [out] String* suite);
+
+        /**
+         * Returns the list of local certificates used during the handshake. These
+         * certificates were sent to the peer.
+         *
+         * @return Returns the list of certificates used during the handshake with
+         *         the local identity certificate followed by CAs, or {@code null}
+         *         if no certificates were used during the handshake.
+         */
+        GetLocalCertificates(
+            [out, callee] ArrayOf<ICertificate*>* cert);
+
+        /**
+         * Return the list of certificates identifying the peer during the
+         * handshake.
+         *
+         * @return the list of certificates identifying the peer with the peer's
+         *         identity certificate followed by CAs.
+         * @throws SSLPeerUnverifiedException
+         *             if the identity of the peer has not been verified.
+         */
+        GetPeerCertificates(
+            [out, callee] ArrayOf<ICertificate*>* cert);
+
+        /**
+         * Returns the list of certificates identifying the peer. The peer's
+         * identity certificate is followed by the validated certificate authority
+         * certificates.
+         * <p>
+         * <b>Replaced by:</b> {@link #getPeerCertificates()}
+         *
+         * @return the list of certificates identifying the peer
+         * @throws SSLPeerUnverifiedException
+         *             if the identity of the peer has not been verified.
+         */
+        GetPeerCertificateChain(
+            [out, callee] ArrayOf<IX509Certificate*>* chain);
+
+        /**
+         * Returns the {@code Principal} identifying the peer.
+         *
+         * @return the {@code Principal} identifying the peer.
+         * @throws SSLPeerUnverifiedException
+         *             if the identity of the peer has not been verified.
+         */
+        GetPeerPrincipal(
+            [out] IPrincipal** principal);
+
+        /**
+         * Returns the {@code Principal} used to identify during the handshake.
+         *
+         * @return the {@code Principal} used to identify during the handshake.
+         */
+        GetLocalPrincipal(
+            [out] IPrincipal** principal);
+
+        /**
+         * Returns the SSL socket that produced this event.
+         *
+         * @return the SSL socket that produced this event.
+         */
+        GetSocket(
+            [out] ISSLSocket** socket);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

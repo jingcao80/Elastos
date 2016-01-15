@@ -1,0 +1,42 @@
+
+module
+{
+
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Auth {
+    namespace Params {
+
+    /**
+     * Parameter names for HttpAuth.
+     *
+     * @version $Revision: 578403 $
+     *
+     * @since 4.0
+     */
+    interface IAuthPNames {
+
+        /**
+         * Defines the charset to be used when encoding
+         * {@link org.apache.http.auth.Credentials}.
+         * <p>
+         * This parameter expects a value of type {@link String}.
+         * If not defined, then
+         * {@link org.apache.http.params.CoreProtocolPNames#HTTP_ELEMENT_CHARSET
+         *        HttpProtocolParams.HTTP_ELEMENT_CHARSET}
+         * should be used.
+         * </p>
+         */
+        const String CREDENTIAL_CHARSET = "http.auth.credential-charset";
+
+    }
+
+    } // namespace Params
+    } // namespace Auth
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

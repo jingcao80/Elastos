@@ -1,0 +1,254 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * Represents a Bluetooth class, which describes general characteristics
+         * and capabilities of a device. For example, a Bluetooth class will
+         * specify the general device type such as a phone, a computer, or
+         * headset, and whether it's capable of services such as audio or telephony.
+         *
+         * <p>Every Bluetooth class is composed of zero or more service classes, and
+         * exactly one device class. The device class is further broken down into major
+         * and minor device class components.
+         *
+         * <p>{@sa BluetoothClass} is useful as a hint to roughly describe a device
+         * (for example to show an icon in the UI), but does not reliably describe which
+         * Bluetooth profiles or services are actually supported by a device. Accurate
+         * service discovery is done through SDP requests, which are automatically
+         * performed when creating an RFCOMM socket with {@sa
+         * BluetoothDevice#createRfcommSocketToServiceRecord} and {@sa
+         * BluetoothAdapter#listenUsingRfcommWithServiceRecord}</p>
+         *
+         * <p>Use {@sa BluetoothDevice#getBluetoothClass} to retrieve the class for
+         * a remote device.
+         *
+         * <!--
+         * The Bluetooth class is a 32 bit field. The format of these bits is defined at
+         * http://www.bluetooth.org/Technical/AssignedNumbers/baseband.htm
+         * (login required). This class contains that 32 bit field, and provides
+         * constants and methods to determine which Service Class(es) and Device Class
+         * are encoded in that field.
+         * -->
+         */
+        interface IBluetoothClass {
+            /**
+             * Legacy error value. Applications should use null instead.
+             * @hide
+             */
+            const Int32 ERROR = 0xFF000000;
+
+            /** @hide */
+            const Int32 PROFILE_HEADSET = 0;
+
+            /** @hide */
+            const Int32 PROFILE_A2DP = 1;
+
+            /** @hide */
+            const Int32 PROFILE_OPP = 2;
+
+            /** @hide */
+            const Int32 PROFILE_HID = 3;
+
+            /** @hide */
+            const Int32 PROFILE_PANU = 4;
+
+            /** @hide */
+            const Int32 PROFILE_NAP = 5;
+
+            /**
+             * Return true if the specified service class is supported by this
+             * {@sa BluetoothClass}.
+             * <p>Valid service classes are the public constants in
+             * {@sa BluetoothClass.Service}. For example, {@sa
+             * BluetoothClass.Service#AUDIO}.
+             *
+             * @param service valid service class
+             * @return true if the service class is supported
+             */
+            HasService(
+                [in] Int32 service,
+                [out] Boolean* hasService);
+
+            /**
+             * Return the major device class component of this {@sa BluetoothClass}.
+             * <p>Values returned from this function can be compared with the
+             * public constants in {@sa BluetoothClass.Device.Major} to determine
+             * which major class is encoded in this Bluetooth class.
+             *
+             * @return major device class component
+             */
+            GetMajorDeviceClass(
+                [out] Int32* deviceClass);
+
+            /**
+             * Return the (major and minor) device class component of this
+             * {@sa BluetoothClass}.
+             * <p>Values returned from this function can be compared with the
+             * public constants in {@sa BluetoothClass.Device} to determine which
+             * device class is encoded in this Bluetooth class.
+             *
+             * @return device class component
+             */
+            GetDeviceClass(
+                [out] Int32* deviceClass);
+
+            /**
+             * Check class bits for possible bluetooth profile support.
+             * This is a simple heuristic that tries to guess if a device with the
+             * given class bits might support specified profile. It is not accurate for all
+             * devices. It tries to err on the side of false positives.
+             * @param profile The profile to be checked
+             * @return True if this device might support specified profile.
+             * @hide
+             */
+            DoesClassMatch(
+                [in] Int32 profile,
+                [out] Boolean* isMatch);
+
+            GetClass(
+                [out] Int32* value);
+        }
+
+        /**
+         * Defines all service class constants.
+         * <p>Each {@sa BluetoothClass} encodes zero or more service classes.
+         */
+        interface IBluetoothClassService {
+            /*private*/ const Int32 BITMASK                 = 0xFFE000;
+
+            const Int32 LIMITED_DISCOVERABILITY = 0x002000;
+            const Int32 POSITIONING             = 0x010000;
+            const Int32 NETWORKING              = 0x020000;
+            const Int32 RENDER                  = 0x040000;
+            const Int32 CAPTURE                 = 0x080000;
+            const Int32 OBJECT_TRANSFER         = 0x100000;
+            const Int32 AUDIO                   = 0x200000;
+            const Int32 TELEPHONY               = 0x400000;
+            const Int32 INFORMATION             = 0x800000;
+        }
+
+        /**
+         * Defines all device class constants.
+         * <p>Each {@sa BluetoothClass} encodes exactly one device class, with
+         * major and minor components.
+         * <p>The constants in {@sa
+         * BluetoothClass.Device} represent a combination of major and minor
+         * device components (the complete device class). The constants in {@sa
+         * BluetoothClass.Device.Major} represent only major device classes.
+         * <p>See {@sa BluetoothClass.Service} for service class constants.
+         */
+        interface IBluetoothClassDevice {
+            /*private*/ const Int32 BITMASK               = 0x1FFC;
+
+            // Devices in the COMPUTER major class
+            const Int32 COMPUTER_UNCATEGORIZED              = 0x0100;
+            const Int32 COMPUTER_DESKTOP                    = 0x0104;
+            const Int32 COMPUTER_SERVER                     = 0x0108;
+            const Int32 COMPUTER_LAPTOP                     = 0x010C;
+            const Int32 COMPUTER_HANDHELD_PC_PDA            = 0x0110;
+            const Int32 COMPUTER_PALM_SIZE_PC_PDA           = 0x0114;
+            const Int32 COMPUTER_WEARABLE                   = 0x0118;
+
+            // Devices in the PHONE major class
+            const Int32 PHONE_UNCATEGORIZED                 = 0x0200;
+            const Int32 PHONE_CELLULAR                      = 0x0204;
+            const Int32 PHONE_CORDLESS                      = 0x0208;
+            const Int32 PHONE_SMART                         = 0x020C;
+            const Int32 PHONE_MODEM_OR_GATEWAY              = 0x0210;
+            const Int32 PHONE_ISDN                          = 0x0214;
+
+            // Minor classes for the AUDIO_VIDEO major class
+            const Int32 AUDIO_VIDEO_UNCATEGORIZED           = 0x0400;
+            const Int32 AUDIO_VIDEO_WEARABLE_HEADSET        = 0x0404;
+            const Int32 AUDIO_VIDEO_HANDSFREE               = 0x0408;
+            //const Int32 AUDIO_VIDEO_RESERVED              = 0x040C;
+            const Int32 AUDIO_VIDEO_MICROPHONE              = 0x0410;
+            const Int32 AUDIO_VIDEO_LOUDSPEAKER             = 0x0414;
+            const Int32 AUDIO_VIDEO_HEADPHONES              = 0x0418;
+            const Int32 AUDIO_VIDEO_PORTABLE_AUDIO          = 0x041C;
+            const Int32 AUDIO_VIDEO_CAR_AUDIO               = 0x0420;
+            const Int32 AUDIO_VIDEO_SET_TOP_BOX             = 0x0424;
+            const Int32 AUDIO_VIDEO_HIFI_AUDIO              = 0x0428;
+            const Int32 AUDIO_VIDEO_VCR                     = 0x042C;
+            const Int32 AUDIO_VIDEO_VIDEO_CAMERA            = 0x0430;
+            const Int32 AUDIO_VIDEO_CAMCORDER               = 0x0434;
+            const Int32 AUDIO_VIDEO_VIDEO_MONITOR           = 0x0438;
+            const Int32 AUDIO_VIDEO_VIDEO_DISPLAY_AND_LOUDSPEAKER = 0x043C;
+            const Int32 AUDIO_VIDEO_VIDEO_CONFERENCING      = 0x0440;
+            //const Int32 AUDIO_VIDEO_RESERVED              = 0x0444;
+            const Int32 AUDIO_VIDEO_VIDEO_GAMING_TOY        = 0x0448;
+
+            // Devices in the WEARABLE major class
+            const Int32 WEARABLE_UNCATEGORIZED              = 0x0700;
+            const Int32 WEARABLE_WRIST_WATCH                = 0x0704;
+            const Int32 WEARABLE_PAGER                      = 0x0708;
+            const Int32 WEARABLE_JACKET                     = 0x070C;
+            const Int32 WEARABLE_HELMET                     = 0x0710;
+            const Int32 WEARABLE_GLASSES                    = 0x0714;
+
+            // Devices in the TOY major class
+            const Int32 TOY_UNCATEGORIZED                   = 0x0800;
+            const Int32 TOY_ROBOT                           = 0x0804;
+            const Int32 TOY_VEHICLE                         = 0x0808;
+            const Int32 TOY_DOLL_ACTION_FIGURE              = 0x080C;
+            const Int32 TOY_CONTROLLER                      = 0x0810;
+            const Int32 TOY_GAME                            = 0x0814;
+
+            // Devices in the HEALTH major class
+            const Int32 HEALTH_UNCATEGORIZED                = 0x0900;
+            const Int32 HEALTH_BLOOD_PRESSURE               = 0x0904;
+            const Int32 HEALTH_THERMOMETER                  = 0x0908;
+            const Int32 HEALTH_WEIGHING                     = 0x090C;
+            const Int32 HEALTH_GLUCOSE                      = 0x0910;
+            const Int32 HEALTH_PULSE_OXIMETER               = 0x0914;
+            const Int32 HEALTH_PULSE_RATE                   = 0x0918;
+            const Int32 HEALTH_DATA_DISPLAY                 = 0x091C;
+
+            // Devices in PERIPHERAL major class
+            /**
+             * @hide
+             */
+            const Int32 PERIPHERAL_NON_KEYBOARD_NON_POINTING = 0x0500;
+            /**
+             * @hide
+             */
+            const Int32 PERIPHERAL_KEYBOARD                  = 0x0540;
+            /**
+             * @hide
+             */
+            const Int32 PERIPHERAL_POINTING                  = 0x0580;
+            /**
+             * @hide
+             */
+            const Int32 PERIPHERAL_KEYBOARD_POINTING         = 0x05C0;
+        }
+
+        /**
+         * Defines all major device class constants.
+         * <p>See {@sa BluetoothClass.Device} for minor classes.
+         */
+        interface IBluetoothClassDeviceMajor {
+            /*private*/ const Int32 BITMASK               = 0x1F00;
+
+            const Int32 MISC              = 0x0000;
+            const Int32 COMPUTER          = 0x0100;
+            const Int32 PHONE             = 0x0200;
+            const Int32 NETWORKING        = 0x0300;
+            const Int32 AUDIO_VIDEO       = 0x0400;
+            const Int32 PERIPHERAL        = 0x0500;
+            const Int32 IMAGING           = 0x0600;
+            const Int32 WEARABLE          = 0x0700;
+            const Int32 TOY               = 0x0800;
+            const Int32 HEALTH            = 0x0900;
+            const Int32 UNCATEGORIZED     = 0x1F00;
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

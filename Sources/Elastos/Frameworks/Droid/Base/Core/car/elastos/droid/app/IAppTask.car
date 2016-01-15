@@ -1,0 +1,38 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+
+    /** @hide */
+    [local]
+    interface IIAppTask {
+        FinishAndRemoveTask();
+
+        GetTaskInfo(
+            [out] IActivityManagerRecentTaskInfo**info);
+
+        MoveToFront();
+
+        StartActivity(
+            [in] IBinder* whoThread,
+            [in] String callingPackage,
+            [in] IIntent* intent,
+            [in] String resolvedType,
+            [in] IBundle* options,
+            [out] Int32* result);
+
+        SetExcludeFromRecents(
+            [in] Boolean exclude);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}
+

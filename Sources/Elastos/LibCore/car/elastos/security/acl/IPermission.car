@@ -1,0 +1,23 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Acl {
+
+    /**
+     * Legacy security code; do not use.
+     */
+    interface IPermission {
+        Equals(
+            [in] IInterface* another,
+            [out] Boolean* result);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Acl
+    } // namespace Security
+    } // namespace Elastos
+}

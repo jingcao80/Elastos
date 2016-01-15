@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <EditText android:id="@+id/edit"
+        android:layout_width="fill_parent"
+        android:layout_height="250dip"
+        android:capitalize="sentences"
+        />
+
+    <!-- <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/scroll"
+        android:layout_width="100dip"
+        android:layout_height="100dip"
+        android:scrollbars="vertical">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="250dip"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_1"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_2"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_3"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_1"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_2"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_3"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_1"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_2"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_3"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_1"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_2"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_3"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_1"/>
+
+            <Button
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_2"/>
+
+            <Button
+                android:id="@+id/last_child"
+                android:layout_width="250dip"
+                android:layout_height="100dip"
+                android:text="vertical_text_3"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <Button android:id="@+id/button"
+        android:layout_width="320dip"
+        android:layout_height="80dip"
+        android:text="Button-Fling"
+    /> -->
+</LinearLayout>

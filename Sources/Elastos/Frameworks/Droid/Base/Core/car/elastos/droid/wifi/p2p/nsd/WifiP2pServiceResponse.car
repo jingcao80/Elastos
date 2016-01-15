@@ -1,0 +1,129 @@
+
+module
+{
+    interface Elastos.Droid.Wifi.P2p.IWifiP2pDevice;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+    namespace Nsd {
+
+    /**
+     * The class for a response of service discovery.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiP2pServiceResponse {
+
+        /**
+         * Return the service type of service discovery response.
+         *
+         * @return service discovery type.<br>
+         * e.g) {@link WifiP2pServiceInfo#SERVICE_TYPE_BONJOUR}
+         */
+        GetServiceType(
+            [out] Int32* result);
+
+        /**
+         * Return the status code of service discovery response.
+         *
+         * @return status code.
+         * @see Status
+         */
+        GetStatus(
+            [out] Int32* result);
+
+        /**
+         * Return the transaction id of service discovery response.
+         *
+         * @return transaction id.
+         * @hide
+         */
+        GetTransactionId(
+            [out] Int32* result);
+
+        /**
+         * Return response data.
+         *
+         * <pre>Data format depends on service type
+         *
+         * @return a query or response data.
+         */
+        GetRawData(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Returns the source device of service discovery response.
+         *
+         * <pre>This is valid only when service discovery response.
+         *
+         * @return the source device of service discovery response.
+         */
+        GetSrcDevice(
+            [out] IWifiP2pDevice** result);
+
+        /** @hide */
+        SetSrcDevice(
+            [in] IWifiP2pDevice* dev);
+    }
+
+    interface IWifiP2pServiceResponseHelper {
+        /**
+         * Create the list of  WifiP2pServiceResponse instance from supplicant event.
+         *
+         * <pre>The format is as follows.
+         * P2P-SERV-DISC-RESP &lt;address&gt; &lt;update indicator&gt; &lt;response data&gt;
+         * e.g) P2P-SERV-DISC-RESP 02:03:7f:11:62:da 1 0300000101
+         *
+         * @param supplicantEvent wpa_supplicant event string.
+         * @return if parse failed, return null
+         * @hide
+         */
+        NewInstance(
+            [in] String supplicantEvent,
+            [out] IList** result);
+    }
+
+    /**
+     * The status code of service discovery response.
+     * Currently 4 status codes are defined and the status codes from  4 to 255
+     * are reserved.
+     *
+     * See Wi-Fi Direct specification for the detail.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IWifiP2pServiceResponseStatus {
+        /** success */
+        const Int32 SUCCESS = 0;
+
+        /** the service protocol type is not available */
+        const Int32 SERVICE_PROTOCOL_NOT_AVAILABLE = 1;
+
+        /** the requested information is not available */
+        const Int32 REQUESTED_INFORMATION_NOT_AVAILABLE = 2;
+
+        /** bad request */
+        const Int32 BAD_REQUEST = 3;
+
+        /** @hide */
+        ToString(
+            [in] Int32 status,
+            [out] String* result);
+    }
+
+    } // namespace Nsd
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

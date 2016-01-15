@@ -1,0 +1,33 @@
+
+module
+{
+    interface Elastosx.Xml.Namespace.IQName;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace XPath {
+
+    interface IXPathVariableResolver {
+
+    /**
+    * <p>Find a variable in the set of available variables.</p>
+    *
+    * <p>If <code>variableName</code> is <code>null</code>, then a <code>NullPointerException</code> is thrown.</p>
+    *
+    * @param variableName The <code>QName</code> of the variable name.
+    *
+    * @return The variables value, or <code>null</code> if no variable named <code>variableName</code>
+    *   exists.  The value returned must be of a type appropriate for the underlying object model.
+    *
+    * @throws NullPointerException If <code>variableName</code> is <code>null</code>.
+    */
+        ResolveVariable(
+            [in] IQName* variableName,
+            [out] IInterface** obj);
+    }
+
+    } // namespace XPath
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

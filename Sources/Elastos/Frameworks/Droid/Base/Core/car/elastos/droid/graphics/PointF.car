@@ -1,0 +1,83 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    /**
+     * PointF holds two float coordinates
+     */
+    interface IPointF {
+        /**
+         * Returns true if the point's coordinates equal (x,y)
+         */
+        Equals(
+            [in] Float x,
+            [in] Float y,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IPointF* o,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* isEqual);
+
+        GetHashCode(
+            [out] Int32* hash);
+
+        ToString(
+            [out] String* info);
+
+        /**
+         * Return the euclidian distance from (0,0) to the point
+         */
+        Length(
+            [out] Float* length);
+
+        Negate();
+
+        Offset(
+            [in] Float dx,
+            [in] Float dy);
+
+        /**
+         * Set the point's x and y coordinates
+         */
+        Set(
+            [in] Float x,
+            [in] Float y);
+
+        Get(
+            [out] Float* x,
+            [out] Float* y);
+
+        /**
+         * Set the point's x and y coordinates to the coordinates of p
+         */
+        Set(
+            [in] IPointF* p);
+
+        GetX(
+            [out] Float* x);
+
+        GetY(
+            [out] Float* y);
+    }
+
+    interface IPointFHelper {
+        /**
+         * Returns the euclidian distance from (0,0) to (x,y)
+         */
+        Length(
+            [in] Float x,
+            [in] Float y,
+            [out] Float* length);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

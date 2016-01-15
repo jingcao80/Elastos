@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, main!</string>
+    <string name="app_name">WebViewDemo</string>
+    <string name="localfile">file:///data/temp/default.html</string>
+    <string name="netpage">http://www.baidu.com</string>
+    <string name="file">file:///data/index.html</string>
+    <string name="bgoto">GoTo</string>
+    <string name="bload">Load Data</string>
+    <string name="bexit">Exit</string>
+    <string name="edata">Hello World!</string>
+
+</resources>

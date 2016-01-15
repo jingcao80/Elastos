@@ -1,0 +1,31 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.Backup.IBackupAgent;
+    using interface Elastos.Droid.App.Backup.IBackupAgentHelper;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace BackupManagerDemo {
+
+    class CActivityOne {
+        interface IActivity;
+    }
+
+    class CMyBackupAgent {
+        interface IBackupAgent;
+    }
+
+    class CFileHelperExampleAgent {
+        interface IBackupAgentHelper;
+    }
+
+    } // namespace BackupManagerDemo
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}

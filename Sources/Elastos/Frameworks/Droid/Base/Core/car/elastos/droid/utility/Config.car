@@ -1,0 +1,46 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+    /**
+     * @deprecated This class is not useful, it just returns the same value for
+     * all constants, and has always done this.  Do not use it.
+     */
+    [deprecated]
+    interface IConfig {
+        /**
+         * @deprecated Always false.
+         */
+        // @Deprecated
+        const Boolean DEBUG = FALSE;
+
+        /**
+         * @deprecated Always true.
+         */
+        // @Deprecated
+        const Boolean RELEASE = TRUE;
+
+        /**
+         * @deprecated Always false.
+         */
+        // @Deprecated
+        const Boolean PROFILE = FALSE;
+
+        /**
+         * @deprecated Always false.
+         */
+        // @Deprecated
+        const Boolean LOGV = FALSE;
+
+        /**
+         * @deprecated Always true.
+         */
+        // @Deprecated
+        const Boolean LOGD = TRUE;
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,13 @@
+
+module
+{
+//    const FAMILY_SYSTEM = 0x29    // Math exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Math exception codes (Family: 0x29)
+    //const E_NOT_USED                            = 0xA9010000;
+
+}

@@ -1,0 +1,31 @@
+
+module
+{
+    interface Elastos.Security.Cert.ICertPath;
+    interface Elastos.Security.ITimestamp;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface ICodeSigner {
+        /**
+         * Returns the certificate path associated with this {@code CodeSigner}.
+         *
+         * @return the certificate path associated with this {@code CodeSigner}.
+         */
+        GetSignerCertPath(
+            [out] ICertPath** certPath);
+
+        /**
+         * Returns the time stamp associated with this {@code CodeSigner}.
+         *
+         * @return the time stamp associated with this {@code CodeSigner}, maybe
+         *         {@code null}.
+         */
+        GetTimestamp(
+            [out] ITimestamp** timestamp);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

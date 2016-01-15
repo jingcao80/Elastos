@@ -1,0 +1,28 @@
+module
+{
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     * interface IParcelableSpan
+     * interface IUpdateAppearance
+     * interface ICharacterStyle
+     * interface IClickableSpan
+     */
+    interface IURLSpan {
+        GetURL(
+            [out] String* url);
+    }
+
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

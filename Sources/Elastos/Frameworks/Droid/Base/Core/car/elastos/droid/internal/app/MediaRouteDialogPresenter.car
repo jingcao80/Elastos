@@ -1,0 +1,37 @@
+module
+{
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.App.IDialog;
+    interface Elastos.Droid.App.IDialogFragment;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IViewOnClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    /**
+     * Shows media route dialog as appropriate.
+     * @hide
+     */
+    [local]
+    interface IMediaRouteDialogPresenter {
+        ShowDialogFragment(
+            [in] IActivity* activity,
+            [in] Int32 routeTypes,
+            [in] IViewOnClickListener* extendedSettingsClickListener,
+            [out] IDialogFragment** dialogFragment);
+
+        CreateDialog(
+            [in] IContext* context,
+            [in] Int32 routeTypes,
+            [in] IViewOnClickListener* extendedSettingsClickListener,
+            [out] IDialog** dialog);
+    }
+
+    } // namespace App
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

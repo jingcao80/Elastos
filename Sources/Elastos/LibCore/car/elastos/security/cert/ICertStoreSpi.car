@@ -1,0 +1,49 @@
+
+module
+{
+    interface Elastos.Utility.ICollection;
+    interface Elastos.Security.Cert.ICertSelector;
+    interface Elastos.Security.Cert.ICRLSelector;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface ICertStoreSpi {
+        /**
+         * Returns the list of {@code Certificate}s for the specified {@code
+         * CertSelector} from this instance.
+         *
+         * @param selector
+         *            the selector containing the criteria to search for
+         *            certificates in this instance.
+         * @return the list of {@code Certificate}s that match the criteria of the
+         *         specified selector.
+         * @throws CertStoreException
+         *             if error(s) occur.
+         */
+        EngineGetCertificates(
+            [in] ICertSelector* selector,
+            [out] ICollection** certs);
+
+        /**
+         * Returns the list of {@code CRL}s for the specified {@code CRLSelector}
+         * from this instance.
+         *
+         * @param selector
+         *            the selector containing the criteria to search for certificate
+         *            revocation lists in instance.
+         * @return the list of {@code CRL}s that match the criteria of the specified
+         *         selector
+         * @throws CertStoreException
+         *             if error(s) occur.
+         */
+        EngineGetCRLs(
+            [in] ICRLSelector* selector,
+            [out] ICollection** crls);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

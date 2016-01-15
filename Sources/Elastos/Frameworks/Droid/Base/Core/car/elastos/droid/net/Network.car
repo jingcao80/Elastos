@@ -1,0 +1,99 @@
+
+module
+{
+    using interface Elastos.Net.IInetAddress;
+    using interface Elastos.Net.ISocket;
+    using interface Elastos.Net.IURL;
+    using interface Elastos.Net.IURLConnection;
+    using interface Elastosx.Net.ISocketFactory;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Identifies a {@code Network}.  This is supplied to applications via
+     * {@link ConnectivityManager.NetworkCallback} in response to the active
+     * {@link ConnectivityManager#requestNetwork} or passive
+     * {@link ConnectivityManager#registerNetworkCallback} calls.
+     * It is used to direct traffic to the given {@code Network}, either on a {@link Socket} basis
+     * through a targeted {@link SocketFactory} or process-wide via
+     * {@link ConnectivityManager#setProcessDefaultNetwork}.
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [local]
+    interface INetwork {
+        /**
+         * @hide
+         */
+        GetNetId(
+            [out] Int32* result);
+
+        /**
+         * Operates the same as {@code InetAddress.getAllByName} except that host
+         * resolution is done on this network.
+         *
+         * @param host the hostname or literal IP string to be resolved.
+         * @return the array of addresses associated with the specified host.
+         * @throws UnknownHostException if the address lookup fails.
+         */
+        GetAllByName(
+            [in] String host,
+            [out, callee] ArrayOf<IInetAddress*>* result);
+
+        /**
+         * Operates the same as {@code InetAddress.getByName} except that host
+         * resolution is done on this network.
+         *
+         * @param host
+         *            the hostName to be resolved to an address or {@code null}.
+         * @return the {@code InetAddress} instance representing the host.
+         * @throws UnknownHostException
+         *             if the address lookup fails.
+         */
+        GetByName(
+            [in] String host,
+            [out] IInetAddress** result);
+
+
+        /**
+         * Returns a {@link SocketFactory} bound to this network.  Any {@link Socket} created by
+         * this factory will have its traffic sent over this {@code Network}.  Note that if this
+         * {@code Network} ever disconnects, this factory and any {@link Socket} it produced in the
+         * past or future will cease to work.
+         *
+         * @return a {@link SocketFactory} which produces {@link Socket} instances bound to this
+         *         {@code Network}.
+         */
+        GetSocketFactory(
+            [out] ISocketFactory** result);
+
+        /**
+         * Opens the specified {@link URL} on this {@code Network}, such that all traffic will be sent
+         * on this Network. The URL protocol must be {@code HTTP} or {@code HTTPS}.
+         *
+         * @return a {@code URLConnection} to the resource referred to by this URL.
+         * @throws MalformedURLException if the URL protocol is not HTTP or HTTPS.
+         * @throws IOException if an error occurs while opening the connection.
+         * @see java.net.URL#openConnection()
+         */
+        OpenConnection(
+            [in] IURL* url,
+            [out] IURLConnection** result);
+
+        /**
+         * Binds the specified {@link Socket} to this {@code Network}. All data traffic on the socket
+         * will be sent on this {@code Network}, irrespective of any process-wide network binding set by
+         * {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be connected.
+         */
+        BindSocket(
+            [in] ISocket* socket);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

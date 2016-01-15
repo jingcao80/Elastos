@@ -1,0 +1,76 @@
+
+module
+{
+
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+    /**
+     * @Involve
+     * interace IParcelable
+     */
+    interface ITag {
+        GetServiceHandle(
+            [out] Int32* handle);
+
+        GetTechCodeList(
+            [out, callee] ArrayOf<Int32> * list);
+
+        GetId(
+            [out, callee] ArrayOf<Byte> * id);
+
+        GetTechList(
+            [out, callee] ArrayOf<String> * list);
+
+        Rediscover(
+            [out] ITag** tag);
+
+        HasTech(
+            [in] Int32 techType,
+            [out] Boolean* res);
+
+        GetTechExtras(
+            [in] Int32 tech,
+            [out] IBundle** extras);
+
+        GetTagService(
+            [out] IINfcTag** tag);
+
+        SetConnectedTechnology(
+            [in] Int32 technology);
+
+        GetConnectedTechnology(
+            [out] Int32* res);
+
+        SetTechnologyDisconnected();
+
+    }
+
+    [deprecated, local]
+    interface ITagHelper {
+        CreateMockTag(
+            [in] ArrayOf<Byte> * id,
+            [in] ArrayOf<Int32> * techList,
+            [in] ArrayOf<IBundle*> * techListExtras,
+            [out] ITag** tag);
+
+        GetTechCodesFromStrings(
+            [in] ArrayOf<String> * techStringList,
+            [out, callee] ArrayOf<Int32> * res);
+
+        ReadBytesWithNull(
+            [in] IParcel* p,
+            [out, callee] ArrayOf<Byte> * res);
+
+        WriteBytesWithNull(
+            [in] IParcel* p,
+            [in] ArrayOf<Byte> * b);
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

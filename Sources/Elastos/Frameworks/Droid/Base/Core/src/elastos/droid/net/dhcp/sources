@@ -1,0 +1,16 @@
+TARGET_NAME= dhcp
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES += DhcpPacket.cpp
+SOURCES += DhcpAckPacket.cpp
+SOURCES += DhcpDeclinePacket.cpp
+SOURCES += DhcpDiscoverPacket.cpp
+SOURCES += DhcpInformPacket.cpp
+SOURCES += DhcpNakPacket.cpp
+SOURCES += DhcpOfferPacket.cpp
+SOURCES += DhcpRequestPacket.cpp

@@ -1,0 +1,77 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * An {@code Map} specialized for use with {@code Enum} types as keys.
+     */
+    /**
+     * @Involve
+     * interface IMap;
+     */
+    interface IEnumMap {
+
+        /**
+         * interfaces from IMap
+         */
+        Clear();
+
+        ContainsKey(
+            [in] IInterface* key,
+            [out] Boolean* result);
+
+        ContainsValue(
+            [in] IInterface* value,
+            [out] Boolean* result);
+
+        GetEntrySet(
+            [out] ISet** entries);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        Get(
+            [in] IInterface* key,
+            [out] IInterface** value);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        GetKeySet(
+            [out] ISet** keySet);
+
+        Put(
+            [in] IInterface* key,
+            [in] IInterface* value,
+            [out] IInterface** oldValue);
+
+        Put(
+            [in] IInterface* key,
+            [in] IInterface* value);
+
+        PutAll(
+            [in] IMap* map);
+
+        Remove(
+            [in] IInterface* key,
+            [out] IInterface** value);
+
+        Remove(
+            [in] IInterface* key);
+
+        GetSize(
+            [out] Int32* size);
+
+        GetValues(
+            [out] ICollection** value);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

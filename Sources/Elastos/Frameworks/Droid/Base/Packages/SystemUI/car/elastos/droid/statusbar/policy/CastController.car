@@ -1,0 +1,82 @@
+
+module
+{
+    using interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    interface ICastControllerCallback {
+        OnCastDevicesChanged();
+    }
+
+    interface ICastControllerCastDevice {
+        const Int32 STATE_DISCONNECTED = 0;
+        const Int32 STATE_CONNECTING = 1;
+        const Int32 STATE_CONNECTED = 2;
+
+        SetId(
+            [in] String value);
+
+        GetId(
+            [out] String* value);
+
+        SetName(
+            [in] String value);
+
+        GetName(
+            [out] String* value);
+
+        SetDescription(
+            [in] String value);
+
+        GetDescription(
+            [out] String* value);
+
+        SetState(
+            [in] Int32 state);
+
+        GetState(
+            [out] Int32* state);
+
+        SetTag(
+            [in] IInterface* tag);
+
+        GetTag(
+            [out] IInterface** tag);
+    }
+
+    interface ICastController {
+        AddCallback(
+            [in] ICastControllerCallback* cb);
+
+        RemoveCallback(
+            [in] ICastControllerCallback* cb);
+
+        SetDiscovering(
+            [in] Boolean request);
+
+        SetCurrentUserId(
+            [in] Int32 currentUserId);
+
+        GetCastDevices(
+            [out] ISet** devices);
+
+        StartCasting(
+            [in] ICastControllerCastDevice* device);
+
+        StopCasting(
+            [in] ICastControllerCastDevice* device);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,61 @@
+
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Doze {
+
+    interface IDozeLog {
+        TracePickupPulse(
+            [in] Boolean withinVibrationThreshold);
+
+        TracePulseStart();
+
+        TracePulseFinish();
+
+        TraceNotificationPulse(
+            [in] Int64 instance);
+
+        TraceDozing(
+            [in] IContext* context,
+            [in] Boolean dozing);
+
+        TraceFling(
+            [in] Boolean expand,
+            [in] Boolean aboveThreshold,
+            [in] Boolean thresholdNeeded,
+            [in] Boolean screenOnFromTouch);
+
+        TraceEmergencyCall();
+
+        TraceKeyguardBouncerChanged(
+            [in] Boolean showing);
+
+        TraceScreenOn();
+
+        TraceScreenOff(
+            [in] Int32 why);
+
+        TraceKeyguard(
+            [in] Boolean showing);
+
+        TraceProximityResult(
+            [in] Boolean near,
+            [in] Int64 millis);
+
+        Dump(
+            [in] IPrintWriter* pw);
+    }
+
+    } // namespace Doze
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

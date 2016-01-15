@@ -1,0 +1,309 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Widget.IActivityChooserModel;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Client that utilizes an {@link ActivityChooserModel}.
+     */
+    interface IActivityChooserModelClient {
+
+        /**
+         * Sets the {@link ActivityChooserModel}.
+         *
+         * @param dataModel The model.
+         */
+        SetActivityChooserModel(
+            [in] IActivityChooserModel* dataModel);
+    }
+
+    /**
+     * Defines a sorter that is responsible for sorting the activities
+     * based on the provided historical choices and an intent.
+     */
+    [local]
+    interface IActivitySorter {
+
+        /**
+         * Sorts the <code>activities</code> in descending order of relevance
+         * based on previous history and an intent.
+         *
+         * @param intent The {@link Intent}.
+         * @param activities Activities to be sorted.
+         * @param historicalRecords Historical records.
+         */
+        // This cannot be done by a simple comparator since an Activity weight
+        // is computed from history. Note that Activity implements Comparable.
+        Sort(
+            [in] IIntent* intent,
+            [in] IList* activities,
+            [in] IList* historicalRecords);
+    }
+
+    /**
+     * Listener for choosing an activity.
+     */
+    [local]
+    interface IOnChooseActivityListener {
+
+        /**
+         * Called when an activity has been chosen. The client can decide whether
+         * an activity can be chosen and if so the caller of
+         * {@link ActivityChooserModel#chooseActivity(int)} will receive and {@link Intent}
+         * for launching it.
+         * <p>
+         * <strong>Note:</strong> Modifying the intent is not permitted and
+         *     any changes to the latter will be ignored.
+         * </p>
+         *
+         * @param host The listener's host model.
+         * @param intent The intent for launching the chosen activity.
+         * @return Whether the intent is handled and should not be delivered to clients.
+         *
+         * @see ActivityChooserModel#chooseActivity(int)
+         */
+        OnChooseActivity(
+            [in] IActivityChooserModel* host,
+            [in] IIntent* intent,
+            [out] Boolean* res);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Database.IObservable
+     * extends Elastos.Droid.Database.IDataSetObservable
+     */
+    [local]
+    interface IActivityChooserModel {
+        /**
+         * Sets an intent for which to choose a activity.
+         * <p>
+         * <strong>Note:</strong> Clients must set only semantically similar
+         * intents for each data model.
+         * <p>
+         *
+         * @param intent The intent.
+         */
+        SetIntent(
+            [in] IIntent* intent);
+
+        /**
+         * Gets the intent for which a activity is being chosen.
+         *
+         * @return The intent.
+         */
+        GetIntent(
+            [out] IIntent** intent);
+
+        /**
+         * Gets the number of activities that can handle the intent.
+         *
+         * @return The activity count.
+         *
+         * @see #setIntent(Intent)
+         */
+        GetActivityCount(
+            [out] Int32* count);
+
+        /**
+         * Gets an activity at a given index.
+         *
+         * @return The activity.
+         *
+         * @see ActivityResolveInfo
+         * @see #setIntent(Intent)
+         */
+        GetActivity(
+            [in] Int32 index,
+            [out] IResolveInfo** resolveInfo);
+
+        /**
+         * Gets the index of a the given activity.
+         *
+         * @param activity The activity index.
+         *
+         * @return The index if found, -1 otherwise.
+         */
+        GetActivityIndex(
+            [in] IResolveInfo* activity,
+            [out] Int32* index);
+
+        /**
+         * Chooses a activity to handle the current intent. This will result in
+         * adding a historical record for that action and construct intent with
+         * its component name set such that it can be immediately started by the
+         * client.
+         * <p>
+         * <strong>Note:</strong> By calling this method the client guarantees
+         * that the returned intent will be started. This intent is returned to
+         * the client solely to let additional customization before the start.
+         * </p>
+         *
+         * @return An {@link Intent} for launching the activity or null if the
+         *         policy has consumed the intent or there is not current intent
+         *         set via {@link #setIntent(Intent)}.
+         *
+         * @see HistoricalRecord
+         * @see OnChooseActivityListener
+         */
+        ChooseActivity(
+            [in] Int32 index,
+            [out] IIntent** intent);
+
+        /**
+         * Sets the listener for choosing an activity.
+         *
+         * @param listener The listener.
+         */
+        SetOnChooseActivityListener(
+            [in] IOnChooseActivityListener* listener);
+
+        /**
+         * Gets the default activity, The default activity is defined as the one
+         * with highest rank i.e. the first one in the list of activities that can
+         * handle the intent.
+         *
+         * @return The default activity, <code>null</code> id not activities.
+         *
+         * @see #getActivity(int)
+         */
+        GetDefaultActivity(
+            [out] IResolveInfo** activity);
+
+        /**
+         * Sets the default activity. The default activity is set by adding a
+         * historical record with weight high enough that this activity will
+         * become the highest ranked. Such a strategy guarantees that the default
+         * will eventually change if not used. Also the weight of the record for
+         * setting a default is inflated with a constant amount to guarantee that
+         * it will stay as default for awhile.
+         *
+         * @param index The index of the activity to set as default.
+         */
+        SetDefaultActivity(
+            [in] Int32 index);
+
+        /**
+         * Sets the sorter for ordering activities based on historical data and an intent.
+         *
+         * @param activitySorter The sorter.
+         *
+         * @see ActivitySorter
+         */
+        SetActivitySorter(
+            [in] IActivitySorter* activitySorter);
+
+        /**
+         * Sets the maximal size of the historical data. Defaults to
+         * {@link #DEFAULT_HISTORY_MAX_LENGTH}
+         * <p>
+         *   <strong>Note:</strong> Setting this property will immediately
+         *   enforce the specified max history size by dropping enough old
+         *   historical records to enforce the desired size. Thus, any
+         *   records that exceed the history size will be discarded and
+         *   irreversibly lost.
+         * </p>
+         *
+         * @param historyMaxSize The max history size.
+         */
+        SetHistoryMaxSize(
+            [in] Int32 historyMaxSize);
+
+        /**
+         * Gets the history max size.
+         *
+         * @return The history max size.
+         */
+        GetHistoryMaxSize(
+            [out] Int32* size);
+
+        /**
+         * Gets the history size.
+         *
+         * @return The history size.
+         */
+        GetHistorySize(
+            [out] Int32* size);
+    }
+
+    /**
+     * Represents a record in the history.
+     */
+    interface IHistoricalRecord {
+        GetHashCode(
+            [out] Int32* code);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* res);
+
+        ToString(
+            [out] String* str);
+    }
+
+    [local]
+    interface IActivityChooserModelHelper {
+        /**
+         * Gets the data model backed by the contents of the provided file with historical data.
+         * Note that only one data model is backed by a given file, thus multiple calls with
+         * the same file name will return the same model instance. If no such instance is present
+         * it is created.
+         * <p>
+         * <strong>Note:</strong> To use the default historical data file clients should explicitly
+         * pass as file name {@link #DEFAULT_HISTORY_FILE_NAME}. If no persistence of the choice
+         * history is desired clients should pass <code>null</code> for the file name. In such
+         * case a new model is returned for each invocation.
+         * </p>
+         *
+         * <p>
+         * <strong>Always use difference historical data files for semantically different actions.
+         * For example, sharing is different from importing.</strong>
+         * </p>
+         *
+         * @param context Context for loading resources.
+         * @param historyFileName File name with choice history, <code>null</code>
+         *        if the model should not be backed by a file. In this case the activities
+         *        will be ordered only by data from the current session.
+         *
+         * @return The model.
+         */
+
+        Get(
+            [in] IContext* ctx,
+            [in] String historyFileName,
+            [out] IActivityChooserModel** result);
+    }
+    /**
+     * Represents an activity.
+     */
+
+    /**
+     * @Involve
+     * interface Elastos.Core.IComparable
+     */
+    interface IActivityResolveInfo {
+        GetHashCode(
+            [out] Int32* code);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* res);
+
+        ToString(
+            [out] String* str);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

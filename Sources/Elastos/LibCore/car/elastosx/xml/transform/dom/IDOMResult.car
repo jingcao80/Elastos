@@ -1,0 +1,52 @@
+
+module
+{
+    interface Org.W3c.Dom.INode;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Transform {
+    namespace Dom {
+
+    /**
+     * @Involve
+     * interface IResult;
+     */
+    interface IDOMResult {
+
+        /** <p>If {@link javax.xml.transform.TransformerFactory#getFeature}
+         * returns <code>true</code> when passed this value as an argument,
+         * the <code>Transformer</code> supports <code>Result</code> output of this type.</p>
+         */
+        const String FEATURE = "http://javax.xml.transform.dom.DOMResult/feature";
+
+        /**
+         * <p>Set the node that will contain the result DOM tree.<p>
+         *
+         * <p>In practice, the node should be
+         * a {@link org.w3c.dom.Document} node,
+         * a {@link org.w3c.dom.DocumentFragment} node, or
+         * a {@link org.w3c.dom.Element} node.
+         * In other words, a node that accepts children.</p>
+         *
+         * <p>An <code>IllegalStateException</code> is thrown if <code>nextSibling</code> is not <code>null</code> and
+         * <code>node</code> is not a parent of <code>nextSibling</code>.
+         * An <code>IllegalStateException</code> is thrown if <code>node</code> is <code>null</code> and
+         * <code>nextSibling</code> is not <code>null</code>.</p>
+         *
+         * @param node The node to which the transformation will be appended.
+         *
+         * @throws IllegalStateException If <code>nextSibling</code> is not <code>null</code> and
+         *   <code>nextSibling</code> is not a child of <code>node</code>.
+         * @throws IllegalStateException If <code>node</code> is <code>null</code> and
+         *   <code>nextSibling</code> is not <code>null</code>.
+         */
+        SetNode(
+            [in] INode* node);
+    }
+
+    } // namespace Dom
+    } // namespace Transform
+    } // namespace Xml
+    } // namespace Elastosx
+}

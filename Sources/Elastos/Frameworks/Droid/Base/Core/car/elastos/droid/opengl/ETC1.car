@@ -1,0 +1,147 @@
+
+module
+{
+    using interface Elastos.IO.IBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    interface IETC1 {
+        /**
+         * Size in bytes of an encoded block.
+         */
+        const Int32 _ENCODED_BLOCK_SIZE = 8;
+
+        /**
+         * Size in bytes of a decoded block.
+         */
+        const Int32 _DECODED_BLOCK_SIZE = 48;
+
+        /**
+         * Size of a PKM file header, in bytes.
+         */
+        const Int32 _ETC_PKM_HEADER_SIZE = 16;
+
+        /**
+         * Accepted by the internalformat parameter of glCompressedTexImage2D.
+         */
+        const Int32 _ETC1_RGB8_OES = 0x8D64;
+
+        /**
+         * Encode a block of pixels.
+         *
+         * @param in a native order direct buffer of size DECODED_BLOCK_SIZE that represent a
+         * 4 x 4 square of 3-byte pixels in form R, G, B. Byte (3 * (x + 4 * y) is the R
+         * value of pixel (x, y).
+         *
+         * @param validPixelMask is a 16-bit mask where bit (1 << (x + y * 4)) indicates whether
+         * the corresponding (x,y) pixel is valid. Invalid pixel color values are ignored when compressing.
+         *
+         * @param out a native order direct buffer of size ENCODED_BLOCK_SIZE that receives the
+         * ETC1 compressed version of the data.
+         *
+         */
+        EncodeBlock(
+            [in] IBuffer* inBuf,
+            [in] Int32 validPixelMask,
+            [in] IBuffer* outBuf);
+
+        /**
+         * Decode a block of pixels.
+         *
+         * @param in a native order direct buffer of size ENCODED_BLOCK_SIZE that contains the
+         * ETC1 compressed version of the data.
+         *
+         * @param out a native order direct buffer of size DECODED_BLOCK_SIZE that will receive
+         * the decoded data. The data represents a
+         * 4 x 4 square of 3-byte pixels in form R, G, B. Byte (3 * (x + 4 * y) is the R
+         * value of pixel (x, y).
+         */
+        DecodeBlock(
+            [in] IBuffer* inBuf,
+            [in] IBuffer* outBuf);
+
+        /**
+         * Return the size of the encoded image data (does not include size of PKM header).
+         */
+        GetEncodedDataSize(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] Int32* size);
+
+        /**
+         * Encode an entire image.
+         * @param in a native order direct buffer of the image data. Formatted such that
+         *           pixel (x,y) is at pIn + pixelSize * x + stride * y;
+         * @param out a native order direct buffer of the encoded data.
+         * Must be large enough to store entire encoded image.
+         * @param pixelSize must be 2 or 3. 2 is an GL_UNSIGNED_SHORT_5_6_5 image,
+         * 3 is a GL_BYTE RGB image.
+         */
+        EncodeImage(
+            [in] IBuffer* inBuf,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 pixelSize,
+            [in] Int32 stride,
+            [in] IBuffer* outBuf);
+
+        /**
+         * Decode an entire image.
+         * @param in native order direct buffer of the encoded data.
+         * @param out native order direct buffer of the image data. Will be written such that
+         * pixel (x,y) is at pIn + pixelSize * x + stride * y. Must be
+         * large enough to store entire image.
+         * @param pixelSize must be 2 or 3. 2 is an GL_UNSIGNED_SHORT_5_6_5 image,
+         * 3 is a GL_BYTE RGB image.
+         */
+        DecodeImage(
+            [in] IBuffer* inBuf,
+            [in] IBuffer* outBuf,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 pixelSize,
+            [in] Int32 stride);
+
+        /**
+         * Format a PKM header
+         * @param header native order direct buffer of the header.
+         * @param width the width of the image in pixels.
+         * @param height the height of the image in pixels.
+         */
+        FormatHeader(
+            [in] IBuffer* header,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * Check if a PKM header is correctly formatted.
+         * @param header native order direct buffer of the header.
+         */
+        IsValid(
+            [in] IBuffer* header,
+            [out] Boolean* isvalid);
+
+        /**
+         * Read the image width from a PKM header
+         * @param header native order direct buffer of the header.
+         */
+        GetWidth(
+            [in] IBuffer* header,
+            [out] Int32* width);
+
+        /**
+         * Read the image height from a PKM header
+         * @param header native order direct buffer of the header.
+         */
+        GetHeight(
+            [in] IBuffer* header,
+            [out] Int32* height);
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}
+`

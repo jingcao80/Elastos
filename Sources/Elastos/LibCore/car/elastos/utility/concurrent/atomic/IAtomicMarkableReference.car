@@ -1,0 +1,114 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+    namespace Atomic {
+
+    [deprecated]
+    interface IAtomicMarkableReference {
+        /**
+         * Returns the current value of the reference.
+         *
+         * @return the current value of the reference
+         */
+        GetReference(
+            [out] IInterface** outface);
+
+        /**
+         * Returns the current value of the mark.
+         *
+         * @return the current value of the mark
+         */
+        IsMarked(
+            [out] Boolean* value);
+
+        /**
+         * Returns the current values of both the reference and the mark.
+         * Typical usage is {@code boolean[1] holder; ref = v.get(holder); }.
+         *
+         * @param markHolder an array of size of at least one. On return,
+         * {@code markholder[0]} will hold the value of the mark.
+         * @return the current value of the reference
+         */
+        Get(
+            [in] ArrayOf<Boolean>* markHolder,
+            [out] IInterface** outface);
+
+        /**
+         * Atomically sets the value of both the reference and mark
+         * to the given update values if the
+         * current reference is {@code ==} to the expected reference
+         * and the current mark is equal to the expected mark.
+         *
+         * <p>May <a href="package-summary.html#Spurious">fail spuriously</a>
+         * and does not provide ordering guarantees, so is only rarely an
+         * appropriate alternative to {@code compareAndSet}.
+         *
+         * @param expectedReference the expected value of the reference
+         * @param newReference the new value for the reference
+         * @param expectedMark the expected value of the mark
+         * @param newMark the new value for the mark
+         * @return true if successful
+         */
+        WeakCompareAndSet(
+            [in] IInterface* expectedReference,
+            [in] IInterface* newReference,
+            [in] Boolean expectedMark,
+            [in] Boolean newMark,
+            [out] Boolean* value);
+
+        /**
+         * Atomically sets the value of both the reference and mark
+         * to the given update values if the
+         * current reference is {@code ==} to the expected reference
+         * and the current mark is equal to the expected mark.
+         *
+         * @param expectedReference the expected value of the reference
+         * @param newReference the new value for the reference
+         * @param expectedMark the expected value of the mark
+         * @param newMark the new value for the mark
+         * @return true if successful
+         */
+        CompareAndSet(
+            [in] IInterface* expectedReference,
+            [in] IInterface* newReference,
+            [in] Boolean expectedMark,
+            [in] Boolean newMark,
+            [out] Boolean* value);
+
+        /**
+         * Unconditionally sets the value of both the reference and mark.
+         *
+         * @param newReference the new value for the reference
+         * @param newMark the new value for the mark
+         */
+        Set(
+            [in] IInterface* newReference,
+            [in] Boolean newMark);
+
+        /**
+         * Atomically sets the value of the mark to the given update value
+         * if the current reference is {@code ==} to the expected
+         * reference.  Any given invocation of this operation may fail
+         * (return {@code false}) spuriously, but repeated invocation
+         * when the current value holds the expected value and no other
+         * thread is also attempting to set the value will eventually
+         * succeed.
+         *
+         * @param expectedReference the expected value of the reference
+         * @param newMark the new value for the mark
+         * @return true if successful
+         */
+        AttemptMark(
+            [in] IInterface* expectedReference,
+            [in] Boolean newMark,
+            [out] Boolean* value);
+    }
+
+    } // namespace Atomic
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

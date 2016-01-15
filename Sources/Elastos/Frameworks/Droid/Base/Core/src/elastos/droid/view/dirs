@@ -1,0 +1,5 @@
+DIRS += inputmethod
+DIRS += accessibility
+DIRS += animation
+DIRS += textservice
+#DIRS += menu

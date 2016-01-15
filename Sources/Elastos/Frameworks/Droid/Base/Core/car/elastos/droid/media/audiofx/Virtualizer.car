@@ -1,0 +1,271 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Audiofx {
+
+    interface IVirtualizer;
+
+    /**
+     * The OnParameterChangeListener interface defines a method called by the Virtualizer when a
+     * parameter value has changed.
+     */
+    interface IVirtualizerOnParameterChangeListener  {
+        /**
+         * Method called when a parameter value has changed. The method is called only if the
+         * parameter was changed by another application having the control of the same
+         * Virtualizer engine.
+         * @param effect the Virtualizer on which the interface is registered.
+         * @param status status of the set parameter operation.
+         * @param param ID of the modified parameter. See {@link #PARAM_STRENGTH} ...
+         * @param value the new parameter value.
+         */
+        OnParameterChange(
+            [in] IVirtualizer* effect,
+            [in] Int32 status,
+            [in] Int32 param,
+            [in] Int16 value);
+    }
+
+    /**
+     * The Settings class regroups all virtualizer parameters. It is used in
+     * conjuntion with getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    interface IVirtualizerSettings {
+        GetStrength(
+            [out] Int16* result);
+
+        SetStrength(
+            [in] Int16 result);
+    }
+
+    /**
+     * @Involve
+     * interface IAudioEffect
+     */
+    [deprecated]
+    interface IVirtualizer {
+
+        /**
+         * Is strength parameter supported by virtualizer engine. Parameter ID for getParameter().
+         */
+        const Int32 PARAM_STRENGTH_SUPPORTED = 0;
+        /**
+         * Virtualizer effect strength. Parameter ID for
+         * {@link android.media.audiofx.Virtualizer.OnParameterChangeListener}
+         */
+        const Int32 PARAM_STRENGTH = 1;
+        /**
+         * @hide
+         * Parameter ID to query the virtual speaker angles for a channel mask / device configuration.
+         */
+        const Int32 PARAM_VIRTUAL_SPEAKER_ANGLES = 2;
+        /**
+         * @hide
+         * Parameter ID to force the virtualization mode to be that of a specific device
+         */
+        const Int32 PARAM_FORCE_VIRTUALIZATION_MODE = 3;
+        /**
+         * @hide
+         * Parameter ID to query the current virtualization mode.
+         */
+        const Int32 PARAM_VIRTUALIZATION_MODE = 4;
+
+        /**
+         * A virtualization mode indicating virtualization processing is not active.
+         * See {@link #getVirtualizationMode()} as one of the possible return value.
+         */
+        const Int32 VIRTUALIZATION_MODE_OFF = 0;
+
+        /**
+         * A virtualization mode used to indicate the virtualizer effect must stop forcing the
+         * processing to a particular mode in {@link #forceVirtualizationMode(int)}.
+         */
+        const Int32 VIRTUALIZATION_MODE_AUTO = 1;
+        /**
+         * A virtualization mode typically used over headphones.
+         * Binaural virtualization describes an audio processing configuration for virtualization
+         * where the left and right channels are respectively reaching the left and right ear of the
+         * user, without also feeding the opposite ear (as is the case when listening over speakers).
+         * <p>Such a mode is therefore meant to be used when audio is playing over stereo wired
+         * headphones or headsets, but also stereo headphones through a wireless A2DP Bluetooth link.
+         * <p>See {@link #canVirtualize(int, int)} to verify this mode is supported by this Virtualizer.
+         */
+        const Int32 VIRTUALIZATION_MODE_BINAURAL = 2;
+
+        /**
+         * A virtualization mode typically used over speakers.
+         * Transaural virtualization describes an audio processing configuration that differs from
+         * binaural (as described in {@link #VIRTUALIZATION_MODE_BINAURAL} in that cross-talk is
+         * present, i.e. audio played from the left channel also reaches the right ear of the user,
+         * and vice-versa.
+         * <p>When supported, such a mode is therefore meant to be used when audio is playing over the
+         * built-in stereo speakers of a device, if they are featured.
+         * <p>See {@link #canVirtualize(int, int)} to verify this mode is supported by this Virtualizer.
+         */
+        const Int32 VIRTUALIZATION_MODE_TRANSAURAL = 3;
+
+        /**
+         * Indicates whether setting strength is supported. If this method returns false, only one
+         * strength is supported and the setStrength() method always rounds to that value.
+         * @return true is strength parameter is supported, false otherwise
+         */
+        GetStrengthSupported(
+            [out] Boolean* strengthSupported);
+
+        /**
+         * Sets the strength of the virtualizer effect. If the implementation does not support per mille
+         * accuracy for setting the strength, it is allowed to round the given strength to the nearest
+         * supported value. You can use the {@link #getRoundedStrength()} method to query the
+         * (possibly rounded) value that was actually set.
+         * @param strength strength of the effect. The valid range for strength strength is [0, 1000],
+         * where 0 per mille designates the mildest effect and 1000 per mille designates the strongest.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetStrength(
+            [in] Int16 strength);
+
+        /**
+         * Gets the current strength of the effect.
+         * @return the strength of the effect. The valid range for strength is [0, 1000], where 0 per
+         * mille designates the mildest effect and 1000 per mille the strongest
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetRoundedStrength(
+            [out] Boolean* result);
+
+        /**
+         * Checks if the combination of a channel mask and virtualization mode is supported by this
+         * virtualizer.
+         * Some virtualizer implementations may only support binaural processing (i.e. only support
+         * headphone output, see {@link #VIRTUALIZATION_MODE_BINAURAL}), some may support transaural
+         * processing (i.e. for speaker output, see {@link #VIRTUALIZATION_MODE_TRANSAURAL}) for the
+         * built-in speakers. Use this method to query the virtualizer implementation capabilities.
+         * @param inputChannelMask the channel mask of the content to virtualize.
+         * @param virtualizationMode the mode for which virtualization processing is to be performed,
+         *    one of {@link #VIRTUALIZATION_MODE_BINAURAL}, {@link #VIRTUALIZATION_MODE_TRANSAURAL}.
+         * @return true if the combination of channel mask and virtualization mode is supported, false
+         *    otherwise.
+         *    <br>An indication that a certain channel mask is not supported doesn't necessarily mean
+         *    you cannot play content with that channel mask, it more likely implies the content will
+         *    be downmixed before being virtualized. For instance a virtualizer that only supports a
+         *    mask such as {@link AudioFormat#CHANNEL_OUT_STEREO}
+         *    will still be able to process content with a mask of
+         *    {@link AudioFormat#CHANNEL_OUT_5POINT1}, but will downmix the content to stereo first, and
+         *    then will virtualize, as opposed to virtualizing each channel individually.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        CanVirtualize(
+            [in] Int32 inputChannelMask,
+            [in] Int32 virtualizationMode,
+            [out] Boolean * result);
+
+            /**
+         * Queries the virtual speaker angles (azimuth and elevation) for a combination of a channel
+         * mask and virtualization mode.
+         * If the virtualization configuration (mask and mode) is supported (see
+         * {@link #canVirtualize(int, int)}, the array angles will contain upon return the
+         * definition of each virtual speaker and its azimuth and elevation angles relative to the
+         * listener.
+         * <br>Note that in some virtualizer implementations, the angles may be strength-dependent.
+         * @param inputChannelMask the channel mask of the content to virtualize.
+         * @param virtualizationMode the mode for which virtualization processing is to be performed,
+         *    one of {@link #VIRTUALIZATION_MODE_BINAURAL}, {@link #VIRTUALIZATION_MODE_TRANSAURAL}.
+         * @param angles a non-null array whose length is 3 times the number of channels in the channel
+         *    mask.
+         *    If the method indicates the configuration is supported, the array will contain upon return
+         *    triplets of values: for each channel <code>i</code> among the channels of the mask:
+         *    <ul>
+         *      <li>the element at index <code>3*i</code> in the array contains the speaker
+         *          identification (e.g. {@link AudioFormat#CHANNEL_OUT_FRONT_LEFT}),</li>
+         *      <li>the element at index <code>3*i+1</code> contains its corresponding azimuth angle
+         *          expressed in degrees, where 0 is the direction the listener faces, 180 is behind
+         *          the listener, and -90 is to her/his left,</li>
+         *      <li>the element at index <code>3*i+2</code> contains its corresponding elevation angle
+         *          where +90 is directly above the listener, 0 is the horizontal plane, and -90 is
+         *          directly below the listener.</li>
+         * @return true if the combination of channel mask and virtualization mode is supported, false
+         *    otherwise.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetSpeakerAngles(
+            [in] Int32 inputChannelMask,
+            [in] Int32 virtualizationMode,
+            [in] ArrayOf<Int32> * angles,
+            [out] Boolean * result);
+
+        /**
+         * Forces the virtualizer effect to use the given processing mode.
+         * The effect must be enabled for the forced mode to be applied.
+         * @param virtualizationMode one of {@link #VIRTUALIZATION_MODE_BINAURAL},
+         *     {@link #VIRTUALIZATION_MODE_TRANSAURAL} to force a particular processing mode, or
+         *     {@value #VIRTUALIZATION_MODE_AUTO} to stop forcing a mode.
+         * @return true if the processing mode is supported, and it is successfully set, or
+         *     forcing was successfully disabled, false otherwise.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        ForceVirtualizationMode(
+            [in] Int32 virtualizationMode,
+            [out] Boolean * result);
+
+        /**
+         * Return the virtualization mode being used, if any.
+         * @return the virtualization mode being used.
+         *     If virtualization is not active, the virtualization mode will be
+         *     {@link #VIRTUALIZATION_MODE_OFF}. Otherwise the value will be
+         *     {@link #VIRTUALIZATION_MODE_BINAURAL} or {@link #VIRTUALIZATION_MODE_TRANSAURAL}.
+         *     Virtualization may not be active either because the effect is not enabled or
+         *     because the current output device is not compatible with this virtualization
+         *     implementation.
+         * @throws IllegalStateException
+         * @throws UnsupportedOperationException
+         */
+        GetVirtualizationMode(
+            [out] Int32 * result);
+
+        /**
+         * Registers an OnParameterChangeListener interface.
+         * @param listener OnParameterChangeListener interface registered
+         */
+        SetParameterListener(
+            [in] IVirtualizerOnParameterChangeListener* listener);
+
+        /**
+         * Gets the virtualizer properties. This method is useful when a snapshot of current
+         * virtualizer settings must be saved by the application.
+         * @return a Virtualizer.Settings object containing all current parameters values
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetProperties(
+            [out] IVirtualizerSettings** properties);
+
+        /**
+         * Sets the virtualizer properties. This method is useful when virtualizer settings have to
+         * be applied from a previous backup.
+         * @param settings a Virtualizer.Settings object containing the properties to apply
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetProperties(
+            [in] IVirtualizerSettings* properties);
+    }
+    } // namespace audiofx {
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

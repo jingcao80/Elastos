@@ -1,0 +1,94 @@
+
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * ExploreByTouchHelper is a utility class for implementing accessibility
+     * support in custom {@link android.view.View}s that represent a collection of View-like
+     * logical items. It extends {@link android.view.accessibility.AccessibilityNodeProvider} and
+     * simplifies many aspects of providing information to accessibility services
+     * and managing accessibility focus. This class does not currently support
+     * hierarchies of logical items.
+     * <p>
+     * This should be applied to the parent view using
+     * {@link android.view.View#setAccessibilityDelegate}:
+     *
+     * <pre>
+     * mAccessHelper = ExploreByTouchHelper.create(someView, mAccessHelperCallback);
+     * ViewCompat.setAccessibilityDelegate(someView, mAccessHelper);
+     * </pre>
+     *
+     * @Involve
+     * interface Elastos.Droid.View.IAccessibilityDelegate
+     */
+    interface IExploreByTouchHelper {
+        /** Virtual node identifier value for invalid nodes. */
+        const Int32 INVALID_ID = 0xFFFFFFFF;
+
+        /**
+         * Dispatches hover {@link android.view.MotionEvent}s to the virtual view hierarchy when
+         * the Explore by Touch feature is enabled.
+         * <p>
+         * This method should be called by overriding
+         * {@link View#dispatchHoverEvent}:
+         *
+         * <pre>&#64;Override
+         * public boolean dispatchHoverEvent(MotionEvent event) {
+         *   if (mHelper.dispatchHoverEvent(this, event) {
+         *     return true;
+         *   }
+         *   return super.dispatchHoverEvent(event);
+         * }
+         * </pre>
+         *
+         * @param event The hover event to dispatch to the virtual view hierarchy.
+         * @return Whether the hover event was handled.
+         */
+        DispatchHoverEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* rst);
+
+        /**
+         * Notifies the accessibility framework that the properties of the parent
+         * view have changed.
+         * <p>
+         * You <b>must</b> call this method after adding or removing items from the
+         * parent view.
+         */
+        InvalidateRoot();
+
+        /**
+         * Notifies the accessibility framework that the properties of a particular
+         * item have changed.
+         * <p>
+         * You <b>must</b> call this method after changing any of the properties set
+         * in {@link #onPopulateNodeForVirtualView}.
+         *
+         * @param virtualViewId The virtual view id to invalidate.
+         */
+        InvalidateVirtualView(
+            [in] Int32 virtualViewId);
+
+        /**
+         * Returns the virtual view id for the currently focused item,
+         *
+         * @return A virtual view id, or {@link #INVALID_ID} if no item is
+         *         currently focused.
+         */
+        GetFocusedVirtualView(
+            [out] Int32* viewId);
+    }
+
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}

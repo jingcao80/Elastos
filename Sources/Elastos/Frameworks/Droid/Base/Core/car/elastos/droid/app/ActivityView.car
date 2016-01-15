@@ -1,0 +1,59 @@
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IIntentSender;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.App.IActivityView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface IActivityViewCallback {
+        /**
+         * Called when all activities in the ActivityView have completed and been removed. Register
+         * using {@link ActivityView#setCallback(ActivityViewCallback)}. Each ActivityView may
+         * have at most one callback registered.
+         */
+        OnAllActivitiesComplete(
+            [in] IActivityView* view);
+    }
+
+    /** @hide */
+    /**
+     * @Involve
+     * interface IViewGroup
+     * interface IView;
+     * interface IViewParent;
+     * interface IViewManager;
+     */
+    interface IActivityView {
+
+        IsAttachedToDisplay(
+            [out] Boolean* bval);
+
+        StartActivity(
+            [in] IIntent* intent);
+
+        StartActivity(
+            [in] IIntentSender* intentSender);
+
+        StartActivity(
+            [in] IPendingIntent* pendingIntent);
+
+        ReleaseResources();
+
+        /**
+         * Set the callback to use to report certain state changes.
+         * @param callback The callback to report events to.
+         *
+         * @see ActivityViewCallback
+         */
+        SetCallback(
+            [in] IActivityViewCallback* cb);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

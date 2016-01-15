@@ -1,0 +1,57 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.App.IActivityOptions;
+    interface Elastos.Droid.App.IExitTransitionCoordinator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * This class contains all persistence-related functionality for Activity Transitions.
+     * Activities start exit and enter Activity Transitions through this class.
+     */
+    [local]
+    interface IActivityTransitionState {
+        AddExitTransitionCoordinator(
+            [in] IExitTransitionCoordinator* exitTransitionCoordinator,
+            [out] Int32* result);
+
+        ReadState(
+            [in] IBundle* bundle);
+
+        SaveState(
+            [in] IBundle* bundle);
+
+        SetEnterActivityOptions(
+            [in] IActivity* activity,
+            [in] IActivityOptions* options);
+
+        EnterReady(
+            [in] IActivity* activity);
+
+        PostponeEnterTransition();
+
+        StartPostponedEnterTransition();
+
+        OnStop();
+
+        OnResume();
+
+        Clear();
+
+        StartExitBackTransition(
+            [in] IActivity* activity,
+            [out] Boolean* result);
+
+        StartExitOutTransition(
+            [in] IActivity* activity,
+            [in] IBundle* options);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

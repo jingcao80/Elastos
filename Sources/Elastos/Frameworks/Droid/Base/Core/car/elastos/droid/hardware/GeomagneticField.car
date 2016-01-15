@@ -1,0 +1,70 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /**
+     * Estimates magnetic field at a given point on
+     * Earth, and in particular, to compute the magnetic declination from true
+     * north.
+     *
+     * <p>This uses the World Magnetic Model produced by the United States National
+     * Geospatial-Intelligence Agency.  More details about the model can be found at
+     * <a href="http://www.ngdc.noaa.gov/geomag/WMM/DoDWMM.shtml">http://www.ngdc.noaa.gov/geomag/WMM/DoDWMM.shtml</a>.
+     * This class currently uses WMM-2010 which is valid until 2015, but should
+     * produce acceptable results for several years after that. Future versions of
+     * Android may use a newer version of the model.
+     */
+    interface IGeomagneticField {
+        /**
+         * @return The X (northward) component of the magnetic field in nanoteslas.
+         */
+        GetX(
+            [out] Float* value);
+
+        /**
+         * @return The Y (eastward) component of the magnetic field in nanoteslas.
+         */
+        GetY(
+            [out] Float* value);
+
+        /**
+         * @return The Z (downward) component of the magnetic field in nanoteslas.
+         */
+        GetZ(
+            [out] Float* value);
+
+        /**
+         * @return The declination of the horizontal component of the magnetic
+         *         field from true north, in degrees (i.e. positive means the
+         *         magnetic field is rotated east that much from true north).
+         */
+        GetDeclination(
+            [out] Float* value);
+
+        /**
+         * @return The inclination of the magnetic field in degrees -- positive
+         *         means the magnetic field is rotated downwards.
+         */
+        GetInclination(
+            [out] Float* value);
+
+        /**
+         * @return  Horizontal component of the field strength in nonoteslas.
+         */
+        GetHorizontalStrength(
+            [out] Float* value);
+
+        /**
+         * @return  Total field strength in nanoteslas.
+         */
+        GetFieldStrength(
+            [out] Float* value);
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,46 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Wallpaper {
+
+    /**
+     * Base class for activities that will be used to configure the settings of
+     * a wallpaper.  You should derive from this class to allow it to select the
+     * proper theme of the activity depending on how it is being used.
+     * @hide
+     *
+     * @Involve
+     * interface IListActivity
+     * interface IPreferenceManagerOnPreferenceTreeClickListener
+     * interface IPreferenceFragmentOnPreferenceStartFragmentCallback
+     * interface IActivity
+     * interface IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IViewOnCreateContextMenuListener //undefined
+     * interface IComponentCallbacks2
+     * interface IComponentCallbacks
+     * interface IOnWindowDismissedCallback  //IOnWindowDismissedCallback
+     * interface IContextWrapper
+     * interface IContext
+     * interface IPreferenceActivity
+     * interface IPreferenceManagerOnPreferenceTreeClickListener
+     * interface IPreferenceFragmentOnPreferenceStartFragmentCallback
+     */
+    interface IWallpaperSettingsActivity {
+        /**
+         * This boolean extra in the launch intent indicates that the settings
+         * are being used while the wallpaper is in preview mode.
+         */
+        const String EXTRA_PREVIEW_MODE = "android.service.wallpaper.PREVIEW_MODE";
+    }
+
+    } //Wallpaper
+    } //Service
+    } //Droid
+    } //Elastos
+}

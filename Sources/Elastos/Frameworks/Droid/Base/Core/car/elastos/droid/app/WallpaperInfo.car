@@ -1,0 +1,150 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Pm.IServiceInfo;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Utility.IPrinter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * This class is used to specify meta information of a wallpaper service.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [local]
+    interface IWallpaperInfo {
+        /**
+         * Return the .apk package that implements this wallpaper.
+         */
+        GetPackageName(
+            [out] String* pkgName);
+
+        /**
+         * Return the class name of the service component that implements
+         * this wallpaper.
+         */
+        GetServiceName(
+            [out] String* sName);
+
+        /**
+         * Return the raw information about the Service implementing this
+         * wallpaper.  Do not modify the returned object.
+         */
+        GetServiceInfo(
+            [out] IServiceInfo** info);
+
+        /**
+         * Return the component of the service that implements this wallpaper.
+         */
+        GetComponent(
+            [out] IComponentName** component);
+
+        /**
+         * Load the user-displayed label for this wallpaper.
+         *
+         * @param pm Supply a PackageManager used to load the wallpaper's
+         * resources.
+         */
+        LoadLabel(
+            [in] IPackageManager* pm,
+            [out] ICharSequence** label);
+
+        /**
+         * Load the user-displayed icon for this wallpaper.
+         *
+         * @param pm Supply a PackageManager used to load the wallpaper's
+         * resources.
+         */
+        LoadIcon(
+            [in] IPackageManager* pm,
+            [out] IDrawable** icon);
+
+        /**
+         * Load the thumbnail image for this wallpaper.
+         *
+         * @param pm Supply a PackageManager used to load the wallpaper's
+         * resources.
+         */
+        LoadThumbnail(
+            [in] IPackageManager* pm,
+            [out] IDrawable** drawable);
+
+        /**
+         * Return a string indicating the author(s) of this wallpaper.
+         */
+        LoadAuthor(
+            [in] IPackageManager* pm,
+            [out] ICharSequence** author);
+
+        /**
+         * Return a brief summary of this wallpaper's behavior.
+         */
+        LoadDescription(
+            [in] IPackageManager* pm,
+            [out] ICharSequence** summary);
+
+        /**
+         * Return the class name of an activity that provides a settings UI for
+         * the wallpaper.  You can launch this activity be starting it with
+         * an android.content.Intent whose action is MAIN and with an
+         * explicit android.content.ComponentName
+         * composed of #getPackageName and the class name returned here.
+         *
+         * @sa android.content.Intent
+         * @sa android.content.ComponentName
+         * @sa #getPackageName
+         *
+         * <p>A null will be returned if there is no settings activity associated
+         * with the wallpaper.
+         */
+        GetSettingsActivity(
+            [out] String* name);
+
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+
+        SetService(
+            [in] IResolveInfo* service);
+
+        GetService(
+            [out] IResolveInfo** service);
+
+        SetSettingsActivityName(
+            [in] String name);
+
+        GetSettingsActivityName(
+            [out] String* name);
+
+        SetThumbnailResource(
+            [in] Int32 thumbnail);
+
+        GetThumbnailResource(
+            [out] Int32* thumbnail);
+
+        SetAuthorResource(
+            [in] Int32 author);
+
+        GetAuthorResource(
+            [out] Int32* author);
+
+        SetDescriptionResource(
+            [in] Int32 description);
+
+        GetDescriptionResource(
+            [out] Int32* description);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

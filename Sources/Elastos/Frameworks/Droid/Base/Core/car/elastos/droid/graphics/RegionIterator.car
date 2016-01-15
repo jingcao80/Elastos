@@ -1,0 +1,24 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    interface IRegionIterator {
+        /**
+         * Return the next rectangle in the region. If there are no more rectangles
+         * this returns false and r is unchanged. If there is at least one more,
+         * this returns true and r is set to that rectangle.
+         */
+        Next(
+            [in] IRect* r,
+            [out] Boolean* result);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

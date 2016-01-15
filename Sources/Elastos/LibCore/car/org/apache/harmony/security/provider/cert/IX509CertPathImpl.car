@@ -1,0 +1,101 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Org.Apache.Harmony.Security.Asn1.IASN1SequenceOf;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Cert {
+
+    /**
+     * This class is an implementation of X.509 CertPath. This implementation
+     * provides ability to create the instance of X.509 Certification Path
+     * by several means:<br>
+     *
+     * &nbsp;  1. It can be created over the list of X.509 certificates
+     * (implementations of X509Certificate class) provided in constructor.<br>
+     *
+     * &nbsp;  2. It can be created by means of <code>getInstance</code> methods
+     * on the base of the following ASN.1 DER encoded forms:<br>
+     *
+     * &nbsp;&nbsp;  - PkiPath as defined in
+     * ITU-T Recommendation X.509(2000) Corrigendum 1(2001)
+     * (can be seen at
+     * ftp://ftp.bull.com/pub/OSIdirectory/DefectResolution/TechnicalCorrigenda/ApprovedTechnicalCorrigendaToX.509/8%7CX.509-TC1(4th).pdf)
+     * <br>
+     * &nbsp;&nbsp;  - PKCS #7 SignedData object provided in the form of
+     * ContentInfo structure. CertPath object is generated on the base of
+     * certificates presented in <code>certificates</code> field of the SignedData
+     * object which in its turn is retrieved from ContentInfo structure.
+     * (see http://www.ietf.org/rfc/rfc2315.txt
+     * for more info on PKCS #7)
+     * <br>
+     * &nbsp;
+     */
+    interface IX509CertPathImpl extends Elastos.Security.Cert.ICertPath {
+        // supported encoding types:
+        const Int32 PKI_PATH = 0;
+        const Int32 PKCS7 = 1;
+    }
+
+    [deprecated]
+    interface IX509CertPathImplHelper {
+        /**
+         * Generates certification path object on the base of PkiPath
+         * encoded form provided via input stream.
+         * @throws CertificateException if some problems occurred during
+         * the decoding.
+         */
+        GetInstance(
+            [in] IInputStream* is,
+            [out] IX509CertPathImpl** instance);
+
+        /**
+         * Generates certification path object on the base of encoding provided via
+         * input stream. The format of provided encoded form is specified by
+         * parameter <code>encoding</code>.
+         * @throws CertificateException if specified encoding form is not supported,
+         * or some problems occurred during the decoding.
+         */
+        GetInstanceEx(
+            [in] IInputStream* is,
+            [in] String encoding,
+            [out] IX509CertPathImpl** instance);
+
+        /**
+         * Generates certification path object on the base of PkiPath
+         * encoded form provided via array of bytes.
+         * @throws CertificateException if some problems occurred during
+         * the decoding.
+         */
+         GetInstanceEx2(
+            [in] ArrayOf<Byte>* path,
+            [out] IX509CertPathImpl** instance);
+
+        /**
+         * Generates certification path object on the base of encoding provided via
+         * array of bytes. The format of provided encoded form is specified by
+         * parameter <code>encoding</code>.
+         * @throws CertificateException if specified encoding form is not supported,
+         * or some problems occurred during the decoding.
+         */
+        GetInstanceEx3(
+            [in] ArrayOf<Byte>* bytesArray,
+            [in] String encoding,
+            [out] IX509CertPathImpl** instance);
+
+        GetASN1(
+            [out] IASN1SequenceOf** asn1);
+    }
+
+    } // namespace Cert
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

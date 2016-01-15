@@ -1,0 +1,40 @@
+TARGET_NAME= hardware
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += SerialPort.cpp
+SOURCES += SerialManager.cpp
+SOURCES += CSensor.cpp
+SOURCES += SensorEvent.cpp
+SOURCES += LegacySensorManager.cpp
+SOURCES += SensorManager.cpp
+SOURCES += CSensorManagerHelper.cpp
+SOURCES += SystemSensorManager.cpp
+SOURCES += GeomagneticField.cpp
+SOURCES += CHardwareCameraHelper.cpp
+SOURCES += HardwareCamera.cpp
+SOURCES += CLegacySensorManagerRotationWatcher.cpp
+SOURCES += CCarrierFrequencyRange.cpp
+SOURCES += CConsumerIrManager.cpp
+SOURCES += CameraInfo.cpp
+SOURCES += CTriggerEvent.cpp
+SOURCES += hardware.cpp
+
+ELASTOS_LIBS += display/display.lib
+ELASTOS_LIBS += input/input.lib
+ELASTOS_LIBS += usb/usb.lib
+ELASTOS_LIBS += soundtrigger/soundtrigger.lib
+ELASTOS_LIBS += location/location.lib
+ELASTOS_LIBS += hdmi/hdmi.lib
+ELASTOS_LIBS += camera2/params/params.lib
+ELASTOS_LIBS += camera2/utils/utils.lib
+ELASTOS_LIBS += camera2/dispatch/dispatch.lib
+ELASTOS_LIBS += camera2/legacy/legacy.lib
+ELASTOS_LIBS += camera2/impl/impl.lib
+ELASTOS_LIBS += camera2/camera2.lib

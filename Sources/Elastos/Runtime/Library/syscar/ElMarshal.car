@@ -1,0 +1,184 @@
+
+library
+{
+    enum MarshalType {
+        MarshalType_IPC,
+        MarshalType_RPC,
+    }
+
+    enum UnmarshalFlag {
+        UnmarshalFlag_Noncoexisting     = 0x10,
+        UnmarshalFlag_Coexisting        = 0x20,
+    }
+
+    [deprecated]
+    interface IParcel {
+        /**
+         * Returns the raw bytes of the parcel.
+         *
+         * <p class="note">The data you retrieve here <strong>must not</strong>
+         * be placed in any kind of persistent storage (on local disk, across
+         * a network, etc).  For that, you should use standard serialization
+         * or another kind of general serialization mechanism.  The Parcel
+         * marshalled representation is highly optimized for local IPC, and as
+         * such does not attempt to maintain compatibility with data created
+         * in different versions of the platform.
+         */
+        Marshall(
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Set the bytes in data to be the raw bytes of this Parcel.
+         */
+        Unmarshall(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offest,
+            [in] Int32 length);
+
+        AppendFrom(
+            [in] IParcel* parcel,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        HasFileDescriptors(
+            [out] Boolean* result);
+
+        ReadByte(
+            [out] Byte *value);
+
+        WriteByte(
+            [in] Byte value);
+
+        ReadBoolean(
+            [out] Boolean *value);
+
+        WriteBoolean(
+            [in] Boolean value);
+
+        ReadChar(
+            [out] Char32 *value);
+
+        WriteChar(
+            [in] Char32 value);
+
+        ReadInt16(
+            [out] Int16 *value);
+
+        WriteInt16(
+            [in] Int16 value);
+
+        ReadInt32(
+            [out] Int32 *value);
+
+        WriteInt32(
+            [in] Int32 value);
+
+        ReadInt64(
+            [out] Int64 *value);
+
+        WriteInt64(
+            [in] Int64 value);
+
+        ReadFloat(
+            [out] Float *value);
+
+        WriteFloat(
+            [in] Float value);
+
+        ReadDouble(
+            [out] Double *value);
+
+        WriteDouble(
+            [in] Double value);
+
+        ReadString(
+            [out] String* str);
+
+        WriteString(
+            [in] String str);
+
+        ReadStruct(
+            [out] Handle32 *address);
+
+        WriteStruct(
+            [in] Handle32 value,
+            [in] Int32 size);
+
+        ReadEMuid(
+            [out] EMuid *id);
+
+        WriteEMuid(
+            [in] EMuid id);
+
+        ReadEGuid(
+            [out] EGuid *id);
+
+        WriteEGuid(
+            [in] EGuid id);
+
+        ReadArrayOf(
+            [out] Handle32 *array);
+
+        WriteArrayOf(
+            [in] Handle32 array);
+
+        ReadArrayOfString(
+            [out, callee] ArrayOf<String>* array);
+
+        WriteArrayOfString(
+            [in] ArrayOf<String>* array);
+
+        ReadInterfacePtr(
+            [out] Handle32 *itfpp);
+
+        WriteInterfacePtr(
+            [in] IInterface* value);
+
+        // Place a file descriptor into the parcel.  The given fd must remain
+        // valid for the lifetime of the parcel.
+        WriteFileDescriptor(
+            [in] Int32 fd);
+
+        // Place a file descriptor into the parcel.  A dup of the fd is made, which
+        // will be closed once the parcel is destroyed.
+        WriteDupFileDescriptor(
+            [in] Int32 fd);
+
+        // Retrieve a file descriptor from the parcel.  This returns the raw fd
+        // in the parcel, which you do not own -- use dup() to get your own copy.
+        ReadFileDescriptor(
+            [out] Int32* fd);
+
+        Clone(
+            [in] IParcel* srcParcel);
+
+        GetDataPosition(
+            [out] Int32* position);
+
+        SetDataPosition(
+            [in] Int32 position);
+
+        GetElementPayload(
+            [out] Handle32* buffer);
+
+        GetElementSize(
+            [out] Int32* size);
+    }
+
+    interface IParcelable {
+        ReadFromParcel(
+            [in] IParcel* source);
+
+        WriteToParcel(
+            [in] IParcel* dest);
+    }
+
+    interface ICustomMarshal {
+        GetClsid(
+            [out] ClassID* clsid);
+
+        CreateObject(
+            [in] ICustomMarshal* originProxy,
+            [out] IInterface** newProxy);
+    }
+}

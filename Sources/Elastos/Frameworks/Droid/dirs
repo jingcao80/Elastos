@@ -1,0 +1,19 @@
+
+
+DIRS = DCARServer
+DIRS += DCARServiceManager
+DIRS += DroidRuntime
+DIRS += Base/Core/
+#DIRS += Base/Packages/
+DIRS += Base/Services/Server/
+DIRS += App_process
+
+#DIRS = ServiceManager
+DIRS += Base/Test
+DIRS += Base/Test-runner
+#DIRS += Lib
+#DIRS += JavaProxy
+#DIRS += Base/Packages/
+#DIRS += DevSamples
+#DIRS += Commands
+

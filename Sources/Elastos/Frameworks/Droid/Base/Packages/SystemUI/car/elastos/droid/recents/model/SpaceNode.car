@@ -1,0 +1,60 @@
+
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Model {
+
+    /**
+     * The full recents space is partitioned using a BSP into various nodes that define where task
+     * stacks should be placed.
+     */
+    interface ISpaceNode {
+
+        /** Sets the current stack for this space node */
+        SetStack(
+            [in] ITaskStack* stack);
+
+        /** Returns the task stack (not null if this is a leaf) */
+        GetStack(
+            [out] ITaskStack** result);
+
+        /** Returns whether there are any tasks in any stacks below this node. */
+        HasTasks(
+            [out] Boolean* result);
+
+        /** Returns whether this is a leaf node */
+        IsLeafNode(
+            [out] Boolean* result);
+
+        GetStacks(
+            [out] IArrayList** result);
+    }
+
+    /* BSP node callbacks */
+    interface ISpaceNodeCallbacks {
+
+        /** Notifies when a node is added */
+        OnSpaceNodeAdded(
+            [in] ISpaceNode* node);
+
+        /** Notifies when a node is measured */
+        OnSpaceNodeMeasured(
+            [in] ISpaceNode* node,
+            [in] IRect* rect);
+    }
+
+    } // namespace Model
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

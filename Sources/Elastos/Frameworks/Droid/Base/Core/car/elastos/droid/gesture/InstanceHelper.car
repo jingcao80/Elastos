@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.Droid.Gesture.IGesture;
+    interface Elastos.Droid.Gesture.IInstance;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Gesture {
+
+    [local]
+    interface IInstanceHelper {
+        CreateInstance(
+            [in] Int32 sequenceType,
+            [in] Int32 orientationType,
+            [in] IGesture* gesture,
+            [in] String label,
+            [out] IInstance** instance);
+
+        SpatialSampler(
+            [in] IGesture* gesture,
+            [out, callee] ArrayOf<Float>* sampler);
+
+        TemporalSampler(
+            [in] Int32 orientationType,
+            [in] IGesture* gesture,
+            [out, callee] ArrayOf<Float>* sampler);
+    }
+
+    } // namespace Gesture
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,79 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+    /**
+     * Constants and static helpers related to the HTTP protocol.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 555989 $
+     *
+     * @since 4.0
+     */
+    interface IHTTP {
+
+        const Int32 CR = 13; // <US-ASCII CR, carriage return (13)>
+        const Int32 LF = 10; // <US-ASCII LF, linefeed (10)>
+        const Int32 SP = 32; // <US-ASCII SP, space (32)>
+        const Int32 HT = 9;  // <US-ASCII HT, horizontal-tab (9)>
+
+        /** HTTP header definitions */
+        const String TRANSFER_ENCODING = "Transfer-Encoding";
+        const String CONTENT_LEN  = "Content-Length";
+        const String CONTENT_TYPE = "Content-Type";
+        const String CONTENT_ENCODING = "Content-Encoding";
+        const String EXPECT_DIRECTIVE = "Expect";
+        const String CONN_DIRECTIVE = "Connection";
+        const String TARGET_HOST = "Host";
+        const String USER_AGENT = "User-Agent";
+        const String DATE_HEADER = "Date";
+        const String SERVER_HEADER = "Server";
+
+        /** HTTP expectations */
+        const String EXPECT_CONTINUE = "100-continue";
+
+        /** HTTP connection control */
+        const String CONN_CLOSE = "Close";
+        const String CONN_KEEP_ALIVE = "Keep-Alive";
+
+        /** Transfer encoding definitions */
+        const String CHUNK_CODING = "chunked";
+        const String IDENTITY_CODING = "identity";
+
+        /** Common charset definitions */
+        const String UTF_8 = "UTF-8";
+        const String UTF_16 = "UTF-16";
+        const String US_ASCII = "US-ASCII";
+        const String ASCII = "ASCII";
+        const String ISO_8859_1 = "ISO-8859-1";
+
+        /** Default charsets */
+        const String DEFAULT_CONTENT_CHARSET = "ISO_8859_1";
+        const String DEFAULT_PROTOCOL_CHARSET = "US_ASCII";
+
+        /** Content type definitions */
+        const String OCTET_STREAM_TYPE = "application/octet-stream";
+        const String PLAIN_TEXT_TYPE = "text/plain";
+        const String CHARSET_PARAM = "; charset=";
+
+        /** Default content type */
+        const String DEFAULT_CONTENT_TYPE = "application/octet-stream";
+
+        IsWhitespace(
+            [in] Char32 ch,
+            [out] Boolean* isWhitespace);
+
+    }
+
+    } // namespace Protocol
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

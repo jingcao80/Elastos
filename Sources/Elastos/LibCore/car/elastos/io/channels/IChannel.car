@@ -1,0 +1,34 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+
+    /*
+     * A channel is a conduit to I/O services covering such itemes as files, sockets,
+     * hw devices, IO ports or some software component.
+     *
+     * Channels are open upon creation, and can be closed explicitly. Once a channel
+     * is closed it cannot be re-opened, and any attempts to perform IO operations
+     * on the closed channel result in a ClosedChannelException error.
+     *
+     * Particular implementations or sub-interfaces of Channel dicate whether they are
+     * thread safe or not.
+     */
+     /**
+     * @Involve
+     * interface ICloseable;
+     */
+    interface IChannel {
+        /**
+         * Returns true if this channel is open.
+         */
+        IsOpen(
+            [out] Boolean* rst);
+    }
+
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

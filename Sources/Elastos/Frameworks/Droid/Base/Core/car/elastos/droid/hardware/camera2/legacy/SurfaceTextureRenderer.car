@@ -1,0 +1,68 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+    interface Elastos.Droid.Graphics.ISurfaceTexture;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    /**
+     * A renderer class that manages the GL state, and can draw a frame into a set of output
+     * {@link Surface}s.
+     */
+    interface ISurfaceTextureRenderer {
+
+        /**
+         * Return the surface texture to draw to - this is the texture use to when producing output
+         * surface buffers.
+         *
+         * @return a {@link SurfaceTexture}.
+         */
+        GetSurfaceTexture(
+            [out] ISurfaceTexture** outst);
+
+        /**
+         * Set a collection of output {@link Surface}s that can be drawn to.
+         *
+         * @param surfaces a {@link Collection} of surfaces.
+         */
+        ConfigureSurfaces(
+            [in] ICollection* surfaces);
+
+        /**
+         * Draw the current buffer in the {@link SurfaceTexture} returned from
+         * {@link #getSurfaceTexture()} into the set of target {@link Surface}s
+         * in the next request from the given {@link CaptureCollector}, or drop
+         * the frame if none is available.
+         *
+         * <p>
+         * Any {@link Surface}s targeted must be a subset of the {@link Surface}s
+         * set in the last {@link #configureSurfaces(java.util.Collection)} call.
+         * </p>
+         *
+         * @param targetCollector the surfaces to draw to.
+         */
+        DrawIntoSurfaces(
+            [in] ICaptureCollector* targetCollector);
+
+        /**
+         * Clean up the current GL context.
+         */
+        CleanupEGLContext();
+
+        /**
+         * Drop all current GL operations on the floor.
+         */
+        Flush();
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

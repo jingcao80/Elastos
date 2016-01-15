@@ -1,0 +1,70 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Creates views in a ViewSwitcher.
+     */
+    [local]
+    interface IViewFactory {
+        /**
+         * Creates a new {@link android.view.View} to be added in a
+         * {@link android.widget.ViewSwitcher}.
+         *
+         * @return a {@link android.view.View}
+         */
+        MakeView(
+            [out] IView** view);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.Widget.IViewAnimator
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface IViewSwitcher {
+        /**
+         * Returns the next view to be displayed.
+         *
+         * @return the view that will be displayed after the next views flip.
+         */
+        GetNextView(
+            [out] IView** view);
+
+        /**
+         * Sets the factory used to create the two views between which the
+         * ViewSwitcher will flip. Instead of using a factory, you can call
+         * {@link #addView(android.view.View, int, android.view.ViewGroup.LayoutParams)}
+         * twice.
+         *
+         * @param factory the view factory used to generate the switcher's content
+         */
+        SetFactory(
+            [in] IViewFactory* factory);
+
+        /**
+         * Reset the ViewSwitcher to hide all of the existing views and to make it
+         * think that the first time animation has not yet played.
+         */
+        Reset();
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

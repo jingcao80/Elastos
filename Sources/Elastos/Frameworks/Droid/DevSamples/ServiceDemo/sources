@@ -1,0 +1,19 @@
+TARGET_NAME= ServiceDemo
+TARGET_TYPE= eco
+
+SOURCES = ServiceDemo.car
+SOURCES += R.cpp
+SOURCES += CActivityOne.cpp
+SOURCES += CServiceOne.cpp
+SOURCES += CServiceConnection.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Droid.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;

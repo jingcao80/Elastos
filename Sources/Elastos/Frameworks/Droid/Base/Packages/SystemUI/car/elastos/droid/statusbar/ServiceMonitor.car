@@ -1,0 +1,46 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    interface IServiceMonitorCallbacks {
+        /** The service does not exist or failed to bind */
+        OnNoService();
+
+        /** The service is about to start, this is a chance to perform cleanup and
+         * delay the start if necessary */
+        OnServiceStartAttempt(
+            [out] Int64* attempt);
+    }
+
+    /**
+     * Manages a persistent connection to a service component defined in a secure setting.
+     *
+     * <p>If a valid service component is specified in the secure setting, starts it up and keeps it
+     * running; handling setting changes, package updates, component disabling, and unexpected
+     * process termination.
+     *
+     * <p>Clients can listen for important events using the supplied {@link Callbacks}.
+     */
+    interface IServiceMonitor {
+
+        // internal handler + messages used to serialize access to internal state
+        const Int32 MSG_START_SERVICE = 1;
+        const Int32 MSG_CONTINUE_START_SERVICE = 2;
+        const Int32 MSG_STOP_SERVICE = 3;
+        const Int32 MSG_PACKAGE_INTENT = 4;
+        const Int32 MSG_CHECK_BOUND = 5;
+        const Int32 MSG_SERVICE_DISCONNECTED = 6;
+
+        Start();
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

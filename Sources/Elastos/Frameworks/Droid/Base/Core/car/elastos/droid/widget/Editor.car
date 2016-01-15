@@ -1,0 +1,87 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Text.ISpannable;
+    interface Elastos.Droid.Text.Style.IEasyEditSpan;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.InputMethod.ICorrectionInfo;
+    interface Elastos.Droid.Text.Method.IWordIterator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Text.IInputFilter;
+     */
+    interface IUndoInputFilter {
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IUndoOperation;
+     */
+    interface ITextModifyOperation {
+    }
+
+    interface ITextViewPositionListener {
+        UpdatePosition(
+            [in] Int32 parentPositionX,
+            [in] Int32 parentPositionY,
+            [in] Boolean parentPositionChanged,
+            [in] Boolean parentScrolled);
+    }
+
+    interface IEasyEditDeleteListener {
+
+        /**
+         * Clicks the delete pop-up.
+         */
+        OnDeleteClick(
+            [in] IEasyEditSpan* span);
+    }
+
+    interface IDragLocalState {
+    }
+
+
+    interface IEditor {
+
+        SetError(
+            [in] ICharSequence* error,
+            [in] IDrawable* icon);
+
+        GetWordIterator(
+            [out] IWordIterator** wordIterator);
+
+        PerformLongClick(
+            [in] Boolean handled,
+            [out] Boolean* res);
+
+        BeginBatchEdit();
+
+        EndBatchEdit();
+
+        /**
+         * Called by the framework in response to a text auto-correction (such as fixing a typo using a
+         * a dictionnary) from the current input method, provided by it calling
+         * {@link InputConnection#commitCorrection} InputConnection.commitCorrection()}. The default
+         * implementation flashes the background of the corrected word to provide feedback to the user.
+         *
+         * @param info The auto correct info about the text that was corrected.
+         */
+        OnCommitCorrection(
+            [in] ICorrectionInfo* info);
+
+        AddSpanWatchers(
+            [in] ISpannable* text);
+
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

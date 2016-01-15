@@ -1,0 +1,344 @@
+
+module
+{
+    interface Elastos.Utility.IDate;
+    interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+       Class to hold the media's metadata.  Metadata are used
+       for human consumption and can be embedded in the media (e.g
+       shoutcast) or available from an external source. The source can be
+       local (e.g thumbnail stored in the DB) or remote.
+
+       Metadata is like a Bundle. It is sparse and each key can occur at
+       most once. The key is an integer and the value is the actual metadata.
+
+       The caller is expected to know the type of the metadata and call
+       the right get* method to fetch its value.
+
+       @hide
+     */
+    interface IMetadata {
+        const Int32 ANY = 0;  // Never used for metadata returned, only for filtering.
+                              // Keep in sync with kAny in MediaPlayerService.cpp
+
+        // Playback capabilities.
+        /**
+         * Indicate whether the media can be paused
+         */
+        const Int32 PAUSE_AVAILABLE = 1; // Boolean
+
+        /**
+         * Indicate whether the media can be backward seeked
+         */
+        const Int32 SEEK_BACKWARD_AVAILABLE = 2; // Boolean
+
+        /**
+         * Indicate whether the media can be forward seeked
+         */
+        const Int32 SEEK_FORWARD_AVAILABLE  = 3; // Boolean
+
+        /**
+         * Indicate whether the media can be seeked
+         */
+        const Int32 SEEK_AVAILABLE = 4; // Boolean
+
+        // TODO: Should we use numbers compatible with the metadata retriever?
+        /**
+         * {@hide}
+         */
+        const Int32 TITLE = 5; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 COMMENT = 6; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 COPYRIGHT = 7; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 ALBUM = 8; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 ARTIST = 9; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 AUTHOR = 10; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 COMPOSER = 11; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 GENRE = 12; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 DATE = 13; // Date
+
+        /**
+         * {@hide}
+         */
+        const Int32 DURATION = 14; // Integer(millisec)
+
+        /**
+         * {@hide}
+         */
+        const Int32 CD_TRACK_NUM = 15; // Integer 1-based
+
+        /**
+         * {@hide}
+         */
+        const Int32 CD_TRACK_MAX = 16; // Integer
+
+        /**
+         * {@hide}
+         */
+        const Int32 RATING = 17; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 ALBUM_ART = 18; // byte[]
+
+        /**
+         * {@hide}
+         */
+        const Int32 VIDEO_FRAME = 19; // Bitmap
+
+        /**
+         * {@hide}
+         */
+        const Int32 BIT_RATE = 20; // Integer, Aggregate rate of
+                                   // all the streams in bps.
+
+        /**
+         * {@hide}
+         */
+        const Int32 AUDIO_BIT_RATE = 21; // Integer, bps
+
+        /**
+         * {@hide}
+         */
+        const Int32 VIDEO_BIT_RATE = 22; // Integer, bps
+
+        /**
+         * {@hide}
+         */
+        const Int32 AUDIO_SAMPLE_RATE = 23; // Integer, Hz
+
+        /**
+         * {@hide}
+         */
+        const Int32 VIDEO_FRAME_RATE = 24; // Integer, Hz
+
+        // See RFC2046 and RFC4281.
+        /**
+         * {@hide}
+         */
+        const Int32 MIME_TYPE = 25; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 AUDIO_CODEC = 26; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 VIDEO_CODEC = 27; // String
+
+        /**
+         * {@hide}
+         */
+        const Int32 VIDEO_HEIGHT = 28; // Integer
+
+        /**
+         * {@hide}
+         */
+        const Int32 VIDEO_WIDTH = 29; // Integer
+
+        /**
+         * {@hide}
+         */
+        const Int32 NUM_TRACKS = 30; // Integer
+
+        /**
+         * {@hide}
+         */
+        const Int32 DRM_CRIPPLED = 31; // Boolean
+
+        /**
+         * {@hide}
+         */
+        const Int32 STRING_VAL = 1;
+
+        /**
+         * {@hide}
+         */
+        const Int32 INTEGER_VAL = 2;
+
+        /**
+         * {@hide}
+         */
+        const Int32 BOOLEAN_VAL = 3;
+
+        /**
+         * {@hide}
+         */
+        const Int32 LONG_VAL = 4;
+
+        /**
+         * {@hide}
+         */
+        const Int32 DOUBLE_VAL = 5;
+
+        /**
+         * {@hide}
+         */
+        const Int32 DATE_VAL = 6;
+
+        /**
+         * {@hide}
+         */
+        const Int32 BYTE_ARRAY_VAL = 7;
+
+        /**
+         * Check a parcel containing metadata is well formed. The header
+         * is checked as well as the individual records format. However, the
+         * data inside the record is not checked because we do lazy access
+         * (we check/unmarshall only data the user asks for.)
+         *
+         * Format of a metadata parcel:
+         <pre>
+                             1                   2                   3
+          0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+          +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+          |                     metadata total size                       |
+          +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+          |     'M'       |     'E'       |     'T'       |     'A'       |
+          +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+          |                                                               |
+          |                .... metadata records ....                     |
+          |                                                               |
+          +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+         </pre>
+         *
+         * @param parcel With the serialized data. Metadata keeps a
+         *               reference on it to access it later on. The caller
+         *               should not modify the parcel after this call (and
+         *               not call recycle on it.)
+         * @return false if an error occurred.
+         */
+        Parse(
+            [in] IParcel* parcel,
+            [out] Boolean* result);
+
+        /**
+         * @return The set of metadata ID found.
+         */
+        KeySet(
+            [out] ISet ** result);
+
+        /**
+         * @return true if a value is present for the given key.
+         */
+        Has(
+            [in] Int32 metadataId,
+            [out] Boolean* result);
+
+        // Accessors.
+        // Caller must make sure the key is present using the {@code has}
+        // method otherwise a RuntimeException will occur.
+        GetString(
+            [in] Int32 key,
+            [out] String* result);
+
+        /**
+         * {@hide}
+         */
+        GetInt32(
+            [in] Int32 key,
+            [out] Int32* result);
+
+        /**
+         * Get the boolean value indicated by key
+         */
+        GetBoolean(
+            [in] Int32 key,
+            [out] Boolean* result);
+
+        /**
+         * {@hide}
+         */
+        GetInt64(
+            [in] Int32 key,
+            [out] Int64* result);
+
+        /**
+         * {@hide}
+         */
+        GetDouble(
+            [in] Int32 key,
+            [out] Double* result);
+
+        /**
+         * {@hide}
+         */
+        GetByteArray(
+            [in] Int32 key,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * {@hide}
+         */
+        GetDate(
+            [in] Int32 key,
+            [out] IDate** result);
+    }
+
+    interface IMetadataHelper {
+        /**
+         * @return the last available system metadata id. Ids are
+         *         1-indexed.
+         * {@hide}
+         */
+        LastSytemId(
+            [out] Int32* result);
+
+        /**
+         * @return the first available cutom metadata id.
+         * {@hide}
+         */
+        FirstCustomId(
+            [out] Int32* result);
+
+        /**
+         * @return the last value of known type. Types are 1-indexed.
+         * {@hide}
+         */
+        LastType(
+            [out] Int32* result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

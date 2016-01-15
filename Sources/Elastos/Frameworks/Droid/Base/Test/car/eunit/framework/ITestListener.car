@@ -1,0 +1,43 @@
+
+module
+{
+    namespace Eunit {
+    namespace Framework {
+
+    interface ITest;
+    interface ITestFailure;
+
+    /**
+     * A Listener for test progress
+     */
+    interface ITestListener {
+        /**
+         * An error occurred.
+         */
+        AddError(
+            [in] ITest* test,
+            [in] ECode ec);
+
+        /**
+         * A failure occurred.
+         */
+        AddFailure(
+            [in] ITest* test,
+            [in] ITestFailure* failure);
+
+        /**
+         * A test ended.
+         */
+        EndTest(
+            [in] ITest* test);
+
+        /**
+         * A test started.
+         */
+        StartTest(
+            [in] ITest* test);
+    }
+
+    } // namespace Framework
+    } // namespace Eunit
+}

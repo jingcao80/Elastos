@@ -1,0 +1,20 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+     * A specialized Reader for reading the contents of a char array.
+     * @sa CharArrayWriter
+     * @implement Elastos.IO.IReader
+     */
+     /**
+     * @Involve
+     * interface IReadable;
+     * interface IReader;
+     */
+    interface ICharArrayReader {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

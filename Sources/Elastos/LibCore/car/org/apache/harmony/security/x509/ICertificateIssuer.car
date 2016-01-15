@@ -1,0 +1,44 @@
+
+module
+{
+    using interface Elastosx.Security.Auth.X500.IX500Principal;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * CRL Entry's Certificate Issuer Extension (OID = 2.5.29.29).
+     * It is a CRL entry extension and contains the GeneralNames describing
+     * the issuer of revoked certificate. Its ASN.1 notation is as follows:
+     * <pre>
+     *   id-ce-certificateIssuer   OBJECT IDENTIFIER ::= { id-ce 29 }
+     *
+     *   certificateIssuer ::=     GeneralNames
+     * </pre>
+     * (as specified in RFC 3280)
+     * In java implementation it is presumed that GeneralNames consist of
+     * one element and its type is directoryName.
+     */
+    interface ICertificateIssuer extends IExtensionValue {
+        GetIssuer(
+            [out] IX500Principal** x500Principal);
+    }
+
+    interface ICertificateIssuerHelper {
+        GetASN1(
+            [out] IASN1Type** asn1);
+
+        SetASN1(
+            [in] IASN1Type* asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

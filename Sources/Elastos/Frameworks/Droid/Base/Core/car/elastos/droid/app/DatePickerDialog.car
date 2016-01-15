@@ -1,0 +1,65 @@
+module
+{
+    interface Elastos.Droid.Widget.IDatePicker;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * The callback used to indicate the user is done filling in the date.
+     */
+    interface IDatePickerDialogOnDateSetListener {
+        /**
+         * @param view The view associated with this listener.
+         * @param year The year that was set.
+         * @param monthOfYear The month that was set (0-11) for compatibility
+         *  with {@link java.util.Calendar}.
+         * @param dayOfMonth The day of the month that was set.
+         */
+        OnDateSet(
+            [in] IDatePicker* view,
+            [in] Int32 year,
+            [in] Int32 monthOfYear,
+            [in] Int32 dayOfMonth);
+    }
+
+    /**
+     * A simple dialog containing an {@link android.widget.DatePicker}.
+     *
+     * <p>See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
+     * guide.</p>
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.IAlertDialog
+     * interface Elastos.Droid.Content.IDialogInterfaceOnClickListener
+     * interface Elastos.Droid.Widget.IDatePickerOnDateChangedListener
+     */
+    interface IDatePickerDialog {
+
+        /**
+         * Gets the {@link DatePicker} contained in this dialog.
+         *
+         * @return The calendar view.
+         */
+        GetDatePicker(
+            [out] IDatePicker** picker);
+
+        /**
+         * Sets the current date.
+         *
+         * @param year The date year.
+         * @param monthOfYear The date month.
+         * @param dayOfMonth The date day of month.
+         */
+        UpdateDate(
+            [in] Int32 year,
+            [in] Int32 monthOfYear,
+            [in] Int32 dayOfMonth);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

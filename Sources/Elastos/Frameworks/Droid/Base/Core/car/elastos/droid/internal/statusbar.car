@@ -1,0 +1,46 @@
+
+
+module
+{
+    merge("statusbar/IStatusBar.car");
+    merge("statusbar/IStatusBarService.car");
+    merge("statusbar/StatusBarIcon.car");
+    merge("statusbar/StatusBarIconList.car");
+
+    interface Elastos.Droid.Os.IUserHandle;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace StatusBar {
+
+    class CStatusBarIcon
+    {
+        constructor();
+
+        constructor(
+            [in] String iconPackage,
+            [in] IUserHandle* user,
+            [in] Int32 iconId,
+            [in] Int32 iconLevel,
+            [in] Int32 number,
+            [in] ICharSequence* contentDescription);
+
+        interface IStatusBarIcon;
+        interface IParcelable;
+    }
+
+    class CStatusBarIconList
+    {
+        constructor();
+
+        interface IStatusBarIconList;
+        interface IParcelable;
+    }
+
+    } // namespace StatusBar
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

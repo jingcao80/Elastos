@@ -1,0 +1,34 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * A Point on an Elliptic Curve in barycentric (or affine) coordinates.
+     */
+    interface IECPoint {
+        /**
+         * Returns the x-coordinate.
+         *
+         * @return the x-coordinate, or {@code null} for the infinite point.
+         */
+        GetAffineX(
+            [out] IBigInteger** affineX);
+
+        /**
+         * Returns the y-coordinate.
+         *
+         * @return the y-coordinate, or {@code null} fot the infinite point.
+         */
+        GetAffineY(
+            [out] IBigInteger** affineY);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

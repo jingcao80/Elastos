@@ -1,0 +1,135 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IMap;
+
+    interface Elastos.Droid.App.Usage.IUsageEvents;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Usage {
+
+    interface IUsageStatsManager {
+
+        /**
+         * An interval type that spans a day. See {@link #queryUsageStats(int, long, long)}.
+         */
+        const Int32 INTERVAL_DAILY = 0;
+
+        /**
+         * An interval type that spans a week. See {@link #queryUsageStats(int, long, long)}.
+         */
+        const Int32 INTERVAL_WEEKLY = 1;
+
+        /**
+         * An interval type that spans a month. See {@link #queryUsageStats(int, long, long)}.
+         */
+        const Int32 INTERVAL_MONTHLY = 2;
+
+        /**
+         * An interval type that spans a year. See {@link #queryUsageStats(int, long, long)}.
+         */
+        const Int32 INTERVAL_YEARLY = 3;
+
+        /**
+         * An interval type that will use the best fit interval for the given time range.
+         * See {@link #queryUsageStats(int, long, long)}.
+         */
+        const Int32 INTERVAL_BEST = 4;
+
+        /**
+         * The number of available intervals. Does not include {@link #INTERVAL_BEST}, since it
+         * is a pseudo interval (it actually selects a real interval).
+         * {@hide}
+         */
+        const Int32 INTERVAL_COUNT = 4;
+
+        /**
+         * Gets application usage stats for the given time range, aggregated by the specified interval.
+         * <p>The returned list will contain a {@link UsageStats} object for each package that
+         * has data for an interval that is a subset of the time range given. To illustrate:</p>
+         * <pre>
+         * intervalType = INTERVAL_YEARLY
+         * beginTime = 2013
+         * endTime = 2015 (exclusive)
+         *
+         * Results:
+         * 2013 - com.example.alpha
+         * 2013 - com.example.beta
+         * 2014 - com.example.alpha
+         * 2014 - com.example.beta
+         * 2014 - com.example.charlie
+         * </pre>
+         *
+         * @param intervalType The time interval by which the stats are aggregated.
+         * @param beginTime The inclusive beginning of the range of stats to include in the results.
+         * @param endTime The exclusive end of the range of stats to include in the results.
+         * @return A list of {@link UsageStats} or null if none are available.
+         *
+         * @see #INTERVAL_DAILY
+         * @see #INTERVAL_WEEKLY
+         * @see #INTERVAL_MONTHLY
+         * @see #INTERVAL_YEARLY
+         * @see #INTERVAL_BEST
+         */
+        QueryUsageStats(
+            [in] Int32 intervalType,
+            [in] Int64 beginTime,
+            [in] Int64 endTime,
+            [out] IList** result);
+
+        /**
+         * Gets the hardware configurations the device was in for the given time range, aggregated by
+         * the specified interval. The results are ordered as in
+         * {@link #queryUsageStats(int, long, long)}.
+         *
+         * @param intervalType The time interval by which the stats are aggregated.
+         * @param beginTime The inclusive beginning of the range of stats to include in the results.
+         * @param endTime The exclusive end of the range of stats to include in the results.
+         * @return A list of {@link ConfigurationStats} or null if none are available.
+         */
+        QueryConfigurations(
+            [in] Int32 intervalType,
+            [in] Int64 beginTime,
+            [in] Int64 endTime,
+            [out] IList** result);
+
+        /**
+         * Query for events in the given time range. Events are only kept by the system for a few
+         * days.
+         * <p />
+         * <b>NOTE:</b> The last few minutes of the event log will be truncated to prevent abuse
+         * by applications.
+         *
+         * @param beginTime The inclusive beginning of the range of events to include in the results.
+         * @param endTime The exclusive end of the range of events to include in the results.
+         * @return A {@link UsageEvents}.
+         */
+        QueryEvents(
+            [in] Int64 beginTime,
+            [in] Int64 endTime,
+            [out] IUsageEvents** result);
+
+        /**
+         * A convenience method that queries for all stats in the given range (using the best interval
+         * for that range), merges the resulting data, and keys it by package name.
+         * See {@link #queryUsageStats(int, long, long)}.
+         *
+         * @param beginTime The inclusive beginning of the range of stats to include in the results.
+         * @param endTime The exclusive end of the range of stats to include in the results.
+         * @return A {@link java.util.Map} keyed by package name, or null if no stats are
+         *         available.
+         */
+        QueryAndAggregateUsageStats(
+            [in] Int64 beginTime,
+            [in] Int64 endTime,
+            [out] IMap** result);
+    }
+
+    } // namespace Usage
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,85 @@
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IReader;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+    using interface Org.Xmlpull.V1.IXmlSerializer;
+    using interface Org.Xml.Sax.IContentHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    interface IXml
+    {
+        const String FEATURE_RELAXED = "http://xmlpull.org/v1/doc/features.html#relaxed";
+
+        /**
+         * Parses the given xml string and fires events on the given SAX handler.
+         */
+        Parse(
+            [in] String xml,
+            [in] IContentHandler * contentHandler);
+
+        /**
+         * Parses xml from the given reader and fires events on the given SAX
+         * handler.
+         */
+        Parse(
+            [in] IReader * inreader,
+            [in] IContentHandler * contentHandler);
+
+        /**
+         * Parses xml from the given input stream and fires events on the given SAX
+         * handler.
+         */
+        Parse(
+            [in] IInputStream * instrean,
+            //[in] IEncoding * encoding,
+            [in] IContentHandler * contentHandler);
+
+        /**
+         * Returns a new pull parser with namespace support.
+         */
+        NewPullParser(
+            [out] IXmlPullParser ** result);
+
+        /**
+         * Creates a new xml serializer.
+         */
+        NewSerializer(
+            [out] IXmlSerializer ** result);
+
+        /**
+         * Finds an encoding by name. Returns UTF-8 if you pass {@code null}.
+         */
+        // FindEncodingByName(
+        //     [in] String encodingName,
+        //     [out] IEncoding ** result);
+
+        /**
+         * Return an AttributeSet interface for use with the given XmlPullParser.
+         * If the given parser itself implements AttributeSet, that implementation
+         * is simply returned.  Otherwise a wrapper class is
+         * instantiated on top of the XmlPullParser, as a proxy for retrieving its
+         * attributes, and returned to you.
+         *
+         * @param parser The existing parser for which you would like an
+         *               AttributeSet.
+         *
+         * @return An AttributeSet you can use to retrieve the
+         *         attribute values at each of the tags as the parser moves
+         *         through its XML document.
+         *
+         * @see AttributeSet
+         */
+        AsAttributeSet(
+            [in] IXmlPullParser * parser,
+            [out] IAttributeSet ** attrSet);
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+
+}

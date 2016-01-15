@@ -1,0 +1,38 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Display {
+
+    interface IIVirtualDisplayCallback {
+
+        /**
+         * Called when the virtual display video projection has been
+         * paused by the system or when the surface has been detached
+         * by the application by calling setSurface(null).
+         * The surface will not receive any more buffers while paused.
+         */
+        OnPaused();
+
+        /**
+         * Called when the virtual display video projection has been
+         * resumed after having been paused.
+         */
+        OnResumed();
+
+        /**
+         * Called when the virtual display video projection has been
+         * stopped by the system.  It will no longer receive frames
+         * and it will never be resumed.  It is still the responsibility
+         * of the application to release() the virtual display.
+         */
+        OnStopped();
+    }
+
+    } // namespace Display
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

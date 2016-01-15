@@ -1,0 +1,242 @@
+
+module
+{
+    using interface Elastos.Utility.ILocale;
+
+    interface Elastos.Droid.Graphics.ITypeface;
+    interface Elastos.Droid.Content.IContentResolver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    /**
+     * Specifies visual properties for video captions, including foreground and
+     * background colors, edge properties, and typeface.
+     */
+    interface ICaptioningManagerCaptionStyle {
+        /** @hide */
+        const Int32 PRESET_CUSTOM = -1;
+
+        /** Unspecified edge type value. */
+        const Int32 EDGE_TYPE_UNSPECIFIED = -1;
+
+        /** Edge type value specifying no character edges. */
+        const Int32 EDGE_TYPE_NONE = 0;
+
+        /** Edge type value specifying uniformly outlined character edges. */
+        const Int32 EDGE_TYPE_OUTLINE = 1;
+
+        /** Edge type value specifying drop-shadowed character edges. */
+        const Int32 EDGE_TYPE_DROP_SHADOW = 2;
+
+        /** Edge type value specifying raised bevel character edges. */
+        const Int32 EDGE_TYPE_RAISED = 3;
+
+        /** Edge type value specifying depressed bevel character edges. */
+        const Int32 EDGE_TYPE_DEPRESSED = 4;
+
+        GetForegroundColor(
+            [out] Int32* color);
+
+        GetBackgroundColor(
+            [out] Int32* color);
+
+        GetEdgeType(
+            [out] Int32* type);
+
+        GetEdgeColor(
+            [out] Int32* color);
+
+        GetWindowColor(
+            [out] Int32* color);
+
+        GetRawTypeface(
+            [out] String* str);
+
+        /**
+         * Applies a caption style, overriding any properties that are specified
+         * in the overlay caption.
+         *
+         * @param overlay The style to apply
+         * @return A caption style with the overlay style applied
+         * @hide
+         */
+        ApplyStyle(
+            [in] ICaptioningManagerCaptionStyle* overlay,
+            [out] ICaptioningManagerCaptionStyle** style);
+
+        /**
+         * @return {@code true} if the user has specified a background color
+         *         that should override the application default, {@code false}
+         *         otherwise
+         */
+        HasBackgroundColor(
+            [out] Boolean* result);
+
+        /**
+         * @return {@code true} if the user has specified a foreground color
+         *         that should override the application default, {@code false}
+         *         otherwise
+         */
+        HasForegroundColor(
+            [out] Boolean* result);
+
+        /**
+         * @return {@code true} if the user has specified an edge type that
+         *         should override the application default, {@code false}
+         *         otherwise
+         */
+        HasEdgeType(
+            [out] Boolean* result);
+
+        /**
+         * @return {@code true} if the user has specified an edge color that
+         *         should override the application default, {@code false}
+         *         otherwise
+         */
+        HasEdgeColor(
+            [out] Boolean* result);
+
+        /**
+         * @return {@code true} if the user has specified a window color that
+         *         should override the application default, {@code false}
+         *         otherwise
+         */
+        HasWindowColor(
+            [out] Boolean* result);
+
+        /**
+         * @return the preferred {@link Typeface} for video captions, or null if
+         *         not specified
+         */
+        GetTypeface(
+            [out] ITypeface** face);
+    }
+
+    interface ICaptioningManagerCaptionStyleHelper {
+        GetCustomStyle(
+            [in] IContentResolver* cr,
+            [out] ICaptioningManagerCaptionStyle** style);
+    }
+
+    /**
+     * Listener for changes in captioning properties, including enabled state
+     * and user style preferences.
+     */
+    interface ICaptioningManagerCaptioningChangeListener {
+        /**
+         * Called when the captioning enabled state changes.
+         *
+         * @param enabled the user's new preferred captioning enabled state
+         */
+        OnEnabledChanged(
+            [in] Boolean enabled);
+
+        /**
+         * Called when the captioning user style changes.
+         *
+         * @param userStyle the user's new preferred style
+         * @see CaptioningManager#getUserStyle()
+         */
+        OnUserStyleChanged(
+            [in] ICaptioningManagerCaptionStyle* userStyle);
+
+        /**
+         * Called when the captioning locale changes.
+         *
+         * @param locale the preferred captioning locale, or {@code null} if not specified
+         * @see CaptioningManager#getLocale()
+         */
+        OnLocaleChanged(
+            [in] ILocale* locale);
+
+        /**
+         * Called when the captioning font scaling factor changes.
+         *
+         * @param fontScale the preferred font scaling factor
+         * @see CaptioningManager#getFontScale()
+         */
+        OnFontScaleChanged(
+            [in] Float fontScale);
+    }
+
+    /**
+     * Contains methods for accessing and monitoring preferred video captioning state and visual
+     * properties.
+     * <p>
+     * To obtain a handle to the captioning manager, do the following:
+     * <p>
+     * <code>
+     * <pre>CaptioningManager captioningManager =
+     *        (CaptioningManager) context.getSystemService(Context.CAPTIONING_SERVICE);</pre>
+     * </code>
+     */
+    interface ICaptioningManager {
+        /**
+         * @return the user's preferred captioning enabled state
+         */
+        IsEnabled(
+            [out] Boolean* result);
+
+        /**
+         * @return the raw locale string for the user's preferred captioning
+         *         language
+         * @hide
+         */
+        GetRawLocale(
+            [out] String* locale);
+
+        /**
+         * @return the locale for the user's preferred captioning language, or null
+         *         if not specified
+         */
+        GetLocale(
+            [out] ILocale** locale);
+
+        /**
+         * @return the user's preferred font scaling factor for video captions, or 1 if not
+         *         specified
+         */
+        GetFontScale(
+            [out] Float* scale);
+
+        /**
+         * @return the raw preset number, or the first preset if not specified
+         * @hide
+         */
+        GetRawUserStyle(
+            [out] Int32* style);
+
+        /**
+         * @return the user's preferred visual properties for captions as a
+         *         {@link CaptionStyle}, or the default style if not specified
+         */
+        GetUserStyle(
+            [out] ICaptioningManagerCaptionStyle** style);
+
+        /**
+         * Adds a listener for changes in the user's preferred captioning enabled
+         * state and visual properties.
+         *
+         * @param listener the listener to add
+         */
+        AddCaptioningChangeListener(
+            [in] ICaptioningManagerCaptioningChangeListener* listener);
+
+        /**
+         * Removes a listener previously added using
+         * {@link #addCaptioningChangeListener}.
+         *
+         * @param listener the listener to remove
+         */
+        RemoveCaptioningChangeListener(
+            [in] ICaptioningManagerCaptioningChangeListener* listener);
+    }
+
+    } // namespace Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

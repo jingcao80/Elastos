@@ -1,0 +1,95 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Utility.IDate;
+    interface Elastosx.Security.Auth.X500.IX500Principal;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+     * @Involve
+     * interface IX509Extension
+     */
+    interface IX509CRLEntry {
+        /**
+         * Returns whether the specified object equals to this instance.
+         *
+         * @param other
+         *            the object to compare.
+         * @return {@code true} if the specified object equals to this instance,
+         *         otherwise {@code false}.
+         */
+        Equals(
+            [in] IInterface* other,
+            [out] Boolean* result);
+
+        /**
+         * Returns the hashcode of this instance.
+         *
+         * @return the hashcode of this instance.
+         */
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        /**
+         * Returns this entry in ASN.1 DER encoded form.
+         *
+         * @return the encoded form of this entry.
+         * @throws CRLException
+         *             if encoding fails.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * Returns the serial number of the revoked certificate.
+         *
+         * @return the serial number of the revoked certificate.
+         */
+        GetSerialNumber(
+            [out] IBigInteger** number);
+
+        /**
+         * Returns the issuer of the revoked certificate.
+         *
+         * @return the issuer of the revoked certificate, or {@code null} if the
+         *         issuer is equal to the CRL issuer.
+         */
+        GetCertificateIssuer(
+            [out] IX500Principal** issuer);
+
+        /**
+         * Returns the date when the certificate is revoked.
+         *
+         * @return the date when the certificate is revoked.
+         */
+        GetRevocationDate(
+            [out] IDate** revocationDate);
+
+        /**
+         * Returns whether this CRL entry has extensions.
+         *
+         * @return {@code true} is this CRL entry has extensions, otherwise {@code
+         *         false}.
+         */
+        HasExtensions(
+            [out] Boolean* result);
+
+        /**
+         * Returns the reason this CRL entry was revoked. If the implementation
+         * doesn't support reasons, this will return {@code null}.
+         *
+         * @since 1.7
+         * @hide
+         */
+        GetRevocationReason(
+            [out] CRLReason* reason);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

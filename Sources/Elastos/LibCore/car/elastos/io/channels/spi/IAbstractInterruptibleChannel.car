@@ -1,0 +1,31 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+    namespace Spi {
+
+    /**
+     * {@code AbstractInterruptibleChannel} is the root class for interruptible
+     * channels.
+     * <p>
+     * The basic usage pattern for an interruptible channel is to invoke
+     * {@code begin()} before any I/O operation that potentially blocks
+     * indefinitely, then {@code end(boolean)} after completing the operation. The
+     * argument to the {@code end} method should indicate if the I/O operation has
+     * actually completed so that any change may be visible to the invoker.
+    */
+    /**
+     * @Involve
+     * interface Elastos.IO.Channels.IInterruptibleChannel;
+     */
+    interface IAbstractInterruptibleChannel {
+    } // end interface
+
+    } // namespace Spi
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

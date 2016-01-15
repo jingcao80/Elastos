@@ -1,0 +1,18 @@
+module
+{
+
+    namespace Elastos{
+    namespace Net{
+
+    /*
+     * @Involve
+     * interface ISocketOptions;
+     * interface ISocketImpl;
+     */
+    interface IPlainSocketImpl {
+        SocksAccept();
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

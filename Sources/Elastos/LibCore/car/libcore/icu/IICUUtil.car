@@ -1,0 +1,196 @@
+
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Libcore {
+    namespace ICU {
+
+    [deprecated, local]
+    interface IICUUtil {
+        // --- Errors.
+
+        // Just the subset of error codes needed by CharsetDecoderICU/CharsetEncoderICU.
+        const Int32 U_ZERO_ERROR = 0;
+        const Int32 U_INVALID_CHAR_FOUND = 10;
+        const Int32 U_TRUNCATED_CHAR_FOUND = 11;
+        const Int32 U_ILLEGAL_CHAR_FOUND = 12;
+        const Int32 U_BUFFER_OVERFLOW_ERROR = 15;
+
+        /**
+         * Returns an array of two-letter ISO 639-1 language codes, either from ICU or our cache.
+         */
+        GetISOLanguages(
+            [out, callee] ArrayOf<String>* languages);
+
+        /**
+         * Returns an array of two-letter ISO 3166 country codes, either from ICU or our cache.
+         */
+        GetISOCountries(
+            [out, callee] ArrayOf<String>* countries);
+
+        /**
+        * Returns the appropriate {@code Locale} given a {@code String} of the form returned
+        * by {@code toString}. This is very lenient, and doesn't care what's between the underscores:
+        * this method can parse strings that {@code Locale.toString} won't produce.
+        * Used to remove duplication.
+        */
+        LocaleFromIcuLocaleId(
+            [in] String localeId,
+            [out] ILocale** locale);
+
+
+        LocalesFromStrings(
+            [in] ArrayOf<String>* localeNames,
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetAvailableLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetAvailableBreakIteratorLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetAvailableCalendarLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetAvailableCollatorLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetAvailableDateFormatLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetAvailableDateFormatSymbolsLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetAvailableDecimalFormatSymbolsLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetAvailableNumberFormatLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetBestDateTimePattern(
+            [in] String skeleton,
+            [in] ILocale* locale,
+            [out] String* rst);
+
+        GetDateFormatOrder(
+            [in] String pattern,
+            [out, callee] ArrayOf<Char32>* locales);
+
+        /**
+         * Returns the version of the CLDR data in use, such as "22.1.1".
+         */
+        GetCldrVersion(
+            [out] String* cldrVersion);
+
+        /**
+         * Returns the icu4c version in use, such as "50.1.1".
+         */
+        GetIcuVersion(
+            [out] String* icuVersion);
+
+        /**
+         * Returns the Unicode version our ICU supports. This is "5.2" for gingerbread, for example.
+         */
+        GetUnicodeVersion(
+            [out] String* unicodeVersion);
+
+        ToLowerCase(
+            [in] String s,
+            [in] ILocale* locale,
+            [out] String* ls);
+
+        ToUpperCase(
+            [in] String s,
+            [in] ILocale* locale,
+            [out] String* us);
+
+        GetAvailableCurrencyCodes(
+            [out, callee] ArrayOf<String>* codes);
+
+        GetCurrencyCode(
+            [in] String locale,
+            [out] String* currencyCode);
+
+        GetCurrencyDisplayName(
+            [in] ILocale* locale,
+            [in] String currencyCode,
+            [out] String* displayName);
+
+        GetCurrencyFractionDigits(
+            [in] String currencyCode,
+            [out] Int32* currencyFractionDigits);
+
+        GetCurrencyNumericCode(
+            [in] String currencyCode,
+            [out] Int32* currencyFractionDigits);
+
+        GetCurrencySymbol(
+            [in] ILocale* locale,
+            [in] String currencyCode,
+            [out] String* currencySymbol);
+
+        GetDisplayCountry(
+            [in] ILocale* targetLocale,
+            [in] ILocale* locale,
+            [out] String* displayCountry);
+
+        GetDisplayLanguage(
+            [in] ILocale* targetLocale,
+            [in] ILocale* locale,
+            [out] String* displayLanguage);
+
+        GetDisplayVariant(
+            [in] ILocale* variant,
+            [in] ILocale* locale,
+            [out] String* displayVariant);
+
+        GetDisplayScript(
+            [in] ILocale* targetLocale,
+            [in] ILocale* locale,
+            [out] String* script);
+
+        GetISO3Country(
+            [in] String languageTag,
+            [out] String* ISO3country);
+
+        GetISO3Language(
+            [in] String locale,
+            [out] String* ISO3Language);
+
+        AddLikelySubtags(
+            [in] ILocale* locale,
+            [out] ILocale** target);
+
+        /**
+        * @deprecated use {@link #addLikelySubtags(java.util.Locale)} instead.
+        */
+        AddLikelySubtags(
+            [in] String locale,
+            [out] String* result);
+
+        /**
+         * @deprecated use {@link java.util.Locale#getScript()} instead. This has been kept
+         *     around only for the support library.
+         */
+        // @Deprecated
+        GetScript(
+            [in] String locale,
+            [out] String* script);
+
+        /**
+        * Takes a BCP-47 language tag (Locale.toLanguageTag()). e.g. en-US, not en_US
+        */
+        SetDefaultLocale(
+            [in] String languageTag);
+
+        /**
+        * Returns a locale name, not a BCP-47 language tag. e.g. en_US not en-US.
+        */
+        GetDefaultLocale(
+            [out] String* defaultLocale);
+    }
+
+    } // IO
+    } // namespace LibCore
+}

@@ -1,0 +1,60 @@
+TARGET_NAME= am
+TARGET_TYPE= lib
+
+INCLUDES += ../
+#INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc
+INCLUDES += $(MAKEDIR)/../../../../../inc
+#INCLUDES += $(PREBUILD_INC)/skia/utils
+#INCLUDES += $(PREBUILD_INC)/skia/core
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+#SOURCES = ActiveServices.cpp
+SOURCES += CActivityRecordToken.cpp
+SOURCES += ActivityRecord.cpp
+SOURCES += ActivityResult.cpp
+SOURCES += ActivityStack.cpp
+SOURCES += ActivityStackSupervisor.cpp
+SOURCES += AppErrorResult.cpp
+#SOURCES += AppBindRecord.cpp
+#SOURCES += AppErrorDialog.cpp
+#SOURCES += AppNotRespondingDialog.cpp
+#SOURCES += AppWaitingForDebuggerDialog.cpp
+SOURCES += BackupRecord.cpp
+#SOURCES += BaseErrorDialog.cpp
+SOURCES += BroadcastFilter.cpp
+#SOURCES += BroadcastQueue.cpp
+SOURCES += BroadcastRecord.cpp
+#SOURCES += CShutdownReceiver.cpp
+#SOURCES += CStoppingReceiver.cpp
+SOURCES += CActivityManagerService.cpp
+#SOURCES += CBatteryStatsService.cpp
+#SOURCES += CompatModeDialog.cpp
+SOURCES += CompatModePackages.cpp
+SOURCES += ConnectionRecord.cpp
+SOURCES += CContentProviderConnection.cpp
+SOURCES += ContentProviderRecord.cpp
+SOURCES += CoreSettingsObserver.cpp
+SOURCES += CPendingAssistExtras.cpp
+SOURCES += CPendingIntentRecord.cpp
+SOURCES += CProcessStatsService.cpp
+SOURCES += CServiceRecord.cpp
+#SOURCES += FactoryErrorDialog.cpp
+SOURCES += GrantUri.cpp
+SOURCES += IntentBindRecord.cpp
+#SOURCES += LaunchWarningWindow.cpp
+SOURCES += LockTaskNotify.cpp
+SOURCES += ProcessList.cpp
+SOURCES += ProcessMemInfo.cpp
+SOURCES += ProcessRecord.cpp
+SOURCES += ProviderMap.cpp
+SOURCES += ReceiverList.cpp
+#SOURCES += StrictModeViolationDialog.cpp
+SOURCES += TaskPersister.cpp
+SOURCES += TaskRecord.cpp
+SOURCES += CUriPermissionOwnerExternalToken.cpp
+SOURCES += UriPermission.cpp
+SOURCES += UriPermissionOwner.cpp
+SOURCES += UserStartedState.cpp

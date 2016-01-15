@@ -1,0 +1,95 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Location.IGeofenceHardwareRequestParcelable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * Fused Geofence Hardware interface.
+     *
+     * <p>This interface is the basic set of supported functionality by Fused Hardware modules that offer
+     * Geofencing capabilities.
+     *
+     * All operations are asynchronous and the status codes can be obtained via a set of callbacks.
+     *
+     * @hide
+     */
+    [local,deprecated]
+    interface IIFusedGeofenceHardware {
+        /**
+         * Flags if the interface functionality is supported by the platform.
+         *
+         * @return true if the functionality is supported, false otherwise.
+         */
+        IsSupported(
+            [out] Boolean* result);
+
+        /**
+         * Adds a given list of geofences to the system.
+         *
+         * @param geofenceRequestsArray    The list of geofences to add.
+         */
+        AddGeofences(
+            [in] ArrayOf<IGeofenceHardwareRequestParcelable*>* geofenceRequestsArray);
+
+        /**
+         * Removes a give list of geofences from the system.
+         *
+         * @param geofences     The list of geofences to remove.
+         */
+        RemoveGeofences(
+            [in] ArrayOf<Int32>* geofenceId);
+
+        /**
+         * Pauses monitoring a particular geofence.
+         *
+         * @param geofenceId    The geofence to pause monitoring.
+         */
+        PauseMonitoringGeofence(
+            [in] Int32 geofenceId);
+
+        /**
+         * Resumes monitoring a particular geofence.
+         *
+         * @param geofenceid            The geofence to resume monitoring.
+         * @param transitionsToMonitor  The transitions to monitor upon resume.
+         *
+         * Remarks: keep naming of geofence request options consistent with the naming used in
+         *          GeofenceHardwareRequest
+         */
+        ResumeMonitoringGeofence(
+            [in] Int32 geofenceId,
+            [in] Int32 monitorTransitions);
+
+        /**
+         * Modifies the request options if a geofence that is already known by the
+         * system.
+         *
+         * @param geofenceId                    The geofence to modify.
+         * @param lastTransition                The last known transition state of
+         *                                      the geofence.
+         * @param monitorTransitions            The set of transitions to monitor.
+         * @param notificationResponsiveness    The notification responsivness needed.
+         * @param unknownTimer                  The time span associated with the.
+         * @param sourcesToUse                  The source technologies to use.
+         *
+         * Remarks: keep the options as separate fields to be able to leverage the class
+         * GeofenceHardwareRequest without any changes
+         */
+        ModifyGeofenceOptions(
+            [in] Int32 geofenceId,
+            [in] Int32 lastTransition,
+            [in] Int32 monitorTransitions,
+            [in] Int32 notificationResponsiveness,
+            [in] Int32 unknownTimer,
+            [in] Int32 sourcesToUse);
+    }
+
+    } // namespace Location
+    } // namespace Droid
+    } // namespace Elastos
+}
+

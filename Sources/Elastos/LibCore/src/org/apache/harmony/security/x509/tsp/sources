@@ -1,0 +1,16 @@
+
+TARGET_NAME= tsp
+TARGET_TYPE= lib
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/Org/Apache/Harmony/Security/X509/Tsp
+
+SOURCES = CMessageImprint.cpp
+SOURCES += CPKIStatusInfo.cpp
+SOURCES += CPKIStatusInfoHelper.cpp
+SOURCES += CTSTInfo.cpp
+SOURCES += CTSTInfoHelper.cpp
+SOURCES += CTimeStampReq.cpp
+SOURCES += CTimeStampReqHelper.cpp
+SOURCES += CTimeStampResp.cpp
+SOURCES += CTimeStampRespHelper.cpp

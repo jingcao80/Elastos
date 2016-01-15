@@ -1,0 +1,78 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHeaderElement;
+    interface Org.Apache.Http.INameValuePair;
+    interface Org.Apache.Http.Message.IParserCursor;
+    interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Message {
+
+    /**
+     * Basic implementation for parsing header values into elements.
+     * Instances of this class are stateless and thread-safe.
+     * Derived classes are expected to maintain these properties.
+     *
+     * @author <a href="mailto:bcholmes@interlog.com">B.C. Holmes</a>
+     * @author <a href="mailto:jericho@thinkfree.com">Park, Sung-Gu</a>
+     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+     * @author <a href="mailto:oleg at ural.com">Oleg Kalnichevski</a>
+     * @author and others
+     *
+     *
+     * <!-- empty lines above to avoid 'svn diff' context problems -->
+     * @version $Revision: 595670 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IHeaderValueParser;
+     */
+    [deprecated]
+    interface IBasicHeaderValueParser {
+
+        /**
+         * Creates a header element.
+         * Called from {@link #parseHeaderElement}.
+         *
+         * @return  a header element representing the argument
+         */
+        CreateHeaderElement(
+            [in] String name,
+            [in] String value,
+            [in] ArrayOf<INameValuePair*>* params,
+            [out] IHeaderElement** element);
+
+        ParseNameValuePair(
+            [in] ICharArrayBuffer* buffer,
+            [in] IParserCursor* cursor,
+            [in] ArrayOf<Char32>* delimiters,
+            [out] INameValuePair** pair);
+
+        /**
+         * Creates a name-value pair.
+         * Called from {@link #parseNameValuePair}.
+         *
+         * @param name      the name
+         * @param value     the value, or <code>null</code>
+         *
+         * @return  a name-value pair representing the arguments
+         */
+        CreateNameValuePair(
+            [in] String name,
+            [in] String value,
+            [out] INameValuePair** pair);
+
+    }
+
+    } // namespace Message
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

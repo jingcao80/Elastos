@@ -1,0 +1,127 @@
+
+module
+{
+    using interface Org.Xmlpull.V1.IXmlSerializer;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Notification {
+
+    interface IZenModeConfigDowntimeInfo {}
+
+    /**
+     * Persisted configuration for zen mode.
+     *
+     * @hide
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    interface IZenModeConfig {
+        const String SLEEP_MODE_NIGHTS = "nights";
+        const String SLEEP_MODE_WEEKNIGHTS = "weeknights";
+        const String SLEEP_MODE_DAYS_PREFIX = "days:";
+
+        const Int32 SOURCE_ANYONE = 0;
+        const Int32 SOURCE_CONTACT = 1;
+        const Int32 SOURCE_STAR = 2;
+        const Int32 MAX_SOURCE = SOURCE_STAR;
+
+        IsValid(
+            [out] Boolean* ret);
+
+        WriteXml(
+            [in] IXmlSerializer* _out);
+
+        Copy(
+            [out] IZenModeConfig** ret);
+
+        ToDowntimeInfo(
+            [out] IZenModeConfigDowntimeInfo** ret);
+    }
+
+    interface IZenModeConfigHelper {
+        GetALL_DAYS(
+            [out, callee] ArrayOf<Int32>* days);
+
+        GetWEEKNIGHT_DAYS(
+            [out, callee] ArrayOf<Int32>* days);
+
+        GetMINUTE_BUCKETS(
+            [out, callee] ArrayOf<Int32>* buckets);
+
+        SourceToString(
+            [in] Int32 source,
+            [out] String* str);
+
+        IsValidSleepMode(
+            [in] String sleepMode,
+            [out] Boolean* ret);
+
+        TryParseDays(
+            [in] String sleepMode,
+            [out, callee] ArrayOf<Int32>* days);
+
+        ReadXml(
+            [in] IXmlPullParser* parser,
+            [out] IZenModeConfig** xml);
+
+        ReadConditionXml(
+            [in] IXmlPullParser* parser,
+            [out] ICondition** condition);
+
+        WriteConditionXml(
+            [in] ICondition* c,
+            [in] IXmlSerializer* _out);
+
+        IsValidHour(
+            [in] Int32 val,
+            [out] Boolean* ret);
+
+        IsValidMinute(
+            [in] Int32 val,
+            [out] Boolean* ret);
+
+        ToTimeCondition(
+            [in] Int32 minutesFromNow,
+            [out] ICondition** ret);
+
+        ToTimeCondition(
+            [in] Int64 time,
+            [in] Int32 minutes,
+            [out] ICondition** ret);
+
+        ToCountdownConditionId(
+            [in] Int64 time,
+            [out] IUri** id);
+
+        TryParseCountdownConditionId(
+            [in] IUri* conditionId,
+            [out] Int64* id);
+
+        IsValidCountdownConditionId(
+            [in] IUri* conditionId,
+            [out] Boolean* ret);
+
+        ToDowntimeConditionId(
+            [in] IZenModeConfigDowntimeInfo* downtime,
+            [out] IUri** id);
+
+        TryParseDowntimeConditionId(
+            [in] IUri* conditionId,
+            [out] IZenModeConfigDowntimeInfo** id);
+
+        IsValidDowntimeConditionId(
+            [in] IUri* conditionId,
+            [out] Boolean* ret);
+    }
+
+    } //Notification
+    } //Service
+    } //Droid
+    } //Elastos
+}

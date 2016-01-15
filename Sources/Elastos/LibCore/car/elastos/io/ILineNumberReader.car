@@ -1,0 +1,47 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+    * Wraps an existing Reader and counts the line terminators encountered while reading the data. The line
+    * number starts at 0 and is incremented any time '\r', '\n' or "\r\n" is read. The class has an
+    * internal
+    * buffer for its data. The size of the buffer defaults to 8 KB.
+    *
+    * @implement Elastos.IO.IBufferedReader
+    *
+    */
+
+     /**
+     * @Involve
+     * interface IReadable;
+     * interface IReader;
+     * interface IBufferedReader;
+     */
+    interface ILineNumberReader {
+        /**
+         * Returns the current line number for this reader. Numbering starts at 0.
+         *
+         * @return the current line number.
+         */
+        GetLineNumber(
+            [out] Int32* lineNumber);
+
+        /**
+         * Sets the line number of this reader to the specified {lineNumber}.
+         * Note that this may have side effects on the line number associated with
+         * the last marked position.
+         *
+         * @param lineNumber
+         *            the new line number value.
+         * @see #mark(int)
+         * @see #reset()
+         */
+        SetLineNumber(
+            [in] Int32 lineNumber);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

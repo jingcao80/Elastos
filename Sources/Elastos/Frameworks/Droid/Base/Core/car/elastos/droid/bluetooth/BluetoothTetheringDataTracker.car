@@ -1,0 +1,79 @@
+
+module
+{
+//    interface Elastos.Droid.Net.INetworkStateTracker;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * This class tracks the data connection associated with Bluetooth
+         * reverse tethering. This is a singleton class and an instance will be
+         * created by ConnectivityService. BluetoothService will call into this
+         * when a reverse tethered connection needs to be activated.
+         *
+         * @hide
+         *
+         * @implements Elastos.Droid.Bluetooth.Elastos.Droid.Net.INetworkStateTracker
+         */
+        /**
+         * @Involve
+         * interface Elastos.Droid.Net.INetworkStateTracker
+         */
+        interface IBluetoothTetheringDataTracker//
+        {
+            /**
+             * Tells the underlying networking system that the caller wants to
+             * begin using the named feature. The interpretation of {@code feature}
+             * is completely up to each networking implementation.
+             * @param feature the name of the feature to be used
+             * @param callingPid the process ID of the process that is issuing this request
+             * @param callingUid the user ID of the process that is issuing this request
+             * @return an integer value representing the outcome of the request.
+             * The interpretation of this value is specific to each networking
+             * implementation+feature combination, except that the value {@code -1}
+             * always indicates failure.
+             * TODO: needs to go away
+             */
+            StartUsingNetworkFeature(
+                [in] String feature,
+                [in] Int32 callingPid,
+                [in] Int32 callingUid,
+                [out] Int32* result);
+
+            /**
+             * Tells the underlying networking system that the caller is finished
+             * using the named feature. The interpretation of {@code feature}
+             * is completely up to each networking implementation.
+             * @param feature the name of the feature that is no longer needed.
+             * @param callingPid the process ID of the process that is issuing this request
+             * @param callingUid the user ID of the process that is issuing this request
+             * @return an integer value representing the outcome of the request.
+             * The interpretation of this value is specific to each networking
+             * implementation+feature combination, except that the value {@code -1}
+             * always indicates failure.
+             * TODO: needs to go away
+             */
+            StopUsingNetworkFeature(
+                [in] String feature,
+                [in] Int32 callingPid,
+                [in] Int32 callingUid,
+                [out] Int32* result);
+
+            /**
+             * Fetch default gateway address for the network
+             */
+            GetDefaultGatewayAddr(
+                [out] Int32* addr);
+
+            StartReverseTether(
+                [in] String iface);
+
+            StopReverseTether();
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

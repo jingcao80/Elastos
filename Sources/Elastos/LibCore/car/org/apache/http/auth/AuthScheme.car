@@ -1,0 +1,134 @@
+
+module
+{
+
+    interface Org.Apache.Http.Auth.ICredentials;
+    interface Org.Apache.Http.IHeader;
+    interface Org.Apache.Http.IHttpRequest;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Auth {
+
+    /**
+     * <p>
+     * This interface represents an abstract challenge-response oriented
+     * authentication scheme.
+     * </p>
+     * <p>
+     * An authentication scheme should be able to support the following
+     * functions:
+     * <ul>
+     *   <li>Parse and process the challenge sent by the targer server
+     *       in response to request for a protected resource
+     *   <li>Provide its textual designation
+     *   <li>Provide its parameters, if available
+     *   <li>Provide the realm this authentication scheme is applicable to,
+     *       if available
+     *   <li>Generate authorization string for the given set of credentials,
+     *       request method and URI as specificed in the HTTP request line
+     *       in response to the actual authorization challenge
+     * </ul>
+     * </p>
+     * <p>
+     * Authentication schemes may ignore method name and URI parameters
+     * if they are not relevant for the given authentication mechanism
+     * </p>
+     * <p>
+     * Authentication schemes may be stateful involving a series of
+     * challenge-response exchanges
+     * </p>
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     * @author <a href="mailto:adrian@ephox.com">Adrian Sutton</a>
+     *
+     * @since 4.0
+     */
+    [deprecated]
+    interface IAuthScheme {
+
+        /**
+         * Processes the given challenge token. Some authentication schemes
+         * may involve multiple challenge-response exchanges. Such schemes must be able
+         * to maintain the state information when dealing with sequential challenges
+         *
+         * @param header the challenge header
+         */
+        ProcessChallenge(
+            [in] IHeader* header);
+
+        /**
+         * Returns textual designation of the given authentication scheme.
+         *
+         * @return the name of the given authentication scheme
+         */
+        GetSchemeName(
+            [out] String* name);
+
+        /**
+         * Returns authentication parameter with the given name, if available.
+         *
+         * @param name The name of the parameter to be returned
+         *
+         * @return the parameter with the given name
+         */
+        GetParameter(
+            [in] String name,
+            [out] String* param);
+
+        /**
+         * Returns authentication realm. If the concept of an authentication
+         * realm is not applicable to the given authentication scheme, returns
+         * <code>null</code>.
+         *
+         * @return the authentication realm
+         */
+        GetRealm(
+            [out] String* realm);
+
+        /**
+         * Tests if the authentication scheme is provides authorization on a per
+         * connection basis instead of usual per request basis
+         *
+         * @return <tt>true</tt> if the scheme is connection based, <tt>false</tt>
+         * if the scheme is request based.
+         */
+        IsConnectionBased(
+            [out] Boolean* connectionBased);
+
+        /**
+         * Authentication process may involve a series of challenge-response exchanges.
+         * This method tests if the authorization process has been completed, either
+         * successfully or unsuccessfully, that is, all the required authorization
+         * challenges have been processed in their entirety.
+         *
+         * @return <tt>true</tt> if the authentication process has been completed,
+         * <tt>false</tt> otherwise.
+         */
+        IsComplete(
+            [out] Boolean* isComplete);
+
+        /**
+         * Produces an authorization string for the given set of {@link Credentials}.
+         *
+         * @param credentials The set of credentials to be used for athentication
+         * @param request The request being authenticated
+         * @throws AuthenticationException if authorization string cannot
+         *   be generated due to an authentication failure
+         *
+         * @return the authorization string
+         */
+        Authenticate(
+            [in] ICredentials* credentials,
+            [in] IHttpRequest* request,
+            [out] IHeader** header);
+
+    }
+
+    } // namespace Auth
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

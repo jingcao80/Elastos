@@ -1,0 +1,81 @@
+module
+{
+    namespace Libcore {
+    namespace IO {
+
+    /**
+     * Iterates over big- or little-endian bytes. See bigEndianIterator and littleEndianIterator.
+     *
+     * @sa MemoryMappedFile#bigEndianIterator
+     * @sa MemoryMappedFile#littleEndianIterator
+     *
+     * @hide don't make this public without adding bounds checking.
+     */
+     [deprecated]
+    interface IBufferIterator {
+
+        /**
+         * Seeks to the absolute position {offset}, measured in bytes from the start.
+         */
+        Seek(
+            [in] Int32 offset);
+
+        /**
+         * Skips forwards or backwards {byteCount} bytes from the current position.
+         */
+        Skip(
+            [in] Int32 byteCount);
+
+        /**
+         * Copies {byteCount} bytes from the current position into {dst}, starting at
+         * {dstOffset}, and advances the current position {byteCount} bytes.
+         */
+        ReadByteArray(
+            [in] ArrayOf<Byte>* dst,
+            [in] Int32 dstOffset,
+            [in] Int32 byteCount);
+
+        /**
+         * Returns the byte at the current position, and advances the current position one byte.
+         */
+        ReadByte(
+            [out] Byte* result);
+
+        /**
+         * Returns the 32-bit int at the current position, and advances the current position four bytes.
+         */
+        ReadInt32(
+            [out] Int32* result);
+
+        /**
+         * Copies {intCount} 32-bit ints from the current position into {dst}, starting at
+         * {dstOffset}, and advances the current position {4 * intCount} bytes.
+         */
+        ReadInt32Array(
+            [in] ArrayOf<Int32>* dst,
+            [in] Int32 dstOffset,
+            [in] Int32 intCount);
+
+        /**
+         * Returns the 16-bit short at the current position, and advances the current position two bytes.
+         */
+        ReadInt16(
+            [out] Int16* result);
+    }
+
+    /**
+     * Iterates over big- or little-endian bytes in a Java byte[].
+     *
+     * @hide don't make this public without adding bounds checking.
+     * @implement Elastos.IO.IBufferIterator
+     */
+     /**
+     * @Involve
+     * interface IBufferIterator;
+     */
+    interface IHeapBufferIterator {
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

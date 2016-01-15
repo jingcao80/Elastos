@@ -1,0 +1,127 @@
+
+module
+{
+    interface Elastos.Core.IStringBuilder;
+    interface Elastos.Math.IBigInteger;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+    interface Org.Apache.Harmony.Security.X509.IExtensions;
+    interface Org.Apache.Harmony.Security.X509.IAlgorithmIdentifier;
+    interface Org.Apache.Harmony.Security.X509.IValidity;
+    interface Org.Apache.Harmony.Security.X509.ISubjectPublicKeyInfo;
+    interface Org.Apache.Harmony.Security.X501.IName;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with TBSCertificate structure which is the part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  TBSCertificate  ::=  SEQUENCE  {
+     *       version         [0]  EXPLICIT Version DEFAULT v1,
+     *       serialNumber         CertificateSerialNumber,
+     *       signature            AlgorithmIdentifier,
+     *       issuer               Name,
+     *       validity             Validity,
+     *       subject              Name,
+     *       subjectPublicKeyInfo SubjectPublicKeyInfo,
+     *       issuerUniqueID  [1]  IMPLICIT UniqueIdentifier OPTIONAL,
+     *                            -- If present, version MUST be v2 or v3
+     *       subjectUniqueID [2]  IMPLICIT UniqueIdentifier OPTIONAL,
+     *                            -- If present, version MUST be v2 or v3
+     *       extensions      [3]  EXPLICIT Extensions OPTIONAL
+     *                            -- If present, version MUST be v3
+     *  }
+     * </pre>
+     */
+    [deprecated]
+    interface ITBSCertificate {
+        /**
+         * Returns the value of version field of the structure.
+         */
+        GetVersion(
+            [out] Int32* ver);
+
+        /**
+         * Returns the value of serialNumber field of the structure.
+         */
+        GetSerialNumber(
+            [out] IBigInteger** serialNumber);
+
+        /**
+         * Returns the value of signature field of the structure.
+         */
+        GetSignature(
+            [out] IAlgorithmIdentifier** signature);
+
+        /**
+         * Returns the value of issuer field of the structure.
+         */
+        GetIssuer(
+            [out] IName** issuer);
+
+        /**
+         * Returns the value of validity field of the structure.
+         */
+        GetValidity(
+            [out] IValidity** validity);
+
+        /**
+         * Returns the value of subject field of the structure.
+         */
+        GetSubject(
+            [out] IName** subject);
+
+        /**
+         * Returns the value of subjectPublicKeyInfo field of the structure.
+         */
+        GetSubjectPublicKeyInfo(
+            [out] ISubjectPublicKeyInfo** info);
+
+        /**
+         * Returns the value of issuerUniqueID field of the structure.
+         */
+        GetIssuerUniqueID(
+            [out, callee] ArrayOf<Boolean>* uniqueId);
+
+        /**
+         * Returns the value of subjectUniqueID field of the structure.
+         */
+        GetSubjectUniqueID(
+            [out, callee] ArrayOf<Boolean>* uniqueId);
+
+        /**
+         * Returns the value of extensions field of the structure.
+         */
+        GetExtensions(
+            [out] IExtensions** extensions);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 TBSCertificate value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        DumpValue(
+            [in] IStringBuilder* sb);
+    }
+
+    interface ITBSCertificateHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

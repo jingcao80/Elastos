@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Interfaces {
+
+    /**
+     * The interface for a public key in the Diffie-Hellman key exchange protocol.
+     */
+    /**
+     * @Involve
+     * interface IDHKey;
+     * interface Elastos.Security.IPublicKey;
+     */
+    interface IDHPublicKey {
+        /**
+         * Returns this key's private value x.
+         * @return this key's private value x.
+         */
+        GetY(
+            [out] IBigInteger** bi);
+    }
+
+    } // namespace interfaces
+    } // namespace Crypto
+    } // namespace Elastosx
+}

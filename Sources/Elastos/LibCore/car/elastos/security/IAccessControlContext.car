@@ -1,0 +1,20 @@
+
+module
+{
+    interface Elastos.Security.IPermission;
+    interface Elastos.Security.IDomainCombiner;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IAccessControlContext {
+        CheckPermission(
+            [in] IPermission* perm);
+
+        GetDomainCombiner(
+            [out] IDomainCombiner** domCombiner);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

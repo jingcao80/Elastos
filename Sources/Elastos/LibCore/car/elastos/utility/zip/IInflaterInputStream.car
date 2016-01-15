@@ -1,0 +1,33 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * This class provides an implementation of FilterInputStream that
+     * decompresses data that was compressed using the DEFLATE algorithm
+     * (see specification). Basically it wraps the Inflater class and takes
+     * care of the buffering.
+     *
+     * @sa specification
+     * @sa Inflater
+     * @saDeflaterOutputStream
+     *
+     * @implements Elastos.Utility.Zip.Elastos.IO.IFilterInputStream
+     */
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IInputStream;
+     * interface IFilterInputStream;
+     */
+    interface IInflaterInputStream {
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

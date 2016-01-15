@@ -1,0 +1,41 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Params {
+
+    /**
+     * {@link HttpParams} implementation that delegates resolution of a parameter
+     * to the given default {@link HttpParams} instance if the parameter is not
+     * present in the local one. The state of the local collection can be mutated,
+     * whereas the default collection is treated as read-only.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 610763 $
+     */
+    /**
+     * @Involve
+     * interface IHttpParams;
+     */
+    interface IDefaultedHttpParams {
+
+        /**
+         * Copies the locally defined parameters to the argument parameters.
+         * This method is called from {@link #copy()}.
+         *
+         * @param target    the parameters to which to copy
+         */
+        GetDefaults(
+            [out] IHttpParams** defaults);
+    }
+
+    } // namespace Params
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

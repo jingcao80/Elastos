@@ -1,0 +1,58 @@
+
+module
+{
+    interface Elastos.Utility.IMap;
+
+    namespace Elastosx {
+    namespace Security {
+    namespace Auth {
+    namespace X500 {
+
+    /**
+     * @Involve
+     * interface Elastos.Security.IPrincipal
+     */
+    interface IX500Principal {
+        /*
+         * Defines a constant for the canonical string format of distinguished
+         * names.
+         */
+        const String CANONICAL = "CANONICAL";
+
+        /**
+         * Defines a constant for the RFC 1779 string format of distinguished
+         * names.
+         */
+        const String RFC1779 = "RFC1779";
+
+        /**
+         * Defines a constant for the RFC 2253 string format of distinguished
+         * names.
+         */
+        const String RFC2253 = "RFC2253";
+
+        /**
+         * Returns an ASN.1 DER-encoded representation of the distinguished name
+         * contained in this X.500 principal.
+         *
+         * @return the ASN.1 DER-encoded representation
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encodedName);
+
+        GetName(
+            [in] String format,
+            [out] String* name);
+
+        //IMap<String, String>
+        GetName(
+            [in] String format,
+            [in] IMap* oidMap,
+            [out] String* name);
+    }
+
+    } // namespace X500
+    } // namespace Auth
+    } // namespace Security
+    } // namespace Elastosx
+}

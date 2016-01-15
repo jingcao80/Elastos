@@ -1,0 +1,68 @@
+$ INPUT class
+$ IF type is not "aspect"
+$   IF attrib is not "hasctor" OR attrib is "hasdefaultctor"
+$   WITH all interfaces DO
+$       IF attrib is not "clsobj" AND attrib is not "callback" and attrib is not "callbacksink" and attrib is not "delegatesink" and attrib is not "filter"
+
+$           IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingleton(
+$           ELSE
+    static _ELASTOS ECode New(
+$           END IF ;; is singleton
+        /* [out] */ ${namespace}${name}** itfObj)
+    {
+$           IF class.attrib is "singleton"
+        return AcquireSingletonByFriend(${namespace}EIID_${name}, (PInterface*)itfObj);
+$           ELSE
+        return NewByFriend(${namespace}EIID_${name}, (PInterface*)itfObj);
+$           END IF ;; is singleton
+    }
+$
+$       END IF ;; attrib is not clsobj and is not callback and ...
+$   END DO ;; all interfaces
+$   END IF ;; not hasctor OR hasdefaultctor
+$
+$   IF attrib is "hasctor"
+$   WITH all interfaces DO
+$       IF attrib is "clsobj"
+$           WITH all methods DO
+$               IF attrib is not "defaultctor"
+$                   WITH all interfaces DO
+$                       IF attrib is not "clsobj" AND attrib is not "callback" and attrib is not "callbacksink" and attrib is not "delegatesink" and attrib is not "filter"
+
+$                           IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingleton(
+$                           ELSE
+    static _ELASTOS ECode New(
+$                           END IF ;; is singleton
+$                           WITH all parameters DO
+$                               IF parameter is not last
+        /* [${attrib}] */ ${ParamNamespaceType(type)} ${name},
+$                               ELSE
+        /* [out] */ ${interface.namespace}${interface.name}** __${interface.name})
+$                               END IF ;; parameter is not last
+$                           END DO ;; all parameters
+    {
+$                           IF class.attrib is "singleton"
+        return AcquireSingletonByFriend($^
+$                           ELSE
+        return NewByFriend($^
+$                           END IF ;; is singleton
+$                           WITH all parameters DO
+$                               IF parameter is not last
+${name}, $^
+$                               ELSE
+${interface.namespace}EIID_${interface.name}, (PInterface*)__${interface.name});
+$                               END IF ;; parameter is not last
+$                           END DO ;; all parameters
+    }
+
+$                       END IF ;; attrib is not clsobj and is not callback and ...
+$                   END DO ;; all interfaces
+$               END IF ;; is not defaultctor
+$           END DO ;; all methods
+$       END IF ;; is clsobj
+$   END DO ;; all interfaces
+$   END IF ;; attrib is hasctor
+$
+$ END IF ;; is not aspect

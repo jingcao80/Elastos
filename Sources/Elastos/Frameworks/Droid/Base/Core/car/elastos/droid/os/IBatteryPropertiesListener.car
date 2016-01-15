@@ -1,0 +1,19 @@
+module
+{
+    interface Elastos.Droid.Os.IBatteryProperties;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    [oneway]
+    interface IBatteryPropertiesListener {
+
+        BatteryPropertiesChanged(
+            [in] IBatteryProperties* props);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

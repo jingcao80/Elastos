@@ -1,0 +1,31 @@
+
+module
+{
+
+    using interface Elastos.Utility.IUUID;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IParcelUuid
+    {
+        GetUuid(
+            [out] IUUID** uuid);
+    }
+
+    interface IParcelUuidHelper
+    {
+        FromString(
+            [in] String uuidStr,
+            [out] IParcelUuid** uuid);
+    }
+
+    }
+    }// Droid
+    }// Elastos
+}

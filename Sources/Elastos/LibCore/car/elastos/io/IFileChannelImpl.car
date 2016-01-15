@@ -1,0 +1,47 @@
+
+module
+{
+    interface Elastos.IO.Channels.IFileLock;
+
+    namespace Elastos {
+    namespace IO {
+
+     /**
+     * @Involve
+     * interface Elastos.IO.Channels.IChannel;
+     * interface IInterruptibleChannel;
+     * interface Elastos.IO.Channels.IFileChannel;
+     */
+    interface IFileChannelImpl {
+
+    /*
+        Lock( [in]  Int64 position,
+              [in]  Int64 size,
+              [in]  Boolean shared,
+              [out] IFileLock** lock);
+
+        TryLock( [in]  Int64 position,
+                 [in]  Int64 size,
+                 [in]  Boolean shared,
+                 [out] IFileLock** lock);
+     */
+
+        /**
+        * Non-API method to release a given lock on a file channel. Assumes that
+        * the lock will mark itself invalid after successful unlocking.
+        */
+        ReleaseLock(
+            [in] IFileLock* lock);
+
+        /*
+        Force(
+            [in] Boolean metadata);
+        */
+
+        GetFD(
+            [out] IFileDescriptor** descriptor);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

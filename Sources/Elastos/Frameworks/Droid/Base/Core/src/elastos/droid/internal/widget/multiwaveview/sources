@@ -1,0 +1,25 @@
+
+TARGET_NAME= multiwaveview
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+#ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+#INCLUDES += $(PREBUILD_INC)/skia/utils
+#INCLUDES += $(PREBUILD_INC)/skia/core
+#endif
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += Ease.cpp
+SOURCES += Tweener.cpp
+SOURCES += CTweenerHelper.cpp
+SOURCES += PointCloud.cpp
+SOURCES += CPointCloud.cpp
+SOURCES += TargetDrawable.cpp
+SOURCES += CTargetDrawable.cpp
+SOURCES += GlowPadView.cpp
+SOURCES += CGlowPadView.cpp

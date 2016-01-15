@@ -1,0 +1,55 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Tech{
+
+    /**
+     * @Involve
+     * interace IBasicTagTechnology
+     */
+    [deprecated]
+    interface IMifareUltralight {
+        GetType(
+            [out] Int32* type);
+
+        ReadPages(
+            [in] Int32 pageOffset,
+            [out, callee] ArrayOf<Byte>* res);
+
+        WritePage(
+            [in] Int32 pageOffset,
+            [in] ArrayOf<Byte> data);
+
+        Transceive(
+            [in] ArrayOf<Byte> data,
+            [out, callee] ArrayOf<Byte>* res);
+
+        GetMaxTransceiveLength(
+            [out] Int32* len);
+
+        SetTimeout(
+            [in] Int32 timeout);
+
+        GetTimeout(
+            [out] Int32* timeout);
+
+
+    }
+
+    interface IMifareUltralightHelper {
+        GetMifareUltralight(
+            [in] ITag* tag,
+            [out] IMifareUltralight** light);
+    }
+
+    }// namespace Tech
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

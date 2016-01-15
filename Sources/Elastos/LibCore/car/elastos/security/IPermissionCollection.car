@@ -1,0 +1,29 @@
+
+module
+{
+    interface Elastos.Security.IPermission;
+    interface Elastos.Utility.IEnumeration;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IPermissionCollection {
+        Add(
+            [in] IPermission* permission);
+
+        GetElements(
+            [out] IEnumeration** permissions);
+
+        Implies(
+            [in] IPermission* permission,
+            [out] Boolean* result);
+
+        IsReadOnly(
+            [out] Boolean* result);
+
+        SetReadOnly();
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

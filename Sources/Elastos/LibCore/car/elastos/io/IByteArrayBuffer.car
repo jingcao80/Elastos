@@ -1,0 +1,16 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * @Involve
+     * interface IBuffer;
+     * interface IByteBuffer;
+     */
+    interface IByteArrayBuffer {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

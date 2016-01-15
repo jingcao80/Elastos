@@ -1,0 +1,1949 @@
+
+module
+{
+    merge("app/ActionBar.car");
+    merge("app/Activity.car");
+    merge("app/ActivityGroup.car");
+    merge("app/ActivityManager.car");
+    merge("app/ActivityOptions.car");
+    merge("app/ActivityThread.car");
+    merge("app/ActivityTransitionCoordinator.car");
+    merge("app/EnterTransitionCoordinator.car");
+    merge("app/ExitTransitionCoordinator.car");
+    merge("app/ActivityTransitionState.car");
+    merge("app/ActivityView.car");
+    merge("app/AlarmManager.car");
+    merge("app/AlarmClockInfo.car");
+    merge("app/AlertDialog.car");
+    merge("app/AliasActivity.car");
+    merge("app/AppOpsManager.car");
+    merge("app/Application.car");
+    merge("app/ApplicationErrorReport.car");
+    merge("app/AppImportanceMonitor.car");
+    merge("app/BackStackRecord.car");
+    merge("app/ContextImpl.car");
+    merge("app/DatePickerDialog.car");
+    merge("app/Dialog.car");
+    merge("app/DialogFragment.car");
+    merge("app/DownloadManager.car");
+    merge("app/ExpandableListActivity.car");
+    merge("app/Fragment.car");
+    merge("app/FragmentManager.car");
+    merge("app/FragmentTransaction.car");
+    merge("app/FragmentBreadCrumbs.car");
+    merge("app/IActivityContainer.car");
+    merge("app/IActivityContainerCallback.car");
+    merge("app/IActivityController.car");
+    merge("app/IActivityManager.car");
+    merge("app/ActivityManagerInternal.car");
+    merge("app/IAlarmManager.car");
+    merge("app/IAppTask.car");
+    merge("app/IApplicationThread.car");
+    merge("app/IBackupAgent.car");
+    merge("app/IInstrumentationWatcher.car");
+    merge("app/INotificationManager.car");
+    merge("app/IProcessObserver.car");
+    merge("app/ISearchManager.car");
+    merge("app/ISearchManagerCallback.car");
+    merge("app/IServiceConnection.car");
+    merge("app/IStopUserCallback.car");
+    merge("app/IUiAutomationConnection.car");
+    merge("app/IUiModeManager.car");
+    merge("app/IUserSwitchObserver.car");
+    merge("app/IWallpaperManager.car");
+    merge("app/IWallpaperManagerCallback.car");
+    merge("app/Instrumentation.car");
+    merge("app/IntentService.car");
+    merge("app/KeyguardManager.car");
+    merge("app/LauncherActivity.car");
+    merge("app/ListActivity.car");
+    merge("app/ListFragment.car");
+    merge("app/LoadedPkg.car");
+    merge("app/LoaderManager.car");
+    merge("app/LocalActivityManager.car");
+    merge("app/MediaRouteActionProvider.car");
+    merge("app/MediaRouteButton.car");
+    merge("app/NativeActivity.car");
+    merge("app/Notification.car");
+    merge("app/NotificationManager.car");
+    merge("app/OnActivityPausedListener.car");
+    merge("app/PackageInstallObserver.car");
+    merge("app/PackageDeleteObserver.car");
+    merge("app/PendingIntent.car");
+    merge("app/Presentation.car");
+    merge("app/ProfilerInfo.car");
+    merge("app/ProgressDialog.car");
+    merge("app/RemoteInput.car");
+    merge("app/ResultInfo.car");
+    merge("app/ResourcesManager.car");
+    merge("app/SearchManager.car");
+    merge("app/SearchDialog.car");
+    merge("app/SearchableInfo.car");
+    merge("app/Service.car");
+    merge("app/SharedElementCallback.car");
+    merge("app/StatusBarManager.car");
+    merge("app/TaskStackBuilder.car");
+    merge("app/TabActivity.car");
+    merge("app/TimePickerDialog.car");
+    merge("app/UiAutomation.car");
+    merge("app/UiModeManager.car");
+    merge("app/VoiceInteractor.car");
+    merge("app/WallpaperInfo.car");
+    merge("app/WallpaperManager.car");
+
+    merge("app/admin/DeviceAdminInfo.car");
+    merge("app/admin/DeviceAdminReceiver.car");
+    merge("app/admin/DevicePolicyManager.car");
+    merge("app/admin/IDevicePolicyManager.car");
+
+    merge("app/backup/AbsoluteFileBackupHelper.car");
+    merge("app/backup/BackupAgent.car");
+    merge("app/backup/BackupAgentHelper.car");
+    merge("app/backup/BackupDataInput.car");
+    merge("app/backup/BackupDataInputStream.car");
+    merge("app/backup/BackupDataOutput.car");
+    merge("app/backup/BackupHelper.car");
+    merge("app/backup/BackupHelperDispatcher.car");
+    merge("app/backup/BackupManager.car");
+    merge("app/backup/BackupTransport.car");
+    merge("app/backup/FileBackupHelper.car");
+    merge("app/backup/FileBackupHelperBase.car");
+    merge("app/backup/FullBackup.car");
+    merge("app/backup/FullBackupDataOutput.car");
+    merge("app/backup/IBackupManager.car");
+    merge("app/backup/IFullBackupRestoreObserver.car");
+    merge("app/backup/IRestoreObserver.car");
+    merge("app/backup/IRestoreSession.car");
+    merge("app/backup/RestoreDescription.car");
+    merge("app/backup/RestoreObserver.car");
+    merge("app/backup/RestoreSession.car");
+    merge("app/backup/RestoreSet.car");
+    merge("app/backup/SharedPreferencesBackupHelper.car");
+    merge("app/backup/WallpaperBackupHelper.car");
+
+    merge("app/job/IJobCallback.car");
+    merge("app/job/IJobScheduler.car");
+    merge("app/job/IJobService.car");
+    merge("app/job/JobInfo.car");
+    merge("app/job/JobParameters.car");
+    merge("app/job/JobScheduler.car");
+    merge("app/job/JobService.car");
+
+    merge("app/trust/ITrustListener.car");
+    merge("app/trust/ITrustManager.car");
+    merge("app/trust/TrustManager.car");
+
+    merge("app/usage/ConfigurationStats.car");
+    merge("app/usage/IUsageStatsManager.car");
+    merge("app/usage/UsageEvents.car");
+    merge("app/usage/UsageStats.car");
+    merge("app/usage/UsageStatsManager.car");
+    merge("app/usage/UsageStatsManagerInternal.car");
+
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.Core.IClassLoader;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IHashMap;
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Os.IRemoteCallback;
+    interface Elastos.Droid.Os.IPersistableBundle;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IIIntentSender;
+    interface Elastos.Droid.Content.IIntentSender;
+    interface Elastos.Droid.Content.IIntentFilter;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContextWrapper;
+    interface Elastos.Droid.Content.IIntentReceiver;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Content.IComponentCallbacks;
+    interface Elastos.Droid.Content.IComponentCallbacks2;
+    interface Elastos.Droid.Content.IDialogInterface;
+    interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Content.Pm.IProviderInfo;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+    interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    interface Elastos.Droid.Content.Pm.IIPackageDeleteObserver2;
+    interface Elastos.Droid.Content.Pm.IIPackageDeleteObserver;
+    interface Elastos.Droid.Content.Pm.IIPackageInstallObserver2;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.View.IViewManager;
+    interface Elastos.Droid.View.IViewParent;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IDisplay;
+    interface Elastos.Droid.View.IContextThemeWrapper;
+    interface Elastos.Droid.View.ILayoutInflaterFactory;
+    interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Droid.View.IKeyEventCallback;
+    interface Elastos.Droid.View.IViewGroupLayoutParams;
+    interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
+    interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    interface Elastos.Droid.View.IOnKeyguardExitResult;
+    interface Elastos.Droid.View.IWindow;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    interface Elastos.Droid.Widget.ILinearLayout;
+    interface Elastos.Droid.Widget.IExpandableListViewOnChildClickListener;
+    interface Elastos.Droid.Widget.IExpandableListViewOnGroupCollapseListener;
+    interface Elastos.Droid.Widget.IExpandableListViewOnGroupExpandListener;
+    interface Elastos.Droid.Widget.IDatePickerOnDateChangedListener;
+    interface Elastos.Droid.Widget.ITimePickerOnTimeChangedListener;
+    interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceClient;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.Utility.IArrayMap;
+    interface Elastos.Droid.Internal.App.IIAppOpsCallback;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractor;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
+    interface Elastos.Droid.Internal.Os.IHandlerCallerCallback;
+    interface Elastos.Droid.Internal.Os.IHandlerCaller;
+    interface Elastos.Droid.App.Job.IJobScheduler;
+    interface Elastos.Droid.App.Job.IIJobScheduler;
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Job {
+
+        class CJobInfo {
+            constructor();
+
+            constructor(
+                [in] IJobInfoBuilder* builder);
+
+            interface IJobInfo;
+            interface IParcelable;
+        }
+
+        class CJobInfoBuilder {
+            constructor(
+                [in] Int32 jobId,
+                [in] IComponentName* jobService);
+
+            interface IJobInfoBuilder;
+        }
+
+        class  CJobParameters {
+            constructor();
+
+            constructor(
+                [in] IBinder* cb,
+                [in] Int32 jobId,
+                [in] IPersistableBundle* extras,
+                [in] Boolean overrideDeadlineExpired);
+
+            interface IJobParameters;
+            interface IParcelable;
+        }
+
+    } // namespace Job
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Trust {
+
+        class CTrustManager {
+            constructor(
+                [in] IBinder* b);
+
+            interface ITrustManager;
+        }
+
+        class CTrustManagerTrustListener {
+            constructor(
+                [in] ITrustListener* trustListener,
+                [in] IHandler* handler);
+
+            interface IITrustListener;
+            interface IBinder;
+        }
+
+    } // namespace Trust
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Usage {
+
+        class CConfigurationStats {
+            constructor();
+
+            constructor(
+                [in] IConfigurationStats* stats);
+
+            interface IConfigurationStats;
+            interface IParcelable;
+        }
+
+        class CUsageStats {
+            constructor();
+
+            constructor(
+                [in] IUsageStats* stats);
+
+            interface IUsageStats;
+            interface IParcelable;
+        }
+
+        class CUsageStatsManager {
+            constructor(
+                [in] IContext* ctx,
+                [in] IIUsageStatsManager* service);
+
+            interface IUsageStatsManager;
+        }
+
+        class CUsageEvent {
+            constructor();
+
+            interface IUsageEvent;
+        }
+
+        [deprecated]
+        class CUsageEvents {
+            constructor();
+
+            constructor(
+                [in] IList* events,
+                [in] ArrayOf<String>* stringPool);
+
+            interface IUsageEvents;
+        }
+
+    } // namespace Usage
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    [local]
+    class CContextImpl {
+        constructor(
+            [in] IContextImpl* container,
+            [in] IActivityThread* mainThread,
+            [in] ILoadedPkg* packageInfo,
+            [in] IBinder* activityToken,
+            [in] IUserHandle* user,
+            [in] Boolean restricted,
+            [in] IDisplay* display,
+            [in] IConfiguration* overrideConfiguration);
+
+        interface IContextImpl;
+        interface IContextWrapper;
+        interface IContext;
+    }
+
+        class CAlarmManager {
+            constructor(
+                [in] IIAlarmManager* service,
+                [in] IContext* ctx);
+
+            interface IAlarmManager;
+        }
+
+        class CAlarmClockInfo {
+            constructor();
+
+            constructor(
+                [in] Int64 triggerTime,
+                [in] IPendingIntent* showIntent);
+
+            interface IAlarmClockInfo;
+            interface IParcelable;
+        }
+
+//     namespace Admin {
+
+//         [local, parcelable]
+//         class CDeviceAdminInfo {
+//             constructor();
+
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IResolveInfo* receiver);
+
+//             interface IDeviceAdminInfo;
+//             interface IParcelable;
+//         }
+
+//         class CDeviceAdminInfoPolicyInfo {
+//             constructor(
+//                 [in] Int32 identIn,
+//                 [in] String tagIn,
+//                 [in] Int32 labelIn,
+//                 [in] Int32 descriptionIn);
+
+//             interface IDeviceAdminInfoPolicyInfo;
+//         }
+
+//         [local]
+//         class CDevicePolicyManager {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IHandler* handler);
+
+//             interface IDevicePolicyManager;
+//         }
+
+//     } // namespace Admin
+
+//     namespace Backup {
+
+//         [local]
+//         class CBackupManager {
+//             constructor(
+//                 [in] IContext* ctx);
+
+//             interface IBackupManager;
+//         }
+
+//         singleton class CBackupManagerHelper {
+//             interface IBackupManagerHelper;
+//         }
+
+//         class CBackupDataOutput {
+//             constructor(
+//                 [in] IFileDescriptor* fd);
+
+//             interface IBackupDataOutput;
+//         }
+
+//         class CBackupDataInput {
+//             constructor(
+//                 [in] IFileDescriptor* fd);
+
+//             interface IBackupDataInput;
+//         }
+
+//         class CBackupDataInputStream {
+//             constructor(
+//                 [in] IBackupDataInput* data);
+
+//             interface IBackupDataInputStream;
+//         }
+
+//         class CFullBackupDataOutput {
+//             constructor(
+//                 [in] IParcelFileDescriptor* fd);
+
+//             interface IFullBackupDataOutput;
+//         }
+
+//         singleton class CFullBackup {
+//             interface IFullBackup;
+//         }
+
+//         class CBackupHelperDispatcher {
+//             constructor();
+
+//             interface IBackupHelperDispatcher;
+//         }
+
+//         [local]
+//         class CFileBackupHelperBase {
+//             constructor(
+//                 [in] IContext* ctx);
+
+//             interface IFileBackupHelperBase;
+//         }
+
+//         [local, deprecated]
+//         class CFileBackupHelper {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] ArrayOf<String>* files);
+
+//             interface IFileBackupHelper;
+//             interface IBackupHelper;
+//         }
+
+//         [local, deprecated]
+//         class CAbsoluteFileBackupHelper {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] ArrayOf<String>* files);
+
+//             interface IAbsoluteFileBackupHelper;
+//             interface IBackupHelper;
+//         }
+
+//         [local, deprecated]
+//         class CSharedPreferencesBackupHelper {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] ArrayOf<String>* prefGroups);
+
+//             interface ISharedPreferencesBackupHelper;
+//             interface IBackupHelper;
+//         }
+
+//         [local]
+//         class CRestoreObserverWrapper {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IRestoreObserver* appObserver);
+
+//             interface IIRestoreObserver;
+//             interface IBinder;
+//         }
+
+//         [local, deprecated]
+//         class CWallpaperBackupHelper {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] ArrayOf<String>* files,
+//                 [in] ArrayOf<String>* keys);
+
+//             interface IWallpaperBackupHelper;
+//             interface IBackupHelper;
+//         }
+
+//         singleton class CWallpaperBackupHelperHelper {
+//             interface IWallpaperBackupHelperHelper;
+//         }
+
+//         class CRestoreSet {
+//             constructor();
+
+//             constructor(
+//                 [in] String name,
+//                 [in] String dev,
+//                 [in] Int64 token);
+
+//             interface IRestoreSet;
+//         }
+
+//         [local]
+//         class CRestoreSession {
+//             constructor(
+//                 [in] IContext* ctx,
+//                 [in] IIRestoreSession* binder);
+
+//             interface IRestoreSession;
+//         }
+
+//     } // namespace Backup
+
+//     class CBackupAgentBackupServiceBinder {
+//         constructor(
+//             [in] Handle32 backupAgent);
+
+//         interface IIBackupAgent;
+//         interface IBinder;
+//     }
+
+    class CActivity {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CActivityGroup {
+        constructor();
+
+        constructor(
+            [in] Boolean singleActivityMode);
+
+        interface IActivityGroup;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CActivityView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 style);
+
+        interface IActivityView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    class CActivityViewActivityContainerCallback {
+        constructor(
+           [in] IActivityView* activityView);
+
+        interface IActivityContainerCallback;
+        interface IBinder;
+    }
+
+    [local]
+    class CActivityNonConfigurationInstances {
+        constructor();
+
+        constructor(
+            [in] IInterface* activity,
+            [in] IHashMap* children,
+            [in] IArrayList* fragments,
+            [in] IArrayMap* loaders,
+            [in] IVoiceInteractor* vi);
+
+        interface IActivityNonConfigurationInstances;
+    }
+
+    class CNativeActivity {
+        constructor();
+
+        interface INativeActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CNativeContentView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface INativeContentView;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CLocalActivityManager {
+        constructor(
+            [in] IActivity* parent,
+            [in] Boolean singleMode);
+
+        interface ILocalActivityManager;
+    }
+
+    class CLocalActivityRecord {
+        constructor(
+            [in] String _id,
+            [in] IIntent* _intent);
+
+        interface ILocalActivityRecord;
+        interface IBinder;
+    }
+
+    [local, parcelable]
+    class CActionKeyInfo{
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IActionKeyInfo;
+        interface IParcelable;
+    }
+
+    class CSearchManager {
+        constructor(
+            [in] IContext* context,
+            [in] IHandler* handler);
+
+        interface ISearchManager;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogInterfaceOnCancelListener;
+    }
+
+    [local, parcelable]
+    class CSearchableInfo{
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] IComponentName* name);
+
+        interface ISearchableInfo;
+        interface IParcelable;
+    }
+
+    [local]
+    singleton class CSearchableInfoHelper{
+        interface ISearchableInfoHelper;
+    }
+
+    /** hide */
+    class CSearchBar {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx);
+
+        interface ISearchBar;
+        interface ILinearLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    /** hide */
+    [local]
+    class CSearchDialog {
+        constructor(
+            [in] IContext* ctx,
+            [in] ISearchManager* searchManager);
+
+        interface ISearchDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    [local]
+    class CActivityManager {
+        constructor(
+            [in] IContext* ctx,
+            [in] IHandler* handler);
+
+        interface IActivityManager;
+    }
+
+    singleton class CActivityManagerHelper {
+        interface IActivityManagerHelper;
+    }
+
+    class CActivityManagerStackInfo {
+         constructor();
+
+        interface IActivityManagerStackInfo;
+        interface IParcelable;
+    }
+
+    class CActivityManagerMemoryInfo {
+        constructor();
+
+        interface IActivityManagerMemoryInfo;
+        interface IParcelable;
+    }
+
+    class CActivityManagerProcessErrorStateInfo {
+        constructor();
+
+        interface IActivityManagerProcessErrorStateInfo;
+        interface IParcelable;
+    }
+
+    class CActivityManagerRecentTaskInfo {
+        constructor();
+
+        interface IActivityManagerRecentTaskInfo;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CActivityManagerRunningAppProcessInfo {
+        constructor();
+
+        constructor(
+            [in] String processName,
+            [in] Int32 pid,
+            [in] ArrayOf<String>* arr);
+
+        interface IActivityManagerRunningAppProcessInfo;
+        interface IParcelable;
+    }
+
+    class CActivityManagerRunningServiceInfo {
+        constructor();
+
+        interface IActivityManagerRunningServiceInfo;
+        interface IParcelable;
+    }
+
+    class CActivityManagerRunningTaskInfo {
+        constructor();
+
+        interface IActivityManagerRunningTaskInfo;
+        interface IParcelable;
+    }
+
+    class CActivityManagerTaskThumbnail {
+        constructor();
+
+        interface IActivityManagerTaskThumbnail;
+        interface IParcelable;
+    }
+
+    class CActivityManagerTaskDescription {
+        constructor();
+
+        constructor(
+            [in] String label,
+            [in] IBitmap* icon,
+            [in] Int32 colorPrimary);
+
+        constructor(
+            [in] String label,
+            [in] Int32 colorPrimary,
+            [in] String iconFilename);
+
+        constructor(
+            [in] String label,
+            [in] IBitmap* icon);
+
+        constructor(
+            [in] String label);
+
+        constructor(
+            [in] IActivityManagerTaskDescription* td);
+
+        interface IActivityManagerTaskDescription;
+        interface IParcelable;
+    }
+
+    class CUiModeManager {
+        constructor();
+
+        interface IUiModeManager;
+    }
+
+    [local]
+    class CUiAutomation {
+        constructor(
+            [in] ILooper* looper,
+            [in] IIUiAutomationConnection* connection);
+
+        interface IUiAutomation;
+    }
+
+    class CUiAutomationConnection {
+        constructor();
+
+        interface IIUiAutomationConnection;
+        interface IBinder;
+    }
+
+    class CAccessibilityServiceClientImpl {
+        constructor(
+            [in] ILooper* looper,
+            [in] IUiAutomation* host);
+
+        interface IIAccessibilityServiceClient;
+        interface IBinder;
+        interface IHandlerCallerCallback;
+    }
+
+    class CPendingIntent {
+        constructor();
+
+        constructor(
+            [in] IIIntentSender* intentSender);
+
+        constructor(
+            [in] IBinder* target);
+
+        interface IPendingIntent;
+        interface IParcelable;
+    }
+
+    class CPendingIntentFinishedDispatcher {
+        constructor(
+            [in] IPendingIntent* pi,
+            [in] IPendingIntentOnFinished* who,
+            [in] IHandler* handler);
+
+        interface IIntentReceiver;
+        interface IRunnable;
+    }
+
+    singleton class CPendingIntentHelper {
+        interface IPendingIntentHelper;
+    }
+
+    /** @hide */
+    class CProfilerInfo {
+
+        constructor();
+
+        constructor(
+            [in] String filename,
+            [in] IParcelFileDescriptor* fd,
+            [in] Int32 interval,
+            [in] Boolean autoStop);
+
+        interface IProfilerInfo;
+        interface IParcelable;
+    }
+
+    class CApplicationErrorReport {
+        constructor();
+
+        interface IApplicationErrorReport;
+        interface IParcelable;
+    }
+
+    singleton class CApplicationErrorReportHelper {
+        constructor();
+
+        interface IApplicationErrorReportHelper;
+    }
+
+    class CApplicationErrorReportCrashInfo {
+        constructor();
+
+        interface IApplicationErrorReportCrashInfo;
+        interface IParcelable;
+    }
+
+    class CApplicationErrorReportAnrInfo {
+        constructor();
+
+        interface IApplicationErrorReportAnrInfo;
+        interface IParcelable;
+    }
+
+    class CApplicationErrorReportBatteryInfo {
+        constructor();
+
+        interface IApplicationErrorReportBatteryInfo;
+        interface IParcelable;
+    }
+
+    class CApplicationErrorReportRunningServiceInfo {
+        constructor();
+
+        interface IApplicationErrorReportRunningServiceInfo;
+        interface IParcelable;
+    }
+
+    class CAppOpsManagerAppOpsCallback {
+        constructor(
+            [in] IAppOpsManagerOnOpChangedListener* cb);
+
+        interface IIAppOpsCallback;
+        interface IBinder;
+    }
+
+    class CAppImportanceMonitorProcessObserver {
+        constructor(
+            [in] IAppImportanceMonitor* monitor);
+
+        interface IIProcessObserver;
+        interface IBinder;
+    }
+
+    class CResultInfo {
+        constructor();
+
+        constructor(
+            [in] String resultWho,
+            [in] Int32 requestCode,
+            [in] Int32 resultCode,
+            [in] IIntent* data);
+
+        interface IResultInfo;
+        interface IParcelable;
+    }
+
+    class CActivityThread {
+        constructor();
+
+        interface IActivityThread;
+    }
+
+    singleton class CActivityThreadHelper {
+        interface IActivityThreadHelper;
+    }
+
+    class CApplicationThread {
+        constructor();
+
+        interface IApplicationThread;
+        interface IBinder;
+    }
+
+    class CApplication {
+        constructor();
+
+        interface IApplication;
+    }
+
+    class CInstrumentation {
+        constructor();
+
+        interface IInstrumentation;
+    }
+
+    singleton class CInstrumentationHelper {
+        interface IInstrumentationHelper;
+    }
+
+    class CInstrumentationActivityMonitor {
+        constructor(
+            [in] IIntentFilter* which,
+            [in] IInstrumentationActivityResult* result,
+            [in] Boolean block);
+
+        constructor(
+            [in] String cls,
+            [in] IInstrumentationActivityResult* result,
+            [in] Boolean block);
+
+        interface IInstrumentationActivityMonitor;
+    }
+
+    class CInstrumentationActivityResult {
+        constructor(
+            [in] Int32 requestCode,
+            [in] IIntent* resultCode);
+
+        interface IInstrumentationActivityResult;
+    }
+
+    [deprecated, local, parcelable]
+    class CNotificationAction {
+        constructor();
+
+        constructor(
+            [in] Int32 icon_,
+            [in] ICharSequence* title_,
+            [in] IPendingIntent* intent_);
+
+        constructor(
+            [in] Int32 icon_,
+            [in] ICharSequence* title_,
+            [in] IPendingIntent* intent_,
+            [in] IBundle* extras,
+            [in] ArrayOf<IRemoteInput*>* remoteInputs);
+
+        interface INotificationAction;
+        interface IParcelable;
+    }
+
+    [local]
+    class CNotificationBuilder {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] INotification* n);
+
+        interface INotificationBuilder;
+    }
+
+    [local]
+    class CNotificationBigPictureStyle {
+        constructor();
+
+        constructor(
+            [in] INotificationBuilder* builder);
+
+        interface INotificationBigPictureStyle;
+    }
+
+    [local]
+    class CNotificationBigTextStyle {
+        constructor();
+
+        constructor(
+            [in] INotificationBuilder* builder);
+
+        interface INotificationBigTextStyle;
+    }
+
+    [local]
+    class CNotificationInboxStyle {
+        constructor();
+
+        constructor(
+            [in] INotificationBuilder* builder);
+
+        interface INotificationInboxStyle;
+    }
+
+    [local]
+    class CNotificationMediaStyle {
+        constructor();
+
+        constructor(
+            [in] INotificationBuilder* builder);
+
+        interface INotificationMediaStyle;
+    }
+
+    [local, parcelable]
+    class CNotification {
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 icon,
+            [in] ICharSequence* tickerText,
+            [in] Int64 when,
+            [in] ICharSequence* contentTitle,
+            [in] ICharSequence* contentText,
+            [in] IIntent* contentIntent);
+
+        constructor(
+            [in] Int32 icon,
+            [in] ICharSequence* tickerText,
+            [in] Int64 when);
+
+        interface INotification;
+        interface IParcelable;
+    }
+
+    class CNotificationManager {
+        constructor(
+            [in] IContext* context,
+            [in] IHandler* handler);
+
+        interface INotificationManager;
+    }
+
+    singleton class CNotificationManagerHelper {
+        interface INotificationManagerHelper;
+    }
+
+    class CNotificationWearableExtender {
+        constructor();
+
+        constructor(
+            [in] INotification* notif);
+
+        interface INotificationWearableExtender;
+        interface INotificationExtender;
+        interface ICloneable;
+    }
+
+    [local]
+    class CPresentation {
+        constructor(
+            [in] IContext* ctx,
+            [in] IDisplay* display);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IDisplay* display,
+            [in] Int32 theme);
+
+        interface IPresentation;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CContentProviderHolder {
+        constructor();
+
+        constructor(
+            [in] IProviderInfo* info);
+
+        interface IContentProviderHolder;
+        interface IParcelable;
+    }
+
+    class CActivityManagerWaitResult {
+        constructor();
+
+        interface IActivityManagerWaitResult;
+        interface IParcelable;
+    }
+
+    [local, parcelable]
+    class CFragmentSavedState {
+        constructor();
+
+        constructor(
+            [in] IBundle* state);
+
+        constructor(
+            [in] IParcel* pin,
+            [in] IClassLoader* loader);
+
+        interface IFragmentSavedState;
+        interface IParcelable;
+    }
+
+    [local, parcelable]
+    class CFragmentState {
+        constructor();
+
+        constructor(
+            [in] IFragment* frag);
+
+        interface IFragmentState;
+        interface IParcelable;
+    }
+
+    singleton class CFragmentHelper {
+        interface IFragmentHelper;
+    }
+
+    class CListActivity {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CListFragment {
+        constructor();
+
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    [local]
+    class CLauncherActivityListItem {
+        constructor();
+
+        constructor(
+            [in] IPackageManager* pm,
+            [in] IResolveInfo* resolveInfo,
+            [in] ILauncherActivityIconResizer* resizer);
+
+        interface ILauncherActivityListItem;
+    }
+
+    class CLauncherActivityIconResizer {
+        constructor(
+            [in] ILauncherActivity* host);
+
+        interface ILauncherActivityIconResizer;
+    }
+
+    class CExpandableListActivity {
+        constructor();
+
+        interface IExpandableListActivity;
+        interface IExpandableListViewOnChildClickListener;
+        interface IExpandableListViewOnGroupCollapseListener;
+        interface IExpandableListViewOnGroupExpandListener;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CTabActivity {
+        constructor();
+
+        interface ITabActivity;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CAliasActivity {
+        constructor();
+
+        interface IAliasActivity;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    [local]
+    class CDialog {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme,
+            [in] Boolean createContextThemeWrapper);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Boolean cancelable,
+            [in] IDialogInterfaceOnCancelListener* cancelListener);
+
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CDialogFragment {
+        constructor();
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    [local]
+    class CReceiverRestrictedContext {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IReceiverRestrictedContext;
+        interface IContextWrapper;
+        interface IContext;
+    }
+
+    [local]
+    class CAlertDialog {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme,
+            [in] Boolean createThemeContextWrapper);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Boolean cancelable,
+            [in] IDialogInterfaceOnCancelListener* cancelListener);
+
+        interface IAlertDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    [local]
+    class CAlertDialogBuilder {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme);
+
+        interface IAlertDialogBuilder;
+    }
+
+    class CTimePickerDialog {
+        constructor(
+            [in] IContext* ctx,
+            [in] ITimePickerDialogOnTimeSetListener* cb,
+            [in] Int32 hourOfDay,
+            [in] Int32 minute,
+            [in] Boolean is24HourView);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme,
+            [in] ITimePickerDialogOnTimeSetListener* cb,
+            [in] Int32 hourOfDay,
+            [in] Int32 minute,
+            [in] Boolean is24HourView);
+
+        interface ITimePickerDialog;
+        interface IDialogInterfaceOnClickListener;
+        interface ITimePickerOnTimeChangedListener;
+        interface IAlertDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CDatePickerDialog {
+        constructor(
+            [in] IContext* ctx,
+            [in] IDatePickerDialogOnDateSetListener* cb,
+            [in] Int32 year,
+            [in] Int32 monthOfYear,
+            [in] Int32 dayOfMonth);
+
+        constructor(
+            [in] IContext* context,
+            [in] Int32 theme,
+            [in] IDatePickerDialogOnDateSetListener* cb,
+            [in] Int32 year,
+            [in] Int32 monthOfYear,
+            [in] Int32 dayOfMonth);
+
+        interface IDatePickerDialog;
+        interface IDialogInterfaceOnClickListener;
+        interface IDatePickerOnDateChangedListener;
+        interface IAlertDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    [local]
+    class CProgressDialog {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 theme);
+
+        interface IProgressDialog;
+        interface IAlertDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    singleton class CProgressDialogHelper {
+        interface IProgressDialogHelper;
+    }
+
+    [local, parcelable]
+    class CWallpaperInfo {
+        constructor(
+            [in] IContext* ctx,
+            [in] IResolveInfo* service);
+
+        constructor();
+
+        interface IWallpaperInfo;
+        interface IParcelable;
+    }
+
+    class CGlobalsWallpaperManagerCallback {
+        constructor(
+            [in] ILooper* looper);
+
+        interface IIWallpaperManagerCallback;
+        interface IBinder;
+    }
+
+    [local]
+    class CWallpaperManager {
+        constructor(
+            [in] IContext* ctx,
+            [in] IHandler* handler);
+
+        interface IWallpaperManager;
+    }
+
+    class CFastBitmapDrawable {
+        constructor(
+            [in] IBitmap* bitmap);
+
+        interface IFastBitmapDrawable;
+        interface IDrawable;
+    }
+
+    singleton class CWallpaperManagerHelper {
+        interface IWallpaperManagerHelper;
+    }
+
+    singleton class CFragmentManagerHelper {
+        interface IFragmentManagerHelper;
+    }
+
+//     class CFragmentManagerImpl {
+//         interface IFragmentManagerImpl;
+//     }
+
+    singleton class CFragmentManagerImplHelper {
+        interface IFragmentManagerImplHelper;
+    }
+
+    class CActivityOptions {
+        constructor();
+
+        constructor(
+            [in] IBundle* opts);
+
+        interface IActivityOptions;
+    }
+
+    singleton class CActivityOptionsHelper {
+        interface IActivityOptionsHelper;
+    }
+
+    class CActivityOptionsAnimationStartedListener {
+        constructor(
+            [in] IHandler* handler,
+            [in] IActivityOptionsOnAnimationStartedListener* listener);
+
+        interface IRemoteCallback;
+        interface IBinder;
+    }
+
+    [local]
+    class CStatusBarManager {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IStatusBarManager;
+    }
+
+    class CTaskStackBuilder {
+        constructor(
+            [in] IContext * ctx);
+
+        interface ITaskStackBuilder;
+    }
+
+    singleton class CTaskStackBuilderHelper {
+        interface ITaskStackBuilderHelper;
+    }
+
+    class CInnerReceiver {
+        constructor(
+            [in] IReceiverDispatcher* rd,
+            [in] Boolean strong);
+
+        interface IIntentReceiver;
+        interface IBinder;
+    }
+
+    class CInnerConnection {
+        constructor(
+            [in] IServiceDispatcher* sd);
+
+        interface IIServiceConnection;
+        interface IBinder;
+    }
+
+    [local]
+    class CActionBarLayoutParams {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 gravity);
+
+        constructor(
+            [in] Int32 gravity);
+
+        constructor(
+            [in] IActionBarLayoutParams* ablp);
+
+        constructor(
+            [in] IViewGroupLayoutParams* vglp);
+
+        interface IActionBarLayoutParams;
+        interface IViewGroupMarginLayoutParams;
+        interface IViewGroupLayoutParams;
+    }
+
+    class CKeyguardManager {
+       constructor();
+
+       interface IKeyguardManager;
+    }
+
+    class COnKeyguardExitResult {
+        constructor(
+            [in] IKeyguardManagerOnKeyguardExitResult* cb);
+
+        interface IOnKeyguardExitResult;
+    }
+
+    class CKeyguardManagerKeyguardLock {
+        constructor(
+            [in] String tag,
+            [in] IKeyguardManager* mgr);
+
+        interface IKeyguardManagerKeyguardLock;
+    }
+
+    [local, parcelable]
+    class CBackStackState {
+        constructor();
+
+        constructor(
+            [in] IFragmentManagerImpl* fm,
+            [in] IBackStackRecord* bse);
+
+        interface IBackStackState;
+        interface IParcelable;
+    }
+
+    [local]
+    class CBackStackRecord {
+        constructor(
+            [in] IFragmentManagerImpl* fm);
+
+        interface IBackStackRecord;
+        interface IFragmentTransaction;
+        interface IRunnable;
+        interface IFragmentManagerBackStackEntry;
+    }
+
+    class CBackStackRecordTransitionState {
+        interface IBackStackRecordTransitionState;
+    }
+
+    class CFragmentManagerState {
+        constructor();
+
+        interface IFragmentManagerState;
+        interface IParcelable;
+    }
+
+    class CDownloadManager {
+        constructor(
+            [in] IContentResolver* resolver,
+            [in] String packageName);
+
+        interface IDownloadManager;
+    }
+
+    singleton class CDownloadManagerHelper {
+        interface IDownloadManagerHelper;
+    }
+
+    class CDownloadManagerRequest {
+        constructor(
+            [in] IUri* uri);
+
+        constructor(
+            [in] String uriString);
+
+        interface IDownloadManagerRequest;
+    }
+
+    class CDownloadManagerQuery {
+        constructor();
+
+        interface IDownloadManagerQuery;
+    }
+
+    [local]
+    class CVoiceInteractor {
+        constructor(
+            [in] IIVoiceInteractor* interactor,
+            [in] IContext* ctx,
+            [in] IActivity* activity,
+            [in] ILooper* looper);
+
+        interface IVoiceInteractor;
+    }
+
+    class CVoiceInteractorCallback {
+        constructor(
+            [in] IObject* handlerCaller);
+
+        interface IIVoiceInteractorCallback;
+        interface IBinder;
+    }
+
+    class CVoiceInteractorConfirmationRequest {
+        constructor(
+            [in] ICharSequence* prompt,
+            [in] IBundle* extras);
+
+        interface IVoiceInteractorConfirmationRequest;
+        interface IVoiceInteractorRequest;
+    }
+
+    class CVoiceInteractorCompleteVoiceRequest {
+        constructor(
+            [in] ICharSequence* message,
+            [in] IBundle* extras);
+
+        interface IVoiceInteractorCompleteVoiceRequest;
+        interface IVoiceInteractorRequest;
+    }
+
+    class CVoiceInteractorAbortVoiceRequest {
+        constructor(
+            [in] ICharSequence* message,
+            [in] IBundle* extras);
+
+        interface IVoiceInteractorAbortVoiceRequest;
+        interface IVoiceInteractorRequest;
+    }
+
+    class CVoiceInteractorCommandRequest {
+        constructor(
+            [in] String message,
+            [in] IBundle* extras);
+
+        interface IVoiceInteractorCommandRequest;
+        interface IVoiceInteractorRequest;
+    }
+
+    class CFragmentBreadCrumbs {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        /**
+         * @hide
+         */
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IFragmentBreadCrumbs;
+        interface IFragmentManagerOnBackStackChangedListener;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    class CJobSchedulerImpl {
+        constructor(
+            [in] IIJobScheduler* binder);
+
+        interface IJobScheduler;
+    }
+
+    class CMediaRouteButton {
+
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IMediaRouteButton;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [deprecated]
+    class CRemoteInput {
+        constructor();
+
+        constructor(
+            [in] String resultKey,
+            [in] ICharSequence* label,
+            [in] ArrayOf<ICharSequence*>* choices,
+            [in] Int32 flags,
+            [in] IBundle* extras);
+
+        interface IRemoteInput;
+        interface IParcelable;
+    }
+
+    singleton class CRemoteInputHelper {
+        interface IRemoteInputHelper;
+    }
+
+    class CRemoteInputBuilder {
+        constructor(
+            [in] String resultKey);
+
+        interface IRemoteInputBuilder;
+    }
+
+    class CBuilderRemoteViews {
+        constructor();
+
+        constructor(
+            [in] IApplicationInfo* appInfo,
+            [in] Int32 layoutId);
+
+        interface IBuilderRemoteViews;
+        //assert(0 && "TODO");
+        //interface IRemoteViews;
+        //interface IParcelable;
+        //interface IFilter;
+    }
+
+    /** @hide */
+    class CResourcesManager {
+        constructor();
+
+        interface IResourcesManager;
+    }
+
+    class CPackageInstallObserver2 {
+        constructor(
+            [in] IPackageInstallObserver* host);
+
+        interface IIPackageInstallObserver2;
+        interface IBinder;
+    }
+
+    class CPackageDeleteObserver2 {
+        constructor(
+            [in] IPackageDeleteObserver* host);
+
+        interface IIPackageDeleteObserver2;
+        interface IBinder;
+    }
+
+    class CLegacyPackageDeleteObserver {
+        constructor(
+            [in] IIPackageDeleteObserver* ovserver);
+
+        interface IPackageDeleteObserver;
+
+    }
+
+    }
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+
+}

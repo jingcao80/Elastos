@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+    * The interface to be implemented by any object that requires notification when
+    * data objects are bound to (or unbound from) an {@code SSLSession}.
+    * @Involve
+    * interface Elastos.Utility.IEventListener;
+    */
+    interface ISSLSessionBindingListener {
+        /**
+         * Notifies this listener when a value is bound to an {@code SSLSession}.
+         *
+         * @param event
+         *            the event data.
+         */
+        ValueBound(
+            [in] ISSLSessionBindingEvent* event);
+
+        /**
+         * Notifies this listener when a value is unbound from an {@code SSLSession}.
+         *
+         * @param event
+         *            the event data.
+         */
+        ValueUnbound(
+            [in] ISSLSessionBindingEvent* event);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

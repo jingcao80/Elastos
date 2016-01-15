@@ -1,0 +1,842 @@
+module
+{
+    merge("io/Errors.car");
+    merge("io/Exceptions.car");
+    merge("io/ICloseable.car");
+    merge("io/IFlushable.car");
+    merge("io/IInputStream.car");
+    merge("io/IFilterInputStream.car");
+    merge("io/IBufferedInputStream.car");
+    merge("io/IOutputStream.car");
+    merge("io/IFilterOutputStream.car");
+    merge("io/IBufferedOutputStream.car");
+    merge("io/IReadable.car");
+    merge("io/IReader.car");
+    merge("io/IBufferedReader.car");
+    merge("io/IWriter.car");
+    merge("io/IBufferedWriter.car");
+    merge("io/IByteArrayInputStream.car");
+    merge("io/IByteArrayOutputStream.car");
+    merge("io/ICharArrayReader.car");
+    merge("io/ICharArrayWriter.car");
+    merge("io/IDataInput.car");
+    merge("io/IDataInputStream.car");
+    merge("io/IDataOutput.car");
+    merge("io/IDataOutputStream.car");
+    merge("io/IFile.car");
+    merge("io/IFileDescriptor.car");
+    merge("io/IFileFilter.car");
+    merge("io/IFileInputStream.car");
+    merge("io/IFileOutputStream.car");
+    merge("io/IFilePermission.car");
+    merge("io/IInputStreamReader.car");
+    merge("io/IFileReader.car");
+    merge("io/IOutputStreamWriter.car");
+    merge("io/IFileWriter.car");
+    merge("io/IFilenameFilter.car");
+    merge("io/IFilterReader.car");
+    merge("io/IFilterWriter.car");
+    merge("io/ILineNumberInputStream.car");
+    merge("io/ILineNumberReader.car");
+    merge("io/IObjectInput.car");
+    merge("io/IObjectInputStream.car");
+    merge("io/IObjectInputValidation.car");
+    merge("io/IObjectOutput.car");
+    merge("io/IObjectOutputStream.car");
+    merge("io/IObjectStreamClass.car");
+    merge("io/IObjectStreamField.car");
+    merge("io/IPipedInputStream.car");
+    merge("io/IPipedOutputStream.car");
+    merge("io/IPrintStream.car");
+    merge("io/IPrintWriter.car");
+    merge("io/IPushbackInputStream.car");
+    merge("io/IPushbackReader.car");
+    merge("io/IRandomAccessFile.car");
+    merge("io/ISequenceInputStream.car");
+    merge("io/IStreamTokenizer.car");
+    merge("io/IStringBufferInputStream.car");
+    merge("io/IStringReader.car");
+    merge("io/IStringWriter.car");
+    merge("io/IPipedReader.car");
+    merge("io/IPipedWriter.car");
+
+    merge("io/IByteOrder.car");
+    merge("io/IBuffer.car");
+    merge("io/IByteBuffer.car");
+    merge("io/IByteArrayBuffer.car");
+    merge("io/ICharBuffer.car");
+    merge("io/IDoubleBuffer.car");
+    merge("io/IFloatBuffer.car");
+    merge("io/IInt16Buffer.car");
+    merge("io/IInt32Buffer.car");
+    merge("io/IInt64Buffer.car");
+    merge("io/IMappedByteBuffer.car");
+    merge("io/IDirectByteBuffer.car");
+    merge("io/INIOAccess.car");
+    merge("io/IFileDescriptorChannel.car");
+    merge("io/IFileChannelImpl.car");
+    merge("io/INioUtils.car");
+
+    merge("io/channels/IChannel.car");
+    merge("io/channels/IReadableByteChannel.car");
+    merge("io/channels/IWritableByteChannel.car");
+    merge("io/channels/IChannels.car");
+    merge("io/channels/IScatteringByteChannel.car");
+    merge("io/channels/IGatheringByteChannel.car");
+    merge("io/channels/IInterruptibleChannel.car");
+    merge("io/channels/IFileChannel.car");
+    merge("io/channels/ISelectableChannel.car");
+    merge("io/channels/ISelectionKey.car");
+    merge("io/channels/ISelector.car");
+    merge("io/channels/ISocketChannel.car");
+    merge("io/channels/IServerSocketChannel.car");
+    merge("io/channels/IDatagramChannel.car");
+    merge("io/channels/ISinkChannel.car");
+    merge("io/channels/ISourceChannel.car");
+    merge("io/channels/IPipe.car");
+    merge("io/channels/IFileLock.car");
+    merge("io/channels/IByteChannel.car");
+
+    merge("io/channels/spi/ISelectorProvider.car");
+    merge("io/channels/spi/IAbstractSelector.car");
+    merge("io/channels/spi/IAbstractSelectionKey.car");
+    merge("io/channels/spi/IAbstractInterruptibleChannel.car");
+    merge("io/channels/spi/IAbstractSelectableChannel.car");
+
+    merge("io/charset/ICharset.car");
+    merge("io/charset/ICoderResult.car");
+    merge("io/charset/ICharsetDecoder.car");
+    merge("io/charset/ICharsetEncoder.car");
+    merge("io/charset/ICodingErrorAction.car");
+    merge("io/charset/ICharsets.car");
+    merge("io/charset/IModifiedUtf8.car");
+    merge("io/charset/IStandardCharsets.car");
+
+    merge("io/charset/spi/ICharsetProvider.car");
+
+    interface Elastos.Core.IAppendable;
+    interface Elastos.Core.IComparable;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.IFlushable;
+    interface Elastos.IO.IDataInput;
+    interface Elastos.IO.IDataOutput;
+    interface Elastos.IO.IByteOrderHelper;
+    interface Elastos.IO.Charset.ICharsetEncoder;
+    interface Elastos.IO.Charset.ICharsetDecoder;
+    interface Elastos.IO.Channels.Spi.ISelectorProvider;
+    interface Elastos.IO.Channels.Spi.IAbstractSelector;
+    interface Elastos.IO.Channels.IChannels;
+    interface Elastos.IO.Channels.ISelector;
+    interface Elastos.Net.IURI;
+    interface Elastos.Utility.IEnumeration;
+    interface Elastos.Security.IGuard;
+
+
+    namespace Elastos {
+    namespace IO {
+
+    class CBufferedInputStream {
+        constructor(
+            [in] IInputStream* is);
+
+        constructor(
+            [in] IInputStream* is,
+            [in] Int32 size);
+
+        interface IBufferedInputStream;
+        interface IInputStream;
+        interface IFilterInputStream;
+        interface ICloseable;
+    }
+
+    class CSelectorProviderImpl {
+        constructor();
+
+        interface ISelectorProvider;
+    }
+
+    class CByteArrayOutputStream {
+        /**
+         * Constructs a new ByteArrayOutputStream with a default size of 32 bytes.
+         * If more than 32 bytes are written to this instance, the underlying byte
+         * array will expand.
+         */
+        constructor();
+
+        /**
+         * Constructs a new {@code ByteArrayOutputStream} with a default size of
+         * {@code size} bytes. If more than {@code size} bytes are written to this
+         * instance, the underlying byte array will expand.
+         *
+         * @param size
+         *            initial size for the underlying byte array, must be
+         *            non-negative.
+         * @throws IllegalArgumentException
+         *             if {@code size} < 0.
+         */
+        constructor(
+            [in] Int32 size);
+
+        interface IByteArrayOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CStringWriter {
+        /**
+         * Constructs a new {@code StringWriter} which has a {@link StringBuffer}
+         * allocated with the default size of 16 characters. The {@code
+         * StringBuffer} is also the {@code lock} used to synchronize access to this
+         * writer.
+         */
+        constructor();
+
+        /**
+         * Constructs a new {@code StringWriter} which has a {@link StringBuffer}
+         * allocated with a size of {@code initialSize} characters. The {@code
+         * StringBuffer} is also the {@code lock} used to synchronize access to this
+         * writer.
+         *
+         * @param initialSize
+         *            the intial size of the target string buffer.
+         */
+        constructor(
+            [in] Int32 initialSize);
+
+        interface IWriter;
+        interface IStringWriter;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CFilterInputStream {
+        constructor(
+            [in] IInputStream* is);
+
+        interface IFilterInputStream;
+        interface ICloseable;
+        interface IInputStream;
+    }
+
+    class CBufferedOutputStream {
+        constructor(
+            [in] IOutputStream* outs,
+            [in] Int32 size);
+
+        constructor(
+            [in] IOutputStream* outs);
+
+        interface IBufferedOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+        interface IOutputStream;
+        interface IFilterOutputStream;
+    }
+
+    class CFilterOutputStream {
+        constructor(
+            [in] IOutputStream* outs);
+
+        interface IFilterOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+        interface IOutputStream;
+    }
+
+    class CBufferedReader {
+        constructor(
+            [in] IReader* rin);
+
+        constructor(
+            [in] IReader* rin,
+            [in] Int32 size);
+
+        interface IBufferedReader;
+        interface IReadable;
+        interface IReader;
+        interface ICloseable;
+    }
+
+    class CBufferedWriter {
+        constructor(
+            [in] IWriter* wout);
+
+        constructor(
+            [in] IWriter* wout,
+            [in] Int32 size);
+
+        interface IBufferedWriter;
+        interface IAppendable;
+        interface ICloseable;
+        interface IFlushable;
+        interface IWriter;
+    }
+
+    [deprecated]
+    class CByteArrayInputStream {
+        constructor(
+            [in] ArrayOf<Byte>* buffer);
+
+        constructor(
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        interface IByteArrayInputStream;
+        interface ICloseable;
+        interface IInputStream;
+    }
+
+    [deprecated]
+    class CCharArrayReader {
+        constructor(
+            [in] ArrayOf<Char32>* buf);
+
+        constructor(
+            [in] ArrayOf<Char32>* buf,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        interface ICharArrayReader;
+        interface IReadable;
+        interface IReader;
+        interface ICloseable;
+    }
+
+    class CCharArrayWriter {
+        constructor();
+
+        constructor(
+            [in] Int32 initialSize);
+
+        interface ICharArrayWriter;
+        interface IAppendable;
+        interface ICloseable;
+        interface IFlushable;
+        interface IWriter;
+    }
+
+    singleton class CCharBufferHelper {
+        interface ICharBufferHelper;
+    }
+
+    class CDataInputStream {
+        constructor(
+            [in] IInputStream* is);
+
+        interface IDataInputStream;
+        interface ICloseable;
+        interface IInputStream;
+        interface IDataInput;
+        interface IFilterInputStream;
+    }
+
+    class CPushbackInputStream {
+        constructor(
+            [in] IInputStream* is);
+
+        constructor(
+            [in] IInputStream* is,
+            [in] Int32 size);
+
+        interface IPushbackInputStream;
+        interface ICloseable;
+        interface IInputStream;
+        interface IFilterInputStream;
+    }
+
+    class CDataOutputStream {
+        constructor(
+            [in] IOutputStream* os);
+
+        interface IDataOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+        interface IOutputStream;
+        interface IFilterOutputStream;
+        interface IDataOutput;
+    }
+
+    singleton class CByteBufferHelper {
+        interface IByteBufferHelper;
+    }
+
+    singleton class CByteOrderHelper {
+        interface IByteOrderHelper;
+    }
+
+    class CSelectorImpl {
+        constructor();
+
+        constructor(
+            [in] ISelectorProvider* selectorProvider);
+
+        interface IAbstractSelector;
+        interface ISelector;
+        interface ICloseable;
+    }
+
+    class CFileDescriptor {
+        constructor();
+
+        interface IFileDescriptor;
+    }
+
+    class CFile {
+        constructor(
+            [in] IFile* dir,
+            [in] String name);
+
+        constructor(
+            [in] String path);
+
+        constructor(
+            [in] String dirPath,
+            [in] String name);
+
+        constructor(
+            [in] IURI* uri);
+
+        interface IFile;
+        interface IComparable;
+        interface ISerializable;
+    }
+
+    singleton class CFileHelper {
+        interface IFileHelper;
+    }
+
+    class CInputStreamReader {
+        constructor(
+            [in] IInputStream *is);
+
+        constructor(
+            [in] IInputStream *is,
+            [in] String charsetName);
+
+        constructor(
+            [in] IInputStream* is,
+            [in] ICharsetDecoder* dec);
+
+        constructor(
+            [in] IInputStream* is,
+            [in] ICharset* charset);
+
+        interface IInputStreamReader;
+        interface IReadable;
+        interface IReader;
+        interface ICloseable;
+    }
+
+    class CPrintWriter {
+        constructor(
+            [in] IOutputStream* outs);
+
+        constructor(
+            [in] IOutputStream* outs,
+            [in] Boolean autoflush);
+
+        constructor(
+            [in] IWriter* wr);
+
+        constructor(
+            [in] IWriter* wr,
+            [in] Boolean autoflush);
+
+        constructor(
+            [in] IFile* file);
+
+        constructor(
+            [in] IFile* file,
+            [in] String csn);
+
+        constructor(
+            [in] String fileName);
+
+        constructor(
+            [in] String fileName,
+            [in] String csn);
+
+        interface IPrintWriter;
+        interface IWriter;
+        interface IAppendable;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CLineNumberInputStream {
+        constructor(
+            [in] IInputStream* is);
+
+        interface ILineNumberInputStream;
+        interface ICloseable;
+        interface IInputStream;
+        interface IFilterInputStream;
+    }
+
+    class CLineNumberReader {
+        constructor(
+            [in] IReader* ir);
+
+        constructor(
+            [in] IReader* ir,
+            [in] Int32 size);
+
+        interface ILineNumberReader;
+        interface IReadable;
+        interface IReader;
+        interface ICloseable;
+        interface IBufferedReader;
+    }
+
+    class COutputStreamWriter {
+        constructor(
+            [in] IOutputStream *os);
+
+        constructor(
+            [in] IOutputStream *os,
+            [in] String enc);
+
+        constructor(
+            [in] IOutputStream *os,
+            [in] ICharsetEncoder* charsetEncoder);
+
+        interface IOutputStreamWriter;
+        interface IAppendable;
+        interface ICloseable;
+        interface IFlushable;
+        interface IWriter;
+    }
+
+    class CPrintStream {
+        constructor(
+            [in] IOutputStream* outs);
+
+        constructor(
+            [in] IOutputStream* outs,
+            [in] Boolean autoflush);
+
+        constructor(
+            [in] IOutputStream* outs,
+            [in] Boolean autoflush,
+            [in] String charsetName);
+
+        constructor(
+            [in] IFile* file);
+
+        constructor(
+            [in] IFile* file,
+            [in] String charsetName);
+
+        constructor(
+            [in] String fileName);
+
+        constructor(
+            [in] String fileName,
+            [in] String charsetName);
+
+        interface IPrintStream;
+        interface ICloseable;
+        interface IFlushable;
+        interface IOutputStream;
+        interface IFilterOutputStream;
+        interface IAppendable;
+    }
+
+    class CPushbackReader {
+        constructor(
+            [in] IReader* ir);
+
+        constructor(
+            [in] IReader* ir,
+            [in] Int32 size);
+
+        interface IPushbackReader;
+        interface IReadable;
+        interface IReader;
+        interface ICloseable;
+    }
+
+    class CRandomAccessFile {
+        constructor(
+            [in] IFile* file,
+            [in] String mode);
+
+        constructor(
+            [in] String fileName,
+            [in] String mode);
+
+        interface IRandomAccessFile;
+        interface ICloseable;
+        interface IDataInput;
+        interface IDataOutput;
+    }
+
+    class CSequenceInputStream {
+        constructor(
+            [in] IInputStream* s1,
+            [in] IInputStream* s2);
+
+        constructor(
+            [in] IEnumeration* e);
+
+        interface ISequenceInputStream;
+        interface ICloseable;
+        interface IInputStream;
+    }
+
+    class CStringBufferInputStream {
+        constructor(
+            [in] String str);
+
+        interface IStringBufferInputStream;
+        interface ICloseable;
+        interface IInputStream;
+    }
+
+    class CStringReader {
+        constructor(
+            [in] String str);
+
+        interface IStringReader;
+        interface IReadable;
+        interface IReader;
+        interface ICloseable;
+    }
+
+    class CFileInputStream {
+        constructor(
+            [in] IFile* file);
+
+        constructor(
+            [in] IFileDescriptor* fd);
+
+        constructor(
+            [in] String fileName);
+
+        interface IFileInputStream;
+        interface ICloseable;
+        interface IInputStream;
+    }
+
+    class CFileOutputStream {
+        constructor(
+            [in] IFile* file);
+
+        constructor(
+            [in] IFile* file,
+            [in] Boolean append);
+
+        constructor(
+            [in] IFileDescriptor* fd);
+
+        constructor(
+            [in] String fileName);
+
+        constructor(
+            [in] String fileName,
+            [in] Boolean append);
+
+        interface IFileOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+        interface IOutputStream;
+    }
+
+    class CFilePermission {
+        constructor(
+            [in] String path,
+            [in] String actions);
+
+        interface IFilePermission;
+        interface IGuard;
+        interface IPermission;
+        interface ISerializable;
+    }
+
+    class CFileReader {
+        constructor(
+            [in] IFile* file);
+
+        constructor(
+            [in] IFileDescriptor* fd);
+
+        constructor(
+            [in] String filename);
+
+        interface IFileReader;
+        interface IReadable;
+        interface ICloseable;
+        interface IReader;
+        interface IInputStreamReader;
+    }
+
+    class CFileWriter {
+        constructor(
+            [in] IFile* file);
+
+        constructor(
+            [in] IFile* file,
+            [in] Boolean append);
+
+        constructor(
+            [in] IFileDescriptor* fd);
+
+        constructor(
+            [in] String filename);
+
+        constructor(
+            [in] String filename,
+            [in] Boolean append);
+
+        interface IFileWriter;
+        interface IAppendable;
+        interface ICloseable;
+        interface IFlushable;
+        interface IWriter;
+        interface IOutputStreamWriter;
+    }
+
+    singleton class CNioUtils {
+        interface INioUtils;
+    }
+
+    class CPipedInputStream {
+        constructor();
+
+        constructor(
+            [in] IPipedOutputStream* ipos);
+
+        constructor(
+            [in] Int32 pipeSize);
+
+        constructor(
+            [in] IPipedOutputStream* ipos,
+            [in] Int32 pipeSize);
+
+        interface IPipedInputStream;
+        interface ICloseable;
+        interface IInputStream;
+    }
+
+    class CPipedOutputStream {
+        constructor();
+
+        constructor(
+            [in] IPipedInputStream* target);
+
+        interface IPipedOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CPipedReader {
+        constructor();
+
+        constructor(
+            [in] IPipedWriter* ipw);
+
+        constructor(
+            [in] Int32 pipeSize);
+
+        constructor(
+            [in] IPipedWriter* ipw,
+            [in] Int32 pipeSize);
+
+        interface IPipedReader;
+        interface IReadable;
+        interface IReader;
+        interface ICloseable;
+    }
+
+    class CPipedWriter {
+        constructor();
+
+        constructor(
+            [in] IPipedReader* destination);
+
+        interface IPipedWriter;
+        interface IWriter;
+        interface IAppendable;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    singleton class CNIOAccess {
+        interface INIOAccess;
+    }
+
+    class CStreamTokenizer {
+        constructor(
+            [in] IInputStream* is);
+
+        constructor(
+            [in] IReader* r);
+
+        interface IStreamTokenizer;
+    }
+
+    namespace Channels {
+
+        singleton class CChannels {
+            interface IChannels;
+        }
+
+    } // namespace Channels
+
+    namespace Channels {
+    namespace Spi {
+
+        singleton class CSelectorProviderHelper {
+            interface ISelectorProviderHelper;
+        }
+
+    } // namespace Spi
+    } // namespace Channels
+
+    namespace Charset {
+
+        class CCodingErrorAction {
+            constructor();
+
+            interface ICodingErrorAction;
+        }
+
+        singleton class CCodingErrorActionHelper {
+            interface ICodingErrorActionHelper;
+        }
+
+        singleton class CCharsetHelper {
+            interface ICharsetHelper;
+        }
+
+        singleton class CCharsets {
+            interface ICharsets;
+        }
+
+        class CCoderResult {
+            constructor();
+
+            interface ICoderResult;
+        }
+
+        singleton class CCoderResultHelper {
+            interface ICoderResultHelper;
+        }
+
+        singleton class CModifiedUtf8 {
+            interface IModifiedUtf8;
+        }
+
+        singleton class CStandardCharsets {
+            interface IStandardCharsets;
+        }
+
+
+    } // namespace Charset
+
+    } // namespace IO
+    } // namespace Elastos
+}

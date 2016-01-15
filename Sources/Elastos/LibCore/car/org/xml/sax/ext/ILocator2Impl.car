@@ -1,0 +1,51 @@
+module
+{
+    namespace Org {
+    namespace Xml {
+    namespace Sax {
+    namespace Ext {
+
+    /**
+     * SAX2 extension helper for holding additional Entity information,
+     * implementing the {@link Locator2} interface.
+     *
+     * <blockquote>
+     * <em>This module, both source code and documentation, is in the
+     * Public Domain, and comes with <strong>NO WARRANTY</strong>.</em>
+     * </blockquote>
+     *
+     * <p> This is not part of core-only SAX2 distributions.</p>
+     *
+     * @since SAX 2.0.2
+     * @author David Brownell
+     * @version TBS
+     */
+    /**
+      * @Involve
+      * interface Org.Xml.Sax.Helpers.ILocatorImpl;
+      */
+    interface ILocator2Impl {
+        /**
+         * Assigns the current value of the version property.
+         *
+         * @param version the new "version" value
+         * @see #getXMLVersion
+         */
+        SetXMLVersion(
+            [in] String xmlVersion);
+
+        /**
+         * Assigns the current value of the encoding property.
+         *
+         * @param encoding the new "encoding" value
+         * @see #getEncoding
+         */
+        SetEncoding(
+            [in] String encoding);
+    }
+
+    } // namespace Ext
+    } // namespace Sax
+    } // namespace Xml
+    } // namespace Org
+}

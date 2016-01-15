@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.Service.Notification.INotificationRankingUpdate;
+    interface Elastos.Droid.Service.Notification.IIStatusBarNotificationHolder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Notification {
+
+    /** @hide */
+    [oneway]
+    interface IINotificationListener {
+        OnListenerConnected(
+            [in] INotificationRankingUpdate* update);
+
+        OnNotificationPosted(
+            [in] IIStatusBarNotificationHolder* notificationHolder,
+            [in] INotificationRankingUpdate* update);
+
+        OnNotificationRemoved(
+            [in] IIStatusBarNotificationHolder* notificationHolder,
+            [in] INotificationRankingUpdate* update);
+
+        OnNotificationRankingUpdate(
+            [in] INotificationRankingUpdate* update);
+
+        OnListenerHintsChanged(
+            [in] Int32 hints);
+
+        OnInterruptionFilterChanged(
+            [in] Int32 interruptionFilter);
+    }
+
+    } //Notification
+    } //Service
+    } //Droid
+    } //Elastos
+}

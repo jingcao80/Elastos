@@ -1,0 +1,59 @@
+module
+{
+    merge("net/pppoe/PppoeDevInfo.car");
+    merge("net/pppoe/PppoeNative.car");
+    merge("net/pppoe/PppoeMonitor.car");
+    merge("net/pppoe/PppoeStateTracker.car");
+    merge("net/pppoe/IPppoeManager.car");
+    merge("net/pppoe/PppoeManager.car");
+
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Net.Pppoe.IIPppoeManager;
+    interface Elastos.Droid.Net.Pppoe.IPppoeManager;
+    interface Elastos.Droid.Net.Pppoe.IPppoeDevInfo;
+    interface Elastos.Droid.Net.Pppoe.IPppoeNative;
+    interface Elastos.Droid.Net.Pppoe.IPppoeStateTracker;
+    interface Elastos.Droid.Net.Pppoe.IPppoeMonitor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Pppoe {
+
+        class CPppoeManager {
+            constructor(
+                [in] IIPppoeManager* service,
+                [in] IHandler* handler);
+            interface IPppoeManager;
+        }
+
+        class CPppoeDevInfo {
+            constructor();
+            interface IPppoeDevInfo;
+            interface IParcelable;
+        }
+
+        singleton class CPppoeNative {
+            interface IPppoeNative;
+        }
+
+        [local]
+        class CPppoeMonitor {
+            constructor(
+                [in] IPppoeStateTracker* tracker);
+            interface IPppoeMonitor;
+        }
+
+        class CPppoeStateTracker {
+            constructor(
+                [in] Int32 netType,
+                [in] String networkName
+            );
+            interface IPppoeStateTracker;
+        }
+
+    } // Pppoe
+    } // Net
+    } // Droid
+    } // Elastos
+}

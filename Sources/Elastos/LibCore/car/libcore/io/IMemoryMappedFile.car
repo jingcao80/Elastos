@@ -1,0 +1,46 @@
+module
+{
+    namespace Libcore {
+    namespace IO {
+
+    /**
+     * A memory-mapped file. Use {@link #mmap} to map a file, {@link #close} to unmap a file,
+     * and either {@link #bigEndianIterator} or {@link #littleEndianIterator} to get a seekable
+     * {@link BufferIterator} over the mapped data.
+     *
+     * @Involve
+     * interface ICloseable;
+     */
+
+    interface IMemoryMappedFile {
+        /**
+         * Returns a new iterator that treats the mapped data as big-endian.
+         */
+        BigEndianIterator(
+            [out] IBufferIterator** it);
+
+        /**
+         * Returns a new iterator that treats the mapped data as little-endian.
+         */
+        LittleEndianIterator(
+            [out] IBufferIterator** it);
+
+        /**
+         * Returns the size in bytes of the memory-mapped region.
+         */
+        Size(
+            [out] Int64* size);
+    }
+
+    interface IMemoryMappedFileHelper {
+        /**
+         * Use this to mmap the whole file read-only.
+         */
+        MmapRO(
+            [in] String path,
+            [out] IMemoryMappedFile** file);
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

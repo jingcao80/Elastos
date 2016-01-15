@@ -1,0 +1,62 @@
+module
+{
+    using interface Elastos.IO.IFile;
+    using interface Elastos.IO.IFileOutputStream;
+    using interface Elastos.IO.IFileInputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /**
+     * Helper class for performing atomic operations on a file, by creating a
+     * backup file until a write has successfully completed.
+     * <p>
+     * Atomic file guarantees file integrity by ensuring that a file has
+     * been completely written and sync'd to disk before removing its backup.
+     * As long as the backup file exists, the original file is considered
+     * to be invalid (left over from a previous attempt to write the file).
+     * </p><p>
+     * Atomic file does not confer any file locking semantics.
+     * Do not use this class when the file may be accessed or modified concurrently
+     * by multiple threads or processes.  The caller is responsible for ensuring
+     * appropriate mutual exclusion invariants whenever it accesses the file.
+     * </p>
+     */
+    [local]
+    interface IAtomicFile {
+        GetBaseFile(
+            [out] IFile** file);
+
+        StartWrite(
+            [out] IFileOutputStream** stream);
+
+        FinishWrite(
+            [in] IFileOutputStream* str);
+
+        FailWrite(
+            [in] IFileOutputStream* str);
+
+        OpenAppend(
+            [out] IFileOutputStream** stream);
+
+        Truncate();
+
+        Exists(
+            [out] Boolean* exists);
+
+        Delete() ;
+
+        OpenRead(
+            [out] IFileInputStream** stream);
+
+        ReadFully(
+            [out, callee] ArrayOf<Byte>* data);
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

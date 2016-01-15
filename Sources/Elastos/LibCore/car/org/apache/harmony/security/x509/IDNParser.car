@@ -1,0 +1,41 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * Distinguished Name Parser.
+     *
+     * Parses a distinguished name(DN) string according
+     * BNF syntax specified in RFC 2253 and RFC 1779
+     *
+     * RFC 2253: Lightweight Directory Access Protocol (v3):
+     *           UTF-8 String Representation of Distinguished Names
+     *   http://www.ietf.org/rfc/rfc2253.txt
+     *
+     * RFC 1779: A String Representation of Distinguished Names
+     *   http://www.ietf.org/rfc/rfc1779.txt
+     */
+    interface IDNParser {
+        /**
+         * Parses DN
+         *
+         * @return a list of Relative Distinguished Names(RND),
+         *         each RDN is represented as a list of AttributeTypeAndValue objects
+         */
+        Parse(
+            [out] IList** list);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

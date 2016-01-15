@@ -1,0 +1,263 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.ILinkProperties;
+    interface Elastos.Droid.Net.INetworkInfo;
+    interface Elastos.Droid.Net.ISamplingDataTrackerSamplingSnapshot;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessenger;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Interface provides the {@link com.android.server.ConnectivityService}
+     * with three services. Events to the ConnectivityService when
+     * changes occur, an API for controlling the network and storage
+     * for network specific information.
+     *
+     * The Connectivity will call startMonitoring before any other
+     * method is called.
+     *
+     * {@hide}
+     */
+    [local]
+    interface INetworkStateTracker {
+        /**
+         * The network state has changed and the NetworkInfo object
+         * contains the new state.
+         *
+         * msg.what = EVENT_STATE_CHANGED
+         * msg.obj = NetworkInfo object
+         */
+        const Int32 EVENT_STATE_CHANGED = 0x00070000;
+
+        /**
+         * msg.what = EVENT_CONFIGURATION_CHANGED
+         * msg.obj = NetworkInfo object
+         */
+        const Int32 EVENT_CONFIGURATION_CHANGED = 0x00070001;
+
+        /**
+         * msg.what = EVENT_RESTORE_DEFAULT_NETWORK
+         * msg.obj = FeatureUser object
+         */
+        const Int32 EVENT_RESTORE_DEFAULT_NETWORK = 0x00070002;
+
+        /**
+         * msg.what = EVENT_NETWORK_SUBTYPE_CHANGED
+         * msg.obj = NetworkInfo object
+         */
+        const Int32 EVENT_NETWORK_SUBTYPE_CHANGED = 0x00070003;
+
+        /**
+         * msg.what = EVENT_NETWORK_CONNECTED
+         * msg.obj = LinkProperties object
+         */
+        const Int32 EVENT_NETWORK_CONNECTED = 0x00070004;
+
+        /**
+         * msg.what = EVENT_NETWORK_CONNECTION_DISCONNECTED
+         * msg.obj = LinkProperties object, same iface name
+         */
+        const Int32 EVENT_NETWORK_DISCONNECTED = 0x00070005;
+
+        /**
+         * Begin monitoring data connectivity.
+         *
+         * This is the first method called when this interface is used.
+         *
+         * @param context is the current Android context
+         * @param target is the Hander to which to return the events.
+         */
+        StartMonitoring(
+            [in] IContext* context,
+            [in] IHandler* target);
+
+        /**
+         * Fetch NetworkInfo for the network
+         */
+        GetNetworkInfo(
+            [out] INetworkInfo** result);
+
+        /**
+         * Return the LinkProperties for the connection.
+         *
+         * @return a copy of the LinkProperties, is never null.
+         */
+        GetLinkProperties(
+            [out] ILinkProperties** result);
+
+        /**
+         * @return a copy of this connections capabilities, may be empty but never null.
+         */
+        GetNetworkCapabilities(
+            [out] INetworkCapabilities** result);
+
+        /**
+         * Get interesting information about this network link
+         * @return a copy of link information, null if not available
+         */
+        GetLinkQualityInfo(
+            [out] ILinkQualityInfo** result);
+
+        /**
+         * Return the system properties name associated with the tcp buffer sizes
+         * for this network.
+         */
+        GetTcpBufferSizesPropName(
+            [out] String* result);
+
+        /**
+         * Disable connectivity to a network
+         * @return {@code true} if a teardown occurred, {@code false} if the
+         * teardown did not occur.
+         */
+        Teardown(
+            [out] Boolean* result);
+
+        /**
+         * Reenable connectivity to a network after a {@link #teardown()}.
+         * @return {@code true} if we're connected or expect to be connected
+         */
+        Reconnect(
+            [out] Boolean* result);
+
+        /**
+         * Captive portal check has completed
+         */
+        CaptivePortalCheckCompleted(
+            [in] Boolean isCaptive);
+
+        /**
+         * Turn the wireless radio off for a network.
+         * @param turnOn {@code true} to turn the radio on, {@code false}
+         */
+        SetRadio(
+            [in] Boolean turnOn,
+            [out] Boolean* result);
+
+        /**
+         * Returns an indication of whether this network is available for
+         * connections. A value of {@code false} means that some quasi-permanent
+         * condition prevents connectivity to this network.
+         *
+         * NOTE that this is broken on multi-connection devices.  Should be fixed in J release
+         * TODO - fix on multi-pdp devices
+         */
+        IsAvailable(
+            [out] Boolean* result);
+
+        /**
+         * User control of data connection through this network, typically persisted
+         * internally.
+         */
+        SetUserDataEnable(
+            [in] Boolean enabled);
+
+        /**
+         * Policy control of data connection through this network, typically not
+         * persisted internally. Usually used when {@link NetworkPolicy#limitBytes}
+         * is passed.
+         */
+        SetPolicyDataEnable(
+            [in] Boolean enabled);
+
+        /**
+         * Check if private DNS route is set for the network
+         */
+        IsPrivateDnsRouteSet(
+            [out] Boolean* result);
+
+        /**
+         * Set a flag indicating private DNS route is set
+         */
+        PrivateDnsRouteSet(
+            [in] Boolean enabled);
+
+        /**
+         * Check if default route is set
+         */
+        IsDefaultRouteSet(
+            [out] Boolean* result);
+
+        /**
+         * Set a flag indicating default route is set for the network
+         */
+        DefaultRouteSet(
+            [in] Boolean enabled);
+
+        /**
+         * Check if tear down was requested
+         */
+        IsTeardownRequested(
+            [out] Boolean* result);
+
+        /**
+         * Indicate tear down requested from connectivity
+         */
+        SetTeardownRequested(
+            [in] Boolean isRequested);
+
+        /**
+         * An external dependency has been met/unmet
+         */
+        SetDependencyMet(
+            [in] Boolean met);
+
+        /**
+         * Informs the state tracker that another interface is stacked on top of it.
+         **/
+        AddStackedLink(
+            [in] ILinkProperties* link);
+
+        /**
+         * Informs the state tracker that a stacked interface has been removed.
+         **/
+        RemoveStackedLink(
+            [in] ILinkProperties* link);
+
+        /*
+         * Called once to setup async channel between this and
+         * the underlying network specific code.
+         */
+        SupplyMessenger(
+            [in] IMessenger* messenger);
+
+        /*
+         * Network interface name that we'll lookup for sampling data
+         */
+        GetNetworkInterfaceName(
+            [out] String* result);
+
+        /*
+         * Save the starting sample
+         */
+        StartSampling(
+            [in] ISamplingDataTrackerSamplingSnapshot* s);
+
+        /*
+         * Save the ending sample
+         */
+        StopSampling(
+            [in] ISamplingDataTrackerSamplingSnapshot* s);
+
+        /*
+         * Record the current netId
+         */
+        SetNetId(
+            [in] Int32 netId);
+
+        /*
+         * ?
+         */
+        GetNetwork(
+            [out] INetwork** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

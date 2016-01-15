@@ -1,0 +1,25 @@
+
+module
+{
+
+    namespace Elastosx {
+    namespace Security {
+    namespace Auth {
+
+    /**
+     * Legacy security code; do not use.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.IDomainCombiner
+     */
+    [deprecated]
+    interface ISubjectDomainCombiner {
+        GetSubject(
+            [out] ISubject** subject);
+    }
+
+    } // namespace Auth
+    } // namespace Security
+    } // namespace Elastosx
+}

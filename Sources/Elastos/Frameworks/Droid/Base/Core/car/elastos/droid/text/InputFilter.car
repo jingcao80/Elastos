@@ -1,0 +1,72 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Text.ISpanned;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * InputFilters can be attached to {@link Editable}s to constrain the
+     * changes that can be made to them.
+     */
+    interface IInputFilter {
+        /**
+         * This method is called when the buffer is going to replace the
+         * range <code>dstart &hellip; dend</code> of <code>dest</code>
+         * with the new text from the range <code>start &hellip; end</code>
+         * of <code>source</code>.  Return the CharSequence that you would
+         * like to have placed there instead, including an empty string
+         * if appropriate, or <code>null</code> to accept the original
+         * replacement.  Be careful to not to reject 0-length replacements,
+         * as this is what happens when you delete text.  Also beware that
+         * you should not attempt to make any changes to <code>dest</code>
+         * from this method; you may only examine it for context.
+         *
+         * Note: If <var>source</var> is an instance of {@link Spanned} or
+         * {@link Spannable}, the span objects in the <var>source</var> should be
+         * copied into the filtered result (i.e. the non-null return value).
+         * {@link TextUtils#copySpansFrom} can be used for convenience.
+         */
+        Filter(
+            [in] ICharSequence* source,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] ISpanned* dest,
+            [in] Int32 dstart,
+            [in] Int32 dend,
+            [out] ICharSequence** cs);
+    }
+
+    /**
+     * This filter will capitalize all the lower case letters that are added
+     * through edits.
+     *
+     * @Involve
+     * interface IInputFilter
+     */
+    interface IAllCapsFilter {
+    }
+
+    /**
+     * This filter will constrain edits not to make the length of the text
+     * greater than the specified length.
+     *
+     * @Involve
+     * interface IInputFilter
+     */
+    interface ILengthFilter {
+        /**
+         * @return the maximum length enforced by this input filter
+         */
+        GetMax(
+            [out] Int32* max);
+    }
+
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

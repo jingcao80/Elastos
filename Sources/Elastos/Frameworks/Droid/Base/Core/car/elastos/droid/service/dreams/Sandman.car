@@ -1,0 +1,47 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Dreams {
+
+    /**
+     * Internal helper for launching dreams to ensure consistency between the
+     * <code>UiModeManagerService</code> system service and the <code>Somnambulator</code> activity.
+     *
+     * @hide
+     */
+    interface ISandman
+    {
+        /**
+         * Returns true if the specified dock app intent should be started.
+         * False if we should dream instead, if appropriate.
+         */
+        ShouldStartDockApp(
+            [in] IContext* ctx,
+            [in] IIntent* intent,
+            [out] Boolean* result);
+
+        /**
+         * Starts a dream manually.
+         */
+        StartDreamByUserRequest(
+            [in] IContext* ctx);
+
+        /**
+         * Starts a dream when docked if the system has been configured to do so,
+         * otherwise does nothing.
+         */
+        StartDreamWhenDockedIfAppropriate(
+            [in] IContext* ctx);
+    }
+
+    } // namespace Dreams
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

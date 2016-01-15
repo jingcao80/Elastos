@@ -1,0 +1,23 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$
+$
+$WITH all classes DO
+$   IF type is not "clsobj" and type is not "sink"
+$     IF type is not "generic"
+$       IF attrib is not "naked"
+$         TEMPLATE "foreh.lub"
+$         TEMPLATE "forecpp.lub"
+$       ELSE
+$         TEMPLATE "nakedforeh.lub"
+$         TEMPLATE "nakedforecpp.lub"
+$       END IF
+$     ELSE
+$       TEMPLATE "foreh.lub"
+$       TEMPLATE "foregeneric.lub"
+$     END IF
+$   END IF
+$END DO

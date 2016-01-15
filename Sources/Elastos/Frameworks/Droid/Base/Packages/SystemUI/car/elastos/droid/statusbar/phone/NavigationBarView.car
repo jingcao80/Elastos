@@ -1,0 +1,104 @@
+
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+
+    interface Elastos.Droid.View.IView;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IBaseStatusBar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    interface IOnVerticalChangedListener {
+        OnVerticalChanged(
+            [in] Boolean isVertical);
+    }
+
+    /**
+     * @Involve
+     * interface ILinearLayout
+     */
+    [local, deprecated]
+    interface INavigationBarView {
+
+        GetBarTransitions(
+            [out] IBarTransitions** result);
+
+        SetDelegateView(
+            [in] IView* view);
+
+        SetBar(
+            [in] IBaseStatusBar* phoneStatusBar);
+
+        SetOnVerticalChangedListener(
+            [in] IOnVerticalChangedListener* onVerticalChangedListener);
+
+        GetCurrentView(
+            [out] IView** result);
+
+        GetRecentsButton(
+            [out] IView** result);
+
+        GetMenuButton(
+            [out] IView** result);
+
+        GetBackButton(
+            [out] IView** result);
+
+        GetHomeButton(
+            [out] IView** result);
+
+        GetImeSwitchButton(
+            [out] IView** result);
+
+        NotifyScreenOn(
+            [in] Boolean screenOn);
+
+        SetNavigationIconHints(
+            [in] Int32 hints);
+
+        SetNavigationIconHints(
+            [in] Int32 hints,
+            [in] Boolean force);
+
+        SetDisabledFlags(
+            [in] Int32 disabledFlags);
+
+        SetDisabledFlags(
+            [in] Int32 disabledFlags,
+            [in] Boolean force);
+
+        SetSlippery(
+            [in] Boolean newSlippery);
+
+        SetMenuVisibility(
+            [in] Boolean show);
+
+        SetMenuVisibility(
+            [in] Boolean show,
+            [in] Boolean force);
+
+        IsVertical(
+            [out] Boolean* result);
+
+        Reorient();
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

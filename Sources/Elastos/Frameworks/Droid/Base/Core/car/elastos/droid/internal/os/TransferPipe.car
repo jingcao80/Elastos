@@ -1,0 +1,42 @@
+
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /**
+     * Helper for transferring data through a pipe from a client app.
+     */
+    /**
+     * @Involve
+     * interface IRunnable;
+     */
+    [local]
+    interface ITransferPipe {
+        GetWriteFd(
+            [out] IParcelFileDescriptor** pfd);
+
+        SetBufferPrefix(
+            [in] String prefix);
+
+        Go(
+            [in] IFileDescriptor* fd);
+
+        Go(
+            [in] IFileDescriptor* fd,
+            [in] Int64 timeout);
+
+        Kill();
+    }
+
+    }//namespace Os
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}
+

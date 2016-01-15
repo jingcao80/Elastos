@@ -1,0 +1,114 @@
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Lang {
+    namespace Annotation {
+
+    /**
+     * This class represents member element of an annotation.
+     * It consists of name and value, supplemented with element
+     * definition information (such as declared type of element).
+     * <br>The value may be one of the following types:
+     * <ul>
+     * <li> boxed primitive
+     * <li> Class
+     * <li> enum constant
+     * <li> annotation (nested)
+     * <li> one-dimensional array of the above
+     * <li> Throwable
+     * </ul>
+     * The last type is specific for this implementation; a Throwable value
+     * means that the error occured during parsing or resolution of corresponding
+     * class-data structures and throwing is delayed until the element
+     * is requested for value.
+     *
+     * @see android.lang.annotation.AnnotationFactory
+     *
+     * @author Alexey V. Varlamov, Serguei S. Zapreyev
+     * @version $Revision$
+    */
+    interface IAnnotationMember {
+        /**
+         * Returns true if the specified object represents the same annotation instance.
+         * That is, if it implements the same annotation type and
+         * returns the same element values.
+         * <br>Note, actual underlying implementation mechanism does not matter - it may
+         * differ completely from this class.
+         * @return true if the passed object is equivalent annotation instance,
+         * false otherwise.
+         * @see android.lang.annotation.AnnotationMember#equals(Object)
+        */
+        Equals(
+            [in] PInterface obj,
+            [out] Boolean* isEqual);
+
+        /**
+         * Provides detailed description of this annotation instance,
+         * including all member name-values pairs.
+         * @return string representation of this annotation
+        */
+        ToString(
+            [out] String* result);
+
+        /**
+         * Returns true if the contained value and a passed object are equal arrays,
+         * false otherwise. Appropriate overloaded method of Arrays.equals()
+         * is used for equality testing.
+         * @see java.util.Arrays#equals(java.lang.Object[], java.lang.Object[])
+         * @return true if the value is array and is equal to specified object,
+         * false otherwise
+         */
+        EqualArrayValue(
+            [in] IInterface* otherValue,
+            [out] Boolean* isEqual);
+
+        /**
+         * Computes hash code of this element. The formula is as follows:
+         * <code> (name.hashCode() * 127) ^ value.hashCode() </code>
+         * <br>If value is an array, one of overloaded Arrays.hashCode()
+         * methods is used.
+         * @return the hash code
+         * @see java.util.Arrays#hashCode(java.lang.Object[])
+         * @see java.lang.annotation.Annotation#hashCode()
+        */
+        GetHashCode(
+            [out] Int32* result);
+
+        /**
+         * Throws contained error (if any) with a renewed stack trace.
+        */
+        RethrowError();
+
+        /**
+         * Validates contained value against its member definition
+         * and if ok returns the value.
+         * Otherwise, if the value type mismatches definition
+         * or the value itself describes an error,
+         * throws appropriate exception.
+         * <br> Note, this method may return null if this element was constructed
+         * with such value.
+         *
+         * @see #rethrowError()
+         * @see #copyValue()
+         * @return actual valid value or null if no value
+        */
+        ValidateValue(
+            [out] IInterface** validateValue);
+
+        /**
+         * Provides mutation-safe access to contained value. That is, caller is free to modify the
+         * returned value, it will not affect the contained data value.
+         * @return cloned value if it is mutable or the original immutable value
+        */
+        CopyValue(
+            [out] IInterface** copyValue);
+    }
+
+    } // namespace Annotation
+    } // namespace Lang
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,131 @@
+
+module
+{
+    interface Elastos.Droid.View.IMenuItem;
+    interface Elastos.Droid.View.IMenuInflater;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IViewOnTouchListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IPopupMenu;
+
+    /**
+     * Callback interface used to notify the application that the menu has closed.
+     */
+    interface IPopupMenuOnDismissListener {
+        /**
+         * Called when the associated menu has been dismissed.
+         *
+         * @param menu The PopupMenu that was dismissed.
+         */
+        OnDismiss(
+            [in] IPopupMenu* menu);
+    }
+
+    /**
+     * Interface responsible for receiving menu item click events if the items themselves
+     * do not have individual item click listeners.
+     */
+     [local]
+    interface IPopupMenuOnMenuItemClickListener {
+        /**
+         * This method will be invoked when a menu item is clicked if the item itself did
+         * not already handle the event.
+         *
+         * @param item {@link MenuItem} that was clicked
+         * @return <code>true</code> if the event was handled, <code>false</code> otherwise.
+         */
+        OnMenuItemClick(
+            [in] IMenuItem* item,
+            [out] Boolean* result);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Internal.View.Menu.IMenuBuilderCallback
+     * interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback
+     */
+    [local]
+    interface IPopupMenu {
+        /**
+         * Returns an {@link OnTouchListener} that can be added to the anchor view
+         * to implement drag-to-open behavior.
+         * <p>
+         * When the listener is set on a view, touching that view and dragging
+         * outside of its bounds will open the popup window. Lifting will select the
+         * currently touched list item.
+         * <p>
+         * Example usage:
+         * <pre>
+         * PopupMenu myPopup = new PopupMenu(context, myAnchor);
+         * myAnchor.setOnTouchListener(myPopup.getDragToOpenListener());
+         * </pre>
+         *
+         * @return a touch listener that controls drag-to-open behavior
+         */
+        GetDragToOpenListener(
+            [out] IViewOnTouchListener** listener);
+
+        /**
+         * @return the {@link Menu} associated with this popup. Populate the returned Menu with
+         * items before calling {@link #show()}.
+         *
+         * @see #show()
+         * @see #getMenuInflater()
+         */
+        GetMenu(
+            [out] IMenu** menu);
+
+        /**
+         * @return a {@link MenuInflater} that can be used to inflate menu items from XML into the
+         * menu returned by {@link #getMenu()}.
+         *
+         * @see #getMenu()
+         */
+        GetMenuInflater(
+            [out] IMenuInflater** flater);
+
+        /**
+         * Inflate a menu resource into this PopupMenu. This is equivalent to calling
+         * popupMenu.getMenuInflater().inflate(menuRes, popupMenu.getMenu()).
+         * @param menuRes Menu resource to inflate
+         */
+        Inflate(
+            [in] Int32 menuRes);
+
+        /**
+         * Show the menu popup anchored to the view specified during construction.
+         * @see #dismiss()
+         */
+        Show();
+
+        /**
+         * Dismiss the menu popup.
+         * @see #show()
+         */
+        Dismiss();
+
+        /**
+         * Set a listener that will be notified when the user selects an item from the menu.
+         *
+         * @param listener Listener to notify
+         */
+        SetOnMenuItemClickListener(
+            [in] IPopupMenuOnMenuItemClickListener* listener);
+
+        /**
+         * Set a listener that will be notified when this menu is dismissed.
+         *
+         * @param listener Listener to notify
+         */
+        SetOnDismissListener(
+            [in] IPopupMenuOnDismissListener* listener);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

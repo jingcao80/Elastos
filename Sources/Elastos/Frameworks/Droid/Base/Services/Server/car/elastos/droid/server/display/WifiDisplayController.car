@@ -1,0 +1,52 @@
+module
+{
+    using interface Elastos.Droid.Hardware.Display.IWifiDisplay;
+    using interface Elastos.Droid.Hardware.Display.IWifiDisplaySessionInfo;
+    using interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Display {
+
+    /**
+     * Called on the handler thread when displays are connected or disconnected.
+     */
+    [deprecated]
+    interface IWifiDisplayControllerListener {
+        OnFeatureStateChanged(
+            [in] Int32 featureState);
+
+        OnScanStarted();
+
+        OnScanResults(
+            [in] ArrayOf<IWifiDisplay*>* availableDisplays);
+
+        OnScanFinished();
+
+        OnDisplayConnecting(
+            [in] IWifiDisplay* display);
+
+        OnDisplayConnectionFailed();
+
+        OnDisplayChanged(
+            [in] IWifiDisplay* display);
+
+        OnDisplayConnected(
+            [in] IWifiDisplay* display,
+            [in] ISurface* surface,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 flags);
+
+        OnDisplaySessionInfo(
+            [in] IWifiDisplaySessionInfo* sessionInfo);
+
+        OnDisplayDisconnected();
+    }
+
+    } // namespace Display
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

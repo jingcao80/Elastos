@@ -1,0 +1,71 @@
+
+module
+{
+
+    interface Org.Apache.Http.Conn.Scheme.ISocketFactory;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Scheme {
+
+    interface IScheme {
+
+        /**
+         * Obtains the default port.
+         *
+         * @return  the default port for this scheme
+         */
+        GetDefaultPort(
+            [out] Int32* port);
+
+        /**
+         * Obtains the socket factory.
+         * If this scheme is {@link #isLayered layered}, the factory implements
+         * {@link LayeredSocketFactory LayeredSocketFactory}.
+         *
+         * @return  the socket factory for this scheme
+         */
+        GetSocketFactory(
+            [out] ISocketFactory** socketFactory);
+
+        /**
+         * Obtains the scheme name.
+         *
+         * @return  the name of this scheme, in lowercase
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Indicates whether this scheme allows for layered connections.
+         *
+         * @return <code>true</code> if layered connections are possible,
+         *         <code>false</code> otherwise
+         */
+        IsLayered(
+            [out] Boolean* isLayered);
+
+        /**
+         * Resolves the correct port for this scheme.
+         * Returns the given port if it is valid, the default port otherwise.
+         *
+         * @param port      the port to be resolved,
+         *                  a negative number to obtain the default port
+         *
+         * @return the given port or the defaultPort
+         */
+        ResolvePort(
+            [in] Int32 port,
+            [out] Int32* resolvedPort);
+
+    }
+
+    } // namespace Scheme
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

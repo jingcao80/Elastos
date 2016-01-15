@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Libcore {
+    namespace IO {
+
+    [deprecated]
+    interface IBase64 {
+        Decode(
+            [in] ArrayOf<Byte>* inData,
+            [out, callee] ArrayOf<Byte>* outData);
+
+        Decode(
+            [in] ArrayOf<Byte>* inData,
+            [in] Int32 len,
+            [out, callee] ArrayOf<Byte>* outData);
+
+        Encode(
+            [in] ArrayOf<Byte>* inData,
+            [out] String* outData);
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

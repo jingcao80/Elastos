@@ -1,0 +1,1784 @@
+
+module
+{
+    using interface Elastos.IO.IInt32Buffer;
+    using interface Elastos.IO.IInt64Buffer;
+    using interface Elastos.IO.IBuffer;
+    using interface Elastos.IO.IFloatBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    /** OpenGL ES 3.0
+     */
+    [deprecated]
+    interface IGLES30 {
+
+        const Int32 _GL_READ_BUFFER                             = 0x0C02;
+        const Int32 _GL_UNPACK_ROW_LENGTH                       = 0x0CF2;
+        const Int32 _GL_UNPACK_SKIP_ROWS                        = 0x0CF3;
+        const Int32 _GL_UNPACK_SKIP_PIXELS                      = 0x0CF4;
+        const Int32 _GL_PACK_ROW_LENGTH                         = 0x0D02;
+        const Int32 _GL_PACK_SKIP_ROWS                          = 0x0D03;
+        const Int32 _GL_PACK_SKIP_PIXELS                        = 0x0D04;
+        const Int32 _GL_COLOR                                   = 0x1800;
+        const Int32 _GL_DEPTH                                   = 0x1801;
+        const Int32 _GL_STENCIL                                 = 0x1802;
+        const Int32 _GL_RED                                     = 0x1903;
+        const Int32 _GL_RGB8                                    = 0x8051;
+        const Int32 _GL_RGBA8                                   = 0x8058;
+        const Int32 _GL_RGB10_A2                                = 0x8059;
+        const Int32 _GL_TEXTURE_BINDING_3D                      = 0x806A;
+        const Int32 _GL_UNPACK_SKIP_IMAGES                      = 0x806D;
+        const Int32 _GL_UNPACK_IMAGE_HEIGHT                     = 0x806E;
+        const Int32 _GL_TEXTURE_3D                              = 0x806F;
+        const Int32 _GL_TEXTURE_WRAP_R                          = 0x8072;
+        const Int32 _GL_MAX_3D_TEXTURE_SIZE                     = 0x8073;
+        const Int32 _GL_UNSIGNED_INT_2_10_10_10_REV             = 0x8368;
+        const Int32 _GL_MAX_ELEMENTS_VERTICES                   = 0x80E8;
+        const Int32 _GL_MAX_ELEMENTS_INDICES                    = 0x80E9;
+        const Int32 _GL_TEXTURE_MIN_LOD                         = 0x813A;
+        const Int32 _GL_TEXTURE_MAX_LOD                         = 0x813B;
+        const Int32 _GL_TEXTURE_BASE_LEVEL                      = 0x813C;
+        const Int32 _GL_TEXTURE_MAX_LEVEL                       = 0x813D;
+        const Int32 _GL_MIN                                     = 0x8007;
+        const Int32 _GL_MAX                                     = 0x8008;
+        const Int32 _GL_DEPTH_COMPONENT24                       = 0x81A6;
+        const Int32 _GL_MAX_TEXTURE_LOD_BIAS                    = 0x84FD;
+        const Int32 _GL_TEXTURE_COMPARE_MODE                    = 0x884C;
+        const Int32 _GL_TEXTURE_COMPARE_FUNC                    = 0x884D;
+        const Int32 _GL_CURRENT_QUERY                           = 0x8865;
+        const Int32 _GL_QUERY_RESULT                            = 0x8866;
+        const Int32 _GL_QUERY_RESULT_AVAILABLE                  = 0x8867;
+        const Int32 _GL_BUFFER_MAPPED                           = 0x88BC;
+        const Int32 _GL_BUFFER_MAP_POINTER                      = 0x88BD;
+        const Int32 _GL_STREAM_READ                             = 0x88E1;
+        const Int32 _GL_STREAM_COPY                             = 0x88E2;
+        const Int32 _GL_STATIC_READ                             = 0x88E5;
+        const Int32 _GL_STATIC_COPY                             = 0x88E6;
+        const Int32 _GL_DYNAMIC_READ                            = 0x88E9;
+        const Int32 _GL_DYNAMIC_COPY                            = 0x88EA;
+        const Int32 _GL_MAX_DRAW_BUFFERS                        = 0x8824;
+        const Int32 _GL_DRAW_BUFFER0                            = 0x8825;
+        const Int32 _GL_DRAW_BUFFER1                            = 0x8826;
+        const Int32 _GL_DRAW_BUFFER2                            = 0x8827;
+        const Int32 _GL_DRAW_BUFFER3                            = 0x8828;
+        const Int32 _GL_DRAW_BUFFER4                            = 0x8829;
+        const Int32 _GL_DRAW_BUFFER5                            = 0x882A;
+        const Int32 _GL_DRAW_BUFFER6                            = 0x882B;
+        const Int32 _GL_DRAW_BUFFER7                            = 0x882C;
+        const Int32 _GL_DRAW_BUFFER8                            = 0x882D;
+        const Int32 _GL_DRAW_BUFFER9                            = 0x882E;
+        const Int32 _GL_DRAW_BUFFER10                           = 0x882F;
+        const Int32 _GL_DRAW_BUFFER11                           = 0x8830;
+        const Int32 _GL_DRAW_BUFFER12                           = 0x8831;
+        const Int32 _GL_DRAW_BUFFER13                           = 0x8832;
+        const Int32 _GL_DRAW_BUFFER14                           = 0x8833;
+        const Int32 _GL_DRAW_BUFFER15                           = 0x8834;
+        const Int32 _GL_MAX_FRAGMENT_UNIFORM_COMPONENTS         = 0x8B49;
+        const Int32 _GL_MAX_VERTEX_UNIFORM_COMPONENTS           = 0x8B4A;
+        const Int32 _GL_SAMPLER_3D                              = 0x8B5F;
+        const Int32 _GL_SAMPLER_2D_SHADOW                       = 0x8B62;
+        const Int32 _GL_FRAGMENT_SHADER_DERIVATIVE_HINT         = 0x8B8B;
+        const Int32 _GL_PIXEL_PACK_BUFFER                       = 0x88EB;
+        const Int32 _GL_PIXEL_UNPACK_BUFFER                     = 0x88EC;
+        const Int32 _GL_PIXEL_PACK_BUFFER_BINDING               = 0x88ED;
+        const Int32 _GL_PIXEL_UNPACK_BUFFER_BINDING             = 0x88EF;
+        const Int32 _GL_FLOAT_MAT2x3                            = 0x8B65;
+        const Int32 _GL_FLOAT_MAT2x4                            = 0x8B66;
+        const Int32 _GL_FLOAT_MAT3x2                            = 0x8B67;
+        const Int32 _GL_FLOAT_MAT3x4                            = 0x8B68;
+        const Int32 _GL_FLOAT_MAT4x2                            = 0x8B69;
+        const Int32 _GL_FLOAT_MAT4x3                            = 0x8B6A;
+        const Int32 _GL_SRGB                                    = 0x8C40;
+        const Int32 _GL_SRGB8                                   = 0x8C41;
+        const Int32 _GL_SRGB8_ALPHA8                            = 0x8C43;
+        const Int32 _GL_COMPARE_REF_TO_TEXTURE                  = 0x884E;
+        const Int32 _GL_MAJOR_VERSION                           = 0x821B;
+        const Int32 _GL_MINOR_VERSION                           = 0x821C;
+        const Int32 _GL_NUM_EXTENSIONS                          = 0x821D;
+        const Int32 _GL_RGBA32F                                 = 0x8814;
+        const Int32 _GL_RGB32F                                  = 0x8815;
+        const Int32 _GL_RGBA16F                                 = 0x881A;
+        const Int32 _GL_RGB16F                                  = 0x881B;
+        const Int32 _GL_VERTEX_ATTRIB_ARRAY_INTEGER             = 0x88FD;
+        const Int32 _GL_MAX_ARRAY_TEXTURE_LAYERS                = 0x88FF;
+        const Int32 _GL_MIN_PROGRAM_TEXEL_OFFSET                = 0x8904;
+        const Int32 _GL_MAX_PROGRAM_TEXEL_OFFSET                = 0x8905;
+        const Int32 _GL_MAX_VARYING_COMPONENTS                  = 0x8B4B;
+        const Int32 _GL_TEXTURE_2D_ARRAY                        = 0x8C1A;
+        const Int32 _GL_TEXTURE_BINDING_2D_ARRAY                = 0x8C1D;
+        const Int32 _GL_R11F_G11F_B10F                          = 0x8C3A;
+        const Int32 _GL_UNSIGNED_INT_10F_11F_11F_REV            = 0x8C3B;
+        const Int32 _GL_RGB9_E5                                 = 0x8C3D;
+        const Int32 _GL_UNSIGNED_INT_5_9_9_9_REV                = 0x8C3E;
+        const Int32 _GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH   = 0x8C76;
+        const Int32 _GL_TRANSFORM_FEEDBACK_BUFFER_MODE          = 0x8C7F;
+        const Int32 _GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS   = 0x8C80;
+        const Int32 _GL_TRANSFORM_FEEDBACK_VARYINGS             = 0x8C83;
+        const Int32 _GL_TRANSFORM_FEEDBACK_BUFFER_START         = 0x8C84;
+        const Int32 _GL_TRANSFORM_FEEDBACK_BUFFER_SIZE          = 0x8C85;
+        const Int32 _GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN   = 0x8C88;
+        const Int32 _GL_RASTERIZER_DISCARD                      = 0x8C89;
+        const Int32 _GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS    = 0x8C8A;
+        const Int32 _GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS = 0x8C8B;
+        const Int32 _GL_INTERLEAVED_ATTRIBS                     = 0x8C8C;
+        const Int32 _GL_SEPARATE_ATTRIBS                        = 0x8C8D;
+        const Int32 _GL_TRANSFORM_FEEDBACK_BUFFER               = 0x8C8E;
+        const Int32 _GL_TRANSFORM_FEEDBACK_BUFFER_BINDING       = 0x8C8F;
+        const Int32 _GL_RGBA32UI                                = 0x8D70;
+        const Int32 _GL_RGB32UI                                 = 0x8D71;
+        const Int32 _GL_RGBA16UI                                = 0x8D76;
+        const Int32 _GL_RGB16UI                                 = 0x8D77;
+        const Int32 _GL_RGBA8UI                                 = 0x8D7C;
+        const Int32 _GL_RGB8UI                                  = 0x8D7D;
+        const Int32 _GL_RGBA32I                                 = 0x8D82;
+        const Int32 _GL_RGB32I                                  = 0x8D83;
+        const Int32 _GL_RGBA16I                                 = 0x8D88;
+        const Int32 _GL_RGB16I                                  = 0x8D89;
+        const Int32 _GL_RGBA8I                                  = 0x8D8E;
+        const Int32 _GL_RGB8I                                   = 0x8D8F;
+        const Int32 _GL_RED_INTEGER                             = 0x8D94;
+        const Int32 _GL_RGB_INTEGER                             = 0x8D98;
+        const Int32 _GL_RGBA_INTEGER                            = 0x8D99;
+        const Int32 _GL_SAMPLER_2D_ARRAY                        = 0x8DC1;
+        const Int32 _GL_SAMPLER_2D_ARRAY_SHADOW                 = 0x8DC4;
+        const Int32 _GL_SAMPLER_CUBE_SHADOW                     = 0x8DC5;
+        const Int32 _GL_UNSIGNED_INT_VEC2                       = 0x8DC6;
+        const Int32 _GL_UNSIGNED_INT_VEC3                       = 0x8DC7;
+        const Int32 _GL_UNSIGNED_INT_VEC4                       = 0x8DC8;
+        const Int32 _GL_INT_SAMPLER_2D                          = 0x8DCA;
+        const Int32 _GL_INT_SAMPLER_3D                          = 0x8DCB;
+        const Int32 _GL_INT_SAMPLER_CUBE                        = 0x8DCC;
+        const Int32 _GL_INT_SAMPLER_2D_ARRAY                    = 0x8DCF;
+        const Int32 _GL_UNSIGNED_INT_SAMPLER_2D                 = 0x8DD2;
+        const Int32 _GL_UNSIGNED_INT_SAMPLER_3D                 = 0x8DD3;
+        const Int32 _GL_UNSIGNED_INT_SAMPLER_CUBE               = 0x8DD4;
+        const Int32 _GL_UNSIGNED_INT_SAMPLER_2D_ARRAY           = 0x8DD7;
+        const Int32 _GL_BUFFER_ACCESS_FLAGS                     = 0x911F;
+        const Int32 _GL_BUFFER_MAP_LENGTH                       = 0x9120;
+        const Int32 _GL_BUFFER_MAP_OFFSET                       = 0x9121;
+        const Int32 _GL_DEPTH_COMPONENT32F                      = 0x8CAC;
+        const Int32 _GL_DEPTH32F_STENCIL8                       = 0x8CAD;
+        const Int32 _GL_FLOAT_32_UNSIGNED_INT_24_8_REV          = 0x8DAD;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING   = 0x8210;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE   = 0x8211;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE         = 0x8212;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE       = 0x8213;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE        = 0x8214;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE       = 0x8215;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE       = 0x8216;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE     = 0x8217;
+        const Int32 _GL_FRAMEBUFFER_DEFAULT                     = 0x8218;
+        const Int32 _GL_FRAMEBUFFER_UNDEFINED                   = 0x8219;
+        const Int32 _GL_DEPTH_STENCIL_ATTACHMENT                = 0x821A;
+        const Int32 _GL_DEPTH_STENCIL                           = 0x84F9;
+        const Int32 _GL_UNSIGNED_INT_24_8                       = 0x84FA;
+        const Int32 _GL_DEPTH24_STENCIL8                        = 0x88F0;
+        const Int32 _GL_UNSIGNED_NORMALIZED                     = 0x8C17;
+        const Int32 _GL_DRAW_FRAMEBUFFER_BINDING                = 0x8CA6;//GL_FRAMEBUFFER_BINDING;
+        const Int32 _GL_READ_FRAMEBUFFER                        = 0x8CA8;
+        const Int32 _GL_DRAW_FRAMEBUFFER                        = 0x8CA9;
+        const Int32 _GL_READ_FRAMEBUFFER_BINDING                = 0x8CAA;
+        const Int32 _GL_RENDERBUFFER_SAMPLES                    = 0x8CAB;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER    = 0x8CD4;
+        const Int32 _GL_MAX_COLOR_ATTACHMENTS                   = 0x8CDF;
+        const Int32 _GL_COLOR_ATTACHMENT1                       = 0x8CE1;
+        const Int32 _GL_COLOR_ATTACHMENT2                       = 0x8CE2;
+        const Int32 _GL_COLOR_ATTACHMENT3                       = 0x8CE3;
+        const Int32 _GL_COLOR_ATTACHMENT4                       = 0x8CE4;
+        const Int32 _GL_COLOR_ATTACHMENT5                       = 0x8CE5;
+        const Int32 _GL_COLOR_ATTACHMENT6                       = 0x8CE6;
+        const Int32 _GL_COLOR_ATTACHMENT7                       = 0x8CE7;
+        const Int32 _GL_COLOR_ATTACHMENT8                       = 0x8CE8;
+        const Int32 _GL_COLOR_ATTACHMENT9                       = 0x8CE9;
+        const Int32 _GL_COLOR_ATTACHMENT10                      = 0x8CEA;
+        const Int32 _GL_COLOR_ATTACHMENT11                      = 0x8CEB;
+        const Int32 _GL_COLOR_ATTACHMENT12                      = 0x8CEC;
+        const Int32 _GL_COLOR_ATTACHMENT13                      = 0x8CED;
+        const Int32 _GL_COLOR_ATTACHMENT14                      = 0x8CEE;
+        const Int32 _GL_COLOR_ATTACHMENT15                      = 0x8CEF;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE      = 0x8D56;
+        const Int32 _GL_MAX_SAMPLES                             = 0x8D57;
+        const Int32 _GL_HALF_FLOAT                              = 0x140B;
+        const Int32 _GL_MAP_READ_BIT                            = 0x0001;
+        const Int32 _GL_MAP_WRITE_BIT                           = 0x0002;
+        const Int32 _GL_MAP_INVALIDATE_RANGE_BIT                = 0x0004;
+        const Int32 _GL_MAP_INVALIDATE_BUFFER_BIT               = 0x0008;
+        const Int32 _GL_MAP_FLUSH_EXPLICIT_BIT                  = 0x0010;
+        const Int32 _GL_MAP_UNSYNCHRONIZED_BIT                  = 0x0020;
+        const Int32 _GL_RG                                      = 0x8227;
+        const Int32 _GL_RG_INTEGER                              = 0x8228;
+        const Int32 _GL_R8                                      = 0x8229;
+        const Int32 _GL_RG8                                     = 0x822B;
+        const Int32 _GL_R16F                                    = 0x822D;
+        const Int32 _GL_R32F                                    = 0x822E;
+        const Int32 _GL_RG16F                                   = 0x822F;
+        const Int32 _GL_RG32F                                   = 0x8230;
+        const Int32 _GL_R8I                                     = 0x8231;
+        const Int32 _GL_R8UI                                    = 0x8232;
+        const Int32 _GL_R16I                                    = 0x8233;
+        const Int32 _GL_R16UI                                   = 0x8234;
+        const Int32 _GL_R32I                                    = 0x8235;
+        const Int32 _GL_R32UI                                   = 0x8236;
+        const Int32 _GL_RG8I                                    = 0x8237;
+        const Int32 _GL_RG8UI                                   = 0x8238;
+        const Int32 _GL_RG16I                                   = 0x8239;
+        const Int32 _GL_RG16UI                                  = 0x823A;
+        const Int32 _GL_RG32I                                   = 0x823B;
+        const Int32 _GL_RG32UI                                  = 0x823C;
+        const Int32 _GL_VERTEX_ARRAY_BINDING                    = 0x85B5;
+        const Int32 _GL_R8_SNORM                                = 0x8F94;
+        const Int32 _GL_RG8_SNORM                               = 0x8F95;
+        const Int32 _GL_RGB8_SNORM                              = 0x8F96;
+        const Int32 _GL_RGBA8_SNORM                             = 0x8F97;
+        const Int32 _GL_SIGNED_NORMALIZED                       = 0x8F9C;
+        const Int32 _GL_PRIMITIVE_RESTART_FIXED_INDEX           = 0x8D69;
+        const Int32 _GL_COPY_READ_BUFFER                        = 0x8F36;
+        const Int32 _GL_COPY_WRITE_BUFFER                       = 0x8F37;
+        const Int32 _GL_COPY_READ_BUFFER_BINDING                = 0x8F36;//GL_COPY_READ_BUFFER;
+        const Int32 _GL_COPY_WRITE_BUFFER_BINDING               = 0x8F37;//GL_COPY_WRITE_BUFFER;
+        const Int32 _GL_UNIFORM_BUFFER                          = 0x8A11;
+        const Int32 _GL_UNIFORM_BUFFER_BINDING                  = 0x8A28;
+        const Int32 _GL_UNIFORM_BUFFER_START                    = 0x8A29;
+        const Int32 _GL_UNIFORM_BUFFER_SIZE                     = 0x8A2A;
+        const Int32 _GL_MAX_VERTEX_UNIFORM_BLOCKS               = 0x8A2B;
+        const Int32 _GL_MAX_FRAGMENT_UNIFORM_BLOCKS             = 0x8A2D;
+        const Int32 _GL_MAX_COMBINED_UNIFORM_BLOCKS             = 0x8A2E;
+        const Int32 _GL_MAX_UNIFORM_BUFFER_BINDINGS             = 0x8A2F;
+        const Int32 _GL_MAX_UNIFORM_BLOCK_SIZE                  = 0x8A30;
+        const Int32 _GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS  = 0x8A31;
+        const Int32 _GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS     = 0x8A33;
+        const Int32 _GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT         = 0x8A34;
+        const Int32 _GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH    = 0x8A35;
+        const Int32 _GL_ACTIVE_UNIFORM_BLOCKS                   = 0x8A36;
+        const Int32 _GL_UNIFORM_TYPE                            = 0x8A37;
+        const Int32 _GL_UNIFORM_SIZE                            = 0x8A38;
+        const Int32 _GL_UNIFORM_NAME_LENGTH                     = 0x8A39;
+        const Int32 _GL_UNIFORM_BLOCK_INDEX                     = 0x8A3A;
+        const Int32 _GL_UNIFORM_OFFSET                          = 0x8A3B;
+        const Int32 _GL_UNIFORM_ARRAY_STRIDE                    = 0x8A3C;
+        const Int32 _GL_UNIFORM_MATRIX_STRIDE                   = 0x8A3D;
+        const Int32 _GL_UNIFORM_IS_ROW_MAJOR                    = 0x8A3E;
+        const Int32 _GL_UNIFORM_BLOCK_BINDING                   = 0x8A3F;
+        const Int32 _GL_UNIFORM_BLOCK_DATA_SIZE                 = 0x8A40;
+        const Int32 _GL_UNIFORM_BLOCK_NAME_LENGTH               = 0x8A41;
+        const Int32 _GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS           = 0x8A42;
+        const Int32 _GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES    = 0x8A43;
+        const Int32 _GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER    = 0x8A44;
+        const Int32 _GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER  = 0x8A46;
+        // GL_INVALID_INDEX is defined as 0xFFFFFFFFu in C.
+        const Int32 _GL_INVALID_INDEX                           = -1;
+        const Int32 _GL_MAX_VERTEX_OUTPUT_COMPONENTS            = 0x9122;
+        const Int32 _GL_MAX_FRAGMENT_INPUT_COMPONENTS           = 0x9125;
+        const Int32 _GL_MAX_SERVER_WAIT_TIMEOUT                 = 0x9111;
+        const Int32 _GL_OBJECT_TYPE                             = 0x9112;
+        const Int32 _GL_SYNC_CONDITION                          = 0x9113;
+        const Int32 _GL_SYNC_STATUS                             = 0x9114;
+        const Int32 _GL_SYNC_FLAGS                              = 0x9115;
+        const Int32 _GL_SYNC_FENCE                              = 0x9116;
+        const Int32 _GL_SYNC_GPU_COMMANDS_COMPLETE              = 0x9117;
+        const Int32 _GL_UNSIGNALED                              = 0x9118;
+        const Int32 _GL_SIGNALED                                = 0x9119;
+        const Int32 _GL_ALREADY_SIGNALED                        = 0x911A;
+        const Int32 _GL_TIMEOUT_EXPIRED                         = 0x911B;
+        const Int32 _GL_CONDITION_SATISFIED                     = 0x911C;
+        const Int32 _GL_WAIT_FAILED                             = 0x911D;
+        const Int32 _GL_SYNC_FLUSH_COMMANDS_BIT                 = 0x00000001;
+        // GL_TIMEOUT_IGNORED is defined as 0xFFFFFFFFFFFFFFFFull in C.
+        const Int64 GL_TIMEOUT_IGNORED                         = -1;
+        const Int32 _GL_VERTEX_ATTRIB_ARRAY_DIVISOR             = 0x88FE;
+        const Int32 _GL_ANY_SAMPLES_PASSED                      = 0x8C2F;
+        const Int32 _GL_ANY_SAMPLES_PASSED_CONSERVATIVE         = 0x8D6A;
+        const Int32 _GL_SAMPLER_BINDING                         = 0x8919;
+        const Int32 _GL_RGB10_A2UI                              = 0x906F;
+        const Int32 _GL_TEXTURE_SWIZZLE_R                       = 0x8E42;
+        const Int32 _GL_TEXTURE_SWIZZLE_G                       = 0x8E43;
+        const Int32 _GL_TEXTURE_SWIZZLE_B                       = 0x8E44;
+        const Int32 _GL_TEXTURE_SWIZZLE_A                       = 0x8E45;
+        const Int32 _GL_GREEN                                   = 0x1904;
+        const Int32 _GL_BLUE                                    = 0x1905;
+        const Int32 _GL_INT_2_10_10_10_REV                      = 0x8D9F;
+        const Int32 _GL_TRANSFORM_FEEDBACK                      = 0x8E22;
+        const Int32 _GL_TRANSFORM_FEEDBACK_PAUSED               = 0x8E23;
+        const Int32 _GL_TRANSFORM_FEEDBACK_ACTIVE               = 0x8E24;
+        const Int32 _GL_TRANSFORM_FEEDBACK_BINDING              = 0x8E25;
+        const Int32 _GL_PROGRAM_BINARY_RETRIEVABLE_HINT         = 0x8257;
+        const Int32 _GL_PROGRAM_BINARY_LENGTH                   = 0x8741;
+        const Int32 _GL_NUM_PROGRAM_BINARY_FORMATS              = 0x87FE;
+        const Int32 _GL_PROGRAM_BINARY_FORMATS                  = 0x87FF;
+        const Int32 _GL_COMPRESSED_R11_EAC                      = 0x9270;
+        const Int32 _GL_COMPRESSED_SIGNED_R11_EAC               = 0x9271;
+        const Int32 _GL_COMPRESSED_RG11_EAC                     = 0x9272;
+        const Int32 _GL_COMPRESSED_SIGNED_RG11_EAC              = 0x9273;
+        const Int32 _GL_COMPRESSED_RGB8_ETC2                    = 0x9274;
+        const Int32 _GL_COMPRESSED_SRGB8_ETC2                   = 0x9275;
+        const Int32 _GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2     = 0x9276;
+        const Int32 _GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2    = 0x9277;
+        const Int32 _GL_COMPRESSED_RGBA8_ETC2_EAC               = 0x9278;
+        const Int32 _GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC        = 0x9279;
+        const Int32 _GL_TEXTURE_IMMUTABLE_FORMAT                = 0x912F;
+        const Int32 _GL_MAX_ELEMENT_INDEX                       = 0x8D6B;
+        const Int32 _GL_NUM_SAMPLE_COUNTS                       = 0x9380;
+        const Int32 _GL_TEXTURE_IMMUTABLE_LEVELS                = 0x82DF;
+
+        // C function void glReadBuffer ( GLenum mode )
+
+        glReadBuffer(
+            [in] Int32 mode
+        );
+
+        // C function void glDrawRangeElements ( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices )
+
+        glDrawRangeElements(
+            [in] Int32 mode,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Int32 count,
+            [in] Int32 type,
+            [in] IBuffer* indices
+        );
+
+        // C function void glDrawRangeElements ( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizei offset )
+
+        glDrawRangeElements(
+            [in] Int32 mode,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Int32 count,
+            [in] Int32 type,
+            [in] Int32 offset
+        );
+
+        // C function void glTexImage3D ( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels )
+
+        glTexImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Int32 border,
+            [in] Int32 format,
+            [in] Int32 type,
+            [in] IBuffer* pixels
+        );
+
+        // C function void glTexImage3D ( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLsizei offset )
+
+        glTexImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Int32 border,
+            [in] Int32 format,
+            [in] Int32 type,
+            [in] Int32 offset
+        );
+
+        // C function void glTexSubImage3D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid *pixels )
+
+        glTexSubImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 xoffset,
+            [in] Int32 yoffset,
+            [in] Int32 zoffset,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Int32 format,
+            [in] Int32 type,
+            [in] IBuffer* pixels
+        );
+
+        // C function void glTexSubImage3D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLsizei offset )
+
+        glTexSubImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 xoffset,
+            [in] Int32 yoffset,
+            [in] Int32 zoffset,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Int32 format,
+            [in] Int32 type,
+            [in] Int32 offset
+        );
+
+        // C function void glCopyTexSubImage3D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height )
+
+        glCopyTexSubImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 xoffset,
+            [in] Int32 yoffset,
+            [in] Int32 zoffset,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 width,
+            [in] Int32 height
+        );
+
+        // C function void glCompressedTexImage3D ( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid *data )
+
+        glCompressedTexImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Int32 border,
+            [in] Int32 imageSize,
+            [in] IBuffer* data
+        );
+
+        // C function void glCompressedTexImage3D ( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, GLsizei offset )
+
+        glCompressedTexImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Int32 border,
+            [in] Int32 imageSize,
+            [in] Int32 offset
+        );
+
+        // C function void glCompressedTexSubImage3D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid *data )
+
+        glCompressedTexSubImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 xoffset,
+            [in] Int32 yoffset,
+            [in] Int32 zoffset,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Int32 format,
+            [in] Int32 imageSize,
+            [in] IBuffer* data
+        );
+
+        // C function void glCompressedTexSubImage3D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLsizei offset )
+
+        glCompressedTexSubImage3D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 xoffset,
+            [in] Int32 yoffset,
+            [in] Int32 zoffset,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Int32 format,
+            [in] Int32 imageSize,
+            [in] Int32 offset
+        );
+
+        // C function void glGenQueries ( GLsizei n, GLuint *ids )
+
+        glGenQueries(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* ids,
+            [in] Int32 offset
+        );
+
+        // C function void glGenQueries ( GLsizei n, GLuint *ids )
+
+        glGenQueries(
+            [in] Int32 n,
+            [in] IInt32Buffer* ids
+        );
+
+        // C function void glDeleteQueries ( GLsizei n, const GLuint *ids )
+
+        glDeleteQueries(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* ids,
+            [in] Int32 offset
+        );
+
+        // C function void glDeleteQueries ( GLsizei n, const GLuint *ids )
+
+        glDeleteQueries(
+            [in] Int32 n,
+            [in] IInt32Buffer* ids
+        );
+
+        // C function GLboolean glIsQuery ( GLuint id
+        glIsQuery(
+            [in] Int32 id,
+            [out] Boolean* result
+        );
+
+        // C function void glBeginQuery ( GLenum target, GLuint id )
+
+        glBeginQuery(
+            [in] Int32 target,
+            [in] Int32 id
+        );
+
+        // C function void glEndQuery ( GLenum target )
+
+        glEndQuery(
+            [in] Int32 target
+        );
+
+        // C function void glGetQueryiv ( GLenum target, GLenum pname, GLint *params )
+
+        glGetQueryiv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetQueryiv ( GLenum target, GLenum pname, GLint *params )
+
+        glGetQueryiv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glGetQueryObjectuiv ( GLuint id, GLenum pname, GLuint *params )
+
+        glGetQueryObjectuiv(
+            [in] Int32 id,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetQueryObjectuiv ( GLuint id, GLenum pname, GLuint *params )
+
+        glGetQueryObjectuiv(
+            [in] Int32 id,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function GLboolean glUnmapBuffer ( GLenum target )
+
+        glUnmapBuffer(
+            [in] Int32 target,
+            [out] Boolean* result
+        );
+
+        // C function void glGetBufferPointerv ( GLenum target, GLenum pname, GLvoid** params )
+
+        glGetBufferPointerv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [out] IBuffer** buffer
+        );
+
+        // C function void glDrawBuffers ( GLsizei n, const GLenum *bufs )
+
+        glDrawBuffers(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* bufs,
+            [in] Int32 offset
+        );
+
+        // C function void glDrawBuffers ( GLsizei n, const GLenum *bufs )
+
+        glDrawBuffers(
+            [in] Int32 n,
+            [in] IInt32Buffer* bufs
+        );
+
+        // C function void glUniformMatrix2x3fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix2x3fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] ArrayOf<Float>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniformMatrix2x3fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix2x3fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] IFloatBuffer* value
+        );
+
+        // C function void glUniformMatrix3x2fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix3x2fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] ArrayOf<Float>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniformMatrix3x2fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix3x2fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] IFloatBuffer* value
+        );
+
+        // C function void glUniformMatrix2x4fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix2x4fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] ArrayOf<Float>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniformMatrix2x4fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix2x4fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] IFloatBuffer* value
+        );
+
+        // C function void glUniformMatrix4x2fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix4x2fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] ArrayOf<Float>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniformMatrix4x2fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix4x2fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] IFloatBuffer* value
+        );
+
+        // C function void glUniformMatrix3x4fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix3x4fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] ArrayOf<Float>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniformMatrix3x4fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix3x4fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] IFloatBuffer* value
+        );
+
+        // C function void glUniformMatrix4x3fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix4x3fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] ArrayOf<Float>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniformMatrix4x3fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat *value )
+
+        glUniformMatrix4x3fv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] Boolean transpose,
+            [in] IFloatBuffer* value
+        );
+
+        // C function void glBlitFramebuffer ( GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter )
+
+        glBlitFramebuffer(
+            [in] Int32 srcX0,
+            [in] Int32 srcY0,
+            [in] Int32 srcX1,
+            [in] Int32 srcY1,
+            [in] Int32 dstX0,
+            [in] Int32 dstY0,
+            [in] Int32 dstX1,
+            [in] Int32 dstY1,
+            [in] Int32 mask,
+            [in] Int32 filter
+        );
+
+        // C function void glRenderbufferStorageMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height )
+
+        glRenderbufferStorageMultisample(
+            [in] Int32 target,
+            [in] Int32 samples,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height
+        );
+
+        // C function void glFramebufferTextureLayer ( GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer )
+
+        glFramebufferTextureLayer(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 texture,
+            [in] Int32 level,
+            [in] Int32 layer
+        );
+
+        // C function GLvoid * glMapBufferRange ( GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access )
+
+        glMapBufferRange(
+            [in] Int32 target,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] Int32 access,
+            [out] IBuffer** buffer
+        );
+
+        // C function void glFlushMappedBufferRange ( GLenum target, GLintptr offset, GLsizeiptr length )
+
+        glFlushMappedBufferRange(
+            [in] Int32 target,
+            [in] Int32 offset,
+            [in] Int32 length
+        );
+
+        // C function void glBindVertexArray ( GLuint array )
+
+        glBindVertexArray(
+            [in] Int32 array
+        );
+
+        // C function void glDeleteVertexArrays ( GLsizei n, const GLuint *arrays )
+
+        glDeleteVertexArrays(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* arrays,
+            [in] Int32 offset
+        );
+
+        // C function void glDeleteVertexArrays ( GLsizei n, const GLuint *arrays )
+
+        glDeleteVertexArrays(
+            [in] Int32 n,
+            [in] IInt32Buffer* arrays
+        );
+
+        // C function void glGenVertexArrays ( GLsizei n, GLuint *arrays )
+
+        glGenVertexArrays(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* arrays,
+            [in] Int32 offset
+        );
+
+        // C function void glGenVertexArrays ( GLsizei n, GLuint *arrays )
+
+        glGenVertexArrays(
+            [in] Int32 n,
+            [in] IInt32Buffer* arrays
+        );
+
+        // C function GLboolean glIsVertexArray ( GLuint array )
+
+        glIsVertexArray(
+            [in] Int32 array,
+            [out] Boolean* result
+        );
+
+        // C function void glGetIntegeri_v ( GLenum target, GLuint index, GLint *data )
+
+        glGetIntegeri_v(
+            [in] Int32 target,
+            [in] Int32 index,
+            [in] ArrayOf<Int32>* data,
+            [in] Int32 offset
+        );
+
+        // C function void glGetIntegeri_v ( GLenum target, GLuint index, GLint *data )
+
+        glGetIntegeri_v(
+            [in] Int32 target,
+            [in] Int32 index,
+            [in] IInt32Buffer* data
+        );
+
+        // C function void glBeginTransformFeedback ( GLenum primitiveMode )
+
+        glBeginTransformFeedback(
+            [in] Int32 primitiveMode
+        );
+
+        // C function void glEndTransformFeedback ( void )
+
+        glEndTransformFeedback(
+        );
+
+        // C function void glBindBufferRange ( GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size )
+
+        glBindBufferRange(
+            [in] Int32 target,
+            [in] Int32 index,
+            [in] Int32 buffer,
+            [in] Int32 offset,
+            [in] Int32 size
+        );
+
+        // C function void glBindBufferBase ( GLenum target, GLuint index, GLuint buffer )
+
+        glBindBufferBase(
+            [in] Int32 target,
+            [in] Int32 index,
+            [in] Int32 buffer
+        );
+
+        // C function void glTransformFeedbackVaryings ( GLuint program, GLsizei count, const GLchar *varyings, GLenum bufferMode )
+
+        glTransformFeedbackVaryings(
+            [in] Int32 program,
+            [in] ArrayOf<String>* varyings,
+            [in] Int32 bufferMode
+        );
+
+        // C function void glGetTransformFeedbackVarying ( GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name )
+
+        glGetTransformFeedbackVarying(
+            [in] Int32 program,
+            [in] Int32 index,
+            [in] Int32 bufsize,
+            [in] ArrayOf<Int32>* length,
+            [in] Int32 lengthOffset,
+            [in] ArrayOf<Int32>* size,
+            [in] Int32 sizeOffset,
+            [in] ArrayOf<Int32>* type,
+            [in] Int32 typeOffset,
+            [in] ArrayOf<Byte>* name,
+            [in] Int32 nameOffset
+        );
+
+        // C function void glGetTransformFeedbackVarying ( GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name )
+
+        glGetTransformFeedbackVarying(
+            [in] Int32 program,
+            [in] Int32 index,
+            [in] Int32 bufsize,
+            [in] IInt32Buffer* length,
+            [in] IInt32Buffer* size,
+            [in] IInt32Buffer* type,
+            [in] Byte name
+        );
+
+        // C function void glGetTransformFeedbackVarying ( GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name )
+
+        glGetTransformFeedbackVarying(
+            [in] Int32 program,
+            [in] Int32 index,
+            [in] ArrayOf<Int32>* size,
+            [in] Int32 sizeOffset,
+            [in] ArrayOf<Int32>* type,
+            [in] Int32 typeOffset,
+            [out] String* result
+        );
+
+        // C function void glGetTransformFeedbackVarying ( GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name )
+
+        glGetTransformFeedbackVarying(
+            [in] Int32 program,
+            [in] Int32 index,
+            [in] IInt32Buffer* size,
+            [in] IInt32Buffer* type,
+            [out] String* result
+        );
+
+        // C function void glVertexAttribIPointer ( GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid *pointer )
+
+        glVertexAttribIPointer(
+            [in] Int32 index,
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] IBuffer* pointer
+        );
+
+        // C function void glVertexAttribIPointer ( GLuint index, GLint size, GLenum type, GLsizei stride, GLsizei offset )
+
+        glVertexAttribIPointer(
+            [in] Int32 index,
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset
+        );
+
+        // C function void glGetVertexAttribIiv ( GLuint index, GLenum pname, GLint *params )
+
+        glGetVertexAttribIiv(
+            [in] Int32 index,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetVertexAttribIiv ( GLuint index, GLenum pname, GLint *params )
+
+        glGetVertexAttribIiv(
+            [in] Int32 index,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glGetVertexAttribIuiv ( GLuint index, GLenum pname, GLuint *params )
+
+        glGetVertexAttribIuiv(
+            [in] Int32 index,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetVertexAttribIuiv ( GLuint index, GLenum pname, GLuint *params )
+
+        glGetVertexAttribIuiv(
+            [in] Int32 index,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glVertexAttribI4i ( GLuint index, GLint x, GLint y, GLint z, GLint w )
+
+        glVertexAttribI4i(
+            [in] Int32 index,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] Int32 w
+        );
+
+        // C function void glVertexAttribI4ui ( GLuint index, GLuint x, GLuint y, GLuint z, GLuint w )
+
+        glVertexAttribI4ui(
+            [in] Int32 index,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] Int32 w
+        );
+
+        // C function void glVertexAttribI4iv ( GLuint index, const GLint *v )
+
+        glVertexAttribI4iv(
+            [in] Int32 index,
+            [in] ArrayOf<Int32>* v,
+            [in] Int32 offset
+        );
+
+        // C function void glVertexAttribI4iv ( GLuint index, const GLint *v )
+
+        glVertexAttribI4iv(
+            [in] Int32 index,
+            [in] IInt32Buffer* v
+        );
+
+        // C function void glVertexAttribI4uiv ( GLuint index, const GLuint *v )
+
+        glVertexAttribI4uiv(
+            [in] Int32 index,
+            [in] ArrayOf<Int32>* v,
+            [in] Int32 offset
+        );
+
+        // C function void glVertexAttribI4uiv ( GLuint index, const GLuint *v )
+
+        glVertexAttribI4uiv(
+            [in] Int32 index,
+            [in] IInt32Buffer* v
+        );
+
+        // C function void glGetUniformuiv ( GLuint program, GLint location, GLuint *params )
+
+        glGetUniformuiv(
+            [in] Int32 program,
+            [in] Int32 location,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetUniformuiv ( GLuint program, GLint location, GLuint *params )
+
+        glGetUniformuiv(
+            [in] Int32 program,
+            [in] Int32 location,
+            [in] IInt32Buffer* params
+        );
+
+        // C function GLint glGetFragDataLocation ( GLuint program, const GLchar *name )
+
+        glGetFragDataLocation(
+            [in] Int32 program,
+            [in] String name,
+            [out] Int32* result
+        );
+
+        // C function void glUniform1ui ( GLint location, GLuint v0 )
+
+        glUniform1ui(
+            [in] Int32 location,
+            [in] Int32 v0
+        );
+
+        // C function void glUniform2ui ( GLint location, GLuint v0, GLuint v1 )
+
+        glUniform2ui(
+            [in] Int32 location,
+            [in] Int32 v0,
+            [in] Int32 v1
+        );
+
+        // C function void glUniform3ui ( GLint location, GLuint v0, GLuint v1, GLuint v2 )
+
+        glUniform3ui(
+            [in] Int32 location,
+            [in] Int32 v0,
+            [in] Int32 v1,
+            [in] Int32 v2
+        );
+
+        // C function void glUniform4ui ( GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3 )
+
+        glUniform4ui(
+            [in] Int32 location,
+            [in] Int32 v0,
+            [in] Int32 v1,
+            [in] Int32 v2,
+            [in] Int32 v3
+        );
+
+        // C function void glUniform1uiv ( GLint location, GLsizei count, const GLuint *value )
+
+        glUniform1uiv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] ArrayOf<Int32>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniform1uiv ( GLint location, GLsizei count, const GLuint *value )
+
+        glUniform1uiv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] IInt32Buffer* value
+        );
+
+        // C function void glUniform2uiv ( GLint location, GLsizei count, const GLuint *value )
+
+        glUniform2uiv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] ArrayOf<Int32>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniform2uiv ( GLint location, GLsizei count, const GLuint *value )
+
+        glUniform2uiv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] IInt32Buffer* value
+        );
+
+        // C function void glUniform3uiv ( GLint location, GLsizei count, const GLuint *value )
+
+        glUniform3uiv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] ArrayOf<Int32>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniform3uiv ( GLint location, GLsizei count, const GLuint *value )
+
+        glUniform3uiv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] IInt32Buffer* value
+        );
+
+        // C function void glUniform4uiv ( GLint location, GLsizei count, const GLuint *value )
+
+        glUniform4uiv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] ArrayOf<Int32>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glUniform4uiv ( GLint location, GLsizei count, const GLuint *value )
+
+        glUniform4uiv(
+            [in] Int32 location,
+            [in] Int32 count,
+            [in] IInt32Buffer* value
+        );
+
+        // C function void glClearBufferiv ( GLenum buffer, GLint drawbuffer, const GLint *value )
+
+        glClearBufferiv(
+            [in] Int32 buffer,
+            [in] Int32 drawbuffer,
+            [in] ArrayOf<Int32>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glClearBufferiv ( GLenum buffer, GLint drawbuffer, const GLint *value )
+
+        glClearBufferiv(
+            [in] Int32 buffer,
+            [in] Int32 drawbuffer,
+            [in] IInt32Buffer* value
+        );
+
+        // C function void glClearBufferuiv ( GLenum buffer, GLint drawbuffer, const GLuint *value )
+
+        glClearBufferuiv(
+            [in] Int32 buffer,
+            [in] Int32 drawbuffer,
+            [in] ArrayOf<Int32>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glClearBufferuiv ( GLenum buffer, GLint drawbuffer, const GLuint *value )
+
+        glClearBufferuiv(
+            [in] Int32 buffer,
+            [in] Int32 drawbuffer,
+            [in] IInt32Buffer* value
+        );
+
+        // C function void glClearBufferfv ( GLenum buffer, GLint drawbuffer, const GLfloat *value )
+
+        glClearBufferfv(
+            [in] Int32 buffer,
+            [in] Int32 drawbuffer,
+            [in] ArrayOf<Float>* value,
+            [in] Int32 offset
+        );
+
+        // C function void glClearBufferfv ( GLenum buffer, GLint drawbuffer, const GLfloat *value )
+
+        glClearBufferfv(
+            [in] Int32 buffer,
+            [in] Int32 drawbuffer,
+            [in] IFloatBuffer* value
+        );
+
+        // C function void glClearBufferfi ( GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil )
+
+        glClearBufferfi(
+            [in] Int32 buffer,
+            [in] Int32 drawbuffer,
+            [in] Float depth,
+            [in] Int32 stencil
+        );
+
+        // C function const GLubyte * glGetStringi ( GLenum name, GLuint index )
+
+        glGetStringi(
+            [in] Int32 name,
+            [in] Int32 index,
+            [out] Boolean* result
+        );
+
+        // C function void glCopyBufferSubData ( GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size )
+
+        glCopyBufferSubData(
+            [in] Int32 readTarget,
+            [in] Int32 writeTarget,
+            [in] Int32 readOffset,
+            [in] Int32 writeOffset,
+            [in] Int32 size
+        );
+
+        // C function void glGetUniformIndices ( GLuint program, GLsizei uniformCount, const GLchar *const *uniformNames, GLuint *uniformIndices )
+
+        glGetUniformIndices(
+            [in] Int32 program,
+            [in] ArrayOf<String>* uniformNames,
+            [in] ArrayOf<Int32>* uniformIndices,
+            [in] Int32 uniformIndicesOffset
+        );
+
+        // C function void glGetUniformIndices ( GLuint program, GLsizei uniformCount, const GLchar *const *uniformNames, GLuint *uniformIndices )
+
+        glGetUniformIndices(
+            [in] Int32 program,
+            [in] ArrayOf<String>* uniformNames,
+            [in] IInt32Buffer* uniformIndices
+        );
+
+        // C function void glGetActiveUniformsiv ( GLuint program, GLsizei uniformCount, const GLuint *uniformIndices, GLenum pname, GLint *params )
+
+        glGetActiveUniformsiv(
+            [in] Int32 program,
+            [in] Int32 uniformCount,
+            [in] ArrayOf<Int32>* uniformIndices,
+            [in] Int32 uniformIndicesOffset,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 paramsOffset
+        );
+
+        // C function void glGetActiveUniformsiv ( GLuint program, GLsizei uniformCount, const GLuint *uniformIndices, GLenum pname, GLint *params )
+
+        glGetActiveUniformsiv(
+            [in] Int32 program,
+            [in] Int32 uniformCount,
+            [in] IInt32Buffer* uniformIndices,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function GLuint glGetUniformBlockIndex ( GLuint program, const GLchar *uniformBlockName )
+
+        glGetUniformBlockIndex(
+            [in] Int32 program,
+            [in] String uniformBlockName,
+            [out] Int32* result
+        );
+
+        // C function void glGetActiveUniformBlockiv ( GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint *params )
+
+        glGetActiveUniformBlockiv(
+            [in] Int32 program,
+            [in] Int32 uniformBlockIndex,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetActiveUniformBlockiv ( GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint *params )
+
+        glGetActiveUniformBlockiv(
+            [in] Int32 program,
+            [in] Int32 uniformBlockIndex,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glGetActiveUniformBlockName ( GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei *length, GLchar *uniformBlockName )
+
+        glGetActiveUniformBlockName(
+            [in] Int32 program,
+            [in] Int32 uniformBlockIndex,
+            [in] Int32 bufSize,
+            [in] ArrayOf<Int32>* length,
+            [in] Int32 lengthOffset,
+            [in] ArrayOf<Byte>* uniformBlockName,
+            [in] Int32 uniformBlockNameOffset
+        );
+
+        // C function void glGetActiveUniformBlockName ( GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei *length, GLchar *uniformBlockName )
+
+        glGetActiveUniformBlockName(
+            [in] Int32 program,
+            [in] Int32 uniformBlockIndex,
+            [in] IBuffer* length,
+            [in] IBuffer* uniformBlockName
+        );
+
+        // C function void glGetActiveUniformBlockName ( GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei *length, GLchar *uniformBlockName )
+
+        glGetActiveUniformBlockName(
+            [in] Int32 program,
+            [in] Int32 uniformBlockIndex,
+            [out] String* result
+        );
+
+        // C function void glUniformBlockBinding ( GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding )
+
+        glUniformBlockBinding(
+            [in] Int32 program,
+            [in] Int32 uniformBlockIndex,
+            [in] Int32 uniformBlockBinding
+        );
+
+        // C function void glDrawArraysInstanced ( GLenum mode, GLint first, GLsizei count, GLsizei instanceCount )
+
+        glDrawArraysInstanced(
+            [in] Int32 mode,
+            [in] Int32 first,
+            [in] Int32 count,
+            [in] Int32 instanceCount
+        );
+
+        // C function void glDrawElementsInstanced ( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices, GLsizei instanceCount )
+
+        glDrawElementsInstanced(
+            [in] Int32 mode,
+            [in] Int32 count,
+            [in] Int32 type,
+            [in] IBuffer* indices,
+            [in] Int32 instanceCount
+        );
+
+        // C function void glDrawElementsInstanced ( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices, GLsizei instanceCount )
+
+        glDrawElementsInstanced(
+            [in] Int32 mode,
+            [in] Int32 count,
+            [in] Int32 type,
+            [in] Int32 indicesOffset,
+            [in] Int32 instanceCount
+        );
+
+        // C function GLsync glFenceSync ( GLenum condition, GLbitfield flags )
+
+        glFenceSync(
+            [in] Int32 condition,
+            [in] Int32 flags,
+            [out] Int64* result
+        );
+
+        // C function GLboolean glIsSync ( GLsync sync )
+
+        glIsSync(
+            [in] Int64 sync,
+            [out] Boolean* result
+        );
+
+        // C function void glDeleteSync ( GLsync sync )
+
+        glDeleteSync(
+            [in] Int64 sync
+        );
+
+        // C function GLenum glClientWaitSync ( GLsync sync, GLbitfield flags, GLuint64 timeout )
+
+        glClientWaitSync(
+            [in] Int64 sync,
+            [in] Int32 flags,
+            [in] Int64 timeout,
+            [out] Int32* result
+        );
+
+        // C function void glWaitSync ( GLsync sync, GLbitfield flags, GLuint64 timeout )
+
+        glWaitSync(
+            [in] Int64 sync,
+            [in] Int32 flags,
+            [in] Int64 timeout
+        );
+
+        // C function void glGetInteger64v ( GLenum pname, GLint64 *params )
+
+        glGetInteger64v(
+            [in] Int32 pname,
+            [in] ArrayOf<Int64>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetInteger64v ( GLenum pname, GLint64 *params )
+
+        glGetInteger64v(
+            [in] Int32 pname,
+            [in] IInt64Buffer*  params
+        );
+
+        // C function void glGetSynciv ( GLsync sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values )
+
+        glGetSynciv(
+            [in] Int64 sync,
+            [in] Int32 pname,
+            [in] Int32 bufSize,
+            [in] ArrayOf<Int32>* length,
+            [in] Int32 lengthOffset,
+            [in] ArrayOf<Int32>* values,
+            [in] Int32 valuesOffset
+        );
+
+        // C function void glGetSynciv ( GLsync sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values )
+
+        glGetSynciv(
+            [in] Int64 sync,
+            [in] Int32 pname,
+            [in] Int32 bufSize,
+            [in] IInt32Buffer* length,
+            [in] IInt32Buffer* values
+        );
+
+        // C function void glGetInteger64i_v ( GLenum target, GLuint index, GLint64 *data )
+
+        glGetInteger64i_v(
+            [in] Int32 target,
+            [in] Int32 index,
+            [in] ArrayOf<Int64>* data,
+            [in] Int32 offset
+        );
+
+        // C function void glGetInteger64i_v ( GLenum target, GLuint index, GLint64 *data )
+
+        glGetInteger64i_v(
+            [in] Int32 target,
+            [in] Int32 index,
+            [in] IInt64Buffer*  data
+        );
+
+        // C function void glGetBufferParameteri64v ( GLenum target, GLenum pname, GLint64 *params )
+
+        glGetBufferParameteri64v(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int64>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetBufferParameteri64v ( GLenum target, GLenum pname, GLint64 *params )
+
+        glGetBufferParameteri64v(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt64Buffer*  params
+        );
+
+        // C function void glGenSamplers ( GLsizei count, GLuint *samplers )
+
+        glGenSamplers(
+            [in] Int32 count,
+            [in] ArrayOf<Int32>* samplers,
+            [in] Int32 offset
+        );
+
+        // C function void glGenSamplers ( GLsizei count, GLuint *samplers )
+
+        glGenSamplers(
+            [in] Int32 count,
+            [in] IInt32Buffer* samplers
+        );
+
+        // C function void glDeleteSamplers ( GLsizei count, const GLuint *samplers )
+
+        glDeleteSamplers(
+            [in] Int32 count,
+            [in] ArrayOf<Int32>* samplers,
+            [in] Int32 offset
+        );
+
+        // C function void glDeleteSamplers ( GLsizei count, const GLuint *samplers )
+
+        glDeleteSamplers(
+            [in] Int32 count,
+            [in] IInt32Buffer* samplers
+        );
+
+        // C function GLboolean glIsSampler ( GLuint sampler )
+
+        glIsSampler(
+            [in] Int32 sampler,
+            [out] Boolean* result
+        );
+
+        // C function void glBindSampler ( GLuint unit, GLuint sampler )
+
+        glBindSampler(
+            [in] Int32 unit,
+            [in] Int32 sampler
+        );
+
+        // C function void glSamplerParameteri ( GLuint sampler, GLenum pname, GLint param )
+
+        glSamplerParameteri(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] Int32 param
+        );
+
+        // C function void glSamplerParameteriv ( GLuint sampler, GLenum pname, const GLint *param )
+
+        glSamplerParameteriv(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* param,
+            [in] Int32 offset
+        );
+
+        // C function void glSamplerParameteriv ( GLuint sampler, GLenum pname, const GLint *param )
+
+        glSamplerParameteriv(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] IInt32Buffer* param
+        );
+
+        // C function void glSamplerParameterf ( GLuint sampler, GLenum pname, GLfloat param )
+
+        glSamplerParameterf(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] Float param
+        );
+
+        // C function void glSamplerParameterfv ( GLuint sampler, GLenum pname, const GLfloat *param )
+
+        glSamplerParameterfv(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* param,
+            [in] Int32 offset
+        );
+
+        // C function void glSamplerParameterfv ( GLuint sampler, GLenum pname, const GLfloat *param )
+
+        glSamplerParameterfv(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] IFloatBuffer* param
+        );
+
+        // C function void glGetSamplerParameteriv ( GLuint sampler, GLenum pname, GLint *params )
+
+        glGetSamplerParameteriv(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetSamplerParameteriv ( GLuint sampler, GLenum pname, GLint *params )
+
+        glGetSamplerParameteriv(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glGetSamplerParameterfv ( GLuint sampler, GLenum pname, GLfloat *params )
+
+        glGetSamplerParameterfv(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetSamplerParameterfv ( GLuint sampler, GLenum pname, GLfloat *params )
+
+        glGetSamplerParameterfv(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params
+        );
+
+        // C function void glVertexAttribDivisor ( GLuint index, GLuint divisor )
+
+        glVertexAttribDivisor(
+            [in] Int32 index,
+            [in] Int32 divisor
+        );
+
+        // C function void glBindTransformFeedback ( GLenum target, GLuint id )
+
+        glBindTransformFeedback(
+            [in] Int32 target,
+            [in] Int32 id
+        );
+
+        // C function void glDeleteTransformFeedbacks ( GLsizei n, const GLuint *ids )
+
+        glDeleteTransformFeedbacks(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* ids,
+            [in] Int32 offset
+        );
+
+        // C function void glDeleteTransformFeedbacks ( GLsizei n, const GLuint *ids )
+
+        glDeleteTransformFeedbacks(
+            [in] Int32 n,
+            [in] IInt32Buffer* ids
+        );
+
+        // C function void glGenTransformFeedbacks ( GLsizei n, GLuint *ids )
+
+        glGenTransformFeedbacks(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* ids,
+            [in] Int32 offset
+        );
+
+        // C function void glGenTransformFeedbacks ( GLsizei n, GLuint *ids )
+
+        glGenTransformFeedbacks(
+            [in] Int32 n,
+            [in] IInt32Buffer* ids
+        );
+
+        // C function GLboolean glIsTransformFeedback ( GLuint id )
+
+        glIsTransformFeedback(
+            [in] Int32 id,
+            [out] Boolean* result
+        );
+
+        // C function void glPauseTransformFeedback ( void )
+
+        glPauseTransformFeedback(
+        );
+
+        // C function void glResumeTransformFeedback ( void )
+
+        glResumeTransformFeedback(
+        );
+
+        // C function void glGetProgramBinary ( GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, GLvoid *binary )
+
+        glGetProgramBinary(
+            [in] Int32 program,
+            [in] Int32 bufSize,
+            [in] ArrayOf<Int32>* length,
+            [in] Int32 lengthOffset,
+            [in] ArrayOf<Int32>* binaryFormat,
+            [in] Int32 binaryFormatOffset,
+            [in] IBuffer* binary
+        );
+
+        // C function void glGetProgramBinary ( GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, GLvoid *binary )
+
+        glGetProgramBinary(
+            [in] Int32 program,
+            [in] Int32 bufSize,
+            [in] IInt32Buffer* length,
+            [in] IInt32Buffer* binaryFormat,
+            [in] IBuffer* binary
+        );
+
+        // C function void glProgramBinary ( GLuint program, GLenum binaryFormat, const GLvoid *binary, GLsizei length )
+
+        glProgramBinary(
+            [in] Int32 program,
+            [in] Int32 binaryFormat,
+            [in] IBuffer* binary,
+            [in] Int32 length
+        );
+
+        // C function void glProgramParameteri ( GLuint program, GLenum pname, GLint value )
+
+        glProgramParameteri(
+            [in] Int32 program,
+            [in] Int32 pname,
+            [in] Int32 value
+        );
+
+        // C function void glInvalidateFramebuffer ( GLenum target, GLsizei numAttachments, const GLenum *attachments )
+
+        glInvalidateFramebuffer(
+            [in] Int32 target,
+            [in] Int32 numAttachments,
+            [in] ArrayOf<Int32>* attachments,
+            [in] Int32 offset
+        );
+
+        // C function void glInvalidateFramebuffer ( GLenum target, GLsizei numAttachments, const GLenum *attachments )
+
+        glInvalidateFramebuffer(
+            [in] Int32 target,
+            [in] Int32 numAttachments,
+            [in] IInt32Buffer* attachments
+        );
+
+        // C function void glInvalidateSubFramebuffer ( GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height )
+
+        glInvalidateSubFramebuffer(
+            [in] Int32 target,
+            [in] Int32 numAttachments,
+            [in] ArrayOf<Int32>* attachments,
+            [in] Int32 offset,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 width,
+            [in] Int32 height
+        );
+
+        // C function void glInvalidateSubFramebuffer ( GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height )
+
+        glInvalidateSubFramebuffer(
+            [in] Int32 target,
+            [in] Int32 numAttachments,
+            [in] IInt32Buffer* attachments,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 width,
+            [in] Int32 height
+        );
+
+        // C function void glTexStorage2D ( GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height )
+
+        glTexStorage2D(
+            [in] Int32 target,
+            [in] Int32 levels,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height
+        );
+
+        // C function void glTexStorage3D ( GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth )
+
+        glTexStorage3D(
+            [in] Int32 target,
+            [in] Int32 levels,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth
+        );
+
+        // C function void glGetInternalformativ ( GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params )
+
+        glGetInternalformativ(
+            [in] Int32 target,
+            [in] Int32 internalformat,
+            [in] Int32 pname,
+            [in] Int32 bufSize,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetInternalformativ ( GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params )
+
+        glGetInternalformativ(
+            [in] Int32 target,
+            [in] Int32 internalformat,
+            [in] Int32 pname,
+            [in] Int32 bufSize,
+            [in] IInt32Buffer* params
+        );
+
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}

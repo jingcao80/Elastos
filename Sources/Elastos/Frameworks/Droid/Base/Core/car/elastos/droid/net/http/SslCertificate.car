@@ -1,0 +1,147 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Net.Http.ISslCertificateDName;
+    interface Elastos.Droid.View.IView;
+
+    using interface Elastos.Utility.IDate;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * SSL certificate info (certificate details) class
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    [local]
+    interface ISslCertificate {
+        /**
+         * @return Not-before date from the certificate validity period or
+         * "" if none has been set
+         */
+        GetValidNotBeforeDate(
+            [out] IDate** result);
+
+        /**
+         * @return Not-before date from the certificate validity period in
+         * ISO 8601 format or "" if none has been set
+         *
+         * @deprecated Use {@link #getValidNotBeforeDate()}
+         */
+        // @Deprecated
+        GetValidNotBefore(
+            [out] String* result);
+
+        /**
+         * @return Not-after date from the certificate validity period or
+         * "" if none has been set
+         */
+        GetValidNotAfterDate(
+            [out] IDate** result);
+
+        /**
+         * @return Not-after date from the certificate validity period in
+         * ISO 8601 format or "" if none has been set
+         *
+         * @deprecated Use {@link #getValidNotAfterDate()}
+         */
+        // @Deprecated
+        GetValidNotAfter(
+            [out] String* result);
+
+        /**
+         * @return Issued-to distinguished name or null if none has been set
+         */
+        GetIssuedTo(
+            [out] ISslCertificateDName** result);
+
+        /**
+         * @return Issued-by distinguished name or null if none has been set
+         */
+        GetIssuedBy(
+            [out] ISslCertificateDName** result);
+
+        /**
+         * Inflates the SSL certificate view (helper method).
+         * @return The resultant certificate view with issued-to, issued-by,
+         * issued-on, expires-on, and possibly other fields set.
+         *
+         * @hide Used by Browser and Settings
+         */
+        InflateCertificateView(
+            [in] IContext* context,
+            [out] IView** result);
+    }
+
+    [local]
+    interface ISslCertificateHelper {
+        /**
+         * Saves the certificate state to a bundle
+         * @param certificate The SSL certificate to store
+         * @return A bundle with the certificate stored in it or null if fails
+         */
+        SaveState(
+            [in] ISslCertificate* certificate,
+            [out] IBundle** result);
+
+        /**
+         * Restores the certificate stored in the bundle
+         * @param bundle The bundle with the certificate state stored in it
+         * @return The SSL certificate stored in the bundle or null if fails
+         */
+        RestoreState(
+            [in] IBundle* bundle,
+            [out] ISslCertificate** result);
+    }
+
+
+    /**
+     * A distinguished name helper class: a 3-tuple of:
+     * <ul>
+     *   <li>the most specific common name (CN)</li>
+     *   <li>the most specific organization (O)</li>
+     *   <li>the most specific organizational unit (OU)</li>
+     * <ul>
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ISslCertificateDName {
+        /**
+         * @return The distinguished name (normally includes CN, O, and OU names)
+         */
+        GetDName(
+            [out] String* result);
+
+        /**
+         * @return The most specific Common-name (CN) component of this name
+         */
+        GetCName(
+            [out] String* result);
+
+        /**
+         * @return The most specific Organization (O) component of this name
+         */
+        GetOName(
+            [out] String* result);
+
+        /**
+         * @return The most specific Organizational Unit (OU) component of this name
+         */
+        GetUName(
+            [out] String* result);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

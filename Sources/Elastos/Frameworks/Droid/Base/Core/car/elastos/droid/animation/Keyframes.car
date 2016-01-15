@@ -1,0 +1,100 @@
+
+module {
+    interface Elastos.Droid.Animation.ITypeEvaluator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Animation {
+
+    /**
+     * This interface abstracts a collection of Keyframe objects and is called by
+     * ValueAnimator to calculate values between those keyframes for a given animation.
+     */
+    interface IKeyframes {
+        /**
+         * Sets the TypeEvaluator to be used when calculating animated values. This object
+         * is required only for Keyframes that are not either IntKeyframes or FloatKeyframes,
+         * both of which assume their own evaluator to speed up calculations with those primitive
+         * types.
+         *
+         * @param evaluator The TypeEvaluator to be used to calculate animated values.
+         */
+        SetEvaluator(
+            [in] ITypeEvaluator* evaluator);
+
+        /**
+         * @return The value type contained by the contained Keyframes.
+         */
+        GetType(
+            [out] InterfaceID* type);
+
+        /**
+         * Gets the animated value, given the elapsed fraction of the animation (interpolated by the
+         * animation's interpolator) and the evaluator used to calculate in-between values. This
+         * function maps the input fraction to the appropriate keyframe interval and a fraction
+         * between them and returns the interpolated value. Note that the input fraction may fall
+         * outside the [0-1] bounds, if the animation's interpolator made that happen (e.g., a
+         * spring interpolation that might send the fraction past 1.0). We handle this situation by
+         * just using the two keyframes at the appropriate end when the value is outside those bounds.
+         *
+         * @param fraction The elapsed fraction of the animation
+         * @return The animated value.
+         */
+        GetValue(
+            [in] Float fraction,
+            [out] IInterface** value);
+
+        /**
+         * If subclass has variables that it calculates based on the Keyframes, it should reset them
+         * when this method is called because Keyframe contents might have changed.
+         */
+        InvalidateCache();
+
+        /**
+         * @return A list of all Keyframes contained by this. This may return null if this is
+         * not made up of Keyframes.
+         */
+        GetKeyframes(
+            [out, callee] ArrayOf<IKeyframe*>* frames);
+    }
+
+    /**
+     * @Involve
+     * @extends Elastos.Droid.Animation.IKeyframes
+     */
+    /**
+     * A specialization of Keyframes that has integer primitive value calculation.
+     */
+    interface IInt32Keyframes {
+        /**
+         * Works like {@link #getValue(float)}, but returning a primitive.
+         * @param fraction The elapsed fraction of the animation
+         * @return The animated value.
+         */
+        GetInt32Value(
+            [in] Float fraction,
+            [out] Int32* value);
+    }
+
+    /**
+     * @Involve
+     * @extends Elastos.Droid.Animation.IKeyframes
+     */
+    /**
+     * A specialization of Keyframes that has float primitive value calculation.
+     */
+    interface IFloatKeyframes {
+        /**
+         * Works like {@link #getValue(float)}, but returning a primitive.
+         * @param fraction The elapsed fraction of the animation
+         * @return The animated value.
+         */
+        GetFloatValue(
+            [in] Float fraction,
+            [out] Float* value);
+    }
+
+    }   //namespace Animation
+    }   //namespace Droid
+    }   //namespace Elastos
+}

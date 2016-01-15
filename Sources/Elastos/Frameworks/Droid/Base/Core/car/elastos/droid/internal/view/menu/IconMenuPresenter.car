@@ -1,0 +1,38 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+
+    /**
+     * MenuPresenter for the classic "six-pack" icon menu.
+     */
+    /**
+     * @Involve
+     * interface IMenuPresenter
+     * interface IBaseMenuPresenter
+     */
+    [local]
+    interface IIconMenuPresenter {
+
+        GetNumActualItemsShown(
+            [out] Int32* rst);
+
+        SaveHierarchyState(
+            [in] IBundle* outState);
+
+        RestoreHierarchyState(
+            [in] IBundle* inState);
+    }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,253 @@
+module
+{
+    interface Elastos.Core.IThrowable;
+    interface Elastos.Utility.IResourceBundle;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Logging {
+    /**
+     * A {@code LogRecord} object represents a logging request. It is passed between
+     * the logging framework and individual logging handlers. Client applications
+     * should not modify a {@code LogRecord} object that has been passed into the
+     * logging framework.
+     * <p>
+     * The {@code LogRecord} class will infer the source method name and source
+     * class name the first time they are accessed if the client application didn't
+     * specify them explicitly. This automatic inference is based on the analysis of
+     * the call stack and is not guaranteed to be precise. Client applications
+     * should force the initialization of these two fields by calling
+     * {@code getSourceClassName} or {@code getSourceMethodName} if they expect to
+     * use them after passing the {@code LogRecord} object to another thread or
+     * transmitting it over RMI.
+     */
+    [deprecated]
+    interface ILogRecord {
+        /**
+         * Gets the logging level.
+         *
+         * @return the logging level.
+         */
+        GetLevel(
+            [out] ILevel** outlevel);
+
+        /**
+         * Sets the logging level.
+         *
+         * @param level
+         *            the level to set.
+         * @throws NullPointerException
+         *             if {@code level} is {@code null}.
+         */
+        SetLevel(
+            [in] ILevel* level);
+
+        /**
+         * Gets the name of the logger.
+         *
+         * @return the logger name.
+         */
+        GetLoggerName(
+            [out] String* str);
+
+        /**
+         * Sets the name of the logger.
+         *
+         * @param loggerName
+         *            the logger name to set.
+         */
+        SetLoggerName(
+            [in] String loggerName);
+
+        /**
+         * Gets the raw message.
+         *
+         * @return the raw message, may be {@code null}.
+         */
+        GetMessage(
+            [out] String* str);
+
+        /**
+         * Sets the raw message. When this record is formatted by a logger that has
+         * a localization resource bundle that contains an entry for {@code message},
+         * then the raw message is replaced with its localized version.
+         *
+         * @param message
+         *            the raw message to set, may be {@code null}.
+         */
+        SetMessage(
+            [in] String message);
+
+        /**
+         * Gets the time when this event occurred, in milliseconds since 1970.
+         *
+         * @return the time when this event occurred, in milliseconds since 1970.
+         */
+        GetMillis(
+            [out] Int64* value);
+
+        /**
+         * Sets the time when this event occurred, in milliseconds since 1970.
+         *
+         * @param millis
+         *            the time when this event occurred, in milliseconds since 1970.
+         */
+        SetMillis(
+            [in] Int64 millis);
+
+        /**
+         * Gets the parameters.
+         *
+         * @return the array of parameters or {@code null} if there are no
+         *         parameters.
+         */
+        GetParameters(
+            [out, callee] ArrayOf<IInterface*>* outarr);
+
+        /**
+         * Sets the parameters.
+         *
+         * @param parameters
+         *            the array of parameters to set, may be {@code null}.
+         */
+        SetParameters(
+            [in] ArrayOf<IInterface*>* parameters);
+
+        /**
+         * Gets the resource bundle used to localize the raw message during
+         * formatting.
+         *
+         * @return the associated resource bundle, {@code null} if none is
+         *         available or the message is not localizable.
+         */
+        GetResourceBundle(
+            [out] IResourceBundle** outres);
+
+        /**
+         * Sets the resource bundle used to localize the raw message during
+         * formatting.
+         *
+         * @param resourceBundle
+         *            the resource bundle to set, may be {@code null}.
+         */
+        SetResourceBundle(
+            [in] IResourceBundle* resourceBundle);
+
+        /**
+         * Gets the name of the resource bundle.
+         *
+         * @return the name of the resource bundle, {@code null} if none is
+         *         available or the message is not localizable.
+         */
+        GetResourceBundleName(
+            [out] String* str);
+
+        /**
+         * Sets the name of the resource bundle.
+         *
+         * @param resourceBundleName
+         *            the name of the resource bundle to set.
+         */
+        SetResourceBundleName(
+            [in] String resourceBundleName);
+
+        /**
+         * Gets the sequence number.
+         *
+         * @return the sequence number.
+         */
+        GetSequenceNumber(
+            [out] Int64* value);
+
+        /**
+         * Sets the sequence number. It is usually not necessary to call this method
+         * to change the sequence number because the number is allocated when this
+         * instance is constructed.
+         *
+         * @param sequenceNumber
+         *            the sequence number to set.
+         */
+        SetSequenceNumber(
+            [in] Int64 sequenceNumber);
+
+        /**
+         * Gets the name of the class that is the source of this log record. This
+         * information can be changed, may be {@code null} and is untrusted.
+         *
+         * @return the name of the source class of this log record (possiblity {@code null})
+         */
+        GetSourceClassName(
+            [out] String* str);
+
+        /**
+         * Sets the name of the class that is the source of this log record.
+         *
+         * @param sourceClassName
+         *            the name of the source class of this log record, may be
+         *            {@code null}.
+         */
+        SetSourceClassName(
+            [in] String sourceClassName);
+
+        /**
+         * Gets the name of the method that is the source of this log record.
+         *
+         * @return the name of the source method of this log record.
+         */
+        GetSourceMethodName(
+            [out] String* str);
+
+        /**
+         * Sets the name of the method that is the source of this log record.
+         *
+         * @param sourceMethodName
+         *            the name of the source method of this log record, may be
+         *            {@code null}.
+         */
+        SetSourceMethodName(
+            [in] String sourceMethodName);
+
+        /**
+         * Gets a unique ID of the thread originating the log record. Every thread
+         * becomes a different ID.
+         * <p>
+         * Notice : the ID doesn't necessary map the OS thread ID
+         * </p>
+         *
+         * @return the ID of the thread originating this log record.
+         */
+        GetThreadID(
+            [out] Int32* value);
+
+        /**
+         * Sets the ID of the thread originating this log record.
+         *
+         * @param threadID
+         *            the new ID of the thread originating this log record.
+         */
+        SetThreadID(
+            [in] Int32 threadID);
+
+        /**
+         * Gets the {@code Throwable} object associated with this log record.
+         *
+         * @return the {@code Throwable} object associated with this log record.
+         */
+        GetThrown(
+            [out] IThrowable** outthr);
+
+        /**
+         * Sets the {@code Throwable} object associated with this log record.
+         *
+         * @param thrown
+         *            the new {@code Throwable} object to associate with this log
+         *            record.
+         */
+        SetThrown(
+            [in] IThrowable* thrown);
+    }
+
+    } // namespace Logging
+    } // namespace Utility
+    } // namespace Elastos
+}

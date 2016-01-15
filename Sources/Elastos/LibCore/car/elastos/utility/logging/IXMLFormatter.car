@@ -1,0 +1,24 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Logging {
+    /**
+     * Formatter to convert a {@link LogRecord} into an XML string. The DTD
+     * specified in Appendix A to the Java Logging APIs specification is used.
+     * {@code XMLFormatter} uses the output handler's encoding if it is specified,
+     * otherwise the default platform encoding is used instead. UTF-8 is the
+     * recommended encoding.
+     */
+
+    /**
+     * @Involve
+     * interface ILogFormatter;
+     */
+    interface IXMLFormatter {
+    }
+
+    } // namespace Logging
+    } // namespace Utility
+    } // namespace Elastos
+}

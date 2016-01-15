@@ -1,0 +1,171 @@
+
+module
+{
+    using interface Elastos.Droid.Os.IParcelUuid;
+    using interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    interface Elastos.Droid.Bluetooth.IIBluetoothCallback;
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        [deprecated]
+        interface IIBluetooth {
+            IsEnabled(
+                [out] Boolean* isEnable);
+
+            GetState(
+                [out] Int32* state);
+
+            Enable(
+                [out] Boolean* result);
+
+            EnableNoAutoConnect(
+                [out] Boolean* result);
+
+            Disable(
+                [out] Boolean* result);
+
+            GetAddress(
+                [out] String* address);
+
+            GetUuids(
+                [out, callee] ArrayOf<IParcelUuid*>* uuids);
+
+            SetName(
+                [in] String name,
+                [out] Boolean* result);
+
+            GetName(
+                [out] String* name);
+
+            GetScanMode(
+                [out] Int32* mode);
+
+            SetScanMode(
+                [in] Int32 mode,
+                [in] Int32 duration,
+                [out] Boolean* result);
+
+            GetDiscoverableTimeout(
+                [out] Int32* timeout);
+
+            SetDiscoverableTimeout(
+                [in] Int32 timeout,
+                [out] Boolean* result);
+
+            StartDiscovery(
+                [out] Boolean* result);
+
+            CancelDiscovery(
+                [out] Boolean* result);
+
+            IsDiscovering(
+                [out] Boolean* IsDiscovering);
+
+            GetAdapterConnectionState(
+                [out] Int32* state);
+
+            GetProfileConnectionState(
+                [in] Int32 profile,
+                [out] Int32* state);
+
+            GetBondedDevices(
+                [out, callee] ArrayOf<IBluetoothDevice*>* devices);
+
+            CreateBond(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            CancelBondProcess(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            RemoveBond(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            GetBondState(
+                [in] IBluetoothDevice* device,
+                [out] Int32* state);
+
+            GetRemoteName(
+                [in] IBluetoothDevice* device,
+                [out] String* name);
+
+            GetRemoteAlias(
+                [in] IBluetoothDevice* device,
+                [out] String* alias);
+
+            SetRemoteAlias(
+                [in] IBluetoothDevice* device,
+                [in] String name,
+                [out] Boolean* result);
+
+            GetRemoteClass(
+                [in] IBluetoothDevice* device,
+                [out] Int32* remoteClass);
+
+            GetRemoteUuids(
+                [in] IBluetoothDevice* device,
+                [out, callee] ArrayOf<IParcelUuid*>* uuids);
+
+            FetchRemoteUuids(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            SetPin(
+                [in] IBluetoothDevice* device,
+                [in] Boolean accept,
+                [in] Int32 len,
+                [in] ArrayOf<Byte>* pinCode,
+                [out] Boolean* result);
+
+            SetPasskey(
+                [in] IBluetoothDevice* device,
+                [in] Boolean accept,
+                [in] Int32 len,
+                [in] ArrayOf<Byte>* passkey,
+                [out] Boolean* result);
+
+            SetPairingConfirmation(
+                [in] IBluetoothDevice* device,
+                [in] Boolean accept,
+                [out] Boolean* result);
+
+            SendConnectionStateChange(
+                [in] IBluetoothDevice* device,
+                [in] Int32 profile,
+                [in] Int32 state,
+                [in] Int32 prevState);
+
+            RegisterCallback(
+                [in] IIBluetoothCallback* bluetoothCallback);
+
+            UnregisterCallback(
+                [in] IIBluetoothCallback* bluetoothCallback);
+
+            // For Socket
+            ConnectSocket(
+                [in] IBluetoothDevice* device,
+                [in] Int32 type,
+                [in] IParcelUuid* uuid,
+                [in] Int32 port,
+                [in] Int32 flag,
+                [out] IParcelFileDescriptor** fd);
+
+            CreateSocketChannel(
+                [in] Int32 type,
+                [in] String serviceName,
+                [in] IParcelUuid* uuid,
+                [in] Int32 port,
+                [in] Int32 flag,
+                [out] IParcelFileDescriptor** fd);
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

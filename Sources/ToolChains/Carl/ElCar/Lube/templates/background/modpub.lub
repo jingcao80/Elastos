@@ -1,0 +1,98 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "_${name}pub.cpp"
+$
+#ifndef __CAR_${Upper(name)}PUB_CPP__
+#define __CAR_${Upper(name)}PUB_CPP__
+
+#include <clsinfo.h>
+#include "elastos.h"
+
+$   WITH all classes DO
+$     IF type is "clsobj"
+#include "${fullname}.h"
+$     END IF
+$   END DO ;; all classes
+
+#ifndef __UUNM_${MacroRewrite(name)}_DEFINED__
+#define __UUNM_${MacroRewrite(name)}_DEFINED__
+#define c_p${MacroRewrite(name)}Uunm ${uunm}
+#endif // __UUNM_${MacroRewrite(name)}_DEFINED__
+
+$   WITH all classes DO
+${ClassNamespaceBegin(class)}$^
+extern const _ELASTOS ClassID ECLSID_${name} = {
+    ${uuid},
+    (char *)c_p${MacroRewrite(module.name)}Uunm,
+    0x${module.carcode} };
+${ClassNamespaceEnd(class)}$^
+$   END DO ;; all classes
+
+${GenerateDependHeaderForModule(module)}
+
+$   WITH all interfaces DO
+${InterfaceNamespaceBegin(interface)}$^
+$   WITH all interfaceconsts DO
+$     IF type is "Byte" or type is "Int16" or type is "Int32" or type is "Char32"
+const ${type} ${interface.name}::${name};
+$     ELSE
+const ${type} ${interface.name}::${name} = ${value};
+$     END IF
+$   END DO ;; all interfaceconsts
+extern const _ELASTOS InterfaceID EIID_${name} = \
+    ${iid};
+${InterfaceNamespaceEnd(interface)}$^
+$   END DO ;; all interfaces
+$
+
+$WITH all classes DO
+$   IF type is not "sink" and type is not "clsobj"
+extern ${namespace}${name}ClassObject _g_${fullname}_ClsObj;
+$   END IF
+$END DO
+extern CIClassInfo *g_${MacroRewrite(name)}_classInfo;
+
+EXTERN_C ECO_PUBLIC CARAPI DllGetClassObject(
+    REMuid clsid, _ELASTOS REIID riid, IInterface **ppObj)
+{
+    ECode ec = NOERROR;
+$WITH all classes DO
+$IF attrib is not "private" and class.type is not "clsobj"
+    if (${namespace}ECLSID_${name} == clsid) {
+$       IF class.type is not "sink"
+        *ppObj = _g_${class.fullname}_ClsObj.Probe(riid);
+        if (*ppObj) (*ppObj)->AddRef();
+        else ec = E_NO_INTERFACE;
+        return ec;
+$       ELSE ;;class.type is not "sink"
+        if (NULL == ppObj || NULL == *ppObj) return E_INVALID_ARGUMENT;
+$          IF OrgClassIsAspect(class) is true
+        IAspect *pAspect = (IAspect*)(*ppObj)->Probe(EIID_IAspect);
+        if (pAspect == NULL) return E_INVALID_ARGUMENT;
+        IInterface *pConnector = (IInterface*)new ${ClassNameOfSink(class.name)}Connector(pAspect);
+$          ELSE
+        IObject *pObj = (IObject*)(*ppObj)->Probe(EIID_IObject);
+        if (pObj == NULL) return E_INVALID_ARGUMENT;
+        IInterface *pConnector = (IInterface*)new ${ClassNameOfSink(class.name)}Connector(pObj);
+$          END IF
+        if (NULL == pConnector) return E_OUT_OF_MEMORY;
+        *ppObj = (IInterface*)pConnector;
+        return NOERROR;
+$       END IF ;; class.type is not "sink"
+    }
+$END IF ;; end of attrib is not "private"
+$END DO ;; all classes
+
+    if (ECLSID_ClassInfo == clsid) {
+        *ppObj = (IInterface *)g_${MacroRewrite(name)}_classInfo;
+        return ec;
+    }
+    return E_CLASS_NOT_AVAILABLE;
+}
+
+#endif // __CAR_${Upper(name)}PUB_CPP__
+$
+$END OUTPUT

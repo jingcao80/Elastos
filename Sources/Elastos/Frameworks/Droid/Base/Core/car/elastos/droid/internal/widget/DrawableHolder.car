@@ -1,0 +1,121 @@
+
+module
+{
+    interface Elastos.Droid.Animation.IAnimatorUpdateListener;
+    interface Elastos.Droid.Animation.IObjectAnimator;
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.Drawable.IBitmapDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * This class is a container for a Drawable with multiple animated properties.
+     *
+     * @Involve
+     * interface Elastos.Droid.Animation.IAnimatorListener;
+     */
+    [local]
+    interface IDrawableHolder {
+        /**
+         *
+         * Adds an animation that interpolates given property from its current value
+         * to the given value.
+         *
+         * @param duration the duration, in ms.
+         * @param delay the delay to start the animation, in ms.
+         * @param property the property to animate
+         * @param toValue the target value
+         * @param replace if true, replace the current animation with this one.
+         */
+        AddAnimTo(
+            [in] Int64 duration,
+            [in] Int64 delay,
+            [in] String property,
+            [in] Float toValue,
+            [in] Boolean replace,
+            [out] IObjectAnimator** animator);
+
+        /**
+         * Stops all animations for the given property and removes it from the list.
+         *
+         * @param property
+         */
+        RemoveAnimationFor(
+            [in] String property);
+
+        /**
+         * Stops all animations and removes them from the list.
+         */
+        ClearAnimations();
+
+        /**
+         * Draw this object to the canvas using the properties defined in this class.
+         *
+         * @param canvas canvas to draw into
+         */
+        Draw(
+            [in] ICanvas* canvas);
+
+        /**
+         * Starts all animations added since the last call to this function.  Used to synchronize
+         * animations.
+         *
+         * @param listener an optional listener to add to the animations. Typically used to know when
+         * to invalidate the surface these are being drawn to.
+         */
+        StartAnimations(
+            [in] IAnimatorUpdateListener* listener);
+
+        SetX(
+            [in] Float value);
+
+        SetY(
+            [in] Float value);
+
+        SetScaleX(
+            [in] Float value);
+
+        SetScaleY(
+            [in] Float value);
+
+        SetAlpha(
+            [in] Float alpha);
+
+        GetX(
+            [out] Float* x);
+
+        GetY(
+            [out] Float* y);
+
+        GetScaleX(
+            [out] Float* x);
+
+        GetScaleY(
+            [out] Float* y);
+
+        GetAlpha(
+            [out] Float* alpha);
+
+        GetDrawable(
+            [out] IBitmapDrawable** d);
+
+        GetWidth(
+            [out] Int32* width);
+
+        GetHeight(
+            [out] Int32* height);
+
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+
+}
+
+

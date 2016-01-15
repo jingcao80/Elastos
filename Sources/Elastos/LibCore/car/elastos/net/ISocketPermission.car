@@ -1,0 +1,21 @@
+
+module
+{
+    namespace Elastos{
+    namespace Net{
+
+    /**
+     * Legacy security code; do not use.
+     *
+     * @Involve
+     * interface IGuard;
+     * interface IPermission;
+     * interface Elastos.IO.ISerializable;
+     */
+    interface ISocketPermission {
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

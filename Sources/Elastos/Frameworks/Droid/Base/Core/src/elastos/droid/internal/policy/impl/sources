@@ -1,0 +1,48 @@
+TARGET_NAME= impl
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = BarController.cpp
+SOURCES += CBarController.cpp
+SOURCES += EnableAccessibilityController.cpp
+SOURCES += CEnableAccessibilityController.cpp
+SOURCES += CEnableAccessibilityControllerHelper.cpp
+SOURCES += ImmersiveModeConfirmation.cpp
+SOURCES += CImmersiveModeConfirmation.cpp
+SOURCES += LogDecelerateInterpolator.cpp
+SOURCES += CLogDecelerateInterpolator.cpp
+SOURCES += PhoneFallbackEventHandler.cpp
+SOURCES += CPhoneFallbackEventHandler.cpp
+SOURCES += PhoneLayoutInflater.cpp
+SOURCES += CPhoneLayoutInflater.cpp
+SOURCES += PhoneWindow.cpp
+SOURCES += CPhoneWindow.cpp
+SOURCES += PhoneWindowManager.cpp
+SOURCES += CPhoneWindowManager.cpp
+SOURCES += PhoneWindowRotationWatcher.cpp
+SOURCES += CPhoneWindowRotationWatcher.cpp
+SOURCES += CPhoneWindowSavedState.cpp
+SOURCES += Policy.cpp
+SOURCES += CPolicy.cpp
+SOURCES += PolicyControl.cpp
+SOURCES += CPolicyControl.cpp
+SOURCES += RecentApplicationsBackground.cpp
+SOURCES += CRecentApplicationsBackground.cpp
+SOURCES += RecentApplicationsDialog.cpp
+SOURCES += CRecentApplicationsDialog.cpp
+SOURCES += SystemGesturesPointerEventListener.cpp
+SOURCES += CSystemGesturesPointerEventListener.cpp
+SOURCES += GlobalActions.cpp
+SOURCES += GlobalKeyManager.cpp
+SOURCES += IconUtilities.cpp
+SOURCES += ShortcutManager.cpp
+SOURCES += WakeGestureListener.cpp
+SOURCES += WindowOrientationListener.cpp
+
+ELASTOS_LIBS += keyguard/keyguard.lib

@@ -1,0 +1,75 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * A loader that queries the ContentResolver and returns a Cursor. This class
+     * implements the Loader protocol in a standard way for querying cursors, building
+     * on AsyncTaskLoader to perform the cursor query on a background thread so that
+     * it does not block the application's UI.
+     * 
+     * @sa ContentResolver
+     * @sa Cursor
+     * @sa Loader
+     * @sa AsyncTaskLoader
+     * <p>
+     * A CursorLoader must be built with the full information for the query to
+     * perform, either through the CursorLoader(Context, Uri, String[], String,
+     * String[], String) or creating an empty instance with CursorLoader(Context) and
+     * filling in the desired paramters with setUri(Uri), setSelection(String),
+     * setSelectionArgs(String[]), setSortOrder(String), and setProjection(String[]).
+     *
+     * @sa CursorLoader(Context, Uri, String[], String, String[], String)
+     * @sa CursorLoader(Context
+     * @sa setUri(Uri), setSelection(String), setSelectionArgs(String[]), setSortOrder(String)
+     * @sa setProjection(String[])
+     *
+     * @implements Elastos.Droid.Content.Elastos.Droid.Content.IAsyncTaskLoader
+     */
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IAsyncTaskLoader
+     */
+    [deprecated]
+    interface ICursorLoader {
+        GetUri(
+            [out] IUri** uri);
+
+        SetUri(
+            [in] IUri* uri);
+
+        GetProjection(
+            [out, callee] ArrayOf<String>* projection);
+
+        SetProjection(
+            [in] ArrayOf<String>* projection);
+
+        GetSelection(
+            [out] String* selection);
+
+        SetSelection(
+            [in] String selection);
+
+        GetSelectionArgs(
+            [out, callee] ArrayOf<String>* selectionArgs);
+
+        SetSelectionArgs(
+            [in] ArrayOf<String>* selectionArgs);
+
+        GetSortOrder(
+            [out] String* sortOrder);
+
+        SetSortOrder(
+            [in] String sortOrder);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

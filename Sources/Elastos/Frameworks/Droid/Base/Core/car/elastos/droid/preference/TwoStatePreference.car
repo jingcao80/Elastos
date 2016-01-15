@@ -1,0 +1,126 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * Common base class for preferences that have two selectable states, persist a
+     * boolean value in SharedPreferences, and may have dependent preferences that are
+     * enabled/disabled based on the current state.
+     *
+     * @Involve
+     * interface IComparable
+     * interface IPreference
+     */
+    [local]
+    interface ITwoStatePreference {
+        /**
+         * Sets the checked state and saves it to the {@link SharedPreferences}.
+         *
+         * @param checked The checked state.
+         */
+        SetChecked(
+            [in] Boolean checked);
+
+        /**
+         * Returns the checked state.
+         *
+         * @return The checked state.
+         */
+        IsChecked(
+            [out] Boolean* isChecked);
+
+        /**
+         * Sets the summary to be shown when checked.
+         *
+         * @param summary The summary to be shown when checked.
+         */
+        SetSummaryOn(
+            [in] ICharSequence* summary);
+
+        /**
+         * @see #setSummaryOn(CharSequence)
+         * @param summaryResId The summary as a resource.
+         */
+        SetSummaryOn(
+            [in] Int32 summaryResId);
+
+        /**
+         * Returns the summary to be shown when checked.
+         * @return The summary.
+         */
+        GetSummaryOn(
+            [out] ICharSequence** summary);
+
+        /**
+         * Sets the summary to be shown when unchecked.
+         *
+         * @param summary The summary to be shown when unchecked.
+         */
+        SetSummaryOff(
+            [in] ICharSequence* summary);
+
+        /**
+         * @see #setSummaryOff(CharSequence)
+         * @param summaryResId The summary as a resource.
+         */
+        SetSummaryOff(
+            [in] Int32 summaryResId);
+
+        /**
+         * Returns the summary to be shown when unchecked.
+         * @return The summary.
+         */
+        GetSummaryOff(
+            [out] ICharSequence** summary);
+
+        /**
+         * Returns whether dependents are disabled when this preference is on ({@code true})
+         * or when this preference is off ({@code false}).
+         *
+         * @return Whether dependents are disabled when this preference is on ({@code true})
+         *         or when this preference is off ({@code false}).
+         */
+        GetDisableDependentsState(
+            [out] Boolean* state);
+
+        /**
+         * Sets whether dependents are disabled when this preference is on ({@code true})
+         * or when this preference is off ({@code false}).
+         *
+         * @param disableDependentsState The preference state that should disable dependents.
+         */
+        SetDisableDependentsState(
+            [in] Boolean disableDependentsState);
+
+        /**
+         * Sync a summary view contained within view's subhierarchy with the correct summary text.
+         * @param view View where a summary should be located
+         */
+        SyncSummaryView(
+            [in] IView* view);
+    }
+
+    /**
+     * @Involve
+     * interface IPreferenceBaseSavedState
+     * interface IAbsSavedState
+     * interface IParcelable
+     */
+    interface ITwoStatePreferenceSavedState {
+        IsChecked(
+            [out] Boolean* isChecked);
+
+        SetChecked(
+            [in] Boolean checked);
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}

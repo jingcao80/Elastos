@@ -1,0 +1,22 @@
+
+module
+{
+    interface Elastos.IO.IByteBuffer;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+
+    /**
+    * @Involve
+    * interface Elastos.IO.Channels.IAbstractSelectableChannel;
+    * interface Elastos.IO.Channels.IWritableByteChannel;
+    * interface Elastos.IO.Channels.IGatheringByteChannel;
+    */
+    interface ISinkChannel {
+    } // ISinkChannel
+
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

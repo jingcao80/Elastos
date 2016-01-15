@@ -1,0 +1,35 @@
+TARGET_NAME= backup
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = CBackupManager.cpp
+SOURCES += CAbsoluteFileBackupHelper.cpp
+SOURCES += BackupAgent.cpp
+SOURCES += BackupAgentHelper.cpp
+SOURCES += CBackupDataInput.cpp
+SOURCES += CBackupDataInputStream.cpp
+SOURCES += CBackupDataOutput.cpp
+SOURCES += CBackupHelperDispatcher.cpp
+SOURCES += CBackupManagerHelper.cpp
+SOURCES += CBackupTransport.cpp
+SOURCES += CFullBackup.cpp
+SOURCES += CLocalTransport.cpp
+SOURCES += CRestoreObserverWrapper.cpp
+SOURCES += CRestoreSet.cpp
+SOURCES += CSharedPreferencesBackupHelper.cpp
+SOURCES += CWallpaperBackupHelper.cpp
+SOURCES += CWallpaperBackupHelperHelper.cpp
+SOURCES += CRestoreDescription.cpp
+SOURCES += CRestoreSession.cpp
+SOURCES += CFullBackupDataOutput.cpp
+SOURCES += FileBackupHelperBase.cpp
+SOURCES += CFileBackupHelperBase.cpp
+SOURCES += CFileBackupHelper.cpp
+#SOURCES += RestoreObserver.cpp
+#SOURCES += RestoreSession.cpp

@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Security.IPublicKey;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the following structure which is a part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  SubjectPublicKeyInfo  ::=  SEQUENCE  {
+     *      algorithm            AlgorithmIdentifier,
+     *      subjectPublicKey     BIT STRING
+     *  }
+     * </pre>
+     */
+    [deprecated]
+    interface ISubjectPublicKeyInfo {
+        /**
+         * Returns the value of algorithmIdentifier field of the structure.
+         */
+        GetAlgorithmIdentifier(
+            [out] IAlgorithmIdentifier** algorithmIdentifier);
+
+        /**
+         * Returns the value of subjectPublicKey field of the structure.
+         */
+        GetSubjectPublicKey(
+            [out, callee] ArrayOf<Byte>* publicKey);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 SubjectPublicKeyInfo value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * Returns The PublicKey corresponding to this SubjectPublicKeyInfo
+         * instance.
+         */
+        GetPublicKey(
+            [out] IPublicKey** publicKey);
+    }
+
+    interface ISubjectPublicKeyInfoHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

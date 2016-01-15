@@ -1,0 +1,27 @@
+
+module
+{
+    namespace Elastos{
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * An InputStream filter to compress data. Callers read compressed data in
+     * the "deflate" format from the uncompressed underlying stream.
+     *
+     * @implements Elastos.Utility.Zip.Elastos.IO.IFilterInputStream
+     */
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IInputStream;
+     * interface IFilterInputStream;
+     */
+    interface IDeflaterInputStream {
+    }
+
+    } // namespace Zip
+    } // namespace Utility
+    } // namespace Elastos
+}

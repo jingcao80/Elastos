@@ -1,0 +1,47 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * Subject Key Identifier Extension (OID = 2.5.29.14).
+     *
+     * The ASN.1 definition for extension is:
+     *
+     * <pre>
+     *  id-ce-subjectKeyIdentifier OBJECT IDENTIFIER ::=  { id-ce 14 }
+     *
+     *  SubjectKeyIdentifier ::= KeyIdentifier
+     *
+     *  KeyIdentifier ::= OCTET STRING
+     * </pre>
+     * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     */
+    interface ISubjectKeyIdentifier extends IExtensionValue {
+        /**
+         * The key identifier for this subject.
+         */
+        GetKeyIdentifier(
+            [out, callee] ArrayOf<Byte>* keyIdentifier);
+    }
+
+    [deprecated]
+    interface ISubjectKeyIdentifierHelper {
+        /**
+         * Creates an object on the base of its encoded form.
+         */
+        Decode(
+            [in] ArrayOf<Byte>* encoding,
+            [out] ISubjectKeyIdentifier** identifier);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

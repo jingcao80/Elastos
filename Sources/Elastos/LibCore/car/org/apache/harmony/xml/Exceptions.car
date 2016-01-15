@@ -1,0 +1,12 @@
+
+module
+{
+//    const FAMILY_CORE = 0x2E    // Security exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Security exception codes (Family: 0x2E)
+    const E_EXPAT_EXCEPTION                        = 0xAE020000;
+}

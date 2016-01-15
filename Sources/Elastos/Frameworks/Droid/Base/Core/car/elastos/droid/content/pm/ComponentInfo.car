@@ -1,0 +1,100 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IApplicationInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Base class containing information common to all application components
+     * (ActivityInfo, ServiceInfo). This class is not intended to be used by itself;
+     * it is simply here to share common definitions between all application
+     * components. As such, it does not itself implement Parcelable, but does
+     * provide convenience methods to assist in the implementation of Parcelable in subclasses.
+     *
+     * @sa ActivityInfo
+     * @sa ServiceInfo
+     *
+     * @implements Elastos.Droid.Content.Pm.Elastos.Droid.Content.Pm.IPackageItemInfo
+     */
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.Pm.IPackageItemInfo
+     */
+    interface IComponentInfo {
+        /**
+         * Return whether this component and its enclosing application are enabled.
+         */
+        IsEnabled(
+            [out] Boolean* isEnable);
+
+        /**
+         * Return the icon resource identifier to use for this component.  If
+         * the component defines an icon, that is used; else, the application
+         * icon is used.
+         *
+         * @return The icon associated with this component.
+         */
+        GetIconResource(
+            [out] Int32* icon);
+
+        /**
+         * Return the logo resource identifier to use for this component.  If
+         * the component defines a logo, that is used; else, the application
+         * logo is used.
+         *
+         * @return The logo associated with this component.
+         */
+        GetLogoResource(
+            [out] Int32* icon);
+
+        /**
+         * Return the banner resource identifier to use for this component. If the
+         * component defines a banner, that is used; else, the application banner is
+         * used.
+         *
+         * @return The banner associated with this component.
+         */
+        GetBannerResource(
+            [out] Int32* icon);
+
+        GetApplicationInfo(
+            [out] IApplicationInfo** info);
+
+        SetApplicationInfo(
+            [in] IApplicationInfo* info);
+
+        GetProcessName(
+            [out] String* processName);
+
+        SetProcessName(
+            [in] String processName);
+
+        GetDescriptionRes(
+            [out] Int32* desRes);
+
+        SetDescriptionRes(
+            [in] Int32 desRes);
+
+        GetEnabled(
+            [out] Boolean* enabled);
+
+        SetEnabled(
+            [in] Boolean enabled);
+
+        GetExported(
+            [out] Boolean* exported);
+
+        SetExported(
+            [in] Boolean exported);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

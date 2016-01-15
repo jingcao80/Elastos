@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastosx.Security.Auth.ISubject;
+    interface Elastosx.Security.Auth.Callback.ICallbackHandler;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * @Involve
+     * interface IProvider
+     */
+    interface IAuthProvider {
+        Login(
+            [in] ISubject* subject,
+            [in] ICallbackHandler* handler);
+
+        Logout();
+
+        SetCallbackHandler(
+            [in] ICallbackHandler* handler);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

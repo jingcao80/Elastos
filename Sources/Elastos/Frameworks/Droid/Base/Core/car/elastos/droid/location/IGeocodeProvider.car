@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * An interface for location providers implementing the Geocoder services.
+     *
+     * {@hide}
+     */
+    interface IIGeocodeProvider {
+
+        GetFromLocation(
+            [in] Double latitude,
+            [in] Double longitude,
+            [in] Int32 maxResults,
+            [in] IGeocoderParams* params,
+            [out] IList** addrs,
+            [out] String* strOut);
+
+        GetFromLocationName(
+            [in] String locationName,
+            [in] Double lowerLeftLatitude,
+            [in] Double lowerLeftLongitude,
+            [in] Double upperRightLatitude,
+            [in] Double upperRightLongitude,
+            [in] Int32 maxResults,
+            [in] IGeocoderParams* params,
+            [out] IList** addrs,
+            [out] String* strOut);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}

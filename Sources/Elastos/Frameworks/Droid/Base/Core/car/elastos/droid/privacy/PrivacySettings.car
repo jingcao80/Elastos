@@ -1,0 +1,370 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Privacy {
+
+    [deprecated]
+    interface IPrivacySettings {
+        /**
+         * Real value, provided by the unmodified Android framework.
+         */
+        // const Byte REAL = 0;
+        const Int16 REAL = 0;
+
+        /**
+         * Empty or unavailable, depending on setting type. For String settings, it is
+         * setter method caller's responsibility to make sure that the corresponding
+         * setting field will contain an empty String.
+         */
+        // const Byte EMPTY = 1;
+        const Int16 EMPTY = 1;
+
+        /**
+         * Custom specified output, appropriate for relevant setting. For String settings,
+         * it is setter method caller's responsibility to make sure that the corresponding
+         * setting field will contain a custom String.
+         */
+        // const Byte CUSTOM = 2;
+        const Int16 CUSTOM = 2;
+
+        /**
+         * Random output, appropriate for relevant setting. When this option is set, the
+         * corresponding getter methods will generate appropriate random values automatically.
+         *
+         * Device ID: a random string consisting of 15 numeric digits preceded by a "+"
+         * Line1Number: a random string consisting of 13 numeric digits
+         */
+        // const Byte RANDOM = 3;
+        const Int16 RANDOM = 3;
+
+        // const Byte SETTING_NOTIFY_OFF    = 0;
+        // const Byte SETTING_NOTIFY_ON     = 1;
+        const Int16 SETTING_NOTIFY_OFF    = 0;
+        const Int16 SETTING_NOTIFY_ON     = 1;
+
+        /**
+         * constants for identification of data types transmitted in the notification intent
+         */
+        const String DATA_DEVICE_ID = "deviceID";
+        const String DATA_LINE_1_NUMBER = "line1Number";
+        const String DATA_LOCATION_GPS = "locationGPS";
+        const String DATA_LOCATION_NETWORK = "locationNetwork";
+        const String DATA_NETWORK_INFO_CURRENT = "networkInfoCurrent";
+        const String DATA_NETWORK_INFO_SIM = "networkInfoSIM";
+        const String DATA_SIM_SERIAL = "simSerial";
+        const String DATA_SUBSCRIBER_ID = "subscriberID";
+        const String DATA_ACCOUNTS_LIST = "accountsList";
+        const String DATA_AUTH_TOKENS = "authTokens";
+        const String DATA_OUTGOING_CALL = "outgoingCall";
+        const String DATA_INCOMING_CALL = "incomingCall";
+        const String DATA_CONTACTS = "contacts";
+        const String DATA_CALENDAR = "calendar";
+        const String DATA_MMS = "mms";
+        const String DATA_SMS = "sms";
+        const String DATA_MMS_SMS = "mmsSms";
+        const String DATA_CALL_LOG = "callLog";
+        const String DATA_BOOKMARKS = "bookmarks";
+        const String DATA_SYSTEM_LOGS = "systemLogs";
+        const String DATA_INTENT_BOOT_COMPLETED = "intentBootCompleted";
+        //    const String DATA_EXTERNAL_STORAGE = "externalStorage";
+        const String DATA_CAMERA = "camera";
+        const String DATA_RECORD_AUDIO = "recordAudio";
+        const String DATA_SMS_SEND = "SmsSend";
+        const String DATA_PHONE_CALL = "phoneCall";
+        const String DATA_ANDROID_ID = "android_id";
+        const String DATA_ICC_ACCESS = "iccAccess";
+        const String DATA_WIFI_INFO = "wifiInfo";
+        const String DATA_IP_TABLES = "iptables";
+        const String DATA_SWITCH_CONNECTIVITY = "switchconnectivity";
+        const String DATA_SEND_MMS = "sendMms";
+        const String DATA_SWITCH_WIFI_STATE = "switchWifiState";
+
+        GetSwitchWifiStateSetting(
+            [out] Byte* setting);
+
+        SetSwitchWifiStateSetting(
+            [in] Byte switchWifiStateSetting);
+
+        GetForceOnlineState(
+            [out] Byte* setting);
+
+        SetForceOnlineState(
+            [in] Byte forceOnlineState);
+
+        GetSendMmsSetting(
+            [out] Byte* setting);
+
+        SetSendMmsSetting(
+            [in] Byte sendMmsSetting);
+
+        GetSwitchConnectivitySetting(
+            [out] Byte* setting);
+
+        SetSwitchConnectivitySetting(
+            [in] Byte switchConnectivitySetting);
+
+        GetAndroidIdSetting(
+            [out] Byte* setting);
+
+        SetAndroidIdSetting(
+            [in] Byte androidIdSetting);
+
+        /**
+         * @return random ID, constant fake id or null
+         */
+        GetAndroidID(
+            [out] String* id);
+
+        GetWifiInfoSetting(
+            [out] Byte* setting);
+
+        SetWifiInfoSetting(
+            [in] Byte wifiInfoSetting);
+
+        SetAndroidID(
+            [in] String androidID);
+
+        GetIpTableProtectSetting(
+            [out] Byte* setting);
+
+        SetIpTableProtectSetting(
+            [in] Byte ipTableProtectSetting);
+
+        GetIccAccessSetting(
+            [out] Byte* setting);
+
+        SetIccAccessSetting(
+            [in] Byte iccAccessSetting);
+
+        GetAddOnManagementSetting(
+            [out] Byte* setting);
+
+        SetAddOnManagementSetting(
+            [in] Byte addOnManagementSetting);
+
+        GetSmsSendSetting(
+            [out] Byte* setting);
+
+        SetSmsSendSetting(
+            [in] Byte smsSendSetting);
+
+        GetPhoneCallSetting(
+            [out] Byte* setting);
+
+        SetPhoneCallSetting(
+            [in] Byte phoneCallSetting);
+
+        GetRecordAudioSetting(
+            [out] Byte* setting);
+
+        SetRecordAudioSetting(
+            [in] Byte recordAudioSetting);
+
+        GetCameraSetting(
+            [out] Byte* setting);
+
+        SetCameraSetting(
+            [in] Byte cameraSetting);
+
+        GetPackageName(
+            [out] String* packageName);
+
+        GetId(
+            [out] Int32* id);
+
+        SetPackageName(
+            [in] String packageName);
+
+        GetUid(
+            [out] Int32* uid);
+
+        SetUid(
+            [in] Int32 uid);
+
+        GetDeviceIdSetting(
+            [out] Byte* setting);
+
+        SetDeviceIdSetting(
+            [in] Byte deviceIdSetting);
+
+        GetDeviceId(
+            [out] String* id);
+
+        SetDeviceId(
+            [in] String deviceId);
+
+        GetLine1NumberSetting(
+            [out] Byte* setting);
+
+        SetLine1NumberSetting(
+            [in] Byte line1NumberSetting);
+
+        GetLine1Number(
+            [out] String* number);
+
+        SetLine1Number(
+            [in] String line1Number);
+
+        GetLocationGpsSetting(
+            [out] Byte* setting);
+
+        SetLocationGpsSetting(
+            [in] Byte locationGpsSetting);
+
+        GetLocationGpsLat(
+            [out] String* lat);
+
+        SetLocationGpsLat(
+            [in] String locationGpsLat);
+
+        GetLocationGpsLon(
+            [out] String* lng);
+
+        SetLocationGpsLon(
+            [in] String locationGpsLon);
+
+        GetLocationNetworkSetting(
+            [out] Byte* setting);
+
+        SetLocationNetworkSetting(
+            [in] Byte locationNetworkSetting);
+
+        GetLocationNetworkLat(
+            [out] String* lat);
+
+        SetLocationNetworkLat(
+            [in] String locationNetworkLat);
+
+        GetLocationNetworkLon(
+            [out] String* lng);
+
+        SetLocationNetworkLon(
+            [in] String locationNetworkLon);
+
+        GetNetworkInfoSetting(
+            [out] Byte* setting);
+
+        SetNetworkInfoSetting(
+            [in] Byte networkInfoSetting);
+
+        GetSimInfoSetting(
+            [out] Byte* setting);
+
+        SetSimInfoSetting(
+            [in] Byte simInfoSetting);
+
+        GetSimSerialNumberSetting(
+            [out] Byte* setting);
+
+        SetSimSerialNumberSetting(
+            [in] Byte simSerialNumberSetting);
+
+        GetSimSerialNumber(
+            [out] String* number);
+
+        SetSimSerialNumber(
+            [in] String simSerialNumber);
+
+        GetSubscriberIdSetting(
+            [out] Byte* setting);
+
+        SetSubscriberIdSetting(
+            [in] Byte subscriberIdSetting);
+
+        GetSubscriberId(
+            [out] String* id);
+
+        SetSubscriberId(
+            [in] String subscriberId);
+
+        GetAccountsSetting(
+            [out] Byte* setting);
+
+        SetAccountsSetting(
+            [in] Byte accountsSetting);
+
+        GetAccountsAuthTokensSetting(
+            [out] Byte* setting);
+
+        SetAccountsAuthTokensSetting(
+            [in] Byte accountsAuthTokensSetting);
+
+        GetOutgoingCallsSetting(
+            [out] Byte* setting);
+
+        SetOutgoingCallsSetting(
+            [in] Byte outgoingCallsSetting);
+
+        GetIncomingCallsSetting(
+            [out] Byte* setting);
+
+        SetIncomingCallsSetting(
+            [in] Byte incomingCallsSetting);
+
+        GetContactsSetting(
+            [out] Byte* setting);
+
+        SetContactsSetting(
+            [in] Byte contactsSetting);
+
+        GetCalendarSetting(
+            [out] Byte* setting);
+
+        SetCalendarSetting(
+            [in] Byte calendarSetting);
+
+        GetMmsSetting(
+            [out] Byte* setting);
+
+        SetMmsSetting(
+            [in] Byte mmsSetting);
+
+        GetSmsSetting(
+            [out] Byte* setting);
+
+        SetSmsSetting(
+            [in] Byte smsSetting);
+
+        GetCallLogSetting(
+            [out] Byte* setting);
+
+        SetCallLogSetting(
+            [in] Byte callLogSetting);
+
+        GetBookmarksSetting(
+            [out] Byte* setting);
+
+        SetBookmarksSetting(
+            [in] Byte bookmarksSetting);
+
+        GetSystemLogsSetting(
+            [out] Byte* setting);
+
+        SetSystemLogsSetting(
+            [in] Byte systemLogsSetting);
+
+        GetIntentBootCompletedSetting(
+            [out] Byte* setting);
+
+        SetIntentBootCompletedSetting(
+            [in] Byte intentBootCompletedSetting);
+
+        GetNotificationSetting(
+            [out] Byte* setting);
+
+        SetNotificationSetting(
+            [in] Byte notificationSetting);
+
+        GetAllowedContacts(
+            [out, callee] ArrayOf<Int32>* contacts);
+
+        SetAllowedContacts(
+            [in] ArrayOf<Int32>* allowedContacts);
+    }
+
+    } // namespace Privacy
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,116 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    [deprecated]
+    interface IINetworkManagementEventObserver {
+        /**
+         * Interface configuration status has changed.
+         *
+         * @param iface The interface.
+         * @param up True if the interface has been enabled.
+         */
+        InterfaceStatusChanged(
+            [in] String iface,
+            [in] Boolean up);
+
+        /**
+         * Interface physical-layer link state has changed.  For Ethernet,
+         * this method is invoked when the cable is plugged in or unplugged.
+         *
+         * @param iface The interface.
+         * @param up  True if the physical link-layer connection signal is valid.
+         */
+        InterfaceLinkStateChanged(
+            [in] String iface,
+            [in] Boolean up);
+
+        /**
+         * An interface has been added to the system
+         *
+         * @param iface The interface.
+         */
+        InterfaceAdded(
+            [in] String iface);
+
+        /**
+         * An interface has been removed from the system
+         *
+         * @param iface The interface.
+         */
+        InterfaceRemoved(
+            [in] String iface);
+
+        /**
+         * An interface address has been added or updated.
+         *
+         * @param iface The interface.
+         * @param address The address.
+         */
+        AddressUpdated(
+            [in] String iface,
+            [in] ILinkAddress* address);
+
+        /**
+         * An interface address has been removed.
+         *
+         * @param iface The interface.
+         * @param address The address.
+         */
+        AddressRemoved(
+            [in] String iface,
+            [in] ILinkAddress* address);
+
+        /**
+         * A networking quota limit has been reached. The quota might not
+         * be specific to an interface.
+         *
+         * @param limitName The name of the limit that triggered.
+         * @param iface The interface on which the limit was detected.
+         */
+        LimitReached(
+            [in] String limitName,
+            [in] String iface);
+
+        /**
+         * Interface data activity status is changed.
+         *
+         * @param iface The interface.
+         * @param active  True if the interface is actively transmitting data, false if it is idle.
+         */
+        InterfaceClassDataActivityChanged(
+            [in] String label,
+            [in] Boolean active);
+
+        /**
+         * Information about available DNS servers has been received.
+         *
+         * @param iface The interface on which the information was received.
+         * @param lifetime The time in seconds for which the DNS servers may be used.
+         * @param servers The IP addresses of the DNS servers.
+         */
+        InterfaceDnsServerInfo(
+            [in] String iface,
+            [in] Int64 lifetime,
+            [in] ArrayOf<String>* servers);
+
+        /**
+         * A route has been added or updated.
+         */
+        RouteUpdated(
+            [in] IRouteInfo* route);
+
+        /**
+         * A route has been removed.
+         */
+        RouteRemoved(
+            [in] IRouteInfo* route);
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,35 @@
+
+module
+{
+    interface Elastos.Utility.IDate;
+
+    namespace Libcore {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * Best-effort parser for HTTP dates.
+     */
+    interface IHttpDate {
+
+        /**
+         * Returns the date for {@code value}. Returns null if the value couldn't be
+         * parsed.
+         */
+        Parse(
+            [in] String value,
+            [out] IDate** adate);
+
+        /**
+         * Returns the string for {@code value}.
+         */
+        Format(
+            [in] IDate* value,
+            [out] String* str);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Libcore
+
+}

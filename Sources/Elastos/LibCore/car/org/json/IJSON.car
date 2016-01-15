@@ -1,0 +1,52 @@
+module
+{
+    interface Elastos.Core.IBoolean;
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Core.IDouble;
+    interface Elastos.Core.IInteger32;
+    interface Elastos.Core.IInteger64;
+
+    namespace Org {
+    namespace Json {
+
+    interface IJSON {
+        /**
+         * Returns the input if it is a JSON-permissible value; throws otherwise.
+         */
+        CheckDouble(
+            [in] Double d,
+            [out] Double* result);
+
+        ToBoolean(
+            [in] IInterface* value,
+            [out] IBoolean** result);
+
+        ToDouble(
+            [in] IInterface* value,
+            [out] IDouble** result);
+
+        ToInteger32(
+            [in] IInterface* value,
+            [out] IInteger32** result);
+
+        ToInteger64(
+            [in] IInterface* value,
+            [out] IInteger64** result);
+
+        ToString(
+            [in] IInterface* value,
+            [out] ICharSequence** result);
+
+        TypeMismatch(
+            [in] IInterface* indexOrName,
+            [in] IInterface* actual,
+            [in] String requiredType);
+
+        TypeMismatch(
+            [in] IInterface* actual,
+            [in] String requiredType);
+    }
+
+    } // namespace Json
+    } // namespace Org
+}

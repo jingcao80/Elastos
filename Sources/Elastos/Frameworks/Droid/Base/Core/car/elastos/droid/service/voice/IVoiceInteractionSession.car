@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Voice {
+
+    /**
+     * @hide
+     */
+     [oneway]
+    interface IIVoiceInteractionSession {
+        TaskStarted(
+            [in] IIntent* intent,
+            [in] Int32 taskId);
+
+        TaskFinished(
+            [in] IIntent* intent,
+            [in] Int32 taskId);
+
+        CloseSystemDialogs();
+
+        Destroy();
+    }
+
+    } // namespace Voice
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

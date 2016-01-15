@@ -1,0 +1,162 @@
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IFileInputStream;
+    using interface Elastos.IO.IFileOutputStream;
+    using interface Elastos.Droid.Os.IParcelFileDescriptor;
+    using interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res{
+
+    /**
+     * File descriptor of an entry in the AssetManager. This provides your own
+     * opened FileDescriptor that can be used to read the data, as well as the
+     * offset and length of that entry's data in the file.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     * interface ICloseable
+     */
+    interface IAssetFileDescriptor {
+
+        /**
+         * Length used with #AssetFileDescriptor(ParcelFileDescriptor, long, long)
+         * and #getDeclaredLength when a length has not been declared.  This means
+         * the data extends to the end of the file.
+         *
+         * @sa #AssetFileDescriptor(ParcelFileDescriptor, long, long)
+         * @sa #getDeclaredLength
+         */
+        const Int64 UNKNOWN_LENGTH = -1;
+
+        /**
+         * The AssetFileDescriptor contains its own ParcelFileDescriptor, which
+         * in addition to the normal FileDescriptor object also allows you to close
+         * the descriptor when you are done with it.
+         */
+        GetParcelFileDescriptor(
+            [out] IParcelFileDescriptor** parcelFileDescriptor);
+
+        /**
+         * Returns the FileDescriptor that can be used to read the data in the
+         * file.
+         */
+        GetFileDescriptor(
+            [out] IFileDescriptor** fd);
+
+        /**
+         * Returns the byte offset where this asset entry's data starts.
+         */
+        GetStartOffset(
+            [out] Int64* startOffset);
+
+        /**
+         * Returns any additional details that can be used to interpret the
+         * underlying file descriptor. May be null.
+         */
+        GetExtras(
+            [out] IBundle** bundle);
+
+        /**
+         * Returns the total number of bytes of this asset entry's data.  May be
+         * #UNKNOWN_LENGTH if the asset extends to the end of the file.
+         * If the AssetFileDescriptor was constructed with #UNKNOWN_LENGTH,
+         * this will use ParcelFileDescriptor#getStatSize()
+         * ParcelFileDescriptor.getStatSize() to find the total size of the file,
+         * returning that number if found or #UNKNOWN_LENGTH if it could
+         * not be determined.
+         *
+         * @sa #UNKNOWN_LENGTH
+         * @sa #UNKNOWN_LENGTH
+         * @sa ParcelFileDescriptor#getStatSize() ParcelFileDescriptor.getStatSize()
+         * @sa #UNKNOWN_LENGTH
+         *
+         * @see #getDeclaredLength()
+         */
+         GetLength(
+            [out] Int64* length);
+
+        /**
+         * Return the actual number of bytes that were declared when the
+         * AssetFileDescriptor was constructed.  Will be
+         * #UNKNOWN_LENGTH if the length was not declared, meaning data
+         * should be read to the end of the file.
+         *
+         * @sa #UNKNOWN_LENGTH
+         *
+         * @see #getDeclaredLength()
+         */
+        GetDeclaredLength(
+            [out] Int64* declaredLength);
+
+        /**
+         * Convenience for calling <code>getParcelFileDescriptor().close()</code>.
+         */
+        Close();
+
+        /**
+         * Create and return a new auto-close input stream for this asset.  This
+         * will either return a full asset AutoCloseInputStream, or
+         * an underlying ParcelFileDescriptor.AutoCloseInputStream
+         * ParcelFileDescriptor.AutoCloseInputStream depending on whether the
+         * the object represents a complete file or sub-section of a file.  You
+         * should only call this once for a particular asset.
+         *
+         * @sa AutoCloseInputStream
+         * @sa ParcelFileDescriptor.AutoCloseInputStream ParcelFileDescriptor.AutoCloseInputStream
+         */
+        CreateInputStream(
+            [out] IFileInputStream** stream);
+
+        /**
+         * Create and return a new auto-close output stream for this asset.  This
+         * will either return a full asset AutoCloseOutputStream, or
+         * an underlying ParcelFileDescriptor.AutoCloseOutputStream
+         * ParcelFileDescriptor.AutoCloseOutputStream depending on whether the
+         * the object represents a complete file or sub-section of a file.  You
+         * should only call this once for a particular asset.
+         *
+         * @sa AutoCloseInputStream
+         * @sa ParcelFileDescriptor.AutoCloseInputStream ParcelFileDescriptor.AutoCloseInputStream
+         */
+        CreateOutputStream(
+            [out] IFileOutputStream** stream);
+    }
+
+    /**
+     * An InputStream you can create on a ParcelFileDescriptor, which will
+     * take care of calling ParcelFileDescriptor#close
+     * ParcelFileDescritor.close() for you when the stream is closed.
+     *
+     * @sa ParcelFileDescriptor#close ParcelFileDescritor.close()
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Os.IParcelFileDescriptorAutoCloseInputStream
+     */
+    interface IAssetFileDescriptorAutoCloseInputStream {
+    }
+
+    /**
+     * An OutputStream you can create on a ParcelFileDescriptor, which will
+     * take care of calling ParcelFileDescriptor#close
+     * ParcelFileDescritor.close() for you when the stream is closed.
+     *
+     * @sa ParcelFileDescriptor#close ParcelFileDescritor.close()
+    */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Os.IParcelFileDescriptorAutoCloseOutputStream
+     */
+    interface IAssetFileDescriptorAutoCloseOutputStream {
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

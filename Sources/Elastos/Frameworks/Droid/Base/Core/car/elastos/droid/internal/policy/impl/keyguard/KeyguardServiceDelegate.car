@@ -1,0 +1,105 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.IOnKeyguardExitResult;
+    interface Elastos.Droid.Internal.Policy.IIKeyguardShowCallback;
+    interface Elastos.Droid.Internal.Policy.IIKeyguardExitCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+    namespace Impl {
+    namespace Keyguard {
+
+    interface IKeyguardServiceDelegateShowListener {
+        OnShown(
+            [in] IBinder* windowToken);
+    }
+
+    /**
+     * A local class that keeps a cache of keyguard state that can be restored in the event
+     * keyguard crashes. It currently also allows runtime-selectable
+     * local or remote instances of keyguard.
+     */
+    interface IKeyguardServiceDelegate {
+        const String KEYGUARD_PACKAGE = "com.android.systemui";
+        const String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
+
+        BindService(
+            [in] IContext* context);
+
+        IsShowing(
+            [out] Boolean* result);
+
+        IsShowingAndNotOccluded(
+            [out] Boolean* result);
+
+        IsInputRestricted(
+            [out] Boolean* result);
+
+        VerifyUnlock(
+            [in] IOnKeyguardExitResult* onKeyguardExitResult);
+
+        KeyguardDone(
+            [in] Boolean authenticated,
+            [in] Boolean wakeup);
+
+        SetOccluded(
+            [in] Boolean isOccluded,
+            [out] Int32* result);
+
+        Dismiss();
+
+        IsSecure(
+            [out] Boolean* result);
+
+        OnDreamingStarted();
+
+        OnDreamingStopped();
+
+        OnScreenTurnedOn(
+            [in] IKeyguardServiceDelegateShowListener* showListener);
+
+        OnScreenTurnedOff(
+            [in] Int32 why);
+
+        SetKeyguardEnabled(
+            [in] Boolean enabled);
+
+        IsDismissable(
+            [out] Boolean* result);
+
+        OnSystemReady();
+
+        DoKeyguardTimeout(
+            [in] IBundle* options);
+
+        ShowAssistant();
+
+        SetCurrentUser(
+            [in] Int32 newUserId);
+
+        StartKeyguardExitAnimation(
+            [in] Int64 startTime,
+            [in] Int64 fadeoutDuration);
+
+        ShowScrim();
+
+        HideScrim();
+
+        OnBootCompleted();
+
+        OnActivityDrawn();
+    }
+
+    } // Keyguard
+    } // Impl
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

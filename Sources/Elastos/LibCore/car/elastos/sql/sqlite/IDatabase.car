@@ -1,0 +1,517 @@
+module
+{
+    interface Elastos.Sql.SQLite.IBusyHandler;
+    interface Elastos.Sql.SQLite.IBlob;
+    interface Elastos.Sql.SQLite.ICallback;
+    interface Elastos.Sql.SQLite.IProgressHandler;
+
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    [deprecated]
+    interface IDatabase {
+        /**
+        * Open an SQLite database file.
+        *
+        * @param filename the name of the database file
+        * @param mode open mode (e.g. SQLITE_OPEN_READONLY)
+        */
+        Open(
+            [in] String filename,
+            [in] Int32 mode);
+
+        /**
+         * Open an SQLite database file.
+         *
+         * @param filename the name of the database file
+         * @param mode open mode (e.g. SQLITE_OPEN_READONLY)
+         * @param vfs VFS name (for SQLite >= 3.5)
+         */
+        Open(
+            [in] String filename,
+            [in] Int32 mode,
+            [in] String vfs);
+
+        /**
+         * Open an SQLite database file.
+         *
+         * @param filename the name of the database file
+         * @param mode open mode (e.g. SQLITE_OPEN_READONLY)
+         * @param vfs VFS name (for SQLite >= 3.5)
+         * @param ver2 flag to force version on create (false = SQLite3, true = SQLite2)
+         */
+        Open(
+            [in] String filename,
+            [in] Int32 mode,
+            [in] String vfs,
+            [in] Boolean ver2);
+
+        /**
+         * Open SQLite auxiliary database file for temporary
+         * tables.
+         *
+         * @param filename the name of the auxiliary file or null
+         */
+        OpenAuxFile(
+            [in] String filename);
+
+        /**
+         * Close the underlying SQLite database file.
+         */
+        Close();
+
+        /**
+         * Execute an SQL statement and invoke callback methods
+         * for each row of the result set.<P>
+         *
+         * It the method fails, an SQLite.Exception is thrown and
+         * an error code is set, which later can be retrieved by
+         * the last_error() method.
+         *
+         * @param sql the SQL statement to be executed
+         * @param cb the object implementing the callback methods
+         */
+        Exec(
+            [in] String sql,
+            [in] ICallback* cb);
+
+        /**
+         * Execute an SQL statement and invoke callback methods
+         * for each row of the result set. Each '%q' or %Q in the
+         * statement string is substituted by its corresponding
+         * element in the argument vector.
+         * <BR><BR>
+         * Example:<BR>
+         * <PRE>
+         *   String args[] = new String[1];
+         *   args[0] = "tab%";
+         *   db.exec("select * from sqlite_master where type like '%q'",
+         *           null, args);
+         * </PRE>
+         *
+         * It the method fails, an SQLite.Exception is thrown and
+         * an error code is set, which later can be retrieved by
+         * the last_error() method.
+         *
+         * @param sql the SQL statement to be executed
+         * @param cb the object implementing the callback methods
+         * @param args arguments for the SQL statement, '%q' substitution
+         */
+        Exec(
+            [in] String sql,
+            [in] ICallback* cb,
+            [in] ArrayOf<String>* args);
+
+        /**
+         * Return the row identifier of the last inserted
+         * row.
+         */
+        LastInsertRowid(
+            [out] Int64* id);
+
+        /**
+         * Abort the current SQLite operation.
+         */
+        Interrupt();
+
+        /**
+         * Return the number of changed rows for the last statement.
+         */
+        Changes(
+            [out] Int64* number);
+
+        /**
+         * Establish a busy callback method which gets called when
+         * an SQLite table is locked.
+         *
+         * @param bh the object implementing the busy callback method
+         */
+        BusyHandler(
+            [in] Elastos.Sql.SQLite.IBusyHandler* bh);
+
+        /**
+         * Set the timeout for waiting for an SQLite table to become
+         * unlocked.
+         *
+         * @param ms number of millisecond to wait
+         */
+        BusyTimeout(
+            [in] Int32 ms);
+
+        /**
+         * Convenience method to retrieve an entire result
+         * set into memory.
+         *
+         * @param sql the SQL statement to be executed
+         * @param maxrows the max. number of rows to retrieve
+         * @return result set
+         */
+        GetTable(
+            [in] String sql,
+            [in] Int32 maxrows,
+            [out] ITableResult** tableresult);
+
+        /**
+         * Convenience method to retrieve an entire result
+         * set into memory.
+         *
+         * @param sql the SQL statement to be executed
+         * @return result set
+         */
+        GetTable(
+            [in] String sql,
+            [out] ITableResult** tableresult);
+
+        /**
+         * Convenience method to retrieve an entire result
+         * set into memory.
+         *
+         * @param sql the SQL statement to be executed
+         * @param maxrows the max. number of rows to retrieve
+         * @param args arguments for the SQL statement, '%q' substitution
+         * @return result set
+         */
+        GetTable(
+            [in] String sql,
+            [in] Int32 maxrows,
+            [in] ArrayOf<String>* args,
+            [out] ITableResult** tableresult);
+
+        /**
+         * Convenience method to retrieve an entire result
+         * set into memory.
+         *
+         * @param sql the SQL statement to be executed
+         * @param args arguments for the SQL statement, '%q' substitution
+         * @return result set
+         */
+        GetTable(
+            [in] String sql,
+            [in] ArrayOf<String>* args,
+            [out] ITableResult** tableresult);
+
+        /**
+         * Convenience method to retrieve an entire result
+         * set into memory.
+         *
+         * @param sql the SQL statement to be executed
+         * @param args arguments for the SQL statement, '%q' substitution
+         * @param tbl TableResult to receive result set
+         */
+        GetTable(
+            [in] String sql,
+            [in] ArrayOf<String>* args,
+            [in] ITableResult* tbl);
+
+        /**
+         * Return SQLite version number as string.
+         * If the database is not open, <tt>unknown</tt> is returned.
+         */
+        Dbversion(
+            [out] String* ver);
+
+        /**
+         * Create regular function.
+         *
+         * @param name the name of the new function
+         * @param nargs number of arguments to function
+         * @param f interface of function
+         */
+        CreateFunction(
+            [in] String name,
+            [in] Int32 nargs,
+            [in] IFunction* f);
+
+        /**
+         * Create aggregate function.
+         *
+         * @param name the name of the new function
+         * @param nargs number of arguments to function
+         * @param f interface of function
+         */
+        CreateAggregate(
+            [in] String name,
+            [in] Int32 nargs,
+            [in] IFunction* f);
+
+        /**
+         * Set function return type. Only available in SQLite 2.6.0 and
+         * above, otherwise a no-op.
+         *
+         * @param name the name of the function whose return type is to be set
+         * @param type return type code, e.g. SQLite.Constants.SQLITE_NUMERIC
+         */
+        FunctionType(
+            [in] String name,
+            [in] Int32 type);
+
+        /**
+         * Return the code of the last error occured in
+         * any of the exec() methods. The value is valid
+         * after an Exception has been reported by one of
+         * these methods. See the <A HREF="Constants.html">Constants</A>
+         * class for possible values.
+         *
+         * @return SQLite error code
+         */
+        LastError(
+            [out] Int32* error_code);
+
+        /**
+         * Internal: set error code.
+         * @param error_code new error code
+         */
+        SetLastError(
+            [in] Int32 error_code);
+
+        /**
+         * Return last error message of SQLite3 engine.
+         *
+         * @return error string or null
+         */
+        ErrorMessage(
+            [out] String* str);
+
+        /**
+         * Set character encoding.
+         * @param enc name of encoding
+         */
+        SetEncoding(
+            [in] String enc);
+
+        /**
+         * Set authorizer function. Only available in SQLite 2.7.6 and
+         * above, otherwise a no-op.
+         *
+         * @param auth the authorizer function
+         */
+        SetAuthorizer(
+            [in] IAuthorizer* auth);
+
+        /**
+         * Set trace function. Only available in SQLite 2.7.6 and above,
+         * otherwise a no-op.
+         *
+         * @param tr the trace function
+         */
+        Trace(
+            [in] ITrace* tr);
+
+        /**
+         * Initiate a database backup, SQLite 3.x only.
+         *
+         * @param dest destination database
+         * @param destName schema of destination database to be backed up
+         * @param srcName schema of source database
+         * @return Backup object to perform the backup operation
+         */
+        Backup(
+            [in] IDatabase* dest,
+            [in] String destName,
+            [in] String srcName,
+            [out] IBackup** backup);
+
+        /**
+         * Set profile function. Only available in SQLite 3.6 and above,
+         * otherwise a no-op.
+         *
+         * @param pr the trace function
+         */
+        Profile(
+            [in] IProfile* pr);
+
+        /**
+         * Return information on SQLite connection status.
+         * Only available in SQLite 3.6 and above,
+         * otherwise a no-op.
+         *
+         * @param op operation code
+         * @param info output buffer, must be able to hold two
+         *             values (current/highwater)
+         * @param flag reset flag
+         * @return SQLite error code
+         */
+        DbStatus(
+            [in] Int32 op,
+            [in] ArrayOf<Int32>* info,
+            [in] Boolean flag,
+            [out] Int32* code);
+
+        /**
+         * Compile and return SQLite VM for SQL statement. Only available
+         * in SQLite 2.8.0 and above, otherwise a no-op.
+         *
+         * @param sql SQL statement to be compiled
+         * @return a Vm object
+         */
+        Compile(
+            [in] String sql,
+            [out] IVm** vm);
+
+        /**
+         * Compile and return SQLite VM for SQL statement. Only available
+         * in SQLite 3.0 and above, otherwise a no-op.
+         *
+         * @param sql SQL statement to be compiled
+         * @param args arguments for the SQL statement, '%q' substitution
+         * @return a Vm object
+         */
+        Compile(
+            [in] String sql,
+            [in] ArrayOf<String>* args,
+            [out] IVm** vm);
+
+        /**
+         * Prepare and return SQLite3 statement for SQL. Only available
+         * in SQLite 3.0 and above, otherwise a no-op.
+         *
+         * @param sql SQL statement to be prepared
+         * @return a Stmt object
+         */
+        Prepare(
+            [in] String sql,
+            [out] IStmt** st);
+
+        /**
+         * Open an SQLite3 blob. Only available in SQLite 3.4.0 and above.
+         * @param db database name
+         * @param table table name
+         * @param column column name
+         * @param row row identifier
+         * @param rw if true, open for read-write, else read-only
+         * @return a Blob object
+         */
+        OpenBlob(
+            [in] String db,
+            [in] String table,
+            [in] String column,
+            [in] Int64 row,
+            [in] Boolean rw,
+            [out] IBlob** bl);
+
+        /**
+         * Check type of open database.
+         * @return true if SQLite3 database
+         */
+        Is3(
+            [out] Boolean* value);
+
+        /**
+         * Establish a progress callback method which gets called after
+         * N SQLite VM opcodes.
+         *
+         * @param n number of SQLite VM opcodes until callback is invoked
+         * @param p the object implementing the progress callback method
+         */
+        ProgressHandler(
+            [in] Int32 n,
+            [in] IProgressHandler* p);
+
+        /**
+         * Specify key for encrypted database. To be called
+         * right after open() on SQLite3 databases.
+         * Not available in public releases of SQLite.
+         *
+         * @param ekey the key as byte array
+         */
+        Key(
+            [in] ArrayOf<Byte>* ekey);
+
+        /**
+         * Specify key for encrypted database. To be called
+         * right after open() on SQLite3 databases.
+         * Not available in public releases of SQLite.
+         *
+         * @param skey the key as String
+         */
+        Key(
+            [in] String skey);
+    }
+
+    [deprecated]
+    interface IDatabaseHelper {
+        /**
+         * See if an SQL statement is complete.
+         * Returns true if the input string comprises
+         * one or more complete SQL statements.
+         *
+         * @param sql the SQL statement to be checked
+         */
+        Complete(
+            [in] String sql,
+            [out] Boolean * value);
+
+        /**
+         * Return SQLite version number as string.
+         * Don't rely on this when both SQLite 2 and 3 are compiled
+         * into the native part. Use the class method in this case.
+         */
+        Version(
+            [out] String * str);
+
+        /**
+         * Return error string given SQLite error code (SQLite2).
+         *
+         * @param error_code the error code
+         * @return error string
+         */
+        ErrorString(
+            [in] Int32 error_code,
+            [out] String * str);
+
+        /**
+         * Return information on SQLite runtime status.
+         * Only available in SQLite 3.6 and above,
+         * otherwise a no-op.
+         *
+         * @param op   operation code
+         * @param info output buffer, must be able to hold two
+         *             values (current/highwater)
+         * @param flag reset flag
+         * @return SQLite error code
+         */
+        Status(
+            [in] Int32 op,
+            [in] ArrayOf<Int32>* info,
+            [in] Boolean flag,
+            [out] Int32 * value);
+
+        /**
+         * Make long value from julian date for java.lang.Date
+         *
+         * @param d double value (julian date in SQLite3 format)
+         * @return long
+         */
+        LongFromJulian(
+            [in] Double d,
+            [out] Int64 * value);
+
+        /**
+         * Make long value from julian date for java.lang.Date
+         *
+         * @param s string (double value) (julian date in SQLite3 format)
+         * @return long
+         */
+
+        LongFromJulian(
+            [in] String s ,
+            [out] Int64 * value);
+
+        /**
+         * Make julian date value from java.lang.Date
+         *
+         * @param ms millisecond value of java.lang.Date
+         * @return double
+         */
+
+        JulianFromLong(
+            [in] Int64 ms,
+            [out] Double * value);
+
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

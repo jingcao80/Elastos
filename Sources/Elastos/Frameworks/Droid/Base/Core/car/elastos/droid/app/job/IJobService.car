@@ -1,0 +1,24 @@
+module
+{
+    interface Elastos.Droid.App.Job.IJobParameters;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Job {
+
+    interface IIJobService {
+        /** Begin execution of application's job. */
+        StartJob(
+            [in] IJobParameters* jobParams);
+
+        /** Stop execution of application's job. */
+        StopJob(
+            [in] IJobParameters* jobParams);
+    }
+
+    } // namespace Job
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,332 @@
+
+module
+{
+    interface Elastos.Utility.IIterator;
+
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * @Involve
+     * interface IIterable;
+     * interface ICollection;
+     * interface IList;
+     * interface IDeque;
+     * interface IQueue;
+     * interface ICloneable;
+     * interface ISerializable;
+     */
+    [deprecated]
+    interface ILinkedList {
+        /**
+         * Adds the specified object at the beginning of this {@code LinkedList}.
+         *
+         * @param object
+         *            the object to add.
+         */
+        AddFirst(
+            [in] IInterface* object);
+
+        /**
+         * Adds the specified object at the end of this {@code LinkedList}.
+         *
+         * @param object
+         *            the object to add.
+         */
+        AddLast(
+            [in] IInterface* object);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#descendingIterator()
+         * @since 1.6
+         */
+        GetDescendingIterator(
+            [out] IIterator** iterator);
+
+        GetElement(
+            [out] IInterface** object);
+
+        /**
+         * Returns the first element in this {@code LinkedList}.
+         *
+         * @return the first element.
+         * @throws NoSuchElementException
+         *             if this {@code LinkedList} is empty.
+         */
+        GetFirst(
+            [out] IInterface** object);
+
+        /**
+         * Returns the last element in this {@code LinkedList}.
+         *
+         * @return the last element
+         * @throws NoSuchElementException
+         *             if this {@code LinkedList} is empty
+         */
+        GetLast(
+            [out] IInterface** object);
+
+        Offer(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+         /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#offerFirst(java.lang.Object)
+         * @since 1.6
+         */
+        OfferFirst(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#offerLast(java.lang.Object)
+         * @since 1.6
+         */
+        OfferLast(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        Peek(
+            [out] IInterface** object);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#peekFirst()
+         * @since 1.6
+         */
+        PeekFirst(
+            [out] IInterface** object);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#peekLast()
+         * @since 1.6
+         */
+        PeekLast(
+            [out] IInterface** object);
+
+        Poll(
+            [out] IInterface** object);
+
+         /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#pollFirst()
+         * @since 1.6
+         */
+        PollFirst(
+            [out] IInterface** object);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#pollLast()
+         * @since 1.6
+         */
+        PollLast(
+            [out] IInterface** object);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#pop()
+         * @since 1.6
+         */
+        Pop(
+            [out] IInterface** object);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#push(java.lang.Object)
+         * @since 1.6
+         */
+        Push(
+            [in] IInterface* object);
+
+        Remove(
+            [out] IInterface** object);
+
+        /**
+         * Removes the first object from this {@code LinkedList}.
+         *
+         * @return the removed object.
+         * @throws NoSuchElementException
+         *             if this {@code LinkedList} is empty.
+         */
+        RemoveFirst(
+            [out] IInterface** object);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#removeFirstOccurrence(java.lang.Object)
+         * @since 1.6
+         */
+        RemoveFirstOccurrence(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        /**
+         * Removes the last object from this {@code LinkedList}.
+         *
+         * @return the removed object.
+         * @throws NoSuchElementException
+         *             if this {@code LinkedList} is empty.
+         */
+        RemoveLast(
+            [out] IInterface** object);
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Deque#removeLastOccurrence(java.lang.Object)
+         * @since 1.6
+         */
+        RemoveLastOccurrence(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+
+        /**
+         * interfaces from IList
+         *
+         */
+        Add(
+            [in] Int32 location,
+            [in] IInterface* object);
+
+        Add(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Add(
+            [in] IInterface* object);
+
+        AddAll(
+            [in] Int32 location,
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] Int32 location,
+            [in] ICollection* collection);
+
+        Get(
+            [in] Int32 location,
+            [out] IInterface** object);
+
+        IndexOf(
+            [in] IInterface* object,
+            [out] Int32* index);
+
+        LastIndexOf(
+            [in] IInterface* object,
+            [out] Int32* index);
+
+        GetListIterator(
+            [out] IListIterator** it);
+
+        GetListIterator(
+            [in] Int32 location,
+            [out] IListIterator** it);
+
+        Remove(
+            [in] Int32 location,
+            [out] IInterface** object);
+
+        Remove(
+            [in] Int32 location);
+
+        Set(
+            [in] Int32 location,
+            [in] IInterface* object,
+            [out] IInterface** prevObject);
+
+        Set(
+            [in] Int32 location,
+            [in] IInterface* object);
+
+        GetSubList(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] IList** subList);
+
+
+        /**
+         * interfaces from ICollection
+         *
+         */
+        GetIterator(
+            [out] IIterator** it);
+
+        AddAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] ICollection* collection);
+
+        Clear();
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        ContainsAll(
+            [in] ICollection* collection,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        Remove(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Remove(
+            [in] IInterface* object);
+
+        RemoveAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RemoveAll(
+            [in] ICollection* collection);
+
+        RetainAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RetainAll(
+            [in] ICollection* collection);
+
+        GetSize(
+            [out] Int32* size);
+
+        ToArray(
+            [out, callee] ArrayOf<IInterface *> * array);
+
+        ToArray(
+            [in] ArrayOf<IInterface* > * inArray,
+            [out, callee] ArrayOf<IInterface *> * outArray);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

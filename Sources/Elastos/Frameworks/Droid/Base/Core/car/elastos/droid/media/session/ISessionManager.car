@@ -1,0 +1,60 @@
+module
+{
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Media.IIRemoteVolumeController;
+    interface Elastos.Droid.Media.Session.IIActiveSessionsListener;
+    interface Elastos.Droid.Media.Session.IISessionCallback;
+    interface Elastos.Droid.Media.Session.IISession;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    interface IISessionManager {
+        CreateSession(
+            [in] String packageName,
+            [in] IISessionCallback * cb,
+            [in] String tag,
+            [in] Int32 userId,
+            [out] IISession ** result);
+
+        GetSessions(
+            [in] IComponentName * compName,
+            [in] Int32 userId,
+            [out] IList ** result);
+
+        DispatchMediaKeyEvent(
+            [in] IKeyEvent * keyEvent,
+            [in] Boolean needWakeLock);
+
+        DispatchAdjustVolume(
+            [in] Int32 suggestedStream,
+            [in] Int32 delta,
+            [in] Int32 flags);
+
+        AddSessionsListener(
+            [in] IIActiveSessionsListener * listener,
+            [in] IComponentName * compName,
+            [in] Int32 userId);
+
+        RemoveSessionsListener(
+            [in] IIActiveSessionsListener * listener);
+
+        // This is for the system volume UI only
+        SetRemoteVolumeController(
+            [in] IIRemoteVolumeController * rvc);
+
+        // For PhoneWindowManager to precheck media keys
+        IsGlobalPriorityActive(
+            [out] Boolean * result);
+    }
+
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

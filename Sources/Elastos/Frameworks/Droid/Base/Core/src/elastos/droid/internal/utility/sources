@@ -1,0 +1,46 @@
+TARGET_NAME = utility
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = ArrayUtils.cpp
+#SOURCES += AsyncService.cpp
+SOURCES += AsyncChannel.cpp
+SOURCES += BitwiseInputStream.cpp
+SOURCES += BitwiseOutputStream.cpp
+SOURCES += CCharSequences.cpp
+SOURCES += CDumpUtils.cpp
+SOURCES += CFastMath.cpp
+SOURCES += CFastXmlSerializer.cpp
+SOURCES += CFileRotator.cpp
+SOURCES += CIndentingPrintWriter.cpp
+SOURCES += CJournaledFile.cpp
+SOURCES += CMemInfoReader.cpp
+SOURCES += CNotificationColorUtilHelper.cpp
+SOURCES += CParcelableString.cpp
+SOURCES += CPreconditions.cpp
+SOURCES += CUserIcons.cpp
+SOURCES += CVirtualRefBasePtr.cpp
+SOURCES += CharSequences.cpp
+SOURCES += DumpUtils.cpp
+SOURCES += FastMath.cpp
+SOURCES += FastPrintWriter.cpp
+SOURCES += GrowingArrayUtils.cpp
+SOURCES += HexDump.cpp
+SOURCES += ImageUtils.cpp
+SOURCES += LocalLog.cpp
+SOURCES += NotificationColorUtil.cpp
+SOURCES += Preconditions.cpp
+SOURCES += ProcFileReader.cpp
+SOURCES += SizedInputStream.cpp
+SOURCES += State.cpp
+SOURCES += StateMachine.cpp
+SOURCES += TypedProperties.cpp
+SOURCES += UserIcons.cpp
+SOURCES += XmlUtils.cpp
+SOURCES += Utility.cpp

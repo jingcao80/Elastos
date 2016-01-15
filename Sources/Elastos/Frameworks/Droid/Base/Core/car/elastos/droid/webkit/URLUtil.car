@@ -1,0 +1,158 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    [deprecated]
+    interface IURLUtil {
+
+        // to refer to bar.png under your package's asset/foo/ directory, use
+        // "file:///android_asset/foo/bar.png".
+        const String ASSET_BASE = "file:///android_asset/";
+
+        // to refer to bar.png under your package's res/drawable/ directory, use
+        // "file:///android_res/drawable/bar.png". Use "drawable" to refer to
+        // "drawable-hdpi" directory as well.
+        const String RESOURCE_BASE = "file:///android_res/";
+
+        const String FILE_BASE = "file://";
+
+        const String PROXY_BASE = "file:///cookieless_proxy/";
+
+        const String CONTENT_BASE = "content:";
+
+        /**
+         * Cleans up (if possible) user-entered web addresses
+         */
+        GuessUrl(
+            [in] String inUrl,
+            [out] String* url);
+
+        ComposeSearchUrl(
+            [in] String inQuery,
+            [in] String templateStr,
+            [in] String queryPlaceHolder,
+            [out] String* url);
+
+        Decode(
+            [in] ArrayOf<Byte>* url,
+            [out, callee] ArrayOf<Byte>* outUrl);
+
+        /**
+         * @return True iff the url is an asset file.
+         */
+        IsAssetUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is a resource file.
+         * @hide
+         */
+        IsResourceUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is a proxy url to allow cookieless network
+         * requests from a file url.
+         * @deprecated Cookieless proxy is no longer supported.
+         */
+        //@Deprecated
+        IsCookielessProxyUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is a local file.
+         */
+        IsFileUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is an about: url.
+         */
+        IsAboutUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is a data: url.
+         */
+        IsDataUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is a javascript: url.
+         */
+        IsJavaScriptUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is an http: url.
+         */
+        IsHttpUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is an https: url.
+         */
+        IsHttpsUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is a network url.
+         */
+        IsNetworkUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is a content: url.
+         */
+        IsContentUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * @return True iff the url is valid.
+         */
+        IsValidUrl(
+            [in] String url,
+            [out] Boolean* result);
+
+        /**
+         * Strips the url of the anchor.
+         */
+        StripAnchor(
+            [in] String url,
+            [out] String* result);
+
+        /**
+         * Guesses canonical filename that a download would have, using
+         * the URL and contentDisposition. File extension, if not defined,
+         * is added based on the mimetype
+         * @param url Url to the content
+         * @param contentDisposition Content-Disposition HTTP header or null
+         * @param mimeType Mime-type of the content or null
+         *
+         * @return suggested filename
+         */
+        GuessFileName(
+            [in] String url,
+            [in] String contentDisposition,
+            [in] String mimeType,
+            [out] String* fileName);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

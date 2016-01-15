@@ -1,0 +1,15 @@
+TARGET_NAME= fingerprint
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+
+SOURCES = fingerprint.cpp
+SOURCES += FingerprintManager.cpp
+SOURCES += FingerprintUtils.cpp
+SOURCES += CFingerprintUtils.cpp
+SOURCES += FingerprintManagerReceiver.cpp

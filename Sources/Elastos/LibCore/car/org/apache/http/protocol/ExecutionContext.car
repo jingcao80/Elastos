@@ -1,0 +1,35 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+    /**
+     * {@link HttpContext Context} attribute names for protocol execution.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 558154 $
+     *
+     * @since 4.0
+     */
+    interface IExecutionContext {
+
+        const String HTTP_CONNECTION  = "http.connection";
+        const String HTTP_REQUEST     = "http.request";
+        const String HTTP_RESPONSE    = "http.response";
+        const String HTTP_TARGET_HOST = "http.target_host";
+        const String HTTP_PROXY_HOST  = "http.proxy_host";
+        const String HTTP_REQ_SENT    = "http.request_sent";
+
+    }
+
+    } // namespace Protocol
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

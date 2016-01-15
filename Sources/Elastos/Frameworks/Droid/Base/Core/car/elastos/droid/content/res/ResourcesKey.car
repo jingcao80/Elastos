@@ -1,0 +1,31 @@
+module
+{
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+    interface IResourcesKey {
+        SetDisplayId(
+            [in] Int32 displayId);
+
+        GetDisplayId(
+            [out] Int32* displayId);
+
+        SetOverrideConfiguration(
+            [in] IConfiguration* cfg);
+
+        GetOverrideConfiguration(
+            [out] IConfiguration** cfg);
+
+        HasOverrideConfiguration(
+            [out] Boolean* cfg);
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

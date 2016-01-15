@@ -1,0 +1,8 @@
+
+TARGET_NAME= vm
+TARGET_TYPE= lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Kernel/Vm
+
+SOURCES = CStringUtils.cpp

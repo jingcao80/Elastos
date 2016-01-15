@@ -1,0 +1,32 @@
+module
+{
+    using interface Elastos.IO.IDataInputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Gesture {
+
+    /**
+     * A timed point of a gesture stroke. Multiple points form a stroke.
+     */
+    interface IGesturePoint {
+        GetX(
+            [out] Float* x);
+
+        GetY(
+            [out] Float* y);
+
+        GetTimestamp(
+            [out] Int64* timestamp);
+    }
+
+    interface IGesturePointHelper {
+        Deserialize(
+            [in] IDataInputStream* inStream,
+            [out] IGesturePoint** point);
+    }
+
+    } // namespace Gesture
+    } // namespace Droid
+    } // namespace Elastos
+}

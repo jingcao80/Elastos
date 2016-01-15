@@ -1,0 +1,24 @@
+module
+{
+    interface Elastos.Sql.SQLite.IDatabase;
+
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+    namespace JDBC {
+
+    /**
+      * @Involve
+      * interface Elastos.Sql.IConnection;
+      * interface Elastos.Sql.IWrapper;
+      */
+    interface IJDBCConnection {
+        GetSQLiteDatabase(
+            [out] IDatabase** db);
+    }
+
+    } // namespace JDBC
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

@@ -1,0 +1,52 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Utils {
+
+    /*
+     * @invoke
+     * IInterface IDecoratorListener
+     */
+    interface ICameraBinderDecoratorListener {
+    }
+
+    /**
+     * Translate camera device status_t return values into exceptions.
+     *
+     * @see android.hardware.camera2.utils.CameraBinderDecorator#newInstance
+     * @hide
+     */
+    interface ICameraBinderDecorator {
+        const Int32 ICameraBinderDecorator_NO_ERROR = 0;
+        const Int32 ICameraBinderDecorator_PERMISSION_DENIED = -1;
+        const Int32 ICameraBinderDecorator_ALREADY_EXISTS = -17;
+        const Int32 ICameraBinderDecorator_BAD_VALUE = -22;
+        const Int32 ICameraBinderDecorator_DEAD_OBJECT = -32;
+        const Int32 ICameraBinderDecorator_INVALID_OPERATION = -38;
+        const Int32 ICameraBinderDecorator_TIMED_OUT = -110;
+
+        /**
+         * TODO: add as error codes in Errors.h
+         * - POLICY_PROHIBITS
+         * - RESOURCE_BUSY
+         * - NO_SUCH_DEVICE
+         * - NOT_SUPPORTED
+         * - TOO_MANY_USERS
+         */
+        const Int32 ICameraBinderDecorator_EACCES = -13;
+        const Int32 ICameraBinderDecorator_EBUSY = -16;
+        const Int32 ICameraBinderDecorator_ENODEV = -19;
+        const Int32 ICameraBinderDecorator_EOPNOTSUPP = -95;
+        const Int32 ICameraBinderDecorator_EUSERS = -87;
+    }
+
+    } // namespace Utils
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

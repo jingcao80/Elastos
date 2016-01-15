@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * The normalization forms supported by the Normalizer. These are specified in
+     * <a href="http://www.unicode.org/unicode/reports/tr15/tr15-23.html">Unicode Standard
+     * Annex #15</a>.
+     */
+    enum NormalizerForm {
+        /**
+         * Normalization Form D - Canonical Decomposition.
+         */
+        NormalizerForm_NFD,
+
+        /**
+         * Normalization Form C - Canonical Decomposition, followed by Canonical Composition.
+         */
+        NormalizerForm_NFC,
+
+        /**
+         * Normalization Form KD - Compatibility Decomposition.
+         */
+        NormalizerForm_NFKD,
+
+        /**
+         * Normalization Form KC - Compatibility Decomposition, followed by Canonical Composition.
+         */
+        NormalizerForm_NFKC
+    }
+
+
+    /**
+     * Provides normalization functions according to Unicode Standard Annex #15:
+     * Unicode Normalization Forms. Normalization can decompose and compose characters
+     * for equivalency checking.
+     */
+
+    interface INormalizer {
+        /**
+         * Check whether the given character sequence <code>src</code> is normalized
+         * according to the normalization method <code>form</code>.
+         *
+         * @param src character sequence to check
+         * @param form normalization form to check against
+         * @return true if normalized according to <code>form</code>
+         */
+        IsNormalized(
+            [in] ICharSequence* src,
+            [in] NormalizerForm form,
+            [out] Boolean* isNormalized);
+
+        /**
+         * Normalize the character sequence <code>src</code> according to the
+         * normalization method <code>form</code>.
+         *
+         * @param src character sequence to read for normalization
+         * @param form normalization form
+         * @return string normalized according to <code>form</code>
+         */
+        Normalize(
+            [in] ICharSequence* src,
+            [in] NormalizerForm form,
+            [out] String* normalizeString);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

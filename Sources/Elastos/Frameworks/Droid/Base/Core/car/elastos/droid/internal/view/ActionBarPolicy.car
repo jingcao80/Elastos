@@ -1,0 +1,50 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    /**
+     * Allows components to query for various configuration policy decisions
+     * about how the action bar should lay out and behave on the current device.
+     */
+    [local]
+    interface IActionBarPolicy {
+        GetMaxActionButtons(
+            [out] Int32* rst);
+
+        ShowsOverflowMenuButton(
+            [out] Boolean* rst);
+
+        GetEmbeddedMenuWidthLimit(
+            [out] Int32* rst);
+
+        HasEmbeddedTabs(
+            [out] Boolean* rst);
+
+        GetTabContainerHeight(
+            [out] Int32* rst);
+
+        EnableHomeButtonByDefault(
+            [out] Boolean* rst);
+
+        GetStackedTabMaxWidth(
+            [out] Int32* rst);
+    }
+
+    [local]
+    interface IActionBarPolicyHelper {
+        Get(
+            [in] IContext* context,
+            [out] IActionBarPolicy** policy);
+    }
+
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,45 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+
+    namespace Reflection {
+
+        interface IFooBar {
+            GetValue(
+                [out] String* str);
+
+            SetValue(
+                [in] String str);
+
+            GetValue(
+                [out] Int32* value);
+
+            SetValue(
+                [in] Int32 value);
+
+            GetValue(
+                [out] Int64* value);
+
+            SetValue(
+                [in] Int64 value);
+
+            SetValue(
+                [in] Int32 value0,
+                [in] String str,
+                [in] Int64 value1);
+
+            GetValue(
+                [out] Int32* value0,
+                [out] String* str,
+                [out] Int64* value1);
+        }
+
+        class CFooBar {
+            constructor();
+
+            interface IFooBar;
+        }
+
+    } // Reflection
+}

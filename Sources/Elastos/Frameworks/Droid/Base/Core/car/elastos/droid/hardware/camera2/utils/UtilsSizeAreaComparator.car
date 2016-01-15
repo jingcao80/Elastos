@@ -1,0 +1,45 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Utility.ISize;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Utils {
+
+    /**
+     * Comparator for {@link Size} objects by the area.
+     *
+     * <p>This comparator totally orders by rectangle area. Tie-breaks on width.</p>
+     *
+     * @invoke
+     * interface IComparator
+     */
+    interface IUtilsSizeAreaComparator {
+    }
+
+    interface IUtilsSizeAreaComparatorHelper {
+        /**
+         * Get the largest {@code Size} from the list by comparing each size's area
+         * by each other using {@link SizeAreaComparator}.
+         *
+         * @param sizes a non-{@code null} list of non-{@code null} sizes
+         * @return a non-{@code null} size
+         *
+         * @throws NullPointerException if {@code sizes} or any elements in it were {@code null}
+         */
+        FindLargestByArea(
+            [in] IList* sizes,
+            [out] ISize** outsz);
+    }
+
+    } // namespace Utils
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

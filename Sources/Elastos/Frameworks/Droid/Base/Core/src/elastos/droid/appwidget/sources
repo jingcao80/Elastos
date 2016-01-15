@@ -1,0 +1,23 @@
+TARGET_NAME= appwidget
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+C_DEFINES += -DDROID_CORE
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+SOURCES = AppWidgetHost.cpp
+SOURCES += CAppWidgetHost.cpp
+SOURCES += CAppWidgetHostHelper.cpp
+SOURCES += CAppWidgetHostCallbacks.cpp
+SOURCES += AppWidgetHostView.cpp
+SOURCES += CAppWidgetHostView.cpp
+SOURCES += CAppWidgetHostViewHelper.cpp
+SOURCES += AppWidgetManager.cpp
+SOURCES += CAppWidgetManager.cpp
+SOURCES += CAppWidgetManagerHelper.cpp
+SOURCES += AppWidgetProvider.cpp
+SOURCES += AppWidgetProviderInfo.cpp
+SOURCES += CAppWidgetProviderInfo.cpp

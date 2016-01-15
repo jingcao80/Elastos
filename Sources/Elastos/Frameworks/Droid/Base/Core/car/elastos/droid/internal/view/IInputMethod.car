@@ -1,0 +1,69 @@
+
+module
+{
+    using interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IResultReceiver;
+    interface Elastos.Droid.View.IInputChannel;
+    interface Elastos.Droid.View.InputMethod.IInputBinding;
+    interface Elastos.Droid.View.InputMethod.IEditorInfo;
+    interface Elastos.Droid.View.InputMethod.IInputMethodSubtype;
+    interface Elastos.Droid.Internal.View.IInputContext;
+    interface Elastos.Droid.Internal.View.IIInputMethodSession;
+    interface Elastos.Droid.Internal.View.IInputSessionCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    /**
+     * Top-level interface to an input method component (implemented in a
+     * Service).
+     * {@hide}
+     */
+    [oneway]
+    interface IIInputMethod {
+        AttachToken(
+            [in] IBinder* token);
+
+        BindInput(
+            [in] IInputBinding* binding);
+
+        UnbindInput();
+
+        StartInput(
+            [in] IInputContext* inputContext,
+            [in] IEditorInfo* attribute);
+
+        RestartInput(
+            [in] IInputContext* inputContext,
+            [in] IEditorInfo* attribute);
+
+        CreateSession(
+            [in] IInputChannel* channel,
+            [in] IInputSessionCallback* inputMethodCalllback);
+
+        SetSessionEnabled(
+            [in] IIInputMethodSession* session,
+            [in] Boolean enabled);
+
+        RevokeSession(
+            [in] IIInputMethodSession* session);
+
+        ShowSoftInput(
+            [in] Int32 flags,
+            [in] IResultReceiver* resultReceiver);
+
+        HideSoftInput(
+            [in] Int32 flags,
+            [in] IResultReceiver* resultReceiver);
+
+        ChangeInputMethodSubtype(
+            [in] IInputMethodSubtype* subtype);
+    }
+
+    } // namespace View
+    } // namepsace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

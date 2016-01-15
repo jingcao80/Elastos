@@ -1,0 +1,40 @@
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    /**
+     * Helper class that generates default user icons.
+     */
+    [local]
+    interface IUserIcons {
+        /**
+         * Converts a given drawable to a bitmap.
+         */
+        ConvertToBitmap(
+            [in] IDrawable* icon,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Returns a default user icon for the given user.
+         *
+         * Note that for guest users, you should pass in {@code UserHandle.USER_NULL}.
+         * @param userId the user id or {@code UserHandle.USER_NULL} for a non-user specific icon
+         * @param light whether we want a light icon (suitable for a dark background)
+         */
+        GetDefaultUserIcon(
+            [in] Int32 userId,
+            [in] Boolean light,
+            [out] IDrawable** icon);
+    }
+
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

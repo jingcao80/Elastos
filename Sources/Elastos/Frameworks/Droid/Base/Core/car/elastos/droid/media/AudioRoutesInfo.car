@@ -1,0 +1,28 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IAudioRoutesInfo
+    {
+        GetBluetoothName(
+            [out] ICharSequence** result);
+
+        SetBluetoothName(
+            [in] ICharSequence* bluetoothName);
+
+        GetMainType(
+            [out] Int32* result);
+
+        SetMainType(
+            [in] Int32 mainType);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

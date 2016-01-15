@@ -1,0 +1,450 @@
+
+module
+{
+    merge("crypto/ICipher.car");
+    merge("crypto/ICipherInputStream.car");
+    merge("crypto/ICipherOutputStream.car");
+    merge("crypto/ICipherSpi.car");
+    merge("crypto/IEncryptedPrivateKeyInfo.car");
+    merge("crypto/IExemptionMechanism.car");
+    merge("crypto/IExemptionMechanismSpi.car");
+    merge("crypto/ISecretKey.car");
+    merge("crypto/IKeyAgreement.car");
+    merge("crypto/IKeyAgreementSpi.car");
+    merge("crypto/IKeyGenerator.car");
+    merge("crypto/IKeyGeneratorSpi.car");
+    merge("crypto/IMac.car");
+    merge("crypto/IMacSpi.car");
+    merge("crypto/ISecretKeyFactory.car");
+    merge("crypto/ISecretKeyFactorySpi.car");
+    merge("crypto/ISealedObject.car");
+    merge("crypto/INullCipher.car");
+
+    merge("crypto/interfaces/IDHKey.car");
+    merge("crypto/interfaces/IDHPrivateKey.car");
+    merge("crypto/interfaces/IDHPublicKey.car");
+    merge("crypto/interfaces/IPBEKey.car");
+
+    merge("crypto/spec/IDESKeySpec.car");
+    merge("crypto/spec/IDESedeKeySpec.car");
+    merge("crypto/spec/IDHGenParameterSpec.car");
+    merge("crypto/spec/IDHParameterSpec.car");
+    merge("crypto/spec/IDHPrivateKeySpec.car");
+    merge("crypto/spec/IDHPublicKeySpec.car");
+    merge("crypto/spec/IGCMParameterSpec.car");
+    merge("crypto/spec/IIvParameterSpec.car");
+    merge("crypto/spec/IOAEPParameterSpec.car");
+    merge("crypto/spec/IPBEKeySpec.car");
+    merge("crypto/spec/IPBEParameterSpec.car");
+    merge("crypto/spec/IPSource.car");
+    merge("crypto/spec/IRC2ParameterSpec.car");
+    merge("crypto/spec/IRC5ParameterSpec.car");
+    merge("crypto/spec/ISecretKeySpec.car");
+
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.IFlushable;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IFilterInputStream;
+    interface Elastos.IO.IFilterOutputStream;
+    interface Elastos.IO.ISerializable;
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.IAlgorithmParameters;
+    interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+    interface Elastos.Security.Spec.IKeySpec;
+    interface Elastos.Math.IBigInteger;
+    interface Elastosx.Crypto.ISecretKey;
+
+   namespace Elastosx {
+   namespace Crypto {
+
+    [deprecated]
+    class CCipher {
+        constructor(
+            [in] ICipherSpi* cipherSpi,
+            [in] IProvider* provider,
+            [in] String transformation);
+
+        constructor(
+            [in] String transformation,
+            [in] ArrayOf<String> * transformParts,
+            [in] IProvider* provider);
+
+        interface ICipher;
+    }
+
+    singleton class CCipherHelper {
+        interface ICipherHelper;
+    }
+
+    class CCipherInputStream {
+        constructor(
+            [in] IInputStream* is,
+            [in] ICipher* c);
+
+        constructor(
+            [in] IInputStream* is);
+
+        interface ICipherInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class CCipherOutputStream {
+        constructor(
+            [in] IOutputStream* os,
+            [in] ICipher* c);
+
+        constructor(
+            [in] IOutputStream* os);
+
+        interface ICipherOutputStream;
+        interface IFilterOutputStream;
+        interface IOutputStream;
+        interface IFlushable;
+        interface ICloseable;
+    }
+
+    [deprecated]
+    class CEncryptedPrivateKeyInfo {
+        constructor(
+            [in] ArrayOf<Byte> * encoded);
+
+        constructor(
+            [in] String encryptionAlgorithmName,
+            [in] ArrayOf<Byte> * encryptedData);
+
+        constructor(
+            [in] IAlgorithmParameters * algParams,
+            [in] ArrayOf<Byte> * encryptedData);
+
+        interface IEncryptedPrivateKeyInfo;
+    }
+
+    class CExemptionMechanism {
+        constructor(
+            [in] IExemptionMechanismSpi* exmechSpi,
+            [in] IProvider* provider,
+            [in] String mechanism);
+
+        interface IExemptionMechanism;
+    }
+
+    singleton class CExemptionMechanismHelper {
+        interface IExemptionMechanismHelper;
+    }
+
+    class CKeyAgreement {
+        constructor(
+            [in] IKeyAgreementSpi* keyAgreeSpi,
+            [in] IProvider* provider,
+            [in] String algorithm);
+
+        interface IKeyAgreement;
+    }
+
+    singleton class CKeyAgreementHelper {
+        interface IKeyAgreementHelper;
+    }
+
+    class CKeyGenerator {
+        constructor(
+            [in] IKeyGeneratorSpi* keyGenSpi,
+            [in] IProvider* provider,
+            [in] String algorithm);
+
+        interface IKeyGenerator;
+    }
+
+    singleton class CKeyGeneratorHelper {
+        interface IKeyGeneratorHelper;
+    }
+
+    [deprecated]
+    class CMac {
+        constructor(
+            [in] IMacSpi* keyGenSpi,
+            [in] IProvider* provider,
+            [in] String algorithm);
+
+        interface IMac;
+        interface ICloneable;
+    }
+
+    singleton class CMacHelper {
+        interface IMacHelper;
+    }
+
+    class CSecretKeyFactory {
+        constructor(
+            [in] ISecretKeyFactorySpi* keyFacSpi,
+            [in] IProvider* provider,
+            [in] String algorithm);
+
+        interface ISecretKeyFactory;
+    }
+
+    singleton class CSecretKeyFactoryHelper {
+        interface ISecretKeyFactoryHelper;
+    }
+
+    class CSealedObject {
+        constructor(
+            [in] ISerializable* object,
+            [in] ICipher* c);
+
+        constructor(
+            [in] ISealedObject* object);
+
+        interface ISecretKeyFactory;
+    }
+
+    class CNullCipher {
+        constructor();
+
+        interface INullCipher;
+    }
+
+    namespace Spec {
+
+        [deprecated]
+        class CDESKeySpec {
+            constructor(
+                [in] ArrayOf<Byte> * key);
+
+            constructor(
+                [in] ArrayOf<Byte> * key,
+                [in] Int32 offset);
+
+            interface IDESKeySpec;
+            interface IKeySpec;
+        }
+
+        singleton class CDESKeySpecHelper {
+            interface IDESKeySpecHelper;
+        }
+
+        [deprecated]
+        class CDESedeKeySpec {
+            constructor(
+                [in] ArrayOf<Byte> * key);
+
+            constructor(
+                [in] ArrayOf<Byte> * key,
+                [in] Int32 offset);
+
+            interface IDESedeKeySpec;
+            interface IKeySpec;
+        }
+
+        singleton class CDESedeKeySpecHelper {
+            interface IDESedeKeySpecHelper;
+        }
+
+        class CDHGenParameterSpec {
+            constructor(
+                [in] Int32 primeSize,
+                [in] Int32 exponentSize);
+
+            interface IDHGenParameterSpec;
+            interface IAlgorithmParameterSpec;
+        }
+
+        class CDHParameterSpec {
+            constructor(
+                [in] IBigInteger * p,
+                [in] IBigInteger * g);
+
+             constructor(
+                [in] IBigInteger * p,
+                [in] IBigInteger * g,
+                [in] Int32 l);
+
+            interface IDHParameterSpec;
+            interface IAlgorithmParameterSpec;
+        }
+
+        class CDHPrivateKeySpec {
+            constructor(
+                [in] IBigInteger * x,
+                [in] IBigInteger * p,
+                [in] IBigInteger * g);
+
+            interface IDHPrivateKeySpec;
+            interface IKeySpec;
+        }
+
+        class CDHPublicKeySpec {
+            constructor(
+                [in] IBigInteger * y,
+                [in] IBigInteger * p,
+                [in] IBigInteger * g);
+
+            interface IDHPublicKeySpec;
+            interface IKeySpec;
+        }
+
+        [deprecated]
+        class CGCMParameterSpec {
+            constructor(
+                [in] Int32 tagLen,
+                [in] ArrayOf<Byte> * iv);
+
+            constructor(
+                [in] Int32 tagLen,
+                [in] ArrayOf<Byte> * iv,
+                [in] Int32 offset,
+                [in] Int32 byteCount);
+
+            interface IGCMParameterSpec;
+            interface IAlgorithmParameterSpec;
+        }
+
+        [deprecated]
+        class CIvParameterSpec {
+            constructor(
+                [in] ArrayOf<Byte> * iv);
+
+            constructor(
+                [in] ArrayOf<Byte> * iv,
+                [in] Int32 offset,
+                [in] Int32 byteCount);
+
+            interface IIvParameterSpec;
+            interface IAlgorithmParameterSpec;
+        }
+
+        class COAEPParameterSpec {
+            constructor();
+
+            constructor(
+                [in] String mdName,
+                [in] String mgfName,
+                [in] IAlgorithmParameterSpec * mgfSpec,
+                [in] IPSource * pSrc);
+
+            interface IOAEPParameterSpec;
+            interface IAlgorithmParameterSpec;
+        }
+
+        singleton class COAEPParameterSpecHelper {
+            interface IOAEPParameterSpecHelper;
+        }
+
+        [deprecated]
+        class CPBEKeySpec {
+            constructor(
+                [in] ArrayOf<Char32> * password);
+
+            constructor(
+                [in] ArrayOf<Char32> * password,
+                [in] ArrayOf<Byte> * salt,
+                [in] Int32 iterationCount,
+                [in] Int32 keyLength);
+
+            constructor(
+                [in] ArrayOf<Char32> * password,
+                [in] ArrayOf<Byte> * salt,
+                [in] Int32 iterationCount);
+
+            interface IPBEKeySpec;
+            interface IKeySpec;
+        }
+
+        [deprecated]
+        class CPBEParameterSpec {
+            constructor(
+                [in] ArrayOf<Byte> * salt,
+                [in] Int32 iterationCount);
+
+            interface IPBEParameterSpec;
+            interface IAlgorithmParameterSpec;
+        }
+
+        class CPSource {
+            constructor(
+                [in] String pSrcName);
+
+            interface IPSource;
+        }
+
+        [deprecated]
+        class CPSpecified {
+            constructor();
+
+            constructor(
+            [in] ArrayOf<Byte> * p);;
+
+            interface IPSpecified;
+        }
+
+        singleton class CPSpecifiedHelper {
+            interface IPSpecifiedHelper;
+        }
+
+        [deprecated]
+        class CRC2ParameterSpec {
+            constructor(
+                [in] Int32 effectiveKeyBits);
+
+            constructor(
+                [in] Int32 effectiveKeyBits,
+                [in] ArrayOf<Byte> * iv);
+
+            constructor(
+                [in] Int32 effectiveKeyBits,
+                [in] ArrayOf<Byte> * iv,
+                [in] Int32 offset);
+
+            interface IRC2ParameterSpec;
+            interface IAlgorithmParameterSpec;
+        }
+
+        [deprecated]
+        class CRC5ParameterSpec {
+            constructor(
+                [in] Int32 ver,
+                [in] Int32 rounds,
+                [in] Int32 wordSize);
+
+            constructor(
+                [in] Int32 ver,
+                [in] Int32 rounds,
+                [in] Int32 wordSize,
+                [in] ArrayOf<Byte> * iv);
+
+            constructor(
+                [in] Int32 ver,
+                [in] Int32 rounds,
+                [in] Int32 wordSize,
+                [in] ArrayOf<Byte> * iv,
+                [in] Int32 offset);
+
+            interface IRC5ParameterSpec;
+            interface IAlgorithmParameterSpec;
+        }
+
+        [deprecated]
+        class CSecretKeySpec {
+            constructor(
+                [in] ArrayOf<Byte> * key,
+                [in] String algorithm);
+
+            constructor(
+                [in] ArrayOf<Byte> * key,
+                [in] Int32 offset,
+                [in] Int32 len,
+                [in] String algorithm);
+
+            interface ISecretKeySpec;
+            interface ISecretKey;
+            interface IKeySpec;
+        }
+
+    }
+
+   } // namespace Crypto
+   } // namespace Elastosx
+}

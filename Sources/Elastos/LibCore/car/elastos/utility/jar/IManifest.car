@@ -1,0 +1,84 @@
+
+module
+{
+    interface Elastos.Utility.IMap;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IInputStream;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    interface IManifest {
+        /**
+         * Resets the both the main attributes as well as the entry attributes
+         * associated with this {@code Manifest}.
+         */
+        Clear();
+
+        /**
+         * Returns the {@code Attributes} associated with the parameter entry
+         * {@code name}.
+         *
+         * @param name
+         *            the name of the entry to obtain {@code Attributes} from.
+         * @return the Attributes for the entry or {@code null} if the entry does
+         *         not exist.
+         */
+        GetAttributes(
+            [in] String name,
+            [out] IAttributes** attrib);
+
+        /**
+         * Returns a map containing the {@code Attributes} for each entry in the
+         * {@code Manifest}.
+         *
+         * @return the map of entry attributes.
+         */
+        GetEntries(
+            [out] IMap** entries);
+
+        /**
+         * Returns the main {@code Attributes} of the {@code JarFile}.
+         *
+         * @return main {@code Attributes} associated with the source {@code
+         *         JarFile}.
+         */
+        GetMainAttributes(
+            [out] IAttributes** attrib);
+
+        /**
+         * Writes out the attribute information of the receiver to the specified
+         * {@code OutputStream}.
+         *
+         * @param os
+         *            The {@code OutputStream} to write to.
+         * @throws IOException
+         *             If an error occurs writing the {@code Manifest}.
+         */
+        Write(
+            [in] IOutputStream* os);
+
+        /**
+         * Merges name/attribute pairs read from the input stream {@code is} into this manifest.
+         *
+         * @param is
+         *            The {@code InputStream} to read from.
+         * @throws IOException
+         *             If an error occurs reading the manifest.
+         */
+        Read(
+            [in] IInputStream* is);
+
+        GetHashCode(
+            [out] Int32* hashcode);
+
+        Equals(
+            [in] IInterface* o,
+            [out] Boolean* result);
+    }
+
+    } // Jar
+    } // Utility
+    } // Elastos
+}

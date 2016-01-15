@@ -1,0 +1,109 @@
+module
+{
+    using interface Elastos.Utility.ISet;
+    using interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+    namespace Tts {
+
+    /**
+     * Characteristics and features of a Text-To-Speech Voice. Each TTS Engine can expose
+     * multiple voices for each locale, with different set of features.
+     */
+    interface IVoice {
+        /** Very low, but still intelligible quality of speech synthesis */
+        const Int32 QUALITY_VERY_LOW = 100;
+
+        /** Low, not human-like quality of speech synthesis */
+        const Int32 QUALITY_LOW = 200;
+
+        /** Normal quality of speech synthesis */
+        const Int32 QUALITY_NORMAL = 300;
+
+        /** High, human-like quality of speech synthesis */
+        const Int32 QUALITY_HIGH = 400;
+
+        /** Very high, almost human-indistinguishable quality of speech synthesis */
+        const Int32 QUALITY_VERY_HIGH = 500;
+
+        /** Very low expected synthesizer latency (< 20ms) */
+        const Int32 LATENCY_VERY_LOW = 100;
+
+        /** Low expected synthesizer latency (~20ms) */
+        const Int32 LATENCY_LOW = 200;
+
+        /** Normal expected synthesizer latency (~50ms) */
+        const Int32 LATENCY_NORMAL = 300;
+
+        /** Network based expected synthesizer latency (~200ms) */
+        const Int32 LATENCY_HIGH = 400;
+
+        /** Very slow network based expected synthesizer latency (> 200ms) */
+        const Int32 LATENCY_VERY_HIGH = 500;
+
+        /**
+         * @return The voice's locale
+         */
+        GetLocale(
+            [out] ILocale** locale);
+
+        /**
+         * @return The voice's quality (higher is better)
+         * @see #QUALITY_VERY_HIGH
+         * @see #QUALITY_HIGH
+         * @see #QUALITY_NORMAL
+         * @see #QUALITY_LOW
+         * @see #QUALITY_VERY_LOW
+         */
+        GetQuality(
+            [out] Int32* quality);
+
+        /**
+         * @return The voice's latency (lower is better)
+         * @see #LATENCY_VERY_LOW
+         * @see #LATENCY_LOW
+         * @see #LATENCY_NORMAL
+         * @see #LATENCY_HIGH
+         * @see #LATENCY_VERY_HIGH
+         */
+        GetLatency(
+            [out] Int32* latency);
+
+        /**
+         * @return Does the Voice require a network connection to work.
+         */
+        IsNetworkConnectionRequired(
+            [out] Boolean* required);
+
+        /**
+         * @return Unique voice name.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns the set of features it supports for a given voice.
+         * Features can either be framework defined, e.g.
+         * {@link TextToSpeech.Engine#KEY_FEATURE_NETWORK_TIMEOUT_MS} or engine specific.
+         * Engine specific keys must be prefixed by the name of the engine they
+         * are intended for. These keys can be used as parameters to
+         * {@link TextToSpeech#speak(String, int, java.util.HashMap)} and
+         * {@link TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)}.
+         *
+         * Features values are strings and their values must met restrictions described in their
+         * documentation.
+         *
+         * @return Set instance. May return {@code null} on error.
+         */
+        GetFeatures(
+            [out] ISet** features);
+    }
+
+    } // namespace Tts
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

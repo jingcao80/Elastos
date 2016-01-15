@@ -1,0 +1,88 @@
+
+module
+{
+    interface Elastos.Droid.Text.ITextWatcher;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IDialerFilter {
+        /** This mode has both lines */
+        const Int32 DIGITS_AND_LETTERS = 1;
+
+        /** This mode is when after starting in {@link #DIGITS_AND_LETTERS} mode the filter
+         *  has removed all possibility of the digits matching, leaving only the letters line */
+        const Int32 DIGITS_AND_LETTERS_NO_DIGITS = 2;
+
+        /** This mode is when after starting in {@link #DIGITS_AND_LETTERS} mode the filter
+         *  has removed all possibility of the letters matching, leaving only the digits line */
+        const Int32 DIGITS_AND_LETTERS_NO_LETTERS = 3;
+
+        /** This mode has only the digits line */
+        const Int32 DIGITS_ONLY = 4;
+
+        /** This mode has only the letters line */
+        const Int32 LETTERS_ONLY = 5;
+
+        IsQwertyKeyboard(
+            [out] Boolean* res);
+
+        GetMode(
+            [out] Int32* mode);
+
+        /**
+         * Change the mode of the widget.
+         *
+         * @param newMode The mode to switch to.
+         */
+        SetMode(
+            [in] Int32 newMode);
+
+        GetLetters(
+            [out] ICharSequence** letters);
+
+        GetDigits(
+            [out] ICharSequence** digits);
+
+        GetFilterText(
+            [out] ICharSequence** text);
+
+        Append(
+            [in] String text);
+
+        /**
+         * Clears both the digits and the filter text.
+         */
+        ClearText();
+
+        SetLettersWatcher(
+            [in] ITextWatcher* watcher);
+
+        SetDigitsWatcher(
+            [in] ITextWatcher* watcher);
+
+        SetFilterWatcher(
+            [in] ITextWatcher* watcher);
+
+        RemoveFilterWatcher(
+            [in] ITextWatcher* watcher);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

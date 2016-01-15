@@ -1,0 +1,314 @@
+module
+{
+    interface Elastos.Droid.Graphics.IPoint;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
+    interface Elastos.Droid.Os.ICancellationSignal;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    /**
+     * @Involve
+     * interface IContentProvider;
+     */
+    [deprecated]
+    interface IDocumentsProvider {
+        /**
+         * The unique ID for a row.
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String ID = "_id";
+
+        /**
+         * The count of rows in a directory.
+         * <P>Type: INTEGER</P>
+         */
+        const String COUNT = "_count";
+
+        /**
+         * Test if a document is descendant (child, grandchild, etc) from the given
+         * parent. For example, providers must implement this to support
+         * {@link Intent#ACTION_OPEN_DOCUMENT_TREE}. You should avoid making network
+         * requests to keep this request fast.
+         *
+         * @param parentDocumentId parent to verify against.
+         * @param documentId child to verify.
+         * @return if given document is a descendant of the given parent.
+         * @see DocumentsContract.Root#FLAG_SUPPORTS_IS_CHILD
+         */
+        IsChildDocument(
+            [in] String parentDocumentId,
+            [in] String documentId,
+            [out] Boolean* result);
+
+        /**
+         * Create a new document and return its newly generated
+         * {@link Document#COLUMN_DOCUMENT_ID}. You must allocate a new
+         * {@link Document#COLUMN_DOCUMENT_ID} to represent the document, which must
+         * not change once returned.
+         *
+         * @param parentDocumentId the parent directory to create the new document
+         *            under.
+         * @param mimeType the concrete MIME type associated with the new document.
+         *            If the MIME type is not supported, the provider must throw.
+         * @param displayName the display name of the new document. The provider may
+         *            alter this name to meet any internal constraints, such as
+         *            avoiding conflicting names.
+         */
+        CreateDocument(
+            [in] String parentDocumentId,
+            [in] String mimeType,
+            [in] String displayName,
+            [out] String* result);
+
+        /**
+         * Rename an existing document.
+         * <p>
+         * If a different {@link Document#COLUMN_DOCUMENT_ID} must be used to
+         * represent the renamed document, generate and return it. Any outstanding
+         * URI permission grants will be updated to point at the new document. If
+         * the original {@link Document#COLUMN_DOCUMENT_ID} is still valid after the
+         * rename, return {@code null}.
+         *
+         * @param documentId the document to rename.
+         * @param displayName the updated display name of the document. The provider
+         *            may alter this name to meet any internal constraints, such as
+         *            avoiding conflicting names.
+         */
+        RenameDocument(
+            [in] String documentId,
+            [in] String displayName,
+            [out] String* result);
+
+        /**
+         * Delete the requested document.
+         * <p>
+         * Upon returning, any URI permission grants for the given document will be
+         * revoked. If additional documents were deleted as a side effect of this
+         * call (such as documents inside a directory) the implementor is
+         * responsible for revoking those permissions using
+         * {@link #revokeDocumentPermission(String)}.
+         *
+         * @param documentId the document to delete.
+         */
+        DeleteDocument(
+            [in] String documentId);
+
+        /**
+         * Return all roots currently provided. To display to users, you must define
+         * at least one root. You should avoid making network requests to keep this
+         * request fast.
+         * <p>
+         * Each root is defined by the metadata columns described in {@link Root},
+         * including {@link Root#COLUMN_DOCUMENT_ID} which points to a directory
+         * representing a tree of documents to display under that root.
+         * <p>
+         * If this set of roots changes, you must call {@link ContentResolver#notifyChange(Uri,
+         * android.database.ContentObserver, boolean)} with
+         * {@link DocumentsContract#buildRootsUri(String)} to notify the system.
+         *
+         * @param projection list of {@link Root} columns to put into the cursor. If
+         *            {@code null} all supported columns should be included.
+         */
+        QueryRoots(
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** cursor);
+
+        /**
+         * Return recently modified documents under the requested root. This will
+         * only be called for roots that advertise
+         * {@link Root#FLAG_SUPPORTS_RECENTS}. The returned documents should be
+         * sorted by {@link Document#COLUMN_LAST_MODIFIED} in descending order, and
+         * limited to only return the 64 most recently modified documents.
+         * <p>
+         * Recent documents do not support change notifications.
+         *
+         * @param projection list of {@link Document} columns to put into the
+         *            cursor. If {@code null} all supported columns should be
+         *            included.
+         * @see DocumentsContract#EXTRA_LOADING
+         */
+        QueryRecentDocuments(
+            [in] String rootId,
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** cursor);
+
+        /**
+         * Return metadata for the single requested document. You should avoid
+         * making network requests to keep this request fast.
+         *
+         * @param documentId the document to return.
+         * @param projection list of {@link Document} columns to put into the
+         *            cursor. If {@code null} all supported columns should be
+         *            included.
+         */
+        QueryDocument(
+            [in] String documentId,
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** cursor);
+
+        /**
+         * Return the children documents contained in the requested directory. This
+         * must only return immediate descendants, as additional queries will be
+         * issued to recursively explore the tree.
+         * <p>
+         * If your provider is cloud-based, and you have some data cached or pinned
+         * locally, you may return the local data immediately, setting
+         * {@link DocumentsContract#EXTRA_LOADING} on the Cursor to indicate that
+         * you are still fetching additional data. Then, when the network data is
+         * available, you can send a change notification to trigger a requery and
+         * return the complete contents. To return a Cursor with extras, you need to
+         * extend and override {@link Cursor#getExtras()}.
+         * <p>
+         * To support change notifications, you must
+         * {@link Cursor#setNotificationUri(ContentResolver, Uri)} with a relevant
+         * Uri, such as
+         * {@link DocumentsContract#buildChildDocumentsUri(String, String)}. Then
+         * you can call {@link ContentResolver#notifyChange(Uri,
+         * android.database.ContentObserver, boolean)} with that Uri to send change
+         * notifications.
+         *
+         * @param parentDocumentId the directory to return children for.
+         * @param projection list of {@link Document} columns to put into the
+         *            cursor. If {@code null} all supported columns should be
+         *            included.
+         * @param sortOrder how to order the rows, formatted as an SQL
+         *            {@code ORDER BY} clause (excluding the ORDER BY itself).
+         *            Passing {@code null} will use the default sort order, which
+         *            may be unordered. This ordering is a hint that can be used to
+         *            prioritize how data is fetched from the network, but UI may
+         *            always enforce a specific ordering.
+         * @see DocumentsContract#EXTRA_LOADING
+         * @see DocumentsContract#EXTRA_INFO
+         * @see DocumentsContract#EXTRA_ERROR
+         */
+        QueryChildDocuments(
+            [in] String parentDocumentId,
+            [in] ArrayOf<String>* projection,
+            [in] String sortOrder,
+            [out] ICursor** cursor);
+
+        QueryChildDocumentsForManage(
+            [in] String parentDocumentId,
+            [in] ArrayOf<String>* projection,
+            [in] String sortOrder,
+            [out] ICursor** cursor);
+
+        /**
+         * Return documents that that match the given query under the requested
+         * root. The returned documents should be sorted by relevance in descending
+         * order. How documents are matched against the query string is an
+         * implementation detail left to each provider, but it's suggested that at
+         * least {@link Document#COLUMN_DISPLAY_NAME} be matched in a
+         * case-insensitive fashion.
+         * <p>
+         * Only documents may be returned; directories are not supported in search
+         * results.
+         * <p>
+         * If your provider is cloud-based, and you have some data cached or pinned
+         * locally, you may return the local data immediately, setting
+         * {@link DocumentsContract#EXTRA_LOADING} on the Cursor to indicate that
+         * you are still fetching additional data. Then, when the network data is
+         * available, you can send a change notification to trigger a requery and
+         * return the complete contents.
+         * <p>
+         * To support change notifications, you must
+         * {@link Cursor#setNotificationUri(ContentResolver, Uri)} with a relevant
+         * Uri, such as {@link DocumentsContract#buildSearchDocumentsUri(String,
+         * String, String)}. Then you can call {@link ContentResolver#notifyChange(Uri,
+         * android.database.ContentObserver, boolean)} with that Uri to send change
+         * notifications.
+         *
+         * @param rootId the root to search under.
+         * @param query string to match documents against.
+         * @param projection list of {@link Document} columns to put into the
+         *            cursor. If {@code null} all supported columns should be
+         *            included.
+         * @see DocumentsContract#EXTRA_LOADING
+         * @see DocumentsContract#EXTRA_INFO
+         * @see DocumentsContract#EXTRA_ERROR
+         */
+        QuerySearchDocuments(
+            [in] String rootId,
+            [in] String query,
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** cursor);
+
+        /**
+         * Return concrete MIME type of the requested document. Must match the value
+         * of {@link Document#COLUMN_MIME_TYPE} for this document. The default
+         * implementation queries {@link #queryDocument(String, String[])}, so
+         * providers may choose to override this as an optimization.
+         */
+        GetDocumentType(
+            [in] String documentId,
+            [out] String* type);
+
+        /**
+         * Open and return the requested document.
+         * <p>
+         * Your provider should return a reliable {@link ParcelFileDescriptor} to
+         * detect when the remote caller has finished reading or writing the
+         * document. You may return a pipe or socket pair if the mode is exclusively
+         * "r" or "w", but complex modes like "rw" imply a normal file on disk that
+         * supports seeking.
+         * <p>
+         * If you block while downloading content, you should periodically check
+         * {@link CancellationSignal#isCanceled()} to abort abandoned open requests.
+         *
+         * @param documentId the document to return.
+         * @param mode the mode to open with, such as 'r', 'w', or 'rw'.
+         * @param signal used by the caller to signal if the request should be
+         *            cancelled. May be null.
+         * @see ParcelFileDescriptor#open(java.io.File, int, android.os.Handler,
+         *      OnCloseListener)
+         * @see ParcelFileDescriptor#createReliablePipe()
+         * @see ParcelFileDescriptor#createReliableSocketPair()
+         * @see ParcelFileDescriptor#parseMode(String)
+         */
+        OpenDocument(
+            [in] String documentId,
+            [in] String mode,
+            [in] ICancellationSignal* signal,
+            [out] IParcelFileDescriptor** pfd);
+
+        /**
+         * Open and return a thumbnail of the requested document.
+         * <p>
+         * A provider should return a thumbnail closely matching the hinted size,
+         * attempting to serve from a local cache if possible. A provider should
+         * never return images more than double the hinted size.
+         * <p>
+         * If you perform expensive operations to download or generate a thumbnail,
+         * you should periodically check {@link CancellationSignal#isCanceled()} to
+         * abort abandoned thumbnail requests.
+         *
+         * @param documentId the document to return.
+         * @param sizeHint hint of the optimal thumbnail dimensions.
+         * @param signal used by the caller to signal if the request should be
+         *            cancelled. May be null.
+         * @see Document#FLAG_SUPPORTS_THUMBNAIL
+         */
+        OpenDocumentThumbnail(
+            [in] String documentId,
+            [in] IPoint* sizeHint,
+            [in] ICancellationSignal* signal,
+            [out] IAssetFileDescriptor** afd);
+
+        /**
+         * Revoke any active permission grants for the given
+         * {@link Document#COLUMN_DOCUMENT_ID}, usually called when a document
+         * becomes invalid. Follows the same semantics as
+         * {@link Context#revokeUriPermission(Uri, int)}.
+         */
+        RevokeDocumentPermission(
+            [in] String documentId);
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+}

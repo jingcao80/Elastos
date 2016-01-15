@@ -1,0 +1,37 @@
+module
+{
+    using interface Elastos.Net.IInetSocketAddress;
+    using interface Elastos.Net.IProxy;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    interface IProxyProperties {
+        GetSocketAddress(
+            [out] IInetSocketAddress** address);
+
+        GetHost(
+            [out] String* host);
+
+        GetPort(
+            [out] Int32* port);
+
+        GetExclusionList(
+            [out] String* exList);
+
+        GetParsedExclusionList(
+            [out, callee] ArrayOf<String>* parsedExclusionList);
+
+        IsExcluded(
+            [in] String url,
+            [out] Boolean* result);
+
+        MakeProxy(
+            [out] IProxy** proxy);
+    }
+
+    } //namespace Net
+    } //namespace Droid
+    } //namespace Elastos
+}

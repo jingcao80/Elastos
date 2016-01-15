@@ -1,0 +1,39 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Utils {
+
+    /**
+     * Utility class for arrays
+     *
+     */
+    [deprecated]
+    interface IArrayHelper {
+        GetBytesAsString(
+            [in] ArrayOf<Byte>* data,
+            [out] String* str);
+
+        /**
+         * Represents <code>array</code> as <code>String</code>
+         * for printing. Array length can be up to 32767
+         *
+         * @param array to be represented as <code>String</code>
+         *
+         * @return <code>String</code> representation of the <code>array</code>
+         */
+        ToString(
+            [in] ArrayOf<Byte>* array,
+            [in] String prefix,
+            [out] String* str);
+    }
+
+    } // namespace Utils
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

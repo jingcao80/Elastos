@@ -1,0 +1,15 @@
+
+TARGET_NAME= org.apache.harmony.security
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/Org/Apache/Harmony/Security
+
+#SOURCES = CPrivateKeyImpl.cpp
+#SOURCES += CPublicKeyImpl.cpp
+#SOURCES += CSystemScope.cpp
+
+ELASTOS_LIBS += asn1/asn1.lib
+ELASTOS_LIBS += fortress/fortress.lib
+ELASTOS_LIBS += pkcs7/pkcs7.lib
+ELASTOS_LIBS += utils/utils.lib

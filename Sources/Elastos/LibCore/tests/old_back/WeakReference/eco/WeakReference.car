@@ -1,0 +1,34 @@
+
+module
+{
+//    interface IWeakReference {
+//        Resolve(
+//            [in] InterfaceID riid,
+//            [out] IInterface** objectReference);
+//    }
+//
+//    interface IWeakReferenceSource {
+//        GetWeakReference(
+//            [out] IWeakReference** weakReference);
+//    }
+
+    interface IFoo {
+        Foo();
+    }
+
+    interface IBar {
+        Bar();
+    }
+
+    interface IFooBar {
+        FooBar();
+    }
+
+    class CFooBar {
+        interface IFoo;
+        interface IBar;
+        interface IFooBar;
+//        interface IWeakReference;
+        interface IWeakReferenceSource;
+    }
+}

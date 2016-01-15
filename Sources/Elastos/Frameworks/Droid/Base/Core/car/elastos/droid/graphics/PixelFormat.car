@@ -1,0 +1,79 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    interface IPixelFormat {
+        /* these constants need to match those in hardware/hardware.h */
+        const Int32 UNKNOWN     = 0;
+
+        /** System chooses a format that supports translucency (many alpha bits) */
+        const Int32 TRANSLUCENT = -3;
+
+        /**
+         * System chooses a format that supports transparency
+         * (at least 1 alpha bit)
+         */
+        const Int32 TRANSPARENT = -2;
+
+        /** System chooses an opaque format (no alpha bits required) */
+        const Int32 OPAQUE      = -1;
+
+        const Int32 RGBA_8888   = 1;
+        const Int32 RGBX_8888   = 2;
+        const Int32 RGB_888     = 3;
+        const Int32 RGB_565     = 4;
+        const Int32 RGBA_5551   = 6;
+        const Int32 RGBA_4444   = 7;
+        const Int32 A_8         = 8;
+        const Int32 L_8         = 9;
+        const Int32 LA_88       = 0xA;
+        const Int32 RGB_332     = 0xB;
+
+        /**
+         * @deprecated use android.graphics.ImageFormat#NV16
+         * ImageFormat.NV16 instead.
+         *
+         * @sa android.graphics.ImageFormat#NV16 ImageFormat.NV16
+         */
+        const Int32 YCbCr_422_SP= 0x10;
+
+        /**
+         * @deprecated use android.graphics.ImageFormat#NV21
+         * ImageFormat.NV21 instead.
+         *
+         * @sa android.graphics.ImageFormat#NV21 ImageFormat.NV21
+         */
+        const Int32 YCbCr_420_SP= 0x11;
+
+        /**
+         * @deprecated use android.graphics.ImageFormat#YUY2
+         * ImageFormat.YUY2 instead.
+         *
+         * @sa android.graphics.ImageFormat#YUY2 ImageFormat.YUY2
+         */
+        const Int32 YCbCr_422_I = 0x14;
+
+        /**
+         * @deprecated use android.graphics.ImageFormat#JPEG
+         * ImageFormat.JPEG instead.
+         *
+         * @sa android.graphics.ImageFormat#JPEG ImageFormat.JPEG
+         */
+        const Int32 JPEG        = 0x100;
+
+        FormatHasAlpha(
+            [in] Int32 format,
+            [out] Boolean* result);
+
+        GetPixelFormatInfo(
+            [in] Int32 format,
+            [in] IPixelFormat* info);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

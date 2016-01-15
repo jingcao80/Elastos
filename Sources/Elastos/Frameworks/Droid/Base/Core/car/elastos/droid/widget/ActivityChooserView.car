@@ -1,0 +1,129 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.IActionProvider;
+    interface Elastos.Droid.Widget.IPopupWindowOnDismissListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.Widget.IActivityChooserModelClient
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface IActivityChooserView {
+
+        /**
+         * {@inheritDoc}
+         */
+        SetActivityChooserModel(
+            [in] IActivityChooserModel* dataModel);
+
+        /**
+         * Sets the background for the button that expands the activity
+         * overflow list.
+         *
+         * <strong>Note:</strong> Clients would like to set this drawable
+         * as a clue about the action the chosen activity will perform. For
+         * example, if a share activity is to be chosen the drawable should
+         * give a clue that sharing is to be performed.
+         *
+         * @param drawable The drawable.
+         */
+        SetExpandActivityOverflowButtonDrawable(
+            [in] IDrawable* drawable);
+
+        /**
+         * Sets the content description for the button that expands the activity
+         * overflow list.
+         *
+         * description as a clue about the action performed by the button.
+         * For example, if a share activity is to be chosen the content
+         * description should be something like "Share with".
+         *
+         * @param resourceId The content description resource id.
+         */
+        SetExpandActivityOverflowButtonContentDescription(
+            [in] Int32 resourceId);
+
+        /**
+         * Set the provider hosting this view, if applicable.
+         * @hide Internal use only
+         */
+        SetProvider(
+            [in] IActionProvider* provider);
+
+        /**
+         * Shows the popup window with activities.
+         *
+         * @return True if the popup was shown, false if already showing.
+         */
+        ShowPopup(
+            [out] Boolean* res);
+
+        /**
+         * Dismisses the popup window with activities.
+         *
+         * @return True if dismissed, false if already dismissed.
+         */
+        DismissPopup(
+            [out] Boolean* res);
+
+        /**
+         * Gets whether the popup window with activities is shown.
+         *
+         * @return True if the popup is shown.
+         */
+        IsShowingPopup(
+            [out] Boolean* res);
+
+        GetDataModel(
+            [out] IActivityChooserModel** model);
+
+        /**
+         * Sets a listener to receive a callback when the popup is dismissed.
+         *
+         * @param listener The listener to be notified.
+         */
+        SetOnDismissListener(
+            [in] IPopupWindowOnDismissListener* listener);
+
+        /**
+         * Sets the initial count of items shown in the activities popup
+         * i.e. the items before the popup is expanded. This is an upper
+         * bound since it is not guaranteed that such number of intent
+         * handlers exist.
+         *
+         * @param itemCount The initial popup item count.
+         */
+        SetInitialActivityCount(
+            [in] Int32 itemCount);
+
+        /**
+         * Sets a content description of the default action button. This
+         * resource should be a string taking one formatting argument and
+         * will be used for formatting the content description of the button
+         * dynamically as the default target changes. For example, a resource
+         * pointing to the string "share with %1$s" will result in a content
+         * description "share with Bluetooth" for the Bluetooth activity.
+         *
+         * @param resourceId The resource id.
+         */
+        SetDefaultActionButtonContentDescription(
+            [in] Int32 resourceId);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

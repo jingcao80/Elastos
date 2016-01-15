@@ -1,0 +1,40 @@
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkControllerDataUsageInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    interface IMobileDataControllerCallback {
+        OnMobileDataEnabled(
+            [in] Boolean locationEnabled);
+    }
+
+    interface IMobileDataController {
+        SetCallback(
+            [in] IMobileDataControllerCallback* cb);
+
+        GetDataUsageInfo(
+            [out] INetworkControllerDataUsageInfo** result);
+
+        SetMobileDataEnabled(
+            [in] Boolean value);
+
+        IsMobileDataSupported(
+            [out] Boolean* result);
+
+        IsMobileDataEnabled(
+            [out] Boolean* result);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

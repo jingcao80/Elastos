@@ -1,0 +1,65 @@
+module
+{
+    using interface Org.Xml.Sax.IContentHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Sax {
+
+    /**
+     * The root XML element. The entry point for this API. Not safe for concurrent
+     * use.
+     *
+     * <p>For example, passing this XML:
+     *
+     * <pre>
+     * &lt;feed xmlns='http://www.w3.org/2005/Atom'>
+     *   &lt;entry>
+     *     &lt;id>bob&lt;/id>
+     *   &lt;/entry>
+     * &lt;/feed>
+     * </pre>
+     *
+     * to this code:
+     *
+     * <pre>
+     * static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
+     *
+     * ...
+     *
+     * RootElement root = new RootElement(ATOM_NAMESPACE, "feed");
+     * Element entry = root.getChild(ATOM_NAMESPACE, "entry");
+     * entry.getChild(ATOM_NAMESPACE, "id").setEndTextElementListener(
+     *   new EndTextElementListener() {
+     *     public void end(String body) {
+     *       System.out.println("Entry ID: " + body);
+     *     }
+     *   });
+     *
+     * XMLReader reader = ...;
+     * reader.setContentHandler(root.getContentHandler());
+     * reader.parse(...);
+     * </pre>
+     *
+     * would output:
+     *
+     * <pre>
+     * Entry ID: bob
+     * </pre>
+     */
+    /**
+     * @Involve
+     * interface IElement
+     */
+    interface IRootElement {
+        /**
+         * Gets the SAX {@code ContentHandler}. Pass this to your SAX parser.
+         */
+        GetContentHandler(
+            [out] IContentHandler** handler);
+    }
+
+    } // namespace Sax
+    } // namespace Droid
+    } // namespace Elastos
+}

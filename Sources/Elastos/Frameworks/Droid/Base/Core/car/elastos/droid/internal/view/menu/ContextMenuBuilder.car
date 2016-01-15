@@ -1,0 +1,87 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Internal.View.Menu.IMenuDialogHelper;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+
+    /**
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IMenu
+     * interface Elastos.Droid.Internal.View.Menu.IMenuBuilder
+     * interface IContextMenu
+     */
+    [local]
+    interface IContextMenuBuilder {
+        /**
+         * Sets the context menu header's icon to the icon given in <var>icon</var>
+         * {@link Drawable}.
+         *
+         * @param icon The {@link Drawable} used for the icon.
+         * @return This ContextMenu so additional setters can be called.
+         */
+        SetHeaderIcon(
+            [in] IDrawable* icon);
+
+        /**
+         * Sets the context menu header's icon to the icon given in <var>iconRes</var>
+         * resource id.
+         *
+         * @param iconRes The resource identifier used for the icon.
+         * @return This ContextMenu so additional setters can be called.
+         */
+        SetHeaderIcon(
+            [in] Int32 iconRes);
+
+        /**
+         * Sets the context menu header's title to the title given in <var>title</var>.
+         *
+         * @param title The character sequence used for the title.
+         * @return This ContextMenu so additional setters can be called.
+         */
+        SetHeaderTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Sets the context menu header's title to the title given in <var>titleRes</var>
+         * resource identifier.
+         *
+         * @param titleRes The string resource identifier used for the title.
+         * @return This ContextMenu so additional setters can be called.
+         */
+        SetHeaderTitle(
+            [in] Int32 titleRes);
+
+        /**
+         * Sets the header of the context menu to the {@link View} given in
+         * <var>view</var>. This replaces the header title and icon (and those
+         * replace this).
+         *
+         * @param view The {@link View} used for the header.
+         * @return This ContextMenu so additional setters can be called.
+         */
+        SetHeaderView(
+            [in] IView* view);
+
+        Show(
+            [in] IView* originalView,
+            [in] IBinder* token,
+            [out] IMenuDialogHelper** res);
+    }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The key specification for a Diffie-Hellman private key.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IKeySpec;
+     */
+    interface IDHPrivateKeySpec {
+        /**
+         * Returns the <i>private value</i> <code>x</code>.
+         *
+         * @return the private value <code>x</code>.
+         */
+        GetX(
+            [out] IBigInteger ** bi);
+
+        /**
+         * Returns the <i>prime modulus</i> <code>p</code>.
+         *
+         * @return the prime modulus <code>p</code>.
+         */
+        GetP(
+            [out] IBigInteger ** bi);
+
+        /**
+         * Returns the <i>base generator</i> <code>g</code>.
+         *
+         * @return the base generator <code>g</code>.
+         */
+        GetG(
+            [out] IBigInteger ** result);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

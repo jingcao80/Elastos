@@ -1,0 +1,46 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * Key Usage Extension (OID = 2.5.29.15).
+     *
+     * The ASN.1 definition for Key Usage Extension is:
+     *
+     * <pre>
+     * id-ce-keyUsage OBJECT IDENTIFIER ::=  { id-ce 15 }
+     *
+     * KeyUsage ::= BIT STRING {
+     *     digitalSignature        (0),
+     *     nonRepudiation          (1),
+     *     keyEncipherment         (2),
+     *     dataEncipherment        (3),
+     *     keyAgreement            (4),
+     *     keyCertSign             (5),
+     *     cRLSign                 (6),
+     *     encipherOnly            (7),
+     *     decipherOnly            (8)
+     * }
+     * </pre>
+     * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     *
+     *
+     * @Involve
+     * interface IExtensionValue;
+     */
+    interface IKeyUsage {
+        GetKeyUsage(
+            [out, callee] ArrayOf<Boolean>* keyUsage);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

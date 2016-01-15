@@ -1,0 +1,44 @@
+
+module
+{
+    merge("xmlpull/v1/Exceptions.car");
+    merge("xmlpull/v1/IXmlPullParser.car");
+    merge("xmlpull/v1/IXmlPullParserFactory.car");
+    merge("xmlpull/v1/IXmlSerializer.car");
+
+    interface Org.Xml.Sax.ILocator;
+    interface Org.Xml.Sax.IXMLReader;
+    interface Org.Xml.Sax.IAttributes;
+    interface Org.Xmlpull.V1.IXmlPullParser;
+
+    namespace Org {
+    namespace Xmlpull {
+    namespace V1 {
+
+        class CXmlPullParserFactory {
+            interface IXmlPullParserFactory;
+        }
+
+        singleton class CXmlPullParserFactoryHelper {
+            interface IXmlPullParserFactoryHelper;
+        }
+
+        namespace Sax2 {
+
+            class CDriver {
+                constructor();
+
+                constructor(
+                    [in] IXmlPullParser* pp);
+
+                interface ILocator;
+                interface IXMLReader;
+                interface IAttributes;
+            }
+
+        } // namespace Sax2
+
+    } // namespace V1
+    } // namespace Xmlpull
+    } // namespace Org
+}

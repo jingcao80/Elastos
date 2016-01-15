@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Service.Media.IIMediaBrowserServiceCallbacks;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Media {
+
+    /**
+     * Media API allows clients to browse through hierarchy of a user’s media collection,
+     * playback a specific media entry and interact with the now playing queue.
+     * @hide
+     */
+    interface IIMediaBrowserService {
+        Connect(
+            [in] String pkg,
+            [in] IBundle * rootHints,
+            [in] IIMediaBrowserServiceCallbacks * cb);
+
+        Disconnect(
+            [in] IIMediaBrowserServiceCallbacks * cb);
+
+        AddSubscription(
+            [in] String uri,
+            [in] IIMediaBrowserServiceCallbacks * cb);
+
+        RemoveSubscription(
+            [in] String uri,
+            [in] IIMediaBrowserServiceCallbacks * cb);
+
+    }
+    } // namespace Media
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

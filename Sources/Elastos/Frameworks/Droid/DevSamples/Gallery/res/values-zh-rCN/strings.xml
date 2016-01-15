@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">图库</string>
+    <string name="slideshow">幻灯片</string>
+
+    <string name="loading">"正在载入..."</string>
+    <string name="select_image">"选择照片"</string>
+    <string name="select_video">"选择视频"</string>
+    <string name="select_item">"选择条目"</string>
+    <string name="select_album">"选择相册"</string>
+    <string name="select_group">"选择群组"</string>
+    <string name="set_image">"将照片设置为"</string>
+    <string name="set_wallpaper">"设置壁纸"</string>
+    <string name="wallpaper">"正在设置壁纸..."</string>
+    <string name="delete">"删除"</string>
+    <string name="title">"标题"</string>
+    <string name="description">"描述"</string>
+    <string name="time">"时间"</string>
+    <string name="location">"地点"</string>
+    <string name="path">"路径"</string>
+    <string name="width">"宽度"</string>
+    <string name="height">"高度"</string>
+    <string name="orientation">"浏览模式"</string>
+    <string name="duration">"时长"</string>
+    <string name="mimetype">"MIME 类型"</string>
+    <string name="file_size">"文件大小"</string>
+    <string name="maker">"制造商"</string>
+    <string name="model">"模型"</string>
+    <string name="flash">"闪光灯"</string>
+    <string name="aperture">"光圈"</string>
+    <string name="focal_length">"焦距"</string>
+    <string name="white_balance">"白平衡"</string>
+    <string name="exposure_time">"曝光时间"</string>
+    <string name="iso">"ISO"</string>
+    
+    <string name="set_label_all_albums">"所有相册"</string>
+    <string name="set_label_local_albums">"本地相册"</string>
+    
+    <string name="no_external_storage_title">"没有存储设备"</string>
+    <string name="no_external_storage">"没有可用的外部存储设备"</string>
+    <string name="no_such_item">"找不到指定的项。"</string>
+    
+    <string name="empty_album">"没有图片/视频。"</string>
+    <string name="btn_detail">"详细信息"</string>
+    <string name="btn_delete">"删除"</string>
+    <string name="details_title">"详细信息"</string>
+
+</resources>

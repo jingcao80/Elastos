@@ -1,0 +1,43 @@
+
+module
+{
+//    const FAMILY_CORE = 0x20    // Core exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Core exception codes (Family: 0x20)
+    const E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION         = 0xA0010000;
+    const E_ILLEGAL_ARGUMENT_EXCEPTION                  = 0xA0020000;
+    const E_INDEX_OUT_OF_BOUNDS_EXCEPTION               = 0xA0030000;
+
+    const E_NULL_POINTER_EXCEPTION                      = 0xA0040000;
+    const E_RUNTIME_EXCEPTION                           = 0xA0050000;
+    const E_ILLEGAL_STATE_EXCEPTION                     = 0xA0060000;
+    const E_ILLEGAL_THREAD_STATE_EXCEPTION              = 0xA0070000;
+    const E_UNSUPPORTED_OPERATION_EXCEPTION             = 0xA0080000;
+    const E_SECURITY_EXCEPTION                          = 0xA0090000;
+
+    const E_STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION        = 0xA00A0000;
+    const E_NO_SUCH_METHOD_EXCEPTION                    = 0xA00B0000;
+
+    const E_ILLEGAL_MONITOR_STATE_EXCEPTION             = 0xA00C0000;
+    const E_INTERRUPTED_EXCEPTION                       = 0xA00D0000;
+    const E_ARITHMETIC_EXCEPTION                        = 0xA00E0000;
+    // the value of E_REMOTE_EXCEPTION must be identical with E_REMOTE_FAIL in CAR Runtime
+    const E_REMOTE_EXCEPTION                            = 0x801C0000;
+    const E_NOT_FOUND_EXCEPTION                         = 0xA0100000;
+    const E_SUPER_NOT_CALLED_EXCEPTION                  = 0xA0110000;
+    const E_CLASS_NOT_FOUND_EXCEPTION                   = 0xA0120000;
+    const E_NEGATIVE_ARRAY_SIZE_EXCEPTION               = 0xA0130000;
+    const E_NUMBER_FORMAT_EXCEPTION                     = 0xA0140000;
+    const E_PATTERN_SYNTAX_EXCEPTION                    = 0xA0150000;
+    const E_CLONE_NOT_SUPPORTED_EXCEPTION               = 0xA0160000;
+    const E_NAGATIVE_ARRAY_SIZE_EXCEPTION               = 0xA0170000;
+    const E_ILLEGAL_ACCESS_EXCEPTION                    = 0xA0180000;
+    const E_NO_SUCH_FIELD_EXCEPTION                     = 0xA0190000;
+    const E_CLASS_CAST_EXCEPTION                        = 0xA0200000;
+
+    const E_ARRAY_STORE_EXCEPTION                       = 0xA0210000;
+}

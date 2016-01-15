@@ -1,0 +1,230 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.Animation.IAnimatorUpdateListener;
+    interface Elastos.Droid.Animation.IAnimatorListener;
+
+    interface Elastos.Droid.Packages.SystemUI.Recents.Model.ITask;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Views {
+
+    interface ITaskView;
+
+    /** The TaskView callbacks */
+    interface ITaskViewCallbacks {
+
+        OnTaskViewAppIconClicked(
+            [in] ITaskView* tv);
+
+        OnTaskViewAppInfoClicked(
+            [in] ITaskView* tv);
+
+        OnTaskViewClicked(
+            [in] ITaskView* tv,
+            [in] ITask* task,
+            [in] Boolean lockToTask);
+
+        OnTaskViewDismissed(
+            [in] ITaskView* tv);
+
+        OnTaskViewClipStateChanged(
+            [in] ITaskView* tv);
+
+        OnTaskViewFullScreenTransitionCompleted();
+
+        OnTaskViewFocusChanged(
+            [in] ITaskView* tv,
+            [in] Boolean focused);
+    }
+
+    /* A task view */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     * interface ITaskCallbacks
+     * interface ITaskFooterViewCallbacks
+     * interface IViewOnClickListener
+     * interface IViewOnLongClickListener
+     */
+    [local]
+    interface ITaskView {
+
+        /** Set callback */
+        SetCallbacks(
+            [in] ITaskViewCallbacks* cb);
+
+        /** Gets the task */
+        GetTask(
+            [out] ITask** result);
+
+        /** Returns the view bounds. */
+        GetViewBounds(
+            [out] IAnimateableViewBounds** result);
+
+        /** Synchronizes this view's properties with the task's transform */
+        UpdateViewPropertiesToTaskTransform(
+            [in] ITaskViewTransform* toTransform,
+            [in] Int32 duration);
+
+        UpdateViewPropertiesToTaskTransform(
+            [in] ITaskViewTransform* toTransform,
+            [in] Int32 duration,
+            [in] IAnimatorUpdateListener* updateCallback);
+
+        /** Resets this view's properties */
+        ResetViewProperties();
+
+        /**
+         * When we are un/filtering, this method will set up the transform that we are animating to,
+         * in order to hide the task.
+         */
+        PrepareTaskTransformForFilterTaskHidden(
+            [in] ITaskViewTransform* toTransform);
+
+        /**
+         * When we are un/filtering, this method will setup the transform that we are animating from,
+         * in order to show the task.
+         */
+        PrepareTaskTransformForFilterTaskVisible(
+            [in] ITaskViewTransform* fromTransform);
+
+        /** Prepares this task view for the enter-recents animations.  This is called earlier in the
+         * first layout because the actual animation into recents may take a long time. */
+        PrepareEnterRecentsAnimation(
+            [in] Boolean isTaskViewLaunchTargetTask,
+            [in] Boolean occludesLaunchTarget,
+            [in] Int32 offscreenY);
+
+        /** Animates this task view as it enters recents */
+        StartEnterRecentsAnimation(
+            [in] ITaskViewEnterContext* ctx);
+
+        /** Animates this task view as it leaves recents by pressing home. */
+        StartExitToHomeAnimation(
+            [in] ITaskViewExitContext* ctx);
+
+        /** Animates this task view as it exits recents */
+        StartLaunchTaskAnimation(
+            [in] IRunnable* postAnimRunnable,
+            [in] Boolean isLaunchingTask,
+            [in] Boolean occludesLaunchTarget,
+            [in] Boolean lockToTask);
+
+        /** Animates the deletion of this task view */
+        StartDeleteTaskAnimation(
+            [in] IRunnable* r);
+
+        /** Animates this task view if the user does not interact with the stack after a certain time. */
+        StartNoUserInteractionAnimation();
+
+        /** Mark this task view that the user does has not interacted with the stack after a certain time. */
+        SetNoUserInteractionState();
+
+        /** Dismisses this task. */
+        DismissTask();
+
+        /** Sets whether this task view is full screen or not. */
+        SetIsFullScreen(
+            [in] Boolean isFullscreen);
+
+        /** Returns whether this task view should currently be drawn as a full screen view. */
+        IsFullScreenView(
+            [out] Boolean* result);
+
+        /**
+         * Returns whether this view should be clipped, or any views below should clip against this
+         * view.
+         */
+        ShouldClipViewInStack(
+            [out] Boolean* result);
+
+        /** Sets whether this view should be clipped, or clipped against. */
+        SetClipViewInStack(
+            [in] Boolean clip);
+
+        /** Gets the max footer height. */
+        GetMaxFooterHeight(
+            [out] Int32* result);
+
+        /** Animates the footer into and out of view. */
+        AnimateFooterVisibility(
+            [in] Boolean visible,
+            [in] Int32 duration);
+
+        /** Sets the current task progress. */
+        SetTaskProgress(
+            [in] Float p);
+
+        /** Returns the current task progress. */
+        GetTaskProgress(
+            [out] Float* result);
+
+        /** Returns the current dim. */
+        SetDim(
+            [in] Int32 dim);
+
+        /** Returns the current dim. */
+        GetDim(
+            [out] Int32* result);
+
+        /** Animates the dim to the task progress. */
+        AnimateDimToProgress(
+            [in] Int32 delay,
+            [in] Int32 duration,
+            [in] IAnimatorListener* postAnimRunnable);
+
+        /** Compute the dim as a function of the scale of this view. */
+        GetDimFromTaskProgress(
+            [out] Int32* result);
+
+        /** Update the dim as a function of the scale of this view. */
+        UpdateDimFromTaskProgress();
+
+        /**** View focus state ****/
+
+        /**
+         * Sets the focused task explicitly. We need a separate flag because requestFocus() won't happen
+         * if the view is not currently visible, or we are in touch state (where we still want to keep
+         * track of focus).
+         */
+        SetFocusedTask();
+
+        /**
+         * Unsets the focused task explicitly.
+         */
+        UnsetFocusedTask();
+
+        /**
+         * Returns whether we have explicitly been focused.
+         */
+        IsFocusedTask(
+            [out] Boolean* result);
+
+        /** Enables all focus animations. */
+        EnableFocusAnimations();
+
+        /**** TaskCallbacks Implementation ****/
+
+        /** Binds this task view to the task */
+        OnTaskBound(
+            [in] ITask* t);
+
+        /** Enables/disables handling touch on this task view. */
+        SetTouchEnabled(
+            [in] Boolean enabled);
+    }
+
+    } // namespace Views
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

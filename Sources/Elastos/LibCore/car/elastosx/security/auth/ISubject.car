@@ -1,0 +1,252 @@
+
+module
+{
+    interface Elastos.Utility.ISet;
+    interface Elastos.Security.IPrivilegedAction;
+    interface Elastos.Security.IPrivilegedExceptionAction;
+    interface Elastos.Security.IAccessControlContext;
+
+    namespace Elastosx {
+    namespace Security {
+    namespace Auth {
+
+    /**
+     * The central class of the {@code javax.security.auth} package representing an
+     * authenticated user or entity (both referred to as "subject"). IT defines also
+     * the static methods that allow code to be run, and do modifications according
+     * to the subject's permissions.
+     * <p>
+     * A subject has the following features:
+     * <ul>
+     * <li>A set of {@code Principal} objects specifying the identities bound to a
+     * {@code Subject} that distinguish it.</li>
+     * <li>Credentials (public and private) such as certificates, keys, or
+     * authentication proofs such as tickets</li>
+     * </ul>
+     */
+    /**
+     * @Involve
+     * Change to no super interface in Elastos.
+     * So, there are some functions override.
+     */
+    interface ISubject {
+        /**
+         * Checks two Subjects for equality. More specifically if the principals,
+         * public and private credentials are equal, equality for two {@code
+         * Subjects} is implied.
+         *
+         * @param obj
+         *            the {@code Object} checked for equality with this {@code
+         *            Subject}.
+         * @return {@code true} if the specified {@code Subject} is equal to this
+         *         one.
+         */
+         // @Override
+         Equals(
+            [in] IInterface* obj,
+            [out] Boolean* isEqual);
+
+        /**
+         * Returns this {@code Subject}'s {@link Principal}.
+         *
+         * @return this {@code Subject}'s {@link Principal}.
+         */
+         GetPrincipals(
+            [out] ISet** principals);
+
+        /**
+         * Returns this {@code Subject}'s {@link Principal} which is a subclass of
+         * the {@code Class} provided.
+         *
+         * @param c
+         *            the {@code Class} as a criteria which the {@code Principal}
+         *            returned must satisfy.
+         * @return this {@code Subject}'s {@link Principal}. Modifications to the
+         *         returned set of {@code Principal}s do not affect this {@code
+         *         Subject}'s set.
+         */
+        GetPrincipals(
+            [in] IInterface* c,
+            [out] ISet** principals);
+
+        /**
+         * Returns the private credentials associated with this {@code Subject}.
+         *
+         * @return the private credentials associated with this {@code Subject}.
+         */
+         GetPrivateCredentials(
+            [out] ISet** credentials);
+
+        /**
+         * Returns this {@code Subject}'s private credentials which are a subclass
+         * of the {@code Class} provided.
+         *
+         * @param c
+         *            the {@code Class} as a criteria which the private credentials
+         *            returned must satisfy.
+         * @return this {@code Subject}'s private credentials. Modifications to the
+         *         returned set of credentials do not affect this {@code Subject}'s
+         *         credentials.
+         */
+        GetPrivateCredentials(
+            [in] ClassID id,
+            [out] ISet** credentials);
+
+        /**
+         * Returns the private credentials associated with this {@code Subject}.
+         *
+         * @return the private credentials associated with this {@code Subject}.
+         */
+         GetPublicCredentials(
+            [out] ISet** credentials);
+
+        /**
+         * Returns this {@code Subject}'s private credentials which are a subclass
+         * of the {@code Class} provided.
+         *
+         * @param c
+         *            the {@code Class} as a criteria which the private credentials
+         *            returned must satisfy.
+         * @return this {@code Subject}'s private credentials. Modifications to the
+         *         returned set of credentials do not affect this {@code Subject}'s
+         *         credentials.
+         */
+        GetPublicCredentials(
+            [in] ClassID id,
+            [out] ISet** credentials);
+
+        /**
+         * Returns a hash code of this {@code Subject}.
+         *
+         * @return a hash code of this {@code Subject}.
+         */
+         // @Override
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        /**
+         * Prevents from modifications being done to the credentials and {@link
+         * Principal} sets. After setting it to read-only this {@code Subject} can
+         * not be made writable again. The destroy method on the credentials still
+         * works though.
+         */
+        SetReadOnly();
+
+         /**
+         * Returns whether this {@code Subject} is read-only or not.
+         *
+         * @return whether this {@code Subject} is read-only or not.
+         */
+        IsReadOnly(
+            [out] Boolean* isReadOnly);
+
+        /**
+         * Returns a {@code String} representation of this {@code Subject}.
+         *
+         * @return a {@code String} representation of this {@code Subject}.
+         */
+        // @Override
+        ToString(
+            [out] String* str);
+    }
+
+    interface ISubjectHelper {
+        /**
+         * Runs the code defined by {@code action} using the permissions granted to
+         * the {@code Subject} itself and to the code as well.
+         *
+         * @param subject
+         *            the distinguished {@code Subject}.
+         * @param action
+         *            the code to be run.
+         * @return the {@code Object} returned when running the {@code action}.
+         */
+        //@SuppressWarnings("unchecked")
+        DoAs(
+            [in] ISubject* subject,
+            [in] IPrivilegedAction* action,
+            [out] IInterface** obj);
+
+        /**
+         * Run the code defined by {@code action} using the permissions granted to
+         * the {@code Subject} and to the code itself, additionally providing a more
+         * specific context.
+         *
+         * @param subject
+         *            the distinguished {@code Subject}.
+         * @param action
+         *            the code to be run.
+         * @param context
+         *            the specific context in which the {@code action} is invoked.
+         *            if {@code null} a new {@link AccessControlContext} is
+         *            instantiated.
+         * @return the {@code Object} returned when running the {@code action}.
+         */
+        //@SuppressWarnings("unchecked")
+        DoAsPrivileged(
+            [in] ISubject* subject,
+            [in] IPrivilegedAction* action,
+            [in] IAccessControlContext* context,
+            [out] IInterface** obj);
+
+        /**
+         * Runs the code defined by {@code action} using the permissions granted to
+         * the subject and to the code itself.
+         *
+         * @param subject
+         *            the distinguished {@code Subject}.
+         * @param action
+         *            the code to be run.
+         * @return the {@code Object} returned when running the {@code action}.
+         * @throws PrivilegedActionException
+         *             if running the {@code action} throws an exception.
+         */
+        //@SuppressWarnings("unchecked")
+        DoAs(
+            [in] ISubject* subject,
+            [in] IPrivilegedExceptionAction * action,
+            [out] IInterface** obj);
+
+        /**
+         * Runs the code defined by {@code action} using the permissions granted to
+         * the subject and to the code itself, additionally providing a more
+         * specific context.
+         *
+         * @param subject
+         *            the distinguished {@code Subject}.
+         * @param action
+         *            the code to be run.
+         * @param context
+         *            the specific context in which the {@code action} is invoked.
+         *            if {@code null} a new {@link AccessControlContext} is
+         *            instantiated.
+         * @return the {@code Object} returned when running the {@code action}.
+         * @throws PrivilegedActionException
+         *             if running the {@code action} throws an exception.
+         */
+        //@SuppressWarnings("unchecked")
+        DoAsPrivileged(
+            [in] ISubject* subject,
+            [in] IPrivilegedExceptionAction* action,
+            [in] IAccessControlContext* context,
+            [out] IInterface** obj);
+
+        /**
+         * Returns the {@code Subject} that was last associated with the {@code
+         * context} provided as argument.
+         *
+         * @param context
+         *            the {@code context} that was associated with the
+         *            {@code Subject}.
+         * @return the {@code Subject} that was last associated with the {@code
+         *         context} provided as argument.
+         */
+         GetSubject(
+            [in] IAccessControlContext* context,
+            [out] ISubject** subject);
+    }
+
+    } // namespace Auth
+    } // namespace Security
+    } // namespace Elastosx
+}

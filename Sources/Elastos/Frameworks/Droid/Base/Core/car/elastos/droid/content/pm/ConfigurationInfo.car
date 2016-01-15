@@ -1,0 +1,90 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Information you can retrieve about hardware configuration preferences
+     * declared by an application. This corresponds to information collected from
+     * the AndroidManifest.xml's <uses-configuration> and <uses-feature> tags.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IConfigurationInfo {
+        /**
+         * Value for #reqInputFeatures: if set, indicates that the application
+         * requires a hard keyboard
+         *
+         * @sa #reqInputFeatures
+         */
+        const Int32 INPUT_FEATURE_HARD_KEYBOARD = 0x00000001;
+
+        /**
+         * Value for #reqInputFeatures: if set, indicates that the application
+         * requires a five way navigation device
+         *
+         * @sa #reqInputFeatures
+         */
+        const Int32 INPUT_FEATURE_FIVE_WAY_NAV = 0x00000002;
+
+        /**
+         * Default value for #reqGlEsVersion;
+         *
+         * @sa #reqGlEsVersion
+         */
+        const Int32 GL_ES_VERSION_UNDEFINED = 0;
+
+
+        ToString(
+            [out] String* str);
+
+        /**
+         * This method extracts the major and minor version of reqGLEsVersion attribute
+         * and returns it as a string. Say reqGlEsVersion value of 0x00010002 is returned
+         * as 1.2
+         * @return String representation of the reqGlEsVersion attribute
+         */
+        GetGlEsVersion(
+            [out] String* ver);
+
+        GetReqTouchScreen(
+            [out] Int32* reqTouchScreen);
+
+        SetReqTouchScreen(
+            [in] Int32 reqTouchScreen);
+
+        GetReqKeyboardType(
+            [out] Int32* reqKeyboardType);
+
+        SetReqKeyboardType(
+            [in] Int32 reqKeyboardType);
+
+        GetReqNavigation(
+            [out] Int32* reqNavigation);
+
+        SetReqNavigation(
+            [in] Int32 reqNavigation);
+
+        GetReqInputFeatures(
+            [out] Int32* reqInputFeatures);
+
+        SetReqInputFeatures(
+            [in] Int32 reqInputFeatures);
+
+        GetReqGlEsVersion(
+            [out] Int32* reqGlEsVersion);
+
+        SetReqGlEsVersion(
+            [in] Int32 reqGlEsVersion);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

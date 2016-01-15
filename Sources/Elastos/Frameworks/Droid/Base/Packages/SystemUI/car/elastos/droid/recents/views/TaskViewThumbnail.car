@@ -1,0 +1,84 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Packages.SystemUI.Recents.Model.ITask;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Views {
+
+    /** The task thumbnail view */
+    /**
+     * @Involve
+     * interface IView
+     */
+    [local]
+    interface ITaskViewThumbnail {
+
+        /** Updates the clip rect based on the given task bar. */
+        EnableTaskBarClip(
+            [in] IView* taskBar);
+
+        UpdateVisibility(
+            [in] Int32 clipBottom);
+
+        /** Binds the thumbnail view to the screenshot. */
+        BindToScreenshot(
+            [in] IBitmap* ss,
+            [out] Boolean* result);
+
+        /** Unbinds the thumbnail view from the screenshot. */
+        UnbindFromScreenshot();
+
+        /** Binds the thumbnail view to the task */
+        RebindToTask(
+            [in] ITask* t);
+
+        SetImageBitmap(
+            [in] IBitmap* bm);
+
+        SetDimAlpha(
+            [in] Float dimAlpha);
+
+        /** Unbinds the thumbnail view from the task */
+        UnbindFromTask();
+
+        /** Handles focus changes. */
+        OnFocusChanged(
+            [in] Boolean focused);
+
+        /** Prepares for the enter recents animation. */
+        PrepareEnterRecentsAnimation(
+            [in] Boolean isTaskViewLaunchTargetTask);
+
+        /** Animates this task thumbnail as it enters recents */
+        StartEnterRecentsAnimation(
+            [in] Int32 delay,
+            [in] IRunnable* postAnimRunnable);
+
+        /** Animates this task thumbnail as it exits recents */
+        StartLaunchTaskAnimation(
+            [in] IRunnable* postAnimRunnable);
+
+        /** Animates the thumbnail alpha. */
+        StartFadeAnimation(
+            [in] Float finalAlpha,
+            [in] Int32 delay,
+            [in] Int32 duration,
+            [in] IRunnable* postAnimRunnable);
+    }
+
+    } // namespace Views
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,41 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Information identifying a Wi-Fi network.
+     * @see NetworkKey
+     *
+     * @hide
+     */
+    // @SystemApi
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiKey {
+        /**
+         * The service set identifier (SSID) of an 802.11 network. If the SSID can be decoded as
+         * UTF-8, it will be surrounded by double quotation marks. Otherwise, it will be a string of
+         * hex digits starting with 0x.
+         */
+        GetSsid(
+            [out] String* result);
+
+        /**
+         * The basic service set identifier (BSSID) of an access point for this network. This will
+         * be in the form of a six-byte MAC address: {@code XX:XX:XX:XX:XX:XX}, where each X is a
+         * hexadecimal digit.
+         */
+        GetBssid(
+            [out] String* result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}
+

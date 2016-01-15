@@ -1,0 +1,47 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.ISSLContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * File-based cache of established SSL sessions.  When re-establishing a
+     * connection to the same server, using an SSL session cache can save some time,
+     * power, and bandwidth by skipping directly to an encrypted stream.
+     * This is a persistent cache which can span executions of the application.
+     *
+     * @see SSLCertificateSocketFactory
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ISSLSessionCache {
+    }
+
+    interface ISSLSessionCacheHelper {
+        /**
+         * Installs a {@link SSLSessionCache} on a {@link SSLContext}. The cache will
+         * be used on all socket factories created by this context (including factories
+         * created before this call).
+         *
+         * @param cache the cache instance to install, or {@code null} to uninstall any
+         *         existing cache.
+         * @param context the context to install it on.
+         * @throws IllegalArgumentException if the context does not support a session
+         *         cache.
+         *
+         * @hide candidate for public API
+         */
+        Install(
+            [in] ISSLSessionCache* cache,
+            [in] ISSLContext* context);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

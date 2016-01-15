@@ -1,0 +1,55 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Pkcs7.IContentInfo;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+    namespace Tsp {
+
+    /**
+     * As defined in Time-Stamp Protocol (TSP)
+     * (http://www.ietf.org/rfc/rfc3161.txt)
+     *
+     * TimeStampResp ::= SEQUENCE {
+     *    status PKIStatusInfo,
+     *    timeStampToken TimeStampToken OPTIONAL
+     * }
+     *
+     */
+    interface ITimeStampResp {
+        ToString(
+            [out] String* str);
+
+        /**
+         * @return Returns the status.
+         */
+        GetStatus(
+            [out] IPKIStatusInfo** status);
+
+        /**
+         * @return Returns the timeStampToken.
+         */
+        GetTimeStampToken(
+            [out] IContentInfo** timeStampToken);
+    }
+
+    interface ITimeStampRespHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
+    }
+
+    } // namespace Tsp
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

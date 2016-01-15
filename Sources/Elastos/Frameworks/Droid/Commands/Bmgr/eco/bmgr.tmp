@@ -1,0 +1,74 @@
+module bmgr.eco
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    interface IInterface;
+    interface IObject;
+    interface IAspect;
+    interface IClassObject;
+    interface IWait;
+
+    typedef [dummytype] EGuid ClassID;
+    typedef [dummytype] Int32 AggregateType;
+    typedef [dummytype] EMuid InterfaceID;
+
+    interface IInterface {
+    }
+
+    interface IObject {
+        Aggregate(
+            [in] Int32 type, 
+            [in] IInterface * object);
+
+        GetDomain(
+            [out] IInterface ** object);
+
+        GetClassID(
+            [out] ClassID * clsid);
+
+        GetHashCode(
+            [out] Int32 * pHashCode);
+
+        Equals(
+            [in] IInterface * pInterface, 
+            [out] Boolean * pEquals);
+
+        ToString(
+            [out] String * pInfo);
+    }
+
+    interface IAspect {
+        AspectAggregate(
+            [in] AggregateType type, 
+            [in] IInterface * object);
+
+        AspectGetDomain(
+            [out] IInterface ** object);
+
+        GetAspectID(
+            [out] ClassID * clsid);
+    }
+
+    interface IClassObject {
+        CreateObject(
+            [in] IInterface * outer, 
+            [in] InterfaceID riid, 
+            [out] IInterface ** object);
+
+        StayResident(
+            [in] Boolean bIsStayResident);
+    }
+
+    interface IWait {
+        WaitForCompletion();
+    }
+
+    [
+
+    ]
+    class CRestoreObserver {
+        interface IIRestoreObserver;
+        interface IBinder;
+        interface IWait;
+    }
+}

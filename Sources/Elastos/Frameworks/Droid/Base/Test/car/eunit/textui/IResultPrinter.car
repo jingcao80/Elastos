@@ -1,0 +1,21 @@
+
+module
+{
+    using interface Elastos.IO.IPrintStream;
+    interface Eunit.Framework.ITestFailure;
+
+    namespace Eunit {
+    namespace Textui {
+
+    interface IResultPrinter {
+        PrintDefect(
+            [in] ITestFailure* booBoo,
+            [in] Int32 count);
+
+        GetWriter(
+            [out] IPrintStream** writer);
+    }
+
+    } // namespace Textui
+    } // namespace Eunit
+}

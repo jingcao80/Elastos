@@ -1,0 +1,19 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+
+    /**
+     * @Involve
+     * interface IExecutor;
+     * interface IExecutorService;
+     */
+    interface IAbstractExecutorService {
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

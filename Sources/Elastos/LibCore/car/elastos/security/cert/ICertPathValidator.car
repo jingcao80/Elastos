@@ -1,0 +1,129 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.Cert.ICertPath;
+    interface Elastos.Security.Cert.ICertPathParameters;
+    interface Elastos.Security.Cert.ICertPathValidatorResult;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface ICertPathValidator {
+        /**
+         * Returns the certification path algorithm name.
+         *
+         * @return the certification path algorithm name.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the security provider.
+         *
+         * @return the provider.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Validates the {@code CertPath} with the algorithm of this {@code
+         * CertPathValidator} using the specified algorithm parameters.
+         *
+         * @param certPath
+         *            the certification path to be validated.
+         * @param params
+         *            the certification path validator algorithm parameters.
+         * @return the validation result.
+         * @throws CertPathValidatorException
+         *             if the validation fails, or the algorithm of the specified
+         *             certification path cannot be validated using the algorithm of
+         *             this instance.
+         * @throws InvalidAlgorithmParameterException
+         *             if the specified algorithm parameters cannot be used with
+         *             this algorithm.
+         * @see CertPathValidatorResult
+         */
+        Validate(
+            [in] ICertPath* certPath,
+            [in] ICertPathParameters* params,
+            [out] ICertPathValidatorResult** result);
+    }
+
+    interface ICertPathValidatorHelper {
+        /**
+         * Returns a new certification path validator for the specified algorithm.
+         *
+         * @param algorithm
+         *            the algorithm name.
+         * @return a certification path validator for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if no installed provider provides the specified algorithm.
+         * @throws NullPointerException
+         *             if algorithm is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] ICertPathValidator** validator);
+
+        /**
+         * Returns a new certification path validator for the specified algorithm
+         * from the specified provider.
+         *
+         * @param algorithm
+         *            the algorithm name.
+         * @param provider
+         *            the security provider name.
+         * @return a certification path validator for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified security provider cannot provide the
+         *             requested algorithm.
+         * @throws NoSuchProviderException
+         *             if no provider with the specified name can be found.
+         * @throws NullPointerException
+         *             if algorithm is {@code null}.
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] ICertPathValidator** validator);
+
+        /**
+         * Returns a new certification path validator for the specified algorithm
+         * from the specified provider.
+         *
+         * @param algorithm
+         *            the algorithm name.
+         * @param provider
+         *            the security provider name.
+         * @return a certification path validator for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified provider cannot provide the requested
+         *             algorithm.
+         * @throws IllegalArgumentException if {@code provider == null}
+         * @throws NullPointerException
+         *             if algorithm is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] ICertPathValidator** validator);
+
+        /**
+         * Returns the default {@code CertPathValidator} type from the <i>Security
+         * Properties</i>.
+         *
+         * @return the default {@code CertPathValidator} type from the <i>Security
+         *         Properties</i>, or the string {@code "PKIX"} if it cannot be
+         *         determined.
+         */
+        GetDefaultType(
+            [out] String* type);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

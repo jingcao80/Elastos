@@ -1,0 +1,183 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.IViewOnClickListener;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IMenuItem;
+    interface Elastos.Droid.View.IOnMenuItemClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface IViewBaseSavedState
+     */
+    interface IToolBarSavedState {
+    }
+
+    [local]
+    interface IToolBarOnMenuItemClickListener {
+
+        OnMenuItemClick(
+            [in] IMenuItem* item,
+            [out] Boolean* isClick);
+    }
+
+    /**
+     * @Involve
+     * interface IActionBarLayoutParams;
+     */
+    interface IToolBarLayoutParams {
+        SetViewType(
+            [in] Int32 type);
+
+        GetViewType(
+            [out] Int32* type);
+    }
+
+    /**
+     * Displays a selectable list of years.
+
+     * @Involve
+     * interface IView;
+     * interface IDrawableCallback;
+     * interface IKeyEventCallback;
+     * interface IAccessibilityEventSource;
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup;
+     */
+    [local]
+    interface IToolBar {
+        SetPopupTheme(
+            [in] Int32 resId);
+
+        GetPopupTheme(
+            [out] Int32* theme);
+
+        SetLogo(
+            [in] Int32 resId);
+
+        IsOverflowMenuShowing(
+            [out] Boolean* isShowing);
+
+        ShowOverflowMenu(
+            [out] Boolean* isShowing);
+
+        HideOverflowMenu(
+            [out] Boolean* isHide);
+
+        DismissPopupMenus();
+
+        SetLogo(
+            [in] IDrawable* drawable);
+
+        GetLogo(
+            [out] IDrawable** logo);
+
+        SetLogoDescription(
+            [in] Int32 resId);
+
+        SetLogoDescription(
+            [in] ICharSequence* description);
+
+        GetLogoDescription(
+            [out] ICharSequence** description);
+
+        HasExpandedActionView(
+            [out] Boolean* has);
+
+        CollapseActionView();
+
+        GetTitle(
+            [out] ICharSequence** title);
+
+        SetTitle(
+            [in] Int32 resId);
+
+        SetTitle(
+            [in] ICharSequence* title);
+
+        GetSubtitle(
+            [out] ICharSequence** description);
+
+        SetSubtitle(
+            [in] Int32 resId);
+
+        SetSubtitle(
+            [in] ICharSequence* title);
+
+        SetTitleTextAppearance(
+            [in] IContext* context,
+            [in] Int32 resId);
+
+        SetSubtitleTextAppearance(
+            [in] IContext* context,
+            [in] Int32 resId);
+
+        SetTitleTextColor(
+            [in] Int32 color);
+
+        SetSubtitleTextColor(
+            [in] Int32 color);
+
+        GetNavigationContentDescription(
+            [out] ICharSequence** description);
+
+        SetNavigationContentDescription(
+            [in] Int32 resId);
+
+        SetNavigationContentDescription(
+            [in] ICharSequence* description);
+
+        SetNavigationIcon(
+            [in] Int32 resId);
+
+        SetNavigationIcon(
+            [in] IDrawable* icon);
+
+        GetNavigationIcon(
+            [out] IDrawable** icon);
+
+        SetNavigationOnClickListener(
+            [in] IViewOnClickListener* listener);
+
+        GetMenu(
+            [out] IMenu** menu);
+
+        InflateMenu(
+            [in] Int32 resId);
+
+        SetOnMenuItemClickListener(
+            [in] IToolBarOnMenuItemClickListener* listener);
+
+        SetContentInsetsRelative(
+            [in] Int32 contentInsetStart,
+            [in] Int32 contentInsetEnd);
+
+        GetContentInsetStart(
+            [out] Int32* start);
+
+        GetContentInsetEnd(
+            [out] Int32* end);
+
+        SetContentInsetsAbsolute(
+            [in] Int32 contentInsetLeft,
+            [in] Int32 contentInsetRight);
+
+        GetContentInsetLeft(
+            [out] Int32* left);
+
+        GetContentInsetRight(
+            [out] Int32* right);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,22 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IOutputStream;
+     * interface IFilterOutputStream;
+     * interface IDeflaterOutputStream;
+     * interface IZipOutputStream;
+     */
+    interface IJarOutputStream {
+    }
+
+    } //Jar
+    } //Utility
+    } //Elastos
+}

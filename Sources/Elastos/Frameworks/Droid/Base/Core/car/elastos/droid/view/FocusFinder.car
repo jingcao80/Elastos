@@ -1,0 +1,77 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * The algorithm used for finding the next focusable view in a given direction
+     * from a view that currently has focus.
+     */
+    [deprecated]
+    interface IFocusFinder {
+        /**
+         * Find the next view to take focus in root's descendants, starting from the view
+         * that currently is focused.
+         * @param root Contains focused. Cannot be null.
+         * @param focused Has focus now.
+         * @param direction Direction to look.
+         * @return The next focusable view, or null if none exists.
+         */
+        FindNextFocus(
+            [in] IViewGroup* root,
+            [in] IView* focused,
+            [in] Int32 direction,
+            [out] IView** nextFocus);
+
+        /**
+         * Find the next view to take focus in root's descendants, searching from
+         * a particular rectangle in root's coordinates.
+         * @param root Contains focusedRect. Cannot be null.
+         * @param focusedRect The starting point of the search.
+         * @param direction Direction to look.
+         * @return The next focusable view, or null if none exists.
+         */
+        FindNextFocusFromRect(
+            [in] IViewGroup* root,
+            [in] IRect* focusedRect,
+            [in] Int32 direction,
+            [out] IView** nextFocus);
+
+        /**
+         * Find the nearest touchable view to the specified view.
+         *
+         * @param root The root of the tree in which to search
+         * @param x X coordinate from which to start the search
+         * @param y Y coordinate from which to start the search
+         * @param direction Direction to look
+         * @param deltas Offset from the <x, y> to the edge of the nearest view. Note that this array
+         *        may already be populated with values.
+         * @return The nearest touchable view, or null if none exists.
+         */
+        FindNearestTouchable(
+            [in] IViewGroup* root,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 direction,
+            [in] ArrayOf<Int32>* deltas,
+            [out] IView** touchable);
+    }
+
+    interface IFocusFinderHelper {
+        /**
+         * Get the focus finder for this thread.
+         */
+        GetInstance(
+            [out] IFocusFinder** finder);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

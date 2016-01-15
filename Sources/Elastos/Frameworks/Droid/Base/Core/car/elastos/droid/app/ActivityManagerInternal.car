@@ -1,0 +1,30 @@
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    [deprecated]
+    interface IActivityManagerInternal
+    {
+        // Called by the power manager.
+        GoingToSleep();
+
+        WakingUp();
+
+        StartIsolatedProcess(
+            [in] String entryPoint,
+            [in] ArrayOf<String>* mainArgs,
+            [in] String processName,
+            [in] String abiOverride,
+            [in] Int32 uid,
+            [in] IRunnable* crashHandler,
+            [out] Int32* status);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

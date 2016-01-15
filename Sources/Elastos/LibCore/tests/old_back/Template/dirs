@@ -1,0 +1,11 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+DIRS = List
+DIRS += Map
+DIRS += Set
+DIRS += Vector
+DIRS += HashTable
+DIRS += HashMap
+DIRS += HashSet

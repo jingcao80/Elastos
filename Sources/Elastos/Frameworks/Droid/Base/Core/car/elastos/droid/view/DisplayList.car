@@ -1,0 +1,375 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IMatrix;
+    interface Elastos.Droid.View.IHardwareCanvas;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * A display lists records a series of graphics related operation and can replay
+     * them later. Display lists are usually built by recording operations on a
+     * {@link android.graphics.Canvas}. Replaying the operations from a display list
+     * avoids executing views drawing code on every frame, and is thus much more
+     * efficient.
+     *
+     * @hide
+     */
+    interface IDisplayList {
+        /**
+         * Flag used when calling
+         * {@link HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, Int32)}
+         * When this flag is set, draw operations lying outside of the bounds of the
+         * display list will be culled early. It is recommeneded to always set this
+         * flag.
+         */
+        const Int32 FLAG_CLIP_CHILDREN = 0x1;
+
+        // NOTE: The STATUS_* values *must* match the enum in DrawGlInfo.h
+
+        /**
+         * Indicates that the display list is done drawing.
+         *
+         * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, Int32)
+         */
+        const Int32 STATUS_DONE = 0x0;
+
+        /**
+         * Indicates that the display list needs another drawing pass.
+         *
+         * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, Int32)
+         */
+        const Int32 STATUS_DRAW = 0x1;
+
+        /**
+         * Indicates that the display list needs to re-execute its GL functors.
+         *
+         * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, Int32)
+         * @see HardwareCanvas#callDrawGLFunction(Int32)
+         */
+        const Int32 STATUS_INVOKE = 0x2;
+
+        /**
+         * Indicates that the display list performed GL drawing operations.
+         *
+         * @see HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, Int32)
+         */
+        const Int32 STATUS_DREW = 0x4;
+
+        /**
+         * Starts recording the display list. All operations performed on the
+         * returned canvas are recorded and stored in this display list.
+         *
+         * @return A canvas to record drawing operations.
+         */
+        Start(
+            [out] IHardwareCanvas** canvas);
+
+        /**
+         * Ends the recording for this display list. A display list cannot be
+         * replayed if recording is not finished.
+         */
+        End();
+
+        /**
+         * Invalidates the display list, indicating that it should be repopulated
+         * with new drawing commands prior to being used again. Calling this method
+         * causes calls to {@link #isValid()} to return <code>false</code>.
+         */
+        Invalidate();
+
+        /**
+         * Clears additional resources held onto by this display list. You should
+         * only invoke this method after {@link #invalidate()}.
+         */
+        Clear();
+
+        /**
+         * Returns whether the display list is currently usable. If this returns false,
+         * the display list should be re-recorded prior to replaying it.
+         *
+         * @return Boolean true if the display list is able to be replayed, false otherwise.
+         */
+        IsValid(
+            [out] Boolean* isValid);
+
+        /**
+         * Return the amount of memory used by this display list.
+         *
+         * @return The size of this display list in bytes
+         */
+        GetSize(
+            [out] Int32* size);
+
+        ///////////////////////////////////////////////////////////////////////////
+        // DisplayList Property Setters
+        ///////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Set the caching property on the DisplayList, which indicates whether the DisplayList
+         * holds a layer. Layer DisplayLists should avoid creating an alpha layer, since alpha is
+         * handled in the drawLayer operation directly (and more efficiently).
+         *
+         * @param caching true if the DisplayList represents a hardware layer, false otherwise.
+         */
+        SetCaching(
+            [in] Boolean caching);
+
+        /**
+         * Set whether the DisplayList should clip itself to its bounds. This property is controlled by
+         * the view's parent.
+         *
+         * @param clipChildren true if the DisplayList should clip to its bounds
+         */
+        SetClipChildren(
+            [in] Boolean clipChildren);
+
+        /**
+         * Set the static matrix on the DisplayList. This matrix exists if a custom ViewGroup
+         * overrides
+         * {@link ViewGroup#getChildStaticTransformation(View, android.view.animation.Transformation)}
+         * and also has {@link ViewGroup#setStaticTransformationsEnabled(Boolean)} set to true.
+         * This matrix will be concatenated with any other matrices in the DisplayList to position
+         * the view appropriately.
+         *
+         * @param matrix The matrix
+         */
+        SetStaticMatrix(
+            [in] IMatrix* matrix);
+
+        /**
+         * Set the Animation matrix on the DisplayList. This matrix exists if an Animation is
+         * currently playing on a View, and is set on the DisplayList during at draw() time. When
+         * the Animation finishes, the matrix should be cleared by sending <code>null</code>
+         * for the matrix parameter.
+         *
+         * @param matrix The matrix, null indicates that the matrix should be cleared.
+         */
+        SetAnimationMatrix(
+            [in] IMatrix* matrix);
+
+        /**
+         * Sets the alpha value for the DisplayList
+         *
+         * @param alpha The translucency of the DisplayList
+         * @see View#setAlpha(float)
+         */
+        SetAlpha(
+            [in] Float alpha);
+
+        /**
+         * Sets whether the DisplayList renders content which overlaps. Non-overlapping rendering
+         * can use a fast path for alpha that avoids rendering to an offscreen buffer.
+         *
+         * @param hasOverlappingRendering
+         * @see android.view.View#hasOverlappingRendering()
+         */
+        SetHasOverlappingRendering(
+            [in] Boolean hasOverlappingRendering);
+
+        /**
+         * Sets the translationX value for the DisplayList
+         *
+         * @param translationX The translationX value of the DisplayList
+         * @see View#setTranslationX(float)
+         */
+        SetTranslationX(
+            [in] Float translationX);
+
+        /**
+         * Sets the translationY value for the DisplayList
+         *
+         * @param translationY The translationY value of the DisplayList
+         * @see View#setTranslationY(float)
+         */
+        SetTranslationY(
+            [in] Float translationY);
+
+        /**
+         * Sets the rotation value for the DisplayList
+         *
+         * @param rotation The rotation value of the DisplayList
+         * @see View#setRotation(float)
+         */
+        SetRotation(
+            [in] Float rotation);
+
+        /**
+         * Sets the rotationX value for the DisplayList
+         *
+         * @param rotationX The rotationX value of the DisplayList
+         * @see View#setRotationX(float)
+         */
+        SetRotationX(
+            [in] Float rotationX);
+
+        /**
+         * Sets the rotationY value for the DisplayList
+         *
+         * @param rotationY The rotationY value of the DisplayList
+         * @see View#setRotationY(float)
+         */
+        SetRotationY(
+            [in] Float rotationY);
+
+        /**
+         * Sets the scaleX value for the DisplayList
+         *
+         * @param scaleX The scaleX value of the DisplayList
+         * @see View#setScaleX(float)
+         */
+        SetScaleX(
+            [in] Float scaleX);
+
+        /**
+         * Sets the scaleY value for the DisplayList
+         *
+         * @param scaleY The scaleY value of the DisplayList
+         * @see View#setScaleY(float)
+         */
+        SetScaleY(
+            [in] Float scaleY);
+
+        /**
+         * Sets all of the transform-related values of the View onto the DisplayList
+         *
+         * @param alpha The alpha value of the DisplayList
+         * @param translationX The translationX value of the DisplayList
+         * @param translationY The translationY value of the DisplayList
+         * @param rotation The rotation value of the DisplayList
+         * @param rotationX The rotationX value of the DisplayList
+         * @param rotationY The rotationY value of the DisplayList
+         * @param scaleX The scaleX value of the DisplayList
+         * @param scaleY The scaleY value of the DisplayList
+         */
+        SetTransformationInfo(
+            [in] Float alpha,
+            [in] Float translationX,
+            [in] Float translationY,
+            [in] Float rotation,
+            [in] Float rotationX,
+            [in] Float rotationY,
+            [in] Float scaleX,
+            [in] Float scaleY);
+
+        /**
+         * Sets the pivotX value for the DisplayList
+         *
+         * @param pivotX The pivotX value of the DisplayList
+         * @see View#setPivotX(float)
+         */
+        SetPivotX(
+            [in] Float pivotX);
+
+        /**
+         * Sets the pivotY value for the DisplayList
+         *
+         * @param pivotY The pivotY value of the DisplayList
+         * @see View#setPivotY(float)
+         */
+        SetPivotY(
+            [in] Float pivotY);
+
+        /**
+         * Sets the camera distance for the DisplayList
+         *
+         * @param distance The distance in z of the camera of the DisplayList
+         * @see View#setCameraDistance(float)
+         */
+        SetCameraDistance(
+            [in] Float distance);
+
+        /**
+         * Sets the left value for the DisplayList
+         *
+         * @param left The left value of the DisplayList
+         * @see View#setLeft(Int32)
+         */
+        SetLeft(
+            [in] Int32 left);
+
+        /**
+         * Sets the top value for the DisplayList
+         *
+         * @param top The top value of the DisplayList
+         * @see View#setTop(Int32)
+         */
+        SetTop(
+            [in] Int32 top);
+
+        /**
+         * Sets the right value for the DisplayList
+         *
+         * @param right The right value of the DisplayList
+         * @see View#setRight(Int32)
+         */
+        SetRight(
+            [in] Int32 right);
+
+        /**
+         * Sets the bottom value for the DisplayList
+         *
+         * @param bottom The bottom value of the DisplayList
+         * @see View#setBottom(Int32)
+         */
+        SetBottom(
+            [in] Int32 bottom);
+
+        /**
+         * Sets the left and top values for the DisplayList
+         *
+         * @param left The left value of the DisplayList
+         * @param top The top value of the DisplayList
+         * @see View#setLeft(Int32)
+         * @see View#setTop(Int32)
+         */
+        SetLeftTop(
+            [in] Int32 left,
+            [in] Int32 top);
+
+        /**
+         * Sets the left and top values for the DisplayList
+         *
+         * @param left The left value of the DisplayList
+         * @param top The top value of the DisplayList
+         * @see View#setLeft(Int32)
+         * @see View#setTop(Int32)
+         */
+        SetLeftTopRightBottom(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /**
+         * Offsets the left and right values for the DisplayList
+         *
+         * @param offset The amount that the left and right values of the DisplayList are offset
+         * @see View#offsetLeftAndRight(Int32)
+         */
+        OffsetLeftRight(
+            [in] Int32 offset);
+
+        /**
+         * Offsets the top and bottom values for the DisplayList
+         *
+         * @param offset The amount that the top and bottom values of the DisplayList are offset
+         * @see View#offsetTopAndBottom(Int32)
+         */
+        OffsetTopBottom(
+            [in] Int32 offset);
+
+        /**
+         * Reset native resources. This is called when cleaning up the state of DisplayLists
+         * during destruction of hardware resources, to ensure that we do not hold onto
+         * obsolete resources after related resources are gone.
+         */
+        Reset();
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

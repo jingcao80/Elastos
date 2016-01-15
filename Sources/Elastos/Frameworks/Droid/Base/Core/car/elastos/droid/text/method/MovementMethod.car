@@ -1,0 +1,83 @@
+module
+{
+    interface Elastos.Droid.Text.ISpannable;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Widget.ITextView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    interface IMovementMethod
+    {
+        Initialize(
+            [in] ITextView* widget,
+            [in] ISpannable* text);
+
+        OnKeyDown(
+            [in] ITextView* widget,
+            [in] ISpannable* text,
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OnKeyUp(
+            [in] ITextView* widget,
+            [in] ISpannable* text,
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * If the key listener wants to other kinds of key events, return true,
+         * otherwise return false and the caller (i.e. the widget host)
+         * will handle the key.
+         */
+        OnKeyOther(
+            [in] ITextView* view,
+            [in] ISpannable* text,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OnTakeFocus(
+            [in] ITextView* widget,
+            [in] ISpannable* text,
+            [in] Int32 direction);
+
+        OnTrackballEvent(
+            [in] ITextView* widget,
+            [in] ISpannable* text,
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        OnTouchEvent(
+            [in] ITextView* widget,
+            [in] ISpannable* text,
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        OnGenericMotionEvent(
+            [in] ITextView* widget,
+            [in] ISpannable* text,
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * Returns true if this movement method allows arbitrary selection
+         * of any text; false if it has no selection (like a movement method
+         * that only scrolls) or a constrained selection (for example
+         * limited to links.  The "Select All" menu item is disabled
+         * if arbitrary selection is not allowed.
+         */
+        CanSelectArbitrarily(
+            [out] Boolean* result);
+    }
+
+    }//namespace Method
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+
+}

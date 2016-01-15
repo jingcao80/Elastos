@@ -1,0 +1,116 @@
+
+module
+{
+    interface Elastos.Security.IAlgorithmParameters;
+    interface Elastos.Security.IKey;
+    interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+
+    namespace Elastosx {
+    namespace Crypto {
+
+    /**
+     * The <i>Service Provider Interface</i> (<b>SPI</b>) definition for the {@code
+     * ExemptionMechanism} class.
+     */
+    [deprecated]
+    interface IExemptionMechanismSpi {
+        /**
+         * Generates the result key blob for this exemption mechanism.
+         *
+         * @return the result key blob for this exemption mechanism.
+         * @throws ExemptionMechanismException
+         *             if error(s) occur during generation.
+         */
+        EngineGenExemptionBlob(
+            [out, callee] ArrayOf<Byte> * blob);
+
+        /**
+         * Generates the result key blob for this exemption mechanism and stores it
+         * into the {@code output} buffer at offset {@code outputOffset}.
+         *
+         * @param output
+         *            the output buffer for the result key blob.
+         * @param outputOffset
+         *            the offset in the output buffer to start.
+         * @return the number of bytes written to the {@code output} buffer.
+         * @throws ShortBufferException
+         *             if the provided buffer is too small for the result key blob.
+         * @throws ExemptionMechanismException
+         *             if error(s) occur during generation.
+         */
+        EngineGenExemptionBlob(
+            [in] ArrayOf<Byte> * output,
+            [in] Int32 outputOffset,
+            [out] Int32 * value);
+
+        /**
+         * Returns the size in bytes for the output buffer needed to hold the output
+         * of the next {@link #engineGenExemptionBlob} call, given the specified
+         * {@code inputLen} (in bytes).
+         *
+         * @param inputLen
+         *            the specified input length (in bytes).
+         * @return the size in bytes for the output buffer.
+         */
+        EngineGetOutputSize(
+            [in] Int32 inputLen,
+            [out] Int32 * value);
+
+        /**
+         * Initializes this {@code ExemptionMechanism} instance with the specified
+         * key.
+         *
+         * @param key
+         *            the key to initialize this instance with.
+         * @throws InvalidKeyException
+         *             if the key cannot be used to initialize this mechanism.
+         * @throws ExemptionMechanismException
+         *             if error(s) occur during initialization.
+         */
+        EngineInit(
+            [in] IKey * key);
+
+        /**
+         * Initializes this {@code ExemptionMechanism} instance with the specified
+         * key and algorithm parameters.
+         *
+         * @param key
+         *            the key to initialize this instance with.
+         * @param params
+         *            the parameters for this exemption mechanism algorithm.
+         * @throws InvalidKeyException
+         *             if the key cannot be used to initialize this mechanism.
+         * @throws InvalidAlgorithmParameterException
+         *             if the parameters cannot be used to initialize this
+         *             mechanism.
+         * @throws ExemptionMechanismException
+         *             if error(s) occur during initialization.
+         */
+        EngineInit(
+            [in] IKey * key,
+            [in] IAlgorithmParameters * params);
+
+        /**
+         * Initializes this {@code ExemptionMechanism} instance with the specified
+         * key and algorithm parameters.
+         *
+         * @param key
+         *            the key to initialize this instance with.
+         * @param params
+         *            the parameters for this exemption mechanism algorithm.
+         * @throws InvalidKeyException
+         *             if the key cannot be used to initialize this mechanism.
+         * @throws InvalidAlgorithmParameterException
+         *             the the parameters cannot be used to initialize this
+         *             mechanism.
+         * @throws ExemptionMechanismException
+         *             if error(s) occur during initialization.
+         */
+        EngineInit(
+            [in] IKey * key,
+            [in] IAlgorithmParameterSpec * params);
+    }
+
+    } // namespace Crypto
+    } // namespace Elastosx
+}

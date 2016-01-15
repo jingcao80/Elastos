@@ -1,0 +1,94 @@
+
+module
+{
+    using interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    interface IBluetoothControllerCallback {
+        OnBluetoothStateChange(
+            [in] Boolean enabled,
+            [in] Boolean connecting);
+
+        OnBluetoothPairedDevicesChanged();
+    }
+
+    interface IBluetoothControllerPairedDevice {
+        const Int32 STATE_DISCONNECTED = 0;
+        const Int32 STATE_CONNECTING = 1;
+        const Int32 STATE_CONNECTED = 2;
+        const Int32 STATE_DISCONNECTING = 3;
+
+        SetId(
+            [in] String id);
+
+        GetId(
+            [out] String* id);
+
+        SetName(
+            [in] String name);
+
+        GetName(
+            [out] String* name);
+
+        SetState(
+            [in] Int32 state);
+
+        GetState(
+            [out] Int32* state);
+
+        SetTag(
+            [in] IInterface* tag);
+
+        GetTag(
+            [out] IInterface** tag);
+    }
+
+    interface IBluetoothController {
+
+        AddStateChangedCallback(
+            [in] IBluetoothControllerCallback* cb);
+
+        RemoveStateChangedCallback(
+            [in] IBluetoothControllerCallback* cb);
+
+        IsBluetoothSupported(
+            [out] Boolean* result);
+
+        IsBluetoothEnabled(
+            [out] Boolean* result);
+
+        IsBluetoothConnected(
+            [out] Boolean* result);
+
+        IsBluetoothConnecting(
+            [out] Boolean* result);
+
+        GetLastDeviceName(
+            [out] String* result);
+
+        SetBluetoothEnabled(
+            [in] Boolean enabled);
+
+        GetPairedDevices(
+            [out] ISet** devices);
+
+        Connect(
+            [in] IBluetoothControllerPairedDevice* device);
+
+        Disconnect(
+            [in] IBluetoothControllerPairedDevice* device);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

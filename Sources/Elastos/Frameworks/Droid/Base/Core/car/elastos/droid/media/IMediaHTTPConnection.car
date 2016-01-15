@@ -1,0 +1,35 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IIMediaHTTPConnection {
+        Connect(
+            [in] String uri,
+            [in] String headers,
+            [out] IBinder** result);
+
+        Disconnect();
+
+        ReadAt(
+            [in] Int64 offset,
+            [in] Int32 size,
+            [out] Int32* result);
+
+        GetSize(
+            [out] Int64* result);
+
+        GetMIMEType(
+            [out] String* result);
+
+        GetUri(
+            [out] String* result);
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

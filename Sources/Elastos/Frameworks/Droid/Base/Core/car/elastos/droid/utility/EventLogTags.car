@@ -1,0 +1,67 @@
+module {
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+        interface IEventLogTagsDescription
+        {
+        }
+
+        interface IEventLogTags
+        {
+            const Int32 CONFIGURATION_CHANGED = 2719;
+            const Int32 CPU = 2721;
+
+            const Int32 BOOT_PROGRESS_AMS_READY = 3040;
+            const Int32 BOOT_PROGRESS_ENABLE_SCREEN = 3050;
+
+            const Int32 AM_FINISH_ACTIVITY = 30001;
+            const Int32 AM_TASK_TO_FRONT = 30002;
+            const Int32 AM_NEW_INTENT = 30003;
+            const Int32 AM_CREATE_TASK = 30004;
+            const Int32 AM_CREATE_ACTIVITY = 30005;
+            const Int32 AM_RESTART_ACTIVITY = 30006;
+            const Int32 AM_RESUME_ACTIVITY = 30007;
+            const Int32 AM_ANR = 30008;
+            const Int32 ACTIVITY_LAUNCH_TIME = 30009;
+            const Int32 AM_PROCESS_BOUND = 30010;
+            const Int32 AM_PROCESS_DIED = 30011;
+            const Int32 AM_FAILED_TO_PAUSE = 30012;
+            const Int32 AM_PAUSE_ACTIVITY = 30013;
+            const Int32 AM_PROCESS_START = 30014;
+            const Int32 AM_PROCESS_BAD = 30015;
+            const Int32 AM_PROCESS_GOOD = 30016;
+            const Int32 AM_LOW_MEMORY = 30017;
+            const Int32 AM_DESTROY_ACTIVITY = 30018;
+            const Int32 AM_RELAUNCH_RESUME_ACTIVITY = 30019;
+            const Int32 AM_RELAUNCH_ACTIVITY = 30020;
+            const Int32 AM_ON_PAUSED_CALLED = 30021;
+            const Int32 AM_ON_RESUME_CALLED = 30022;
+            const Int32 AM_KILL = 30023;
+            const Int32 AM_BROADCAST_DISCARD_FILTER = 30024;
+            const Int32 AM_BROADCAST_DISCARD_APP = 30025;
+            const Int32 AM_CREATE_SERVICE = 30030;
+            const Int32 AM_DESTROY_SERVICE = 30031;
+            const Int32 AM_PROCESS_CRASHED_TOO_MUCH = 30032;
+            const Int32 AM_DROP_PROCESS = 30033;
+            const Int32 AM_SERVICE_CRASHED_TOO_MUCH = 30034;
+            const Int32 AM_SCHEDULE_SERVICE_RESTART = 30035;
+            const Int32 AM_PROVIDER_LOST_PROCESS = 30036;
+            const Int32 AM_PROCESS_START_TIMEOUT = 30037;
+
+            const Int32 AM_CRASH = 30039;
+            const Int32 AM_WTF = 30040;
+
+            // Get(
+            //  [in] String name,
+            //  [out] IEventLogTagsDescription** desc);
+
+            // Get(
+            //  [in] Int32 tag,
+            //  [out] IEventLogTagsDescription** desc);
+        }
+
+    }
+    }
+    }
+}

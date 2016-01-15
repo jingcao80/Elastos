@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Libcore {
+    namespace IO {
+
+    /**
+    * @extends
+    * Elastos.Core.IThread;
+    */
+
+    interface IDeleteOnExit {
+        /**
+         * Schedules a file for deletion.
+         *
+         * @param filename The file to delete.
+        */
+        AddFile(
+            [in] String filename);
+    }
+
+    interface IDeleteOnExitHelper {
+        GetInstance(
+            [out] IDeleteOnExit** instance);
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

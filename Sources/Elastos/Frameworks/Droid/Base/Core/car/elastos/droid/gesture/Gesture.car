@@ -1,0 +1,144 @@
+module
+{
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.IO.IDataOutputStream;
+    using interface Elastos.IO.IDataInputStream;
+
+    interface Elastos.Droid.Graphics.IRectF;
+    interface Elastos.Droid.Graphics.IPath;
+    interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Gesture {
+
+    /**
+     * A gesture is a hand-drawn shape on a touch screen. It can have one or multiple strokes.
+     * Each stroke is a sequence of timed points. A user-defined gesture can be recognized by
+     * a GestureLibrary.
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    [local]
+    interface IGesture {
+        /**
+         * @return all the strokes of the gesture
+         */
+        GetStrokes(
+            [out] IArrayList** container);
+
+        /**
+         * @return the number of strokes included by this gesture
+         */
+        GetStrokesCount(
+            [out] Int32* count);
+
+        /**
+         * Adds a stroke to the gesture.
+         *
+         * @param stroke
+         */
+        AddStroke(
+            [in] IGestureStroke* stroke);
+
+        /**
+         * Calculates the total length of the gesture. When there are multiple strokes in
+         * the gesture, this returns the sum of the lengths of all the strokes.
+         *
+         * @return the length of the gesture
+         */
+        GetLength(
+            [out] Float* length);
+
+        /**
+         * @return the bounding box of the gesture
+         */
+        GetBoundingBox(
+            [out] IRectF** box);
+
+        ToPath(
+            [out] IPath** outPath);
+
+        ToPath(
+            [in] IPath* path,
+            [out] IPath** outPath);
+
+        ToPath(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 edge,
+            [in] Int32 numSample,
+            [out] IPath** outPath);
+
+        ToPath(
+            [in] IPath* path,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 edge,
+            [in] Int32 numSample,
+            [out] IPath** outPath);
+
+        /**
+         * Sets the id of the gesture.
+         *
+         * @param id
+         */
+        SetID(
+            [in] Int64 id);
+
+        /**
+         * @return the id of the gesture
+         */
+        GetID(
+            [out] Int64* id);
+
+        /**
+         * Creates a bitmap of the gesture with a transparent background.
+         *
+         * @param width width of the target bitmap
+         * @param height height of the target bitmap
+         * @param edge the edge
+         * @param numSample
+         * @param color
+         * @return the bitmap
+         */
+        ToBitmap(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 edge,
+            [in] Int32 numSample,
+            [in] Int32 color,
+            [out] IBitmap** bm);
+
+        /**
+         * Creates a bitmap of the gesture with a transparent background.
+         *
+         * @param width
+         * @param height
+         * @param inset
+         * @param color
+         * @return the bitmap
+         */
+        ToBitmap(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 inset,
+            [in] Int32 color,
+            [out] IBitmap** bm);
+
+        Serialize(
+            [in] IDataOutputStream* outStream);
+    }
+
+    [local]
+    interface IGestureHelper {
+        Deserialize(
+            [in] IDataInputStream* inStream,
+            [out] IGesture** result);
+    }
+
+    } // namespace Gesture
+    } // namespace Droid
+    } // namespace Elastos
+}

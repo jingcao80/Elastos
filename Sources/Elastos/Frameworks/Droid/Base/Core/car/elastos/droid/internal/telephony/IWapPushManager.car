@@ -1,0 +1,70 @@
+
+module
+{
+
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    interface IIWapPushManager {
+
+        /**
+         * Processes WAP push message and triggers the receiver application registered
+         * in the application ID table.
+         */
+        ProcessMessage(
+            [in] String app_id,
+            [in] String content_type,
+            [in] IIntent* intent,
+            [out] Int32* val);
+
+        /**
+         * Add receiver application into the application ID table.
+         * Returns true if inserting the information is successfull. Inserting the duplicated
+         * record in the application ID table is not allowed. Use update/delete method.
+         */
+        AddPackage(
+            [in] String x_app_id,
+            [in] String content_type,
+            [in] String package_name,
+            [in] String class_name,
+            [in] Int32 app_type,
+            [in] Boolean need_signature,
+            [in] Boolean further_processing,
+            [out] Boolean* res);
+
+        /**
+         * Updates receiver application that is last added.
+         * Returns true if updating the information is successfull.
+         */
+        UpdatePackage(
+            [in] String x_app_id,
+            [in] String content_type,
+            [in] String package_name,
+            [in] String class_name,
+            [in] Int32 app_type,
+            [in] Boolean need_signature,
+            [in] Boolean further_processing,
+            [out] Boolean* res);
+
+        /**
+         * Delites receiver application information.
+         * Returns true if deleting is successfull.
+         */
+        DeletePackage(
+            [in] String x_app_id,
+            [in] String content_type,
+            [in] String package_name,
+            [in] String class_name,
+            [out] Boolean* res);
+
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

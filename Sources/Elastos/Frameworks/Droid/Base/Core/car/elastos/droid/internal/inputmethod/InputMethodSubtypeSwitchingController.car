@@ -1,0 +1,100 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.InputMethod.IInputMethodInfo;
+    interface Elastos.Droid.View.InputMethod.IInputMethodSubtype;
+    interface Elastos.Droid.Internal.InputMethod.IInputMethodSettings;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace InputMethod {
+
+    /**
+     * @Involve
+     * interface IComparable
+     */
+    [local]
+    interface IImeSubtypeListItem {
+        GetImeName(
+            [out] ICharSequence** imeName);
+
+        SetImeName(
+            [in] ICharSequence* imeName);
+
+        GetSubtypeName(
+            [out] ICharSequence** subtypeName);
+
+        SetSubtypeName(
+            [in] ICharSequence* subtypeName);
+
+        GetImi(
+            [out] IInputMethodInfo** imi);
+
+        SetImi(
+            [in] IInputMethodInfo* imi);
+
+        GetSubtypeId(
+            [out] Int32* subtypeId);
+
+        SetSubtypeId(
+            [in] Int32 subtypeId);
+
+        GetIsSystemLocale(
+            [out] Boolean* isSystemLocale);
+
+        SetIsSystemLocale(
+            [in] Boolean isSystemLocale);
+
+        GetIsSystemLanguage(
+            [out] Boolean* isSystemLanguage);
+
+        SetIsSystemLanguage(
+            [in] Boolean isSystemLanguage);
+    }
+
+    /**
+     * InputMethodSubtypeSwitchingController controls the switching behavior of the subtypes.
+     * <p>
+     * This class is designed to be used from and only from {@link InputMethodManagerService} by using
+     * {@link InputMethodManagerService#mMethodMap} as a global lock.
+     * </p>
+     */
+    [local]
+    interface IInputMethodSubtypeSwitchingController {
+        OnUserActionLocked(
+            [in] IInputMethodInfo* imi,
+            [in] IInputMethodSubtype* subtype);
+
+        ResetCircularListLocked(
+            [in] IContext* context);
+
+        GetNextInputMethodLocked(
+            [in] Boolean onlyCurrentIme,
+            [in] IInputMethodInfo* imi,
+            [in] IInputMethodSubtype* subtype,
+            [out] IImeSubtypeListItem** item);
+
+        GetSortedInputMethodAndSubtypeListLocked(
+            [in] Boolean showSubtypes,
+            [in] Boolean inputShown,
+            [in] Boolean isScreenLocked,
+            [out] IList** list);
+    }
+
+    [local]
+    interface IInputMethodSubtypeSwitchingControllerHelper {
+        CreateInstanceLocked(
+            [in] IInputMethodSettings* settings,
+            [in] IContext* context,
+            [out] IInputMethodSubtypeSwitchingController** instance);
+    }
+
+    } // namespace InputMethod
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

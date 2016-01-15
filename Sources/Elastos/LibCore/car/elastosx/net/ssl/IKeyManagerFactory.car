@@ -1,0 +1,152 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.IKeyStore;
+    interface Elastosx.Net.Ssl.IKeyManager;
+    interface Elastosx.Net.Ssl.IManagerFactoryParameters;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The public API for {@code KeyManagerFactory} implementations.
+     */
+    [deprecated]
+    interface IKeyManagerFactory {
+        /**
+         * Returns the name of the key management algorithm.
+         *
+         * @return the name of the key management algorithm.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the provider for this {@code KeyManagerFactory} instance.
+         *
+         * @return the provider for this {@code KeyManagerFactory} instance.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Initializes this instance with the specified key store and password.
+         *
+         * @param ks
+         *            the key store or {@code null} to use the default key store.
+         * @param password
+         *            the password for the specified key store or {@code null} if no
+         *            key store is provided.
+         * @throws KeyStoreException
+         *             if initializing this key manager factory fails.
+         * @throws NoSuchAlgorithmException
+         *             if a required algorithm is not available.
+         * @throws UnrecoverableKeyException
+         *             if a key cannot be recovered.
+         */
+        Init(
+            [in] IKeyStore* ks,
+            [in] ArrayOf<Char32>* password);
+
+        /**
+         * Initializes this instance with the specified factory parameters.
+         *
+         * @param spec
+         *            the factory parameters.
+         * @throws InvalidAlgorithmParameterException
+         *             if an error occurs.
+         */
+        Init(
+            [in] IManagerFactoryParameters* spec);
+
+        /**
+         * Returns the list of {@code TrustManager}s with one entry for each type
+         * of trust material.
+         *
+         * @return the list of {@code TrustManager}s
+         */
+        GetKeyManagers(
+            [out, callee] ArrayOf<IKeyManager*>* managers);
+    }
+
+    interface IKeyManagerFactoryHelper {
+        /**
+         * Returns the default key manager factory algorithm name.
+         * <p>
+         * The default algorithm name is specified by the security property:
+         * {@code 'ssl.KeyManagerFactory.algorithm'}.
+         *
+         * @return the default algorithm name.
+         */
+        GetDefaultAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Creates a new {@code KeyManagerFactory} instance for the specified key
+         * management algorithm.
+         *
+         * @param algorithm
+         *            the name of the requested key management algorithm.
+         * @return a key manager factory for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if no installed provider can provide the requested algorithm.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null} (instead of
+         *             NoSuchAlgorithmException as in 1.4 release)
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] IKeyManagerFactory** factory);
+
+        /**
+         * Creates a new {@code KeyManagerFactory} instance for the specified key
+         * management algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the requested key management algorithm name.
+         * @param provider
+         *            the name of the provider that provides the requested
+         *            algorithm.
+         * @return a key manager factory for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified provider cannot provide the requested
+         *             algorithm.
+         * @throws NoSuchProviderException
+         *             if the specified provider does not exist.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null} (instead of
+         *             NoSuchAlgorithmException as in 1.4 release)
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] IKeyManagerFactory** factory);
+
+        /**
+         * Creates a new {@code KeyManagerFactory} instance for the specified key
+         * management algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the requested key management algorithm name.
+         * @param provider
+         *            the provider that provides the requested algorithm.
+         * @return a key manager factory for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified provider cannot provide the requested
+         *             algorithm.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null} (instead of
+         *             NoSuchAlgorithmException as in 1.4 release)
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] IKeyManagerFactory** factory);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

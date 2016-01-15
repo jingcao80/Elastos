@@ -1,0 +1,49 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * API for Bluetooth Pan service
+         *
+         * {@hide}
+         */
+        [deprecated]
+        interface IIBluetoothPan
+        {
+            // Public API
+            IsTetheringOn(
+                [out] Boolean* isTetheringOn);
+
+            SetBluetoothTethering(
+                [in] Boolean value);
+
+            Connect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            Disconnect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            // Mike TODO: wait for List car interface
+            GetConnectedDevices(
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetDevicesMatchingConnectionStates(
+                [in] ArrayOf<Int32>* states,
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetConnectionState(
+                [in] IBluetoothDevice* device,
+                [out] Int32* state);
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

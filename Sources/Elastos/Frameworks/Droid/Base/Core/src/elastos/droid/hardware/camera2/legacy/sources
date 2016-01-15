@@ -1,0 +1,39 @@
+
+TARGET_NAME= legacy
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES =  BurstHolder.cpp
+SOURCES += CameraDeviceState.cpp
+SOURCES += CameraDeviceUserShim.cpp
+SOURCES += CCameraDeviceUserShimHelper.cpp
+SOURCES += CaptureCollector.cpp
+SOURCES += GLThreadManager.cpp
+SOURCES += LegacyExceptionUtils.cpp
+SOURCES += CLegacyExceptionUtilsHelper.cpp
+SOURCES += LegacyCameraDevice.cpp
+SOURCES += LegacyFaceDetectMapper.cpp
+SOURCES += LegacyFocusStateMapper.cpp
+SOURCES += LegacyMetadataMapper.cpp
+SOURCES += CLegacyMetadataMapper.cpp
+SOURCES += LegacyRequest.cpp
+SOURCES += LegacyRequestMapper.cpp
+SOURCES += CLegacyRequestMapper.cpp
+SOURCES += LegacyResultMapper.cpp
+SOURCES += ParameterUtils.cpp
+SOURCES += CParameterUtils.cpp
+SOURCES += PerfMeasurement.cpp
+SOURCES += CPerfMeasurementHelper.cpp
+SOURCES += RequestHandlerThread.cpp
+SOURCES += RequestHolder.cpp
+SOURCES += RequestQueue.cpp
+SOURCES += RequestThreadManager.cpp
+SOURCES += LegacySizeAreaComparator.cpp
+SOURCES += CLegacySizeAreaComparatorHelper.cpp
+SOURCES += SurfaceTextureRenderer.cpp
+
+SOURCES += legacy.cpp

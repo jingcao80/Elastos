@@ -1,0 +1,16 @@
+
+module
+{
+    interface Elastos.Namespace2.IFoo;
+
+    namespace Elastos {
+    namespace Namespace2 {
+
+    interface IBar {
+        Bar(
+            [in] IFoo* foo);
+    }
+
+    }
+    }
+}

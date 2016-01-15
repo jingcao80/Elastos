@@ -1,0 +1,90 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    interface IILockSettings {
+        SetBoolean(
+            [in] String key,
+            [in] Boolean value,
+            [in] Int32 userId);
+
+        SetInt64(
+            [in] String key,
+            [in] Int64 value,
+            [in] Int32 userId);
+
+        SetString(
+            [in] String key,
+            [in] String value,
+            [in] Int32 userId);
+
+        GetBoolean(
+            [in] String key,
+            [in] Boolean defaultValue,
+            [in] Int32 userId,
+            [out] Boolean* res);
+
+        GetInt64(
+            [in] String key,
+            [in] Int64 defaultValue,
+            [in] Int32 userId,
+            [out] Int64* res);
+
+        GetString(
+            [in] String key,
+            [in] String defaultValue,
+            [in] Int32 userId,
+            [out] String* str);
+
+        SetLockPattern(
+            [in] String pattern,
+            [in] Int32 userId);
+
+        CheckPattern(
+            [in] String pattern,
+            [in] Int32 userId,
+            [out] Boolean* res);
+
+        SetLockPassword(
+            [in] String pattern,
+            [in] Int32 userId);
+
+        CheckPassword(
+            [in] String pattern,
+            [in] Int32 userId,
+            [out] Boolean* res);
+
+        CheckVoldPassword(
+            [in] Int32 userId,
+            [out] Boolean* res);
+
+        HavePattern(
+            [in] Int32 userId,
+            [out] Boolean* res);
+
+        HavePassword(
+            [in] Int32 userId,
+            [out] Boolean* res);
+
+        RemoveUser(
+            [in] Int32 userId);
+
+        RegisterObserver(
+            [in] IILockSettingsObserver* observer);
+
+        UnregisterObserver(
+            [in] IILockSettingsObserver* observer);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+
+}

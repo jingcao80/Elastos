@@ -1,0 +1,48 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * A data tracker responsible for bringing up and tearing down the system proxy server.
+     *
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * interface IBaseNetworkStateTracker;
+     * interface INetworkStateTracker;
+     */
+    interface IProxyDataTracker {
+        /**
+         * Disable connectivity to the network.
+         */
+        Teardown(
+            [out] Boolean* result);
+
+        /**
+         * Re-enable proxy data connectivity after a {@link #teardown()}.
+         */
+        Reconnect(
+            [out] Boolean* result);
+
+        /**
+         * Fetch default gateway address for the network
+         */
+        GetDefaultGatewayAddr(
+            [out] Int32* result);
+
+        /**
+         * Return the system properties name associated with the tcp buffer sizes
+         * for this network.
+         */
+        GetTcpBufferSizesPropName(
+            [out] String* result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

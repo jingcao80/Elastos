@@ -1,0 +1,65 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Provides a low-level mechanism for an application to receive display events
+     * such as vertical sync.
+     *
+     * The display event receive is NOT thread safe.  Moreover, its methods must only
+     * be called on the Looper thread to which it is attached.
+     *
+     * @hide
+     */
+    interface IDisplayEventReceiver {
+        /**
+         * Disposes the receiver.
+         */
+        Dispose();
+
+        /**
+         * Called when a vertical sync pulse is received.
+         * The recipient should render a frame and then call {@link #scheduleVsync}
+         * to schedule the next vertical sync pulse.
+         *
+         * @param timestampNanos The timestamp of the pulse, in the {@link System#nanoTime()}
+         * timebase.
+         * @param builtInDisplayId The surface flinger built-in display id such as
+         * {@link SurfaceControl#BUILT_IN_DISPLAY_ID_MAIN}.
+         * @param frame The frame number.  Increases by one for each vertical sync interval.
+         */
+        OnVsync(
+            [in] Int64 timestampNanos,
+            [in] Int32 builtInDisplayId,
+            [in] Int32 frame);
+
+        /**
+         * Called when a display hotplug event is received.
+         *
+         * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
+         * timebase.
+         * @param builtInDisplayId The surface flinger built-in display id such as
+         * {@link SurfaceControl#BUILT_IN_DISPLAY_ID_HDMI}.
+         * @param connected True if the display is connected, false if it disconnected.
+         */
+        OnHotplug(
+            [in] Int64 timestampNanos,
+            [in] Int32 builtInDisplayId,
+            [in] Boolean connected);
+
+        /**
+         * Schedules a single vertical sync pulse to be delivered when the next
+         * display frame begins.
+         */
+        ScheduleVsync();
+
+        }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

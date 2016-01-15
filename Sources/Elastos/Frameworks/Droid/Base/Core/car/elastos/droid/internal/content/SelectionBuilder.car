@@ -1,0 +1,90 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Database.Sqlite.ISQLiteDatabase;
+    interface Elastos.Droid.Database.ICursor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Content {
+
+    [local, deprecated]
+    interface ISelectionBuilder {
+        /**
+         * Reset any internal state, allowing this builder to be recycled.
+         */
+        Reset();
+
+        /**
+         * Append the given selection clause to the internal state. Each clause is
+         * surrounded with parenthesis and combined using {@code AND}.
+         */
+        Append(
+            [in] String selection,
+            [in] ArrayOf<IInterface*>* selectionArgs);
+
+        /**
+         * Return selection string for current internal state.
+         *
+         * @see #getSelectionArgs()
+         */
+        GetSelection(
+            [out] String* str);
+
+        /**
+         * Return selection arguments for current internal state.
+         *
+         * @see #getSelection()
+         */
+        GetSelectionArgs(
+            [out, callee] ArrayOf<String>* selectionArgs);
+
+        /**
+         * Execute query using the current internal state as {@code WHERE} clause.
+         * Missing arguments as treated as {@code null}.
+         */
+        Query(
+            [in] ISQLiteDatabase* db,
+            [in] String table,
+            [in] ArrayOf<String>* columns,
+            [in] String orderBy,
+            [out] ICursor** cursor);
+
+        /**
+         * Execute query using the current internal state as {@code WHERE} clause.
+         */
+        Query(
+            [in] ISQLiteDatabase* db,
+            [in] String table,
+            [in] ArrayOf<String>* columns,
+            [in] String groupBy,
+            [in] String having,
+            [in] String orderBy,
+            [in] String limit,
+            [out] ICursor** cursor);
+
+        /**
+         * Execute update using the current internal state as {@code WHERE} clause.
+         */
+        Update(
+            [in] ISQLiteDatabase* db,
+            [in] String table,
+            [in] IContentValues* values,
+            [out] Int32* affectedRow);
+
+        /**
+         * Execute delete using the current internal state as {@code WHERE} clause.
+         */
+        Delete(
+            [in] ISQLiteDatabase* db,
+            [in] String table,
+            [out] Int32* affectedRow);
+    }
+
+    } // namespace Content
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

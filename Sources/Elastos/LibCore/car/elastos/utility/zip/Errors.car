@@ -1,0 +1,12 @@
+
+module
+{
+//    const FAMILY_SYSTEM = 0x25    // Zip error codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos ZIP error codes (Family: 0x25)
+    const E_ZIP_ERROR                                = 0xA5010000;
+}

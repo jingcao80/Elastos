@@ -1,0 +1,18 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Xml {
+    namespace Validation {
+
+    interface ISchemaFactoryLoader {
+
+        NewFactory(
+            [in] String schemaLanguage,
+            [out] ISchemaFactory** factory);
+    }
+
+    } // namespace Validation
+    } // namespace Xml
+    } // namespace Elastosx
+}

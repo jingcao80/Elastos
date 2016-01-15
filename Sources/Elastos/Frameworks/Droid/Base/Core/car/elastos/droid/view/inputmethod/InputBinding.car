@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastos.Droid.View.InputMethod.IInputConnection;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * Information given to an {@link InputMethod} about a client connecting
+     * to it.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IInputBinding {
+        /**
+         * Return the connection for interacting back with the application.
+         */
+        GetConnection(
+            [out] IInputConnection** connection);
+
+        /**
+         * Return the token for the connection back to the application.  You can
+         * not use this directly, it must be converted to a {@link InputConnection}
+         * for you.
+         */
+        GetConnectionToken(
+            [out] IBinder** token);
+
+        /**
+         * Return the user id of the client associated with this binding.
+         */
+        GetUid(
+            [out] Int32* uid);
+
+        /**
+         * Return the process id where this binding came from.
+         */
+        GetPid(
+            [out] Int32* pid);
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

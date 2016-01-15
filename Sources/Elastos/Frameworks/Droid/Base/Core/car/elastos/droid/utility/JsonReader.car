@@ -1,0 +1,234 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    /**
+     * A structure, name or value type in a JSON-encoded string.
+     */
+    enum JsonToken {
+
+        /**
+         * The opening of a JSON array. Written using {@link JsonWriter#beginObject}
+         * and read using {@link JsonReader#beginObject}.
+         */
+        JsonToken_BEGIN_ARRAY,
+
+        /**
+         * The closing of a JSON array. Written using {@link JsonWriter#endArray}
+         * and read using {@link JsonReader#endArray}.
+         */
+        JsonToken_END_ARRAY,
+
+        /**
+         * The opening of a JSON object. Written using {@link JsonWriter#beginObject}
+         * and read using {@link JsonReader#beginObject}.
+         */
+        JsonToken_BEGIN_OBJECT,
+
+        /**
+         * The closing of a JSON object. Written using {@link JsonWriter#endObject}
+         * and read using {@link JsonReader#endObject}.
+         */
+        JsonToken_END_OBJECT,
+
+        /**
+         * A JSON property name. Within objects, tokens alternate between names and
+         * their values. Written using {@link JsonWriter#name} and read using {@link
+         * JsonReader#nextName}
+         */
+        JsonToken_NAME,
+
+        /**
+         * A JSON string.
+         */
+        JsonToken_STRING,
+
+        /**
+         * A JSON number represented in this API by a Java {@code double}, {@code
+         * long}, or {@code int}.
+         */
+        JsonToken_NUMBER,
+
+        /**
+         * A JSON {@code true} or {@code false}.
+         */
+        JsonToken_BOOLEAN,
+
+        /**
+         * A JSON {@code null}.
+         */
+        JsonToken_NULL,
+
+        /**
+         * The end of the JSON stream. This sentinel value is returned by {@link
+         * JsonReader#peek()} to signal that the JSON-encoded value has no more
+         * tokens.
+         */
+        JsonToken_END_DOCUMENT
+    }
+
+    interface IJsonReader {
+        /**
+         * Configure this parser to be  be liberal in what it accepts. By default,
+         * this parser is strict and only accepts JSON as specified by <a
+         * href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a>. Setting the
+         * parser to lenient causes it to ignore the following syntax errors:
+         *
+         * <ul>
+         *   <li>End of line comments starting with {@code //} or {@code #} and
+         *       ending with a newline character.
+         *   <li>C-style comments starting with {@code /*} and ending with
+         *       {@code *}{@code /}. Such comments may not be nested.
+         *   <li>Names that are unquoted or {@code 'single quoted'}.
+         *   <li>Strings that are unquoted or {@code 'single quoted'}.
+         *   <li>Array elements separated by {@code ;} instead of {@code ,}.
+         *   <li>Unnecessary array separators. These are interpreted as if null
+         *       was the omitted value.
+         *   <li>Names and values separated by {@code =} or {@code =>} instead of
+         *       {@code :}.
+         *   <li>Name/value pairs separated by {@code ;} instead of {@code ,}.
+         * </ul>
+         */
+        SetLenient(
+            [in] Boolean lenient);
+
+        /**
+         * Returns true if this parser is liberal in what it accepts.
+         */
+        IsLenient(
+            [out] Boolean* value);
+
+        /**
+         * Consumes the next token from the JSON stream and asserts that it is the
+         * beginning of a new array.
+         */
+        BeginArray();
+
+        /**
+         * Consumes the next token from the JSON stream and asserts that it is the
+         * end of the current array.
+         */
+        EndArray();
+
+        /**
+         * Consumes the next token from the JSON stream and asserts that it is the
+         * beginning of a new object.
+         */
+        BeginObject();
+
+        /**
+         * Consumes the next token from the JSON stream and asserts that it is the
+         * end of the current array.
+         */
+        EndObject();
+
+        /**
+         * Returns true if the current array or object has another element.
+         */
+        HasNext(
+            [out] Boolean* value);
+
+        /**
+         * Returns the type of the next token without consuming it.
+         */
+        Peek(
+            [out] JsonToken* outjt);
+
+        /**
+         * Returns the next token, a {@link JsonToken#NAME property name}, and
+         * consumes it.
+         *
+         * @throws IOException if the next token in the stream is not a property
+         *     name.
+         */
+        NextName(
+            [out] String* str);
+
+        /**
+         * Returns the {@link JsonToken#STRING string} value of the next token,
+         * consuming it. If the next token is a number, this method will return its
+         * string form.
+         *
+         * @throws IllegalStateException if the next token is not a string or if
+         *     this reader is closed.
+         */
+        NextString(
+            [out] String* str);
+
+        /**
+         * Returns the {@link JsonToken#BOOLEAN boolean} value of the next token,
+         * consuming it.
+         *
+         * @throws IllegalStateException if the next token is not a boolean or if
+         *     this reader is closed.
+         */
+        NextBoolean(
+            [out] Boolean* value);
+
+        /**
+         * Consumes the next token from the JSON stream and asserts that it is a
+         * literal null.
+         *
+         * @throws IllegalStateException if the next token is not null or if this
+         *     reader is closed.
+         */
+        NextNull();
+
+        /**
+         * Returns the {@link JsonToken#NUMBER double} value of the next token,
+         * consuming it. If the next token is a string, this method will attempt to
+         * parse it as a double using {@link Double#parseDouble(String)}.
+         *
+         * @throws IllegalStateException if the next token is not a literal value.
+         */
+        NextDouble(
+            [out] Double* value);
+
+        /**
+         * Returns the {@link JsonToken#NUMBER long} value of the next token,
+         * consuming it. If the next token is a string, this method will attempt to
+         * parse it as a long. If the next token's numeric value cannot be exactly
+         * represented by a Java {@code long}, this method throws.
+         *
+         * @throws IllegalStateException if the next token is not a literal value.
+         * @throws NumberFormatException if the next literal value cannot be parsed
+         *     as a number, or exactly represented as a long.
+         */
+        NextLong(
+            [out] Int64* value);
+
+        /**
+         * Returns the {@link JsonToken#NUMBER int} value of the next token,
+         * consuming it. If the next token is a string, this method will attempt to
+         * parse it as an int. If the next token's numeric value cannot be exactly
+         * represented by a Java {@code int}, this method throws.
+         *
+         * @throws IllegalStateException if the next token is not a literal value.
+         * @throws NumberFormatException if the next literal value cannot be parsed
+         *     as a number, or exactly represented as an int.
+         */
+        NextInt(
+            [out] Int32* value);
+
+        /**
+         * Closes this JSON reader and the underlying {@link Reader}.
+         */
+        Close();
+
+        /**
+         * Skips the next value recursively. If it is an object or array, all nested
+         * elements are skipped. This method is intended for use when the JSON token
+         * stream contains unrecognized or unhandled values.
+         */
+        SkipValue();
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+}

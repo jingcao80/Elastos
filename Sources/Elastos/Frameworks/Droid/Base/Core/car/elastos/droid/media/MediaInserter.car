@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IMediaInserter {
+
+        Insert(
+            [in] IUri* tableUri,
+            [in] IContentValues* values);
+
+        InsertwithPriority(
+            [in] IUri* tableUri,
+            [in] IContentValues* values);
+
+        FlushAll();
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

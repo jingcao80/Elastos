@@ -1,0 +1,749 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnKeyListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnMultiChoiceClickListener;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Internal.App.IAlertController;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Widget.IButton;
+    interface Elastos.Droid.Widget.IListView;
+    interface Elastos.Droid.Widget.IListAdapter;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * A subclass of Dialog that can display one, two or three buttons. If you only
+     * want to display a String in this dialog box, use the setMessage() method. If you
+     * want to display a more complex view, look up the FrameLayout called "custom" and
+     * add your view to it:
+     * <pre>
+     * FrameLayout fl = (FrameLayout) findViewById(android.R.id.custom);
+     * fl.addView(myView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+     * </pre>
+     * <p>
+     * The AlertDialog class takes care of automatically setting WindowManager.
+     * LayoutParams.FLAG_ALT_FOCUSABLE_IM for you based on whether any views in the
+     * dialog return true from View.onCheckIsTextEditor(). Generally you want this set
+     * for a Dialog without text editors, so that it will be placed on top of the
+     * current input method UI. You can modify this behavior by forcing the flag to
+     * your desired mode after calling onCreate(Bundle).
+     *
+     * @sa View.onCheckIsTextEditor()
+     * @sa View.onCheckIsTextEditor()
+     * @sa onCreate(Bundle)
+     * <p>
+     * <h3>Developer Guides<h3>
+     * <p>
+     * For more information about creating dialogs, read the Dialogs developer guide.
+     *
+     * @sa Dialogs
+     *
+     * @implements Elastos.Droid.App.IDialog
+     */
+    /**
+     * @Involve
+     * interface IDialog
+     * interface IDialogInterface
+     */
+    [local]
+    interface IAlertDialog {
+        /**
+         * Special theme constant for {@link #AlertDialog(Context, int)}: use
+         * the traditional (pre-Holo) alert dialog theme.
+         */
+        const Int32 THEME_TRADITIONAL = 1;
+
+        /**
+         * Special theme constant for {@link #AlertDialog(Context, int)}: use
+         * the holographic alert theme with a dark background.
+         */
+        const Int32 THEME_HOLO_DARK = 2;
+
+        /**
+         * Special theme constant for {@link #AlertDialog(Context, int)}: use
+         * the holographic alert theme with a light background.
+         */
+        const Int32 THEME_HOLO_LIGHT = 3;
+
+        /**
+         * Special theme constant for {@link #AlertDialog(Context, int)}: use
+         * the device's default alert theme with a dark background.
+         */
+        const Int32 THEME_DEVICE_DEFAULT_DARK = 4;
+
+        /**
+         * Special theme constant for {@link #AlertDialog(Context, int)}: use
+         * the device's default alert theme with a light background.
+         */
+        const Int32 THEME_DEVICE_DEFAULT_LIGHT = 5;
+
+        /**
+         * No layout hint.
+         * @hide
+         */
+        const Int32 LAYOUT_HINT_NONE = 0;
+
+        /**
+         * Hint layout to the side.
+         * @hide
+         */
+        const Int32 LAYOUT_HINT_SIDE = 1;
+
+        /**
+         * Gets one of the buttons used in the dialog.
+         * <p>
+         * If a button does not exist in the dialog, null will be returned.
+         *
+         * @param whichButton The identifier of the button that should be returned.
+         *            For example, this can be
+         *            DialogInterface#BUTTON_POSITIVE.
+         *
+         * @sa DialogInterface#BUTTON_POSITIVE
+         * @return The button from the dialog, or null if a button does not exist.
+         */
+        GetButton(
+            [in] Int32 whichButton,
+            [out] IButton** button);
+
+        /**
+         * Gets the list view used in the dialog.
+         *
+         * @return The ListView from the dialog.
+         *
+         * @sa ListView
+         */
+        GetListView(
+            [out] IListView** listView);
+
+        /**
+         * @see Builder#setCustomTitle(View)
+         */
+        SetCustomTitle(
+            [in] IView* customTitleView);
+
+        SetMessage(
+            [in] ICharSequence* message);
+
+        /**
+         * Set the view to display in that dialog.
+         */
+        SetView(
+            [in] IView* view);
+
+        /**
+         * Set the view to display in that dialog, specifying the spacing to appear around that
+         * view.
+         *
+         * @param view The view to show in the content area of the dialog
+         * @param viewSpacingLeft Extra space to appear to the left of {view}
+         * @param viewSpacingTop Extra space to appear above {view}
+         * @param viewSpacingRight Extra space to appear to the right of {view}
+         * @param viewSpacingBottom Extra space to appear below {view}
+         */
+        SetView(
+            [in] IView* view,
+            [in] Int32 viewSpacingLeft,
+            [in] Int32 viewSpacingTop,
+            [in] Int32 viewSpacingRight,
+            [in] Int32 viewSpacingBottom);
+
+        /**
+         * Set a message to be sent when a button is pressed.
+         *
+         * @param whichButton Which button to set the message for, can be one of
+         *            DialogInterface#BUTTON_POSITIVE,
+         *            DialogInterface#BUTTON_NEGATIVE, or
+         *            DialogInterface#BUTTON_NEUTRAL
+         *
+         * @sa DialogInterface#BUTTON_POSITIVE
+         * @sa DialogInterface#BUTTON_NEGATIVE
+         * @sa DialogInterface#BUTTON_NEUTRAL
+         *
+         * @param text The text to display in positive button.
+         * @param msg The Message to be sent when clicked.
+         *
+         * @sa Message
+         */
+        SetButton(
+            [in] Int32 whichButton,
+            [in] ICharSequence* text,
+            [in] IMessage* msg);
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         *
+         * @param whichButton Which button to set the listener on, can be one of
+         *            DialogInterface#BUTTON_POSITIVE,
+         *            DialogInterface#BUTTON_NEGATIVE, or
+         *            DialogInterface#BUTTON_NEUTRAL
+         *
+         * @sa DialogInterface#BUTTON_POSITIVE
+         * @sa DialogInterface#BUTTON_NEGATIVE
+         * @sa DialogInterface#BUTTON_NEUTRAL
+         *
+         * @param text The text to display in positive button.
+         * @param listener The DialogInterface.OnClickListener to use.
+         *
+         * @sa DialogInterface.OnClickListener
+         */
+        SetButton(
+            [in] Int32 whichButton,
+            [in] ICharSequence* text,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set resId to 0 if you don't want an icon.
+         * @param resId the resourceId of the drawable to use as the icon or 0
+         * if you don't want an icon.
+         */
+        SetIcon(
+            [in] Int32 resId);
+
+        SetIcon(
+            [in] IDrawable* icon);
+
+        /**
+         * Set an icon as supplied by a theme attribute. e.g. android.R.attr.alertDialogIcon
+         *
+         * @param attrId ID of a theme attribute that points to a drawable resource.
+         */
+        SetIconAttribute(
+            [in] Int32 attrId);
+
+        SetInverseBackgroundForced(
+            [in] Boolean forceInverseBackground);
+
+        GetAlertController(
+            [out] IAlertController** alert);
+
+        SetAlertController(
+            [in] IAlertController* alert);
+    }
+
+    [local, deprecated]
+    interface IAlertDialogBuilder {
+        /**
+         * Returns a Context with the appropriate theme for dialogs created by this Builder.
+         *
+         * @sa Context
+         * Applications should use this Context for obtaining LayoutInflaters for inflating views
+         * that will be used in the resulting dialogs, as it will cause views to be inflated with
+         * the correct theme.
+         *
+         * @return A Context for built Dialogs.
+         */
+        GetContext(
+            [out] IContext** contex);
+
+        /**
+         * Set the title using the given resource id.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
+        SetTitle(
+            [in] Int32 titleId);
+
+        /**
+         * Set the title displayed in the Dialog.
+         *
+         8 @sa Dialog
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Set the title using the custom view {customTitleView}. The
+         * methods #setTitle(int) and #setIcon(int) should be
+         * sufficient for most titles, but this is provided if the title needs
+         * more customization. Using this will replace the title and icon set
+         * via the other methods.
+         *
+         * @sa #setTitle(int)
+         * @sa #setIcon(int)
+         *
+         * @param customTitleView The custom view to use as the title.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
+        SetCustomTitle(
+            [in] IView* customTitleView);
+
+        /**
+         * Set the message to display using the given resource id.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetMessage(
+            [in] Int32 messageId);
+
+        /**
+         * Set the message to display.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetMessage(
+            [in] ICharSequence* message);
+
+        /**
+         * Set the resource id of the Drawable to be used in the title.
+         *
+         * @sa Drawable
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetIcon(
+            [in] Int32 iconId);
+
+        /**
+         * Set the Drawable to be used in the title.
+         *
+         * @sa Drawable
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetIcon(
+            [in] IDrawable* icon);
+
+        /**
+         * Set an icon as supplied by a theme attribute. e.g. android.R.attr.alertDialogIcon
+         *
+         * @param attrId ID of a theme attribute that points to a drawable resource.
+         */
+        SetIconAttribute(
+            [in] Int32 attrId);
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         * @param textId The resource id of the text to display in the positive button
+         * @param listener The DialogInterface.OnClickListener to use.
+         *
+         * @sa DialogInterface.OnClickListener
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
+        SetPositiveButton(
+            [in] Int32 textId,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         * @param text The text to display in the positive button
+         * @param listener The DialogInterface.OnClickListener to use.
+         *
+         * @sa DialogInterface.OnClickListener
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetPositiveButton(
+            [in] ICharSequence* text,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a listener to be invoked when the negative button of the dialog is pressed.
+         * @param textId The resource id of the text to display in the negative button
+         * @param listener The DialogInterface.OnClickListener to use.
+         *
+         * @sa DialogInterface.OnClickListener
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetNegativeButton(
+            [in] Int32 textId,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a listener to be invoked when the negative button of the dialog is pressed.
+         * @param text The text to display in the negative button
+         * @param listener The DialogInterface.OnClickListener to use.
+         *
+         * @sa DialogInterface.OnClickListener
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetNegativeButton(
+            [in] ICharSequence* text,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a listener to be invoked when the neutral button of the dialog is pressed.
+         * @param textId The resource id of the text to display in the neutral button
+         * @param listener The DialogInterface.OnClickListener to use.
+         *
+         * @sa DialogInterface.OnClickListener
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetNeutralButton(
+            [in] Int32 textId,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a listener to be invoked when the neutral button of the dialog is pressed.
+         * @param text The text to display in the neutral button
+         * @param listener The DialogInterface.OnClickListener to use.
+         *
+         * @sa DialogInterface.OnClickListener
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetNeutralButton(
+            [in] ICharSequence* text,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Sets whether the dialog is cancelable or not.  Default is TRUE.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetCancelable(
+            [in] Boolean cancelable);
+
+        /**
+         * Sets the callback that will be called if the dialog is canceled.
+         * @see #setCancelable(Boolean)
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetOnCancelListener(
+            [in] IDialogInterfaceOnCancelListener* onCancelListener);
+
+        /**
+         * Sets the callback that will be called when the dialog is dismissed for any reason.
+         *
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
+        SetOnDismissListener(
+            [in] IDialogInterfaceOnDismissListener* onDismissListener);
+
+        /**
+         * Sets the callback that will be called if a key is dispatched to the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetOnKeyListener(
+            [in] IDialogInterfaceOnKeyListener* onKeyListener);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content, you will be notified of the
+         * selected item via the supplied listener. This should be an array type i.e. R.array.foo
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetItems(
+            [in] Int32 itemsId,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content, you will be notified of the
+         * selected item via the supplied listener.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetItems(
+            [in] ArrayOf<ICharSequence*>* items,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a list of items, which are supplied by the given ListAdapter, to be
+         * displayed in the dialog as the content, you will be notified of the
+         * selected item via the supplied listener.
+         *
+         * @sa ListAdapter
+         *
+         * @param adapter The ListAdapter to supply the list of items
+         * @param listener The listener that will be called when an item is clicked.
+         *
+         8 @sa ListAdapter
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetAdapter(
+            [in] IListAdapter* adapter,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a list of items, which are supplied by the given Cursor, to be
+         * displayed in the dialog as the content, you will be notified of the
+         * selected item via the supplied listener.
+         *
+         * @sa Cursor
+         *
+         * @param cursor The Cursor to supply the list of items
+         * @param listener The listener that will be called when an item is clicked.
+         * @param labelColumn The column name on the cursor containing the string to display
+         *          in the label.
+         *
+         * @sa Cursor
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetCursor(
+            [in] ICursor* cursor,
+            [in] IDialogInterfaceOnClickListener* listener,
+            [in] String labelColumn);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content,
+         * you will be notified of the selected item via the supplied listener.
+         * This should be an array type, e.g. R.array.foo. The list will have
+         * a check mark displayed to the right of the text for each checked
+         * item. Clicking on an item in the list will not dismiss the dialog.
+         * Clicking on a button will dismiss the dialog.
+         *
+         * @param itemsId the resource id of an array i.e. R.array.foo
+         * @param checkedItems specifies which items are checked. It should be null in which case no
+         *        items are checked. If non null it must be exactly the same length as the array of
+         *        items.
+         * @param listener notified when an item on the list is clicked. The dialog will not be
+         *        dismissed when an item is clicked. It will only be dismissed if clicked on a
+         *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetMultiChoiceItems(
+            [in] Int32 itemsId,
+            [in] ArrayOf<Boolean>* checkedItems,
+            [in] IDialogInterfaceOnMultiChoiceClickListener* listener);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content,
+         * you will be notified of the selected item via the supplied listener.
+         * The list will have a check mark displayed to the right of the text
+         * for each checked item. Clicking on an item in the list will not
+         * dismiss the dialog. Clicking on a button will dismiss the dialog.
+         *
+         * @param items the text of the items to be displayed in the list.
+         * @param checkedItems specifies which items are checked. It should be null in which case no
+         *        items are checked. If non null it must be exactly the same length as the array of
+         *        items.
+         * @param listener notified when an item on the list is clicked. The dialog will not be
+         *        dismissed when an item is clicked. It will only be dismissed if clicked on a
+         *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetMultiChoiceItems(
+            [in] ArrayOf<ICharSequence*>* items,
+            [in] ArrayOf<Boolean>* checkedItems,
+            [in] IDialogInterfaceOnMultiChoiceClickListener* listener);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content,
+         * you will be notified of the selected item via the supplied listener.
+         * The list will have a check mark displayed to the right of the text
+         * for each checked item. Clicking on an item in the list will not
+         * dismiss the dialog. Clicking on a button will dismiss the dialog.
+         *
+         * @param cursor the cursor used to provide the items.
+         * @param isCheckedColumn specifies the column name on the cursor to use to determine
+         *        whether a checkbox is checked or not. It must return an Int32eger value where 1
+         *        means checked and 0 means unchecked.
+         * @param labelColumn The column name on the cursor containing the string to display in the
+         *        label.
+         * @param listener notified when an item on the list is clicked. The dialog will not be
+         *        dismissed when an item is clicked. It will only be dismissed if clicked on a
+         *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetMultiChoiceItems(
+            [in] ICursor* cursor,
+            [in] String isCheckedColumn,
+            [in] String labelColumn,
+            [in] IDialogInterfaceOnMultiChoiceClickListener* listener);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content, you will be notified of
+         * the selected item via the supplied listener. This should be an array type i.e.
+         * R.array.foo The list will have a check mark displayed to the right of the text for the
+         * checked item. Clicking on an item in the list will not dismiss the dialog. Clicking on a
+         * button will dismiss the dialog.
+         *
+         * @param itemsId the resource id of an array i.e. R.array.foo
+         * @param checkedItem specifies which item is checked. If -1 no items are checked.
+         * @param listener notified when an item on the list is clicked. The dialog will not be
+         *        dismissed when an item is clicked. It will only be dismissed if clicked on a
+         *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetSingleChoiceItems(
+            [in] Int32 itemsId,
+            [in] Int32 checkedItem,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content, you will be notified of
+         * the selected item via the supplied listener. The list will have a check mark displayed to
+         * the right of the text for the checked item. Clicking on an item in the list will not
+         * dismiss the dialog. Clicking on a button will dismiss the dialog.
+         *
+         * @param cursor the cursor to retrieve the items from.
+         * @param checkedItem specifies which item is checked. If -1 no items are checked.
+         * @param labelColumn The column name on the cursor containing the string to display in the
+         *        label.
+         * @param listener notified when an item on the list is clicked. The dialog will not be
+         *        dismissed when an item is clicked. It will only be dismissed if clicked on a
+         *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetSingleChoiceItems(
+            [in] ICursor* cursor,
+            [in] Int32 checkedItem,
+            [in] String labelColumn,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content, you will be notified of
+         * the selected item via the supplied listener. The list will have a check mark displayed to
+         * the right of the text for the checked item. Clicking on an item in the list will not
+         * dismiss the dialog. Clicking on a button will dismiss the dialog.
+         *
+         * @param items the items to be displayed.
+         * @param checkedItem specifies which item is checked. If -1 no items are checked.
+         * @param listener notified when an item on the list is clicked. The dialog will not be
+         *        dismissed when an item is clicked. It will only be dismissed if clicked on a
+         *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetSingleChoiceItems(
+            [in] ArrayOf<ICharSequence*>* items,
+            [in] Int32 checkedItem,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Set a list of items to be displayed in the dialog as the content, you will be notified of
+         * the selected item via the supplied listener. The list will have a check mark displayed to
+         * the right of the text for the checked item. Clicking on an item in the list will not
+         * dismiss the dialog. Clicking on a button will dismiss the dialog.
+         *
+         * @param adapter The ListAdapter to supply the list of items
+         *
+         * @sa ListAdapter
+         * @param checkedItem specifies which item is checked. If -1 no items are checked.
+         * @param listener notified when an item on the list is clicked. The dialog will not be
+         *        dismissed when an item is clicked. It will only be dismissed if clicked on a
+         *        button, if no buttons are supplied it's up to the user to dismiss the dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetSingleChoiceItems(
+            [in] IListAdapter* adapter,
+            [in] Int32 checkedItem,
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        /**
+         * Sets a listener to be invoked when an item in the list is selected.
+         *
+         * @param listener The listener to be invoked.
+         * @see AdapterView#setOnItemSelectedListener(android.widget.AdapterView.OnItemSelectedListener)
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetOnItemSelectedListener(
+            [in] IAdapterViewOnItemSelectedListener* listener);
+
+        /**
+         * Set a custom view to be the contents of the Dialog. If the supplied view is an instance
+         * of a ListView the light background will be used.
+         *
+         * @sa ListView
+         *
+         * @param view The view to use as the contents of the Dialog.
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetView(
+            [in] IView* view);
+
+        /**
+         * Set a custom view to be the contents of the Dialog, specifying the
+         * spacing to appear around that view. If the supplied view is an
+         * instance of a ListView the light background will be used.
+         *
+         * @sa ListView
+         *
+         * @param view The view to use as the contents of the Dialog.
+         * @param viewSpacingLeft Spacing between the left edge of the view and
+         *        the dialog frame
+         * @param viewSpacingTop Spacing between the top edge of the view and
+         *        the dialog frame
+         * @param viewSpacingRight Spacing between the right edge of the view
+         *        and the dialog frame
+         * @param viewSpacingBottom Spacing between the bottom edge of the view
+         *        and the dialog frame
+         * @return This Builder object to allow for chaining of calls to Set
+         *         methods
+         *
+         *
+         * This is currently hidden because it seems like people should just
+         * be able to put padding around the view.
+         * @hide
+         */
+        SetView(
+            [in] IView* view,
+            [in] Int32 viewSpacingLeft,
+            [in] Int32 viewSpacingTop,
+            [in] Int32 viewSpacingRight,
+            [in] Int32 viewSpacingBottom);
+
+        /**
+         * Sets the Dialog to use the inverse background, regardless of what the
+         * contents is.
+         *
+         * @param useInverseBackground Whether to use the inverse background
+         *
+         * @return This Builder object to allow for chaining of calls to Set methods
+         */
+        SetInverseBackgroundForced(
+            [in] Boolean useInverseBackground);
+
+        /**
+         * @hide
+         */
+        SetRecycleOnMeasureEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Creates a AlertDialog with the arguments supplied to this builder. It does not
+         * {@sa Dialog#show()} the dialog. This allows the user to do any extra processing
+         * before displaying the dialog. Use #show() if you don't have any other processing
+         * to do and want this to be created and displayed.
+         *
+         * @sa AlertDialog
+         * @sa Dialog#show()
+         * @sa #show()
+         */
+        Create(
+            [out] IAlertDialog** dialog);
+
+        /**
+         * Creates a AlertDialog with the arguments supplied to this builder and
+         * Dialog#show()'s the dialog.
+         *
+         * @sa AlertDialog
+         * @sa Dialog#show()
+         */
+        Show(
+            [out] IAlertDialog** dialog);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

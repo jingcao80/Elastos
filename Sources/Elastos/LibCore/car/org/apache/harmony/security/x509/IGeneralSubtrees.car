@@ -1,0 +1,55 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the GeneralSubtrees structure which is a part of X.509 certificate:
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *   GeneralSubtrees ::= SEQUENCE SIZE (1..MAX) OF GeneralSubtree
+     * </pre>
+     *
+     * @see org.apache.harmony.security.x509.NameConstraints
+     * @see org.apache.harmony.security.x509.GeneralSubtree
+     */
+    interface IGeneralSubtrees {
+        /**
+         * Returns the list of values of subtrees.
+         */
+        GetSubtrees(
+            [out] IList** subtrees);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 AlgorithmIdentifier value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface IGeneralSubtreesHelper {
+        /**
+         * ASN.1 DER X.509 GeneralSubtrees encoder/decoder class.
+         */
+        GetASN1(
+            [out] IASN1Type** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

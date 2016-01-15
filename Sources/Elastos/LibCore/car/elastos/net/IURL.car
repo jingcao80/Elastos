@@ -1,0 +1,254 @@
+
+module
+{
+    interface Elastos.IO.IInputStream;
+
+    interface Elastos.Net.IURLConnection;
+    interface Elastos.Net.IURI;
+    interface Elastos.Net.IProxy;
+    interface Elastos.Net.IURLStreamHandlerFactory;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * A Uniform Resource Locator that identifies the location of an Internet
+     * resource as specified by RFC 1738.
+     */
+    /**
+     * @Involve
+     * interface ISerializable
+     */
+    interface IURL {
+        /**
+         * Returns whether this URL refers to the same resource as the given
+         * argument {otherURL}. All URL components except the reference field
+         * are compared.
+         *
+         * @param otherURL
+         *            the URL to compare against.
+         * @return {true} if both instances refer to the same resource,
+         *         {false} otherwise.
+         */
+        SameFile(
+            [in] IURL* otherURL,
+            [out] Boolean* isSame);
+
+        /**
+         * Gets the content of the resource which is referred by this URL. By
+         * default one of the following object types will be returned:
+         * <p>
+         * <li>Image for pictures</li>
+         * <li>AudioClip for audio sequences</li>
+         * <li>InputStream for all other data</li>
+         *
+         * @sa InputStream
+         *
+         * @return the content of the referred resource.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs obtaining the content.
+         */
+        GetContent(
+            [out] IInterface** content);
+
+        /**
+         * Gets the content of the resource which is referred by this URL. The
+         * argument {types} is an array of allowed or expected object types.
+         * {null} will be returned if the obtained object type does not match
+         * with one from this list. Otherwise the first type that matches will be
+         * used.
+         *
+         * @param types
+         *            the list of allowed or expected object types.
+         * @return the object representing the resource referred by this URL,
+         *         {null} if the content does not match to a specified content
+         *         type.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs obtaining the content.
+         */
+        // Param not generic in spec
+//        public final Object getContent(Class[] types)
+
+        /**
+         * Opens an InputStream to read the resource referred by this URL.
+         *
+         * @return the stream which allows to read the resource.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while opening the InputStream.
+         */
+        OpenStream(
+            [out] IInputStream** is);
+
+        /**
+         * Opens a connection to the remote resource specified by this URL. This
+         * connection allows bidirectional data transfer.
+         *
+         * @return the connection to this URL.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while opening the connection.
+         */
+        OpenConnection(
+            [out] IURLConnection** connection);
+
+        /**
+         * Opens a connection to the remote resource specified by this URL. The
+         * connection will be established through the given proxy and allows
+         * bidirectional data transfer.
+         *
+         * @param proxy
+         *            the proxy through which the connection will be established.
+         * @return the appropriate URLconnection instance representing the
+         *         connection to this URL.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while opening the connection.
+         * SecurityException |if a security manager is installed and it denies to connect to the proxy.
+         * IllegalArgumentException | if the argument proxy is {null} or is an invalid type.
+         * UnsupportedOperationException | if the protocol handler does not support opening connections through proxies.
+         */
+        OpenConnection(
+            [in] IProxy* proxy,
+            [out] IURLConnection** connection);
+
+        /**
+         * Converts this URL instance into an equivalent URI object.
+         *
+         * @return the URI instance that represents this URL.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * URISyntaxException | if this URL cannot be converted into a URI.
+         */
+        ToURI(
+            [out] IURI** uri);
+
+        /**
+         * Encodes this URL to the equivalent URI after escaping characters that are
+         * not permitted by URI.
+         *
+         * @hide
+         */
+        ToURILenient(
+            [out] IURI** uri);
+
+        /**
+         * Returns a string containing a concise, human-readable representation of
+         * this URL. The returned string is the same as the result of the method
+         * {@code toExternalForm()}.
+         */
+        ToString(
+            [out] String* str);
+
+        /**
+         * Returns a string containing a concise, human-readable representation of
+         * this URL.
+         *
+         * @return the string representation of this URL.
+         */
+        ToExternalForm(
+            [out] String* url);
+
+        /**
+         *@hide
+         */
+        GetEffectivePort(
+                [out] Int32* port);
+
+        /**
+         * Returns the protocol of this URL like "http" or "file". This is also
+         * known as the scheme. The returned string is lower case.
+         */
+        GetProtocol(
+                [out] String* protocol);
+
+        /**
+         * Returns the authority part of this URL, or null if this URL has no
+         * authority.
+         */
+        GetAuthority(
+                [out] String* authority);
+
+        /**
+         * Returns the user info of this URL, or null if this URL has no user info.
+         */
+        GetUserInfo(
+                [out] String* info);
+
+        /**
+         * Gets the value of the host part of this URL.
+         *
+         * @return the host name or IP address of this URL.
+         */
+        GetHost(
+            [out] String* hostName);
+
+        /**
+         * Gets the port number of this URL or {-1} if the port is not set.
+         *
+         * @return the port number of this URL.
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /**
+         * Gets the default port number of the protocol used by this URL. If no
+         * default port is defined by the protocol or the {URLStreamHandler},
+         * {-1} will be returned.
+         *
+         * @return the default port number according to the protocol of this URL.
+         * @see URLStreamHandler#getDefaultPort
+         */
+        GetDefaultPort(
+            [out] Int32* port);
+
+        /**
+         * Returns the file of this URL.
+         */
+        GetFile(
+            [out]String* file);
+
+        /**
+         * Returns the path part of this URL.
+         */
+        GetPath(
+            [out] String* path);
+
+        /**
+         * Gets the value of the query part of this URL.
+         *
+         * @return the query part of this URL.
+         */
+        GetQuery(
+            [out] String* query);
+
+        /**
+         * Returns the value of the reference part of this URL, or null if this URL
+         * has no reference part. This is also known as the fragment.
+         */
+        GetRef(
+            [out] String* ref);
+    }
+
+    interface IURLHelper {
+        /**
+         * Sets the stream handler factory for this VM.
+         *
+         * @throws Error if a URLStreamHandlerFactory has already been installed
+         *     for the current VM.
+         */
+        SetURLStreamHandlerFactory(
+            [in] IURLStreamHandlerFactory* factory);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

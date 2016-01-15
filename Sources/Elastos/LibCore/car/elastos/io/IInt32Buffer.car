@@ -1,0 +1,323 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * A buffer of ints.
+     * <p>
+     * A int buffer can be created in either of the following ways:
+     * <ul>
+     * <li>{@link #allocate(int) Allocate} a new int array and create a buffer
+     * based on it;</li>
+     * <li>{@link #wrap(int[]) Wrap} an existing int array to create a new buffer;</li>
+     * <li>Use {@link java.nio.ByteBuffer#asIntBuffer() ByteBuffer.asIntBuffer} to
+     * create a int buffer based on a byte buffer.</li>
+     * </ul>
+     */
+    /**
+     * @Involve
+     * interface IBuffer;
+     * interface IComparable;
+     */
+    [deprecated]
+    interface IInt32Buffer {
+        GetArray(
+            [out, callee] ArrayOf<Int32>* array);
+
+        /**
+         * Returns a read-only buffer that shares its content with this buffer.
+         * <p>
+         * The returned buffer is guaranteed to be a new instance, even this buffer
+         * is read-only itself. The new buffer's position, limit, capacity and mark
+         * are the same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means this
+         * buffer's change of content will be visible to the new buffer. The two
+         * buffer's position, limit and mark are independent.
+         *
+         * @return a read-only version of this buffer.
+         */
+        AsReadOnlyBuffer(
+            [out] IInt32Buffer** buffer);
+
+        /**
+         * Compacts this int buffer.
+         * <p>
+         * The remaining ints will be moved to the head of the buffer, starting from
+         * position zero. Then the position is set to {remaining()}; the
+         * limit is set to capacity; the mark is cleared.
+         *
+         * @return this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Compact();
+
+        /**
+         * Returns a duplicated buffer that shares its content with this buffer.
+         * <p>
+         * The duplicated buffer's position, limit, capacity and mark are the same
+         * as this buffer. The duplicated buffer's read-only property and byte order
+         * are the same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a duplicated buffer that shares its content with this buffer.
+         */
+        Duplicate(
+            [out] IInt32Buffer** buffer);
+
+        /**
+         * Returns the int at the current position and increases the position by 1.
+         *
+         * @return the int at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is equal or greater than limit.
+         */
+        Get(
+            [out] Int32* value);
+
+        /**
+         * Returns an int at the specified index; the position is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and less than limit.
+         * @return an int at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         */
+        Get(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        /**
+         * Reads ints from the current position into the specified int array and
+         * increases the position by the number of ints read.
+         * <p>
+         * Calling this method has the same effect as
+         * {get(dst, 0, dst.length)}.
+         *
+         * @param dst
+         *            the destination int array.
+         * @return this buffer.
+         * @exception BufferUnderflowException
+         *                if {dst.length} is greater than {remaining()}.
+         */
+        Get(
+            [in] ArrayOf<Int32>* dst);
+
+        /**
+         * Reads ints from the current position into the specified int array,
+         * starting from the specified offset, and increases the position by the
+         * number of ints read.
+         *
+         * @param dst
+         *            the target int array.
+         * @param dstOffset
+         *            the offset of the int array, must not be negative and not
+         *            greater than {@code dst.length}.
+         * @param intCount
+         *            the number of ints to read, must be no less than zero and not
+         *            greater than {@code dst.length - dstOffset}.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code dstOffset} or {@code intCount} is invalid.
+         * @exception BufferUnderflowException
+         *                if {@code intCount} is greater than {@code remaining()}.
+         */
+        Get(
+            [in] ArrayOf<Int32>* dst,
+            [in] Int32 dstOffset,
+            [in] Int32 int32Count);
+
+        /**
+         * Returns the byte order used by this buffer when converting ints from/to
+         * bytes.
+         * <p>
+         * If this buffer is not based on a byte buffer, then always return the
+         * platform's native byte order.
+         *
+         * @return the byte order used by this buffer when converting ints from/to
+         *         bytes.
+         */
+        GetOrder(
+            [out] ByteOrder* byteOrder);
+
+        /**
+         * Writes the given int to the current position and increases the position
+         * by 1.
+         *
+         * @param i
+         *            the int to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is equal or greater than limit.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Int32 i);
+
+        /**
+         * Write a int to the specified index of this buffer; the position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and less than the limit.
+         * @param i
+         *            the int to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Int32 index,
+            [in] Int32 i);
+
+        /**
+         * Writes ints from the given int array to the current position and
+         * increases the position by the number of ints written.
+         * <p>
+         * Calling this method has the same effect as
+         * {put(src, 0, src.length)}.
+         *
+         * @param src
+         *            the source int array.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {remaining()} is less than {src.length}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Int32>* src);
+
+        /**
+         * Writes ints from the given int array, starting from the specified offset,
+         * to the current position and increases the position by the number of ints
+         * written.
+         *
+         * @param src
+         *            the source int array.
+         * @param srcOffset
+         *            the offset of int array, must not be negative and not greater
+         *            than {@code src.length}.
+         * @param intCount
+         *            the number of ints to write, must be no less than zero and not
+         *            greater than {@code src.length - srcOffset}.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {@code remaining()} is less than {@code intCount}.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code srcOffset} or {@code intCount} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Int32>* src,
+            [in] Int32 srcOffset,
+            [in] Int32 int32Count);
+
+        /**
+         * Writes all the remaining ints of the {src} int buffer to this
+         * buffer's current position, and increases both buffers' position by the
+         * number of ints copied.
+         *
+         * @param src
+         *            the source int buffer.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {src.remaining()} is greater than this buffer's
+         *                {remaining()}.
+         * @exception IllegalArgumentException
+         *                if {src} is this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] IInt32Buffer* src);
+
+        /**
+         * Returns a sliced buffer that shares its content with this buffer.
+         * <p>
+         * The sliced buffer's capacity will be this buffer's {remaining()},
+         * and its zero position will correspond to this buffer's current position.
+         * The new buffer's position will be 0, limit will be its capacity, and its
+         * mark is cleared. The new buffer's read-only property and byte order are
+         * same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a sliced buffer that shares its content with this buffer.
+         */
+        Slice(
+            [out] IInt32Buffer** buffer);
+    }
+
+    [deprecated]
+    interface IInt32BufferHelper {
+        /**
+         * Creates a int buffer based on a newly allocated int array.
+         *
+         * @param capacity
+         *            the capacity of the new buffer.
+         * @return the created int buffer.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {capacity} is less than zero.
+         */
+        Allocate(
+            [in] Int32 capacity,
+            [out] IInt32Buffer** int32Buffer);
+
+        /**
+         * Creates a new int buffer by wrapping the given int array.
+         * <p>
+         * Calling this method has the same effect as
+         * {wrap(array, 0, array.length)}.
+         *
+         * @param array
+         *            the int array which the new buffer will be based on.
+         * @return the created int buffer.
+         */
+        Wrap(
+            [in] ArrayOf<Int32>* array,
+            [out] IInt32Buffer** int32Buffer);
+
+        /**
+         * Creates a new int buffer by wrapping the given int array.
+         * <p>
+         * The new buffer's position will be {start}, limit will be
+         * {start + intCount}, capacity will be the length of the array.
+         *
+         * @param array
+         *            the int array which the new buffer will be based on.
+         * @param start
+         *            the start index, must not be negative and not greater than
+         *            {array.length}.
+         * @param intCount
+         *            the length, must not be negative and not greater than
+         *            {array.length - start}.
+         * @return the created int buffer.
+         * @exception IndexOutOfBoundsException
+         *                if either {start} or {intCount} is invalid.
+         */
+        Wrap(
+            [in] ArrayOf<Int32>* array,
+            [in] Int32 start,
+            [in] Int32 int32Count,
+            [out] IInt32Buffer** int32Buffer);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

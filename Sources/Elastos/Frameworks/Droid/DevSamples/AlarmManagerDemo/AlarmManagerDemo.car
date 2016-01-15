@@ -1,0 +1,37 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace AlarmManagerDemo {
+
+    class CActivityOne {
+        interface IActivity;
+    }
+
+    class CActionBroadCast {
+        constructor();
+        interface IBroadcastReceiver;
+    }
+
+    class CActionServiceCast {
+        constructor();
+        interface IService;
+    }
+
+    class CActionActivityCast {
+        interface IActivity;
+    }
+
+    } // namespace AlarmManagerDemo
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}

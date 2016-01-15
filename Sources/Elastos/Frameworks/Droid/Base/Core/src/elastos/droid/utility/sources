@@ -1,0 +1,65 @@
+TARGET_NAME= utility
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += util.cpp
+SOURCES += CArrayMap.cpp
+SOURCES += CArraySet.cpp
+SOURCES += CAtomicFile.cpp
+SOURCES += CBase64.cpp
+SOURCES += CInt64Array.cpp
+SOURCES += Base64InputStream.cpp
+SOURCES += Base64OutputStream.cpp
+SOURCES += DayOfMonthCursor.cpp
+SOURCES += CDisplayMetrics.cpp
+SOURCES += FastImmutableArraySet.cpp
+SOURCES += FloatMath.cpp
+SOURCES += FloatProperty.cpp
+SOURCES += Int32Property.cpp
+
+SOURCES += MapCollections.cpp
+SOURCES += MathUtils.cpp
+SOURCES += MonthDisplayHelper.cpp
+SOURCES += NtpTrustedTime.cpp
+SOURCES += CNtpTrustedTimeHelper.cpp
+SOURCES += CPair.cpp
+SOURCES += CPairHelper.cpp
+SOURCES += PathParser.cpp
+SOURCES += Patterns.cpp
+SOURCES += CRational.cpp
+SOURCES += CRationalHelper.cpp
+SOURCES += CSize.cpp
+SOURCES += CSizeHelper.cpp
+SOURCES += CSizeF.cpp
+SOURCES += CSizeFHelper.cpp
+SOURCES += Int64SparseArray.cpp
+SOURCES += SparseArray.cpp
+SOURCES += SparseBooleanArray.cpp
+SOURCES += SparseInt32Array.cpp
+SOURCES += Spline.cpp
+SOURCES += CSplineHelper.cpp
+SOURCES += StateSet.cpp
+SOURCES += TimeUtils.cpp
+SOURCES += CTypedValue.cpp
+SOURCES += CTypedValueHelper.cpp
+SOURCES += Xml.cpp
+SOURCES += CXmlPullAttributes.cpp
+
+// SOURCES += droid_nio_utils.cpp
+// SOURCES += SparseInt32Array.cpp
+// SOURCES += CParcelableObjectContainer.cpp
+// SOURCES += JournaledFile.cpp
+// SOURCES += CFastXmlSerializer.cpp
+// SOURCES += StateMachine.cpp
+// SOURCES += CharSequences.cpp
+// SOURCES += CPropertyHelper.cpp
+// SOURCES += ReflectiveProperty.cpp
+// SOURCES += FileRotator.cpp
+
+// SOURCES += CIndentingPrintWriter.cpp

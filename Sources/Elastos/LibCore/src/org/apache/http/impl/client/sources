@@ -1,0 +1,30 @@
+
+TARGET_NAME= client
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+SOURCES = AbstractAuthenticationHandler.cpp
+SOURCES += AbstractHttpClient.cpp
+SOURCES += BasicCookieStore.cpp
+SOURCES += BasicCredentialsProvider.cpp
+SOURCES += BasicResponseHandler.cpp
+SOURCES += ClientParamsStack.cpp
+SOURCES += DefaultConnectionKeepAliveStrategy.cpp
+SOURCES += DefaultHttpClient.cpp
+SOURCES += DefaultHttpRequestRetryHandler.cpp
+SOURCES += DefaultProxyAuthenticationHandler.cpp
+SOURCES += DefaultRedirectHandler.cpp
+SOURCES += DefaultRequestDirector.cpp
+SOURCES += DefaultTargetAuthenticationHandler.cpp
+SOURCES += DefaultUserTokenHandler.cpp
+SOURCES += RequestWrapper.cpp
+SOURCES += EntityEnclosingRequestWrapper.cpp
+SOURCES += RedirectLocations.cpp
+SOURCES += RoutedRequest.cpp

@@ -1,0 +1,51 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     *The GZIPInputStream class is used to read data stored in the GZIP format,
+     * reading and decompressing GZIP data from the underlying stream into its buffer.
+     * <p>
+     * <strong>Example</strong>
+     * <p>
+     * Using GZIPInputStream is easier than ZipInputStream because GZIP is only for
+     * compression, and is not a container for multiple files. This code decompresses
+     * the data from a GZIP stream, similar to the gunzip(1) utility.
+     *
+     * @sa ZipInputStream
+     *
+     * <pre>
+     * InputStream is = ...
+     * GZIPInputStream zis = new GZIPInputStream(new BufferedInputStream(is));
+     * try {
+     * // Reading from 'zis' gets you the uncompressed bytes...
+     *  processStream(zis);
+     * } finally {
+     * zis.close();
+     * }
+     * </pre>
+     *
+     * @implements Elastos.Utility.Zip.IDeflaterInputStream
+     */
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IInputStream;
+     * interface IFilterInputStream;
+     * interface IInflaterInputStream;
+     */
+    interface IGZIPInputStream {
+        /**
+         * The magic header for the GZIP format.
+         */
+        const Int32 GZIP_MAGIC = 0x8b1f;
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,1710 @@
+
+module
+{
+    merge("graphics/Atlas.car");
+    merge("graphics/Xfermode.car");
+    merge("graphics/AvoidXfermode.car");
+    merge("graphics/Bitmap.car");
+    merge("graphics/BitmapFactory.car");
+    merge("graphics/BitmapRegionDecoder.car");
+    merge("graphics/Shader.car");
+    merge("graphics/BitmapShader.car");
+    merge("graphics/MaskFilter.car");
+    merge("graphics/BlurMaskFilter.car");
+    merge("graphics/Camera.car");
+    merge("graphics/Canvas.car");
+    merge("graphics/Color.car");
+    merge("graphics/ColorFilter.car");
+    merge("graphics/ColorMatrix.car");
+    merge("graphics/ColorMatrixColorFilter.car");
+    merge("graphics/PathEffect.car");
+    merge("graphics/ComposePathEffect.car");
+    merge("graphics/ComposeShader.car");
+    merge("graphics/CornerPathEffect.car");
+    merge("graphics/DashPathEffect.car");
+    merge("graphics/DiscretePathEffect.car");
+    merge("graphics/DrawFilter.car");
+    merge("graphics/EmbossMaskFilter.car");
+    merge("graphics/FontFamily.car");
+    merge("graphics/ImageFormat.car");
+    merge("graphics/Insets.car");
+    merge("graphics/Interpolator.car");
+    merge("graphics/Rasterizer.car");
+    merge("graphics/LargeBitmap.car");
+    merge("graphics/LayerRasterizer.car");
+    merge("graphics/LightingColorFilter.car");
+    merge("graphics/LinearGradient.car");
+    merge("graphics/Matrix.car");
+    merge("graphics/Movie.car");
+    merge("graphics/NinePatch.car");
+    merge("graphics/Outline.car");
+    merge("graphics/Paint.car");
+    merge("graphics/PaintFlagsDrawFilter.car");
+    merge("graphics/Path.car");
+    merge("graphics/PathDashPathEffect.car");
+    merge("graphics/PathMeasure.car");
+    merge("graphics/Picture.car");
+    merge("graphics/PixelFormat.car");
+    merge("graphics/PixelXorXfermode.car");
+    merge("graphics/Point.car");
+    merge("graphics/PointF.car");
+    merge("graphics/PorterDuff.car");
+    merge("graphics/PorterDuffColorFilter.car");
+    merge("graphics/PorterDuffXfermode.car");
+    merge("graphics/RadialGradient.car");
+    merge("graphics/Rect.car");
+    merge("graphics/RectF.car");
+    merge("graphics/Region.car");
+    merge("graphics/RegionIterator.car");
+    merge("graphics/SumPathEffect.car");
+    merge("graphics/SurfaceTexture.car");
+    merge("graphics/SweepGradient.car");
+    merge("graphics/TableMaskFilter.car");
+    merge("graphics/Typeface.car");
+    merge("graphics/YuvImage.car");
+    merge("graphics/CanvasProperty.car");
+    merge("graphics/drawable/Drawable.car");
+    merge("graphics/drawable/Animatable.car");
+    merge("graphics/drawable/NinePatchDrawable.car");
+    merge("graphics/drawable/AnimatedRotateDrawable.car");
+    merge("graphics/drawable/DrawableContainer.car");
+    merge("graphics/drawable/AnimationDrawable.car");
+    merge("graphics/drawable/BitmapDrawable.car");
+    merge("graphics/drawable/ClipDrawable.car");
+    merge("graphics/drawable/ColorDrawable.car");
+    merge("graphics/drawable/LayerDrawable.car");
+    merge("graphics/drawable/GradientDrawable.car");
+    merge("graphics/drawable/ShapeDrawable.car");
+    merge("graphics/drawable/RotateDrawable.car");
+    merge("graphics/drawable/InsetDrawable.car");
+    merge("graphics/drawable/StateListDrawable.car");
+    merge("graphics/drawable/ScaleDrawable.car");
+    merge("graphics/drawable/TransitionDrawable.car");
+    merge("graphics/drawable/LevelListDrawable.car");
+    merge("graphics/drawable/PaintDrawable.car");
+    merge("graphics/drawable/PictureDrawable.car");
+    merge("graphics/drawable/AnimatedStateListDrawable.car");
+    merge("graphics/drawable/AnimatedVectorDrawable.car");
+    merge("graphics/drawable/RippleDrawable.car");
+    merge("graphics/drawable/VectorDrawable.car");
+    merge("graphics/drawable/shapes/Shape.car");
+    merge("graphics/drawable/shapes/RectShape.car");
+    merge("graphics/drawable/shapes/RoundRectShape.car");
+    merge("graphics/drawable/shapes/ArcShape.car");
+    merge("graphics/drawable/shapes/OvalShape.car");
+    merge("graphics/drawable/shapes/PathShape.car");
+    merge("graphics/pdf/PdfDocument.car");
+    merge("graphics/pdf/PdfEditor.car");
+    merge("graphics/pdf/PdfRenderer.car");
+
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Content.Res.IResourcesTheme;
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    interface Elastos.Droid.Graphics.Drawable.Shapes.IShape;
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.IO.IInputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    class CAvoidXfermode {
+        /** This xfermode draws, or doesn't draw, based on the destination's
+         * distance from an op-color.
+         *
+         * There are two modes, and each mode interprets a tolerance value.
+         *
+         * Avoid: In this mode, drawing is allowed only on destination pixels that
+         * are different from the op-color.
+         * Tolerance near 0: avoid any colors even remotely similar to the op-color
+         * Tolerance near 255: avoid only colors nearly identical to the op-color
+         *
+         * Target: In this mode, drawing only occurs on destination pixels that
+         * are similar to the op-color
+         * Tolerance near 0: draw only on colors that are nearly identical to the op-color
+         * Tolerance near 255: draw on any colors even remotely similar to the op-color
+         */
+        constructor(
+            [in] Int32 opColor,
+            [in] Int32 tolerance,
+            [in] AvoidXfermodeMode mode);
+
+        interface IAvoidXfermode;
+        interface IXfermode;
+    }
+
+    [deprecated]
+    class CBitmap {
+        constructor();
+
+        /**
+         * Private constructor that must received an already allocated native bitmap
+         * int (pointer).
+         */
+        constructor(
+            [in] Int64 nativeBitmap,
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 density,
+            [in] Boolean isMutable,
+            [in] Boolean requestPremultiplied,
+            [in] ArrayOf<Byte>* ninePatchChunk,
+            [in] INinePatchInsetStruct* ninePatchInsets);
+
+        interface IBitmap;
+        interface IParcelable;
+    }
+
+    singleton class CBitmapHelper {
+        interface IBitmapHelper;
+    }
+
+    class CBitmapFactoryOptions {
+        interface IBitmapFactoryOptions;
+    }
+
+    singleton class CBitmapFactory {
+        interface IBitmapFactory;
+    }
+
+    singleton class CBitmapRegionDecoderHelper {
+        interface IBitmapRegionDecoderHelper;
+    }
+
+    class CBitmapShader {
+        /**
+         * Call this to create a new shader that will draw with a bitmap.
+         *
+         * @param bitmap            The bitmap to use inside the shader
+         * @param tileX             The tiling mode for x to draw the bitmap in.
+         * @param tileY             The tiling mode for y to draw the bitmap in.
+         */
+        constructor(
+            [in] IBitmap* bitmap,
+            [in] ShaderTileMode tileX,
+            [in] ShaderTileMode tileY);
+
+        interface IShader;
+        interface IBitmapShader;
+    }
+
+    class CBlurMaskFilter {
+        /**
+         * Create a blur maskfilter.
+         *
+         * @param radius The radius to extend the blur from the original mask. Must be > 0.
+         * @param style  The Blur to use
+         * @return       The new blur maskfilter
+         */
+        constructor(
+            [in] Float radius,
+            [in] BlurMaskFilterBlur style);
+
+        interface IBlurMaskFilter;
+        interface IMaskFilter;
+    }
+
+    class CCamera {
+        interface ICamera;
+    }
+
+    class CCanvas {
+        /**
+         * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
+         * draw into.  The initial target density is {@link Bitmap#DENSITY_NONE};
+         * this will typically be replaced when a target bitmap is set for the
+         * canvas.
+         */
+        constructor();
+
+        /**
+         * Construct a canvas with the specified bitmap to draw into. The bitmap
+         * must be mutable.
+         *
+         * <p>The initial target density of the canvas is the same as the given
+         * bitmap's density.
+         *
+         * @param bitmap Specifies a mutable bitmap for the canvas to draw into.
+         */
+        constructor(
+            [in] IBitmap* bitmap);
+
+        constructor(
+            [in] Int32 nativeCanvas);
+
+        interface ICanvas;
+    }
+
+    singleton class CColor {
+        interface IColor;
+    }
+
+    class CColorMatrix {
+        /**
+         * Create a new colormatrix initialized to identity (as if reset() had
+         * been called).
+         */
+        constructor();
+
+        /**
+         * Create a new colormatrix initialized with the specified array of values.
+         */
+        constructor(
+            [in] ArrayOf<Float> src);
+
+        /**
+         * Create a new colormatrix initialized with the specified colormatrix.
+         */
+        constructor(
+            [in] IColorMatrix* matrix);
+
+        interface IColorMatrix;
+    }
+
+    class CColorMatrixColorFilter {
+        /**
+         * Create a colorfilter that transforms colors through a 4x5 color matrix.
+         *
+         * @param matrix 4x5 matrix used to transform colors. It is copied into
+         *               the filter, so changes made to the matrix after the filter
+         *               is constructed will not be reflected in the filter.
+         */
+        constructor(
+            [in] IColorMatrix* matrix);
+
+        /**
+         * Create a colorfilter that transforms colors through a 4x5 color matrix.
+         *
+         * @param array array of floats used to transform colors, treated as a 4x5
+         *              matrix. The first 20 entries of the array are copied into
+         *              the filter. See ColorMatrix.
+         */
+        constructor(
+            [in] ArrayOf<Float> array);
+
+        interface IColorMatrixColorFilter;
+        interface IColorFilter;
+    }
+
+    class CComposePathEffect {
+        /**
+         * Construct a PathEffect whose effect is to apply first the inner effect
+         * and the the outer pathEffect (e.g. outer(inner(path))).
+         */
+        constructor(
+            [in] IPathEffect* outerpe,
+            [in] IPathEffect* innerpe);
+
+        interface IComposePathEffect;
+        interface IPathEffect;
+    }
+
+    class CComposeShader {
+        /**
+         * Create a new compose shader, given shaders A, B, and a combining mode.
+         * When the mode is applied, it will be given the result from shader A as its
+         * "dst", and the result from shader B as its "src".
+         *
+         * @param shaderA  The colors from this shader are seen as the "dst" by the mode
+         * @param shaderB  The colors from this shader are seen as the "src" by the mode
+         * @param mode     The mode that combines the colors from the two shaders. If mode
+         *                 is null, then SRC_OVER is assumed.
+         */
+        constructor(
+            [in] IShader* shaderA,
+            [in] IShader* shaderB,
+            [in] IXfermode* mode);
+
+        /**
+         * Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
+         * When the mode is applied, it will be given the result from shader A as its
+         * "dst", and the result from shader B as its "src".
+         *
+         * @param shaderA  The colors from this shader are seen as the "dst" by the mode
+         * @param shaderB  The colors from this shader are seen as the "src" by the mode
+         * @param mode     The PorterDuff mode that combines the colors from the two shaders.
+         */
+        constructor(
+            [in] IShader* shaderA,
+            [in] IShader* shaderB,
+            [in] PorterDuffMode mode1);
+
+        interface IComposeShader;
+        interface IShader;
+    }
+
+    class CCornerPathEffect {
+        /**
+         * Transforms geometries that are drawn (either STROKE or FILL styles) by
+         * replacing any sharp angles between line segments into rounded angles of
+         * the specified radius.
+         * @param radius Amount to round sharp angles between line segments.
+         */
+        constructor(
+            [in] Float radius);
+
+        interface ICornerPathEffect;
+        interface IPathEffect;
+    }
+
+    class CDashPathEffect {
+        /**
+         * The intervals array must contain an even number of entries (>=2), with
+         * the even indices specifying the "on" intervals, and the odd indices
+         * specifying the "off" intervals. phase is an offset into the intervals
+         * array (mod the sum of all of the intervals). The intervals array
+         * controls the length of the dashes. The paint's strokeWidth controls the
+         * thickness of the dashes.
+         * Note: this patheffect only affects drawing with the paint's style is set
+         * to STROKE or STROKE_AND_FILL. It is ignored if the drawing is done with
+         * style == FILL.
+         * @param intervals array of ON and OFF distances
+         * @param phase offset into the intervals array
+         */
+        constructor(
+            [in] ArrayOf<Float> intervals,
+            [in] Float phase);
+
+        interface IDashPathEffect;
+        interface IPathEffect;
+    }
+
+    class CDiscretePathEffect {
+        /**
+         * Chop the path into lines of segmentLength, randomly deviating from the
+         * original path by deviation.
+         */
+        constructor(
+            [in] Float segmentLength,
+            [in] Float deviation);
+
+        interface IDiscretePathEffect;
+        interface IPathEffect;
+    }
+
+    class CEmbossMaskFilter {
+        /**
+         * Create an emboss maskfilter
+         *
+         * @param direction  array of 3 scalars [x, y, z] specifying the direction of the light source
+         * @param ambient    0...1 amount of ambient light
+         * @param specular   coefficient for specular highlights (e.g. 8)
+         * @param blurRadius amount to blur before applying lighting (e.g. 3)
+         * @return           the emboss maskfilter
+         */
+        constructor(
+            [in] ArrayOf<Float> direction,
+            [in] Float ambient,
+            [in] Float specular,
+            [in] Float blurRadius);
+
+        interface IEmbossMaskFilter;
+        interface IMaskFilter;
+    }
+
+    singleton class CImageFormat {
+        interface IImageFormat;
+    }
+
+    singleton class CInsetsHelper {
+        interface IInsetsHelper;
+    }
+
+    class CInterpolator {
+        constructor(
+            [in] Int32 valueCount);
+
+        constructor(
+            [in] Int32 valueCount,
+            [in] Int32 frameCount);
+
+        interface IInterpolator;
+    }
+
+    class CLargeBitmap {
+        constructor(
+            [in] Int64 lbm);
+
+        interface ILargeBitmap;
+    }
+
+    class CLayerRasterizer {
+        constructor();
+
+        interface ILayerRasterizer;
+        interface IRasterizer;
+    }
+
+    class CLightingColorFilter {
+        /**
+         * Create a colorfilter that multiplies the RGB channels by one color, and then adds a second color,
+         * pinning the result for each component to [0..255]. The alpha components of the mul and add arguments
+         * are ignored.
+         */
+        constructor(
+            [in] Int32 mul,
+            [in] Int32 add);
+
+        interface ILightingColorFilter;
+        interface IColorFilter;
+    }
+
+    [deprecated]
+    class CLinearGradient {
+        /** Create a shader that draws a linear gradient along a line.
+         *  @param x0           The x-coordinate for the start of the gradient line
+         *  @param y0           The y-coordinate for the start of the gradient line
+         *  @param x1           The x-coordinate for the end of the gradient line
+         *  @param y1           The y-coordinate for the end of the gradient line
+         *  @param  colors      The colors to be distributed along the gradient line
+         *  @param  positions   May be null. The relative positions [0..1] of
+         *                      each corresponding color in the colors array. If this is null,
+         *                      the the colors are distributed evenly along the gradient line.
+         *  @param  tile        The Shader tiling mode
+         */
+        constructor(
+            [in] Float x0,
+            [in] Float y0,
+            [in] Float x1,
+            [in] Float y1,
+            [in] ArrayOf<Int32> colors,
+            [in] ArrayOf<Float>* positions,
+            [in] ShaderTileMode tile);
+
+        /** Create a shader that draws a linear gradient along a line.
+         *  @param x0       The x-coordinate for the start of the gradient line
+         *  @param y0       The y-coordinate for the start of the gradient line
+         *  @param x1       The x-coordinate for the end of the gradient line
+         *  @param y1       The y-coordinate for the end of the gradient line
+         *  @param  color0  The color at the start of the gradient line.
+         *  @param  color1  The color at the end of the gradient line.
+         *  @param  tile    The Shader tiling mode
+         */
+        constructor(
+            [in] Float x0,
+            [in] Float y0,
+            [in] Float x1,
+            [in] Float y1,
+            [in] Int32 color0,
+            [in] Int32 color1,
+            [in] ShaderTileMode tile);
+
+        interface ILinearGradient;
+        interface IShader;
+    }
+
+    class CMatrix {
+        /**
+         * Create an identity matrix
+         */
+        constructor();
+
+        /**
+         * Create a matrix that is a (deep) copy of src
+         * @param src The matrix to copy into this matrix
+         */
+        constructor(
+            [in] IMatrix* src);
+
+        interface IMatrix;
+    }
+
+    class CShader {
+        interface IShader;
+    }
+
+    singleton class CMovieHelper {
+        interface IMovieHelper;
+    }
+
+    [deprecated]
+    class CNinePatch {
+        /**
+         * Create a drawable projection from a bitmap to nine patches.
+         *
+         * @param bitmap The bitmap describing the patches.
+         * @param chunk The 9-patch data chunk describing how the underlying bitmap
+         *              is split apart and drawn.
+         */
+        constructor(
+            [in] IBitmap* bitmap,
+            [in] ArrayOf<Byte>* chunk);
+
+        /**
+         * Create a drawable projection from a bitmap to nine patches.
+         *
+         * @param bitmap    The bitmap describing the patches.
+         * @param chunk     The 9-patch data chunk describing how the underlying
+         *                  bitmap is split apart and drawn.
+         * @param srcName   The name of the source for the bitmap. Might be null.
+         */
+        constructor(
+            [in] IBitmap* bitmap,
+            [in] ArrayOf<Byte>* chunk,
+            [in] String srcName);
+
+        /**
+         * @hide
+         */
+        constructor(
+            [in] INinePatch* patch);
+
+        interface INinePatch;
+    }
+
+    singleton class CNinePatchHelper {
+        interface INinePatchHelper;
+    }
+
+    class CPaintFontMetrics {
+        interface IPaintFontMetrics;
+    }
+
+    class CPaintFontMetricsInt {
+        interface IPaintFontMetricsInt;
+    }
+
+    class CPaint{
+        /**
+         * Create a new paint with default settings.
+         */
+        constructor();
+
+        /**
+         * Create a new paint with the specified flags. Use setFlags() to change
+         * these after the paint is created.
+         *
+         * @param flags initial flag bits, as if they were passed via setFlags().
+         */
+        constructor(
+            [in] Int32 flags);
+
+        /**
+         * Create a new paint, initialized with the attributes in the specified
+         * paint parameter.
+         *
+         * @param paint Existing paint used to initialized the attributes of the
+         *              new paint.
+         */
+        constructor(
+            [in] IPaint* paint);
+
+        interface IPaint;
+    }
+
+    class CPaintFlagsDrawFilter {
+        constructor(
+            [in] Int32 clearBits,
+            [in] Int32 setBits);
+
+        interface IPaintFlagsDrawFilter;
+        interface IDrawFilter;
+    }
+
+    class CPath {
+        /**
+         * Create an empty path
+         */
+        constructor();
+
+        /**
+         * Create a new path, copying the contents from the src path.
+         *
+         * @param src The path to copy from when initializing the new path
+         */
+         constructor(
+            [in] IPath* src);
+
+        interface IPath;
+    }
+
+    class CPathDashPathEffect {
+        /**
+         * Dash the drawn path by stamping it with the specified shape. This only
+         * applies to drawings when the paint's style is STROKE or STROKE_AND_FILL.
+         * If the paint's style is FILL, then this effect is ignored. The paint's
+         * strokeWidth does not affect the results.
+         * @param shape The path to stamp along
+         * @param advance spacing between each stamp of shape
+         * @param phase amount to offset before the first shape is stamped
+         * @param style how to transform the shape at each position as it is stamped
+         */
+        constructor(
+            [in] IPath* shape,
+            [in] Float advance,
+            [in] Float phase,
+            [in] PathDashPathEffectStyle style);
+
+        interface IPathDashPathEffect;
+        interface IPathEffect;
+    }
+
+    class CPathMeasure {
+        /**
+         * Create an empty PathMeasure object. To uses this to measure the length
+         * of a path, and/or to find the position and tangent along it, call
+         * setPath.
+         *
+         * Note that once a path is associated with the measure object, it is
+         * undefined if the path is subsequently modified and the the measure object
+         * is used. If the path is modified, you must call setPath with the path.
+         */
+        constructor();
+
+        /**
+         * Create a PathMeasure object associated with the specified path object
+         * (already created and specified). The meansure object can now return the
+         * path's length, and the position and tangent of any position along the
+         * path.
+         *
+         * Note that once a path is associated with the measure object, it is
+         * undefined if the path is subsequently modified and the the measure object
+         * is used. If the path is modified, you must call setPath with the path.
+         *
+         * @param path The path that will be measured by this object
+         * @param forceClosed If true, then the path will be considered as "closed"
+         *        even if its contour was not explicitly closed.
+         */
+        constructor(
+            [in] IPath* path,
+            [in] Boolean forceClosed);
+
+        interface IPathMeasure;
+    }
+
+    class CPicture {
+        constructor();
+
+        /**
+         * Create a picture by making a copy of what has already been recorded in
+         * src. The contents of src are unchanged, and if src changes later, those
+         * changes will not be reflected in this picture.
+         */
+        constructor(
+            [in] IPicture* src);
+
+        /*private*/ constructor(
+            [in] Int64 nativePicture);
+
+        interface IPicture;
+    }
+
+    singleton class CPixelFormat {
+        interface IPixelFormat;
+    }
+
+    class CPixelXorXfermode {
+        constructor(
+            [in] Int32 opColor);
+
+        interface IPixelXorXfermode;
+        interface IXfermode;
+    }
+
+    class CPoint {
+        constructor();
+
+        constructor(
+            [in] Int32 x,
+            [in] Int32 y);
+
+        constructor(
+            [in] IPoint* src);
+
+        interface IPoint;
+        interface IParcelable;
+    }
+
+    class CPointF {
+        constructor();
+
+        constructor(
+            [in] Float x,
+            [in] Float y);
+
+        constructor(
+            [in] IPoint* src);
+
+        interface IPointF;
+        interface IParcelable;
+    }
+
+    singleton class CPointFHelper {
+        interface IPointFHelper;
+    }
+
+    class CPorterDuffColorFilter {
+        /**
+         * Create a colorfilter that uses the specified color and porter-duff mode.
+         *
+         * @param srcColor       The source color used with the specified
+         *                       porter-duff mode
+         * @param mode           The porter-duff mode that is applied
+         */
+        constructor(
+            [in] Int32 srcColor,
+            [in] PorterDuffMode mode);
+
+        interface IPorterDuffColorFilter;
+        interface IColorFilter;
+    }
+
+    class CPorterDuffXfermode{
+        /**
+         * Create an xfermode that uses the specified porter-duff mode.
+         *
+         * @param mode           The porter-duff mode that is applied
+         */
+        constructor(
+            [in] PorterDuffMode mode);
+
+        interface IPorterDuffXfermode;
+        interface IXfermode;
+    }
+
+    [deprecated]
+    class CRadialGradient{
+        /** Create a shader that draws a radial gradient given the center and radius.
+         *  @param x        The x-coordinate of the center of the radius
+         *  @param y        The y-coordinate of the center of the radius
+         *  @param radius   Must be positive. The radius of the circle for this gradient
+         *  @param colors   The colors to be distributed between the center and edge of the circle
+         *  @param positions May be NULL. The relative position of
+         *                   each corresponding color in the colors array. If this is NULL,
+         *                   the the colors are distributed evenly between the center and edge of the circle.
+         *  @param  tile    The Shader tiling mode
+         */
+        constructor(
+            [in] Float x,
+            [in] Float y,
+            [in] Float radius,
+            [in] ArrayOf<Int32> colors,
+            [in] ArrayOf<Float>* positions,
+            [in] ShaderTileMode tile);
+
+        /** Create a shader that draws a radial gradient given the center and radius.
+         *  @param x        The x-coordinate of the center of the radius
+         *  @param y        The y-coordinate of the center of the radius
+         *  @param radius   Must be positive. The radius of the circle for this gradient
+         *  @param color0   The color at the center of the circle.
+         *  @param color1   The color at the edge of the circle.
+         *  @param tile     The Shader tiling mode
+         */
+        constructor(
+            [in] Float x,
+            [in] Float y,
+            [in] Float radius,
+            [in] Int32 color0,
+            [in] Int32 color1,
+            [in] ShaderTileMode tile);
+
+        interface IRadialGradient;
+        interface IShader;
+    }
+
+    class CRect{
+        /**
+         * Create a new empty Rect. All coordinates are initialized to 0.
+         */
+        constructor();
+
+        /**
+         * Create a new rectangle with the specified coordinates. Note: no range
+         * checking is performed, so the caller must ensure that left <= right and
+         * top <= bottom.
+         *
+         * @param left   The X coordinate of the left side of the rectangle
+         * @param top    The Y coordinate of the top of the rectangle
+         * @param right  The X coordinate of the right side of the rectangle
+         * @param bottom The Y coordinate of the bottom of the rectangle
+         */
+        constructor(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /**
+         * Create a new rectangle, initialized with the values in the specified
+         * rectangle (which is left unmodified).
+         *
+         * @param r The rectangle whose coordinates are copied into the new
+         *          rectangle.
+         */
+        constructor(
+            [in] IRect* r);
+
+        interface IRect;
+        interface IParcelable;
+    }
+
+    singleton class CRectHelper{
+        interface IRectHelper;
+    }
+
+    class CRectF {
+        /**
+         * Create a new empty RectF. All coordinates are initialized to 0.
+         */
+        constructor();
+
+        /**
+         * Create a new rectangle with the specified coordinates. Note: no range
+         * checking is performed, so the caller must ensure that left <= right and
+         * top <= bottom.
+         *
+         * @param left   The X coordinate of the left side of the rectangle
+         * @param top    The Y coordinate of the top of the rectangle
+         * @param right  The X coordinate of the right side of the rectangle
+         * @param bottom The Y coordinate of the bottom of the rectangle
+         */
+        constructor(
+            [in] Float left,
+            [in] Float top,
+            [in] Float right,
+            [in] Float bottom);
+
+        /**
+         * Create a new rectangle, initialized with the values in the specified
+         * rectangle (which is left unmodified).
+         *
+         * @param r The rectangle whose coordinates are copied into the new
+         *          rectangle.
+         */
+        constructor(
+            [in] IRectF* rf);
+
+        constructor(
+            [in] IRect* r);
+
+        interface IRectF;
+        interface IParcelable;
+    }
+
+    class CRegion {
+        /**
+         * Create an empty region
+         */
+        constructor();
+
+        /**
+         * Return a copy of the specified region
+         */
+        constructor(
+            [in] IRegion* region);
+
+        /**
+         * Return a region set to the specified rectangle
+         */
+        constructor(
+            [in] IRect* r);
+
+        /**
+         * Return a region set to the specified rectangle
+         */
+        constructor(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /*private*/ constructor(
+            [in] Int64 ni);
+
+        /*private*/ constructor(
+            [in] Int64 ni,
+            [in] Int32 dummy);
+
+        interface IRegion;
+        interface IParcelable;
+    }
+
+    class CRegionIterator {
+        /**
+         * Construct an iterator for all of the rectangles in a region. This
+         * effectively makes a private copy of the region, so any subsequent edits
+         * to region will not affect the iterator.
+         *
+         * @param region the region that will be iterated
+         */
+        constructor(
+            [in] IRegion* region);
+
+        interface IRegionIterator;
+    }
+
+    class CSumPathEffect {
+        /**
+         * Construct a PathEffect whose effect is to apply two effects, in sequence.
+         * (e.g. first(path) + second(path))
+         */
+        constructor(
+            [in] IPathEffect* first,
+            [in] IPathEffect* second);
+
+        interface ISumPathEffect;
+        interface IPathEffect;
+    }
+
+    class CSurfaceTexture {
+        /**
+         * Construct a new SurfaceTexture to stream images to a given OpenGL texture.
+         *
+         * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
+         */
+        constructor(
+            [in] Int32 texName);
+
+        /**
+         * Construct a new SurfaceTexture to stream images to a given OpenGL texture.
+         *
+         * In single buffered mode the application is responsible for serializing access to the image
+         * content buffer. Each time the image content is to be updated, the
+         * {@link #releaseTexImage()} method must be called before the image content producer takes
+         * ownership of the buffer. For example, when producing image content with the NDK
+         * ANativeWindow_lock and ANativeWindow_unlockAndPost functions, {@link #releaseTexImage()}
+         * must be called before each ANativeWindow_lock, or that call will fail. When producing
+         * image content with OpenGL ES, {@link #releaseTexImage()} must be called before the first
+         * OpenGL ES function call each frame.
+         *
+         * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
+         * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
+         *
+         * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
+         */
+        constructor(
+            [in] Int32 texName,
+            [in] Boolean singleBufferMode);
+
+        /**
+         * Construct a new SurfaceTexture to stream images to a given OpenGL texture.
+         *
+         * In single buffered mode the application is responsible for serializing access to the image
+         * content buffer. Each time the image content is to be updated, the
+         * {@link #releaseTexImage()} method must be called before the image content producer takes
+         * ownership of the buffer. For example, when producing image content with the NDK
+         * ANativeWindow_lock and ANativeWindow_unlockAndPost functions, {@link #releaseTexImage()}
+         * must be called before each ANativeWindow_lock, or that call will fail. When producing
+         * image content with OpenGL ES, {@link #releaseTexImage()} must be called before the first
+         * OpenGL ES function call each frame.
+         *
+         * Unlike {@link #SurfaceTexture(int, boolean)}, which takes an OpenGL texture object name,
+         * this constructor creates the SurfaceTexture in detached mode. A texture name must be passed
+         * in using {@link #attachToGLContext} before calling {@link #releaseTexImage()} and producing
+         * image content using OpenGL ES.
+         *
+         * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
+         *
+         * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
+         * @hide
+         */
+        constructor(
+            [in] Boolean singleBufferMode);
+
+        interface ISurfaceTexture;
+    }
+
+    [deprecated]
+    class CSweepGradient{
+        /**
+         * A subclass of Shader that draws a sweep gradient around a center point.
+         *
+         * @param cx       The x-coordinate of the center
+         * @param cy       The y-coordinate of the center
+         * @param colors   The colors to be distributed between around the center.
+         *                 There must be at least 2 colors in the array.
+         * @param positions May be NULL. The relative position of
+         *                 each corresponding color in the colors array, beginning
+         *                 with 0 and ending with 1.0. If the values are not
+         *                 monotonic, the drawing may produce unexpected results.
+         *                 If positions is NULL, then the colors are automatically
+         *                 spaced evenly.
+         */
+        constructor(
+            [in] Float cx,
+            [in] Float cy,
+            [in] ArrayOf<Int32> colors,
+            [in] ArrayOf<Float>* positions);
+
+        /**
+         * A subclass of Shader that draws a sweep gradient around a center point.
+         *
+         * @param cx       The x-coordinate of the center
+         * @param cy       The y-coordinate of the center
+         * @param color0   The color to use at the start of the sweep
+         * @param color1   The color to use at the end of the sweep
+         */
+        constructor(
+            [in] Float cx,
+            [in] Float cy,
+            [in] Int32 color0,
+            [in] Int32 color1);
+
+        interface ISweepGradient;
+        interface IShader;
+    }
+
+    class CTableMaskFilter {
+        constructor(
+            [in] ArrayOf<Byte> table);
+
+        constructor(
+            [in] Int64 ni);
+
+        interface ITableMaskFilter;
+        interface IMaskFilter;
+    }
+
+    singleton class CTableMaskFilterHelper {
+        interface ITableMaskFilterHelper;
+    }
+
+    class CTypeface {
+        /*private*/ constructor(
+            [in] Int64 ni);
+
+        interface ITypeface;
+    }
+
+    singleton class CTypefaceHelper {
+        interface ITypefaceHelper;
+    }
+
+    [deprecated]
+    class CYuvImage {
+        /**
+         * Construct an YuvImage.
+         *
+         * @param yuv     The YUV data. In the case of more than one image plane, all the planes must be
+         *                concatenated into a single byte array.
+         * @param format  The YUV data format as defined in {@link ImageFormat}.
+         * @param width   The width of the YuvImage.
+         * @param height  The height of the YuvImage.
+         * @param strides (Optional) Row bytes of each image plane. If yuv contains padding, the stride
+         *                of each image must be provided. If strides is null, the method assumes no
+         *                padding and derives the row bytes by format and width itself.
+         * @throws IllegalArgumentException if format is not support; width or height <= 0; or yuv is
+         *                null.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* yuv,
+            [in] Int32 format,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] ArrayOf<Int32>* strides);
+
+        interface IYuvImage;
+    }
+
+    class COutline {
+        constructor();
+
+        constructor(
+            [in] /*@NonNull*/ IOutline* src);
+
+        interface IOutline;
+    }
+
+    namespace Drawable {
+
+
+    singleton class CDrawableHelper {
+        interface IDrawableHelper;
+    }
+
+    class CAnimationDrawable {
+        constructor();
+
+        /*private*/ constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res);
+
+        interface IAnimationDrawable;
+        interface IDrawableContainer;
+        interface IDrawable;
+        interface IDrawableCallback;
+        interface Elastos.Core.IRunnable;
+        interface IAnimatable;
+    }
+
+    class CBitmapDrawable {
+        /**
+         * Create an empty drawable, not dealing with density.
+         * @deprecated Use {@link #BitmapDrawable(Resources)} to ensure
+         * that the drawable has correctly set its target density.
+         */
+        constructor();
+
+        /**
+         * Create an empty drawable, setting initial target density based on
+         * the display metrics of the resources.
+         */
+        constructor(
+            [in] IResources* res);
+
+        /**
+         * Create drawable from a bitmap, not dealing with density.
+         * @deprecated Use {@link #BitmapDrawable(Resources, Bitmap)} to ensure
+         * that the drawable has correctly set its target density.
+         */
+        constructor(
+            [in] Elastos.Droid.Graphics.IBitmap* bitmap);
+
+        /**
+         * Create drawable from a bitmap, setting initial target density based on
+         * the display metrics of the resources.
+         */
+        constructor(
+            [in] IResources* res,
+            [in] Elastos.Droid.Graphics.IBitmap* bitmap);
+
+        /**
+         * Create a drawable by opening a given file path and decoding the bitmap.
+         * @deprecated Use {@link #BitmapDrawable(Resources, String)} to ensure
+         * that the drawable has correctly set its target density.
+         */
+        constructor(
+            [in] String filepath);
+
+        /**
+         * Create a drawable by opening a given file path and decoding the bitmap.
+         */
+        constructor(
+            [in] IResources* res,
+            [in] String filepath);
+
+        /**
+         * Create a drawable by decoding a bitmap from the given input stream.
+         * @deprecated Use {@link #BitmapDrawable(Resources, java.io.InputStream)} to ensure
+         * that the drawable has correctly set its target density.
+         */
+        constructor(
+            [in] IInputStream* is);
+
+        /**
+         * Create a drawable by decoding a bitmap from the given input stream.
+         */
+        constructor(
+            [in] IResources* res,
+            [in] IInputStream* is);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        interface IBitmapDrawable;
+        interface IDrawable;
+    }
+
+    [deprecated]
+    class CNinePatchDrawable {
+        constructor();
+
+        /**
+         * Create drawable from raw nine-patch data, not dealing with density.
+         * @deprecated Use {@link #NinePatchDrawable(Resources, Bitmap, byte[], Rect, String)}
+         * to ensure that the drawable has correctly set its target density.
+         */
+        constructor(
+            [in] Elastos.Droid.Graphics.IBitmap* bitmap,
+            [in] ArrayOf<Byte>* chunk,
+            [in] Elastos.Droid.Graphics.IRect* padding,
+            [in] String srcName);
+
+        /**
+         * Create drawable from raw nine-patch data, setting initial target density
+         * based on the display metrics of the resources.
+         */
+        constructor(
+            [in] IResources* res,
+            [in] Elastos.Droid.Graphics.IBitmap* bitmap,
+            [in] ArrayOf<Byte>* chunk,
+            [in] Elastos.Droid.Graphics.IRect* padding,
+            [in] String srcName);
+
+        /**
+         * Create drawable from raw nine-patch data, setting initial target density
+         * based on the display metrics of the resources.
+         *
+         * @hide
+         */
+        constructor(
+            [in] IResources* res,
+            [in] Elastos.Droid.Graphics.IBitmap* bitmap,
+            [in] ArrayOf<Byte>* chunk,
+            [in] Elastos.Droid.Graphics.IRect* padding,
+            [in] Elastos.Droid.Graphics.IRect* layoutInsets,
+            [in] String srcName);
+
+        /**
+         * Create drawable from existing nine-patch, not dealing with density.
+         * @deprecated Use {@link #NinePatchDrawable(Resources, NinePatch)}
+         * to ensure that the drawable has correctly set its target density.
+         */
+        constructor(
+            [in] Elastos.Droid.Graphics.INinePatch* patch);
+
+        /**
+         * Create drawable from existing nine-patch, setting initial target density
+         * based on the display metrics of the resources.
+         */
+        constructor(
+            [in] IResources* res,
+            [in] Elastos.Droid.Graphics.INinePatch* patch);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        interface INinePatchDrawable;
+        interface IDrawable;
+    }
+
+    class CClipDrawable {
+        constructor();
+
+        /**
+         * @param orientation Bitwise-or of {@link #HORIZONTAL} and/or {@link #VERTICAL}
+         */
+        constructor(
+            [in] IDrawable* drawable,
+            [in] Int32 gravity,
+            [in] Int32 orientation);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res);
+
+        interface IClipDrawable;
+        interface IDrawable;
+        interface IDrawableCallback;
+    }
+
+    class CColorDrawable {
+        /**
+         * Creates a new black ColorDrawable.
+         */
+        constructor();
+
+        /**
+         * Creates a new ColorDrawable with the specified color.
+         *
+         * @param color The color to draw.
+         */
+        constructor(
+            [in] Int32 color);
+
+        /*private*/ constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        interface IColorDrawable;
+        interface IDrawable;
+    }
+
+    [deprecated]
+    class CLayerDrawable {
+        constructor();
+
+        /**
+         * Create a new layer drawable with the list of specified layers.
+         *
+         * @param layers A list of drawables to use as layers in this new drawable.
+         */
+        constructor(
+            [in] ArrayOf<IDrawable*>* layers);
+
+        /**
+         * Create a new layer drawable with the specified list of layers and the specified
+         * constant state.
+         *
+         * @param layers The list of layers to add to this drawable.
+         * @param state The constant drawable state.
+         */
+        constructor(
+            [in] ArrayOf<IDrawable*>* layers,
+            [in] IDrawableConstantState* state);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        interface ILayerDrawable;
+        interface IDrawable;
+        interface IDrawableCallback;
+    }
+
+    [deprecated]
+    class CGradientDrawable {
+        constructor();
+
+        /**
+         * Create a new gradient drawable given an orientation and an array
+         * of colors for the gradient.
+         */
+        constructor(
+            [in] GradientDrawableOrientation orientation,
+            [in] ArrayOf<Int32>* colors);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResourcesTheme* theme);
+
+        interface IGradientDrawable;
+        interface IDrawable;
+    }
+
+    class CShapeDrawable {
+        /**
+         * ShapeDrawable constructor.
+         */
+        constructor();
+
+        /**
+         * Creates a ShapeDrawable with a specified Shape.
+         *
+         * @param s the Shape that this ShapeDrawable should be
+         */
+        constructor(
+            [in] IShape* s);
+
+        /*private*/ constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        interface IShapeDrawable;
+        interface IDrawable;
+    }
+
+    class CRotateDrawable {
+        /**
+         * <p>Create a new rotating drawable with an empty state.</p>
+         */
+        constructor();
+
+        /**
+         * <p>Create a new rotating drawable with the specified state. A copy of
+         * this state is used as the internal state for the newly created
+         * drawable.</p>
+         *
+         * @param rotateState the state for this drawable
+         */
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res);
+
+        interface IRotateDrawable;
+        interface IDrawable;
+        interface IDrawableCallback;
+    }
+
+    class CInsetDrawable {
+        /*package*/ constructor();
+
+        constructor(
+            [in] IDrawable* drawable,
+            [in] Int32 inset);
+
+        constructor(
+            [in] IDrawable* drawable,
+            [in] Int32 insetLeft,
+            [in] Int32 insetTop,
+            [in] Int32 insetRight,
+            [in] Int32 insetBottom);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res);
+
+        interface IInsetDrawable;
+        interface IDrawable;
+        interface IDrawableCallback;
+    }
+
+    class CStateListDrawable {
+        constructor();
+
+        /*private*/ constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res);
+
+        constructor(
+            [in] IDrawableConstantState* state);
+
+        interface IStateListDrawable;
+        interface IDrawableContainer;
+        interface IDrawableCallback;
+        interface IDrawable;
+    }
+
+    class CAnimatedRotateDrawable {
+        constructor();
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res);
+
+        interface IAnimatedRotateDrawable;
+        interface IDrawable;
+        interface IDrawableCallback;
+        interface Elastos.Core.IRunnable;
+        interface IAnimatable;
+    }
+
+    class CScaleDrawable {
+        constructor();
+
+        constructor(
+            [in] IDrawable* drawable,
+            [in] Int32 gravity,
+            [in] Float scaleWidth,
+            [in] Float scaleHeight);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res);
+
+        interface IScaleDrawable;
+        interface IDrawable;
+        interface IDrawableCallback;
+    }
+
+    [deprecated]
+    class CTransitionDrawable {
+        /**
+         * Create a new transition drawable with the specified list of layers. At least
+         * 2 layers are required for this drawable to work properly.
+         */
+        constructor(
+            [in] ArrayOf<IDrawable*>* layers);
+
+        /**
+         * Create a new transition drawable with no layer. To work correctly, at least 2
+         * layers must be added to this drawable.
+         *
+         * @see #TransitionDrawable(Drawable[])
+         */
+        constructor();
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] ArrayOf<IDrawable*>* layers);
+
+        interface ITransitionDrawable;
+        interface ILayerDrawable;
+        interface IDrawable;
+        interface IDrawableCallback;
+    }
+
+    class CLevelListDrawable {
+        constructor();
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res);
+
+        interface ILevelListDrawable;
+        interface IDrawableContainer;
+        interface IDrawable;
+        interface IDrawableCallback;
+    }
+
+    class CPaintDrawable {
+        constructor();
+
+        constructor(
+            [in] Int32 color);
+
+        interface IPaintDrawable;
+        interface IShapeDrawable;
+        interface IDrawable;
+    }
+
+    class CPictureDrawable {
+        /**
+         * Construct a new drawable referencing the specified picture. The picture
+         * may be null.
+         *
+         * @param picture The picture to associate with the drawable. May be null.
+         */
+        constructor(
+            [in] Elastos.Droid.Graphics.IPicture* picture);
+
+        interface IPictureDrawable;
+        interface IDrawable;
+    }
+
+    class CAnimatedStateListDrawable {
+        constructor();
+
+        constructor(
+            [in] /*@Nullable*/ IDrawableConstantState* state,
+            [in] /*@Nullable*/ IResources* res);
+
+        interface IAnimatedStateListDrawable;
+        interface IStateListDrawable;
+        interface IDrawableContainer;
+        interface IDrawableCallback;
+        interface IDrawable;
+    }
+
+    class CAnimatedVectorDrawable {
+        constructor();
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        interface IAnimatedVectorDrawable;
+        interface IAnimatable;
+        interface IDrawable;
+    }
+
+    class CVectorDrawable {
+        constructor();
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        interface IVectorDrawable;
+        interface IDrawable;
+    }
+
+    class CRippleDrawable {
+        constructor();
+
+        constructor(
+            [in] /*@NonNull*/ IColorStateList* color,
+            [in] /*@Nullable*/ IDrawable* content,
+            [in] /*@Nullable*/ IDrawable* mask);
+
+        constructor(
+            [in] IDrawableConstantState* state,
+            [in] IResources* res,
+            [in] IResourcesTheme* theme);
+
+        interface IRippleDrawable;
+        interface ILayerDrawable;
+        interface IDrawableCallback;
+        interface IDrawable;
+    }
+
+    namespace Shapes {
+
+    class CArcShape {
+        /**
+         * ArcShape constructor.
+         *
+         * @param startAngle the angle (in degrees) where the arc begins
+         * @param sweepAngle the sweep angle (in degrees). Anything equal to or
+         *                   greater than 360 results in a complete circle/oval.
+         */
+        constructor(
+            [in] Float startAngle,
+            [in] Float sweepAngle);
+
+        interface IArcShape;
+        interface IRectShape;
+        interface IShape;
+        interface ICloneable;
+    }
+
+    class COvalShape {
+        constructor();
+
+        interface IOvalShape;
+        interface IRectShape;
+        interface IShape;
+        interface ICloneable;
+    }
+
+    class CPathShape {
+        constructor(
+            [in] Elastos.Droid.Graphics.IPath* path,
+            [in] Float stdWidth,
+            [in] Float stdHeight);
+
+        interface IPathShape;
+        interface IShape;
+        interface ICloneable;
+    }
+
+    class CRectShape {
+        constructor();
+
+        interface IRectShape;
+        interface IShape;
+        interface ICloneable;
+    }
+
+    [deprecated]
+    class CRoundRectShape {
+
+        /**
+         * RoundRectShape constructor.
+         * Specifies an outer (round)rect and an optional inner (round)rect.
+         *
+         * @param outerRadii An array of 8 radius values, for the outer roundrect.
+         *                   The first two floats are for the
+         *                   top-left corner (remaining pairs correspond clockwise).
+         *                   For no rounded corners on the outer rectangle,
+         *                   pass null.
+         * @param inset      A RectF that specifies the distance from the inner
+         *                   rect to each side of the outer rect.
+         *                   For no inner, pass null.
+         * @param innerRadii An array of 8 radius values, for the inner roundrect.
+         *                   The first two floats are for the
+         *                   top-left corner (remaining pairs correspond clockwise).
+         *                   For no rounded corners on the inner rectangle,
+         *                   pass null.
+         *                   If inset parameter is null, this parameter is ignored.
+         */
+        constructor(
+            [in] ArrayOf<Float>* outerRadii,
+            [in] Elastos.Droid.Graphics.IRectF* inset,
+            [in] ArrayOf<Float>* innerRadii);
+
+        interface IRoundRectShape;
+        interface IRectShape;
+        interface IShape;
+        interface ICloneable;
+    }
+
+    } // namespace Shapes
+
+    } // namespace Drawable
+
+    namespace Pdf {
+    class CPdfDocument {
+        constructor();
+
+        interface IPdfDocument;
+    }
+
+    class CPdfRenderer {
+        constructor(
+            [in] /*@NonNull*/ Elastos.Droid.Os.IParcelFileDescriptor* input);
+
+        interface IPdfRenderer;
+        //intefface IAutoCloseable;
+    }
+
+    } // namespace Pdf
+    } // namespace Graphics
+    } // namepsace Droid
+    } // namespace Elastos
+}

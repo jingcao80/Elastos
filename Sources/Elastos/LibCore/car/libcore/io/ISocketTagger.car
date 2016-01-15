@@ -1,0 +1,59 @@
+
+module
+{
+    interface Elastos.Net.ISocket;
+    interface Elastos.IO.IFileDescriptor;
+
+    namespace Libcore {
+    namespace IO {
+
+    /**
+     * Callbacks for socket assignment and reassignment.
+     *
+     * @hide
+     */
+    [deprecated]
+    interface ISocketTagger {
+        /**
+         * Notified when {@code socketDescriptor} is either assigned to the current
+         * thread. The socket is either newly connected or reused from a connection
+         * pool. Implementations of this method should be thread-safe.
+         */
+        Tag(
+            [in] IFileDescriptor* socketDescriptor);
+
+        /**
+         * Notified when {@code socketDescriptor} is released from the current
+         * thread to a connection pool. Implementations of this method should be
+         * thread-safe.
+         *
+         * <p><strong>Note:</strong> this method will not be invoked when the socket
+         * is closed.
+         */
+        Untag(
+            [in] IFileDescriptor* socketDescriptor);
+
+        Tag(
+            [in] ISocket* socket);
+
+        Untag(
+            [in] ISocket* socket);
+    }
+
+    interface ISocketTaggerHelper {
+        /**
+         * Sets this process' socket tagger to {@code tagger}.
+         */
+        Set(
+            [in] ISocketTagger* tagger);
+
+        /**
+         * Returns this process socket tagger.
+         */
+        Get(
+            [out] ISocketTagger** tagger);
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

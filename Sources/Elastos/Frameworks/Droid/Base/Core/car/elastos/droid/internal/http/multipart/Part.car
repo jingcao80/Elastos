@@ -1,0 +1,157 @@
+module
+{
+    using interface Elastos.IO.IOutputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Http {
+    namespace Multipart {
+
+    /**
+     * Abstract class for one Part of a multipart post object.
+     *
+     * @author <a href="mailto:mattalbright@yahoo.com">Matthew Albright</a>
+     * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
+     * @author <a href="mailto:adrian@ephox.com">Adrian Sutton</a>
+     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+     * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 2.0
+     */
+    [local]
+    interface IPart {
+        /**
+         * Return the name of this part.
+         * @return The name.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns the content type of this part.
+         * @return the content type, or <code>null</code> to exclude the content type header
+         */
+        GetContentType(
+            [out] String* type);
+
+        /**
+         * Return the character encoding of this part.
+         * @return the character encoding, or <code>null</code> to exclude the character
+         * encoding header
+         */
+        GetCharSet(
+            [out] String* charset);
+
+        /**
+         * Return the transfer encoding of this part.
+         * @return the transfer encoding, or <code>null</code> to exclude the transfer encoding header
+         */
+        GetTransferEncoding(
+            [out] String* transferEncoding);
+
+        /**
+         * Tests if this part can be sent more than once.
+         * @return <code>true</code> if {@link #sendData(OutputStream)} can be successfully called
+         * more than once.
+         * @since 3.0
+         */
+        IsRepeatable(
+            [out] Boolean* isRepeatable);
+
+        /**
+         * Write all the data to the output stream.
+         * If you override this method make sure to override
+         * #length() as well
+         *
+         * @param out The output stream
+         * @throws IOException If an IO problem occurs.
+         */
+        Send(
+            [in] IOutputStream* outStream);
+
+        /**
+         * Return the full length of all the data.
+         * If you override this method make sure to override
+         * #send(OutputStream) as well
+         *
+         * @return long The length.
+         * @throws IOException If an IO problem occurs
+         */
+        Length(
+            [out] Int64* length);
+    }
+
+    [local, deprecated]
+    interface IPartHelper {
+        /**
+         * Return the boundary string.
+         * @return the boundary string
+         * @deprecated uses a constant string. Rather use {@link #getPartBoundary}
+         */
+        GetBoundary(
+            [out] String* boundary);
+
+        /**
+         * Write all parts and the last boundary to the specified output stream.
+         *
+         * @param out The stream to write to.
+         * @param parts The parts to write.
+         *
+         * @throws IOException If an I/O error occurs while writing the parts.
+         */
+        SendParts(
+            [in] IOutputStream* outStream,
+            [in] ArrayOf<IPart*>* parts);
+
+        /**
+         * Write all parts and the last boundary to the specified output stream.
+         *
+         * @param out The stream to write to.
+         * @param parts The parts to write.
+         * @param partBoundary The ASCII bytes to use as the part boundary.
+         *
+         * @throws IOException If an I/O error occurs while writing the parts.
+         *
+         * @since 3.0
+         */
+        SendParts(
+            [in] IOutputStream* outStream,
+            [in] ArrayOf<IPart*>* parts,
+            [in] ArrayOf<Byte>* partBoundary);
+
+        /**
+         * Return the total sum of all parts and that of the last boundary
+         *
+         * @param parts The parts.
+         * @return The total length
+         *
+         * @throws IOException If an I/O error occurs while writing the parts.
+         */
+        GetLengthOfParts(
+            [in] ArrayOf<IPart*>* parts,
+            [out] Int64* length);
+
+        /**
+         * Gets the length of the multipart message including the given parts.
+         *
+         * @param parts The parts.
+         * @param partBoundary The ASCII bytes to use as the part boundary.
+         * @return The total length
+         *
+         * @throws IOException If an I/O error occurs while writing the parts.
+         *
+         * @since 3.0
+         */
+        GetLengthOfParts(
+            [in] ArrayOf<IPart*>* parts,
+            [in] ArrayOf<Byte>* partBoundary,
+            [out] Int64* length);
+    }
+
+    } // namespace Multipart
+    } // namespace Http
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

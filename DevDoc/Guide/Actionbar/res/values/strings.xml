@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Actionbar</string>
+    <string name="action_settings">Settings</string>
+    <string name="second_action_settings">Second Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_second_bar">SecondBarActivity</string>
+	<string name="second_button">start second activity</string>
+	<string name="action_search">Search</string>
+	<string name="sent_text">sent text</string>
+</resources>

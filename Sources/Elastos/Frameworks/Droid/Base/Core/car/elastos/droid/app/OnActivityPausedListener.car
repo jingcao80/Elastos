@@ -1,0 +1,21 @@
+module
+{
+    interface Elastos.Droid.App.IActivity;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    [local]
+    interface IOnActivityPausedListener {
+        /**
+         * Called when the given activity is paused.
+         */
+        OnPaused(
+            [in] IActivity* activity);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

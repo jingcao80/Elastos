@@ -1,0 +1,165 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.IKeyPair;
+    interface Elastos.Security.ISecureRandom;
+    interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IKeyPairGenerator {
+        /**
+         * Returns the name of the algorithm of this {@code KeyPairGenerator}.
+         *
+         * @return the name of the algorithm of this {@code KeyPairGenerator}
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the provider associated with this {@code KeyPairGenerator}.
+         *
+         * @return the provider associated with this {@code KeyPairGenerator}
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Initializes this {@code KeyPairGenerator} with the given key size. The
+         * default parameter set and a default {@code SecureRandom} instance will be
+         * used.
+         *
+         * @param keysize
+         *            the size of the key (number of bits)
+         */
+        Initialize(
+            [in] Int32 keysize);
+
+        /**
+         * Initializes this {@code KeyPairGenerator} with the given {@code
+         * AlgorithmParameterSpec}. A default {@code SecureRandom} instance will be
+         * used.
+         *
+         * @param param
+         *            the parameters to use
+         * @throws InvalidAlgorithmParameterException
+         *             if the specified parameters are not supported
+         */
+        InitializeEx(
+            [in] IAlgorithmParameterSpec* param);
+
+        /**
+         * Computes and returns a new unique {@code KeyPair} each time this method
+         * is called.
+         * <p>
+         * This does exactly the same as {@link #generateKeyPair()}.
+         *
+         * @return a new unique {@code KeyPair} each time this method is called
+         */
+        GenKeyPair(
+            [out] IKeyPair** keyPair);
+
+        /**
+         * Computes and returns a new unique {@code KeyPair} each time this method
+         * is called.
+         * <p>
+         * This does exactly the same as {@link #genKeyPair()}.
+         *
+         * @return a new unique {@code KeyPair} each time this method is called
+         */
+        GenerateKeyPair(
+            [out] IKeyPair** keyPair);
+
+        /**
+         * Initializes this {@code KeyPairGenerator} with the given key size and the
+         * given {@code SecureRandom}. The default parameter set will be used.
+         *
+         * @param keysize
+         *            the key size
+         * @param random
+         *            the source of randomness
+         */
+        InitializeEx2(
+            [in] Int32 keysize,
+            [in] ISecureRandom* random);
+
+        /**
+         * Initializes this {@code KeyPairGenerator} with the given {@code
+         * AlgorithmParameterSpec} and the given {@code SecureRandom}.
+         *
+         * @param param
+         *            the parameters to use
+         * @param random
+         *            the source of randomness
+         * @throws InvalidAlgorithmParameterException
+         *             if the specified parameters are not supported
+         */
+        InitializeEx3(
+            [in] IAlgorithmParameterSpec* param,
+            [in] ISecureRandom* random);
+    }
+
+    interface IKeyPairGeneratorHelper {
+        /**
+         * Returns a new instance of {@code KeyPairGenerator} that utilizes the
+         * specified algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use
+         * @return a new instance of {@code KeyPairGenerator} that utilizes the
+         *         specified algorithm
+         * @throws NoSuchAlgorithmException if the specified algorithm is not available
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] IKeyPairGenerator** instance);
+
+        /**
+         * Returns a new instance of {@code KeyPairGenerator} that utilizes the
+         * specified algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use
+         * @param provider
+         *            the name of the provider
+         * @return a new instance of {@code KeyPairGenerator} that utilizes the
+         *         specified algorithm from the specified provider
+         * @throws NoSuchAlgorithmException if the specified algorithm is not available
+         * @throws NoSuchProviderException if the specified provider is not available
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         */
+        GetInstanceEx(
+            [in] String algorithm,
+            [in] String provider,
+            [out] IKeyPairGenerator** instance);
+
+        /**
+         * Returns a new instance of {@code KeyPairGenerator} that utilizes the
+         * specified algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use
+         * @param provider
+         *            the provider
+         * @return a new instance of {@code KeyPairGenerator} that utilizes the
+         *         specified algorithm from the specified provider
+         * @throws NoSuchAlgorithmException if the specified algorithm is not available
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}
+         * @throws IllegalArgumentException if {@code provider == null}
+         */
+        GetInstanceEx2(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] IKeyPairGenerator** instance);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

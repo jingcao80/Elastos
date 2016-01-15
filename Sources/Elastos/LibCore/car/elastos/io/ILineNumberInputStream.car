@@ -1,0 +1,50 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace IO {
+    /**
+     * Wraps an existing {@link InputStream} and counts the line terminators
+     * encountered while reading the data. Line numbering starts at 0. Recognized
+     * line terminator sequences are {@code '\r'}, {@code '\n'} and {@code "\r\n"}.
+     * When using {@code read}, line terminator sequences are always translated into
+     * {@code '\n'}.
+     *
+     * @deprecated Use {@link LineNumberReader} instead.
+     *
+     * @implement Elastos.IO.IFilterInputStream
+     */
+     // @Deprecated
+     /**
+     * @Involve
+     * interface Elastos.IO.ICloseable;
+     * interface IInputStream;
+     * interface IFilterInputStream;
+     */
+    interface ILineNumberInputStream {
+        /**
+         * Returns the current line number for this stream. Numbering starts at 0.
+         *
+         * @return the current line number.
+         */
+        GetLineNumber(
+            [out] Int32* lineNumber);
+
+        /**
+         * Sets the line number of this stream to the specified
+         * {lineNumber}. Note that this may have side effects on the
+         * line number associated with the last marked position.
+         *
+         * @param lineNumber
+         *            the new lineNumber value.
+         * @see #mark(int)
+         * @see #reset()
+         */
+        SetLineNumber(
+            [in] Int32 lineNumber);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

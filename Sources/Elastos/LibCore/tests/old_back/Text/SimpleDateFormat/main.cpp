@@ -1,0 +1,52 @@
+#include "test.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <elautoptr.h>
+
+typedef int (CTest::*PTestEntry)(int argc, char *argv[]);
+
+PTestEntry TestEntry[] =
+{
+    &CTest::test_2DigitYearStartIsCloned,
+    &CTest::test_StandAloneNames,
+    &CTest::test2038,
+    &CTest::testParsingUncommonTimeZoneAbbreviations,
+    &CTest::testFormattingUncommonTimeZoneAbbreviations,
+    &CTest::testTimeZoneFormatting,
+    &CTest::testObsoleteDstZoneName,
+    &CTest::testDstZoneNameWithNonDstTimestamp,
+    &CTest::testNonDstZoneNameWithDstTimestamp,
+    &CTest::testDstZoneWithNonDstTimestampForNonHourDstZone,
+    &CTest::testNonDstZoneWithDstTimestampForNonHourDstZone,
+    &CTest::testLocales,
+    &CTest::testParseTimezoneOnly,
+    &CTest::testParseArabic,
+
+};
+
+
+int main(int argc, char *argv[])
+{
+    if (argc == 1) {
+        printf("*ERROR* Require test case number\n");
+        return -1;
+    }
+
+    int nIndex = atoi(argv[1]) - 1;
+    int nLength = sizeof(TestEntry) / sizeof(TestEntry[0]);
+
+    if (nIndex < 0 || nIndex >= nLength) {
+        printf("*ERROR* Invalid testing case number\n");
+        return -1;
+    }
+
+//    TPINIT;
+
+    CTest TestObject;
+
+    int nQuitCode = (TestObject.*TestEntry[nIndex])(argc, argv);
+
+//    TPEND;
+
+    return nQuitCode;
+}

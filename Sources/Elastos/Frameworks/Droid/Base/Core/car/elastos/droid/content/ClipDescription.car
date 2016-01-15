@@ -1,0 +1,122 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IStringBuilder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+
+    /**
+     * Meta-data describing the contents of a ClipData. Provides enough information to know if you can handle the ClipData, but not the data itself.
+     *
+     * @sa ClipData
+     * <p>
+     * <h3>Developer Guides</h3>
+     * <p>
+     * For more information about using the clipboard framework, read the Copy and Paste developer guide.
+     *
+     * Copy and Paste
+     */
+     /**
+      * @Involve
+      * interface IParcelable
+      */
+    interface IClipDescription {
+        /**
+         * The MIME type for a clip holding plain text.
+         */
+        const String MIMETYPE_TEXT_PLAIN = "text/plain";
+
+        /**
+         * The MIME type for a clip holding HTML text.
+         */
+        const String MIMETYPE_TEXT_HTML = "text/html";
+
+        /**
+         * The MIME type for a clip holding one or more URIs.  This should be
+         * used for URIs that are meaningful to a user (such as an http: URI).
+         * It should <em>not</em> be used for a content: URI that references some
+         * other piece of data; in that case the MIME type should be the type
+         * of the referenced data.
+         */
+        const String MIMETYPE_TEXT_URILIST = "text/uri-list";
+
+        /**
+         * The MIME type for a clip holding an Intent.
+         */
+        const String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
+
+        /**
+         * Return the label for this clip.
+         */
+        GetLabel(
+            [out] ICharSequence** label);
+
+        /**
+         * Check whether the clip description contains the given MIME type.
+         *
+         * @param mimeType The desired MIME type.  May be a pattern.
+         * @return Returns true if one of the MIME types in the clip description
+         * matches the desired MIME type, else false.
+         */
+        HasMimeType(
+            [in] String mimeType,
+            [out] Boolean* hasMimeType);
+
+        /**
+         * Filter the clip description MIME types by the given MIME type.  Returns
+         * all MIME types in the clip that match the given MIME type.
+         *
+         * @param mimeType The desired MIME type.  May be a pattern.
+         * @return Returns an array of all matching MIME types.  If there are no
+         * matching MIME types, null is returned.
+         */
+        FilterMimeTypes(
+            [in] String mimeType,
+            [out, callee] ArrayOf<String>* mimeTypes);
+
+        /**
+         * Return the number of MIME types the clip is available in.
+         */
+        GetMimeTypeCount(
+            [out] Int32* count);
+
+        /**
+         * Return one of the possible clip MIME types.
+         */
+        GetMimeType(
+            [in] Int32 index,
+            [out] String* mimeType);
+
+        /** @hide */
+        Validate();
+
+        ToString(
+            [out] String* str);
+
+        /** @hide */
+        ToShortString(
+            [in] IStringBuilder* builder,
+            [out] Boolean* value);
+    }
+
+    interface IClipDescriptionHelper {
+        /**
+         * Helper to compare two MIME types, where one may be a pattern.
+         * @param concreteType A fully-specified MIME type.
+         * @param desiredType A desired MIME type that may be a pattern such as *\/*.
+         * @return Returns true if the two MIME types match.
+         */
+        CompareMimeTypes(
+            [in] String concreteType,
+            [in] String desiredType,
+            [out] Boolean* isMatch);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

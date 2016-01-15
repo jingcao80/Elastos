@@ -1,0 +1,85 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.IProviderService;
+    interface Elastos.Utility.IArrayList;
+    interface Org.Apache.Harmony.Security.Fortress.ISecurityAccess;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Fortress {
+
+    interface ISpiAndProvider {
+        SetSpi(
+            [in] IInterface* spi);
+
+        GetSpi(
+            [out] IInterface** spi);
+
+        SetProvider(
+            [in] IProvider* provider);
+
+        GetProvider(
+            [out] IProvider** provider);
+    }
+
+    interface IEngine {
+        /**
+         * Finds the appropriate service implementation and returns an
+         * {@code SpiAndProvider} instance containing a reference to SPI
+         * and its {@code Provider}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IInterface* param,
+            [out] ISpiAndProvider** instance);
+
+        /**
+         * Finds the appropriate service implementation and returns an
+         * {@code SpiAndProvider} instance containing a reference to SPI
+         * and its {@code Provider}
+         */
+        GetInstance(
+            [in] IProviderService* service,
+            [in] String param,
+            [out] ISpiAndProvider** instance);
+
+        /**
+         * Returns a list of all possible matches for a given algorithm.
+         */
+        GetServices(
+            [in] String algorithm,
+            [out] IArrayList** services);
+
+        /**
+         * Finds the appropriate service implementation and returns and
+         * instance of the class that implements corresponding Service
+         * Provider Interface.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [in] IInterface* param,
+            [out] IInterface** instance);
+    }
+
+    interface IEngineHelper {
+        /**
+         * Access to package visible api in java.security
+         */
+        SetDoor(
+            [in] ISecurityAccess* door);
+
+        GetDoor(
+            [out] ISecurityAccess** door);
+    }
+
+    } // namespace Fortress
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

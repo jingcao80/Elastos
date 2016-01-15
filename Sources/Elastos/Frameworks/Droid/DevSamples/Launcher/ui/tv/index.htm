@@ -1,0 +1,823 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+<script type="text/javascript">
+
+window.onerror=function(m,u,l){
+	//var s='Err:' + m + '\r\n'+'Line:' + l + '\r\n'+'URL:' + u + '\r\n';
+	//alert(s);
+};
+window.onload=function(){TVUI.init();};
+
+window.onfocus=function(){
+	//alert('window.focus');
+	document.body.focus();
+	
+}
+window.onblur=function(){
+	//alert('window.blur');
+}
+
+</script>
+
+<meta http-equiv="Conent-Type" content="text/html;charset=utf-8">
+
+<link rel="shortcut icon" href="../favicon.ico">
+
+<link href="video/video-js.css" rel="stylesheet">
+<script src="video/video.js"></script>
+
+
+<link rel="stylesheet" type="text/css" href="css/tvui.css" />
+
+        <link href="3dshow/css/main.css" rel="stylesheet" type="text/css" />
+
+<style id="css_mod_com" type="text/css">
+	.hide{display:none;}
+</style>
+
+<meta name="viewport" content="width=480; initial-scale=.6667; user-scalable=0" />
+
+<meta name="viewport" content="width=480; initial-scale=.6667; user-scalable=0" />
+
+</head>
+
+<body><div id="UI_KT_CONT" style="width:100%;height:100%;">
+<div id="UI_KT" class="UI_KT" style="left:0%;top:200%;width:100%;height:100%;">
+	<div id="bg_main" class="cvs" src="img/ui_bg/Elastos_Bg.png" alpha=1 style="width:100%;height:100%;overflow:hidden;"></div>
+
+	<div id="ui_demo" style="display:none;width:100%;height:100%;">
+		<div id="ui_demo_00" class="demo_div cvs" src="img/ui_demo/elastos_pingbao_jianrong.png" alpha=0.1 style="left:5.5%;top:10%;"></div>
+		<div id="ui_demo_00_txt" class="demo_img cvs" src="img/ui_demo/elastos_pingbao_jianrong_word.png" alpha=0.1 style="left:22.5%;top:12.22%;"></div>
+
+		<div id="ui_demo_01" class="demo_div cvs" src="img/ui_demo/elastos_pingbao_baomi.png" alpha=0.25 style="left:34.4%;top:22.5%;"></div>
+		<div id="ui_demo_01_txt" class="demo_img cvs" src="img/ui_demo/elastos_pingbao_baomi_word.png" alpha=0.25 style="left:52.6%;top:27%;"></div>
+
+		<div id="ui_demo_02" class="demo_div cvs" src="img/ui_demo/elastos_pingbao_jiating.png" alpha=0.4 style="left:72%;top:8%;"></div>
+		<div id="ui_demo_02_txt" class="demo_img cvs" src="img/ui_demo/elastos_pingbao_jiating_word.png" alpha=0.4 style="left:66.2%;top:9.8%;"></div>
+
+		<div id="ui_demo_03" class="demo_div cvs" src="img/ui_demo/elastos_pingbao_yingyong.png" alpha=0.55 style="left:11%;top:54%;"></div>
+		<div id="ui_demo_03_txt" class="demo_img cvs" src="img/ui_demo/elastos_pingbao_yingyong_word.png" alpha=0.55 style="left:5.2%;top:57%;"></div>
+
+		<div id="ui_demo_04" class="demo_div cvs" src="img/ui_demo/elastos_pingbao_fenxiang.png" alpha=0.7 style="left:39.6%;top:60.5%;"></div>
+		<div id="ui_demo_04_txt" class="demo_img cvs" src="img/ui_demo/elastos_pingbao_fenxiang_word.png" alpha=0.7 style="left:34%;top:81.8%;"></div>
+
+		<div id="ui_demo_05" class="demo_div cvs" src="img/ui_demo/elastos_pingbao_meiti.png" alpha=0.85 style="left:70.5%;top:61%;"></div>
+		<div id="ui_demo_05_txt" class="demo_img" src="img/ui_demo/elastos_pingbao_meiti_word.png" alpha=0.85 style="left:86.7%;top:60.5%;"></div>
+	</div>
+
+<!----------------ui_home begin----------------><div id="ui_home" style="display:none;width:100%;height:100%;">
+
+	<div id="bar_top_bk" class="grp_out_bak" style="left:0%;top:0%;width:100%;height:11%;border:1px solid rgba(150,150,150,0.5);background:rgba(150,150,150,0.3);">
+	</div>
+
+	<div id="bar_top_02" class="bar_top_02 grp_out_bak">
+		<div id="grp_app_con">
+			<div id="grp_app_con_cont">
+				<div id="app_con_02" class="app_con kb btn_out" tab="[0,0],[0,0]">
+					<img id="app_con_02_img" src="img/ui_con/elastos_demoui_status_ic_wifi.png" style="position:absolute;left:2%;top:5%;width:100%;height:90%;">
+				</div>
+				<div id="app_con_03" class="app_con kb btn_out" tab="[0,0],[0,1]">
+					<img id="app_con_03_img" src="img/ui_con/elastos_demoui_status_ic_net.png" style="position:absolute;left:2%;top:5%;width:100%;height:90%;">
+				</div>
+				<div id="app_con_04" class="app_con kb btn_out" tab="[0,0],[1,0]">
+					<img id="app_con_04_img" src="img/ui_con/elastos_demoui_status_ic_dungle.png" style="position:absolute;left:2%;top:5%;width:100%;height:90%;">
+				</div>
+				<div id="app_con_05" class="app_con kb btn_out" tab="[0,0],[1,1]">
+					<img id="app_con_05_img" src="img/ui_con/elastos_demoui_status_ic_box.png" style="position:absolute;left:2%;top:5%;width:100%;height:90%;">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="bar_bot_01" class="grp_out_bak">
+		<div id="app_wgt">
+			<div id="app_wgt_weather" class="kb grp_out" tab="[0,0],[0-1,2-3]" style="background:white;box-shadow: 0px 0px 4px 4px rgba(255,255,255,0.5);">
+				<div style="left:0px;top:0px;width:220px;height:100%;">
+					<iframe id="app_wgt_weather_frame" src="http://www.ieface.com/widget" style="display:none;width:100%;height:100%;" onload="TVUI.showWeatherWidget(true);"></iframe>
+				</div>
+
+				<div style="width:100%;height:100%;background:rgba(0,0,256,0.3)"></div>
+			</div>
+			<div id="app_wgt_datetime" class="kb grp_out" tab="[0,0],[0-1,4-5]">
+				<img id="app_wgt_datetime_img" src="datetime.png" style="display:none;width:100%;height:100%;padding:0px 2px;">
+
+
+			</div>
+		</div>
+	</div>
+
+	<div id="bar_top_01" class="grp_out_bak">
+		<div id="grp_app_hot">
+			<div id="grp_app_hot_cont_00">
+				<div id="hot_shortcutSetting" class="app_hot kb btn_out" tab="[0,0],[0-1,6]" cmd="cmd_shortcutSetting">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_add.png">
+				</div>
+
+				<div id="hot_ic_setting_calculator" class="app_hot kb btn_out" tab="[0,0],[0-1,7]" cmd="cmd_ic_setting_calculator">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_calculator.png">
+				</div>
+				<div id="hot_ic_setting_wifi" class="app_hot kb btn_out" tab="[0,0],[0-1,8]" cmd="cmd_ic_setting_wifi">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_wifi.png">
+				</div>
+				<div id="hot_ic_setting_gps" class="app_hot kb btn_out" tab="[0,0],[0-1,9]" cmd="cmd_ic_setting_gps">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_gps.png">
+				</div>
+				<div id="hot_ic_setting_privilege" class="app_hot kb btn_out" tab="[0,0],[0-1,10]" cmd="cmd_ic_setting_privilege">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_privilege.png">
+				</div>
+				<div id="hot_ic_setting_bluetooth" class="app_hot kb btn_out" tab="[0,0],[0-1,11]" cmd="cmd_ic_setting_bluetooth">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_bluetooth.png">
+				</div>
+				<div id="hot_ic_setting_storage" class="app_hot kb btn_out" tab="[0,0],[0-1,12]" cmd="cmd_ic_setting_storage">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_storage.png">
+				</div>
+				<div id="hot_ic_setting_security" class="app_hot kb btn_out" tab="[0,0],[0-1,13]" cmd="cmd_ic_setting_security">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_security.png">
+				</div>
+				<div id="hot_ic_setting_apmanage" class="app_hot kb btn_out" tab="[0,0],[0-1,14]" cmd="cmd_ic_setting_apmanage">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_apmanage.png">
+				</div>
+				<div id="hot_ic_setting_shortcut" class="app_hot kb btn_out" tab="[0,0],[0-1,15]" cmd="cmd_ic_setting_shortcut">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_shortcut.png">
+				</div>
+				<div id="hot_ic_setting_voice" class="app_hot kb btn_out" tab="[0,0],[0-1,16]" cmd="cmd_ic_setting_voice">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_voice.png">
+				</div>
+				<div id="hot_ic_setting_bright" class="app_hot kb btn_out" tab="[0,0],[0-1,17]" cmd="cmd_ic_setting_bright">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_bright.png">
+				</div>
+				<div id="hot_ic_setting_resolution" class="app_hot kb btn_out" tab="[0,0],[0-1,18]" cmd="cmd_ic_setting_resolution">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_resolution.png">
+				</div>
+				<div id="hot_ic_setting_word" class="app_hot kb btn_out" tab="[0,0],[0-1,19]" cmd="cmd_ic_setting_word">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_word.png">
+				</div>
+				<div id="hot_ic_setting_language" class="app_hot kb btn_out" tab="[0,0],[0-1,20]" cmd="cmd_ic_setting_language">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_language.png">
+				</div>
+				<div id="hot_ic_setting_input" class="app_hot kb btn_out" tab="[0,3],[0,0],[0-1,21]" cmd="cmd_ic_setting_input">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_input.png">
+				</div>
+				<div id="hot_ic_setting_time" class="app_hot kb btn_out" tab="[0,0],[0-1,22]" cmd="cmd_ic_setting_time">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_time.png">
+				</div>
+				<div id="hot_ic_setting_worldt" class="app_hot kb btn_out" tab="[0,0],[0-1,23]" cmd="cmd_ic_setting_worldt">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_worldt.png">
+				</div>
+				<div id="hot_ic_setting_reset" class="app_hot kb btn_out" tab="[0,0],[0-1,24]" cmd="cmd_ic_setting_reset">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_reset.png">
+				</div>
+				<div id="hot_ic_setting_infor" class="app_hot kb btn_out" tab="[0,0],[0-1,25]" cmd="cmd_ic_setting_infor">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_infor.png">
+				</div>
+
+				<div id="hot_shortcutSetting" class="app_hot kb btn_out" tab="[0,0],[0-1,26]" cmd="cmd_shortcutSetting">
+					<img src="img/ui_local/elastos_demoui_title_shortcut_add.png">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="app_tv" class="app_tv grp_out_bak" cmd="cmd_app_tv">
+		<div style="position:absolute;width:100%;height:100%;">
+			<img src="img/ui_tv/bg_blue.jpg" style="width:100%;height:100%;">
+		</div>
+		<div id="app_tv_show_cont" style="position:absolute;width:100%;height:100%;">
+		</div>
+
+		<div id="app_tv_show_cont_img" class="kb grp_out" tab="[0,0],[3-4,0-8]" style="position:absolute;left:1%;top:19%;width:98%;height:58%;">
+			<div id="app_tv_show_cont_imgs" style="position:absolute;;left:-100%;top:0%;width:400%;height:100%;">
+				<div id="app_tv_show_cont_img_00" style="position:absolute;left:0%;top:0%;width:25%;height:100%;background:none;">
+					<img id="app_tv_imgs_00" src="3dshow/images/pic1.png" style="width:100%;height:100%;">
+				</div>
+				<div id="app_tv_show_cont_img_01" style="position:absolute;left:25%;top:0%;width:25%;height:100%;background:none;">
+					<img id="app_tv_imgs_01" src="3dshow/images/pic2.png" style="width:100%;height:100%;">
+				</div>
+				<div id="app_tv_show_cont_img_02" style="position:absolute;left:50%;top:0%;width:25%;height:100%;background:none;">
+					<img id="app_tv_imgs_02" src="3dshow/images/pic3.png" style="width:100%;height:100%;">
+				</div>
+				<div id="app_tv_show_cont_img_03" style="position:absolute;left:75%;top:0%;width:25%;height:100%;background:none;">
+					<img id="app_tv_imgs_03" src="3dshow/images/pic4.png" style="width:100%;height:100%;">
+				</div>
+			</div>
+		</div>
+
+		<div id="app_tv_cont" style="display:none;position:absolute;left:0%;top:0%;width:100%;height:100%;overflow:hidden;">
+			<img src="img/ui_tv/bg_tv.png" style="width:100%;height:100%;">
+		</div>
+
+		<div id="app_tv_cont" style="position:absolute;left:0%;top:0%;width:100%;height:100%;overflow:hidden;">
+			<div id="app_tv_top" style="position:absolute;left:0%;top:0%;width:100%;height:17%;background:rgba(255,255,255,0.4);border-bottom:2px solid rgba(255,255,255,0.2)">
+				<div class="kb grp_out" tab="[0,0],[2,0-3]" style="left:2%;top:10%;font-size:48px;color:rgba(255,0,0,0.5);">Elastos TV</div>
+			</div>
+
+			<div id="app_tv_icons" class="grp_out_bak" style="position:absolute;left:60%;top:6%;width:25%;height:6%;overflow:hidden;">
+				<img id="app_tv_icons_00" src="3dshow/images/icons_00.png" class="kb btn_out" tab="[0,0],[2,4]" style="width:15%;height:100%;margin-left:4%;" cmd="cmd_app_tv_icons">
+				<img id="app_tv_icons_01" src="3dshow/images/icons_00.png" class="kb btn_out" tab="[0,0],[2,5]" style="width:15%;height:100%;margin-left:4%;" cmd="cmd_app_tv_icons">
+				<img id="app_tv_icons_02" src="3dshow/images/icons_00.png" class="kb btn_out" tab="[0,0],[2,6]" style="width:15%;height:100%;margin-left:4%;" cmd="cmd_app_tv_icons">
+				<img id="app_tv_icons_03" src="3dshow/images/icons_00.png" class="kb btn_out" tab="[0,0],[2,7]" style="width:15%;height:100%;margin-left:4%;" cmd="cmd_app_tv_icons">
+			</div>
+
+			<div id="app_tv_top" style="position:absolute;left:0%;top:68%;width:100%;height:8%;">
+
+			</div>
+			<div id="app_tv_bot" class="grp_out_bak" style="position:absolute;left:0%;top:77%;width:100%;height:20%;overflow:hidden;">
+				<div id="app_tv_00" style="position:absolute;left:2%;top:0%;width:12%;height:100%;">
+					<div id="app_tv_00_img" class="kb app_tv_icon_out" tab="[0,0],[5,0]">
+						<img src="img/ui_home/elastos_demoui_home_ic_androidmarket.png" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+					</div>
+					<div id="app_tv_01_txt" class="app_tv_icon_txt">
+						动漫
+					</div>
+
+				</div>
+				<div id="app_tv_01" style="position:absolute;left:14%;top:0%;width:12%;height:100%;">
+					<div id="app_tv_01_img" class="kb app_tv_icon_out" tab="[0,0],[5,1]">
+						<img src="img/ui_home/elastos_demoui_home_ic_cloud.png" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+					</div>
+					<div id="app_tv_01_txt" class="app_tv_icon_txt">
+						电影
+					</div>
+
+				</div>
+				<div id="app_tv_02" style="position:absolute;left:26%;top:0%;width:12%;height:100%;">
+					<div id="app_tv_02_img" class="kb app_tv_icon_out" tab="[0,0],[5,2]">
+						<img src="img/ui_home/elastos_demoui_home_ic_share.png" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+					</div>
+					<div id="app_tv_01_txt" class="app_tv_icon_txt">
+						音乐
+					</div>
+
+				</div>
+				<div id="app_tv_03" style="position:absolute;left:38%;top:0%;width:12%;height:100%;">
+					<div id="app_tv_03_img" class="kb app_tv_icon_out" tab="[0,0],[5,3]">
+						<img src="img/ui_home/elastos_demoui_home_ic_elastosmall.png" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+					</div>
+					<div id="app_tv_01_txt" class="app_tv_icon_txt">
+						体育
+					</div>
+
+				</div>
+				<div id="app_tv_04" style="position:absolute;left:50%;top:0%;width:12%;height:100%;">
+					<div id="app_tv_04_img" class="kb app_tv_icon_out" tab="[0,0],[5,4]">
+						<img src="img/ui_home/elastos_demoui_home_ic_multi.png" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+					</div>
+					<div id="app_tv_01_txt" class="app_tv_icon_txt">
+						电视剧
+					</div>
+
+				</div>
+				<div id="app_tv_05" style="position:absolute;left:62%;top:0%;width:12%;height:100%;">
+					<div id="app_tv_05_img" class="kb app_tv_icon_out" tab="[0,0],[5,5]">
+						<img src="img/ui_home/elastos_demoui_home_ic_browser.png" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+					</div>
+					<div id="app_tv_01_txt" class="app_tv_icon_txt">
+						高清视频
+					</div>
+
+				</div>
+				<div id="app_tv_06" style="position:absolute;left:74%;top:0%;width:12%;height:100%;">
+					<div id="app_tv_06_img" class="kb app_tv_icon_out" tab="[0,0],[5,6]">
+						<img src="img/ui_home/elastos_demoui_home_ic_setting.png" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+					</div>
+					<div id="app_tv_01_txt" class="app_tv_icon_txt">
+						搜索
+					</div>
+
+				</div>
+				<div id="app_tv_07" style="position:absolute;left:86%;top:0%;width:12%;height:100%;">
+					<div id="app_tv_07_img" class="kb app_tv_icon_out" tab="[0,0],[5,7-8]">
+						<img src="img/ui_home/elastos_demoui_home_ic_androidmarket.png" style="position:absolute;left:0%;top:0%;width:100%;height:100%;">
+					</div>
+					<div id="app_tv_01_txt" class="app_tv_icon_txt">
+						信息中心
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div id="app_ms" class="app_ms grp_out_bak">
+		<div id="app_tv_cont" style="position:absolute;left:0%;top:0%;width:100%;height:100%;overflow:hidden;">
+			<img src="img/ui_minisocial/bg_minisocial.png" style="width:100%;height:100%;">
+		</div>
+
+		<div id="app_ms_cont" class="kb app_ms_cont btn_out" tab="[0,0],[2,8-14]" style="position:absolute;left:5%;top:2%;width:90%;height:8%;font-size:24px;text-align:center;color:red;">
+			<img src="img/ui_minisocial/bg_minisocial_button.png" style="width:50%;height:70%;">
+		</div>
+		<div id="app_ms_cont" class="app_ms_cont" style="position:absolute;left:3%;top:10%;width:94%;height:90%;">
+
+			<div id="app_ms_0000" class="app_ms_item row_00 col_00;">
+				<div id="app_ms_0000_img" class="app_ms_img kb btn_out" tab="[0,0],[3,9]" cmd="cmd_exec_app" app="com.makemedroid.foxconn2012">
+					<img src="img/ui_minisocial/Foxconn2012.png">
+				</div>
+				<div class="app_ms_pin btn_out">
+					<img src="img/ui_minisocial/elastos_pin.png">
+				</div>
+				<div id="app_ms_0000_txt" class="app_ms_txt">
+					2012鸿海
+				</div>
+			</div>
+			<div id="app_ms_0001" class="app_ms_item row_00 col_01">
+				<div id="app_ms_0001_img" class="app_ms_img kb btn_out" tab="[0,0],[3,10]" cmd="cmd_exec_app" app="com.makemedroid.mobilemeal">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0001_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0002" class="app_ms_item row_00 col_02">
+				<div id="app_ms_0002_img" class="app_ms_img kb btn_out" tab="[0,0],[3,11]" cmd="cmd_exec_app" app="com.makemedroid.shanghaitourism">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0001_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0003" class="app_ms_item row_00 col_03">
+				<div id="app_ms_0003_img" class="app_ms_img kb btn_out" tab="[0,0],[3,12]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0003_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0004" class="app_ms_item row_00 col_04">
+				<div id="app_ms_0004_img" class="app_ms_img kb btn_out" tab="[0,0],[3,13-14]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0004_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+
+			<div id="app_ms_0100" class="app_ms_item row_01 col_00">
+				<div id="app_ms_0100_img" class="app_ms_img kb btn_out" tab="[0,0],[4,9]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0100_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0101" class="app_ms_item row_01 col_01">
+				<div id="app_ms_0101_img" class="app_ms_img kb btn_out" tab="[0,0],[4,10]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0101_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0102" class="app_ms_item row_01 col_02">
+				<div id="app_ms_0102_img" class="app_ms_img kb btn_out" tab="[0,0],[4,11]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0102_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0103" class="app_ms_item row_01 col_03">
+				<div id="app_ms_0103_img" class="app_ms_img kb btn_out" tab="[0,0],[4,12]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0103_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0104" class="app_ms_item row_01 col_04">
+				<div id="app_ms_0104_img" class="app_ms_img kb btn_out" tab="[0,0],[4,13-14]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0104_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+
+			<div id="app_ms_0200" class="app_ms_item row_02 col_00">
+				<div id="app_ms_0200_img" class="app_ms_img kb btn_out" tab="[0,0],[5,9]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0200_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0201" class="app_ms_item row_02 col_01">
+				<div id="app_ms_0201_img" class="app_ms_img kb btn_out" tab="[0,0],[5,10]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0201_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0202" class="app_ms_item row_02 col_02">
+				<div id="app_ms_0202_img" class="app_ms_img kb btn_out" tab="[0,0],[5,11]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0202_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0203" class="app_ms_item row_02 col_03">
+				<div id="app_ms_0203_img" class="app_ms_img kb btn_out" tab="[0,0],[5,12]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0203_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+			<div id="app_ms_0204" class="app_ms_item row_02 col_04">
+				<div id="app_ms_0204_img" class="app_ms_img kb btn_out" tab="[0,0],[5,13-14]">
+					<img src="img/ui_minisocial/elastos_add_pin.png">
+				</div>
+				<div id="app_ms_0204_txt" class="app_ms_txt">
+					&nbsp;
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="app_kt" class="grp_out_bak">
+
+		<div id="app_kt_00" class="app_kt_item" style="left:1%;">
+			<div class="kb app_kt_icon_out" tab="[0,0],[6,0-1]" cmd="cmd_home_ic_androidmarket">
+				<img src="img/ui_home/elastos_demoui_home_ic_androidmarket.png">
+			</div>
+			<div class="app_kt_word">
+				<img src="img/ui_home/elastos_demoui_home_ic_androidmarket_word.png">
+			</div>
+		</div>
+
+		<div id="app_kt_01" class="app_kt_item" style="left:15%;">
+			<div class="kb app_kt_icon_out" tab="[0,0],[6,2-3]" cmd="cmd_home_ic_cloud">
+				<img src="img/ui_home/elastos_demoui_home_ic_cloud.png">
+			</div>
+			<div class="app_kt_word">
+				<img src="img/ui_home/elastos_demoui_home_ic_cloud_word.png">
+			</div>
+
+		</div>
+
+		<div id="app_kt_02" class="app_kt_item" style="left:29%;">
+			<div class="kb app_kt_icon_out" tab="[0,0],[6,4-5]" cmd="cmd_home_ic_share">
+				<img src="img/ui_home/elastos_demoui_home_ic_share.png">
+			</div>
+			<div class="app_kt_word">
+				<img src="img/ui_home/elastos_demoui_home_ic_share_word.png">
+			</div>
+		</div>
+
+		<div id="app_kt_03" class="app_kt_item" style="left:43%;">
+			<div class="kb app_kt_icon_out" tab="[0,0],[6,6-7]" cmd="cmd_home_ic_elastosmall">
+				<img src="img/ui_home/elastos_demoui_home_ic_elastosmall.png">
+			</div>
+			<div class="app_kt_word">
+				<img src="img/ui_home/elastos_demoui_home_ic_elastosmall_word.png">
+			</div>
+		</div>
+
+		<div id="app_kt_04" class="app_kt_item" style="left:57%;">
+			<div class="kb app_kt_icon_out" tab="[0,0],[6,8-9]" cmd="cmd_home_ic_multi">
+				<img src="img/ui_home/elastos_demoui_home_ic_multi.png">
+			</div>
+			<div class="app_kt_word">
+				<img src="img/ui_home/elastos_demoui_home_ic_multi_word.png">
+			</div>
+		</div>
+
+		<div id="app_kt_05" class="app_kt_item" style="left:71%;">
+			<div class="kb app_kt_icon_out" tab="[0,0],[6,10-11]" cmd="cmd_home_ic_browser">
+				<img src="img/ui_home/elastos_demoui_home_ic_browser.png">
+			</div>
+			<div class="app_kt_word">
+				<img src="img/ui_home/elastos_demoui_home_ic_browser_word.png">
+			</div>
+		</div>
+
+		<div id="app_kt_06" class="app_kt_item" style="left:85%;">
+			<div class="kb app_kt_icon_out" tab="[0,0],[6,12-14]" cmd="cmd_home_ic_setting">
+				<img src="img/ui_home/elastos_demoui_home_ic_setting.png">
+			</div>
+			<div class="app_kt_word">
+				<img src="img/ui_home/elastos_demoui_home_ic_setting_word.png">
+			</div>
+		</div>
+	</div><!--app_kt end-->
+
+</div><!----------------ui_home end---------------->
+
+	<div id="app_ic_androidmarket" style="display:none;width:100%;height:100%;background:rgba(255,255,255,0.5);">
+		<div style="left:20%;top:30%;width:60%;height:20%;font-size:64px;text-align:center;">ANDROID&nbsp;MARKET</div>
+	</div>
+	<div id="app_ic_cloud" style="display:none;width:100%;height:100%;background:rgba(255,255,255,0.5);">
+		<div style="left:20%;top:30%;width:60%;height:20%;font-size:64px;text-align:center;">CLOUD</div>
+	</div>
+	<div id="app_ic_share" style="display:none;width:100%;height:100%;background:rgba(255,255,255,0.5);">
+		<div style="left:20%;top:30%;width:60%;height:20%;font-size:64px;text-align:center;">SHARE</div>
+	</div>
+	<div id="app_ic_elastosmall" style="display:none;width:100%;height:100%;background:rgba(255,255,255,0.5);">
+		<div style="left:20%;top:30%;width:60%;height:20%;font-size:64px;text-align:center;">ELASTOS&nbsp;MALL</div>
+	</div>
+	<div id="app_ic_multi" style="display:none;width:100%;height:100%;background:rgba(255,255,255,0.5);">
+		<div id="app_ic_multi_cont" style="left:0%;top:0%;width:100%;height:100%;font-size:64px;text-align:center;">
+		</div>
+
+	</div>
+	<div id="app_ic_browser" style="display:none;width:100%;height:100%;background:rgba(255,255,255,0.5);">
+		<div style="left:20%;top:30%;width:60%;height:20%;font-size:64px;text-align:center;">BROWSER</div>
+	</div>
+
+	<div id="app_ic_setting" style="display:none;">
+<!-----------------------app_ic_setting begin----------------------------->
+		<div class="grp_out" style="left:0%;top:0%;width:100%;height:100%;">
+			<img src="img/ui_bg/Elastos_Minisocials_Settings.png" style="display:none;width:100%;height:100%;">
+			<img src="img/ui_bg/Elastos_Bg.png" style="display:none;width:100%;height:100%;">
+		</div>
+
+
+		<div id="app_ic_setting_exec" style="left:0%;top:12%;width:100%;height:88%;">
+			<div class="gl00 gt00 gw01 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">数据连接</div>
+				</div>
+				<div id="app_ic_setting_wifi" class="kb su_0001 pu_0000 bg_blue btn_blue_out" tab="[1,0],[0,0]" cmd="cmd_ic_setting_wifi">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_wifi.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">网络设置</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+				<div id="app_ic_setting_bluetooth" class="kb su_0001 pu_0001 bg_green btn_blue_out" tab="[1,0],[0,1]" cmd="cmd_ic_setting_bluetooth">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_buletooth.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">蓝牙</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+			<div id="app_ic_setting_storage" class="gl00 gt01 gw01 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">存储空间</div>
+				</div>
+				<div class="kb su_0001 pu_0000 bg_yellow btn_blue_out" tab="[1,0],[1,0-1]" cmd="cmd_ic_setting_storage">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_storage.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">存储空间</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+			<div class="gl00 gt02 gw01 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">安全保密</div>
+				</div>
+				<div id="app_ic_setting_security" class="kb su_0001 pu_0000 bg_salpink btn_blue_out" tab="[1,0],[2,0-1]" cmd="cmd_ic_setting_security">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_security.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">安全保密</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+
+			<div class="gl01 gt00 gw00 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">应用管理</div>
+				</div>
+				<div id="app_ic_setting_apmanage" class="kb su_0000 pu_0000 bg_purple btn_blue_out" tab="[1,0],[0,2]" cmd="cmd_ic_setting_apmanage">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_apmanage.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">应用程式管理</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+			<div class="gl01 gt01 gw00 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">个性化</div>
+				</div>
+				<div id="app_ic_setting_shortcut" class="kb su_0000 pu_0000 bg_maroon btn_blue_out" tab="[1,0],[1,2]" cmd="cmd_ic_setting_shortcut">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_shortcut.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">快捷应用</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+			<div class="gl01 gt02 gw00 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">声音</div>
+				</div>
+				<div id="app_ic_setting_voice" class="kb su_0000 pu_0000 bg_green btn_blue_out" tab="[1,0],[2,2]" cmd="cmd_ic_setting_voice">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_voice.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">声音设置</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+
+			<div class="gl02 gt00 gw01 gh01">
+				<div class="gt_cont" style="left:4%;top:2%;width:92%;height:12%;">
+					<div class="gt_text">显示</div>
+				</div>
+
+				<div id="app_ic_setting_bright" class="kb su_0001 pu_0000 bg_blue btn_blue_out" tab="[1,0],[0,3]" cmd="cmd_ic_setting_bright" style="top:16.5%;height:30%;">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_bright.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">亮度设置</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+
+				<div id="app_ic_setting_resolution" class="kb su_0001 pu_0001 bg_salpink btn_blue_out" tab="[1,0],[0,4]" cmd="cmd_ic_setting_resolution" style="top:16.5%;height:30%;">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_resolution.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">分辨率设置</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+				<div id="app_ic_setting_word" class="kb su_0100 pu_0100 bg_green btn_blue_out" tab="[1,0],[1,3-4]" cmd="cmd_ic_setting_word" style="left:10%;top:49%;width:38%;height:29%;">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_word.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">字体大小设置</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+			<div class="gl02 gt02 gw01 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">语言和输入法</div>
+				</div>
+				<div id="app_ic_setting_language" class="kb su_0001 pu_0000 bg_blue btn_blue_out" tab="[1,0],[2,3]" cmd="cmd_ic_setting_language">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_language.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">语言</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+				<div id="app_ic_setting_input" class="kb su_0001 pu_0001 bg_yellow btn_blue_out" tab="[1,0],[2,4]" cmd="cmd_ic_setting_input">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_input.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">输入法</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+
+			<div class="gl03 gt00 gw01 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">时间和日期</div>
+				</div>
+				<div id="app_ic_setting_time" class="kb su_0001 pu_0000 bg_yellow btn_blue_out" tab="[1,0],[0,5]" cmd="cmd_ic_setting_time">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_time.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">时间设置</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+				<div id="app_ic_setting_worldt" class="kb su_0001 pu_0001 bg_green btn_blue_out" tab="[1,0],[0,6]" cmd="cmd_ic_setting_worldt">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_worldt.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">时区设置</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+			<div class="gl03 gt01 gw01 gh00">
+				<div class="gt_cont">
+					<div class="gt_text">原始</div>
+				</div>
+				<div id="app_ic_setting_reset" class="kb su_0001 pu_0000 bg_purple btn_blue_out" tab="[1,0],[1,5]" cmd="cmd_ic_setting_reset">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_reset.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">恢复出厂设置</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+				<div id="app_ic_setting_infor" class="kb su_0001 pu_0001 bg_blue btn_blue_out" tab="[1,0],[1,6]" cmd="cmd_ic_setting_infor">
+					<div class="ci_cont">
+						<img src="img/ui_ic/elastos_demoui_ic_infor.png">
+					</div>
+					<div class="ct_cont">
+						<div class="ct_text">关于Elastos</div>
+					</div>
+					<div class="cc_cont">
+						<img class="cc_img0" src="img/ui_ic/elastos_demoui_ic_check.png" cmd="cmd_ic_setting_check">
+					</div>
+				</div>
+			</div>
+			<div class="gl03 gt02 gw01 gh00 grp_out">
+			</div>
+		</div>
+
+<!-----------------------app_ic_setting end----------------------------->
+	</div>
+
+
+</div>
+
+<div id="FPS" style="display:none;position:absolute;right:5px;bottom:5px;font-size:12px;color:#666;font-family:verdana;background:black;padding:4px;"></div>
+
+<div id="setting_back" cmd="cmd_ui_shortcutSetting_ret" style="left:4%;top:1.2%;width:4%;height:4.2%;background:rgba(255,255,255,0);"></div>
+
+<div id="app_ic_setting_btn_confirm" class="kb btn_out" tab="[1,0],[2,5-6]" cmd="cmd_ui_shortcutSetting_ret" style="display:none;right:0%;bottom:0%;width:32px;height:32px;">
+	<img src="img/ui_bg/ret_bg.png" style="width:32px;height:32px;">
+</div>
+
+</div>
+
+<a id="dom_newwindow" style="display:none;" target="_blank"></a>
+
+</body>
+
+<script>
+
+(function(){				//----main begin----
+
+
+})();					//----main end----
+
+</script>
+
+<script src="js/tvui_fn.js"></script>
+<script src="js/tvui_tvui.js"></script>
+
+<script src="js/tvui_widget.js"></script>
+
+<script src="3dshow/js/tvshow.js"></script>
+
+<script src="js/tvui_evt.js"></script>
+<script src="js/tvui_demo.js"></script>
+<script src="js/tvui_home.js"></script>
+
+<script src="js/tvui_screens.js"></script>
+
+<script src="js/tvui_ic_setting.js"></script>
+
+<script src="js/tvui_cmd.js"></script>
+<script src="js/tvui_fps.js"></script>
+
+</html>

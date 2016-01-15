@@ -1,0 +1,44 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * An instance of this class is passed as a parameter in various {@link WebChromeClient} action
+     * notifications. The object is used as a handle onto the underlying JavaScript-originated request,
+     * and provides a means for the client to indicate whether this action should proceed.
+     */
+    interface IJsResult {
+        /**
+         * Handle the result if the user cancelled the dialog.
+         */
+        Cancel();
+
+        /**
+         * Handle a confirmation response from the user.
+         */
+        Confirm();
+
+        /**
+         * @hide Only for use by WebViewProvider implementations
+         */
+        GetResult(
+            [out] Boolean* result);
+    }
+
+    /**
+     * Callback interface, implemented by the WebViewProvider implementation to receive
+     * notifications when the JavaScript result represented by a JsResult instance has
+     * @hide Only for use by WebViewProvider implementations
+     */
+    interface IJsResultReceiver {
+        OnJsResultComplete(
+            [in] IJsResult* result);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

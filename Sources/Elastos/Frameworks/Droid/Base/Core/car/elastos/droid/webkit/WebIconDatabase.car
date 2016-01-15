@@ -1,0 +1,107 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Webkit.IWebIconDatabase;
+    interface Elastos.Droid.Content.IContentResolver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * Interface for receiving icons from the database.
+     * @deprecated This interface is obsolete.
+     */
+    [deprecated]
+    interface IWebIconDatabaseIconListener {
+        /**
+         * Called when the icon has been retrieved from the database and the
+         * result is non-null.
+         * @param url The url passed in the request.
+         * @param icon The favicon for the given url.
+         */
+        OnReceivedIcon(
+            [in] String url,
+            [in] IBitmap* icon);
+    }
+
+    interface IWebIconDatabaseHelper {
+        /**
+         * Get the global instance of WebIconDatabase.
+         * @return A single instance of WebIconDatabase. It will be the same
+         *         instance for the current process each time this method is
+         *         called.
+         */
+        GetInstance(
+            [out] IWebIconDatabase** database);
+    }
+
+    /**
+     * Functions for manipulating the icon database used by WebView.
+     * These functions require that a WebView be constructed before being invoked
+     * and WebView.getIconDatabase() will return a WebIconDatabase object. This
+     * WebIconDatabase object is a single instance and all methods operate on that
+     * single object.
+     * The main use-case for this class is calling {@link #open}
+     * to enable favicon functionality on all WebView instances in this process.
+     *
+     * @deprecated This class is only required when running on devices
+     *             up to {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}
+     */
+    //@Deprecated
+    interface IWebIconDatabase {
+
+        /**
+         * Open a the icon database and store the icons in the given path.
+         * @param path The directory path where the icon database will be stored.
+         */
+        Open(
+            [in] String path);
+
+        /**
+         * Close the shared instance of the icon database.
+         */
+        Close();
+
+        /**
+         * Removes all the icons in the database.
+         */
+        RemoveAllIcons();
+
+        /**
+         * Request the Bitmap representing the icon for the given page
+         * url. If the icon exists, the listener will be called with the result.
+         * @param url The page's url.
+         * @param listener An implementation on IconListener to receive the result.
+         */
+        RequestIconForPageUrl(
+            [in] String url,
+            [in] IWebIconDatabaseIconListener* listener);
+
+        /** {@hide}
+         */
+        BulkRequestIconForPageUrl(
+            [in] IContentResolver* cr,
+            [in] String where,
+            [in] IWebIconDatabaseIconListener* listener);
+
+        /**
+         * Retain the icon for the given page url.
+         * @param url The page's url.
+         */
+        RetainIconForPageUrl(
+            [in] String url);
+
+        /**
+         * Release the icon for the given page url.
+         * @param url The page's url.
+         */
+        ReleaseIconForPageUrl(
+            [in] String url);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

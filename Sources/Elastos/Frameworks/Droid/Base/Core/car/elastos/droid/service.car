@@ -1,0 +1,499 @@
+
+module
+{
+    merge("service/dreams/DreamManagerInternal.car");
+    merge("service/dreams/DreamService.car");
+    merge("service/dreams/IDreamManager.car");
+    merge("service/dreams/IDreamService.car");
+    merge("service/dreams/Sandman.car");
+
+    merge("service/fingerprint/FingerprintManager.car");
+    merge("service/fingerprint/FingerprintManagerReceiver.car");
+    merge("service/fingerprint/FingerprintUtils.car");
+    merge("service/fingerprint/IFingerprintService.car");
+    merge("service/fingerprint/IFingerprintServiceReceiver.car");
+
+    merge("service/media/IIMediaBrowserServiceCallbacks.car");
+    merge("service/media/IIMediaBrowserService.car");
+    merge("service/media/IMediaBrowserService.car");
+
+    merge("service/notification/Condition.car");
+    merge("service/notification/ConditionProviderService.car");
+    merge("service/notification/IConditionListener.car");
+    merge("service/notification/IConditionProvider.car");
+    merge("service/notification/INotificationListener.car");
+    merge("service/notification/IStatusBarNotificationHolder.car");
+    merge("service/notification/NotificationListenerService.car");
+    merge("service/notification/NotificationRankingUpdate.car");
+    merge("service/notification/StatusBarNotification.car");
+    merge("service/notification/ZenModeConfig.car");
+
+    merge("service/persistentdata/IPersistentDataBlockService.car");
+    merge("service/persistentdata/PersistentDataBlockManager.car");
+
+    merge("service/restrictions/RestrictionsReceiver.car");
+
+    merge("service/textservice/SpellCheckerService.car");
+
+    merge("service/trust/ITrustAgentServiceCallback.car");
+    merge("service/trust/ITrustAgentService.car");
+    merge("service/trust/TrustAgentService.car");
+
+    merge("service/voice/AlwaysOnHotwordDetector.car");
+    merge("service/voice/IVoiceInteractionService.car");
+    merge("service/voice/IVoiceInteractionSession.car");
+    merge("service/voice/IVoiceInteractionSessionService.car");
+    merge("service/voice/VoiceInteractionService.car");
+    merge("service/voice/VoiceInteractionServiceInfo.car");
+    merge("service/voice/VoiceInteractionSession.car");
+    merge("service/voice/VoiceInteractionSessionService.car");
+
+    merge("service/wallpaper/IWallpaperConnection.car");
+    merge("service/wallpaper/IWallpaperEngine.car");
+    merge("service/wallpaper/IWallpaperService.car");
+    merge("service/wallpaper/WallpaperService.car");
+    merge("service/wallpaper/WallpaperSettingsActivity.car");
+
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.App.IListActivity;
+    interface Elastos.Droid.App.INotification;
+    interface Elastos.Droid.App.IService;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContextWrapper;
+    interface Elastos.Droid.Content.IComponentCallbacks;
+    interface Elastos.Droid.Content.IComponentCallbacks2;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Content.Pm.IServiceInfo;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Hardware.Soundtrigger.IIRecognitionStatusCallback;
+    interface Elastos.Droid.Hardware.Soundtrigger.IKeyphraseEnrollmentInfo;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractionManagerService;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
+    interface Elastos.Droid.Internal.Os.IHandlerCallerCallback;
+    interface Elastos.Droid.Media.IAudioFormat;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Preference.IPreferenceActivity;
+    interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
+    interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
+    interface Elastos.Droid.View.IContextThemeWrapper;
+    interface Elastos.Droid.View.IKeyEventCallback;
+    interface Elastos.Droid.View.ILayoutInflaterFactory;
+    interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerService;
+    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerSession;
+    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerSessionListener;
+    interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+
+    namespace Dreams {
+
+        class CDreamService {
+            constructor();
+
+            interface IContext;
+            interface IContextWrapper;
+            interface IService;
+            interface IComponentCallbacks2;
+            interface IWindowCallback;
+            interface IDreamService;
+        }
+
+        singleton class CSandman {
+            interface ISandman;
+        }
+
+    }//namespace Dreams
+
+    namespace Fingerprint {
+
+        class CFingerprintManager {
+            constructor(
+                [in] IContext* ctx,
+                [in] IIFingerprintService* service);
+
+            interface IFingerprintManager;
+        }
+
+        class CFingerprintManagerReceiver {
+            constructor();
+
+            interface IFingerprintManagerReceiver;
+        }
+
+        singleton class CFingerprintUtils {
+            interface IFingerprintUtils;
+        }
+
+    }//namespace Fingerprint
+
+    namespace Persistentdata {
+
+        class CPersistentDataBlockManager {
+            constructor(
+                [in] IIPersistentDataBlockService* service);
+
+            interface IPersistentDataBlockManager;
+        }
+
+    }// namespace Persistentdata
+
+    namespace Textservice {
+
+        class CInternalISpellCheckerSession {
+            constructor(
+                [in] String locale,
+                [in] IISpellCheckerSessionListener* listener,
+                [in] IBundle* bundle,
+                [in] ISpellCheckerServiceSession* session);
+
+            interface IInternalISpellCheckerSession;
+            interface IISpellCheckerSession;
+            interface IBinder;
+        }
+
+        class CSpellCheckerServiceBinder {
+            constructor(
+                [in] ISpellCheckerService* service);
+
+            interface ISpellCheckerServiceBinder;
+            interface IISpellCheckerService;
+            interface IBinder;
+        }
+
+    }// namespace Textservice
+
+    namespace Trust {
+
+        class CTrustAgentService {
+            constructor();
+
+            interface IContext;
+            interface IContextWrapper;
+            interface IService;
+            interface IWindowCallback;
+            interface ITrustAgentService;
+        }
+
+        class CTrustAgentServiceWrapper {
+            constructor();
+
+            interface ITrustAgentServiceWrapper;
+            interface IITrustAgentService;
+            interface IBinder;
+        }
+
+    }// namespace Trust
+
+    namespace Wallpaper {
+
+        class CWallpaperSettingsActivity {
+
+            constructor();
+
+            interface IListActivity;
+            interface IActivity;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            //interface IViewOnCreateContextMenuListener; //undefined
+            interface IComponentCallbacks2;
+            interface IComponentCallbacks;
+            //interface IOnWindowDismissedCallback;  //IOnWindowDismissedCallback
+            interface IContextWrapper;
+            interface IContext;
+            interface IPreferenceActivity;
+            interface IPreferenceManagerOnPreferenceTreeClickListener;
+            interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+            interface IWallpaperSettingsActivity;
+        }
+
+        class CWallpaperServiceEngine {
+            constructor();
+
+            interface IWallpaperServiceEngine;
+        }
+
+        [local]
+        class CIWallpaperEngineWrapper {
+            constructor(
+                [in] IWallpaperService* wx,
+                [in] IIWallpaperConnection* wc,
+                [in] IBinder* windowToken,
+                [in] Int32 windowType,
+                [in] Boolean isPreview,
+                [in] Int32 reqWidth,
+                [in] Int32 reqHeight,
+                [in] IRect* padding);
+
+            interface IIWallpaperEngineWrapper;
+            interface IIWallpaperEngine;
+            interface IHandlerCallerCallback;
+            interface IBinder;
+        }
+
+        [local]
+        class CIWallpaperServiceWrapper {
+            constructor(
+                [in] IWallpaperService* context);
+
+            interface IIWallpaperServiceWrapper;
+            interface IIWallpaperService;
+            interface IBinder;
+        }
+
+    }// namespace Wallpaper
+
+    namespace Voice {
+
+        class CAlwaysOnHotwordDetector {
+            constructor(
+                [in] String text,
+                [in] ILocale* locale,
+                [in] IAlwaysOnHotwordDetectorCallback* cb,
+                [in] IKeyphraseEnrollmentInfo* keyphraseEnrollmentInfo,
+                [in] IIVoiceInteractionService* voiceInteractionService,
+                [in] IIVoiceInteractionManagerService* modelManagementService);
+
+            interface IAlwaysOnHotwordDetector;
+        }
+
+        [deprecated]
+        class CAlwaysOnHotwordDetectorEventPayload {
+            //private
+            constructor(
+                [in] Boolean triggerAvailable,
+                [in] Boolean captureAvailable,
+                [in] IAudioFormat* audioFormat,
+                [in] Int32 captureSession,
+                [in] ArrayOf<Byte>* data);
+
+            interface IAlwaysOnHotwordDetectorEventPayload;
+        }
+
+        class CAlwaysOnHotwordDetectorSoundTriggerListener {
+            constructor(
+                [in] IHandler* handler);
+
+            interface IIRecognitionStatusCallback;
+            interface IBinder;
+        }
+
+        class CVoiceInteractionService {
+            constructor();
+
+            interface IContext;
+            interface IContextWrapper;
+            interface IService;
+            interface IComponentCallbacks2;
+            interface IWindowCallback;
+            interface IVoiceInteractionService;
+        }
+
+        singleton class CVoiceInteractionServiceHelper {
+
+            interface IVoiceInteractionServiceHelper;
+        }
+
+        [local]
+        class CVoiceInteractionServiceInfo {
+            constructor(
+                [in] IPackageManager* pm,
+                [in] IComponentName* comp);
+
+            constructor(
+                [in] IPackageManager* pm,
+                [in] IComponentName* comp,
+                [in] Int32 userHandle);
+
+            constructor(
+                [in] IPackageManager* pm,
+                [in] IServiceInfo* si);
+
+            interface IVoiceInteractionServiceInfo;
+        }
+
+        [local]
+        class CVoiceInteractionSessionRequest {
+            constructor(
+                [in] IIVoiceInteractorCallback* cb,
+                [in] IVoiceInteractionSession* vs);
+
+            interface IVoiceInteractionSessionRequest;
+        }
+
+        class CVoiceInteractionSessionCaller {
+            constructor(
+                [in] String _packageName,
+                [in] Int32 _uid);
+
+            interface IVoiceInteractionSessionCaller;
+        }
+
+        class CVoiceInteractionSessionInsets {
+            constructor();
+
+            interface IVoiceInteractionSessionInsets;
+        }
+
+    }// namespace Voice
+
+    namespace Notification {
+
+        class CNotificationListenerServiceRanking {
+            constructor();
+
+            interface INotificationListenerServiceRanking;
+        }
+
+        class CNotificationListenerServiceRankingMap {
+            constructor();
+
+            constructor(
+                [in] IParcelable* superState);
+
+            //private
+            constructor(
+                [in] INotificationRankingUpdate* rankingUpdate);
+
+            interface IParcelable;
+            interface INotificationListenerServiceRankingMap;
+        }
+
+        class CCondition {
+            constructor(
+                [in] IUri* id,
+                [in] String summary,
+                [in] String line1,
+                [in] String line2,
+                [in] Int32 icon,
+                [in] Int32 state,
+                [in] Int32 flags);
+
+            constructor(
+                [in] IParcelable* source);
+
+            interface IParcelable;
+            interface ICondition;
+        }
+
+        singleton class CConditionHelper {
+            interface IConditionHelper;
+        }
+
+        class CConditionProviderServiceProvider {
+            constructor();
+
+            interface IIConditionProvider;
+            interface IBinder;
+        }
+
+        [deprecated]
+        class CNotificationRankingUpdate {
+            constructor(
+                [in] ArrayOf<String>* keys,
+                [in] ArrayOf<String>* interceptedKeys,
+                [in] IBundle* visibilityOverrides,
+                [in] Int32 firstAmbientIndex);
+
+            constructor(
+                [in] IParcelable* source);
+
+            interface INotificationRankingUpdate;
+            interface IParcelable;
+        }
+
+        class CStatusBarNotification {
+            /** @hide */
+            constructor(
+                [in] String pkg,
+                [in] String opPkg,
+                [in] Int32 id,
+                [in] String tag,
+                [in] Int32 uid,
+                [in] Int32 initialPid,
+                [in] Int32 score,
+                [in] INotification* notification,
+                [in] IUserHandle* user);
+
+            constructor(
+                [in] String pkg,
+                [in] String opPkg,
+                [in] Int32 id,
+                [in] String tag,
+                [in] Int32 uid,
+                [in] Int32 initialPid,
+                [in] Int32 score,
+                [in] INotification* notification,
+                [in] IUserHandle* user,
+                [in] Int64 postTime);
+
+            constructor(
+                [in] IParcelable* source);
+
+            interface IStatusBarNotification;
+            interface IParcelable;
+        }
+
+        class CZenModeConfigDowntimeInfo {
+            constructor();
+
+            interface IZenModeConfigDowntimeInfo;
+        }
+
+        class CZenModeConfig {
+            constructor();
+
+            constructor(
+                [in] IParcelable* source);
+
+            interface IZenModeConfig;
+            interface IParcelable;
+        }
+
+        singleton class CZenModeConfigHelper {
+
+            interface IZenModeConfigHelper;
+        }
+
+    }// namespace Notification
+
+    namespace Media {
+
+    class CMediaBrowserServiceBrowserRoot {
+        constructor(
+            [in] String rootId,
+            [in] IBundle * extras);
+
+        interface IMediaBrowserServiceBrowserRoot;
+    }
+
+    class CMediaBrowserServiceResult {
+        constructor(
+            [in] IInterface * debug);
+
+        interface IMediaBrowserServiceResult;
+    }
+
+    class CMediaBrowserService {
+        interface IMediaBrowserService;
+        interface IService;
+    }
+
+    } // namespace Media
+
+
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,219 @@
+
+module
+{
+    interface Elastosx.Net.Ssl.ISSLSession;
+    interface Elastosx.Net.Ssl.ISSLParameters;
+    interface Elastosx.Net.Ssl.IHandshakeCompletedListener;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The extension of {@code Socket} providing secure protocols like SSL (Secure
+     * Sockets Layer) or TLS (Transport Layer Security).
+     */
+    /**
+     * @Involve
+     * interface Elastos.Net.ISocket
+     * interface ICloseable;
+     */
+    [deprecated]
+    interface ISSLSocket {
+        /**
+         * Returns the names of the supported cipher suites.
+         */
+        GetSupportedCipherSuites(
+            [out, callee] ArrayOf<String>* suites);
+
+        /**
+         * Returns the names of the enabled cipher suites.
+         */
+        GetEnabledCipherSuites(
+            [out, callee] ArrayOf<String>* suites);
+
+        /**
+         * Sets the names of the cipher suites to be enabled.
+         * Only cipher suites returned by {@link #getSupportedCipherSuites()} are
+         * allowed.
+         *
+         * @param suites
+         *            the names of the to be enabled cipher suites.
+         * @throws IllegalArgumentException
+         *             if one of the cipher suite names is not supported.
+         */
+        SetEnabledCipherSuites(
+            [in] ArrayOf<String>* suites);
+
+        /**
+         * Returns the names of the supported protocols.
+         */
+        GetSupportedProtocols(
+            [out, callee] ArrayOf<String>* protocols);
+
+        /**
+         * Returns the names of the enabled protocols.
+         */
+        GetEnabledProtocols(
+            [out, callee] ArrayOf<String>* protocols);
+
+        /**
+         * Sets the names of the protocols to be enabled. Only
+         * protocols returned by {@link #getSupportedProtocols()} are allowed.
+         *
+         * @param protocols
+         *            the names of the to be enabled protocols.
+         * @throws IllegalArgumentException
+         *             if one of the protocols is not supported.
+         */
+        SetEnabledProtocols(
+            [in] ArrayOf<String>* protocols);
+
+        /**
+         * Returns the {@code SSLSession} for this connection. If necessary, a
+         * handshake will be initiated, in which case this method will block until the handshake
+         * has been established. If the handshake fails, an invalid session object
+         * will be returned.
+         *
+         * @return the session object.
+         */
+        GetSession(
+            [out] ISSLSession** session);
+
+        /**
+         * Registers the specified listener to receive notification on completion of a
+         * handshake on this connection.
+         *
+         * @param listener
+         *            the listener to register.
+         * @throws IllegalArgumentException
+         *             if {@code listener} is {@code null}.
+         */
+        AddHandshakeCompletedListener(
+            [in] IHandshakeCompletedListener* listener);
+
+        /**
+         * Removes the specified handshake completion listener.
+         *
+         * @param listener
+         *            the listener to remove.
+         * @throws IllegalArgumentException
+         *             if the specified listener is not registered or {@code null}.
+         */
+        RemoveHandshakeCompletedListener(
+            [in] IHandshakeCompletedListener* listener);
+
+        /**
+         * Starts a new SSL handshake on this connection.
+         *
+         * @throws IOException
+         *             if an error occurs.
+         */
+        StartHandshake();
+
+        /**
+         * Sets whether this connection should act in client mode when handshaking.
+         *
+         * @param mode
+         *            {@code true} if this connection should act in client mode,
+         *            {@code false} if not.
+         */
+        SetUseClientMode(
+            [in] Boolean mode);
+
+        /**
+         * Returns true if this connection will act in client mode when handshaking.
+         */
+        GetUseClientMode(
+            [out] Boolean* mode);
+
+        /**
+         * Sets whether the server should require client authentication. This
+         * does not apply to sockets in {@link #getUseClientMode() client mode}.
+         * Client authentication is one of the following:
+         * <ul>
+         * <li>authentication required</li>
+         * <li>authentication requested</li>
+         * <li>no authentication needed</li>
+         * </ul>
+         * This method overrides the setting of {@link #setWantClientAuth(boolean)}.
+         */
+        SetNeedClientAuth(
+            [in] Boolean need);
+
+        /**
+         * Sets whether the server should request client authentication. Unlike
+         * {@link #setNeedClientAuth} this won't stop the negotiation if the client
+         * doesn't authenticate. This does not apply to sockets in {@link
+         * #getUseClientMode() client mode}.The client authentication is one of:
+         * <ul>
+         * <li>authentication required</li>
+         * <li>authentication requested</li>
+         * <li>no authentication needed</li>
+         * </ul>
+         * This method overrides the setting of {@link #setNeedClientAuth(boolean)}.
+         */
+        SetWantClientAuth(
+            [in] Boolean want);
+
+        /**
+         * Returns true if the server socket should require client authentication.
+         * This does not apply to sockets in {@link #getUseClientMode() client
+         * mode}.
+         */
+        GetNeedClientAuth(
+            [out] Boolean* auth);
+
+        /**
+         * Returns true if the server should request client authentication. This
+         * does not apply to sockets in {@link #getUseClientMode() client mode}.
+         */
+        GetWantClientAuth(
+            [out] Boolean* auth);
+
+        /**
+         * Sets whether new SSL sessions may be created by this socket or if
+         * existing sessions must be reused. If {@code flag} is false and there are
+         * no sessions to resume, handshaking will fail.
+         *
+         * @param flag {@code true} if new sessions may be created.
+         */
+        SetEnableSessionCreation(
+            [in] Boolean flag);
+
+        /**
+         * Returns whether new SSL sessions may be created by this socket or if
+         * existing sessions must be reused.
+         *
+         * @return {@code true} if new sessions may be created, otherwise
+         *         {@code false}.
+         */
+        GetEnableSessionCreation(
+            [out] Boolean* enabled);
+
+        /**
+         * Returns a new SSLParameters based on this SSLSocket's current
+         * cipher suites, protocols, and client authentication settings.
+         *
+         * @since 1.6
+         */
+        GetSSLParameters(
+            [out] ISSLParameters** param);
+
+        /**
+         * Sets various SSL handshake parameters based on the SSLParameter
+         * argument. Specifically, sets the SSLSocket's enabled cipher
+         * suites if the parameter's cipher suites are non-null. Similarly
+         * sets the enabled protocols. If the parameters specify the want
+         * or need for client authentication, those requirements are set
+         * on the SSLSocket, otherwise both are set to false.
+         * @since 1.6
+         */
+        SetSSLParameters(
+            [in] ISSLParameters* p);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

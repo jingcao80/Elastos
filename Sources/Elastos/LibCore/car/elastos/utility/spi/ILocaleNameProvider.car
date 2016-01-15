@@ -1,0 +1,73 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Spi {
+    /**
+     * This abstract class should be extended by service providers that provide
+     * localized locale names.
+     * <p>Note that Android does not support user-supplied locale service providers.
+     * @since 1.6
+     * @hide
+     */
+
+    /**
+     * @Involve
+     * interface ILocaleServiceProvider;
+     */
+    interface ILocaleNameProvider {
+        /**
+         * Returns the localized name for the given ISO 639 language code.
+         *
+         * @param languageCode an ISO 639 language code
+         * @param locale a locale
+         * @return the name or null if unavailable
+         * @throws NullPointerException
+         *             if {@code code == null || locale == null}
+         * @throws IllegalArgumentException
+         *             if code or locale is not in a legal format or not available
+         */
+        GetDisplayLanguage(
+            [in] String languageCode,
+            [in] ILocale* locale,
+            [out] String* str);
+
+        /**
+         * Returns the localized name for the given ISO 3166 country code.
+         *
+         * @param countryCode an ISO 3166 language code
+         * @param locale a locale
+         * @return the name or null if unavailable
+         * @throws NullPointerException
+         *             if {@code code == null || locale == null}
+         * @throws IllegalArgumentException
+         *             if code or locale is not in a legal format or not available
+         */
+        GetDisplayCountry(
+            [in] String countryCode,
+            [in] ILocale* locale,
+            [out] String* str);
+
+        /**
+         * Returns the localized name for the given variant code.
+         *
+         * @param variantCode a variant code
+         * @param locale a locale
+         * @return the name or null if unavailable
+         * @throws NullPointerException
+         *             if {@code code == null || locale == null}
+         * @throws IllegalArgumentException
+         *             if code or locale is not in a legal format or not available
+         */
+        GetDisplayVariant(
+            [in] String variantCode,
+            [in] ILocale* locale,
+            [out] String* str);
+    }
+
+    } // namespace Spi
+    } // namespace Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,9 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+
+    merge("../../car/eunit/framework.car");
+    merge("../../car/eunit/runner.car");
+    merge("../../car/eunit/textui.car");
+}

@@ -1,0 +1,161 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Animation.IObjectAnimator;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Widget.IAdvanceable
+     */
+     [local]
+    interface IAdapterViewAnimator {
+        /**
+         * Sets which child view will be displayed.
+         *
+         * @param whichChild the index of the child view to display
+         */
+        SetDisplayedChild(
+            [in] Int32 whichChild);
+
+        /**
+         * Returns the index of the currently displayed child view.
+         */
+        GetDisplayedChild(
+            [out] Int32* child);
+
+        /**
+         * Manually shows the next child.
+         */
+        ShowNext();
+
+        /**
+         * Manually shows the previous child.
+         */
+        ShowPrevious();
+
+        /**
+         * Returns the View corresponding to the currently displayed child.
+         *
+         * @return The View currently displayed.
+         *
+         * @see #getDisplayedChild()
+         */
+        GetCurrentView(
+            [out] IView** view);
+
+        /**
+         * Returns the current animation used to animate a View that enters the screen.
+         *
+         * @return An Animation or null if none is set.
+         *
+         * @see #setInAnimation(android.animation.ObjectAnimator)
+         * @see #setInAnimation(android.content.Context, Int32)
+         */
+        GetInAnimation(
+            [out] IObjectAnimator** animator);
+
+        /**
+         * Specifies the animation used to animate a View that enters the screen.
+         *
+         * @param inAnimation The animation started when a View enters the screen.
+         *
+         * @see #getInAnimation()
+         * @see #setInAnimation(android.content.Context, Int32)
+         */
+        SetInAnimation(
+            [in] IObjectAnimator* inAnimation);
+
+        /**
+         * Returns the current animation used to animate a View that exits the screen.
+         *
+         * @return An Animation or null if none is set.
+         *
+         * @see #setOutAnimation(android.animation.ObjectAnimator)
+         * @see #setOutAnimation(android.content.Context, Int32)
+         */
+        GetOutAnimation(
+            [out] IObjectAnimator** animator);
+
+        /**
+         * Specifies the animation used to animate a View that exit the screen.
+         *
+         * @param outAnimation The animation started when a View exit the screen.
+         *
+         * @see #getOutAnimation()
+         * @see #setOutAnimation(android.content.Context, Int32)
+         */
+        SetOutAnimation(
+            [in] IObjectAnimator* outAnimation);
+
+        /**
+         * Specifies the animation used to animate a View that enters the screen.
+         *
+         * @param context The application's environment.
+         * @param resourceID The resource id of the animation.
+         *
+         * @see #getInAnimation()
+         * @see #setInAnimation(android.animation.ObjectAnimator)
+         */
+        SetInAnimation(
+            [in] IContext* ctx,
+            [in] Int32 resourceID);
+
+        /**
+         * Specifies the animation used to animate a View that exit the screen.
+         *
+         * @param context The application's environment.
+         * @param resourceID The resource id of the animation.
+         *
+         * @see #getOutAnimation()
+         * @see #setOutAnimation(android.animation.ObjectAnimator)
+         */
+        SetOutAnimation(
+            [in] IContext* ctx,
+            [in] Int32 resourceID);
+
+        /**
+         * Indicates whether the current View should be animated the first time
+         * the ViewAnimation is displayed.
+         *
+         * @param animate True to animate the current View the first time it is displayed,
+         *                false otherwise.
+         */
+        SetAnimateFirstView(
+            [in] Boolean animate);
+
+        /**
+         * Sets up the onClickHandler to be used by the RemoteViewsAdapter when inflating RemoteViews
+         *
+         * @param handler The OnClickHandler to use when inflating RemoteViews.
+         *
+         * @hide
+         */
+        SetRemoteViewsOnClickHandler(
+            [in] IRemoteViewsOnClickHandler* handler);
+
+        SetRemoteViewsAdapter(
+            [in] IIntent* intent);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

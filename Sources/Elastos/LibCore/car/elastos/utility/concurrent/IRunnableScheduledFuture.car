@@ -1,0 +1,46 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+    /**
+     * A {@link ScheduledFuture} that is {@link Runnable}. Successful
+     * execution of the <tt>run</tt> method causes completion of the
+     * <tt>Future</tt> and allows access to its results.
+     * @see FutureTask
+     * @see Executor
+     * @since 1.6
+     * @author Doug Lea
+     * @param <V> The result type returned by this Future's <tt>get</tt> method
+     */
+
+    /**
+     * @Involve
+     * interface IFuture;
+     * interface IRunnableFuture;
+     */
+    interface IRunnableScheduledFuture {
+        /**
+         * Returns true if this is a periodic task. A periodic task may
+         * re-run according to some schedule. A non-periodic task can be
+         * run only once.
+         *
+         * @return true if this task is periodic
+         */
+        IsPeriodic(
+            [out] Boolean* value);
+
+        GetDelay(
+            [in] ITimeUnit* unit,
+            [out] Int64* value);
+
+        CompareTo(
+            [in] IInterface* another,
+            [out] Int32* result);
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

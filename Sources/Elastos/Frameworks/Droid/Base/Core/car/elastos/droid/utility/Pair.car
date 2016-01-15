@@ -1,0 +1,54 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    interface IPair {
+        GetFirst(
+            [out] IInterface** first);
+
+        GetSecond(
+            [out] IInterface** second);
+
+        /**
+         * Checks the two objects for equality by delegating to their respective
+         * {@link Object#equals(Object)} methods.
+         *
+         * @param o the {@link Pair} to which this one is to be checked for equality
+         * @return true if the underlying objects of the Pair are both considered
+         *         equal
+         */
+        // @Override
+        Equals(
+            [in] IInterface *o,
+            [out] Boolean *isEqual);
+
+        /**
+         * Compute a hash code using the hash codes of the underlying objects
+         *
+         * @return a hashcode of the Pair
+         */
+        // @Override
+        GetHashCode(
+            [out] Int32 *ret);
+    }
+
+    interface IPairHelper {
+        /**
+         * Convenience method for creating an appropriately typed pair.
+         * @param a the first object in the Pair
+         * @param b the second object in the pair
+         * @return a Pair that is templatized with the types of a and b
+         */
+        Create(
+            [in] IInterface *a,
+            [in] IInterface *b,
+            [out] IPair **pair);
+    }
+
+    } // namespace Utility
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,227 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IServiceConnection;
+    using interface Elastos.Droid.Media.IMediaPlayerOnCompletionListener;
+    using interface Elastos.Droid.Os.IBinder;
+
+    namespace MusicPlayer {
+
+        interface IOnTickListener
+        {
+            OnTick([in] Int32 duration);
+        }
+
+        interface IOnPlayCompletionListener
+        {
+            OnCompletion();
+        }
+
+        interface IPlayController
+        {
+            const String TYPE_SONG     = "type_song";
+            const String TYPE_SINGER   = "type_singer";
+            const String TYPE_ALBUM    = "type_album";
+            const String TYPE_PLAYLIST = "type_playlist";
+            const String TYPE_SEARCH   = "type_search";
+
+            const Int32 MODE_ALL_LOOP    = 0x0000;
+            const Int32 MODE_SINGLE_LOOP = 0x0001;
+            const Int32 MODE_RANDOM_PLAY = 0x0002;
+            const Int32 MODE_ORDER_PLAY  = 0x0003;
+            const Int32 MODE_INVALID     = 0x0004;
+
+            // add the song to the queue only
+            const Int32 ACTION_ADD_QUIET = 0x2001;
+
+            // add the song and play immediately
+            const Int32 ACTION_ADD_PLAY  = 0x2002;
+
+            // open audio file by specified path
+            OpenFile(
+                [in] String path);
+
+            // open audio file by the specified position in play list
+            Open(
+                [in] ArrayOf<Int32> list,
+                [in] Int32 pos);
+
+            /**
+            * Returns the rowid of the currently playing file, or -1 if
+            * no file is currently playing.
+            */
+            GetAudioId(
+                [out] Int64* id);
+
+            SetAudioId(
+                [in] Int64 id);
+
+            GetTrackName(
+                [out] ICharSequence** name);
+
+            RemoveTrack(
+                [in] Int64 id);
+
+            RemoveTracks(
+                [in] Int32 first,
+                [in]Int32 last);
+
+            GetAlbumId(
+                [out] Int64* id);
+
+            GetAlubmName(
+                [out] String* name);
+
+            GetAritistId(
+                [out] Int64* id);
+
+            GetAritistName(
+                [out] String* name);
+
+            // enqueue
+            Enqueue(
+                [in] ArrayOf<Int32> list,
+                [in] Int32 action);
+
+            // move a song from a queue
+            MoveQueueItem(
+                [in] Int32 id);
+
+            GetQueue(
+                [out, callee] ArrayOf<Int64>* queue);
+
+            // chage the position of the queue
+            SetQueuePosition(
+                [in] Int32 index);
+
+            // get the position in the play list
+            GetQueuePostion(
+                [out] Int32* pos);
+
+            // get the status of player
+            IsPlaying(
+                [out] Boolean* isPlaying);
+
+            // play the audio file
+            Play();
+
+            // pasue the audio file
+            Pause();
+
+            // play the next file in the play list
+            PlayNext();
+
+            // play the previous file in the play list
+            PlayPrevious();
+
+            // stop the player
+            Stop();
+
+            // seek to the specified postion
+            SeekTo(
+                [in] Int32 pos);
+
+            // get the totoal time of the audio file
+            GetDuration(
+                [out] Int32* duration);
+
+            // get the current progress
+            GetProgress(
+                [out] Int32* pos);
+
+            // get the audio list by diffierent type in MainActivity Tab
+            GetAudioList(
+                [in] String type,
+                [out, callee] ArrayOf<IInterface*>* mDataList);
+
+            // set the tick listener when playing
+            SetOnTickListener(
+                [in] Int32 keyId,
+                [in] IOnTickListener* tickListener);
+
+            // set play completion listener
+            SetPlayCompletionListener(
+                [in] Int32 keyId,
+                [in] IOnPlayCompletionListener* listener);
+
+            // remove the tick listener when activity unbind
+            RemoveOnTickListener(
+                [in] Int32 keyId);
+
+            // remove play completion listener
+            RemovePlayCompletionListener(
+                [in] Int32 keyId);
+
+            // set play mode
+            SetPlayMode(
+                [in] Int32 mode);
+
+            // get play mode
+            GetPlayMode(
+                [out] Int32* mode);
+        }
+
+	    class CMainActivity {
+	        interface IActivity;
+            interface IServiceConnection;
+	    }
+
+        class CMainActivityListener {
+            constructor(
+                [in] IWeakReference* mainActivity);
+
+            interface IOnPlayCompletionListener;
+            interface IOnTickListener;
+            interface IRunnable;
+        }
+
+        class CAboutActivity
+        {
+            interface IActivity;
+        }
+
+        class CPlayActivity
+        {
+            interface IActivity;
+            interface IOnPlayCompletionListener;
+            interface IOnTickListener;
+            interface IServiceConnection;
+        }
+
+        class CPlayActivityListener {
+            constructor(
+                [in] IWeakReference* playActivity);
+
+            interface IOnPlayCompletionListener;
+            interface IOnTickListener;
+        }
+
+        class CEditActivity
+        {
+            interface IActivity;
+        }
+
+        class CSearchActivity
+        {
+            interface IActivity;
+        }
+
+        class CMusicService
+        {
+            interface IBinder;
+            interface IMediaPlayerOnCompletionListener;
+            interface IPlayController;
+            interface IRunnable;
+            interface IService;
+        }
+
+    } //end namespace MusicPlayer
+}
+

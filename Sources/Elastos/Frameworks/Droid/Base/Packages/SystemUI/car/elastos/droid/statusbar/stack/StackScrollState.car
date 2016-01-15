@@ -1,0 +1,67 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.ISpeedBumpView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Stack {
+
+    interface IStackScrollStateViewState {
+
+        // These are flags such that we can create masks for filtering.
+
+        const Int32 LOCATION_UNKNOWN = 0x00;
+        const Int32 LOCATION_FIRST_CARD = 0x01;
+        const Int32 LOCATION_TOP_STACK_HIDDEN = 0x02;
+        const Int32 LOCATION_TOP_STACK_PEEKING = 0x04;
+        const Int32 LOCATION_MAIN_AREA = 0x08;
+        const Int32 LOCATION_BOTTOM_STACK_PEEKING = 0x10;
+        const Int32 LOCATION_BOTTOM_STACK_HIDDEN = 0x20;
+    }
+
+    /**
+     * A state of a {@link com.android.systemui.statusbar.stack.NotificationStackScrollLayout} which
+     * can be applied to a viewGroup.
+     */
+    [local]
+    interface IStackScrollState {
+
+        GetHostView(
+            [out] IViewGroup** vg);
+
+        ResetViewStates();
+
+        GetViewStateForView(
+            [in] IView* requestedView,
+            [out] IStackScrollStateViewState** state);
+
+        RemoveViewStateForView(
+            [in] IView* child);
+
+        /**
+         * Apply the properties saved in {@link #mStateMap} to the children of the {@link #mHostView}.
+         * The properties are only applied if they effectively changed.
+         */
+        Apply();
+
+        PerformSpeedBumpAnimation(
+            [in] Int32 i,
+            [in] ISpeedBumpView* speedBump,
+            [in] IStackScrollStateViewState* state,
+            [in] Int64 delay);
+    }
+
+    } // namespace Stack
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

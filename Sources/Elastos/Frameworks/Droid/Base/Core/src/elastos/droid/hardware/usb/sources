@@ -1,0 +1,19 @@
+
+TARGET_NAME= usb
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES =  UsbAccessory.cpp
+SOURCES += UsbConfiguration.cpp
+SOURCES += UsbDevice.cpp
+SOURCES += CUsbDeviceHelper.cpp
+SOURCES += UsbDeviceConnection.cpp
+SOURCES += UsbEndpoint.cpp
+SOURCES += UsbInterface.cpp
+SOURCES += UsbManager.cpp
+SOURCES += UsbRequest.cpp
+SOURCES += usb.cpp

@@ -1,0 +1,140 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Text.INumberFormat;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * A dialog showing a progress indicator and an optional text message or view. Only a text message or a view can be used at the same time.
+     * <p>
+     * The dialog can be made cancelable on back key press.
+     * <p>
+     * The progress range is 0..10000.
+     *
+     * @implements Elastos.Driod.App.IAlertDialog
+     */
+    /**
+     * @Involve
+     * interface IAlertDialog
+     */
+    interface IProgressDialog {
+        /** Creates a ProgressDialog with a circular, spinning progress
+         * bar. This is the default.
+         */
+        const Int32 STYLE_SPINNER = 0;
+
+        /** Creates a ProgressDialog with a horizontal progress bar.
+         */
+        const Int32 STYLE_HORIZONTAL = 1;
+
+        SetProgress(
+            [in] Int32 value);
+
+        SetSecondaryProgress(
+            [in] Int32 secondaryProgress);
+
+        GetProgress(
+            [out] Int32* value);
+
+        GetSecondaryProgress(
+            [out] Int32* value);
+
+        GetMax(
+            [out] Int32* max);
+
+        SetMax(
+            [in] Int32 max);
+
+        IncrementProgressBy(
+            [in] Int32 diff);
+
+        IncrementSecondaryProgressBy(
+            [in] Int32 diff);
+
+        SetProgressDrawable(
+            [in] IDrawable* d);
+
+        SetIndeterminateDrawable(
+            [in] IDrawable* d);
+
+        SetIndeterminate(
+            [in] Boolean indeterminate);
+
+        IsIndeterminate(
+            [out] Boolean* isIndeterminate);
+
+        SetProgressStyle(
+            [in] Int32 style);
+
+        /**
+         * Change the format of the small text showing current and maximum units
+         * of progress.  The default is "%1d/%2d".
+         * Should not be called during the number is progressing.
+         * @param format A string passed to String#format String.format();
+         * use "%1d" for the current number and "%2d" for the maximum.  If null,
+         * nothing will be shown.
+         *
+         * @sa String#format String.format()
+         */
+        SetProgressNumberFormat(
+            [in] String format);
+
+        /**
+         * Change the format of the small text showing the percentage of progress.
+         * The default is
+         * NumberFormat#getPercentInstance() NumberFormat.getPercentageInstnace().
+         * Should not be called during the number is progressing.
+         * @param format An instance of a NumberFormat to generate the
+         * percentage text.  If null, nothing will be shown.
+         *
+         * @sa NumberFormat#getPercentInstance() NumberFormat.getPercentageInstnace().
+         * @sa NumberFormat
+         */
+        SetProgressPercentFormat(
+            [in] INumberFormat* format);
+    }
+
+    [local]
+    interface IProgressDialogHelper {
+        Show(
+            [in] IContext* ctx,
+            [in] ICharSequence* title,
+            [in] ICharSequence* message,
+            [out] IProgressDialog** pDialog);
+
+        Show(
+            [in] IContext* ctx,
+            [in] ICharSequence* title,
+            [in] ICharSequence* message,
+            [in] Boolean indeterminate,
+            [out] IProgressDialog** pDialog);
+
+        Show(
+            [in] IContext* ctx,
+            [in] ICharSequence* title,
+            [in] ICharSequence* message,
+            [in] Boolean indeterminate,
+            [in] Boolean cancelable,
+            [out] IProgressDialog** pDialog);
+
+        Show(
+            [in] IContext* ctx,
+            [in] ICharSequence* title,
+            [in] ICharSequence* message,
+            [in] Boolean indeterminate,
+            [in] Boolean cancelable,
+            [in] IDialogInterfaceOnCancelListener* cancelListener,
+            [out] IProgressDialog** pDialog);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,266 @@
+
+module
+{
+    using interface Elastos.IO.IFile;
+    using interface Elastos.Utility.IMap;
+
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * Represents a resource stored in the HTTP cache. Instances of this class
+     * can be obtained by calling
+     * {@link CacheManager#getCacheFile CacheManager.getCacheFile(String, Map<String, String>))}.
+     *
+     * @deprecated Access to the HTTP cache will be removed in a future release.
+     */
+    //@Deprecated
+    interface ICacheManagerCacheResult {
+
+        /**
+         * Gets the status code of this cache entry.
+         *
+         * @return the status code of this cache entry
+         */
+        GetHttpStatusCode(
+            [out] Int32* statusCode);
+
+        /**
+         * Gets the content length of this cache entry.
+         *
+         * @return the content length of this cache entry
+         */
+        GetContentLength(
+            [out] Int64* length);
+
+        /**
+         * Gets the path of the file used to store the content of this cache
+         * entry, relative to the base directory of the cache. See
+         * {@link CacheManager#getCacheFileBaseDir CacheManager.getCacheFileBaseDir()}.
+         *
+         * @return the path of the file used to store this cache entry
+         */
+        GetLocalPath(
+            [out] String* path);
+
+        /**
+         * Gets the expiry date of this cache entry, expressed in milliseconds
+         * since midnight, January 1, 1970 UTC.
+         *
+         * @return the expiry date of this cache entry
+         */
+        GetExpires(
+            [out] Int64* expires);
+
+        /**
+         * Gets the expiry date of this cache entry, expressed as a string.
+         *
+         * @return the expiry date of this cache entry
+         *
+         */
+        GetExpiresString(
+            [out] String* expires);
+
+        /**
+         * Gets the date at which this cache entry was last modified, expressed
+         * as a string.
+         *
+         * @return the date at which this cache entry was last modified
+         */
+        GetLastModified(
+            [out] String* lastModified);
+
+        /**
+         * Gets the entity tag of this cache entry.
+         *
+         * @return the entity tag of this cache entry
+         */
+        GetETag(
+            [out] String* etag);
+
+        /**
+         * Gets the MIME type of this cache entry.
+         *
+         * @return the MIME type of this cache entry
+         */
+        GetMimeType(
+            [out] String* mimeType);
+
+        /**
+         * Gets the value of the HTTP 'Location' header with which this cache
+         * entry was received.
+         *
+         * @return the HTTP 'Location' header for this cache entry
+         */
+        GetLocation(
+            [out] String* location);
+
+        /**
+         * Gets the encoding of this cache entry.
+         *
+         * @return the encoding of this cache entry
+         */
+        GetEncoding(
+            [out] String* encoding);
+
+        /**
+         * Gets the value of the HTTP 'Content-Disposition' header with which
+         * this cache entry was received.
+         *
+         * @return the HTTP 'Content-Disposition' header for this cache entry
+         *
+         */
+        GetContentDisposition(
+            [out] String* contentdisposition);
+
+        /**
+         * Gets the input stream to the content of this cache entry, to allow
+         * content to be read. See
+         * {@link CacheManager#getCacheFile CacheManager.getCacheFile(String, Map<String, String>)}.
+         *
+         * @return an input stream to the content of this cache entry
+         */
+        GetInputStream(
+            [out] IInputStream** inStream);
+
+        /**
+         * Gets an output stream to the content of this cache entry, to allow
+         * content to be written. See
+         * {@link CacheManager#saveCacheFile CacheManager.saveCacheFile(String, CacheResult)}.
+         *
+         * @return an output stream to the content of this cache entry
+         */
+        // Note that this is always null for objects returned by getCacheFile()!
+        GetOutputStream(
+            [out] IOutputStream** outStream);
+
+
+        /**
+         * Sets an input stream to the content of this cache entry.
+         *
+         * @param stream an input stream to the content of this cache entry
+         */
+        SetInputStream(
+            [in] IInputStream* stream);
+
+        /**
+         * Sets the encoding of this cache entry.
+         *
+         * @param encoding the encoding of this cache entry
+         */
+        SetEncoding(
+            [in] String encoding);
+
+        /**
+         * @hide
+         */
+        SetContentLength(
+            [in] Int64 contentLength);
+    }
+
+    /**
+     * Manages the HTTP cache used by an application's {@link WebView} instances.
+     * @deprecated Access to the HTTP cache will be removed in a future release.
+     * @hide Since {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
+     */
+    // The class CacheManager provides the persistent cache of content that is
+    // received over the network. The component handles parsing of HTTP headers and
+    // utilizes the relevant cache headers to determine if the content should be
+    // stored and if so, how long it is valid for. Network requests are provided to
+    // this component and if they can not be resolved by the cache, the HTTP headers
+    // are attached, as appropriate, to the request for revalidation of content. The
+    // class also manages the cache size.
+    //
+    // CacheManager may only be used if your activity contains a WebView.
+    //@Deprecated
+    interface ICacheManager {
+
+        const String HEADER_KEY_IFMODIFIEDSINCE = "if-modified-since";
+        const String HEADER_KEY_IFNONEMATCH = "if-none-match";
+
+        /**
+         * Gets the base directory in which the files used to store the contents of
+         * cache entries are placed. See
+         * {@link CacheManager.CacheResult#getLocalPath CacheManager.CacheResult.getLocalPath()}.
+         *
+         * @return the base directory of the cache
+         * @deprecated Access to the HTTP cache will be removed in a future release.
+         */
+        //@Deprecated
+        GetCacheFileBaseDir(
+            [out] IFile** dir);
+
+        /**
+         * Gets whether the HTTP cache is disabled.
+         *
+         * @return true if the HTTP cache is disabled
+         * @deprecated Access to the HTTP cache will be removed in a future release.
+         */
+        //@Deprecated
+        CacheDisabled(
+            [out] Boolean* disabled);
+
+        /**
+         * Starts a cache transaction. Returns true if this is the only running
+         * transaction. Otherwise, this transaction is nested inside currently
+         * running transactions and false is returned.
+         *
+         * @return true if this is the only running transaction
+         * @deprecated This method no longer has any effect and always returns false.
+         */
+        //@Deprecated
+        StartCacheTransaction(
+            [out] Boolean* result);
+
+        /**
+         * Ends the innermost cache transaction and returns whether this was the
+         * only running transaction.
+         *
+         * @return true if this was the only running transaction
+         * @deprecated This method no longer has any effect and always returns false.
+         */
+        //@Deprecated
+        EndCacheTransaction(
+            [out] Boolean* result);
+
+        /**
+         * Gets the cache entry for the specified URL, or null if none is found.
+         * If a non-null value is provided for the HTTP headers map, and the cache
+         * entry needs validation, appropriate headers will be added to the map.
+         * The input stream of the CacheEntry object should be closed by the caller
+         * when access to the underlying file is no longer required.
+         *
+         * @param url the URL for which a cache entry is requested
+         * @param headers a map from HTTP header name to value, to be populated
+         *                for the returned cache entry
+         * @return the cache entry for the specified URL
+         * @deprecated Access to the HTTP cache will be removed in a future release.
+         */
+        //@Deprecated
+        GetCacheFile(
+            [in] String url,
+            [in] IMap* headers,
+            [out] ICacheManagerCacheResult** cacheResult);
+
+        /**
+         * Adds a cache entry to the HTTP cache for the specicifed URL. Also closes
+         * the cache entry's output stream.
+         *
+         * @param url the URL for which the cache entry should be added
+         * @param cacheResult the cache entry to add
+         * @deprecated Access to the HTTP cache will be removed in a future release.
+         */
+        //@Deprecated
+        SaveCacheFile(
+            [in] String url,
+            [in] ICacheManagerCacheResult* cacheResult);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

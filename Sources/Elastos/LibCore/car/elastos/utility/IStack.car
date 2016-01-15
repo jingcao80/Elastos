@@ -1,0 +1,209 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * {@code Stack} is a Last-In/First-Out(LIFO) data structure which represents a
+     * stack of objects. It enables users to pop to and push from the stack,
+     * including null objects. There is no limit to the size of the stack.
+     */
+    /**
+     * @Involve
+     * interface IIterable;
+     * interface ICollection;
+     * interface IList;
+     * interface IVector;
+     */
+    [deprecated]
+    interface IStack {
+        /**
+         * Returns whether the stack is empty or not.
+         *
+         * @return {@code true} if the stack is empty, {@code false} otherwise.
+         */
+        IsEmpty(
+            [out] Boolean* value);
+
+        /**
+         * Returns the element at the top of the stack without removing it.
+         *
+         * @return the element at the top of the stack.
+         * @throws EmptyStackException
+         *             if the stack is empty.
+         * @see #pop
+         */
+        // @SuppressWarnings("unchecked")
+        Peek(
+            [out] IInterface** outface);
+
+        /**
+         * Returns the element at the top of the stack and removes it.
+         *
+         * @return the element at the top of the stack.
+         * @throws EmptyStackException
+         *             if the stack is empty.
+         * @see #peek
+         * @see #push
+         */
+        // @SuppressWarnings("unchecked")
+        Pop(
+            [out] IInterface** outface);
+
+        /**
+         * Pushes the specified object onto the top of the stack.
+         *
+         * @param object
+         *            The object to be added on top of the stack.
+         * @return the object argument.
+         * @see #peek
+         * @see #pop
+         */
+        Push(
+            [in] IInterface* object);
+
+        /**
+         * Returns the index of the first occurrence of the object, starting from
+         * the top of the stack.
+         *
+         * @return the index of the first occurrence of the object, assuming that
+         *         the topmost object on the stack has a distance of one.
+         * @param o
+         *            the object to be searched.
+         */
+        Search(
+            [in] IInterface* o,
+            [out] Int32* value);
+
+
+        /**
+         * interfaces from IList
+         *
+         */
+        Add(
+            [in] Int32 location,
+            [in] IInterface* object);
+
+        Add(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Add(
+            [in] IInterface* object);
+
+        AddAll(
+            [in] Int32 location,
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] Int32 location,
+            [in] ICollection* collection);
+
+        Get(
+            [in] Int32 location,
+            [out] IInterface** object);
+
+        IndexOf(
+            [in] IInterface* object,
+            [out] Int32* index);
+
+        LastIndexOf(
+            [in] IInterface* object,
+            [out] Int32* index);
+
+        GetListIterator(
+            [out] IListIterator** it);
+
+        GetListIterator(
+            [in] Int32 location,
+            [out] IListIterator** it);
+
+        Remove(
+            [in] Int32 location,
+            [out] IInterface** object);
+
+        Remove(
+            [in] Int32 location);
+
+        Set(
+            [in] Int32 location,
+            [in] IInterface* object,
+            [out] IInterface** prevObject);
+
+        Set(
+            [in] Int32 location,
+            [in] IInterface* object);
+
+        GetSubList(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] IList** subList);
+
+
+        /**
+         * interfaces from ICollection
+         *
+         */
+        GetIterator(
+            [out] IIterator** it);
+
+        AddAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] ICollection* collection);
+
+        Clear();
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        ContainsAll(
+            [in] ICollection* collection,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        Remove(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Remove(
+            [in] IInterface* object);
+
+        RemoveAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RemoveAll(
+            [in] ICollection* collection);
+
+        RetainAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RetainAll(
+            [in] ICollection* collection);
+
+        GetSize(
+            [out] Int32* size);
+
+        ToArray(
+            [out, callee] ArrayOf<IInterface *> * array);
+
+        ToArray(
+            [in] ArrayOf<IInterface* > * inArray,
+            [out, callee] ArrayOf<IInterface *> * outArray);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,58 @@
+module
+{
+    interface Elastos.Droid.Graphics.IPoint;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+
+    /**
+     * @Involve
+     * interface IFrameLayout
+     */
+    [local]
+    interface IDessertCaseView {
+        const Float SCALE = 0.25; // natural display size will be SCALE*mCellSize
+
+        Start();
+
+        Stop();
+
+        FillFreeList();
+
+        FillFreeList(
+            [in] Int32 animationLen);
+
+        Place(
+            [in] IView* v,
+            [in] Boolean animate);
+
+        Place(
+            [in] IView* v,
+            [in] IPoint* pt,
+            [in] Boolean animate);
+    }
+
+    /**
+     * @Involve
+     * interface IFrameLayout
+     */
+    [local]
+    interface IDessertCaseViewRescalingContainer {
+        SetView(
+            [in] IDessertCaseView* v);
+
+        SetDarkness(
+            [in] Float p);
+
+        GetDarkness(
+            [out] Float* p);
+    }
+
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

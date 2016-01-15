@@ -1,0 +1,21 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    /**
+     * {@code EventObject}s represent events. Typically applications subclass this class to
+     * add event specific information.
+     *
+     * @see EventListener
+     */
+    interface IEventObject {
+        /**
+         * Returns the object which fired the event.
+         */
+        GetSource(
+            [out] IInterface** outface);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

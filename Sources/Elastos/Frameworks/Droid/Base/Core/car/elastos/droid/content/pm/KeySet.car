@@ -1,0 +1,31 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Represents a {@code KeySet} that has been declared in the AndroidManifest.xml
+     * file for the application.  A {@code KeySet} can be used explicitly to
+     * represent a trust relationship with other applications on the device.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IKeySet {
+
+        GetToken(
+            [out] IBinder** binder);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

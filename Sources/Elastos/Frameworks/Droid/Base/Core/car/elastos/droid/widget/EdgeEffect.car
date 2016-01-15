@@ -1,0 +1,134 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    [local]
+    interface IEdgeEffect {
+        /**
+         * Set the size of this edge effect in pixels.
+         *
+         * @param width Effect width in pixels
+         * @param height Effect height in pixels
+         */
+        SetSize(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * Reports if this EdgeEffect's animation is finished. If this method returns false
+         * after a call to {@link #draw(Canvas)} the host widget should schedule another
+         * drawing pass to continue the animation.
+         *
+         * @return true if animation is finished, false if drawing should continue on the next frame.
+         */
+        IsFinished(
+            [out] Boolean* res);
+
+        /**
+         * Immediately finish the current animation.
+         * After this call {@link #isFinished()} will return true.
+         */
+        Finish();
+
+        /**
+         * A view should call this when content is pulled away from an edge by the user.
+         * This will update the state of the current visual effect and its associated animation.
+         * The host view should always {@link android.view.View#invalidate()} after this
+         * and draw the results accordingly.
+         *
+         * <p>Views using EdgeEffect should favor {@link #onPull(float, float)} when the displacement
+         * of the pull point is known.</p>
+         *
+         * @param deltaDistance Change in distance since the last call. Values may be 0 (no change) to
+         *                      1.f (full length of the view) or negative values to express change
+         *                      back toward the edge reached to initiate the effect.
+         */
+        OnPull(
+            [in] Float deltaDistance);
+
+        /**
+         * A view should call this when content is pulled away from an edge by the user.
+         * This will update the state of the current visual effect and its associated animation.
+         * The host view should always {@link android.view.View#invalidate()} after this
+         * and draw the results accordingly.
+         *
+         * @param deltaDistance Change in distance since the last call. Values may be 0 (no change) to
+         *                      1.f (full length of the view) or negative values to express change
+         *                      back toward the edge reached to initiate the effect.
+         * @param displacement The displacement from the starting side of the effect of the point
+         *                     initiating the pull. In the case of touch this is the finger position.
+         *                     Values may be from 0-1.
+         */
+        OnPull(
+            [in] Float deltaDistance,
+            [in] Float displacement);
+
+        /**
+         * Call when the object is released after being pulled.
+         * This will begin the "decay" phase of the effect. After calling this method
+         * the host view should {@link android.view.View#invalidate()} and thereby
+         * draw the results accordingly.
+         */
+        OnRelease();
+
+        /**
+         * Call when the effect absorbs an impact at the given velocity.
+         * Used when a fling reaches the scroll boundary.
+         *
+         * <p>When using a {@link android.widget.Scroller} or {@link android.widget.OverScroller},
+         * the method <code>getCurrVelocity</code> will provide a reasonable approximation
+         * to use here.</p>
+         *
+         * @param velocity Velocity at impact in pixels per second.
+         */
+        OnAbsorb(
+            [in] Int32 velocity);
+
+        /**
+         * Set the color of this edge effect in argb.
+         *
+         * @param color Color in argb
+         */
+        SetColor(
+            [in] Int32 color);
+
+        /**
+         * Return the color of this edge effect in argb.
+         * @return The color of this edge effect in argb
+         */
+        GetColor(
+            [out] Int32* color);
+
+        /**
+         * Draw into the provided canvas. Assumes that the canvas has been rotated
+         * accordingly and the size has been set. The effect will be drawn the full
+         * width of X=0 to X=width, beginning from Y=0 and extending to some factor <
+         * 1.f of height.
+         *
+         * @param canvas Canvas to draw into
+         * @return true if drawing should continue beyond this frame to continue the
+         *         animation
+         */
+        Draw(
+            [in] ICanvas* canvas,
+            [out] Boolean* res);
+
+        /**
+         * Return the maximum height that the edge effect will be drawn at given the original
+         * {@link #setSize(int, int) input size}.
+         * @return The maximum height of the edge effect
+         */
+        GetMaxHeight(
+            [out] Int32* height);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

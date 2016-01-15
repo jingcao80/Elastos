@@ -1,0 +1,301 @@
+
+module
+{
+    interface Elastos.Utility.IIterator;
+    interface Elastos.Utility.IListIterator;
+
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * A {@code List} is a collection which maintains an ordering for its elements. Every
+     * element in the {@code List} has an index. Each element can thus be accessed by its
+     * index, with the first index being zero. Normally, {@code List}s allow duplicate
+     * elements, as compared to Sets, where elements have to be unique.
+     */
+    /**
+     * @Involve
+     * interface IIterable;
+     * interface ICollection;
+     */
+    [deprecated]
+    interface IList {
+
+        /**
+         * Inserts the specified object into this {@code List} at the specified location.
+         * The object is inserted before the current element at the specified
+         * location. If the location is equal to the size of this {@code List}, the object
+         * is added at the end. If the location is smaller than the size of this
+         * {@code List}, then all elements beyond the specified location are moved by one
+         * position towards the end of the {@code List}.
+         *
+         * @param location
+         *            the index at which to insert.
+         * @param object
+         *            the object to add.
+         * @throws UnsupportedOperationException
+         *                if adding to this {@code List} is not supported.
+         * @throws ClassCastException
+         *                if the class of the object is inappropriate for this
+         *                {@code List}.
+         * @throws IllegalArgumentException
+         *                if the object cannot be added to this {@code List}.
+         * @throws IndexOutOfBoundsException
+         *                if {@code location < 0 || location > size()}
+         */
+        Add(
+            [in] Int32 location,
+            [in] IInterface* object);
+
+        /**
+         * Adds the specified object at the end of this {@code List}.
+         *
+         * @param object
+         *            the object to add.
+         * @return always true.
+         * @throws UnsupportedOperationException
+         *                if adding to this {@code List} is not supported.
+         * @throws ClassCastException
+         *                if the class of the object is inappropriate for this
+         *                {@code List}.
+         * @throws IllegalArgumentException
+         *                if the object cannot be added to this {@code List}.
+         */
+        Add(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Add(
+            [in] IInterface* object);
+
+        /**
+         * Inserts the objects in the specified collection at the specified location
+         * in this {@code List}. The objects are added in the order they are returned from
+         * the collection's iterator.
+         *
+         * @param location
+         *            the index at which to insert.
+         * @param collection
+         *            the collection of objects to be inserted.
+         * @return true if this {@code List} has been modified through the insertion, false
+         *         otherwise (i.e. if the passed collection was empty).
+         * @throws UnsupportedOperationException
+         *                if adding to this {@code List} is not supported.
+         * @throws ClassCastException
+         *                if the class of an object is inappropriate for this
+         *                {@code List}.
+         * @throws IllegalArgumentException
+         *                if an object cannot be added to this {@code List}.
+         * @throws IndexOutOfBoundsException
+         *                if {@code location < 0 || location > size()}
+         */
+        AddAll(
+            [in] Int32 location,
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] Int32 location,
+            [in] ICollection* collection);
+
+        /**
+         * Returns the element at the specified location in this {@code List}.
+         *
+         * @param location
+         *            the index of the element to return.
+         * @return the element at the specified location.
+         * @throws IndexOutOfBoundsException
+         *                if {@code location < 0 || location >= size()}
+         */
+        Get(
+            [in] Int32 location,
+            [out] IInterface** object);
+
+        /**
+         * Searches this {@code List} for the specified object and returns the index of the
+         * first occurrence.
+         *
+         * @param object
+         *            the object to search for.
+         * @return the index of the first occurrence of the object or -1 if the
+         *         object was not found.
+         */
+        IndexOf(
+            [in] IInterface* object,
+            [out] Int32* index);
+
+        /**
+         * Searches this {@code List} for the specified object and returns the index of the
+         * last occurrence.
+         *
+         * @param object
+         *            the object to search for.
+         * @return the index of the last occurrence of the object, or -1 if the
+         *         object was not found.
+         */
+        LastIndexOf(
+            [in] IInterface* object,
+            [out] Int32* index);
+
+        /**
+         * Returns a {@code List} iterator on the elements of this {@code List}. The elements are
+         * iterated in the same order that they occur in the {@code List}.
+         *
+         * @return a {@code List} iterator on the elements of this {@code List}
+         *
+         * @see ListIterator
+         */
+        GetListIterator(
+            [out] IListIterator** it);
+
+        /**
+         * Returns a list iterator on the elements of this {@code List}. The elements are
+         * iterated in the same order as they occur in the {@code List}. The iteration
+         * starts at the specified location.
+         *
+         * @param location
+         *            the index at which to start the iteration.
+         * @return a list iterator on the elements of this {@code List}.
+         * @throws IndexOutOfBoundsException
+         *                if {@code location < 0 || location > size()}
+         * @see ListIterator
+         */
+        GetListIterator(
+            [in] Int32 location,
+            [out] IListIterator** it);
+
+        /**
+         * Removes the object at the specified location from this {@code List}.
+         *
+         * @param location
+         *            the index of the object to remove.
+         * @return the removed object.
+         * @throws UnsupportedOperationException
+         *                if removing from this {@code List} is not supported.
+         * @throws IndexOutOfBoundsException
+         *                if {@code location < 0 || location >= size()}
+         */
+        Remove(
+            [in] Int32 location,
+            [out] IInterface** object);
+
+        Remove(
+            [in] Int32 location);
+
+        /**
+         * Replaces the element at the specified location in this {@code List} with the
+         * specified object. This operation does not change the size of the {@code List}.
+         *
+         * @param location
+         *            the index at which to put the specified object.
+         * @param object
+         *            the object to insert.
+         * @return the previous element at the index.
+         * @throws UnsupportedOperationException
+         *                if replacing elements in this {@code List} is not supported.
+         * @throws ClassCastException
+         *                if the class of an object is inappropriate for this
+         *                {@code List}.
+         * @throws IllegalArgumentException
+         *                if an object cannot be added to this {@code List}.
+         * @throws IndexOutOfBoundsException
+         *                if {@code location < 0 || location >= size()}
+         */
+        Set(
+            [in] Int32 location,
+            [in] IInterface* object,
+            [out] IInterface** prevObject);
+
+        Set(
+            [in] Int32 location,
+            [in] IInterface* object);
+
+        /**
+         * Returns a {@code List} of the specified portion of this {@code List} from the given start
+         * index to the end index minus one. The returned {@code List} is backed by this
+         * {@code List} so changes to it are reflected by the other.
+         *
+         * @param start
+         *            the index at which to start the sublist.
+         * @param end
+         *            the index one past the end of the sublist.
+         * @return a list of a portion of this {@code List}.
+         * @throws IndexOutOfBoundsException
+         *                if {@code start < 0, start > end} or {@code end >
+         *                size()}
+         */
+        GetSubList(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] IList** subList);
+
+
+        /**
+         * interfaces from ICollection
+         *
+         */
+        GetIterator(
+            [out] IIterator** it);
+
+        AddAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] ICollection* collection);
+
+        Clear();
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        ContainsAll(
+            [in] ICollection* collection,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        Remove(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Remove(
+            [in] IInterface* object);
+
+        RemoveAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RemoveAll(
+            [in] ICollection* collection);
+
+        RetainAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RetainAll(
+            [in] ICollection* collection);
+
+        GetSize(
+            [out] Int32* size);
+
+        ToArray(
+            [out, callee] ArrayOf<IInterface *> * array);
+
+        ToArray(
+            [in] ArrayOf<IInterface* > * inArray,
+            [out, callee] ArrayOf<IInterface *> * outArray);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

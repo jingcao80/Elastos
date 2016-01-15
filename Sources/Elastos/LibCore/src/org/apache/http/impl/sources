@@ -1,0 +1,24 @@
+
+TARGET_NAME= impl
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc;
+
+SOURCES = AbstractHttpClientConnection.cpp
+SOURCES += AbstractHttpServerConnection.cpp
+SOURCES += SocketHttpClientConnection.cpp
+SOURCES += SocketHttpServerConnection.cpp
+SOURCES += DefaultHttpServerConnection.cpp
+SOURCES += DefaultHttpClientConnection.cpp
+SOURCES += DefaultHttpRequestFactory.cpp
+SOURCES += DefaultHttpResponseFactory.cpp
+SOURCES += DefaultConnectionReuseStrategy.cpp
+SOURCES += EnglishReasonPhraseCatalog.cpp
+SOURCES += NoConnectionReuseStrategy.cpp
+SOURCES += HttpConnectionMetricsImpl.cpp

@@ -1,0 +1,49 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    interface IIRemoteViewsFactory {
+        OnDataSetChanged();
+
+        [oneway] OnDataSetChangedAsync();
+
+        [oneway] OnDestroy(
+            [in] IIntent* intent);
+
+        GetCount(
+            [out] Int32* count);
+
+        GetViewAt(
+            [in] Int32 position,
+            [out] IParcelable** views);
+
+        GetLoadingView(
+            [out] IParcelable** views);
+
+        GetViewTypeCount(
+            [out] Int32* count);
+
+        GetItemId(
+            [in] Int32 position,
+            [out] Int64* id);
+
+        HasStableIds(
+            [out] Boolean* result);
+
+        IsCreated(
+            [out] Boolean* result);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+

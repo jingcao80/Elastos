@@ -1,0 +1,106 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "${name}.h"
+$
+#ifndef __${Upper(name)}_H__
+#define __${Upper(name)}_H__
+
+#include <new>
+#include "${ClassNameOfSink(class.name)}.h"
+#include "_CCallbackSink_.h"
+#include <elaatomics.h>
+
+class ${name} :
+    public _CCallbackSink_,
+$ WITH all interfaces DO
+$   IF interfaces is not first
+,
+$   END IF
+    public ${name}$^
+$ END DO
+$
+
+{
+public:
+    ${name}();
+    virtual ~${name}();
+
+    CARAPI InitializeSink();
+
+    CARAPI_(UInt32) AddRef();
+
+    CARAPI_(UInt32) Release();
+
+    CARAPI_(PInterface) Probe(
+        /* [in] */ REIID iid);
+
+    CARAPI GetInterfaceID(
+        /* [in] */ IInterface *pObject,
+        /* [out] */ InterfaceID *pIID);
+
+    CARAPI Aggregate(
+        /* [in] */ AggregateType type,
+        /* [in] */ PInterface pObj);
+
+    CARAPI GetDomain(
+        /* [out] */ IInterface** ppObj);
+
+    CARAPI GetClassID(
+        /* [out] */ ClassID* pCLSID);
+
+    CARAPI GetHashCode(
+        /* [out] */ Int32* pHashCode);
+
+    CARAPI Equals(
+        /* [out] */ IInterface* pInterface,
+        /* [out] */ Boolean* pEquals);
+
+    CARAPI ToString(
+        /* [out] */ String* pInfo);
+
+$WITH all interfaces DO
+$ IF name is not "IObject" and attrib is not "callback" and attrib is not "filter"
+$   WITH all methods DO
+$     IF type is "ECode"
+    CARAPI ${name}($^
+$     ELSE
+    CARAPI_(${type}) ${name}($^
+$     END IF
+$
+$   WITH all parameters DO
+
+        /* [${attrib}] */ ${type} ${prefixingname(parameter)}$^
+$       IF parameter is not last
+,$^
+$       END IF
+$   END DO ;; all parameters
+);
+
+$   END DO;; all methods
+$ END IF;; not callback
+$END DO;; all interfaces
+$
+
+    friend CARAPI ${name}CreateObject(PInterface *);
+    static ECode NewByFriend(${name} **ppNewObj);
+
+    IInterface                  *_m_pServer;
+    ICallbackConnector          *_m_pConnector;
+    CallbackContextContainer    _m_events[${name}_MaxEvents];
+    UInt8                       _m_EventsStatus[${name}_MaxEvents];
+#ifdef _DEBUG
+    unsigned int                _m_cNestings[${name}_MaxEvents];
+#endif
+
+private:
+    void InitializeEvents();
+
+    Int32 m_cRef;
+};
+
+#endif // __${Upper(name)}_H__
+$
+$END OUTPUT

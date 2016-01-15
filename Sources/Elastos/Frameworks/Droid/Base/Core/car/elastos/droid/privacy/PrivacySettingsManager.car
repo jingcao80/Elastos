@@ -1,0 +1,94 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Privacy {
+
+    interface IPrivacySettings;
+
+    interface IPrivacySettingsManager {
+        const String ACTION_PRIVACY_NOTIFICATION = "com.privacy.pdroid.PRIVACY_NOTIFICATION";
+        const String ACTION_PRIVACY_NOTIFICATION_ADDON = "com.privacy.pdroid.PRIVACY_NOTIFICATION_ADDON";
+
+        GetSettings(
+            [in]  String packageName,
+            [out] IPrivacySettings** privactySettings);
+
+        GetSettings(
+            [in]  String packageName,
+            [in]  Int32 uid,
+            [out] IPrivacySettings** privactySettings);
+
+        SaveSettings(
+            [in]  IPrivacySettings* settings,
+            [out] Boolean* result);
+
+        DeleteSettings(
+            [in]  String packageName,
+            [out] Boolean* result);
+
+        DeleteSettings(
+            [in]  String packageName,
+            [in]  Int32 uid,
+            [out] Boolean* result);
+
+        IsServiceAvailable(
+            [out] Boolean* isServiceAvailable);
+
+        Notification(
+            [in] String packageName,
+            [in] Byte accessMode,
+            [in] String dataType,
+            [in] String output);
+
+        Notification(
+            [in] String packageName,
+            [in] Byte accessMode,
+            [in] String dataType,
+            [in] String output,
+            [in] IPrivacySettings* pSet);
+
+        Notification(
+            [in] String packageName,
+            [in] Int32 uid,
+            [in] Byte accessMode,
+            [in] String dataType,
+            [in] String output,
+            [in] IPrivacySettings* pSet);
+
+        RegisterObservers();
+
+        AddObserver(
+            [in] String packageName);
+
+        PurgeSettings(
+            [out] Boolean* result);
+
+        GetVersion(
+            [out] Double* result);
+
+        GetApiVersion(
+            [out] Double* apiVersion);
+
+        GetModVersion(
+            [out] Double* modVersion);
+
+        GetModDetails(
+            [out] String* modDetails);
+
+        SetEnabled(
+            [in] Boolean isEnable,
+            [out] Boolean* result);
+
+        SetNotificationsEnabled(
+            [in] Boolean isEnable,
+            [out] Boolean* result);
+
+        SetBootCompleted();
+    }
+
+    } // namespace Privacy
+    } // namespace Droid
+    } // namespace Elastos
+}

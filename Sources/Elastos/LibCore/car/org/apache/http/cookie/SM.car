@@ -1,0 +1,31 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Cookie {
+
+    /**
+     * Constants and static helpers related to the HTTP state management.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 4.0
+     */
+    interface ISM {
+
+        const String COOKIE            = "Cookie";
+        const String COOKIE2          = "Cookie2";
+        const String SET_COOKIE        = "Set-Cookie";
+        const String SET_COOKIE2       = "Set-Cookie2";
+
+    }
+
+    } // namespace Cookie
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

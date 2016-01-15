@@ -1,0 +1,292 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "_${fullname}.h"
+
+#ifndef __CAR_${fullname}_H__
+#define __CAR_${fullname}_H__
+
+#include "${module.name}_server.h"
+#include <elcontainer.h>
+#include <elastos/core/Mutex.h>
+
+using Elastos::Core::Mutex;
+
+${ClassNamespaceBegin(class)}
+class ${name};
+
+$IF class.type is not "sink"
+$  IF class.attrib is not "hasctor"
+CARAPI _${class.name}CreateObject(${class.name} **ppObj);
+$  ELSE
+$  WITH all constructors DO
+CARAPI _${class.name}CreateObject(
+$    WITH all parameters DO
+$       IF parameter is not last
+        /* [${attrib}] */ ${type} ${prefixingname(parameter)},
+$       END IF
+$    END DO ;; all parameters
+        ${class.name} **);
+$  END DO
+$  END IF
+$END IF
+
+class _${name}
+    : public CCarObject
+$ WITH all interfaces DO
+$   IF attrib is not "callback" and attrib is not "callbacksink" and attrib is not "delegatesink" and attrib is not "clsobj" and attrib is not "filter"
+    , public ${namespace}${name}
+$   END IF ;; !callback, !callbacksink, !delegatesink, !clsobj and !filter
+$ END DO
+$
+$ IF attrib is "hascallback" or attrib is "hasfilter"
+$    IF type is not "generic"
+    , public _I${name}CallbackTrigger
+$    END IF
+$ END IF
+$
+$ WITH all super DO
+$ IF super is last
+$   IF super.attrib is "hascallback" and super.type is not "generic"
+#ifdef _DEBUG
+    , public _I${super.name}_ForCallbackKeywordChecking
+#endif
+$   END IF ;; hascallback
+$ END IF;;
+$ END DO;;
+$IF attrib is not "singleton"
+$IF lubeoption is "WeakReference"
+    , public ElRefBase
+$ELSE
+    , public ElLightRefBase
+$END IF
+$END IF
+{
+$ IF attrib is "hasparent" and super.type is not "generic"
+$     TEMPLATE "superh.lub"
+
+$ END IF
+$
+public:
+$
+$ TEMPLATE "basenew.lub"
+$
+$
+$IF type is not "generic" and attrib is not "private"
+$TEMPLATE "classnew.lub"
+$END IF
+$
+$IF attrib is "hascallback" and type is not "generic"
+$TEMPLATE "clientcallback.lub"
+$END IF ;; hascallback
+$
+$IF attrib is "hasctor" and type is "generic" and attrib is not "private"
+
+${NewOfGeneric(class)}
+$TEMPLATE "genericnew.lub"
+$END IF
+$
+$IF attrib is not "hasctor"
+$  IF type is not "aspect"
+$   IF class.attrib is not "singleton"
+    static ECode NewByFriend(${name} **ppNewObj);
+$   ELSE
+    static ECode AcquireSingletonByFriend(${name} **ppNewObj);
+$   END IF ;; "singleton"
+$  END IF
+$ELSE ;; not "hasctor"
+$  IF type is not "generic" and type is not "aspect"
+$   WITH all interfaces DO
+$       IF attrib is "clsobj"
+$           WITH all methods DO
+$               IF class.attrib is not "singleton"
+    static ECode NewByFriend($^
+$               ELSE
+    static ECode AcquireSingletonByFriend($^
+$               END IF ;; "singleton"
+$               WITH all parameters DO
+$                   IF parameter is not last
+
+    /* [${attrib}] */ ${type} ${prefixingname(parameter)},$^
+$                   ELSE
+ ${class.name} **${prefixingname(parameter)});
+$                   END IF
+$               END DO ;; all parameters
+$           END DO ;; all methods
+$       END IF ;; attrib is "clsobj"
+$    END DO ;; all interfaces
+$   END IF ;;
+$END IF ;;
+
+    _${name}();
+    virtual ~_${name}();
+
+    CARAPI_(UInt32) AddRef();
+    CARAPI_(UInt32) Release();
+    CARAPI_(PInterface) Probe(REIID);
+    CARAPI GetInterfaceID(IInterface *object, InterfaceID *pIID);
+$IF class.type is not "aspect"
+    CARAPI Aggregate(AggregateType type, PInterface pObj);
+    CARAPI GetDomain(IInterface** ppObj);
+    CARAPI GetClassID(ClassID* pCLSID);
+    CARAPI GetHashCode(Int32* pHashCode);
+    CARAPI Equals(IInterface* pInterface, Boolean* pEquals);
+    CARAPI ToString(String* pInfo);
+$ELSE
+    CARAPI AspectAggregate(AggregateType type, PInterface pObj);
+    CARAPI AspectGetDomain(IInterface** ppObj);
+    CARAPI GetAspectID(ClassID* pCLSID);
+$END IF
+$IF attrib is not "singleton"
+$IF lubeoption is "WeakReference"
+    CARAPI GetWeakReference(IWeakReference** weakReference);
+$END IF;; not WeakReference
+$END IF
+
+protected:
+$        IF lubeoption is not "inkernel"
+$          IF lubeoption is not "UseNakedMode"
+    static void *operator new(size_t size) { assert(0&&"You should call CFoo::NewByFriend(&pFoo);"); return NULL; }
+    static void *operator new(size_t size, void* _location) { assert(0&&"You should call CFoo::NewByFriend(&pFoo);"); return NULL; }
+    static void operator delete(void* _location) { ::operator delete(_location); }
+$          ELSE
+    static void *operator new(size_t size) { return ::operator new(size); }
+    static void *operator new(size_t size, void* _location) { return _location; }
+    static void operator delete(void* _location) { ::operator delete(_location); }
+$          END IF;; not UseNakedMode
+$        END IF;; not InKernel
+    _${name}(const _${name}&) {}
+    _${name}& operator=(const _${name}&) { return *this; }
+$
+$  WITH all interfaces DO
+$    IF attrib is "callbacksink" or attrib is "delegatesink"
+
+    CARAPI Add${name}Source(PInterface pServerObj);
+$    END IF
+$  END DO
+$
+$IF attrib is "hasfilter"
+$  WITH all interfaces DO
+$    IF attrib is "filter"
+$        WITH ALL methods DO
+
+    virtual CARAPI ${name}Filter(Int32 cFlags$^
+$               WITH all parameters DO
+, ${type} ${prefixingname(parameter)}$^
+$               END DO ;; all parameters
+);
+$        END DO;; methods
+$    END IF;; filter
+$  END DO;; class interface
+$END IF;; hasfilter
+
+    inline void SelfLock()
+    {
+$IF class.type is "aspect"
+        _m_syncLock->Lock();
+$ELSE
+        _m_syncLock.Lock();
+$END IF
+    }
+
+    inline void SelfUnlock()
+    {
+$IF class.type is "aspect"
+        _m_syncLock->Unlock();
+$ELSE
+        _m_syncLock.Unlock();
+$END IF
+    }
+
+$IF lubeoption is not "UseNakedMode"
+    CARAPI _AspectAttach(IAspect* pAspect);
+    CARAPI _AspectDetach(IAspect* pAspect);
+
+    virtual CARAPI OnAspectAttaching(PInterface pAspect) { return NOERROR; }
+    virtual CARAPI OnAspectDetaching(PInterface pAspect) { return NOERROR; }
+    virtual CARAPI OnEnteredRegime(PInterface pObject) { return NOERROR; }
+    virtual CARAPI OnLeftRegime(PInterface pObject) { return NOERROR; }
+$END IF;; not UseNakedMode
+
+$IF class.type is not "sink"
+$  IF class.attrib is not "hasctor"
+    friend CARAPI _${class.name}CreateObject(${class.name} **ppObj);
+$  ELSE
+$  WITH all constructors DO
+    friend CARAPI _${class.name}CreateObject(
+$    WITH all parameters DO
+$       IF parameter is not last
+            /* [${attrib}] */ ${type} ${prefixingname(parameter)},
+$       END IF
+$    END DO ;; all parameters
+            ${class.name} **);
+$  END DO
+$  END IF
+$END IF
+
+    ECode _m_ecCtor;
+$IF class.type is "aspect"
+    IObject* _m_pOuter;
+$ELSE
+$IF attrib is "hasvirtual"
+    IObject* _m_pChild;
+$END IF;; hasvirtual
+$END IF
+$IF lubeoption is not "UseNakedMode"
+    DLinkNode _m_pAspects;
+$END IF;; not UseNakedMode
+$IF class.type is "aspect"
+    Mutex* _m_syncLock;
+$ELSE
+    Mutex _m_syncLock;
+$END IF
+$IF attrib is "singleton"
+    Int32 m_cRef;
+$END IF
+
+private:
+    CARAPI _Initialize_();
+$IF lubeoption is not "UseNakedMode"
+    CARAPI_(void) _Uninitialize_();
+$END IF;; not UseNakedMode
+$
+$IF type is "aspect"
+$   TEMPLATE "declaspect.lub"
+$END IF
+$
+$IF type is "regime"
+$   TEMPLATE "declregime.lub"
+$END IF
+$
+$IF attrib is "hasvirtual"
+$   TEMPLATE "declbase.lub"
+$END IF
+$
+$IF attrib is "hascallback" and type is not "generic"
+$   TEMPLATE "declcallback.lub"
+$END IF
+$
+$IF attrib is "hasfilter"
+$   TEMPLATE "declfilter.lub"
+$END IF
+
+$IF attrib is "hascallback" and type is not "generic" or attrib is "hasfilter"
+public:
+    typedef _${class.name} Callback;
+    typedef _${class.name} Delegate;
+#ifdef _DEBUG
+#define ${class.name}_CallbackKeyword_Checking , public _I${class.name}_ForCallbackKeywordChecking
+#endif
+$ELSE
+#ifdef _DEBUG
+#define ${class.name}_CallbackKeyword_Checking
+#endif
+$END IF
+};
+
+${ClassNamespaceEnd(class)}
+#endif // __CAR_${fullname}_H__
+$
+$END OUTPUT

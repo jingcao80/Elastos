@@ -1,0 +1,275 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.ISyncRequest;
+    interface Elastos.Droid.Accounts.IAccount;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Builder class for a @link SyncRequest. As you build your SyncRequest this class will also
+     * perform validation.
+     */
+    interface ISyncRequestBuilder {
+        /**
+         * Request that a sync occur immediately.
+         *
+         * Example
+         * <pre>
+         *     SyncRequest.Builder builder = (new SyncRequest.Builder()).syncOnce();
+         * </pre>
+         */
+        SyncOnce();
+
+        /**
+         * Build a periodic sync. Either this or syncOnce() <b>must</b> be called for this builder.
+         * Syncs are identified by target {@link android.provider} and by the
+         * contents of the extras bundle.
+         * You cannot reuse the same builder for one-time syncs after having specified a periodic
+         * sync (by calling this function). If you do, an <code>IllegalArgumentException</code>
+         * will be thrown.
+         * <p>The bundle for a periodic sync can be queried by applications with the correct
+         * permissions using
+         * {@link ContentResolver#getPeriodicSyncs(Account account, String provider)}, so no
+         * sensitive data should be transferred here.
+         *
+         * Example usage.
+         *
+         * <pre>
+         *     Request a periodic sync every 5 hours with 20 minutes of flex.
+         *     SyncRequest.Builder builder =
+         *         (new SyncRequest.Builder()).syncPeriodic(5 * HOUR_IN_SECS, 20 * MIN_IN_SECS);
+         *
+         *     Schedule a periodic sync every hour at any point in time during that hour.
+         *     SyncRequest.Builder builder =
+         *         (new SyncRequest.Builder()).syncPeriodic(1 * HOUR_IN_SECS, 1 * HOUR_IN_SECS);
+         * </pre>
+         *
+         * N.B.: Periodic syncs are not allowed to have any of
+         * {@link ContentResolver#SYNC_EXTRAS_DO_NOT_RETRY},
+         * {@link ContentResolver#SYNC_EXTRAS_IGNORE_BACKOFF},
+         * {@link ContentResolver#SYNC_EXTRAS_IGNORE_SETTINGS},
+         * {@link ContentResolver#SYNC_EXTRAS_INITIALIZE},
+         * {@link ContentResolver#SYNC_EXTRAS_FORCE},
+         * {@link ContentResolver#SYNC_EXTRAS_EXPEDITED},
+         * {@link ContentResolver#SYNC_EXTRAS_MANUAL}
+         * set to true. If any are supplied then an <code>IllegalArgumentException</code> will
+         * be thrown.
+         *
+         * @param pollFrequency the amount of time in seconds that you wish
+         *            to elapse between periodic syncs.
+         * @param beforeSeconds the amount of flex time in seconds before
+         *            {@code pollFrequency} that you permit for the sync to take
+         *            place. Must be less than {@code pollFrequency}.
+         */
+        SyncPeriodic(
+            [in] Int64 pollFrequency,
+            [in] Int64 beforeSeconds);
+
+        /**
+         * Will throw an <code>IllegalArgumentException</code> if called and
+         * {@link #setIgnoreSettings(boolean ignoreSettings)} has already been called.
+         * @param disallow true to allow this transfer on metered networks. Default false.
+         *
+         */
+        SetDisallowMetered(
+            [in] Boolean disallow);
+
+        /**
+         * Specify an authority and account for this transfer.
+         *
+         * @param authority A String identifying the content provider to be synced.
+         * @param account Account to sync. Can be null unless this is a periodic
+         *            sync, for which verification by the ContentResolver will
+         *            fail. If a sync is performed without an account, the
+         */
+        SetSyncAdapter(
+            [in] IAccount* account,
+            [in] String authority);
+
+        /**
+         * Developer-provided extras handed back when sync actually occurs. This bundle is copied
+         * into the SyncRequest returned by {@link #build()}.
+         *
+         * Example:
+         * <pre>
+         *   String[] syncItems = {"dog", "cat", "frog", "child"};
+         *   SyncRequest.Builder builder =
+         *     new SyncRequest.Builder()
+         *       .setSyncAdapter(dummyAccount, dummyProvider)
+         *       .syncOnce();
+         *
+         *   for (String syncData : syncItems) {
+         *     Bundle extras = new Bundle();
+         *     extras.setString("data", syncData);
+         *     builder.setExtras(extras);
+         *     ContentResolver.sync(builder.build()); // Each sync() request creates a unique sync.
+         *   }
+         * </pre>
+         * Only values of the following types may be used in the extras bundle:
+         * <ul>
+         * <li>Integer</li>
+         * <li>Long</li>
+         * <li>Boolean</li>
+         * <li>Float</li>
+         * <li>Double</li>
+         * <li>String</li>
+         * <li>Account</li>
+         * <li>null</li>
+         * </ul>
+         * If any data is present in the bundle not of this type, build() will
+         * throw a runtime exception.
+         *
+         * @param bundle extras bundle to set.
+         */
+        SetExtras(
+            [in] IBundle* bundle);
+
+        /**
+         * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_DO_NOT_RETRY}.
+         *
+         * A one-off sync operation that fails will be retried with exponential back-off unless
+         * this is set to false. Not valid for periodic sync and will throw an
+         * <code>IllegalArgumentException</code> in build().
+         *
+         * @param noRetry true to not retry a failed sync. Default false.
+         */
+        SetNoRetry(
+            [in] Boolean noRetry);
+
+        /**
+         * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_IGNORE_SETTINGS}.
+         *
+         * Not valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
+         * {@link #build()}.
+         * <p>Throws <code>IllegalArgumentException</code> if called and
+         * {@link #setDisallowMetered(boolean)} has been set.
+         *
+         *
+         * @param ignoreSettings true to ignore the sync automatically settings. Default false.
+         */
+        SetIgnoreSettings(
+            [in] Boolean ignoreSettings);
+
+        /**
+         * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_IGNORE_BACKOFF}.
+         *
+         * Ignoring back-off will force the sync scheduling process to ignore any back-off that was
+         * the result of a failed sync, as well as to invalidate any {@link SyncResult#delayUntil}
+         * value that may have been set by the adapter. Successive failures will not honor this
+         * flag. Not valid for periodic sync and will throw an <code>IllegalArgumentException</code>
+         * in {@link #build()}.
+         *
+         * @param ignoreBackoff ignore back off settings. Default false.
+         */
+        SetIgnoreBackoff(
+            [in] Boolean ignoreBackoff);
+
+        /**
+         * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_MANUAL}.
+         *
+         * Not valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
+         * {@link #build()}.
+         *
+         * @param isManual User-initiated sync or not. Default false.
+         */
+        SetManual(
+            [in] Boolean isManual);
+
+        /**
+         * An expedited sync runs immediately and can preempt other non-expedited running syncs.
+         *
+         * Not valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
+         * {@link #build()}.
+         *
+         * @param expedited whether to run expedited. Default false.
+         */
+        SetExpedited(
+            [in] Boolean expedited);
+
+        /**
+         * Performs validation over the request and throws the runtime exception
+         * <code>IllegalArgumentException</code> if this validation fails.
+         *
+         * @return a SyncRequest with the information contained within this
+         *         builder.
+         */
+        Build(
+            [out] ISyncRequest** request);
+    }
+
+    /**
+     * Convenience class to construct sync requests. See {@link android.content.SyncRequest.Builder}
+     * for an explanation of the various functions. The resulting object is passed through to the
+     * framework via {@link android.content.ContentResolver#requestSync(SyncRequest)}.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ISyncRequest {
+        /**
+         * {@hide}
+         * @return whether this sync is periodic or one-time. A Sync Request must be
+         *         either one of these or an InvalidStateException will be thrown in
+         *         Builder.build().
+         */
+        IsPeriodic(
+            [out] Boolean* periodic);
+
+        /**
+         * {@hide}
+         * @return whether this sync is expedited.
+         */
+        IsExpedited(
+            [out] Boolean* periodic);
+
+        /**
+         * {@hide}
+         *
+         * @return account object for this sync.
+         * @throws IllegalArgumentException if this function is called for a request that targets a
+         * sync service.
+         */
+        GetAccount(
+            [out] IAccount** account);
+
+        /**
+         * {@hide}
+         *
+         * @return provider for this sync.
+         * @throws IllegalArgumentException if this function is called for a request that targets a
+         * sync service.
+         */
+        GetProvider(
+            [out] String* provider);
+
+        /**
+         * {@hide}
+         * Retrieve bundle for this SyncRequest. Will not be null.
+         */
+        GetBundle(
+            [out] IBundle** account);
+
+        /**
+         * {@hide}
+         * @return the earliest point in time that this sync can be scheduled.
+         */
+        GetSyncFlexTime(
+            [out] Int64* time);
+
+        /**
+         * {@hide}
+         * @return the last point in time at which this sync must scheduled.
+         */
+        GetSyncRunTime(
+            [out] Int64* time);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

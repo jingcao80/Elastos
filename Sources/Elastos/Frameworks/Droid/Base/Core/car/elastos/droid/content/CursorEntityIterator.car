@@ -1,0 +1,76 @@
+
+module
+{
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Content.IEntity;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Abstract implementation of EntityIterator that makes it easy to wrap a cursor
+     * that can contain several consecutive rows for an entity.
+     * @hide
+     *
+     * @implements Elastos.Droid.Content.Elastos.Droid.Content.IEntityIterator
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IEntityIterator
+     */
+    interface ICursorEntityIterator {
+        /**
+         * Returns the entity that the cursor is currently pointing to. This must take care to advance
+         * the cursor past this entity. This will never be called if the cursor is at the end.
+         * @param cursor the cursor that contains the entity rows
+         * @return the entity that the cursor is currently pointing to
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * RemoteException | if a RemoteException is caught while attempting to build the Entity
+         */
+        GetEntityAndIncrementCursor(
+            [in] ICursor* cursor,
+            [out] IEntity** entity);
+
+        /**
+         * Returns true if there is at least one more element, false otherwise.
+         * @see #next
+         */
+        HasNext(
+            [out] Boolean* result);
+
+        /**
+         * Returns the next object and advances the iterator.
+         *
+         * @return the next object.
+         * @throws NoSuchElementException
+         *             if there are no more elements.
+         * @see #hasNext
+         */
+        GetNext(
+            [out] IInterface** object);
+
+        /**
+         * Removes the last object returned by {@code next} from the collection.
+         * This method can only be called once between each call to {@code next}.
+         *
+         * @throws UnsupportedOperationException
+         *             if removing is not supported by the collection being
+         *             iterated.
+         * @throws IllegalStateException
+         *             if {@code next} has not been called, or {@code remove} has
+         *             already been called after the last call to {@code next}.
+         */
+        Remove();
+
+        Reset();
+
+        Close();
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

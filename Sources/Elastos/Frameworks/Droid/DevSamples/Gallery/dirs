@@ -1,0 +1,3 @@
+DIRS = src/data
+DIRS += src/ui
+DIRS += src/util

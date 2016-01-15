@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * A convenience class for accessing fields in an entry in the back/forward list
+     * of a WebView. Each WebHistoryItem is a snapshot of the requested history
+     * item. Each history item may be updated during the load of a page.
+     * @see WebBackForwardList
+     */
+    [deprecated]
+    interface IWebHistoryItem /*implements Cloneable*/ {
+
+        /**
+         * Return an identifier for this history item. If an item is a copy of
+         * another item, the identifiers will be the same even if they are not the
+         * same object.
+         * @return The id for this item.
+         * @deprecated This method is now obsolete.
+         * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
+         */
+        //@Deprecated
+        GetId(
+            [out] Int32* id);
+
+        /**
+         * Return the url of this history item. The url is the base url of this
+         * history item. See getTargetUrl() for the url that is the actual target of
+         * this history item.
+         * @return The base url of this history item.
+         * Note: The VM ensures 32-bit atomic read/write operations so we don't have
+         * to synchronize this method.
+         */
+        GetUrl(
+            [out] String* url);
+
+        /**
+         * Return the original url of this history item. This was the requested
+         * url, the final url may be different as there might have been
+         * redirects while loading the site.
+         * @return The original url of this history item.
+         */
+        GetOriginalUrl(
+            [out] String* url);
+
+        /**
+         * Return the document title of this history item.
+         * @return The document title of this history item.
+         * Note: The VM ensures 32-bit atomic read/write operations so we don't have
+         * to synchronize this method.
+         */
+        GetTitle(
+            [out] String* title);
+
+        /**
+         * Return the favicon of this history item or null if no favicon was found.
+         * @return A Bitmap containing the favicon for this history item or null.
+         * Note: The VM ensures 32-bit atomic read/write operations so we don't have
+         * to synchronize this method.
+         */
+        GetFavicon(
+            [out] IBitmap** bitmap);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

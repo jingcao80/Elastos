@@ -1,0 +1,272 @@
+module
+{
+    interface Elastos.Core.IThread;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+    namespace Locks {
+    /**
+     * A reentrant mutual exclusion {@link Lock} with the same basic
+     * behavior and semantics as the implicit monitor lock accessed using
+     * {@code synchronized} methods and statements, but with extended
+     * capabilities.
+     *
+     * <p>A {@code ReentrantLock} is <em>owned</em> by the thread last
+     * successfully locking, but not yet unlocking it. A thread invoking
+     * {@code lock} will return, successfully acquiring the lock, when
+     * the lock is not owned by another thread. The method will return
+     * immediately if the current thread already owns the lock. This can
+     * be checked using methods {@link #isHeldByCurrentThread}, and {@link
+     * #getHoldCount}.
+     *
+     * <p>The constructor for this class accepts an optional
+     * <em>fairness</em> parameter.  When set {@code true}, under
+     * contention, locks favor granting access to the longest-waiting
+     * thread.  Otherwise this lock does not guarantee any particular
+     * access order.  Programs using fair locks accessed by many threads
+     * may display lower overall throughput (i.e., are slower; often much
+     * slower) than those using the default setting, but have smaller
+     * variances in times to obtain locks and guarantee lack of
+     * starvation. Note however, that fairness of locks does not guarantee
+     * fairness of thread scheduling. Thus, one of many threads using a
+     * fair lock may obtain it multiple times in succession while other
+     * active threads are not progressing and not currently holding the
+     * lock.
+     * Also note that the untimed {@link #tryLock() tryLock} method does not
+     * honor the fairness setting. It will succeed if the lock
+     * is available even if other threads are waiting.
+     *
+     * <p>It is recommended practice to <em>always</em> immediately
+     * follow a call to {@code lock} with a {@code try} block, most
+     * typically in a before/after construction such as:
+     *
+     *  <pre> {@code
+     * class X {
+     *   private final ReentrantLock lock = new ReentrantLock();
+     *   // ...
+     *
+     *   public void m() {
+     *     lock.lock();  // block until condition holds
+     *     try {
+     *       // ... method body
+     *     } finally {
+     *       lock.unlock()
+     *     }
+     *   }
+     * }}</pre>
+     *
+     * <p>In addition to implementing the {@link Lock} interface, this
+     * class defines methods {@code isLocked} and
+     * {@code getLockQueueLength}, as well as some associated
+     * {@code protected} access methods that may be useful for
+     * instrumentation and monitoring.
+     *
+     * <p>Serialization of this class behaves in the same way as built-in
+     * locks: a deserialized lock is in the unlocked state, regardless of
+     * its state when serialized.
+     *
+     * <p>This lock supports a maximum of 2147483647 recursive locks by
+     * the same thread. Attempts to exceed this limit result in
+     * {@link Error} throws from locking methods.
+     *
+     * @since 1.5
+     * @author Doug Lea
+     */
+
+    /**
+     * @Involve
+     * interface ILock;
+     */
+    interface IReentrantLock {
+        /**
+         * Queries the number of holds on this lock by the current thread.
+         *
+         * <p>A thread has a hold on a lock for each lock action that is not
+         * matched by an unlock action.
+         *
+         * <p>The hold count information is typically only used for testing and
+         * debugging purposes. For example, if a certain section of code should
+         * not be entered with the lock already held then we can assert that
+         * fact:
+         *
+         *  <pre> {@code
+         * class X {
+         *   ReentrantLock lock = new ReentrantLock();
+         *   // ...
+         *   public void m() {
+         *     assert lock.getHoldCount() == 0;
+         *     lock.lock();
+         *     try {
+         *       // ... method body
+         *     } finally {
+         *       lock.unlock();
+         *     }
+         *   }
+         * }}</pre>
+         *
+         * @return the number of holds on this lock by the current thread,
+         *         or zero if this lock is not held by the current thread
+         */
+        GetHoldCount(
+            [out] Int32* value);
+
+        /**
+         * Queries if this lock is held by the current thread.
+         *
+         * <p>Analogous to the {@link Thread#holdsLock} method for built-in
+         * monitor locks, this method is typically used for debugging and
+         * testing. For example, a method that should only be called while
+         * a lock is held can assert that this is the case:
+         *
+         *  <pre> {@code
+         * class X {
+         *   ReentrantLock lock = new ReentrantLock();
+         *   // ...
+         *
+         *   public void m() {
+         *       assert lock.isHeldByCurrentThread();
+         *       // ... method body
+         *   }
+         * }}</pre>
+         *
+         * <p>It can also be used to ensure that a reentrant lock is used
+         * in a non-reentrant manner, for example:
+         *
+         *  <pre> {@code
+         * class X {
+         *   ReentrantLock lock = new ReentrantLock();
+         *   // ...
+         *
+         *   public void m() {
+         *       assert !lock.isHeldByCurrentThread();
+         *       lock.lock();
+         *       try {
+         *           // ... method body
+         *       } finally {
+         *           lock.unlock();
+         *       }
+         *   }
+         * }}</pre>
+         *
+         * @return {@code true} if current thread holds this lock and
+         *         {@code false} otherwise
+         */
+        IsHeldByCurrentThread(
+            [out] Boolean* value);
+
+        /**
+         * Queries if this lock is held by any thread. This method is
+         * designed for use in monitoring of the system state,
+         * not for synchronization control.
+         *
+         * @return {@code true} if any thread holds this lock and
+         *         {@code false} otherwise
+         */
+        IsLocked(
+            [out] Boolean* value);
+
+        /**
+         * Returns {@code true} if this lock has fairness set true.
+         *
+         * @return {@code true} if this lock has fairness set true
+         */
+        IsFair(
+            [out] Boolean* value);
+
+        /**
+         * Queries whether any threads are waiting to acquire this lock. Note that
+         * because cancellations may occur at any time, a {@code true}
+         * return does not guarantee that any other thread will ever
+         * acquire this lock.  This method is designed primarily for use in
+         * monitoring of the system state.
+         *
+         * @return {@code true} if there may be other threads waiting to
+         *         acquire the lock
+         */
+        HasQueuedThreads(
+            [out] Boolean* value);
+
+        /**
+         * Queries whether the given thread is waiting to acquire this
+         * lock. Note that because cancellations may occur at any time, a
+         * {@code true} return does not guarantee that this thread
+         * will ever acquire this lock.  This method is designed primarily for use
+         * in monitoring of the system state.
+         *
+         * @param thread the thread
+         * @return {@code true} if the given thread is queued waiting for this lock
+         * @throws NullPointerException if the thread is null
+         */
+        HasQueuedThread(
+            [in] IThread* thread,
+            [out] Boolean* value);
+
+        /**
+         * Returns an estimate of the number of threads waiting to
+         * acquire this lock.  The value is only an estimate because the number of
+         * threads may change dynamically while this method traverses
+         * internal data structures.  This method is designed for use in
+         * monitoring of the system state, not for synchronization
+         * control.
+         *
+         * @return the estimated number of threads waiting for this lock
+         */
+        GetQueueLength(
+            [out] Int32* value);
+
+        /**
+         * Queries whether any threads are waiting on the given condition
+         * associated with this lock. Note that because timeouts and
+         * interrupts may occur at any time, a {@code true} return does
+         * not guarantee that a future {@code signal} will awaken any
+         * threads.  This method is designed primarily for use in
+         * monitoring of the system state.
+         *
+         * @param condition the condition
+         * @return {@code true} if there are any waiting threads
+         * @throws IllegalMonitorStateException if this lock is not held
+         * @throws IllegalArgumentException if the given condition is
+         *         not associated with this lock
+         * @throws NullPointerException if the condition is null
+         */
+        HasWaiters(
+            [in] ICondition* condition,
+            [out] Boolean* value);
+
+        /**
+         * Returns an estimate of the number of threads waiting on the
+         * given condition associated with this lock. Note that because
+         * timeouts and interrupts may occur at any time, the estimate
+         * serves only as an upper bound on the actual number of waiters.
+         * This method is designed for use in monitoring of the system
+         * state, not for synchronization control.
+         *
+         * @param condition the condition
+         * @return the estimated number of waiting threads
+         * @throws IllegalMonitorStateException if this lock is not held
+         * @throws IllegalArgumentException if the given condition is
+         *         not associated with this lock
+         * @throws NullPointerException if the condition is null
+         */
+        GetWaitQueueLength(
+            [in] ICondition* condition,
+            [out] Int32* value);
+
+        /**
+         * Returns a string identifying this lock, as well as its lock state.
+         * The state, in brackets, includes either the String {@code "Unlocked"}
+         * or the String {@code "Locked by"} followed by the
+         * {@linkplain Thread#getName name} of the owning thread.
+         *
+         * @return a string identifying this lock, as well as its lock state
+         */
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Locks
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

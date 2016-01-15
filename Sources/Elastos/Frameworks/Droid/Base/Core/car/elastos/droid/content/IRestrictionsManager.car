@@ -1,0 +1,41 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IPersistableBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Interface used by the RestrictionsManager
+     * @hide
+     */
+    interface IIRestrictionsManager {
+        GetApplicationRestrictions(
+            [in] String packageName,
+            [out] IBundle** bundle);
+
+        HasRestrictionsProvider(
+            [out] Boolean* result);
+
+        RequestPermission(
+            [in] String packageName,
+            [in] String requestType,
+            [in] String requestId,
+            [in] IPersistableBundle* requestData);
+
+        NotifyPermissionResponse(
+            [in] String packageName,
+            [in] IPersistableBundle* response);
+
+        CreateLocalApprovalIntent(
+            [out] IIntent** intent);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,29 @@
+
+module
+{
+    interface Elastos.Utility.Jar.IManifest;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IInputStream;
+     * interface IFilterInputStream;
+     * interface IInflaterInputStream;
+     * interface IZipInputStream;
+     */
+    interface IJarInputStream {
+        GetManifest(
+            [out] IManifest** manifest);
+
+        GetNextJarEntry(
+            [out] IJarEntry** jarEntry);
+    }
+
+    } //Jar
+    } //Utility
+    } //Elastos
+}

@@ -1,0 +1,49 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IServiceConnection;
+    using interface Elastos.Droid.Os.IBinder;
+
+    namespace AccountsAndSyncSettings {
+
+        interface IOnTickListener
+        {
+            OnTick([in] Int32 duration);
+        }
+
+        class CAddAccountSettings {
+            interface IActivity;
+            interface IOnTickListener;
+            interface IRunnable;
+        }
+
+        class CManageAccountsSettings
+        {
+            interface IActivity;
+        }
+
+        class CAccountSyncSettings
+        {
+            interface IActivity;
+        }
+
+        class CAccountSyncSettingsInAddAccount
+        {
+            interface IActivity;
+        }
+
+        class CSyncActivityTooManyDeletes
+        {
+            interface IActivity;
+        }
+
+    } //end namespace AccountsAndSyncSettings
+}
+

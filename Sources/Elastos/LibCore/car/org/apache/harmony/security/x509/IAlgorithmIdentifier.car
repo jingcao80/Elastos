@@ -1,0 +1,72 @@
+
+module
+{
+    interface Elastos.Core.IStringBuilder;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the Algorithm Identifier which is a part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  AlgorithmIdentifier ::= SEQUENCE {
+     *      algorithm OBJECT IDENTIFIER,
+     *      parameters ANY DEFINED BY algorithm OPTIONAL
+     *  }
+     * </pre>
+     */
+    interface IAlgorithmIdentifier {
+        /**
+         * Returns the value of algorithm field of the structure.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the name of the algorithm corresponding to
+         * its OID. If there is no the such correspondence,
+         * algorithm OID is returned.
+         */
+        GetAlgorithmName(
+            [out] String* algorithmName);
+
+        /**
+         * Returns the value of parameters field of the structure.
+         */
+        GetParameters(
+            [out, callee] ArrayOf<Byte>* parameters);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 AlgorithmIdentifier value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        DumpValue(
+            [in] IStringBuilder* sb);
+    }
+
+    interface IAlgorithmIdentifierHelper {
+        /**
+         * Custom AlgorithmIdentifier DER encoder/decoder
+         */
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

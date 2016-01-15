@@ -1,0 +1,277 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Audiofx {
+
+    interface IEqualizer;
+
+    /**
+     * The OnParameterChangeListener interface defines a method called by the Equalizer when a
+     * parameter value has changed.
+     */
+    interface IEqualizerOnParameterChangeListener {
+        /**
+         * Method called when a parameter value has changed. The method is called only if the
+         * parameter was changed by another application having the control of the same
+         * Equalizer engine.
+         * @param effect the Equalizer on which the interface is registered.
+         * @param status status of the set parameter operation.
+         * @param param1 ID of the modified parameter. See {@link #PARAM_BAND_LEVEL} ...
+         * @param param2 additional parameter qualifier (e.g the band for band level parameter).
+         * @param value the new parameter value.
+         */
+        OnParameterChange(
+            [in] IEqualizer* effect,
+            [in] Int32 status,
+            [in] Int32 param1,
+            [in] Int32 param2,
+            [in] Int32 value);
+    }
+
+    /**
+     * The Settings class regroups all equalizer parameters. It is used in
+     * conjuntion with getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    [deprecated]
+    interface IEqualizerSettings {
+        GetCurPreset(
+            [out] Int16* curPreset);
+
+        SetCurPreset(
+            [in] Int16 curPreset);
+
+        GetNumBands(
+            [out] Int16* numBands);
+
+        SetNumBands(
+            [in] Int16 numBands);
+
+        GetBandLevels(
+            [out, callee] ArrayOf<Int16>* levels);
+
+        SetBandLevels(
+            [in] ArrayOf<Int16>* levels);
+    }
+
+    /**
+     * @Involve
+     * interface IAudioEffect
+     */
+    interface IEqualizer {
+
+        // These constants must be synchronized with those in
+        // frameworks/base/include/media/EffectEqualizerApi.h
+        /**
+         * Number of bands. Parameter ID for OnParameterChangeListener
+         */
+        const Int32 PARAM_NUM_BANDS = 0;
+        /**
+         * Band level range. Parameter ID for OnParameterChangeListener
+         */
+        const Int32 PARAM_LEVEL_RANGE = 1;
+        /**
+         * Band level. Parameter ID for OnParameterChangeListener
+         */
+        const Int32 PARAM_BAND_LEVEL = 2;
+        /**
+         * Band center frequency. Parameter ID for OnParameterChangeListener
+         */
+        const Int32 PARAM_CENTER_FREQ = 3;
+        /**
+         * Band frequency range. Parameter ID for
+         * {@link android.media.audiofx.Equalizer.OnParameterChangeListener}
+         */
+        const Int32 PARAM_BAND_FREQ_RANGE = 4;
+        /**
+         * Band for a given frequency. Parameter ID for OnParameterChangeListener
+         *
+         */
+        const Int32 PARAM_GET_BAND = 5;
+        /**
+         * Current preset. Parameter ID for OnParameterChangeListener
+         */
+        const Int32 PARAM_CURRENT_PRESET = 6;
+        /**
+         * Request number of presets. Parameter ID for OnParameterChangeListener
+         */
+        const Int32 PARAM_GET_NUM_OF_PRESETS = 7;
+        /**
+         * Request preset name. Parameter ID for OnParameterChangeListener
+         */
+        const Int32 PARAM_GET_PRESET_NAME = 8;
+        /**
+         * Maximum size for preset name
+         */
+        const Int32 PARAM_STRING_SIZE_MAX = 32;
+
+        /**
+         * Gets the number of frequency bands supported by the Equalizer engine.
+         * @return the number of bands
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetNumberOfBands(
+            [out] Int16* numBands);
+
+        /**
+         * Gets the level range for use by {@link #setBandLevel(short,short)}. The level is expressed in
+         * milliBel.
+         * @return the band level range in an array of short integers. The first element is the lower
+         * limit of the range, the second element the upper limit.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetBandLevelRange(
+            [out, callee] ArrayOf<Int16>* bandLevelRange);
+
+        /**
+         * Sets the given equalizer band to the given gain value.
+         * @param band frequency band that will have the new gain. The numbering of the bands starts
+         * from 0 and ends at (number of bands - 1).
+         * @param level new gain in millibels that will be set to the given band. getBandLevelRange()
+         * will define the maximum and minimum values.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         * @see #getNumberOfBands()
+         */
+        SetBandLevel(
+            [in] Int16 band,
+            [in] Int16 level);
+
+        /**
+         * Gets the gain set for the given equalizer band.
+         * @param band frequency band whose gain is requested. The numbering of the bands starts
+         * from 0 and ends at (number of bands - 1).
+         * @return the gain in millibels of the given band.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetBandLevel(
+            [in] Int16 band,
+            [out] Int16* level);
+
+        /**
+         * Gets the center frequency of the given band.
+         * @param band frequency band whose center frequency is requested. The numbering of the bands
+         * starts from 0 and ends at (number of bands - 1).
+         * @return the center frequency in milliHertz
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetCenterFreq(
+            [in] Int16 band,
+            [out] Int32* centerFreq);
+
+        /**
+         * Gets the frequency range of the given frequency band.
+         * @param band frequency band whose frequency range is requested. The numbering of the bands
+         * starts from 0 and ends at (number of bands - 1).
+         * @return the frequency range in millHertz in an array of integers. The first element is the
+         * lower limit of the range, the second element the upper limit.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetBandFreqRange(
+            [in] Int16 band,
+            [out, callee] ArrayOf<Int32>* bandFreqRange);
+
+        /**
+         * Gets the band that has the most effect on the given frequency.
+         * @param frequency frequency in milliHertz which is to be equalized via the returned band.
+         * @return the frequency band that has most effect on the given frequency.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetBand(
+            [in] Int32 frequency,
+            [out] Int16* band);
+
+        /**
+         * Gets current preset.
+         * @return the preset that is set at the moment.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetCurrentPreset(
+            [out] Int16* preset);
+
+        /**
+         * Sets the equalizer according to the given preset.
+         * @param preset new preset that will be taken into use. The valid range is [0,
+         * number of presets-1].
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         * @see #getNumberOfPresets()
+         */
+        UsePreset(
+            [in] Int16 preset);
+
+        /**
+         * Gets the total number of presets the equalizer supports. The presets will have indices
+         * [0, number of presets-1].
+         * @return the number of presets the equalizer supports.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetNumberOfPresets(
+            [out] Int16* numPresets);
+
+        /**
+         * Gets the preset name based on the index.
+         * @param preset index of the preset. The valid range is [0, number of presets-1].
+         * @return a string containing the name of the given preset.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetPresetName(
+            [in] Int16 preset,
+            [out] String* presetName);
+
+        /**
+         * Registers an OnParameterChangeListener interface.
+         * @param listener OnParameterChangeListener interface registered
+         */
+        SetParameterListener(
+            [in] IEqualizerOnParameterChangeListener* listener);
+
+        /**
+         * Gets the equalizer properties. This method is useful when a snapshot of current
+         * equalizer settings must be saved by the application.
+         * @return an Equalizer.Settings object containing all current parameters values
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetProperties(
+            [out] IEqualizerSettings** properties);
+
+        /**
+         * Sets the equalizer properties. This method is useful when equalizer settings have to
+         * be applied from a previous backup.
+         * @param settings an Equalizer.Settings object containing the properties to apply
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetProperties(
+            [in] IEqualizerSettings* settings);
+    }
+    } // namespace audiofx
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

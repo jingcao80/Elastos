@@ -1,0 +1,342 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Droid.App.IInstrumentation;
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface IPerformanceResultsWriter {
+        /**
+         * Callback invoked as first action in
+         * PerformanceCollector#beginSnapshot(String) for reporting the start of
+         * a performance snapshot.
+         *
+         * @param label description of code block between beginSnapshot and
+         *              PerformanceCollector#endSnapshot()
+         * @see PerformanceCollector#beginSnapshot(String)
+         */
+        WriteBeginSnapshot(
+            [in] String label);
+
+        /**
+         * Callback invoked as last action in PerformanceCollector#endSnapshot()
+         * for reporting performance data collected in the snapshot.
+         *
+         * @param results memory and runtime metrics stored as key/value pairs,
+         *        in the same structure as returned by
+         *        PerformanceCollector#endSnapshot()
+         * @see PerformanceCollector#endSnapshot()
+         */
+        WriteEndSnapshot(
+            [in] IBundle* results);
+
+        /**
+         * Callback invoked as first action in
+         * PerformanceCollector#startTiming(String) for reporting the start of
+         * a timing measurement.
+         *
+         * @param label description of code block between startTiming and
+         *              PerformanceCollector#stopTiming(String)
+         * @see PerformanceCollector#startTiming(String)
+         */
+        WriteStartTiming(
+            [in] String label);
+
+        /**
+         * Callback invoked as last action in
+         * {@link PerformanceCollector#stopTiming(String)} for reporting the
+         * sequence of timings measured.
+         *
+         * @param results runtime metrics of code block between calls to
+         *                startTiming and stopTiming, in the same structure as
+         *                returned by PerformanceCollector#stopTiming(String)
+         * @see PerformanceCollector#stopTiming(String)
+         */
+        WriteStopTiming(
+            [in] IBundle* results);
+
+        /**
+         * Callback invoked as last action in
+         * {@link PerformanceCollector#addMeasurement(String, long)} for
+         * reporting an integer type measurement.
+         *
+         * @param label short description of the metric that was measured
+         * @param value long value of the measurement
+         */
+        WriteMeasurement(
+            [in] String label,
+            [in] Int64 value);
+
+        /**
+         * Callback invoked as last action in
+         * {@link PerformanceCollector#addMeasurement(String, float)} for
+         * reporting a float type measurement.
+         *
+         * @param label short description of the metric that was measured
+         * @param value float value of the measurement
+         */
+        WriteMeasurement(
+            [in] String label,
+            [in] Float value);
+
+        /**
+         * Callback invoked as last action in
+         * {@link PerformanceCollector#addMeasurement(String, String)} for
+         * reporting a string field.
+         *
+         * @param label short description of the metric that was measured
+         * @param value string summary of the measurement
+         */
+        WriteMeasurement(
+            [in] String label,
+            [in] String value);
+    }
+
+    } // namespace Os
+
+    namespace Test {
+
+    [local]
+    interface IElastosTestCase {
+        TestElastosTestCaseSetupProperly();
+
+        SetContext(
+            [in] IContext* context);
+
+        GetContext(
+            [out] IContext** context);
+
+        /**
+         * Test context can be used to access resources from the test's own package
+         * as opposed to the resources from the test target package. Access to the
+         * latter is provided by the context set with the {@link #setContext}
+         * method.
+         *
+         * @hide
+         */
+        SetTestContext(
+            [in] IContext* context);
+
+        /**
+         * @hide
+         */
+        GetTestContext(
+            [out] IContext** context);
+
+        /**
+         * Asserts that launching a given activity is protected by a particular permission by
+         * attempting to start the activity and validating that a {@link SecurityException}
+         * is thrown that mentions the permission in its error message.
+         *
+         * Note that an instrumentation isn't needed because all we are looking for is a security error
+         * and we don't need to wait for the activity to launch and get a handle to the activity.
+         *
+         * @param packageName The package name of the activity to launch.
+         * @param className The class of the activity to launch.
+         * @param permission The name of the permission.
+         */
+        AssertActivityRequiresPermission(
+            [in] String packageName,
+            [in] String className,
+            [in] String permission);
+
+        /**
+         * Asserts that reading from the content uri requires a particular permission by querying the
+         * uri and ensuring a {@link SecurityException} is thrown mentioning the particular permission.
+         *
+         * @param uri The uri that requires a permission to query.
+         * @param permission The permission that should be required.
+         */
+        AssertReadingContentUriRequiresPermission(
+            [in] IUri* uri,
+            [in] String permission);
+
+        /**
+         * Asserts that writing to the content uri requires a particular permission by inserting into
+         * the uri and ensuring a {@link SecurityException} is thrown mentioning the particular
+         * permission.
+         *
+         * @param uri The uri that requires a permission to query.
+         * @param permission The permission that should be required.
+         */
+        AssertWritingContentUriRequiresPermission(
+            [in] IUri* uri,
+            [in] String permission);
+    }
+
+    [deprecated, local]
+    interface IInstrumentationTestCase {
+        /**
+         * Injects instrumentation into this test case. This method is
+         * called by the test runner during test setup.
+         *
+         * @param instrumentation the instrumentation to use with this instance
+         */
+        InjectInstrumentation(
+            [in] IInstrumentation* instrumentation);
+
+        /**
+         * Inheritors can access the instrumentation using this.
+         * @return instrumentation
+         */
+        GetInstrumentation(
+            [out] IInstrumentation** instrumentation);
+
+        /**
+         * Utility method for launching an activity.
+         *
+         * <p>The {@link Intent} used to launch the Activity is:
+         *  action = {@link Intent#ACTION_MAIN}
+         *  extras = null, unless a custom bundle is provided here
+         * All other fields are null or empty.
+         *
+         * <p><b>NOTE:</b> The parameter <i>pkg</i> must refer to the package identifier of the
+         * package hosting the activity to be launched, which is specified in the AndroidManifest.xml
+         * file.  This is not necessarily the same as the java package name.
+         *
+         * @param pkg The package hosting the activity to be launched.
+         * @param activityCls The activity class to launch.
+         * @param extras Optional extra stuff to pass to the activity.
+         * @return The activity, or null if non launched.
+         */
+        LaunchActivity(
+            [in] String pkg,
+            [in] IClassInfo* activityCls,
+            [in] IBundle* extras,
+            [out] IActivity** activity);
+
+        /**
+         * Utility method for launching an activity with a specific Intent.
+         *
+         * <p><b>NOTE:</b> The parameter <i>pkg</i> must refer to the package identifier of the
+         * package hosting the activity to be launched, which is specified in the AndroidManifest.xml
+         * file.  This is not necessarily the same as the java package name.
+         *
+         * @param pkg The package hosting the activity to be launched.
+         * @param activityCls The activity class to launch.
+         * @param intent The intent to launch with
+         * @return The activity, or null if non launched.
+         */
+        LaunchActivityWithIntent(
+            [in] String pkg,
+            [in] IClassInfo* activityCls,
+            [in] IIntent* intent,
+            [out] IActivity** activity);
+
+        /**
+         * Helper for running portions of a test on the UI thread.
+         *
+         * Note, in most cases it is simpler to annotate the test method with
+         * {@link android.test.UiThreadTest}, which will run the entire test method on the UI thread.
+         * Use this method if you need to switch in and out of the UI thread to perform your test.
+         *
+         * @param r runnable containing test code in the {@link Runnable#run()} method
+         */
+        RunTestOnUiThread(
+            [in] IRunnable* r);
+
+        /**
+         * Sends a series of key events through instrumentation and waits for idle. The sequence
+         * of keys is a string containing the key names as specified in KeyEvent, without the
+         * KEYCODE_ prefix. For instance: sendKeys("DPAD_LEFT A B C DPAD_CENTER"). Each key can
+         * be repeated by using the N* prefix. For instance, to send two KEYCODE_DPAD_LEFT, use
+         * the following: sendKeys("2*DPAD_LEFT").
+         *
+         * @param keysSequence The sequence of keys.
+         */
+        SendKeys(
+            [in] String keysSequence);
+
+        /**
+         * Sends a series of key events through instrumentation and waits for idle. For instance:
+         * sendKeys(KEYCODE_DPAD_LEFT, KEYCODE_DPAD_CENTER).
+         *
+         * @param keys The series of key codes to send through instrumentation.
+         */
+        SendKeys(
+            [in] ArrayOf<Int32>* keys);
+
+        /**
+         * Sends a series of key events through instrumentation and waits for idle. Each key code
+         * must be preceded by the number of times the key code must be sent. For instance:
+         * sendRepeatedKeys(1, KEYCODE_DPAD_CENTER, 2, KEYCODE_DPAD_LEFT).
+         *
+         * @param keys The series of key repeats and codes to send through instrumentation.
+         */
+        SendRepeatedKeys(
+            [in] ArrayOf<Int32>* keys);
+    }
+
+    interface IActivityInstrumentationTestCase2 {
+        /**
+         * Get the Activity under test, starting it if necessary.
+         *
+         * For each test method invocation, the Activity will not actually be created until the first
+         * time this method is called.
+         *
+         * <p>If you wish to provide custom setup values to your Activity, you may call
+         * {@link #setActivityIntent(Intent)} and/or {@link #setActivityInitialTouchMode(boolean)}
+         * before your first call to getActivity().  Calling them after your Activity has
+         * started will have no effect.
+         *
+         * <p><b>NOTE:</b> Activities under test may not be started from within the UI thread.
+         * If your test method is annotated with {@link android.test.UiThreadTest}, then your Activity
+         * will be started automatically just before your test method is run.  You still call this
+         * method in order to get the Activity under test.
+         *
+         * @return the Activity under test
+         */
+        GetActivity(
+            [out] IInterface** object);
+
+        /**
+         * Call this method before the first call to {@link #getActivity} to inject a customized Intent
+         * into the Activity under test.
+         *
+         * <p>If you do not call this, the default intent will be provided.  If you call this after
+         * your Activity has been started, it will have no effect.
+         *
+         * <p><b>NOTE:</b> Activities under test may not be started from within the UI thread.
+         * If your test method is annotated with {@link android.test.UiThreadTest}, then you must call
+         * {@link #setActivityIntent(Intent)} from {@link #setUp()}.
+         *
+         * <p>The default Intent (if this method is not called) is:
+         *  action = {@link Intent#ACTION_MAIN}
+         *  flags = {@link Intent#FLAG_ACTIVITY_NEW_TASK}
+         * All other fields are null or empty.
+         *
+         * @param i The Intent to start the Activity with, or null to reset to the default Intent.
+         */
+        SetActivityIntent(
+            [in] IIntent* i);
+
+        /**
+         * Call this method before the first call to {@link #getActivity} to set the initial touch
+         * mode for the Activity under test.
+         *
+         * <p>If you do not call this, the touch mode will be false.  If you call this after
+         * your Activity has been started, it will have no effect.
+         *
+         * <p><b>NOTE:</b> Activities under test may not be started from within the UI thread.
+         * If your test method is annotated with {@link android.test.UiThreadTest}, then you must call
+         * {@link #setActivityInitialTouchMode(boolean)} from {@link #setUp()}.
+         *
+         * @param initialTouchMode true if the Activity should be placed into "touch mode" when started
+         */
+        SetActivityInitialTouchMode(
+            [in] Boolean initialTouchMode);
+    }
+
+    } // namespace Test
+
+    } // namespace Droid
+    } // namespace Elastos
+}

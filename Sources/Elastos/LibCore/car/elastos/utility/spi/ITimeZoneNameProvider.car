@@ -1,0 +1,45 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Spi {
+    /**
+     * This abstract class should be extended by service providers that provide
+     * localized time zone names.
+     * <p>Note that Android does not support user-supplied locale service providers.
+     * @since 1.6
+     * @hide
+     */
+
+    /**
+     * @Involve
+     * interface ILocaleServiceProvider;
+     */
+    interface ITimeZoneNameProvider {
+        /**
+         * Returns the localized name for the given time zone in the given locale.
+         *
+         * @param id the time zone id
+         * @param daylight true to return the name for daylight saving time.
+         * @param style TimeZone.LONG or TimeZone.SHORT
+         * @param locale the locale
+         * @return the readable time zone name, or null if it is unavailable
+         * @throws NullPointerException
+         *             if {@code id == null || locale == null}
+         * @throws IllegalArgumentException
+         *             if locale is not available or style is invalid
+         */
+        GetDisplayName(
+            [in] String id,
+            [in] Boolean daylight,
+            [in] Int32 style,
+            [in] ILocale* locale,
+            [out] String* str);
+    }
+
+    } // namespace Spi
+    } // namespace Utility
+    } // namespace Elastos
+}

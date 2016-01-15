@@ -1,0 +1,26 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IIBluetooth;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * API for Communication between BluetoothAdapter and BluetoothManager
+         *
+         * {@hide}
+         */
+        interface IIBluetoothManagerCallback
+        {
+            OnBluetoothServiceUp(
+                [in] IIBluetooth* bluetoothService);
+
+            OnBluetoothServiceDown();
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

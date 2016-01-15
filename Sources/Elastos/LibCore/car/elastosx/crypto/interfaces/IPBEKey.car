@@ -1,0 +1,45 @@
+
+module
+{
+
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Interfaces {
+
+    /**
+     * The interface to a <i>password-based-encryption</i>  key.
+     */
+    /**
+     * @Involve
+     * interface ISecretKey;
+     */
+    interface IPBEKey {
+        /**
+         * Returns the iteration count, 0 if not specified.
+         *
+         * @return the iteration count, 0 if not specified.
+         */
+        GetIterationCount(
+            [out] Int32* count);
+
+        /**
+         * Returns a copy of the salt data or null if not specified.
+         *
+         * @return a copy of the salt data or null if not specified.
+         */
+        GetSalt(
+            [out, callee] ArrayOf<Byte> * salts);
+
+        /**
+         * Returns a copy to the password.
+         *
+         * @return a copy to the password.
+         */
+        GetPassword(
+            [out, callee] ArrayOf<Char32> * salts);
+    }
+
+    } // namespace interfaces
+    } // namespace Crypto
+    } // namespace Elastosx
+}

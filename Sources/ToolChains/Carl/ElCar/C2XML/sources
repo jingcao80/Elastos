@@ -1,0 +1,18 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= c2xml
+TARGET_TYPE= exe
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES += $(MAKEDIR)/../inc;
+INCLUDES += $(INCLUDESTEMP);
+
+SOURCES = c2xml.cpp
+
+ELASTOS_LIBS += ../Carc/clsbase/clsbase.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Archiving.zlib.lib
+
+EXTERN_LIBS = msvcrt
+EXTERN_LIBS += kernel32

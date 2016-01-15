@@ -1,0 +1,208 @@
+module
+{
+    interface Elastos.Text.ICharacterIterator;
+
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * A concrete implementation class for Collation.
+     * <p>
+     * RuleBasedCollator has the following restrictions for efficiency (other subclasses may be used for more complex languages):
+     * <p>
+     * 1.If a French secondary ordering is specified it applies to the whole collator object.
+     * <p>
+     * 2.All non-mentioned Unicode characters are at the end of the collation order.
+     * <p>
+     * 3.If a character is not located in the RuleBasedCollator, the default Unicode Collation Algorithm (UCA) rule-based table is automatically searched as a backup.
+     * <p>
+     * The collation table is composed of a list of collation rules, where each rule is of three forms:
+     * <pre>
+     * <modifier>
+     * <relation> <text-argument>
+     * <reset> <text-argument>
+     * </pre>
+     * The rule elements are defined as follows:
+     * <p>
+     * <li><strong>Modifier:</strong>There is a single modifier which is used to specify that all accents (secondary differences) are backwards:
+     * <p>
+     * <li>'@' : Indicates that accents are sorted backwards, as in French.</li></li>
+     * <p>
+     * <li> <strong>Relation</strong>: The relations are the following:
+     * <p>
+     * <li>'<' : Greater, as a letter difference (primary)</li>
+     * <li>';' : Greater, as an accent difference (secondary)</li>
+     * <li>',' : Greater, as a case difference (tertiary)</li>
+     * <li>'=' : Equal</li></li>
+     * <li><strong>Text-Argument</strong>: A text-argument is any sequence of characters, excluding special characters (that is, common whitespace characters [0009-000D, 0020] and rule syntax characters [0021-002F, 003A-0040, 005B-0060, 007B-007E]). If those characters are desired, you can put them in single quotes (for example, use '&' for ampersand). Note that unquoted white space characters are ignored; for example, b c is treated as bc.</li>
+     * <li>Reset: There is a single reset which is used primarily for contractions and expansions, but which can also be used to add a modification at the end of a set of rules:
+     * <li>'&' : Indicates that the next rule follows the position to where the reset text-argument would be sorted.</li></li>
+     * <p>
+     * This sounds more complicated than it is in practice. For example, the following are equivalent ways of expressing the same thing:
+     * <pre>
+     * a < b < c
+     * a < b & b < c
+     * a < c & a < b
+     * </pre>
+     * <p>
+     * Notice that the order is important, as the subsequent item goes immediately
+     * after the text-argument. The following are not equivalent:
+     * <pre>
+     * a < b & a < c
+     * a < c & a < b
+     * </pre>
+     * <p>
+     * Either the text-argument must already be present in the sequence, or some
+     * initial substring of the text-argument must be present. For example "a < b &
+     * ae < e" is valid since "a" is present in the sequence before "ae" is reset. In
+     * this latter case, "ae" is not entered and treated as a single character;
+     * instead, "e" is sorted as if it were expanded to two characters: "a" followed
+     * by an "e". This difference appears in natural languages: in traditional
+     * Spanish "ch" is treated as if it contracts to a single character (expressed as
+     * "c < ch < d"), while in traditional German a-umlaut is treated as if it
+     * expands to two characters (expressed as "a,A < b,B ... & ae;ã & AE;Ã", where ã
+     * and Ã are the escape sequences for a-umlaut).
+     * <p>
+     * <strong>Ignorable Characters</strong>
+     * For ignorable characters, the first rule must start with a relation
+     * (the examples we have used above are really fragments; "a < b" really should
+     * be "< a < b"). If, however, the first relation is not "<", then all
+     * text-arguments up to the first "<" are ignorable. For example, ", - < a < b"
+     * makes "-" an ignorable character.
+     * <p>
+     * <strong>Normalization and Accents</strong>
+     * <p>
+     * RuleBasedCollator automatically processes its rule table to include both
+     * pre-composed and combining-character versions of accented characters. Even if
+     * the provided rule string contains only base characters and separate combining
+     * accent characters, the pre-composed accented characters matching all canonical
+     * combinations of characters from the rule string will be entered in the table.
+     * <p>
+     * This allows you to use a RuleBasedCollator to compare accented strings even
+     * when the collator is set to NO_DECOMPOSITION. However, if the strings to be
+     * collated contain combining sequences that may not be in canonical order, you
+     * should set the collator to CANONICAL_DECOMPOSITION to enable sorting of
+     * combining sequences. For more information,
+     * @see The Unicode Standard, Version 3.0.
+     * <p>
+     * <strong>Errors</strong>
+     * <p>
+     * The following rules are not valid:
+     * <p>
+     * <li>A text-argument contains unquoted punctuation symbols, for example "a < b-c < d".</li>
+     * <p>
+     * <li>A relation or reset character is not followed by a text-argument, for example "a < , b".</li>
+     * <p>
+     * <li>A reset where the text-argument (or an initial substring of the text-argument) is not already in the sequence or allocated in the default UCA table, for example "a < b & e < f".</li>
+     * <p>
+     * If you produce one of these errors, RuleBasedCollator throws a ParseException.
+     * <p>
+     * </strong>Examples</strong>
+     * <p>
+     * Normally, to create a rule-based collator object, you will use Collator's factory method getInstance. However, to create a rule-based collator object with specialized rules tailored to your needs, you construct the RuleBasedCollator with the rules contained in a String object. For example:
+     * <pre>
+     * String Simple = "< a < b < c < d";
+     * RuleBasedCollator mySimple = new RuleBasedCollator(Simple);
+     * </pre>
+     * Or:
+     * <pre>
+     * String Norwegian = "< a,A< b,B< c,C< d,D< e,E< f,F< g,G< h,H< i,I"
+     *    + "< j,J< k,K< l,L< m,M< n,N< o,O< p,P< q,Q< r,R"
+     *    + "< s,S< t,T< u,U< v,V< w,W< x,X< y,Y< z,Z"
+     *    + "< å=å,Å=Å"
+     *    + ";aa,AA< æ,Æ< ø,Ø";
+     * RuleBasedCollator myNorwegian = new RuleBasedCollator(Norwegian);
+     * </pre>
+     * <p>
+     * Combining Collators is as simple as concatenating strings. Here is an example that combines two Collators from two different locales:
+     * <pre>
+     * // Create an en_US Collator object
+     * RuleBasedCollator en_USCollator = (RuleBasedCollator)Collator.getInstance(new Locale("en", "US", ""));
+     *
+     * // Create a da_DK Collator object
+     * RuleBasedCollator da_DKCollator = (RuleBasedCollator)Collator.getInstance(new Locale("da", "DK", ""));
+     * // Combine the two collators
+     * // First, get the collation rules from en_USCollator
+     * String en_USRules = en_USCollator.getRules();
+     *
+     * // Second, get the collation rules from da_DKCollator
+     * String da_DKRules = da_DKCollator.getRules();
+     *
+     * RuleBasedCollator newCollator = new RuleBasedCollator(en_USRules + da_DKRules);
+     * // newCollator has the combined rules
+     * </pre>
+     * <p>
+     * The next example shows to make changes on an existing table to create a new Collator object. For example, add "& C < ch, cH, Ch, CH" to the en_USCollator object to create your own:
+     * <pre>
+     * // Create a new Collator object with additional rules
+     * String addRules = "& C < ch, cH, Ch, CH";
+     *
+     * RuleBasedCollator myCollator = new RuleBasedCollator(en_USCollator + addRules);
+     * // myCollator contains the new rules
+     * </pre>
+     * <p>
+     * The following example demonstrates how to change the order of non-spacing accents:
+     * <pre>
+     * // old rule
+     * String oldRules = "= ¨ ; ¯ ; ¿" + "< a , A ; ae, AE ; æ , Æ"
+     *    + "< b , B < c, C < e, E & C < d, D";
+     *
+     * // change the order of accent characters
+     * String addOn = "& ¿ ; ¯ ; ¨;";
+     *
+     * RuleBasedCollator myCollator = new RuleBasedCollator(oldRules + addOn);
+     * </pre>
+     * <p>
+     * The last example shows how to put new primary ordering in before the default setting. For example, in the Japanese Collator, you can either sort English characters before or after Japanese characters:
+     * <pre>
+     * // get en_US Collator rules
+     * RuleBasedCollator en_USCollator = (RuleBasedCollator)
+     * Collator.getInstance(Locale.US);
+     * // add a few Japanese character to sort before English characters
+     * // suppose the last character before the first base letter 'a' in
+     * // the English collation rule is ア
+     * String jaString = "& ア , ー < ト";
+     * RuleBasedCollator myJapaneseCollator =
+     *  new RuleBasedCollator(en_USCollator.getRules() + jaString);
+     * </pre>
+     *
+     * @implements Elastos.Text.ICollator
+     */
+    /**
+     * @Involve
+     * interface ICollator
+     */
+    interface IRuleBasedCollator {
+        /**
+         * Obtains a {CollationElementIterator} for the given string.
+         */
+        GetCollationElementIterator(
+            [in] String source,
+            [out] ICollationElementIterator** iterator);
+
+        /**
+         * Obtains a {CollationElementIterator} for the given
+         * {CharacterIterator}. The source iterator's integrity will be
+         * preserved since a new copy will be created for use.
+         */
+        GetCollationElementIterator(
+            [in] ICharacterIterator* source,
+            [out] ICollationElementIterator** iterator);
+
+        /**
+         * Returns the collation rules of this collator. These {rules} can be
+         * fed into the {RuleBasedCollator(String)} constructor.
+         * <p>
+         * Note that the {rules} are actually interpreted as a delta to the
+         * standard Unicode Collation Algorithm (UCA). Hence, an empty {rules}
+         * string results in the default UCA rules being applied. This differs
+         * slightly from other implementations which work with full {rules}
+         * specifications and may result in different behavior.
+         */
+        GetRules(
+            [out] String* rules);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

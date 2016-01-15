@@ -1,0 +1,69 @@
+
+module
+{
+    submodule Elastos.CoreLibrary.Core {
+    merge("../../car/elastos/core.car");
+    merge("../../car/elastos/math.car");
+    merge("../../car/elastos/system.car");
+    }
+
+    submodule Elastos.CoreLibrary.Security {
+    merge("../../car/elastos/security.car");
+    }
+
+    submodule Elastos.CoreLibrary.IO {
+    merge("../../car/elastos/io.car");
+    }
+
+    submodule Elastos.CoreLibrary.Net {
+    merge("../../car/elastos/net.car");
+    }
+
+    submodule Elastos.CoreLibrary.Text {
+    merge("../../car/elastos/text.car");
+    }
+
+    submodule Elastos.CoreLibrary.Utility {
+    merge("../../car/elastos/utility.car");
+    }
+
+    submodule Elastos.CoreLibrary.Utility.Concurrent {
+    merge("../../car/elastos/utility.concurrent.car");
+    }
+
+    submodule Elastos.CoreLibrary.Utility.Zip {
+    merge("../../car/elastos/utility.zip.car");
+    }
+
+    submodule Elastos.CoreLibrary.Sql {
+    merge("../../car/elastos/sql.car");
+    }
+
+    submodule Elastos.CoreLibrary.Libcore {
+    merge("../../car/libcore/icu.car");
+    merge("../../car/libcore/io.car");
+    merge("../../car/libcore/utility.car");
+    merge("../../car/libcore/net.car");
+    }
+
+    submodule Elastos.CoreLibrary.Extensions {
+    merge("../../car/elastosx/Exceptions.car");
+    merge("../../car/elastosx/crypto.car");
+    merge("../../car/elastosx/net.car");
+    merge("../../car/elastosx/security.car");
+    merge("../../car/elastosx/sql.car");
+    merge("../../car/elastosx/xml.car");
+    }
+
+    submodule Elastos.CoreLibrary.Apache {
+    merge("../../car/org/apache.car");
+    }
+
+    submodule Elastos.CoreLibrary.External {
+    merge("../../car/org/w3c.car");
+    merge("../../car/org/xml.car");
+    merge("../../car/org/xmlpull.car");
+    merge("../../car/org/kxml2.car");
+    merge("../../car/org/json.car");
+    }
+}

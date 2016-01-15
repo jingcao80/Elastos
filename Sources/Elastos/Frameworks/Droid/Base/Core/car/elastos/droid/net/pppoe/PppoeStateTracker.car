@@ -1,0 +1,91 @@
+
+module
+{
+    enum Elastos.Droid.Net.NetworkInfoDetailedState;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Net.IDhcpInfo;
+    interface Elastos.Droid.Net.INetworkInfo;
+    interface Elastos.Droid.Net.ILinkProperties;
+    interface Elastos.Droid.Net.ILinkCapabilities;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Pppoe {
+        [local, deprecated]
+        interface IPppoeStateTracker {
+            const String TAG="PppoeStateTracker";
+            const String PROP_PPP_ADDR = "dhcp.ppp0.ipaddress";
+            const String PROP_PPP_MASK = "dhcp.ppp0.mask";
+            const String PROP_PPP_DNS1 = "dhcp.ppp0.dns1";
+            const String PROP_PPP_DNS2 = "dhcp.ppp0.dns2";
+            const String PROP_PPP_GW = "dhcp.ppp0.gateway";
+
+            const String PROP_VAL_PPP_NOERR = "0:0";
+            const String PROP_NAME_PPP_ERRCODE = "net.ppp.errcode";
+
+            const Int32 EVENT_CONNECTED            = 3;
+            const Int32 EVENT_DISCONNECTED        = 4;
+            const Int32 EVENT_CONNECT_FAILED    = 5;
+            const Int32 EVENT_DISCONNECT_FAILED    = 6;
+
+            StopInterface(
+                [in] Boolean suspend,
+                [out] Boolean* result);
+            ResetInterface(
+                [out] Boolean* result);
+            GetTcpBufferSizesPropName(
+                [out] String* name);
+            StartPolling();
+            IsAvailable(
+                [out] Boolean* result);
+            Reconnect(
+                [out] Boolean* result);
+            SetRadio(
+                [in] Boolean turnOn,
+                [out] Boolean* result);
+            StartMonitoring(
+                [in] IContext* ctx,
+                [in] IHandler* target);
+            Teardown(
+                [out] Boolean* result);
+            CaptivePortalCheckComplete();
+            GetDhcpInfo(
+                [out] IDhcpInfo** dhcpInfo);
+            NotifyPppConnected(
+                [in] String ifname);
+            NotifyStateChange(
+                [in] String ifname,
+                [in] NetworkInfoDetailedState state);
+            GetNetworkInfo(
+                [out] INetworkInfo** GetNetworkInfo);
+            GetLinkProperties(
+                [out] ILinkProperties** linkProperties);
+            GetLinkCapabilities(
+                [out] ILinkCapabilities** linkCapabilities);
+            SetUserDataEnable(
+                [in] Boolean enabled);
+            SetPolicyDataEnable(
+                [in] Boolean enabled);
+            IsPrivateDnsRouteSet(
+                [out] Boolean* result);
+            PrivateDnsRouteSet(
+                [in] Boolean enabled);
+            IsDefaultRouteSet(
+                [out] Boolean* result);
+            DefaultRouteSet(
+                [in] Boolean enabled);
+            SetTeardownRequested(
+                [in] Boolean isRequested);
+            IsTeardownRequested(
+                [out] Boolean* result);
+            SetDependencyMet(
+                [in] Boolean met);
+        }
+    } // namespace Pppoe
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

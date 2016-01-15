@@ -1,0 +1,60 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * @hide
+     */
+    interface ITvStreamConfig {
+        const Int32 STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE = 1;
+        const Int32 STREAM_TYPE_BUFFER_PRODUCER = 2;
+
+        GetStreamId(
+            [out] Int32 * result);
+
+        GetType(
+            [out] Int32 * result);
+
+        GetMaxWidth(
+            [out] Int32 * result);
+
+        GetMaxHeight(
+            [out] Int32 * result);
+
+        GetGeneration(
+            [out] Int32 * result);
+
+    }
+
+    /**
+     * A helper class for creating a TvStreamConfig object.
+     */
+    interface ITvStreamConfigBuilder {
+        StreamId(
+            [in] Int32 streamId);
+
+        Type(
+            [in] Int32 type);
+
+        MaxWidth(
+            [in] Int32 maxWidth);
+
+        MaxHeight(
+            [in] Int32 maxHeight);
+
+        Generation(
+            [in] Int32 generation);
+
+        Build(
+            [out] ITvStreamConfig ** result);
+
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

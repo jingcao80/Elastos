@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Security.Interfaces.IDSAParams;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Interfaces {
+
+    /**
+     * The base interface for Digital Signature Algorithm (DSA) public or private
+     * keys.
+     */
+    interface IDSAKey {
+        /**
+         * Returns the DSA key parameters.
+         *
+         * @return the DSA key parameters.
+         */
+        GetParams(
+            [out] IDSAParams** parameters);
+    }
+
+    } // namespace Interfaces
+    } // namespace Security
+    } // namespace Elastos
+}

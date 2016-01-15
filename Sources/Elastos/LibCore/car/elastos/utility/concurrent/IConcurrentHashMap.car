@@ -1,0 +1,85 @@
+
+module
+{
+    interface Elastos.Utility.IEnumeration;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+
+    /**
+     * @Involve
+     * interface IMapEntry;
+     */
+    interface ITreeBin {
+    }
+
+    /**
+     * @Involve
+     * interface IMapEntry;
+     */
+    interface ITreeNode {
+    }
+
+    /**
+     * @Involve
+     * interface IMapEntry;
+     */
+    interface IForwardingNode {
+    }
+
+    /**
+     * @Involve
+     * interface IMapEntry;
+     */
+    interface IReservationNode {
+    }
+
+    /**
+     * @Involve
+     * interface IMap;
+     * interface IConcurrentMap;
+     */
+    interface IConcurrentHashMap {
+        /**
+         * Legacy method testing if some key maps into the specified value
+         * in this table.  This method is identical in functionality to
+         * {@link #containsValue}, and exists solely to ensure
+         * full compatibility with class {@link java.util.Hashtable},
+         * which supported this method prior to introduction of the
+         * Java Collections framework.
+         *
+         * @param  value a value to search for
+         * @return <tt>true</tt> if and only if some key maps to the
+         *         <tt>value</tt> argument in this table as
+         *         determined by the <tt>equals</tt> method;
+         *         <tt>false</tt> otherwise
+         * @throws NullPointerException if the specified value is null
+         */
+        Contains(
+            [in] IInterface* value,
+            [out] Boolean* result);
+
+        /**
+         * Returns an enumeration of the keys in this table.
+         *
+         * @return an enumeration of the keys in this table
+         * @see #keySet()
+         */
+        Keys(
+            [out] IEnumeration** outenum);
+
+        /**
+         * Returns an enumeration of the values in this table.
+         *
+         * @return an enumeration of the values in this table
+         * @see #values()
+         */
+        Elements(
+            [out] IEnumeration** outenum);
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

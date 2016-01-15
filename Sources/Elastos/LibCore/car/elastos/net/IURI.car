@@ -1,0 +1,250 @@
+
+module
+{
+    interface Elastos.Net.IURL;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * A Uniform Resource Identifier that identifies an abstract or physical resource,
+     *  as specified by RFC 2396.
+     */
+    /**
+     * @Involve
+     * interface IComparable
+     * interface ISerializable
+     */
+    interface IURI {
+        /**
+         * Returns the scheme of this URI, or null if this URI has no scheme. This
+         * is also known as the protocol.
+         */
+        GetScheme(
+            [out] String* scheme);
+
+        /**
+         * Returns the decoded scheme-specific part of this URI, or null if this URI
+         * has no scheme-specific part.
+         */
+        GetSchemeSpecificPart(
+            [out] String* schemeSpecific);
+
+        /**
+         * Returns the encoded scheme-specific part of this URI, or null if this URI
+         * has no scheme-specific part.
+         */
+        GetRawSchemeSpecificPart(
+            [out] String* schemeSpecific);
+
+        /**
+         * Returns the decoded authority part of this URI, or null if this URI has
+         * no authority.
+         */
+        GetAuthority(
+            [out] String* authority);
+
+        /**
+         * Returns the encoded authority of this URI, or null if this URI has no
+         * authority.
+         */
+        GetRawAuthority(
+            [out] String* authority);
+
+        /**
+         * Returns the decoded user info of this URI, or null if this URI has no
+         * user info.
+         */
+        GetUserInfo(
+            [out] String* userInfo);
+
+        /**
+         * Returns the encoded user info of this URI, or null if this URI has no
+         * user info.
+         */
+        GetRawUserInfo(
+            [out] String* userInfo);
+
+        /**
+         * Returns the host of this URI, or null if this URI has no host.
+         */
+        GetHost(
+            [out] String* host);
+
+        /**
+         * Returns the port number of this URI, or {-1} if this URI has no
+         * explicit port.
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /** @hide */
+        GetEffectivePort(
+            [out] Int32* port);
+
+        /**
+         * Returns the decoded path of this URI, or null if this URI has no path.
+         */
+        GetPath(
+            [out] String* path);
+
+        /**
+         * Returns the encoded path of this URI, or null if this URI has no path.
+         */
+        GetRawPath(
+            [out] String* path);
+
+        /**
+         * Returns the decoded query of this URI, or null if this URI has no query.
+         */
+        GetQuery(
+            [out] String* query);
+
+        /**
+         * Returns the encoded query of this URI, or null if this URI has no query.
+         */
+        GetRawQuery(
+            [out] String* query);
+
+        /**
+         * Returns the decoded fragment of this URI, or null if this URI has no
+         * fragment.
+         */
+        GetFragment(
+            [out] String* fragment);
+
+        /**
+         * Gets the encoded fragment of this URI, or null if this URI has no
+         * fragment.
+         */
+        GetRawFragment(
+            [out] String* fragment);
+
+        /**
+         * Returns true if this URI is absolute, which means that a scheme is
+         * defined.
+         */
+        IsAbsolute(
+            [out] Boolean* isAbsolute);
+
+        /**
+         * Returns true if this URI is opaque. Opaque URIs are absolute and have a
+         * scheme-specific part that does not start with a slash character. All
+         * parts except scheme, scheme-specific and fragment are undefined.
+         */
+        IsOpaque(
+            [out] Boolean* isOpaque);
+
+        /**
+         * Normalizes the path part of this URI.
+         *
+         * @return an URI object which represents this instance with a normalized
+         *         path.
+         */
+        Normalize(
+            [out] IURI** uri);
+
+        /**
+         * Tries to parse the authority component of this URI to divide it into the
+         * host, port, and user-info. If this URI is already determined as a
+         * ServerAuthority this instance will be returned without changes.
+         *
+         * @return this instance with the components of the parsed server authority.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * URISyntaxException | if the authority part could not be parsed as a server-based authority.
+         */
+        ParseServerAuthority(
+            [out] IURI** uri);
+
+        /**
+         * Makes the given URI {relative} to a relative URI against the URI
+         * represented by this instance.
+         *
+         * @param relative
+         *            the URI which has to be relativized against this URI.
+         * @return the relative URI.
+         */
+        Relativize(
+            [in] IURI* relative,
+            [out] IURI** uri);
+
+        /**
+         * Resolves the given URI {relative} against the URI represented by
+         * this instance.
+         *
+         * @param relative
+         *            the URI which has to be resolved against this URI.
+         * @return the resolved URI.
+         */
+        Resolve(
+            [in] IURI* relative,
+            [out] IURI** uri);
+
+        /**
+         * Creates a new URI instance by parsing the given string {relative}
+         * and resolves the created URI against the URI represented by this
+         * instance.
+         *
+         * @param relative
+         *            the given string to create the new URI instance which has to
+         *            be resolved later on.
+         * @return the created and resolved URI.
+         */
+        Resolve(
+            [in] String relative,
+            [out] IURI** uri);
+
+        /**
+         * Returns the textual string representation of this URI instance using the
+         * US-ASCII encoding.
+         *
+         * @return the US-ASCII string representation of this URI.
+         */
+        ToASCIIString(
+            [out] String* str);
+
+        /**
+         * Converts this URI instance to a URL.
+         *
+         * @return the created URL representing the same resource as this URI.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * MalformedURLException | if an error occurs while creating the URL or no protocol handler could be found.
+         */
+        ToURL(
+            [out] IURL** uri);
+    }
+
+    interface IURIHelper {
+        /**
+         * Returns the URI formed by parsing {uri}. This method behaves
+         * identically to the string constructor but throws a different exception
+         * on failure. The constructor fails with a checked URISyntaxException;
+         * this method fails with an unchecked IllegalArgumentException.
+         *
+         * @sa URISyntaxException
+         * @sa IllegalArgumentException
+         */
+        Create(
+            [in] String uri,
+            [out] IURI** result);
+
+        /**
+         * Returns the port to use for {scheme} connections will use when
+         * getPort returns {specifiedPort}.
+         *
+         * @sa #getPort
+         * @hide
+         */
+        GetEffectivePort(
+            [in] String scheme,
+            [in] Int32 specifiedPort,
+            [out] Int32* port);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

@@ -1,0 +1,122 @@
+
+module
+{
+    interface Elastos.Droid.Net.ISamplingDataTrackerSamplingSnapshot;
+    using interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * @hide
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ISamplingDataTracker {
+        // Protects sampling data from concurrent access
+        GetSAMPLING_DATA_LOCK(
+            [out] IInterface** o);
+
+        StartSampling(
+            [in] ISamplingDataTrackerSamplingSnapshot* s);
+
+        StopSampling(
+            [in] ISamplingDataTrackerSamplingSnapshot* s);
+
+        ResetSamplingData();
+
+        GetSampledTxByteCount(
+            [out] Int64* result);
+
+        GetSampledTxPacketCount(
+            [out] Int64* result);
+
+        GetSampledTxPacketErrorCount(
+            [out] Int64* result);
+
+        GetSampledRxByteCount(
+            [out] Int64* result);
+
+        GetSampledRxPacketCount(
+            [out] Int64* result);
+
+        GetSampledPacketCount(
+            [out] Int64* result);
+
+        GetSampledPacketCount(
+            [in] ISamplingDataTrackerSamplingSnapshot* begin,
+            [in] ISamplingDataTrackerSamplingSnapshot* end,
+            [out] Int64* result);
+
+        GetSampledPacketErrorCount(
+            [out] Int64* result);
+
+        GetSampledRxPacketErrorCount(
+            [out] Int64* result);
+
+        GetSampleTimestamp(
+            [out] Int64* result);
+
+        GetSampleDuration(
+            [out] Int32* result);
+
+        SetCommonLinkQualityInfoFields(
+            [in] ILinkQualityInfo* li);
+    }
+
+    interface ISamplingDataTrackerHelper {
+        GetSamplingSnapshots(
+            [in] IMap* mapIfaceToSample);
+    }
+
+    interface ISamplingDataTrackerSamplingSnapshot {
+        GetTxByteCount(
+            [out] Int64* result);
+
+        SetTxByteCount(
+            [in] Int64 mTxByteCount);
+
+        GetRxByteCount(
+            [out] Int64* result);
+
+        SetRxByteCount(
+            [in] Int64 mRxByteCount);
+
+        GetTxPacketCount(
+            [out] Int64* result);
+
+        SetTxPacketCount(
+            [in] Int64 mTxPacketCount);
+
+        GetRxPacketCount(
+            [out] Int64* result);
+
+        SetRxPacketCount(
+            [in] Int64 mRxPacketCount);
+
+        GetTxPacketErrorCount(
+            [out] Int64* result);
+
+        SetTxPacketErrorCount(
+            [in] Int64 mTxPacketErrorCount);
+
+        GetRxPacketErrorCount(
+            [out] Int64* result);
+
+        SetRxPacketErrorCount(
+            [in] Int64 mRxPacketErrorCount);
+
+        GetTimestamp(
+            [out] Int64* result);
+
+        SetTimestamp(
+            [in] Int64 mTimestamp);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,84 @@
+module
+{
+    using interface Elastos.Droid.App.INotification;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Internal.StatusBar.IStatusBarIcon;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Packages.SystemUI.StatusBar.IAnimatedImageView
+     */
+    interface IStatusBarIconView {
+        SetNotification(
+            [in] INotification* notification);
+
+        Set(
+            [in] IStatusBarIcon* icon,
+            [out] Boolean* succeeded);
+
+        UpdateDrawable();
+
+        GetStatusBarIcon(
+            [out] IStatusBarIcon** icon);
+
+        ToString(
+            [out] String* str);
+    }
+
+    /**
+     * Returns the right icon to use for this item, respecting the iconId and
+     * iconPackage (if set)
+     *
+     * @param context Context to use to get resources if iconPackage is not set
+     * @return Drawable for this item, or null if the package or item could not
+     *         be found
+     */
+    interface IStatusBarIconViewHelper {
+        GetIcon(
+            [in] IContext* context,
+            [in] IStatusBarIcon* icon,
+            [out] IDrawable** drawable);
+    }
+
+    interface IStatusBarPanel {
+        IsInContentArea(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Boolean* result);
+    }
+
+    /**
+     * Class to encapsulate all possible status bar states regarding Keyguard.
+     */
+    interface IStatusBarState {
+
+        /**
+         * The status bar is in the "normal" shade mode.
+         */
+        const Int32 SHADE = 0;
+
+        /**
+         * Status bar is currently the Keyguard.
+         */
+        const Int32 KEYGUARD = 1;
+
+        /**
+         * Status bar is in the special mode, where it is fully interactive but still locked. So
+         * dismissing the shade will still show the bouncer.
+         */
+        const Int32 SHADE_LOCKED = 2;
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

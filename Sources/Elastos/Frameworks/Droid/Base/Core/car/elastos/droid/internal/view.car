@@ -1,0 +1,450 @@
+
+module
+{
+    merge("view/animation/FallbackLUTInterpolator.car");
+    // merge("view/animation/NativeInterpolatorFactory.car");
+    merge("view/animation/NativeInterpolatorFactoryHelper.car");
+    merge("view/menu/ActionMenu.car");
+    merge("view/menu/ActionMenuItem.car");
+    merge("view/menu/ActionMenuItemView.car");
+    merge("view/menu/ContextMenuBuilder.car");
+    merge("view/menu/ExpandedMenuView.car");
+    merge("view/menu/IconMenuItemView.car");
+    merge("view/menu/IconMenuPresenter.car");
+    merge("view/menu/IconMenuView.car");
+    merge("view/menu/ListMenuItemView.car");
+    merge("view/menu/ListMenuPresenter.car");
+    merge("view/menu/MenuDialogHelper.car");
+    merge("view/menu/MenuItemImpl.car");
+    merge("view/menu/MenuPopupHelper.car");
+    merge("view/menu/SubMenuBuilder.car");
+    merge("view/ActionBarPolicy.car");
+    // merge("view/BaseIWindow.car");
+    // merge("view/IInputContext.car");
+    merge("view/IInputContextCallback.car");
+    merge("view/IInputMethod.car");
+    // merge("view/IInputMethodClient.car");
+    merge("view/IInputMethodManager.car");
+    merge("view/IInputMethodSession.car");
+    merge("view/IInputSessionCallback.car");
+    merge("view/InputBindResult.car");
+    merge("view/RootViewSurfaceTaker.car");
+    merge("view/RotationPolicy.car");
+    merge("view/WindowManagerPolicyThread.car");
+
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IDialogInterfaceOnKeyListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Text.ITextWatcher;
+    interface Elastos.Droid.Text.INoCopySpan;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.View.IAbsSavedState;
+    interface Elastos.Droid.View.IContextMenu;
+    interface Elastos.Droid.View.IInputChannel;
+    interface Elastos.Droid.View.IKeyEventCallback;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IMenuItem;
+    interface Elastos.Droid.View.IOnPreDrawListener;
+    interface Elastos.Droid.View.IOnGlobalLayoutListener;
+    interface Elastos.Droid.View.IOnTouchModeChangeListener;
+    interface Elastos.Droid.View.ISubMenu;
+    interface Elastos.Droid.View.ISubUiVisibilityListener;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewBaseSavedState;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.View.IViewManager;
+    interface Elastos.Droid.View.IViewParent;
+    interface Elastos.Droid.View.IViewOnAttachStateChangeListener;
+    interface Elastos.Droid.View.IViewOnClickListener;
+    interface Elastos.Droid.View.IViewOnLongClickListener;
+    interface Elastos.Droid.View.IViewOnKeyListener;
+    interface Elastos.Droid.View.IViewGroupLayoutParams;
+    interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    interface Elastos.Droid.View.InputMethod.IInputConnection;
+    interface Elastos.Droid.Widget.IAbsListView;
+    interface Elastos.Droid.Widget.IActionMenuChildView;
+    interface Elastos.Droid.Widget.IAdapterView;
+    interface Elastos.Droid.Widget.ITextView;
+    interface Elastos.Droid.Widget.IListView;
+    interface Elastos.Droid.Widget.ILinearLayout;
+    interface Elastos.Droid.Widget.IFilterListener;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback;
+    interface Elastos.Droid.Widget.IPopupWindowOnDismissListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+
+    [local]
+    class CActionMenu {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IActionMenu;
+        interface IMenu;
+    }
+
+    [local]
+    class CActionMenuItem {
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 group,
+            [in] Int32 id,
+            [in] Int32 categoryOrder,
+            [in] Int32 ordering,
+            [in] ICharSequence* title);
+
+        interface IActionMenuItem;
+        interface IMenuItem;
+    }
+
+    [local]
+    class CActionMenuItemView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IActionMenuItemView;
+        interface ITextView;
+        interface IView;
+        interface IMenuItemView;
+        interface IViewOnClickListener;
+        interface IViewOnLongClickListener;
+        interface IActionMenuChildView;
+        interface IOnPreDrawListener;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CContextMenuBuilder {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IContextMenuBuilder;
+        interface IMenuBuilder;
+        interface IMenu;
+        interface IContextMenu;
+    }
+
+    [local]
+    class CExpandedMenuView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IExpandedMenuView;
+        interface IListView;
+        interface IAbsListView;
+        interface IAdapterView;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IOnGlobalLayoutListener;
+        interface IOnTouchModeChangeListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface ITextWatcher;
+        interface INoCopySpan;
+        interface IFilterListener;
+        interface IRemoteAdapterConnectionCallback;
+        interface IDrawableCallback;
+        interface IMenuBuilderItemInvoker;
+        interface IMenuView;
+        interface IAdapterViewOnItemClickListener;
+    }
+
+    [local]
+    class CIconMenuItemView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IIconMenuItemView;
+        interface ITextView;
+        interface IView;
+        interface IMenuItemView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IOnPreDrawListener;
+    }
+
+    [local]
+    class CIconMenuPresenter {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IIconMenuPresenter;
+        interface IBaseMenuPresenter;
+        interface IMenuPresenter;
+    }
+
+    [local]
+    class CIconMenuView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IIconMenuView;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IMenuBuilderItemInvoker;
+        interface IMenuView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IRunnable;
+    }
+
+    class CIconMenuViewSavedState {
+        constructor();
+
+        constructor(
+            [in] IParcelable* superState,
+            [in] Int32 focusedPosition);
+
+        interface IIconMenuViewSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
+    [local]
+    class CIconMenuViewLayoutParams {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        interface IIconMenuViewLayoutParams;
+        interface IViewGroupMarginLayoutParams;
+        interface IViewGroupLayoutParams;
+    }
+
+    [local]
+    class CListMenuItemView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IListMenuItemView;
+        interface ILinearLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IMenuItemView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CListMenuPresenter {
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 itemLayoutRes);
+
+        constructor(
+            [in] Int32 itemLayoutRes,
+            [in] Int32 themeRes);
+
+        interface IListMenuPresenter;
+        interface IMenuPresenter;
+        interface IAdapterViewOnItemClickListener;
+    }
+
+    [local]
+    class CMenuBuilder {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IMenuBuilder;
+        interface IMenu;
+    }
+
+    [local]
+    class CMenuDialogHelper {
+        constructor(
+            [in] IMenuBuilder* menu);
+
+        interface IMenuDialogHelper;
+        interface IDialogInterfaceOnKeyListener;
+        interface IDialogInterfaceOnClickListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IMenuPresenterCallback;
+    }
+
+    [local]
+    class CMenuItemImpl {
+        constructor(
+            [in] IMenuBuilder* menu,
+            [in] Int32 group,
+            [in] Int32 id,
+            [in] Int32 categoryOrder,
+            [in] Int32 ordering,
+            [in] ICharSequence* title,
+            [in] Int32 showAsAction);
+
+        interface IMenuItemImpl;
+        interface IMenuItem;
+    }
+
+    [local]
+    class CMenuPopupHelper {
+        constructor(
+            [in] IContext* ctx,
+            [in] IMenuBuilder* menu);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IMenuBuilder* menu,
+            [in] IView* anchorView);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IMenuBuilder* menu,
+            [in] IView* anchorView,
+            [in] Boolean overflowOnly,
+            [in] Int32 popupStyleAttr);
+
+        interface IMenuPopupHelper;
+        interface IAdapterViewOnItemClickListener;
+        interface IViewOnKeyListener;
+        interface IOnGlobalLayoutListener;
+        interface IPopupWindowOnDismissListener;
+        interface IViewOnAttachStateChangeListener;
+        interface IMenuPresenter;
+    }
+
+    [local]
+    class CSubMenuBuilder {
+        constructor(
+            [in] IContext* ctx,
+            [in] IMenuBuilder* build,
+            [in] IMenuItemImpl* impl);
+
+        interface ISubMenuBuilder;
+        interface IMenuBuilder;
+        interface ISubMenu;
+        interface IMenu;
+    }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    singleton class CActionBarPolicyHelper {
+        interface IActionBarPolicyHelper;
+    }
+
+    class CIInputConnectionWrapper {
+        constructor(
+            [in] ILooper* mainLooper,
+            [in] IInputConnection* conn);
+
+        interface IInputContext;
+        interface IBinder;
+    }
+
+    class CInputBindResult {
+        constructor();
+
+        constructor(
+            [in] IIInputMethodSession* method,
+            [in] IInputChannel* channel,
+            [in] String id,
+            [in] Int32 sequence,
+            [in] Int32 userActionNotificationSequenceNumber);
+
+        interface IInputBindResult;
+        interface IParcelable;
+    }
+
+    class CInputConnectionWrapper {
+        constructor(
+            [in] IInputContext* inputContext);
+
+        interface IInputConnection;
+    }
+
+    class CInputContextCallback {
+        constructor();
+
+        interface IInputContextCallback;
+        interface IBinder;
+    }
+
+    singleton class CRotationPolicy {
+        interface IRotationPolicy;
+    }
+
+    singleton class CWindowManagerPolicyThread {
+        interface IWindowManagerPolicyThread;
+    }
+
+    } // namespace View
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

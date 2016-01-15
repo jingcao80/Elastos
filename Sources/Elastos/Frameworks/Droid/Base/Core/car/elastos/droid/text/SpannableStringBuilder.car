@@ -1,0 +1,125 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPaint;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * This is the class for text whose content and markup can both be changed.
+     *
+     * @Involve
+     * interface IGraphicsOperations
+     * interface IAppendable
+     * interface IEditable
+     * interface ISpanned
+     * interface ISpannable
+     * interface IGetChars
+     * interface ICharSequence
+     */
+    [deprecated]
+    interface ISpannableStringBuilder {
+        /**
+         * Return a String containing a copy of the chars in this buffer, limited to the
+         * [start, end[ range.
+         * @hide
+         */
+        Substring(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] String* str);
+
+        /**
+         * Don't call this yourself -- exists for Canvas to use internally.
+         * {@hide}
+         */
+        DrawTextRun(
+            [in] ICanvas* c,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Int32 contextStart,
+            [in] Int32 contextEnd,
+            [in] Float x,
+            [in] Float y,
+            [in] Boolean isRtl,
+            [in] IPaint* p);
+
+        /**
+         * Don't call this yourself -- exists for Paint to use internally.
+         * {@hide}
+         */
+        GetTextRunAdvances(
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Int32 contextStart,
+            [in] Int32 contextEnd,
+            [in] Boolean isRtl,
+            [in] ArrayOf<Float>* advances,
+            [in] Int32 advancesPos,
+            [in] IPaint* p,
+            [out] Float* result);
+
+        /**
+         * Returns the next cursor position in the run.  This avoids placing the cursor between
+         * surrogates, between characters that form conjuncts, between base characters and combining
+         * marks, or within a reordering cluster.
+         *
+         * <p>The context is the shaping context for cursor movement, generally the bounds of the metric
+         * span enclosing the cursor in the direction of movement.
+         * <code>contextStart</code>, <code>contextEnd</code> and <code>offset</code> are relative to
+         * the start of the string.</p>
+         *
+         * <p>If cursorOpt is CURSOR_AT and the offset is not a valid cursor position,
+         * this returns -1.  Otherwise this will never return a value before contextStart or after
+         * contextEnd.</p>
+         *
+         * @param contextStart the start index of the context
+         * @param contextEnd the (non-inclusive) end index of the context
+         * @param dir either DIRECTION_RTL or DIRECTION_LTR
+         * @param offset the cursor position to move from
+         * @param cursorOpt how to move the cursor, one of CURSOR_AFTER,
+         * CURSOR_AT_OR_AFTER, CURSOR_BEFORE,
+         * CURSOR_AT_OR_BEFORE, or CURSOR_AT
+         * @param p the Paint object that is requesting this information
+         * @return the offset of the next position, or -1
+         * @deprecated This is an internal method, refrain from using it in your code
+         */
+        //@Deprecated
+        GetTextRunCursor(
+            [in] Int32 contextStart,
+            [in] Int32 contextEnd,
+            [in] Int32 dir,
+            [in] Int32 offset,
+            [in] Int32 cursorOpt,
+            [in] IPaint* p,
+            [out] Int32* cursor);
+
+        /**
+         * Appends the character sequence {@code text} and spans {@code what} over the appended part.
+         * See {@link Spanned} for an explanation of what the flags mean.
+         * @param text the character sequence to append.
+         * @param what the object to be spanned over the appended text.
+         * @param flags see {@link Spanned}.
+         * @return this {@code SpannableStringBuilder}.
+         */
+        Append(
+            [in] ICharSequence* text,
+            [in] IInterface* what,
+            [in] Int32 flags);
+    }
+
+    interface ISpannableStringBuilderHelper {
+        ValueOf(
+            [in] ICharSequence* source,
+            [out] ISpannableStringBuilder** builder);
+    }
+
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

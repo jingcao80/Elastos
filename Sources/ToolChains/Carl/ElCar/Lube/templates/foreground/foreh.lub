@@ -1,0 +1,153 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "${name}.h"
+$
+
+#ifndef __${Upper(name)}_H__
+#define __${Upper(name)}_H__
+$IF class.attrib is "hascoalescence"
+
+#include <${module.name}_server.h>
+
+${ClassNamespaceBegin(class)}
+$  WITH ALL coalescences DO
+ECode ${interface.name}_${name}Coalescer(
+$ WITH ALL parameters DO
+    /* [in] */ ${type} ${prefixingnameByName(parameter)}$^
+,
+$    END DO
+$ WITH ALL parameters DO
+    /* [in, out] */ ${type}* p${PrefixingNameByName(parameter)}$^
+$       IF parameters is not last
+,
+$       END IF
+$    END DO
+);
+$  END DO;; all coalescence methods
+${ClassNamespaceEnd(class)}
+$END IF;; hascoalescence
+
+#include "_${fullname}.h"
+
+${ClassNamespaceBegin(class)}
+$IF type is not "generic"
+CarClass(${name})
+{
+public:
+$WITH all interfaces DO
+$   IF attrib is not "callback" and attrib is not "callbacksink" and attrib is not "clsobj" and attrib is not "filter" and name is not "IRegime" and name is not "IObject"
+$       WITH all parents_and_me DO
+$       WITH all methods DO
+$           IF interface.attrib is "inherited" and interface.name is not "IAppletMain"
+$               WITH all supers DO
+$                   IF super is last
+    // inherits from ${super.name}, implement to override ${super.name}::${method.name}
+$                   END IF ;; is last
+$               END DO ;; all supers
+    // $^
+$           ELSE ;; is "inherited" is not "IAppletMain"
+    $^
+$           END IF ;; is "inherited" is not "IAppletMain"
+$    IF type is "ECode"
+CARAPI ${name}($^
+$    ELSE
+CARAPI_(${type}) ${name}($^
+$    END IF
+$
+$    WITH all parameters DO
+
+$   IF interface.attrib is "inherited" and interface.name is not "IAppletMain"
+    // $^
+$   ELSE ;; is "inherited" is not "IAppletMain"
+    $^
+$   END IF ;; is "inherited" is not "IAppletMain"
+    /* [${attrib}] */ ${type} ${PrefixingNameByName(parameter)}$^
+$      IF parameter is not last
+,$^
+$      END IF
+$    END DO ;; all parameters
+);$^
+
+
+$       END DO ;; all methods
+$       END DO ;; parents_and_me
+$   END IF ;; is not "callback" and not "callbacksink" and not "clsobj" and not "filter"
+$
+$   IF attrib is "callbacksink"
+$       WITH all parents_and_me DO
+$       WITH all methods DO
+    CARAPI On${name}(
+        /* [in] */ IInterface * pSender$^
+$    WITH all parameters DO
+,$^
+        /* [${attrib}] */ ${type} ${PrefixingNameByName(parameter)}$^
+$    END DO ;; all parameters
+);
+
+$       END DO ;; all methods
+$       END DO ;; parents_and_me
+$   END IF ;; is "callbacksink"
+$
+$   IF attrib is "delegatesink"
+$       WITH all parents_and_me DO
+$       WITH all methods DO
+    CARAPI Do${name}(
+        /* [in] */ IInterface * pSender$^
+$    WITH all parameters DO
+,$^
+        /* [${attrib}] */ ${type} ${PrefixingNameByName(parameter)}$^
+$    END DO ;; all parameters
+);
+
+$       END DO ;; all methods
+$       END DO ;; parents_and_me
+$   END IF ;; is "delegatesink"
+$END DO ;; all interfaces
+$
+$IF class.attrib is not "hasTrivialCtor"
+$  WITH all interfaces DO
+$    IF attrib is "clsobj"
+$      WITH all methods DO
+$        IF type is "ECode"
+    CARAPI constructor($^
+$        ELSE
+    CARAPI_(${type}) constructor($^
+$        END IF
+$
+$        WITH all parameters DO
+$          IF parameter is not last
+$            IF parameter is not first
+,$^
+$            END IF
+
+        /* [${attrib}] */ ${type} ${PrefixingNameByName(parameter)}$^
+$          END IF
+$        END DO ;; all parameters
+);
+
+$      END DO ;; all methods
+$
+$    END IF ;; clsobj
+$  END DO ;; all interfaces
+$END IF;;
+private:
+    // TODO: Add your private member variables here.
+};
+
+$ELSE ;; not generic
+CarClass(${name})
+{
+public:
+${NewHeaderOfGeneric(class)}
+
+private:
+    // TODO: Add your private member variables here.
+};
+$END IF ;; end of generic IF
+${ClassNamespaceEnd(class)}
+#endif // __${Upper(name)}_H__
+$
+$END OUTPUT

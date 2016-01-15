@@ -1,0 +1,13 @@
+TARGET_NAME= admin
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = CDeviceAdminInfo.cpp
+SOURCES += CDeviceAdminInfoPolicyInfo.cpp
+#SOURCES += CDeviceAdminReceiver.cpp
+SOURCES += CDevicePolicyManager.cpp
+#SOURCES += CDevicePolicyManagerHelper.cpp

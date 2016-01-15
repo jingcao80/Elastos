@@ -1,0 +1,33 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IFrameLayout
+     */
+    interface IActionBarViewHomeView {
+        SetUp(
+            [in] Boolean isUp);
+
+        SetIcon(
+            [in] IDrawable* d);
+
+        GetStartOffset(
+            [out] Int32* offset);
+
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+

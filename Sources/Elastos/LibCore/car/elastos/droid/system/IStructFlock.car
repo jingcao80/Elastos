@@ -1,0 +1,53 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace System {
+
+    /**
+     * Information returned/taken by fcntl(2) F_GETFL and F_SETFL. Corresponds to C's
+     * {@code struct flock} from
+     * <a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/fcntl.h.html">&lt;fcntl.h&gt;</a>
+     */
+    interface IStructFlock {
+        /** The operation type, one of F_RDLCK, F_WRLCK, or F_UNLCK. */
+        GetType(
+            [out] Int16* type);
+
+        SetType(
+            [in] Int16 type);
+
+        /** How to interpret l_start, one of SEEK_CUR, SEEK_END, SEEK_SET. */
+        GetWhence(
+            [out] Int16* whence);
+
+        SetWhence(
+            [in] Int16 whence);
+
+        /** Start offset. */
+        GetStart(
+            [out] Int64* start);
+
+        SetStart(
+            [in] Int64 start);
+
+        /** Byte count to operate on. */
+        GetLen(
+            [out] Int64* len);
+
+        SetLen(
+            [in] Int64 len);
+
+        /** Process blocking our lock (filled in by F_GETLK, otherwise unused). */
+        GetPid(
+            [out] Int32* pid);
+
+        SetPid(
+            [in] Int32 pid);
+    }
+
+    } // namespace System
+    } // namespace Droid
+    } // namespace Elastos
+}

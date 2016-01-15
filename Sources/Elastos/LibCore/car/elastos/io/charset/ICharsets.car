@@ -1,0 +1,109 @@
+module
+{
+    interface Elastos.IO.Charset.ICharset;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Charset {
+
+    /**
+     * Provides convenient access to the most important built-in charsets. Saves a hash lookup and
+     * unnecessary handling of UnsupportedEncodingException at call sites, compared to using the
+     * charset's name.
+     *
+     * Also various special-case charset conversions (for performance).
+     *
+     * @hide internal use only
+     */
+    [deprecated]
+    interface ICharsets {
+        /**
+         * A cheap and type-safe constant for the ISO-8859-1 Charset.
+         */
+        GetISO_8859_1(
+            [out] ICharset** charset);
+
+        /**
+         * A cheap and type-safe constant for the US-ASCII Charset.
+         */
+        GetUS_ASCII(
+            [out] ICharset** charset);
+
+        /**
+         * A cheap and type-safe constant for the UTF-8 Charset.
+         */
+        GetUTF_8(
+            [out] ICharset** charset);
+
+        /**
+         * Returns a new byte array containing the bytes corresponding to the given characters,
+         * encoded in US-ASCII. Unrepresentable characters are replaced by (byte) '?'.
+         */
+        ToAsciiBytes(
+            [in] ArrayOf<Char32> chars,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns a new byte array containing the bytes corresponding to the given characters,
+         * encoded in ISO-8859-1. Unrepresentable characters are replaced by (byte) '?'.
+         */
+        ToIsoLatin1Bytes(
+            [in] ArrayOf<Char32> chars,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns a new byte array containing the bytes corresponding to the given characters,
+         * encoded in UTF-8. All characters are representable in UTF-8.
+         */
+        ToUtf8Bytes(
+            [in] ArrayOf<Char32> chars,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns a new byte array containing the bytes corresponding to the given characters,
+         * encoded in UTF-16BE. All characters are representable in UTF-16BE.
+         */
+        ToBigEndianUtf16Bytes(
+            [in] ArrayOf<Char32> chars,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Decodes the given US-ASCII bytes into the given char[]. Equivalent to but faster than:
+         *
+         * for (int i = 0; i < count; ++i) {
+         *     char ch = (char) (data[start++] & 0xff);
+         *     value[i] = (ch <= 0x7f) ? ch : REPLACEMENT_CHAR;
+         * }
+         */
+        AsciiBytesToChars(
+            [in] ArrayOf<Byte> bytes,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out, callee] ArrayOf<Char32>* chars);
+
+        /**
+         * Decodes the given ISO-8859-1 bytes into the given char[]. Equivalent to but faster than:
+         *
+         * for (int i = 0; i < count; ++i) {
+         *     value[i] = (char) (data[start++] & 0xff);
+         * }
+         */
+        IsoLatin1BytesToChars(
+            [in] ArrayOf<Byte> bytes,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out, callee] ArrayOf<Char32>* chars);
+    }
+
+    } // namespace Charset
+    } // namespace IO
+    } // namespace Elastos
+}

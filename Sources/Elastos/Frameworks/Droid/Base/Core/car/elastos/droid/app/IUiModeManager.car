@@ -1,0 +1,52 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * Interface used to control special UI modes.
+     * @hide
+     */
+    interface IIUiModeManager {
+        /**
+         * Enables the car mode. Only the system can do this.
+         * @hide
+         */
+        EnableCarMode(
+            [in] Int32 flags);
+
+        /**
+         * Disables the car mode.
+         */
+        DisableCarMode(
+            [in] Int32 flags);
+
+        /**
+         * Return the current running mode.
+         */
+        GetCurrentModeType(
+            [out] Int32* type);
+
+        /**
+         * Sets the night mode.
+         * The mode can be one of:
+         *   1 - notnight mode
+         *   2 - night mode
+         *   3 - automatic mode switching
+         */
+        SetNightMode(
+            [in] Int32 mode);
+
+        /**
+         * Gets the currently configured night mode.  Return 1 for notnight,
+         * 2 for night, and 3 for automatic mode switching.
+         */
+        GetNightMode(
+            [out] Int32* mode);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

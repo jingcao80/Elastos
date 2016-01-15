@@ -1,0 +1,30 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.Pm.IIPackageInstallObserver2;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** {@hide} */
+    interface IPackageInstallObserver {
+
+        GetBinder(
+            [out] IIPackageInstallObserver2** activity);
+
+        OnUserActionRequired(
+            [in] IIntent* intent);
+
+        OnPackageInstalled(
+            [in] String basePackageName,
+            [in] Int32 returnCode,
+            [in] String msg,
+            [in] IBundle* extras);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

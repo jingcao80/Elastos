@@ -1,0 +1,74 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Views {
+
+    interface IDebugOverlayViewCallbacks {
+
+        OnPrimarySeekBarChanged(
+            [in] Float progress);
+
+        OnSecondarySeekBarChanged(
+            [in] Float progress);
+    }
+
+    /**
+     * A full screen overlay layer that allows us to draw views from throughout the system on the top
+     * most layer.
+     */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     * interface IOnSeekBarChangeListener
+     */
+    [local]
+    interface IDebugOverlayView {
+
+        SetCallbacks(
+            [in] IDebugOverlayViewCallbacks* cb);
+
+        /** Enables the debug overlay drawing. */
+        Enable();
+
+        /** Disables the debug overlay drawing. */
+        Disable();
+
+        /** Clears all debug rects. */
+        Clear();
+
+        /** Adds a rect to be drawn. */
+        AddRect(
+            [in] IRect* r,
+            [in] Int32 color);
+
+        /** Adds a view's global rect to be drawn. */
+        AddViewRect(
+            [in] IView* v,
+            [in] Int32 color);
+
+        /** Adds a rect, relative to a given view to be drawn. */
+        AddRectRelativeToView(
+            [in] IView* v,
+            [in] IRect* r,
+            [in] Int32 color);
+
+        /** Sets the debug text at the bottom of the screen. */
+        SetText(
+            [in] String message);
+    }
+
+    } // namespace Views
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

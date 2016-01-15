@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    interface IASN1Oid extends IASN1Primitive {}
+
+    interface IASN1OidHelper {
+        GetInstance(
+            [out] IASN1Oid** instance);
+
+        GetInstanceForString(
+            [out] IASN1Oid** instance);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

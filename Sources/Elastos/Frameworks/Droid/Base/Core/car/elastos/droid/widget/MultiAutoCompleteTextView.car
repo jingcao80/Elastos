@@ -1,0 +1,71 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface ITokenizer {
+        /**
+         * Returns the start of the token that ends at offset
+         * <code>cursor</code> within <code>text</code>.
+         */
+        FindTokenStart(
+            [in] ICharSequence* text,
+            [in] Int32 cursor,
+            [out] Int32* start);
+
+        /**
+         * Returns the end of the token (minus trailing punctuation)
+         * that begins at offset <code>cursor</code> within <code>text</code>.
+         */
+        FindTokenEnd(
+            [in] ICharSequence* text,
+            [in] Int32 cursor,
+            [out] Int32* end);
+
+        /**
+         * Returns <code>text</code>, modified, if necessary, to ensure that
+         * it ends with a token terminator (for example a space or comma).
+         */
+        TerminateToken(
+            [in] ICharSequence* text,
+            [out] ICharSequence** res);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.ITokenizer
+     */
+    interface ICommaTokenizer {
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IView
+     * extends Elastos.Droid.Widget.ITextView
+     * extends Elastos.Droid.Widget.IEditText
+     * extends Elastos.Droid.Widget.IAutoCompleteTextView
+     *
+     * interface Elastos.Droid.View.IOnPreDrawListener
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IMultiAutoCompleteTextView {
+        /**
+         * Sets the Tokenizer that will be used to determine the relevant
+         * range of the text where the user is typing.
+         */
+        SetTokenizer(
+            [in] ITokenizer* t);
+
+    }
+
+    }
+    }
+    }
+}

@@ -1,0 +1,41 @@
+
+module
+{
+    enum Elastos.Droid.Wifi.WpsResultStatus;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * A class representing the result of a WPS request
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWpsResult {
+        GetStatus(
+            [out] WpsResultStatus* result);
+
+        SetStatus(
+            [in] WpsResultStatus status);
+
+        GetPin(
+            [out] String* result);
+
+        SetPin(
+            [in] String pin);
+    }
+
+    enum WpsResultStatus {
+        WpsResultStatus_SUCCESS,
+        WpsResultStatus_FAILURE,
+        WpsResultStatus_IN_PROGRESS,
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

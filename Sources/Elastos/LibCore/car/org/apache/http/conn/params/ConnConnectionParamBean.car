@@ -1,0 +1,32 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Params {
+
+    /**
+     * Allows for setting parameters relating to connections on
+     * {@link HttpParams}.  This class ensures that the values set on the params
+     * are type-safe.
+     */
+    interface IConnConnectionParamBean {
+
+        /**
+         * @see ConnConnectionPNames#MAX_STATUS_LINE_GARBAGE
+         */
+        SetMaxStatusLineGarbage(
+            [in] Int32 maxStatusLineGarbage);
+
+    }
+
+    } // namespace Params
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

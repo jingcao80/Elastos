@@ -1,0 +1,54 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+
+EXTERN_C ELAPI _Impl_CheckClsId(
+    PInterface pServerObj,
+    const _ELASTOS ClassID* pClassid,
+    PInterface *ppServerObj);
+$WITH all classes DO
+$   IF type is not "sink" and type is not "clsobj" and attrib is not "private" and type is not "generic"
+
+${ClassNamespaceBegin(class)}$^
+class ${name}
+{
+public:
+$IF attrib is "naked"
+$ TEMPLATE "nakedbasenew.lub"
+$ TEMPLATE "nakedclassnew.lub"
+$ELSE
+$ TEMPLATE "basenew.lub"
+$ TEMPLATE "classnew.lub"
+$ IF attrib is "hascallback"
+$     TEMPLATE "clientcallback.lub"
+$ END IF
+$ WITH all supers DO
+$   WITH super DO
+$     IF attrib is "hascallback" and type is not "generic"
+$       TEMPLATE "supercallback.lub"
+$     END IF
+$   END DO ;; super
+$ END DO ;; supers
+$END IF
+};
+${ClassNamespaceEnd(class)}$^
+$   END IF ;; is not sink and is not private and is not clsobj and is not "generic"
+$END DO ;; all classes
+$
+$
+$WITH all classes DO
+$IF attrib is "hasctor" and type is "generic" and attrib is not "private"
+${ClassNamespaceBegin(class)}$^
+class ${name}
+{
+public:
+${NewOfGeneric(class)}
+$ IF attrib is "hascallback"
+$     TEMPLATE "genericcallback.lub"
+$ END IF
+};
+${ClassNamespaceEnd(class)}$^
+$END IF
+$END DO ;; all classes

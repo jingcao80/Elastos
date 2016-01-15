@@ -1,0 +1,118 @@
+
+module
+{
+    using interface Elastos.Utility.IEnumeration;
+
+    namespace Eunit {
+    namespace Framework {
+
+    interface ITest;
+    interface ITestListener;
+    interface ITestCase;
+    interface IProtectable;
+
+    interface ITestResult {
+        /**
+         * Adds an error to the list of errors. The passed in exception
+         * caused the error.
+         */
+        AddError(
+            [in] ITest* test,
+            [in] ECode ec);
+
+        /**
+         * Adds a failure to the list of failures. The passed in exception
+         * caused the failure.
+         */
+        AddFailure(
+            [in] ITest* test,
+            [in] ECode ec);
+
+        /**
+         * Registers a TestListener
+         */
+        AddListener(
+            [in] ITestListener* listener);
+
+        /**
+         * Unregisters a TestListener
+         */
+        RemoveListener(
+            [in] ITestListener* listener);
+
+        /**
+         * Informs the result that a test was completed.
+         */
+        EndTest(
+            [in] ITest* test);
+
+        /**
+         * Gets the number of detected errors.
+         */
+        ErrorCount(
+            [out] Int32* number);
+
+        /**
+         * Returns an Enumeration for the errors
+         */
+        Errors(
+            [out] IEnumeration** errors);
+
+        /**
+         * Gets the number of detected failures.
+         */
+        FailureCount(
+            [out] Int32* number);
+
+        /**
+         * Returns an Enumeration for the failures
+         */
+        Failures(
+            [out] IEnumeration** failures);
+
+        /**
+         * Runs a TestCase.
+         */
+        Run(
+            [in] ITestCase* test);
+
+        /**
+         * Gets the number of run tests.
+         */
+        RunCount(
+            [out] Int32* number);
+
+        /**
+         * Runs a TestCase.
+         */
+        RunProtected(
+            [in] ITest* test,
+            [in] IProtectable* p);
+
+        /**
+         * Checks whether the test run should stop
+         */
+        ShouldStop(
+            [out] Boolean* result);
+
+        /**
+         * Informs the result that a test will be started.
+         */
+        StartTest(
+            [in] ITest* test);
+
+        /**
+         * Marks that the test run should stop.
+         */
+        Stop();
+
+        /**
+         * Returns whether the entire test was successful or not.
+         */
+        WasSuccessful(
+            [out] Boolean* result);
+    }
+
+    } // namespace Framework
+    } // namespace Eunit
+}

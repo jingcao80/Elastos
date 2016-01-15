@@ -1,0 +1,41 @@
+# ' ' or =: fork new job
+# -: run job without fork
+# <: merge then fork new job
+# >: merge then run job without fork
+- Elastos/Runtime/PortingLayer/crt0
+- Elastos/Runtime/PortingLayer
+  Elastos/Runtime/Library/inc/eltypes
+  Elastos/Runtime/Library/inc/car
+  Elastos/Runtime/Library/inc/elasys
+  Elastos/Runtime/Library/inc/clsmodule
+  Elastos/Runtime/Library/inc/driver
+< Elastos/Runtime/Library/inc
+  Elastos/Runtime/Library/syscar
+# !!!!!
+< Elastos/Runtime/Library/elasys
+  Elastos/Runtime/Library/eltypes/elstring
+< Elastos/Runtime/Library/eltypes
+  Elastos/Runtime/Library/clsmodule
+> Elastos/Runtime/Library
+# !!!!!
+- Elastos/Runtime/Core/inc
+  Elastos/Runtime/Core/reflection
+  Elastos/Runtime/Core/marshal/others
+> Elastos/Runtime/Core/marshal
+- Elastos/Runtime/Core/libusr/lib4car/lib4ela
+- Elastos/Runtime/Core/libusr/lib4car
+- Elastos/Runtime/Core/libusr
+  Elastos/Runtime/Core/carapi
+  Elastos/Runtime/Core/elapi
+> Elastos/Runtime/Core/eladll/lib
+- Elastos/Runtime/Core/eladll/dll
+- Elastos/Runtime/Core/eladll
+- Elastos/Runtime/Core
+- Elastos/Runtime
+- Elastos/LibCore/inc/Elastos/Core
+- Elastos/LibCore/inc
+- Elastos/LibCore/src/Elastos/Core/eco
+- Elastos/LibCore/src/Elastos/Core
+- Elastos/LibCore/src
+- Elastos/LibCore
+- Elastos

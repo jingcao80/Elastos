@@ -1,0 +1,81 @@
+module
+{
+    interface Elastos.Droid.Media.IAudioFormat;
+    interface Elastos.Droid.Media.AudioPolicy.IAudioMixingRule;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace AudioPolicy {
+
+    /**
+     * @hide CANDIDATE FOR PUBLIC API
+     */
+    interface IAudioMix {
+
+        /**
+         * An audio mix behavior where the output of the mix is sent to the original destination of
+         * the audio signal, i.e. an output device for an output mix, or a recording for an input mix.
+         */
+        const Int32 ROUTE_FLAG_RENDER = 0x1;
+
+        /**
+         * An audio mix behavior where the output of the mix is rerouted back to the framework and
+         * is accessible for injection or capture through the {@link Audiotrack} and {@link AudioRecord}
+         * APIs.
+         */
+        const Int32 ROUTE_FLAG_LOOP_BACK = 0x1 << 1;
+
+    }
+
+    /**
+     * Builder class for {@link AudioMix} objects
+     *
+     */
+    interface IAudioMixBuilder {
+        /**
+         * @hide
+         * Only used by AudioPolicyConfig, not a public API.
+         * @param rule
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        SetMixingRule(
+            [in] IAudioMixingRule * rule,
+            [out] IAudioMixBuilder** builder);
+
+        /**
+         * Sets the {@link AudioFormat} for the mix.
+         * @param format a non-null {@link AudioFormat} instance.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        SetFormat(
+            [in] IAudioFormat * format,
+            [out] IAudioMixBuilder** builder);
+
+        /**
+         * Sets the routing behavior for the mix.
+         * @param routeFlags one of {@link AudioMix#ROUTE_FLAG_LOOP_BACK},
+         *     {@link AudioMix#ROUTE_FLAG_RENDER}
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        SetRouteFlags(
+            [in] Int32 routeFlags,
+            [out] IAudioMixBuilder** builder);
+
+        /**
+         * Combines all of the settings and return a new {@link AudioMix} object.
+         * @return a new {@link AudioMix} object
+         * @throws IllegalArgumentException if no {@link AudioMixingRule} has been set.
+         */
+        Build(
+            [out] IAudioMix** result);
+    }
+
+    } // namespace AudioPolicy
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

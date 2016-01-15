@@ -1,0 +1,116 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * Interface definition for a callback to be invoked when the dial
+     * is "triggered" by rotating it one way or the other.
+     */
+    [local]
+    interface IOnDialTriggerListener {
+        /**
+         * The dial was triggered because the user grabbed the left handle,
+         * and rotated the dial clockwise.
+         */
+        const Int32 LEFT_HANDLE = 1;
+
+        /**
+         * The dial was triggered because the user grabbed the right handle,
+         * and rotated the dial counterclockwise.
+         */
+        const Int32 RIGHT_HANDLE = 2;
+
+        /**
+         * Called when the dial is triggered.
+         *
+         * @param v The view that was triggered
+         * @param whichHandle  Which "dial handle" the user grabbed,
+         *        either {@link #LEFT_HANDLE}, {@link #RIGHT_HANDLE}.
+         */
+        OnDialTrigger(
+            [in] IView* v,
+            [in] Int32 whichHandle);
+
+        /**
+         * Called when the "grabbed state" changes (i.e. when
+         * the user either grabs or releases one of the handles.)
+         *
+         * @param v the view that was triggered
+         * @param grabbedState the new state: either {@link #NOTHING_GRABBED},
+         * {@link #LEFT_HANDLE_GRABBED}, or {@link #RIGHT_HANDLE_GRABBED}.
+         */
+        OnGrabbedStateChange(
+            [in] IView* v,
+            [in] Int32 grabbedState);
+    }
+
+    /**
+     * Custom view that presents up to two items that are selectable by rotating a semi-circle from
+     * left to right, or right to left.  Used by incoming call screen, and the lock screen when no
+     * security pattern is set.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+     [local]
+    interface IRotarySelector {
+        const Int32 HORIZONTAL = 0;
+        const Int32 VERTICAL = 1;
+
+
+        const Int32 NOTHING_GRABBED = 0;
+        const Int32 LEFT_HANDLE_GRABBED = 1;
+        const Int32 RIGHT_HANDLE_GRABBED = 2;
+
+        /**
+         * Sets the left handle icon to a given resource.
+         *
+         * The resource should refer to a Drawable object, or use 0 to remove
+         * the icon.
+         *
+         * @param resId the resource ID.
+         */
+        SetLeftHandleResource(
+            [in] Int32 resId);
+
+        /**
+         * Sets the right handle icon to a given resource.
+         *
+         * The resource should refer to a Drawable object, or use 0 to remove
+         * the icon.
+         *
+         * @param resId the resource ID.
+         */
+        SetRightHandleResource(
+            [in] Int32 resId);
+
+        /**
+         * Registers a callback to be invoked when the dial
+         * is "triggered" by rotating it one way or the other.
+         *
+         * @param l the OnDialTriggerListener to attach to this view
+         */
+        SetOnDialTriggerListener(
+            [in] IOnDialTriggerListener* l);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+
+

@@ -1,0 +1,30 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace BroadcastStaticDemo {
+
+    class CActivityOne {
+        interface IActivity;
+    }
+
+    class CBroadcastReceiverOne {
+        interface IBroadcastReceiver;
+    }
+
+    class CBroadcastReceiverTwo {
+        interface IBroadcastReceiver;
+    }
+
+    } // namespace BroadcastStaticDemo
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}

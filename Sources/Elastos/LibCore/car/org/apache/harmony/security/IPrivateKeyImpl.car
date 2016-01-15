@@ -1,0 +1,22 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+
+    [deprecated]
+    interface IPrivateKeyImpl extends Elastos.Security.IPrivateKey {
+        SetAlgorithm(
+            [in] String algorithm);
+
+        SetEncoding(
+            [in] ArrayOf<Byte>* encoding);
+    }
+
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

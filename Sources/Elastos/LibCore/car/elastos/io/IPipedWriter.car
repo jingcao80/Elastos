@@ -1,0 +1,29 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+        /**
+         * @Involved
+         * interface IAppendable;
+         * interface IWriter;
+         */
+        interface IPipedWriter {
+            /**
+             * Connects this {@code PipedWriter} to a {@link PipedReader}. Any data
+             * written to this writer becomes readable in the reader.
+             *
+             * @param reader
+             *            the reader to connect to.
+             * @throws IOException
+             *             if this writer is closed or already connected, or if {@code
+             *             reader} is already connected.
+             */
+            Connect(
+                [in] IPipedReader* reader);
+
+        }
+
+    } // namespace IO
+    } // namespace Elastos
+}

@@ -1,0 +1,13 @@
+TARGET_NAME= update
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+#INCLUDES += $(MAKEDIR)/../../../../../../../LibCore/inc/Elastos/Core
+#INCLUDES += $(MAKEDIR)/../../../../../../../LibCore/inc/Elastos/Core/elastos
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES += CCertPinInstallReceiver.cpp
+SOURCES += CConfigUpdateInstallReceiver.cpp
+SOURCES += CSmsShortCodesInstallReceiver.cpp

@@ -1,0 +1,63 @@
+
+module
+{
+    using interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+    using interface Elastosx.Crypto.ISecretKey;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated]
+    interface IContainerEncryptionParams {
+        GetEncryptionAlgorithm(
+            [out] String* ealgo);
+
+        GetEncryptionSpec(
+            [out] IAlgorithmParameterSpec** spec);
+
+        GetEncryptionKey(
+            [out] ISecretKey** key);
+
+        GetMacAlgorithm(
+            [out] String* malgo);
+
+        GetMacSpec(
+            [out] IAlgorithmParameterSpec** spec);
+
+        GetMacKey(
+            [out] ISecretKey** key);
+
+        GetMacTag(
+            [out, callee] ArrayOf<Byte>* tag);
+
+        GetAuthenticatedDataStart(
+            [out] Int64* aDataStart);
+
+        GetEncryptedDataStart(
+            [out] Int64* eDataStart);
+
+        GetDataEnd(
+            [out] Int64* dataEnd);
+
+        Equals(
+            [in] IInterface* o,
+            [out] Boolean* isEquals);
+
+        GetHashCode(
+            [out] Int32* code);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

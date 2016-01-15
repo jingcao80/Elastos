@@ -1,0 +1,95 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Utils {
+    /**
+     * Helper class to release a lock at the end of a try-with-resources statement.
+     *
+     * @invoke
+     * IInterface AutoCloseable
+     */
+    interface ICloseableLockScopedLock {
+    }
+
+    /**
+     * Implement a shared/exclusive lock that can be closed.
+     *
+     * <p>A shared lock can be acquired if any other shared locks are also acquired. An
+     * exclusive lock acquire will block until all shared locks have been released.</p>
+     *
+     * <p>Locks are re-entrant; trying to acquire another lock (of the same type)
+     * while a lock is already held will immediately succeed.</p>
+     *
+     * <p>Acquiring to acquire a shared lock while holding an exclusive lock or vice versa is not
+     * supported; attempting it will throw an {@link IllegalStateException}.</p>
+     *
+     * <p>If the lock is closed, all future and current acquires will immediately return {@code null}.
+     * </p>
+     *
+     * @invoke
+     * IInterface AutoCloseable
+     */
+    interface ICloseableLock {
+        /**
+         * Try to acquire the lock non-exclusively, blocking until the operation completes.
+         *
+         * <p>If the lock has already been closed, or being closed before this operation returns,
+         * the call will immediately return {@code false}.</p>
+         *
+         * <p>If other threads hold a non-exclusive lock (and the lock is not yet closed),
+         * this operation will return immediately. If another thread holds an exclusive lock,
+         * this thread will block until the exclusive lock has been released.</p>
+         *
+         * <p>This lock is re-entrant; acquiring more than one non-exclusive lock per thread is
+         * supported, and must be matched by an equal number of {@link #releaseLock} calls.</p>
+         *
+         * @return {@code ScopedLock} instance if the lock was acquired, or {@code null} if the lock
+         *         was already closed.
+         *
+         * @throws IllegalStateException if this thread is already holding an exclusive lock
+         */
+        AcquireLock(
+            [out] ICloseableLockScopedLock** outsl);
+
+        /**
+         * Try to acquire the lock exclusively, blocking until all other threads release their locks.
+         *
+         * <p>If the lock has already been closed, or being closed before this operation returns,
+         * the call will immediately return {@code false}.</p>
+         *
+         * <p>If any other threads are holding a lock, this thread will block until all
+         * other locks are released.</p>
+         *
+         * <p>This lock is re-entrant; acquiring more than one exclusive lock per thread is supported,
+         * and must be matched by an equal number of {@link #releaseLock} calls.</p>
+         *
+         * @return {@code ScopedLock} instance if the lock was acquired, or {@code null} if the lock
+         *         was already closed.
+         *
+         * @throws IllegalStateException
+         *          if an attempt is made to acquire an exclusive lock while already holding a lock
+         */
+        AcquireExclusiveLock(
+            [out] ICloseableLockScopedLock** outsl);
+
+        /**
+         * Release a single lock that was acquired.
+         *
+         * <p>Any other other that is blocked and trying to acquire a lock will get a chance
+         * to acquire the lock.</p>
+         *
+         * @throws IllegalStateException if no locks were acquired, or if the lock was already closed
+         */
+        ReleaseLock();
+    }
+
+    } // namespace Utils
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,31 @@
+module
+{
+    namespace Elastos {
+    namespace IO{
+    [deprecated]
+    interface IUnsafeByteSequence
+    {
+
+        Size(
+                [out] Int32* size);
+
+        Rewind();
+
+        Write(
+                [in] ArrayOf<Byte>* buffer,
+                [in] Int32 offset,
+                [in] Int32 length);
+
+        Write(
+                [in] Int32 b);
+
+        ToByteArray(
+                [out, callee] ArrayOf<Byte>* result);
+
+        ToString(
+                [out] String* result);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

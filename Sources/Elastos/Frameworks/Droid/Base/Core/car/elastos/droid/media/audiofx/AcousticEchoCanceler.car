@@ -1,0 +1,39 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Audiofx {
+
+    /**
+     * @Involve
+     * interface IAudioEffect
+     */
+    interface IAcousticEchoCanceler
+    {}
+
+    interface IAcousticEchoCancelerHelper{
+        /**
+         * Checks if the device implements acoustic echo cancellation.
+         * @return true if the device implements acoustic echo cancellation, false otherwise.
+        */
+        IsAvailable(
+            [out] Boolean* result);
+
+        /**
+         * Creates an AcousticEchoCanceler and attaches it to the AudioRecord on the audio
+         * session specified.
+         * @param audioSession system wide unique audio session identifier. The AcousticEchoCanceler
+         * will be applied to the AudioRecord with the same audio session.
+         * @return AcousticEchoCanceler created or null if the device does not implement AEC.
+         */
+        Create(
+            [in] Int32 audioSession,
+            [out] IAcousticEchoCanceler** result);
+    }
+
+    } // namespace audiofx
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

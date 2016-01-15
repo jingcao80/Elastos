@@ -1,0 +1,148 @@
+module
+{
+//    const FAMILY_CONTENT  = 0x60 - E0   // Elastos.Droid.Content exception codes
+//    const FAMILY_APP      = 0x61 - E1   // Elastos.Droid.App exception codes
+//    const FAMILY_VIEW     = 0x62 - E2   // Elastos.Droid.View exception codes
+//    const FAMILY_OS       = 0x66 - E6   // Elastos.Droid.Os exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Content exception codes (Family: 0x60 - E0)
+    const E_NAME_NOT_FOUND_EXCEPTION                    = 0xE0010000;
+    const E_SEND_INTENT_EXCEPTION                       = 0xE0020000;
+    const E_ACTIVITY_NOT_FOUND_EXCEPTION                = 0xE0030000;
+    const E_RECEIVER_CALL_NOT_ALLOWED_EXCEPTION         = 0xE0040000;
+    const E_OPERATION_APPLICATION_EXCEPTION             = 0xE0050000;
+    const E_MALFORMED_MIME_TYPE_EXCEPTION               = 0xE0060000;
+    const E_RESOURCES_NOT_FOUND_EXCEPTION               = 0xE0070000;
+    const E_PACKAGE_PARSER_EXCEPTION                    = 0xE0080000;
+    const E_PACKAGEMANAGER_NAME_NOT_FOUND_EXCEPTION = 0xE0090000;
+
+    //==========================================================================
+    // Elastos App exception codes (Family: 0x61 - E1)
+    const E_SUPER_NOT_CALLED_EXCEPTION                  = 0xE1010000;
+    const E_REMOTE_SERVICE_EXCEPTION                    = 0xE1020000;
+    const E_LAUNCH_EXCEPTION                            = 0xE1030000;
+    const E_CANCELED_EXCEPTION                          = 0xE1040000;
+    const E_INSTANTIATION_EXCEPTION                     = 0xE1050000;
+
+    //==========================================================================
+    // Elastos View exception codes (Family: 0x62 - E2)
+    const E_OUT_OF_RESOURCES_EXCEPTION                  = 0xE2010000;
+    const E_UNAVAILABLE_EXCEPTION                       = 0xE2020000;
+    const E_BAD_SURFACE_TYPE_EXCEPTION                  = 0xE2030000;
+    const E_INFLATE_EXCEPTION                           = 0xE2040000;
+    const E_BAD_TOKEN_EXCEPTION                         = 0xE2050000;
+    const E_INVALID_DISPLAY_EXCEPTION                   = 0xE2060000;
+    const E_CALLED_FROM_WRONG_THREAD_EXCEPTION          = 0xE2070000;
+    const E_PENDING_INTENT_CANCELED_EXCEPTION           = 0xE2080000;
+    const E_WINDOWMANAGER_BAD_TOKEN_EXCEPTION = 0xE2090000;
+
+    //==========================================================================
+    // Elastos Accounts exception codes (Family: 0x63 - E3)
+    const E_ACCOUNTS_EXCEPTION                          = 0xE3010000;
+    const E_NETWORK_ERROR_EXCEPTION                     = 0xE3020000;
+    const E_AUTHENTICATOR_EXCEPTION                     = 0xE3030000;
+
+    //==========================================================================
+    // Elastos Widget exception codes (Family: 0x64 - E4)
+
+    //==========================================================================
+    // Elastos database exception codes (Family: 0x65 - E5)
+    const E_SQLITE_EXCEPTION_DETAIL_MESSAGE             = 0xE5010000;
+    const E_SQLITE_EXCEPTION                            = 0xE5020000;
+    const E_ILLEGAL_SQLITE_EXCEPTION                    = 0xE5030000;
+    const E_SQLITE_DATABASE_CORRUPT_EXCEPTION           = 0xE5040000;
+    const E_SQLITE_BIND_OR_COLUMN_INDEX_OUTOF_RANGE_EXCEPTION = 0xE5050000;
+    const E_CURSOR_WINDOW_ALLOCATION_EXCEPTION          = 0xE5060000;
+    const E_CURSOR_INDEX_OUT_OF_BOUNDS_EXCEPTION        = 0xE5070000;
+    const E_STALE_DATA_EXCEPTION                        = 0xE5080000;
+    const E_SQLITE_ABORT_EXCEPTION                      = 0xE5090000;
+    const E_SQLITE_CONSTRAINT_EXCEPTION                 = 0xE50A0000;
+    const E_SQLITE_FULL_EXCEPTION                       = 0xE50B0000;
+    const E_SQLITE_DISK_IO_EXCEPTION                    = 0xE50C0000;
+    const E_SQLITE3_EXCEPTION                           = 0xE50D0000;
+    const E_UNKNOW_TYPE_EXCEPTION                       = 0xE50E0000;
+    const E_WITH_ROW_COL_EXCEPTION                      = 0xE5100000;
+    const E_SQLITE_DONE_EXCEPTION                       = 0xE5110000;
+    const E_SQLITE_MISUSE_EXCEPTION                     = 0xE5120000;
+    const E_SQLITE_ACCESS_PERM_EXCEPTION                = 0xE5130000;
+    const E_SQLITE_DATABASE_LOCKED_EXCEPTION            = 0xE5140000;
+    const E_SQLITE_TABLE_LOCKED_EXCEPTION               = 0xE5150000;
+    const E_SQLITE_READONLY_DATABASE_EXCEPTION          = 0xE5160000;
+    const E_SQLITE_CANT_OPEN_DATABASE_EXCEPTION         = 0xE5170000;
+    const E_SQLITE_BLOB_TOO_BIG_EXCEPTION               = 0xE5180000;
+    const E_SQLITE_OUTOF_MEMORY_EXCEPTION               = 0xE5190000;
+    const E_SQLITE_DATA_TYPE_MISMATCH_EXCEPTION         = 0xE51A0000;
+
+    //==========================================================================
+    // Elastos Os exception codes (Family: 0x66 - E6)
+    const E_DEAD_OBJECT_EXCEPTION                       = 0xE6010000;
+    const E_ZYGOTE_START_FAILED_EXCEPTION               = 0xE6020000;
+    const E_NETWORK_ON_MAIN_THREAD_FAILED_EXCEPTION     = 0xE6030000;
+    const E_OPERATION_CANCELED_EXCEPTION                = 0xE6040000;
+    const E_PARCEL_FORMAT_EXCEPTION                     = 0xE6050000;
+    const E_REMOTE_MAIL_EXCEPTION                       = 0xE6060000;
+    const E_TRANSACTION_TOO_LARGE_EXCEPTION             = 0xE6070000;
+    const E_BAD_PARCELABLE_EXCEPTION                    = 0xE6080000;
+
+    //==========================================================================
+    // Elastos Droid Utility exception codes (Family: 0x67 - E7)
+    const E_TIME_FORMAT_EXCEPTION                       =  0xE7010000;
+    const E_ANDROID_EXCEPTION                           =  0xE7020000;
+    const E_ANDROID_RUNTIME_EXCEPTION                   =  0xE7030000;
+    const E_BASE64_DATA_EXCEPTION                       =  0xE7040000;
+    const E_MALFORMED_JSON_EXCEPTION                    =  0xE7050000;
+    const E_NO_SUCH_PROPERTY_EXCEPTION                  =  0xE7060000;
+
+    //==========================================================================
+    // Elastos Droid Utility exception codes (Family: 0x68 - E8)
+    const E_CRYPTO_EXCEPTION                            =  0xE8010000;
+
+    //==========================================================================
+    // Elastos Droid Settings exception codes (Family: 0x69 - E9)
+    const E_SETTING_NOT_FOUND_EXCEPTION                 =  0xE9010000;
+
+    //==========================================================================
+    // Elastos Droid Opengl exception codes (Family: 0x6A - EA)
+    const E_GL_EXCEPTION                                =  0xEA010000;
+
+    //==========================================================================
+    // Elastos Droid webkit exception codes (Family: 0x6B - EB)
+    const E_MUST_OVERRIDE_EXCEPTION                     =  0xEB010000;
+
+    //==========================================================================
+    // Elastos Droid sax/media exception codes (Family: 0x6C - EC)
+    const E_BAD_XML_EXCEPTION                           =  0xEC010000;
+    const E_MEDIACODEC_CODEC_EXCEPTION                  =  0xEC020000;
+    const E_MEDIACODEC_CRYPTO_EXCEPTION                 =  0xEC030000;
+    const E_MEDIA_CRYPTO_EXCEPTION                      =  0xEC040000;
+    const E_MEDIA_DRM_EXCEPTION                         =  0xEC050000;
+    const E_MEDIA_DRM_STATE_EXCEPTION                   =  0xEC060000;
+
+    //==========================================================================
+    // Elastos Droid internal exception codes (Family: 0x6D - ED)
+    const E_ZYGOTE_SECURITY_EXCEPTION                   =  0xED010000;
+    const E_ACCESS_EXCEPTION                            =  0xED020000;
+    const E_PARSE_EXCEPTION                             =  0xED030000;
+    const E_TYPE_EXCEPTION                              =  0xED040000;
+    const E_QUERY_POOL_EXCEPTION                        =  0xED050000;
+    const E_ENCODE_EXCEPTION                            =  0xED060000;
+
+    //==========================================================================
+    // Elastos Droid hardware exception codes (Family: 0x6E - EE)
+    const E_INVALID_PARAMETER_EXCEPTION                 =  0xEE010000;
+    const E_CAMERA_RUNTIME_EXCEPTION                    =  0xEE020000;
+    const E_BUFFER_QUEUE_ABANDONED_EXCEPTION            =  0xEE030000;
+    const E_CAMERA_ACCESS_EXCEPTION                     =  0xEE040000;
+
+    //==========================================================================
+    // Elastos Droid net exception codes (Family: 0x6F - EF)
+    const E_SSL_CONNECTION_CLOSED_BY_USER_EXCEPTION     = 0xEF010000;
+
+    //==========================================================================
+    // Elastos Droid preference exception codes (Family: 0x7A - EA)
+    const E_ABSTRACT_METHOD_ERROR = 0x7A010000;
+}

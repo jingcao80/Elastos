@@ -1,0 +1,91 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+
+    /**
+     *  Listener for speech recognition events, used with RecognitionService.
+     *  This gives you both the final recognition results, as well as various
+     *  intermediate events that can be used to show visual feedback to the user.
+     *  {@hide}
+     */
+    [deprecated, oneway]
+    interface IIRecognitionListener {
+        /**
+         * Called when the endpointer is ready for the user to start speaking.
+         *
+         * @param params parameters set by the recognition service. Reserved for future use.
+         */
+        OnReadyForSpeech(
+            [in] IBundle* params);
+
+        /**
+         * The user has started to speak.
+         */
+        OnBeginningOfSpeech();
+
+        /**
+         * The sound level in the audio stream has changed.
+         *
+         * @param rmsdB the new RMS dB value
+         */
+        OnRmsChanged(
+            [in] Float rmsdB);
+
+        /**
+         * More sound has been received.
+         *
+         * @param buffer the byte buffer containing a sequence of 16-bit shorts.
+         */
+        OnBufferReceived(
+            [in] ArrayOf<Byte>* buffer);
+
+        /**
+         * Called after the user stops speaking.
+         */
+        OnEndOfSpeech();
+
+        /**
+         * A network or recognition error occurred.
+         *
+         * @param error code is defined in {@link SpeechRecognizer}
+         */
+        OnError(
+            [in] Int32 error);
+
+        /**
+         * Called when recognition results are ready.
+         *
+         * @param results a Bundle containing the most likely results (N-best list).
+         */
+        OnResults(
+            [in] IBundle* results);
+
+         /**
+         * Called when recognition partial results are ready.
+         *
+         * @param results a Bundle containing the current most likely result.
+         */
+        OnPartialResults(
+            [in] IBundle* results);
+
+        /**
+         * Reserved for adding future events.
+         *
+         * @param eventType the type of the occurred event
+         * @param params a Bundle containing the passed parameters
+         */
+        OnEvent(
+            [in] Int32 eventType,
+            [in] IBundle* params);
+
+    }
+
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

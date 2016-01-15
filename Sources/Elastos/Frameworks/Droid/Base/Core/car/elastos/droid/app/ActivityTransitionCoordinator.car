@@ -1,0 +1,177 @@
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.View.IViewParent;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface ISharedElementOriginalState {
+    }
+
+    /**
+     * Base class for ExitTransitionCoordinator and EnterTransitionCoordinator, classes
+     * that manage activity transitions and the communications coordinating them between
+     * Activities. The ExitTransitionCoordinator is created in the
+     * ActivityOptions#makeSceneTransitionAnimation. The EnterTransitionCoordinator
+     * is created by ActivityOptions#createEnterActivityTransition by Activity when the window is
+     * attached.
+     *
+     * Typical startActivity goes like this:
+     * 1) ExitTransitionCoordinator created with ActivityOptions#makeSceneTransitionAnimation
+     * 2) Activity#startActivity called and that calls startExit() through
+     *    ActivityOptions#dispatchStartExit
+     *    - Exit transition starts by setting transitioning Views to INVISIBLE
+     * 3) Launched Activity starts, creating an EnterTransitionCoordinator.
+     *    - The Window is made translucent
+     *    - The Window background alpha is set to 0
+     *    - The transitioning views are made INVISIBLE
+     *    - MSG_SET_LISTENER is sent back to the ExitTransitionCoordinator.
+     * 4) The shared element transition completes.
+     *    - MSG_TAKE_SHARED_ELEMENTS is sent to the EnterTransitionCoordinator
+     * 5) The MSG_TAKE_SHARED_ELEMENTS is received by the EnterTransitionCoordinator.
+     *    - Shared elements are made VISIBLE
+     *    - Shared elements positions and size are set to match the end state of the calling
+     *      Activity.
+     *    - The shared element transition is started
+     *    - If the window allows overlapping transitions, the views transition is started by setting
+     *      the entering Views to VISIBLE and the background alpha is animated to opaque.
+     *    - MSG_HIDE_SHARED_ELEMENTS is sent to the ExitTransitionCoordinator
+     * 6) MSG_HIDE_SHARED_ELEMENTS is received by the ExitTransitionCoordinator
+     *    - The shared elements are made INVISIBLE
+     * 7) The exit transition completes in the calling Activity.
+     *    - MSG_EXIT_TRANSITION_COMPLETE is sent to the EnterTransitionCoordinator.
+     * 8) The MSG_EXIT_TRANSITION_COMPLETE is received by the EnterTransitionCoordinator.
+     *    - If the window doesn't allow overlapping enter transitions, the enter transition is started
+     *      by setting entering views to VISIBLE and the background is animated to opaque.
+     * 9) The background opacity animation completes.
+     *    - The window is made opaque
+     * 10) The calling Activity gets an onStop() call
+     *    - onActivityStopped() is called and all exited Views are made VISIBLE.
+     *
+     * Typical finishAfterTransition goes like this:
+     * 1) finishAfterTransition() creates an ExitTransitionCoordinator and calls startExit()
+     *    - The Window start transitioning to Translucent with a new ActivityOptions.
+     *    - If no background exists, a black background is substituted
+     *    - The shared elements in the scene are matched against those shared elements
+     *      that were sent by comparing the names.
+     *    - The exit transition is started by setting Views to INVISIBLE.
+     * 2) The ActivityOptions is received by the Activity and an EnterTransitionCoordinator is created.
+     *    - All transitioning views are made VISIBLE to reverse what was done when onActivityStopped()
+     *      was called
+     * 3) The Window is made translucent and a callback is received
+     *    - The background alpha is animated to 0
+     * 4) The background alpha animation completes
+     * 5) The shared element transition completes
+     *    - After both 4 & 5 complete, MSG_TAKE_SHARED_ELEMENTS is sent to the
+     *      EnterTransitionCoordinator
+     * 6) MSG_TAKE_SHARED_ELEMENTS is received by EnterTransitionCoordinator
+     *    - Shared elements are made VISIBLE
+     *    - Shared elements positions and size are set to match the end state of the calling
+     *      Activity.
+     *    - The shared element transition is started
+     *    - If the window allows overlapping transitions, the views transition is started by setting
+     *      the entering Views to VISIBLE.
+     *    - MSG_HIDE_SHARED_ELEMENTS is sent to the ExitTransitionCoordinator
+     * 7) MSG_HIDE_SHARED_ELEMENTS is received by the ExitTransitionCoordinator
+     *    - The shared elements are made INVISIBLE
+     * 8) The exit transition completes in the finishing Activity.
+     *    - MSG_EXIT_TRANSITION_COMPLETE is sent to the EnterTransitionCoordinator.
+     *    - finish() is called on the exiting Activity
+     * 9) The MSG_EXIT_TRANSITION_COMPLETE is received by the EnterTransitionCoordinator.
+     *    - If the window doesn't allow overlapping enter transitions, the enter transition is started
+     *      by setting entering views to VISIBLE.
+     */
+    [local]
+    interface IActivityTransitionCoordinator {
+        /**
+         * Sent by the exiting coordinator (either EnterTransitionCoordinator
+         * or ExitTransitionCoordinator) after the shared elements have
+         * become stationary (shared element transition completes). This tells
+         * the remote coordinator to take control of the shared elements and
+         * that animations may begin. The remote Activity won't start entering
+         * until this message is received, but may wait for
+         * MSG_EXIT_TRANSITION_COMPLETE if allowOverlappingTransitions() is true.
+         */
+        const Int32 MSG_SET_REMOTE_RECEIVER = 100;
+
+        /**
+         * Sent by the entering coordinator to tell the exiting coordinator
+         * to hide its shared elements after it has started its shared
+         * element transition. This is temporary until the
+         * interlock of shared elements is figured out.
+         */
+        const Int32 MSG_HIDE_SHARED_ELEMENTS = 101;
+
+        /**
+         * Sent by the exiting coordinator (either EnterTransitionCoordinator
+         * or ExitTransitionCoordinator) after the shared elements have
+         * become stationary (shared element transition completes). This tells
+         * the remote coordinator to take control of the shared elements and
+         * that animations may begin. The remote Activity won't start entering
+         * until this message is received, but may wait for
+         * MSG_EXIT_TRANSITION_COMPLETE if allowOverlappingTransitions() is true.
+         */
+        const Int32 MSG_TAKE_SHARED_ELEMENTS = 103;
+
+        /**
+         * Sent by the exiting coordinator (either
+         * EnterTransitionCoordinator or ExitTransitionCoordinator) after
+         * the exiting Views have finished leaving the scene. This will
+         * be ignored if allowOverlappingTransitions() is true on the
+         * remote coordinator. If it is false, it will trigger the enter
+         * transition to start.
+         */
+        const Int32 MSG_EXIT_TRANSITION_COMPLETE = 104;
+
+        /**
+         * Sent by Activity#startActivity to begin the exit transition.
+         */
+        const Int32 MSG_START_EXIT_TRANSITION = 105;
+
+        /**
+         * It took too long for a message from the entering Activity, so we canceled the transition.
+         */
+        const Int32 MSG_CANCEL = 106;
+
+        /**
+         * When returning, this is the destination location for the shared element.
+         */
+        const Int32 MSG_SHARED_ELEMENT_DESTINATION = 107;
+
+        /**
+         * Send the shared element positions.
+         */
+        const Int32 MSG_SEND_SHARED_ELEMENT_DESTINATION = 108;
+
+        GetDecor(
+            [out] IViewGroup** group);
+
+        GetAcceptedNames(
+            [out] IArrayList** list);
+
+        GetMappedNames(
+            [out] IArrayList** list);
+
+        CopyMappedViews(
+            [out] IArrayList** list);
+
+        GetAllSharedElementNames(
+            [out] IArrayList** list);
+    }
+
+    [local]
+    interface IActivityTransitionCoordinatorHelper {
+        IsInTransitionGroup(
+            [in] IViewParent* viewParent,
+            [in] IViewGroup* decor,
+            [out] Boolean* result);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

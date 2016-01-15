@@ -1,0 +1,47 @@
+
+TARGET_NAME= protocol
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc;
+
+SOURCES = CHttpRequestExecutor.cpp
+SOURCES += CBasicHttpProcessor.cpp
+SOURCES += HttpService.cpp
+SOURCES += CHttpService.cpp
+SOURCES += UriPatternMatcher.cpp
+SOURCES += CUriPatternMatcher.cpp
+SOURCES += ResponseConnControl.cpp
+SOURCES += CResponseConnControl.cpp
+SOURCES += RequestContent.cpp
+SOURCES += CRequestContent.cpp
+SOURCES += ResponseContent.cpp
+SOURCES += CResponseContent.cpp
+SOURCES += HTTP.cpp
+SOURCES += RequestTargetHost.cpp
+SOURCES += CRequestTargetHost.cpp
+SOURCES += RequestExpectContinue.cpp
+SOURCES += CRequestExpectContinue.cpp
+SOURCES += BasicHttpContext.cpp
+SOURCES += CBasicHttpContext.cpp
+SOURCES += HttpRequestHandlerRegistry.cpp
+SOURCES += CHttpRequestHandlerRegistry.cpp
+SOURCES += CDefaultedHttpContext.cpp
+SOURCES += HttpDateGenerator.cpp
+SOURCES += CHttpDateGenerator.cpp
+SOURCES += CHttpDateGeneratorHelper.cpp
+SOURCES += ResponseDate.cpp
+SOURCES += CResponseDate.cpp
+SOURCES += RequestDate.cpp
+SOURCES += CRequestDate.cpp
+SOURCES += ResponseServer.cpp
+SOURCES += CResponseServer.cpp
+SOURCES += RequestUserAgent.cpp
+SOURCES += CRequestUserAgent.cpp
+SOURCES += RequestConnControl.cpp
+SOURCES += CRequestConnControl.cpp

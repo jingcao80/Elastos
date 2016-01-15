@@ -1,0 +1,128 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Content.Res.IResourcesTheme;
+    interface Elastos.Droid.View.Animation.IAnimation;
+    interface Elastos.Droid.View.Animation.IInterpolator;
+    interface Elastos.Droid.View.Animation.ILayoutAnimationController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Animation {
+
+    [local]
+    interface IAnimationUtils {
+        /**
+         * Returns the current animation time in milliseconds. This time should be used when invoking
+         * {@link Animation#setStartTime(long)}. Refer to {@link android.os.SystemClock} for more
+         * information about the different available clocks. The clock used by this method is
+         * <em>not</em> the "wall" clock (it is not {@link System#currentTimeMillis}).
+         *
+         * @return the current animation time in milliseconds
+         *
+         * @see android.os.SystemClock
+         */
+        CurrentAnimationTimeMillis(
+            [out] Int64* time);
+
+        /**
+         * Loads an {@link Animation} object from a resource
+         *
+         * @param context Application context used to access resources
+         * @param id The resource id of the animation to load
+         * @return The animation object reference by the specified id
+         * @throws NotFoundException when the animation cannot be loaded
+         */
+        LoadAnimation(
+            [in] IContext* ctx,
+            [in] Int32 id,
+            [out] IAnimation** animation);
+
+        /**
+         * Loads a {@link LayoutAnimationController} object from a resource
+         *
+         * @param context Application context used to access resources
+         * @param id The resource id of the animation to load
+         * @return The animation object reference by the specified id
+         * @throws NotFoundException when the layout animation controller cannot be loaded
+         */
+        LoadLayoutAnimation(
+            [in] IContext* ctx,
+            [in] Int32 id,
+            [out] ILayoutAnimationController** controller);
+
+        /**
+         * Make an animation for objects becoming visible. Uses a slide and fade
+         * effect.
+         *
+         * @param c Context for loading resources
+         * @param fromLeft is the object to be animated coming from the left
+         * @return The new animation
+         */
+        MakeInAnimation(
+            [in] IContext* ctx,
+            [in] Boolean fromLeft,
+            [out] IAnimation** animation);
+
+        /**
+         * Make an animation for objects becoming invisible. Uses a slide and fade
+         * effect.
+         *
+         * @param c Context for loading resources
+         * @param toRight is the object to be animated exiting to the right
+         * @return The new animation
+         */
+        MakeOutAnimation(
+            [in] IContext* ctx,
+            [in] Boolean toRight,
+            [out] IAnimation** animation);
+
+        /**
+         * Make an animation for objects becoming visible. Uses a slide up and fade
+         * effect.
+         *
+         * @param c Context for loading resources
+         * @return The new animation
+         */
+        MakeInChildBottomAnimation(
+            [in] IContext* ctx,
+            [out] IAnimation** animation);
+
+        /**
+         * Loads an {@link Interpolator} object from a resource
+         *
+         * @param context Application context used to access resources
+         * @param id The resource id of the animation to load
+         * @return The animation object reference by the specified id
+         * @throws NotFoundException
+         */
+        LoadInterpolator(
+            [in] IContext* ctx,
+            [in] Int32 id,
+            [out] IInterpolator** interpolator);
+
+        /**
+         * Loads an {@link Interpolator} object from a resource
+         *
+         * @param res The resources
+         * @param id The resource id of the animation to load
+         * @return The interpolator object reference by the specified id
+         * @throws NotFoundException
+         * @hide
+         */
+        LoadInterpolator(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [in] Int32 id,
+            [out] IInterpolator** interpolator);
+    }
+
+    }   //namespace Animation
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}
+

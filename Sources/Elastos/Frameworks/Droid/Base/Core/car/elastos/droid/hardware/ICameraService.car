@@ -1,0 +1,105 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.IIProCameraCallbacks;
+    interface Elastos.Droid.Hardware.Camera2.IICameraDeviceCallbacks;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNative;
+    interface Elastos.Droid.Hardware.Camera2.Utils.IBinderHolder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /** @hide */
+    [deprecated]
+    interface IICameraService {
+        /**
+         * Keep up-to-date with frameworks/av/include/camera/ICameraService.h
+         */
+        GetNumberOfCameras(
+            [out] Int32* num);
+
+        // rest of 'int' return values in this file are actually status_t
+
+        GetCameraInfo(
+            [in] Int32 cameraId,
+            [in] ICameraInfo* info,
+            [out] Int32* result);
+
+        Connect(
+            [in] IICameraClient* client,
+            [in] Int32 cameraId,
+            [in] String clientPackageName,
+            [in] Int32 clientUid,
+            // Container for an ICamera object
+            [in] IBinderHolder* device,
+            [out] Int32* result);
+
+        ConnectPro(
+            [in] IIProCameraCallbacks* _callbacks,
+            [in] Int32 cameraId,
+            [in] String clientPackageName,
+            [in] Int32 clientUid,
+            // Container for an IProCameraUser object
+            [in] IBinderHolder* device,
+            [out] Int32* result);
+
+        ConnectDevice(
+            [in] IICameraDeviceCallbacks* _callbacks,
+            [in] Int32 cameraId,
+            [in] String clientPackageName,
+            [in] Int32 clientUid,
+            // Container for an ICameraDeviceUser object
+            [in] IBinderHolder* device,
+            [out] Int32* result);
+
+        AddListener(
+            [in] IICameraServiceListener* listener,
+            [out] Int32* result);
+
+        RemoveListener(
+            [in] IICameraServiceListener* listener,
+            [out] Int32* result);
+
+        GetCameraCharacteristics(
+            [in] Int32 cameraId,
+            [in] ICameraMetadataNative* info,
+            [out] Int32* result);
+
+        /**
+         * The java stubs for this method are not intended to be used.  Please use
+         * the native stub in frameworks/av/include/camera/ICameraService.h instead.
+         * The BinderHolder output is being used as a placeholder, and will not be
+         * well-formatted in the generated java method.
+         */
+        GetCameraVendorTagDescriptor(
+            [in] IBinderHolder* desc,
+            [out] Int32* result);
+
+        // Writes the camera1 parameters into a single-element array.
+        GetLegacyParameters(
+            [in] Int32 cameraId,
+            [in] ArrayOf<String>* parameters,
+            [out] Int32* result);
+
+        // Determines if a particular API version is supported; see ICameraService.h for version defines
+        SupportsCameraApi(
+            [in] Int32 cameraId,
+            [in] Int32 apiVersion,
+            [out] Int32* result);
+
+        ConnectLegacy(
+            [in] IICameraClient* client,
+            [in] Int32 cameraId,
+            [in] Int32 halVersion,
+            [in] String clientPackageName,
+            [in] Int32 clientUid,
+            // Container for an ICamera object
+            [in] IBinderHolder* device,
+            [out] Int32* result);
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

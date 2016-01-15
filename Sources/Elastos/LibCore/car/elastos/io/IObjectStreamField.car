@@ -1,0 +1,98 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    interface IObjectStreamField {
+        /**
+         * Compares this field descriptor to the specified one. Checks first if one
+         * of the compared fields has a primitive type and the other one not. If so,
+         * the field with the primitive type is considered to be "smaller". If both
+         * fields are equal, their names are compared.
+         *
+         * @param o
+         *            the object to compare with.
+         * @return -1 if this field is "smaller" than field o, 0 if both
+         *         fields are equal; 1 if this field is "greater" than field o.
+         */
+        CompareTo(
+            [in] IObjectStreamField* o,
+            [out] Int32* result);
+
+        /**
+         * Gets the name of this field.
+         *
+         * @return the field's name.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Gets the offset of this field in the object.
+         *
+         * @return this field's offset.
+         */
+        GetOffset(
+            [out] Int32* offset);
+
+        /**
+         * Gets the type of this field.
+         *
+         * @return a Class object representing the type of the field.
+         */
+        GetType(
+            [out] InterfaceID* type);
+
+        /**
+         * Gets a character code for the type of this field. The following codes are
+         * used:
+         *
+         * <pre>
+         * B     byte
+         * C     char
+         * D     double
+         * F     float
+         * I     int
+         * J     long
+         * L     class or interface
+         * S     short
+         * Z     boolean
+         * [     array
+         * </pre>
+         *
+         * @return the field's type code.
+         */
+        GetTypeCode(
+            [out] Char32* code);
+
+        /**
+         * Gets the type signature used by the VM to represent the type of this
+         * field.
+         *
+         * @return the signature of this field's class or null if this
+         *         field's type is primitive.
+         */
+        GetTypeString(
+            [out] String* type);
+
+        /**
+         * Indicates whether this field's type is a primitive type.
+         *
+         * @return true if this field's type is primitive; false if
+         *         the type of this field is a regular class.
+         */
+        IsPrimitive(
+            [out] Boolean* isPrimitive);
+
+        /**
+         * Indicates whether this field is unshared.
+         *
+         * @return true if this field is unshared, false otherwise.
+         */
+        IsUnshared(
+            [out] Boolean* isUnshared);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

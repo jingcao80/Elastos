@@ -1,0 +1,24 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Auth {
+    namespace Params {
+
+    interface IAuthParamBean {
+
+        SetCredentialCharset (
+            [in] String charset);
+
+    }
+
+    } // namespace Params
+    } // namespace Auth
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

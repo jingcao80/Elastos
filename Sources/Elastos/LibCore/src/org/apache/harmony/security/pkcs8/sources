@@ -1,0 +1,9 @@
+
+TARGET_NAME= pkcs8
+TARGET_TYPE= lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Security/Pkcs8
+
+SOURCES = CPrivateKeyInfo.cpp
+SOURCES += CPrivateKeyInfoHelper.cpp

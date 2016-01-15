@@ -1,0 +1,36 @@
+
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.Security.Cert.ICertificate;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Utils {
+
+    interface IJarUtils {
+        /**
+         * This method handle all the work with  PKCS7, ASN1 encoding, signature verifying,
+         * and certification path building.
+         * See also PKCS #7: Cryptographic Message Syntax Standard:
+         * http://www.ietf.org/rfc/rfc2315.txt
+         * @param signature - the input stream of signature file to be verified
+         * @param signatureBlock - the input stream of corresponding signature block file
+         * @return array of certificates used to verify the signature file
+         * @throws IOException - if some errors occurs during reading from the stream
+         * @throws GeneralSecurityException - if signature verification process fails
+         */
+        VerifySignature(
+            [in] IInputStream* signature,
+            [in] IInputStream* signatureBlock,
+            [out, callee] ArrayOf<ICertificate*>* sign);
+    }
+
+    } // namespace Utils
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

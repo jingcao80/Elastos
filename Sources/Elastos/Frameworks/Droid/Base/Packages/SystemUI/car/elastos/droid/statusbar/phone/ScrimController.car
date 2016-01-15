@@ -1,0 +1,63 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.Packages.SystemUI.Doze.IDozeHostPulseCallback;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IBackDropView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * Controls both the scrim behind the notifications and in front of the notifications (when a
+     * security method gets shown).
+     */
+    interface IScrimController {
+        SetKeyguardShowing(
+            [in] Boolean showing);
+
+        OnTrackingStarted();
+
+        OnExpandingFinished();
+
+        SetPanelExpansion(
+            [in] Float fraction);
+
+        SetBouncerShowing(
+            [in] Boolean showing);
+
+        AnimateKeyguardFadingOut(
+            [in] Int64 delay,
+            [in] Int64 duration,
+            [in] IRunnable* onAnimationFinished);
+
+        AnimateGoingToFullShade(
+            [in] Int64 delay,
+            [in] Int64 duration);
+
+        SetDozing(
+            [in] Boolean dozing);
+
+        /** When dozing, fade screen contents in and out using the front scrim. */
+        Pulse(
+            [in] IDozeHostPulseCallback* _callback);
+
+        IsPulsing(
+            [out] Boolean* ret);
+
+        SetBackDropView(
+            [in] IBackDropView* backDropView);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

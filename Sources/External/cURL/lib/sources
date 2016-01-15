@@ -1,0 +1,121 @@
+TARGET_NAME=Elastos.Networking.cURL
+TARGET_TYPE=eco
+
+DISABLE_OPENSSL=1
+
+ifeq "$(XDK_TARGET_PLATFORM)" "win32"
+  C_DEFINES+=-UWIN32
+  C_DEFINES+=-U_WIN32
+endif
+
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
+C_DEFINES+= -DANDROID
+endif
+
+SOURCES+=curl.def
+SOURCES+=file.c
+SOURCES+=timeval.c
+SOURCES+=base64.c
+SOURCES+=hostip.c
+SOURCES+=progress.c
+SOURCES+=formdata.c
+SOURCES+=cookie.c
+SOURCES+=http.c
+SOURCES+=sendf.c
+SOURCES+=ftp.c
+SOURCES+=url.c
+SOURCES+=dict.c
+SOURCES+=if2ip.c
+SOURCES+=speedcheck.c
+SOURCES+=ldap.c
+SOURCES+=ssluse.c
+SOURCES+=version.c
+SOURCES+=getenv.c
+SOURCES+=escape.c
+SOURCES+=mprintf.c
+SOURCES+=telnet.c
+SOURCES+=netrc.c
+SOURCES+=getinfo.c
+SOURCES+=transfer.c
+SOURCES+=strequal.c
+SOURCES+=easy.c
+SOURCES+=security.c
+SOURCES+=krb4.c
+SOURCES+=curl_fnmatch.c
+SOURCES+=fileinfo.c
+SOURCES+=ftplistparser.c
+SOURCES+=wildcard.c
+SOURCES+=krb5.c
+SOURCES+=memdebug.c
+SOURCES+=http_chunks.c
+SOURCES+=strtok.c
+SOURCES+=connect.c
+SOURCES+=llist.c
+SOURCES+=hash.c
+SOURCES+=multi.c
+SOURCES+=content_encoding.c
+SOURCES+=share.c
+SOURCES+=http_digest.c
+SOURCES+=md4.c
+SOURCES+=md5.c
+SOURCES+=curl_rand.c
+SOURCES+=http_negotiate.c
+SOURCES+=http_ntlm.c
+SOURCES+=inet_pton.c
+SOURCES+=strtoofft.c
+SOURCES+=strerror.c
+SOURCES+=hostares.c
+SOURCES+=hostasyn.c
+SOURCES+=hostip4.c
+SOURCES+=hostip6.c
+SOURCES+=hostsyn.c
+SOURCES+=hostthre.c
+SOURCES+=inet_ntop.c
+SOURCES+=parsedate.c
+SOURCES+=select.c
+SOURCES+=gtls.c
+SOURCES+=sslgen.c
+SOURCES+=tftp.c
+SOURCES+=splay.c
+SOURCES+=strdup.c
+SOURCES+=socks.c
+SOURCES+=ssh.c
+SOURCES+=nss.c
+SOURCES+=qssl.c
+SOURCES+=rawstr.c
+SOURCES+=curl_addrinfo.c
+SOURCES+=socks_gssapi.c
+SOURCES+=socks_sspi.c
+SOURCES+=curl_sspi.c
+SOURCES+=slist.c
+SOURCES+=nonblock.c
+SOURCES+=curl_memrchr.c
+SOURCES+=imap.c
+SOURCES+=pop3.c
+SOURCES+=smtp.c
+SOURCES+=pingpong.c
+SOURCES+=rtsp.c
+SOURCES+=curl_threads.c
+SOURCES+=warnless.c
+SOURCES+=hmac.c
+SOURCES+=polarssl.c
+SOURCES+=curl_rtmp.c
+SOURCES+=openldap.c
+SOURCES+=curl_gethostname.c
+SOURCES+=gopher.c
+
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
+LIBRARIES += -lm -ldl -llog -lz -ldbus
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+else
+LIBRARIES+=$(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES+=$(XDK_USER_LIB)/Elastos.Archiving.zlib.lib
+endif
+
+ifeq "$(DISABLE_OPENSSL)" ""
+  C_DEFINES+=-DUSE_SSLEAY=1
+
+  LIBRARIES+=$(XDK_USER_LIB)/Elastos.Security.OpenSSL.crypto.lib
+  LIBRARIES+=$(XDK_USER_LIB)/Elastos.Security.OpenSSL.ssl.lib
+endif
+

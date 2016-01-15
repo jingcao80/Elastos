@@ -1,0 +1,91 @@
+
+TARGET_NAME= Elastos.Droid.Core
+TARGET_TYPE= eco
+
+EXPORT_ALL_SYMBOLS=1
+
+C_DEFINES += -DDROID_CORE
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+IMPORTS = Elastos.CoreLibrary.eco
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(MAKEDIR)/../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../../../LibCore/inc/
+
+SOURCES = Elastos.Droid.Core.car
+SOURCES += R.cpp
+SOURCES += Manifest.cpp
+SOURCES += frameworkext.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+ELASTOS_LIBS += accessibilityservice/accessibilityservice.lib
+ELASTOS_LIBS += animation/animation.lib
+ELASTOS_LIBS += app/app.lib
+ELASTOS_LIBS += appwidget/appwidget.lib
+ELASTOS_LIBS += content/content.lib
+ELASTOS_LIBS += database/database.lib
+ELASTOS_LIBS += emoji/emoji.lib
+ELASTOS_LIBS += gesture/gesture.lib
+ELASTOS_LIBS += graphics/graphics.lib
+ELASTOS_LIBS += hardware/hardware.lib
+ELASTOS_LIBS += inputmethodservice/inputmethodservice.lib
+ELASTOS_LIBS += internal/internal.lib
+ELASTOS_LIBS += location/location.lib
+ELASTOS_LIBS += media/media.lib
+ELASTOS_LIBS += mtp/mtp.lib
+ELASTOS_LIBS += net/net.lib
+ELASTOS_LIBS += os/os.lib
+ELASTOS_LIBS += preference/preference.lib
+ELASTOS_LIBS += provider/provider.lib
+ELASTOS_LIBS += sax/sax.lib
+ELASTOS_LIBS += server/server.lib
+ELASTOS_LIBS += server/backup/backup.lib
+ELASTOS_LIBS += server/net/net.lib
+ELASTOS_LIBS += service/dreams/dreams.lib
+ELASTOS_LIBS += service/fingerprint/fingerprint.lib
+ELASTOS_LIBS += service/persistentdata/persistentdata.lib
+ELASTOS_LIBS += service/restrictions/restrictions.lib
+ELASTOS_LIBS += service/textservice/textservice.lib
+ELASTOS_LIBS += service/trust/trust.lib
+ELASTOS_LIBS += service/wallpaper/wallpaper.lib
+ELASTOS_LIBS += service/voice/voice.lib
+ELASTOS_LIBS += service/notification/notification.lib
+ELASTOS_LIBS += service/media/media.lib
+ELASTOS_LIBS += speech/speech.lib
+ELASTOS_LIBS += text/text.lib
+ELASTOS_LIBS += transition/transition.lib
+ELASTOS_LIBS += utility/utility.lib
+ELASTOS_LIBS += view/view.lib
+ELASTOS_LIBS += webkit/webkit.lib
+ELASTOS_LIBS += widget/widget.lib
+ELASTOS_LIBS += wifi/wifi.lib
+
+// ELASTOS_LIBS += wifidisplay/wifidisplay.lib
+// ELASTOS_LIBS += statusbar/statusbar.lib
+// ELASTOS_LIBS += bluetooth/bluetooth.lib
+// ELASTOS_LIBS += opengl/opengl.lib
+// ELASTOS_LIBS += privacy/privacy.lib
+// ELASTOS_LIBS += accounts/accounts.lib
+// ELASTOS_LIBS += inputmethods/pinyinIME/pinyin.lib
+// ELASTOS_LIBS += swextend/gpio/gpio.lib
+// ELASTOS_LIBS += telephony/telephony.lib
+
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+#ELASTOS_LIBS += $(XDK_USER_LIB)/DroidRuntime.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(PREBUILD_LIB)/libm.a
+LIBRARIES += $(PREBUILD_LIB)/libxml2.a
+LIBRARIES += $(PREBUILD_LIB)/libstdc++.a
+#LIBRARIES += $(PREBUILD_LIB)/cxx-stl/gnu-libstdc++/armeabi/libstdc++.a
+#LIBRARIES += $(PREBUILD_LIB)/libc++.a
+LIBRARIES += $(PREBUILD_LIB)/libstagefright_amrnbenc.a
+
+LIBRARIES += -licuuc -licui18n -lbinder -lutils -lcutils -lsqlite -lskia -lui -linput -landroidfw -lselinux -lz -lusbhost -lnativebridge -lprocessgroup -lmtp -lexif -ljhead -lmedia -lcamera_client -lminikin -lhwui -lgui -lsoundtrigger -lhardware_legacy -lelwebviewchromium -lhardware -lpdfium -ljpeg -lstlport -ldl -lcamera_metadata -lGLESv2 -lnetd_client  -lnetutils -limg_utils
+
+//LIBRARIES += -licuuc -licui18n -lbinder -lutils -lcutils -lsqlite -lskia -lgui -lui -lhwui -landroidfw -lharfbuzz -ljpeg -lz -lmedia -lhardware_legacy -lstagefright -lstagefright_foundation -lstagefright_amrnb_common -lsqlite -lcamera_client -lusbhost -lselinux -lgpioservice -lelwebcore -lelchromium_net -lcrypto -lstlport -lEGL -lGLESv1_CM -lETC1 -lGLESv2 -ldrm1 -lmtp -lexif -lminikin -lc++ -lharfbuzz_ng

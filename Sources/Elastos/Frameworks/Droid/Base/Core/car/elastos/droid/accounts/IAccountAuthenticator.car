@@ -1,0 +1,102 @@
+
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Accounts {
+
+    /**
+     * Service that allows the interaction with an authentication server.
+     * @hide
+     */
+    interface IAccountAuthenticator {
+        /**
+         * prompts the user for account information and adds the result to the IAccountManager
+         */
+        AddAccount(
+            [in] IIAccountAuthenticatorResponse* response,
+            [in] String accountType,
+            [in] String authTokenType,
+            [in] ArrayOf<String> requiredFeatures,
+            [in] IBundle* options);
+
+        /**
+         * prompts the user for the credentials of the account
+         */
+        ConfirmCredentials(
+            [in] IIAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] IBundle* options);
+
+        /**
+         * gets the password by either prompting the user or querying the IAccountManager
+         */
+        GetAuthToken(
+            [in] IIAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] IBundle* options);
+
+        /**
+         * Gets the user-visible label of the given authtoken type.
+         */
+        GetAuthTokenLabel(
+            [in] IIAccountAuthenticatorResponse* response,
+            [in] String authTokenType);
+
+        /**
+         * prompts the user for a new password and writes it to the IAccountManager
+         */
+        UpdateCredentials(
+            [in] IIAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] IBundle* options);
+
+        /**
+         * launches an activity that lets the user edit and set the properties for an authenticator
+         */
+        EditProperties(
+            [in] IIAccountAuthenticatorResponse* response,
+            [in] String accountType);
+
+        /**
+         * returns a Bundle where the boolean value BOOLEAN_RESULT_KEY is set if the account has the
+         * specified features
+         */
+        HasFeatures(
+            [in] IIAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] ArrayOf<String> features);
+
+        /**
+         * Gets whether or not the account is allowed to be removed.
+         */
+        GetAccountRemovalAllowed(
+            [in] IIAccountAuthenticatorResponse* response,
+            [in] IAccount* account);
+
+        /**
+         * Returns a Bundle containing the required credentials to copy the account across users.
+         */
+        GetAccountCredentialsForCloning(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account);
+
+        /**
+         * Uses the Bundle containing credentials from another instance of the authenticator to create
+         * a copy of the account on this user.
+         */
+        AddAccountFromCredentials(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] IBundle* accountCredentials);
+    }
+
+    } // Accounts
+    } // Droid
+    } // Elastos
+}

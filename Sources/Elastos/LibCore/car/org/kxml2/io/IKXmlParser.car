@@ -1,0 +1,34 @@
+
+module
+{
+    namespace Org {
+    namespace Kxml2 {
+    namespace IO {
+
+    /**
+      * @Involve
+      * interface Org.Xmlpull.V1.IXmlPullParser;
+      */
+    interface IKXmlParser{
+        /**
+         * Retains namespace attributes like {@code xmlns="http://foo"} or {@code xmlns:foo="http:foo"}
+         * in pulled elements. Most applications will only be interested in the effective namespaces of
+         * their elements, so these attributes aren't useful. But for structure preserving wrappers like
+         * DOM, it is necessary to keep the namespace data around.
+         */
+        KeepNamespaceAttributes();
+
+        GetRootElementName(
+            [out] String* name);
+
+        GetSystemId(
+            [out] String* id);
+
+        GetPublicId(
+            [out] String* id);
+    }
+
+    } //namespace IO
+    } //namespace Kxml2
+    } //namespace Org
+}

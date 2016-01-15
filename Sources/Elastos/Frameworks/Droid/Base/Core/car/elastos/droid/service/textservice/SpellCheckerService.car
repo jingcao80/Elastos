@@ -1,0 +1,181 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.TextService.ITextInfo;
+    interface Elastos.Droid.View.TextService.ISuggestionsInfo;
+    interface Elastos.Droid.View.TextService.ISentenceSuggestionsInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Textservice {
+
+    /**
+     * @Involve
+     *
+     * interface Elastos.Droid.View.Internal.Textservice.IISpellCheckerSession
+     * interface Elastos.Droid.Os.IBinder
+     */
+    interface IInternalISpellCheckerSession {
+        GetLocale(
+            [out] String* result);
+
+        GetBundle(
+            [out] IBundle** result);
+    }
+
+    [deprecated]
+    interface ISpellCheckerServiceSession
+    {
+        /**
+         * @hide
+         */
+        SetInternalISpellCheckerSession(
+            [in] IInternalISpellCheckerSession* session);
+
+        /**
+         * This is called after the class is initialized, at which point it knows it can call
+         * getLocale() etc...
+         */
+        /*abstract*/
+        OnCreate();
+
+        /**
+         * Get suggestions for specified text in TextInfo.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         * @param textInfo the text metadata
+         * @param suggestionsLimit the maximum number of suggestions to be returned
+         * @return SuggestionsInfo which contains suggestions for textInfo
+         */
+        /*abstract*/
+        OnGetSuggestions(
+            [in] ITextInfo* textInfo,
+            [in] Int32 suggestionsLimit,
+            [out] ISuggestionsInfo** result);
+
+        /**
+         * A batch process of onGetSuggestions.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         * @param textInfos an array of the text metadata
+         * @param suggestionsLimit the maximum number of suggestions to be returned
+         * @param sequentialWords true if textInfos can be treated as sequential words.
+         * @return an array of {@link SentenceSuggestionsInfo} returned by
+         * {@link SpellCheckerService.Session#onGetSuggestions(TextInfo, int)}
+         */
+        OnGetSuggestionsMultiple(
+            [in] ArrayOf<ITextInfo>* textInfos,
+            [in] Int32 suggestionsLimit,
+            [in] Boolean sequentialWords,
+            [out, callee] ArrayOf<ISuggestionsInfo*>* result);
+
+        /**
+         * Get sentence suggestions for specified texts in an array of TextInfo.
+         * The default implementation splits the input text to words and returns
+         * {@link SentenceSuggestionsInfo} which contains suggestions for each word.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         * When you override this method, make sure that suggestionsLimit is applied to suggestions
+         * that share the same start position and length.
+         * @param textInfos an array of the text metadata
+         * @param suggestionsLimit the maximum number of suggestions to be returned
+         * @return an array of {@link SentenceSuggestionsInfo} returned by
+         * {@link SpellCheckerService.Session#onGetSuggestions(TextInfo, int)}
+         */
+        OnGetSentenceSuggestionsMultiple(
+            [in] ArrayOf<ITextInfo>* textInfos,
+            [in] Int32 suggestionsLimit,
+            [out, callee] ArrayOf<ISentenceSuggestionsInfo*>* result);
+
+        /**
+         * Request to abort all tasks executed in SpellChecker.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         */
+        OnCancel();
+
+        /**
+         * Request to close this session.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         */
+        OnClose();
+
+        /**
+         * @return Locale for this session
+         */
+        GetLocale(
+            [out] String* result);
+
+        /**
+         * @return Bundle for this session
+         */
+        GetBundle(
+            [out] IBundle** result);
+    }
+
+    /**
+     * @Involve
+     *
+     * interface Elastos.Droid.View.Internal.Textservice.IISpellCheckerService
+     * interface Elastos.Droid.Os.IBinder
+     */
+    interface ISpellCheckerServiceBinder {
+    }
+
+    /**
+     * SpellCheckerService provides an abstract base class for a spell checker.
+     * This class combines a service to the system with the spell checker service interface that
+     * spell checker must implement.
+     *
+     * <p>In addition to the normal Service lifecycle methods, this class
+     * introduces a new specific callback that subclasses should override
+     * {@link #createSession()} to provide a spell checker session that is corresponding
+     * to requested language and so on. The spell checker session returned by this method
+     * should extend {@link SpellCheckerService.Session}.
+     * </p>
+     *
+     * <h3>Returning spell check results</h3>
+     *
+     * <p>{@link SpellCheckerService.Session#onGetSuggestions(TextInfo, int)}
+     * should return spell check results.
+     * It receives {@link android.view.textservice.TextInfo} and returns
+     * {@link android.view.textservice.SuggestionsInfo} for the input.
+     * You may want to override
+     * {@link SpellCheckerService.Session#onGetSuggestionsMultiple(TextInfo[], int, boolean)} for
+     * better performance and quality.
+     * </p>
+     *
+     * <p>Please note that {@link SpellCheckerService.Session#getLocale()} does not return a valid
+     * locale before {@link SpellCheckerService.Session#onCreate()} </p>
+     *
+     * @Involve
+     * extends Elastos.Droid.Content.IContext
+     * extends Elastos.Droid.Content.IContextWrapper
+     * extends Elastos.Droid.App.IService
+     *
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     */
+    interface ISpellCheckerService {
+        const String SERVICE_INTERFACE = "android.service.textservice.SpellCheckerService";
+
+        /**
+         * Factory method to create a spell checker session impl
+         * @return SpellCheckerSessionImpl which should be overridden by a concrete implementation.
+         */
+        CreateSession(
+            [out] ISpellCheckerServiceSession** result);
+    }
+
+    } //namespace Textservice
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

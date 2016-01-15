@@ -1,0 +1,214 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+
+    /**
+     * This class provides access to the system uimode services. These services
+     * allow applications to control UI modes of the device. It provides
+     * functionality to disable the car mode and it gives access to the night mode settings.
+     * <p>
+     * These facilities are built on top of the underlying ACTION_DOCK_EVENT
+     * broadcasts that are sent when the user physical places the device into and
+     * out of a dock. When that happens, the UiModeManager switches the system
+     * Configuration to the appropriate UI mode, sends broadcasts about the mode
+     * switch, and starts the corresponding mode activity if appropriate. See the
+     * broadcasts ACTION_ENTER_CAR_MODE and ACTION_ENTER_DESK_MODE for more information.
+     *
+     * @sa ACTION_DOCK_EVENT
+     * @sa Configuration
+     * @sa ACTION_ENTER_CAR_MODE
+     * @sa ACTION_ENTER_DESK_MODE
+     * <p>
+     * In addition, the user may manually switch the system to car mode without
+     * physically being in a dock. While in car mode -- whether by manual action
+     * from the user or being physically placed in a dock -- a notification is
+     * displayed allowing the user to exit dock mode. Thus the dock mode
+     * represented here may be different than the current state of the underlying dock event broadcast.
+     * <p>
+     * You do not instantiate this class directly; instead, retrieve it through Context.getSystemService(Context.UI_MODE_SERVICE).
+     *
+     * @sa Context.getSystemService(Context.UI_MODE_SERVICE)
+     */
+    interface IUiModeManager {
+        /**
+         * Broadcast sent when the device's UI has switched to car mode, either
+         * by being placed in a car dock or explicit action of the user.  After
+         * sending the broadcast, the system will start the intent
+         * android.content.Intent#ACTION_MAIN with category
+         * android.content.Intent#CATEGORY_CAR_DOCK
+         * to display the car UI, which typically what an application would
+         * implement to provide their own interface.  However, applications can
+         * also monitor this Intent in order to be informed of mode changes or
+         * prevent the normal car UI from being displayed by setting the result
+         * of the broadcast to Activity#RESULT_CANCELED.
+         *
+         * @sa android.content.Intent#ACTION_MAIN
+         * @sa android.content.Intent#CATEGORY_CAR_DOCK
+         * @sa Activity#RESULT_CANCELED
+         */
+        const String ACTION_ENTER_CAR_MODE = "android.app.action.ENTER_CAR_MODE";
+
+        /**
+         * Broadcast sent when the device's UI has switch away from car mode back
+         * to normal mode.  Typically used by a car mode app, to dismiss itself
+         * when the user exits car mode.
+         */
+        const String ACTION_EXIT_CAR_MODE = "android.app.action.EXIT_CAR_MODE";
+
+        /**
+         * Broadcast sent when the device's UI has switched to car mode, either
+         * by being placed in a car dock or explicit action of the user.  After
+         * sending the broadcast, the system will start the intent
+         * android.content.Intent#ACTION_MAIN with category
+         * android.content.Intent#CATEGORY_CAR_DOCK
+         * to display the car UI, which typically what an application would
+         * implement to provide their own interface.  However, applications can
+         * also monitor this Intent in order to be informed of mode changes or
+         * prevent the normal car UI from being displayed by setting the result
+         * of the broadcast to Activity#RESULT_CANCELED.
+         *
+         * @sa android.content.Intent#ACTION_MAIN
+         * @sa android.content.Intent#CATEGORY_CAR_DOCK
+         * @sa Activity#RESULT_CANCELED
+         */
+        const String ACTION_ENTER_DESK_MODE = "android.app.action.ENTER_DESK_MODE";
+
+        /**
+         * Broadcast sent when the device's UI has switched away from desk mode back
+         * to normal mode.  Typically used by a desk mode app, to dismiss itself
+         * when the user exits desk mode.
+         */
+        const String ACTION_EXIT_DESK_MODE = "android.app.action.EXIT_DESK_MODE";
+
+        /** Constant for #setNightMode(int) and #getNightMode():
+         * automatically switch night mode on and off based on the time.
+         *
+         * @sa #setNightMode(int)
+         * @sa #getNightMode()
+         */
+        const Int32 MODE_NIGHT_AUTO = 0x00 >> 4; //Configuration.UI_MODE_NIGHT_UNDEFINED >> 4;
+
+        /** Constant for #setNightMode(int) and #getNightMode():
+         * never run in night mode.
+         *
+         * @sa #setNightMode(int)
+         * @sa #getNightMode()
+         */
+        const Int32 MODE_NIGHT_NO = 0x10 >> 4; //Configuration.UI_MODE_NIGHT_NO >> 4;
+
+        /** Constant for #setNightMode(int) and #getNightMode():
+         * always run in night mode.
+         *
+         * @sa #setNightMode(int)
+         * @sa #getNightMode()
+         */
+        const Int32 MODE_NIGHT_YES = 0x20 >> 4; //Configuration.UI_MODE_NIGHT_YES >> 4;
+
+        /**
+         * Flag for use with #enableCarMode(int): go to the car
+         * home activity as part of the enable.  Enabling this way ensures
+         * a clean transition between the current activity (in non-car-mode) and
+         * the car home activity that will serve as home while in car mode.  This
+         * will switch to the car home activity even if we are already in car mode.
+         *
+         * @sa #enableCarMode(int)
+         */
+        const Int32 ENABLE_CAR_MODE_GO_CAR_HOME = 0x0001;
+
+        /**
+         * Flag for use with {@link #enableCarMode(int)}: allow sleep mode while in car mode.
+         * By default, when this flag is not set, the system may hold a full wake lock to keep the
+         * screen turned on and prevent the system from entering sleep mode while in car mode.
+         * Setting this flag disables such behavior and the system may enter sleep mode
+         * if there is no other user activity and no other wake lock held.
+         * Setting this flag can be relevant for a car dock application that does not require the
+         * screen kept on.
+         */
+        const Int32 ENABLE_CAR_MODE_ALLOW_SLEEP = 0x0002;
+
+        /**
+         * Flag for use with #disableCarMode(int): go to the normal
+         * home activity as part of the disable.  Disabling this way ensures
+         * a clean transition between the current activity (in car mode) and
+         * the original home activity (which was typically last running without
+         * being in car mode).
+         *
+         * @sa #disableCarMode(int)
+         */
+        const Int32 DISABLE_CAR_MODE_GO_HOME = 0x0001;
+
+        /**
+         * Force device into car mode, like it had been placed in the car dock.
+         * This will cause the device to switch to the car home UI as part of
+         * the mode switch.
+         * @param flags Must be 0.
+         */
+        EnableCarMode(
+            [in] Int32 flags);
+
+        /**
+         * Turn off special mode if currently in car mode.
+         * @param flags May be 0 or #DISABLE_CAR_MODE_GO_HOME.
+         *
+         * @sa #DISABLE_CAR_MODE_GO_HOME
+         */
+        DisableCarMode(
+            [in] Int32 flags);
+
+        /**
+         * Return the current running mode type.  May be one of
+         * Configuration#UI_MODE_TYPE_NORMAL Configuration.UI_MODE_TYPE_NORMAL,
+         * Configuration#UI_MODE_TYPE_DESK Configuration.UI_MODE_TYPE_DESK, or
+         * Configuration#UI_MODE_TYPE_CAR Configuration.UI_MODE_TYPE_CAR, or
+         * Configuration#UI_MODE_TYPE_TELEVISION Configuration.UI_MODE_TYPE_APPLIANCE.
+         *
+         * @sa Configuration#UI_MODE_TYPE_NORMAL Configuration.UI_MODE_TYPE_NORMAL
+         * @sa Configuration#UI_MODE_TYPE_DESK Configuration.UI_MODE_TYPE_DESK
+         * @sa Configuration#UI_MODE_TYPE_CAR Configuration.UI_MODE_TYPE_CAR
+         * @sa Configuration#UI_MODE_TYPE_TELEVISION Configuration.UI_MODE_TYPE_APPLIANCE.
+         */
+        GetCurrentModeType(
+            [out] Int32* type);
+
+        /**
+         * Sets the night mode.  Changes to the night mode are only effective when
+         * the car or desk mode is enabled on a device.
+         *
+         * <p>The mode can be one of:
+         * <ul>
+         *   <li><em>#MODE_NIGHT_NO<em> - sets the device into notnight
+         *       mode.</li>
+         *   <li><em>#MODE_NIGHT_YES</em> - sets the device into night mode.
+         *   </li>
+         *   <li><em>#MODE_NIGHT_AUTO</em> - automatic night/notnight switching
+         *       depending on the location and certain other sensors.</li>
+         * </ul>
+         *
+         * @sa #MODE_NIGHT_NO
+         * @sa #MODE_NIGHT_YES
+         * @sa #MODE_NIGHT_AUTO
+         */
+        SetNightMode(
+            [in] Int32 mode);
+
+        /**
+         * Returns the currently configured night mode.
+         *
+         * @return #MODE_NIGHT_NO, #MODE_NIGHT_YES, or
+         * #MODE_NIGHT_AUTO.  When an error occurred -1 is returned.
+         *
+         * @sa #MODE_NIGHT_NO
+         * @sa #MODE_NIGHT_YES
+         * @sa #MODE_NIGHT_AUTO
+         */
+        GetNightMode(
+            [out] Int32* mode);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

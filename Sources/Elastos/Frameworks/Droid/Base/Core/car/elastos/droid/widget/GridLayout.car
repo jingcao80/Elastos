@@ -1,0 +1,702 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Widget.IGridLayoutAlignment;
+    interface Elastos.Droid.Widget.IGridLayoutSpec;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Layout information associated with each of the children of a GridLayout.
+     * <p>
+     * GridLayout supports both row and column spanning and arbitrary forms of alignment within
+     * each cell group. The fundamental parameters associated with each cell group are
+     * gathered into their vertical and horizontal components and stored
+     * in the {@link #rowSpec} and {@link #columnSpec} layout parameters.
+     * {@link GridLayout.Spec Specs} are immutable structures
+     * and may be shared between the layout parameters of different children.
+     * <p>
+     * The row and column specs contain the leading and trailing indices along each axis
+     * and together specify the four grid indices that delimit the cells of this cell group.
+     * <p>
+     * The  alignment properties of the row and column specs together specify
+     * both aspects of alignment within the cell group. It is also possible to specify a child's
+     * alignment within its cell group by using the {@link GridLayout.LayoutParams#setGravity(Int32)}
+     * method.
+     *
+     * <h4>WRAP_CONTENT and MATCH_PARENT</h4>
+     *
+     * Because the default values of the {@link #width} and {@link #height}
+     * properties are both {@link #WRAP_CONTENT}, this value never needs to be explicitly
+     * declared in the layout parameters of GridLayout's children. In addition,
+     * GridLayout does not distinguish the special size value {@link #MATCH_PARENT} from
+     * {@link #WRAP_CONTENT}. A component's ability to expand to the size of the parent is
+     * instead controlled by the principle of <em>flexibility</em>,
+     * as discussed in {@link GridLayout}.
+     *
+     * <h4>Summary</h4>
+     *
+     * You should not need to use either of the special size values:
+     * {@code WRAP_CONTENT} or {@code MATCH_PARENT} when configuring the children of
+     * a GridLayout.
+     *
+     * <h4>Default values</h4>
+     *
+     * <ul>
+     *     <li>{@link #width} = {@link #WRAP_CONTENT}</li>
+     *     <li>{@link #height} = {@link #WRAP_CONTENT}</li>
+     *     <li>{@link #topMargin} = 0 when
+     *          {@link GridLayout#setUseDefaultMargins(Boolean) useDefaultMargins} is
+     *          {@code false}; otherwise {@link #UNDEFINED}, to
+     *          indicate that a default value should be computed on demand. </li>
+     *     <li>{@link #leftMargin} = 0 when
+     *          {@link GridLayout#setUseDefaultMargins(Boolean) useDefaultMargins} is
+     *          {@code false}; otherwise {@link #UNDEFINED}, to
+     *          indicate that a default value should be computed on demand. </li>
+     *     <li>{@link #bottomMargin} = 0 when
+     *          {@link GridLayout#setUseDefaultMargins(Boolean) useDefaultMargins} is
+     *          {@code false}; otherwise {@link #UNDEFINED}, to
+     *          indicate that a default value should be computed on demand. </li>
+     *     <li>{@link #rightMargin} = 0 when
+     *          {@link GridLayout#setUseDefaultMargins(Boolean) useDefaultMargins} is
+     *          {@code false}; otherwise {@link #UNDEFINED}, to
+     *          indicate that a default value should be computed on demand. </li>
+     *     <li>{@link #rowSpec}<code>.row</code> = {@link #UNDEFINED} </li>
+     *     <li>{@link #rowSpec}<code>.rowSpan</code> = 1 </li>
+     *     <li>{@link #rowSpec}<code>.alignment</code> = {@link #BASELINE} </li>
+     *     <li>{@link #columnSpec}<code>.column</code> = {@link #UNDEFINED} </li>
+     *     <li>{@link #columnSpec}<code>.columnSpan</code> = 1 </li>
+     *     <li>{@link #columnSpec}<code>.alignment</code> = {@link #START} </li>
+     * </ul>
+     *
+     * See {@link GridLayout} for a more complete description of the conventions
+     * used by GridLayout in the interpretation of the properties of this class.
+     *
+     * @attr ref android.R.styleable#GridLayout_Layout_layout_row
+     * @attr ref android.R.styleable#GridLayout_Layout_layout_rowSpan
+     * @attr ref android.R.styleable#GridLayout_Layout_layout_column
+     * @attr ref android.R.styleable#GridLayout_Layout_layout_columnSpan
+     * @attr ref android.R.styleable#GridLayout_Layout_layout_gravity
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupMarginLayoutParams
+     */
+    interface IGridLayoutLayoutParams {
+        /**
+         * Describes how the child views are positioned. Default is {@code LEFT | BASELINE}.
+         * See {@link Gravity}.
+         *
+         * @param gravity the new gravity value
+         *
+         * @attr ref android.R.styleable#GridLayout_Layout_layout_gravity
+         */
+        SetGravity(
+            [in] Int32 gravity);
+
+        SetRowSpec(
+            [in] IGridLayoutSpec* r);
+
+        SetColumnSpec(
+            [in] IGridLayoutSpec* c);
+
+        GetRowSpec(
+            [out] IGridLayoutSpec** r);
+
+        GetColumnSpec(
+            [out] IGridLayoutSpec** c);
+    }
+
+    /**
+     * An Interval represents a contiguous range of values that lie between
+     * the interval's {@link #min} and {@link #max} values.
+     * <p>
+     * Intervals are immutable so may be passed as values and used as keys in hash tables.
+     * It is not necessary to have multiple instances of Intervals which have the same
+     * {@link #min} and {@link #max} values.
+     * <p>
+     * Intervals are often written as {@code [min, max]} and represent the set of values
+     * {@code x} such that {@code min <= x < max}.
+     */
+    interface IInterval {
+        /**
+         * The minimum value.
+         */
+        GetMin(
+            [out] Int32* min);
+
+        /**
+         * The maximum value.
+         */
+        GetMax(
+            [out] Int32* max);
+
+        Size(
+            [out] Int32* size);
+
+        Inverse(
+            [out] IInterval** interval);
+    }
+    /**
+     * A Spec defines the horizontal or vertical characteristics of a group of
+     * cells. Each spec. defines the <em>grid indices</em> and <em>alignment</em>
+     * along the appropriate axis.
+     * <p>
+     * The <em>grid indices</em> are the leading and trailing edges of this cell group.
+     * See {@link GridLayout} for a description of the conventions used by GridLayout
+     * for grid indices.
+     * <p>
+     * The <em>alignment</em> property specifies how cells should be aligned in this group.
+     * For row groups, this specifies the vertical alignment.
+     * For column groups, this specifies the horizontal alignment.
+     * <p>
+     * Use the following static methods to create specs:
+     * <ul>
+     *   <li>{@link #spec(int)}</li>
+     *   <li>{@link #spec(int, int)}</li>
+     *   <li>{@link #spec(int, Alignment)}</li>
+     *   <li>{@link #spec(int, int, Alignment)}</li>
+     * </ul>
+     *
+     */
+    interface IGridLayoutSpec {
+        CopyWriteSpan(
+            [in] IInterval* span,
+            [out] IGridLayoutSpec** spec);
+
+        CopyWriteAlignment(
+            [in] IGridLayoutAlignment* alignment,
+            [out] IGridLayoutSpec** spec);
+
+        GetFlexibility(
+            [out] Int32* rst);
+    }
+
+    /*
+    For each group (with a given alignment) we need to store the amount of space required
+    before the alignment point and the amount of space required after it. One side of this
+    calculation is always 0 for START and END alignments but we don't make use of this.
+    For CENTER and BASELINE alignments both sides are needed and in the BASELINE case no
+    simple optimisations are possible.
+
+    The general algorithm therefore is to create a Map (actually a PackedMap) from
+    group to Bounds and to loop through all Views in the group taking the maximum
+    of the values for each View.
+    */
+    interface IBounds {
+        GetBefore(
+            [out] Int32* before);
+
+        GetAfter(
+            [out] Int32* after);
+
+        GetFlexibility(
+            [out] Int32* flexibility);
+
+        SetBefore(
+            [in] Int32 before);
+
+        SetAfter(
+            [in] Int32 after);
+
+        SetFlexibility(
+            [in] Int32 flexibility);
+    }
+    /**
+     * Alignments specify where a view should be placed within a cell group and
+     * what size it should be.
+     * <p>
+     * The {@link LayoutParams} class contains a {@link LayoutParams#rowSpec rowSpec}
+     * and a {@link LayoutParams#columnSpec columnSpec} each of which contains an
+     * {@code alignment}. Overall placement of the view in the cell
+     * group is specified by the two alignments which act along each axis independently.
+     * <p>
+     *  The GridLayout class defines the most common alignments used in general layout:
+     * {@link #TOP}, {@link #LEFT}, {@link #BOTTOM}, {@link #RIGHT}, {@link #START},
+     * {@link #END}, {@link #CENTER}, {@link #BASELINE} and {@link #FILL}.
+     */
+    /*
+     * An Alignment implementation must define {@link #getAlignmentValue(View, Int32, Int32)},
+     * to return the appropriate value for the type of alignment being defined.
+     * The enclosing algorithms position the children
+     * so that the locations defined by the alignment values
+     * are the same for all of the views in a group.
+     * <p>
+     */
+    [local]
+    interface IGridLayoutAlignment {
+        GetGravityOffset(
+            [in] IView* view,
+            [in] Int32 cellDelta,
+            [out] Int32* offset);
+
+        /**
+         * Returns an alignment value. In the case of vertical alignments the value
+         * returned should indicate the distance from the top of the view to the
+         * alignment location.
+         * For horizontal alignments measurement is made from the left edge of the component.
+         *
+         * @param view              the view to which this alignment should be applied
+         * @param viewSize          the measured size of the view
+         * @param mode              the basis of alignment: CLIP or OPTICAL
+         * @return the alignment value
+         */
+        GetAlignmentValue(
+            [in] IView* view,
+            [in] Int32 viewSize,
+            [in] Int32 mode,
+            [out] Int32* value);
+
+        /**
+         * Returns the size of the view specified by this alignment.
+         * In the case of vertical alignments this method should return a height; for
+         * horizontal alignments this method should return the width.
+         * <p>
+         * The default implementation returns {@code viewSize}.
+         *
+         * @param view              the view to which this alignment should be applied
+         * @param viewSize          the measured size of the view
+         * @param cellSize          the size of the cell into which this view will be placed
+         * @return the aligned size
+         */
+        GetSizeInCell(
+            [in] IView* view,
+            [in] Int32 viewSize,
+            [in] Int32 cellSize,
+            [out] Int32* size);
+
+        GetBounds(
+            [out] IBounds** bounds);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+     [local]
+    interface IGridLayout {
+        /**
+         * Returns the current orientation.
+         *
+         * @return either {@link #HORIZONTAL} or {@link #VERTICAL}
+         *
+         * @see #setOrientation(Int32)
+         *
+         * @attr ref android.R.styleable#GridLayout_orientation
+         */
+        GetOrientation(
+            [out] Int32* orientation);
+
+        /**
+         *
+         * GridLayout uses the orientation property for two purposes:
+         * <ul>
+         *  <li>
+         *      To control the 'direction' in which default row/column indices are generated
+         *      when they are not specified in a component's layout parameters.
+         *  </li>
+         *  <li>
+         *      To control which axis should be processed first during the layout operation:
+         *      when orientation is {@link #HORIZONTAL} the horizontal axis is laid out first.
+         *  </li>
+         * </ul>
+         *
+         * The order in which axes are laid out is important if, for example, the height of
+         * one of GridLayout's children is dependent on its width - and its width is, in turn,
+         * dependent on the widths of other components.
+         * <p>
+         * If your layout contains a {@link TextView} (or derivative:
+         * {@code Button}, {@code EditText}, {@code CheckBox}, etc.) which is
+         * in multi-line mode (the default) it is normally best to leave GridLayout's
+         * orientation as {@code HORIZONTAL} - because {@code TextView} is capable of
+         * deriving its height for a given width, but not the other way around.
+         * <p>
+         * Other than the effects above, orientation does not affect the actual layout operation of
+         * GridLayout, so it's fine to leave GridLayout in {@code HORIZONTAL} mode even if
+         * the height of the intended layout greatly exceeds its width.
+         * <p>
+         * The default value of this property is {@link #HORIZONTAL}.
+         *
+         * @param orientation either {@link #HORIZONTAL} or {@link #VERTICAL}
+         *
+         * @see #getOrientation()
+         *
+         * @attr ref android.R.styleable#GridLayout_orientation
+         */
+        SetOrientation(
+            [in] Int32 orientation);
+
+        /**
+         * Returns the current number of rows. This is either the last value that was set
+         * with {@link #setRowCount(Int32)} or, if no such value was set, the maximum
+         * value of each the upper bounds defined in {@link LayoutParams#rowSpec}.
+         *
+         * @return the current number of rows
+         *
+         * @see #setRowCount(Int32)
+         * @see LayoutParams#rowSpec
+         *
+         * @attr ref android.R.styleable#GridLayout_rowCount
+         */
+        GetRowCount(
+            [out] Int32* count);
+
+        /**
+         * RowCount is used only to generate default row/column indices when
+         * they are not specified by a component's layout parameters.
+         *
+         * @param rowCount the number of rows
+         *
+         * @see #getRowCount()
+         * @see LayoutParams#rowSpec
+         *
+         * @attr ref android.R.styleable#GridLayout_rowCount
+         */
+        SetRowCount(
+            [in] Int32 rowCount);
+
+        /**
+         * Returns the current number of columns. This is either the last value that was set
+         * with {@link #setColumnCount(Int32)} or, if no such value was set, the maximum
+         * value of each the upper bounds defined in {@link LayoutParams#columnSpec}.
+         *
+         * @return the current number of columns
+         *
+         * @see #setColumnCount(Int32)
+         * @see LayoutParams#columnSpec
+         *
+         * @attr ref android.R.styleable#GridLayout_columnCount
+         */
+        GetColumnCount(
+            [out] Int32* count);
+
+        /**
+         * ColumnCount is used only to generate default column/column indices when
+         * they are not specified by a component's layout parameters.
+         *
+         * @param columnCount the number of columns.
+         *
+         * @see #getColumnCount()
+         * @see LayoutParams#columnSpec
+         *
+         * @attr ref android.R.styleable#GridLayout_columnCount
+         */
+        SetColumnCount(
+            [in] Int32 columnCount);
+
+        /**
+         * Returns whether or not this GridLayout will allocate default margins when no
+         * corresponding layout parameters are defined.
+         *
+         * @return {@code true} if default margins should be allocated
+         *
+         * @see #setUseDefaultMargins(Boolean)
+         *
+         * @attr ref android.R.styleable#GridLayout_useDefaultMargins
+         */
+        GetUseDefaultMargins(
+            [out] Boolean* margins);
+
+        /**
+         * When {@code true}, GridLayout allocates default margins around children
+         * based on the child's visual characteristics. Each of the
+         * margins so defined may be independently overridden by an assignment
+         * to the appropriate layout parameter.
+         * <p>
+         * When {@code false}, the default value of all margins is zero.
+         * <p>
+         * When setting to {@code true}, consider setting the value of the
+         * {@link #setAlignmentMode(Int32) alignmentMode}
+         * property to {@link #ALIGN_BOUNDS}.
+         * <p>
+         * The default value of this property is {@code false}.
+         *
+         * @param useDefaultMargins use {@code true} to make GridLayout allocate default margins
+         *
+         * @see #getUseDefaultMargins()
+         * @see #setAlignmentMode(Int32)
+         *
+         * @see MarginLayoutParams#leftMargin
+         * @see MarginLayoutParams#topMargin
+         * @see MarginLayoutParams#rightMargin
+         * @see MarginLayoutParams#bottomMargin
+         *
+         * @attr ref android.R.styleable#GridLayout_useDefaultMargins
+         */
+        SetUseDefaultMargins(
+            [in] Boolean useDefaultMargins);
+
+        /**
+         * Returns the alignment mode.
+         *
+         * @return the alignment mode; either {@link #ALIGN_BOUNDS} or {@link #ALIGN_MARGINS}
+         *
+         * @see #ALIGN_BOUNDS
+         * @see #ALIGN_MARGINS
+         *
+         * @see #setAlignmentMode(Int32)
+         *
+         * @attr ref android.R.styleable#GridLayout_alignmentMode
+         */
+        GetAlignmentMode(
+            [out] Int32* mode);
+
+        /**
+         * Sets the alignment mode to be used for all of the alignments between the
+         * children of this container.
+         * <p>
+         * The default value of this property is {@link #ALIGN_MARGINS}.
+         *
+         * @param alignmentMode either {@link #ALIGN_BOUNDS} or {@link #ALIGN_MARGINS}
+         *
+         * @see #ALIGN_BOUNDS
+         * @see #ALIGN_MARGINS
+         *
+         * @see #getAlignmentMode()
+         *
+         * @attr ref android.R.styleable#GridLayout_alignmentMode
+         */
+        SetAlignmentMode(
+            [in] Int32 alignmentMode);
+
+        /**
+         * Returns whether or not row boundaries are ordered by their grid indices.
+         *
+         * @return {@code true} if row boundaries must appear in the order of their indices,
+         *         {@code false} otherwise
+         *
+         * @see #setRowOrderPreserved(Boolean)
+         *
+         * @attr ref android.R.styleable#GridLayout_rowOrderPreserved
+         */
+        IsRowOrderPreserved(
+            [out] Boolean* preserved);
+
+        /**
+         * When this property is {@code true}, GridLayout is forced to place the row boundaries
+         * so that their associated grid indices are in ascending order in the view.
+         * <p>
+         * When this property is {@code false} GridLayout is at liberty to place the vertical row
+         * boundaries in whatever order best fits the given constraints.
+         * <p>
+         * The default value of this property is {@code true}.
+
+         * @param rowOrderPreserved {@code true} to force GridLayout to respect the order
+         *        of row boundaries
+         *
+         * @see #isRowOrderPreserved()
+         *
+         * @attr ref android.R.styleable#GridLayout_rowOrderPreserved
+         */
+        SetRowOrderPreserved(
+            [in] Boolean rowOrderPreserved);
+
+        /**
+         * Returns whether or not column boundaries are ordered by their grid indices.
+         *
+         * @return {@code true} if column boundaries must appear in the order of their indices,
+         *         {@code false} otherwise
+         *
+         * @see #setColumnOrderPreserved(Boolean)
+         *
+         * @attr ref android.R.styleable#GridLayout_columnOrderPreserved
+         */
+        IsColumnOrderPreserved(
+            [out] Boolean* preserved);
+
+        /**
+         * When this property is {@code true}, GridLayout is forced to place the column boundaries
+         * so that their associated grid indices are in ascending order in the view.
+         * <p>
+         * When this property is {@code false} GridLayout is at liberty to place the horizontal column
+         * boundaries in whatever order best fits the given constraints.
+         * <p>
+         * The default value of this property is {@code true}.
+         *
+         * @param columnOrderPreserved use {@code true} to force GridLayout to respect the order
+         *        of column boundaries.
+         *
+         * @see #isColumnOrderPreserved()
+         *
+         * @attr ref android.R.styleable#GridLayout_columnOrderPreserved
+         */
+        SetColumnOrderPreserved(
+            [in] Boolean columnOrderPreserved);
+
+        GetMeasurementIncludingMargin(
+            [in] IView* c,
+            [in] Boolean horizontal,
+            [out] Int32* margin);
+    }
+
+    [local]
+    interface IGridLayoutHelper {
+        GetTopAlignment(
+            [out] IGridLayoutAlignment** top);
+
+        GetBottomAlignment(
+            [out] IGridLayoutAlignment** bottom);
+
+        GetStartAlignment(
+            [out] IGridLayoutAlignment** start);
+
+        GetEndAlignment(
+            [out] IGridLayoutAlignment** end);
+
+        GetLeftAlignment(
+            [out] IGridLayoutAlignment** left);
+
+        GetRightAlignment(
+            [out] IGridLayoutAlignment** right);
+
+        GetCenterAlignment(
+            [out] IGridLayoutAlignment** center);
+
+        GetBaselineAlignment(
+            [out] IGridLayoutAlignment** baseline);
+
+        GetFillAlignment(
+            [out] IGridLayoutAlignment** fill);
+
+        /**
+         * Return a Spec, {@code spec}, where:
+         * <ul>
+         *     <li> {@code spec.span = [start, start + size]} </li>
+         *     <li> {@code spec.alignment = alignment} </li>
+         *     <li> {@code spec.weight = weight} </li>
+         * </ul>
+         * <p>
+         * To leave the start index undefined, use the value {@link #UNDEFINED}.
+         *
+         * @param start     the start
+         * @param size      the size
+         * @param alignment the alignment
+         * @param weight    the weight
+         */
+        Spec(
+            [in] Int32 start,
+            [in] Int32 size,
+            [in] IGridLayoutAlignment* alignment,
+            [in] Float weight,
+            [out] IGridLayoutSpec** spec);
+
+        /**
+         * Equivalent to: {@code spec(start, 1, alignment, weight)}.
+         *
+         * @param start     the start
+         * @param alignment the alignment
+         * @param weight    the weight
+         */
+        Spec(
+            [in] Int32 start,
+            [in] IGridLayoutAlignment* alignment,
+            [in] Float weight,
+            [out] IGridLayoutSpec** spec);
+
+        /**
+         * Equivalent to: {@code spec(start, 1, default_alignment, weight)} -
+         * where {@code default_alignment} is specified in
+         * {@link android.widget.GridLayout.LayoutParams}.
+         *
+         * @param start  the start
+         * @param size   the size
+         * @param weight the weight
+         */
+        Spec(
+            [in] Int32 start,
+            [in] Int32 size,
+            [in] Float weight,
+            [out] IGridLayoutSpec** spec);
+
+        /**
+         * Equivalent to: {@code spec(start, 1, weight)}.
+         *
+         * @param start  the start
+         * @param weight the weight
+         */
+        Spec(
+            [in] Int32 start,
+            [in] Float weight,
+            [out] IGridLayoutSpec** spec);
+        /**
+         * Equivalent to: {@code spec(start, size, alignment, 0f)}.
+         *
+         * @param start     the start
+         * @param size      the size
+         * @param alignment the alignment
+         */
+        Spec(
+            [in] Int32 start,
+            [in] Int32 size,
+            [in] IGridLayoutAlignment* alignment,
+            [out] IGridLayoutSpec** spec);
+
+        /**
+         * Return a Spec, {@code spec}, where:
+         * <ul>
+         *     <li> {@code spec.span = [start, start + 1]} </li>
+         *     <li> {@code spec.alignment = alignment} </li>
+         * </ul>
+         * <p>
+         * To leave the start index undefined, use the value {@link #UNDEFINED}.
+         *
+         * @param start     the start index
+         * @param alignment the alignment
+         *
+         * @see #spec(int, int, Alignment)
+         */
+        Spec(
+            [in] Int32 start,
+            [in] IGridLayoutAlignment* alignment,
+            [out] IGridLayoutSpec** spec);
+
+        /**
+         * Return a Spec, {@code spec}, where:
+         * <ul>
+         *     <li> {@code spec.span = [start, start + size]} </li>
+         * </ul>
+         * <p>
+         * To leave the start index undefined, use the value {@link #UNDEFINED}.
+         *
+         * @param start     the start
+         * @param size      the size
+         *
+         * @see #spec(int, Alignment)
+         */
+        Spec(
+            [in] Int32 start,
+            [in] Int32 size,
+            [out] IGridLayoutSpec** spec);
+
+        /**
+         * Return a Spec, {@code spec}, where:
+         * <ul>
+         *     <li> {@code spec.span = [start, start + 1]} </li>
+         * </ul>
+         * <p>
+         * To leave the start index undefined, use the value {@link #UNDEFINED}.
+         *
+         * @param start     the start index
+         *
+         * @see #spec(int, int)
+         */
+        Spec(
+            [in] Int32 start,
+            [out] IGridLayoutSpec** spec);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

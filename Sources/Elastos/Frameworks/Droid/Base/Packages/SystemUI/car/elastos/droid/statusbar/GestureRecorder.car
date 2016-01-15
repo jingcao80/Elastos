@@ -1,0 +1,97 @@
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    interface IGestureRecorderGestureRecord {
+        GetTime(
+            [out] Int64* time);
+
+        SetTime(
+            [in] Int64 time);
+
+        ToJson(
+            [out] String* json);
+    }
+
+    /**
+     * @Involve
+     * interface IGestureRecorderGestureRecord
+     */
+    interface IGestureRecorderMotionEventRecord {
+
+    }
+
+    /**
+     * @Involve
+     * interface IGestureRecorderGestureRecord
+     */
+    interface IGestureRecorderTagRecord {
+
+    }
+
+    interface IGestureRecorderGesture {
+        Add(
+            [in] IMotionEvent* ev);
+
+        Tag(
+            [in] Int64 when,
+            [in] String tag,
+            [in] String info);
+
+        IsComplete(
+            [out] Boolean* result);
+
+        ToJson(
+            [out] String* result);
+    }
+
+    /**
+     * Convenience class for capturing gestures for later analysis.
+     */
+    interface IGestureRecorder {
+        Add(
+            [in] IMotionEvent* ev);
+
+        Tag(
+            [in] Int64 when,
+            [in] String tag,
+            [in] String info);
+
+        Tag(
+            [in] Int64 when,
+            [in] String tag);
+
+        Tag(
+            [in] String tag);
+
+        Tag(
+            [in] String tag,
+            [in] String info);
+
+        /**
+         * Generates a JSON string capturing all completed gestures.
+         * Not threadsafe; call with a lock.
+         */
+        ToJsonLocked(
+            [out] String* result);
+
+        ToJson(
+            [out] String* result);
+
+        SaveLater();
+
+        Save();
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

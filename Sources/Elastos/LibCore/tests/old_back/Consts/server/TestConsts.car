@@ -1,0 +1,44 @@
+
+module
+{
+    interface IConstsDef {
+        const Byte bt1 = 3;
+        const Byte bt2 = 0x6;
+
+        const Int16 sh1 = 2;
+        const Int16 sh2 = 0x5;
+
+        const Int32 i1 = 2;
+        const Int32 i2 = 0x3;
+        const Int32 i3 = i1 | i2;
+        const Int32 i4 = i3 & i1;
+
+        const Boolean b1 = TRUE;
+        const Boolean b2 = ~b1;
+
+        const Int64 l1 = 2;
+        const Int64 l2 = 0x3;
+        const Int64 l3 = l1 | l2;
+        const Int64 l4 = l3 & l2;
+
+        const Float f1 = 1;
+
+        const Double d1 = 1;
+
+        const String s1 = "IConstsDef";
+
+        const Int32 i5 = 1 << 0;
+        const Int32 i6 = 1 << 1;
+
+        const Int32 i7 = 2 * 5 * 6;
+
+        const Char32 c = 's';
+        const Char32 c1 = '\'';
+
+        Read();
+    }
+
+    class CDummy {
+        interface IConstsDef;
+    }
+}

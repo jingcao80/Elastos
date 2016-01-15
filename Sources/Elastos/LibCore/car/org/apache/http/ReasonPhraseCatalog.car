@@ -1,0 +1,45 @@
+
+module
+{
+
+    using interface Elastos.Utility.ILocale;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * Interface for obtaining reason phrases for HTTP status codes.
+     *
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     *
+     * <!-- empty lines above to avoid 'svn diff' context problems -->
+     * @version $Revision: 505744 $
+     *
+     * @since 4.0
+     */
+    interface IReasonPhraseCatalog {
+
+        /**
+         * Obtains the reason phrase for a status code.
+         * The optional context allows for catalogs that detect
+         * the language for the reason phrase.
+         *
+         * @param status    the status code, in the range 100-599
+         * @param loc       the preferred locale for the reason phrase
+         *
+         * @return  the reason phrase, or <code>null</code> if unknown
+         */
+        GetReason(
+            [in] Int32 status,
+            [in] ILocale* loc,
+            [out] String* reason);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

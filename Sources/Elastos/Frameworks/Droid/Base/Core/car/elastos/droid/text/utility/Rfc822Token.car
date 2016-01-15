@@ -1,0 +1,101 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Utility {
+
+    /**
+     * This class stores an RFC 822-like name, address, and comment,
+     * and provides methods to convert them to quoted strings.
+     */
+    interface IRfc822Token {
+
+        /**
+         * Returns the name part.
+         */
+        GetName(
+            [out] String* ret);
+
+        /**
+         * Returns the address part.
+         */
+        GetAddress(
+            [out] String* ret);
+
+        /**
+         * Returns the comment part.
+         */
+        GetComment(
+            [out] String* ret);
+
+        /**
+         * Changes the name to the specified name.
+         */
+        SetName(
+            [in] String name);
+
+        /**
+         * Changes the address to the specified address.
+         */
+        SetAddress(
+            [in] String address);
+
+        /**
+         * Changes the comment to the specified comment.
+         */
+        SetComment(
+            [in] String comment);
+
+        /**
+         * Returns the name (with quoting added if necessary),
+         * the comment (in parentheses), and the address (in angle brackets).
+         * This should be suitable for inclusion in an RFC 822 address list.
+         */
+        ToString(
+            [out] String* ret);
+
+        GetHashCode(
+            [out] Int32* ret);
+
+        Equals(
+            [in] IInterface* o,
+            [out] Boolean* ret);
+    }
+
+    interface IRfc822TokenHelper {
+
+        /**
+         * Returns the name, conservatively quoting it if there are any
+         * characters that are likely to cause trouble outside of a
+         * quoted string, or returning it literally if it seems safe.
+         */
+        QuoteNameIfNecessary(
+            [in] String name,
+            [out] String* ret);
+
+        /**
+         * Returns the name, with internal backslashes and quotation marks
+         * preceded by backslashes.  The outer quote marks themselves are not
+         * added by this method.
+         */
+        QuoteName(
+            [in] String name,
+            [out] String* ret);
+
+        /**
+         * Returns the comment, with internal backslashes and parentheses
+         * preceded by backslashes.  The outer parentheses themselves are
+         * not added by this method.
+         */
+        QuoteComment(
+            [in] String comment,
+            [out] String* ret);
+
+    }
+
+    }//namespace Utility
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

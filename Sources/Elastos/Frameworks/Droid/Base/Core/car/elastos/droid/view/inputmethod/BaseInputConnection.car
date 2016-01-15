@@ -1,0 +1,229 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.View.InputMethod.ICompletionInfo;
+    interface Elastos.Droid.View.InputMethod.ICorrectionInfo;
+    interface Elastos.Droid.View.InputMethod.IExtractedText;
+    interface Elastos.Droid.View.InputMethod.IExtractedTextRequest;
+    interface Elastos.Droid.Text.IEditable;
+    interface Elastos.Droid.Text.ISpannable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * Base class for implementors of the InputConnection interface, taking care
+     * of most of the common behavior for providing a connection to an Editable.
+     * Implementors of this class will want to be sure to implement
+     * {@link #getEditable} to provide access to their own editable object, and
+     * to refer to the documentation in {@link InputConnection}.
+     */
+    /**
+     * @Involve
+     * interface IInputConnection
+     */
+    interface IBaseInputConnection {
+
+        /**
+         * Return the target of edit operations.  The default implementation
+         * returns its own fake editable that is just used for composing text;
+         * subclasses that are real text editors should override this and
+         * supply their own.
+         */
+        GetEditable(
+            [out] IEditable** result);
+
+        /**
+         * Default implementation does nothing.
+         */
+        BeginBatchEdit(
+            [out] Boolean* result);
+
+        /**
+         * Default implementation does nothing.
+         */
+        EndBatchEdit(
+            [out] Boolean* result);
+
+        /**
+         * Default implementation uses
+         * {@link MetaKeyKeyListener#clearMetaKeyState(long, int)
+         * MetaKeyKeyListener.clearMetaKeyState(long, int)} to clear the state.
+         */
+        ClearMetaKeyStates(
+            [in] Int32 states,
+            [out] Boolean* result);
+
+        /**
+         * Default implementation does nothing and returns false.
+         */
+        CommitCompletion(
+            [in] ICompletionInfo* text,
+            [out] Boolean* result);
+
+        /**
+         * Default implementation does nothing and returns false.
+         */
+        CommitCorrection(
+            [in] ICorrectionInfo* correctionInfo,
+            [out] Boolean* result);
+
+        /**
+         * Default implementation replaces any existing composing text with
+         * the given text.  In addition, only if dummy mode, a key event is
+         * sent for the new text and the current editable buffer cleared.
+         */
+        CommitText(
+            [in] ICharSequence* text,
+            [in] Int32 newCursorPosition,
+            [out] Boolean* result);
+
+        /**
+         * The default implementation performs the deletion around the current
+         * selection position of the editable text.
+         * @param beforeLength
+         * @param afterLength
+         */
+        DeleteSurroundingText(
+            [in] Int32 beforeLength,
+            [in] Int32 afterLength,
+            [out] Boolean* result);
+
+        /**
+         * The default implementation removes the composing state from the
+         * current editable text.  In addition, only if dummy mode, a key event is
+         * sent for the new text and the current editable buffer cleared.
+         */
+        FinishComposingText(
+            [out] Boolean* result);
+
+        /**
+         * The default implementation uses TextUtils.getCapsMode to get the
+         * cursor caps mode for the current selection position in the editable
+         * text, unless in dummy mode in which case 0 is always returned.
+         */
+        GetCursorCapsMode(
+            [in] Int32 beforeLength,
+            [out] Int32* afterLength);
+
+        /**
+         * The default implementation always returns null.
+         */
+        GetExtractedText(
+            [in] IExtractedTextRequest* request,
+            [in] Int32 flags,
+            [out] IExtractedText** text);
+
+        /**
+         * The default implementation returns the given amount of text from the
+         * current cursor position in the buffer.
+         */
+        GetTextBeforeCursor(
+            [in] Int32 length,
+            [in] Int32 flags,
+            [out] ICharSequence** seq);
+
+        /**
+         * The default implementation returns the text currently selected, or null if none is
+         * selected.
+         */
+        GetSelectedText(
+            [in] Int32 flags,
+            [out] ICharSequence** seq);
+
+        /**
+         * The default implementation returns the given amount of text from the
+         * current cursor position in the buffer.
+         */
+        GetTextAfterCursor(
+            [in] Int32 length,
+            [in] Int32 flags,
+            [out] ICharSequence** seq);
+
+        /**
+         * The default implementation turns this into the enter key.
+         */
+        PerformEditorAction(
+            [in] Int32 actionCode,
+            [out] Boolean* result);
+
+        /**
+         * The default implementation does nothing.
+         */
+        PerformContextMenuAction(
+            [in] Int32 id,
+            [out] Boolean* result);
+
+        /**
+         * The default implementation does nothing.
+         */
+        PerformPrivateCommand(
+            [in] String action,
+            [in] IBundle* data,
+            [out] Boolean* result);
+
+        /**
+         * The default implementation does nothing.
+         */
+        RequestCursorUpdates(
+            [in] Int32 cursorUpdateMode,
+            [out] Boolean* result);
+
+        SetComposingText(
+            [in] ICharSequence* text,
+            [in] Int32 newCursorPosition,
+            [out] Boolean* result);
+
+        SetComposingRegion(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] Boolean* result);
+
+        SetSelection(
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] Boolean* result);
+
+        /**
+         * Provides standard implementation for sending a key event to the window
+         * attached to the input connection's view.
+         */
+        SendKeyEvent(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * Updates InputMethodManager with the current fullscreen mode.
+         */
+        ReportFullscreenMode(
+            [in] Boolean enabled,
+            [out] Boolean* result);
+    }
+
+    interface IBaseInputConnectionHelper {
+        RemoveComposingSpans(
+            [in] ISpannable* text);
+
+        SetComposingSpans(
+            [in] ISpannable* text);
+
+        GetComposingSpanStart(
+            [in] ISpannable* text,
+            [out] Int32* start);
+
+        GetComposingSpanEnd(
+            [in] ISpannable* text,
+            [out] Int32* start);
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

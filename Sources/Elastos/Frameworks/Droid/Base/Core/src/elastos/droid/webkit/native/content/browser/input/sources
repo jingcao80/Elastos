@@ -1,0 +1,42 @@
+
+TARGET_NAME= input
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../../../sources.inc
+
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AdapterInputConnection.cpp
+SOURCES += CanonicalAxisIndex.cpp
+SOURCES += CanonicalButtonIndex.cpp
+SOURCES += ChromeDatePickerDialog.cpp
+SOURCES += DateDialogNormalizer.cpp
+SOURCES += DateTimeChooserElastos.cpp
+SOURCES += DateTimePickerDialog.cpp
+SOURCES += DateTimeSuggestion.cpp
+SOURCES += DateTimeSuggestionListAdapter.cpp
+SOURCES += GamepadDevice.cpp
+SOURCES += GamepadList.cpp
+SOURCES += GamepadMappings.cpp
+SOURCES += HandleView.cpp
+SOURCES += ImeAdapter.cpp
+SOURCES += InputDialogContainer.cpp
+SOURCES += InputMethodManagerWrapper.cpp
+SOURCES += InsertionHandleController.cpp
+SOURCES += MonthPicker.cpp
+SOURCES += MonthPickerDialog.cpp
+SOURCES += MultiFieldTimePickerDialog.cpp
+SOURCES += PopupItemType.cpp
+SOURCES += SelectPopupAdapter.cpp
+SOURCES += SelectPopupDialog.cpp
+SOURCES += SelectPopupDropdown.cpp
+SOURCES += SelectPopupItem.cpp
+SOURCES += SelectionHandleController.cpp
+SOURCES += TwoFieldDatePicker.cpp
+SOURCES += TwoFieldDatePickerDialog.cpp
+SOURCES += WeekPicker.cpp
+SOURCES += WeekPickerDialog.cpp
+SOURCES += CursorController.cpp

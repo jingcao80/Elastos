@@ -1,0 +1,53 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.INdefMessage;
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Tech{
+
+    /**
+     * @Involve
+     * interace IBasicTagTechnology
+     */
+    interface INdef {
+        GetCachedNdefMessage(
+            [out] INdefMessage** message);
+
+        GetType(
+            [out] String* str);
+
+        GetMaxSize(
+            [out] Int32* size);
+
+        IsWritable(
+            [out] Boolean* writable);
+
+        GetNdefMessage(
+            [out] INdefMessage** message);
+
+        WriteNdefMessage(
+            [in] INdefMessage* msg);
+
+        CanMakeReadOnly(
+            [out] Boolean* res);
+
+        MakeReadOnly(
+            [out] Boolean* res);
+    }
+
+    interface INdefHelper {
+        GetNdef(
+            [in] ITag* tag,
+            [out] INdef** light);
+    }
+
+    }// namespace Tech
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

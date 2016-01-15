@@ -1,0 +1,31 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Interface to receive callbacks from ITvInputManager regardless of sessions.
+     * @hide
+     */
+    interface IITvInputManagerCallback {
+        OnInputStateChanged(
+            [in] String inputId,
+            [in] Int32 state);
+
+        OnInputAdded(
+            [in] String inputId);
+
+        OnInputRemoved(
+            [in] String inputId);
+
+        OnInputUpdated(
+            [in] String inputId);
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

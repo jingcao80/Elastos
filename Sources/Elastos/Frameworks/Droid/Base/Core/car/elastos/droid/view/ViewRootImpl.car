@@ -1,0 +1,297 @@
+
+module
+{
+    interface Elastos.Droid.Animation.ILayoutTransition;
+    interface Elastos.Droid.Content.IComponentCallbacks;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.Graphics.IMatrix;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IPoint;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+    interface Elastos.Droid.View.InputMethod.IInputConnection;
+    interface Elastos.Core.IRunnable;
+    interface Elastos.IO.IFileDescriptor;
+    interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    interface ISystemUiVisibilityInfo {
+    }
+
+    /**
+     * A {@link Parcelable} implementation that should be used by inheritance
+     * hierarchies to ensure the state of all classes along the chain is saved.
+     */
+    /**
+     * @Involve
+     * interface IViewParent
+     * interface IViewAttachInfoCallbacks
+     * interface IHardwareDrawCallbacks
+     */
+    [local, deprecated]
+    interface IViewRootImpl {
+        Profile();
+
+        SetView(
+            [in] IView* view,
+            [in] IWindowManagerLayoutParams* attrs,
+            [in] IView* panelParentView);
+
+        DetachFunctor(
+            [in] Int64 functor);
+
+        InvokeFunctor(
+            [in] Int64 functor,
+            [in] Boolean waitForCompletion);
+
+        RegisterAnimatingRenderNode(
+            [in] IRenderNode* animator);
+
+        GetView(
+            [out] IView** view);
+
+        DestroyHardwareResources();
+
+        SetLayoutParams(
+            [in] IWindowManagerLayoutParams* attrs,
+            [in] Boolean newView);
+
+        HandleAppVisibility(
+            [in] Boolean visible);
+
+        HandleGetNewSurface();
+
+        Invalidate();
+
+        InvalidateWorld(
+            [in] IView* view);
+
+        SetStopped(
+            [in] Boolean stopped);
+
+        GetHostVisibility(
+            [out] Int32* res);
+
+        DisposeResizeBuffer();
+
+        RequestTransitionStart(
+            [in] ILayoutTransition* transition);
+
+        NotifyRendererOfFramePending();
+
+        ScheduleTraversals();
+
+        UnscheduleTraversals();
+
+        DoTraversal();
+
+        TransformMatrixToGlobal(
+            [in] IMatrix* m);
+
+        TransformMatrixToLocal(
+            [in] IMatrix* m);
+
+        DispatchApplyInsets(
+            [in] IView* host);
+
+        IsInLayout(
+            [out] Boolean* res);
+
+        RequestLayoutDuringLayout(
+            [in] IView* view,
+            [out] Boolean* res);
+
+        OutputDisplayList(
+            [in] IView* view);
+
+        GetAccessibilityFocusedDrawable(
+            [out] IDrawable** res);
+
+        SetDrawDuringWindowsAnimating(
+            [in] Boolean value);
+
+        ScrollToRectOrFocus(
+            [in] IRect* rectangle,
+            [in] Boolean immediate,
+            [out] Boolean* res);
+
+        GetAccessibilityFocusedHost(
+            [out] IView** res);
+
+        GetAccessibilityFocusedVirtualView(
+            [out] IAccessibilityNodeInfo** res);
+
+        SetAccessibilityFocus(
+            [in] IView* view,
+            [in] IAccessibilityNodeInfo* node);
+
+        DispatchDetachedFromWindow();
+
+        UpdateConfiguration(
+            [in] IConfiguration* config,
+            [in] Boolean force);
+
+        EnsureTouchMode(
+            [in] Boolean inTouchMode,
+            [out] Boolean* res);
+
+        SetLocalDragState(
+            [in] IInterface* obj);
+
+        HandleDispatchSystemUiVisibilityChanged(
+            [in] ISystemUiVisibilityInfo* args);
+
+        HandleDispatchDoneAnimating();
+
+        GetLastTouchPoint(
+            [in] IPoint* outLocation);
+
+        SetDragFocus(
+            [in] IView* newDragTarget);
+
+        GetAccessibilityInteractionController(
+            [out] IAccessibilityInteractionController** controller);
+
+        Debug();
+
+        Dump(
+            [in] String prefix,
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* writer,
+            [in] ArrayOf<String> * args);
+
+        DumpGfxInfo(
+            [in] ArrayOf<Int32> * info);
+
+        Die(
+            [in] Boolean immediate,
+            [out] Boolean* res);
+
+        DoDie();
+
+        RequestUpdateConfiguration(
+            [in] IConfiguration* config);
+
+        LoadSystemProperties();
+
+        DispatchFinishInputConnection(
+            [in] IInputConnection* connection);
+
+        DispatchResized(
+            [in] IRect* frame,
+            [in] IRect* overscanInsets,
+            [in] IRect* contentInsets,
+            [in] IRect* visibleInsets,
+            [in] IRect* stableInsets,
+            [in] Boolean reportDraw,
+            [in] IConfiguration* newConfig);
+
+        DispatchMoved(
+            [in] Int32 newX,
+            [in] Int32 newY);
+
+        EnqueueInputEvent(
+            [in] IInputEvent* event);
+
+        EnqueueInputEvent(
+            [in] IInputEvent* event,
+            [in] IInputEventReceiver* receiver,
+            [in] Int32 flags,
+            [in] Boolean processImmediately);
+
+        DoProcessInputEvents();
+
+        ScheduleConsumeBatchedInput();
+
+        UnscheduleConsumeBatchedInput();
+
+        ScheduleConsumeBatchedInputImmediately();
+
+        DoConsumeBatchedInput(
+            [in] Int64 frameTimeNanos);
+
+        DispatchInvalidateDelayed(
+            [in] IView* view,
+            [in] Int64 delayMilliseconds);
+
+        DispatchInvalidateOnAnimation(
+            [in] IView* view);
+
+        CancelInvalidate(
+            [in] IView* view);
+
+        DispatchInputEvent(
+            [in] IInputEvent* event);
+
+        DispatchInputEvent(
+            [in] IInputEvent* event,
+            [in] IInputEventReceiver* receiver);
+
+        SynthesizeInputEvent(
+            [in] IInputEvent* event);
+
+        DispatchKeyFromIme(
+            [in] IKeyEvent* event);
+
+        DispatchUnhandledInputEvent(
+            [in] IInputEvent* event);
+
+        DispatchAppVisibility(
+            [in] Boolean visible);
+
+        DispatchGetNewSurface();
+
+        WindowFocusChanged(
+            [in] Boolean hasFocus,
+            [in] Boolean inTouchMode);
+
+        DispatchCloseSystemDialogs(
+            [in] String reason);
+
+        DispatchDragEvent(
+            [in] IDragEvent* event);
+
+        DispatchSystemUiVisibilityChanged(
+            [in] Int32 seq,
+            [in] Int32 globalVisibility,
+            [in] Int32 localValue,
+            [in] Int32 localChanges);
+
+        DispatchDoneAnimating();
+
+        DispatchCheckFocus();
+
+        CheckThread();
+
+        ChangeCanvasOpacity(
+            [in] Boolean opaque);
+    }
+
+    [local]
+    interface IViewRootImplHelper {
+        AddFirstDrawHandler(
+            [in] IRunnable* cb);
+
+        AddConfigCallback(
+            [in] IComponentCallbacks* cb);
+
+        IsInTouchMode(
+            [out] Boolean* res);
+
+        IsViewDescendantOf(
+            [in] IView* child,
+            [in] IView* parent,
+            [out] Boolean* res);
+
+        IsTerminalInputEvent(
+            [in] IInputEvent* event,
+            [out] Boolean* res);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

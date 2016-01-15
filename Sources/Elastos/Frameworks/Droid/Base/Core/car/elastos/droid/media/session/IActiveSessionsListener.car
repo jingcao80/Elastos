@@ -1,0 +1,20 @@
+module
+{
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Media.Session.IMediaSessionToken;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    interface IIActiveSessionsListener {
+        OnActiveSessionsChanged(
+            [in] IList* sessions);
+    }
+
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

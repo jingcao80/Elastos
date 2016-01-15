@@ -1,0 +1,3 @@
+DIRS = event
+DIRS += http
+DIRS += url

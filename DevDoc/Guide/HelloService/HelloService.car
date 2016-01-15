@@ -1,0 +1,34 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace HelloService {
+
+    class CMainActivity {
+        interface IActivity;
+    }
+
+    class CHelloService {
+        interface IService;
+    }
+
+    class CBindHelloService{
+        interface IService;
+    }
+
+    class CHelloBinder {
+        interface IBinder;
+    }
+
+    } // namespace HelloService
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}
+

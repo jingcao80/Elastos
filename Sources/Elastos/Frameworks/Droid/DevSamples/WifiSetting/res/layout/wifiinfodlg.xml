@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parentPanel"
+    android:layout_width="200px"
+    android:layout_height="200px"
+    android:padding="5dip"
+    android:orientation="vertical">
+
+    <TextView android:id="@+id/secutityText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Security "
+        android:textSize="20sp"
+        android:visibility="gone"
+        android:padding="5dip" />
+
+    <TextView android:id="@+id/signalText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Signal Strength "
+        android:visibility="gone"
+        android:textSize="20sp"
+        android:padding="5dip" />
+
+    <TextView
+    	android:id="@+id/pwdText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Password"
+        android:padding="5dip"
+        android:textSize="20sp"
+        android:visibility="gone"/>
+
+    <EditText android:id="@+id/pwdEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:text="Security "
+        android:padding="5dip" />
+
+	<CheckBox android:id="@+id/showPwdCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Show Password"
+        android:visibility="gone"
+        android:padding="5dip" >
+	</CheckBox>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="54dip"
+        android:orientation="horizontal">
+        <Button android:id="@+id/connectButton"
+            android:layout_width="50px"
+            android:layout_gravity="left"
+            android:layout_weight="1"
+            android:layout_height="50px"
+            android:text="Connect" />
+        <Button android:id="@+id/cancelButton"
+            android:layout_width="50px"
+            android:layout_gravity="right"
+            android:layout_weight="1"
+            android:layout_height="50px"
+            android:text="Cancel" />
+    </LinearLayout>
+</LinearLayout>
+

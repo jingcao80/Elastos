@@ -1,0 +1,19 @@
+TARGET_NAME= multipart
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += ByteArrayPartSource.cpp
+SOURCES += CPartHelper.cpp
+SOURCES += FilePart.cpp
+SOURCES += FilePartSource.cpp
+SOURCES += MultipartEntity.cpp
+SOURCES += Part.cpp
+SOURCES += PartBase.cpp
+SOURCES += StringPart.cpp
+SOURCES += Multipart.cpp

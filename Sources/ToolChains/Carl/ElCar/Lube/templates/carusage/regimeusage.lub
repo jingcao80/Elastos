@@ -1,0 +1,13 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}_regime.txt"
+$
+$WITH all classes DO
+$    IF type is not "clsobj" and type is "regime"
+$        TEMPLATE "objectusage.lub"
+$    END IF
+$END DO ;; all classes
+$END OUTPUT

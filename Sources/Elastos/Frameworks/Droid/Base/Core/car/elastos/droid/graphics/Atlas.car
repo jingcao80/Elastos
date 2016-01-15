@@ -1,0 +1,106 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    /**
+     * Each type defines a different packing algorithm that can
+     * be used by an {@link Atlas}. The best algorithm to use
+     * will depend on the source dataset and the dimensions of
+     * the atlas.
+     */
+    enum AtlasType {
+        AtlasType_SliceMinArea = 0,
+        AtlasType_SliceMaxArea = 1,
+        AtlasType_SliceShortAxis = 2,
+        AtlasType_SliceLongAxis = 3
+    }
+
+    interface IAtlasEntry {
+        /**
+         * Location, in pixels, of the bitmap on the X axis in the atlas.
+         */
+        SetX(
+            [in] Int32 x);
+
+        GetX(
+            [out] Int32* x);
+        /**
+         * Location, in pixels, of the bitmap on the Y axis in the atlas.
+         */
+        SetY(
+            [in] Int32 y);
+
+        GetY(
+            [out] Int32* y);
+
+        /**
+         * If true, the bitmap must be rotated 90 degrees in the atlas.
+         */
+        SetRotated(
+            [in] Boolean rotated);
+
+        GetRotated(
+            [out] Boolean* rotated);
+    }
+
+    interface IAtlas {
+        /**
+         * This flag indicates whether the packing algorithm will attempt
+         * to rotate entries to make them fit better in the atlas.
+         */
+        const Int32 FLAG_ALLOW_ROTATIONS = 0x1;
+        /**
+         * This flag indicates whether the packing algorithm should leave
+         * an empty 1 pixel wide border around each bitmap. This border can
+         * be useful if the content of the atlas will be used in OpenGL using
+         * bilinear filtering.
+         */
+        const Int32 FLAG_ADD_PADDING = 0x2;
+        /**
+         * Default flags: allow rotations and add padding.
+         */
+        const Int32 FLAG_DEFAULTS = FLAG_ADD_PADDING;
+
+    /**
+     * Packs a rectangle of the specified dimensions in this atlas.
+     *
+     * @param width The width of the rectangle to pack in the atlas
+     * @param height The height of the rectangle to pack in the atlas
+     *
+     * @return An {@link Entry} instance if the rectangle was packed in
+     *         the atlas, or null if the rectangle could not fit
+     *
+     * @see #pack(int, int, Atlas.Entry)
+     */
+        Pack(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] IAtlasEntry** entry);
+
+    /**
+     * Packs a rectangle of the specified dimensions in this atlas.
+     *
+     * @param width The width of the rectangle to pack in the atlas
+     * @param height The height of the rectangle to pack in the atlas
+     * @param entry Out parameter that will be filled in with the location
+     *              and attributes of the packed rectangle, can be null
+     *
+     * @return An {@link Entry} instance if the rectangle was packed in
+     *         the atlas, or null if the rectangle could not fit
+     *
+     * @see #pack(int, int)
+     */
+        Pack(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] IAtlasEntry* inEntry,
+            [out] IAtlasEntry** outEntry);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

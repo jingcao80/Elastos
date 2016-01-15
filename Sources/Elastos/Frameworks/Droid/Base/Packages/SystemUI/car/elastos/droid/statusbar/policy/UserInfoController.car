@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    interface IUserInfoControllerOnUserInfoChangedListener {
+        OnUserInfoChanged(
+            [in] String name,
+            [in] IDrawable* picture);
+    }
+
+    interface IUserInfoController {
+        AddListener(
+            [in] IUserInfoControllerOnUserInfoChangedListener* listener);
+
+        ReloadUserInfo();
+
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

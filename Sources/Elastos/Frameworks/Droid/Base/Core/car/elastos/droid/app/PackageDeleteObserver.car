@@ -1,0 +1,29 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.Pm.IIPackageDeleteObserver2;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** {@hide} */
+    interface IPackageDeleteObserver {
+
+        GetBinder(
+            [out] IIPackageDeleteObserver2** binder);
+
+        OnUserActionRequired(
+            [in] IIntent* intent);
+
+        OnPackageDeleted(
+            [in] String basePackageName,
+            [in] Int32 returnCode,
+            [in] String msg);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

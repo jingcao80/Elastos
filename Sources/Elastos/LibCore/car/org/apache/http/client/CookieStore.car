@@ -1,0 +1,63 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IDate;
+
+    interface Org.Apache.Http.Cookie.ICookie;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+
+    /**
+     * Abstract cookie store.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 4.0
+     */
+    interface ICookieStore {
+
+        /**
+         * Adds an {@link Cookie HTTP cookie}, replacing any existing equivalent cookies.
+         * If the given cookie has already expired it will not be added, but existing
+         * values will still be removed.
+         *
+         * @param cookie the {@link Cookie cookie} to be added
+         */
+        AddCookie(
+            [in] ICookie* cookie);
+
+        /**
+         * Returns all cookies contained in this store.
+         *
+         * @return all cookies
+         */
+        GetCookies(
+            [out] IList** cookies);
+
+        /**
+         * Removes all of {@link Cookie cookies} in this store that have expired by
+         * the specified {@link java.util.Date date}.
+         *
+         * @return true if any cookies were purged.
+         */
+        ClearExpired(
+            [in] IDate* date,
+            [out] Boolean* purged);
+
+        /**
+         * Clears all cookies.
+         */
+        Clear();
+
+    }
+
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

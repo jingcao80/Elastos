@@ -1,0 +1,255 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Speech.Tts.IITextToSpeechCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+    namespace Tts {
+
+    /**
+     * Interface for TextToSpeech to talk to TextToSpeechService.
+     *
+     * {@hide}
+     */
+    interface IITextToSpeechService {
+
+        /**
+         * Tells the engine to synthesize some speech and play it back.
+         *
+         * @param callingInstance a binder representing the identity of the calling
+         *        TextToSpeech object.
+         * @param text The text to synthesize.
+         * @param queueMode Determines what to do to requests already in the queue.
+         * @param param Request parameters.
+         * @param utteranceId Unique identifier of synthesized utterance.
+         */
+        Speak(
+            [in] IBinder* callingInstance,
+            [in] ICharSequence* text,
+            [in] Int32 queueMode,
+            [in] IBundle* params,
+            [in] String utteranceld,
+            [out] Int32* ret);
+
+        /**
+         * Tells the engine to synthesize some speech and write it to a file.
+         *
+         * @param callingInstance a binder representing the identity of the calling
+         *        TextToSpeech object.
+         * @param text The text to synthesize.
+         * @param fileDescriptor The file descriptor to write the synthesized audio to. Has to be
+                  writable.
+         * @param utteranceId Unique identifier of synthesized utterance.
+         * @param param Request parameters.
+         */
+        SynthesizeToFileDescriptor(
+            [in] IBinder* callingInstance,
+            [in] ICharSequence* text,
+            [in] IParcelFileDescriptor* fd,
+            [in] IBundle* params,
+            [out] Int32* ret);
+
+        /**
+         * Plays an existing audio resource.
+         *
+         * @param callingInstance a binder representing the identity of the calling
+         *        TextToSpeech object.
+         * @param audioUri URI for the audio resource (a file or android.resource URI)
+         * @param queueMode Determines what to do to requests already in the queue.
+         * @param utteranceId Unique identifier of synthesized utterance.
+         * @param param Request parameters.
+         */
+        PlayAudio(
+            [in] IBinder* callingInstance,
+            [in] IUri* audioUri,
+            [in] Int32 queueMode,
+            [in] IBundle* params,
+            [in] String utteranceId,
+            [out] Int32* ret);
+
+        /**
+         * Plays silence.
+         *
+         * @param callingInstance a binder representing the identity of the calling
+         *        TextToSpeech object.
+         * @param duration Number of milliseconds of silence to play.
+         * @param queueMode Determines what to do to requests already in the queue.
+         * @param utteranceId Unique id used to identify this request in callbacks.
+         */
+        PlaySilence(
+            [in] IBinder* callingInstance,
+            [in] Int64 duration,
+            [in] Int32 queueMode,
+            [in] IBundle* params,
+            [in] String utteranceId,
+            [out] Int32* ret);
+
+        /**
+         * Checks whether the service is currently playing some audio.
+         */
+        IsSpeaking(
+            [out] Boolean* ret);
+
+        /**
+         * Returns the language, country and variant currently being used by the TTS engine.
+         * Can be called from multiple threads.
+         *
+         * @return A 3-element array, containing language (ISO 3-letter code),
+         *         country (ISO 3-letter code) and variant used by the engine.
+         *         The country and variant may be {@code ""}. If country is empty, then variant must
+         *         be empty too.
+         */
+        GetLanguage(
+            [out, callee] ArrayOf<String>* language);
+
+        /**
+         * Returns a default TTS language, country and variant as set by the user.
+         *
+         * Can be called from multiple threads.
+         *
+         * @return A 3-element array, containing language (ISO 3-letter code),
+         *         country (ISO 3-letter code) and variant used by the engine.
+         *         The country and variant may be {@code ""}. If country is empty, then variant must
+         *         be empty too.
+         */
+        GetClientDefaultLanguage(
+            [out, callee] ArrayOf<String>* language);
+
+        /**
+         * Interrupts the current utterance (if from the given app) and removes any utterances
+         * in the queue that are from the given app.
+         *
+         * @param callingInstance a binder representing the identity of the calling
+         *        TextToSpeech object.
+         */
+        Stop(
+            [in] IBinder* callingInstance,
+            [out] Int32* ret);
+
+        /**
+         * Checks whether the engine supports a given language.
+         *
+         * @param lang ISO-3 language code.
+         * @param country ISO-3 country code. May be empty or null.
+         * @param variant Language variant. May be empty or null.
+         * @return Code indicating the support status for the locale.
+         *         One of {@link TextToSpeech#LANG_AVAILABLE},
+         *         {@link TextToSpeech#LANG_COUNTRY_AVAILABLE},
+         *         {@link TextToSpeech#LANG_COUNTRY_VAR_AVAILABLE},
+         *         {@link TextToSpeech#LANG_MISSING_DATA}
+         *         {@link TextToSpeech#LANG_NOT_SUPPORTED}.
+         */
+        IsLanguageAvailable(
+            [in] String lang,
+            [in] String country,
+            [in] String variant,
+            [out] Int32* ret);
+
+        /**
+         * Returns a list of features available for a given language. Elements of the returned
+         * string array can be passed in as keys to {@link TextToSpeech#speak} and
+         * {@link TextToSpeech#synthesizeToFile} to select a given feature or features to be
+         * used during synthesis.
+         *
+         * @param lang ISO-3 language code.
+         * @param country ISO-3 country code. May be empty or null.
+         * @param variant Language variant. May be empty or null.
+         * @return An array of strings containing the set of features supported for
+         *         the supplied locale. The array of strings must not contain
+         *         duplicates.
+         */
+        GetFeaturesForLanguage(
+            [in] String lang,
+            [in] String country,
+            [in] String variant,
+            [out, callee] ArrayOf<String>* ret);
+
+        /**
+         * Notifies the engine that it should load a speech synthesis language.
+         *
+         * @param caller a binder representing the identity of the calling
+         *        TextToSpeech object.
+         * @param lang ISO-3 language code.
+         * @param country ISO-3 country code. May be empty or null.
+         * @param variant Language variant. May be empty or null.
+         * @return Code indicating the support status for the locale.
+         *         One of {@link TextToSpeech#LANG_AVAILABLE},
+         *         {@link TextToSpeech#LANG_COUNTRY_AVAILABLE},
+         *         {@link TextToSpeech#LANG_COUNTRY_VAR_AVAILABLE},
+         *         {@link TextToSpeech#LANG_MISSING_DATA}
+         *         {@link TextToSpeech#LANG_NOT_SUPPORTED}.
+         */
+        LoadLanguage(
+            [in] IBinder* caller,
+            [in] String lang,
+            [in] String country,
+            [in] String variant,
+            [out] Int32* ret);
+
+        /**
+         * Sets the callback that will be notified when playback of utterance from the
+         * given app are completed.
+         *
+         * @param callingApp Package name for the app whose utterance the callback will handle.
+         * @param cb The callback.
+         */
+        SetCallback(
+            [in] IBinder* caller,
+            [in] IITextToSpeechCallback* cb);
+
+        /**
+         * Get the array of available voices.
+         */
+        GetVoices(
+            [out] IList** list);
+
+        /**
+         * Notifies the engine that it should load a speech synthesis voice.
+         *
+         * @param caller a binder representing the identity of the calling
+         *        TextToSpeech object.
+         * @param voiceName Unique voice of the name.
+         * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
+         */
+        LoadVoice(
+            [in] IBinder* caller,
+            [in] String voiceName,
+            [out] Int32* err);
+
+        /**
+         * Return a name of the default voice for a given locale.
+         *
+         * This allows {@link TextToSpeech#getVoice} to return a sensible value after a client calls
+         * {@link TextToSpeech#setLanguage}.
+         *
+         * @param lang ISO 3-character language code.
+         * @param country ISO 3-character country code. May be empty or null.
+         * @param variant Language variant. May be empty or null.
+         * @return Code indicating the support status for the locale.
+         *         One of {@link TextToSpeech#LANG_AVAILABLE},
+         *         {@link TextToSpeech#LANG_COUNTRY_AVAILABLE},
+         *         {@link TextToSpeech#LANG_COUNTRY_VAR_AVAILABLE},
+         *         {@link TextToSpeech#LANG_MISSING_DATA}
+         *         {@link TextToSpeech#LANG_NOT_SUPPORTED}.
+         */
+        GetDefaultVoiceNameFor(
+            [in] String lang,
+            [in] String country,
+            [in] String variant,
+            [out] String* name);
+    }
+
+    } // namespace Tts
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

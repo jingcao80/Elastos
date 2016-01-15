@@ -1,0 +1,188 @@
+$ INPUT class
+$ IF attrib is not "hasctor" OR attrib is "hasdefaultctor"
+$   WITH all interfaces DO
+$       IF attrib is not "clsobj" and attrib is not "callback" and attrib is not "callbacksink" and attrib is not "delegatesink" and attrib is not "filter" and name is not "IObject"
+
+$           IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingletonInRegime($^
+$           ELSE
+    static _ELASTOS ECode NewInRegime($^
+$           END IF ;; is singleton
+/* [in] */ IRegime* pRegime,/* [out] */ ${name}** pp${name})
+    {
+        IInterface* pObject;
+        _ELASTOS ECode ec = $^
+$           IF class.attrib is "singleton"
+_AcquireSingletonInRegime($^
+$           ELSE
+_NewInRegime($^
+$           END IF ;; is singleton
+pRegime, &pObject);
+        if (FAILED(ec)) return ec;
+
+        *pp${name} = ${name}::Probe(pObject);
+        if (!(*pp${name})) ec = E_NO_INTERFACE;
+
+        return ec;
+    }
+
+$           IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingletonInRegime($^
+$           ELSE
+    static _ELASTOS ECode NewInRegime($^
+$           END IF ;; is singleton
+/* [in] */ IInterface* pRegimeObject,/* [out] */ ${name}** pp${name})
+    {
+        IRegime* pRegime = IRegime::Probe(pRegimeObject);
+        if (!pRegime) return E_NO_INTERFACE;
+        return $^
+$           IF class.attrib is "singleton"
+AcquireSingletonInRegime($^
+$           ELSE
+NewInRegime($^
+$           END IF ;; is singleton
+pRegime, pp${name});
+    }
+
+$           IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingleton($^
+$           ELSE
+    static _ELASTOS ECode New($^
+$           END IF ;; is singleton
+/* [out] */ ${name}** pp${name})
+    {
+        return $^
+$           IF class.attrib is "singleton"
+AcquireSingletonInRegime($^
+$           ELSE
+NewInRegime($^
+$           END IF ;; is singleton
+RGM_SAME_DOMAIN, pp${name});
+    }
+$
+$       END IF ;; attrib is not clsobj and is not callback and ...
+$   END DO ;; all interfaces
+$ END IF ;; not hasctor OR hasdefaultctor
+$
+$   IF attrib is "hasctor"
+$   WITH all interfaces DO
+$       IF attrib is "clsobj"
+$           WITH all methods DO
+$               IF attrib is not "defaultctor"
+$                   WITH super DO
+$                   WITH all interfaces DO
+$                       IF attrib is not "clsobj" AND attrib is not "callback" and attrib is not "callbacksink" and attrib is not "delegatesink" and attrib is not "filter" and name is not "IObject"
+
+$                           IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingletonInRegime($^
+$                           ELSE
+    static _ELASTOS ECode NewInRegime($^
+$                           END IF ;; is singleton
+/* [in] */ IRegime* __pRegime$^
+$                           WITH all parameters DO
+,$^
+$                               IF parameter is not last
+/* [${attrib}] */ ${ParamNamespaceType(type)} ${prefixingname(parameter)}$^
+$                               ELSE
+/* [out] */ ${interface.name}** __pp${interface.name})
+$                               END IF ;; parameter is not last
+$                           END DO ;; all parameters
+    {
+        IInterface* __pNewObj;
+        _ELASTOS ECode ec = $^
+$                           IF class.attrib is "singleton"
+_AcquireSingletonInRegime($^
+$                           ELSE
+_NewInRegime($^
+$                           END IF ;; is singleton
+__pRegime$^
+$                           WITH all parameters DO
+, $^
+$                               IF parameter is not last
+${prefixingname(parameter)}$^
+$                               ELSE
+&__pNewObj);
+$                               END IF ;; parameter is not last
+$                           END DO ;; all parameters
+        if (FAILED(ec)) return ec;
+
+        *__pp${name} = ${name}::Probe(__pNewObj);
+        if (!(*__pp${name})) ec = E_NO_INTERFACE;
+
+        return ec;
+    }
+
+$                           IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingletonInRegime($^
+$                           ELSE
+    static _ELASTOS ECode NewInRegime($^
+$                           END IF ;; is singleton
+/* [in] */ IInterface* __pRegimeObject$^
+$                           WITH all parameters DO
+,$^
+$                               IF parameter is not last
+/* [${attrib}] */ ${ParamNamespaceType(type)} ${prefixingname(parameter)}$^
+$                               ELSE
+/* [out] */ ${interface.name}** __pp${interface.name})
+$                               END IF ;; parameter is not last
+$                           END DO ;; all parameters
+    {
+        IRegime *__pRegime = IRegime::Probe(__pRegimeObject);
+        if (!__pRegime) return E_NO_INTERFACE;
+
+        return $^
+$                           IF class.attrib is "singleton"
+AcquireSingletonInRegime($^
+$                           ELSE
+NewInRegime($^
+$                           END IF ;; is singleton
+__pRegime$^
+$                           WITH all parameters DO
+, $^
+$                               IF parameter is not last
+${prefixingname(parameter)}$^
+$                               ELSE
+__pp${interface.name});
+$                               END IF ;; parameter is not last
+$                           END DO ;; all parameters
+    }
+
+$                           IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingleton($^
+$                           ELSE
+    static _ELASTOS ECode New($^
+$                           END IF ;; is singleton
+$                           WITH all parameters DO
+$                               IF parameter is not last
+/* [${attrib}] */ ${ParamNamespaceType(type)} ${prefixingname(parameter)},
+$                               ELSE
+/* [out] */ ${interface.name}** __pp${interface.name})
+$                               END IF ;; parameter is not last
+$                           END DO ;; all parameters
+    {
+        return $^
+$                           IF class.attrib is "singleton"
+AcquireSingletonInRegime($^
+$                           ELSE
+NewInRegime($^
+$                           END IF ;; is singleton
+(IRegime*)RGM_SAME_DOMAIN$^
+$                           WITH all parameters DO
+, $^
+$                               IF parameter is not last
+${prefixingname(parameter)}$^
+$                               ELSE
+__pp${interface.name});
+$                               END IF ;; parameter is not last
+$                           END DO ;; all parameters
+    }
+$
+$                       END IF ;; attrib is not clsobj and is not callback and ...
+$                   END DO ;; all interfaces
+$                   END DO ;; super
+$               END IF ;; is not defaultctor
+$           END DO ;; all methods
+$       END IF ;; is clsobj
+$   END DO ;; all interfaces
+$ END IF ;; attrib is hasctor
+$

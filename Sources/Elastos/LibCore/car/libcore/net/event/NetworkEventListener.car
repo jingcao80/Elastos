@@ -1,0 +1,14 @@
+module
+{
+    namespace Libcore {
+    namespace Net {
+    namespace Event {
+
+    interface INetworkEventListener{
+        OnNetworkConfigurationChanged();
+    }
+
+    } // namespace Event
+    } // namespace Net
+    } // namespace Libcore
+}

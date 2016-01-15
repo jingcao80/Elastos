@@ -1,0 +1,79 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.View.Accessibility.IAccessibilityWindowInfo;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    /**
+     * Cache for AccessibilityWindowInfos and AccessibilityNodeInfos.
+     * It is updated when windows change or nodes change.
+     */
+    interface IAccessibilityCache {
+        AddWindow(
+            [in] IAccessibilityWindowInfo* window);
+
+        /**
+         * Notifies the cache that the something in the UI changed. As a result
+         * the cache will either refresh some nodes or evict some nodes.
+         *
+         * @param event An event.
+         */
+        OnAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        /**
+         * Gets a cached {@link AccessibilityNodeInfo} given the id of the hosting
+         * window and the accessibility id of the node.
+         *
+         * @param windowId The id of the window hosting the node.
+         * @param accessibilityNodeId The info accessibility node id.
+         * @return The cached {@link AccessibilityNodeInfo} or null if such not found.
+         */
+        GetNode(
+            [in] Int32 windowId,
+            [in] Int64 accessibilityNodeId,
+            [out] IAccessibilityNodeInfo** info);
+
+        GetWindows(
+            [out] IList** list);
+
+        GetWindow(
+            [in] Int32 windowId,
+            [out] IAccessibilityWindowInfo** info);
+
+        /**
+         * Caches an {@link AccessibilityNodeInfo}.
+         *
+         * @param info The node to cache.
+         */
+        Add(
+            [in] IAccessibilityNodeInfo* info);
+
+        /**
+         * Clears the cache.
+         */
+        Clear();
+
+        /**
+         * Check the integrity of the cache which is nodes from different windows
+         * are not mixed, there is a single active window, there is a single focused
+         * window, for every window there are no duplicates nodes, all nodes for a
+         * window are connected, for every window there is a single input focused
+         * node, and for every window there is a single accessibility focused node.
+         */
+        CheckIntegrity();
+    }
+
+    } // namespace Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,54 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IActionMode;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Internal.Widget.IAbsActionBarView
+     */
+     [local]
+    interface IActionBarContextView {
+        SetCustomView(
+            [in] IView* view);
+
+        SetTitle(
+            [in] ICharSequence* title);
+
+        SetSubtitle(
+            [in] ICharSequence* subtitle);
+
+        GetTitle(
+            [out] ICharSequence** title);
+
+        GetSubtitle(
+            [out] ICharSequence** subTitle);
+
+        InitForMode(
+            [in] IActionMode* mode);
+
+        CloseMode();
+
+        KillMode();
+
+        SetTitleOptional(
+            [in] Boolean titleOptional);
+
+        IsTitleOptional(
+            [out] Boolean* res);
+    }
+
+    } // namespace Widget
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}
+
+

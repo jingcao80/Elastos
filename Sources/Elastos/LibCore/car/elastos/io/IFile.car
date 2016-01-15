@@ -1,0 +1,749 @@
+
+module
+{
+    interface Elastos.IO.IFileFilter;
+    interface Elastos.IO.IFilenameFilter;
+    interface Elastos.Net.IURI;
+    interface Elastos.Net.IURL;
+
+    namespace Elastos {
+    namespace IO {
+
+    interface IFile {
+        /**
+         * Tests whether or not this process is allowed to execute this file.
+         * Note that this is a best-effort result; the only way to be certain is
+         * to actually attempt the operation.
+         *
+         * @return {true} if this file can be executed, {false} otherwise.
+         * @since 1.6
+         */
+        CanExecute(
+            [out] Boolean* canExecute);
+
+        /**
+         * Indicates whether the current context is allowed to read from this file.
+         *
+         * @return {true} if this file can be read, {false} otherwise.
+         */
+        CanRead(
+            [out] Boolean* canRead);
+
+        /**
+         * Indicates whether the current context is allowed to write to this file.
+         *
+         * @return {true} if this file can be written, {false}
+         *         otherwise.
+         */
+        CanWrite(
+            [out] Boolean* canWrite);
+
+        /**
+         * Creates a new, empty file on the file system according to the path
+         * information stored in this file.
+         *
+         * <p>Note that this method does <i>not</i> throw IOException on failure.
+         * Callers must check the return value.
+         *
+         * @return true if the file has been created, false if it
+         *         already exists.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if it's not possible to create the file.
+         * SecurityException | if a SecurityManager is installed and it denies write access for this file.
+         */
+
+        /**
+         * Compares this object to the specified object to determine their relative
+         * order.
+         *
+         * @param another
+         *            the object to compare to this instance.
+         * @return a negative integer if this instance is less than {@code another};
+         *         a positive integer if this instance is greater than
+         *         {@code another}; 0 if this instance has the same order as
+         *         {@code another}.
+         * @throws ClassCastException
+         *             if {@code another} cannot be converted into something
+         *             comparable to {@code this} instance.
+         */
+        CompareTo(
+            [in] IFile* another,
+            [out] Int32* result);
+
+        /**
+         * Deletes this file. Directories must be empty before they will be deleted.
+         *
+         * <p>Note that this method does <i>not</i> throw {IOException} on failure.
+         * Callers must check the return value.
+         *
+         * @return {true} if this file was deleted, {false} otherwise.
+         */
+        Delete(
+            [out] Boolean* isDeleted);
+
+        Delete();
+
+        /**
+         * Schedules this file to be automatically deleted when the VM terminates normally.
+         *
+         * <p><i>Note that on Android, the application lifecycle does not include VM termination,
+         * so calling this method will not ensure that files are deleted</i>. Instead, you should
+         * use the most appropriate out of:
+         * <ul>
+         * <li>Use a {@code finally} clause to manually invoke {@link #delete}.
+         * <li>Maintain your own set of files to delete, and process it at an appropriate point
+         * in your application's lifecycle.
+         * <li>Use the Unix trick of deleting the file as soon as all readers and writers have
+         * opened it. No new readers/writers will be able to access the file, but all existing
+         * ones will still have access until the last one closes the file.
+         * </ul>
+         */
+        DeleteOnExit();
+
+        /**
+         * Compares {@code obj} to this file and returns {@code true} if they
+         * represent the <em>same</em> object using a path specific comparison.
+         *
+         * @param obj
+         *            the object to compare this file with.
+         * @return {@code true} if {@code obj} is the same as this object,
+         *         {@code false} otherwise.
+         */
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* pCode);
+
+        /**
+         * Returns a Boolean indicating whether this file can be found on the underlying file system.
+         * @return {true} if this file exists, {false} otherwise.
+         */
+        Exists(
+            [out] Boolean* isExist);
+
+        /**
+         * Returns the absolute path of this file. An absolute path is a path that starts at a root
+         * of the file system. On Android, there is only one root: {/}.
+         *
+         * <p>A common use for absolute paths is when passing paths to a {Process} as
+         * command-line arguments, to remove the requirement implied by relative paths, that the
+         * child must have the same working directory as its parent.
+         */
+        GetAbsolutePath(
+            [out] String* path);
+
+        /**
+         * Returns a new file constructed using the absolute path of this file.
+         * Equivalent to {new File(this.getAbsolutePath())}.
+         */
+        GetAbsoluteFile(
+            [out] IFile** file);
+
+        /**
+         * Returns the canonical path of this file.
+         * An <i>absolute</i> path is one that begins at the root of the file system.
+         * A <i>canonical</i> path is an absolute path with symbolic links
+         * and references to "." or ".." resolved. If a path element does not exist (or
+         * is not searchable), there is a conflict between interpreting canonicalization
+         * as a textual operation (where "a/../b" is "b" even if "a" does not exist) .
+         *
+         * <p>Most callers should use getAbsolutePath instead. A canonical path is
+         * significantly more expensive to compute, and not generally useful. The primary
+         * use for canonical paths is determining whether two paths point to the same file by
+         * comparing the canonicalized paths.
+         *
+         * @sa #getAbsolutePath
+         *
+         * <p>It can be actively harmful to use a canonical path, specifically because
+         * canonicalization removes symbolic links. It's wise to assume that a symbolic link
+         * is present for a reason, and that that reason is because the link may need to change.
+         * Canonicalization removes this layer of indirection. Good code should generally avoid
+         * caching canonical paths.
+         *
+         * @return the canonical path of this file.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs.
+         */
+        GetCanonicalPath(
+            [out] String* path);
+
+        /**
+         * Returns a new file created using the canonical path of this file.
+         * Equivalent to new File(this.getCanonicalPath()).
+         *
+         * @return the new file constructed from this file's canonical path.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs.
+         */
+        GetCanonicalFile(
+            [out] IFile** file);
+
+        /**
+         * Returns the name of the file or directory represented by this file.
+         *
+         * @return this file's name or an empty string if there is no name part in
+         *         the file's path.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns the pathname of the parent of this file. This is the path up to
+         * but not including the last name. null is returned if there is no
+         * parent.
+         *
+         * @return this file's parent pathname or null.
+         */
+        GetParent(
+            [out] String* parent);
+
+        /**
+         * Returns a new file made from the pathname of the parent of this file.
+         * This is the path up to but not including the last name. null is
+         * returned when there is no parent.
+         *
+         * @return a new file representing this file's parent or null.
+         */
+        GetParentFile(
+            [out] IFile** file);
+
+        /**
+         * Returns the path of this file.
+         */
+        GetPath(
+            [out] String* path);
+
+        /**
+         * Indicates if this file's pathname is absolute. Whether a pathname is
+         * absolute is platform specific. On Android, absolute paths start with
+         * the character '/'.
+         *
+         * @return true if this file's pathname is absolute, false
+         *         otherwise.
+         * @see #getPath
+         */
+        IsAbsolute(
+            [out] Boolean* isAbsolute);
+
+        /**
+         * Indicates if this file represents a <em>directory</em> on the
+         * underlying file system.
+         *
+         * @return true if this file is a directory, false
+         *         otherwise.
+         */
+        IsDirectory(
+            [out] Boolean* isDirectory);
+
+        /**
+         * Indicates if this file represents a <em>file</em> on the underlying
+         * file system.
+         *
+         * @return true if this file is a file, false otherwise.
+         */
+        IsFile(
+            [out] Boolean* isFile);
+
+        /**
+         * Returns whether or not this file is a hidden file as defined by the
+         * operating system. The notion of "hidden" is system-dependent. For Unix
+         * systems a file is considered hidden if its name starts with a ".". For
+         * Windows systems there is an explicit flag in the file system for this
+         * purpose.
+         *
+         * @return true if the file is hidden, false otherwise.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SecurityException | if a SecurityManager is installed and it denies read access to this file.
+         */
+        IsHidden(
+            [out] Boolean* isHidden);
+
+        /**
+         * Returns the time when this file was last modified, measured in
+         * milliseconds since January 1st, 1970, midnight.
+         * Returns 0 if the file does not exist.
+         *
+         * @return the time when this file was last modified.
+         */
+        GetLastModified(
+            [out] Int64* time);
+
+        /**
+         * Sets the time this file was last modified, measured in milliseconds since
+         * January 1st, 1970, midnight.
+         *
+         * <p>Note that this method does <i>not</i> throw IOException on failure.
+         * Callers must check the return value.
+         *
+         * @param time
+         *            the last modification time for this file.
+         * @return true if the operation is successful, false
+         *         otherwise.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if time < 0.
+         */
+        SetLastModified(
+            [in] Int64 time,
+            [out] Boolean* succeeded);
+
+        /**
+         * Equivalent to setWritable(false, false).
+         *
+         * @see #setWritable(Boolean, Boolean)
+         */
+        SetReadOnly(
+            [out] Boolean* succeeded);
+
+        /**
+         * Manipulates the execute permissions for the abstract path designated by
+         * this file.
+         *
+         * <p>Note that this method does <i>not</i> throw IOException on failure.
+         * Callers must check the return value.
+         *
+         * @param executable
+         *            To allow execute permission if true, otherwise disallow
+         * @param ownerOnly
+         *            To manipulate execute permission only for owner if true,
+         *            otherwise for everyone. The manipulation will apply to
+         *            everyone regardless of this value if the underlying system
+         *            does not distinguish owner and other users.
+         * @return true if and only if the operation succeeded. If the user does not
+         *         have permission to change the access permissions of this abstract
+         *         pathname the operation will fail. If the underlying file system
+         *         does not support execute permission and the value of executable
+         *         is false, this operation will fail.
+         * @since 1.6
+         */
+        SetExecutable(
+            [in] Boolean executable,
+            [in] Boolean ownerOnly,
+            [out] Boolean* succeeded);
+
+        /**
+         * Equivalent to setExecutable(executable, true).
+         * @see #setExecutable(Boolean, Boolean)
+         * @since 1.6
+         */
+        SetExecutable(
+            [in] Boolean executable,
+            [out] Boolean* succeeded);
+
+        /**
+         * Manipulates the read permissions for the abstract path designated by this
+         * file.
+         *
+         * @param readable
+         *            To allow read permission if true, otherwise disallow
+         * @param ownerOnly
+         *            To manipulate read permission only for owner if true,
+         *            otherwise for everyone. The manipulation will apply to
+         *            everyone regardless of this value if the underlying system
+         *            does not distinguish owner and other users.
+         * @return true if and only if the operation succeeded. If the user does not
+         *         have permission to change the access permissions of this abstract
+         *         pathname the operation will fail. If the underlying file system
+         *         does not support read permission and the value of readable is
+         *         false, this operation will fail.
+         * @since 1.6
+         */
+        SetReadable(
+            [in] Boolean readable,
+            [in] Boolean ownerOnly,
+            [out] Boolean* succeeded);
+
+        /**
+         * Equivalent to setReadable(readable, true).
+         * @see #setReadable(Boolean, Boolean)
+         * @since 1.6
+         */
+        SetReadable(
+            [in] Boolean readable,
+            [out] Boolean* succeeded);
+
+        /**
+         * Manipulates the write permissions for the abstract path designated by this
+         * file.
+         *
+         * @param writable
+         *            To allow write permission if true, otherwise disallow
+         * @param ownerOnly
+         *            To manipulate write permission only for owner if true,
+         *            otherwise for everyone. The manipulation will apply to
+         *            everyone regardless of this value if the underlying system
+         *            does not distinguish owner and other users.
+         * @return true if and only if the operation succeeded. If the user does not
+         *         have permission to change the access permissions of this abstract
+         *         pathname the operation will fail.
+         * @since 1.6
+         */
+        SetWritable(
+            [in] Boolean writable,
+            [in] Boolean ownerOnly,
+            [out] Boolean* succeeded);
+
+        /**
+         * Equivalent to setWritable(writable, true).
+         * @see #setWritable(Boolean, Boolean)
+         * @since 1.6
+         */
+        SetWritable(
+            [in] Boolean writable,
+            [out] Boolean* succeeded);
+
+        /**
+         * Returns the length of this file in bytes.
+         * Returns 0 if the file does not exist.
+         * The result for a directory is not defined.
+         *
+         * @return the number of bytes in this file.
+         */
+        GetLength(
+            [out] Int64* len);
+
+        /**
+         * Returns an array of strings with the file names in the directory
+         * represented by this file. The result is {null} if this file is not
+         * a directory.
+         * <p>
+         * The entries {.} and {..} representing the current and parent
+         * directory are not returned as part of the list.
+         *
+         * @return an array of strings with file names or {null}.
+         */
+        List(
+            [out, callee] ArrayOf<String>* files);
+
+        /**
+         * Gets a list of the files in the directory represented by this file. This
+         * list is then filtered through a FilenameFilter and the names of files
+         * with matching names are returned as an array of strings. Returns
+         * {null} if this file is not a directory. If {filter} is
+         * {null} then all filenames match.
+         * <p>
+         * The entries {.} and {..} representing the current and parent
+         * directories are not returned as part of the list.
+         *
+         * @param filter
+         *            the filter to match names against, may be {null}.
+         * @return an array of files or {null}.
+         */
+        List(
+            [in] IFilenameFilter* filter,
+            [out, callee] ArrayOf<String>* files);
+
+        /**
+         * Returns an array of files contained in the directory represented by this
+         * file. The result is {null} if this file is not a directory. The
+         * paths of the files in the array are absolute if the path of this file is
+         * absolute, they are relative otherwise.
+         *
+         * @return an array of files or {null}.
+         */
+        ListFiles(
+            [out, callee] ArrayOf<IFile*>* files);
+
+        /**
+         * Gets a list of the files in the directory represented by this file. This
+         * list is then filtered through a FilenameFilter and files with matching
+         * names are returned as an array of files. Returns {null} if this
+         * file is not a directory. If {filter} is {null} then all
+         * filenames match.
+         * <p>
+         * The entries {.} and {..} representing the current and parent
+         * directories are not returned as part of the list.
+         *
+         * @param filter
+         *            the filter to match names against, may be {null}.
+         * @return an array of files or {null}.
+         */
+        ListFiles(
+            [in] IFilenameFilter* filter,
+            [out, callee] ArrayOf<IFile*>* files);
+
+        /**
+         * Gets a list of the files in the directory represented by this file. This
+         * list is then filtered through a FileFilter and matching files are
+         * returned as an array of files. Returns {null} if this file is not a
+         * directory. If {filter} is {null} then all files match.
+         * <p>
+         * The entries {.} and {..} representing the current and parent
+         * directories are not returned as part of the list.
+         *
+         * @param filter
+         *            the filter to match names against, may be {null}.
+         * @return an array of files or {null}.
+         */
+        ListFiles(
+            [in] IFileFilter* filter,
+            [out, callee] ArrayOf<IFile*>* files);
+
+        /**
+         * Creates the directory named by this file, assuming its parents exist.
+         * Use #mkdirs if you also want to create missing parents.
+         *
+         * @sa #mkdirs
+         * <p>Note that this method does <i>not</i> throw {IOException} on failure.
+         * Callers must check the return value. Note also that this method returns
+         * false if the directory already existed. If you want to know whether the
+         * directory exists on return, either use {(f.mkdir() || f.isDirectory())}
+         * or simply ignore the return value from this method and simply call isDirectory.
+         *
+         * @sa #isDirectory
+         *
+         * @return {true} if the directory was created,
+         *         {false} on failure or if the directory already existed.
+         */
+        Mkdir(
+            [out] Boolean* succeeded);
+
+        /**
+         * Creates the directory named by this file, creating missing parent
+         * directories if necessary.
+         * Use #mkdir if you don't want to create missing parents.
+         *
+         * @sa #mkdir
+         *
+         * <p>Note that this method does <i>not</i> throw {IOException} on failure.
+         * Callers must check the return value. Note also that this method returns
+         * false if the directory already existed. If you want to know whether the
+         * directory exists on return, either use {(f.mkdirs() || f.isDirectory())}
+         * or simply ignore the return value from this method and simply call  isDirectory.
+         *
+         * @sa #isDirectory
+         *
+         * @return {true} if the directory was created,
+         *         {false} on failure or if the directory already existed.
+         */
+        Mkdirs(
+            [out] Boolean* succeeded);
+
+        /**
+         * Creates a new, empty file on the file system according to the path
+         * information stored in this file. This method returns true if it creates
+         * a file, false if the file already existed. Note that it returns false
+         * even if the file is not a file (because it's a directory, say).
+         *
+         * <p>This method is not generally useful. For creating temporary files,
+         * use {@link #createTempFile} instead. For reading/writing files, use {@link FileInputStream},
+         * {@link FileOutputStream}, or {@link RandomAccessFile}, all of which can create files.
+         *
+         * <p>Note that this method does <i>not</i> throw {@code IOException} if the file
+         * already exists, even if it's not a regular file. Callers should always check the
+         * return value, and may additionally want to call {@link #isFile}.
+         *
+         * @return true if the file has been created, false if it
+         *         already exists.
+         * @throws IOException if it's not possible to create the file.
+         */
+        CreateNewFile(
+            [out] Boolean* succeeded);
+
+        /**
+         * Renames this file to newPath. This operation is supported for both
+         * files and directories.
+         *
+         * <p>Many failures are possible. Some of the more likely failures include:
+         * <ul>
+         * <li>Write permission is required on the directories containing both the source and
+         * destination paths.
+         * <li>Search permission is required for all parents of both paths.
+         * <li>Both paths be on the same mount point. On Android, applications are most likely to hit
+         * this restriction when attempting to copy between internal storage and an SD card.
+         * </ul>
+         *
+         * <p>Note that this method does <i>not</i> throw IOException on failure.
+         * Callers must check the return value.
+         *
+         * @param newPath the new path.
+         * @return true on success.
+         */
+        RenameTo(
+            [in] IFile* newPath,
+            [out] Boolean* succeeded);
+
+        ToString(
+            [out] String* str);
+
+        /**
+         * Returns a Uniform Resource Identifier for this file. The URI is system
+         * dependent and may not be transferable between different operating / file
+         * systems.
+         *
+         * @return an URI for this file.
+         */
+        ToURI(
+            [out] IURI** uri);
+
+        /**
+         * Returns a Uniform Resource Locator for this file. The URL is system
+         * dependent and may not be transferable between different operating / file
+         * systems.
+         *
+         * @return a URL for this file.
+         * @throws java.net.MalformedURLException
+         *             if the path cannot be transformed into a URL.
+         * @deprecated Use {@link #toURI} and {@link java.net.URI#toURL} to get
+         * correct escape illegal characters.
+         */
+        // @Deprecated
+        ToURL(
+            [out] IURL** uri);
+
+        /**
+         * Returns the total size in bytes of the partition containing this path.
+         * Returns 0 if this path does not exist.
+         *
+         * @since 1.6
+         */
+        GetTotalSpace(
+            [out] Int64* space);
+
+        /**
+         * Returns the number of usable free bytes on the partition containing this path.
+         * Returns 0 if this path does not exist.
+         *
+         * <p>Note that this is likely to be an optimistic over-estimate and should not
+         * be taken as a guarantee your application can actually write this many bytes.
+         * On Android (and other Unix-based systems), this method returns the number of free bytes
+         * available to non-root users, regardless of whether you're actually running as root,
+         * and regardless of any quota or other restrictions that might apply to the user.
+         * (The getFreeSpace method returns the number of bytes potentially available to root.)
+         *
+         * @since 1.6
+         */
+        GetUsableSpace(
+            [out] Int64* space);
+
+        /**
+         * Returns the number of free bytes on the partition containing this path.
+         * Returns 0 if this path does not exist.
+         *
+         * <p>Note that this is likely to be an optimistic over-estimate and should not
+         * be taken as a guarantee your application can actually write this many bytes.
+         *
+         * @since 1.6
+         */
+        GetFreeSpace(
+            [out] Int64* space);
+    }
+
+    interface IFileHelper {
+        /**
+         * Creates an empty temporary file using the given prefix and suffix as part
+         * of the file name. If {suffix} is null, {.tmp} is used. This
+         * method is a convenience method that calls
+         * createTempFile(String, String, File) with the third argument
+         * being {null}.
+         *
+         * @sa #createTempFile(String, String, File)
+         *
+         * @param prefix
+         *            the prefix to the temp file name.
+         * @param suffix
+         *            the suffix to the temp file name.
+         * @return the temporary file.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs when writing the file.
+         */
+        CreateTempFile(
+            [in] String prefix,
+            [in] String suffix,
+            [out] IFile** file);
+
+        /**
+         * Creates an empty temporary file in the given directory using the given
+         * prefix and suffix as part of the file name. If {suffix} is null, {.tmp} is used.
+         *
+         * <p>Note that this method does <i>not</i> call #deleteOnExit, but see the
+         * documentation for that method before you call it manually.
+         *
+         * @sa #deleteOnExit
+         *
+         * @param prefix
+         *            the prefix to the temp file name.
+         * @param suffix
+         *            the suffix to the temp file name.
+         * @param directory
+         *            the location to which the temp file is to be written, or
+         *            {null} for the default location for temporary files,
+         *            which is taken from the "java.io.tmpdir" system property. It
+         *            may be necessary to set this property to an existing, writable
+         *            directory for this method to work properly.
+         * @return the temporary file.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the length of {prefix} is less than 3.
+         * IOException | if an error occurs when writing the file.
+         */
+        CreateTempFile(
+            [in] String prefix,
+            [in] String suffix,
+            [in] IFile* directory,
+            [out] IFile** file);
+
+        /**
+         * The system-dependent character used to separate components in filenames ('/').
+         * Use of this (rather than hard-coding '/') helps portability to other operating systems.
+         *
+         * <p>This field is initialized from the system property "file.separator".
+         * Later changes to that property will have no effect on this field or this class.
+         */
+        GetSeparatorChar(
+            [out] Char32* separatorChar);
+
+        /**
+         * The system-dependent string used to separate components in filenames ('/').
+         * See #separatorChar.
+         *
+         * @sa #separatorChar
+         */
+        GetSeparator(
+            [out] String* separator);
+
+        /**
+         * The system-dependent character used to separate components in search paths (':').
+         * This is used to split such things as the PATH environment variable and classpath
+         * system properties into lists of directories to be searched.
+         *
+         * <p>This field is initialized from the system property "path.separator".
+         * Later changes to that property will have no effect on this field or this class.
+         */
+        GetPathSeparatorChar(
+            [out] Char32* pathSeparatorChar);
+
+        /**
+         * The system-dependent string used to separate components in search paths (":").
+         * See #pathSeparatorChar.
+         *
+         * @sa #pathSeparatorChar
+         */
+        GetPathSeparator(
+            [out] String* pathSeparator);
+
+        /**
+         * Returns the file system roots. On Android and other Unix systems, there is
+         * a single root, {/}.
+         */
+        ListRoots(
+            [out, callee] ArrayOf<IFile*>* files);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

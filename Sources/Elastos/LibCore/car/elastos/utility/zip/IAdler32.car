@@ -1,0 +1,28 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * The Adler-32 class is used to compute the Adler32 checksum from a set
+     * of data. Compared to CRC32 it trades reliability for speed. Refer to
+     * RFC 1950 for the specification.
+     *
+     * @sa CRC32
+     *
+     * @implements Elastos.Utility.Zip.IChecksum
+     */
+
+    /**
+     * @Involve
+     * interface IChecksum;
+     */
+    interface IAdler32 {
+    }
+
+    } // namespace Zip
+    } // namespace Utility
+    } // namespace Elastos
+}

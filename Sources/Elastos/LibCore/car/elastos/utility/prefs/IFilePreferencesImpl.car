@@ -1,0 +1,26 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Prefs {
+    /**
+     * The default implementation of <code>AbstractPreferences</code> for the Linux
+     * platform, using the file system as its back end.
+     *
+     * TODO some sync mechanism with backend, Performance - check file edit date
+     *
+     * @since 1.4
+     */
+
+    /**
+     * @Involve
+     * interface IPreferences;
+     * interface IAbstractPreferences;
+     */
+    interface IFilePreferencesImpl {
+    }
+
+    } // namespace Prefs
+    } // namespace Utility
+    } // namespace Elastos
+}

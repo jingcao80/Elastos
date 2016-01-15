@@ -1,0 +1,175 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Let {@link TabHost} know that the user clicked on a tab indicator.
+     */
+    interface ITabWidgetOnTabSelectionChanged {
+        /**
+         * Informs the TabHost which tab was selected. It also indicates
+         * if the tab was clicked/pressed or just focused into.
+         *
+         * @param tabIndex index of the tab that was selected
+         * @param clicked whether the selection changed due to a touch/click
+         * or due to focus entering the tab through navigation. Pass true
+         * if it was due to a press/click and false otherwise.
+         */
+        OnTabSelectionChanged(
+            [in] Int32 tabIndex,
+            [in] Boolean clicked);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.View.ILinearLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.View.IViewOnFocusChangeListener
+     */
+     [local]
+    interface ITabWidget {
+        /**
+         * Returns the tab indicator view at the given index.
+         *
+         * @param index the zero-based index of the tab indicator view to return
+         * @return the tab indicator view at the given index
+         */
+        GetChildTabViewAt(
+            [in] Int32 index,
+            [out] IView** view);
+
+        /**
+         * Returns the number of tab indicator views.
+         * @return the number of tab indicator views.
+         */
+        GetTabCount(
+            [out] Int32* count);
+
+        /**
+         * Sets the drawable to use as a divider between the tab indicators.
+         * @param resId the resource identifier of the drawable to use as a
+         * divider.
+         */
+        SetDividerDrawable(
+            [in] Int32 resId);
+
+        /**
+         * Sets the drawable to use as the left part of the strip below the
+         * tab indicators.
+         * @param drawable the left strip drawable
+         */
+        SetLeftStripDrawable(
+            [in] IDrawable* drawable);
+
+        /**
+         * Sets the drawable to use as the left part of the strip below the
+         * tab indicators.
+         * @param resId the resource identifier of the drawable to use as the
+         * left strip drawable
+         */
+        SetLeftStripDrawable(
+            [in] Int32 resId);
+
+        /**
+         * Sets the drawable to use as the right part of the strip below the
+         * tab indicators.
+         * @param drawable the right strip drawable
+         */
+        SetRightStripDrawable(
+            [in] IDrawable* drawable);
+
+        /**
+         * Sets the drawable to use as the right part of the strip below the
+         * tab indicators.
+         * @param resId the resource identifier of the drawable to use as the
+         * right strip drawable
+         */
+        SetRightStripDrawable(
+            [in] Int32 resId);
+
+        /**
+         * Controls whether the bottom strips on the tab indicators are drawn or
+         * not.  The default is to draw them.  If the user specifies a custom
+         * view for the tab indicators, then the TabHost class calls this method
+         * to disable drawing of the bottom strips.
+         * @param stripEnabled true if the bottom strips should be drawn.
+         */
+        SetStripEnabled(
+            [in] Boolean stripEnabled);
+
+        /**
+         * Indicates whether the bottom strips on the tab indicators are drawn
+         * or not.
+         */
+        IsStripEnabled(
+            [out] Boolean* stripEnabled);
+
+        /**
+         * Sets the current tab.
+         * This method is used to bring a tab to the front of the Widget,
+         * and is used to post to the rest of the UI that a different tab
+         * has been brought to the foreground.
+         *
+         * Note, this is separate from the traditional "focus" that is
+         * employed from the view logic.
+         *
+         * For instance, if we have a list in a tabbed view, a user may be
+         * navigating up and down the list, moving the UI focus (orange
+         * highlighting) through the list items.  The cursor movement does
+         * not effect the "selected" tab though, because what is being
+         * scrolled through is all on the same tab.  The selected tab only
+         * changes when we navigate between tabs (moving from the list view
+         * to the next tabbed view, in this example).
+         *
+         * To move both the focus AND the selected tab at once, please use
+         * {@link #setCurrentTab}. Normally, the view logic takes care of
+         * adjusting the focus, so unless you're circumventing the UI,
+         * you'll probably just focus your interest here.
+         *
+         *  @param index The tab that you want to indicate as the selected
+         *  tab (tab brought to the front of the widget)
+         *
+         *  @see #focusCurrentTab
+         */
+        SetCurrentTab(
+            [in] Int32 index);
+
+        /**
+         * Sets the current tab and focuses the UI on it.
+         * This method makes sure that the focused tab matches the selected
+         * tab, normally at {@link #setCurrentTab}.  Normally this would not
+         * be an issue if we go through the UI, since the UI is responsible
+         * for calling TabWidget.onFocusChanged(), but in the case where we
+         * are selecting the tab programmatically, we'll need to make sure
+         * focus keeps up.
+         *
+         *  @param index The tab that you want focused (highlighted in orange)
+         *  and selected (tab brought to the front of the widget)
+         *
+         *  @see #setCurrentTab
+         */
+        FocusCurrentTab(
+            [in] Int32 index);
+
+        SetTabSelectionListener(
+            [in] ITabWidgetOnTabSelectionChanged* listener);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+
+}

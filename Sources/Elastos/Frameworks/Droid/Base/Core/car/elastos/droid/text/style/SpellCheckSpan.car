@@ -1,0 +1,31 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * A SpellCheckSpan is an internal data structure created by the TextView's SpellChecker to
+     * annotate portions of the text that are about to or currently being spell checked. They are
+     * automatically removed once the spell check is completed.
+     *
+     * @hide
+     *
+     * @Involve
+     * interface IParcelable
+     * interface IParcelableSpan
+     */
+    interface ISpellCheckSpan {
+        SetSpellCheckInProgress(
+            [in] Boolean inProgress);
+
+        IsSpellCheckInProgress(
+            [out] Boolean* ret);
+    }
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

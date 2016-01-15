@@ -1,0 +1,74 @@
+module
+{
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.View.IInputChannel;
+    interface Elastos.Droid.Media.Tv.ITvTrackInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Interface a client of the ITvInputManager implements, to identify itself and receive information
+     * about changes to the state of each TV input service.
+     * @hide
+     */
+    interface IITvInputClient {
+        OnSessionCreated(
+            [in] String inputId,
+            [in] IBinder * token,
+            [in] IInputChannel * channel,
+            [in] Int32 seq);
+
+        OnSessionReleased(
+            [in] Int32 seq);
+
+        OnSessionEvent(
+            [in] String name,
+            [in] IBundle * args,
+            [in] Int32 seq);
+
+        OnChannelRetuned(
+            [in] IUri * channelUri,
+            [in] Int32 seq);
+
+        OnTracksChanged(
+            [in] IList * tracks,
+            [in] Int32 seq);
+
+        OnTrackSelected(
+            [in] Int32 type,
+            [in] String trackId,
+            [in] Int32 seq);
+
+        OnVideoAvailable(
+            [in] Int32 seq);
+
+        OnVideoUnavailable(
+            [in] Int32 reason,
+            [in] Int32 seq);
+
+        OnContentAllowed(
+            [in] Int32 seq);
+
+        OnContentBlocked(
+            [in] String rating,
+            [in] Int32 seq);
+
+        OnLayoutSurface(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [in] Int32 seq);
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

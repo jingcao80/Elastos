@@ -1,0 +1,454 @@
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace AccessibilityService {
+
+    /**
+     * This class describes an {@link AccessibilityService}. The system notifies an
+     * {@link AccessibilityService} for {@link android.view.accessibility.AccessibilityEvent}s
+     * according to the information encapsulated in this class.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about creating AccessibilityServices, read the
+     * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+     * developer guide.</p>
+     * </div>
+     *
+     * @attr ref android.R.styleable#AccessibilityService_accessibilityEventTypes
+     * @attr ref android.R.styleable#AccessibilityService_accessibilityFeedbackType
+     * @attr ref android.R.styleable#AccessibilityService_accessibilityFlags
+     * @attr ref android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
+     * @attr ref android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
+     * @attr ref android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
+     * @attr ref android.R.styleable#AccessibilityService_canRetrieveWindowContent
+     * @attr ref android.R.styleable#AccessibilityService_description
+     * @attr ref android.R.styleable#AccessibilityService_notificationTimeout
+     * @attr ref android.R.styleable#AccessibilityService_packageNames
+     * @attr ref android.R.styleable#AccessibilityService_settingsActivity
+     *
+     * @see AccessibilityService
+     * @see android.view.accessibility.AccessibilityEvent
+     * @see android.view.accessibility.AccessibilityManager
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    [local, parcelable, deprecated]
+    interface IAccessibilityServiceInfo {
+        /**
+         * Capability: This accessibility service can retrieve the active window content.
+         * @see android.R.styleable#AccessibilityService_canRetrieveWindowContent
+         */
+        const Int32 CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT = 0x00000001;
+
+        /**
+         * Capability: This accessibility service can request touch exploration mode in which
+         * touched items are spoken aloud and the UI can be explored via gestures.
+         * @see android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
+         */
+        const Int32 CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION = 0x00000002;
+
+        /**
+         * Capability: This accessibility service can request enhanced web accessibility
+         * enhancements. For example, installing scripts to make app content more accessible.
+         * @see android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
+         */
+        const Int32 CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000004;
+
+        /**
+         * Capability: This accessibility service can request to filter the key event stream.
+         * @see android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
+         */
+        const Int32 CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 0x00000008;
+
+        /**
+         * Denotes spoken feedback.
+         */
+        const Int32 FEEDBACK_SPOKEN = 0x0000001;
+
+        /**
+         * Denotes haptic feedback.
+         */
+        const Int32 FEEDBACK_HAPTIC =  0x0000002;
+
+        /**
+         * Denotes audible (not spoken) feedback.
+         */
+        const Int32 FEEDBACK_AUDIBLE = 0x0000004;
+
+        /**
+         * Denotes visual feedback.
+         */
+        const Int32 FEEDBACK_VISUAL = 0x0000008;
+
+        /**
+         * Denotes generic feedback.
+         */
+        const Int32 FEEDBACK_GENERIC = 0x0000010;
+
+        /**
+         * Denotes braille feedback.
+         */
+        const Int32 FEEDBACK_BRAILLE = 0x0000020;
+
+        /**
+         * Mask for all feedback types.
+         *
+         * @see #FEEDBACK_SPOKEN
+         * @see #FEEDBACK_HAPTIC
+         * @see #FEEDBACK_AUDIBLE
+         * @see #FEEDBACK_VISUAL
+         * @see #FEEDBACK_GENERIC
+         * @see #FEEDBACK_BRAILLE
+         */
+        const Int32 FEEDBACK_ALL_MASK = 0xFFFFFFFF;
+
+        /**
+         * If an {@link AccessibilityService} is the default for a given type.
+         * Default service is invoked only if no package specific one exists. In case of
+         * more than one package specific service only the earlier registered is notified.
+         */
+        const Int32 DEFAULT = 0x0000001;
+
+        /**
+         * If this flag is set the system will regard views that are not important
+         * for accessibility in addition to the ones that are important for accessibility.
+         * That is, views that are marked as not important for accessibility via
+         * {@link View#IMPORTANT_FOR_ACCESSIBILITY_NO} or
+         * {@link View#IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS} and views that are
+         * marked as potentially important for accessibility via
+         * {@link View#IMPORTANT_FOR_ACCESSIBILITY_AUTO} for which the system has determined
+         * that are not important for accessibility, are reported while querying the window
+         * content and also the accessibility service will receive accessibility events from
+         * them.
+         * <p>
+         * <strong>Note:</strong> For accessibility services targeting API version
+         * {@link Build.VERSION_CODES#JELLY_BEAN} or higher this flag has to be explicitly
+         * set for the system to regard views that are not important for accessibility. For
+         * accessibility services targeting API version lower than
+         * {@link Build.VERSION_CODES#JELLY_BEAN} this flag is ignored and all views are
+         * regarded for accessibility purposes.
+         * </p>
+         * <p>
+         * Usually views not important for accessibility are layout managers that do not
+         * react to user actions, do not draw any content, and do not have any special
+         * semantics in the context of the screen content. For example, a three by three
+         * grid can be implemented as three horizontal linear layouts and one vertical,
+         * or three vertical linear layouts and one horizontal, or one grid layout, etc.
+         * In this context the actual layout mangers used to achieve the grid configuration
+         * are not important, rather it is important that there are nine evenly distributed
+         * elements.
+         * </p>
+         */
+        const Int32 FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x0000002;
+
+        /**
+         * This flag requests that the system gets into touch exploration mode.
+         * In this mode a single finger moving on the screen behaves as a mouse
+         * pointer hovering over the user interface. The system will also detect
+         * certain gestures performed on the touch screen and notify this service.
+         * The system will enable touch exploration mode if there is at least one
+         * accessibility service that has this flag set. Hence, clearing this
+         * flag does not guarantee that the device will not be in touch exploration
+         * mode since there may be another enabled service that requested it.
+         * <p>
+         * For accessibility services targeting API version higher than
+         * {@link Build.VERSION_CODES#JELLY_BEAN_MR1} that want to set
+         * this flag have to declare this capability in their meta-data by setting
+         * the attribute {@link android.R.attr#canRequestTouchExplorationMode
+         * canRequestTouchExplorationMode} to true, otherwise this flag will
+         * be ignored. For how to declare the meta-data of a service refer to
+         * {@value AccessibilityService#SERVICE_META_DATA}.
+         * </p>
+         * <p>
+         * Services targeting API version equal to or lower than
+         * {@link Build.VERSION_CODES#JELLY_BEAN_MR1} will work normally, i.e.
+         * the first time they are run, if this flag is specified, a dialog is
+         * shown to the user to confirm enabling explore by touch.
+         * </p>
+         * @see android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
+         */
+        const Int32 FLAG_REQUEST_TOUCH_EXPLORATION_MODE= 0x0000004;
+
+        /**
+         * This flag requests from the system to enable web accessibility enhancing
+         * extensions. Such extensions aim to provide improved accessibility support
+         * for content presented in a {@link android.webkit.WebView}. An example of such
+         * an extension is injecting JavaScript from a secure source. The system will enable
+         * enhanced web accessibility if there is at least one accessibility service
+         * that has this flag set. Hence, clearing this flag does not guarantee that the
+         * device will not have enhanced web accessibility enabled since there may be
+         * another enabled service that requested it.
+         * <p>
+         * Services that want to set this flag have to declare this capability
+         * in their meta-data by setting the attribute {@link android.R.attr
+         * #canRequestEnhancedWebAccessibility canRequestEnhancedWebAccessibility} to
+         * true, otherwise this flag will be ignored. For how to declare the meta-data
+         * of a service refer to {@value AccessibilityService#SERVICE_META_DATA}.
+         * </p>
+         * @see android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
+         */
+        const Int32 FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000008;
+
+        /**
+         * This flag requests that the {@link AccessibilityNodeInfo}s obtained
+         * by an {@link AccessibilityService} contain the id of the source view.
+         * The source view id will be a fully qualified resource name of the
+         * form "package:id/name", for example "foo.bar:id/my_list", and it is
+         * useful for UI test automation. This flag is not set by default.
+         */
+        const Int32 FLAG_REPORT_VIEW_IDS = 0x00000010;
+
+        /**
+         * This flag requests from the system to filter key events. If this flag
+         * is set the accessibility service will receive the key events before
+         * applications allowing it implement global shortcuts. Setting this flag
+         * does not guarantee that this service will filter key events since only
+         * one service can do so at any given time. This avoids user confusion due
+         * to behavior change in case different key filtering services are enabled.
+         * If there is already another key filtering service enabled, this one will
+         * not receive key events.
+         * <p>
+         * Services that want to set this flag have to declare this capability
+         * in their meta-data by setting the attribute {@link android.R.attr
+         * #canRequestFilterKeyEvents canRequestFilterKeyEvents} to true,
+         * otherwise this flag will be ignored. For how to declare the meta-data
+         * of a service refer to {@value AccessibilityService#SERVICE_META_DATA}.
+         * </p>
+         * @see android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
+         */
+        const Int32 FLAG_REQUEST_FILTER_KEY_EVENTS = 0x00000020;
+
+        /**
+         * This flag indicates to the system that the accessibility service wants
+         * to access content of all interactive windows. An interactive window is a
+         * window that has input focus or can be touched by a sighted user when explore
+         * by touch is not enabled. If this flag is not set your service will not receive
+         * {@link android.view.accessibility.AccessibilityEvent#TYPE_WINDOWS_CHANGED}
+         * events, calling AccessibilityService{@link AccessibilityService#getWindows()
+         * AccessibilityService.getWindows()} will return an empty list, and {@link
+         * AccessibilityNodeInfo#getWindow() AccessibilityNodeInfo.getWindow()} will
+         * return null.
+         * <p>
+         * Services that want to set this flag have to declare the capability
+         * to retrieve window content in their meta-data by setting the attribute
+         * {@link android.R.attr#canRetrieveWindowContent canRetrieveWindowContent} to
+         * true, otherwise this flag will be ignored. For how to declare the meta-data
+         * of a service refer to {@value AccessibilityService#SERVICE_META_DATA}.
+         * </p>
+         * @see android.R.styleable#AccessibilityService_canRetrieveWindowContent
+         */
+        const Int32 FLAG_RETRIEVE_INTERACTIVE_WINDOWS = 0x00000040;
+
+        SetEventTypes (
+            [in] Int32 types);
+
+        GetEventTypes (
+            [out] Int32* types);
+
+        SetPackageNames (
+            [in] ArrayOf<String>* names);
+
+        GetPackageNames (
+            [out, callee] ArrayOf<String>* names);
+
+        SetFeedbackType (
+            [in] Int32 type);
+
+        GetFeedbackType (
+            [out] Int32* type);
+
+        SetNotificationTimeout (
+            [in] Int64 timeout);
+
+        GetNotificationTimeout (
+            [out] Int64* timeout);
+
+        SetFlags (
+            [in] Int32 flags);
+
+        GetFlags (
+            [out] Int32* flags);
+
+        /**
+        * Updates the properties that an AccessibilitySerivice can change dynamically.
+        *
+        * @param other The info from which to update the properties.
+        *
+        * @hide
+        */
+        UpdateDynamicallyConfigurableProperties(
+            [in] IAccessibilityServiceInfo* other);
+
+        /**
+         * @hide
+         */
+        SetComponentName(
+            [in] IComponentName* component);
+
+        /**
+         * The accessibility service id.
+         * <p>
+         *   <strong>Generated by the system.</strong>
+         * </p>
+         * @return The id.
+         */
+        GetId(
+            [out] String* id);
+
+        /**
+         * The service {@link ResolveInfo}.
+         * <p>
+         *   <strong>Generated by the system.</strong>
+         * </p>
+         * @return The info.
+         */
+        GetResolveInfo(
+            [out] IResolveInfo** info);
+
+        /**
+         * The settings activity name.
+         * <p>
+         *    <strong>Statically set from
+         *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+         * </p>
+         * @return The settings activity name.
+         */
+        GetSettingsActivityName(
+            [out] String* activityName);
+
+        /**
+         * Whether this service can retrieve the current window's content.
+         * <p>
+         *    <strong>Statically set from
+         *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+         * </p>
+         * @return True if window content can be retrieved.
+         *
+         * @deprecated Use {@link #getCapabilities()}.
+         */
+        GetCanRetrieveWindowContent(
+            [out] Boolean* result);
+
+        /**
+         * Returns the bit mask of capabilities this accessibility service has such as
+         * being able to retrieve the active window content, etc.
+         *
+         * @return The capability bit mask.
+         *
+         * @see #CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
+         * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
+         * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
+         * @see #CAPABILITY_FILTER_KEY_EVENTS
+         */
+        GetCapabilities(
+            [out] Int32* capabilities);
+
+        /**
+         * Sets the bit mask of capabilities this accessibility service has such as
+         * being able to retrieve the active window content, etc.
+         *
+         * @param capabilities The capability bit mask.
+         *
+         * @see #CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
+         * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
+         * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
+         * @see #CAPABILITY_FILTER_KEY_EVENTS
+         *
+         * @hide
+         */
+        SetCapabilities(
+            [in] Int32 capabilities);
+
+        /**
+         * Gets the non-localized description of the accessibility service.
+         * <p>
+         *    <strong>Statically set from
+         *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+         * </p>
+         * @return The description.
+         *
+         * @deprecated Use {@link #loadDescription(PackageManager)}.
+         */
+        GetDescription(
+            [out] String* description);
+
+        /**
+         * The localized description of the accessibility service.
+         * <p>
+         *    <strong>Statically set from
+         *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+         * </p>
+         * @return The localized description.
+         */
+        LoadDescription(
+            [in] IPackageManager* packageManager,
+            [out] String* description);
+
+        /**
+         * @hide
+         * @return The list of {@link CapabilityInfo} objects.
+         */
+        GetCapabilityInfos(
+            [out] IList** infos);
+    }
+
+    interface IAccessibilityServiceInfoHelper {
+        /**
+         * Returns the string representation of a feedback type. For example,
+         * {@link #FEEDBACK_SPOKEN} is represented by the string FEEDBACK_SPOKEN.
+         *
+         * @param feedbackType The feedback type.
+         * @return The string representation.
+         */
+        FeedbackTypeToString(
+            [in] Int32 feedbackType,
+            [out] String* str);
+
+        /**
+         * Returns the string representation of a flag. For example,
+         * {@link #DEFAULT} is represented by the string DEFAULT.
+         *
+         * @param flag The flag.
+         * @return The string representation.
+         */
+        FlagToString(
+            [in] Int32 flag,
+            [out] String* str);
+
+        /**
+         * Returns the string representation of a capability. For example,
+         * {@link #CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT} is represented
+         * by the string CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT.
+         *
+         * @param capability The capability.
+         * @return The string representation.
+         */
+        CapabilityToString(
+            [in] Int32 capability,
+            [out] String* str);
+    }
+
+    interface IAccessibilityServiceInfoCapabilityInfo {
+        GetCapability(
+            [out] Int32* capability);
+
+        GetTitleResId(
+            [out] Int32* titleResId);
+
+        GetDescResId(
+            [out] Int32* descResId);
+    }
+
+    } // namespace AccessibilityService
+    } // namepsace Droid
+    } // namespace Elastos
+}

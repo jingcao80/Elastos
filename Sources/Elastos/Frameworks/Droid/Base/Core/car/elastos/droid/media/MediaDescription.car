@@ -1,0 +1,152 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * A simple set of metadata for a media item suitable for display. This can be
+     * created using the Builder or retrieved from existing metadata using
+     * {@link MediaMetadata#getDescription()}.
+     */
+    interface IMediaDescription {
+        /**
+         * Returns the media id or null. See
+         * {@link MediaMetadata#METADATA_KEY_MEDIA_ID}.
+         */
+        GetMediaId(
+            [out] String* result);
+
+        /**
+         * Returns a title suitable for display or null.
+         *
+         * @return A title or null.
+         */
+        GetTitle(
+            [out] ICharSequence** result);
+
+        /**
+         * Returns a subtitle suitable for display or null.
+         *
+         * @return A subtitle or null.
+         */
+        GetSubtitle(
+            [out] ICharSequence** result);
+
+        /**
+         * Returns a description suitable for display or null.
+         *
+         * @return A description or null.
+         */
+        GetDescription(
+            [out] ICharSequence** result);
+
+        /**
+         * Returns a bitmap icon suitable for display or null.
+         *
+         * @return An icon or null.
+         */
+        GetIconBitmap(
+            [out] IBitmap** result);
+
+        /**
+         * Returns a Uri for an icon suitable for display or null.
+         *
+         * @return An icon uri or null.
+         */
+        GetIconUri(
+            [out] IUri** result);
+
+        /**
+         * Returns any extras that were added to the description.
+         *
+         * @return A bundle of extras or null.
+         */
+        GetExtras(
+            [out] IBundle** result);
+    }
+
+    /**
+     * Builder for {@link MediaDescription} objects.
+     */
+    interface IMediaDescriptionBuilder {
+        /**
+         * Sets the media id.
+         *
+         * @param mediaId The unique id for the item or null.
+         * @return this
+         */
+        SetMediaId(
+            [in] String mediaId);
+
+        /**
+         * Sets the title.
+         *
+         * @param title A title suitable for display to the user or null.
+         * @return this
+         */
+        SetTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Sets the subtitle.
+         *
+         * @param subtitle A subtitle suitable for display to the user or null.
+         * @return this
+         */
+        SetSubtitle(
+            [in] ICharSequence* subtitle);
+
+        /**
+         * Sets the description.
+         *
+         * @param description A description suitable for display to the user or
+         *            null.
+         * @return this
+         */
+        SetDescription(
+            [in] ICharSequence* description);
+
+        /**
+         * Sets the icon.
+         *
+         * @param icon A {@link Bitmap} icon suitable for display to the user or
+         *            null.
+         * @return this
+         */
+        SetIconBitmap(
+            [in] IBitmap* icon);
+
+        /**
+         * Sets the icon uri.
+         *
+         * @param iconUri A {@link Uri} for an icon suitable for display to the
+         *            user or null.
+         * @return this
+         */
+        SetIconUri(
+            [in] IUri* iconUri);
+
+        /**
+         * Sets a bundle of extras.
+         *
+         * @param extras The extras to include with this description or null.
+         * @return this
+         */
+        SetExtras(
+            [in] IBundle* extras);
+
+        Build(
+            [out] IMediaDescription** result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

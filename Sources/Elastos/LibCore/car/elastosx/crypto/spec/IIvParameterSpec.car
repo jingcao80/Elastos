@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The algorithm parameter specification for an <i>initialization vector</i>.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+     */
+    interface IIvParameterSpec {
+
+        /**
+         * Returns a copy of the <i>initialization vector</i> data.
+         *
+         * @return a copy of the initialization vector data.
+         */
+        GetIV(
+            [out, callee] ArrayOf<Byte> * bi);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

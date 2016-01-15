@@ -1,0 +1,38 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "sources"
+$
+TARGET_NAME= ${name}
+TARGET_TYPE= $^
+$IF type is "library"
+lib
+$ELSE
+eco
+$END IF
+
+SOURCES = ${name}.car
+$   WITH all classes DO
+$       IF type is not "sink" and type is not "clsobj"
+SOURCES += ${name}.cpp
+$       END IF
+$   END DO ;; all classes
+$
+$IF type is not "library"
+
+$  IF compilingenv is not "InSDK"
+LIBRARIES = $$(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $$(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $$(XDK_TARGETS)/Elastos.Core.eco
+LIBRARIES += $$(XDK_USER_LIB)/crt0.lib
+$  ELSE
+ELASTOS_LIBS = Elastos.Runtime.lib
+ELASTOS_LIBS += Elastos.Core.lib
+ELASTOS_LIBS += Elastos.Runtime.eco
+ELASTOS_LIBS += Elastos.Core.eco
+$  END IF;; not InSDK
+$END IF ;; type is not "library"
+$
+$END OUTPUT

@@ -1,0 +1,104 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Params {
+
+    /**
+     * Immutable class to store a 4-element vector of floats indexable by a bayer RAW 2x2 pixel block.
+     */
+    [deprecated]
+    interface IRggbChannelVector {
+        /**
+         * The number of color channels in this vector.
+         */
+        const Int32 COUNT = 4;
+
+        /** Red color channel in a bayer Raw pattern. */
+        const Int32 RED = 0;
+
+        /** Green color channel in a bayer Raw pattern used by the even rows. */
+        const Int32 GREEN_EVEN = 1;
+
+        /** Green color channel in a bayer Raw pattern used by the odd rows. */
+        const Int32 GREEN_ODD = 2;
+
+        /** Blue color channel in a bayer Raw pattern. */
+        const Int32 BLUE = 3;
+
+        /**
+         * Get the red component.
+         *
+         * @return a floating point value (guaranteed to be finite)
+         */
+        GetRed(
+            [out] Float* value);
+
+        /**
+         * Get the green (even rows) component.
+         *
+         * @return a floating point value (guaranteed to be finite)
+         */
+        GetGreenEven(
+            [out] Float* value);
+
+        /**
+         * Get the green (odd rows) component.
+         *
+         * @return a floating point value (guaranteed to be finite)
+         */
+        GetGreenOdd(
+            [out] Float* value);
+
+        /**
+         * Get the blue component.
+         *
+         * @return a floating point value (guaranteed to be finite)
+         */
+        GetBlue(
+            [out] Float* value);
+
+        /**
+         * Get the component by the color channel index.
+         *
+         * <p>{@code colorChannel} must be one of {@link #RED}, {@link #GREEN_EVEN}, {@link #GREEN_ODD},
+         * {@link #BLUE}.</p>
+         *
+         * @param colorChannel greater or equal to {@code 0} and less than {@link #COUNT}
+         * @return a floating point value (guaranteed to be finite)
+         *
+         * @throws IllegalArgumentException if {@code colorChannel} was out of range
+         */
+        GetComponent(
+            [in] Int32 colorChannel,
+            [out] Float* value);
+
+        /**
+         * Copy the vector into the destination in the order {@code [R, Geven, Godd, B]}.
+         *
+         * @param destination
+         *          an array big enough to hold at least {@value #COUNT} elements after the
+         *          {@code offset}
+         * @param offset
+         *          a non-negative offset into the array
+         *
+         * @throws NullPointerException
+         *          If {@code destination} was {@code null}
+         * @throws ArrayIndexOutOfBoundsException
+         *          If there's not enough room to write the elements at the specified destination and
+         *          offset.
+         */
+        CopyTo(
+            [in] ArrayOf<Float>* destination,
+            [in] Int32 offset);
+    }
+
+    } // namespace Params
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

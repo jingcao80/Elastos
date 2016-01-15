@@ -1,0 +1,203 @@
+
+module
+{
+    using interface Elastos.Droid.Internal.Policy.IIKeyguardShowCallback;
+    using interface Elastos.Droid.Internal.Policy.IIKeyguardExitCallback;
+    using interface Elastos.Droid.Keyguard.IViewMediatorCallback;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneStatusBar;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IScrimController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IStatusBarWindowManager;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IStatusBarKeyguardViewManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    /**
+     * Mediates requests related to the keyguard.  This includes queries about the
+     * state of the keyguard, power management events that effect whether the keyguard
+     * should be shown or reset, callbacks to the phone window manager to notify
+     * it of when the keyguard is showing, and events from the keyguard view itself
+     * stating that the keyguard was succesfully unlocked.
+     *
+     * Note that the keyguard view is shown when the screen is off (as appropriate)
+     * so that once the screen comes on, it will be ready immediately.
+     *
+     * Example queries about the keyguard:
+     * - is {movement, key} one that should wake the keygaurd?
+     * - is the keyguard showing?
+     * - are input events restricted due to the state of the keyguard?
+     *
+     * Callbacks to the phone window manager:
+     * - the keyguard is showing
+     *
+     * Example external events that translate to keyguard view changes:
+     * - screen turned off -> reset the keyguard, and show it so it will be ready
+     *   next time the screen turns on
+     * - keyboard is slid open -> if the keyguard is not secure, hide it
+     *
+     * Events from the keyguard view:
+     * - user succesfully unlocked keyguard -> hide keyguard view, and no longer
+     *   restrict input events.
+     *
+     * Note: in addition to normal power managment events that effect the state of
+     * whether the keyguard should be showing, external apps and services may request
+     * that the keyguard be disabled via {@link #setKeyguardEnabled(boolean)}.  When
+     * false, this will override all other conditions for turning on the keyguard.
+     *
+     * Threading and synchronization:
+     * This class is created by the initialization routine of the {@link android.view.WindowManagerPolicy},
+     * and runs on its thread.  The keyguard UI is created from that thread in the
+     * constructor of this class.  The apis may be called from other threads, including the
+     * {@link com.android.server.input.InputManagerService}'s and {@link android.view.WindowManager}'s.
+     * Therefore, methods on this class are synchronized, and any action that is pointed
+     * directly to the keyguard UI is posted to a {@link android.os.Handler} to ensure it is taken on the UI
+     * thread of the keyguard.
+     *
+     * @Involve
+     * interface ISystemUI
+     */
+    [local]
+    interface IKeyguardViewMediator {
+        /**
+         * The default amount of time we stay awake (used for all key input)
+         */
+        const Int32 AWAKE_INTERVAL_DEFAULT_MS = 10000;
+
+        UserActivity();
+
+        /**
+         * Let us know that the system is ready after startup.
+         */
+        OnSystemReady();
+
+        /**
+         * Called to let us know the screen was turned off.
+         * @param why either {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_USER} or
+         *   {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
+         */
+        OnScreenTurnedOff(
+            [in] Int32 why);
+
+        /**
+         * Let's us know the screen was turned on.
+         */
+        OnScreenTurnedOn(
+            [in] IIKeyguardShowCallback* _callback);
+
+        /**
+         * A dream started.  We should lock after the usual screen-off lock timeout but only
+         * if there is a secure lock pattern.
+         */
+        OnDreamingStarted();
+
+        /**
+         * A dream stopped.
+         */
+        OnDreamingStopped();
+
+        /**
+         * Same semantics as {@link android.view.WindowManagerPolicy#enableKeyguard}; provide
+         * a way for external stuff to override normal keyguard behavior.  For instance
+         * the phone app disables the keyguard when it receives incoming calls.
+         */
+        SetKeyguardEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * @see android.app.KeyguardManager#exitKeyguardSecurely
+         */
+        VerifyUnlock(
+            [in] IIKeyguardExitCallback* _callback);
+
+        /**
+         * Is the keyguard currently showing?
+         */
+        IsShowing(
+            [out] Boolean* ret);
+
+        IsOccluded(
+            [out] Boolean* ret);
+
+        /**
+         * Is the keyguard currently showing and not being force hidden?
+         */
+        IsShowingAndNotOccluded(
+            [out] Boolean* ret);
+
+        /**
+         * Notify us when the keyguard is occluded by another window
+         */
+        SetOccluded(
+            [in] Boolean isOccluded);
+
+        /**
+         * Used by PhoneWindowManager to enable the keyguard due to a user activity timeout.
+         * This must be safe to call from any thread and with any window manager locks held.
+         */
+        DoKeyguardTimeout(
+            [in] IBundle* options);
+
+        /**
+         * Given the state of the keyguard, is the input restricted?
+         * Input is restricted when the keyguard is showing, or when the keyguard
+         * was suppressed by an app that disabled the keyguard or we haven't been provisioned yet.
+         */
+        IsInputRestricted(
+            [out] Boolean* ret);
+
+        /**
+         * Dismiss the keyguard through the security layers.
+         */
+        HandleDismiss();
+
+        Dismiss();
+
+        IsSecure(
+            [out] Boolean* ret);
+
+        /**
+         * Update the newUserId. Call while holding WindowManagerService lock.
+         * NOTE: Should only be called by KeyguardViewMediator in response to the user id changing.
+         *
+         * @param newUserId The id of the incoming user.
+         */
+        SetCurrentUser(
+            [in] Int32 newUserId);
+
+        KeyguardDone(
+            [in] Boolean authenticated,
+            [in] Boolean wakeup);
+
+        IsDismissable(
+            [out] Boolean* ret);
+
+        OnBootCompleted();
+
+        RegisterStatusBar(
+            [in] IPhoneStatusBar* phoneStatusBar,
+            [in] IViewGroup* container,
+            [in] IStatusBarWindowManager* statusBarWindowManager,
+            [in] IScrimController* scrimController,
+            [out] IStatusBarKeyguardViewManager** ret);
+
+        StartKeyguardExitAnimation(
+            [in] Int64 startTime,
+            [in] Int64 fadeoutDuration);
+
+        OnActivityDrawn();
+
+        GetViewMediatorCallback(
+            [out] IViewMediatorCallback** ret);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

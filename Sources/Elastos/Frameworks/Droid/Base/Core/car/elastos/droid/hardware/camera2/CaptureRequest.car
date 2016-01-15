@@ -1,0 +1,235 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNativeKey;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+
+    /**
+     * A {@code Key} is used to do capture request field lookups with
+     * {@link CaptureResult#get} or to set fields with
+     * {@link CaptureRequest.Builder#set(Key, Object)}.
+     *
+     * <p>For example, to set the crop rectangle for the next capture:
+     * <code><pre>
+     * Rect cropRectangle = new Rect(0, 0, 640, 480);
+     * captureRequestBuilder.set(SCALER_CROP_REGION, cropRectangle);
+     * </pre></code>
+     * </p>
+     *
+     * <p>To enumerate over all possible keys for {@link CaptureResult}, see
+     * {@link CameraCharacteristics#getAvailableCaptureResultKeys}.</p>
+     *
+     * @see CaptureResult#get
+     * @see CameraCharacteristics#getAvailableCaptureResultKeys
+     */
+    interface ICaptureRequestKey {
+        /**
+         * Return a camelCase, period separated name formatted like:
+         * {@code "root.section[.subsections].name"}.
+         *
+         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+         *
+         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+         *
+         * @return String representation of the key name
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Visible for CameraMetadataNative implementation only; do not use.
+         *
+         * TODO: Make this private or remove it altogether.
+         *
+         * @hide
+         */
+        GetNativeKey(
+            [out] ICameraMetadataNativeKey** key);
+    }
+
+    interface ICaptureRequest;
+
+    /**
+     * A builder for capture requests.
+     *
+     * <p>To obtain a builder instance, use the
+     * {@link CameraDevice#createCaptureRequest} method, which initializes the
+     * request fields to one of the templates defined in {@link CameraDevice}.
+     *
+     * @see CameraDevice#createCaptureRequest
+     * @see CameraDevice#TEMPLATE_PREVIEW
+     * @see CameraDevice#TEMPLATE_RECORD
+     * @see CameraDevice#TEMPLATE_STILL_CAPTURE
+     * @see CameraDevice#TEMPLATE_VIDEO_SNAPSHOT
+     * @see CameraDevice#TEMPLATE_MANUAL
+     */
+    interface ICaptureRequestBuilder {
+        /**
+         * <p>Add a surface to the list of targets for this request</p>
+         *
+         * <p>The Surface added must be one of the surfaces included in the most
+         * recent call to {@link CameraDevice#createCaptureSession}, when the
+         * request is given to the camera device.</p>
+         *
+         * <p>Adding a target more than once has no effect.</p>
+         *
+         * @param outputTarget Surface to use as an output target for this request
+         */
+        AddTarget(
+            [in] ISurface* outputTarget);
+
+        /**
+         * <p>Remove a surface from the list of targets for this request.</p>
+         *
+         * <p>Removing a target that is not currently added has no effect.</p>
+         *
+         * @param outputTarget Surface to use as an output target for this request
+         */
+        RemoveTarget(
+            [in] ISurface* outputTarget);
+
+        /**
+         * Set a capture request field to a value. The field definitions can be
+         * found in {@link CaptureRequest}.
+         *
+         * @param key The metadata field to write.
+         * @param value The value to set the field to, which must be of a matching
+         * type to the key.
+         */
+        Set(
+            [in] ICaptureRequestKey* key,
+            [in] IInterface* value);
+
+        /**
+         * Get a capture request field value. The field definitions can be
+         * found in {@link CaptureRequest}.
+         *
+         * @throws IllegalArgumentException if the key was not valid
+         *
+         * @param key The metadata field to read.
+         * @return The value of that key, or {@code null} if the field is not set.
+         */
+        Get(
+            [in] ICaptureRequestKey* key,
+            [out] IInterface** result);
+
+        /**
+         * Set a tag for this request.
+         *
+         * <p>This tag is not used for anything by the camera device, but can be
+         * used by an application to easily identify a CaptureRequest when it is
+         * returned by
+         * {@link CameraCaptureSession.CaptureCallback#onCaptureCompleted CaptureCallback.onCaptureCompleted}
+         *
+         * @param tag an arbitrary Object to store with this request
+         * @see CaptureRequest#getTag
+         */
+        SetTag(
+            [in] IInterface* tag);
+
+        /**
+         * Build a request using the current target Surfaces and settings.
+         * <p>Note that, although it is possible to create a {@code CaptureRequest} with no target
+         * {@link Surface}s, passing such a request into {@link CameraCaptureSession#capture},
+         * {@link CameraCaptureSession#captureBurst},
+         * {@link CameraCaptureSession#setRepeatingBurst}, or
+         * {@link CameraCaptureSession#setRepeatingRequest} will cause that method to throw an
+         * {@link IllegalArgumentException}.</p>
+         *
+         * @return A new capture request instance, ready for submission to the
+         * camera device.
+         */
+        Build(
+            [out] ICaptureRequest** result);
+
+        /**
+         * @hide
+         */
+        IsEmpty(
+            [out] Boolean* result);
+    }
+
+    /**
+     * <p>An immutable package of settings and outputs needed to capture a single
+     * image from the camera device.</p>
+     *
+     * <p>Contains the configuration for the capture hardware (sensor, lens, flash),
+     * the processing pipeline, the control algorithms, and the output buffers. Also
+     * contains the list of target Surfaces to send image data to for this
+     * capture.</p>
+     *
+     * <p>CaptureRequests can be created by using a {@link Builder} instance,
+     * obtained by calling {@link CameraDevice#createCaptureRequest}</p>
+     *
+     * <p>CaptureRequests are given to {@link CameraCaptureSession#capture} or
+     * {@link CameraCaptureSession#setRepeatingRequest} to capture images from a camera.</p>
+     *
+     * <p>Each request can specify a different subset of target Surfaces for the
+     * camera to send the captured data to. All the surfaces used in a request must
+     * be part of the surface list given to the last call to
+     * {@link CameraDevice#createCaptureSession}, when the request is submitted to the
+     * session.</p>
+     *
+     * <p>For example, a request meant for repeating preview might only include the
+     * Surface for the preview SurfaceView or SurfaceTexture, while a
+     * high-resolution still capture would also include a Surface from a ImageReader
+     * configured for high-resolution JPEG images.</p>
+     *
+     * @see CameraDevice#capture
+     * @see CameraDevice#setRepeatingRequest
+     * @see CameraDevice#createCaptureRequest
+     *
+     * @ invoke
+     * interface ICameraMetadata
+     * interface IParcelable
+     */
+    interface ICaptureRequest {
+        Get(
+            [in] ICaptureRequestKey* key,
+            [out] IInterface** face);
+
+        /**
+         * Retrieve the tag for this request, if any.
+         *
+         * <p>This tag is not used for anything by the camera device, but can be
+         * used by an application to easily identify a CaptureRequest when it is
+         * returned by
+         * {@link CameraCaptureSession.CaptureCallback#onCaptureCompleted CaptureCallback.onCaptureCompleted}
+         * </p>
+         *
+         * @return the last tag Object set on this request, or {@code null} if
+         *     no tag has been set.
+         * @see Builder#setTag
+         */
+        GetTag(
+            [out] IInterface** tag);
+
+        /**
+         * @hide
+         */
+        ContainsTarget(
+            [in] ISurface* surface,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        GetTargets(
+            [out] ICollection** result);
+    }
+
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

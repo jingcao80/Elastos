@@ -1,0 +1,32 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace SSL {
+
+    /**
+     * @Involve
+     * interface IX509HostnameVerifier;
+     */
+    [deprecated]
+    interface IAbstractVerifier {
+
+        Verify(
+            [in] String host,
+            [in] ArrayOf<String>* cns,
+            [in] ArrayOf<String>* subjectAlts,
+            [in] Boolean strictWithSubDomains);
+
+    }
+
+    } // namespace SSL
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

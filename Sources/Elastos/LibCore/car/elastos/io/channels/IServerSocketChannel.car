@@ -1,0 +1,87 @@
+
+module
+{
+    interface Elastos.Net.IServerSocket;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+    /**
+    * A IServerSocketChannel is a partial abstraction of a selectable, stream-oriented
+    * listening socket. Binding and manipulation of socket options can only be done
+    * through the associated ServerSocket object, returned by calling socket().
+    * IServerSocketChannels can not be constructed for an already existing
+    * server-socket, nor can a SocketImpl be assigned.
+    *<p>
+    * A server-socket channel is open but not bound when created by the open() method.
+    * Calling accept before bound will cause a NotYetBoundException. It can be bound by
+    * calling the bind method of a related ServerSocket instance.
+    * @implement Elastos.IO.ISelectableChannel
+    */
+    /**
+    * @Involve
+    * interface Elastos.IO.Channels.IChannel;
+    * interface ISelectableChannel;
+    */
+    interface IServerSocketChannel {
+        /**
+         * Return the server-socket assigned this channel, which does not declare
+         * any public methods that are not declared in {ServerSocket}.
+         *
+         * @return the server-socket assigned to this channel.
+         */
+        GetSocket(
+            [out] IServerSocket** serverSocket);
+
+        /**
+         * Accepts a connection to this server-socket channel.
+         * <p>
+         * This method returns {null} when this channel is non-blocking and no
+         * connection is available, otherwise it blocks until a new connection is
+         * available or an I/O error occurs. The socket channel returned by this
+         * method will always be in blocking mode.
+         * <p>
+         * This method just executes the same security checks as the {
+         * accept()} method of the ServerSocket class.
+         *
+         * @sa ServerSocket
+         *
+         * @return the accepted {SocketChannel} instance, or {null} if
+         *         the channel is non-blocking and no connection is available.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * AsynchronousCloseException | if this channel is closed by another thread while this method is in operation.
+         * ClosedByInterruptException | if another thread interrupts the calling thread while this operation is in progress. The interrupt state of the calling thread is set and the channel is closed.
+         * ClosedChannelException | if this channel is closed.
+         * IOException | if another I/O error occurs.
+         * NotYetBoundException | if the socket has not yet been bound.
+         * SecurityException
+         *             if there is a security manager and it does not permit to
+         *             access the new connection.
+         */
+        Accept(
+            [out] ISocketChannel** channel);
+    }
+
+    interface IServerSocketChannelHelper {
+        /**
+         * Creates an open and unbound server-socket channel.
+         * <p>
+         * This channel is created by calling {openServerSocketChannel} method
+         * of the default {SelectorProvider} instance.
+         *
+         * @return the new channel which is open but unbound.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs.
+         */
+        Open(
+            [out] IServerSocketChannel** socketChannel);
+    }
+
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

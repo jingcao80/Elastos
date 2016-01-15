@@ -1,0 +1,26 @@
+module
+{
+    interface Elastos.Droid.Graphics.IRasterizer;
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * @Involve
+     * interface IUpdateAppearance
+     * interface ICharacterStyle
+     */
+    interface IRasterizerSpan {
+        GetRasterizer(
+            [out] IRasterizer** ret);
+    }
+
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

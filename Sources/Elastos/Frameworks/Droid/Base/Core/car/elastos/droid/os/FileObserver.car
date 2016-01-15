@@ -1,0 +1,78 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * Callback interface for discovering when a thread is going to block
+     * waiting for more messages.
+     */
+    interface IFileObserver {
+        /** Event type: Data was read from a file */
+        const Int32 ACCESS = 0x00000001;
+        /** Event type: Data was written to a file */
+        const Int32 MODIFY = 0x00000002;
+        /** Event type: Metadata (permissions, owner, timestamp) was changed explicitly */
+        const Int32 ATTRIB = 0x00000004;
+        /** Event type: Someone had a file or directory open for writing, and closed it */
+        const Int32 CLOSE_WRITE = 0x00000008;
+        /** Event type: Someone had a file or directory open read-only, and closed it */
+        const Int32 CLOSE_NOWRITE = 0x00000010;
+        /** Event type: A file or directory was opened */
+        const Int32 OPEN = 0x00000020;
+        /** Event type: A file or subdirectory was moved from the monitored directory */
+        const Int32 MOVED_FROM = 0x00000040;
+        /** Event type: A file or subdirectory was moved to the monitored directory */
+        const Int32 MOVED_TO = 0x00000080;
+        /** Event type: A new file or subdirectory was created under the monitored directory */
+        const Int32 CREATE = 0x00000100;
+        /** Event type: A file was deleted from the monitored directory */
+        const Int32 DELETE = 0x00000200;
+        /** Event type: The monitored file or directory was deleted; monitoring effectively stops */
+        const Int32 DELETE_SELF = 0x00000400;
+        /** Event type: The monitored file or directory was moved; monitoring continues */
+        const Int32 MOVE_SELF = 0x00000800;
+
+        /** Event mask: All valid event types, combined */
+        const Int32 ALL_EVENTS = ACCESS | MODIFY | ATTRIB | CLOSE_WRITE
+                | CLOSE_NOWRITE | OPEN | MOVED_FROM | MOVED_TO | DELETE | CREATE
+                | DELETE_SELF | MOVE_SELF;
+
+        /**
+         * Start watching for events.  The monitored file or directory must exist at
+         * this time, or else no events will be reported (even if it appears later).
+         * If monitoring is already started, this call has no effect.
+         */
+        StartWatching();
+
+        /**
+         * Stop watching for events.  Some events may be in process, so events
+         * may continue to be reported even after this method completes.  If
+         * monitoring is already stopped, this call has no effect.
+         */
+        StopWatching();
+
+        /**
+         * The event handler, which must be implemented by subclasses.
+         *
+         * <p class="note">This method is invoked on a special FileObserver thread.
+         * It runs independently of any threads, so take care to use appropriate
+         * synchronization!  Consider using {@link Handler#post(Runnable)} to shift
+         * event handling work to the main thread to avoid concurrency problems.</p>
+         *
+         * <p>Event handlers must not throw exceptions.</p>
+         *
+         * @param event The type of event which happened
+         * @param path The path, relative to the main monitored file or directory,
+         *     of the file or directory which triggered the event
+         */
+        OnEvent(
+            [in] Int32 event,
+            [in] String path);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

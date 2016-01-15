@@ -1,0 +1,86 @@
+
+module
+{
+    merge("test/suitebuilder/IFailedToCreateTests.car");
+    merge("test/suitebuilder/ITestMethod.car");
+    merge("test/suitebuilder/ITestSuiteBuilder.car");
+    merge("test/IAndroidTestRunner.car");
+    merge("test/IInstrumentationTestRunner.car");
+    merge("test/IPerformanceCollectorTestCase.car");
+    merge("test/ITestRunner.car");
+    merge("test/ITestSuiteProvider.car");
+
+    using interface Eunit.Framework.ITest;
+    using interface Eunit.Framework.ITestCase;
+    using interface Eunit.Runner.IBaseTestRunner;
+    using interface Elastos.Core.IClassLoader;
+    using interface Elastos.Droid.App.IInstrumentation;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Test {
+
+    namespace SuiteBuilder {
+
+    class CFailedToCreateTests {
+        constructor(
+            [in] ECode ecError);
+
+        interface ITest;
+        interface ITestCase;
+        interface IFailedToCreateTests;
+    }
+
+    [local]
+    class CTestMethod {
+        constructor(
+            [in] IMethodInfo* method,
+            [in] IClassInfo* enclosingClass);
+
+        constructor(
+            [in] String methodName,
+            [in] IClassInfo* enclosingClass);
+
+        constructor(
+            [in] ITestCase* testCase);
+
+        interface ITestMethod;
+    }
+
+    [local]
+    class CTestSuiteBuilder {
+        /**
+         * The given name is automatically prefixed with the package containing the tests to be run.
+         * If more than one package is specified, the first is used.
+         *
+         * @param clazz Use the class from your .apk. Use the class name for the test suite name.
+         *              Use the class' classloader in order to load classes for testing.
+         *              This is needed when running in the emulator.
+         */
+        constructor(
+            [in] IClassInfo* clazz);
+
+        constructor(
+            [in] String name,
+            [in] IClassLoader* classLoader);
+
+        interface ITestSuiteBuilder;
+    }
+
+    } // namespace SuiteBuilder
+
+    class CAndroidTestRunner {
+        interface IAndroidTestRunner;
+        interface IBaseTestRunner;
+    }
+
+    class CInstrumentationTestRunner {
+        interface IInstrumentationTestRunner;
+        interface IInstrumentation;
+        interface ITestSuiteProvider;
+    }
+
+    } // namespace Test
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,178 @@
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Speech.IRecognitionListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+
+    /**
+     * This class provides access to the speech recognition service. This service allows access to the
+     * speech recognizer. Do not instantiate this class directly, instead, call
+     * {@link SpeechRecognizer#createSpeechRecognizer(Context)}. This class's methods must be
+     * invoked only from the main application thread.
+     *
+     * <p>The implementation of this API is likely to stream audio to remote servers to perform speech
+     * recognition. As such this API is not intended to be used for continuous recognition, which would
+     * consume a significant amount of battery and bandwidth.
+     *
+     * <p>Please note that the application must have {@link android.Manifest.permission#RECORD_AUDIO}
+     * permission to use this class.
+     */
+    interface ISpeechRecognizer {
+
+        /**
+         * Key used to retrieve an {@code ArrayList<String>} from the {@link Bundle} passed to the
+         * {@link RecognitionListener#onResults(Bundle)} and
+         * {@link RecognitionListener#onPartialResults(Bundle)} methods. These strings are the possible
+         * recognition results, where the first element is the most likely candidate.
+         */
+        const String RESULTS_RECOGNITION = "results_recognition";
+
+        /**
+         * Key used to retrieve a float array from the {@link Bundle} passed to the
+         * {@link RecognitionListener#onResults(Bundle)} and
+         * {@link RecognitionListener#onPartialResults(Bundle)} methods. The array should be
+         * the same size as the ArrayList provided in {@link #RESULTS_RECOGNITION}, and should contain
+         * values ranging from 0.0 to 1.0, or -1 to represent an unavailable confidence score.
+         * <p>
+         * Confidence values close to 1.0 indicate high confidence (the speech recognizer is confident
+         * that the recognition result is correct), while values close to 0.0 indicate low confidence.
+         * <p>
+         * This value is optional and might not be provided.
+         */
+        const String CONFIDENCE_SCORES = "confidence_scores";
+
+        /** Network operation timed out. */
+        const Int32 ERROR_NETWORK_TIMEOUT = 1;
+
+        /** Other network related errors. */
+        const Int32 ERROR_NETWORK = 2;
+
+        /** Audio recording error. */
+        const Int32 ERROR_AUDIO = 3;
+
+        /** Server sends error status. */
+        const Int32 ERROR_SERVER = 4;
+
+        /** Other client side errors. */
+        const Int32 ERROR_CLIENT = 5;
+
+        /** No speech input */
+        const Int32 ERROR_SPEECH_TIMEOUT = 6;
+
+        /** No recognition result matched. */
+        const Int32 ERROR_NO_MATCH = 7;
+
+        /** RecognitionService busy. */
+        const Int32 ERROR_RECOGNIZER_BUSY = 8;
+
+        /** Insufficient permissions */
+        const Int32 ERROR_INSUFFICIENT_PERMISSIONS = 9;
+
+        /**
+         * Sets the listener that will receive all the callbacks. The previous unfinished commands will
+         * be executed with the old listener, while any following command will be executed with the new
+         * listener.
+         *
+         * @param listener listener that will receive all the callbacks from the created
+         *        {@link SpeechRecognizer}, this must not be null.
+         */
+        SetRecognitionListener(
+            [in] IRecognitionListener* listener);
+
+        /**
+         * Starts listening for speech. Please note that
+         * {@link #setRecognitionListener(RecognitionListener)} should be called beforehand, otherwise
+         * no notifications will be received.
+         *
+         * @param recognizerIntent contains parameters for the recognition to be performed. The intent
+         *        may also contain optional extras, see {@link RecognizerIntent}. If these values are
+         *        not set explicitly, default values will be used by the recognizer.
+         */
+        StartListening(
+            [in] IIntent* recognizerIntent);
+
+        /**
+         * Stops listening for speech. Speech captured so far will be recognized as if the user had
+         * stopped speaking at this point. Note that in the default case, this does not need to be
+         * called, as the speech endpointer will automatically stop the recognizer listening when it
+         * determines speech has completed. However, you can manipulate endpointer parameters directly
+         * using the intent extras defined in {@link RecognizerIntent}, in which case you may sometimes
+         * want to manually call this method to stop listening sooner. Please note that
+         * {@link #setRecognitionListener(RecognitionListener)} should be called beforehand, otherwise
+         * no notifications will be received.
+         */
+        StopListening();
+
+        /**
+         * Cancels the speech recognition. Please note that
+         * {@link #setRecognitionListener(RecognitionListener)} should be called beforehand, otherwise
+         * no notifications will be received.
+         */
+        Cancel();
+
+        /**
+         * Destroys the {@code SpeechRecognizer} object.
+         */
+        Destroy();
+    }
+
+    [local]
+    interface ISpeechRecognizerHelper {
+
+        /**
+         * Checks whether a speech recognition service is available on the system. If this method
+         * returns {@code false}, {@link SpeechRecognizer#createSpeechRecognizer(Context)} will
+         * fail.
+         *
+         * @param context with which {@code SpeechRecognizer} will be created
+         * @return {@code true} if recognition is available, {@code false} otherwise
+         */
+        IsRecognitionAvailable(
+            [in] IContext* ctx,
+            [out] Boolean* ret);
+
+        /**
+         * Factory method to create a new {@code SpeechRecognizer}. Please note that
+         * {@link #setRecognitionListener(RecognitionListener)} should be called before dispatching any
+         * command to the created {@code SpeechRecognizer}, otherwise no notifications will be
+         * received.
+         *
+         * @param context in which to create {@code SpeechRecognizer}
+         * @return a new {@code SpeechRecognizer}
+         */
+        CreateSpeechRecognizer(
+            [in] IContext* ctx,
+            [out] ISpeechRecognizer** ret);
+
+        /**
+         * Factory method to create a new {@code SpeechRecognizer}. Please note that
+         * {@link #setRecognitionListener(RecognitionListener)} should be called before dispatching any
+         * command to the created {@code SpeechRecognizer}, otherwise no notifications will be
+         * received.
+         *
+         * Use this version of the method to specify a specific service to direct this
+         * {@link SpeechRecognizer} to. Normally you would not use this; use
+         * {@link #createSpeechRecognizer(Context)} instead to use the system default recognition
+         * service.
+         *
+         * @param context in which to create {@code SpeechRecognizer}
+         * @param serviceComponent the {@link ComponentName} of a specific service to direct this
+         *        {@code SpeechRecognizer} to
+         * @return a new {@code SpeechRecognizer}
+         */
+        CreateSpeechRecognizer(
+            [in] IContext* ctx,
+            [in] IComponentName* serviceComponent,
+            [out] ISpeechRecognizer** ret);
+    }
+
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

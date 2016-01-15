@@ -1,0 +1,39 @@
+TARGET_NAME=curl
+TARGET_TYPE=exe
+
+INCLUDES+=$(MAKEDIR)/../lib
+
+ifeq "$(XDK_TARGET_PLATFORM)" "win32"
+  C_DEFINES+=-UWIN32
+  C_DEFINES+=-U_WIN32
+endif
+
+ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+C_DEFINES+= -DANDROID
+endif
+
+SOURCES+=main.c
+SOURCES+=hugehelp.c
+SOURCES+=urlglob.c
+SOURCES+=writeout.c
+SOURCES+=getpass.c
+SOURCES+=homedir.c
+SOURCES+=curlutil.c
+SOURCES+=os-specific.c
+#SOURCES+=strtoofft.c
+#SOURCES+=strdup.c
+#SOURCES+=rawstr.c
+#SOURCES+=nonblock.c
+
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
+LIBRARIES += -lgcc -lc -lm -ldl -llog -lz -ldbus
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+else
+LIBRARIES+=$(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES+=$(XDK_USER_LIB)/Elastos.Archiving.zlib.lib
+endif
+ifeq "$(XDK_TARGET_PLATFORM)" "win32"
+LIBRARIES+=$(XDK_USER_LIB)/Elastos.Networking.cURL.lib
+else
+LIBRARIES+=$(XDK_TARGETS)/Elastos.Networking.cURL.eco
+endif

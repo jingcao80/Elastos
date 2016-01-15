@@ -1,0 +1,26 @@
+
+module
+{
+    interface Elastosx.Crypto.Spec.IDHParameterSpec;
+
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Interfaces {
+
+    /**
+     * The interface for a Diffie-Hellman key.
+     */
+    interface IDHKey {
+        /**
+         * Returns the parameters for this key.
+         *
+         * @return the parameters for this key.
+         */
+        GetParams(
+            [out] IDHParameterSpec** spec);
+    }
+
+    } // namespace interfaces
+    } // namespace Crypto
+    } // namespace Elastosx
+}

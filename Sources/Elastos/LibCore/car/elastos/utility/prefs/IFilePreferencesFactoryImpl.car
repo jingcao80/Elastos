@@ -1,0 +1,26 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Prefs {
+    /**
+     * This abstract class is a partial implementation of the abstract class
+     * Preferences, which can be used to simplify {@code Preferences} provider's
+     * implementation. This class defines nine abstract SPI methods, which must be
+     * implemented by a preference provider.
+     *
+     * @since 1.4
+     * @see Preferences
+     */
+
+    /**
+     * @Involve
+     * interface IPreferencesFactory;
+     */
+    interface IFilePreferencesFactoryImpl {
+    }
+
+    } // namespace Prefs
+    } // namespace Utility
+    } // namespace Elastos
+}

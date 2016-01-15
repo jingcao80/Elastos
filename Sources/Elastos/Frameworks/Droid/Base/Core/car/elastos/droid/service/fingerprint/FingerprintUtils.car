@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContentResolver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Fingerprint {
+
+    /**
+     * Utility class for dealing with fingerprints and fingerprint settings.
+     * @hide
+     */
+    interface IFingerprintUtils {
+        GetFingerprintIdsForUser(
+            [in] IContentResolver* res,
+            [in] Int32 userId,
+            [out, callee] ArrayOf<Int32>* ids);
+
+        AddFingerprintIdForUser(
+            [in] Int32 fingerId,
+            [in] IContentResolver* res,
+            [in] Int32 userId);
+
+        RemoveFingerprintIdForUser(
+            [in] Int32 fingerId,
+            [in] IContentResolver* res,
+            [in] Int32 userId,
+            [out] Boolean* ret);
+    }
+
+    } // namespace Fingerprint
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

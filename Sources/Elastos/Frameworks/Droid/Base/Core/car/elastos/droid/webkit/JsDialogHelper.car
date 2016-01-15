@@ -1,0 +1,38 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Webkit.IWebChromeClient;
+    interface Elastos.Droid.Webkit.IWebView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * Helper class to create JavaScript dialogs. It is used by
+     * different WebView implementations.
+     *
+     * @hide Helper class for internal use
+     */
+    interface IJsDialogHelper {
+
+        // Dialog types
+        const Int32 ALERT   = 1;
+        const Int32 CONFIRM = 2;
+        const Int32 PROMPT  = 3;
+        const Int32 UNLOAD  = 4;
+
+        InvokeCallback(
+            [in] IWebChromeClient* client,
+            [in] IWebView* webView,
+            [out] Boolean* result);
+
+        ShowDialog(
+            [in] IContext* context);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

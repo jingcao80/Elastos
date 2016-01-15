@@ -1,0 +1,920 @@
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+
+    interface Elastos.Droid.Bluetooth.IBluetoothHeadset;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IBatteryStatsHistoryItem;
+    interface Elastos.Droid.Os.IBatteryStatsUidPid;
+    interface Elastos.Droid.Os.IWorkSource;
+    interface Elastos.Droid.Telephony.ISignalStrength;
+    interface Elastos.Droid.Utility.IArrayMap;
+    interface Elastos.Droid.Utility.ISparseArray;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    [local]
+    interface IBatteryCallback {
+        BatteryNeedsCpuUpdate();
+
+        BatteryPowerChanged(
+            [in] Boolean onBattery);
+    }
+
+    [local]
+    interface ITimeBaseObs {
+        OnTimeStarted(
+            [in] Int64 elapsedRealtime,
+            [in] Int64 baseUptime,
+            [in] Int64 baseRealtime);
+
+        OnTimeStopped(
+            [in] Int64 elapsedRealtime,
+            [in] Int64 baseUptime,
+            [in] Int64 baseRealtime);
+    }
+
+    /**
+     * State for keeping track of counting information.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsCounter
+     * interface ITimeBaseObs;
+     */
+    [local]
+    interface IBatteryStatsImplCounter {
+        WriteToParcel(
+            [in] IParcel* parcel);
+    }
+
+    /**
+     * @Involve
+     * interface IBatteryStatsCounter
+     * interface ITimeBaseObs;
+     * interface IBatteryStatsImplCounter
+     */
+    [local]
+    interface IBatteryStatsImplSamplingCounter {
+        AddCountAtomic(
+            [in] Int64 count);
+    }
+
+    /**
+     * @Involve
+     * interface IBatteryStatsLongCounter
+     * interface ITimeBaseObs;
+     */
+    [local]
+    interface IBatteryStatsImplLongSamplingCounter {
+        WriteToParcel(
+            [in] IParcel* parcel);
+    }
+
+    /**
+     * State for keeping track of timing information.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsTimer
+     * interface ITimeBaseObs;
+     */
+    [local]
+    interface IBatteryStatsImplTimer {
+        WriteToParcel(
+            [in] IParcel* parcel,
+            [in] Int64 elapsedRealtimeUs);
+    }
+
+    /**
+     * @Involve
+     * interface IBatteryStatsTimer
+     * interface ITimeBaseObs;
+     * interface IBatteryStatsImplTimer
+     */
+    [local]
+    interface IBatteryStatsImplSamplingTimer {
+        SetStale();
+
+        SetUpdateVersion(
+            [in] Int32 updateVersion);
+
+        GetUpdateVersion(
+            [out] Int32* updateVersion);
+
+        UpdateCurrentReportedCount(
+            [in] Int32 count);
+
+        AddCurrentReportedCount(
+            [in] Int32 delta);
+
+        UpdateCurrentReportedTotalTime(
+            [in] Int64 totalTime);
+
+        AddCurrentReportedTotalTime(
+            [in] Int64 delta);
+    }
+
+    interface IBatteryStatsImpl;
+
+    /**
+     * A timer that increments in batches.  It does not run for durations, but just jumps
+     * for a pre-determined amount.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsTimer
+     * interface ITimeBaseObs;
+     * interface IBatteryStatsImplTimer
+     */
+    [local]
+    interface IBatteryStatsImplBatchTimer {
+        AddDuration(
+            [in] IBatteryStatsImpl* stats,
+            [in] Int64 durationMillis);
+
+        AbortLastDuration(
+            [in] IBatteryStatsImpl* stats);
+    }
+
+    /**
+     * State for keeping track of timing information.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsTimer
+     * interface ITimeBaseObs;
+     * interface IBatteryStatsImplTimer
+     */
+    [local]
+    interface IBatteryStatsImplStopwatchTimer {
+    }
+
+    [local]
+    interface IOverflowArrayMap {
+        GetMap(
+            [out] IArrayMap** arrayMap);
+
+        Clear();
+
+        Add(
+            [in] String name,
+            [in] IInterface* obj);
+
+        Cleanup();
+
+        StartObject(
+            [in] String name,
+            [out] IInterface** obj);
+
+        StopObject(
+            [in] String name,
+            [out] IInterface** obj);
+
+        InstantiateObject(
+            [out] IInterface** obj);
+    }
+
+    /**
+     * The statistics associated with a particular wake lock.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsUidWakelock
+     */
+    [local]
+    interface IBatteryStatsImplUidWakelock {
+        GetStopwatchTimer(
+            [in] Int32 type,
+            [out] IBatteryStatsImplStopwatchTimer** timer);
+    }
+
+    /**
+     * @Involve
+     * interface IBatteryStatsUidSensor
+     * interface ITimeBaseObs
+     */
+    [local]
+    interface IBatteryStatsImplUidSensor {
+    }
+
+    /**
+     * The statistics associated with a particular process.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsUidProc
+     * interface ITimeBaseObs
+     */
+    [local]
+    interface IBatteryStatsImplUidProc {
+        AddExcessiveWake(
+            [in] Int64 overTime,
+            [in] Int64 usedTime);
+
+        AddExcessiveCpu(
+            [in] Int64 overTime,
+            [in] Int64 usedTime);
+
+        GetBatteryStats(
+            [out] IBatteryStatsImpl** batteryStats);
+
+        AddCpuTimeLocked(
+            [in] Int32 utime,
+            [in] Int32 stime);
+
+        AddForegroundTimeLocked(
+            [in] Int64 ttime);
+
+        IncStartsLocked();
+
+        /* Called by ActivityManagerService when CPU times are updated. */
+        AddSpeedStepTimes(
+            [in] ArrayOf<Int64> values);
+    }
+
+    /**
+     * The statistics associated with a particular service.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsUidPkgServ
+     * interface ITimeBaseObs
+     */
+    [local]
+    interface IBatteryStatsImplUidPkgServ {
+        StartLaunchedLocked();
+
+        StopLaunchedLocked();
+
+        StartRunningLocked();
+
+        StopRunningLocked();
+
+        GetBatteryStats(
+            [out] IBatteryStatsImpl** batteryStats);
+    }
+
+    /**
+     * The statistics associated with a particular package.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsUidPkg
+     * interface ITimeBaseObs
+     */
+    [local]
+    interface IBatteryStatsImplUidPkg {
+        GetBatteryStats(
+            [out] IBatteryStatsImpl** batteryStats);
+
+        IncWakeupsLocked();
+    }
+
+    /**
+     * The statistics associated with a particular uid.
+     */
+    /**
+     * @Involve
+     * interface IBatteryStatsUid
+     */
+    [local]
+    interface IBatteryStatsImplUid {
+        CreateAudioTurnedOnTimerLocked(
+            [out] IBatteryStatsImplStopwatchTimer** timer);
+
+        NoteAudioTurnedOnLocked(
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteAudioTurnedOffLocked(
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteResetAudioLocked(
+            [in] Int64 elapsedRealtimeMs);
+
+        CreateVideoTurnedOnTimerLocked(
+            [out] IBatteryStatsImplStopwatchTimer** timer);
+
+        NoteVideoTurnedOnLocked(
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteVideoTurnedOffLocked(
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteResetVideoLocked(
+            [in] Int64 elapsedRealtimeMs);
+
+        CreateForegroundActivityTimerLocked(
+            [out] IBatteryStatsImplStopwatchTimer** timer);
+
+        CreateVibratorOnTimerLocked(
+            [out] IBatteryStatsImplBatchTimer** timer);
+
+        NoteVibratorOnLocked(
+            [in] Int64 durationMillis);
+
+        NoteVibratorOffLocked();
+
+        /**
+         * Retrieve the statistics object for a particular process, creating
+         * if needed.
+         */
+        GetProcessStatsLocked(
+            [in] String name,
+            [out] IBatteryStatsImplUidProc** proc);
+
+        UpdateProcessStateLocked(
+            [in] String procName,
+            [in] Int32 state,
+            [in] Int64 elapsedRealtimeMs);
+
+        UpdateRealProcessStateLocked(
+            [in] String procName,
+            [in] Int32 procState,
+            [in] Int64 elapsedRealtimeMs);
+
+        GetPidStats(
+            [out] ISparseArray** pidStats);
+
+        GetPidStatsLocked(
+            [in] Int32 pid,
+            [out] IBatteryStatsUidPid** pidStats);
+
+        /**
+         * Retrieve the statistics object for a particular service, creating
+         * if needed.
+         */
+        GetPackageStatsLocked(
+            [in] String name,
+            [out] IBatteryStatsImplUidPkg** pkg);
+
+        /**
+         * Retrieve the statistics object for a particular service, creating
+         * if needed.
+         */
+        GetServiceStatsLocked(
+            [in] String pkg,
+            [in] String serv,
+            [out] IBatteryStatsImplUidPkgServ** service);
+
+        ReadSyncSummaryFromParcelLocked(
+            [in] String name,
+            [in] IParcel* parcel);
+
+        ReadJobSummaryFromParcelLocked(
+            [in] String name,
+            [in] IParcel* parcel);
+
+        ReadWakeSummaryFromParcelLocked(
+            [in] String wlName,
+            [in] IParcel* parcel);
+
+        GetSensorTimerLocked(
+            [in] Int32 sensor,
+            [in] Boolean create,
+            [out] IBatteryStatsImplStopwatchTimer** timer);
+
+        NoteStartSyncLocked(
+            [in] String name,
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteStopSyncLocked(
+            [in] String name,
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteStartJobLocked(
+            [in] String name,
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteStopJobLocked(
+            [in] String name,
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteStartWakeLocked(
+            [in] Int32 pid,
+            [in] String name,
+            [in] Int32 type,
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteStopWakeLocked(
+            [in] Int32 pid,
+            [in] String name,
+            [in] Int32 type,
+            [in] Int64 elapsedRealtimeMs);
+
+        ReportExcessiveWakeLocked(
+            [in] String proc,
+            [in] Int64 overTime,
+            [in] Int64 usedTime);
+
+        ReportExcessiveCpuLocked(
+            [in] String proc,
+            [in] Int64 overTime,
+            [in] Int64 usedTime);
+
+        NoteStartSensor(
+            [in] Int32 sensor,
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteStopSensor(
+            [in] Int32 sensor,
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteStartGps(
+            [in] Int64 elapsedRealtimeMs);
+
+        NoteStopGps(
+            [in] Int64 elapsedRealtimeMs);
+
+        GetBatteryStats(
+            [out] IBatteryStatsImpl** batteryStats);
+    }
+
+    /**
+     * All information we are collecting about things that can happen that impact
+     * battery life.  All times are represented in microseconds except where indicated
+     * otherwise.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     * interface IBatteryStats;
+     */
+    [local, parcelable]
+    interface IBatteryStatsImpl {
+        /*
+         * Get the wakeup reason counter, and create a new one if one
+         * doesn't already exist.
+         */
+        GetWakeupReasonTimerLocked(
+            [in] String name,
+            [out] IBatteryStatsImplSamplingTimer** timer);
+
+        /*
+         * Get the KernelWakelockTimer associated with name, and create a new one if one
+         * doesn't already exist.
+         */
+        GetKernelWakelockTimerLocked(
+            [in] String name,
+            [out] IBatteryStatsImplSamplingTimer** timer);
+
+        SetBtHeadset(
+            [in] IBluetoothHeadset* headset);
+
+        WriteHistoryDelta(
+            [in] IParcel* dest,
+            [in] IBatteryStatsHistoryItem* cur,
+            [in] IBatteryStatsHistoryItem* last);
+
+        ReadHistoryDelta(
+            [in] IParcel* src,
+            [in] IBatteryStatsHistoryItem* cur);
+
+        UpdateTimeBasesLocked(
+            [in] Boolean unplugged,
+            [in] Boolean screenOff,
+            [in] Int64 uptime,
+            [in] Int64 realtime);
+
+        AddIsolatedUidLocked(
+            [in] Int32 isolatedUid,
+            [in] Int32 appUid);
+
+        RemoveIsolatedUidLocked(
+            [in] Int32 isolatedUid,
+            [in] Int32 appUid);
+
+        MapUid(
+            [in] Int32 uid,
+            [out] Int32* result);
+
+        NoteEventLocked(
+            [in] Int32 code,
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteCurrentTimeChangedLocked();
+
+        NoteProcessStartLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteProcessStateLocked(
+            [in] String name,
+            [in] Int32 uid,
+            [in] Int32 state);
+
+        NoteProcessFinishLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteSyncStartLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteSyncFinishLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteJobStartLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        NoteJobFinishLocked(
+            [in] String name,
+            [in] Int32 uid);
+
+        SetRecordAllHistoryLocked(
+            [in] Boolean enabled);
+
+        SetNoAutoReset(
+            [in] Boolean enabled);
+
+        NoteStartWakeLocked(
+            [in] Int32 uid,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] Boolean unimportantForLogging,
+            [in] Int64 elapsedRealtime,
+            [in] Int64 uptime);
+
+        NoteStopWakeLocked(
+            [in] Int32 uid,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] Int64 elapsedRealtime,
+            [in] Int64 uptime);
+
+        NoteStartWakeFromSourceLocked(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] Boolean unimportantForLogging);
+
+        NoteChangeWakelockFromSourceLocked(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type,
+            [in] IWorkSource* newWs,
+            [in] Int32 newPid,
+            [in] String newName,
+            [in] String newHistoryName,
+            [in] Int32 newType,
+            [in] Boolean newUnimportantForLogging);
+
+        NoteStopWakeFromSourceLocked(
+            [in] IWorkSource* ws,
+            [in] Int32 pid,
+            [in] String name,
+            [in] String historyName,
+            [in] Int32 type);
+
+        NoteWakeupReasonLocked(
+            [in] String reason);
+
+        StartAddingCpuLocked(
+            [out] Int32* result);
+
+        FinishAddingCpuLocked(
+            [in] Int32 perc,
+            [in] Int32 utime,
+            [in] Int32 stime,
+            [in] ArrayOf<Int64> cpuSpeedTimes);
+
+        GetProcessWakeTime(
+            [in] Int32 uid,
+            [in] Int32 pid,
+            [in] Int64 realtime,
+            [out] Int64* result);
+
+        ReportExcessiveWakeLocked(
+            [in] Int32 uid,
+            [in] String proc,
+            [in] Int64 overTime,
+            [in] Int64 usedTime);
+
+        ReportExcessiveCpuLocked(
+            [in] Int32 uid,
+            [in] String proc,
+            [in] Int64 overTime,
+            [in] Int64 usedTime);
+
+        NoteStartSensorLocked(
+            [in] Int32 uid,
+            [in] Int32 sensor);
+
+        NoteStopSensorLocked(
+            [in] Int32 uid,
+            [in] Int32 sensor);
+
+        NoteStartGpsLocked(
+            [in] Int32 uid);
+
+        NoteStopGpsLocked(
+            [in] Int32 uid);
+
+        NoteScreenStateLocked(
+            [in] Int32 state);
+
+        NoteScreenBrightnessLocked(
+            [in] Int32 brightness);
+
+        NoteUserActivityLocked(
+            [in] Int32 uid,
+            [in] Int32 event);
+
+        NoteInteractiveLocked(
+            [in] Boolean interactive);
+
+        NoteMobileRadioPowerState(
+            [in] Int32 powerState,
+            [in] Int64 timestampNs);
+
+        NoteLowPowerMode(
+            [in] Boolean enabled);
+
+        NotePhoneOnLocked();
+
+        NotePhoneOffLocked();
+
+        /**
+         * Telephony stack updates the phone state.
+         * @param state phone state from ServiceState.getState()
+         */
+        NotePhoneStateLocked(
+            [in] Int32 state,
+            [in] Int32 simState);
+
+        NotePhoneSignalStrengthLocked(
+            [in] ISignalStrength* signalStrength);
+
+        NotePhoneDataConnectionStateLocked(
+            [in] Int32 dataType,
+            [in] Boolean hasData);
+
+        NoteWifiOnLocked();
+
+        NoteWifiOffLocked();
+
+        NoteAudioOnLocked(
+            [in] Int32 uid);
+
+        NoteAudioOffLocked(
+            [in] Int32 uid);
+
+        NoteVideoOnLocked(
+            [in] Int32 uid);
+
+        NoteVideoOffLocked(
+            [in] Int32 uid);
+
+        NoteResetAudioLocked();
+
+        NoteResetVideoLocked();
+
+        NoteActivityResumedLocked(
+            [in] Int32 uid);
+
+        NoteActivityPausedLocked(
+            [in] Int32 uid);
+
+        NoteVibratorOnLocked(
+            [in] Int32 uid,
+            [in] Int64 durationMillis);
+
+        NoteVibratorOffLocked(
+            [in] Int32 uid);
+
+        NoteFlashlightOnLocked();
+
+        NoteFlashlightOffLocked();
+
+        NoteWifiRunningLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiRunningChangedLocked(
+            [in] IWorkSource* oldWs,
+            [in] IWorkSource* newWs);
+
+        NoteWifiStoppedLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiStateLocked(
+            [in] Int32 wifiState,
+            [in] String accessPoint);
+
+        NoteWifiSupplicantStateChangedLocked(
+            [in] Int32 supplState,
+            [in] Boolean failedAuth);
+
+        NoteWifiRssiChangedLocked(
+            [in] Int32 newRssi);
+
+        NoteBluetoothOnLocked();
+
+        NoteBluetoothOffLocked();
+
+        NoteBluetoothStateLocked(
+            [in] Int32 bluetoothState);
+
+        NoteFullWifiLockAcquiredLocked(
+            [in] Int32 uid);
+
+        NoteFullWifiLockReleasedLocked(
+            [in] Int32 uid);
+
+        NoteWifiScanStartedLocked(
+            [in] Int32 uid);
+
+        NoteWifiScanStoppedLocked(
+            [in] Int32 uid);
+
+        NoteWifiBatchedScanStartedLocked(
+            [in] Int32 uid,
+            [in] Int32 csph);
+
+        NoteWifiBatchedScanStoppedLocked(
+            [in] Int32 uid);
+
+        NoteWifiMulticastEnabledLocked(
+            [in] Int32 uid);
+
+        NoteWifiMulticastDisabledLocked(
+            [in] Int32 uid);
+
+        NoteFullWifiLockAcquiredFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteFullWifiLockReleasedFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiScanStartedFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiScanStoppedFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiBatchedScanStartedFromSourceLocked(
+            [in] IWorkSource* ws,
+            [in] Int32 csph);
+
+        NoteWifiBatchedScanStoppedFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiMulticastEnabledFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteWifiMulticastDisabledFromSourceLocked(
+            [in] IWorkSource* ws);
+
+        NoteNetworkInterfaceTypeLocked(
+            [in] String iface,
+            [in] Int32 networkType);
+
+        NoteNetworkStatsEnabledLocked();
+
+        SetCallback(
+            [in] IBatteryCallback* cb);
+
+        SetNumSpeedSteps(
+            [in] Int32 steps);
+
+        SetRadioScanningTimeout(
+            [in] Int64 timeout);
+
+        IsOnBattery(
+            [out] Boolean* result);
+
+        IsScreenOn(
+            [out] Boolean* result);
+
+        ResetAllStatsCmdLocked();
+
+        PullPendingStateUpdatesLocked();
+
+        SetBatteryState(
+            [in] Int32 status,
+            [in] Int32 health,
+            [in] Int32 plugType,
+            [in] Int32 level,
+            [in] Int32 temp,
+            [in] Int32 volt);
+
+        UpdateKernelWakelocksLocked();
+
+        GetAwakeTimeBattery(
+            [out] Int64* result);
+
+        GetAwakeTimePlugged(
+            [out] Int64* result);
+
+        GetDischargeStartLevelLocked(
+            [out] Int32* result);
+
+        GetDischargeCurrentLevelLocked(
+            [out] Int32* result);
+
+        /**
+         * Retrieve the statistics object for a particular uid, creating if needed.
+         */
+        GetUidStatsLocked(
+            [in] Int32 uid,
+            [out] IBatteryStatsImplUid** uidStats);
+
+
+        /**
+         * Remove the statistics object for a particular uid.
+         */
+        RemoveUidStatsLocked(
+            [in] Int32 uid);
+
+        /**
+         * Retrieve the statistics object for a particular process, creating
+         * if needed.
+         */
+        GetProcessStatsLocked(
+            [in] Int32 uid,
+            [in] String name,
+            [out] IBatteryStatsImplUidProc** procStats);
+
+        /**
+         * Retrieve the statistics object for a particular process, creating
+         * if needed.
+         */
+        GetPackageStatsLocked(
+            [in] Int32 uid,
+            [in] String pkg,
+            [out] IBatteryStatsImplUidPkg** pkgStats);
+
+        /**
+         * Retrieve the statistics object for a particular service, creating
+         * if needed.
+         */
+        GetServiceStatsLocked(
+            [in] Int32 uid,
+            [in] String pkg,
+            [in] String name,
+            [out] IBatteryStatsImplUidPkgServ** servStats);
+
+        /**
+         * Massage data to distribute any reasonable work down to more specific
+         * owners.  Must only be called on a dead BatteryStats object!
+         */
+        DistributeWorkLocked(
+            [in] Int32 which);
+
+
+        ShutdownLocked();
+
+        WriteAsyncLocked();
+
+        WriteSyncLocked();
+
+        CommitPendingDataToDisk();
+
+        ReadLocked();
+
+        ReadSummaryFromParcel(
+            [in] IParcel* parcel);
+
+        /**
+         * Writes a summary of the statistics to a Parcel, in a format suitable to be written to
+         * disk.  This format does not allow a lossless round-trip.
+         *
+         * @param out the Parcel to be written to.
+         */
+        WriteSummaryToParcel(
+            [in] IParcel* parcel,
+            [in] Boolean inclHistory);
+
+        WriteToParcelWithoutUids(
+            [in] IParcel* parcel,
+            [in] Int32 flags);
+
+        PrepareForDumpLocked();
+
+        DumpLocked(
+            [in] IContext* context,
+            [in] IPrintWriter* pw,
+            [in] Int32 flags,
+            [in] Int32 reqUid,
+            [in] Int64 histStart);
+
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

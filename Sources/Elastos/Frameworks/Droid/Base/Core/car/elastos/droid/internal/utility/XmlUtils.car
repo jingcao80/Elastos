@@ -1,0 +1,55 @@
+
+module
+{
+    using interface Org.Xmlpull.V1.IXmlSerializer;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    /** @hide */
+    interface IXmlUtilsWriteMapCallback {
+        /**
+         * Called from writeMapXml when an Object type is not recognized. The implementer
+         * must write out the entire element including start and end tags.
+         *
+         * @param v The object to be written out
+         * @param name The mapping key for v. Must be written into the "name" attribute of the
+         *             start tag.
+         * @param out The XML output stream.
+         * @throws XmlPullParserException on unrecognized Object type.
+         * @throws IOException on XmlSerializer serialization errors.
+         * @hide
+         */
+        WriteUnknownObject(
+            [in] IInterface* v,
+            [in] String name,
+            [in] IXmlSerializer* xs);
+    }
+
+    /** @hide */
+    interface IXmlUtilsReadMapCallback {
+        /**
+         * Called from readThisMapXml when a START_TAG is not recognized. The input stream
+         * is positioned within the start tag so that attributes can be read using in.getAttribute.
+         *
+         * @param in the XML input stream
+         * @param tag the START_TAG that was not recognized.
+         * @return the Object parsed from the stream which will be put into the map.
+         * @throws XmlPullParserException if the START_TAG is not recognized.
+         * @throws IOException on XmlPullParser serialization errors.
+         * @hide
+         */
+        ReadThisUnknownObjectXml(
+            [in] IXmlPullParser* xpp,
+            [in] String tag,
+            [out] IInterface** obj);
+    }
+
+    } // namespace Utility
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

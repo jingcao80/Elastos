@@ -1,0 +1,24 @@
+
+TARGET_NAME= mtp
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE -DMTP_DEVICE -DMTP_HOST
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+INCLUDES += $(PREBUILD_INC)/MediaMtp
+INCLUDES += $(PREBUILD_INC)/libexif
+
+SOURCES = CMtpConstants.cpp
+SOURCES += CMtpDatabase.cpp
+SOURCES += CMtpDevice.cpp
+SOURCES += CMtpDeviceInfo.cpp
+SOURCES += CMtpObjectInfo.cpp
+SOURCES += CMtpPropertyGroup.cpp
+SOURCES += CMtpPropertyList.cpp
+SOURCES += CMtpServer.cpp
+SOURCES += CMtpStorage.cpp
+SOURCES += CMtpStorageInfo.cpp

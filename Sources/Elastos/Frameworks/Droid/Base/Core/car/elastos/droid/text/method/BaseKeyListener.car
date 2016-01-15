@@ -1,0 +1,75 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.Text.IEditable;
+    interface Elastos.Droid.Text.ISpannable;
+    enum Elastos.Droid.Text.Method.Capitalize;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    /**
+     * Abstract base class for key listeners.
+     *
+     * Provides a basic foundation for entering and editing text.
+     * Subclasses should override {@link #onKeyDown} and {@link #onKeyUp} to insert
+     * characters as keys are pressed.
+     * <p></p>
+     * As for all implementations of {@link KeyListener}, this class is only concerned
+     * with hardware keyboards.  Software input methods have no obligation to trigger
+     * the methods in this class.
+     *
+     * @Involve
+     * interface IKeyListener;
+     * interface IMetaKeyKeyListener
+     */
+    [local]
+    interface IBaseKeyListener {
+        /**
+         * Performs the action that happens when you press the {@link KeyEvent#KEYCODE_DEL} key in
+         * a {@link TextView}.  If there is a selection, deletes the selection; otherwise,
+         * deletes the character before the cursor, if any; ALT+DEL deletes everything on
+         * the line the cursor is on.
+         *
+         * @return true if anything was deleted; false otherwise.
+         */
+        Backspace(
+            [in] IView* view,
+            [in] IEditable* content,
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* ret);
+
+        /**
+         * Performs the action that happens when you press the {@link KeyEvent#KEYCODE_FORWARD_DEL}
+         * key in a {@link TextView}.  If there is a selection, deletes the selection; otherwise,
+         * deletes the character before the cursor, if any; ALT+FORWARD_DEL deletes everything on
+         * the line the cursor is on.
+         *
+         * @return true if anything was deleted; false otherwise.
+         */
+        ForwardDelete(
+            [in] IView* view,
+            [in] IEditable* content,
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* ret);
+    }
+
+    interface IBaseKeyListenerHelper {
+        MakeTextContentType(
+            [in] Capitalize caps,
+            [in] Boolean autoText,
+            [out] Int32* ret);
+    }
+
+    }//namespace Method
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

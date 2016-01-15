@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    interface IUriMatcher {
+        const Int32 NO_MATCH = -1;
+
+        /**
+         * Add a URI to match, and the code to return when this URI is
+         * matched. URI nodes may be exact match string, the token "*"
+         * that matches any text, or the token "#" that matches only
+         * numbers.
+         *
+         * @param authority the authority to match
+         * @param path the path to match. * may be used as a wild card for
+         * any text, and # may be used as a wild card for numbers.
+         * @param code the code that is returned when a URI is matched
+         * against the given components. Must be positive.
+         */
+        AddURI(
+            [in] String authority,
+            [in] String path,
+            [in] Int32 code); 
+       
+        /**
+         * Try to match against the path in a url.
+         *
+         * @param uri       The url whose path we will match against.
+         *
+         * @return  The code for the matched node (added using addURI), 
+         * or -1 if there is no matched node.
+         */
+        Match(
+            [in] IUri* uri,
+            [out] Int32* matchCode);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

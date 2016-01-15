@@ -1,0 +1,91 @@
+
+module
+{
+    using interface Elastos.Droid.Content.Res.IConfiguration;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Packages.SystemUI.IRecentsComponentCallbacks;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+
+    /** A proxy implementation for the recents component */
+    /**
+     * @Involve
+     * interface IActivityOptionsOnAnimationStartedListener
+     */
+    [local]
+    interface IAlternateRecentsComponent {
+
+        const String EXTRA_FROM_HOME = "recents.triggeredOverHome";
+        const String EXTRA_FROM_SEARCH_HOME = "recents.triggeredOverSearchHome";
+        const String EXTRA_FROM_APP_THUMBNAIL = "recents.animatingWithThumbnail";
+        const String EXTRA_FROM_APP_FULL_SCREENSHOT = "recents.thumbnail";
+        const String EXTRA_FROM_TASK_ID = "recents.activeTaskId";
+        const String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
+        const String EXTRA_TRIGGERED_FROM_HOME_KEY = "recents.triggeredFromHomeKey";
+
+        const String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
+        const String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
+        const String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
+
+        OnStart();
+
+        OnBootCompleted();
+
+        /** Shows the recents */
+        OnShowRecents(
+            [in] Boolean triggeredFromAltTab,
+            [in] IView* statusBarView);
+
+        /** Hides the recents */
+        OnHideRecents(
+            [in] Boolean triggeredFromAltTab,
+            [in] Boolean triggeredFromHomeKey);
+
+        /** Toggles the alternate recents activity */
+        OnToggleRecents(
+            [in] IView* statusBarView);
+
+        OnPreloadRecents();
+
+        OnCancelPreloadingRecents();
+
+        ShowRelativeAffiliatedTask(
+            [in] Boolean showNextTask);
+
+        OnShowNextAffiliatedTask();
+
+        OnShowPrevAffiliatedTask();
+
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        /** Sets the RecentsComponent callbacks. */
+        SetRecentsComponentCallback(
+            [in] IRecentsComponentCallbacks* cb);
+    }
+
+    interface IAlternateRecentsComponentHelper {
+
+        /** Returns the last screenshot taken, this will be called by the RecentsActivity. */
+        GetLastScreenshot(
+            [out] IBitmap** result);
+
+        /** Recycles the last screenshot taken, this will be called by the RecentsActivity. */
+        ConsumeLastScreenshot();
+
+        /** Notifies the callbacks that the visibility of Recents has changed. */
+        NotifyVisibilityChanged(
+            [in] Boolean visible);
+    }
+
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

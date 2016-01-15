@@ -1,0 +1,139 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * HttpAuthHeader: a class to store HTTP authentication-header parameters.
+     * For more information, see: RFC 2617: HTTP Authentication.
+     *
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IHttpAuthHeader {
+        /**
+         * Possible HTTP-authentication header tokens to search for:
+         */
+        const String BASIC_TOKEN = "Basic";
+        const String DIGEST_TOKEN = "Digest";
+
+        const Int32 UNKNOWN = 0;
+        const Int32 BASIC = 1;
+        const Int32 DIGEST = 2;
+
+        /**
+         * @return True iff this is a proxy authentication header.
+         */
+        IsProxy(
+            [out] Boolean* result);
+
+        /**
+         * Marks this header as a proxy authentication header.
+         */
+        SetProxy();
+
+        /**
+         * @return The username string.
+         */
+        GetUsername(
+            [out] String* result);
+
+        /**
+         * Sets the username string.
+         */
+        SetUsername(
+            [in] String username);
+
+        /**
+         * @return The password string.
+         */
+        GetPassword(
+            [out] String* result);
+
+        /**
+         * Sets the password string.
+         */
+        SetPassword(
+            [in] String password);
+
+        /**
+         * @return True iff this is the  BASIC-authentication request.
+         */
+        IsBasic(
+            [out] Boolean* result);
+
+        /**
+         * @return True iff this is the DIGEST-authentication request.
+         */
+        IsDigest(
+            [out] Boolean* result);
+
+        /**
+         * @return The authentication scheme requested. We currently
+         * support two schemes:
+         * HttpAuthHeader.BASIC  - basic, and
+         * HttpAuthHeader.DIGEST - digest (algorithm=MD5, QOP="auth").
+         */
+        GetScheme(
+            [out] Int32* result);
+
+        /**
+         * @return True if indicating that the previous request from
+         * the client was rejected because the nonce value was stale.
+         */
+        GetStale(
+            [out] Boolean* result);
+
+        /**
+         * @return The realm value or null if there is none.
+         */
+        GetRealm(
+            [out] String* result);
+
+        /**
+         * @return The nonce value or null if there is none.
+         */
+        GetNonce(
+            [out] String* result);
+
+        /**
+         * @return The opaque value or null if there is none.
+         */
+        GetOpaque(
+            [out] String* result);
+
+        /**
+         * @return The QOP ("quality-of_protection") value or null if
+         * there is none. The QOP value is always lower-case.
+         */
+        GetQop(
+            [out] String* result);
+
+        /**
+         * @return The name of the algorithm used or null if there is
+         * none. By default, MD5 is used.
+         */
+        GetAlgorithm(
+            [out] String* result);
+
+        /**
+         * @return True iff the authentication scheme requested by the
+         * server is supported; currently supported schemes:
+         * BASIC,
+         * DIGEST (only algorithm="md5", no qop or qop="auth).
+         */
+        IsSupportedScheme(
+            [out] Boolean* result);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

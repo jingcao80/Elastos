@@ -1,0 +1,30 @@
+
+TARGET_NAME= session
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = CMediaControllerPlaybackInfo.cpp
+SOURCES += CMediaControllerTransportControls.cpp
+SOURCES += CMediaController.cpp
+SOURCES += CMediaSessionToken.cpp
+SOURCES += CMediaSessionQueueItem.cpp
+SOURCES += CMediaSessionCallbackStub.cpp
+SOURCES += MediaSessionCallback.cpp
+SOURCES += CMediaSessionCallback.cpp
+SOURCES += CMediaSession.cpp
+SOURCES += CMediaSessionHelper.cpp
+SOURCES += CMediaSessionManager.cpp
+SOURCES += CParcelableVolumeInfo.cpp
+SOURCES += CMediaSessionLegacyHelper.cpp
+SOURCES += CMediaSessionLegacyHelperHelper.cpp
+SOURCES += CPlaybackStateBuilder.cpp
+SOURCES += CPlaybackStateCustomAction.cpp
+SOURCES += CPlaybackStateCustomActionBuilder.cpp
+SOURCES += CPlaybackState.cpp
+SOURCES += CPlaybackStateHelper.cpp

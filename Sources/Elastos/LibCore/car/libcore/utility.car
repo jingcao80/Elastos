@@ -1,0 +1,38 @@
+module {
+    merge("utility/IBasicLruCache.car");
+    merge("utility/ICollectionUtils.car");
+    merge("utility/IZoneInfo.car");
+    merge("utility/IZoneInfoDB.car");
+
+    namespace Libcore {
+    namespace Utility {
+
+        class CBasicLruCache {
+            constructor(
+                [in] Int32 maxSize);
+
+            interface IBasicLruCache;
+        }
+
+        class CZoneInfoWallTime {
+            interface IZoneInfoWallTime;
+        }
+
+        singleton class CCollectionUtils {
+            interface ICollectionUtils;
+        }
+
+        singleton class COffsetIntervalHelper {
+            interface IOffsetIntervalHelper;
+        }
+
+        singleton class CZoneInfoHelper {
+            interface IZoneInfoHelper;
+        }
+
+        singleton class CZoneInfoDB {
+            interface IZoneInfoDB;
+        }
+    }
+    }
+}

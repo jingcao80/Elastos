@@ -1,0 +1,191 @@
+module
+{
+    namespace Elastos{
+    namespace Utility{
+
+    /**
+     * SimpleTimeZone is a concrete subclass of TimeZone that represents
+     * a time zone for use with a Gregorian calendar. This class does not
+     * handle historical changes.
+     * <p>
+     * Use a negative value for dayOfWeekInMonth to indicate that
+     * SimpleTimeZone should count from the end of the month backwards. For
+     * example, Daylight Savings Time ends at the last (dayOfWeekInMonth = -1)
+     * Sunday in October, at 2 AM in standard time. </p>
+     *
+     * @sa Calendar
+     * @sa GregorianCalendar
+     * @sa TimeZone
+     *
+     * @implements Elastos.Utility.ITimeZone
+     */
+
+    /**
+     * @Involve
+     * interface ITimeZone;
+     */
+    interface ISimpleTimeZone {
+        /**
+         * The constant for representing a start or end time in GMT time mode.
+         */
+        const Int32 UTC_TIME = 2;
+
+        /**
+         * The constant for representing a start or end time in standard local time mode,
+         * based on timezone's raw offset from GMT; does not include Daylight
+         * savings.
+         */
+        const Int32 STANDARD_TIME = 1;
+
+        /**
+         * The constant for representing a start or end time in local wall clock time
+         * mode, based on timezone's adjusted offset from GMT; includes
+         * Daylight savings.
+         */
+        const Int32 WALL_TIME = 0;
+
+        /**
+         * Sets the daylight savings offset in milliseconds for this {SimpleTimeZone}.
+         *
+         * @param milliseconds
+         *            the daylight savings offset in milliseconds.
+         */
+        SetDSTSavings(
+            [in] Int32 milliseconds);
+
+        /**
+         * Sets the rule which specifies the end of daylight savings time.
+         *
+         * @param month
+         *            the {Calendar} month in which daylight savings time ends.
+         * @param dayOfMonth
+         *            the {Calendar} day of the month on which daylight savings time
+         *            ends.
+         * @param time
+         *            the time of day in milliseconds standard time on which
+         *            daylight savings time ends.
+         */
+        SetEndRule(
+            [in] Int32 month,
+            [in] Int32 dayOfMonth,
+            [in] Int32 time);
+
+        /**
+         * Sets the rule which specifies the end of daylight savings time.
+         *
+         * @param month
+         *            the {Calendar} month in which daylight savings time ends.
+         * @param day
+         *            the occurrence of the day of the week on which daylight
+         *            savings time ends.
+         * @param dayOfWeek
+         *            the {Calendar} day of the week on which daylight savings time
+         *            ends.
+         * @param time
+         *            the time of day in milliseconds standard time on which
+         *            daylight savings time ends.
+         */
+        SetEndRule(
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int32 dayOfWeek,
+            [in] Int32 time);
+
+        /**
+         * Sets the rule which specifies the end of daylight savings time.
+         *
+         * @param month
+         *            the {Calendar} month in which daylight savings time ends.
+         * @param day
+         *            the {Calendar} day of the month.
+         * @param dayOfWeek
+         *            the {Calendar} day of the week on which daylight savings time
+         *            ends.
+         * @param time
+         *            the time of day in milliseconds on which daylight savings time
+         *            ends.
+         * @param after
+         *            selects the day after or before the day of month.
+         */
+        SetEndRule(
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int32 dayOfWeek,
+            [in] Int32 time,
+            [in] Boolean after);
+
+        /**
+         * Sets the rule which specifies the start of daylight savings time.
+         *
+         * @param month
+         *            the {Calendar} month in which daylight savings time starts.
+         * @param dayOfMonth
+         *            the {Calendar} day of the month on which daylight savings time
+         *            starts.
+         * @param time
+         *            the time of day in milliseconds on which daylight savings time
+         *            starts.
+         */
+        SetStartRule(
+            [in] Int32 month,
+            [in] Int32 dayOfMonth,
+            [in] Int32 time);
+
+        /**
+         * Sets the rule which specifies the start of daylight savings time.
+         *
+         * @param month
+         *            the {Calendar} month in which daylight savings time starts.
+         * @param day
+         *            the occurrence of the day of the week on which daylight
+         *            savings time starts.
+         * @param dayOfWeek
+         *            the {Calendar} day of the week on which daylight savings time
+         *            starts.
+         * @param time
+         *            the time of day in milliseconds on which daylight savings time
+         *            starts.
+         */
+        SetStartRule(
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int32 dayOfWeek,
+            [in] Int32 time);
+
+        /**
+         * Sets the rule which specifies the start of daylight savings time.
+         *
+         * @param month
+         *            the {Calendar} month in which daylight savings time starts.
+         * @param day
+         *            the {Calendar} day of the month.
+         * @param dayOfWeek
+         *            the {Calendar} day of the week on which daylight savings time
+         *            starts.
+         * @param time
+         *            the time of day in milliseconds on which daylight savings time
+         *            starts.
+         * @param after
+         *            selects the day after or before the day of month.
+         */
+        SetStartRule(
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int32 dayOfWeek,
+            [in] Int32 time,
+            [in] Boolean after);
+
+        /**
+         * Sets the starting year for daylight savings time in this {SimpleTimeZone}.
+         * Years before this start year will always be in standard time.
+         *
+         * @param year
+         *            the starting year.
+         */
+        SetStartYear(
+            [in] Int32 year);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

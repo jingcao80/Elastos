@@ -1,0 +1,29 @@
+module
+{
+    interface Elastos.Droid.Text.Method.IMovementMethod;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    /**
+     * A movement method that provides cursor movement and selection.
+     * Supports displaying the context menu on DPad Center.
+     *
+     * @Involve
+     * interface IMovementMethod
+     * interface IBaseMovementMethod
+     */
+    interface IArrowKeyMovementMethod {}
+
+    interface IArrowKeyMovementMethodHelper {
+        GetInstance(
+            [out] IMovementMethod** ret);
+    }
+
+    }//namespace Method
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

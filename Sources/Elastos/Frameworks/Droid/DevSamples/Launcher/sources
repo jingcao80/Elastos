@@ -1,0 +1,45 @@
+TARGET_NAME= Launcher
+TARGET_TYPE= eco
+
+SPECIAL_TARGET= cpfile
+
+IMPORTS = Elastos.CoreLibrary.eco
+#IMPORTS += Elastos.Utility.Locks.eco
+#IMPORTS += Elastos.Framework.Media.eco
+IMPORTS += Elastos.Droid.Core.eco
+
+SOURCES =  Launcher.car
+
+SOURCES += CAlertNotification.cpp
+SOURCES += GeckoEvent.cpp
+SOURCES += CGeckoInputConnection.cpp
+SOURCES += CGeckoSurfaceView.cpp
+SOURCES += CVideoPlayer.cpp
+SOURCES += GeckoAppShell.cpp
+SOURCES += GeckoApp.cpp
+SOURCES += CApp.cpp
+SOURCES += CRestarter.cpp
+SOURCES += CNotificationHandler.cpp
+#SOURCES += CCrashReporter.cpp
+SOURCES += CGeckoBatteryManager.cpp
+SOURCES += CGeckoNetworkManager.cpp
+SOURCES += CGeckoConnectivityReceiver.cpp
+#SOURCES += CGeckoSmsManager.cpp
+SOURCES += ElAudioTrack.cpp
+SOURCES += ElastosGeckoWrapper.cpp
+#SOURCES += CLauncherShortcuts.cpp
+SOURCES += CLauncherHelper.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Droid.lib
+#LIBRARIES += $(MAKEDIR)/lib/libjansson.so.4.4.0
+LIBRARIES += -lm -ldl -licuuc -lskia -lutils -lcutils -lmedia -lbinder
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+DIRRESOURCES += $(MAKEDIR)/data;
+FILERESOURCES += $(MAKEDIR)/Launcher/*

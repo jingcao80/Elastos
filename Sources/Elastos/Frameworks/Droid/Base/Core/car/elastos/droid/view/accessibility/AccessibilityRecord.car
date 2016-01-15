@@ -1,0 +1,508 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    [local]
+    interface IAccessibilityRecord {
+        /**
+         * Sets the event source.
+         *
+         * @param source The source.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetSource(
+            [in] IView* source);
+
+        /**
+         * Sets the source to be a virtual descendant of the given <code>root</code>.
+         * If <code>virtualDescendantId</code> equals to {@link View#NO_ID} the root
+         * is set as the source.
+         * <p>
+         * A virtual descendant is an imaginary View that is reported as a part of the view
+         * hierarchy for accessibility purposes. This enables custom views that draw complex
+         * content to report them selves as a tree of virtual views, thus conveying their
+         * logical structure.
+         * </p>
+         *
+         * @param root The root of the virtual subtree.
+         * @param virtualDescendantId The id of the virtual descendant.
+         */
+        SetSource(
+            [in] IView* root,
+            [in] Int32 virtualDescendantId);
+
+        /**
+         * Gets the {@link AccessibilityNodeInfo} of the event source.
+         * <p>
+         *   <strong>Note:</strong> It is a client responsibility to recycle the received info
+         *   by calling {@link AccessibilityNodeInfo#recycle() AccessibilityNodeInfo#recycle()}
+         *   to avoid creating of multiple instances.
+         * </p>
+         * @return The info of the source.
+         */
+        GetSource(
+            [out] IAccessibilityNodeInfo** info);
+
+        /**
+         * Sets the window id.
+         *
+         * @param windowId The window id.
+         *
+         * @hide
+         */
+        SetWindowId(
+            [in] Int32 windowId);
+
+        /**
+         * Gets the id of the window from which the event comes from.
+         *
+         * @return The window id.
+         */
+        GetWindowId(
+            [out] Int32* windowId);
+
+        /**
+         * Gets if the source is checked.
+         *
+         * @return True if the view is checked, false otherwise.
+         */
+        IsChecked(
+            [out] Boolean* checked);
+
+        /**
+         * Sets if the source is checked.
+         *
+         * @param isChecked True if the view is checked, false otherwise.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetChecked(
+            [in] Boolean isChecked);
+
+        /**
+         * Gets if the source is enabled.
+         *
+         * @return True if the view is enabled, false otherwise.
+         */
+        IsEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Sets if the source is enabled.
+         *
+         * @param isEnabled True if the view is enabled, false otherwise.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Gets if the source is a password field.
+         *
+         * @return True if the view is a password field, false otherwise.
+         */
+        IsPassword(
+            [out] Boolean* password);
+
+        /**
+         * Sets if the source is a password field.
+         *
+         * @param isPassword True if the view is a password field, false otherwise.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetPassword(
+            [in] Boolean password);
+
+        /**
+         * Gets if the source is taking the entire screen.
+         *
+         * @return True if the source is full screen, false otherwise.
+         */
+        IsFullScreen(
+            [out] Boolean* isFull);
+
+        /**
+         * Sets if the source is taking the entire screen.
+         *
+         * @param isFullScreen True if the source is full screen, false otherwise.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetFullScreen(
+            [in] Boolean full);
+
+        /**
+         * Gets if the source is scrollable.
+         *
+         * @return True if the source is scrollable, false otherwise.
+         */
+        IsScrollable(
+            [out] Boolean* scrollable);
+
+        /**
+         * Sets if the source is scrollable.
+         *
+         * @param scrollable True if the source is scrollable, false otherwise.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetScrollable(
+            [in] Boolean scrollable);
+
+        /**
+         * Gets if the source is important for accessibility.
+         *
+         * <strong>Note:</strong> Used only internally to determine whether
+         * to deliver the event to a given accessibility service since some
+         * services may want to regard all views for accessibility while others
+         * may want to regard only the important views for accessibility.
+         *
+         * @return True if the source is important for accessibility,
+         *        false otherwise.
+         *
+         * @hide
+         */
+        IsImportantForAccessibility(
+            [out] Boolean* important);
+
+        /**
+         * Gets the number of items that can be visited.
+         *
+         * @return The number of items.
+         */
+        GetItemCount(
+            [out] Int32* count);
+
+        /**
+         * Sets the number of items that can be visited.
+         *
+         * @param itemCount The number of items.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetItemCount(
+            [in] Int32 count);
+
+        /**
+         * Gets the index of the source in the list of items the can be visited.
+         *
+         * @return The current item index.
+         */
+        GetCurrentItemIndex(
+            [out] Int32* index);
+
+        /**
+         * Sets the index of the source in the list of items that can be visited.
+         *
+         * @param currentItemIndex The current item index.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetCurrentItemIndex(
+            [in] Int32 index);
+
+        /**
+         * Gets the index of the first character of the changed sequence,
+         * or the beginning of a text selection or the index of the first
+         * visible item when scrolling.
+         *
+         * @return The index of the first character or selection
+         *        start or the first visible item.
+         */
+        GetFromIndex(
+            [out] Int32* index);
+
+        /**
+         * Sets the index of the first character of the changed sequence
+         * or the beginning of a text selection or the index of the first
+         * visible item when scrolling.
+         *
+         * @param fromIndex The index of the first character or selection
+         *        start or the first visible item.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetFromIndex(
+            [in] Int32 index);
+
+        /**
+         * Gets the index of text selection end or the index of the last
+         * visible item when scrolling.
+         *
+         * @return The index of selection end or last item index.
+         */
+        GetToIndex(
+            [out] Int32* index);
+
+        /**
+         * Sets the index of text selection end or the index of the last
+         * visible item when scrolling.
+         *
+         * @param toIndex The index of selection end or last item index.
+         */
+        SetToIndex(
+            [in] Int32 index);
+
+        /**
+         * Gets the scroll offset of the source left edge in pixels.
+         *
+         * @return The scroll.
+         */
+        GetScrollX(
+            [out] Int32* x);
+
+        /**
+         * Sets the scroll offset of the source left edge in pixels.
+         *
+         * @param scrollX The scroll.
+         */
+        SetScrollX(
+            [in] Int32 x);
+
+        /**
+         * Gets the scroll offset of the source top edge in pixels.
+         *
+         * @return The scroll.
+         */
+        GetScrollY(
+            [out] Int32* y);
+
+        /**
+         * Sets the scroll offset of the source top edge in pixels.
+         *
+         * @param scrollY The scroll.
+         */
+        SetScrollY(
+            [in] Int32 y);
+
+        /**
+         * Gets the max scroll offset of the source left edge in pixels.
+         *
+         * @return The max scroll.
+         */
+        GetMaxScrollX(
+            [out] Int32* x);
+
+        /**
+         * Sets the max scroll offset of the source left edge in pixels.
+         *
+         * @param maxScrollX The max scroll.
+         */
+        SetMaxScrollX(
+            [in] Int32 x);
+
+        /**
+         * Gets the max scroll offset of the source top edge in pixels.
+         *
+         * @return The max scroll.
+         */
+        GetMaxScrollY(
+            [out] Int32* y);
+
+        /**
+         * Sets the max scroll offset of the source top edge in pixels.
+         *
+         * @param maxScrollY The max scroll.
+         */
+        SetMaxScrollY(
+            [in] Int32 y);
+
+        /**
+         * Gets the number of added characters.
+         *
+         * @return The number of added characters.
+         */
+        GetAddedCount(
+            [out] Int32* count);
+
+        /**
+         * Sets the number of added characters.
+         *
+         * @param addedCount The number of added characters.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetAddedCount(
+            [in] Int32 count);
+
+        /**
+         * Gets the number of removed characters.
+         *
+         * @return The number of removed characters.
+         */
+        GetRemovedCount(
+            [out] Int32* count);
+
+        /**
+         * Sets the number of removed characters.
+         *
+         * @param removedCount The number of removed characters.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetRemovedCount(
+            [in] Int32 count);
+
+        /**
+         * Gets the class name of the source.
+         *
+         * @return The class name.
+         */
+        GetClassName(
+            [out] ICharSequence** name);
+
+        /**
+         * Sets the class name of the source.
+         *
+         * @param className The lass name.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetClassName(
+            [in] ICharSequence* name);
+
+        /**
+         * Gets the text of the event. The index in the list represents the priority
+         * of the text. Specifically, the lower the index the higher the priority.
+         *
+         * @return The text.
+         */
+        GetText(
+            [out] IList** list);
+
+        /**
+         * Sets the text before a change.
+         *
+         * @return The text before the change.
+         */
+        GetBeforeText(
+            [out] ICharSequence** text);
+
+        /**
+         * Sets the text before a change.
+         *
+         * @param beforeText The text before the change.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetBeforeText(
+            [in] ICharSequence* text);
+
+        /**
+         * Gets the description of the source.
+         *
+         * @return The description.
+         */
+        GetContentDescription(
+            [out] ICharSequence** contentDescription);
+
+        /**
+         * Sets the description of the source.
+         *
+         * @param contentDescription The description.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetContentDescription(
+            [in] ICharSequence* contentDescription);
+
+        /**
+         * Gets the {@link Parcelable} data.
+         *
+         * @return The parcelable data.
+         */
+        GetParcelableData(
+            [out] IParcelable** parcelableData);
+
+        /**
+         * Sets the {@link Parcelable} data of the event.
+         *
+         * @param parcelableData The parcelable data.
+         *
+         * @throws IllegalStateException If called from an AccessibilityService.
+         */
+        SetParcelableData(
+            [in] IParcelable* parcelableData);
+
+        /**
+         * Gets the id of the source node.
+         *
+         * @return The id.
+         *
+         * @hide
+         */
+        GetSourceNodeId(
+            [out] Int64* nodeId);
+
+        /**
+         * Sets the unique id of the IIAccessibilityServiceConnection over which
+         * this instance can send requests to the system.
+         *
+         * @param connectionId The connection id.
+         *
+         * @hide
+         */
+        SetConnectionId(
+            [in] Int32 connectionId);
+
+        /**
+         * Sets if this instance is sealed.
+         *
+         * @param sealed Whether is sealed.
+         *
+         * @hide
+         */
+        SetSealed(
+            [in] Boolean sealed);
+
+        /**
+         * Return an instance back to be reused.
+         * <p>
+         * <strong>Note:</strong> You must not touch the object after calling this function.
+         *
+         * @throws IllegalStateException If the record is already recycled.
+         */
+        Recycle();
+    }
+
+    [local]
+    interface IAccessibilityRecordHelper {
+        /**
+         * Returns a cached instance if such is available or a new one is
+         * instantiated. The instance is initialized with data from the
+         * given record.
+         *
+         * @return An instance.
+         */
+        Obtain(
+            [in] IAccessibilityRecord* record,
+            [out] IAccessibilityRecord** newInstance);
+
+        /**
+         * Returns a cached instance if such is available or a new one is
+         * instantiated.
+         *
+         * @return An instance.
+         */
+        Obtain(
+            [out] IAccessibilityRecord** newInstance);
+    }
+
+    } // namespace Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

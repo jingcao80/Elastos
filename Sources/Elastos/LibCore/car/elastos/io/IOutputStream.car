@@ -1,0 +1,83 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+     *A writable sink for bytes.
+
+     *Most clients will use output streams that write data to the file system (FileOutputStream), the
+     *network (getOutputStream()/getOutputStream()), or to an in-memory byte array (ByteArrayOutputStream).
+     *<p>
+     *Use OutputStreamWriter to adapt a byte stream like this one into a character stream.
+     *<p>
+     *Most clients should wrap their output stream with BufferedOutputStream. Callers that do only bulk
+     *writes may omit buffering.
+     *
+     *@sa InputStream
+     *@implements Elastos.IO.ICloseable
+     */
+     /**
+     * @Involve
+     * interface ICloseable;
+     * interface IFlushable;
+     */
+    [deprecated]
+    interface IOutputStream {
+        /**
+         * Writes a single byte to this stream. Only the least significant byte of
+         * the integer oneByte is written to the stream.
+         *
+         * @param oneByte
+         *            the byte to be written.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while writing to this stream.
+         */
+        Write(
+            [in] Int32 oneByte);
+
+        /**
+         * Equivalent to write(buffer, 0, buffer.length).
+         */
+        Write(
+            [in] ArrayOf<Byte>* buffer);
+
+        /**
+         * Writes count bytes from the byte array buffer starting at
+         * position offset to this stream.
+         *
+         * @param buffer
+         *            the buffer to be written.
+         * @param offset
+         *            the start position in buffer from where to get bytes.
+         * @param count
+         *            the number of bytes from buffer to write to this
+         *            stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while writing to this stream.
+         * IndexOutOfBoundsException | if {offset < 0} or {count < 0}, or if
+         *                             {offset + count} is bigger than the length of
+         *                             {buffer}.
+         */
+        Write(
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 count);
+
+        /**
+         * Returns true if this writer has encountered and suppressed an error. Used
+         * by PrintStreams as an alternative to checked exceptions.
+         */
+        CheckError(
+            [out] Boolean* hasError);
+
+        Close();
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

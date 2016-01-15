@@ -1,0 +1,104 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHeader;
+    interface Org.Apache.Http.IRequestLine;
+    interface Org.Apache.Http.IStatusLine;
+    interface Org.Apache.Http.IProtocolVersion;
+    interface Org.Apache.Http.Message.IParserCursor;
+    interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Message {
+
+    /**
+     * Basic parser for lines in the head section of an HTTP message.
+     * There are individual methods for parsing a request line, a
+     * status line, or a header line.
+     * The lines to parse are passed in memory, the parser does not depend
+     * on any specific IO mechanism.
+     * Instances of this class are stateless and thread-safe.
+     * Derived classes MUST maintain these properties.
+     *
+     * <p>
+     * Note: This class was created by refactoring parsing code located in
+     * various other classes. The author tags from those other classes have
+     * been replicated here, although the association with the parsing code
+     * taken from there has not been traced.
+     * </p>
+     *
+     * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
+     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+     * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
+     * @author and others
+     */
+    /**
+     * @Involve
+     * interface ILineParser;
+     */
+    interface IBasicLineParser {
+
+        /**
+         * Creates a protocol version.
+         * Called from {@link #parseProtocolVersion}.
+         *
+         * @param major     the major version number, for example 1 in HTTP/1.0
+         * @param minor     the minor version number, for example 0 in HTTP/1.0
+         *
+         * @return  the protocol version
+         */
+        CreateProtocolVersion(
+            [in] Int32 major,
+            [in] Int32 minor,
+            [out] IProtocolVersion** ver);
+
+        /**
+         * Instantiates a new request line.
+         * Called from {@link #parseRequestLine}.
+         *
+         * @param method    the request method
+         * @param uri       the requested URI
+         * @param ver       the protocol version
+         *
+         * @return  a new status line with the given data
+         */
+        CreateRequestLine(
+            [in] String method,
+            [in] String uri,
+            [in] IProtocolVersion* ver,
+            [out] IRequestLine** requestLine);
+
+        /**
+         * Instantiates a new status line.
+         * Called from {@link #parseStatusLine}.
+         *
+         * @param ver       the protocol version
+         * @param status    the status code
+         * @param reason    the reason phrase
+         *
+         * @return  a new status line with the given data
+         */
+        CreateStatusLine(
+            [in] IProtocolVersion* ver,
+            [in] Int32 status,
+            [in] String reason,
+            [out] IStatusLine** statusLine);
+
+        /**
+         * Helper to skip whitespace.
+         */
+        SkipWhitespace(
+            [in] ICharArrayBuffer* buffer,
+            [in] IParserCursor* cursor);
+
+    }
+
+    } // namespace Message
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

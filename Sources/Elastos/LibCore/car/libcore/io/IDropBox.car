@@ -1,0 +1,49 @@
+
+module
+{
+    namespace Libcore {
+    namespace IO {
+
+    /**
+     * Interface to allow customization of reporting behavior.
+     */
+    [deprecated]
+    interface IReporter {
+        AddData(
+            [in] String tag,
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 flags);
+
+        AddText(
+            [in] String tag,
+            [in] String data);
+    }
+
+    [deprecated]
+    interface IDropBox {
+        /**
+         * Used to replace default Reporter for logging events. Must be non-null.
+         */
+        SetReporter(
+            [in] IReporter* reporter);
+
+        /**
+         * Returns non-null Reporter.
+         */
+        GetReporter(
+            [out] IReporter** reporter);
+
+        AddData(
+            [in] String tag,
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 flags);
+
+        AddText(
+            [in] String tag,
+            [in] String data);
+    }
+
+
+    } // namespace IO
+    } // namespace Libcore
+}

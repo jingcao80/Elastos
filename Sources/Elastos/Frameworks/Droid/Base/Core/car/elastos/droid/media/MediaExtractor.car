@@ -1,0 +1,237 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Media.IDataSource;
+    interface Elastos.Droid.Media.IMediaCodecCryptoInfo;
+    interface Elastos.Droid.Media.IMediaFormat;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.IO.IByteBuffer;
+    interface Elastos.IO.IFileDescriptor;
+    interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    [local]
+    interface IMediaExtractor {
+        /**
+         * If possible, seek to a sync sample at or before the specified time
+         */
+        const Int32 SEEK_TO_PREVIOUS_SYNC       = 0;
+        /**
+         * If possible, seek to a sync sample at or after the specified time
+         */
+        const Int32 SEEK_TO_NEXT_SYNC           = 1;
+        /**
+         * If possible, seek to the sync sample closest to the specified time
+         */
+        const Int32 SEEK_TO_CLOSEST_SYNC        = 2;
+
+        // Keep these in sync with their equivalents in NuMediaExtractor.h
+        /**
+         * The sample is a sync sample
+         */
+        const Int32 SAMPLE_FLAG_SYNC      = 1;
+
+        /**
+         * The sample is (at least partially) encrypted, see also the documentation
+         * for {@link android.media.MediaCodec#queueSecureInputBuffer}
+         */
+        const Int32 SAMPLE_FLAG_ENCRYPTED = 2;
+
+        /**
+         * Sets the DataSource object to be used as the data source for this extractor
+         * {@hide}
+         */
+        SetDataSource(
+            [in] IDataSource* source);
+
+        /**
+         * Sets the data source as a content Uri.
+         *
+         * @param context the Context to use when resolving the Uri
+         * @param uri the Content URI of the data you want to extract from.
+         * @param headers the headers to be sent together with the request for the data
+         */
+        SetDataSource(
+            [in] IContext* ctx,
+            [in] IUri* uri,
+            [in] IMap* headers);
+
+        /**
+         * Sets the data source (file-path or http URL) to use.
+         *
+         * @param path the path of the file, or the http URL
+         * @param headers the headers associated with the http request for the stream you want to play
+         */
+        SetDataSource(
+            [in] String path,
+            [in] IMap* headers);
+
+        /**
+         * Sets the data source (file-path or http URL) to use.
+         *
+         * @param path the path of the file, or the http URL of the stream
+         *
+         * <p>When <code>path</code> refers to a local file, the file may actually be opened by a
+         * process other than the calling application.  This implies that the pathname
+         * should be an absolute path (as any other process runs with unspecified current working
+         * directory), and that the pathname should reference a world-readable file.
+         * As an alternative, the application could first open the file for reading,
+         * and then use the file descriptor form {@link #setDataSource(FileDescriptor)}.
+         */
+        SetDataSource(
+            [in] String path);
+
+        /**
+         * Sets the data source (FileDescriptor) to use. It is the caller's responsibility
+         * to close the file descriptor. It is safe to do so as soon as this call returns.
+         *
+         * @param fd the FileDescriptor for the file you want to extract from.
+         */
+        SetDataSource(
+            [in] IFileDescriptor* fd);
+
+        /**
+         * Sets the data source (FileDescriptor) to use.  The FileDescriptor must be
+         * seekable (N.B. a LocalSocket is not seekable). It is the caller's responsibility
+         * to close the file descriptor. It is safe to do so as soon as this call returns.
+         *
+         * @param fd the FileDescriptor for the file you want to extract from.
+         * @param offset the offset into the file where the data to be extracted starts, in bytes
+         * @param length the length in bytes of the data to be extracted
+         */
+        SetDataSource(
+            [in] IFileDescriptor* fd,
+            [in] Int64 offset,
+            [in] Int64 length);
+
+        /**
+         * Make sure you call this when you're done to free up any resources
+         * instead of relying on the garbage collector to do this for you at
+         * some point in the future.
+         */
+        ReleaseResources();
+
+        /**
+         * Count the number of tracks found in the data source.
+         */
+        GetTrackCount(
+            [out] Int32* result);
+
+        /**
+         * Get the PSSH info if present.
+         * @return a map of uuid-to-bytes, with the uuid specifying
+         * the crypto scheme, and the bytes being the data specific to that scheme.
+         */
+        GetPsshInfo(
+            [out] IMap** result);
+
+        /**
+         * Get the track format at the specified index.
+         * More detail on the representation can be found at {@link android.media.MediaCodec}
+         */
+        GetTrackFormat(
+            [in] Int32 index,
+            [out] IMediaFormat** result);
+
+        /**
+         * Subsequent calls to {@link #readSampleData}, {@link #getSampleTrackIndex} and
+         * {@link #getSampleTime} only retrieve information for the subset of tracks
+         * selected.
+         * Selecting the same track multiple times has no effect, the track is
+         * only selected once.
+         */
+        SelectTrack(
+            [in] Int32 index);
+
+        /**
+         * Subsequent calls to {@link #readSampleData}, {@link #getSampleTrackIndex} and
+         * {@link #getSampleTime} only retrieve information for the subset of tracks
+         * selected.
+         */
+        UnselectTrack(
+            [in] Int32 index);
+
+        /**
+         * All selected tracks seek near the requested time according to the
+         * specified mode.
+         */
+        SeekTo(
+            [in] Int64 timeUs,
+            [in] Int32 mode);
+
+        /**
+         * Advance to the next sample. Returns false if no more sample data
+         * is available (end of stream).
+         */
+        Advance(
+            [out] Boolean* result);
+
+        /**
+         * Retrieve the current encoded sample and store it in the byte buffer
+         * starting at the given offset. Returns the sample size (or -1 if
+         * no more samples are available).
+         */
+        ReadSampleData(
+            [in] IByteBuffer* byteBuf,
+            [in] Int32 offset,
+            [out] Int32* result);
+
+        /**
+         * Returns the track index the current sample originates from (or -1
+         * if no more samples are available)
+         */
+        GetSampleTrackIndex(
+            [out] Int32* result);
+
+        /**
+         * Returns the current sample's presentation time in microseconds.
+         * or -1 if no more samples are available.
+         */
+        GetSampleTime(
+            [out] Int64* result);
+
+        /**
+         * Returns the current sample's flags.
+         */
+        GetSampleFlags(
+            [out] Int32* result);
+
+        /**
+         * If the sample flags indicate that the current sample is at least
+         * partially encrypted, this call returns relevant information about
+         * the structure of the sample data required for decryption.
+         * @param info The android.media.MediaCodec.CryptoInfo structure
+         *             to be filled in.
+         * @return true iff the sample flags contain {@link #SAMPLE_FLAG_ENCRYPTED}
+         */
+        GetSampleCryptoInfo(
+            [in] IMediaCodecCryptoInfo* info,
+            [out] Boolean* result);
+
+        /**
+         * Returns an estimate of how much data is presently cached in memory
+         * expressed in microseconds. Returns -1 if that information is unavailable
+         * or not applicable (no cache).
+         */
+        GetCachedDuration(
+            [out] Int64* result);
+
+        /**
+         * Returns true iff we are caching data and the cache has reached the
+         * end of the data stream (for now, a future seek may of course restart
+         * the fetching of data).
+         * This API only returns a meaningful result if {@link #getCachedDuration}
+         * indicates the presence of a cache, i.e. does NOT return -1.
+         */
+        HasCacheReachedEndOfStream(
+            [out] Boolean* result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,224 @@
+
+module
+{
+    interface Elastos.Droid.Utility.IDisplayMetrics;
+    interface Elastos.Droid.Content.Res.ICompatibilityInfo;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Describes the characteristics of a particular logical display.
+     * @hide
+     */
+    [deprecated]
+    interface IDisplayInfo {
+        GetLayerStack(
+            [out] Int32* layerStack);
+
+        SetLayerStack(
+            [in] Int32 layerStack);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        GetType(
+            [out] Int32* type);
+
+        SetType(
+            [in] Int32 type);
+
+        GetAddress(
+            [out] String* address);
+
+        SetAddress(
+            [in] String address);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetAppWidth(
+            [out] Int32* appWidth);
+
+        SetAppWidth(
+            [in] Int32 appWidth);
+
+        GetAppHeight(
+            [out] Int32* appHeight);
+
+        SetAppHeight(
+            [in] Int32 appHeight);
+
+        GetSmallestNominalAppWidth(
+            [out] Int32* smallestNominalAppWidth);
+
+        SetSmallestNominalAppWidth(
+            [in] Int32 smallestNominalAppWidth);
+
+        GetSmallestNominalAppHeight(
+            [out] Int32* smallestNominalAppHeight);
+
+        SetSmallestNominalAppHeight(
+            [in] Int32 smallestNominalAppHeight);
+
+        GetLargestNominalAppWidth(
+            [out] Int32* largestNominalAppWidth);
+
+        SetLargestNominalAppWidth(
+            [in] Int32 largestNominalAppWidth);
+
+        GetLargestNominalAppHeight(
+            [out] Int32* largestNominalAppHeight);
+
+        SetLargestNominalAppHeight(
+            [in] Int32 largestNominalAppHeight);
+
+        GetLogicalWidth(
+            [out] Int32* logicalWidth);
+
+        SetLogicalWidth(
+            [in] Int32 logicalWidth);
+
+        GetLogicalHeight(
+            [out] Int32* logicalHeight);
+
+        SetLogicalHeight(
+            [in] Int32 logicalHeight);
+
+        GetOverscanLeft(
+            [out] Int32* left);
+
+        GetOverscanTop(
+            [out] Int32* top);
+
+        GetOverscanRight(
+            [out] Int32* right);
+
+        GetOverscanBottom(
+            [out] Int32* bottom);
+
+        SetOverscanLeft(
+            [in] Int32 left);
+
+        SetOverscanTop(
+            [in] Int32 top);
+
+        SetOverscanRight(
+            [in] Int32 right);
+
+        SetOverscanBottom(
+            [in] Int32 bottom);
+
+        GetRotation(
+            [out] Int32* rotation);
+
+        SetRotation(
+            [in] Int32 rotation);
+
+        GetRefreshRate(
+            [out] Float* refreshRate);
+
+        SetRefreshRate(
+            [in] Float refreshRate);
+
+        GetSupportedRefreshRates(
+            [out, callee] ArrayOf<Float>* rates);
+
+        SetSupportedRefreshRates(
+            [in] ArrayOf<Float>* rates);
+
+        GetLogicalDensityDpi(
+            [out] Int32* logicalDensityDpi);
+
+        SetLogicalDensityDpi(
+            [in] Int32 logicalDensityDpi);
+
+        GetPhysicalXDpi(
+            [out] Float* physicalXDpi);
+
+        SetPhysicalXDpi(
+            [in] Float physicalXDpi);
+
+        GetPhysicalYDpi(
+            [out] Float* physicalYDpi);
+
+        SetPhysicalYDpi(
+            [in] Float physicalYDpi);
+
+        GetAppVsyncOffsetNanos(
+            [out] Int64* nanos);
+
+        SetAppVsyncOffsetNanos(
+            [in] Int64 nanos);
+
+        GetPresentationDeadlineNanos(
+            [out] Int64* nanos);
+
+        SetPresentationDeadlineNanos(
+            [in] Int64 nanos);
+
+        GetState(
+            [out] Int32* state);
+
+        SetState(
+            [in] Int32 state);
+
+        GetOwnerUid(
+            [out] Int32* uid);
+
+        SetOwnerUid(
+            [in] Int32 uid);
+
+        GetOwnerPackageName(
+            [out] String* name);
+
+        SetOwnerPackageName(
+            [in] String name);
+
+        CopyFrom(
+            [in] IDisplayInfo* otherObj);
+
+        GetAppMetrics(
+            [in] IDisplayMetrics* outMetrics);
+
+        GetAppMetrics(
+            [in] IDisplayMetrics* outMetrics,
+            [in] IDisplayAdjustments* da);
+
+        GetAppMetrics(
+            [in] IDisplayMetrics* outMetrics,
+            [in] ICompatibilityInfo* cih,
+            [in] IBinder* binder);
+
+        GetLogicalMetrics(
+            [in] IDisplayMetrics* outMetrics,
+            [in] ICompatibilityInfo* cih,
+            [in] IBinder* binder);
+
+        GetNaturalWidth(
+            [out] Int32* width);
+
+        GetNaturalHeight(
+            [out] Int32* height);
+
+        /**
+         * Returns true if the specified UID has access to this display.
+         */
+        HasAccess(
+            [in] Int32 uid,
+            [out] Boolean* result);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}
+

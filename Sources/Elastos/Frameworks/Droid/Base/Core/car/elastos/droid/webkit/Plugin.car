@@ -1,0 +1,143 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /*
+     * @hide
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    [local]
+    interface IPreferencesClickHandler {
+        /*
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        HandleClickEvent(
+            [in] IContext* ctx);
+    }
+
+    /**
+     * Represents a plugin (Java equivalent of the PluginPackageAndroid
+     * C++ class in libs/WebKitLib/WebKit/WebCore/plugins/android/)
+     *
+     * @hide
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    //@Deprecated
+    [local]
+    interface IPlugin {
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        ToString(
+            [out] String* name);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        GetName(
+            [out] String* name);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        GetPath(
+            [out] String* path);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        GetFileName(
+            [out] String* fileName);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        GetDescription(
+            [out] String* desc);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        SetName(
+            [in] String name);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        SetPath(
+            [in] String path);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        SetFileName(
+            [in] String fileName);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        SetDescription(
+            [in] String description);
+
+        /**
+         * @hide
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        //@Deprecated
+        SetClickHandler(
+            [in] IPreferencesClickHandler* handler);
+
+       /**
+        * Invokes the click handler for this plugin.
+        *
+        * @hide
+        * @deprecated This interface was intended to be used by Gears. Since Gears was
+        * deprecated, so is this class.
+        */
+        //@Deprecated
+        DispatchClickEvent(
+            [in] IContext* ctx);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

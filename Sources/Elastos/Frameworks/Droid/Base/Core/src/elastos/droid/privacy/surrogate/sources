@@ -1,0 +1,9 @@
+TARGET_NAME= surrogate
+TARGET_TYPE= lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES += CPrivacyLocationManager.cpp
+SOURCES += PrivacyContentResolver.cpp
+SOURCES += PrivacyCursor.cpp

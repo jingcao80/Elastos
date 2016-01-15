@@ -1,0 +1,639 @@
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.Utility.IArrayList;
+    interface Elastos.Droid.Utility.IArrayMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    interface IProcessStats;
+
+    [local, deprecated]
+    interface IDurationsTable {
+        GetStats(
+            [out] IProcessStats** stats);
+
+        GetName(
+            [out] String* name);
+
+        GetDurationsTable(
+            [out, callee] ArrayOf<Int32>* durationsTable);
+
+        SetDurationsTable(
+            [in] ArrayOf<Int32>* durationsTable);
+
+        GetDurationsTableSize(
+            [out] Int32* durationsTableSize);
+
+        SetDurationsTableSize(
+            [in] Int32 durationsTableSize);
+    }
+
+    /**
+     * @Involve
+     * interface IDurationsTable
+     */
+    [local]
+    interface IProcessState {
+        MakeActive();
+
+        MakeInactive();
+
+        IsInUse(
+            [out] Boolean* isInUse);
+
+        /**
+         * Update the current state of the given list of processes.
+         *
+         * @param state Current ActivityManager.PROCESS_STATE_*
+         * @param memFactor Current mem factor constant.
+         * @param now Current time.
+         * @param pkgList Processes to update.
+         */
+        SetState(
+            [in] Int32 state,
+            [in] Int32 memFactor,
+            [in] Int64 now,
+            [in] IArrayMap* pkgList);
+
+        AddPss(
+            [in] Int64 pss,
+            [in] Int64 uss,
+            [in] Boolean always,
+            [in] IArrayMap* pkgList);
+
+        ReportExcessiveWake(
+            [in] IArrayMap* pkgList);
+
+        ReportExcessiveCpu(
+            [in] IArrayMap* pkgList);
+
+        ReportCachedKill(
+            [in] IArrayMap* pkgList,
+            [in] Int64 pss);
+
+        GetCommonProcess(
+            [out] IProcessState** commonProcess);
+
+        SetCommonProcess(
+            [in] IProcessState* commonProcess);
+
+        GetPackage(
+            [out] String* package);
+
+        GetUid(
+            [out] Int32* uid);
+
+        GetVersion(
+            [out] Int32* vers);
+
+        GetTmpTotalTime(
+            [out] Int64* tmpTotalTime);
+
+        SetTmpTotalTime(
+            [in] Int64 tmpTotalTime);
+    }
+
+    [local]
+    interface IProcessStateHolder {
+        GetAppVersion(
+            [out] Int32* appVersion);
+
+        GetState(
+            [out] IProcessState** state);
+
+        SetState(
+            [in] IProcessState* state);
+    }
+
+    /**
+     * @Involve
+     * interface IDurationsTable
+     */
+    [local]
+    interface IServiceState {
+        const Int32 SERVICE_RUN = 0;
+        const Int32 SERVICE_STARTED = 1;
+        const Int32 SERVICE_BOUND = 2;
+        const Int32 SERVICE_EXEC = 3;
+
+        ApplyNewOwner(
+            [in] IInterface* newOwner);
+
+        ClearCurrentOwner(
+            [in] IInterface* owner,
+            [in] Boolean silently);
+
+        IsInUse(
+            [out] Boolean* isInUse);
+
+        IsRestarting(
+            [out] Boolean* isRestarting);
+
+        SetStarted(
+            [in] Boolean started,
+            [in] Int32 memFactor,
+            [in] Int64 now);
+
+        SetRestarting(
+            [in] Boolean restarting,
+            [in] Int32 memFactor,
+            [in] Int64 now);
+
+        SetBound(
+            [in] Boolean bound,
+            [in] Int32 memFactor,
+            [in] Int64 now);
+
+        SetExecuting(
+            [in] Boolean executing,
+            [in] Int32 memFactor,
+            [in] Int64 now);
+
+        GetPackage(
+            [out] String* package);
+
+        GetProcessName(
+            [out] String* processName);
+
+        GetRunState(
+            [out] Int32* runState);
+
+        SetRunState(
+            [in] Int32 runState);
+
+        GetStartedState(
+            [out] Int32* startedState);
+
+        SetStartedState(
+            [in] Int32 startedState);
+
+        GetBoundState(
+            [out] Int32* boundState);
+
+        SetBoundState(
+            [in] Int32 boundState);
+
+        GetExecState(
+            [out] Int32* execState);
+
+        SetExecState(
+            [in] Int32 execState);
+    }
+
+    [local]
+    interface IPackageState {
+        GetProcesses(
+            [out] IArrayMap** processes);
+
+        GetServices(
+            [out] IArrayMap** services);
+
+        GetPackageName(
+            [out] String* packageName);
+
+        GetUid(
+            [out] Int32* uid);
+    }
+
+    [local]
+    interface IProcessDataCollection {
+        GetTotalTime(
+            [out] Int64* totalTime);
+
+        SetTotalTime(
+            [in] Int64 totalTime);
+
+        GetNumPss(
+            [out] Int64* numPss);
+
+        SetNumPss(
+            [in] Int64 numPss);
+
+        GetMinPss(
+            [out] Int64* minPss);
+
+        SetMinPss(
+            [in] Int64 minPss);
+
+        GetAvgPss(
+            [out] Int64* avgPss);
+
+        SetAvgPss(
+            [in] Int64 avgPss);
+
+        GetMaxPss(
+            [out] Int64* maxPss);
+
+        SetMaxPss(
+            [in] Int64 maxPss);
+
+        GetMinUss(
+            [out] Int64* minUss);
+
+        SetMinUss(
+            [in] Int64 minUss);
+
+        GetAvgUss(
+            [out] Int64* avgUss);
+
+        SetAvgUss(
+            [in] Int64 avgUss);
+
+        GetMaxUss(
+            [out] Int64* maxUss);
+
+        SetMaxUss(
+            [in] Int64 maxUss);
+    }
+
+    [local, deprecated]
+    interface ITotalMemoryUseCollection {
+        GetTotalTime(
+            [out] Int64* totalTime);
+
+        SetTotalTime(
+            [in] Int64 totalTime);
+
+        GetProcessStatePss(
+            [out, callee] ArrayOf<Int64>* processStatePss);
+
+        SetProcessStatePss(
+            [in] ArrayOf<Int64>* processStatePss);
+
+        GetProcessStateWeight(
+            [out, callee] ArrayOf<Double>* processStateWeight);
+
+        SetProcessStateWeight(
+            [in] ArrayOf<Double>* processStateWeight);
+
+        GetProcessStateTime(
+            [out, callee] ArrayOf<Int64>* processStateTime);
+
+        SetProcessStateTime(
+            [in] ArrayOf<Int64>* processStateTime);
+
+        GetProcessStateSamples(
+            [out, callee] ArrayOf<Int32>* processStateSamples);
+
+        SetProcessStateSamples(
+            [in] ArrayOf<Int32>* processStateSamples);
+
+        GetSysMemUsage(
+            [out, callee] ArrayOf<Int64>* sysMemUsage);
+
+        SetSysMemUsage(
+            [in] ArrayOf<Int64>* sysMemUsage);
+
+        GetSysMemCachedWeight(
+            [out] Double* sysMemCachedWeight);
+
+        SetSysMemCachedWeight(
+            [in] Double sysMemCachedWeight);
+
+        GetSysMemFreeWeight(
+            [out] Double* sysMemFreeWeight);
+
+        SetSysMemFreeWeight(
+            [in] Double sysMemFreeWeight);
+
+        GetSysMemZRamWeight(
+            [out] Double* sysMemZRamWeight);
+
+        SetSysMemZRamWeight(
+            [in] Double sysMemZRamWeight);
+
+        GetSysMemKernelWeight(
+            [out] Double* sysMemKernelWeight);
+
+        SetSysMemKernelWeight(
+            [in] Double sysMemKernelWeight);
+
+        GetSysMemNativeWeight(
+            [out] Double* sysMemNativeWeight);
+
+        SetSysMemNativeWeight(
+            [in] Double sysMemNativeWeight);
+
+        GetSysMemSamples(
+            [out] Int32* sysMemSamples);
+
+        SetSysMemSamples(
+            [in] Int32 sysMemSamples);
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated, local, parcelable]
+    interface IProcessStats {
+        const String SERVICE_NAME = "procstats";
+        const Int32 STATE_NOTHING = -1;
+        const Int32 STATE_PERSISTENT = 0;
+        const Int32 STATE_TOP = 1;
+        const Int32 STATE_IMPORTANT_FOREGROUND = 2;
+        const Int32 STATE_IMPORTANT_BACKGROUND = 3;
+        const Int32 STATE_BACKUP = 4;
+        const Int32 STATE_HEAVY_WEIGHT = 5;
+        const Int32 STATE_SERVICE = 6;
+        const Int32 STATE_SERVICE_RESTARTING = 7;
+        const Int32 STATE_RECEIVER = 8;
+        const Int32 STATE_HOME = 9;
+        const Int32 STATE_LAST_ACTIVITY = 10;
+        const Int32 STATE_CACHED_ACTIVITY = 11;
+        const Int32 STATE_CACHED_ACTIVITY_CLIENT = 12;
+        const Int32 STATE_CACHED_EMPTY = 13;
+        const Int32 STATE_COUNT = 14;//STATE_CACHED_EMPTY+1;
+
+        const Int32 PSS_SAMPLE_COUNT = 0;
+        const Int32 PSS_MINIMUM = 1;
+        const Int32 PSS_AVERAGE = 2;
+        const Int32 PSS_MAXIMUM = 3;
+        const Int32 PSS_USS_MINIMUM = 4;
+        const Int32 PSS_USS_AVERAGE = 5;
+        const Int32 PSS_USS_MAXIMUM = 6;
+        const Int32 PSS_COUNT = 7;//PSS_USS_MAXIMUM+1;
+
+        const Int32 SYS_MEM_USAGE_SAMPLE_COUNT = 0;
+        const Int32 SYS_MEM_USAGE_CACHED_MINIMUM = 1;
+        const Int32 SYS_MEM_USAGE_CACHED_AVERAGE = 2;
+        const Int32 SYS_MEM_USAGE_CACHED_MAXIMUM = 3;
+        const Int32 SYS_MEM_USAGE_FREE_MINIMUM = 4;
+        const Int32 SYS_MEM_USAGE_FREE_AVERAGE = 5;
+        const Int32 SYS_MEM_USAGE_FREE_MAXIMUM = 6;
+        const Int32 SYS_MEM_USAGE_ZRAM_MINIMUM = 7;
+        const Int32 SYS_MEM_USAGE_ZRAM_AVERAGE = 8;
+        const Int32 SYS_MEM_USAGE_ZRAM_MAXIMUM = 9;
+        const Int32 SYS_MEM_USAGE_KERNEL_MINIMUM = 10;
+        const Int32 SYS_MEM_USAGE_KERNEL_AVERAGE = 11;
+        const Int32 SYS_MEM_USAGE_KERNEL_MAXIMUM = 12;
+        const Int32 SYS_MEM_USAGE_NATIVE_MINIMUM = 13;
+        const Int32 SYS_MEM_USAGE_NATIVE_AVERAGE = 14;
+        const Int32 SYS_MEM_USAGE_NATIVE_MAXIMUM = 15;
+        const Int32 SYS_MEM_USAGE_COUNT = 16;//SYS_MEM_USAGE_NATIVE_MAXIMUM+1;
+
+        const Int32 ADJ_NOTHING = -1;
+        const Int32 ADJ_MEM_FACTOR_NORMAL = 0;
+        const Int32 ADJ_MEM_FACTOR_MODERATE = 1;
+        const Int32 ADJ_MEM_FACTOR_LOW = 2;
+        const Int32 ADJ_MEM_FACTOR_CRITICAL = 3;
+        const Int32 ADJ_MEM_FACTOR_COUNT = 4;//ADJ_MEM_FACTOR_CRITICAL+1;
+        const Int32 ADJ_SCREEN_MOD = ADJ_MEM_FACTOR_COUNT;
+        const Int32 ADJ_SCREEN_OFF = 0;
+        const Int32 ADJ_SCREEN_ON = ADJ_SCREEN_MOD;
+        const Int32 ADJ_COUNT = ADJ_SCREEN_ON*2;
+
+        const Int32 FLAG_COMPLETE = 1<<0;
+        const Int32 FLAG_SHUTDOWN = 1<<1;
+        const Int32 FLAG_SYSPROPS = 1<<2;
+
+        Add(
+            [in] IProcessStats* other);
+
+        AddSysMemUsage(
+            [in] Int64 cachedMem,
+            [in] Int64 freeMem,
+            [in] Int64 zramMem,
+            [in] Int64 kernelMem,
+            [in] Int64 nativeMem);
+
+        ComputeTotalMemoryUse(
+            [in] ITotalMemoryUseCollection* data,
+            [in] Int64 now);
+
+        Reset();
+
+        ResetSafely();
+
+        EvaluateSystemProperties(
+            [in] Boolean update,
+            [out] Boolean* result);
+
+        /** @hide */
+        WriteToParcel(
+            [in] IParcel* outParcel,
+            [in] Int64 now);
+
+        Read(
+            [in] IInputStream* stream);
+
+        GetPackageStateLocked(
+            [in] String packageName,
+            [in] Int32 uid,
+            [in] Int32 vers,
+            [out] IPackageState** state);
+
+        GetProcessStateLocked(
+            [in] String packageName,
+            [in] Int32 uid,
+            [in] Int32 vers,
+            [in] String processName,
+            [out] IProcessState** state);
+
+        GetServiceStateLocked(
+            [in] String packageName,
+            [in] Int32 uid,
+            [in] Int32 vers,
+            [in] String processName,
+            [in] String className,
+            [out] IServiceState** state);
+
+        DumpLocked(
+            [in] IPrintWriter* pw,
+            [in] String reqPackage,
+            [in] Int64 now,
+            [in] Boolean dumpSummary,
+            [in] Boolean dumpAll,
+            [in] Boolean activeOnly);
+
+        DumpSummaryLocked(
+            [in] IPrintWriter* pw,
+            [in] String reqPackage,
+            [in] Int64 now,
+            [in] Boolean activeOnly);
+
+        CollectProcessesLocked(
+            [in] ArrayOf<Int32>* screenStates,
+            [in] ArrayOf<Int32>* memStates,
+            [in] ArrayOf<Int32>* procStates,
+            [in] ArrayOf<Int32>* sortProcStates,
+            [in] Int64 now,
+            [in] String reqPackage,
+            [in] Boolean activeOnly,
+            [out] IArrayList** processes);
+
+        DumpCheckinLocked(
+            [in] IPrintWriter* pw,
+            [in] String reqPackage);
+
+        GetReadError(
+            [out] String* readError);
+
+        SetReadError(
+            [in] String readError);
+
+        GetTimePeriodStartClockStr(
+            [out] String* timePeriodStartClockStr);
+
+        SetTimePeriodStartClockStr(
+            [in] String timePeriodStartClockStr);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        GetPackages(
+            [out] IProcessMap** packages);
+
+        GetProcesses(
+            [out] IProcessMap** processes);
+
+        GetMemFactorDurations(
+            [out, callee] ArrayOf<Int64>* memFactorDurations);
+
+        GetMemFactor(
+            [out] Int32* memFactor);
+
+        SetMemFactor(
+            [in] Int32 memFactor);
+
+        GetStartTime(
+            [out] Int64* startTime);
+
+        SetStartTime(
+            [in] Int64 startTime);
+
+        GetSysMemUsageTable(
+            [out, callee] ArrayOf<Int32>* sysMemUsageTable);
+
+        SetSysMemUsageTable(
+            [in] ArrayOf<Int32>* sysMemUsageTable);
+
+        GetSysMemUsageTableSize(
+            [out] Int32* sysMemUsageTableSize);
+
+        SetSysMemUsageTableSize(
+            [in] Int32 sysMemUsageTableSize);
+
+        GetSysMemUsageArgs(
+            [out, callee] ArrayOf<Int64>* sysMemUsageArgs);
+
+        GetTimePeriodStartClock(
+            [out] Int64* timePeriodStartClock);
+
+        SetTimePeriodStartClock(
+            [in] Int64 timePeriodStartClock);
+
+        GetTimePeriodStartRealtime(
+            [out] Int64* timePeriodStartRealtime);
+
+        SetTimePeriodStartRealtime(
+            [in] Int64 timePeriodStartRealtime);
+
+        GetTimePeriodEndRealtime(
+            [out] Int64* timePeriodEndRealtime);
+
+        SetTimePeriodEndRealtime(
+            [in] Int64 timePeriodEndRealtime);
+
+        GetTimePeriodStartUptime(
+            [out] Int64* timePeriodStartUptime);
+
+        SetTimePeriodStartUptime(
+            [in] Int64 timePeriodStartUptime);
+
+        GetTimePeriodEndUptime(
+            [out] Int64* timePeriodEndUptime);
+
+        SetTimePeriodEndUptime(
+            [in] Int64 timePeriodEndUptime);
+    }
+
+    [deprecated, local]
+    interface IProcessStatsHelper {
+        PrintScreenLabelCsv(
+            [in] IPrintWriter* pw,
+            [in] Int32 offset);
+
+        PrintMemLabelCsv(
+            [in] IPrintWriter* pw,
+            [in] Int32 offset);
+
+        DumpSingleTime(
+            [in] IPrintWriter* pw,
+            [in] String prefix,
+            [in] ArrayOf<Int64>* durations,
+            [in] Int32 curState,
+            [in] Int64 curStartTime,
+            [in] Int64 now,
+            [out] Int64* result);
+
+        ComputeProcessData(
+            [in] IProcessState* proc,
+            [in] IProcessDataCollection* data,
+            [in] Int64 now);
+
+        DumpProcessListCsv(
+            [in] IPrintWriter* pw,
+            [in] IArrayList* procs,
+            [in] Boolean sepScreenStates,
+            [in] ArrayOf<Int32>* screenStates,
+            [in] Boolean sepMemStates,
+            [in] ArrayOf<Int32>* memStates,
+            [in] Boolean sepProcStates,
+            [in] ArrayOf<Int32>* procStates,
+            [in] Int64 now);
+
+        DumpSingleServiceTime(
+            [in] IPrintWriter* pw,
+            [in] String prefix,
+            [in] IServiceState* service,
+            [in] Int32 serviceType,
+            [in] Int32 curState,
+            [in] Int64 curStartTime,
+            [in] Int64 now,
+            [out] Int64* result);
+
+        GetCOMMIT_PERIOD(
+            [out] Int64* result);
+
+        GetCOMMIT_UPTIME_PERIOD(
+            [out] Int64* result);
+
+        GetALL_MEM_ADJ(
+            [out, callee] ArrayOf<Int32>* result);
+
+        GetALL_SCREEN_ADJ(
+            [out, callee] ArrayOf<Int32>* result);
+
+        GetNON_CACHED_PROC_STATES(
+            [out, callee] ArrayOf<Int32>* result);
+
+        GetBACKGROUND_PROC_STATES(
+            [out, callee] ArrayOf<Int32>* result);
+
+        GetALL_PROC_STATES(
+            [out, callee] ArrayOf<Int32>* result);
+
+        GetADJ_SCREEN_NAMES_CSV(
+            [out, callee] ArrayOf<String>* result);
+
+        GetADJ_MEM_NAMES_CSV(
+            [out, callee] ArrayOf<String>* result);
+
+        GetSTATE_NAMES_CSV(
+            [out, callee] ArrayOf<String>* result);
+    }
+
+    }//namespace App
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

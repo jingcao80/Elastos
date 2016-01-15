@@ -1,0 +1,86 @@
+
+module
+{
+    interface Elastos.Droid.Server.ISystemService;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+
+    /**
+     * Manages creating, starting, and other lifecycle events of
+     * {@link com.android.server.SystemService system services}.
+     *
+     * {@hide}
+     */
+    [local]
+    interface ISystemServiceManager {
+
+        /**
+         * Starts a service by class name signature.
+         *
+         * @return The service instance.
+         */
+        //@SuppressWarnings("unchecked")
+        StartService(
+            [in] String classNameSignature,
+            [out] ISystemService** service);
+
+        StartService(
+            [in] ISystemService* service);
+
+        /**
+         * Creates and starts a system service. The class must be a subclass of
+         * {@link com.android.server.SystemService}.
+         *
+         * @param serviceClass A Java class that implements the SystemService interface.
+         * @return The service instance, never null.
+         * @throws RuntimeException if the service fails to start.
+         */
+        //@SuppressWarnings("unchecked")
+        StartService(
+            [in] IClassInfo* serviceClass,
+            [out] ISystemService** service);
+
+        /**
+         * Starts the specified boot phase for all system services that have been started up to
+         * this point.
+         *
+         * @param phase The boot phase to start.
+         */
+        StartBootPhase(
+            [in] Int32 phase);
+
+        StartUser(
+            [in] Int32 userHandle);
+
+        SwitchUser(
+            [in] Int32 userHandle);
+
+        StopUser(
+            [in] Int32 userHandle);
+
+        CleanupUser(
+            [in] Int32 userHandle);
+
+        /** Sets the safe mode flag for services to query. */
+        SetSafeMode(
+            [in] Boolean safeMode);
+
+        /**
+         * Returns whether we are booting into safe mode.
+         * @return safe mode flag
+         */
+        IsSafeMode(
+            [out] Boolean* safeMode);
+
+        /**
+         * Outputs the state of this manager to the System log.
+         */
+        Dump();
+    }
+
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

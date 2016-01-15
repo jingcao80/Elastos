@@ -1,0 +1,61 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * This is the interface for text to which markup objects can be
+     * attached and detached.  Not all Spannable classes have mutable text;
+     * see {@link Editable} for that.
+     *
+     * @Involve
+     * interface ICharSequence
+     * interface ISpanned
+     */
+    interface ISpannable {
+        /**
+         * Attach the specified markup object to the range <code>start&hellip;end</code>
+         * of the text, or move the object to that range if it was already
+         * attached elsewhere.  See {@link Spanned} for an explanation of
+         * what the flags mean.  The object can be one that has meaning only
+         * within your application, or it can be one that the text system will
+         * use to affect text display or behavior.  Some noteworthy ones are
+         * the subclasses of {@link android.text.style.CharacterStyle} and
+         * {@link android.text.style.ParagraphStyle}, and
+         * {@link android.text.TextWatcher} and
+         * {@link android.text.SpanWatcher}.
+         */
+        SetSpan(
+            [in] IInterface* what,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Int32 flags);
+
+        /**
+         * Remove the specified object from the range of text to which it
+         * was attached, if any.  It is OK to remove an object that was never
+         * attached in the first place.
+         */
+        RemoveSpan(
+            [in] IInterface* what);
+    }
+
+    interface ISpannableFactory {
+        NewSpannable(
+            [in] ICharSequence* source,
+            [out] ISpannable** spannable);
+    }
+
+    interface ISpannableFactoryHelper {
+        GetInstance(
+            [out] ISpannableFactory** spannable);
+    }
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

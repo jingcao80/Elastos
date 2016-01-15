@@ -1,0 +1,196 @@
+
+module
+{
+    merge("security/Exceptions.car");
+    merge("security/IKey.car");
+    merge("security/IPublicKey.car");
+    merge("security/IPrivateKey.car");
+    merge("security/IPrincipal.car");
+
+    merge("security/acl/Exceptions.car");
+    merge("security/acl/IOwner.car");
+    merge("security/acl/IAcl.car");
+    merge("security/acl/IAclEntry.car");
+    merge("security/acl/IGroup.car");
+    merge("security/acl/IPermission.car");
+
+    merge("security/cert/Extension.car");
+    merge("security/cert/Exceptions.car");
+    merge("security/cert/CRLReason.car");
+    merge("security/cert/ICertificate.car");
+    merge("security/cert/IX509Certificate.car");
+    merge("security/cert/ICRL.car");
+    merge("security/cert/ICRLSelector.car");
+    merge("security/cert/ICertPath.car");
+    merge("security/cert/ICertPathParameters.car");
+    merge("security/cert/ICertPathValidatorResult.car");
+    merge("security/cert/ICertPathBuilderResult.car");
+    merge("security/cert/ICertPathBuilderSpi.car");
+    merge("security/cert/ICertPathBuilder.car");
+    merge("security/cert/ICertPathValidator.car");
+    merge("security/cert/ICertPathValidatorSpi.car");
+    merge("security/cert/ICertSelector.car");
+    merge("security/cert/ICertStore.car");
+    merge("security/cert/ICertStoreParameters.car");
+    merge("security/cert/ICertStoreSpi.car");
+    merge("security/cert/ICertificateFactory.car");
+    merge("security/cert/ICertificateFactorySpi.car");
+    merge("security/cert/ICollectionCertStoreParameters.car");
+    merge("security/cert/ILDAPCertStoreParameters.car");
+    merge("security/cert/IPKIXParameters.car");
+    merge("security/cert/IPKIXBuilderParameters.car");
+    merge("security/cert/IPolicyNode.car");
+    merge("security/cert/ITrustAnchor.car");
+    merge("security/cert/IPKIXCertPathValidatorResult.car");
+    merge("security/cert/IPKIXCertPathBuilderResult.car");
+    merge("security/cert/IPKIXCertPathChecker.car");
+    merge("security/cert/IPolicyQualifierInfo.car");
+    merge("security/cert/IX509CRL.car");
+    merge("security/cert/IX509Extension.car");
+    merge("security/cert/IX509CRLEntry.car");
+    merge("security/cert/IX509CRLSelector.car");
+    merge("security/cert/IX509CertSelector.car");
+
+    merge("security/spec/IRSAOtherPrimeInfo.car");
+
+    merge("security/interfaces/IDSAKey.car");
+    merge("security/interfaces/IDSAKeyPairGenerator.car");
+    merge("security/interfaces/IDSAParams.car");
+    merge("security/interfaces/IDSAPrivateKey.car");
+    merge("security/interfaces/IDSAPublicKey.car");
+    merge("security/interfaces/IECKey.car");
+    merge("security/interfaces/IECPrivateKey.car");
+    merge("security/interfaces/IECPublicKey.car");
+    merge("security/interfaces/IRSAKey.car");
+    merge("security/interfaces/IRSAPrivateKey.car");
+    merge("security/interfaces/IRSAMultiPrimePrivateCrtKey.car");
+    merge("security/interfaces/IRSAPrivateCrtKey.car");
+    merge("security/interfaces/IRSAPublicKey.car");
+
+    merge("security/spec/Exceptions.car");
+    merge("security/spec/IAlgorithmParameterSpec.car");
+    merge("security/spec/IKeySpec.car");
+    merge("security/spec/IDSAPrivateKeySpec.car");
+    merge("security/spec/IDSAPublicKeySpec.car");
+    merge("security/spec/IECField.car");
+    merge("security/spec/IECFieldF2m.car");
+    merge("security/spec/IECFieldFp.car");
+    merge("security/spec/IECGenParameterSpec.car");
+    merge("security/spec/IECParameterSpec.car");
+    merge("security/spec/IECPoint.car");
+    merge("security/spec/IECPrivateKeySpec.car");
+    merge("security/spec/IECPublicKeySpec.car");
+    merge("security/spec/IEllipticCurve.car");
+    merge("security/spec/IEncodedKeySpec.car");
+    merge("security/spec/IMGF1ParameterSpec.car");
+    merge("security/spec/IPKCS8EncodedKeySpec.car");
+    merge("security/spec/IPSSParameterSpec.car");
+    merge("security/spec/IPublicKey.car");
+    merge("security/spec/IRSAKeyGenParameterSpec.car");
+    merge("security/spec/IRSAPrivateKeySpec.car");
+    merge("security/spec/IRSAMultiPrimePrivateCrtKeySpec.car");
+    merge("security/spec/IRSAPrivateCrtKeySpec.car");
+    merge("security/spec/IRSAPublicKeySpec.car");
+    merge("security/spec/IX509EncodedKeySpec.car");
+
+    merge("security/IAccessControlContext.car");
+    merge("security/IAccessController.car");
+    merge("security/IAlgorithmParameterGenerator.car");
+    merge("security/IAlgorithmParameters.car");
+    merge("security/IProvider.car");
+    merge("security/IAuthProvider.car");
+    merge("security/ICertificate.car");
+    merge("security/ITimestamp.car");
+    merge("security/ICodeSigner.car");
+    merge("security/ICodeSource.car");
+    merge("security/IDigestInputStream.car");
+    merge("security/IDigestOutputStream.car");
+    merge("security/IDomainCombiner.car");
+    merge("security/IGuard.car");
+    merge("security/IGuardedObject.car");
+    merge("security/IIdentity.car");
+    merge("security/IIdentityScope.car");
+    merge("security/IKeyFactory.car");
+    merge("security/IKeyFactorySpi.car");
+    merge("security/IKeyPair.car");
+    merge("security/IKeyPairGenerator.car");
+    merge("security/IKeyPairGeneratorSpi.car");
+    merge("security/IKeyRep.car");
+    merge("security/IKeyStore.car");
+    merge("security/IKeyStoreSpi.car");
+    merge("security/IMessageDigest.car");
+    merge("security/IPermission.car");
+    merge("security/IPermissionCollection.car");
+    merge("security/IPolicy.car");
+    merge("security/IPrivilegedAction.car");
+    merge("security/IPrivilegedExceptionAction.car");
+    merge("security/IProtectionDomain.car");
+    merge("security/ISecureRandom.car");
+    merge("security/ISecureRandomSpi.car");
+    merge("security/ISecurity.car");
+    merge("security/ISignatureSpi.car");
+    merge("security/ISignature.car");
+    merge("security/ISignedObject.car");
+    merge("security/ISigner.car");
+    merge("security/IUnresolvedPermission.car");
+
+    interface Elastos.Utility.IList;
+    interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Security {
+
+    class CProviderService {
+        /**
+         * Constructs a new instance of {@code Service} with the given
+         * attributes.
+         *
+         * @param provider
+         *            the provider to which this service belongs.
+         * @param type
+         *            the type of this service (for example {@code
+         *            KeyPairGenerator}).
+         * @param algorithm
+         *            the algorithm this service implements.
+         * @param className
+         *            the name of the class implementing this service.
+         * @param aliases
+         *            {@code List} of aliases for the algorithm name, or {@code
+         *            null} if the implemented algorithm has no aliases.
+         * @param attributes
+         *            {@code Map} of additional attributes, or {@code null} if
+         *            this {@code Service} has no attributed.
+         * @throws NullPointerException
+         *             if {@code provider, type, algorithm} or {@code className}
+         *             is {@code null}.
+         */
+        constructor(
+            [in] IProvider* provider,
+            [in] String type,
+            [in] String algorithm,
+            [in] String className,
+            [in] IList* aliases,
+            [in] IMap* attributes);
+
+        interface IProviderService;
+    }
+
+    singleton class CSecurity {
+        interface ISecurity;
+    }
+
+    singleton class CMessageDigestHelper {
+        interface IMessageDigestHelper;
+    }
+
+    namespace Cert {
+
+    singleton class CCertificateFactoryHelper {
+        interface ICertificateFactoryHelper;
+    }
+
+    } // namespace Cert
+
+    } // namespace Security
+    } // namespace Elastos
+}

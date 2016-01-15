@@ -1,0 +1,137 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IMediaFileType {
+        GetFileType(
+            [out] Int32* result);
+
+        SetFileType(
+            [in] Int32 type);
+
+        GetMimeType(
+            [out] String* result);
+
+        SetMimeType(
+            [in] String type);
+    }
+
+    interface IMediaFile {
+
+        // Audio file types
+        const Int32 FILE_TYPE_MP3     = 1;
+        const Int32 FILE_TYPE_M4A     = 2;
+        const Int32 FILE_TYPE_WAV     = 3;
+        const Int32 FILE_TYPE_AMR     = 4;
+        const Int32 FILE_TYPE_AWB     = 5;
+        const Int32 FILE_TYPE_WMA     = 6;
+        const Int32 FILE_TYPE_OGG     = 7;
+        const Int32 FILE_TYPE_AAC     = 8;
+        const Int32 FILE_TYPE_MKA     = 9;
+        const Int32 FILE_TYPE_FLAC    = 10;
+
+        // MIDI file types
+        const Int32 FILE_TYPE_MID     = 11;
+        const Int32 FILE_TYPE_SMF     = 12;
+        const Int32 FILE_TYPE_IMY     = 13;
+
+        // Video file types
+        const Int32 FILE_TYPE_MP4     = 21;
+        const Int32 FILE_TYPE_M4V     = 22;
+        const Int32 FILE_TYPE_3GPP    = 23;
+        const Int32 FILE_TYPE_3GPP2   = 24;
+        const Int32 FILE_TYPE_WMV     = 25;
+        const Int32 FILE_TYPE_ASF     = 26;
+        const Int32 FILE_TYPE_MKV     = 27;
+        const Int32 FILE_TYPE_MP2TS   = 28;
+        const Int32 FILE_TYPE_AVI     = 29;
+        const Int32 FILE_TYPE_WEBM    = 30;
+
+        // More video file types
+        const Int32 FILE_TYPE_MP2PS   = 200;
+
+        // Image file types
+        const Int32 FILE_TYPE_JPEG    = 31;
+        const Int32 FILE_TYPE_GIF     = 32;
+        const Int32 FILE_TYPE_PNG     = 33;
+        const Int32 FILE_TYPE_BMP     = 34;
+        const Int32 FILE_TYPE_WBMP    = 35;
+        const Int32 FILE_TYPE_WEBP    = 36;
+
+        // Playlist file types
+        const Int32 FILE_TYPE_M3U      = 41;
+        const Int32 FILE_TYPE_PLS      = 42;
+        const Int32 FILE_TYPE_WPL      = 43;
+        const Int32 FILE_TYPE_HTTPLIVE = 44;
+
+        // Drm file types
+        const Int32 FILE_TYPE_FL      = 51;
+
+        // Other popular file types
+        const Int32 FILE_TYPE_TEXT          = 100;
+        const Int32 FILE_TYPE_HTML          = 101;
+        const Int32 FILE_TYPE_PDF           = 102;
+        const Int32 FILE_TYPE_XML           = 103;
+        const Int32 FILE_TYPE_MS_WORD       = 104;
+        const Int32 FILE_TYPE_MS_EXCEL      = 105;
+        const Int32 FILE_TYPE_MS_POWERPOINT = 106;
+        const Int32 FILE_TYPE_ZIP           = 107;
+
+        IsAudioFileType(
+            [in] Int32 fileType,
+            [out] Boolean* result);
+
+        IsVideoFileType(
+            [in] Int32 fileType,
+            [out] Boolean* result);
+
+        IsImageFileType(
+            [in] Int32 fileType,
+            [out] Boolean* result);
+
+        IsPlayListFileType(
+            [in] Int32 fileType,
+            [out] Boolean* result);
+
+        IsDrmFileType(
+            [in] Int32 fileType,
+            [out] Boolean* result);
+
+        GetFileType(
+            [in] String path,
+            [out] IMediaFileType** result);
+
+        IsMimeTypeMedia(
+            [in] String mimeType,
+            [out] Boolean* result);
+
+        // generates a title based on file name
+        GetFileTitle(
+            [in] String path,
+            [out] String* result);
+
+        GetFileTypeForMimeType(
+            [in] String mimeType,
+            [out] Int32* result);
+
+        GetMimeTypeForFile(
+            [in] String path,
+            [out] String* result);
+
+        GetFormatCode(
+            [in] String fileName,
+            [in]  String mimeType,
+            [out] Int32* result);
+
+        GetMimeTypeForFormatCode(
+            [in] Int32 formatCode,
+            [out] String* result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

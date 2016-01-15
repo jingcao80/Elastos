@@ -1,0 +1,22 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="SettingsProvider"
+        coreApp="true"
+        android:sharedUserId="android.uid.system">
+
+    <!-- todo add: android:backupAgent="SettingsBackupAgent" -->
+    <application android:allowClearUserData="false"
+                 android:label="@string/app_label"
+                 android:process="system"
+                 android:backupAgent="CSettingsBackupAgent"
+                 android:killAfterRestore="false"
+                 android:icon="@drawable/ic_launcher_settings">
+
+    <!-- todo add: android:neverEncrypt="true" -->
+
+        <provider android:name="CSettingsProvider" android:authorities="settings"
+                  android:multiprocess="false"
+                  android:exported="true"
+                  android:writePermission="android.permission.WRITE_SETTINGS"
+                  android:initOrder="100" />
+    </application>
+</manifest>

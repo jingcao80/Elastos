@@ -1,0 +1,23 @@
+module
+{
+    using interface Elastos.Droid.Os.IRemoteCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** {@hide} */
+    [oneway]
+    interface IUserSwitchObserver {
+        OnUserSwitching(
+            [in] Int32 newUserId,
+            [in] IRemoteCallback* reply);
+
+        OnUserSwitchComplete(
+            [in] Int32 newUserId);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

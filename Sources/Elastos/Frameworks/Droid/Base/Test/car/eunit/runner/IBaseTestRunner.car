@@ -1,0 +1,89 @@
+
+module
+{
+    interface Eunit.Framework.ITest;
+
+    namespace Eunit {
+    namespace Runner {
+
+    interface ITestSuiteLoader;
+
+    interface IBaseTestRunner {
+        SetPreference(
+            [in] String key,
+            [in] String value);
+
+        TestStarted(
+            [in] String testName);
+
+        TestEnded(
+            [in] String testName);
+
+        TestFailed(
+            [in] Int32 status,
+            [in] ITest* test,
+            [in] ECode ec);
+
+        /**
+         * Returns the formatted string of the elapsed time.
+         */
+        ElapsedTimeAsString(
+            [in] Int64 runTime,
+            [out] String* timeStr);
+
+        /**
+         * Sets the loading behaviour of the test runner
+         */
+        SetLoading(
+            [in] Boolean bEnable);
+
+        /**
+         * Extract the class name from a String in VA/Java style
+         */
+        ExtractClassName(
+            [in] String className,
+            [out] String* result);
+
+        /**
+         * Returns the loader to be used.
+         *
+         * @deprecated not present in JUnit4.10
+         */
+        GetLoader(
+            [out] ITestSuiteLoader** loader);
+    }
+
+    interface IBaseTestRunnerHelper {
+        SavePreferences();
+
+        /**
+         * Truncates a String to the maximum length.
+         */
+        Truncate(
+            [in] String s,
+            [out] String* result);
+
+        GetPreference(
+            [in] String key,
+            [out] String* value);
+
+        GetPreference(
+            [in] String key,
+            [in] Int32 dflt,
+            [out] Int32* value);
+
+        GetFilteredTrace(
+            [in] ECode ec,
+            [out] String* result);
+
+        /**
+         * Filters stack frames from internal JUnit classes
+         */
+        GetFilteredTrace(
+            [in] String stack,
+            [out] String* result);
+    }
+
+    } // namespace Runner
+    } // namespace Eunit
+}

@@ -1,0 +1,282 @@
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface INumberPicker;
+
+    /**
+     * Interface to listen for changes of the current value.
+     */
+    interface INumberPickerOnValueChangeListener {
+
+        /**
+         * Called upon a change of the current value.
+         *
+         * @param picker The NumberPicker associated with this listener.
+         * @param oldVal The previous value.
+         * @param newVal The new value.
+         */
+        OnValueChange(
+            [in] INumberPicker* picker,
+            [in] Int32 oldVal,
+            [in] Int32 newVal);
+    }
+
+    /**
+     * Interface to listen for the picker scroll state.
+     */
+    interface INumberPickerOnScrollListener {
+
+        const Int32 SCROLL_STATE_IDLE = 0;
+
+        const Int32 SCROLL_STATE_TOUCH_SCROLL = 1;
+
+        const Int32 SCROLL_STATE_FLING = 2;
+
+        /**
+         * Callback invoked while the number picker scroll state has changed.
+         *
+         * @param view The view whose scroll state is being reported.
+         * @param scrollState The current scroll state. One of
+         *            {@link #SCROLL_STATE_IDLE},
+         *            {@link #SCROLL_STATE_TOUCH_SCROLL} or
+         *            {@link #SCROLL_STATE_IDLE}.
+         */
+        OnScrollStateChange(
+            [in] INumberPicker* view,
+            [in] Int32 scrollState);
+    }
+
+    /**
+     * Interface used to format current value into a string for presentation.
+     */
+
+    interface INumberPickerFormatter {
+        /**
+         * Formats a string representation of the current value.
+         *
+         * @param value The currently selected value.
+         * @return A formatted string representation.
+         */
+        Format(
+            [in] Int32 value,
+            [out] String* str);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IEditText
+     * extends Elastos.Droid.View.ITextView
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface INumberPickerCustomEditText {
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.ILinearLayout
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [deprecated]
+    interface INumberPicker {
+        /**
+         * Sets the listener to be notified on change of the current value.
+         *
+         * @param onValueChangedListener The listener.
+         */
+        SetOnValueChangedListener(
+            [in] INumberPickerOnValueChangeListener* onValueChangedListener);
+
+        /**
+         * Set listener to be notified for scroll state changes.
+         *
+         * @param onScrollListener The listener.
+         */
+        SetOnScrollListener(
+            [in] INumberPickerOnScrollListener* onScrollListener);
+
+        /**
+         * Set the formatter to be used for formatting the current value.
+         * <p>
+         * Note: If you have provided alternative values for the values this
+         * formatter is never invoked.
+         * </p>
+         *
+         * @param formatter The formatter object. If formatter is <code>null</code>,
+         *            {@link String#valueOf(int)} will be used.
+         *@see #setDisplayedValues(String[])
+         */
+        SetFormatter(
+            [in] INumberPickerFormatter* formatter);
+
+        /**
+         * Set the current value for the number picker.
+         * <p>
+         * If the argument is less than the {@link NumberPicker#getMinValue()} and
+         * {@link NumberPicker#getWrapSelectorWheel()} is <code>false</code> the
+         * current value is set to the {@link NumberPicker#getMinValue()} value.
+         * </p>
+         * <p>
+         * If the argument is less than the {@link NumberPicker#getMinValue()} and
+         * {@link NumberPicker#getWrapSelectorWheel()} is <code>true</code> the
+         * current value is set to the {@link NumberPicker#getMaxValue()} value.
+         * </p>
+         * <p>
+         * If the argument is less than the {@link NumberPicker#getMaxValue()} and
+         * {@link NumberPicker#getWrapSelectorWheel()} is <code>false</code> the
+         * current value is set to the {@link NumberPicker#getMaxValue()} value.
+         * </p>
+         * <p>
+         * If the argument is less than the {@link NumberPicker#getMaxValue()} and
+         * {@link NumberPicker#getWrapSelectorWheel()} is <code>true</code> the
+         * current value is set to the {@link NumberPicker#getMinValue()} value.
+         * </p>
+         *
+         * @param value The current value.
+         * @see #setWrapSelectorWheel(boolean)
+         * @see #setMinValue(int)
+         * @see #setMaxValue(int)
+         */
+        SetValue(
+            [in] Int32 value);
+
+        /**
+         * Gets whether the selector wheel wraps when reaching the min/max value.
+         *
+         * @return True if the selector wheel wraps.
+         *
+         * @see #getMinValue()
+         * @see #getMaxValue()
+         */
+        GetWrapSelectorWheel(
+            [out] Boolean* isWrapSelectorWheel);
+
+        /**
+         * Sets whether the selector wheel shown during flinging/scrolling should
+         * wrap around the {@link NumberPicker#getMinValue()} and
+         * {@link NumberPicker#getMaxValue()} values.
+         * <p>
+         * By default if the range (max - min) is more than the number of items shown
+         * on the selector wheel the selector wheel wrapping is enabled.
+         * </p>
+         * <p>
+         * <strong>Note:</strong> If the number of items, i.e. the range (
+         * {@link #getMaxValue()} - {@link #getMinValue()}) is less than
+         * the number of items shown on the selector wheel, the selector wheel will
+         * not wrap. Hence, in such a case calling this method is a NOP.
+         * </p>
+         *
+         * @param wrapSelectorWheel Whether to wrap.
+         */
+        SetWrapSelectorWheel(
+            [in] Boolean wrapSelectorWheel);
+
+        /**
+         * Sets the speed at which the numbers be incremented and decremented when
+         * the up and down buttons are long pressed respectively.
+         * <p>
+         * The default value is 300 ms.
+         * </p>
+         *
+         * @param intervalMillis The speed (in milliseconds) at which the numbers
+         *            will be incremented and decremented.
+         */
+        SetOnLongPressUpdateInterval(
+            [in] Int64 intervalMillis) ;
+
+        /**
+         * Returns the value of the picker.
+         *
+         * @return The value.
+         */
+        GetValue(
+            [out] Int32* value);
+
+        /**
+         * Returns the min value of the picker.
+         *
+         * @return The min value
+         */
+        GetMinValue(
+            [out] Int32* MinValue);
+
+        /**
+         * Sets the min value of the picker.
+         *
+         * @param minValue The min value inclusive.
+         *
+         * <strong>Note:</strong> The length of the displayed values array
+         * set via {@link #setDisplayedValues(String[])} must be equal to the
+         * range of selectable numbers which is equal to
+         * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
+         */
+       SetMinValue(
+           [in] Int32 MinValue);
+
+        /**
+         * Returns the max value of the picker.
+         *
+         * @return The max value.
+         */
+        GetMaxValue(
+            [out] Int32* MaxValue);
+
+        /**
+         * Sets the max value of the picker.    }
+         *
+         * @param maxValue The max value inclusive.
+         *
+         * <strong>Note:</strong> The length of the displayed values array
+         * set via {@link #setDisplayedValues(String[])} must be equal to the
+         * range of selectable numbers which is equal to
+         * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
+         */
+        SetMaxValue(
+            [in] Int32 maxValue);
+
+        /**
+         * Gets the values to be displayed instead of string values.
+         *LayoutParams=
+         * @return The displayed values.
+         */
+        GetDisplayedValues(
+            [out, callee] ArrayOf<String>* displayedValues);
+
+        /**
+         * Sets the values to be displayed.
+         *
+         * @param displayedValues The displayed values.
+         *
+         * <strong>Note:</strong> The length of the displayed values array
+         * must be equal to the range of selectable numbers which is equal to
+         * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
+         */
+        SetDisplayedValues(
+           [in] ArrayOf<String>* displayedValues);
+    }
+
+    interface INumberPickerHelper {
+
+        GetTwoDigitFormatter(
+            [out] INumberPickerFormatter** format);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

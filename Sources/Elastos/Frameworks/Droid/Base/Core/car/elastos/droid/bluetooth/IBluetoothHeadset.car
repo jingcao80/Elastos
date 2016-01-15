@@ -1,0 +1,118 @@
+
+module
+{
+
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * API for Bluetooth Headset service
+         *
+         * {@hide}
+         */
+        [deprecated]
+        interface IIBluetoothHeadset {
+            // Public API
+            Connect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            Disconnect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            // Mike TODO: wait for list car interface
+            GetConnectedDevices(
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetDevicesMatchingConnectionStates(
+                [in] ArrayOf<Int32>* states,
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetConnectionState(
+                [in] IBluetoothDevice* device,
+                [out] Int32* state);
+
+            SetPriority(
+                [in] IBluetoothDevice* device,
+                [in] Int32 priority,
+                [out] Boolean* result);
+
+            GetPriority(
+                [in] IBluetoothDevice* device,
+                [out] Int32* priority);
+
+            StartVoiceRecognition(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            StopVoiceRecognition(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            IsAudioConnected(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* isAudioConnected);
+
+            // APIs that can be made public in future
+            GetBatteryUsageHint(
+                [in] IBluetoothDevice* device,
+                [out] Int32* batteryUsage);
+
+            // Internal functions, not be made public
+            AcceptIncomingConnect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            RejectIncomingConnect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            GetAudioState(
+                [in] IBluetoothDevice* device,
+                [out] Int32* state);
+
+            IsAudioOn(
+                [out] Boolean* isAudioOn);
+
+            ConnectAudio(
+                [out] Boolean* result);
+
+            DisconnectAudio(
+                [out] Boolean* result);
+
+            StartScoUsingVirtualVoiceCall(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            StopScoUsingVirtualVoiceCall(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            PhoneStateChanged(
+                [in] Int32 numActive,
+                [in] Int32 numHeld,
+                [in] Int32 callState,
+                [in] String number,
+                [in] Int32 type);
+
+            RoamChanged(
+                [in] Boolean roam);
+
+            ClccResponse(
+                [in] Int32 index,
+                [in] Int32 direction,
+                [in] Int32 status,
+                [in] Int32 mode,
+                [in] Boolean mpty,
+                [in] String number,
+                [in] Int32 type);
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

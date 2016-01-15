@@ -1,0 +1,101 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IOutputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    [deprecated]
+    interface IMemoryFile {
+
+        /**
+         * Closes the memory file. If there are no other open references to the memory
+         * file, it will be deleted.
+         */
+        Close();
+
+        /**
+         * Returns the length of the memory file.
+         *
+         * @return file length.
+         */
+        GetLenth(
+            [out] Int32* len);
+
+        /**
+         * Is memory file purging enabled?
+         *
+         * @return true if the file may be purged.
+         */
+        IsPurgingAllowed(
+            [out] Boolean* result);
+
+        /**
+         * Enables or disables purging of the memory file.
+         *
+         * @param allowPurging true if the operating system can purge the contents
+         * of the file in low memory situations
+         * @return previous value of allowPurging
+         */
+        AllowPurging(
+            [in] Boolean allowPurging,
+            [out] Boolean* result);
+
+        /**
+         * Creates a new InputStream for reading from the memory file.
+         *
+         @return InputStream
+         */
+        GetInputStream(
+            [out] IInputStream** stream);
+
+        /**
+         * Creates a new OutputStream for writing to the memory file.
+         *
+         @return OutputStream
+         */
+        GetOutputStream(
+            [out] IOutputStream** stream);
+
+        /**
+         * Reads bytes from the memory file.
+         * Will throw an IOException if the file has been purged.
+         *
+         * @param buffer byte array to read bytes into.
+         * @param srcOffset offset into the memory file to read from.
+         * @param destOffset offset into the byte array buffer to read into.
+         * @param count number of bytes to read.
+         * @return number of bytes read.
+         * @throws IOException if the memory file has been purged or deactivated.
+         */
+        ReadBytes(
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 srcOffset,
+            [in] Int32 destOffset,
+            [in] Int32 count,
+            [out] Int32* number);
+
+        /**
+         * Write bytes to the memory file.
+         * Will throw an IOException if the file has been purged.
+         *
+         * @param buffer byte array to write bytes from.
+         * @param srcOffset offset into the byte array buffer to write from.
+         * @param destOffset offset  into the memory file to write to.
+         * @param count number of bytes to write.
+         * @throws IOException if the memory file has been purged or deactivated.
+         */
+        WriteBytes(
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 srcOffset,
+            [in] Int32 destOffset,
+            [in] Int32 count);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

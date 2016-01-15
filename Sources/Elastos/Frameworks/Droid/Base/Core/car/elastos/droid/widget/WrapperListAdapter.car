@@ -1,0 +1,35 @@
+
+module
+{
+    interface Elastos.Droid.Widget.IListAdapter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * List adapter that wraps another list adapter. The wrapped adapter can be retrieved
+     * by calling {@link #getWrappedAdapter()}.
+     *
+     * @see ListView
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IAdapter
+     * interface Elastos.Droid.Widget.IListAdapter
+     */
+    [local]
+    interface IWrapperListAdapter {
+        /**
+         * Returns the adapter wrapped by this list adapter.
+         *
+         * @return The {@link android.widget.ListAdapter} wrapped by this adapter.
+         */
+        GetWrappedAdapter(
+            [out] IListAdapter** adapter);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

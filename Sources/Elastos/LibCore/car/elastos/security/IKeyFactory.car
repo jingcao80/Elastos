@@ -1,0 +1,151 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.IPublicKey;
+    interface Elastos.Security.IPrivateKey;
+    interface Elastos.Security.IKey;
+    interface Elastos.Security.Spec.IKeySpec;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IKeyFactory {
+        /**
+         * Returns the provider associated with this {@code KeyFactory}.
+         *
+         * @return the provider associated with this {@code KeyFactory}.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Returns the name of the algorithm associated with this {@code
+         * KeyFactory}.
+         *
+         * @return the name of the algorithm associated with this {@code
+         *         KeyFactory}.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Generates a instance of {@code PublicKey} from the given key
+         * specification.
+         *
+         * @param keySpec
+         *            the specification of the public key
+         * @return the public key
+         * @throws InvalidKeySpecException
+         *             if the specified {@code keySpec} is invalid
+         */
+        GeneratePublic(
+            [in] IKeySpec* keySpec,
+            [out] IPublicKey** pubKey);
+
+        /**
+         * Generates a instance of {@code PrivateKey} from the given key
+         * specification.
+         *
+         * @param keySpec
+         *            the specification of the private key.
+         * @return the private key.
+         * @throws InvalidKeySpecException
+         *             if the specified {@code keySpec} is invalid.
+         */
+        GeneratePrivate(
+            [in] IKeySpec* keySpec,
+            [out] IPrivateKey** prvKey);
+
+        /**
+         * Returns the key specification for the specified key.
+         *
+         * @param key
+         *            the key from which the specification is requested.
+         * @param keySpec
+         *            the type of the requested {@code KeySpec}.
+         * @return the key specification for the specified key.
+         * @throws InvalidKeySpecException
+         *             if the key can not be processed, or the requested requested
+         *             {@code KeySpec} is inappropriate for the given key.
+         */
+        GetKeySpec(
+            [in] IKey* key,
+            [in] ClassID type,
+            [out] IKeySpec** keySpec);
+
+        /**
+         * Translates the given key into a key from this key factory.
+         *
+         * @param key
+         *            the key to translate.
+         * @return the translated key.
+         * @throws InvalidKeyException
+         *             if the specified key can not be translated by this key
+         *             factory.
+         */
+        TranslateKey(
+            [in] IKey* key,
+            [out] IKey** translatedKey);
+    }
+
+    interface IKeyFactoryHelper {
+        /**
+         * Returns a new instance of {@code KeyFactory} that utilizes the specified
+         * algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm.
+         * @return a new instance of {@code KeyFactory} that utilizes the specified
+         *         algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if no provider provides the requested algorithm.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] IKeyFactory** instance);
+
+        /**
+         * Returns a new instance of {@code KeyFactory} that utilizes the specified
+         * algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm.
+         * @param provider
+         *            the name of the provider.
+         * @return a new instance of {@code KeyFactory} that utilizes the specified
+         *         algorithm from the specified provider.
+         * @throws NoSuchAlgorithmException
+         *             if the provider does not provide the requested algorithm.
+         * @throws NoSuchProviderException
+         *             if the requested provider is not available.
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         */
+        GetInstanceEx(
+            [in] String algorithm,
+            [in] String provider,
+            [out] IKeyFactory** instance);
+
+        /**
+         * Returns a new instance of {@code KeyFactory} that utilizes the specified
+         * algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm.
+         * @param provider
+         *            the security provider.
+         * @return a new instance of {@code KeyFactory} that utilizes the specified
+         *         algorithm from the specified provider.
+         * @throws NoSuchAlgorithmException
+         *             if the provider does not provide the requested algorithm.
+         * @throws IllegalArgumentException if {@code provider == null}
+         */
+        GetInstanceEx2(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] IKeyFactory** instance);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

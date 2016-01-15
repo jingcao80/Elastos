@@ -1,0 +1,232 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    /**
+     * Interface used to retrieve various phone-related subscriber information.
+     *
+     */
+    interface IIPhoneSubInfo {
+        /**
+         * Retrieves the unique device ID, e.g., IMEI for GSM phones.
+         */
+        GetDeviceId(
+            [out] String* str);
+
+        /**
+         * Retrieves the unique device ID of a subId for the device, e.g., IMEI
+         * for GSM phones.
+         */
+        GetDeviceIdForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Retrieves the IMEI.
+         */
+        GetImeiForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Retrieves the software version number for the device, e.g., IMEI/SV
+         * for GSM phones.
+         */
+        GetDeviceSvn(
+            [out] String* str);
+
+        /**
+         * Retrieves the unique sbuscriber ID, e.g., IMSI for GSM phones.
+         */
+        GetSubscriberId(
+            [out] String* str);
+
+        /**
+         * Retrieves the unique subscriber ID of a given subId, e.g., IMSI for GSM phones.
+         */
+        GetSubscriberIdForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Retrieves the Group Identifier Level1 for GSM phones.
+         */
+        GetGroupIdLevel1(
+            [out] String* str);
+
+        /**
+         * Retrieves the Group Identifier Level1 for GSM phones of a subId.
+         */
+        GetGroupIdLevel1ForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Retrieves the serial number of the ICC, if applicable.
+         */
+        GetIccSerialNumber(
+            [out] String* str);
+
+        /**
+         * Retrieves the serial number of a given subId.
+         */
+        GetIccSerialNumberForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Retrieves the phone number string for line 1.
+         */
+        GetLine1Number(
+            [out] String* str);
+
+        /**
+         * Retrieves the phone number string for line 1 of a subcription.
+         */
+        GetLine1NumberForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+
+        /**
+         * Retrieves the alpha identifier for line 1.
+         */
+        GetLine1AlphaTag(
+            [out] String* str);
+
+        /**
+         * Retrieves the alpha identifier for line 1 of a subId.
+         */
+        GetLine1AlphaTagForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+
+        /**
+         * Retrieves MSISDN Number.
+         */
+        GetMsisdn(
+            [out] String* str);
+
+        /**
+         * Retrieves the Msisdn of a subId.
+         */
+        GetMsisdnForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Retrieves the voice mail number.
+         */
+        GetVoiceMailNumber(
+            [out] String* str);
+
+        /**
+         * Retrieves the voice mail number of a given subId.
+         */
+        GetVoiceMailNumberForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Retrieves the complete voice mail number.
+         */
+        GetCompleteVoiceMailNumber(
+            [out] String* str);
+
+        /**
+         * Retrieves the complete voice mail number for particular subId
+         */
+        GetCompleteVoiceMailNumberForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Retrieves the alpha identifier associated with the voice mail number.
+         */
+        GetVoiceMailAlphaTag(
+            [out] String* str);
+
+        /**
+         * Retrieves the alpha identifier associated with the voice mail number
+         * of a subId.
+         */
+        GetVoiceMailAlphaTagForSubscriber(
+            [in] Int64 subId,
+            [out] String* str);
+
+        /**
+         * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
+         * @return the IMPI, or null if not present or not loaded
+         */
+        GetIsimImpi(
+            [out] String* str);
+
+        /**
+         * Returns the IMS home network domain name that was loaded from the ISIM.
+         * @return the IMS domain name, or null if not present or not loaded
+         */
+        GetIsimDomain(
+            [out] String* str);
+
+        /**
+         * Returns the IMS public user identities (IMPU) that were loaded from the ISIM.
+         * @return an array of IMPU strings, with one IMPU per string, or null if
+         *      not present or not loaded
+         */
+        GetIsimImpu(
+            [out, callee] ArrayOf<String>* isimImpu);
+
+        /**
+         * Returns the IMS Service Table (IST) that was loaded from the ISIM.
+         * @return IMS Service Table or null if not present or not loaded
+         */
+        GetIsimIst(
+            [out] String* str);
+
+        /**
+         * Returns the IMS Proxy Call Session Control Function(PCSCF) that were loaded from the ISIM.
+         * @return an array of PCSCF strings with one PCSCF per string, or null if
+         *      not present or not loaded
+         */
+        GetIsimPcscf(
+            [out, callee] ArrayOf<String>* isimPcscf);
+
+        /**
+         * TODO: Deprecate and remove this interface. Superceded by getIccsimChallengeResponse.
+         * Returns the response of ISIM Authetification through RIL.
+         * @return the response of ISIM Authetification, or null if
+         *     the Authentification hasn't been successed or isn't present iphonesubinfo.
+         */
+        GetIsimChallengeResponse(
+            [in] String nonce,
+            [out] String* str);
+
+        /**
+         * Returns the response of the SIM application on the UICC to authentication
+         * challenge/response algorithm. The data string and challenge response are
+         * Base64 encoded Strings.
+         * Can support EAP-SIM, EAP-AKA with results encoded per 3GPP TS 31.102.
+         *
+         * @param subId subscription ID to be queried
+         * @param appType ICC application type (@see com.android.internal.telephony.PhoneConstants#APPTYPE_xxx)
+         * @param data authentication challenge data
+         * @return challenge response
+         */
+        GetIccSimChallengeResponse(
+            [in] Int64 subId,
+            [in] Int32 appType,
+            [in] String data,
+            [out] String* str);
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

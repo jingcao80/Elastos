@@ -1,0 +1,394 @@
+module {
+
+    interface Elastos.Droid.Content.Pm.IActivityInfo;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * Information about an action key in searchability meta-data.
+     *
+     * @see SearchableInfo#findActionKey(int)
+     *
+     * @hide This feature is used very little, and on many devices there are no reasonable
+     *       keys to use for actions.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IActionKeyInfo {
+
+        GetKeyCode(
+            [out] Int32* keyCode);
+
+        GetQueryActionMsg(
+            [out] String* actionMsg);
+
+        GetSuggestActionMsg(
+            [out] String* actionMsg);
+
+        GetSuggestActionMsgColumn(
+            [out] String* column);
+    }
+
+    /**
+     * Searchability meta-data for an activity. Only applications that search other applications
+     * should need to use this class.
+     * See <a href="{@docRoot}guide/topics/search/searchable-config.html">Searchable Configuration</a>
+     * for more information about declaring searchability meta-data for your application.
+     *
+     * @see SearchManager#getSearchableInfo(ComponentName)
+     * @see SearchManager#getSearchablesInGlobalSearch()
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [local]
+    interface ISearchableInfo {
+
+        /**
+         * Gets the search suggestion content provider authority.
+         *
+         * @return The search suggestions authority, or {@code null} if not set.
+         * @see android.R.styleable#Searchable_searchSuggestAuthority
+         */
+        GetSuggestAuthority(
+            [out] String* auth);
+
+        /**
+         * Gets the name of the package where the suggestion provider lives,
+         * or {@code null}.
+         */
+        GetSuggestPackage(
+            [out] String* pkg);
+
+        /**
+         * Gets the component name of the searchable activity.
+         *
+         * @return A component name, never {@code null}.
+         */
+        GetSearchActivity(
+            [out] IComponentName** nameRst);
+
+        /**
+         * Checks whether the badge should be a text label.
+         *
+         * @see android.R.styleable#Searchable_searchMode
+         *
+         * @hide This feature is deprecated, no need to add it to the API.
+         */
+        UseBadgeLabel(
+            [out] Boolean* isUsing);
+
+        /**
+         * Checks whether the badge should be an icon.
+         *
+         * @see android.R.styleable#Searchable_searchMode
+         *
+         * @hide This feature is deprecated, no need to add it to the API.
+         */
+        UseBadgeIcon(
+            [out] Boolean* isUsing);
+
+        /**
+         * Checks whether the text in the query field should come from the suggestion intent data.
+         *
+         * @see android.R.styleable#Searchable_searchMode
+         */
+        ShouldRewriteQueryFromData(
+            [out] Boolean* isShould);
+
+        /**
+         * Checks whether the text in the query field should come from the suggestion title.
+         *
+         * @see android.R.styleable#Searchable_searchMode
+         */
+        ShouldRewriteQueryFromText(
+            [out] Boolean* isShould);
+
+        /**
+         * Gets the resource id of the description string to use for this source in system search
+         * settings, or {@code 0} if none has been specified.
+         *
+         * @see android.R.styleable#Searchable_searchSettingsDescription
+         */
+        GetSettingsDescriptionId(
+            [out] Boolean* id);
+
+        /**
+         * Gets the content provider path for obtaining search suggestions.
+         *
+         * @return The suggestion path, or {@code null} if not set.
+         * @see android.R.styleable#Searchable_searchSuggestPath
+         */
+        GetSuggestPath(
+            [out] String* path);
+
+        /**
+         * Gets the selection for obtaining search suggestions.
+         *
+         * @see android.R.styleable#Searchable_searchSuggestSelection
+         */
+        GetSuggestSelection(
+            [out] String* selection);
+
+        /**
+         * Gets the optional intent action for use with these suggestions. This is
+         * useful if all intents will have the same action
+         * (e.g. {@link android.content.Intent#ACTION_VIEW})
+         *
+         * This can be overriden in any given suggestion using the column
+         * {@link SearchManager#SUGGEST_COLUMN_INTENT_ACTION}.
+         *
+         * @return The default intent action, or {@code null} if not set.
+         * @see android.R.styleable#Searchable_searchSuggestIntentAction
+         */
+        GetSuggestIntentAction(
+            [out] String* action);
+
+        /**
+         * Gets the optional intent data for use with these suggestions.  This is
+         * useful if all intents will have similar data URIs,
+         * but you'll likely need to provide a specific ID as well via the column
+         * {@link SearchManager#SUGGEST_COLUMN_INTENT_DATA_ID}, which will be appended to the
+         * intent data URI.
+         *
+         * This can be overriden in any given suggestion using the column
+         * {@link SearchManager#SUGGEST_COLUMN_INTENT_DATA}.
+         *
+         * @return The default intent data, or {@code null} if not set.
+         * @see android.R.styleable#Searchable_searchSuggestIntentData
+         */
+        GetSuggestIntentData(
+            [out] String* data);
+
+        /**
+         * Gets the suggestion threshold.
+         *
+         * @return The suggestion threshold, or {@code 0} if not set.
+         * @see android.R.styleable#Searchable_searchSuggestThreshold
+         */
+        GetSuggestThreshold(
+            [out] Int32* threshold);
+
+        /**
+         * Get the context for the searchable activity.
+         *
+         * @param context You need to supply a context to start with
+         * @return Returns a context related to the searchable activity
+         * @hide
+         */
+        GetActivityContext(
+            [in] IContext* inCtx,
+            [out] IContext** outCtx);
+
+        /**
+         * Get the context for the suggestions provider.
+         *
+         * @param context You need to supply a context to start with
+         * @param activityContext If we can determine that the provider and the activity are the
+         *        same, we'll just return this one.
+         * @return Returns a context related to the suggestion provider
+         * @hide
+         */
+        GetProviderContext(
+            [in] IContext* ctx,
+            [in] IContext* activityCtx,
+            [out] IContext** rstCtx);
+
+        /**
+         * If any action keys were defined for this searchable activity, look up and return.
+         *
+         * @param keyCode The key that was pressed
+         * @return Returns the action key info, or {@code null} if none defined.
+         *
+         * @hide ActionKeyInfo is hidden
+         */
+        FindActionKey(
+            [in] Int32 keyCode,
+            [out] IActionKeyInfo** info);
+
+        /**
+         * Gets the "label" (user-visible name) of this searchable context. This must be
+         * read using the searchable Activity's resources.
+         *
+         * @return A resource id, or {@code 0} if no label was specified.
+         * @see android.R.styleable#Searchable_label
+         *
+         * @hide deprecated functionality
+         */
+        GetLabelId(
+            [out] Int32* id);
+
+        /**
+         * Gets the resource id of the hint text. This must be
+         * read using the searchable Activity's resources.
+         *
+         * @return A resource id, or {@code 0} if no hint was specified.
+         * @see android.R.styleable#Searchable_hint
+         */
+        GetHintId(
+            [out] Int32* id);
+
+        /**
+         * Gets the icon id specified by the Searchable_icon meta-data entry. This must be
+         * read using the searchable Activity's resources.
+         *
+         * @return A resource id, or {@code 0} if no icon was specified.
+         * @see android.R.styleable#Searchable_icon
+         *
+         * @hide deprecated functionality
+         */
+        GetIconId(
+            [out] Int32* id);
+
+        /**
+         * Checks if the searchable activity wants the voice search button to be shown.
+         *
+         * @see android.R.styleable#Searchable_voiceSearchMode
+         */
+        GetVoiceSearchEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Checks if voice search should start web search.
+         *
+         * @see android.R.styleable#Searchable_voiceSearchMode
+         */
+        GetVoiceSearchLaunchWebSearch(
+            [out] Boolean* mode);
+
+        /**
+         * Checks if voice search should start in-app search.
+         *
+         * @see android.R.styleable#Searchable_voiceSearchMode
+         */
+        GetVoiceSearchLaunchRecognizer(
+            [out] Boolean* mode);
+
+        /**
+         * Gets the resource id of the voice search language model string.
+         *
+         * @return A resource id, or {@code 0} if no language model was specified.
+         * @see android.R.styleable#Searchable_voiceLanguageModel
+         */
+        GetVoiceLanguageModeId(
+            [out] Int32* modeId);
+
+        /**
+         * Gets the resource id of the voice prompt text string.
+         *
+         * @return A resource id, or {@code 0} if no voice prompt text was specified.
+         * @see android.R.styleable#Searchable_voicePromptText
+         */
+        GetVoicePromptTextId(
+            [out] Int32* textId);
+
+        /**
+         * Gets the resource id of the spoken language to recognize in voice search.
+         *
+         * @return A resource id, or {@code 0} if no language was specified.
+         * @see android.R.styleable#Searchable_voiceLanguage
+         */
+        GetVoiceLanguageId(
+            [out] Int32* id);
+
+        /**
+         * The maximum number of voice recognition results to return.
+         *
+         * @return the max results count, if specified in the searchable
+         *         activity's metadata, or {@code 0} if not specified.
+         * @see android.R.styleable#Searchable_voiceMaxResults
+         */
+        GetVoiceMaxResults(
+            [out] Int32* results);
+
+        /**
+         * Gets the resource id of replacement text for the "Search" button.
+         *
+         * @return A resource id, or {@code 0} if no replacement text was specified.
+         * @see android.R.styleable#Searchable_searchButtonText
+         * @hide This feature is deprecated, no need to add it to the API.
+         */
+        GetSearchButtonText(
+            [out] Int32* text);
+
+        /**
+         * Gets the input type as specified in the searchable attributes. This will default to
+         * {@link InputType#TYPE_CLASS_TEXT} if not specified (which is appropriate
+         * for free text input).
+         *
+         * @return the input type
+         * @see android.R.styleable#Searchable_inputType
+         */
+        GetInputType(
+            [out] Int32* type);
+
+        /**
+         * Gets the input method options specified in the searchable attributes.
+         * This will default to {@link EditorInfo#IME_ACTION_GO} if not specified (which is
+         * appropriate for a search box).
+         *
+         * @return the input type
+         * @see android.R.styleable#Searchable_imeOptions
+         */
+        GetImeOptions(
+            [out] Int32* options);
+
+        /**
+         * Checks whether the searchable should be included in global search.
+         *
+         * @return The value of the {@link android.R.styleable#Searchable_includeInGlobalSearch}
+         *         attribute, or {@code false} if the attribute is not set.
+         * @see android.R.styleable#Searchable_includeInGlobalSearch
+         */
+        ShouldIncludeInGlobalSearch(
+            [out] Boolean* isShould);
+
+        /**
+         * Checks whether this searchable activity should be queried for suggestions if a prefix
+         * of the query has returned no results.
+         *
+         * @see android.R.styleable#Searchable_queryAfterZeroResults
+         */
+        QueryAfterZeroResults(
+            [out] Boolean* results);
+
+        /**
+         * Checks whether this searchable activity has auto URL detection turned on.
+         *
+         * @see android.R.styleable#Searchable_autoUrlDetect
+         */
+        AutoUrlDetect(
+            [out] Boolean* autoDetect);
+    }
+
+    [local]
+    interface ISearchableInfoHelper {
+
+        /**
+         * Gets search information for the given activity.
+         *
+         * @param context Context to use for reading activity resources.
+         * @param activityInfo Activity to get search information from.
+         * @return Search information about the given activity, or {@code null} if
+         *         the activity has no or invalid searchability meta-data.
+         *
+         * @hide For use by SearchManagerService.
+         */
+         GetActivityMetaData(
+            [in] IContext* ctx,
+            [in] IActivityInfo* activityInfo,
+            [in] Int32 userId,
+            [out] ISearchableInfo** info);
+    }
+
+    }
+    }
+    }
+}

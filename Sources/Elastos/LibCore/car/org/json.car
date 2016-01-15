@@ -1,0 +1,85 @@
+
+module
+{
+    merge("json/Exceptions.car");
+    merge("json/IJSON.car");
+    merge("json/IJSONArray.car");
+    merge("json/IJSONObject.car");
+    merge("json/IJSONStringer.car");
+    merge("json/IJSONTokener.car");
+
+    interface Elastos.Utility.ICollection;
+    interface Elastos.Utility.IMap;
+
+    namespace Org {
+    namespace Json {
+
+    singleton class CJSON {
+        interface IJSON;
+    }
+
+    class CJSONArray {
+        constructor();
+
+        constructor(
+            [in] ICollection* copyFrom);
+
+        constructor(
+            [in] IJSONTokener* readFrom);
+
+        constructor(
+            [in] String json);
+
+        constructor(
+            [in] IInterface* array);
+
+        interface IJSONArray;
+    }
+
+    [local, deprecated]
+    class CJSONObject {
+        constructor();
+
+        constructor(
+            [in] IMap* copyFrom);
+
+        constructor(
+            [in] IJSONTokener* readFrom);
+
+        constructor(
+            [in] String json);
+
+        constructor(
+            [in] IJSONObject* copyFrom,
+            [in] ArrayOf<String>* names);
+
+        interface IJSONObject;
+    }
+
+    singleton class CJSONObjectHelper {
+        interface IJSONObjectHelper;
+    }
+
+    class CJSONStringer {
+        constructor();
+
+        constructor(
+            [in] Int32 indentSpaces);
+
+        interface IJSONStringer;
+    }
+
+    class CJSONTokener {
+        constructor(
+            [in] String str);
+
+        interface IJSONTokener;
+    }
+
+    singleton class CJSONTokenerHelper {
+        interface IJSONTokenerHelper;
+    }
+
+    } // namespace Json
+    } // namespace Org
+}

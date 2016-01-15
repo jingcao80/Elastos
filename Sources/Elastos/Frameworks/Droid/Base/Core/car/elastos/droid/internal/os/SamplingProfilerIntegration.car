@@ -1,0 +1,48 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IPackageInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /**
+     * Integrates the framework with Dalvik's sampling profiler.
+     */
+    [local]
+    interface ISamplingProfilerIntegration {
+        const String SNAPSHOT_DIR = "/data/snapshots";
+
+        /**
+         * Is profiling enabled?
+         */
+        IsEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Starts the profiler if profiling is enabled.
+         */
+        Start();
+
+        /**
+         * Writes a snapshot if profiling is enabled.
+         */
+        WriteSnapshot(
+            [in] String processName,
+            [in] IPackageInfo* packageInfo);
+
+        /**
+         * Writes the zygote's snapshot to internal storage if profiling is enabled.
+         */
+        WriteZygoteSnapshot();
+
+    }
+
+    }//namespace Os
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}
+

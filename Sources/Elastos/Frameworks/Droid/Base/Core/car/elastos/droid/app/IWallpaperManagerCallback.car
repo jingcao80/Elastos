@@ -1,0 +1,25 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * Callback interface used by IWallpaperManager to send asynchronous
+     * notifications back to its clients.  Note that this is a
+     * one-way interface so the server does not block waiting for the client.
+     *
+     * @hide
+     */
+    [oneway]
+    interface IIWallpaperManagerCallback {
+        /**
+         * Called when the wallpaper has changed
+         */
+        OnWallpaperChanged();
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

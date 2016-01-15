@@ -1,0 +1,155 @@
+
+module {
+
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    enum Elastos.Droid.Graphics.PorterDuffMode;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IProgressBar
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+
+    interface IAbsSeekBar {
+        /**
+         * Sets the thumb that will be drawn at the end of the progress meter within the SeekBar.
+         * <p>
+         * If the thumb is a valid drawable (i.e. not null), half its width will be
+         * used as the new thumb offset (@see #setThumbOffset(Int32)).
+         *
+         * @param thumb Drawable representing the thumb
+         */
+        SetThumb(
+            [in] IDrawable* thumb);
+        /**
+         * Return the drawable used to represent the scroll thumb - the component that
+         * the user can drag back and forth indicating the current value by its position.
+         *
+         * @return The current thumb drawable
+         */
+        GetThumb(
+            [out] IDrawable** thumb);
+
+        /**
+         * Applies a tint to the thumb drawable. Does not modify the current tint
+         * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+         * <p>
+         * Subsequent calls to {@link #setThumb(Drawable)} will automatically
+         * mutate the drawable and apply the specified tint and tint mode using
+         * {@link Drawable#setTintList(ColorStateList)}.
+         *
+         * @param tint the tint to apply, may be {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#SeekBar_thumbTint
+         * @see #getThumbTintList()
+         * @see Drawable#setTintList(ColorStateList)
+         */
+        SetThumbTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * Returns the tint applied to the thumb drawable, if specified.
+         *
+         * @return the tint applied to the thumb drawable
+         * @attr ref android.R.styleable#SeekBar_thumbTint
+         * @see #setThumbTintList(ColorStateList)
+         */
+        // @Nullable
+        GetThumbTintList(
+            [out] IColorStateList** tint);
+
+        /**
+         * Specifies the blending mode used to apply the tint specified by
+         * {@link #setThumbTintList(ColorStateList)}} to the thumb drawable. The
+         * default mode is {@link PorterDuff.Mode#SRC_IN}.
+         *
+         * @param tintMode the blending mode used to apply the tint, may be
+         *                 {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#SeekBar_thumbTintMode
+         * @see #getThumbTintMode()
+         * @see Drawable#setTintMode(PorterDuff.Mode)
+         */
+        SetThumbTintMode(
+            [in] PorterDuffMode tintMode);
+
+        /**
+         * Returns the blending mode used to apply the tint to the thumb drawable,
+         * if specified.
+         *
+         * @return the blending mode used to apply the tint to the thumb drawable
+         * @attr ref android.R.styleable#SeekBar_thumbTintMode
+         * @see #setThumbTintMode(PorterDuff.Mode)
+         */
+        // @Nullable
+        GetThumbTintMode(
+            [out] PorterDuffMode* tintMode);
+
+        /**
+         * @see #setThumbOffset(Int32)
+         */
+        GetThumbOffset(
+            [out] Int32* offset);
+
+        /**
+         * Sets the thumb offset that allows the thumb to extend out of the range of
+         * the track.
+         *
+         * @param thumbOffset The offset amount in pixels.
+         */
+        SetThumbOffset(
+            [in] Int32 thumbOffset);
+
+        /**
+         * Specifies whether the track should be split by the thumb. When true,
+         * the thumb's optical bounds will be clipped out of the track drawable,
+         * then the thumb will be drawn into the resulting gap.
+         *
+         * @param splitTrack Whether the track should be split by the thumb
+         */
+        SetSplitTrack(
+            [in] Boolean splitTrack);
+
+        /**
+         * Returns whether the track should be split by the thumb.
+         */
+        GetSplitTrack(
+            [out] Boolean* track);
+
+        /**
+         * Sets the amount of progress changed via the arrow keys.
+         *
+         * @param increment The amount to increment or decrement when the user
+         *            presses the arrow keys.
+         */
+        SetKeyProgressIncrement(
+            [in] Int32 increment);
+
+        /**
+         * Returns the amount of progress changed via the arrow keys.
+         * <p>
+         * By default, this will be a value that is derived from the max progress.
+         *
+         * @return The amount to increment or decrement when the user presses the
+         *         arrow keys. This will be positive.
+         */
+        GetKeyProgressIncrement(
+            [out] Int32* increment);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

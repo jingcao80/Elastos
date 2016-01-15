@@ -1,0 +1,21 @@
+TARGET_NAME= cert
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/security/auth
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/security/auth/callback
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/security/auth/x500
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/security/cert
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security/cert
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility
+
+SOURCES += CX509CertificateHelper.cpp
+SOURCES += CertificateX.cpp
+SOURCES += X509CertificateX.cpp

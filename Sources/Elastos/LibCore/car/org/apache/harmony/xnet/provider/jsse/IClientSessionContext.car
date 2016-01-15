@@ -1,0 +1,45 @@
+
+
+module
+{
+    interface Org.Apache.Harmony.Xnet.Provider.Jsse.ISSLClientSessionCache;
+    using interface Elastosx.Net.Ssl.ISSLSession;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * Caches client sessions. Indexes by host and port. Users are typically
+     * looking to reuse any session for a given host and port.
+     */
+    interface IClientSessionContext extends Elastosx.Net.Ssl.ISSLSessionContext {
+        GetSize(
+            [out] Int32* size);
+
+        SetPersistentCache(
+            [in] ISSLClientSessionCache* persistentCache);
+
+        /**
+         * Finds a cached session for the given host name and port.
+         *
+         * @param host of server
+         * @param port of server
+         * @return cached session or null if none found
+         */
+        GetSessionEx(
+            [in] String host,
+            [in] Int32 port,
+            [out] ISSLSession** session);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

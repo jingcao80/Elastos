@@ -1,0 +1,25 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Spi {
+    /**
+     * The base class for all the locale related service provider interfaces (SPIs).
+     * <p>Note that Android does not support user-supplied locale service providers.
+     * @since 1.6
+     * @hide
+     */
+    interface ILocaleServiceProvider {
+        /**
+         * Returns all locales for which this locale service provider has localized objects or names.
+         */
+        GetAvailableLocales(
+            [out, callee] ArrayOf<ILocale*>* outarr);
+    }
+
+    } // namespace Spi
+    } // namespace Utility
+    } // namespace Elastos
+}

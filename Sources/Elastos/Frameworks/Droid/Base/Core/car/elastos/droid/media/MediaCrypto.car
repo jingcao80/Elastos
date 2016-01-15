@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Utility.IUUID;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IMediaCryptoHelper {
+        /**
+         * Query if the given scheme identified by its UUID is supported on
+         * this device.
+         * @param uuid The UUID of the crypto scheme.
+         */
+        IsCryptoSchemeSupported(
+            [in] IUUID* uuid,
+            [out] Boolean* result);
+    }
+
+    interface IMediaCrypto {
+        /**
+         * Query if the crypto scheme requires the use of a secure decoder
+         * to decode data of the given mime type.
+         * @param mime The mime type of the media data
+         */
+        RequiresSecureDecoderComponent(
+            [in] String mime,
+            [out] Boolean* result);
+
+        ReleaseResources();
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

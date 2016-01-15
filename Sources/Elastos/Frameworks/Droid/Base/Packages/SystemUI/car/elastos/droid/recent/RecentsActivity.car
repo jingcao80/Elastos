@@ -1,0 +1,32 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recent {
+
+    [deprecated]
+    interface IRecentsActivity {
+        const String TOGGLE_RECENTS_INTENT = "com.android.systemui.recent.action.TOGGLE_RECENTS";
+        const String PRELOAD_INTENT = "com.android.systemui.recent.action.PRELOAD";
+        const String CANCEL_PRELOAD_INTENT = "com.android.systemui.recent.CANCEL_PRELOAD";
+        const String CLOSE_RECENTS_INTENT = "com.android.systemui.recent.action.CLOSE";
+        const String WINDOW_ANIMATION_START_INTENT = "com.android.systemui.recent.action.WINDOW_ANIMATION_START";
+        const String PRELOAD_PERMISSION = "com.android.systemui.recent.permission.PRELOAD";
+        const String WAITING_FOR_WINDOW_ANIMATION_PARAM = "com.android.systemui.recent.WAITING_FOR_WINDOW_ANIMATION";
+
+        DismissAndGoHome();
+
+        DismissAndGoBack();
+
+        IsActivityShowing(
+            [out] Boolean* result);
+    }
+
+    } // namespace Recent
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

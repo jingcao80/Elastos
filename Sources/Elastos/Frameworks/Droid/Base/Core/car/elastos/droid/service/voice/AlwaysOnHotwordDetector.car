@@ -1,0 +1,313 @@
+module
+{
+    using interface Elastos.Core.IInteger32;
+
+    interface Elastos.Droid.Media.IAudioFormat;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Voice {
+
+    interface IAlwaysOnHotwordDetectorEventPayload {
+        /**
+         * Gets the format of the audio obtained using {@link #getTriggerAudio()}.
+         * May be null if there's no audio present.
+         * @Nullable
+         */
+        GetCaptureAudioFormat(
+            [out] IAudioFormat** format);
+
+        /**
+         * Gets the raw audio that triggered the keyphrase.
+         * This may be null if the trigger audio isn't available.
+         * If non-null, the format of the audio can be obtained by calling
+         * {@link #getCaptureAudioFormat()}.
+         *
+         * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         * @Nullable
+         */
+        GetTriggerAudio(
+            [out, callee] ArrayOf<Byte>* audio);
+
+        /**
+         * Gets the session ID to start a capture from the DSP.
+         * This may be null if streaming capture isn't possible.
+         * If non-null, the format of the audio that can be captured can be
+         * obtained using {@link #getCaptureAudioFormat()}.
+         *
+         * TODO: Candidate for Public API when the API to start capture with a session ID
+         * is made public.
+         *
+         * TODO: Add this to {@link #getCaptureAudioFormat()}:
+         * "Gets the format of the audio obtained using {@link #getTriggerAudio()}
+         * or {@link #getCaptureSession()}. May be null if no audio can be obtained
+         * for either the trigger or a streaming session."
+         *
+         * TODO: Should this return a known invalid value instead?
+         *
+         * @hide
+         * @Nullable
+         */
+        GetCaptureSession(
+            [out] IInteger32** session);
+    }
+
+    /**
+     * Callbacks for always-on hotword detection.
+     */
+     interface IAlwaysOnHotwordDetectorCallback {
+        /**
+         * Called when the hotword availability changes.
+         * This indicates a change in the availability of recognition for the given keyphrase.
+         * It's called at least once with the initial availability.<p/>
+         *
+         * Availability implies whether the hardware on this system is capable of listening for
+         * the given keyphrase or not. <p/>
+         *
+         * @see AlwaysOnHotwordDetector#STATE_HARDWARE_UNAVAILABLE
+         * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNSUPPORTED
+         * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNENROLLED
+         * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_ENROLLED
+         */
+        OnAvailabilityChanged(
+            [in] Int32 status);
+
+        /**
+         * Called when the keyphrase is spoken.
+         * This implicitly stops listening for the keyphrase once it's detected.
+         * Clients should start a recognition again once they are done handling this
+         * detection.
+         *
+         * @param eventPayload Payload data for the detection event.
+         *        This may contain the trigger audio, if requested when calling
+         *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
+         */
+        OnDetected(
+            [in] IAlwaysOnHotwordDetectorEventPayload* eventPayload);
+
+        /**
+         * Called when the detection fails due to an error.
+         */
+        OnError();
+
+        /**
+         * Called when the recognition is paused temporarily for some reason.
+         * This is an informational callback, and the clients shouldn't be doing anything here
+         * except showing an indication on their UI if they have to.
+         */
+        OnRecognitionPaused();
+
+        /**
+         * Called when the recognition is resumed after it was temporarily paused.
+         * This is an informational callback, and the clients shouldn't be doing anything here
+         * except showing an indication on their UI if they have to.
+         */
+        OnRecognitionResumed();
+     }
+
+    /**
+     * A class that lets a VoiceInteractionService implementation interact with
+     * always-on keyphrase detection APIs.
+     */
+     [oneway]
+    interface IAlwaysOnHotwordDetector {
+        /**
+         * Indicates that recognition for the given keyphrase is not available on the system
+         * because of the hardware configuration.
+         * No further interaction should be performed with the detector that returns this availability.
+         */
+        const Int32 STATE_HARDWARE_UNAVAILABLE = -2;
+        /**
+         * Indicates that recognition for the given keyphrase is not supported.
+         * No further interaction should be performed with the detector that returns this availability.
+         */
+        const Int32 STATE_KEYPHRASE_UNSUPPORTED = -1;
+        /**
+         * Indicates that the given keyphrase is not enrolled.
+         * The caller may choose to begin an enrollment flow for the keyphrase.
+         */
+        const Int32 STATE_KEYPHRASE_UNENROLLED = 1;
+        /**
+         * Indicates that the given keyphrase is currently enrolled and it's possible to start
+         * recognition for it.
+         */
+        const Int32 STATE_KEYPHRASE_ENROLLED = 2;
+
+        /**
+         * Indicates that we need to enroll.
+         *
+         * @hide
+         */
+        const Int32 MANAGE_ACTION_ENROLL = 0;
+        /**
+         * Indicates that we need to re-enroll.
+         *
+         * @hide
+         */
+        const Int32 MANAGE_ACTION_RE_ENROLL = 1;
+        /**
+         * Indicates that we need to un-enroll.
+         *
+         * @hide
+         */
+        const Int32 MANAGE_ACTION_UN_ENROLL = 2;
+
+        /**
+         * Empty flag for {@link #startRecognition(int)}.
+         *
+         * @hide
+         */
+        const Int32 RECOGNITION_FLAG_NONE = 0;
+        /**
+         * Recognition flag for {@link #startRecognition(int)} that indicates
+         * whether the trigger audio for hotword needs to be captured.
+         */
+        const Int32 RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 0x1;
+        /**
+         * Recognition flag for {@link #startRecognition(int)} that indicates
+         * whether the recognition should keep going on even after the keyphrase triggers.
+         * If this flag is specified, it's possible to get multiple triggers after a
+         * call to {@link #startRecognition(int)} if the user speaks the keyphrase multiple times.
+         * When this isn't specified, the default behavior is to stop recognition once the
+         * keyphrase is spoken, till the caller starts recognition again.
+         */
+        const Int32 RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 0x2;
+
+        //---- Recognition mode flags. Return codes for getSupportedRecognitionModes() ----//
+        // Must be kept in sync with the related attribute defined as searchKeyphraseRecognitionFlags.
+
+        /**
+         * Simple recognition of the key phrase.
+         * Returned by {@link #getSupportedRecognitionModes()}
+         */
+        const Int32 RECOGNITION_MODE_VOICE_TRIGGER = 0x1;
+        /**
+         * User identification performed with the keyphrase recognition.
+         * Returned by {@link #getSupportedRecognitionModes()}
+         */
+        const Int32 RECOGNITION_MODE_USER_IDENTIFICATION = 0x2;
+
+        /**
+         * Gets the recognition modes supported by the associated keyphrase.
+         *
+         * @see #RECOGNITION_MODE_USER_IDENTIFICATION
+         * @see #RECOGNITION_MODE_VOICE_TRIGGER
+         *
+         * @throws UnsupportedOperationException if the keyphrase itself isn't supported.
+         *         Callers should only call this method after a supported state callback on
+         *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+         * @throws IllegalStateException if the detector is in an invalid state.
+         *         This may happen if another detector has been instantiated or the
+         *         {@link VoiceInteractionService} hosting this detector has been shut down.
+         */
+        GetSupportedRecognitionModes(
+            [out] Int32* modes);
+
+        /**
+         * Starts recognition for the associated keyphrase.
+         *
+         * @see #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         * @see #RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS
+         *
+         * @param recognitionFlags The flags to control the recognition properties.
+         * @return Indicates whether the call succeeded or not.
+         * @throws UnsupportedOperationException if the recognition isn't supported.
+         *         Callers should only call this method after a supported state callback on
+         *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+         * @throws IllegalStateException if the detector is in an invalid state.
+         *         This may happen if another detector has been instantiated or the
+         *         {@link VoiceInteractionService} hosting this detector has been shut down.
+         */
+        StartRecognition(
+            [in] Int32 recognitionFlags,
+            [out] Boolean* res);
+
+        /**
+         * Stops recognition for the associated keyphrase.
+         *
+         * @return Indicates whether the call succeeded or not.
+         * @throws UnsupportedOperationException if the recognition isn't supported.
+         *         Callers should only call this method after a supported state callback on
+         *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+         * @throws IllegalStateException if the detector is in an invalid state.
+         *         This may happen if another detector has been instantiated or the
+         *         {@link VoiceInteractionService} hosting this detector has been shut down.
+         */
+        StopRecognition(
+            [out] Boolean* res);
+
+        /**
+         * Creates an intent to start the enrollment for the associated keyphrase.
+         * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
+         * Starting re-enrollment is only valid if the keyphrase is un-enrolled,
+         * i.e. {@link #STATE_KEYPHRASE_UNENROLLED},
+         * otherwise {@link #createReEnrollIntent()} should be preferred.
+         *
+         * @return An {@link Intent} to start enrollment for the given keyphrase.
+         * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
+         *         Callers should only call this method after a supported state callback on
+         *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+         * @throws IllegalStateException if the detector is in an invalid state.
+         *         This may happen if another detector has been instantiated or the
+         *         {@link VoiceInteractionService} hosting this detector has been shut down.
+         */
+        CreateEnrollIntent(
+            [out] IIntent** intent);
+
+        /**
+         * Creates an intent to start the un-enrollment for the associated keyphrase.
+         * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
+         * Starting re-enrollment is only valid if the keyphrase is already enrolled,
+         * i.e. {@link #STATE_KEYPHRASE_ENROLLED}, otherwise invoking this may result in an error.
+         *
+         * @return An {@link Intent} to start un-enrollment for the given keyphrase.
+         * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
+         *         Callers should only call this method after a supported state callback on
+         *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+         * @throws IllegalStateException if the detector is in an invalid state.
+         *         This may happen if another detector has been instantiated or the
+         *         {@link VoiceInteractionService} hosting this detector has been shut down.
+         */
+        CreateUnEnrollIntent(
+            [out] IIntent** intent);
+
+        /**
+         * Creates an intent to start the re-enrollment for the associated keyphrase.
+         * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
+         * Starting re-enrollment is only valid if the keyphrase is already enrolled,
+         * i.e. {@link #STATE_KEYPHRASE_ENROLLED}, otherwise invoking this may result in an error.
+         *
+         * @return An {@link Intent} to start re-enrollment for the given keyphrase.
+         * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
+         *         Callers should only call this method after a supported state callback on
+         *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+         * @throws IllegalStateException if the detector is in an invalid state.
+         *         This may happen if another detector has been instantiated or the
+         *         {@link VoiceInteractionService} hosting this detector has been shut down.
+         */
+        CreateReEnrollIntent(
+            [out] IIntent** intent);
+
+        /**
+         * Invalidates this hotword detector so that any future calls to this result
+         * in an IllegalStateException.
+         *
+         * @hide
+         */
+        Invalidate();
+
+        /**
+         * Reloads the sound models from the service.
+         *
+         * @hide
+         */
+        OnSoundModelsChanged();
+    }
+
+    } // namespace Voice
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

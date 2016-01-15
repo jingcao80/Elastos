@@ -1,0 +1,72 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    interface IName {
+        GetName(
+            [out] String* name);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        ToString(
+            [out] String* name);
+    }
+
+    interface IAttributes {
+        /**
+         * Returns the value associated with the parameter {@code Attributes.Name}
+         * key.
+         *
+         * @param name
+         *            the key to obtain the value for.
+         * @return the {@code String} associated with name, or {@code null} if name
+         *         is not a valid key.
+         */
+        GetValue(
+            [in] IName* name,
+            [out] String* value);
+
+        /**
+         * Returns the string associated with the parameter name.
+         *
+         * @param name
+         *            the key to obtain the value for.
+         * @return the string associated with name, or {@code null} if name is not a
+         *         valid key.
+         */
+        GetValue(
+            [in] String name,
+            [out] String* value);
+
+        /**
+         * Stores the value {@code val} associated with the key {@code name} in this
+         * {@code Attributes}.
+         *
+         * @param name
+         *            the key to store.
+         * @param val
+         *            the value to store in this {@code Attributes}.
+         * @return the value being stored.
+         */
+        PutValue(
+            [in] String name,
+            [in] String val,
+            [out] String* oldVal);
+
+        PutValue(
+            [in] String name,
+            [in] String val);
+    }
+
+    } //Jar
+    } //Utility
+    } //Elastos
+}

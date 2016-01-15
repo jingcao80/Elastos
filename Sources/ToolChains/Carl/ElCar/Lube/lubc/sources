@@ -1,0 +1,33 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= lubc
+TARGET_TYPE= exe
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES += $(MAKEDIR)/../inc;
+INCLUDES += $(MAKEDIR)/../../inc;
+INCLUDES += $(INCLUDESTEMP);
+
+SOURCES = lubc.cpp
+SOURCES += cmdarg.cpp
+SOURCES += context.cpp
+SOURCES += token.cpp
+SOURCES += parerr.cpp
+SOURCES += parser.cpp
+SOURCES += memcond.cpp
+SOURCES += funcarg.cpp
+#    sample.rc \
+
+ELASTOS_LIBS = ../userfunc/userfunc.lib
+ELASTOS_LIBS += ../lubase/lubase.lib
+ELASTOS_LIBS += ../../Carc/clsutil/clsutil.lib
+ELASTOS_LIBS += ../../Carc/clsbase/clsbase.lib
+ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+LIBRARIES += -lz
+else
+LIBRARIES += $(XDK_USER_LIB)/libz.lib
+endif
+LIBRARIES += -lstdc++
+

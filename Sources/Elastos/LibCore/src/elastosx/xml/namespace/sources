@@ -1,0 +1,14 @@
+TARGET_NAME= namespace
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml/namespace
+
+SOURCES = CQName.cpp
+SOURCES += CQNameHelper.cpp

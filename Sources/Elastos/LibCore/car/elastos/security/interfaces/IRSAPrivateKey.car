@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Interfaces {
+
+    /**
+     * The interface for an PKCS#1 RSA private key.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.IPrivateKey
+     */
+    interface IRSAPrivateKey/*, Elastos.Security.Interfaces.IRSAKey*/ {
+        /**
+         * Returns the private exponent {@code d}.
+         *
+         * @return the private exponent {@code d}.
+         */
+        GetPrivateExponent(
+            [out] IBigInteger** privateExponent);
+    }
+
+    } // namespace Interfaces
+    } // namespace Security
+    } // namespace Elastos
+}

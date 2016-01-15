@@ -1,0 +1,67 @@
+module
+{
+    interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Text {
+
+    [deprecated]
+    interface IAttributedString {
+        /**
+         * Applies a given attribute to this string.
+         */
+        AddAttribute(
+            [in] IAttributedCharacterIteratorAttribute* attribute,
+            [in] IInterface* value);
+
+        /**
+         * Applies a given attribute to the given range of this string.
+         */
+        AddAttribute(
+            [in] IAttributedCharacterIteratorAttribute* attribute,
+            [in] IInterface* value,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * Applies a given set of attributes to the given range of the string.
+         */
+        AddAttributes(
+            [in] IMap * attributes,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * Returns an {AttributedCharacterIterator} that gives access to the
+         * complete content of this attributed string.
+         */
+        GetIterator(
+            [out] IAttributedCharacterIterator** iterator);
+
+        /**
+         * Returns an {AttributedCharacterIterator} that gives access to the
+         * complete content of this attributed string. Only attributes contained in
+         * {attributes} are available from this iterator if they are defined
+         * for this text.
+         */
+        GetIterator(
+            [in] ArrayOf<IAttributedCharacterIteratorAttribute*>* attributes,
+            [out] IAttributedCharacterIterator** iterator);
+
+        /**
+         * Returns an {AttributedCharacterIterator} that gives access to the
+         * contents of this attributed string starting at index {start} up to
+         * index {end}. Only attributes contained in {attributes} are
+         * available from this iterator if they are defined for this text.
+         */
+
+        GetIterator(
+            [in] ArrayOf<IAttributedCharacterIteratorAttribute*>* attributes,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] IAttributedCharacterIterator** iterator);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

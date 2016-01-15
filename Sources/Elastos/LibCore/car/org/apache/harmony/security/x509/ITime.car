@@ -1,0 +1,36 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Choice;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * Class represents the work with the following X.509 structure:
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     * Time ::= CHOICE {
+     *       utcTime        UTCTime,
+     *       generalTime    GeneralizedTime
+     * }
+     * </pre>
+     */
+    interface ITimeHelper {
+        GetASN1(
+            [out] IASN1Choice** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

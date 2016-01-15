@@ -1,0 +1,272 @@
+
+module
+{
+    //
+    // Elastos.Droid.Net
+    //
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+        interface ILinkCapabilities {}  // deleted in V5
+
+        interface IIProxyService {
+            ResolvePacFile(
+                [in] String host,
+                [in] String url,
+                [out] String* result);
+
+            SetPacFile(
+                [in] String scriptContents);
+
+            StartPacSystem();
+
+            StopPacSystem();
+        }
+
+        interface IIProxyCallback {}
+
+        interface IIProxyPortListener {}
+
+    }}} // Elastos.Droid.Net
+
+    //
+    // Elastos.Droid.Collect
+    //
+    namespace Elastos {
+    namespace Droid {
+    namespace Collect {
+
+        interface ISets {}
+
+    }}} // Elastos.Droid.Collect
+
+    //
+    // Elastos.Droid.Privacy
+    //
+    namespace Elastos {
+    namespace Droid {
+    namespace Privacy {
+
+        interface IIPrivacySettingsManager {}
+
+        interface IPrivacySettingsManager {}
+
+        interface IPrivacySettings {}
+
+    }}} // Elastos.Droid.Privacy
+
+    //
+    // Elastos.Droid.telecom
+    //
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecom {
+
+        interface IPhoneAccountHandle {}
+
+    }}} // Elastos.Droid.telecom
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+        interface ILog {}
+
+        interface ISlog {}
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        interface IBluetoothDevice {}
+
+        interface IBluetoothProfile {}
+
+    }}} // Elastos.Droid.Bluetooth
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Keyguard {
+
+        interface IViewMediatorCallback {}
+
+        namespace KeyguardHostView {
+            interface IOnDismissAction {}
+        }
+
+    }}} // Elastos.Droid.Keyguard
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+        interface IPackageLite {}
+    }}}} // Elastos.Droid.Content.Pm
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+        interface IBluetoothHeadset {}
+    }}} // Elastos.Droid.Bluetooth
+
+    namespace Org {
+    namespace Conscrypt {
+        interface IPSKKeyManager {}
+        interface IOpenSSLSocketImpl {}
+        interface IOpenSSLContextImpl {}
+        interface ISSLClientSessionCache {}
+        interface ISSLParametersImpl {}
+        interface ITrustManagerImpl {}
+        interface IClientSessionContext {}
+        interface IFileClientSessionCache {}
+        interface IFileClientSessionCacheHelper {}
+    }} // Org.Conscrypt
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Impl {
+    namespace Entity {
+
+        interface IEntitySerializer {}
+
+        interface IStrictContentLengthStrategy {}
+
+    }}}}} // Org.Apache.Http.Impl.Entity
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Impl {
+    namespace IO {
+
+        interface IChunkedInputStream {}
+
+        interface IContentLengthInputStream {}
+
+        interface IHttpRequestWriter {}
+
+        interface IIdentityInputStream {}
+
+        interface ISocketInputBuffer {}
+
+        interface ISocketOutputBuffer {}
+
+    }}}}} // Org.Apache.Http.Impl.IO
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Impl {
+
+        interface IHttpConnectionMetricsImpl {}
+
+    }}}} // Org.Apache.Http.Impl
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Impl {
+    namespace Conn {
+    namespace Tsccm {
+
+        interface IThreadSafeClientConnManager {}
+
+    }}}}}} // Org.Apache.Http.Impl.Conn.Tsccm
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+        interface ISystemClock {}
+
+    }}} // Elastos.Droid.Os
+
+    namespace Com {
+    namespace Squareup {
+    namespace Okhttp {
+
+        interface IHttpResponseCache {}
+
+        interface IHostResolver {}
+
+        interface IConnectionPool {}
+
+        interface IOkHttpClient {}
+
+    }}} // Com.Squareup.Okhttp
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Message {
+
+        interface IBasicHttpRequest {}
+
+        interface IBasicHttpEntityEnclosingRequest {}
+
+        interface IBasicLineParserHelper {}
+
+    }}}} // Org.Apache.Http.Message
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Entity {
+
+        interface IInputStreamEntity {}
+
+        interface IByteArrayEntity {}
+
+    }}}} // Org.Apache.Http.Entity
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+        interface IRequestContent {}
+
+        interface IBasicHttpContext {}
+
+    }}}} // Org.Apache.Http.Protocol
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Impl {
+    namespace Client {
+
+        interface IDefaultHttpClient {}
+
+        interface IRequestWrapper {}
+
+    }}}}} // Org.Apache.Http.Impl.Client
+
+    namespace Org {
+    namespace Apache {
+    namespace Commons {
+    namespace Codec {
+    namespace Binary {
+
+        interface IBase64 {}
+
+        interface IBase64Helper {}
+
+    }}}}} // Org.Apache.Commons.Codec.Binary
+
+    namespace Org {
+    namespace Bouncycastle {
+    namespace Asn1 {
+    namespace X509 {
+
+        interface IX509Name {}
+
+    }}}} // Org.Bouncycastle.Asn1.X509
+}

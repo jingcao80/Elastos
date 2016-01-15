@@ -1,0 +1,62 @@
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    /**
+     * External class that reads data from a given {@link InputStream}. May be
+     * called multiple times when reading rotated data.
+     */
+    [local]
+    interface IHexDump {
+        DumpHexString(
+            [in] ArrayOf<Byte> array,
+            [out] String* hexStr);
+
+        DumpHexString(
+            [in] ArrayOf<Byte> array,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out] String* hexStr);
+
+        ToHexString(
+            [in] Byte b,
+            [out] String* hexStr);
+
+        ToHexString(
+            [in] ArrayOf<Byte> array,
+            [out] String* hexStr);
+
+        ToHexString(
+            [in] ArrayOf<Byte> array,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out] String* hexStr);
+
+        ToHexString(
+            [in] Int32 i,
+            [out] String* hexStr);
+
+        ToByteArray(
+            [in] Byte b,
+            [out, callee] ArrayOf<Byte>* array);
+
+        ToByteArray(
+            [in] Int32 i,
+            [out, callee] ArrayOf<Byte>* array);
+
+        HexStringToByteArray(
+            [in] String hexString,
+            [out, callee] ArrayOf<Byte>* array);
+    }
+
+    }
+
+    } // namespace Utility
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,474 @@
+
+module
+{
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.ISharedPreferences;
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IDialogInterface;
+    interface Elastos.Droid.Content.ISharedPreferencesEditor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+   /**
+     * Interface definition for a callback to be invoked when a
+     * {@link Preference} in the hierarchy rooted at this {@link PreferenceScreen} is
+     * clicked.
+     *
+     * @hide
+     */
+     [local]
+    interface IPreferenceManagerOnPreferenceTreeClickListener {
+        /**
+         * Called when a preference in the tree rooted at this
+         * {@link PreferenceScreen} has been clicked.
+         *
+         * @param preferenceScreen The {@link PreferenceScreen} that the
+         *        preference is located in.
+         * @param preference The preference that was clicked.
+         * @return Whether the click was handled.
+         */
+        OnPreferenceTreeClick(
+            [in] IPreferenceScreen* preferenceScreen,
+            [in] IPreference* preference,
+            [out] Boolean* result);
+    }
+
+    /**
+     * Interface definition for a class that will be called when the container's activity
+     * receives an activity result.
+     */
+    interface IPreferenceManagerOnActivityResultListener {
+
+        /**
+         * See Activity's onActivityResult.
+         *
+         * @return Whether the request code was handled (in which case
+         *         subsequent listeners will not be called.
+         */
+        OnActivityResult(
+            [in] Int32 requestCode,
+            [in] Int32 resultCode,
+            [in] IIntent* data,
+            [out] Boolean* result);
+    }
+
+    /**
+     * Interface definition for a class that will be called when the container's activity
+     * is stopped.
+     */
+    interface IPreferenceManagerOnActivityStopListener {
+
+        /**
+         * See Activity's onStop.
+         */
+        OnActivityStop();
+    }
+
+    /**
+     * Interface definition for a class that will be called when the container's activity
+     * is destroyed.
+     */
+    interface IPreferenceManagerOnActivityDestroyListener {
+
+        /**
+         * See Activity's onDestroy.
+         */
+        OnActivityDestroy();
+    }
+
+    /**
+     * Used to help create {@link Preference} hierarchies
+     * from activities or XML.
+     * <p>
+     * In most cases, clients should use
+     * {@link PreferenceActivity#addPreferencesFromIntent} or
+     * {@link PreferenceActivity#addPreferencesFromResource(int)}.
+     *
+     * @see PreferenceActivity
+     */
+     [local,deprecated]
+    interface IPreferenceManager {
+        /**
+             * The Activity meta-data key for its XML preference hierarchy.
+             */
+        const String METADATA_KEY_PREFERENCES = "android.preference";
+
+        const String KEY_HAS_SET_DEFAULT_VALUES = "_has_set_default_values";
+
+        /**
+         * Sets the owning preference fragment
+         */
+        SetFragment(
+            [in] IPreferenceFragment* fragment);
+
+        /**
+         * Returns the owning preference fragment, if any.
+         */
+        GetFragment(
+            [out] IPreferenceFragment** fragment);
+
+        /**
+         * Inflates a preference hierarchy from the preference hierarchies of
+         * {@link Activity Activities} that match the given {@link Intent}. An
+         * {@link Activity} defines its preference hierarchy with meta-data using
+         * the {@link #METADATA_KEY_PREFERENCES} key.
+         * <p>
+         * If a preference hierarchy is given, the new preference hierarchies will
+         * be merged in.
+         *
+         * @param queryIntent The intent to match activities.
+         * @param rootPreferences Optional existing hierarchy to merge the new
+         *            hierarchies into.
+         * @return The root hierarchy (if one was not provided, the new hierarchy's
+         *         root).
+         */
+        InflateFromIntent(
+            [in] IIntent* queryIntent,
+            [in] IPreferenceScreen* rootPreferences,
+            [out] IPreferenceScreen** result);
+
+        /**
+             * Inflates a preference hierarchy from XML. If a preference hierarchy is
+             * given, the new preference hierarchies will be merged in.
+             *
+             * @param context The context of the resource.
+             * @param resId The resource ID of the XML to inflate.
+             * @param rootPreferences Optional existing hierarchy to merge the new
+             *            hierarchies into.
+             * @return The root hierarchy (if one was not provided, the new hierarchy's
+             *         root).
+             * @hide
+             */
+        InflateFromResource(
+            [in] IContext* context,
+            [in] Int32 resId,
+            [in] IPreferenceScreen* rootPreferences,
+            [out] IPreferenceScreen** result);
+
+        CreatePreferenceScreen(
+            [in] IContext* context,
+            [out] IPreferenceScreen** result);
+
+        /**
+         * Called by a preference to get a unique ID in its hierarchy.
+         *
+         * @return A unique ID.
+         */
+        GetNextId(
+            [out] Int64* id);
+
+        /**
+             * Returns the current name of the SharedPreferences file that preferences managed by
+             * this will use.
+             *
+             * @return The name that can be passed to {@link Context#getSharedPreferences(String, int)}.
+             * @see Context#getSharedPreferences(String, int)
+             */
+        GetSharedPreferencesName(
+            [out] String* result);
+
+        /**
+             * Sets the name of the SharedPreferences file that preferences managed by this
+             * will use.
+             *
+             * @param sharedPreferencesName The name of the SharedPreferences file.
+             * @see Context#getSharedPreferences(String, int)
+             */
+        SetSharedPreferencesName(
+            [in] String sharedPreferencesName);
+
+        /**
+             * Returns the current mode of the SharedPreferences file that preferences managed by
+             * this will use.
+             *
+             * @return The mode that can be passed to {@link Context#getSharedPreferences(String, int)}.
+             * @see Context#getSharedPreferences(String, int)
+             */
+        GetSharedPreferencesMode(
+            [out] Int32* result);
+
+        /**
+             * Sets the mode of the SharedPreferences file that preferences managed by this
+             * will use.
+             *
+             * @param sharedPreferencesMode The mode of the SharedPreferences file.
+             * @see Context#getSharedPreferences(String, int)
+             */
+        SetSharedPreferencesMode(
+            [in] Int32 sharedPreferencesMode);
+
+        /**
+             * Gets a SharedPreferences instance that preferences managed by this will
+             * use.
+             *
+             * @return A SharedPreferences instance pointing to the file that contains
+             *         the values of preferences that are managed by this.
+             */
+        GetSharedPreferences(
+            [out] ISharedPreferences** result);
+
+        /**
+         * Returns the root of the preference hierarchy managed by this class.
+         *
+         * @return The {@link PreferenceScreen} object that is at the root of the hierarchy.
+         */
+        GetPreferenceScreen(
+            [out] IPreferenceScreen** result);
+
+        /**
+         * Sets the root of the preference hierarchy.
+         *
+         * @param preferenceScreen The root {@link PreferenceScreen} of the preference hierarchy.
+         * @return Whether the {@link PreferenceScreen} given is different than the previous.
+         */
+        SetPreferences(
+            [in] IPreferenceScreen* preferenceScreen,
+            [out] Boolean* result);
+
+        /**
+             * Finds a {@link Preference} based on its key.
+             *
+             * @param key The key of the preference to retrieve.
+             * @return The {@link Preference} with the key, or null.
+             * @see PreferenceGroup#findPreference(CharSequence)
+             */
+        FindPreference(
+            [in] ICharSequence* key,
+            [out] IPreference** result);
+
+        /**
+         * Returns an editor to use when modifying the shared preferences.
+         * <p>
+         * Do NOT commit unless {@link #shouldCommit()} returns true.
+         *
+         * @return An editor to use to write to shared preferences.
+         * @see #shouldCommit()
+         */
+        GetEditor(
+            [out] ISharedPreferencesEditor** result);
+
+        /**
+         * Whether it is the client's responsibility to commit on the
+         * {@link #getEditor()}. This will return false in cases where the writes
+         * should be batched, for example when inflating preferences from XML.
+         *
+         * @return Whether the client should commit.
+         */
+        ShouldCommit(
+            [out] Boolean* result);
+
+        /**
+         * Returns the activity that shows the preferences. This is useful for doing
+         * managed queries, but in most cases the use of {@link #getContext()} is
+         * preferred.
+         * <p>
+         * This will return null if this class was instantiated with a Context
+         * instead of Activity. For example, when setting the default values.
+         *
+         * @return The activity that shows the preferences.
+         * @see #mContext
+         */
+        GetActivity(
+            [out] IActivity** act);
+
+        /**
+         * Returns the context. This is preferred over {@link #getActivity()} when
+         * possible.
+         *
+         * @return The context.
+         */
+        GetContext(
+            [out] IContext** context);
+
+        /**
+         * Registers a listener.
+         *
+         * @see OnActivityResultListener
+         */
+        RegisterOnActivityResultListener(
+            [in] IPreferenceManagerOnActivityResultListener* listener);
+
+        /**
+         * Unregisters a listener.
+         *
+         * @see OnActivityResultListener
+         */
+        UnregisterOnActivityResultListener(
+            [in] IPreferenceManagerOnActivityResultListener* listener);
+
+        /**
+         * Called by the {@link PreferenceManager} to dispatch a subactivity result.
+         */
+        DispatchActivityResult(
+            [in] Int32 requestCode,
+            [in] Int32 resultCode,
+            [in] IIntent* data);
+
+        /**
+             * Registers a listener.
+             *
+             * @see OnActivityStopListener
+             * @hide
+             */
+        RegisterOnActivityStopListener(
+            [in] IPreferenceManagerOnActivityStopListener* listener);
+
+        /**
+             * Unregisters a listener.
+             *
+             * @see OnActivityStopListener
+             * @hide
+             */
+        UnregisterOnActivityStopListener(
+            [in] IPreferenceManagerOnActivityStopListener* listener);
+
+        /**
+         * Called by the {@link PreferenceManager} to dispatch the activity stop
+         * event.
+         */
+        DispatchActivityStop();
+
+        /**
+         * Registers a listener.
+         *
+         * @see OnActivityDestroyListener
+         */
+        RegisterOnActivityDestroyListener(
+            [in] IPreferenceManagerOnActivityDestroyListener* listener);
+
+        /**
+         * Unregisters a listener.
+         *
+         * @see OnActivityDestroyListener
+         */
+        UnregisterOnActivityDestroyListener(
+            [in] IPreferenceManagerOnActivityDestroyListener* listener);
+
+        /**
+         * Called by the {@link PreferenceManager} to dispatch the activity destroy
+         * event.
+         */
+        DispatchActivityDestroy();
+
+        /**
+         * Returns a request code that is unique for the activity. Each subsequent
+         * call to this method should return another unique request code.
+         *
+         * @return A unique request code that will never be used by anyone other
+         *         than the caller of this method.
+         */
+        GetNextRequestCode(
+            [out] Int32* result);
+
+        AddPreferencesScreen(
+            [in] IDialogInterface* screen);
+
+        RemovePreferencesScreen(
+            [in] IDialogInterface* screen);
+
+        /**
+         * Called by {@link PreferenceActivity} to dispatch the new Intent event.
+         *
+         * @param intent The new Intent.
+         */
+        DispatchNewIntent(
+            [in] IIntent* intent);
+
+        /**
+         * Sets the callback to be invoked when a {@link Preference} in the
+         * hierarchy rooted at this {@link PreferenceManager} is clicked.
+         *
+         * @param listener The callback to be invoked.
+         */
+        SetOnPreferenceTreeClickListener(
+            [in] IPreferenceManagerOnPreferenceTreeClickListener* listener);
+
+        GetOnPreferenceTreeClickListener(
+            [out] IPreferenceManagerOnPreferenceTreeClickListener** listener);
+    }
+
+    interface IPreferenceManagerHelper {
+        /**
+             * Gets a SharedPreferences instance that points to the default file that is
+             * used by the preference framework in the given context.
+             *
+             * @param context The context of the preferences whose values are wanted.
+             * @return A SharedPreferences instance that can be used to retrieve and
+             *         listen to values of the preferences.
+             */
+        GetDefaultSharedPreferences(
+            [in] IContext* context,
+            [out] ISharedPreferences** result);
+
+        /**
+             * Sets the default values from an XML preference file by reading the values defined
+             * by each {@link Preference} item's {@code android:defaultValue} attribute. This should
+             * be called by the application's main activity.
+             * <p>
+             *
+             * @param context The context of the shared preferences.
+             * @param resId The resource ID of the preference XML file.
+             * @param readAgain Whether to re-read the default values.
+             * If false, this method sets the default values only if this
+             * method has never been called in the past (or if the
+             * {@link #KEY_HAS_SET_DEFAULT_VALUES} in the default value shared
+             * preferences file is false). To attempt to set the default values again
+             * bypassing this check, set {@code readAgain} to true.
+             *            <p class="note">
+             *            Note: this will NOT reset preferences back to their default
+             *            values. For that functionality, use
+             *            {@link PreferenceManager#getDefaultSharedPreferences(Context)}
+             *            and clear it followed by a call to this method with this
+             *            parameter set to true.
+             */
+        SetDefaultValues(
+            [in] IContext* context,
+            [in] Int32 resId,
+            [in] Boolean readAgain);
+
+        /**
+             * Similar to {@link #setDefaultValues(Context, int, boolean)} but allows
+             * the client to provide the filename and mode of the shared preferences
+             * file.
+             *
+             * @param context The context of the shared preferences.
+             * @param sharedPreferencesName A custom name for the shared preferences file.
+             * @param sharedPreferencesMode The file creation mode for the shared preferences file, such
+             * as {@link android.content.Context#MODE_PRIVATE} or {@link
+             * android.content.Context#MODE_PRIVATE}
+             * @param resId The resource ID of the preference XML file.
+             * @param readAgain Whether to re-read the default values.
+             * If false, this method will set the default values only if this
+             * method has never been called in the past (or if the
+             * {@link #KEY_HAS_SET_DEFAULT_VALUES} in the default value shared
+             * preferences file is false). To attempt to set the default values again
+             * bypassing this check, set {@code readAgain} to true.
+             *            <p class="note">
+             *            Note: this will NOT reset preferences back to their default
+             *            values. For that functionality, use
+             *            {@link PreferenceManager#getDefaultSharedPreferences(Context)}
+             *            and clear it followed by a call to this method with this
+             *            parameter set to true.
+             *
+             * @see #setDefaultValues(Context, int, boolean)
+             * @see #setSharedPreferencesName(String)
+             * @see #setSharedPreferencesMode(int)
+             */
+        SetDefaultValues(
+            [in] IContext* context,
+            [in] String sharedPreferencesName,
+            [in] Int32 sharedPreferencesMode,
+            [in] Int32 resId,
+            [in] Boolean readAgain);
+
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}
+

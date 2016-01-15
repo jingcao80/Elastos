@@ -1,0 +1,95 @@
+module {
+
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    /**
+     * This is a utility class providing access to
+     * {@link android.content.SearchRecentSuggestionsProvider}.
+     *
+     * <p>Unlike some utility classes, this one must be instantiated and properly initialized, so that
+     * it can be configured to operate with the search suggestions provider that you have created.
+     *
+     * <p>Typically, you will do this in your searchable activity, each time you receive an incoming
+     * {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} Intent.  The code to record each
+     * incoming query is as follows:
+     * <pre class="prettyprint">
+     *      SearchSuggestions suggestions = new SearchSuggestions(this,
+     *              MySuggestionsProvider.AUTHORITY, MySuggestionsProvider.MODE);
+     *      suggestions.saveRecentQuery(queryString, null);
+     * </pre>
+     *
+     * <p>For a working example, see SearchSuggestionSampleProvider and SearchQueryResults in
+     * samples/ApiDemos/app.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For information about using search suggestions in your application, read the
+     * <a href="{@docRoot}guide/topics/search/adding-recent-query-suggestions.html">Adding Recent Query
+     * Suggestions</a> developer guide.</p>
+     * </div>
+     */
+    [local]
+    interface ISearchRecentSuggestions {
+        /* if you change column order you must also change indices below */
+        /**
+         * This is the database projection that can be used to view saved queries, when
+         * configured for one-line operation.
+         */
+        GetQUERIES_PROJECTION_1LINE(
+            [out, callee] ArrayOf<String>* info);
+
+        /* if you change column order you must also change indices below */
+        /**
+         * This is the database projection that can be used to view saved queries, when
+         * configured for two-line operation.
+         */
+        GetQUERIES_PROJECTION_2LINE(
+            [out, callee] ArrayOf<String>* info);
+
+        /* these indices depend on QUERIES_PROJECTION_xxx */
+        /** Index into the provided query projections.  For use with Cursor.update methods. */
+        const Int32 QUERIES_PROJECTION_DATE_INDEX = 1;
+        /** Index into the provided query projections.  For use with Cursor.update methods. */
+        const Int32 QUERIES_PROJECTION_QUERY_INDEX = 2;
+        /** Index into the provided query projections.  For use with Cursor.update methods. */
+        const Int32 QUERIES_PROJECTION_DISPLAY1_INDEX = 3;
+        /** Index into the provided query projections.  For use with Cursor.update methods. */
+        const Int32 QUERIES_PROJECTION_DISPLAY2_INDEX = 4;  // only when 2line active
+
+        /**
+         * Add a query to the recent queries list.  Returns immediately, performing the save
+         * in the background.
+         *
+         * @param queryString The string as typed by the user.  This string will be displayed as
+         * the suggestion, and if the user clicks on the suggestion, this string will be sent to your
+         * searchable activity (as a new search query).
+         * @param line2 If you have configured your recent suggestions provider with
+         * {@link android.content.SearchRecentSuggestionsProvider#DATABASE_MODE_2LINES}, you can
+         * pass a second line of text here.  It will be shown in a smaller font, below the primary
+         * suggestion.  When typing, matches in either line of text will be displayed in the list.
+         * If you did not configure two-line mode, or if a given suggestion does not have any
+         * additional text to display, you can pass null here.
+         */
+        SaveRecentQuery(
+            [in] String queryString,
+            [in] String line2);
+
+        /**
+         * Completely delete the history.  Use this call to implement a "clear history" UI.
+         *
+         * Any application that implements search suggestions based on previous actions (such as
+         * recent queries, page/items viewed, etc.) should provide a way for the user to clear the
+         * history.  This gives the user a measure of privacy, if they do not wish for their recent
+         * searches to be replayed by other users of the device (via suggestions).
+         */
+        ClearHistory();
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,20 @@
+TARGET_NAME= input
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+INCLUDES += $(PREBUILD_INC)/skia/utils
+INCLUDES += $(PREBUILD_INC)/skia/core
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = NativeInputApplicationHandle.cpp
+SOURCES += InputApplicationHandle.cpp
+SOURCES += NativeInputWindowHandle.cpp
+SOURCES += InputWindowHandle.cpp
+SOURCES += NativeInputManager.cpp
+SOURCES += PersistentDataStore.cpp
+SOURCES += CInputManagerService.cpp

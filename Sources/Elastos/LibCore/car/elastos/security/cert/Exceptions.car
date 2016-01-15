@@ -1,0 +1,21 @@
+
+module
+{
+//    const FAMILY_CORE = 0x2C    // Security exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Security exception codes (Family: 0x2C)
+    const E_CERTIFICATE_ENCODING_EXCEPTION                  = 0xAC040000;
+    const E_CERTIFICATE_EXCEPTION                           = 0xAC050000;
+    const E_CERTIFICATE_EXPIRED_EXCEPTION                   = 0xAC060000;
+    const E_CERTIFICATE_NOT_YET_VALID_EXCEPTION             = 0xAC070000;
+    const E_CERTIFICATE_PARSING_EXCEPTION                   = 0xAC080000;
+    const E_CERT_PATH_BUILDER_EXCEPTION                     = 0xAC090000;
+    const E_CERT_PATH_VALIDATOR_EXCEPTION                   = 0xAC0A0000;
+    const E_CERT_STORE_EXCEPTION                            = 0xAC0B0000;
+    const E_CRL_EXCEPTION                                   = 0xAC0C0000;
+    const E_NOT_SERIALIZABLE_EXCEPTION                      = 0xAC0D0000;
+}

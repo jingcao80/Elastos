@@ -1,0 +1,106 @@
+
+module
+{
+
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.NFC.INfcAdapter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Cardemulation{
+
+    /**
+     * This class can be used to query the state of
+     * NFC card emulation services.
+     *
+     * For a general introduction into NFC card emulation,
+     * please read the <a href="{@docRoot}guide/topics/nfc/ce.html">
+     * NFC card emulation developer guide</a>.</p>
+     *
+     * <p class="note">Use of this class requires the
+     * {@link PackageManager#FEATURE_NFC_HOST_CARD_EMULATION} to be present
+     * on the device.
+     */
+    [local]
+    interface ICardEmulation {
+
+        IsDefaultServiceForCategory(
+            [in] IComponentName* service,
+            [in] String category,
+            [out] Boolean* res);
+
+        IsDefaultServiceForAid(
+            [in] IComponentName* service,
+            [in] String aid,
+            [out] Boolean* res);
+
+        CategoryAllowsForegroundPreference(
+            [in] String category,
+            [out] Boolean* res);
+
+        GetSelectionModeForCategory(
+            [in] String category,
+            [out] Int32* res);
+
+        RegisterAidsForService(
+            [in] IComponentName* service,
+            [in] String category,
+            [in] IList* aids,
+            [out] Boolean* res);
+
+        GetAidsForService(
+            [in] IComponentName* service,
+            [in] String category,
+            [out] IList** res);
+
+        RemoveAidsForService(
+            [in] IComponentName* service,
+            [in] String category,
+            [out] Boolean* res);
+
+        SetPreferredService(
+            [in] IActivity* activity,
+            [in] IComponentName* service,
+            [out] Boolean* res);
+
+        UnsetPreferredService(
+            [in] IActivity* activity,
+            [out] Boolean* res);
+
+        SupportsAidPrefixRegistration(
+            [out] Boolean* res);
+
+        SetDefaultServiceForCategory(
+            [in] IComponentName* service,
+            [in] String category,
+            [out] Boolean* res);
+
+        SetDefaultForNextTap(
+            [in] IComponentName* service,
+            [out] Boolean* res);
+
+        GetServices(
+            [in] String category,
+            [out] IList** res);
+    }
+
+    [local]
+    interface ICardEmulationHelper {
+
+        IsValidAid(
+            [in] String aid,
+            [out] Boolean* res);
+
+        GetInstance(
+            [in] INfcAdapter* adapter,
+            [out] ICardEmulation** res);
+    }
+
+    }// namespace Cardemulation
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

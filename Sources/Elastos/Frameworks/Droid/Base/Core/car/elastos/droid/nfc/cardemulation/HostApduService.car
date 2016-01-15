@@ -1,0 +1,37 @@
+
+module
+{
+
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Cardemulation{
+
+    /**
+     * @Involve
+     * interace IService
+     */
+    [deprecated]
+    interface IHostApduService {
+
+        SendResponseApdu(
+            [in] ArrayOf<Byte>* responseApdu);
+
+        NotifyUnhandled();
+
+        ProcessCommandApdu(
+            [in] ArrayOf<Byte>* commandApdu,
+            [in] IBundle* extras,
+            [out, callee] ArrayOf<Byte>* res);
+
+        OnDeactivated(
+            [in] Int32 reason);
+    }
+
+    }// namespace Cardemulation
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

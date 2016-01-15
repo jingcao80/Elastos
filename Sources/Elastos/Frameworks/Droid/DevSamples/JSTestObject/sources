@@ -1,0 +1,27 @@
+TARGET_NAME= JSTestObject
+TARGET_TYPE= eco
+
+IMPORTS = Elastos.CoreLibrary.eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -u
+
+SOURCES = JSTestObject.car
+SOURCES += CTestObject.cpp
+SOURCES += CTestCarDataType.cpp
+
+SOURCES += CTestModuleInfo.cpp
+SOURCES += CTestClassInfo.cpp
+SOURCES += CTestMethodInfo.cpp
+SOURCES += CTestParamInfo.cpp
+SOURCES += CTestArgumentList.cpp
+SOURCES += CTestTypeAliasInfo.cpp
+SOURCES += CTestProperty.cpp
+
+SOURCES += Elastos.CoreLibrary.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lutils

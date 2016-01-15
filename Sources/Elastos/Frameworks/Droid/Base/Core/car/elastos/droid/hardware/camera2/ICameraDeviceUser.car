@@ -1,0 +1,99 @@
+
+module
+{
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.Hardware.Camera2.Utils.ILongParcelable;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNative;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+
+    /** @hide */
+    interface IICameraDeviceUser {
+        /**
+         * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceUser.h and
+         * frameworks/base/core/java/android/hardware/camera2/legacy/CameraDeviceUserShim.java
+         */
+        Disconnect();
+
+        // ints here are status_t
+
+        // non-negative value is the requestId. negative value is status_t
+        SubmitRequest(
+            [in] ICaptureRequest* request,
+            [in] Boolean streaming,
+            [in] ILongParcelable* lastFrameNumber,
+            [out] Int32* result);
+
+        SubmitRequestList(
+            [in] IList* requestList,
+            [in] Boolean streaming,
+            [in] ILongParcelable* lastFrameNumber,
+            [out] Int32* result);
+
+        CancelRequest(
+            [in] Int32 requestId,
+            [in] ILongParcelable* lastFrameNumber,
+            [out] Int32* result);
+
+        /**
+         * Begin the device configuration.
+         *
+         * <p>
+         * beginConfigure must be called before any call to deleteStream, createStream,
+         * or endConfigure.  It is not valid to call this when the device is not idle.
+         * <p>
+         */
+        BeginConfigure(
+           [out] Int32* result);
+
+        /**
+         * End the device configuration.
+         *
+         * <p>
+         * endConfigure must be called after stream configuration is complete (i.e. after
+         * a call to beginConfigure and subsequent createStream/deleteStream calls).  This
+         * must be called before any requests can be submitted.
+         * <p>
+         */
+        EndConfigure(
+            [out] Int32* result);
+
+        DeleteStream(
+            [in] Int32 streamId,
+            [out] Int32* result);
+
+        // non-negative value is the stream ID. negative value is status_t
+        CreateStream(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 format,
+            [in] ISurface* surface,
+            [out] Int32* result);
+
+        CreateDefaultRequest(
+            [in] Int32 templateId,
+            [in] ICameraMetadataNative* request,
+            [out] Int32* result);
+
+        GetCameraInfo(
+            [in] ICameraMetadataNative* info,
+            [out] Int32* result);
+
+        WaitUntilIdle(
+            [out] Int32* result);
+
+        Flush(
+            [in] ILongParcelable* lastFrameNumber,
+            [out] Int32* result);
+    }
+
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

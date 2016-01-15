@@ -1,0 +1,159 @@
+module
+{
+    using interface Elastos.Utility.ILocale;
+
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    /**
+     * The Indexable data for Search.
+     *
+     * This abstract class defines the common parts for all search indexable data.
+     *
+     * @hide
+     */
+     interface ISearchIndexableData {
+        /**
+         * The context for the data. Will usually allow retrieving some resources.
+         *
+         * @see Context
+         */
+        SetContext(
+            [in] IContext* context);
+
+        GetContext(
+            [out] IContext** context);
+
+        /**
+         * The locale for the data
+         */
+        SetLocale(
+            [in] ILocale* locale);
+
+        GetLocale(
+            [out] ILocale** locale);
+
+        /**
+         * Tells if the data will be included into the search results. This is application specific.
+         */
+        SetEnabled(
+            [in] Boolean enabled);
+
+        GetEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * The rank for the data. This is application specific.
+         */
+        SetRank(
+            [in] Int32 rank);
+
+        GetRank(
+            [out] Int32* rank);
+
+        /**
+         * The key for the data. This is application specific. Should be unique per data as the data
+         * should be able to be retrieved by the key.
+         */
+        SetKey(
+            [in] String key);
+
+        GetKey(
+            [out] String* key);
+
+        /**
+         * The UserID for the data (in a multi user context). This is application specific and -1 is the
+         * default non initialized value.
+         */
+        SetUserId(
+            [in] Int32 userId);
+
+        GetUserId(
+            [out] Int32* userId);
+
+        /**
+         * The class name associated with the data. Generally this is a Fragment class name for
+         * referring where the data is coming from and for launching the associated Fragment for
+         * displaying the data. This is used only when the data is provided "locally".
+         *
+         * If the data is provided "externally", the relevant information come from the
+         * {@link SearchIndexableData#intentAction} and {@link SearchIndexableData#intentTargetPackage}
+         * and {@link SearchIndexableData#intentTargetClass}.
+         *
+         * @see SearchIndexableData#intentAction
+         * @see SearchIndexableData#intentTargetPackage
+         * @see SearchIndexableData#intentTargetClass
+         */
+        SetClassName(
+            [in] String className);
+
+        GetClassName(
+            [out] String* className);
+
+        /**
+         * The package name for retrieving the icon associated with the data.
+         *
+         * @see SearchIndexableData#iconResId
+         */
+        SetPackageName(
+            [in] String packageName);
+
+        GetPackageName(
+            [out] String* packageName);
+
+        /**
+         * The icon resource ID associated with the data.
+         *
+         * @see SearchIndexableData#packageName
+         */
+        SetIconResId(
+            [in] Int32 iconResId);
+
+        GetIconResId(
+            [out] Int32* iconResId);
+
+        /**
+         * The Intent action associated with the data. This is used when the
+         * {@link SearchIndexableData#className} is not relevant.
+         *
+         * @see SearchIndexableData#intentTargetPackage
+         * @see SearchIndexableData#intentTargetClass
+         */
+        SetIntentAction(
+            [in] String intentAction);
+
+        GetIntentAction(
+            [out] String* intentAction);
+
+        /**
+         * The Intent target package associated with the data.
+         *
+         * @see SearchIndexableData#intentAction
+         * @see SearchIndexableData#intentTargetClass
+         */
+        SetIntentTargetPackage(
+            [in] String intentTargetPackage);
+
+        GetIntentTargetPackage(
+            [out] String* intentTargetPackage);
+
+        /**
+         * The Intent target class associated with the data.
+         *
+         * @see SearchIndexableData#intentAction
+         * @see SearchIndexableData#intentTargetPackage
+         */
+        SetIntentTargetClass(
+            [in] String intentTargetClass);
+
+        GetIntentTargetClass(
+            [out] String* intentTargetClass);
+     }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+}

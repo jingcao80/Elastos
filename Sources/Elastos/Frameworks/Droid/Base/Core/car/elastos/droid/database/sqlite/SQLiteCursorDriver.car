@@ -1,0 +1,60 @@
+module
+{
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Database.Sqlite.ISQLiteDatabaseCursorFactory;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+    namespace Sqlite {
+
+    /**
+     * A driver for SQLiteCursors that is used to create them and gets notified
+     * by the cursors it creates on significant events in their lifetimes.
+     */
+    [deprecated]
+    interface ISQLiteCursorDriver
+    {
+        /**
+         * Executes the query returning a Cursor over the result set.
+         *
+         * @param factory The CursorFactory to use when creating the Cursors, or
+         *         null if standard SQLiteCursors should be returned.
+         * @return a Cursor over the result set
+         */
+        Query(
+            [in] ISQLiteDatabaseCursorFactory* factory,
+            [in] ArrayOf<String>* bindArgs,
+            [out] ICursor** cursor);
+
+        /**
+         * Called by a SQLiteCursor when it is released.
+         */
+        CursorDeactivated();
+
+        /**
+         * Called by a SQLiteCursor when it is requeryed.
+         *
+         * @return The new count value.
+         */
+        CursorRequeried(
+            [in] ICursor* cursor);
+
+        /**
+         * Called by a SQLiteCursor when it it closed to destroy this object as well.
+         */
+        CursorClosed();
+
+        /**
+         * Set new bind arguments. These will take effect in cursorRequeried().
+         * @param bindArgs the new arguments
+         */
+        SetBindArguments(
+            [in] ArrayOf<String>* bindArgs);
+    }
+
+    } // namespace Sqlite
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

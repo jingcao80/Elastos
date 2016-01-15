@@ -1,0 +1,379 @@
+
+module
+{
+    using interface Elastos.Utility.IHashMap;
+
+    interface Elastos.Droid.Content.IContentProvider;
+    interface Elastos.Droid.Content.IContentProviderResult;
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    [deprecated]
+    interface IContentProviderOperation {
+        /** @hide exposed for unit tests */
+        const Int32 TYPE_INSERT = 1;
+
+        /** @hide exposed for unit tests */
+        const Int32 TYPE_UPDATE = 2;
+
+        /** @hide exposed for unit tests */
+        const Int32 TYPE_DELETE = 3;
+
+        /** @hide exposed for unit tests */
+        const Int32 TYPE_ASSERT = 4;
+
+        GetUri(
+            [out] IUri** uri);
+
+        IsYieldAllowed(
+            [out] Boolean* isAllowed);
+
+        /** @hide exposed for unit tests */
+        GetType(
+            [out] Int32* type);
+
+        IsWriteOperation(
+            [out] Boolean* isWrite);
+
+        IsReadOperation(
+            [out] Boolean* isRead);
+
+        /**
+         * Applies this operation using the given provider. The backRefs array is used to resolve any
+         * back references that were requested using
+         * Builder#withValueBackReferences(ContentValues) and
+         * Builder#withSelectionBackReference.
+         * @param provider the ContentProvider on which this batch is applied
+         * @param backRefs a ContentProviderResult array that will be consulted
+         * to resolve any requested back references.
+         * @param numBackRefs the number of valid results on the backRefs array.
+         * @return a ContentProviderResult that contains either the Uri of the inserted
+         * row if this was an insert otherwise the number of rows affected.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * OperationApplicationException thrown | if either the insert fails or if the number of rows affected didn't match the expected count
+         *
+         * @sa Builder#withValueBackReferences(ContentValues)
+         * @sa Builder#withSelectionBackReference
+         * @sa ContentProvider
+         * @sa ContentProviderResult
+         * @sa ContentProviderResult
+         * @sa Uri
+         */
+        Apply(
+            [in] IContentProvider* provider,
+            [in] ArrayOf<IContentProviderResult*>* backRefs,
+            [in] Int32 numBackRefs,
+            [out] IContentProviderResult** providerResult);
+
+        /**
+         * The ContentValues back references are represented as a ContentValues object where the
+         * key refers to a column and the value is an index of the back reference whose
+         * valued should be associated with the column.
+         * <p>
+         * This is intended to be a private method but it is exposed for
+         * unit testing purposes
+         * @param backRefs an array of previous results
+         * @param numBackRefs the number of valid previous results in backRefs
+         * @return the ContentValues that should be used in this operation application after
+         * expansion of back references. This can be called if either mValues or mValuesBackReferences
+         * is null
+         */
+        ResolveValueBackReferences(
+            [in] ArrayOf<IContentProviderResult*>* backRefs,
+            [in] Int32 numBackRefs,
+            [out] IContentValues** contentValues);
+
+        /**
+         * The Selection Arguments back references are represented as a Map of Integer->Integer where
+         * the key is an index into the selection argument array (see Builder#withSelection)
+         * and the value is the index of the previous result that should be used for that selection
+         * argument array slot.
+         *
+         * @sa Builder#withSelection
+         * <p>
+         * This is intended to be a private method but it is exposed for
+         * unit testing purposes
+         * @param backRefs an array of previous results
+         * @param numBackRefs the number of valid previous results in backRefs
+         * @return the ContentValues that should be used in this operation application after
+         * expansion of back references. This can be called if either mValues or mValuesBackReferences
+         * is null
+         */
+        ResolveSelectionArgsBackReferences(
+            [in] ArrayOf<IContentProviderResult*>* backRefs,
+            [in] Int32 numBackRefs,
+            [out, callee] ArrayOf<String>* stringArray);
+
+        ToString(
+            [out] String* result);
+    }
+
+    /**
+     * Used to add parameters to a ContentProviderOperation. The
+     * ContentProviderOperation.Builder is first created by calling
+     * newInsert(android.net.Uri), newUpdate(android.net.Uri),
+     * newDelete(android.net.Uri) or newAssertQuery(Uri). The withXXX methods can
+     * then be used to add parameters to the builder. See the specific methods to
+     * find for which ContentProviderOperation.Builder type each is allowed. Call
+     * build() to create the ContentProviderOperation once all the parameters have
+     * been supplied.
+     *
+     * @sa ContentProviderOperation
+     * @sa ContentProviderOperation.Builder
+     * @sa newInsert(android.net.Uri)
+     * @sa newUpdate(android.net.Uri)
+     * @sa newDelete(android.net.Uri)
+     * @sa newAssertQuery(Uri)
+     * @sa ContentProviderOperation.Builder
+     * @sa build()
+     * @sa ContentProviderOperation
+     */
+    [deprecated]
+    interface IContentProviderOperationBuilder {
+        /**
+         * Create a ContentProviderOperation from this Builder.
+         *
+         * @sa Builder
+         */
+        Build(
+            [out] IContentProviderOperation** providerOperation);
+
+        /**
+         * Add a ContentValues of back references. The key is the name of the column
+         * and the value is an integer that is the index of the previous result whose
+         * value should be used for the column. The value is added as a String.
+         * A column value from the back references takes precedence over a value specified in
+         * #withValues.
+         * This can only be used with builders of type insert, update, or assert.
+         * @return this builder, to allow for chaining.
+         *
+         * @sa ContentValues
+         * @sa #withValues
+         * @sa String
+         */
+        WithValueBackReferences(
+            [in] IContentValues* backReferences);
+
+        /**
+         * Add a ContentValues back reference.
+         * A column value from the back references takes precedence over a value specified in #withValues.
+         * This can only be used with builders of type insert, update, or assert.
+         * @return this builder, to allow for chaining.
+         *
+         * @sa #withValues
+         */
+        WithValueBackReference(
+            [in] String key,
+            [in] Int32 previousResult);
+
+        /**
+         * Add a back references as a selection arg. Any value at that index of the selection arg
+         * that was specified by #withSelection will be overwritten.
+         * This can only be used with builders of type update, delete, or assert.
+         *
+         * @sa #withSelection
+         * @return this builder, to allow for chaining.
+         */
+        WithSelectionBackReference(
+            [in] Int32 selectionArgIndex,
+            [in] Int32 previousResult);
+
+        /**
+         * The ContentValues to use. This may be null. These values may be overwritten by
+         * the corresponding value specified by #withValueBackReference or by
+         * future calls to #withValues or #withValue.
+         * This can only be used with builders of type insert, update, or assert.
+         *
+         * @sa #withValueBackReference
+         * @sa #withValues
+         * @sa #withValue
+         * @return this builder, to allow for chaining.
+         */
+        WithValues(
+            [in] IContentValues* values);
+
+        /**
+         * A value to insert or update. This value may be overwritten by
+         * the corresponding value specified by #withValueBackReference.
+         * This can only be used with builders of type insert, update, or assert.
+         *
+         * @sa #withValueBackReference
+         * @param key the name of this value
+         * @param value the value itself. the type must be acceptable for insertion by
+         * ContentValues#put
+         *
+         * @sa ContentValues#put
+         * @return this builder, to allow for chaining.
+         */
+        WithValue(
+            [in] String key,
+            [in] IInterface* value);
+
+        WithByte(
+            [in] String key,
+            [in] Byte value);
+
+        WithBoolean(
+            [in] String key,
+            [in] Boolean value);
+
+        WithValue(
+            [in] String key,
+            [in] String value);
+
+        WithValue(
+            [in] String key,
+            [in] Int16 value);
+
+        WithValue(
+            [in] String key,
+            [in] Int32 value);
+
+        WithValue(
+            [in] String key,
+            [in] Int64 value);
+
+        WithValue(
+            [in] String key,
+            [in] Float value);
+
+        WithValue(
+            [in] String key,
+            [in] Double value);
+
+        WithValue(
+            [in] String key,
+            [in] ArrayOf<Byte>* value);
+
+        /**
+         * The selection and arguments to use. An occurrence of '?' in the selection will be
+         * replaced with the corresponding occurence of the selection argument. Any of the
+         * selection arguments may be overwritten by a selection argument back reference as
+         * specified by #withSelectionBackReference.
+         * This can only be used with builders of type update, delete, or assert.
+         *
+         * @sa #withSelectionBackReference
+         * @return this builder, to allow for chaining.
+         */
+        WithSelection(
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs);
+
+        /**
+         * If set then if the number of rows affected by this operation do not match
+         * this count OperationApplicationException will be throw.
+         * This can only be used with builders of type update, delete, or assert.
+         *
+         * @sa OperationApplicationException
+         * @return this builder, to allow for chaining.
+         */
+        WithExpectedCount(
+            [in] Int32 count);
+
+        WithYieldAllowed(
+            [in] Boolean yieldAllowed);
+
+        GetType(
+            [out] Int32* type);
+
+        GetUri(
+            [out] IUri** uri);
+
+        GetSelection(
+            [out] String* selection);
+
+        GetSelectionArgs(
+            [out, callee] ArrayOf<String>* selectionArgs);
+
+        GetValues(
+            [out] IContentValues** values);
+
+        GetExpectedCount(
+            [out] Int32* expectedCount);
+
+        GetValuesBackReferences(
+            [out] IContentValues**  valuesBackReferences);
+
+        GetSelectionArgsBackReferences(
+            [out] IHashMap** selectionArgsBackRef);
+
+        GetYieldAllowed(
+            [out] Boolean* yieldAllowed);
+    }
+
+    interface IContentProviderOperationHelper {
+        /**
+         * Create a Builder suitable for building an insert ContentProviderOperation.
+         * @param uri The Uri that is the target of the insert.
+         * @return a Builder
+         *
+         * @sa Builder
+         * @sa ContentProviderOperation
+         * @sa Uri
+         * @sa Builder
+         */
+        NewInsert(
+            [in] IUri* uri,
+            [out] IContentProviderOperationBuilder** operationBuilder);
+
+        /**
+         * Create a Builder suitable for building an insert ContentProviderOperation.
+         * @param uri The Uri that is the target of the insert.
+         * @return a Builder
+         *
+         * @sa Builder
+         * @sa ContentProviderOperation
+         * @sa Uri
+         * @sa Builder
+         */
+        NewUpdate(
+            [in] IUri* uri,
+            [out] IContentProviderOperationBuilder** operationBuilder);
+
+        /**
+         * Create a Builder suitable for building an insert ContentProviderOperation.
+         * @param uri The Uri that is the target of the insert.
+         * @return a Builder
+         *
+         * @sa Builder
+         * @sa ContentProviderOperation
+         * @sa Uri
+         * @sa Builder
+         */
+        NewDelete(
+            [in] IUri* uri,
+            [out] IContentProviderOperationBuilder** operationBuilder);
+
+        /**
+         * Create a Builder suitable for building an insert ContentProviderOperation.
+         * @param uri The Uri that is the target of the insert.
+         * @return a Builder
+         *
+         * @sa Builder
+         * @sa ContentProviderOperation
+         * @sa Uri
+         * @sa Builder
+         */
+        NewAssertQuery(
+            [in] IUri* uri,
+            [out] IContentProviderOperationBuilder** operationBuilder);
+    }
+
+    interface IIntegerMapWrapper {
+        GetKey(
+            [out] Int32* key);
+
+        GetValue(
+            [out] Int32* value);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,183 @@
+module
+{
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Media.Tv.ITvInputInfo;
+    interface Elastos.Droid.Media.Tv.ITvContentRatingSystemInfo;
+    interface Elastos.Droid.Media.Tv.IITvInputManagerCallback;
+    interface Elastos.Droid.Media.Tv.IITvInputClient;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Interface to the TV input manager service.
+     * @hide
+     */
+    interface IITvInputManager {
+        GetTvInputList(
+            [in] Int32 userId,
+            [out] IList ** result);
+
+        GetTvInputInfo(
+            [in] String inputId,
+            [in] Int32 userId,
+            [out] ITvInputInfo ** result);
+
+        GetTvContentRatingSystemList(
+            [in] Int32 userId,
+            [out] IList ** result);
+
+        RegisterCallback(
+            [in] IITvInputManagerCallback * cb,
+            [in] Int32 userId);
+
+        UnregisterCallback(
+            [in] IITvInputManagerCallback * cb,
+            [in] Int32 userId);
+
+        IsParentalControlsEnabled(
+            [in] Int32 userId,
+            [out] Boolean * result);
+
+        SetParentalControlsEnabled(
+            [in] Boolean enabled,
+            [in] Int32 userId);
+
+        IsRatingBlocked(
+            [in] String rating,
+            [in] Int32 userId,
+            [out] Boolean * result);
+
+        GetBlockedRatings(
+            [in] Int32 userId,
+            [out] IList ** result);
+
+        AddBlockedRating(
+            [in] String rating,
+            [in] Int32 userId);
+
+        RemoveBlockedRating(
+            [in] String rating,
+            [in] Int32 userId);
+
+        CreateSession(
+            [in] IITvInputClient * client,
+            [in] String inputId,
+            [in] Int32 seq,
+            [in] Int32 userId);
+
+        ReleaseSession(
+            [in] IBinder * sessionToken,
+            [in] Int32 userId);
+
+        SetMainSession(
+            [in] IBinder * sessionToken,
+            [in] Int32 userId);
+
+        SetSurface(
+            [in] IBinder * sessionToken,
+            [in] ISurface * surface,
+            [in] Int32 userId);
+
+        DispatchSurfaceChanged(
+            [in] IBinder * sessionToken,
+            [in] Int32 format,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 userId);
+
+        SetVolume(
+            [in] IBinder * sessionToken,
+            [in] Float volume,
+            [in] Int32 userId);
+
+        Tune(
+            [in] IBinder * sessionToken,
+            [in] IUri * channelUri,
+            [in] IBundle * params,
+            [in] Int32 userId);
+
+        SetCaptionEnabled(
+            [in] IBinder * sessionToken,
+            [in] Boolean enabled,
+            [in] Int32 userId);
+
+        SelectTrack(
+            [in] IBinder * sessionToken,
+            [in] Int32 type,
+            [in] String trackId,
+            [in] Int32 userId);
+
+        SendAppPrivateCommand(
+            [in] IBinder * sessionToken,
+            [in] String action,
+            [in] IBundle * data,
+            [in] Int32 userId);
+
+
+        CreateOverlayView(
+            [in] IBinder* sessionToken,
+            [in] IBinder* windowToken,
+            [in] IRect* frame,
+            [in] Int32 userId);
+
+        RelayoutOverlayView(
+            [in] IBinder * sessionToken,
+            [in] IRect * frame,
+            [in] Int32 userId);
+
+        RemoveOverlayView(
+            [in] IBinder * sessionToken,
+            [in] Int32 userId);
+
+        RequestUnblockContent(
+            [in] IBinder * sessionToken,
+            [in] String unblockedRating,
+            [in] Int32 userId);
+
+        // For TV input hardware binding
+        GetHardwareList(
+            [out] IList ** result);
+
+        AcquireTvInputHardware(
+            [in] Int32 deviceId,
+            [in] IITvInputHardwareCallback * cb,
+            [in] ITvInputInfo * info,
+            [in] Int32 userId,
+            [out] IITvInputHardware ** result);
+
+        ReleaseTvInputHardware(
+            [in] Int32 deviceId,
+            [in] IITvInputHardware * hardware,
+            [in] Int32 userId);
+
+        // For TV input capturing
+        GetAvailableTvStreamConfigList(
+            [in] String inputId,
+            [in] Int32 userId,
+            [out] IList ** result);
+
+        CaptureFrame(
+            [in] String inputId,
+            [in] ISurface * surface,
+            [in] ITvStreamConfig * config,
+            [in] Int32 userId,
+            [out] Boolean * result);
+
+        IsSingleSessionActive(
+            [in] Int32 userId,
+            [out] Boolean * result);
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

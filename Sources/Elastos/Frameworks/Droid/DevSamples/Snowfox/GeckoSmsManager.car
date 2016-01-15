@@ -1,0 +1,69 @@
+module {
+
+    using interface Elastos.Core.IInteger32;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace Snowfox {
+
+    interface ISmsManager
+    {
+        Start();
+
+        Stop();
+
+        Shutdown();
+
+        GetNumberOfMessagesForText(
+            [in] String aText,
+            [out] Int32* num);
+
+        Send(
+            [in] String aNumber,
+            [in] String aMessage,
+            [in] Int32 aRequestId,
+            [in] Int64 aProcessId);
+
+        SaveSentMessage(
+            [in] ICharSequence* aRecipient,
+            [in] ICharSequence* aBody,
+            [in] IInteger32* aDate,
+            [out] Int32* result);
+
+        GetMessage(
+            [in] Int32 aMessageId,
+            [in] Int32 aRequestId,
+            [in] Int64 aProcessId);
+
+        DeleteMessage(
+            [in] Int32 aMessageId,
+            [in] Int32 aRequestId,
+            [in] Int64 aProcessId);
+
+        CreateMessageList(
+            [in] Int64 aStartDate,
+            [in] Int64 aEndDate,
+            [in] ArrayOf<String> aNumbers,
+            [in] Int32 aNumbersCount,
+            [in] Int32 aDeliveryState,
+            [in] Boolean aReverse,
+            [in] Int32 aRequestId,
+            [in] Int64 aProcessId);
+
+        GetNextMessageInList(
+            [in] Int32 aListId,
+            [in] Int32 aRequestId,
+            [in] Int64 aProcessId);
+
+        ClearMessageList(
+            [in] Int32 aListId);
+    }
+
+} // namespace Snowfox
+} // namespace DevSamples
+} // namespace Droid
+} // namespace Elastos
+
+}

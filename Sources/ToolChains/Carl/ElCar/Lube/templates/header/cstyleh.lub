@@ -1,0 +1,62 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "_${name}_c.h"
+$
+$WITH all interfaces DO
+typedef interface ${name} ${name};
+$END DO
+$
+$WITH all interfaces DO
+
+typedef struct ${name}Vtbl {
+    PInterface (CARAPICALLTYPE *Probe)(
+            ${name} *pThis,
+            /* [in] */ REIID riid);
+
+    UInt32 (CARAPICALLTYPE *AddRef)(
+            ${name} *pThis);
+
+    UInt32 (CARAPICALLTYPE *Release)(
+            ${name} *pThis);
+
+    ECode (CARAPICALLTYPE *GetInterfaceID)(
+            ${name} *pThis,
+            /* [in] */ IInterface *object,
+            /* [in] */ InterfaceID *iid);
+$
+$   WITH all parents DO
+$       WITH all methods DO
+
+    ECode (CARAPICALLTYPE *${name})(
+            ${interface.name} *pThis,$^
+$           WITH all parameters DO
+
+            /* [${attrib}] */ ${CStyleParamType(type)} ${CStyleName(parameter)},$^
+$           END DO
+$           Rewrite(")")
+;
+$       END DO ;; all methods
+$   END DO ;; all parents
+$
+$   WITH all methods DO
+
+    ECode (CARAPICALLTYPE *${name})(
+            ${interface.name} *pThis,$^
+$       WITH all parameters DO
+
+            /* [${attrib}] */ ${CStyleParamType(type)} ${CStyleName(parameter)},$^
+$       END DO
+$       Rewrite(")")
+;
+$   END DO ;; all methods
+}   ${name}Vtbl;
+
+interface ${name} {
+    CONST_VTBL struct ${name}Vtbl *v;
+};
+$END DO ;; all interfaces
+$
+$END OUTPUT

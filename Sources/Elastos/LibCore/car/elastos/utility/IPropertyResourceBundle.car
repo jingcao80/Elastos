@@ -1,0 +1,28 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    /**
+     * {@code PropertyResourceBundle} loads resources from an {@code InputStream}. All resources are
+     * Strings. The resources must be of the form {@code key=value}, one
+     * resource per line (see Properties).
+     *
+     * @see ResourceBundle
+     * @see Properties
+     * @since 1.1
+     */
+
+    /**
+     * @Involve
+     * interface IResourceBundle;
+     */
+    interface IPropertyResourceBundle {
+
+        HandleGetObject(
+            [in] String key,
+            [out] IInterface** outface);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

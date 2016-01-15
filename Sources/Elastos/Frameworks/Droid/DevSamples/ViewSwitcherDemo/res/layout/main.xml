@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/prev"
+            android:layout_width="80px"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/next"
+            android:layout_width="80px"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+    <ViewSwitcher
+        android:id="@+id/ViewSwitcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/TextView_One"
+                android:layout_width="fill_parent"
+                android:layout_height="125px"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_vertical"
+                android:textColor="#000000"
+                android:text="====人之初 性本善 性相近 习相远 苟不教 性乃迁 教之道 贵以专 昔孟母 择邻处 子不学 断机杼===="
+                android:background="#FFFFFF" >
+            </TextView>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/myTextView_Two"
+                android:layout_width="fill_parent"
+                android:layout_height="125px"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_vertical"
+                android:textColor="#000000"
+                android:text="====                           ===="
+                android:background="#FFFFFF" >
+            </TextView>
+        </RelativeLayout>
+    </ViewSwitcher>
+</LinearLayout>

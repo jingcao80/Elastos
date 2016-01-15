@@ -1,0 +1,47 @@
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IDisplay;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+
+    interface IRecentsComponentCallbacks {
+        OnVisibilityChanged(
+            [in] Boolean visible);
+    }
+
+    [local]
+    interface IRecentsComponent {
+        ShowRecents(
+            [in] Boolean triggeredFromAltTab,
+            [in] IView* statusBarView);
+
+        HideRecents(
+            [in] Boolean triggeredFromAltTab,
+            [in] Boolean triggeredFromHomeKey);
+
+        ToggleRecents(
+            [in] IDisplay* display,
+            [in] Int32 layoutDirection,
+            [in] IView* statusBarView);
+
+        PreloadRecents();
+
+        CancelPreloadingRecents();
+
+        ShowNextAffiliatedTask();
+
+        ShowPrevAffiliatedTask();
+
+        SetCallback(
+            [in] IRecentsComponentCallbacks* cb);
+    }
+
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

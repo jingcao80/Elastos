@@ -1,0 +1,60 @@
+
+module
+{
+    interface Elastosx.Security.Auth.X500.IX500Principal;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1SetOf;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1SequenceOf;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X501 {
+
+    /**
+     * X.501 Name
+     */
+    interface IName {
+        /**
+         * Returns <code>X500Principal</code> instance corresponding to this
+         * <code>Name</code> instance
+         *
+         * @return equivalent X500Principal object
+         */
+        GetX500Principal(
+            [out] IX500Principal** x500Principal);
+
+        /**
+         * Returns Relative Distinguished Name as <code>String</code> according
+         * the format requested
+         *
+         * @param format one of X500Principal.CANONICAL, X500Principal.RFC1779, or
+         *     X500Principal.RFC2253, case insensitive
+         */
+        GetName(
+            [in] String format,
+            [out] String* name);
+
+        /**
+         * Gets encoded form of DN
+         *
+         * @return return encoding, no copying is performed
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface INameHelper {
+        GetASN1_RDN(
+            [out] IASN1SetOf** asn1_rdn);
+
+        GetASN1(
+            [out] IASN1SequenceOf** asn1);
+    }
+
+    } // namespace X501
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

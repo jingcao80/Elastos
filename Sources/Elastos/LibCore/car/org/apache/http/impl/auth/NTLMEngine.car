@@ -1,0 +1,64 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Impl {
+    namespace Auth {
+
+    /**
+     * Abstract NTLM authentication engine. The engine can be used to
+     * generate Type1 messages and Type3 messages in response to a
+     * Type2 challenge.
+     * <p/>
+     * For details see <a href="http://davenport.sourceforge.net/ntlm.html">this resource</a>
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+    */
+    interface INTLMEngine {
+
+        /**
+         * Generates a Type1 message given the domain and workstation.
+         *
+         * @param domain Optional Windows domain name. Can be <code>null</code>.
+         * @param workstation Optional Windows workstation name. Can be
+         *  <code>null</code>.
+         * @return Type1 message
+         * @throws NTLMEngineException
+         */
+        GenerateType1Msg(
+            [in] String dom,
+            [in] String workstation,
+            [out] String* msg);
+
+        /**
+         * Generates a Type3 message given the user credentials and the
+         * authentication challenge.
+         *
+         * @param username Windows user name
+         * @param password Password
+         * @param domain Windows domain name
+         * @param workstation Windows workstation name
+         * @param challenge Type2 challenge.
+         * @return Type3 response.
+         * @throws NTLMEngineException
+         */
+        GenerateType3Msg(
+            [in] String username,
+            [in] String password,
+            [in] String dom,
+            [in] String workstation,
+            [in] String challenge,
+            [out] String* msg);
+
+    }
+
+    } // namespace Auth
+    } // namesapce Impl
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

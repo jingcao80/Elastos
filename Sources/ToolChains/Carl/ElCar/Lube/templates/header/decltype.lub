@@ -1,0 +1,54 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$
+
+${GenerateModuleDeclaration(module)}
+
+$WITH all consts DO
+
+#ifndef ${name}
+#define ${name} ${value}
+#endif
+$END DO ;; all consts
+
+$WITH all enums DO
+
+#ifndef __ENUM_${fullname}__
+#define __ENUM_${fullname}__
+${EnumNamespaceBegin(enum)}$^
+enum {
+$   WITH all members DO
+    ${name} = ${value},
+$   END DO
+};
+typedef _ELASTOS Int32 ${name};
+${EnumNamespaceEnd(enum)}$^
+
+#endif //__ENUM_${fullname}__
+
+$END DO ;; all enums
+$
+$WITH all aliases DO
+$   IF attrib is not "dummytype"
+typedef ${NamespaceType(Type)} ${name};
+$   END IF
+$END DO ;; all aliases
+$
+$WITH all structs DO
+
+struct ${name} {
+$   WITH all members DO
+    ${MemberNamespaceType(type)} ${name}${dimention};
+$   END DO
+};
+
+typedef struct ${name} ${name};
+
+$END DO ;; all structs
+
+#ifdef __${Upper(name)}_USER_TYPE_H__
+#include "${name}_user_type.h"
+#endif

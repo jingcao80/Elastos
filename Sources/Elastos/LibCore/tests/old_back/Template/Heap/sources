@@ -1,0 +1,8 @@
+
+TARGET_NAME = testHeap
+TARGET_TYPE = ecx
+
+SOURCES = test.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += -lstdc++

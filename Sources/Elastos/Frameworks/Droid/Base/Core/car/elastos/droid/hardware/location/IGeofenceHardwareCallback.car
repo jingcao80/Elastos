@@ -1,0 +1,42 @@
+
+module
+{
+    interface Elastos.Droid.Location.ILocation;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /** @hide */
+    [oneway]
+    interface IIGeofenceHardwareCallback {
+        OnGeofenceTransition(
+            [in] Int32 geofenceId,
+            [in] Int32 transition,
+            [in] ILocation* location,
+            [in] Int64 timestamp,
+            [in] Int32 monitoringType);
+
+        OnGeofenceAdd(
+            [in] Int32 geofenceId,
+            [in] Int32 status);
+
+        OnGeofenceRemove(
+            [in] Int32 geofenceId,
+            [in] Int32 status);
+
+        OnGeofencePause(
+            [in] Int32 geofenceId,
+            [in] Int32 status);
+
+        OnGeofenceResume(
+            [in] Int32 geofenceId,
+            [in] Int32 status);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

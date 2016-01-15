@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Security.IPrivateKey;
+    interface Elastos.Security.IKeyPair;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * @Involve
+     * interface IIdentity
+     */
+    interface ISigner {
+        /**
+         * Returns the private key of this {@code Signer}.
+         */
+        GetPrivateKey(
+            [out] IPrivateKey** priKey);
+
+        /**
+         * Associates the specified key pair with this {@code Signer}.
+         *
+         * @param pair
+         *            the key pair to associate with this {@code Signer}.
+         * @throws InvalidParameterException
+         *             if the key pair is invalid.
+         * @throws KeyException
+         *             if any other key related problem occurs.
+         */
+        SetKeyPair(
+            [in] IKeyPair* pair);
+
+        /**
+         * Returns a string containing a concise, human-readable description of this
+         * {@code Signer} including its name and its scope if present.
+         *
+         * @return a printable representation for this {@code Signer}.
+         */
+        ToString(
+            [out] String* str);
+    }
+
+    } // end namespace Security
+    } // end namespace Elastos
+}

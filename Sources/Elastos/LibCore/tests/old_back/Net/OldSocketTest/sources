@@ -1,0 +1,18 @@
+
+TARGET_NAME = testSocket
+TARGET_TYPE = ecx
+
+IMPORTS = Elastos.CoreLibrary.eco
+
+SOURCES = test.cpp
+SOURCES += main.cpp
+SOURCES += Elastos.Core.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+ifeq "$(XDK_TARGET_PLATFORM)" "win32"
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Runtime.lib
+else
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += -lstdc++ -lm -ldl -llog -lz -lcutils -lutils -lbinder -licuuc -licui18n
+endif

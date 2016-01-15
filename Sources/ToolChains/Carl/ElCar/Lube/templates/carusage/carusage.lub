@@ -1,0 +1,10 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$
+$TEMPLATE "enumusage.lub"
+$TEMPLATE "constusage.lub"
+$TEMPLATE "structusage.lub"
+$TEMPLATE "methodusage.lub" ;; interface, class, generic, aspect, regime

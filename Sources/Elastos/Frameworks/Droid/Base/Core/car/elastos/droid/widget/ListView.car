@@ -1,0 +1,311 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    [local]
+    interface IFixedViewInfo {
+        SetView(
+            [in] IView* view);
+
+        GetView(
+            [out] IView** view);
+
+        SetData(
+            [in] IInterface* data);
+
+        GetData(
+            [out] IInterface** data);
+
+        SetSelectable(
+            [in] Boolean selectable);
+
+        GetSelectable(
+            [out] Boolean* selectable);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface IListViewSavedState {
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsListView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IOnGlobalLayoutListener
+     * interface Elastos.Droid.View.IOnTouchModeChangeListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.View.IAdapterViewOnItemClickListener
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.Widget.IOnDateChangedListener
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local, deprecated]
+    interface IListView {
+        /**
+         * @return The maximum amount a list view will scroll in response to
+         *   an arrow event.
+         */
+        GetMaxScrollAmount(
+            [out] Int32* amount);
+
+        /**
+         * Add a fixed view to appear at the top of the list. If this method is
+         * called more than once, the views will appear in the order they were
+         * added. Views added using this call can take focus if they want.
+         * <p>
+         * Note: When first introduced, this method could only be called before
+         * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
+         * {@link android.os.Build.VERSION_CODES#KITKAT}, this method may be
+         * called at any time. If the ListView's adapter does not extend
+         * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
+         * instance of {@link WrapperListAdapter}.
+         *
+         * @param v The view to add.
+         * @param data Data to associate with this view
+         * @param isSelectable whether the item is selectable
+         */
+        AddHeaderView(
+            [in] IView* v,
+            [in] IInterface* data,
+            [in] Boolean isSelectable);
+
+        /**
+         * Add a fixed view to appear at the top of the list. If addHeaderView is
+         * called more than once, the views will appear in the order they were
+         * added. Views added using this call can take focus if they want.
+         * <p>
+         * Note: When first introduced, this method could only be called before
+         * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
+         * {@link android.os.Build.VERSION_CODES#KITKAT}, this method may be
+         * called at any time. If the ListView's adapter does not extend
+         * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
+         * instance of {@link WrapperListAdapter}.
+         *
+         * @param v The view to add.
+         */
+        AddHeaderView(
+            [in] IView* v);
+
+        /**
+         * Removes a previously-added header view.
+         *
+         * @param v The view to remove
+         * @return TRUE if the view was removed, FALSE if the view was not a header
+         *         view
+         */
+        RemoveHeaderView(
+            [in] IView* v,
+            [out] Boolean* result);
+
+        /**
+         * Add a fixed view to appear at the bottom of the list. If addFooterView is
+         * called more than once, the views will appear in the order they were
+         * added. Views added using this call can take focus if they want.
+         * <p>
+         * Note: When first introduced, this method could only be called before
+         * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
+         * {@link android.os.Build.VERSION_CODES#KITKAT}, this method may be
+         * called at any time. If the ListView's adapter does not extend
+         * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
+         * instance of {@link WrapperListAdapter}.
+         *
+         * @param v The view to add.
+         * @param data Data to associate with this view
+         * @param isSelectable true if the footer view can be selected
+         */
+        AddFooterView(
+            [in] IView* v,
+            [in] IInterface* data,
+            [in] Boolean isSelectable);
+
+        /**
+         * Add a fixed view to appear at the bottom of the list. If addFooterView is
+         * called more than once, the views will appear in the order they were
+         * added. Views added using this call can take focus if they want.
+         * <p>
+         * Note: When first introduced, this method could only be called before
+         * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
+         * {@link android.os.Build.VERSION_CODES#KITKAT}, this method may be
+         * called at any time. If the ListView's adapter does not extend
+         * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
+         * instance of {@link WrapperListAdapter}.
+         *
+         * @param v The view to add.
+         */
+        AddFooterView(
+            [in] IView* v);
+
+        /**
+         * Removes a previously-added footer view.
+         *
+         * @param v The view to remove
+         * @return
+         * TRUE if the view was removed, FALSE if the view was not a footer view
+         */
+        RemoveFooterView(
+            [in] IView* v,
+            [out] Boolean* result);
+
+        /**
+         * setSelectionAfterHeaderView set the selection to be the first list item
+         * after the header views.
+         */
+        SetSelectionAfterHeaderView();
+
+        /**
+         * Indicates that the views created by the ListAdapter can contain focusable
+         * items.
+         *
+         * @param itemsCanFocus TRUE if items can Get focus, FALSE otherwise
+         */
+        SetItemsCanFocus(
+            [in] Boolean itemsCanFocus);
+
+        /**
+         * @return Whether the views created by the ListAdapter can contain focusable
+         * items.
+         */
+        GetItemsCanFocus(
+            [out] Boolean* canFocus);
+
+        /**
+         * Returns the drawable that will be drawn between each item in the list.
+         *
+         * @return the current drawable drawn between list elements
+         */
+        GetDivider(
+            [out] IDrawable** divider);
+
+        /**
+         * Sets the drawable that will be drawn between each item in the list. If the drawable does
+         * not have an intrinsic height, you should also call {@link #setDividerHeight(Int32)}
+         *
+         * @param divider The drawable to use.
+         */
+        SetDivider(
+            [in] IDrawable* divider);
+
+        /**
+         * @return Returns the height of the divider that will be drawn between each item in the list.
+         */
+        GetDividerHeight(
+            [out] Int32* height);
+
+        /**
+         * Sets the height of the divider that will be drawn between each item in the list. Calling
+         * this will override the intrinsic height as set by {@link #setDivider(Drawable)}
+         *
+         * @param height The new height of the divider in pixels.
+         */
+        SetDividerHeight(
+            [in] Int32 height);
+
+        /**
+         * Enables or disables the drawing of the divider for header views.
+         *
+         * @param headerDividersEnabled True to draw the headers, FALSE otherwise.
+         *
+         * @see #setFooterDividersEnabled(Boolean)
+         * @see #areHeaderDividersEnabled()
+         * @see #addHeaderView(android.view.View)
+         */
+        SetHeaderDividersEnabled(
+            [in] Boolean headerDividersEnabled);
+
+        /**
+         * @return Whether the drawing of the divider for header views is enabled
+         *
+         * @see #setHeaderDividersEnabled(boolean)
+         */
+        AreHeaderDividersEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * @return Whether the drawing of the divider for footer views is enabled
+         *
+         * @see #setFooterDividersEnabled(boolean)
+         */
+        AreFooterDividersEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Enables or disables the drawing of the divider for footer views.
+         *
+         * @param footerDividersEnabled True to draw the footers, FALSE otherwise.
+         *
+         * @see #setHeaderDividersEnabled(Boolean)
+         * @see #areFooterDividersEnabled()
+         * @see #addFooterView(android.view.View)
+         */
+        SetFooterDividersEnabled(
+            [in] Boolean footerDividersEnabled);
+
+        /**
+         * Sets the drawable that will be drawn above all other list content.
+         * This area can become visible when the user overscrolls the list.
+         *
+         * @param header The drawable to use
+         */
+        SetOverscrollHeader(
+            [in] IDrawable* header);
+
+        /**
+         * @return The drawable that will be drawn above all other list content
+         */
+        GetOverscrollHeader(
+            [out] IDrawable** overScrollHeader);
+
+        /**
+         * Sets the drawable that will be drawn below all other list content.
+         * This area can become visible when the user overscrolls the list,
+         * or when the list's content does not fully fill the container area.
+         *
+         * @param footer The drawable to use
+         */
+        SetOverscrollFooter(
+            [in] IDrawable* footer);
+
+        /**
+         * @return The drawable that will be drawn below all other list content
+         */
+        GetOverscrollFooter(
+            [out] IDrawable** overScrollFooter);
+
+        /**
+         * Returns the set of checked items ids. The result is only valid if the
+         * choice mode has not been set to {@link #CHOICE_MODE_NONE}.
+         *
+         * @return A new array which contains the id of each checked item in the
+         *         list.
+         *
+         * @deprecated Use {@link #getCheckedItemIds()} instead.
+         */
+        //@Deprecated
+        GetCheckItemIds(
+            [out, callee] ArrayOf<Int64>* itemIds);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

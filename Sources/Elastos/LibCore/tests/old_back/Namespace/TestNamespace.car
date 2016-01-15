@@ -1,0 +1,49 @@
+
+module
+{
+    enum State {
+        State_1,
+    }
+
+    namespace Elastos {
+        namespace IO {
+            namespace IO2 {
+                interface IInput {
+                    ReadByte();
+                }
+            }
+
+            enum Color1 {
+                Color1_Red,
+            }
+
+            interface IInput {
+                Read();
+            }
+
+            class CInput {
+                interface IInput;
+            }
+        }
+
+        namespace Xml {
+            interface IInput {
+                ReadEx();
+            }
+        }
+    }
+
+    using namespace Elastos.IO;
+
+    interface IInput2 extends Elastos.IO.IInput {
+        ReadByte();
+    }
+
+    interface IInput3 extends Elastos.Xml.IInput {
+        ReadByte();
+    }
+
+    class CInput2 {
+        interface Elastos.Xml.IInput;
+    }
+}

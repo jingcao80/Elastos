@@ -1,0 +1,483 @@
+
+module
+{
+    interface Elastos.Droid.Animation.IPropertyValuesHolder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Animation {
+
+    interface IAnimatorUpdateListener;
+
+    /**
+     * This class provides a simple timing engine for running animations
+     * which calculate animated values and set them on target objects.
+     *
+     * <p>There is a single timing pulse that all animations use. It runs in a
+     * custom handler to ensure that property changes happen on the UI thread.</p>
+     *
+     * <p>By default, ValueAnimator uses non-linear time interpolation, via the
+     * AccelerateDecelerateInterpolator class, which accelerates into and decelerates
+     * out of an animation. This behavior can be changed by calling
+     * ValueAnimator#setInterpolator(TimeInterpolator).</p>
+     *
+     * @sa AccelerateDecelerateInterpolator
+     * @sa ValueAnimator#setInterpolator(TimeInterpolator)
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about animating with {ValueAnimator}, read the
+     * <a href="{@docRoot}guide/topics/graphics/prop-animation.html#value-animator">Property
+     * Animation</a> developer guide.</p>
+     * </div>
+     *
+     * @implements Elastos.Droid.Animation.IAnimator
+     */
+    /**
+     * @Involve
+     * interface IAnimator
+     */
+    [deprecated]
+    interface IValueAnimator {
+        /**
+         * When the animation reaches the end and <code>repeatCount</code> is INFINITE
+         * or a positive value, the animation restarts from the beginning.
+         */
+        const Int32 ANIMATION_RESTART = 1;
+        /**
+         * When the animation reaches the end and <code>repeatCount</code> is INFINITE
+         * or a positive value, the animation reverses direction on every iteration.
+         */
+        const Int32 ANIMATION_REVERSE = 2;
+        /**
+         * This value used used with the {@link #setRepeatCount(Int32)} property to repeat
+         * the animation indefinitely.
+         */
+        const Int32 ANIMATION_INFINITE = -1;
+
+        /**
+         * Sets Int32 values that will be animated between. A single
+         * value implies that that value is the one being animated to. However, this is not typically
+         * useful in a ValueAnimator object because there is no way for the object to determine the
+         * starting value for the animation (unlike ObjectAnimator, which can derive that value
+         * from the target object and property being animated). Therefore, there should typically
+         * be two or more values.
+         *
+         * <p>If there are already multiple sets of values defined for this ValueAnimator via more
+         * than one PropertyValuesHolder object, this method will set the values for the first
+         * of those objects.</p>
+         *
+         * @param values A set of values that the animation will animate between over time.
+         */
+        SetInt32Values(
+            [in] ArrayOf<Int32>* values);
+
+        /**
+         * Sets Float values that will be animated between. A single
+         * value implies that that value is the one being animated to. However, this is not typically
+         * useful in a ValueAnimator object because there is no way for the object to determine the
+         * starting value for the animation (unlike ObjectAnimator, which can derive that value
+         * from the target object and property being animated). Therefore, there should typically
+         * be two or more values.
+         *
+         * <p>If there are already multiple sets of values defined for this ValueAnimator via more
+         * than one PropertyValuesHolder object, this method will set the values for the first
+         * of those objects.</p>
+         *
+         * @param values A set of values that the animation will animate between over time.
+         */
+        SetFloatValues(
+            [in] ArrayOf<Float>* values);
+
+        /**
+         * Sets the values to animate between for this animation. A single
+         * value implies that that value is the one being animated to. However, this is not typically
+         * useful in a ValueAnimator object because there is no way for the object to determine the
+         * starting value for the animation (unlike ObjectAnimator, which can derive that value
+         * from the target object and property being animated). Therefore, there should typically
+         * be two or more values.
+         *
+         * <p>If there are already multiple sets of values defined for this ValueAnimator via more
+         * than one PropertyValuesHolder object, this method will set the values for the first
+         * of those objects.</p>
+         *
+         * <p>There should be a TypeEvaluator set on the ValueAnimator that knows how to interpolate
+         * between these value objects. ValueAnimator only knows how to interpolate between the
+         * primitive types specified in the other setValues() methods.</p>
+         *
+         * @param values The set of values to animate between.
+         */
+        SetObjectValues(
+            [in] ArrayOf<IInterface*>* values);
+
+        /**
+         * Sets the values, per property, being animated between. This function is called internally
+         * by the constructors of ValueAnimator that take a list of values. But a ValueAnimator can
+         * be constructed without values and this method can be called to set the values manually
+         * instead.
+         *
+         * @param values The set of values, per property, being animated between.
+         */
+        SetValues(
+            [in] ArrayOf<IPropertyValuesHolder*>* values);
+
+        /**
+         * Returns the values that this ValueAnimator animates between. These values are stored in
+         * PropertyValuesHolder objects, even if the ValueAnimator was created with a simple list
+         * of value objects instead.
+         *
+         * @return PropertyValuesHolder[] An array of PropertyValuesHolder objects which hold the
+         * values, per property, that define the animation.
+         */
+        GetValues(
+            [out, callee] ArrayOf<IPropertyValuesHolder*>* values);
+
+		/**
+	     * Sets the length of the animation. The default duration is 300 milliseconds.
+	     *
+	     * @param duration The length of the animation, in milliseconds. This value cannot
+	     * be negative.
+	     * @return ValueAnimator The object called with setDuration(). This return
+	     * value makes it easier to compose statements together that construct and then set the
+	     * duration, as in <code>ValueAnimator.ofInt(0, 10).setDuration(500).start()</code>.
+	     */
+		SetDuration(
+			[in] Int64 duration);
+
+		/**
+	     * Gets the length of the animation. The default duration is 300 milliseconds.
+	     *
+	     * @return The length of the animation, in milliseconds.
+	     */
+	    GetDuration(
+			[out] Int64* duration);
+
+        /**
+         * Sets the position of the animation to the specified point in time. This time should
+         * be between 0 and the total duration of the animation, including any repetition. If
+         * the animation has not yet been started, then it will not advance forward after it is
+         * set to this time; it will simply set the time to this value and perform any appropriate
+         * actions based on that time. If the animation is already running, then setCurrentPlayTime()
+         * will set the current playing time to this value and continue playing from that point.
+         *
+         * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
+         */
+        SetCurrentPlayTime(
+            [in] Int64 playTime);
+
+        /**
+         * Gets the current position of the animation in time, which is equal to the current
+         * time minus the time that the animation started. An animation that is not yet started will
+         * return a value of zero.
+         *
+         * @return The current position in time of the animation.
+         */
+        GetCurrentPlayTime(
+            [out] Int64* playeTime);
+
+        /**
+         * The most recent value calculated by this <code>ValueAnimator</code> when there is just one
+         * property being animated. This value is only sensible while the animation is running. The main
+         * purpose for this read-only property is to retrieve the value from the <code>ValueAnimator</code>
+         * during a call to AnimatorUpdateListener#onAnimationUpdate(ValueAnimator), which
+         * is called during each animation frame, immediately after the value is calculated.
+         *
+         * @sa AnimatorUpdateListener#onAnimationUpdate(ValueAnimator)
+         *
+         * @return animatedValue The value most recently calculated by this <code>ValueAnimator</code> for
+         * the single property being animated. If there are several properties being animated
+         * (specified by several PropertyValuesHolder objects in the constructor), this function
+         * returns the animated value for the first of those objects.
+         */
+        GetAnimatedValue(
+            [out] IInterface** value);
+
+        /**
+         * The most recent value calculated by this <code>ValueAnimator</code> for <code>propertyName</code>.
+         * The main purpose for this read-only property is to retrieve the value from the
+         * <code>ValueAnimator</code> during a call to
+         * AnimatorUpdateListener#onAnimationUpdate(ValueAnimator), which
+         * is called during each animation frame, immediately after the value is calculated.
+         *
+         * @sa AnimatorUpdateListener#onAnimationUpdate(ValueAnimator)
+         *
+         * @return animatedValue The value most recently calculated for the named property
+         * by this <code>ValueAnimator</code>.
+         */
+        GetAnimatedValue(
+            [in] String propertyName,
+            [out] IInterface** value);
+
+        /**
+         * Sets how many times the animation should be repeated. If the repeat
+         * count is 0, the animation is never repeated. If the repeat count is
+         * greater than 0 or #INFINITE, the repeat mode will be taken
+         * into account. The repeat count is 0 by default.
+         *
+         * @sa #INFINITE
+         *
+         * @param value the number of times the animation should be repeated
+         */
+        SetRepeatCount(
+            [in] Int32 value);
+
+        /**
+         * Defines how many times the animation should repeat. The default value
+         * is 0.
+         *
+         * @return the number of times the animation should repeat, or #INFINITE
+         *
+         * @sa #INFINITE
+         */
+        GetRepeatCount(
+            [in] Int32* count);
+
+        /**
+         * Defines what this animation should do when it reaches the end. This
+         * setting is applied only when the repeat count is either greater than
+         * 0 or #INFINITE. Defaults to #RESTART.
+         *
+         * @sa #INFINITE
+         * @sa #RESTART
+         *
+         * @param value #RESTART or #REVERSE
+         *
+         * @sa #RESTART
+         * @sa #REVERSE
+         *
+         */
+        SetRepeatMode(
+            [in] Int32 value);
+
+        /**
+         * Defines what this animation should do when it reaches the end.
+         *
+         * @return either one of #REVERSE or #RESTART
+         *
+         * @sa #REVERSE
+         * @sa #RESTART
+         */
+        GetRepeatMode(
+            [out] Int32* mode);
+
+        /**
+         * Adds a listener to the set of listeners that are sent update events through the life of
+         * an animation. This method is called on all listeners for every frame of the animation,
+         * after the values for the animation have been calculated.
+         *
+         * @param listener the listener to be added to the current set of listeners for this animation.
+         */
+        AddUpdateListener(
+            [in] IAnimatorUpdateListener* listener);
+
+        /**
+         * Removes all listeners from the set listening to frame updates for this animation.
+         */
+        RemoveAllUpdateListeners();
+
+        /**
+         * Removes a listener from the set listening to frame updates for this animation.
+         *
+         * @param listener the listener to be removed from the current set of update listeners
+         * for this animation.
+         */
+        RemoveUpdateListener(
+            [in] IAnimatorUpdateListener* listener);
+
+        /**
+         * Returns the timing interpolator that this ValueAnimator uses.
+         *
+         * @return The timing interpolator for this ValueAnimator.
+         */
+        GetInterpolator(
+            [out] ITimeInterpolator** polator);
+
+        /**
+         * The type evaluator to be used when calculating the animated values of this animation.
+         * The system will automatically assign a Float or Int32 evaluator based on the type
+         * of <code>startValue</code> and <code>endValue</code> in the constructor. But if these values
+         * are not one of these primitive types, or if different evaluation is desired (such as is
+         * necessary with Int32 values that represent colors), a custom evaluator needs to be assigned.
+         * For example, when running an animation on color values, the ArgbEvaluator
+         * should be used to get correct RGB color interpolation.
+         *
+         * @sa ArgbEvaluator
+         *
+         * <p>If this ValueAnimator has only one set of values being animated between, this evaluator
+         * will be used for that set. If there are several sets of values being animated, which is
+         * the case if PropertyValuesHOlder objects were set on the ValueAnimator, then the evaluator
+         * is assigned just to the first PropertyValuesHolder object.</p>
+         *
+         * @param value the evaluator to be used this animation
+         */
+        SetEvaluator(
+            [in] ITypeEvaluator* value);
+
+        /**
+         * Plays the ValueAnimator in reverse. If the animation is already running,
+         * it will stop itself and play backwards from the point reached when reverse was called.
+         * If the animation is not currently running, then it will start from the end and
+         * play backwards. This behavior is only set for the current animation; future playing
+         * of the animation will use the default behavior of playing forward.
+         */
+        Reverse();
+
+        /**
+         * Returns the current animation fraction, which is the elapsed/interpolated fraction used in
+         * the most recent frame update on the animation.
+         *
+         * @return Elapsed/interpolated fraction of the animation.
+         */
+        GetAnimatedFraction(
+            [out] Float* farction);
+    }
+
+    /**
+     * Implementors of this interface can add themselves as update listeners
+     * to an <code>ValueAnimator</code> instance to receive callbacks on every animation
+     * frame, after the current frame's values have been calculated for that
+     * <code>ValueAnimator</code>.
+     */
+    interface IAnimatorUpdateListener {
+        /**
+         * <p>Notifies the occurrence of another frame of the animation.</p>
+         *
+         * @param animation The animation which was repeated.
+         */
+        OnAnimationUpdate(
+            [in] IValueAnimator* animation);
+    }
+
+    [deprecated]
+    interface IValueAnimatorHelper {
+        /**
+         * @hide
+         */
+        SetDurationScale(
+            [in] Float durationScale);
+
+        /**
+         * @hide
+         */
+        GetDurationScale(
+            [out] Float* durationScale);
+
+        /**
+         * Constructs and returns a ValueAnimator that animates between int values. A single
+         * value implies that that value is the one being animated to. However, this is not typically
+         * useful in a ValueAnimator object because there is no way for the object to determine the
+         * starting value for the animation (unlike ObjectAnimator, which can derive that value
+         * from the target object and property being animated). Therefore, there should typically
+         * be two or more values.
+         *
+         * @param values A set of values that the animation will animate between over time.
+         * @return A ValueAnimator object that is set up to animate between the given values.
+         */
+        OfInt32(
+            [in] ArrayOf<Int32>* values,
+            [out] IValueAnimator** obj);
+
+        /**
+         * Constructs and returns a ValueAnimator that animates between float values. A single
+         * value implies that that value is the one being animated to. However, this is not typically
+         * useful in a ValueAnimator object because there is no way for the object to determine the
+         * starting value for the animation (unlike ObjectAnimator, which can derive that value
+         * from the target object and property being animated). Therefore, there should typically
+         * be two or more values.
+         *
+         * @param values A set of values that the animation will animate between over time.
+         * @return A ValueAnimator object that is set up to animate between the given values.
+         */
+         OfFloat(
+            [in] ArrayOf<Float>* values,
+            [out] IValueAnimator** obj);
+
+        /**
+         * Constructs and returns a ValueAnimator that animates between the values
+         * specified in the PropertyValuesHolder objects.
+         *
+         * @param values A set of PropertyValuesHolder objects whose values will be animated
+         * between over time.
+         * @return A ValueAnimator object that is set up to animate between the given values.
+         */
+        OfPropertyValuesHolder(
+            [in] ArrayOf<IPropertyValuesHolder*>* values,
+            [out] IValueAnimator** obj);
+
+        /**
+         * Constructs and returns a ValueAnimator that animates between Object values. A single
+         * value implies that that value is the one being animated to. However, this is not typically
+         * useful in a ValueAnimator object because there is no way for the object to determine the
+         * starting value for the animation (unlike ObjectAnimator, which can derive that value
+         * from the target object and property being animated). Therefore, there should typically
+         * be two or more values.
+         *
+         * <p>Since ValueAnimator does not know how to animate between arbitrary Objects, this
+         * factory method also takes a TypeEvaluator object that the ValueAnimator will use
+         * to perform that interpolation.
+         *
+         * @param evaluator A TypeEvaluator that will be called on each animation frame to
+         * provide the ncessry interpolation between the Object values to derive the animated
+         * value.
+         * @param values A set of values that the animation will animate between over time.
+         * @return A ValueAnimator object that is set up to animate between the given values.
+         */
+        OfObject(
+            [in] ITypeEvaluator* evaluator,
+            [in] ArrayOf<IInterface*>* values,
+            [out] IValueAnimator** obj);
+
+        /**
+         * The amount of time, in milliseconds, between each frame of the animation. This is a
+         * requested time that the animation will attempt to honor, but the actual delay between
+         * frames may be different, depending on system load and capabilities. This is a static
+         * function because the same delay will be applied to all animations, since they are all
+         * run off of a single timing loop.
+         *
+         * The frame delay may be ignored when the animation system uses an external timing
+         * source, such as the display refresh rate (vsync), to govern animations.
+         *
+         * @return the requested time between frames, in milliseconds
+         */
+        GetFrameDelay(
+            [out] Int64* frameDelay);
+
+        /**
+         * The amount of time, in milliseconds, between each frame of the animation. This is a
+         * requested time that the animation will attempt to honor, but the actual delay between
+         * frames may be different, depending on system load and capabilities. This is a static
+         * function because the same delay will be applied to all animations, since they are all
+         * run off of a single timing loop.
+         *
+         * The frame delay may be ignored when the animation system uses an external timing
+         * source, such as the display refresh rate (vsync), to govern animations.
+         *
+         * @param frameDelay the requested time between frames, in milliseconds
+         */
+        SetFrameDelay(
+            [in] Int64 frameDelay);
+
+        /**
+         * Return the number of animations currently running.
+         *
+         * Used by StrictMode internally to annotate violations.
+         * May be called on arbitrary threads!
+         *
+         * @hide
+         */
+        GetCurrentAnimationsCount(
+            [out] Int32* animationsCount);
+
+        /**
+         * Clear all animations on this thread, without canceling or ending them.
+         * This should be used with caution.
+         *
+         * @hide
+         */
+        ClearAllAnimations();
+    }
+
+    } // namespace Animation
+    } // namepsace Droid
+    } // namespace Elastos
+}

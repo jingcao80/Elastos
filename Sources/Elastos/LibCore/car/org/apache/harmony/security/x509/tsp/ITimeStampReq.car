@@ -1,0 +1,94 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.X509.IExtensions;
+    using interface Elastos.Math.IBigInteger;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+    namespace Tsp {
+
+    /**
+     * As defined in Time-Stamp Protocol (TSP)
+     * (http://www.ietf.org/rfc/rfc3161.txt)
+     *
+     * TimeStampReq ::= SEQUENCE  {
+     *    version                      INTEGER  { v1(1) },
+     *    messageImprint               MessageImprint,
+     *      --a hash algorithm OID and the hash value of the data to be
+     *      --time-stamped
+     *    reqPolicy             TSAPolicyId              OPTIONAL,
+     *    nonce                 INTEGER                  OPTIONAL,
+     *    certReq               BOOLEAN                  DEFAULT FALSE,
+     *    extensions            [0] IMPLICIT Extensions  OPTIONAL
+     *  }
+     *
+     *  TSAPolicyId ::= OBJECT IDENTIFIER
+     */
+    interface ITimeStampReq {
+        ToString(
+            [out] String* str);
+
+        /**
+         * Returns ASN.1 encoded form of this TimeStampReq.
+         * @return a byte array containing ASN.1 encoded form.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * @return Returns the certReq.
+         */
+        GetCertReq(
+            [out] Boolean* certReq);
+
+        /**
+         * @return Returns the extensions.
+         */
+        GetExtensions(
+            [out] IExtensions** extensions);
+
+        /**
+         * @return Returns the messageImprint.
+         */
+        GetMessageImprint(
+            [out] IMessageImprint** messageImprint);
+
+        /**
+         * @return Returns the nonce.
+         */
+        GetNonce(
+            [out] IBigInteger** nonce);
+
+        /**
+         * @return Returns the reqPolicy.
+         */
+        GetReqPolicy(
+            [out] String* reqPolicy);
+
+        /**
+         * @return Returns the version.
+         */
+        GetVersion(
+            [out] Int32* ver);
+    }
+
+    interface ITimeStampReqHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
+    }
+
+    } // namespace Tsp
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,61 @@
+module
+{
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Media.Tv.IITvInputSession;
+    interface Elastos.Droid.Media.Tv.ITvTrackInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Helper interface for ITvInputSession to allow the TV input to notify the system service when a
+     * new session has been created.
+     * @hide
+     */
+    interface IITvInputSessionCallback {
+        OnSessionCreated(
+            [in] IITvInputSession * session,
+            [in] IBinder * hardwareSessionToken);
+
+        OnSessionEvent(
+            [in] String name,
+            [in] IBundle * args);
+
+        OnChannelRetuned(
+            [in] IUri * channelUri);
+
+        OnTracksChanged(
+            [in] IList * tracks);
+
+        OnTrackSelected(
+            [in] Int32 type,
+            [in] String trackId);
+
+        OnVideoAvailable();
+
+        OnVideoUnavailable(
+            [in] Int32 reason);
+
+        OnContentAllowed();
+
+        OnContentBlocked(
+            [in] String rating);
+
+        OnLayoutSurface(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

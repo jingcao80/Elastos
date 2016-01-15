@@ -1,0 +1,196 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+
+    merge("../../../car/elastos/droid/Exceptions.car");
+    merge("../../../car/elastos/droid/fake_interfaces.car");
+
+    submodule Elastos.Droid.Animation {
+    merge("../../../car/elastos/droid/animation.car");
+    }
+
+    submodule Elastos.Droid.Graphics {
+    merge("../../../car/elastos/droid/graphics.car");
+    }
+
+    submodule Elastos.Droid.Opengl {
+    merge("../../../car/elastos/droid/opengl.car");
+    }
+
+    submodule Elastos.Droid.Internal {
+    merge("../../../car/elastos/droid/internal/app.car");
+    merge("../../../car/elastos/droid/internal/appwidget.car");
+    merge("../../../car/elastos/droid/internal/backup.car");
+    merge("../../../car/elastos/droid/internal/content.car");
+    merge("../../../car/elastos/droid/internal/http.car");
+    merge("../../../car/elastos/droid/internal/inputmethod.car");
+    merge("../../../car/elastos/droid/internal/location.car");
+    merge("../../../car/elastos/droid/internal/logging.car");
+    merge("../../../car/elastos/droid/internal/net.car");
+    merge("../../../car/elastos/droid/internal/os.car");
+    merge("../../../car/elastos/droid/internal/statusbar.car");
+    merge("../../../car/elastos/droid/internal/telephony.car");
+    merge("../../../car/elastos/droid/internal/textservice.car");
+    merge("../../../car/elastos/droid/internal/utility.car");
+    merge("../../../car/elastos/droid/internal/view2.car");
+    }
+
+    submodule Elastos.Droid.Os {
+    merge("../../../car/elastos/droid/os.car");
+    }
+
+    submodule Elastos.Droid.Database {
+    merge("../../../car/elastos/droid/database.car"); //should after os.car
+    }
+
+    submodule Elastos.Droid.Location {
+    merge("../../../car/elastos/droid/location.car");
+    }
+
+    submodule Elastos.Droid.Utility {
+    merge("../../../car/elastos/droid/utility.car");
+    }
+
+    submodule Elastos.Droid.Text {
+    merge("../../../car/elastos/droid/text.car");
+    }
+
+    submodule Elastos.Droid.Content {
+    merge("../../../car/elastos/droid/content.car"); //should after os.car and text.car
+    }
+
+    //merge("../../../car/elastos/droid/inputmethods.car"); //should be removed
+
+    submodule Elastos.Droid.View {
+    merge("../../../car/elastos/droid/view.car");
+    }
+
+    submodule Elastos.Droid.Hardware {
+    merge("../../../car/elastos/droid/hardware.car"); //should after view.car
+    }
+
+    submodule Elastos.Droid.AccessibilityService {
+    merge("../../../car/elastos/droid/accessibilityservice.car");
+    }
+
+    submodule Elastos.Droid.Emoji {
+    merge("../../../car/elastos/droid/emoji.car");
+    }
+
+    submodule Elastos.Droid.Gesture {
+    merge("../../../car/elastos/droid/gesture.car");
+    }
+
+    submodule Elastos.Droid.Accounts {
+    merge("../../../car/elastos/droid/accounts.car");
+    }
+
+    submodule Elastos.Droid.App {
+    merge("../../../car/elastos/droid/app2.car");
+    }
+
+    submodule Elastos.Droid.Media {
+    merge("../../../car/elastos/droid/media.car");
+    }
+
+    submodule Elastos.Droid.Widget {
+    merge("../../../car/elastos/droid/widget.car");
+    }
+
+    submodule Elastos.Droid.App {
+    merge("../../../car/elastos/droid/app.car");
+    }
+
+    submodule Elastos.Droid.Text {
+    merge("../../../car/elastos/droid/text2.car"); //should after widget.car, app.car
+    }
+
+    submodule Elastos.Droid.Content {
+    merge("../../../car/elastos/droid/content2.car");
+    }
+
+    submodule Elastos.Droid.Internal {
+    merge("../../../car/elastos/droid/internal/policy.car");
+    }
+
+    submodule Elastos.Droid.AppWidget {
+    merge("../../../car/elastos/droid/appwidget.car");
+    }
+
+    submodule Elastos.Droid.Net {
+    merge("../../../car/elastos/droid/net.car");
+    }
+
+    submodule Elastos.Droid.Wifi {
+    merge("../../../car/elastos/droid/wifi.car");
+    }
+
+    submodule Elastos.Droid.Nfc {
+    merge("../../../car/elastos/droid/nfc.car");
+    }
+
+    submodule Elastos.Droid.Preference {
+    merge("../../../car/elastos/droid/preference.car");
+    }
+
+    submodule Elastos.Droid.Provider {
+    merge("../../../car/elastos/droid/provider.car");
+    }
+
+    submodule Elastos.Droid.Transition {
+    merge("../../../car/elastos/droid/transition.car");
+    }
+
+    submodule Elastos.Droid.Core.Server {
+    merge("../../../car/elastos/droid/server.car");
+    }
+
+    submodule Elastos.Droid.Internal {
+    merge("../../../car/elastos/droid/internal/database.car");
+    merge("../../../car/elastos/droid/internal/preference.car");
+    merge("../../../car/elastos/droid/internal/view.car");
+    merge("../../../car/elastos/droid/internal/widget.car");
+    merge("../../../car/elastos/droid/internal/os/storage.car");
+    merge("../../../car/elastos/droid/internal/app2.car");
+    }
+
+    submodule Elastos.Droid.InputMethodService {
+    merge("../../../car/elastos/droid/inputmethodservice.car");
+    }
+
+    submodule Elastos.Droid.KeyStore {
+    merge("../../../car/elastos/droid/keystore.car");
+    }
+
+    //merge("../../../car/elastos/droid/bluetooth.car");
+    //merge("../../../car/elastos/droid/menu1.car");
+    //merge("../../../car/elastos/droid/menu2.car");
+    //merge("../../../car/elastos/droid/app/ResolverActivity.car");
+    //merge("../../../car/elastos/droid/pppoe.car");
+    //merge("../../../car/elastos/droid/ethernet.car");
+
+    submodule Elastos.Droid.Speech {
+    merge("../../../car/elastos/droid/speech.car");
+    }
+
+    submodule Elastos.Droid.Telephony {
+    merge("../../../car/elastos/droid/telephony.car");
+    }
+
+    submodule Elastos.Droid.Webkit {
+    merge("../../../car/elastos/droid/webkit.car");
+    }
+
+    //merge("../../../car/elastos/droid/privacy.car"); //should be removed
+
+    submodule Elastos.Droid.Sax {
+    merge("../../../car/elastos/droid/sax.car");
+    }
+
+    submodule Elastos.Droid.Service {
+    merge("../../../car/elastos/droid/service.car");
+    }
+
+    //merge("../../../car/elastos/droid/swextend.car");
+}

@@ -1,0 +1,198 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    [deprecated]
+    interface IExifInterface {
+
+        // The Exif tag names
+        /** Type is int. */
+        const String TAG_ORIENTATION = "Orientation";
+        /** Type is String. */
+        const String TAG_DATETIME = "DateTime";
+        /** Type is String. */
+        const String TAG_MAKE = "Make";
+        /** Type is String. */
+        const String TAG_MODEL = "Model";
+        /** Type is int. */
+        const String TAG_FLASH = "Flash";
+        /** Type is int. */
+        const String TAG_IMAGE_WIDTH = "ImageWidth";
+        /** Type is int. */
+        const String TAG_IMAGE_LENGTH = "ImageLength";
+        /** String. Format is "num1/denom1,num2/denom2,num3/denom3". */
+        const String TAG_GPS_LATITUDE = "GPSLatitude";
+        /** String. Format is "num1/denom1,num2/denom2,num3/denom3". */
+        const String TAG_GPS_LONGITUDE = "GPSLongitude";
+        /** Type is String. */
+        const String TAG_GPS_LATITUDE_REF = "GPSLatitudeRef";
+        /** Type is String. */
+        const String TAG_GPS_LONGITUDE_REF = "GPSLongitudeRef";
+        /** Type is String. */
+        const String TAG_EXPOSURE_TIME = "ExposureTime";
+        /** Type is String. */
+        const String TAG_APERTURE = "FNumber";
+        /** Type is String. */
+        const String TAG_ISO = "ISOSpeedRatings";
+
+        /**
+         * The altitude (in meters) based on the reference in TAG_GPS_ALTITUDE_REF.
+         * Type is rational.
+         */
+        const String TAG_GPS_ALTITUDE = "GPSAltitude";
+
+        /**
+         * 0 if the altitude is above sea level. 1 if the altitude is below sea
+         * level. Type is int.
+         */
+        const String TAG_GPS_ALTITUDE_REF = "GPSAltitudeRef";
+
+        /** Type is String. */
+        const String TAG_GPS_TIMESTAMP = "GPSTimeStamp";
+        /** Type is String. */
+        const String TAG_GPS_DATESTAMP = "GPSDateStamp";
+        /** Type is int. */
+        const String TAG_WHITE_BALANCE = "WhiteBalance";
+        /** Type is rational. */
+        const String TAG_FOCAL_LENGTH = "FocalLength";
+        /** Type is String. Name of GPS processing method used for location finding. */
+        const String TAG_GPS_PROCESSING_METHOD = "GPSProcessingMethod";
+
+        // Constants used for the Orientation Exif tag.
+        const Int32 ORIENTATION_UNDEFINED = 0;
+        const Int32 ORIENTATION_NORMAL = 1;
+        const Int32 ORIENTATION_FLIP_HORIZONTAL = 2;  // left right reversed mirror
+        const Int32 ORIENTATION_ROTATE_180 = 3;
+        const Int32 ORIENTATION_FLIP_VERTICAL = 4;  // upside down mirror
+        const Int32 ORIENTATION_TRANSPOSE = 5;  // flipped about top-left <--> bottom-right axis
+        const Int32 ORIENTATION_ROTATE_90 = 6;  // rotate 90 cw to right it
+        const Int32 ORIENTATION_TRANSVERSE = 7;  // flipped about top-right <--> bottom-left axis
+        const Int32 ORIENTATION_ROTATE_270 = 8;  // rotate 270 to right it
+
+        // Constants used for white balance
+        const Int32 WHITEBALANCE_AUTO = 0;
+        const Int32 WHITEBALANCE_MANUAL = 1;
+
+        /**
+         * Returns the value of the specified tag or {@code null} if there
+         * is no such tag in the JPEG file.
+         *
+         * @param tag the name of the tag.
+         */
+        GetAttribute(
+            [in] String tag,
+            [out] String* result);
+
+        /**
+         * Returns the integer value of the specified tag. If there is no such tag
+         * in the JPEG file or the value cannot be parsed as integer, return
+         * <var>defaultValue</var>.
+         *
+         * @param tag the name of the tag.
+         * @param defaultValue the value to return if the tag is not available.
+         */
+        GetAttributeInt32(
+            [in] String tag,
+            [in] Int32 defaultValue,
+            [out] Int32* result);
+
+        /**
+         * Returns the double value of the specified rational tag. If there is no
+         * such tag in the JPEG file or the value cannot be parsed as double, return
+         * <var>defaultValue</var>.
+         *
+         * @param tag the name of the tag.
+         * @param defaultValue the value to return if the tag is not available.
+         */
+        GetAttributeDouble(
+            [in] String tag,
+            [in] Double defaultValue,
+            [out] Double* result);
+
+        /**
+         * Set the value of the specified tag.
+         *
+         * @param tag the name of the tag.
+         * @param value the value of the tag.
+         */
+        SetAttribute(
+            [in] String tag,
+            [in] String value);
+
+        /**
+         * Save the tag data into the JPEG file. This is expensive because it involves
+         * copying all the JPG data from one file to another and deleting the old file
+         * and renaming the other. It's best to use {@link #setAttribute(String,String)}
+         * to set all attributes to write and make a single call rather than multiple
+         * calls for each attribute.
+         */
+        SaveAttributes();
+
+        /**
+         * Returns true if the JPEG file has a thumbnail.
+         */
+        HasThumbnail(
+            [out] Boolean* result);
+
+        /**
+         * Returns the thumbnail inside the JPEG file, or {@code null} if there is no thumbnail.
+         * The returned data is in JPEG format and can be decoded using
+         * {@link android.graphics.BitmapFactory#decodeByteArray(byte[],int,int)}
+         */
+        GetThumbnail(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Returns the offset and length of thumbnail inside the JPEG file, or
+         * {@code null} if there is no thumbnail.
+         *
+         * @return two-element array, the offset in the first value, and length in
+         *         the second, or {@code null} if no thumbnail was found.
+         * @hide
+         */
+        GetThumbnailRange(
+            [out, callee] ArrayOf<Int64>* result);
+
+        /**
+         * Stores the latitude and longitude value in a float array. The first element is
+         * the latitude, and the second element is the longitude. Returns false if the
+         * Exif tags are not available.
+         */
+        GetLatLong(
+            [in] ArrayOf<Float>* output,
+            [out] Boolean* result);
+
+        /**
+         * Return the altitude in meters. If the exif tag does not exist, return
+         * <var>defaultValue</var>.
+         *
+         * @param defaultValue the value to return if the tag is not available.
+         */
+        GetAltitude(
+            [in] Double defaultValue,
+            [out] Double* result);
+
+        /**
+         * Returns number of milliseconds since Jan. 1, 1970, midnight.
+         * Returns -1 if the date time information if not available.
+         * @hide
+         */
+        GetDateTime(
+            [out] Int64* result);
+
+        /**
+         * Returns number of milliseconds since Jan. 1, 1970, midnight UTC.
+         * Returns -1 if the date time information if not available.
+         * @hide
+         */
+        GetGpsDateTime(
+            [out] Int64* result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

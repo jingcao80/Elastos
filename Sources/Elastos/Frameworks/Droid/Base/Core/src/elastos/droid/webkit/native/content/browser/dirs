@@ -1,0 +1,5 @@
+DIRS = accessibility
+DIRS += crypto
+DIRS += framehost
+DIRS += input
+DIRS += webcontents

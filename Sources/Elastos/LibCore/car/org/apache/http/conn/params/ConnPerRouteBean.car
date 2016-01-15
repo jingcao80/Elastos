@@ -1,0 +1,57 @@
+
+module
+{
+
+    using interface Elastos.Utility.IMap;
+
+    interface Org.Apache.Http.Conn.Routing.IHttpRoute;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Params {
+
+    /**
+     * This class maintains a map of HTTP routes to maximum number of connections allowed
+     * for those routes. This class can be used by pooling
+     * {@link org.apache.http.conn.ClientConnectionManager connection managers} for
+     * a fine-grained control of connections on a per route basis.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 652947 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IConnPerRoute;
+     */
+    interface IConnPerRouteBean {
+
+        /** The default maximum number of connections allowed per host */
+        const Int32 DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 2;   // Per RFC 2616 sec 8.1.4
+
+        GetDefaultMax(
+            [out] Int32* max);
+
+        SetDefaultMaxPerRoute(
+            [in] Int32 max);
+
+        SetMaxForRoute(
+            [in] IHttpRoute* route,
+            [in] Int32 max);
+
+        SetMaxForRoutes(
+            [in] IMap* map);
+
+    }
+
+    } // namespace Params
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

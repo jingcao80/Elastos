@@ -1,0 +1,57 @@
+
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    [deprecated]
+    interface ILoggerStream extends Elastos.IO.IPrintStream {
+        NewIndent();
+
+        EndIndent();
+
+        PrintBytes(
+            [in] ArrayOf<Byte>* data);
+
+        PrintBytesEx(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offset,
+            [in] Int32 len);
+
+        PrintAsHex(
+            [in] Int32 perLine,
+            [in] String prefix,
+            [in] String delimiter,
+            [in] ArrayOf<Byte>* data);
+
+        PrintAsHexEx(
+            [in] Int32 perLine,
+            [in] String prefix,
+            [in] String delimiter,
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offset,
+            [in] Int32 len);
+    }
+
+    /**
+     * This class provides debug logging for JSSE provider implementation
+     * TODO: Use java.util.logging
+     */
+    interface ILoggerHelper {
+        GetStream(
+            [in] String name,
+            [out] ILoggerStream** stream);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

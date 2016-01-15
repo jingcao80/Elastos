@@ -1,0 +1,51 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+    namespace Tts {
+
+    [oneway]
+    interface IITextToSpeechCallback {
+        /**
+         * Tells the client that the synthesis has started.
+         *
+         * @param utteranceId Unique id identifying synthesis request.
+         */
+        OnStart(
+            [in] String utteranceId);
+
+        /**
+         * Tells the client that the synthesis has finished.
+         *
+         * @param utteranceId Unique id identifying synthesis request.
+         */
+        OnSuccess(
+            [in] String utteranceId);
+
+        /**
+         * Tells the client that the synthesis was stopped.
+         *
+         * @param utteranceId Unique id identifying synthesis request.
+         */
+        OnStop(
+            [in] String utteranceId);
+
+        /**
+         * Tells the client that the synthesis has failed.
+         *
+         * @param utteranceId Unique id identifying synthesis request.
+         * @param errorCode One of the values from
+         *        {@link android.speech.tts.v2.TextToSpeech}.
+         */
+        OnError(
+            [in] String utteranceId,
+            [in] Int32 errorCode);
+    }
+
+    } // namespace Tts
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

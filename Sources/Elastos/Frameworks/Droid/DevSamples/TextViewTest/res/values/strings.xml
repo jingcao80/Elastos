@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextViewTest</string>
+
+    <string name="text_chinese">这是一个文本框!</string>
+    <string name="text_english">This is a textview!</string>
+
+    <string name="language">语言:</string>
+    <string name="gravity">位置:</string>
+
+    <string name="use_chinese">Use Chinese</string>
+    <string name="use_english">Use English</string>
+
+    <string name="move_center_horizontal">Move center horizontal</string>
+    <string name="move_center_vertical">Move center vertical</string>
+    <string name="move_top">Move top</string>
+    <string name="move_bottom">Move bottom</string>
+    <string name="move_left">Move left</string>
+    <string name="move_right">Move right</string>
+    <string name="move_center">Move center</string>
+</resources>

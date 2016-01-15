@@ -1,0 +1,255 @@
+module
+{
+    interface Elastos.IO.IFileDescriptor;
+    interface Elastos.Droid.Os.IDebugMemoryInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    [deprecated]
+    interface IDebug {
+        const Int32 TRACE_COUNT_ALLOCS = 1;
+        const Int32 SHOW_FULL_DETAIL = 1;
+        const Int32 SHOW_CLASSLOADER = 2;
+        const Int32 SHOW_INITIALIZED = 4;
+
+        /** @hide */
+        const Int32 MEMINFO_TOTAL = 0;
+        /** @hide */
+        const Int32 MEMINFO_FREE = 1;
+        /** @hide */
+        const Int32 MEMINFO_BUFFERS = 2;
+        /** @hide */
+        const Int32 MEMINFO_CACHED = 3;
+        /** @hide */
+        const Int32 MEMINFO_SHMEM = 4;
+        /** @hide */
+        const Int32 MEMINFO_SLAB = 5;
+        /** @hide */
+        const Int32 MEMINFO_SWAP_TOTAL = 6;
+        /** @hide */
+        const Int32 MEMINFO_SWAP_FREE = 7;
+        /** @hide */
+        const Int32 MEMINFO_ZRAM_TOTAL = 8;
+        /** @hide */
+        const Int32 MEMINFO_COUNT = 9;
+
+        /**
+         * Wait until a debugger attaches.  As soon as the debugger attaches,
+         * this returns, so you will need to place a breakpoint after the
+         * waitForDebugger() call if you want to start tracing immediately.
+         */
+        WaitForDebugger();
+
+        /**
+         * Returns "true" if one or more threads is waiting for a debugger
+         * to attach.
+         */
+        WaitForDebugger(
+            [out] Boolean* result);
+
+        /**
+         * Determine if a debugger is currently attached.
+         */
+        IsDebuggerConnected(
+            [out] Boolean* result);
+
+        ChangeDebugPort(
+            [in] Int32 port);
+
+        StartNativeTracing();
+
+        StopNativeTracing();
+
+        EnableEmulatorTraceOutput();
+
+        StartMethodTracing();
+
+        StartMethodTracing(
+            [in] String traceName);
+
+        StartMethodTracing(
+            [in] String traceName,
+            [in] Int32 bufferSize);
+
+        StartMethodTracing(
+            [in] String traceName,
+            [in] Int32 bufferSize,
+            [in] Int32 flags);
+
+        StartMethodTracingSampling(
+            [in] String traceName,
+            [in] Int32 bufferSize,
+            [in] Int32 intervalUs);
+
+        StartMethodTracing(
+            [in] String traceName,
+            [in] IFileDescriptor* fd,
+            [in] Int32 bufferSize,
+            [in] Int32 flags);
+
+        StopMethodTracing();
+
+        ThreadCpuTimeNanos(
+            [out] Int64* result);
+
+        StartAllocCounting();
+
+        StopAllocCounting();
+
+        GetGlobalAllocCount(
+            [out] Int32* count);
+
+        ReSetGlobalAllocCount();
+
+        GetGlobalAllocSize(
+            [out] Int32* size);
+
+        ReSetGlobalAllocSize();
+
+        GetGlobalFreedCount(
+            [out] Int32* count);
+
+        ReSetGlobalFreedCount();
+
+        GetGlobalFreedSize(
+            [out] Int32* size);
+
+        ReSetGlobalFreedSize();
+
+        GetGlobalGcInvocationCount(
+            [out] Int32* count);
+
+        ReSetGlobalGcInvocationCount();
+
+        GetGlobalClassInitCount(
+            [out] Int32* count);
+
+        ReSetGlobalClassInitCount();
+
+        GetGlobalClassInitTime(
+            [out] Int32* count);
+
+        ReSetGlobalClassInitTime();
+
+        GetGlobalExternalAllocCount(
+            [out] Int32* count);
+
+        ReSetGlobalExternalAllocCount();
+
+        GetGlobalExternalAllocSize(
+            [out] Int32* size);
+
+        ReSetGlobalExternalAllocSize();
+
+        GetGlobalExternalFreedCount(
+            [out] Int32* count);
+
+        ReSetGlobalExternalFreedCount();
+
+        GetGlobalExternalFreedSize(
+            [out] Int32* size);
+
+        ReSetGlobalExternalFreedSize();
+
+        GetThreadAllocCount(
+            [out] Int32* count);
+
+        ReSetThreadAllocCount();
+
+        GetThreadAllocSize(
+            [out] Int32* size);
+
+        ReSetThreadAllocSize();
+
+        GetThreadExternalAllocCount(
+            [out] Int32* count);
+
+        ReSetThreadExternalAllocCount();
+
+        GetThreadExternalAllocSize(
+            [out] Int32* size);
+
+        ReSetThreadExternalAllocSize();
+
+        GetThreadGcInvocationCount(
+            [out] Int32* count);
+
+        ReSetThreadGcInvocationCount();
+
+        GetNativeHeapSize();
+
+        GetNativeHeapAllocatedSize();
+
+        GetNativeHeapFreeSize();
+
+        GetMemoryInfo(
+            [out] IDebugMemoryInfo** memoryInfo);
+
+        GetMemoryInfo(
+            [in] Int32 pid,
+            [out] IDebugMemoryInfo** memoryInfo);
+
+        GetPss(
+            [out] Int64* pss);
+
+        GetPss(
+            [in] Int64 pid,
+            [out, callee] ArrayOf<Int64>* outUss);
+
+        SetAllocationLimit(
+            [in] Int32 limit,
+            [out] Int32* result);
+
+        SetGlobalAllocationLimit(
+            [in] Int32 limit,
+            [out] Int32* result);
+
+        PrintLoadedClasses(
+            [in] Int32 flags);
+
+        GetLoadedClassCount(
+            [out] Int32* result);
+
+        DumpHprofData(
+            [in] String fileName);
+
+        DumpHprofData(
+            [in] String fileName,
+            [in] IFileDescriptor* fd);
+
+        GetBinderSentTransactions(
+            [out] Int32* result);
+
+        GetBinderReceivedTransactions(
+            [out] Int32* result);
+
+        GetBinderLocalObjectCount(
+            [out] Int32* result);
+
+        GetBinderProxyObjectCount(
+            [out] Int32* result);
+
+        GetBinderDeathObjectCount(
+            [out] Int32* result);
+
+        SetFieldsOn(
+            [in] InterfaceID cl,
+            [in] Boolean partial);
+
+        DumpService(
+            [in] String name,
+            [in] IFileDescriptor* fd,
+            [in] ArrayOf<String>* args,
+            [out] Boolean * result);
+
+        DumpNativeBacktraceToFile(
+            [in] Int32 pid,
+            [in] String file);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

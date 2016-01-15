@@ -1,0 +1,35 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpRequest;
+    interface Org.Apache.Http.IHttpResponse;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+    /**
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 613298 $
+     *
+     * @since 4.0
+     */
+    interface IHttpRequestHandler {
+
+        Handle(
+            [in] IHttpRequest* request,
+            [in] IHttpResponse* response,
+            [in] IHttpContext* context);
+
+    }
+
+    } // namespace Protocol
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

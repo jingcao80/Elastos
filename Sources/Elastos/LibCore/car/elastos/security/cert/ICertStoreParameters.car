@@ -1,0 +1,23 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+     * The marker interface specifying the parameters used to initialize a {@code
+     * CertStore} instance.
+     */
+    /**
+      * @Involve
+      * interface Elastos.Core.ICloneable;
+      */
+    interface ICertStoreParameters {
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

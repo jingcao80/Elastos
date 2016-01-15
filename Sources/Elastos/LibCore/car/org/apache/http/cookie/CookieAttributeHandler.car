@@ -1,0 +1,70 @@
+
+module
+{
+
+    interface Org.Apache.Http.Cookie.ISetCookie;
+    interface Org.Apache.Http.Cookie.ICookieOrigin;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Cookie {
+
+    /**
+     * Ths interface represents a cookie attribute handler responsible
+     * for parsing, validating, and matching a specific cookie attribute,
+     * such as path, domain, port, etc.
+     *
+     * Different cookie specifications can provide a specific
+     * implementation for this class based on their cookie handling
+     * rules.
+     *
+     * @author jain.samit@gmail.com (Samit Jain)
+     *
+     * @since 4.0
+     */
+    interface ICookieAttributeHandler {
+
+        /**
+         * Parse the given cookie attribute value and update the corresponding
+         * {@link org.apache.http.cookie.Cookie} property.
+         *
+         * @param cookie {@link org.apache.http.cookie.Cookie} to be updated
+         * @param value cookie attribute value from the cookie response header
+         */
+        Parse(
+            [in] ISetCookie* cookie,
+            [in] String value);
+
+        /**
+         * Peforms cookie validation for the given attribute value.
+         *
+         * @param cookie {@link org.apache.http.cookie.Cookie} to validate
+         * @param origin the cookie source to validate against
+         * @throws MalformedCookieException if cookie validation fails for this attribute
+         */
+        Validate(
+            [in] ICookie* cookie,
+            [in] ICookieOrigin* origin);
+
+        /**
+         * Matches the given value (property of the destination host where request is being
+         * submitted) with the corresponding cookie attribute.
+         *
+         * @param cookie {@link org.apache.http.cookie.Cookie} to match
+         * @param origin the cookie source to match against
+         * @return <tt>true</tt> if the match is successful; <tt>false</tt> otherwise
+         */
+        Match(
+            [in] ICookie* cookie,
+            [in] ICookieOrigin* origin,
+            [out] Boolean* result);
+
+    }
+
+    } // namespace Cookie
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,1324 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.IO.IInputStream;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Utility.IDisplayMetrics;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.Utility.ITypedValue;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Graphics.IMovie;
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    interface Elastos.Droid.Content.Res.IXmlResourceParser;
+    interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.Content.Res.ICompatibilityInfo;
+    interface Elastos.Droid.Content.Res.ITypedArray;
+    interface Elastos.Droid.Content.Res.IAssetManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+
+    /**
+     * This class holds the current attribute values for a particular theme. In
+     * other words, a Theme is a set of values for resource attributes; these are
+     * used in conjunction with TypedArray to resolve the final value for an attribute.
+     *
+     * @sa TypedArray
+     * <p>
+     * The Theme's attributes come into play in two ways: (1) a styled attribute
+     * can explicit reference a value in the theme through the "?themeAttribute"
+     * syntax; (2) if no value has been defined for a particular styled attribute,
+     * as a last resort we will try to find that attribute's value in the Theme.
+     * <p>
+     * You will normally use the obtainStyledAttributes(AttributeSet, int[], int,
+     * int) APIs to retrieve XML attributes with style and theme information applied.
+     *
+     * @sa obtainStyledAttributes(AttributeSet, int[], int, int)
+     */
+
+    [deprecated]
+    interface IResourcesTheme {
+        /**
+         * Place new attribute values into the theme.  The style resource
+         * specified by <var>resid</var> will be retrieved from this Theme's
+         * resources, its values placed into the Theme object.
+         *
+         * <p>The semantics of this function depends on the <var>force</var>
+         * argument:  If false, only values that are not already defined in
+         * the theme will be copied from the system resource; otherwise, if
+         * any of the style's attributes are already defined in the theme, the
+         * current values in the theme will be overwritten.
+         *
+         * @param resid The resource ID of a style resource from which to
+         *              obtain attribute values.
+         * @param force If true, values in the style resource will always be
+         *              used in the theme; otherwise, they will only be used
+         *              if not already defined in the theme.
+         */
+        ApplyStyle(
+            [in] Int32 resid,
+            [in] Boolean force);
+
+        /**
+         * Set this theme to hold the same contents as the theme
+         * <var>other</var>.  If both of these themes are from the same
+         * Resources object, they will be identical after this function
+         * returns.  If they are from different Resources, only the resources
+         * they have in common will be set in this theme.
+         *
+         * @param other The existing Theme to copy from.
+         */
+        SetTo(
+            [in] IResourcesTheme* other);
+
+        /**
+         * Return a StyledAttributes holding the values defined by
+         * <var>Theme</var> which are listed in <var>attrs</var>.
+         *
+         * <p>Be sure to call StyledAttributes.recycle() when you are done with
+         * the array.
+         *
+         * @param attrs The desired attributes.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return Returns a TypedArray holding an array of the attribute values.
+         * Be sure to call TypedArray#recycle() TypedArray.recycle()
+         * when done with it.
+         *
+         * @sa TypedArray#recycle() TypedArray.recycle()
+         *
+         * @see Resources#obtainAttributes
+         * @see #obtainStyledAttributes(int, int[])
+         * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
+         */
+        ObtainStyledAttributes(
+            [in] ArrayOf<Int32>* attrs,
+            [out] ITypedArray** styles);
+
+        /**
+         * Return a StyledAttributes holding the values defined by the style
+         * resource <var>resid</var> which are listed in <var>attrs</var>.
+         *
+         * <p>Be sure to call StyledAttributes.recycle() when you are done with
+         * the array.
+         *
+         * @param resid The desired style resource.
+         * @param attrs The desired attributes in the style.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return Returns a TypedArray holding an array of the attribute values.
+         * Be sure to call TypedArray#recycle() TypedArray.recycle()
+         * when done with it.
+         *
+         * @sa TypedArray#recycle() TypedArray.recycle()
+         *
+         * @see Resources#obtainAttributes
+         * @see #obtainStyledAttributes(int[])
+         * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
+         */
+        ObtainStyledAttributes(
+            [in] Int32 resid,
+            [in] ArrayOf<Int32>* attrs,
+            [out] ITypedArray** styles);
+
+        /**
+         * Return a StyledAttributes holding the attribute values in
+         * <var>set</var>
+         * that are listed in <var>attrs</var>.  In addition, if the given
+         * AttributeSet specifies a style class (through the "style" attribute),
+         * that style will be applied on top of the base attributes it defines.
+         *
+         * <p>Be sure to call StyledAttributes.recycle() when you are done with
+         * the array.
+         *
+         * <p>When determining the final value of a particular attribute, there
+         * are four inputs that come into play:</p>
+         *
+         * <ol>
+         *     <li> Any attribute values in the given AttributeSet.
+         *     <li> The style resource specified in the AttributeSet (named
+         *     "style").
+         *     <li> The default style specified by <var>defStyleAttr</var> and
+         *     <var>defStyleRes</var>
+         *     <li> The base values in this theme.
+         * </ol>
+         *
+         * <p>Each of these inputs is considered in-order, with the first listed
+         * taking precedence over the following ones.  In other words, if in the
+         * AttributeSet you have supplied <code>&lt;Button
+         * textColor="#ff000000"&gt;</code>, then the button's text will
+         * <em>always</em> be black, regardless of what is specified in any of
+         * the styles.
+         *
+         * @param set The base set of attribute values.  May be null.
+         * @param attrs The desired attributes to be retrieved.
+         * @param defStyleAttr An attribute in the current theme that contains a
+         *                     reference to a style resource that supplies
+         *                     defaults values for the StyledAttributes.  Can be
+         *                     0 to not look for defaults.
+         * @param defStyleRes A resource identifier of a style resource that
+         *                    supplies default values for the StyledAttributes,
+         *                    used only if defStyleAttr is 0 or can not be found
+         *                    in the theme.  Can be 0 to not look for defaults.
+         *
+         * @return Returns a TypedArray holding an array of the attribute values.
+         * Be sure to call TypedArray#recycle() TypedArray.recycle()
+         * when done with it.
+         *
+         * @sa TypedArray#recycle() TypedArray.recycle()
+         *
+         * @see Resources#obtainAttributes
+         * @see #obtainStyledAttributes(int[])
+         * @see #obtainStyledAttributes(int, int[])
+         */
+        ObtainStyledAttributes(
+            [in] IAttributeSet* set,
+            [in] ArrayOf<Int32>* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes,
+            [out] ITypedArray** styles);
+
+        /**
+         * Retrieve the value of an attribute in the Theme.  The contents of
+         * <var>outValue</var> are ultimately filled in by Resources#getValue.
+         *
+         * @sa Resources#getValue
+         *
+         * @param resid The resource identifier of the desired theme
+         *              attribute.
+         * @param outValue Filled in with the ultimate resource value supplied
+         *                 by the attribute.
+         * @param resolveRefs If true, resource references will be walked; if
+         *                    false, <var>outValue</var> may be a
+         *                    TYPE_REFERENCE.  In either case, it will never
+         *                    be a TYPE_ATTRIBUTE.
+         *
+         * @return boolean Returns true if the attribute was found and
+         *         <var>outValue</var> is valid, else false.
+         */
+        ResolveAttribute(
+            [in] Int32 resid,
+            [in] ITypedValue* outValue,
+            [in] Boolean resolveRefs,
+            [out] Boolean* isFounded);
+
+        /**
+         * Print contents of this theme out to the log.  For debugging only.
+         *
+         * @param priority The log priority to use.
+         * @param tag The log tag to use.
+         * @param prefix Text to prefix each line printed.
+         */
+        Dump(
+            [in] Int32 priority,
+            [in] String tag,
+            [in] String prefix);
+    }
+
+    [deprecated]
+    interface IResources {
+        const String path_separate = " / ";
+
+        /**
+         * Return the string value associated with a particular resource ID.  The
+         * returned object will be a String if this is a plain string; it will be
+         * some other type of CharSequence if it is styled.
+         * {@more}
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return CharSequence The string data associated with the resource, plus
+         *         possibly styled text information.
+         */
+        GetText(
+            [in] Int32 id,
+            [out] ICharSequence** csq);
+
+        /**
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return CharSequence The string data associated with the resource, plus
+         *         possibly styled text information.
+         */
+        GetQuantityText(
+            [in] Int32 id,
+            [in] Int32 quantity,
+            [out] ICharSequence** seq);
+
+        /**
+         * Return the string value associated with a particular resource ID.  It
+         * will be stripped of any styled text information.
+         * {@more}
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return String The string data associated with the resource,
+         * stripped of styled text information.
+         */
+        GetString(
+            [in] Int32 id,
+            [out] String* str);
+
+        /**
+         * Return the string value associated with a particular resource ID,
+         * substituting the format arguments as defined in java.util.Formatter
+         * and java.lang.String#format. It will be stripped of any styled text
+         * information.
+         *
+         * @sa java.util.Formatter
+         * @sa java.lang.String#format
+         * {@more}
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @param formatArgs The format arguments that will be used for substitution.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return String The string data associated with the resource,
+         * stripped of styled text information.
+         */
+        GetString(
+            [in] Int32 id,
+            [in] ArrayOf<IInterface*>* formatArgs,
+            [out] String* str);
+
+        /**
+         * Return the string value associated with a particular resource ID for a particular
+         * numerical quantity, substituting the format arguments as defined in
+         * java.util.Formatter and java.lang.String#format. It will be
+         * stripped of any styled text information.
+         *
+         * @sa java.util.Formatter
+         * @sa java.lang.String#format
+         * {@more}
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         * @param quantity The number used to get the correct string for the current language's
+         *           plural rules.
+         * @param formatArgs The format arguments that will be used for substitution.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return String The string data associated with the resource,
+         * stripped of styled text information.
+         */
+        GetQuantityString(
+            [in] Int32 id,
+            [in] Int32 quantity,
+            [in] ArrayOf<IInterface*>* formatArgs,
+            [out] String* str);
+
+        /**
+         * Return the string value associated with a particular resource ID for a particular
+         * numerical quantity.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         * @param quantity The number used to get the correct string for the current language's
+         *           plural rules.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return String The string data associated with the resource,
+         * stripped of styled text information.
+         */
+        GetQuantityString(
+            [in] Int32 id,
+            [in] Int32 quantity,
+            [out] String* str);
+
+        /**
+         * Return the string value associated with a particular resource ID.  The
+         * returned object will be a String if this is a plain string; it will be
+         * some other type of CharSequence if it is styled.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @param def The default CharSequence to return.
+         *
+         * @return CharSequence The string data associated with the resource, plus
+         *         possibly styled text information, or def if id is 0 or not found.
+         */
+        GetText(
+            [in] Int32 id,
+            [in] ICharSequence* def,
+            [out] ICharSequence** csq);
+
+        /**
+         * Return the styled text array associated with a particular resource ID.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return The styled text array associated with the resource.
+         */
+        GetTextArray(
+            [in] Int32 id,
+            [out, callee] ArrayOf<ICharSequence*>* seqs);
+
+        /**
+         * Return the string array associated with a particular resource ID.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return The string array associated with the resource.
+         */
+        GetStringArray(
+            [in] Int32 id,
+            [out, callee] ArrayOf<String>* array);
+
+        /**
+         * Return the int array associated with a particular resource ID.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+         *
+         * @return The int array associated with the resource.
+         */
+        GetInt32Array(
+            [in] Int32 id,
+            [out, callee] ArrayOf<Int32>* ints);
+
+        /**
+         * Return an array of heterogeneous values.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return Returns a TypedArray holding an array of the array values.
+         * Be sure to call TypedArray#recycle() TypedArray.recycle()
+         * when done with it.
+         *
+         * @sa TypedArray#recycle() TypedArray.recycle()
+         */
+        ObtainTypedArray(
+            [in] Int32 id,
+            [out] ITypedArray** array);
+
+        /**
+         * Retrieve a dimensional for a particular resource ID.  Unit
+         * conversions are based on the current {@sa DisplayMetrics} associated
+         * with the resources.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return Resource dimension value multiplied by the appropriate
+         * metric.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @see #getDimensionPixelOffset
+         * @see #getDimensionPixelSize
+         */
+        GetDimension(
+            [in] Int32 id,
+            [out] Float* dim);
+
+        /**
+         * Retrieve a dimensional for a particular resource ID for use
+         * as an offset in raw pixels.  This is the same as
+         * #getDimension, except the returned value is converted to
+         * integer pixels for you.  An offset conversion involves simply
+         * truncating the base value to an integer.
+         *
+         * @sa #getDimension
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return Resource dimension value multiplied by the appropriate
+         * metric and truncated to integer pixels.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @see #getDimension
+         * @see #getDimensionPixelSize
+         */
+        GetDimensionPixelOffset(
+            [in] Int32 id,
+            [out] Int32* offset);
+
+        /**
+         * Retrieve a dimensional for a particular resource ID for use
+         * as a size in raw pixels.  This is the same as
+         * #getDimension, except the returned value is converted to
+         * integer pixels for use as a size.  A size conversion involves
+         * rounding the base value, and ensuring that a non-zero base value
+         * is at least one pixel in size.
+         *
+         * @sa #getDimension
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return Resource dimension value multiplied by the appropriate
+         * metric and truncated to integer pixels.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @see #getDimension
+         * @see #getDimensionPixelOffset
+         */
+        GetDimensionPixelSize(
+            [in] Int32 id,
+            [out] Int32* size);
+
+        /**
+         * Retrieve a fractional unit for a particular resource ID.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         * @param base The base value of this fraction.  In other words, a
+         *             standard fraction is multiplied by this value.
+         * @param pbase The parent base value of this fraction.  In other
+         *             words, a parent fraction (nn%p) is multiplied by this
+         *             value.
+         *
+         * @return Attribute fractional value multiplied by the appropriate
+         * base value.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         */
+        GetFraction(
+            [in] Int32 id,
+            [in] Int32 base,
+            [in] Int32 pbase,
+            [out] Float* fraction);
+
+        /**
+         * Return a drawable object associated with a particular resource ID.
+         * Various types of objects will be returned depending on the underlying
+         * resource -- for example, a solid color, PNG image, scalable image, etc.
+         * The Drawable API hides these implementation details.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return Drawable An object that can be used to draw this resource.
+         */
+        GetDrawable(
+            [in] Int32 id,
+            [out] IDrawable** drawable);
+
+        /**
+         * Return a drawable object associated with a particular resource ID and
+         * styled for the specified theme. Various types of objects will be
+         * returned depending on the underlying resource -- for example, a solid
+         * color, PNG image, scalable image, etc.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         * @param theme The theme used to style the drawable attributes, may be {@code null}.
+         * @return Drawable An object that can be used to draw this resource.
+         * @throws NotFoundException Throws NotFoundException if the given ID does
+         *         not exist.
+         */
+        GetDrawable(
+            [in] Int32 id,
+            [in] IResourcesTheme* theme,
+            [out] IDrawable** drawable);
+
+        /**
+         * Return a drawable object associated with a particular resource ID for the
+         * given screen density in DPI. This will set the drawable's density to be
+         * the device's density multiplied by the ratio of actual drawable density
+         * to requested density. This allows the drawable to be scaled up to the
+         * correct size if needed. Various types of objects will be returned
+         * depending on the underlying resource -- for example, a solid color, PNG
+         * image, scalable image, etc. The Drawable API hides these implementation
+         * details.
+         *
+         * @param id The desired resource identifier, as generated by the aapt tool.
+         *            This integer encodes the package, type, and resource entry.
+         *            The value 0 is an invalid identifier.
+         * @param density the desired screen density indicated by the resource as
+         *            found in DisplayMetrics.
+         *
+         * @sa DisplayMetrics
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does
+         *             not exist.
+         * @return Drawable An object that can be used to draw this resource.
+         */
+        GetDrawableForDensity(
+            [in] Int32 id,
+            [in] Int32 density,
+            [out] IDrawable** drawable);
+
+        /**
+         * Return a drawable object associated with a particular resource ID for the
+         * given screen density in DPI and styled for the specified theme.
+         *
+         * @param id The desired resource identifier, as generated by the aapt tool.
+         *            This integer encodes the package, type, and resource entry.
+         *            The value 0 is an invalid identifier.
+         * @param density The desired screen density indicated by the resource as
+         *            found in {@link DisplayMetrics}.
+         * @param theme The theme used to style the drawable attributes, may be {@code null}.
+         * @return Drawable An object that can be used to draw this resource.
+         * @throws NotFoundException Throws NotFoundException if the given ID does
+         *             not exist.
+         */
+        GetDrawableForDensity(
+            [in] Int32 id,
+            [in] Int32 density,
+            [in] IResourcesTheme* theme,
+            [out] IDrawable** drawable);
+
+        /**
+         * Return a movie object associated with the particular resource ID.
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         */
+        GetMovie(
+            [in] Int32 id,
+            [out] IMovie** movie);
+
+        /**
+         * Return a color integer associated with a particular resource ID.
+         * If the resource holds a complex
+         * android.content.res.ColorStateList, then the default color from
+         * the set is returned.
+         *
+         * @sa android.content.res.ColorStateList
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return Returns a single color value in the form 0xAARRGGBB.
+         */
+        GetColor(
+            [in] Int32 id,
+            [out] Int32* color);
+
+        /**
+         * Return a color state list associated with a particular resource ID.  The
+         * resource may contain either a single raw color value, or a complex
+         *android.content.res.ColorStateList holding multiple possible colors.
+         *
+         * @sa android.content.res.ColorStateList
+         *
+         * @param id The desired resource identifier of a ColorStateList,
+         *        as generated by the aapt tool. This integer encodes the package, type, and resource
+         *        entry. The value 0 is an invalid identifier.
+         *
+         * @sa ColorStateList
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return Returns a ColorStateList object containing either a single
+         * solid color or multiple colors that can be selected based on a state.
+         */
+        GetColorStateList(
+            [in] Int32 id,
+            [out] IColorStateList** list);
+
+        /**
+         * Return a boolean associated with a particular resource ID.  This can be
+         * used with any integral resource value, and will return true if it is
+         * non-zero.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return Returns the boolean value contained in the resource.
+         */
+        GetBoolean(
+            [in] Int32 id,
+            [out] Boolean* b);
+
+        /**
+         * Return an integer associated with a particular resource ID.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return Returns the integer value contained in the resource.
+         */
+        GetInteger(
+            [in] Int32 id,
+            [out] Int32* i);
+
+        /**
+         * Retrieve a floating-point value for a particular resource ID.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return Returns the floating-point value contained in the resource.
+         *
+         * @throws NotFoundException Throws NotFoundException if the given ID does
+         *         not exist or is not a floating-point value.
+         * @hide Pending API council approval.
+         */
+        GetFloat(
+            [in] Int32 id,
+            [out] Float* f);
+
+        /**
+         * Return an XmlResourceParser through which you can read a view layout
+         * description for the given resource ID.  This parser has limited
+         * functionality -- in particular, you can't change its input, and only
+         * the high-level events are available.
+         *
+         * <p>This function is really a simple wrapper for calling
+         * #getXml with a layout resource.'
+         *
+         * @sa #getXml
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return A new parser object through which you can read
+         *         the XML data.
+         *
+         * @see #getXml
+         */
+        GetLayout(
+            [in] Int32 id,
+            [out] IXmlResourceParser** parser);
+
+        /**
+         * Return an XmlResourceParser through which you can read an animation
+         * description for the given resource ID.  This parser has limited
+         * functionality -- in particular, you can't change its input, and only
+         * the high-level events are available.
+         *
+         * <p>This function is really a simple wrapper for calling
+         * #getXml with an animation resource.
+         *
+         * @sa #getXml
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return A new parser object through which you can read
+         *         the XML data.
+         *
+         * @see #getXml
+         */
+        GetAnimation(
+            [in] Int32 id,
+            [out] IXmlResourceParser** animation);
+
+        /**
+         * Return an XmlResourceParser through which you can read a generic XML
+         * resource for the given resource ID.
+         *
+         * <p>The XmlPullParser implementation returned here has some limited
+         * functionality.  In particular, you can't change its input, and only
+         * high-level parsing events are available (since the document was
+         * pre-parsed for you at build time, which involved merging text and
+         * stripping comments).
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @return A new parser object through which you can read
+         *         the XML data.
+         *
+         * @see android.util.AttributeSet
+         */
+        GetXml(
+            [in] Int32 id,
+            [out] IXmlResourceParser** xml);
+
+        /**
+         * Open a data stream for reading a raw resource.  This can only be used
+         * with resources whose value is the name of an asset files -- that is, it can be
+         * used to open drawable, sound, and raw resources; it will fail on string
+         * and color resources.
+         *
+         * @param id The resource identifier to open, as generated by the appt
+         *           tool.
+         *
+         * @return InputStream Access to the resource data.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         */
+        OpenRawResource(
+            [in] Int32 id,
+            [out] IInputStream** res);
+
+        /**
+         * Open a data stream for reading a raw resource.  This can only be used
+         * with resources whose value is the name of an asset file -- that is, it can be
+         * used to open drawable, sound, and raw resources; it will fail on string
+         * and color resources.
+         *
+         * @param id The resource identifier to open, as generated by the appt tool.
+         * @param value The TypedValue object to hold the resource information.
+         *
+         * @return InputStream Access to the resource data.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         */
+        OpenRawResource(
+            [in] Int32 id,
+            [in] ITypedValue* value,
+            [out] IInputStream** res);
+
+        /**
+         * Open a file descriptor for reading a raw resource.  This can only be used
+         * with resources whose value is the name of an asset files -- that is, it can be
+         * used to open drawable, sound, and raw resources; it will fail on string
+         * and color resources.
+         *
+         * <p>This function only works for resources that are stored in the package
+         * as uncompressed data, which typically includes things like mp3 files
+         * and png images.
+         *
+         * @param id The resource identifier to open, as generated by the appt
+         *           tool.
+         *
+         * @return AssetFileDescriptor A new file descriptor you can use to read
+         * the resource.  This includes the file descriptor itself, as well as the
+         * offset and length of data where the resource appears in the file.  A
+         * null is returned if the file exists but is compressed.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         */
+        OpenRawResourceFd(
+            [in] Int32 id,
+            [out] IAssetFileDescriptor** des);
+
+        /**
+         * Return the raw data associated with a particular resource ID.
+         *
+         * @param id The desired resource identifier, as generated by the aapt
+         *           tool. This integer encodes the package, type, and resource
+         *           entry. The value 0 is an invalid identifier.
+         * @param outValue Object in which to place the resource data.
+         * @param resolveRefs If true, a resource that is a reference to another
+         *                    resource will be followed so that you receive the
+         *                    actual final resource data.  If false, the TypedValue
+         *                    will be filled in with the reference itself.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         */
+        GetValue(
+            [in] Int32 id,
+            [in] ITypedValue* outValue,
+            [in] Boolean resolveRefs);
+
+        /**
+        * Get the raw value associated with a resource with associated density.
+        *
+        * @param id resource identifier
+        * @param density density in DPI
+        * @param resolveRefs If true, a resource that is a reference to another
+        *            resource will be followed so that you receive the actual final
+        *            resource data. If false, the TypedValue will be filled in with
+        *            the reference itself.
+        * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+        * @throws NotFoundException Throws NotFoundException | if the given ID does
+        *             not exist.
+        * @see #getValue(String, TypedValue, boolean)
+        */
+        GetValueForDensity(
+            [in] Int32 id,
+            [in] Int32 density,
+            [in] ITypedValue* outValue,
+            [in] Boolean resolveRefs);
+
+        /**
+         * Return the raw data associated with a particular resource ID.
+         * See getIdentifier() for information on how names are mapped to resource
+         * IDs, and getString(int) for information on how string resources are
+         * retrieved.
+         *
+         * <p>Note: use of this function is discouraged.  It is much more
+         * efficient to retrieve resources by identifier than by name.
+         *
+         * @param name The name of the desired resource.  This is passed to
+         *             getIdentifier() with a default type of "string".
+         * @param outValue Object in which to place the resource data.
+         * @param resolveRefs If true, a resource that is a reference to another
+         *                    resource will be followed so that you receive the
+         *                    actual final resource data.  If false, the TypedValue
+         *                    will be filled in with the reference itself.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         */
+         GetValue(
+            [in] String name,
+            [in] ITypedValue* outValue,
+            [in] Boolean resolveRefs);
+
+        /**
+         * Generate a new Theme object for this set of Resources.  It initially
+         * starts out empty.
+         *
+         * @return Theme The newly created Theme container.
+         */
+        NewTheme(
+            [out] IResourcesTheme** theme);
+
+        /**
+         * Retrieve a set of basic attribute values from an AttributeSet, not
+         * performing styling of them using a theme and/or style resources.
+         *
+         * @param set The current attribute values to retrieve.
+         * @param attrs The specific attributes to be retrieved.
+         * @return Returns a TypedArray holding an array of the attribute values.
+         * Be sure to call TypedArray#recycle() TypedArray.recycle()
+         * when done with it.
+         *
+         * @sa TypedArray#recycle() TypedArray.recycle()
+         *
+         * @see Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
+         */
+        ObtainAttributes(
+            [in] IAttributeSet* set,
+            [in] ArrayOf<Int32>* attrs,
+            [out] ITypedArray** array);
+
+        /**
+         * Store the newly updated configuration.
+         */
+        UpdateConfiguration(
+            [in] IConfiguration* config,
+            [in] IDisplayMetrics* metrics);
+
+        /**
+         * @hide
+         */
+        UpdateConfiguration(
+            [in] IConfiguration* config,
+            [in] IDisplayMetrics* metrics,
+            [in] ICompatibilityInfo* compat);
+
+        /**
+         * Return the current display metrics that are in effect for this resource
+         * object.  The returned object should be treated as read-only.
+         *
+         * @return The resource's current display metrics.
+         */
+        GetDisplayMetrics(
+            [out] IDisplayMetrics** metrics);
+
+        /**
+         * Return the current configuration that is in effect for this resource
+         * object.  The returned object should be treated as read-only.
+         *
+         * @return The resource's current configuration.
+         */
+        GetConfiguration(
+            [out] IConfiguration** config);
+
+        /**
+         * Return the compatibility mode information for the application.
+         * The returned object should be treated as read-only.
+         *
+         * @return compatibility info. null if the app does not require compatibility mode.
+         * @hide
+         */
+        GetCompatibilityInfo(
+            [out] ICompatibilityInfo** ci);
+
+        /**
+         * This is just for testing.
+         * @hide
+         */
+        SetCompatibilityInfo(
+            [in] ICompatibilityInfo* ci);
+
+        /**
+         * Return a resource identifier for the given resource name.  A fully
+         * qualified resource name is of the form "package:type/entry".  The first
+         * two components (package and type) are optional if defType and
+         * defPackage, respectively, are specified here.
+         *
+         * <p>Note: use of this function is discouraged.  It is much more
+         * efficient to retrieve resources by identifier than by name.
+         *
+         * @param name The name of the desired resource.
+         * @param defType Optional default resource type to find, if "type/" is
+         *                not included in the name.  Can be null to require an
+         *                explicit type.
+         * @param defPackage Optional default package to find, if "package:" is
+         *                   not included in the name.  Can be null to require an
+         *                   explicit package.
+         *
+         * @return int The associated resource identifier.  Returns 0 if no such
+         *         resource was found.  (0 is not a valid resource ID.)
+         */
+        GetIdentifier(
+            [in] String name,
+            [in] String defType,
+            [in] String defPackage,
+            [out] Int32* id);
+
+        /**
+         * Return the full name for a given resource identifier.  This name is
+         * a single string of the form "package:type/entry".
+         *
+         * @param resid The resource identifier whose name is to be retrieved.
+         *
+         * @return A string holding the name of the resource.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @see #getResourcePackageName
+         * @see #getResourceTypeName
+         * @see #getResourceEntryName
+         */
+        GetResourceName(
+            [in] Int32 resid,
+            [out] String* name);
+
+        /**
+         * Return the package name for a given resource identifier.
+         *
+         * @param resid The resource identifier whose package name is to be
+         * retrieved.
+         *
+         * @return A string holding the package name of the resource.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @see #getResourceName
+         */
+        GetResourcePackageName(
+            [in] Int32 resid,
+            [out] String* name);
+
+        /**
+         * Return the type name for a given resource identifier.
+         *
+         * @param resid The resource identifier whose type name is to be
+         * retrieved.
+         *
+         * @return A string holding the type name of the resource.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @see #getResourceName
+         */
+        GetResourceTypeName(
+            [in] Int32 resid,
+            [out] String* name);
+
+        /**
+         * Return the entry name for a given resource identifier.
+         *
+         * @param resid The resource identifier whose entry name is to be
+         * retrieved.
+         *
+         * @return A string holding the entry name of the resource.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws NotFoundException Throws NotFoundException | if the given ID does not exist.
+         *
+         * @see #getResourceName
+         */
+        GetResourceEntryName(
+            [in] Int32 resid,
+            [out] String* name);
+
+        /**
+         * Parse a series of android.R.styleable#Extra &lt;extra&gt; tags from
+         * an XML file.  You call this when you are at the parent tag of the
+         * extra tags, and it return once all of the child tags have been parsed.
+         * This will call #parseBundleExtra for each extra tag encountered.
+         *
+         * @sa android.R.styleable#Extra &lt;extra&gt;
+         * @sa #parseBundleExtra
+         * @param parser The parser from which to retrieve the extras.
+         * @param outBundle A Bundle in which to place all parsed extras.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value |
+         * :---|
+         * XmlPullParserException
+         * IOException
+         */
+        ParseBundleExtras(
+            [in] IXmlResourceParser* parser,
+            [in] IBundle* outBundle);
+
+        /**
+         * Parse a name/value pair out of an XML tag holding that data.  The
+         * AttributeSet must be holding the data defined by
+         * {@sa android.R.styleable#Extra}.  The following value types are supported:
+         * <ul>
+         * <li> TypedValue#TYPE_STRING:
+         * Bundle#putCharSequence Bundle.putCharSequence()
+         * <li> TypedValue#TYPE_INT_BOOLEAN:
+         * Bundle#putCharSequence Bundle.putBoolean()
+         * <li> TypedValue#TYPE_FIRST_INT- TypedValue#TYPE_LAST_INT:
+         * Bundle#putCharSequence Bundle.putBoolean()
+         * <li> TypedValue#TYPE_FLOAT:
+         * Bundle#putCharSequence Bundle.putFloat()
+         * </ul>
+         *
+         * android.R.styleable#Extra.  The following value types are supported:
+         *
+         * @sa android.R.styleable#Extra
+         * <ul>
+         * @sa TypedValue#TYPE_STRING
+         * @sa Bundle#putCharSequence Bundle.putCharSequence()
+         * @sa TypedValue#TYPE_INT_BOOLEAN
+         * @sa Bundle#putCharSequence Bundle.putBoolean()
+         * @sa TypedValue#TYPE_FIRST_INT
+         * @sa TypedValue#TYPE_LAST_INT
+         * @sa Bundle#putCharSequence Bundle.putBoolean()
+         * @sa TypedValue#TYPE_FLOAT
+         * @sa Bundle#putCharSequence Bundle.putFloat()
+         *
+         * @param tagName The name of the tag these attributes come from; this is
+         * only used for reporting error messages.
+         * @param attrs The attributes from which to retrieve the name/value pair.
+         * @param outBundle The Bundle in which to place the parsed value.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * @throws XmlPullParserException | If the attributes are not valid.
+         */
+        ParseBundleExtra(
+            [in] String tagName,
+            [in] IAttributeSet* attrs,
+            [in] IBundle* outBundle);
+
+        /**
+         * Retrieve underlying AssetManager storage for these resources.
+         */
+        GetAssets(
+            [out] IAssetManager** manager);
+
+        /**
+         * Call this to remove all cached loaded layout resources from the
+         * Resources object.  Only intended for use with performance testing
+         * tools.
+         */
+        FlushLayoutCache();
+
+        /**
+         * Start preloading of resource data using this Resources object.  Only
+         * for use by the zygote process for loading common system resources.
+         * {@hide}
+         */
+        StartPreloading();
+
+        /**
+         * Called by zygote when it is done preloading resources, to change back
+         * to normal Resources operation.
+         */
+        FinishPreloading();
+    }
+
+    interface IResourcesHelper {
+        SelectDefaultTheme(
+            [in] Int32 curTheme,
+            [in] Int32 targetSdkVersion,
+            [out] Int32* value);
+
+        SelectSystemTheme(
+            [in] Int32 curTheme,
+            [in] Int32 targetSdkVersion,
+            [in] Int32 orig,
+            [in] Int32 holo,
+            [in] Int32 dark,
+            [in] Int32 deviceDefault,
+            [out] Int32* value);
+
+        /**
+         * Return a global shared Resources object that provides access to only
+         * system resources (no application resources), and is not configured for
+         * the current screen (can not use dimension units, does not change based
+         * on orientation, etc).
+         */
+        GetSystem(
+            [out] IResources** res);
+
+        /**
+         * Update the system resources configuration if they have previously
+         * been initialized.
+         *
+         * @hide
+         */
+        UpdateSystemConfiguration(
+            [in] IConfiguration* config,
+            [in] IDisplayMetrics* metrics,
+            [in] ICompatibilityInfo* compat);
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

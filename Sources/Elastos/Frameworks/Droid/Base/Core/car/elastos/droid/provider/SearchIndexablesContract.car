@@ -1,0 +1,179 @@
+module
+{
+    interface Elastos.Droid.Content.IContentResolver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    interface ISearchIndexablesContract {
+        /**
+         * Intent action used to identify {@link SearchIndexablesProvider}
+         * instances. This is used in the {@code <intent-filter>} of a {@code <provider>}.
+         */
+        const String PROVIDER_INTERFACE = "android.content.action.SEARCH_INDEXABLES_PROVIDER";
+
+        /**
+         * Indexable reference names.
+         */
+        const String INDEXABLES_XML_RES = "indexables_xml_res";
+
+        /**
+         * Indexable raw data names.
+         */
+        const String INDEXABLES_RAW = "indexables_raw";
+
+        /**
+         * Non indexable data keys.
+         */
+        const String NON_INDEXABLES_KEYS = "non_indexables_key";
+
+        /**
+         * Indexable xml resources columns indices.
+         */
+        const Int32 COLUMN_INDEX_XML_RES_RANK = 0;
+        const Int32 COLUMN_INDEX_XML_RES_RESID = 1;
+        const Int32 COLUMN_INDEX_XML_RES_CLASS_NAME = 2;
+        const Int32 COLUMN_INDEX_XML_RES_ICON_RESID = 3;
+        const Int32 COLUMN_INDEX_XML_RES_INTENT_ACTION = 4;
+        const Int32 COLUMN_INDEX_XML_RES_INTENT_TARGET_PACKAGE = 5;
+        const Int32 COLUMN_INDEX_XML_RES_INTENT_TARGET_CLASS = 6;
+
+        /**
+         * Indexable raw data columns indices.
+         */
+        const Int32 COLUMN_INDEX_RAW_RANK = 0;
+        const Int32 COLUMN_INDEX_RAW_TITLE = 1;
+        const Int32 COLUMN_INDEX_RAW_SUMMARY_ON = 2;
+        const Int32 COLUMN_INDEX_RAW_SUMMARY_OFF = 3;
+        const Int32 COLUMN_INDEX_RAW_ENTRIES = 4;
+        const Int32 COLUMN_INDEX_RAW_KEYWORDS = 5;
+        const Int32 COLUMN_INDEX_RAW_SCREEN_TITLE = 6;
+        const Int32 COLUMN_INDEX_RAW_CLASS_NAME = 7;
+        const Int32 COLUMN_INDEX_RAW_ICON_RESID = 8;
+        const Int32 COLUMN_INDEX_RAW_INTENT_ACTION = 9;
+        const Int32 COLUMN_INDEX_RAW_INTENT_TARGET_PACKAGE = 10;
+        const Int32 COLUMN_INDEX_RAW_INTENT_TARGET_CLASS = 11;
+        const Int32 COLUMN_INDEX_RAW_KEY = 12;
+        const Int32 COLUMN_INDEX_RAW_USER_ID = 13;
+
+        /**
+         * Non indexable data keys columns indices.
+         */
+        const Int32 COLUMN_INDEX_NON_INDEXABLE_KEYS_KEY_VALUE = 0;
+
+        /**
+         * ContentProvider path for indexable xml resources.
+         */
+        GetINDEXABLES_XML_RES_PATH(
+            [out] String* result);
+
+        /**
+         * ContentProvider path for indexable raw data.
+         */
+        GetINDEXABLES_RAW_PATH(
+            [out] String* result);
+
+        /**
+         * ContentProvider path for non indexable data keys.
+         */
+        GetNON_INDEXABLES_KEYS_PATH(
+            [out] String* result);
+
+        /**
+         * Indexable xml resources columns.
+         */
+        GetINDEXABLES_XML_RES_COLUMNS(
+            [out, callee] ArrayOf<String>* resColumns);
+
+        /**
+         * Indexable raw data columns.
+         */
+        GetINDEXABLES_RAW_COLUMNS(
+            [out, callee] ArrayOf<String>* rawColumns);
+
+        /**
+         * Indexable raw data columns.
+         */
+        GetNON_INDEXABLES_KEYS_COLUMNS(
+            [out, callee] ArrayOf<String>* nonColumns);
+    }
+
+    interface ISearchIndexablesContractXmlResource {
+
+        const String MIME_TYPE = "vnd.android.cursor.dir/indexables_xml_res";
+
+        /**
+         * XML resource ID for the {@link android.preference.PreferenceScreen} to load and index.
+         */
+        const String COLUMN_XML_RESID = "xmlResId";
+
+        GetXmlResourceMIME_TYPE(
+            [out] String* result);
+    }
+
+    interface ISearchIndexablesContractRawData {
+
+        const String MIME_TYPE = "vnd.android.cursor.dir/indexables_raw";
+
+        /**
+         * Title's raw data.
+         */
+        const String COLUMN_TITLE = "title";
+
+        /**
+         * Summary's raw data when the data is "ON".
+         */
+        const String COLUMN_SUMMARY_ON = "summaryOn";
+
+        /**
+         * Summary's raw data when the data is "OFF".
+         */
+        const String COLUMN_SUMMARY_OFF = "summaryOff";
+
+        /**
+         * Entries associated with the raw data (when the data can have several values).
+         */
+        const String COLUMN_ENTRIES = "entries";
+
+        /**
+         * Keywords' raw data.
+         */
+        const String COLUMN_KEYWORDS = "keywords";
+
+        /**
+         * Fragment or Activity title associated with the raw data.
+         */
+        const String COLUMN_SCREEN_TITLE = "screenTitle";
+
+        /**
+         * Key associated with the raw data. The key needs to be unique.
+         */
+        const String COLUMN_KEY = "key";
+
+        /**
+         * UserId associated with the raw data.
+         */
+        const String COLUMN_USER_ID = "user_id";
+
+        GetRawDataMIME_TYPE(
+            [out] String* result);
+    }
+
+    interface ISearchIndexablesContractNonIndexableKey {
+
+        const String MIME_TYPE = "vnd.android.cursor.dir/non_indexables_key";
+
+        /**
+         * Key for the non indexable data.
+         */
+        const String COLUMN_KEY_VALUE = "key";
+
+        GetNonIndexableKeyMIME_TYPE(
+            [out] String* result);
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+}

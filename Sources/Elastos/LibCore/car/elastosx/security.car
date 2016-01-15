@@ -1,0 +1,126 @@
+
+module
+{
+    merge("security/auth/callback/Exceptions.car");
+    merge("security/auth/callback/IPasswordCallback.car");
+    merge("security/auth/login/Exceptions.car");
+    merge("security/auth/Exceptions.car");
+    merge("security/auth/IPrivateCredentialPermission.car");
+    merge("security/auth/ISubject.car");
+    merge("security/auth/ISubjectDomainCombiner.car");
+    merge("security/auth/x500/IX500Principal.car");
+    merge("security/auth/callback/ICallback.car");
+    merge("security/auth/callback/ICallbackHandler.car");
+    merge("security/auth/IDestroyable.car");
+    merge("security/auth/IAuthPermission.car");
+    merge("security/cert/ICertificate.car");
+    merge("security/cert/IX509Certificate.car");
+
+    interface Elastos.Security.IPrincipal;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.Utility.IMap;
+    interface Elastos.Security.IPermission;
+    interface Elastos.Security.IGuard;
+    interface Elastos.Utility.ISet;
+    interface Elastos.Security.IDomainCombiner;
+
+    namespace Elastosx {
+    namespace Security {
+    namespace Auth {
+    namespace Callback {
+
+    class CPasswordCallback {
+        constructor(
+            [in] String prompt,
+            [in] Boolean echoOn);
+
+        interface ICallback;
+        interface IPasswordCallback;
+    }
+
+    } // namespace Callback
+
+    namespace X500 {
+
+    [deprecated]
+    class CX500Principal {
+        constructor(
+            [in] ArrayOf<Byte>* name1);
+
+        constructor(
+            [in] IInputStream *is);
+
+        constructor(
+            [in] String name2);
+
+        constructor(
+            [in] String name,
+            [in] IMap *keywordMap);
+
+        interface IPrincipal;
+        interface IX500Principal;
+    }
+
+    } // namespace X500
+
+    class CAuthPermission {
+        constructor(
+            [in] String name);
+
+        constructor(
+            [in] String name,
+            [in] String actions);
+
+        interface IAuthPermission;
+        // interface IBasicPermission; // TODO: Waiting for IBasicPermission
+        interface IPermission;
+        interface IGuard;
+    }
+
+    class CPrivateCredentialPermission {
+        constructor(
+            [in] String name,
+            [in] String action);
+
+        interface IGuard;
+        interface IPermission;
+        interface IPrivateCredentialPermission;
+    }
+
+    class CSubject {
+        constructor();
+
+        constructor(
+            [in] Boolean readOnly,
+            [in] ISet *subjPrincipals,
+            [in] ISet *pubCredentials,
+            [in] ISet *privCredentials);
+
+        interface ISubject;
+    }
+
+    singleton class CSubjectHelper {
+        interface ISubjectHelper;
+    }
+
+    class CSubjectDomainCombiner {
+        constructor(
+            [in] ISubject *sub);
+
+        interface IDomainCombiner;
+        interface ISubjectDomainCombiner;
+    }
+
+    } // namespace Auth
+
+    namespace Cert {
+
+    singleton class CX509CertificateHelper {
+        interface IX509CertificateHelper;
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastosx
+
+}

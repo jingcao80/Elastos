@@ -1,0 +1,17 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+     /**
+     * @Involve
+     * interface Elastos.Core.IAppendable;
+     * interface IWriter;
+     */
+    interface IFilterWriter {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

@@ -1,0 +1,70 @@
+
+module
+{
+    interface Elastos.Droid.Net.IScoredNetwork;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * A service for updating network scores from a network scorer application.
+     * @hide
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IINetworkScoreService {
+        /**
+         * Update scores.
+         * @return whether the update was successful.
+         * @throws SecurityException if the caller is not the current active scorer.
+         */
+        UpdateScores(
+            [in] ArrayOf<IScoredNetwork*>* networks,
+            [out] Boolean* result);
+
+        /**
+         * Clear all scores.
+         * @return whether the clear was successful.
+         * @throws SecurityException if the caller is neither the current active scorer nor the system.
+         */
+        ClearScores(
+            [out] Boolean* result);
+
+        /**
+         * Set the active scorer and clear existing scores.
+         * @param packageName the package name of the new scorer to use.
+         * @return true if the operation succeeded, or false if the new package is not a valid scorer.
+         * @throws SecurityException if the caller is not the system.
+         */
+        SetActiveScorer(
+            [in] String packageName,
+            [out] Boolean* result);
+
+        /**
+         * Disable the current active scorer and clear existing scores.
+         * @throws SecurityException if the caller is not the current scorer or the system.
+         */
+        DisableScoring();
+
+        /**
+         * Register a network subsystem for scoring.
+         *
+         * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}.
+         * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores.
+         * @throws SecurityException if the caller is not the system.
+         * @throws IllegalArgumentException if a score cache is already registed for this type.
+         * @hide
+         */
+        RegisterNetworkScoreCache(
+            [in] Int32 networkType,
+            [in] IINetworkScoreCache* scoreCache);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

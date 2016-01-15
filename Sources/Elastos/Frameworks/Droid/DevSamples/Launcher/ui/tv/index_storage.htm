@@ -1,0 +1,1345 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>个人云存储</title>
+
+<script type="text/javascript">
+
+window.onerror=function(m,u,l){
+	var s='Err:' + m + '\r\n'+'Line:' + l + '\r\n'+'URL:' + u + '\r\n';
+	alert(s);
+};
+window.onload=function(){TVUI.init();};
+
+window.onfocus=function(){
+	//alert('window.focus');
+	document.body.focus();
+	
+}
+window.onblur=function(){
+	//alert('window.blur');
+}
+
+window.log_data=[];
+window.log=function(s){
+	log_data.push('<p>'+s+'</p>');
+	if(log_data.length>10)log_data.shift();
+	var o=document.getElementById('log_cont');
+	o.innerHTML=log_data.join('');
+}
+
+</script>
+
+<meta http-equiv="Conent-Type" content="text/html;charset=utf-8">
+
+<link rel="shortcut icon" href="../favicon.ico">
+
+<link rel="stylesheet" type="text/css" href="storage/css/storage.css" />
+
+<style id="css_mod_com" type="text/css">
+	div{position:absolute;overflow:hidden;}
+	div.text,span{font-size:1.4vw;}
+	.filemenu span{font-size:1.1vw;}
+	input{font-size:1.4vw;background:#dddddd;border:1px solid gray;}
+
+	#mainmenu span{
+		font-size:1.6vw;
+		font-weight:400;
+		font-family:黑体;
+		color:#666666;
+	}
+
+	#option_folders td{background:red;}
+	#option_folders_bak div{position:static;}
+
+</style>
+
+<meta name="viewport" content="width=480; initial-scale=.6667; user-scalable=0" />
+
+</head>
+
+<body>
+
+<div id='log' style="position:absolute;left:0%;top:100%;width:100%;height:0%;background:lightsteelblue;overflow:hidden;">
+	<div id='log_cont' style="position:absolute;left:0%;top:0%;width:100%;height:100%;background:lightsteelblue;overflow:auto;">
+	</div>
+</div>
+
+<div id="main" style="position:absolute;width:100%;height:100%;">
+	<div style="left:0%;height:0%;width:100%;height:100%;overflow:hidden;border:none;background:lightsteelblue;">
+		<img  src="storage/img/bg/Elastos_Bg.jpg" style="display:none;width:100%;height:100%;">
+	</div>
+
+	<div style="left:0%;top:0%;width:100%;height:12%;">
+		<div style="top:0%;left:0%;width:100%;height:100%;background:rgba(155,155,255,0.1);"></div>
+
+		<div style="top:0%;left:0%;width:84%;height:100%;">
+			<div tab="[0,0],[0,0]" cmd="cmd_storage_file_back" class="kb btn_blue_out" style="top:18%;left:1%;width:3.5%;height:64%;">
+				<img src="storage/img/main_menu/arrow_left_normal.png" style="width:100%;height:100%;">
+			</div>
+			<div tab="[0,0],[0,1]" class="kb btn_blue_out" style="top:18%;left:6%;width:5%;height:64%;">
+				<img src="storage/img/main_menu/back_logo.png" style="width:100%;height:100%;">
+			</div>
+			<div tab="[0,0],[0,2]" class="kb btn_blue_out" style="top:18%;left:13%;width:8%;height:64%;">
+				<div style="left:0%;top:30%;width:100%;height:70%;text-align:center;">
+					<span>我的云盘</span>
+				</div>
+			</div>
+			<div tab="[0,0],[0,3-8]" class="kb btn_blue_out" style="top:18%;left:22%;width:70%;height:64%;border:1px solid rgba(255,255,255,0.2);">
+				<div id="curpath" style="padding-left:4px;left:0%;top:0%;width:99%;height:100%;border:1px solid rgba(255,255,255,0.2);">
+					<span>root</span>
+					<span>path1</span>
+				</div>
+			</div>
+			<div tab="[0,0],[0,9]" class="kb btn_blue_out" cmd="cmd_storage_message" style="top:18%;left:93%;width:5%;height:64%;">
+				<div style="left:5%;top:5%;width:90%;height:90%;"><img src="storage/img/main_menu/mail_normal.png" style="width:100%;height:100%;"></div>
+				<div style="left:65%;top:0%;width:35%;height:35%;"><img src="storage/img/main_menu/news.png" style="width:100%;height:100%;"></div>
+			</div>
+		</div>
+
+		<div style="top:0%;left:84%;width:1%;height:100%;">
+			<div style="top:5%;left:40%;width:10%;height:90%;background:rgba(255,255,255,0.3);"></div>
+			<div style="top:5%;left:51%;width:10%;height:90%;background:rgba(0,0,155,0.5);"></div>
+		</div>
+
+		<div style="top:0%;left:85%;width:15%;height:100%;">
+			<div tab="[0,0],[0,10-11]" class="kb btn_blue_out" style="top:18%;left:5%;width:32%;height:64%;">
+				<img id="user_portrait" src="storage/img/usr/person_login.png" style="width:100%;height:100%;">
+			</div>
+			<div tab="[0,0],[0,12]" cmd="cmd_storage_login" class="kb btn_blue_out" style="top:18%;left:45%;width:45%;height:64%;">
+				<div id="current_username" class="text" style="left:10%;top:30%;width:80%;height:40%;">登录</div>
+			</div>
+		</div>
+	</div>
+
+	<div style="left:0%;top:12%;width:100%;height:9%;background:rgba(255,255,255,0.2);border:none;">
+		<div id="mainmenu" style="top:1%;left:1%;width:52%;height:100%;">
+			<div id="storage_cat_file" cmd="cmd_storage_cat_file" tab="[0,0],[1,0-1]" class="kb btn_purple_out" style="top:15%;left:1%;width:18%;height:65%;">
+				<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+				<div style="left:0%;top:20%;width:100%;height:80%;text-align:center;"><span>全部文件</span></div>
+			</div>
+			<div cmd="cmd_storage_cat_app" tab="[0,0],[1,2]" class="kb btn_purple_out" style="top:15%;left:19%;width:18%;height:65%;">
+				<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+				<div style="left:0%;top:20%;width:100%;height:80%;text-align:center;"><span>应用程序</span></div>
+			</div>
+			<div cmd="cmd_storage_cat_image" tab="[0,0],[1,3]" class="kb btn_purple_out" style="top:15%;left:37%;width:12%;height:65%;">
+				<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+				<div style="left:0%;top:20%;width:100%;height:80%;text-align:center;"><span>图片</span></div>
+			</div>
+			<div cmd="cmd_storage_cat_video" tab="[0,0],[1,4]" class="kb btn_purple_out" style="top:15%;left:49%;width:12%;height:65%;">
+				<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+				<div style="left:0%;top:20%;width:100%;height:80%;text-align:center;"><span>视频</span></div>
+			</div>
+			<div cmd="cmd_storage_cat_music" tab="[0,0],[1,5]" class="kb btn_purple_out" style="top:15%;left:61%;width:12%;height:65%;">
+				<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+				<div style="left:0%;top:20%;width:100%;height:80%;text-align:center;"><span>音乐</span></div>
+			</div>
+			<div cmd="cmd_storage_cat_doc" tab="[0,0],[1,6]" class="kb btn_purple_out" style="top:15%;left:73%;width:12%;height:65%;">
+				<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+				<div style="left:0%;top:20%;width:100%;height:80%;text-align:center;"><span>文档</span></div>
+			</div>
+			<div cmd="cmd_storage_cat_fav" tab="[0,0],[1,7]" class="kb btn_purple_out" style="top:15%;left:85%;width:14%;height:65%;">
+				<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+				<div style="left:0%;top:20%;width:100%;height:80%;text-align:center;"><span>收藏夹</span></div>
+			</div>
+		</div>
+
+		<div style="top:0%;left:53%;width:1%;height:100%;">
+			<div style="top:5%;left:40%;width:10%;height:90%;background:rgba(255,255,255,0.3);"></div>
+			<div style="top:5%;left:51%;width:10%;height:90%;background:rgba(0,0,155,0.5);"></div>
+		</div>
+
+		<div style="top:0%;left:54%;width:16%;height:100%;">
+			<div tab="[0,0],[1,8]" class="kb btn_purple_out" style="top:0%;left:0%;width:100%;height:100%;">
+				<div  class="btn_purple_out" style="left:0%;top:15%;width:100%;height:65%;font-size:16px;text-align:center;">
+					<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+					<div style="left:0%;top:12%;width:100%;height:98%;text-align:center;"><nobr><span id="share_nums">0</span><span>个新的分享</spsn></nobr></div>
+				</div>
+				<div style="left:0%;top:50%;width:100%;height:48%;display:none;">
+					<div class="btn_purple_out" style="left:0%;top:0%;width:50%;height:100%;font-size:16px;text-align:center;">
+						<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+						<div style="left:0%;top:1%;width:100%;height:98%;font-size:16px;text-align:center;"><nobr><span>分享给我的</spsn></nobr></div>
+					</div>
+					<div class="btn_purple_out" style="left:50%;top:0%;width:50%;height:100%;font-size:16px;text-align:center;">
+						<div class="main_btn_bk" style="width:100%;height:100%;"><img src="storage/img/file/title_focus.png" style="width:100%;height:100%;"></div>
+						<div style="left:0%;top:1%;width:100%;height:98%;font-size:16px;text-align:center;"><nobr><span>我分享的</spsn></nobr></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div style="top:0%;left:70%;width:1%;height:100%;">
+			<div style="top:5%;left:40%;width:10%;height:90%;background:rgba(255,255,255,0.3);"></div>
+			<div style="top:5%;left:51%;width:10%;height:90%;background:rgba(0,0,155,0.5);"></div>
+		</div>
+
+		<div style="top:0%;left:71%;width:24%;height:100%;">
+			<div tab="[0,0],[1,9-10]" class="kb btn_blue_out" style="top:15%;left:5%;width:65%;height:65%;">
+				<div style="top:0%;left:0%;width:100%;height:100%;background:rgba(200,200,200,1);"></div>
+				<div style="top:0%;left:0%;width:80%;height:100%;">
+					<input id="keyword" type="text" value="" title="按文件名搜索" style="width:100%;height:100%;">
+				</div>
+				<div cmd="cmd_storage_file_clearkeyword" class="btn_blue_out" style="top:20%;left:82%;width:14%;height:60%;">
+					<img src="storage/img/file/clear_keyword.png" style="width:100%;height:100%;">
+				</div>
+			</div>
+			<div tab="[0,0],[1,11]" cmd="cmd_storage_file_search" class="kb btn_blue_out" style="top:15%;left:75%;width:14%;height:65%;">
+				<img src="storage/img/sub_menu/search_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+
+		<div style="top:0%;left:94%;width:1%;height:100%;">
+			<div style="top:5%;left:40%;width:10%;height:90%;background:rgba(255,255,255,0.3);"></div>
+			<div style="top:5%;left:51%;width:10%;height:90%;background:rgba(0,0,155,0.5);"></div>
+		</div>
+
+		<div style="top:0%;left:95%;width:5%;height:100%;">
+			<div tab="[0,0],[1,12]" class="kb btn_blue_out" cmd="cmd_storage_menu" class="btn_blue_out" style="top:15%;left:15%;width:65%;height:65%;">
+				<img src="storage/img/sub_menu/sequence_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+	</div>
+
+	<div id="main_fileitems" style="display:none;left:0%;top:21%;width:100%;height:79%;background:rgba(255,255,255,0.3);">
+		<div style="top:2%;left:0%;width:5%;height:95%;">
+			<div tab="[0,0],[2-4,0]" id="fileitems_left" cmd="cmd_storage_scroll_left" class="kb btn_blue_out" style="display:none;left:20%;top:44%;width:60%;height:12%;">
+				<img src="storage/img/file/left_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+		<div class="tabgrid_fileitems" grid="{'tab_par':'[0,0]','tab_row':['2','3','4'],'tab_column':['1-3','4-7','8','9-11']}" style="top:2%;left:5%;width:90%;height:95%;">
+			<div style="left:0%;top:0%;width:100%;height:0%;">
+				<div id="%%tabgrid_fileitem_0_0%%" cmd="cmd_storage_fileitem" class="fileitem" style="left:0%;top:0%;width:25%;height:100%;">
+					<div style="left:5%;top:5%;width:89%;height:88%;border:2px solid rgba(255,255,255,0.0);">
+						<img src="storage/img/file/blue.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:5%;top:5%;width:89%;height:88%;border:2px solid rgba(255,255,255,0.0);">
+						<div class="" style="left:25%;top:2%;width:50%;height:80%;">
+							<img class="file_icon type_document" src="storage/img/file/movie.png" style="width:100%;height:100%;">
+						</div>
+					</div>
+					<div style="left:10%;top:78%;width:80%;height:22%;font-size:16px;text-align:center;">
+						<span class="file_name">文件夹00</span>
+					</div>
+					<div  tab="%%[0,0],[2,1-3]%%" class="kb btn_blue_out" style="left:5%;top:5%;width:89%;height:88%;">
+					</div>
+					<div style="left:85%;top:0%;width:12%;height:20%;">
+						<img class="pin_state ping" src="storage/img/file/ping.png" style="width:100%;height:100%;">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div style="top:2%;left:95%;width:5%;height:95%;">
+			<div tab="[0,0],[2-4,12]" id="fileitems_right" cmd="cmd_storage_scroll_right" class="kb btn_blue_out" style="display:none;left:20%;top:44%;width:60%;height:12%;">
+				<img src="storage/img/file/right_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+	</div>
+
+<div id="menu_storage_login" style="display:none;left:31%;top:29%;width:38%;height:51%;">
+	<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:15%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_title.png" style="width:100%;height:100%;"></img>
+	</div>
+	<div class="btn_blue_out" style="left:0%;top:15%;width:100%;height:85%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_body.png" style="width:100%;height:100%;"></img>
+	</div>
+
+	<div style="left:8%;top:5%;width:50%;height:15%;color:white;font-size:24px;">
+		<span>登录</span>
+	</div>
+
+	<div style="left:0%;top:18%;width:100%;height:80%;">
+		<div style="left:8%;top:12%;width:17%;height:14%;">
+			<span>用户名</span>
+		</div>
+		<div class="btn_blue_out" style="left:25%;top:8%;width:44%;height:14%;">
+			<input id="username" type="text" value="yang.yong@kortide.com" style="width:100%;height:100%;background:ivory;">
+		</div>
+
+		<div style="left:8%;top:32%;width:17%;height:12%;">
+			<span>密码</span>
+		</div>
+		<div class="btn_blue_out" style="left:25%;top:28%;width:44%;height:14%;">
+			<input id="password" type="password" value="elastos" style="width:100%;height:100%;background:ivory;">
+		</div>
+		<div style="left:75%;top:32%;width:20%;height:12%;">
+			<span>忘记密码?</span>
+		</div>
+
+		<div style="left:8%;top:52%;width:80%;height:12%;">
+			<input type="checkbox">
+			<span>下次自动登录</span>
+		</div>
+
+		<div class="btn_blue_out" cmd="cmd_storage_login_confirm" style="left:10%;top:71%;width:35%;height:15%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:15%;left:4%;width:92%;height:85%;font-size:24px;color:white;text-align:center;"><span>登录</span></div>
+		</div>
+		<div cmd="cmd_storage_cancel" class="btn_blue_out" style="left:55%;top:71%;width:35%;height:15%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:15%;left:4%;width:92%;height:85%;font-size:24px;color:white;text-align:center;"><span>取消</span></div>
+		</div>
+		<div cmd="cmd_storage_regist_bak" class="btn_blue_out" style="display:none;left:55%;top:71%;width:35%;height:15%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:white;text-align:center;"><span>立即注册</span></div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_regist" style="display:none;left:31%;top:29%;width:38%;height:51%;">
+	<div style="left:0%;top:0%;width:100%;height:15%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_title.png" style="width:100%;height:100%;"></img>
+	</div>
+	<div style="left:0%;top:15%;width:100%;height:85%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_body.png" style="width:100%;height:100%;"></img>
+	</div>
+
+	<div style="left:8%;top:0%;width:50%;height:15%;color:white;font-size:24px;">
+		<span>用户注册</span>
+	</div>
+
+	<div style="left:15%;top:22%;width:70%;height:70%;">
+		<div style="left:0%;top:0%;width:100%;height:14%;">
+			<div style="left:0%;top:10%;width:30%;height:80%;"><span>邮箱</span></div>
+			<div style="left:30%;width:60%;height:100%;"><input type="text" style="width:100%;height:100%;"></div>
+		</div>
+		<div style="left:0%;top:20%;width:100%;height:14%;">
+			<div style="left:0%;top:10%;width:30%;height:80%;"><span>设置密码</span></div>
+			<div style="left:30%;width:60%;height:100%;"><input type="text" style="width:100%;height:100%;"></div>
+		</div>
+		<div style="left:0%;top:40%;width:100%;height:14%;">
+			<div style="left:0%;top:10%;width:30%;height:80%;"><span>昵称</span></div>
+			<div style="left:30%;width:60%;height:100%;"><input type="text" style="width:100%;height:100%;"></div>
+		</div>
+		<div style="left:0%;top:60%;width:100%;height:14%;">
+			<div style="left:0%;top:10%;width:30%;height:80%;"><span>验证码</span></div>
+			<div style="left:30%;width:60%;height:100%;"><input type="text" style="width:100%;height:100%;"></div>
+		</div>
+		<div style="left:0%;top:80%;width:100%;height:20%;">
+			<div class="btn_blue_out" cmd="cmd_storage_regist_confirm" style="left:10%;top:15%;width:35%;height:70%;">
+				<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+				<div style="top:0%;left:4%;width:92%;height:100%;font-size:20px;color:white;text-align:center;"><span>注册</span></div>
+			</div>
+			<div cmd="cmd_storage_cancel" class="btn_blue_out" style="left:55%;top:15%;width:35%;height:70%;">
+				<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+				<div style="top:0%;left:4%;width:92%;height:100%;font-size:20px;color:white;text-align:center;"><span>取消</span></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_usermenu" style="display:none;left:74%;top:8%;width:25%;height:61%;">
+	<div style="left:0%;top:0%;width:100%;height:7%;">
+		<div style="left:85%;top:0%;width:15%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:7%;width:100%;height:90%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_01.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div tab="[1,0],[0,0]" class="kb btn_blue_out" cmd="cmd_storage_usermenu_minisocials" style="left:5%;top:6%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">
+			<div style="top:20%;left:4%;width:92%;height:60%;color:white;"><span>My minisocials</span></div>
+		</div>
+		<div tab="[1,0],[1,0]" class="kb btn_blue_out" cmd="cmd_storage_usermenu_miniportals" style="left:5%;top:24%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">			
+			<div style="top:20%;left:4%;width:92%;height:60%;color:white;"><span>My miniportals</span></div>
+		</div>
+		<div tab="[1,0],[2,0]" class="kb btn_blue_out" cmd="cmd_storage_usermenu_account_set" style="left:5%;top:42%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">
+			<div style="top:20%;left:4%;width:92%;height:60%;color:white;"><span>帐号设置</span></div>
+		</div>
+		<div tab="[1,0],[3,0]" id="dom_storage_usermenu_account_bind" class="kb btn_blue_out" cmd="cmd_storage_usermenu_account_bind" style="left:5%;top:60%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">
+			<div id="menu_storage_usermenu_account_bind_text" class="text" style="top:20%;left:4%;width:92%;height:60%;color:white;">绑定该设备为当前帐户server</div>
+		</div>
+		<div tab="[1,0],[4,0]" class="kb btn_blue_out" cmd="cmd_storage_usermenu_logout" style="left:5%;top:78%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">
+			<div style="top:20%;left:4%;width:92%;height:60%;color:white;"><span>退出</span></div>
+		</div>
+	</div>
+</div>
+
+<div id="menu_main" style="display:none;left:79%;top:19%;width:20%;height:61%;">
+	<div style="left:0%;top:0%;width:100%;height:7%;">
+		<div style="left:85%;top:0%;width:15%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:7%;width:100%;height:90%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_01.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div tab="[1,0],[0,0]" class="kb btn_blue_out" cmd="cmd_storage_sortbytime" style="left:5%;top:6%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">
+			<div style="top:10%;left:4%;width:92%;height:80%;font-size:24px;color:white;"><span>按时间排序</span></div>
+		</div>
+		<div tab="[1,0],[1,0]" class="kb btn_blue_out" cmd="cmd_storage_sortbyname" style="left:5%;top:24%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">			
+			<div style="top:10%;left:4%;width:92%;height:80%;font-size:24px;color:white;"><span>按名称排序</span></div>
+		</div>
+		<div tab="[1,0],[2,0]" class="kb btn_blue_out" cmd="cmd_storage_paste" style="left:5%;top:42%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">
+			<div style="top:10%;left:4%;width:92%;height:80%;font-size:24px;color:white;"><span>粘贴</span></div>
+		</div>
+		<div tab="[1,0],[3,0]" class="kb btn_blue_out" cmd="cmd_storage_file_attach" style="left:5%;top:60%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">
+			<div style="top:10%;left:4%;width:92%;height:80%;font-size:24px;color:white;"><span>添加文件</span></div>
+		</div>
+		<div tab="[1,0],[4,0]" class="kb btn_blue_out" cmd="cmd_storage_file_newfolder" style="left:5%;top:78%;width:90%;height:14%;border:1px solid rgba(255,255,255,0.1);">
+			<div style="top:10%;left:4%;width:92%;height:80%;font-size:24px;color:white;"><span>新建文件夹</span></div>
+		</div>
+	</div>
+</div>
+
+<!---------------------fileitem menu begin--------------------------------->
+<div id="menu_storage_fileitem_folder" class="filemenu" style="display:none;left:29%;top:29%;width:38%;height:13%;background:rgba(255,255,255,0.6);">
+	<div style="left:0%;top:0%;width:100%;height:40%;">
+		<div style="left:45%;top:0%;width:8%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:40%;width:100%;height:60%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_04.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div style="left:2%;width:16%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_folder_open" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>打开</span>
+			</div>
+		</div>
+
+		<div style="left:18%;width:16%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_share" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>分享</span>
+			</div>
+		</div>
+		<div style="display:none;left:18%;width:16%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_noshare" class="btn_blue_out" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>取消<br>分享</span>
+			</div>
+		</div>
+		<div style="left:34%;width:16%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_privilege" class="btn_blue_out" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>权限<br>设置</span>
+			</div>
+		</div>
+
+		<div style="left:50%;width:16%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_copy" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>复制</span>
+			</div>
+		</div>
+		<div style="left:66%;width:16%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_detail" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>详情</span>
+			</div>
+		</div>
+		<div style="left:82%;width:16%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_delete" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>删除</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_fileitem_app" class="filemenu" style="display:none;left:29%;top:29%;width:38%;height:13%;background:rgba(255,255,255,0.6);">
+	<div style="left:0%;top:0%;width:100%;height:40%;">
+		<div style="left:45%;top:0%;width:8%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:40%;width:100%;height:60%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_04.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div style="left:1%;width:11%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_run" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>运行</span>
+			</div>
+		</div>
+
+		<div style="left:12%;width:11%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_share" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>分享</span>
+			</div>
+		</div>
+		<div style="display:none;left:12%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_noshare" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>取消<br>分享</span>
+			</div>
+		</div>
+		<div style="left:23%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_privilege" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>权限<br>设置</span>
+			</div>
+		</div>
+
+		<div style="left:34%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_pin" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>pin</span>
+			</div>
+		</div>
+		<div style="display:none;left:34%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_unpin" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>unpin</span>
+			</div>
+		</div>
+
+		<div style="left:45%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>收藏</span>
+			</div>
+		</div>
+		<div style="left:56%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark_word" class="btn_blue_out" style="left:10%;top:15%;width:75%;height:100%;color:#bbbbbb;text-align:center;">
+				<span>分类<br>标签</span>
+			</div>
+		</div>
+
+		<div style="left:67%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_copy" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>复制</span>
+			</div>
+		</div>
+		<div style="left:78%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_detail" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>详情</span>
+			</div>
+		</div>
+		<div style="left:89%;width:11%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_delete" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>删除</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_fileitem_picture" class="filemenu" style="display:none;left:29%;top:29%;width:38%;height:13%;background:rgba(255,255,255,0.6);">
+	<div style="left:0%;top:0%;width:100%;height:40%;">
+		<div style="left:45%;top:0%;width:8%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:40%;width:100%;height:60%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_04.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div style="left:2%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_open_picture" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>查看</span>
+			</div>
+		</div>
+
+		<div style="left:14%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_share" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>分享</span>
+			</div>
+		</div>
+		<div style="display:none;left:14%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_noshare" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>取消<br>分享</span>
+			</div>
+		</div>
+		<div style="left:26%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_privilege" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>权限<br>设置</span>
+			</div>
+		</div>
+
+		<div style="left:38%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>收藏</span>
+			</div>
+		</div>
+		<div style="left:50%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark_word" class="btn_blue_out" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>分类<br>标签</span>
+			</div>
+		</div>
+
+		<div style="left:62%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_copy" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>复制</span>
+			</div>
+		</div>
+		<div style="left:74%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_detail" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>详情</span>
+			</div>
+		</div>
+		<div style="left:86%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_delete" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>删除</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_fileitem_video" class="filemenu" style="display:none;left:29%;top:29%;width:38%;height:13%;background:rgba(255,255,255,0.6);">
+	<div style="left:0%;top:0%;width:100%;height:40%;">
+		<div style="left:45%;top:0%;width:8%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:40%;width:100%;height:60%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_04.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div style="left:2%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_play_video" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>播放</span>
+			</div>
+		</div>
+
+		<div style="left:14%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_share" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>分享</span>
+			</div>
+		</div>
+		<div style="display:none;left:14%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_noshare" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>取消<br>分享</span>
+			</div>
+		</div>
+		<div style="left:26%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_privilege" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>权限<br>设置</span>
+			</div>
+		</div>
+
+		<div style="left:38%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>收藏</span>
+			</div>
+		</div>
+		<div style="left:50%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark_word" class="btn_blue_out" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>分类<br>标签</span>
+			</div>
+		</div>
+
+		<div style="left:62%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_copy" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>复制</span>
+			</div>
+		</div>
+		<div style="left:74%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_detail" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>详情</span>
+			</div>
+		</div>
+		<div style="left:86%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_delete" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>删除</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_fileitem_audio" class="filemenu" style="display:none;left:29%;top:29%;width:38%;height:13%;background:rgba(255,255,255,0.6);">
+	<div style="left:0%;top:0%;width:100%;height:40%;">
+		<div style="left:45%;top:0%;width:8%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:40%;width:100%;height:60%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_04.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div style="left:2%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_play_audio" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>播放</span>
+			</div>
+		</div>
+
+		<div style="left:14%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_share" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>分享</span>
+			</div>
+		</div>
+		<div style="display:none;left:14%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_noshare" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>取消<br>分享</span>
+			</div>
+		</div>
+		<div style="left:26%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_privilege" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>权限<br>设置</span>
+			</div>
+		</div>
+
+		<div style="left:38%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>收藏</span>
+			</div>
+		</div>
+		<div style="left:50%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark_word" class="btn_blue_out" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>分类<br>标签</span>
+			</div>
+		</div>
+
+		<div style="left:62%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_copy" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>复制</span>
+			</div>
+		</div>
+		<div style="left:74%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_detail" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>详情</span>
+			</div>
+		</div>
+		<div style="left:86%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_delete" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>删除</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_fileitem_document" class="filemenu" style="display:none;left:29%;top:29%;width:38%;height:13%;background:rgba(255,255,255,0.6);">
+	<div style="left:0%;top:0%;width:100%;height:40%;">
+		<div style="left:45%;top:0%;width:8%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:40%;width:100%;height:60%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_04.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div style="left:2%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_browse" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>查看</span>
+			</div>
+		</div>
+
+		<div style="left:14%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_share" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>分享</span>
+			</div>
+		</div>
+		<div style="display:none;left:14%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_noshare" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>取消<br>分享</span>
+			</div>
+		</div>
+		<div style="left:26%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_privilege" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>权限<br>设置</span>
+			</div>
+		</div>
+
+		<div style="left:38%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>收藏</span>
+			</div>
+		</div>
+		<div style="left:50%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark_word" class="btn_blue_out" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>分类<br>标签</span>
+			</div>
+		</div>
+
+		<div style="left:62%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_copy" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>复制</span>
+			</div>
+		</div>
+		<div style="left:74%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_detail" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>详情</span>
+			</div>
+		</div>
+		<div style="left:86%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_delete" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>删除</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_fileitem_others" class="filemenu" style="display:none;left:29%;top:29%;width:38%;height:13%;background:rgba(255,255,255,0.6);">
+	<div style="left:0%;top:0%;width:100%;height:40%;">
+		<div style="left:45%;top:0%;width:8%;height:100%;">
+			<img src="storage/img/sub_menu/list_arrow.png" style="width:100%;height:100%;"></img>
+		</div>
+	</div>
+	<div style="left:0%;top:40%;width:100%;height:60%;">
+		<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+			<img src="storage/img/sub_menu/sub_menu_bg_04.png" style="width:100%;height:100%;"></img>
+		</div>
+
+		<div style="left:2%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_open_others" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>查看</span>
+			</div>
+		</div>
+
+		<div style="left:14%;width:12%;height:100%;border:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_share" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>分享</span>
+			</div>
+		</div>
+		<div style="display:none;left:14%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_noshare" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>取消<br>分享</span>
+			</div>
+		</div>
+		<div style="left:26%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div class="btn_blue_out" cmd="cmd_storage_file_privilege" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>权限<br>设置</span>
+			</div>
+		</div>
+
+		<div style="left:38%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>收藏</span>
+			</div>
+		</div>
+		<div style="left:50%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_mark_word" class="btn_blue_out" style="left:10%;top:15%;width:75%;height:70%;color:#bbbbbb;text-align:center;">
+				<span>分类<br>标签</span>
+			</div>
+		</div>
+
+		<div style="left:62%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_copy" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>复制</span>
+			</div>
+		</div>
+		<div style="left:74%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_detail" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>详情</span>
+			</div>
+		</div>
+		<div style="left:86%;width:12%;height:100%;border-right:1px solid rgba(255,255,255,0.1);">
+			<div cmd="cmd_storage_file_delete" class="btn_blue_out" style="left:10%;top:20%;width:75%;height:60%;color:#bbbbbb;text-align:center;">
+				<span>删除</span>
+			</div>
+		</div>
+	</div>
+</div>
+<!---------------------fileitem menu end--------------------------------->
+
+<div id="menu_storage_file_attach" style="display:none;left:31%;top:29%;width:38%;height:31%;">
+	<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_bg_02.png" style="width:100%;height:100%;"></img>
+	</div>
+
+	<div style="left:0%;top:22%;width:100%;height:77%;">
+		<div class="btn_blue_out" style="left:2.5%;top:5%;width:95%;height:25%;border:1px solid ivory;">
+			<div cmd="cmd_storage_file_camera" style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:#444444;"><span>拍照</span></div>
+		</div>
+		<div class="btn_blue_out" style="left:2.5%;top:36%;width:95%;height:25%;border:1px solid ivory;">
+			<div cmd="cmd_storage_file_local" style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:#444444;"><span>本地文件</span></div>
+		</div>
+		<div class="btn_blue_out" style="left:2.5%;top:67%;width:95%;height:25%;border:1px solid ivory;">
+			<div cmd="cmd_storage_file_mobile" style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:#444444;"><span>外地存储设备（名字）</span></div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_file_newfolder" style="display:none;left:31%;top:29%;width:38%;height:31%;">
+	<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_bg_03.png" style="width:100%;height:100%;"></img>
+	</div>
+
+	<div style="left:0%;top:22%;width:100%;height:77%;">
+		<div style="left:8%;top:22%;width:84%;height:20%;font-size:24px;">
+			<span>文件夹名</span>
+		</div>
+		<div class="btn_blue_out" style="left:33%;top:18%;width:60%;height:25%;">
+			<input id="newfoldername" type="text" value="" style="width:100%;height:100%;">
+		</div>
+		<div class="btn_blue_out" cmd="cmd_storage_file_newfolder_confirm" style="left:10%;top:62%;width:35%;height:25%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:white;text-align:center;"><span>创建</span></div>
+		</div>
+		<div cmd="cmd_storage_cancel" class="btn_blue_out" style="left:55%;top:62%;width:35%;height:25%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:white;text-align:center;"><span>取消</span></div>
+		</div>
+	</div>
+</div>
+<div id="menu_storage_file_pin" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+<div style="left:31%;top:29%;width:38%;height:31%;">
+	<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_bg_05.png" style="width:100%;height:100%;"></img>
+	</div>
+
+	<div style="left:0%;top:22%;width:100%;height:77%;">
+		<div cmd="cmd_storage_unpin" class="btn_blue_out" style="left:10%;top:62%;width:35%;height:25%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:white;text-align:center;"><span>确定</span></div>
+		</div>
+		<div cmd="cmd_storage_cancel" class="btn_blue_out" style="left:55%;top:62%;width:35%;height:25%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:white;text-align:center;"><span>取消</span></div>
+		</div>
+	</div>
+</div>
+</div>
+<div id="menu_storage_file_unpin" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+<div style="left:31%;top:29%;width:38%;height:31%;">
+	<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_bg_05.png" style="width:100%;height:100%;"></img>
+	</div>
+
+	<div style="left:0%;top:22%;width:100%;height:77%;">
+		<div cmd="cmd_storage_unpin" class="btn_blue_out" style="left:10%;top:62%;width:35%;height:25%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:white;text-align:center;"><span>确定</span></div>
+		</div>
+		<div cmd="cmd_storage_cancel" class="btn_blue_out" style="left:55%;top:62%;width:35%;height:25%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:0%;left:4%;width:92%;height:100%;font-size:24px;color:white;text-align:center;"><span>取消</span></div>
+		</div>
+	</div>
+</div>
+</div>
+
+<div id="menu_storage_file_copy" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+<div style="left:10%;top:10%;width:80%;height:80%;">
+	<div style="left:0%;top:0%;width:100%;height:10%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_title.png" style="width:100%;height:100%;"></img>
+	</div>
+	<div style="left:0%;top:10%;width:100%;height:90%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_body.png" style="width:100%;height:100%;"></img>
+	</div>
+
+	<div class="text" style="left:6%;top:4.5%;width:80%;height:5%;color:white;">
+		请选择要复制到的文件夹
+	</div>
+
+	<div style="left:5%;top:14%;width:90%;height:66%;background:lightsteelblue;border:1px solid #bbbbbb;">
+		<div id="main_fileitems_000" style="left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+			<div style="top:2%;left:0%;width:5%;height:95%;">
+				<div  tab="[0,0],[2-4,0]" id="folderitems_left" cmd="cmd_storage_folder_scroll_left" class="kb btn_blue_out" style="left:20%;top:44%;width:60%;height:12%;">
+					<img src="storage/img/file/left_normal.png" style="width:100%;height:100%;">
+				</div>
+			</div>
+			<div class="tabgrid_folders" grid="{'tab_par':'[0,0]','tab_row':['2','3','4'],'tab_column':['1-3','4-7','8','9-11']}" style="top:2%;left:5%;width:90%;height:95%;">
+				<div style="left:0%;top:0%;width:100%;height:0%;">
+					<div id="%%p_0_0%%" cmd="cmd_storage_folderitem" class="folderitem" style="left:0%;top:0%;width:25%;height:100%;">
+						<div style="left:5%;top:5%;width:89%;height:88%;border:2px solid rgba(255,255,255,0.0);">
+							<img src="storage/img/file/blue.png" style="width:100%;height:100%;">
+						</div>
+						<div style="left:5%;top:5%;width:89%;height:88%;border:2px solid rgba(255,255,255,0.0);">
+							<div class="" style="left:25%;top:2%;width:50%;height:80%;">
+								<img class="file_icon type_document" src="storage/img/file/movie.png" style="width:100%;height:100%;">
+							</div>
+						</div>
+						<div style="left:10%;top:78%;width:80%;height:22%;font-size:16px;text-align:center;">
+							<span class="file_name">文件夹00</span>
+						</div>
+						<div  tab="%%[0,0],[2,1-3]%%" class="kb btn_blue_out" style="left:5%;top:5%;width:89%;height:88%;">
+						</div>
+						<div style="left:85%;top:0%;width:12%;height:20%;">
+							<img class="pin_state ping" src="storage/img/file/ping.png" style="width:100%;height:100%;">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div style="top:2%;left:95%;width:5%;height:95%;">
+				<div  tab="[0,0],[2-4,12]" id="folderitems_right" cmd="cmd_storage_folder_scroll_right" class="kb btn_blue_out" style="left:20%;top:44%;width:60%;height:12%;">
+					<img src="storage/img/file/right_normal.png" style="width:100%;height:100%;">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div style="left:0%;top:82%;width:100%;height:10%;">
+		<div style="top:0%;left:0%;width:100%;height:100%;background:rgba(155,155,255,0.1);"></div>
+
+		<div style="top:0%;left:0%;width:74%;height:100%;">
+			<div tab="[0,0],[0,0]" cmd="cmd_storage_folder_back" class="kb btn_blue_out" style="top:18%;left:6%;width:3%;height:64%;">
+				<img src="storage/img/main_menu/arrow_left_normal.png" style="width:100%;height:100%;">
+			</div>
+			<div tab="[0,0],[0,2]" class="kb btn_blue_out" style="top:18%;left:11%;width:10%;height:64%;">
+				<div style="left:0%;top:20%;width:100%;height:70%;font-size:16px;text-align:center;">
+					<span>当前路径</span>
+				</div>
+			</div>
+			<div tab="[0,0],[0,3-8]" class="kb btn_blue_out" style="top:18%;left:22%;width:38%;height:64%;border:1px solid rgba(255,255,255,0.2);">
+				<div id="curfolderpath" style="padding-left:4px;left:0%;top:0%;width:99%;height:100%;border:1px solid rgba(255,255,255,0.2);">
+					<span>path</span>
+				</div>
+			</div>
+			<div tab="[0,0],[0,2]" class="kb btn_blue_out" style="top:18%;left:60%;width:10%;height:64%;">
+				<div style="left:0%;top:20%;width:100%;height:80%;font-size:16px;text-align:center;">
+					<span>文件名:</span>
+				</div>
+			</div>
+			<div tab="[0,0],[0,3-8]" class="kb btn_blue_out" style="top:18%;left:70%;width:26%;height:64%;border:1px solid rgba(255,255,255,0.2);">
+				<div style="padding0px;left:0%;top:0%;width:99%;height:100%;border:1px solid rgba(255,255,255,0.2);">
+					<input id="copytofilename" type="text" style="width:100%;height:100%;border:none;">
+				</div>
+			</div>
+		</div>
+
+		<div style="top:0%;left:74%;width:1%;height:100%;">
+			<div style="top:5%;left:40%;width:10%;height:90%;background:rgba(255,255,255,0.3);"></div>
+			<div style="top:5%;left:51%;width:10%;height:90%;background:rgba(0,0,155,0.5);"></div>
+		</div>
+
+		<div style="top:0%;left:75%;width:20%;height:100%;">
+			<div cmd="cmd_storage_paste_confirm" class="btn_blue_out" style="left:4%;top:10%;width:44%;height:70%;">
+				<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+				<div style="top:20%;left:4%;width:92%;height:80%;color:white;text-align:center;"><span>保存</span></div>
+			</div>
+			<div cmd="cmd_storage_cancel" class="btn_blue_out" style="left:52%;top:10%;width:44%;height:70%;">
+				<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+				<div style="top:20%;left:4%;width:92%;height:80%;color:white;text-align:center;"><span>取消</span></div>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+
+
+<div id="menu_storage_message" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+<div class="btn_black" style="left:30%;top:10%;width:60%;height:40%;">
+	<div style="left:0%;height:0%;width:100%;height:100%;overflow:hidden;background:lightsteelblue;">
+		<img  src="storage/img/bg/Elastos_Bg.jpg" style="display:none;width:100%;height:100%;">
+	</div>
+
+	<div id="detail_msgitems" style="left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+		<div style="top:2%;left:0%;width:5%;height:95%;">
+			<div  tab="[2,0],[2-3,0]" cmd="cmd_storage_groupuser_scroll_left" class="kb btn_blue_out" style="left:20%;top:38%;width:60%;height:24%;">
+				<img src="storage/img/file/left_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+
+		<div class="tabgrid_msgitems" grid="{'tab_par':'[2,0]','tab_row':['2','3','4','5','6','7'],'tab_column':['1']}" style="top:2%;left:5%;width:90%;height:95%;">
+			<div style="left:0%;top:0%;width:100%;height:0%;">
+				<div id="%%p_0_0%%" cmd="cmd_storage_useritem" class="msgitem" style="left:0%;top:0%;width:0%;height:100%;">
+
+					<div style="top:0%;left:0%;width:100%;height:100%;background:rgba(155,155,255,0.1);"></div>
+
+					<div  tab="%%[0,0],[2,1-3]%%" class="kb btn_blue_out" style="top:25%;left:1%;width:93%;height:60%;font-size:24px;border:1px solid rgba(255,255,255,0.5);">
+						<span>message</span>
+					</div>
+					<div cmd="cmd_storage_cancel" class="kb btn_blue_out" style="top:25%;left:95%;width:4%;height:60%;font-size:24px;border:1px solid rgba(255,255,255,0.5);">
+						<span>返回</span>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+
+		<div style="top:2%;left:95%;width:5%;height:95%;">
+			<div  tab="[2,0],[2-3,6]" cmd="cmd_storage_groupuser_scroll_right" class="kb btn_blue_out" style="left:20%;top:38%;width:60%;height:24%;">
+				<img src="storage/img/file/right_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+
+<div id="menu_storage_file_detail" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+<div class="btn_black" style="left:10%;top:10%;width:80%;height:80%;">
+	<div style="left:0%;height:0%;width:100%;height:100%;overflow:hidden;background:lightsteelblue;">
+		<img  src="storage/img/bg/Elastos_Bg.jpg" style="display:none;width:100%;height:100%;">
+	</div>
+
+	<div style="left:0%;top:0%;width:100%;height:12%;">
+		<div style="top:0%;left:0%;width:100%;height:100%;background:rgba(155,155,255,0.1);"></div>
+
+		<div  tab="[1,0],[0,0-5]" class="kb btn_blue_out" style="top:25%;left:1%;width:93%;height:40%;border:1px solid rgba(255,255,255,0.5);">
+			<span>filename</span>
+		</div>
+		<div  tab="[1,0],[0,6]" cmd="cmd_storage_cancel" class="kb btn_blue_out" style="top:25%;left:95%;width:4%;height:40%;font-size:24px;border:1px solid rgba(255,255,255,0.5);">
+			<span>返回</span>
+		</div>
+	</div>
+
+	<div style="left:0%;top:12%;width:100%;height:50%;background:rgba(255,255,255,0.2);border:none;">
+		<div style="left:0%;top:0%;width:100%;height:80%;">
+			<div style="left:0%;top:0%;width:15%;height:100%;">
+				<div style="left:10%;top:10%;width:80%;height:50%;">
+					<img src="storage/img/file/video.png" style="width:100%;height:100%;"></img>
+				</div>
+				<div style="left:10%;top:65%;width:80%;height:10%;font-size:24px;text-align:center;">
+					<span>filename</span>
+				</div>
+			</div>
+			<div style="left:15%;top:0%;width:85%;height:100%;">
+				<div style="left:2%;top:8%;width:96%;height:90%;border:1px solid rgba(255,255,255,0.5);">
+					fileinfo
+				</div>
+			</div>
+		</div>
+		<div style="left:0%;top:80%;width:100%;height:20%;">
+			<div style="left:1%;top:30%;width:20%;height:60%;font-size:24px;">
+				<span>文件分享名单</span>
+			</div>
+
+			<div  tab="[1,0],[1,0-5]" class="kb btn_blue_out" cmd="cmd_storage_file_share" style="left:88%;top:15%;width:4%;height:70%;">
+				<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/share/add_normal.png" style="width:100%;height:100%;"></img></div>
+			</div>
+			<div  tab="[1,0],[1,6]" class="kb btn_blue_out" cmd="cmd_storage_cancel" style="left:94%;top:15%;width:4%;height:70%;">
+				<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/share/delete_normal.png" style="width:100%;height:100%;"></img></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="detail_useritems" style="left:0%;top:62%;width:100%;height:38%;background:rgba(255,255,255,0.3);">
+		<div style="top:2%;left:0%;width:5%;height:95%;">
+			<div  tab="[2,0],[2-3,0]" cmd="cmd_storage_detailuser_scroll_left" class="kb btn_blue_out" style="left:20%;top:38%;width:60%;height:24%;">
+				<img src="storage/img/file/left_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+
+		<div class="tabgrid_useritems" grid="{'tab_par':'[2,0]','tab_row':['2','3'],'tab_column':['1','2','3','4','5']}" style="top:2%;left:5%;width:90%;height:95%;">
+			<div style="left:0%;top:0%;width:100%;height:0%;">
+				<div id="%%p_0_0%%" cmd="cmd_storage_useritem" class="useritem" style="left:0%;top:0%;width:0%;height:100%;">
+					<div style="left:5%;top:5%;width:89%;height:88%;border:2px solid rgba(255,255,255,0.0);">
+						<img src="storage/img/file/blue.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:10%;top:15%;width:40%;height:70%;">
+						<img class="file_icon" src="storage/img/share/p_001.jpg" style="width:100%;height:100%;">
+					</div>
+					<div style="left:36%;top:15%;width:14%;height:27%;">
+						<img class="file_icon" src="storage/img/share/bluecheck.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:36%;top:15%;width:14%;height:27%;">
+						<img class="file_icon rightcheck" src="storage/img/share/rightcheck.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:52%;top:15%;width:40%;height:20%;">
+						<span>friend_001</span>
+					</div>
+					<div style="left:52%;top:40%;width:40%;height:40%;">
+						<span class='file_name'>被分享<br>成员</span>
+					</div>
+					<div  tab="%%[0,0],[2,1-3]%%" class="kb btn_blue_out" style="left:5%;top:5%;width:89%;height:88%;">
+					</div>
+					<div style="left:85%;top:0%;width:12%;height:20%;display:none;">
+						<img class="pin_state ping" src="storage/img/file/ping.png" style="width:100%;height:100%;">
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<div style="top:2%;left:95%;width:5%;height:95%;">
+			<div  tab="[2,0],[2-3,6]" cmd="cmd_storage_detailuser_scroll_right" class="kb btn_blue_out" style="left:20%;top:38%;width:60%;height:24%;">
+				<img src="storage/img/file/right_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+
+
+<div id="menu_storage_file_sharecircle" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+<div class="btn_black" style="left:10%;top:10%;width:80%;height:80%;">
+	<div style="left:0%;height:0%;width:100%;height:100%;overflow:hidden;border:none;background:lightsteelblue;">
+		<img  src="storage/img/bg/Elastos_Bg.jpg" style="display:none;width:100%;height:100%;">
+	</div>
+
+	<div style="left:0%;top:0%;width:100%;height:12%;">
+		<div style="top:0%;left:0%;width:100%;height:100%;background:rgba(155,155,255,0.1);"></div>
+
+		<div  tab="[0,0],[0,0-3]" class="kb btn_blue_out" style="top:25%;left:1%;width:58%;height:40%;font-size:24px;border:1px solid rgba(255,255,255,0.2);">
+			<span>请选择分享圈</span>
+		</div>
+	</div>
+
+	<div id="detail_set_groupitems" style="left:0%;top:12%;width:100%;height:79%;background:rgba(255,255,255,0.3);">
+		<div style="top:2%;left:0%;width:5%;height:95%;">
+			<div  tab="[0,0],[1-4,0]" cmd="cmd_storage_group_scroll_left" class="kb btn_blue_out" style="left:20%;top:44%;width:60%;height:12%;">
+				<img src="storage/img/file/left_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+
+		<div class="tabgrid_set_useritems" grid="{'tab_par':'[2,0]','tab_row':['2','3','4'],'tab_column':['1','2','3','4']}" style="top:2%;left:5%;width:90%;height:95%;">
+			<div style="left:0%;top:0%;width:100%;height:0%;">
+				<div id="%%p_0_0%%" cmd="cmd_storage_groupitem" class="groupitem" style="left:0%;top:0%;width:0%;height:100%;">
+					<div style="left:5%;top:5%;width:89%;height:88%;border:2px solid rgba(255,255,255,0.0);">
+						<img src="storage/img/file/blue.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:10%;top:15%;width:40%;height:70%;">
+						<img class="file_icon" src="storage/img/share/p_001.jpg" style="width:100%;height:100%;">
+					</div>
+					<div style="left:36%;top:15%;width:14%;height:27%;display:none;">
+						<img class="file_icon" src="storage/img/share/bluecheck.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:36%;top:15%;width:14%;height:27%;display:none;">
+						<img class="file_icon rightcheck" src="storage/img/share/rightcheck.png" style="display:none;width:100%;height:100%;">
+					</div>
+					<div style="left:52%;top:15%;width:40%;height:20%;font-size:16px;">
+						<span>circle_001</span>
+					</div>
+					<div style="left:52%;top:40%;width:40%;height:40%;font-size:16px;">
+						<span class='file_name'>分享圈</span>
+					</div>
+					<div  tab="%%[0,0],[2,1-3]%%" class="kb btn_blue_out" style="left:5%;top:5%;width:89%;height:88%;">
+					</div>
+					<div style="left:85%;top:0%;width:12%;height:20%;display:none;">
+						<img class="pin_state ping" src="storage/img/file/ping.png" style="width:100%;height:100%;">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div style="top:2%;left:95%;width:5%;height:95%;">
+			<div  tab="[0,0],[1-4,6]" cmd="cmd_storage_group_scroll_right" class="kb btn_blue_out" style="left:20%;top:44%;width:60%;height:12%;">
+				<img src="storage/img/file/right_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+	</div>
+
+	<div style="left:0%;top:91%;width:100%;height:9%;background:rgba(255,255,255,0.2);border:none;">
+		<div  tab="[0,0],[5,0-3]" class="kb btn_blue_out" cmd="cmd_storage_sharecircle_create" style="left:30%;top:12%;width:15%;height:75%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:20%;left:4%;width:92%;height:60%;color:white;text-align:center;"><span>创建</span></div>
+		</div>
+		<div  tab="[0,0],[5,4-6]" class="kb btn_blue_out" cmd="cmd_storage_cancel" style="left:55%;top:12%;width:15%;height:75%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:20%;left:4%;width:92%;height:60%;color:white;text-align:center;"><span>取消</span></div>
+		</div>
+	</div>
+</div>
+</div>
+
+<div id="menu_storage_file_share" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+<div class="btn_black" style="left:10%;top:10%;width:80%;height:80%;">
+	<div style="left:0%;height:0%;width:100%;height:100%;overflow:hidden;border:none;background:lightsteelblue;">
+		<img  src="storage/img/bg/Elastos_Bg.jpg" style="display:none;width:100%;height:100%;">
+	</div>
+
+	<div style="left:0%;top:0%;width:100%;height:12%;">
+		<div style="top:0%;left:0%;width:100%;height:100%;background:rgba(155,155,255,0.1);"></div>
+
+		<div  tab="[0,0],[0,0-3]" class="kb btn_blue_out" style="top:25%;left:1%;width:30%;height:40%;font-size:24px;border:1px solid rgba(255,255,255,0.2);">
+			<span>文件&nbsp;</span>
+			<span>filename</span>
+		</div>
+		<div  tab="[0,0],[0,0-3]" class="kb btn_blue_out" style="top:25%;left:32%;width:30%;height:40%;font-size:24px;border:1px solid rgba(255,255,255,0.2);">
+			<span>分享圈&nbsp;</span>
+			<span>groupname</span>
+		</div>
+		<div  tab="[0,0],[0,4]" class="kb btn_blue_out" style="top:25%;left:66%;width:15%;height:40%;font-size:24px;border:1px solid rgba(255,255,255,0.2);">
+			<input type="checkbox">
+			<span>可以转分享</span>
+		</div>
+		<div  tab="[0,0],[0,5-6]" class="kb btn_blue_out" style="top:25%;left:82%;width:15%;height:40%;font-size:24px;border:1px solid rgba(255,255,255,0.2);">
+			<input type="checkbox">
+			<span>需要我同意</span>
+		</div>
+	</div>
+
+	<div id="detail_set_useritems" style="left:0%;top:12%;width:100%;height:79%;background:rgba(255,255,255,0.3);">
+		<div style="top:2%;left:0%;width:5%;height:95%;">
+			<div  tab="[0,0],[1-4,0]" cmd="cmd_storage_scroll_left" class="kb btn_blue_out" style="left:20%;top:44%;width:60%;height:12%;">
+				<img src="storage/img/file/left_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+
+		<div class="tabgrid_set_useritems" grid="{'tab_par':'[2,0]','tab_row':['2','3','4','5'],'tab_column':['1','2','3','4','5']}" style="top:2%;left:5%;width:90%;height:95%;">
+			<div style="left:0%;top:0%;width:100%;height:0%;">
+				<div id="%%p_0_0%%" cmd="cmd_storage_useritem" class="useritem" style="left:0%;top:0%;width:0%;height:100%;">
+					<div style="left:5%;top:5%;width:89%;height:88%;border:2px solid rgba(255,255,255,0.0);">
+						<img src="storage/img/file/blue.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:10%;top:15%;width:40%;height:70%;">
+						<img class="file_icon" src="storage/img/share/p_001.jpg" style="width:100%;height:100%;">
+					</div>
+					<div style="left:36%;top:15%;width:14%;height:27%;">
+						<img class="file_icon" src="storage/img/share/bluecheck.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:36%;top:15%;width:14%;height:27%;">
+						<img class="file_icon rightcheck" src="storage/img/share/rightcheck.png" style="width:100%;height:100%;">
+					</div>
+					<div style="left:52%;top:15%;width:40%;height:20%;font-size:16px;">
+						<span>friend_001</span>
+					</div>
+					<div style="left:52%;top:40%;width:40%;height:40%;font-size:16px;">
+						<span class='file_name'>分享圈<br>成员</span>
+					</div>
+					<div  tab="%%[0,0],[2,1-3]%%" class="kb btn_blue_out" style="left:5%;top:5%;width:89%;height:88%;">
+					</div>
+					<div style="left:85%;top:0%;width:12%;height:20%;display:none;">
+						<img class="pin_state ping" src="storage/img/file/ping.png" style="width:100%;height:100%;">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div style="top:2%;left:95%;width:5%;height:95%;">
+			<div  tab="[0,0],[1-4,6]" cmd="cmd_storage_scroll_right" class="kb btn_blue_out" style="left:20%;top:44%;width:60%;height:12%;">
+				<img src="storage/img/file/right_normal.png" style="width:100%;height:100%;">
+			</div>
+		</div>
+	</div>
+
+	<div style="left:0%;top:91%;width:100%;height:9%;background:rgba(255,255,255,0.2);border:none;">
+		<div  tab="[0,0],[5,0-3]" class="kb btn_blue_out" cmd="cmd_storage_share_confirm" style="left:30%;top:12%;width:15%;height:75%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:10%;left:4%;width:92%;height:60%;font-size:24px;color:white;text-align:center;"><span>分享</span></div>
+		</div>
+		<div  tab="[0,0],[5,4-6]" class="kb btn_blue_out" cmd="cmd_storage_cancel" style="left:55%;top:12%;width:15%;height:75%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="top:10%;left:4%;width:92%;height:60%;font-size:24px;color:white;text-align:center;"><span>取消</span></div>
+		</div>
+	</div>
+</div>
+</div>
+
+<div id="menu_storage_file_copy_bak" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+	<iframe src="index_storage_share.htm" style="width:100%;height:100%;border:none;"></iframe>
+</div>
+
+<div id="menu_storage_popinfo" style="display:none;left:0%;top:0%;width:100%;height:100%;background:rgba(255,255,255,0.3);">
+<div style="left:31%;top:29%;width:38%;height:31%;">
+	<div class="btn_blue_out" style="left:0%;top:0%;width:100%;height:100%;border:1px solid rgba(255,255,255,0);">
+		<img src="storage/img/sub_menu/sub_menu_bg.png" style="width:100%;height:100%;"></img>
+	</div>
+
+	<div id="menu_storage_popinfo_title" class="text" style="left:8%;top:10%;width:100%;height:10%;color:white;">
+		提示标题
+	</div>
+	<div style="left:0%;top:22%;width:100%;height:77%;">
+		<div id="menu_storage_popinfo_text" class="text" style="left:10%;top:16%;width:80%;height:36%;font-size:24px;text-align:center;border:1px solid rgba(255,255,255,0.3);">
+			提示文本
+		</div>
+		<div class="btn_blue_out" cmd="cmd_storage_cancel" style="left:30%;top:60%;width:40%;height:25%;">
+			<div style="left:0%;top:0%;width:100%;height:100%;"><img src="storage/img/sub_menu/botton_nomal.png" style="width:100%;height:100%;"></img></div>
+			<div style="left:4%;top:0%;width:92%;height:100%;font-size:24px;color:white;text-align:center;"><span>确定</span></div>
+		</div>
+	</div>
+</div>
+</div>
+
+</div>
+
+<a id="dom_newwindow" style="display:none;" target="_blank"></a>
+
+</body>
+
+<script>
+
+(function(){				//----main begin----
+
+
+})();					//----main end----
+
+</script>
+
+<script src="storage/js/tvui_fn.js"></script>
+<script src="storage/js/tvui_tvui.js"></script>
+
+<script src="storage/js/tvui_component_storage.js"></script>
+
+<script src="storage/js/tvui_menu.js"></script>
+
+<script src="storage/js/tvui_widget.js"></script>
+
+<script src="storage/js/tvui_evt.js"></script>
+<script src="storage/js/tvui_demo.js"></script>
+<script src="storage/js/tvui_home.js"></script>
+
+<script src="storage/js/tvui_screens.js"></script>
+
+<script src="storage/js/tvui_ic_setting.js"></script>
+
+<script src="storage/js/tvui_storage_fs_car.js"></script>
+<script src="storage/js/tvui_storage.js"></script>
+<script src="storage/js/tvui_storage_folder.js"></script>
+
+<script src="storage/js/tvui_cmd.js"></script>
+<script src="storage/js/tvui_fps.js"></script>
+
+</html>

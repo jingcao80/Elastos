@@ -1,0 +1,146 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Usage {
+
+    /**
+     * An event representing a state change for a component.
+     */
+    interface IUsageEvent {
+        /**
+         * No event type.
+         */
+        const Int32 NONE = 0;
+
+        /**
+         * An event type denoting that a component moved to the foreground.
+         */
+        const Int32 MOVE_TO_FOREGROUND = 1;
+
+        /**
+         * An event type denoting that a component moved to the background.
+         */
+        const Int32 MOVE_TO_BACKGROUND = 2;
+
+        /**
+         * An event type denoting that a component was in the foreground when the stats
+         * rolled-over. This is effectively treated as a {@link #MOVE_TO_BACKGROUND}.
+         * {@hide}
+         */
+        const Int32 END_OF_DAY = 3;
+
+        /**
+         * An event type denoting that a component was in the foreground the previous day.
+         * This is effectively treated as a {@link #MOVE_TO_FOREGROUND}.
+         * {@hide}
+         */
+        const Int32 CONTINUE_PREVIOUS_DAY = 4;
+
+        /**
+         * An event type denoting that the device configuration has changed.
+         */
+        const Int32 CONFIGURATION_CHANGE = 5;
+
+        SetPackageName(
+            [in] String value);
+
+        /**
+         * The package name of the source of this event.
+         */
+        GetPackageName(
+            [out] String* result);
+
+        SetClassName(
+            [in] String value);
+
+        /**
+         * The class name of the source of this event. This may be null for
+         * certain events.
+         */
+        GetClassName(
+            [out] String* result);
+
+        SetTimeStamp(
+            [in] Int64 value);
+
+        /**
+         * The time at which this event occurred, measured in milliseconds since the epoch.
+         * <p/>
+         * See {@link System#currentTimeMillis()}.
+         */
+        GetTimeStamp(
+            [out] Int64* result);
+
+        SetEventType(
+            [in] Int32 value);
+
+        /**
+         * The event type.
+         *
+         * See {@link #MOVE_TO_BACKGROUND}
+         * See {@link #MOVE_TO_FOREGROUND}
+         */
+        GetEventType(
+            [out] Int32* result);
+
+        SetConfiguration(
+            [in] IConfiguration* value);
+
+        /**
+         * Returns a {@link Configuration} for this event if the event is of type
+         * {@link #CONFIGURATION_CHANGE}, otherwise it returns null.
+         */
+        GetConfiguration(
+            [out] IConfiguration** config);
+    }
+
+    /**
+     * A result returned from {@link android.app.usage.UsageStatsManager#queryEvents(long, long)}
+     * from which to read {@link android.app.usage.UsageEvents.Event} objects.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IUsageEvents {
+
+        /**
+         * Returns whether or not there are more events to read using
+         * {@link #getNextEvent(android.app.usage.UsageEvents.Event)}.
+         *
+         * @return true if there are more events, FALSE otherwise.
+         */
+        HasNextEvent(
+            [out] Boolean* result);
+
+        /**
+         * Retrieve the next {@link android.app.usage.UsageEvents.Event} from the collection and put the
+         * resulting data into {@code eventOut}.
+         *
+         * @param eventOut The {@link android.app.usage.UsageEvents.Event} object that will receive the
+         *                 next event data.
+         * @return true if an event was available, FALSE if there are no more events.
+         */
+        GetNextEvent(
+            [in] IUsageEvent* eventOut,
+            [out] Boolean* result);
+
+        /**
+         * Resets the collection so that it can be iterated over from the beginning.
+         *
+         * @hide When this object is iterated to completion, the parcel is destroyed and
+         * so resetToStart doesn't work.
+         */
+        ResetToStart();
+    }
+
+    } // namespace Usage
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

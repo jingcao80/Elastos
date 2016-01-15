@@ -1,0 +1,41 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+     * The interface specification to determine whether a {@code
+     * Certificate} meets some criteria.
+     * <p>
+     * The implementations of this interface are typically used to define the
+     * criteria for selecting {@code Certificate}s from a {@code CertStore}.
+     *
+     * @see CertStore
+     * @see Certificate
+     */
+    /**
+      * @Involve
+      * interface Elastos.Core.ICloneable;
+      */
+    interface ICertSelector {
+        /**
+         * Checks whether the defined criteria of this instance match the specified
+         * certificate.
+         *
+         * @param cert
+         *            the certificate to be evaluated.
+         * @return {@code true} if the certificate matches the criteria, {@code
+         *         false} otherwise.
+         */
+        Match(
+            [in] ICertificate* cert,
+            [out] Boolean* result);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

@@ -1,0 +1,31 @@
+
+module
+{
+    namespace Elastos {
+    namespace Core {
+
+    [local]
+    interface IClassLoader {
+        /**
+         * Loads the class with the specified name. Invoking this method is
+         * equivalent to calling {@code loadClass(className, false)}.
+         * <p>
+         * <strong>Note:</strong> In the Android reference implementation, the
+         * second parameter of {@link #loadClass(String, boolean)} is ignored
+         * anyway.
+         * </p>
+         *
+         * @return the {@code Class} object.
+         * @param className
+         *            the name of the class to look for.
+         * @throws ClassNotFoundException
+         *             if the class can not be found.
+         */
+        LoadClass(
+            [in] String className,
+            [out] IClassInfo** klass);
+    }
+
+    } // namespace Core
+    } // namespace Elastos
+}

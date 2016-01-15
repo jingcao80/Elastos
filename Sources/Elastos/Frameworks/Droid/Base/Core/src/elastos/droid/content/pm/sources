@@ -1,0 +1,58 @@
+TARGET_NAME = pm
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+C_DEFINES += -DDROID_CORE
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES += pm.cpp
+SOURCES += ActivityInfo.cpp
+SOURCES += CActivityInfoHelper.cpp
+SOURCES += ApplicationInfo.cpp
+SOURCES += CApplicationInfoDisplayNameComparator.cpp
+SOURCES += ComponentInfo.cpp
+SOURCES += CContainerEncryptionParams.cpp
+SOURCES += CFeatureInfo.cpp
+SOURCES += CFeatureGroupInfo.cpp
+SOURCES += CConfigurationInfo.cpp
+SOURCES += KeySet.cpp
+SOURCES += LabeledIntent.cpp
+SOURCES += CLauncherActivityInfo.cpp
+SOURCES += CLauncherApps.cpp
+SOURCES += CLimitedLengthInputStream.cpp
+SOURCES += CMacAuthenticatedInputStream.cpp
+SOURCES += CManifestDigest.cpp
+SOURCES += CPackageCleanItem.cpp
+SOURCES += InstrumentationInfo.cpp
+SOURCES += CPackageInfo.cpp
+SOURCES += CPackageInfoLite.cpp
+SOURCES += PackageItemInfo.cpp
+SOURCES += CPackageItemInfoDisplayNameComparator.cpp
+SOURCES += CPackageInstaller.cpp
+SOURCES += CPackageInstallerSession.cpp
+SOURCES += CPackageInstallerSessionParams.cpp
+SOURCES += CPackageInstallerSessionInfo.cpp
+SOURCES += PackageManager.cpp
+SOURCES += PackageParser.cpp
+SOURCES += CPackageStats.cpp
+SOURCES += PackageUserState.cpp
+SOURCES += CParceledListSlice.cpp
+SOURCES += CPathPermission.cpp
+SOURCES += PermissionGroupInfo.cpp
+SOURCES += PermissionInfo.cpp
+SOURCES += CPermissionInfoHelper.cpp
+SOURCES += ProviderInfo.cpp
+SOURCES += RegisteredServicesCache.cpp
+SOURCES += ResolveInfo.cpp
+SOURCES += CResolveInfoDisplayNameComparator.cpp
+SOURCES += ServiceInfo.cpp
+SOURCES += CSignature.cpp
+SOURCES += CSignatureHelper.cpp
+SOURCES += CUserInfo.cpp
+SOURCES += CVerificationParams.cpp
+SOURCES += CVerifierDeviceIdentity.cpp
+SOURCES += CVerifierDeviceIdentityHelper.cpp
+SOURCES += CVerifierInfo.cpp

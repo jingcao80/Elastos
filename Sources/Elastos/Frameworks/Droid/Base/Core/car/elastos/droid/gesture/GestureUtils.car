@@ -1,0 +1,182 @@
+module
+{
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Gesture.IGesture;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Gesture {
+
+    /**
+     * Utility functions for gesture processing & analysis, including methods for:
+     * <ul>
+     * <li>feature extraction (e.g., samplers and those for calculating bounding
+     * boxes and gesture path lengths);
+     * <li>geometric transformation (e.g., translation, rotation and scaling);
+     * <li>gesture similarity comparison (e.g., calculating Euclidean or Cosine
+     * distances between two gestures).
+     * </ul>
+     */
+    [deprecated, local]
+    interface IGestureUtils {
+        /**
+         * Closes the specified stream.
+         *
+         * @param stream The stream to close.
+         */
+        CloseStream(
+            [in] ICloseable* stream);
+
+        /**
+         * Samples the gesture spatially by rendering the gesture into a 2D
+         * grayscale bitmap. Scales the gesture to fit the size of the bitmap.
+         * The scaling does not necessarily keep the aspect ratio of the gesture.
+         *
+         * @param gesture the gesture to be sampled
+         * @param bitmapSize the size of the bitmap
+         * @return a bitmapSize x bitmapSize grayscale bitmap that is represented
+         *         as a 1D array. The float at index i represents the grayscale
+         *         value at pixel [i%bitmapSize, i/bitmapSize]
+         */
+        SpatialSampling(
+            [in] IGesture* gesture,
+            [in] Int32 bitmapSize,
+            [out, callee] ArrayOf<Float>* ret);
+
+        /**
+         * Samples the gesture spatially by rendering the gesture into a 2D
+         * grayscale bitmap. Scales the gesture to fit the size of the bitmap.
+         *
+         * @param gesture the gesture to be sampled
+         * @param bitmapSize the size of the bitmap
+         * @param keepAspectRatio if the scaling should keep the gesture's
+         *        aspect ratio
+         *
+         * @return a bitmapSize x bitmapSize grayscale bitmap that is represented
+         *         as a 1D array. The float at index i represents the grayscale
+         *         value at pixel [i%bitmapSize, i/bitmapSize]
+         */
+        SpatialSampling(
+            [in] IGesture* gesture,
+            [in] Int32 bitmapSize,
+            [in] Boolean keepAspectRatio,
+            [out, callee] ArrayOf<Float>* ret);
+
+        /**
+         * Samples a stroke temporally into a given number of evenly-distributed
+         * points.
+         *
+         * @param stroke the gesture stroke to be sampled
+         * @param numPoints the number of points
+         * @return the sampled points in the form of [x1, y1, x2, y2, ..., xn, yn]
+         */
+        TemporalSampling(
+            [in] IGestureStroke* stroke,
+            [in] Int32 numPoints,
+            [out, callee] ArrayOf<Float>* ret);
+
+        /**
+         * Calculates the centroid of a set of points.
+         *
+         * @param points the points in the form of [x1, y1, x2, y2, ..., xn, yn]
+         * @return the centroid
+         */
+        ComputeCentroid(
+            [in] ArrayOf<Float>* points,
+            [out, callee] ArrayOf<Float>* ret);
+
+        ComputeTotalLength(
+            [in] ArrayOf<Float>* points,
+            [out] Float* length);
+
+        ComputeStraightness(
+            [in] ArrayOf<Float>* points,
+            [out] Float* ret);
+
+        ComputeStraightness(
+            [in] ArrayOf<Float>* points,
+            [in] Float totalLen,
+            [out] Float* ret);
+
+        /**
+         * Calculates the squared Euclidean distance between two vectors.
+         *
+         * @param vector1
+         * @param vector2
+         * @return the distance
+         */
+        SquaredEuclideanDistance(
+            [in] ArrayOf<Float>* vector1,
+            [in] ArrayOf<Float>* vector2,
+            [out] Float* ret);
+
+        /**
+         * Calculates the cosine distance between two instances.
+         *
+         * @param vector1
+         * @param vector2
+         * @return the distance between 0 and Math.PI
+         */
+        CosineDistance(
+            [in] ArrayOf<Float>* vector1,
+            [in] ArrayOf<Float>* vector2,
+            [out] Float* ret);
+
+        /**
+         * Calculates the "minimum" cosine distance between two instances.
+         *
+         * @param vector1
+         * @param vector2
+         * @param numOrientations the maximum number of orientation allowed
+         * @return the distance between the two instances (between 0 and Math.PI)
+         */
+        MinimumCosineDistance(
+            [in] ArrayOf<Float>* vector1,
+            [in] ArrayOf<Float>* vector2,
+            [in] Int32 numOrientations,
+            [out] Float* ret);
+
+        /**
+         * Computes an oriented, minimum bounding box of a set of points.
+         *
+         * @param originalPoints
+         * @return an oriented bounding box
+         */
+        ComputeOrientedBoundingBox(
+            [in] IArrayList* originalPoints,
+            [out] IOrientedBoundingBox** box);
+
+        /**
+         * Computes an oriented, minimum bounding box of a set of points.
+         *
+         * @param originalPoints
+         * @return an oriented bounding box
+         */
+        ComputeOrientedBoundingBox(
+            [in] ArrayOf<Float>* originalPoints,
+            [out] IOrientedBoundingBox** box);
+
+        Rotate(
+            [in] ArrayOf<Float>* points,
+            [in] Float angle,
+            [out, callee] ArrayOf<Float>* ret);
+
+        Translate(
+            [in] ArrayOf<Float>* points,
+            [in] Float dx,
+            [in] Float dy,
+            [out, callee] ArrayOf<Float>* ret);
+
+        Scale(
+            [in] ArrayOf<Float>* points,
+            [in] Float sx,
+            [in] Float sy,
+            [out, callee] ArrayOf<Float>* ret);
+    }
+
+    } // namespace Gesture
+    } // namespace Droid
+    } // namespace Elastos
+}

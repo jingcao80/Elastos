@@ -1,0 +1,12 @@
+;
+; Purpose: Drop/Pack List for SDK
+;
+; Format:  SrcFile/Folder or
+;          SrcFile/Folder [DestFolder]
+;
+SystemUI.epk            /system/app
+;SoftKeyboard.epk              /system/app
+PinyinIME.epk                 /system/app
+Gallery.epk                   /system/app
+MusicPlayer.epk               /system/app
+SettingsProvider.epk          /system/app

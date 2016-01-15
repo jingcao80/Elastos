@@ -1,0 +1,59 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the following structure which is a subpart of GeneralName
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *   EDIPartyName ::= SEQUENCE {
+     *        nameAssigner            [0]     DirectoryString OPTIONAL,
+     *        partyName               [1]     DirectoryString
+     *   }
+     *
+     *   DirectoryString ::= CHOICE {
+     *        teletexString             TeletexString   (SIZE (1..MAX)),
+     *        printableString           PrintableString (SIZE (1..MAX)),
+     *        universalString           UniversalString (SIZE (1..MAX)),
+     *        utf8String              UTF8String      (SIZE (1..MAX)),
+     *        bmpString               BMPString       (SIZE (1..MAX))
+     *   }
+     * </pre>
+     */
+    interface IEDIPartyName {
+        /**
+         * Returns ASN.1 encoded form of this X.509 EDIPartyName value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encode);
+    }
+
+    interface IEDIPartyNameHelper {
+        /**
+         * ASN.1 DER X.509 EDIPartyName encoder/decoder class.
+         */
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

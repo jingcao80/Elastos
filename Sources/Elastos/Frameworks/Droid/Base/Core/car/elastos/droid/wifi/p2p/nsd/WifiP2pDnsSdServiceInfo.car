@@ -1,0 +1,71 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+    namespace Nsd {
+
+    /**
+     * A class for storing Bonjour service information that is advertised
+     * over a Wi-Fi peer-to-peer setup.
+     *
+     * {@see android.net.wifi.p2p.WifiP2pManager#addLocalService}
+     * {@see android.net.wifi.p2p.WifiP2pManager#removeLocalService}
+     * {@see WifiP2pServiceInfo}
+     * {@see WifiP2pUpnpServiceInfo}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     * interface IWifiP2pServiceInfo;
+     */
+    interface IWifiP2pDnsSdServiceInfo {
+        /**
+         * Bonjour version 1.
+         * @hide
+         */
+        const Int32 VERSION_1 = 0x01;
+
+        /**
+         * Pointer record.
+         * @hide
+         */
+        const Int32 DNS_TYPE_PTR = 12;
+
+        /**
+         * Text record.
+         * @hide
+         */
+        const Int32 DNS_TYPE_TXT = 16;
+    }
+
+    interface IWifiP2pDnsSdServiceInfoHelper {
+        /**
+         * Create a Bonjour service information object.
+         *
+         * @param instanceName instance name.<br>
+         *  e.g) "MyPrinter"
+         * @param serviceType service type.<br>
+         *  e.g) "_ipp._tcp"
+         * @param txtMap TXT record with key/value pair in a map confirming to format defined at
+         * http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
+         * @return Bonjour service information object
+         */
+        NewInstance(
+            [in] String instanceName,
+            [in] String serviceType,
+            [in] IMap* txtMap,
+            [out] IWifiP2pDnsSdServiceInfo** result);
+    }
+
+    } // namespace Nsd
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}
+

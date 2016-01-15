@@ -1,0 +1,35 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    /* Helper for managing a secure setting.
+     *
+     * @Involve
+     * interface IListenable;
+     * interface IContentObserver
+     */
+    interface ISecureSetting {
+        HandleValueChanged(
+            [in] Int32 value);
+
+        GetValue(
+            [out] Int32* value);
+
+        SetValue(
+            [in] Int32 value);
+
+        SetUserId(
+            [in] Int32 userId);
+    }
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

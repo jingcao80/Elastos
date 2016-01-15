@@ -1,0 +1,32 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+
+    interface IAnnotation {
+
+        [ oneway ] M1();
+
+        [ oneway ]
+        M2();
+
+        [oneway, @MainThread] M3();
+
+        [oneway, @MainThread]
+        M4();
+
+        [@NotMainThread]
+        M5();
+    }
+
+    class CAnnotation {
+        [@MainThread]
+        constructor();
+
+        [@NotMainThread]
+        constructor(
+            [in] Int32 data);
+
+        interface IAnnotation;
+    }
+}

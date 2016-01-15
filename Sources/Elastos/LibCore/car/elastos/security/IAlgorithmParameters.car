@@ -1,0 +1,182 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IAlgorithmParameters {
+        /**
+         * Returns the provider associated with this {@code AlgorithmParameters}.
+         *
+         * @return the provider associated with this {@code AlgorithmParameters}.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Returns the name of the algorithm.
+         *
+         * @return the name of the algorithm.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Initializes this {@code AlgorithmParameters} with the specified {@code
+         * AlgorithmParameterSpec}.
+         *
+         * @param paramSpec
+         *            the parameter specification.
+         * @throws InvalidParameterSpecException
+         *             if this {@code AlgorithmParameters} has already been
+         *             initialized or the given {@code paramSpec} is not appropriate
+         *             for initializing this {@code AlgorithmParameters}.
+         */
+        Init(
+            [in] IAlgorithmParameterSpec* paramSpec);
+
+        /**
+         * Initializes this {@code AlgorithmParameters} with the specified {@code
+         * byte[]} using the default decoding format for parameters. The default
+         * encoding format is ASN.1.
+         *
+         * @param params
+         *            the encoded parameters.
+         * @throws IOException
+         *             if this {@code AlgorithmParameters} has already been
+         *             initialized, or the parameter could not be encoded.
+         */
+        Init(
+            [in] ArrayOf<Byte> params);
+
+        /**
+         * Initializes this {@code AlgorithmParameters} with the specified {@code
+         * byte[]} using the specified decoding format.
+         *
+         * @param params
+         *            the encoded parameters.
+         * @param format
+         *            the name of the decoding format.
+         * @throws IOException
+         *             if this {@code AlgorithmParameters} has already been
+         *             initialized, or the parameter could not be encoded.
+         */
+        Init(
+            [in] ArrayOf<Byte> params,
+            [in] String format);
+
+        /**
+         * Returns the {@code AlgorithmParameterSpec} for this {@code
+         * AlgorithmParameters}.
+         *
+         * @param paramSpec
+         *            the type of the parameter specification in which this
+         *            parameters should be converted.
+         * @return the {@code AlgorithmParameterSpec} for this {@code
+         *         AlgorithmParameters}.
+         * @throws InvalidParameterSpecException
+         *             if this {@code AlgorithmParameters} has already been
+         *             initialized, or if this parameters could not be converted to
+         *             the specified class.
+         */
+        GetParameterSpec(
+            [in] ClassID type,
+            [out] IInterface** paramSpec);
+
+        /**
+         * Returns this {@code AlgorithmParameters} in their default encoding
+         * format. The default encoding format is ASN.1.
+         *
+         * @return the encoded parameters.
+         * @throws IOException
+         *             if this {@code AlgorithmParameters} has already been
+         *             initialized, or if this parameters could not be encoded.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * Returns this {@code AlgorithmParameters} in the specified encoding
+         * format.
+         *
+         * @param format
+         *            the name of the encoding format.
+         * @return the encoded parameters.
+         * @throws IOException
+         *             if this {@code AlgorithmParameters} has already been
+         *             initialized, or if this parameters could not be encoded.
+         */
+        GetEncoded(
+            [in] String format,
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface IAlgorithmParametersHelper {
+        /**
+         * Returns a new instance of {@code AlgorithmParameters} for the specified
+         * algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @return a new instance of {@code AlgorithmParameters} for the specified
+         *         algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] IAlgorithmParameters** instance);
+
+        /**
+         * Returns a new instance of {@code AlgorithmParameters} from the specified
+         * provider for the specified algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @param provider
+         *            name of the provider of the {@code AlgorithmParameters}.
+         * @return a new instance of {@code AlgorithmParameters} for the specified
+         *         algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NoSuchProviderException
+         *             if the specified provider is not available.
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] IAlgorithmParameters** instance);
+
+        /**
+         * Returns a new instance of {@code AlgorithmParameters} from the specified
+         * provider for the specified algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @param provider
+         *            the provider of the {@code AlgorithmParameters}.
+         * @return a new instance of {@code AlgorithmParameters} for the specified
+         *         algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         * @throws IllegalArgumentException if {@code provider == null}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] IAlgorithmParameters** instance);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

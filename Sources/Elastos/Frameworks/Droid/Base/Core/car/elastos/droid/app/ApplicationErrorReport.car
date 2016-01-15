@@ -1,0 +1,402 @@
+module
+{
+    interface Elastos.Droid.Utility.IPrinter;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.App.IApplicationErrorReportCrashInfo;
+    interface Elastos.Droid.App.IApplicationErrorReportAnrInfo;
+    interface Elastos.Droid.App.IApplicationErrorReportBatteryInfo;
+    interface Elastos.Droid.App.IApplicationErrorReportRunningServiceInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * Describes an application error. A report has a type, which is one of
+     * <p>
+     * <li>TYPE_NONE uninitialized instance of ApplicationErrorReport.</li>
+     * <p>
+     * <li>TYPE_CRASH application crash. Information about the crash is stored in crashInfo.</li>
+     * <p>
+     * <li>TYPE_ANR application not responding. Information about the ANR is stored in anrInfo.</li>
+     * <p>
+     * <li>TYPE_BATTERY user reported application is using too much battery. Information about the battery use is stored in batteryInfo.</li>
+     * <p>
+     * <li>TYPE_RUNNING_SERVICE user reported application is leaving an unneeded serive running. Information about the battery use is stored in runningServiceInfo.</li>
+     *
+     * @sa TYPE_NONE
+     * @sa TYPE_CRASH
+     * @sa TYPE_ANR
+     * @sa TYPE_BATTERY
+     * @sa TYPE_RUNNING_SERVICE
+     * @sa ApplicationErrorReport
+     * @sa crashInfo
+     * @sa anrInfo
+     * @sa batteryInfo
+     * @sa runningServiceInfo
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IApplicationErrorReport {
+        /**
+         * Uninitialized error report.
+         */
+        const Int32 TYPE_NONE = 0;
+
+        /**
+         * An error report about an application crash.
+         */
+        const Int32 TYPE_CRASH = 1;
+
+        /**
+         * An error report about an application that's not responding.
+         */
+        const Int32 TYPE_ANR = 2;
+
+        /**
+         * An error report about an application that's consuming too much battery.
+         */
+        const Int32 TYPE_BATTERY = 3;
+
+        /**
+         * A report from a user to a developer about a running service that the
+         * user doesn't think should be running.
+         */
+        const Int32 TYPE_RUNNING_SERVICE = 5;
+
+        /**
+         * Type of this report. Can be one of #TYPE_NONE,
+         * #TYPE_CRASH, #TYPE_ANR, #TYPE_BATTERY,
+         * or #TYPE_RUNNING_SERVICE.
+         *
+         * @sa #TYPE_NONE
+         * @sa #TYPE_CRASH
+         * @sa #TYPE_ANR
+         * @sa #TYPE_BATTERY
+         * @sa #TYPE_RUNNING_SERVICE
+         */
+        GetType(
+            [out] Int32* type);
+
+        SetType(
+            [in] Int32 type);
+
+        /**
+         * Package name of the application.
+         */
+        GetPackageName(
+            [out] String* packageName);
+
+        SetPackageName(
+            [in] String packageName);
+
+        /**
+         * Package name of the application which installed the application this
+         * report pertains to.
+         * This identifies which market the application came from.
+         */
+        GetInstallerPackageName(
+            [out] String* pkgName);
+
+        SetInstallerPackageName(
+            [in] String pkgName);
+
+        /**
+         * Process name of the application.
+         */
+        GetProcessName(
+            [out] String* processName);
+
+        SetProcessName(
+            [in] String processName);
+
+        /**
+         * Time at which the error occurred.
+         */
+        GetTime(
+            [out] Int64* time);
+
+        SetTime(
+            [in] Int64 time);
+
+        /**
+         * Set if the app is on the system image.
+         */
+        GetSystemApp(
+            [out] Boolean* systemApp);
+
+        SetSystemApp(
+            [in] Boolean systemApp);
+
+        /**
+         * If this report is of type #TYPE_CRASH, contains an instance
+         * of CrashInfo describing the crash; otherwise null.
+         *
+         * @sa #TYPE_CRASH
+         */
+        GetCrashInfo(
+            [out] IApplicationErrorReportCrashInfo** crashInfo);
+
+        SetCrashInfo(
+            [in] IApplicationErrorReportCrashInfo* crashInfo);
+
+        /**
+         * If this report is of type #TYPE_ANR, contains an instance
+         * of AnrInfo describing the ANR; otherwise null.
+         *
+         * @sa #TYPE_ANR
+         */
+        GetAnrInfo(
+            [out] IApplicationErrorReportAnrInfo** anrInfo);
+
+        SetAnrInfo(
+            [in] IApplicationErrorReportAnrInfo* anrInfo);
+
+        /**
+         * If this report is of type #TYPE_BATTERY, contains an instance
+         * of BatteryInfo; otherwise null.
+         *
+         * @sa #TYPE_BATTERY
+         */
+        GetBatteryInfo(
+            [out] IApplicationErrorReportBatteryInfo** batteryInfo);
+
+        SetBatteryInfo(
+            [in] IApplicationErrorReportBatteryInfo* batteryInfo);
+
+        /**
+         * If this report is of type #TYPE_RUNNING_SERVICE, contains an instance
+         * of RunningServiceInfo; otherwise null.
+         *
+         * @sa #TYPE_RUNNING_SERVICE
+         */
+        GetRunningServiceInfo(
+            [out] IApplicationErrorReportRunningServiceInfo** runningServiceInfo);
+
+        SetRunningServiceInfo(
+            [in] IApplicationErrorReportRunningServiceInfo* runningServiceInfo);
+
+        /**
+         * Dump the report to a Printer.
+         */
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+    }
+
+    [local]
+    interface IApplicationErrorReportHelper {
+        GetErrorReportReceiver(
+            [in] IContext* ctx,
+            [in] String packageName,
+            [in] Int32 appFlags,
+            [out] IComponentName** receiver);
+
+        GetErrorReportReceiver(
+                [in] IPackageManager* pm,
+                [in] String errorPackage,
+                [in] String receiverPackage,
+                [out] IComponentName** receiver);
+    }
+
+    /**
+     * Describes an application crash.
+     */
+    interface IApplicationErrorReportCrashInfo {
+        /**
+         * Class name of the exception that caused the crash.
+         */
+        GetExceptionClassName(
+            [out] String* className);
+
+        SetExceptionClassName(
+            [in] String className);
+
+        /**
+         * Message stored in the exception.
+         */
+        GetExceptionMessage(
+            [out] String* exceptionMessage);
+
+        SetExceptionMessage(
+            [in] String exceptionMessage);
+
+        /**
+         * File which the exception was thrown from.
+         */
+        GetThrowFileName(
+            [out] String* fileName);
+
+        SetThrowFileName(
+            [in] String fileName);
+
+        /**
+         * Class which the exception was thrown from.
+         */
+        GetThrowClassName(
+            [out] String* className);
+
+        SetThrowClassName(
+            [in] String className);
+
+        /**
+         * Method which the exception was thrown from.
+         */
+        GetThrowMethodName(
+            [out] String* methodName);
+
+        SetThrowMethodName(
+            [in] String methodName);
+
+        /**
+         * Line number the exception was thrown from.
+         */
+        GetThrowLineNumber(
+            [out] Int32* lineNumber);
+
+        SetThrowLineNumber(
+            [in] Int32 lineNumber);
+
+        /**
+         * Stack trace.
+         */
+        GetStackTrace(
+            [out] String* stackTrace);
+
+        SetStackTrace(
+            [in] String stackTrace);
+
+        /**
+         * Dump a CrashInfo instance to a Printer.
+         */
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+    }
+
+    /**
+     * Describes an application not responding error.
+     */
+    interface IApplicationErrorReportAnrInfo {
+        /**
+         * Activity name.
+         */
+        GetActivity(
+            [out] String* activity);
+
+        SetActivity(
+            [in] String activity);
+
+        /**
+         * Description of the operation that timed out.
+         */
+        GetCause(
+            [out] String* cause);
+
+        SetCause(
+            [in] String cause);
+
+        /**
+         * Additional info, including CPU stats.
+         */
+        GetInfo(
+            [out] String* info);
+
+        SetInfo(
+            [in] String info);
+
+        /**
+         * Dump an AnrInfo instance to a Printer.
+         */
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+    }
+
+    /**
+     * Describes a battery usage report.
+     */
+    interface IApplicationErrorReportBatteryInfo {
+        /**
+         * Percentage of the battery that was used up by the process.
+         */
+        GetUsagePercent(
+            [out] Int32* usagePercent);
+
+        SetUsagePercent(
+            [in] Int32 usagePercent);
+
+        /**
+         * Duration in microseconds over which the process used the above
+         * percentage of battery.
+         */
+        GetDurationMicros(
+            [out] Int64* durationMicros);
+
+        SetDurationMicros(
+            [in] Int64 durationMicros);
+
+        /**
+         * Dump of various info impacting battery use.
+         */
+        GetUsageDetails(
+            [out] String* usageDetails);
+
+        SetUsageDetails(
+            [in] String usageDetails);
+
+        /**
+         * Checkin details.
+         */
+        GetCheckinDetails(
+            [out] String* checkinDetails);
+
+        SetCheckinDetails(
+            [in] String checkinDetails);
+
+        /**
+         * Dump a BatteryInfo instance to a Printer.
+         */
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+    }
+
+    /**
+     * Describes a running service report.
+     */
+    interface IApplicationErrorReportRunningServiceInfo {
+        /**
+         * Duration in milliseconds that the service has been running.
+         */
+        GetDurationMillis(
+            [out] Int64* durationMillis);
+
+        SetDurationMillis(
+            [in] Int64 durationMillis);
+
+        /**
+         * Dump of debug information about the service.
+         */
+        GetServiceDetails(
+            [out] String* serviceDetails);
+
+        SetServiceDetails(
+            [in] String serviceDetails);
+
+        /**
+         * Dump a BatteryInfo instance to a Printer.
+         */
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

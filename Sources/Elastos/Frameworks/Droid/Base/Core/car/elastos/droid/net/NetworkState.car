@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Snapshot of network state.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [local]
+    interface INetworkState {
+
+        GetNetworkInfo(
+            [out] INetworkInfo** result);
+
+        GetLinkProperties(
+            [out] ILinkProperties** result);
+
+        GetNetworkCapabilities(
+            [out] INetworkCapabilities** result);
+
+        /** Currently only used by testing. */
+        GetSubscriberId(
+            [out] String* result);
+
+        GetNetworkId(
+            [out] String* result);
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

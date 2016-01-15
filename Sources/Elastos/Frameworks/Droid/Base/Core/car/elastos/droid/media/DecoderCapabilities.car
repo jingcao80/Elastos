@@ -1,0 +1,44 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * The VideoDecoder class represents the type of a video decoder
+     *
+     */
+    enum VideoDecoder {
+        VIDEO_DECODER_WMV,
+    }
+
+    /**
+     * The AudioDecoder class represents the type of an audio decoder
+     */
+    enum AudioDecoder {
+        AUDIO_DECODER_WMA,
+    }
+
+    interface IDecoderCapabilities {}
+
+    interface IDecoderCapabilitiesHelper {
+        /**
+         * Returns the list of video decoder types
+         * @see android.media.DecoderCapabilities.VideoDecoder
+         */
+        GetVideoDecoders(
+            [out, callee] ArrayOf<VideoDecoder>* result);
+
+        /**
+         * Returns the list of audio decoder types
+         * @see android.media.DecoderCapabilities.AudioDecoder
+         */
+        GetAudioDecoders(
+            [out, callee] ArrayOf<AudioDecoder>* result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

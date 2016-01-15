@@ -1,0 +1,37 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * Changes the {@link Locale} of the text to which the span is attached.
+     *
+     * @Involve
+     * interface IParcelable
+     * interface IParcelableSpan
+     * interface IUpdateAppearance
+     * interface IUpdateLayout
+     * interface ICharacterStyle
+     * interface IMetricAffectingSpan
+     */
+    interface ILocaleSpan {
+        /**
+         * Returns the {@link Locale}.
+         *
+         * @return The {@link Locale} for this span.
+         */
+        GetLocale(
+            [out] ILocale** ret);
+    }
+
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

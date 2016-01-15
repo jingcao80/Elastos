@@ -1,0 +1,283 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IIWindow;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    interface IAccessibilityEvent;
+    interface IIAccessibilityInteractionConnection;
+    interface IIAccessibilityManagerClient;
+
+    /**
+     * Listener for the system accessibility state. To listen for changes to the
+     * accessibility state on the device, implement this interface and register
+     * it with the system by calling {@link #addAccessibilityStateChangeListener}.
+     */
+    interface IAccessibilityManagerAccessibilityStateChangeListener {
+
+        /**
+         *Called when the accessibility enabled state changes.
+         *
+         * @param enabled Whether accessibility is enabled.
+         */
+        OnAccessibilityStateChanged(
+            [in] Boolean enabled);
+    }
+
+    /**
+     * Listener for the system touch exploration state. To listen for changes to
+     * the touch exploration state on the device, implement this interface and
+     * register it with the system by calling
+     * {@link #addTouchExplorationStateChangeListener}.
+     */
+     interface IAccessibilityManagerTouchExplorationStateChangeListener {
+
+        /**
+         * Called when the touch exploration enabled state changes.
+         *
+         * @param enabled Whether touch exploration is enabled.
+         */
+        OnTouchExplorationStateChanged(
+            [in] Boolean enabled);
+    }
+
+    /**
+     * Listener for the system high text contrast state. To listen for changes to
+     * the high text contrast state on the device, implement this interface and
+     * register it with the system by calling
+     * {@link #addHighTextContrastStateChangeListener}.
+     *
+     * @hide
+     */
+    interface IAccessibilityManagerHighTextContrastChangeListener {
+
+        /**
+         * Called when the high text contrast enabled state changes.
+         *
+         * @param enabled Whether high text contrast is enabled.
+         */
+        OnHighTextContrastStateChanged(
+            [in] Boolean enabled);
+    }
+
+    [deprecated]
+    interface IAccessibilityManager {
+        /** @hide */
+        const Int32 STATE_FLAG_ACCESSIBILITY_ENABLED = 0x00000001;
+
+        /** @hide */
+        const Int32 STATE_FLAG_TOUCH_EXPLORATION_ENABLED = 0x00000002;
+
+        /** @hide */
+        const Int32 STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED = 0x00000004;
+
+        /** @hide */
+        const Int32 DALTONIZER_DISABLED = -1;
+
+        /** @hide */
+        const Int32 DALTONIZER_SIMULATE_MONOCHROMACY = 0;
+
+        /** @hide */
+        const Int32 DALTONIZER_CORRECT_DEUTERANOMALY = 12;
+
+        /**
+         * @hide
+         */
+        GetClient(
+            [out] IIAccessibilityManagerClient** client);
+
+        /**
+         * Returns if the accessibility in the system is enabled.
+         *
+         * @return True if accessibility is enabled, false otherwise.
+         */
+        IsEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Returns if the touch exploration in the system is enabled.
+         *
+         * @return True if touch exploration is enabled, false otherwise.
+         */
+        IsTouchExplorationEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Returns if the high text contrast in the system is enabled.
+         * <p>
+         * <strong>Note:</strong> You need to query this only if you application is
+         * doing its own rendering and does not rely on the platform rendering pipeline.
+         * </p>
+         *
+         * @return True if high text contrast is enabled, false otherwise.
+         *
+         * @hide
+         */
+        IsHighTextContrastEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Sends an {@link AccessibilityEvent}.
+         *
+         * @param event The event to send.
+         *
+         * @throws IllegalStateException if accessibility is not enabled.
+         *
+         * <strong>Note:</strong> The preferred mechanism for sending custom accessibility
+         * events is through calling
+         * {@link android.view.ViewParent#requestSendAccessibilityEvent(View, AccessibilityEvent)}
+         * instead of this method to allow predecessors to augment/filter events sent by
+         * their descendants.
+         */
+        SendAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        /**
+         * Requests feedback interruption from all accessibility services.
+         */
+        Interrupt();
+
+        /**
+         * Returns the {@link ServiceInfo}s of the installed accessibility services.
+         *
+         * @return An unmodifiable list with {@link ServiceInfo}s.
+         *
+         * @deprecated Use {@link #getInstalledAccessibilityServiceList()}
+         */
+        GetAccessibilityServiceList(
+            [out] IList** serviceList);
+
+        /**
+         * Returns the {@link AccessibilityServiceInfo}s of the installed accessibility services.
+         *
+         * @return An unmodifiable list with {@link AccessibilityServiceInfo}s.
+         */
+        GetInstalledAccessibilityServiceList(
+            [out] IList** serviceList);
+
+        /**
+         * Returns the {@link AccessibilityServiceInfo}s of the enabled accessibility services
+         * for a given feedback type.
+         *
+         * @param feedbackTypeFlags The feedback type flags.
+         * @return An unmodifiable list with {@link AccessibilityServiceInfo}s.
+         *
+         * @see AccessibilityServiceInfo#FEEDBACK_AUDIBLE
+         * @see AccessibilityServiceInfo#FEEDBACK_GENERIC
+         * @see AccessibilityServiceInfo#FEEDBACK_HAPTIC
+         * @see AccessibilityServiceInfo#FEEDBACK_SPOKEN
+         * @see AccessibilityServiceInfo#FEEDBACK_VISUAL
+         * @see AccessibilityServiceInfo#FEEDBACK_BRAILLE
+         */
+        GetEnabledAccessibilityServiceList(
+            [in] Int32 feedbackTypeFlags,
+            [out] IList** serviceList);
+
+        /**
+         * Registers an {@link AccessibilityStateChangeListener} for changes in
+         * the global accessibility state of the system.
+         *
+         * @param listener The listener.
+         * @return True if successfully registered.
+         */
+        AddAccessibilityStateChangeListener(
+            [in] IAccessibilityManagerAccessibilityStateChangeListener* listener,
+            [out] Boolean* result);
+
+        /**
+         * Unregisters an {@link AccessibilityStateChangeListener}.
+         *
+         * @param listener The listener.
+         * @return True if successfully unregistered.
+         */
+        RemoveAccessibilityStateChangeListener(
+            [in] IAccessibilityManagerAccessibilityStateChangeListener* listener,
+            [out] Boolean* result);
+
+        /**
+         * Registers a {@link TouchExplorationStateChangeListener} for changes in
+         * the global touch exploration state of the system.
+         *
+         * @param listener The listener.
+         * @return True if successfully registered.
+         */
+        AddTouchExplorationStateChangeListener(
+            [in] IAccessibilityManagerTouchExplorationStateChangeListener* listener,
+            [out] Boolean* result);
+
+        /**
+         * Unregisters a {@link TouchExplorationStateChangeListener}.
+         *
+         * @param listener The listener.
+         * @return True if successfully unregistered.
+         */
+        RemoveTouchExplorationStateChangeListener(
+            [in] IAccessibilityManagerTouchExplorationStateChangeListener* listener,
+            [out] Boolean* result);
+
+        /**
+         * Registers a {@link HighTextContrastChangeListener} for changes in
+         * the global high text contrast state of the system.
+         *
+         * @param listener The listener.
+         * @return True if successfully registered.
+         *
+         * @hide
+         */
+        AddHighTextContrastStateChangeListener(
+            [in] IAccessibilityManagerHighTextContrastChangeListener* listener,
+            [out] Boolean* result);
+
+        /**
+         * Unregisters a {@link HighTextContrastChangeListener}.
+         *
+         * @param listener The listener.
+         * @return True if successfully unregistered.
+         *
+         * @hide
+         */
+        RemoveHighTextContrastStateChangeListener(
+            [in] IAccessibilityManagerHighTextContrastChangeListener* listener,
+            [out] Boolean* result);
+
+        /**
+         * Adds an accessibility interaction connection interface for a given window.
+         * @param windowToken The window token to which a connection is added.
+         * @param connection The connection.
+         *
+         * @hide
+         */
+        AddAccessibilityInteractionConnection(
+            [in] IIWindow* windowToken,
+            [in] IIAccessibilityInteractionConnection* connection,
+            [out] Int32* add);
+
+        /**
+         * Removed an accessibility interaction connection interface for a given window.
+         * @param windowToken The window token to which a connection is removed.
+         *
+         * @hide
+         */
+        RemoveAccessibilityInteractionConnection(
+            [in] IIWindow* windowToken);
+    }
+
+    [local]
+    interface IAccessibilityManagerHelper {
+        GetInstance(
+            [in] IContext* ctx,
+            [out] IAccessibilityManager** manager);
+    }
+
+    } // namespace Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

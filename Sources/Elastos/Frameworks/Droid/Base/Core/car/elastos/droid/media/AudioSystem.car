@@ -1,0 +1,528 @@
+
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /*
+     * Handles the audio error callback.
+     */
+    interface IAudioSystemErrorCallback {
+        /*
+         * Callback for audio server errors.
+         * param error   error code:
+         * - AUDIO_STATUS_OK
+         * - AUDIO_STATUS_SERVER_DIED
+         * - AUDIO_STATUS_ERROR
+         */
+        OnError(
+            [in] Int32 error);
+    }
+
+    interface IAudioSystem {
+        /* The default audio stream */
+        const Int32 STREAM_DEFAULT = -1;
+        /* These values must be kept in sync with AudioSystem.h */
+        /*
+         * If these are modified, please also update Settings.System.VOLUME_SETTINGS
+         * and attrs.xml and AudioManager.java.
+         */
+        /* The audio stream for phone calls */
+        const Int32 STREAM_VOICE_CALL = 0;
+
+        /* The audio stream for system sounds */
+        const Int32 STREAM_SYSTEM = 1;
+
+        /* The audio stream for the phone ring and message alerts */
+        const Int32 STREAM_RING = 2;
+
+        /* The audio stream for music playback */
+        const Int32 STREAM_MUSIC = 3;
+
+        /* The audio stream for alarms */
+        const Int32 STREAM_ALARM = 4;
+
+        /* The audio stream for notifications */
+        const Int32 STREAM_NOTIFICATION = 5;
+
+        /* @hide The audio stream for phone calls when connected on bluetooth */
+        const Int32 STREAM_BLUETOOTH_SCO = 6;
+
+        /* @hide The audio stream for enforced system sounds in certain countries (e.g camera in Japan) */
+        const Int32 STREAM_SYSTEM_ENFORCED = 7;
+
+        /* @hide The audio stream for DTMF tones */
+        const Int32 STREAM_DTMF = 8;
+
+        /* @hide The audio stream for text to speech (TTS) */
+        const Int32 STREAM_TTS = 9;
+
+        /**
+         * @deprecated Use {@link #numStreamTypes() instead}
+         */
+        const Int32 NUM_STREAMS = 5;
+
+        /* modes for setPhoneState, must match AudioSystem.h audio_mode */
+        const Int32 MODE_INVALID = -2;
+        const Int32 MODE_CURRENT = -1;
+        const Int32 MODE_NORMAL = 0;
+        const Int32 MODE_RINGTONE = 1;
+        const Int32 MODE_IN_CALL = 2;
+        const Int32 MODE_IN_COMMUNICATION = 3;
+        const Int32 NUM_MODES = 4;
+
+        /* Routing bits for the former setRouting/getRouting API */
+        /** @deprecated */
+        const Int32 ROUTE_EARPIECE = 1 << 0; // 1;
+
+        /** @deprecated */
+        const Int32 ROUTE_SPEAKER = 1 << 1; // 2;
+
+        /** @deprecated use {@link #ROUTE_BLUETOOTH_SCO} */
+        const Int32 ROUTE_BLUETOOTH = 1 << 2; // 4;
+
+        /** @deprecated */
+        const Int32 ROUTE_BLUETOOTH_SCO = 1 << 2; // 4;
+
+        /** @deprecated */
+        const Int32 ROUTE_HEADSET = 1 << 3; // 8;
+
+        /** @deprecated */
+        const Int32 ROUTE_BLUETOOTH_A2DP = 1 << 4; // 16;
+
+        /** @deprecated */
+        const Int32 ROUTE_ALL = 0xFFFFFFFF;
+
+        // Keep in sync with system/core/include/system/audio.h
+        const Int32 AUDIO_SESSION_ALLOCATE = 0;
+
+        // These match the enum AudioError in frameworks/base/core/jni/android_media_AudioSystem.cpp
+        /* Command sucessful or Media server restarted. see ErrorCallback */
+        const Int32 AUDIO_STATUS_OK = 0;
+
+        /* Command failed or unspecified audio error.  see ErrorCallback */
+        const Int32 AUDIO_STATUS_ERROR = 1;
+
+        /* Media server died. see ErrorCallback */
+        const Int32 AUDIO_STATUS_SERVER_DIED = 100;
+
+        /*
+         * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
+         * Must be kept in sync with frameworks/base/core/jni/android_media_AudioErrors.h
+         */
+        const Int32 SUCCESS            = 0;
+        const Int32 ERROR              = -1;
+        const Int32 BAD_VALUE          = -2;
+        const Int32 INVALID_OPERATION  = -3;
+        const Int32 PERMISSION_DENIED  = -4;
+        const Int32 NO_INIT            = -5;
+        const Int32 DEAD_OBJECT        = -6;
+
+        /*
+         * AudioPolicyService methods
+         */
+
+        //
+        // audio device definitions: must be kept in sync with values in system/core/audio.h
+        //
+
+        const Int32 DEVICE_NONE = 0x0;
+
+        /*
+         * AudioPolicyService methods
+         */
+        //
+        // audio device definitions: must be kept in sync with values in system/core/audio.h
+        //
+        // reserved bits
+        const Int32 DEVICE_BIT_IN = 0x80000000;
+        const Int32 DEVICE_BIT_DEFAULT = 0x40000000;
+
+        // output devices, be sure to update AudioManager.java also
+        const Int32 DEVICE_OUT_EARPIECE = 0x1;
+        const Int32 DEVICE_OUT_SPEAKER = 0x2;
+        const Int32 DEVICE_OUT_WIRED_HEADSET = 0x4;
+        const Int32 DEVICE_OUT_WIRED_HEADPHONE = 0x8;
+        const Int32 DEVICE_OUT_BLUETOOTH_SCO = 0x10;
+        const Int32 DEVICE_OUT_BLUETOOTH_SCO_HEADSET = 0x20;
+        const Int32 DEVICE_OUT_BLUETOOTH_SCO_CARKIT = 0x40;
+        const Int32 DEVICE_OUT_BLUETOOTH_A2DP = 0x80;
+        const Int32 DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES = 0x100;
+        const Int32 DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER = 0x200;
+        const Int32 DEVICE_OUT_AUX_DIGITAL = 0x400;
+        const Int32 DEVICE_OUT_HDMI = 0x400; //DEVICE_OUT_AUX_DIGITAL;
+        const Int32 DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800;
+        const Int32 DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000;
+        const Int32 DEVICE_OUT_USB_ACCESSORY = 0x2000;
+        const Int32 DEVICE_OUT_USB_DEVICE = 0x4000;
+        const Int32 DEVICE_OUT_REMOTE_SUBMIX = 0x8000;
+        const Int32 DEVICE_OUT_TELEPHONY_TX = 0x10000;
+        const Int32 DEVICE_OUT_LINE = 0x20000;
+        const Int32 DEVICE_OUT_HDMI_ARC = 0x40000;
+        const Int32 DEVICE_OUT_SPDIF = 0x80000;
+        const Int32 DEVICE_OUT_FM = 0x100000;
+        const Int32 DEVICE_OUT_AUX_LINE = 0x200000;
+
+        const Int32 DEVICE_OUT_DEFAULT = 0x40000000; // DEVICE_BIT_DEFAULT;
+
+        const Int32 DEVICE_OUT_ALL = 0x403FFFFF;
+                                            // (DEVICE_OUT_EARPIECE |
+                                            //   DEVICE_OUT_SPEAKER |
+                                            //   DEVICE_OUT_WIRED_HEADSET |
+                                            //   DEVICE_OUT_WIRED_HEADPHONE |
+                                            //   DEVICE_OUT_BLUETOOTH_SCO |
+                                            //   DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
+                                            //   DEVICE_OUT_BLUETOOTH_SCO_CARKIT |
+                                            //   DEVICE_OUT_BLUETOOTH_A2DP |
+                                            //   DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
+                                            //   DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
+                                            //   DEVICE_OUT_HDMI |
+                                            //   DEVICE_OUT_ANLG_DOCK_HEADSET |
+                                            //   DEVICE_OUT_DGTL_DOCK_HEADSET |
+                                            //   DEVICE_OUT_USB_ACCESSORY |
+                                            //   DEVICE_OUT_USB_DEVICE |
+                                            //   DEVICE_OUT_REMOTE_SUBMIX |
+                                            //   DEVICE_OUT_TELEPHONY_TX |
+                                            //   DEVICE_OUT_LINE |
+                                            //   DEVICE_OUT_HDMI_ARC |
+                                            //   DEVICE_OUT_SPDIF |
+                                            //   DEVICE_OUT_FM |
+                                            //   DEVICE_OUT_AUX_LINE |
+                                            //   DEVICE_OUT_DEFAULT);
+
+        const Int32 DEVICE_OUT_ALL_A2DP = 0x380;
+        //                                     (DEVICE_OUT_BLUETOOTH_A2DP |
+        //                           DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
+        //                              DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER);
+
+        const Int32 DEVICE_OUT_ALL_SCO = 0x70;
+        //                                   (DEVICE_OUT_BLUETOOTH_SCO |
+        //                            DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
+        //                             DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
+
+        const Int32 DEVICE_OUT_ALL_USB = 0x6000;
+        //                                     (DEVICE_OUT_USB_ACCESSORY |
+        //                                         DEVICE_OUT_USB_DEVICE);
+        const Int32 DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO = 0x2C0000;
+                                                // (DEVICE_OUT_AUX_LINE |
+                                                // DEVICE_OUT_HDMI_ARC |
+                                                // DEVICE_OUT_SPDIF);
+        const Int32 DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER = 0x2C0002;
+                // (DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO |
+                //  DEVICE_OUT_SPEAKER);
+
+        // input devices
+        const Int32 DEVICE_IN_COMMUNICATION = 0x80000001;         // DEVICE_BIT_IN | 0x1;
+        const Int32 DEVICE_IN_AMBIENT = 0x80000002;               // DEVICE_BIT_IN | 0x2;
+        const Int32 DEVICE_IN_BUILTIN_MIC = 0x80000004;           // DEVICE_BIT_IN | 0x4;
+        const Int32 DEVICE_IN_BLUETOOTH_SCO_HEADSET = 0x80000008; // DEVICE_BIT_IN | 0x8;
+        const Int32 DEVICE_IN_WIRED_HEADSET = 0x80000010;         // DEVICE_BIT_IN | 0x10;
+        const Int32 DEVICE_IN_AUX_DIGITAL = 0x80000020;           // DEVICE_BIT_IN | 0x20;
+        const Int32 DEVICE_IN_HDMI = 0x80000020;                  // DEVICE_IN_AUX_DIGITAL;
+        const Int32 DEVICE_IN_VOICE_CALL = 0x80000040;            // DEVICE_BIT_IN | 0x40;
+        const Int32 DEVICE_IN_TELEPHONY_RX = 0x80000040;          // DEVICE_IN_VOICE_CALL;
+        const Int32 DEVICE_IN_BACK_MIC = 0x80000080;              // DEVICE_BIT_IN | 0x80;
+        const Int32 DEVICE_IN_REMOTE_SUBMIX = 0x80000100;         // DEVICE_BIT_IN | 0x100;
+        const Int32 DEVICE_IN_ANLG_DOCK_HEADSET = 0x80000200;     // DEVICE_BIT_IN | 0x200;
+        const Int32 DEVICE_IN_DGTL_DOCK_HEADSET = 0x80000400;     // DEVICE_BIT_IN | 0x400;
+        const Int32 DEVICE_IN_USB_ACCESSORY = 0x80000800;         // DEVICE_BIT_IN | 0x800;
+        const Int32 DEVICE_IN_USB_DEVICE = 0x80001000;            // DEVICE_BIT_IN | 0x1000;
+        const Int32 DEVICE_IN_FM_TUNER = 0x80002000;              // DEVICE_BIT_IN | 0x2000;
+        const Int32 DEVICE_IN_TV_TUNER = 0x80004000;              // DEVICE_BIT_IN | 0x4000;
+        const Int32 DEVICE_IN_LINE = 0x80008000;                  // DEVICE_BIT_IN | 0x8000;
+        const Int32 DEVICE_IN_SPDIF = 0x80010000;                 // DEVICE_BIT_IN | 0x10000;
+        const Int32 DEVICE_IN_BLUETOOTH_A2DP = 0x80020000;        // DEVICE_BIT_IN | 0x20000;
+        const Int32 DEVICE_IN_LOOPBACK = 0x80040000;              // DEVICE_BIT_IN | 0x40000;
+        const Int32 DEVICE_IN_DEFAULT = 0xC0000000;               // DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
+
+
+        const Int32 DEVICE_IN_ALL = 0xC007FFFF;
+                                            // (DEVICE_IN_COMMUNICATION |
+                                            //  DEVICE_IN_AMBIENT |
+                                            //  DEVICE_IN_BUILTIN_MIC |
+                                            //  DEVICE_IN_BLUETOOTH_SCO_HEADSET |
+                                            //  DEVICE_IN_WIRED_HEADSET |
+                                            //  DEVICE_IN_HDMI |
+                                            //  DEVICE_IN_TELEPHONY_RX |
+                                            //  DEVICE_IN_BACK_MIC |
+                                            //  DEVICE_IN_REMOTE_SUBMIX |
+                                            //  DEVICE_IN_ANLG_DOCK_HEADSET |
+                                            //  DEVICE_IN_DGTL_DOCK_HEADSET |
+                                            //  DEVICE_IN_USB_ACCESSORY |
+                                            //  DEVICE_IN_USB_DEVICE |
+                                            //  DEVICE_IN_FM_TUNER |
+                                            //  DEVICE_IN_TV_TUNER |
+                                            //  DEVICE_IN_LINE |
+                                            //  DEVICE_IN_SPDIF |
+                                            //  DEVICE_IN_BLUETOOTH_A2DP |
+                                            //  DEVICE_IN_LOOPBACK |
+                                            //  DEVICE_IN_DEFAULT);
+
+        const Int32 DEVICE_IN_ALL_SCO = 0x80000008; // DEVICE_IN_BLUETOOTH_SCO_HEADSET;
+        const Int32 DEVICE_IN_ALL_USB = 0x80001800; // (DEVICE_IN_USB_ACCESSORY |
+                                                    // DEVICE_IN_USB_DEVICE);
+
+        // device states, must match AudioSystem::device_connection_state
+        const Int32 DEVICE_STATE_UNAVAILABLE = 0;
+        const Int32 DEVICE_STATE_AVAILABLE = 1;
+
+        const String DEVICE_OUT_EARPIECE_NAME = "earpiece";
+        const String DEVICE_OUT_SPEAKER_NAME = "speaker";
+        const String DEVICE_OUT_WIRED_HEADSET_NAME = "headset";
+        const String DEVICE_OUT_WIRED_HEADPHONE_NAME = "headphone";
+        const String DEVICE_OUT_BLUETOOTH_SCO_NAME = "bt_sco";
+        const String DEVICE_OUT_BLUETOOTH_SCO_HEADSET_NAME = "bt_sco_hs";
+        const String DEVICE_OUT_BLUETOOTH_SCO_CARKIT_NAME = "bt_sco_carkit";
+        const String DEVICE_OUT_BLUETOOTH_A2DP_NAME = "bt_a2dp";
+        const String DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES_NAME = "bt_a2dp_hp";
+        const String DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER_NAME = "bt_a2dp_spk";
+        const String DEVICE_OUT_AUX_DIGITAL_NAME = "aux_digital";
+        const String DEVICE_OUT_HDMI_NAME = "hdmi";
+        const String DEVICE_OUT_ANLG_DOCK_HEADSET_NAME = "analog_dock";
+        const String DEVICE_OUT_DGTL_DOCK_HEADSET_NAME = "digital_dock";
+        const String DEVICE_OUT_USB_ACCESSORY_NAME = "usb_accessory";
+        const String DEVICE_OUT_USB_DEVICE_NAME = "usb_device";
+        const String DEVICE_OUT_REMOTE_SUBMIX_NAME = "remote_submix";
+        const String DEVICE_OUT_TELEPHONY_TX_NAME = "telephony_tx";
+        const String DEVICE_OUT_LINE_NAME = "line";
+        const String DEVICE_OUT_HDMI_ARC_NAME = "hmdi_arc";
+        const String DEVICE_OUT_SPDIF_NAME = "spdif";
+        const String DEVICE_OUT_FM_NAME = "fm_transmitter";
+        const String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
+
+        // phone state, match audio_mode???
+        const Int32 PHONE_STATE_OFFCALL = 0;
+        const Int32 PHONE_STATE_RINGING = 1;
+        const Int32 PHONE_STATE_INCALL = 2;
+
+        // device categories config for setForceUse, must match AudioSystem::forced_config
+        const Int32 FORCE_NONE = 0;
+        const Int32 FORCE_SPEAKER = 1;
+        const Int32 FORCE_HEADPHONES = 2;
+        const Int32 FORCE_BT_SCO = 3;
+        const Int32 FORCE_BT_A2DP = 4;
+        const Int32 FORCE_WIRED_ACCESSORY = 5;
+        const Int32 FORCE_BT_CAR_DOCK = 6;
+        const Int32 FORCE_BT_DESK_DOCK = 7;
+        const Int32 FORCE_ANALOG_DOCK = 8;
+        const Int32 FORCE_DIGITAL_DOCK = 9;
+        const Int32 FORCE_NO_BT_A2DP = 10;
+        const Int32 FORCE_SYSTEM_ENFORCED = 11;
+        const Int32 FORCE_HDMI_SYSTEM_AUDIO_ENFORCED = 12;
+        const Int32 FORCE_DEFAULT = 0; // FORCE_NONE;
+
+        // usage for setForceUse, must match AudioSystem::force_use
+        const Int32 FOR_COMMUNICATION = 0;
+        const Int32 FOR_MEDIA = 1;
+        const Int32 FOR_RECORD = 2;
+        const Int32 FOR_DOCK = 3;
+        const Int32 FOR_SYSTEM = 4;
+        const Int32 FOR_HDMI_SYSTEM_AUDIO = 5;
+
+        // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
+        const Int32 SYNC_EVENT_NONE = 0;
+        const Int32 SYNC_EVENT_PRESENTATION_COMPLETE = 1;
+
+        // must be kept in sync with value in include/system/audio.h
+        const Int32 AUDIO_HW_SYNC_INVALID = 0;
+
+    }
+
+    [deprecated]
+    interface IAudioSystemHelper {
+        GetNumStreamTypes(
+            [out] Int32* result);
+
+        /*
+         * Sets the microphone mute on or off.
+         *
+         * @param on set <var>true</var> to mute the microphone;
+         *           <var>false</var> to turn mute off
+         * @return command completion status see AUDIO_STATUS_OK, see AUDIO_STATUS_ERROR
+         */
+        MuteMicrophone(
+            [in] Boolean on);
+
+        /*
+         * Checks whether the microphone mute is on or off.
+         *
+         * @return true if microphone is muted, false if it's not
+         */
+        IsMicrophoneMuted(
+            [out] Boolean* result);
+
+        /*
+         * Checks whether the specified stream type is active.
+         *
+         * return true if any track playing on this stream is active.
+         */
+        IsStreamActive(
+            [in] Int32 stream,
+            [in] Int32 inPastMs,
+            [out] Boolean* result);
+
+        /*
+         * Checks whether the specified stream type is active on a remotely connected device. The notion
+         * of what constitutes a remote device is enforced by the audio policy manager of the platform.
+         *
+         * return true if any track playing on this stream is active on a remote device.
+         */
+        IsStreamActiveRemotely(
+            [in] Int32 stream,
+            [in] Int32 inPastMs,
+            [out] Boolean* result);
+
+        /*
+         * Checks whether the specified audio source is active.
+         *
+         * return true if any recorder using this source is currently recording
+         */
+        IsSourceActive(
+            [in] Int32 source,
+            [out] Boolean* result);
+
+        /*
+         * Returns a new unused audio session ID
+         */
+        NewAudioSessionId(
+            [out] Int32* result);
+
+        /*
+         * Sets a group generic audio configuration parameters. The use of these parameters
+         * are platform dependent, see libaudio
+         *
+         * param keyValuePairs  list of parameters key value pairs in the form:
+         *    key1=value1;key2=value2;...
+         */
+        SetParameters(
+            [in] String keyValuePairs);
+
+        /*
+         * Gets a group generic audio configuration parameters. The use of these parameters
+         * are platform dependent, see libaudio
+         *
+         * param keys  list of parameters
+         * return value: list of parameters key value pairs in the form:
+         *    key1=value1;key2=value2;...
+         */
+        GetParameters(
+            [in] String keys,
+            [out] String* result);
+
+        /*
+         * Registers a callback to be invoked when an error occurs.
+         * @param cb the callback to run
+         */
+        SetErrorCallback(
+            [in] IAudioSystemErrorCallback* cb);
+
+        GetOutputDeviceName(
+            [in] Int32 device,
+            [out] String* result);
+
+        SetDeviceConnectionState(
+            [in] Int32 device,
+            [in] Int32 state,
+            [in] String device_address);
+
+        GetDeviceConnectionState(
+            [in] Int32 device,
+            [in] String device_address,
+            [out] Int32* result);
+
+        SetPhoneState(
+            [in] Int32 state);
+
+        SetForceUse(
+            [in] Int32 usage,
+            [in] Int32 config);
+
+        GetForceUse(
+            [in] Int32 usage,
+            [out] Int32* result);
+
+        InitStreamVolume(
+            [in] Int32 stream,
+            [in] Int32 indexMin,
+            [in] Int32 indexMax);
+
+        SetStreamVolumeIndex(
+            [in] Int32 stream,
+            [in] Int32 index,
+            [in] Int32 device);
+
+        GetStreamVolumeIndex(
+            [in] Int32 stream,
+            [in] Int32 device,
+            [out] Int32* result);
+
+        SetMasterVolume(
+            [in] Float value);
+
+        GetMasterVolume(
+            [out] Float* result);
+
+        SetMasterMute(
+            [in] Boolean mute);
+
+        GetMasterMute(
+            [out] Boolean* result);
+
+        GetDevicesForStream(
+            [in] Int32 stream,
+            [out] Int32* result);
+
+        // helpers for android.media.AudioManager.getProperty(), see description there for meaning
+        GetPrimaryOutputSamplingRate(
+            [out] Int32* result);
+
+        GetPrimaryOutputFrameCount(
+            [out] Int32* result);
+
+        GetOutputLatency(
+            [in] Int32 stream,
+            [out] Int32* result);
+
+        SetLowRamDevice(
+            [in] Boolean isLowRamDevice,
+            [out] Int32* result);
+
+        CheckAudioFlinger(
+            [out] Int32* result);
+
+        ListAudioPorts(
+            [in] IArrayList* ports,
+            [in] ArrayOf<Int32>* generation,
+            [out] Int32* result);
+
+        CreateAudioPatch(
+            [in] ArrayOf<IAudioPatch*>* patch,
+            [in] ArrayOf<IAudioPortConfig*>* sources,
+            [in] ArrayOf<IAudioPortConfig*>* sinks,
+            [out] Int32* result);
+
+        ReleaseAudioPatch(
+            [in] IAudioPatch* patch,
+            [out] Int32* result);
+
+        ListAudioPatches(
+            [in] IArrayList* patches,
+            [in] ArrayOf<Int32>* generation,
+            [out] Int32* result);
+
+        SetAudioPortConfig(
+            [in] IAudioPortConfig* config,
+            [out] Int32* result);
+
+        GetAudioHwSyncForSession(
+            [in] Int32 sessionId,
+            [out] Int32* result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

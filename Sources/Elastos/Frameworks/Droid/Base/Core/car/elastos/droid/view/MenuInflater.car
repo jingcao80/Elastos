@@ -1,0 +1,42 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IMenu;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+        /**
+         * This class is used to instantiate menu XML files into Menu objects.
+         * <p>
+         * For performance reasons, menu inflation relies heavily on pre-processing of
+         * XML files that is done at build time. Therefore, it is not currently possible
+         * to use MenuInflater with an XmlPullParser over a plain XML file at runtime;
+         * it only works with an XmlPullParser returned from a compiled resource (R.
+         * <em>something</em> file.)
+         */
+        [local]
+        interface IMenuInflater {
+            /**
+             * Inflate a menu hierarchy from the specified XML resource. Throws
+             * {@link InflateException} if there is an error.
+             *
+             * @param menuRes Resource ID for an XML layout resource to load (e.g.,
+             *            <code>R.menu.main_activity</code>)
+             * @param menu The Menu to inflate into. The items and submenus will be
+             *            added to this Menu.
+             */
+            Inflate(
+                [in] Int32 menuRes,
+                [in] IMenu* menu);
+
+            GetContext(
+                [out] IContext** ctx);
+        }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

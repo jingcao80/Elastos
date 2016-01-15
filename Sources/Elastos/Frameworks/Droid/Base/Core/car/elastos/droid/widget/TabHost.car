@@ -1,0 +1,152 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.App.ILocalActivityManager;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Interface definition for a callback to be invoked when tab changed
+     */
+    interface ITabHostOnTabChangeListener {
+        OnTabChanged(
+            [in] String tabId);
+    }
+
+    /**
+     * Makes the content of a tab when it is selected. Use this if your tab
+     * content needs to be created on demand, i.e. you are not showing an
+     * existing view or starting an activity.
+     */
+    [local]
+    interface ITabHostTabContentFactory {
+        CreateTabContent(
+            [in] String tag,
+            [out] IView** view);
+    }
+
+    /**
+     * Specifies what you do to create a tab indicator.
+     */
+    [local]
+    interface ITabHostIndicatorStrategy {
+
+        /**
+         * Return the view for the indicator.
+         */
+        CreateIndicatorView(
+            [out] IView** view);
+    }
+
+    /**
+     * Specifies what you do to manage the tab content.
+     */
+    [local]
+    interface ITabHostContentStrategy {
+
+        /**
+         * Return the content view.  The view should may be cached locally.
+         */
+        GetContentView(
+            [out] IView** view);
+
+        /**
+         * Perhaps do something when the tab associated with this content has
+         * been closed (i.e make it invisible, or remove it).
+         */
+        TabClosed();
+    }
+
+    [local]
+    interface ITabSpec {
+        SetIndicator(
+            [in] ICharSequence* label);
+
+        SetIndicator(
+            [in] ICharSequence* label,
+            [in] IDrawable* icon);
+
+        SetIndicator(
+            [in] IView* view);
+
+        SetContent(
+            [in] Int32 viewId);
+
+        SetContent(
+            [in] ITabHostTabContentFactory* contentFactory);
+
+        SetContent(
+            [in] IIntent* intent);
+
+        GetTag(
+            [out] String* str);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface ITabHost {
+        NewTabSpec(
+            [in] String tag,
+            [out] ITabSpec** tabspec);
+
+        Setup();
+
+        Setup(
+            [in] ILocalActivityManager* activityGroup);
+
+        AddTab(
+            [in] ITabSpec* tabSpec);
+
+        ClearAllTabs();
+
+        GetTabWidget(
+            [out] ITabWidget** tabWidget);
+
+        GetCurrentTab(
+            [out] Int32* tab);
+
+        GetCurrentTabTag(
+            [out] String* tag);
+
+        GetCurrentTabView(
+            [out] IView** view);
+
+        GetCurrentView(
+            [out] IView** view);
+
+        SetCurrentTabByTag(
+            [in] String tag);
+
+        GetTabContentView(
+            [out] IFrameLayout** view);
+
+        SetCurrentTab(
+            [in] Int32 index);
+
+        SetOnTabChangedListener(
+            [in] ITabHostOnTabChangeListener* l);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+
+}

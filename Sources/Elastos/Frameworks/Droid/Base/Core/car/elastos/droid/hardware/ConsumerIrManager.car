@@ -1,0 +1,77 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /**
+     * Represents a range of carrier frequencies (inclusive) on which the
+     * infrared transmitter can transmit
+     */
+    interface ICarrierFrequencyRange {
+        /**
+         * Get the minimum (inclusive) frequency in this range segment.
+         */
+        GetMinFrequency(
+            [out] Int32* value);
+
+        /**
+         * Get the maximum (inclusive) frequency in this range segment.
+         */
+        GetMaxFrequency(
+            [out] Int32* value);
+    }
+
+    /**
+    * Class that operates consumer infrared on the device.
+    *
+    * <p>
+    * To obtain an instance of the system infrared transmitter, call
+    * {@link android.content.Context#getSystemService(java.lang.String)
+    * Context.getSystemService()} with
+    * {@link android.content.Context#CONSUMER_IR_SERVICE} as the argument.
+    * </p>
+    */
+    [deprecated]
+    interface IConsumerIrManager {
+
+        /**
+         * Check whether the device has an infrared emitter.
+         *
+         * @return true if the device has an infrared emitter, else false.
+         */
+        HasIrEmitter(
+            [out] Boolean* value);
+
+        /**
+         * Transmit an infrared pattern
+         * <p>
+         * This method is synchronous; when it returns the pattern has
+         * been transmitted. Only patterns shorter than 2 seconds will
+         * be transmitted.
+         * </p>
+         *
+         * @param carrierFrequency The IR carrier frequency in Hertz.
+         * @param pattern The alternating on/off pattern in microseconds to transmit.
+         */
+        Transmit(
+            [in] Int32 carrierFrequency,
+            [in] ArrayOf<Int32>* pattern);
+
+        /**
+         * Query the infrared transmitter's supported carrier frequencies
+         *
+         * @return an array of
+         * {@link android.hardware.ConsumerIrManager.CarrierFrequencyRange}
+         * objects representing the ranges that the transmitter can support, or
+         * null if there was an error communicating with the Consumer IR Service.
+         */
+        GetCarrierFrequencies(
+            [out, callee] ArrayOf<ICarrierFrequencyRange*>* outarr);
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

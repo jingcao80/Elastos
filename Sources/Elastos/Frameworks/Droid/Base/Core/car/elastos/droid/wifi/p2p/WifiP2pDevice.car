@@ -1,0 +1,167 @@
+
+module
+{
+    interface Elastos.Droid.Wifi.P2p.IWifiP2pWfdInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+
+    /**
+     * A class representing a Wi-Fi p2p device
+     *
+     * Note that the operations are not thread safe
+     * {@see WifiP2pManager}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiP2pDevice {
+        const Int32 CONNECTED = 0;
+
+        const Int32 INVITED = 1;
+
+        const Int32 FAILED = 2;
+
+        const Int32 AVAILABLE = 3;
+
+        const Int32 UNAVAILABLE = 4;
+
+        /**
+         * The device name is a user friendly string to identify a Wi-Fi p2p device
+         */
+        GetDeviceName(
+            [out] String* result);
+
+        SetDeviceName(
+            [in] String deviceName);
+
+        /**
+         * The device MAC address uniquely identifies a Wi-Fi p2p device
+         */
+        GetDeviceAddress(
+            [out] String* result);
+
+        SetDeviceAddress(
+            [in] String deviceAddress);
+
+        /**
+         * Primary device type identifies the type of device. For example, an application
+         * could filter the devices discovered to only display printers if the purpose is to
+         * enable a printing action from the user. See the Wi-Fi Direct technical specification
+         * for the full list of standard device types supported.
+         */
+        GetPrimaryDeviceType(
+            [out] String* result);
+
+        SetPrimaryDeviceType(
+            [in] String primaryDeviceType);
+
+        /**
+         * Secondary device type is an optional attribute that can be provided by a device in
+         * addition to the primary device type.
+         */
+        GetSecondaryDeviceType(
+            [out] String* result);
+
+        SetSecondaryDeviceType(
+            [in] String secondaryDeviceType);
+
+        /**
+         * WPS config methods supported
+         * @hide
+         */
+        GetWpsConfigMethodsSupported(
+            [out] Int32* result);
+
+        SetWpsConfigMethodsSupported(
+            [in] Int32 wpsConfigMethodsSupported);
+
+        /**
+         * Device capability
+         * @hide
+         */
+        GetDeviceCapability(
+            [out] Int32* result);
+
+        SetDeviceCapability(
+            [in] Int32 deviceCapability);
+
+        /**
+         * Group capability
+         * @hide
+         */
+        GetGroupCapability(
+            [out] Int32* result);
+
+        SetGroupCapability(
+            [in] Int32 groupCapability);
+
+        /** Device connection status */
+        GetStatus(
+            [out] Int32* result);
+
+        SetStatus(
+            [in] Int32 status);
+
+        /** @hide */
+        GetWfdInfo(
+            [out] IWifiP2pWfdInfo** result);
+
+        SetWfdInfo(
+            [in] IWifiP2pWfdInfo* wfdInfo);
+
+        /** Returns true if WPS push button configuration is supported */
+        WpsPbcSupported(
+            [out] Boolean* result);
+
+        /** Returns true if WPS keypad configuration is supported */
+        WpsKeypadSupported(
+            [out] Boolean* result);
+
+        /** Returns true if WPS display configuration is supported */
+        WpsDisplaySupported(
+            [out] Boolean* result);
+
+        /** Returns true if the device is capable of service discovery */
+        IsServiceDiscoveryCapable(
+            [out] Boolean* result);
+
+        /** Returns true if the device is capable of invitation {@hide}*/
+        IsInvitationCapable(
+            [out] Boolean* result);
+
+        /** Returns true if the device reaches the limit. {@hide}*/
+        IsDeviceLimit(
+            [out] Boolean* result);
+
+        /** Returns true if the device is a group owner */
+        IsGroupOwner(
+            [out] Boolean* result);
+
+        /** Returns true if the group reaches the limit. {@hide}*/
+        IsGroupLimit(
+            [out] Boolean* result);
+
+        /**
+         * Update device details. This will be throw an exception if the device address
+         * does not match.
+         * @param device to be updated
+         * @throws IllegalArgumentException if the device is null or device address does not match
+         * @hide
+         */
+        Update(
+            [in] IWifiP2pDevice* device);
+
+        /** Updates details obtained from supplicant @hide */
+        UpdateSupplicantDetails(
+            [in] IWifiP2pDevice* device);
+    }
+
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

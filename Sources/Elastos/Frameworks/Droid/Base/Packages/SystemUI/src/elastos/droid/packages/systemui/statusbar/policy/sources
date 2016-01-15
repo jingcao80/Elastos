@@ -1,0 +1,39 @@
+
+TARGET_NAME= policy
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES = Clock.cpp
+SOURCES += CClock.cpp
+SOURCES += DeadZone.cpp
+SOURCES += CDeadZone.cpp
+SOURCES += KeyButtonView.cpp
+SOURCES += CKeyButtonView.cpp
+SOURCES += Prefs.cpp
+SOURCES += CompatModeButton.cpp
+SOURCES += CCompatModeButton.cpp
+SOURCES += ToggleSlider.cpp
+SOURCES += CToggleSlider.cpp
+SOURCES += EventHole.cpp
+SOURCES += CEventHole.cpp
+SOURCES += DateView.cpp
+SOURCES += CDateView.cpp
+SOURCES += IntruderAlertView.cpp
+SOURCES += CIntruderAlertView.cpp
+SOURCES += NetworkController.cpp
+SOURCES += NotificationRowLayout.cpp
+SOURCES += CNotificationRowLayout.cpp
+SOURCES += AccessibilityContentDescriptions.cpp
+SOURCES += TelephonyIcons.cpp
+SOURCES += WifiIcons.cpp
+SOURCES += WimaxIcons.cpp
+SOURCES += FixedSizeDrawable.cpp
+SOURCES += CFixedSizeDrawable.cpp
+SOURCES += AutoRotateController.cpp
+

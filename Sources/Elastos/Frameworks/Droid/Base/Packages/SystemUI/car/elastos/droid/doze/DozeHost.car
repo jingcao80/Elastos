@@ -1,0 +1,57 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Doze {
+
+    interface IDozeHostCallback {
+        OnNewNotifications();
+
+        OnBuzzBeepBlinked();
+
+        OnNotificationLight(
+            [in] Boolean on);
+
+        OnPowerSaveChanged(
+            [in] Boolean active);
+    }
+
+    interface IDozeHostPulseCallback {
+        OnPulseStarted();
+
+        OnPulseFinished();
+    }
+
+    /**
+     * Interface the doze service uses to communicate with the rest of system UI.
+     */
+    interface IDozeHost {
+        AddCallback(
+            [in] IDozeHostCallback* _callback);
+
+        RemoveCallback(
+            [in] IDozeHostCallback* _callback);
+
+        StartDozing(
+            [in] IRunnable* ready);
+
+        PulseWhileDozing(
+            [in] IDozeHostPulseCallback* _callback);
+
+        StopDozing();
+
+        IsPowerSaveActive(
+            [out] Boolean* ret);
+    }
+
+    } //namespace Doze
+    } //namespace SystemUI
+    } // namespace Packages
+    } //namespace Droid
+    } //namespace Elastos
+}

@@ -1,0 +1,194 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+     /**
+       * An entry within a zip file. An entry has attributes such as its name
+       * (which is actually a path) and the uncompressed size of the corresponding data.
+       * An entry does not contain the data itself, but can be used as a key with
+       * getInputStream(ZipEntry). The class documentation for ZipInputStream and
+       * ZipOutputStream shows how ZipEntry is used in conjunction with those two classes.
+       *
+       * @sa getInputStream(ZipEntry)
+       * @sa ZipOutputStream
+       * @sa ZipInputStream
+       */
+    [deprecated]
+    interface IZipEntry {
+        /**
+         * Zip entry state: Deflated.
+         */
+        const Int32 DEFLATED = 8;
+
+        /**
+         * Zip entry state: Stored.
+         */
+        const Int32 STORED = 0;
+
+        /**
+         * Gets the comment for this {ZipEntry}.
+         *
+         * @return the comment for this {ZipEntry}, or {null} if there
+         *         is no comment. If we're reading an archive with
+         *         {ZipInputStream} the comment is not available.
+         */
+        GetComment(
+            [out] String* comment);
+
+        /**
+         * Gets the compressed size of this {ZipEntry}.
+         *
+         * @return the compressed size, or -1 if the compressed size has not been
+         *         set.
+         */
+        GetCompressedSize(
+            [out] Int64* size);
+
+        /**
+         * Gets the checksum for this {ZipEntry}.
+         *
+         * @return the checksum, or -1 if the checksum has not been set.
+         */
+        GetCrc(
+            [out] Int64* checksum);
+
+        /**
+         * Gets the extra information for this {ZipEntry}.
+         *
+         * @return a byte array containing the extra information, or {null} if
+         *         there is none.
+         */
+        GetExtra(
+            [out, callee] ArrayOf<Byte>* extra);
+
+        /**
+         * Gets the compression method for this {ZipEntry}.
+         *
+         * @return the compression method, either {DEFLATED}, {STORED}
+         *         or -1 if the compression method has not been set.
+         */
+        GetMethod(
+            [out] Int32* method);
+
+        /**
+         * Gets the name of this {ZipEntry}.
+         *
+         * @return the entry name.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Gets the uncompressed size of this {ZipEntry}.
+         *
+         * @return the uncompressed size, or {-1} if the size has not been
+         *         set.
+         */
+        GetSize(
+            [out] Int64* size);
+
+        /**
+         * Gets the last modification time of this {ZipEntry}.
+         *
+         * @return the last modification time as the number of milliseconds since
+         *         Jan. 1, 1970.
+         */
+        GetTime(
+            [out] Int64* time);
+
+        /**
+         * Determine whether or not this {ZipEntry} is a directory.
+         *
+         * @return {true} when this {ZipEntry} is a directory, {false} otherwise.
+         */
+        IsDirectory(
+            [out] Boolean* isDirectory);
+
+        /**
+         * Sets the comment for this {ZipEntry}.
+         *
+         * @param string
+         *            the comment for this entry.
+         */
+        SetComment(
+            [in] String comment);
+
+        /**
+         * Sets the compressed size for this {ZipEntry}.
+         *
+         * @param value
+         *            the compressed size (in bytes).
+         */
+        SetCompressedSize(
+            [in] Int64 size);
+
+        /**
+         * Sets the checksum for this {ZipEntry}.
+         *
+         * @param value
+         *            the checksum for this entry.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {value} is < 0 or > 0xFFFFFFFFL.
+         */
+        SetCrc(
+            [in] Int64 checksum);
+
+        /**
+         * Sets the extra information for this {ZipEntry}.
+         *
+         * @param data
+         *            a byte array containing the extra information.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | when the length of data is greater than 0xFFFF bytes.
+         */
+        SetExtra(
+            [in] ArrayOf<Byte>* data);
+
+        /**
+         * Sets the compression method for this {ZipEntry}.
+         *
+         * @param value
+         *            the compression method, either {DEFLATED} or {STORED}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | when value is not {DEFLATED} or {STORED}.
+         */
+        SetMethod(
+            [in] Int32 method);
+
+        /**
+         * Sets the uncompressed size of this {ZipEntry}.
+         *
+         * @param value
+         *            the uncompressed size for this entry.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {value} < 0 or {value} > 0xFFFFFFFFL.
+         */
+        SetSize(
+            [in] Int64 size);
+
+        /**
+         * Sets the modification time of this {ZipEntry}.
+         *
+         * @param value
+         *            the modification time as the number of milliseconds since Jan.
+         *            1, 1970.
+         */
+        SetTime(
+            [in] Int64 time);
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

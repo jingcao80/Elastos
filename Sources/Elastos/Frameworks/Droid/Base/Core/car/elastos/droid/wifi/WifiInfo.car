@@ -1,0 +1,331 @@
+
+module
+{
+    enum Elastos.Droid.Net.NetworkInfoDetailedState;
+    interface Elastos.Droid.Wifi.IWifiLinkLayerStats;
+
+    using interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Describes the state of any Wifi connection that is active or
+     * is in the process of being set up.
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiInfo {
+        /** @hide **/
+        const Int32 INVALID_RSSI = -127;
+
+        /** @hide **/
+        const Int32 MIN_RSSI = -126;
+
+        /** @hide **/
+        const Int32 MAX_RSSI = 200;
+
+        /**
+         * Link speed in Mbps
+         */
+        const String LINK_SPEED_UNITS = "Mbps";
+
+        /**
+         * Frequency in MHz
+         */
+        const String FREQUENCY_UNITS = "MHz";
+
+        /**
+         * @hide
+         */
+        GetTxBad(
+            [out] Int64* result);
+
+        SetTxBad(
+            [in] Int64 txBad);
+
+        /**
+         * @hide
+         */
+        GetTxRetries(
+            [out] Int64* result);
+
+        SetTxRetries(
+            [in] Int64 txRetries);
+
+        /**
+         * @hide
+         */
+        GetTxSuccess(
+            [out] Int64* result);
+
+        SetTxSuccess(
+            [in] Int64 txSuccess);
+
+        /**
+         * @hide
+         */
+        GetRxSuccess(
+            [out] Int64* result);
+
+        SetRxSuccess(
+            [in] Int64 rxSuccess);
+
+        /**
+         * @hide
+         */
+        GetTxBadRate(
+            [out] Double* result);
+
+        SetTxBadRate(
+            [in] Double txBadRate);
+
+        /**
+         * @hide
+         */
+        GetTxRetriesRate(
+            [out] Double* result);
+
+        SetTxRetriesRate(
+            [in] Double txRetriesRate);
+
+        /**
+         * @hide
+         */
+        GetTxSuccessRate(
+            [out] Double* result);
+
+        SetTxSuccessRate(
+            [in] Double txSuccessRate);
+
+        /**
+         * @hide
+         */
+        GetRxSuccessRate(
+            [out] Double* result);
+
+        SetRxSuccessRate(
+            [in] Double rxSuccessRate);
+
+        /**
+         * @hide
+         */
+        GetBadRssiCount(
+            [out] Int32* result);
+
+        SetBadRssiCount(
+            [in] Int32 badRssiCount);
+
+        /**
+         * @hide
+         */
+        GetLinkStuckCount(
+            [out] Int32* result);
+
+        SetLinkStuckCount(
+            [in] Int32 linkStuckCount);
+
+        /**
+         * @hide
+         */
+        GetLowRssiCount(
+            [out] Int32* result);
+
+        SetLowRssiCount(
+            [in] Int32 lowRssiCount);
+
+        /**
+         * @hide
+         */
+        GetScore(
+            [out] Int32* result);
+
+        SetScore(
+            [in] Int32 score);
+
+        /**
+         * TODO: get actual timestamp and calculate true rates
+         * @hide
+         */
+        UpdatePacketRates(
+            [in] IWifiLinkLayerStats* stats);
+
+        /**
+         * This function is less powerful and used if the WifiLinkLayerStats API is not implemented
+         * at the Wifi HAL
+         * @hide
+         */
+        UpdatePacketRates(
+            [in] Int64 txPackets,
+            [in] Int64 rxPackets);
+
+        /** @hide */
+        Reset();
+
+        /** @hide */
+        SetSSID(
+            [in] IWifiSsid* wifiSsid);
+
+        /**
+         * Returns the service set identifier (SSID) of the current 802.11 network.
+         * If the SSID can be decoded as UTF-8, it will be returned surrounded by double
+         * quotation marks. Otherwise, it is returned as a string of hex digits. The
+         * SSID may be {@code null} if there is no network currently connected.
+         * @return the SSID
+         */
+        GetSSID(
+            [out] String* result);
+
+        /** @hide */
+        GetWifiSsid(
+            [out] IWifiSsid** result);
+
+        /** @hide */
+        SetBSSID(
+            [in] String BSSID);
+
+        /**
+         * Return the basic service set identifier (BSSID) of the current access point.
+         * The BSSID may be {@code null} if there is no network currently connected.
+         * @return the BSSID, in the form of a six-byte MAC address: {@code XX:XX:XX:XX:XX:XX}
+         */
+        GetBSSID(
+            [out] String* result);
+
+        /**
+         * Returns the received signal strength indicator of the current 802.11
+         * network, in dBm.
+         *
+         * <p>Use {@link android.net.wifi.WifiManager#calculateSignalLevel} to convert this number into
+         * an absolute signal level which can be displayed to a user.
+         *
+         * @return the RSSI.
+         */
+        GetRssi(
+            [out] Int32* result);
+
+        /** @hide */
+        SetRssi(
+            [in] Int32 rssi);
+
+        /**
+         * Returns the current link speed in {@link #LINK_SPEED_UNITS}.
+         * @return the link speed.
+         * @see #LINK_SPEED_UNITS
+         */
+        GetLinkSpeed(
+            [out] Int32* result);
+
+        /** @hide */
+        SetLinkSpeed(
+            [in] Int32 linkSpeed);
+
+        /**
+         * Returns the current frequency in {@link #FREQUENCY_UNITS}.
+         * @return the frequency.
+         * @see #FREQUENCY_UNITS
+         */
+        GetFrequency(
+            [out] Int32* result);
+
+        /** @hide */
+        SetFrequency(
+            [in] Int32 frequency);
+
+        /**
+         * @hide
+         * TODO: makes real freq boundaries
+         */
+        Is24GHz(
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         * TODO: makes real freq boundaries
+         */
+        Is5GHz(
+            [out] Boolean* result);
+
+        /**
+         * Record the MAC address of the WLAN interface
+         * @param macAddress the MAC address in {@code XX:XX:XX:XX:XX:XX} form
+         * @hide
+         */
+        SetMacAddress(
+            [in] String macAddress);
+
+        GetMacAddress(
+            [out] String* result);
+
+        /** {@hide} */
+        SetMeteredHint(
+            [in] Boolean meteredHint);
+
+        /** {@hide} */
+        GetMeteredHint(
+            [out] Boolean* result);
+
+        /** @hide */
+        SetNetworkId(
+            [in] Int32 id);
+
+        /**
+         * Each configured network has a unique small integer ID, used to identify
+         * the network when performing operations on the supplicant. This method
+         * returns the ID for the currently connected network.
+         * @return the network ID, or -1 if there is no currently connected network
+         */
+        GetNetworkId(
+            [out] Int32* result);
+
+        /**
+         * Return the detailed state of the supplicant's negotiation with an
+         * access point, in the form of a {@link SupplicantState SupplicantState} object.
+         * @return the current {@link SupplicantState SupplicantState}
+         */
+        GetSupplicantState(
+            [out] ISupplicantState** result);
+
+        /** @hide */
+        SetSupplicantState(
+            [in] ISupplicantState* state);
+
+        /** @hide */
+        SetInetAddress(
+            [in] IInetAddress* address);
+
+        GetIpAddress(
+            [out] Int32* result);
+
+        /**
+         * @return {@code true} if this network does not broadcast its SSID, so an
+         * SSID-specific probe request must be used for scans.
+         */
+        GetHiddenSSID(
+            [out] Boolean* result);
+    }
+
+    interface IWifiInfoHelper {
+        /**
+         * Map a supplicant state into a fine-grained network connectivity state.
+         * @param suppState the supplicant state
+         * @return the corresponding {@link DetailedState}
+         */
+        GetDetailedStateOf(
+            [in] ISupplicantState* suppState,
+            [out] NetworkInfoDetailedState* result);
+
+        /** {@hide} */
+        RemoveDoubleQuotes(
+            [in] String string,
+            [out] String* result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}
+

@@ -1,0 +1,61 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Description of a single Uri permission grant. This grants may have been
+     * created via {@link Intent#FLAG_GRANT_READ_URI_PERMISSION}, etc when sending
+     * an {@link Intent}, or explicitly through
+     * {@link Context#grantUriPermission(String, android.net.Uri, int)}.
+     *
+     * @see ContentResolver#getPersistedUriPermissions()
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IUriPermission {
+        /**
+         * Value returned when a permission has not been persisted.
+         */
+        const Int64 INVALID_TIME = 0x8000000000000000;//Long.MIN_VALUE;
+
+        /**
+         * Return the Uri this permission pertains to.
+         */
+        GetUri(
+            [out] IUri** uri);
+
+        /**
+         * Returns if this permission offers read access.
+         */
+        IsReadPermission(
+            [out] Boolean* permission);
+
+        /**
+         * Returns if this permission offers write access.
+         */
+        IsWritePermission(
+            [out] Boolean* permission);
+
+        /**
+         * Return the time when this permission was first persisted, in milliseconds
+         * since January 1, 1970 00:00:00.0 UTC. Returns {@link #INVALID_TIME} if
+         * not persisted.
+         *
+         * @see ContentResolver#takePersistableUriPermission(Uri, int)
+         * @see System#currentTimeMillis()
+         */
+        GetPersistedTime(
+            [out] Int64* time);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

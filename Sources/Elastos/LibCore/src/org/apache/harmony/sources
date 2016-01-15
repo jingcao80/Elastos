@@ -1,0 +1,70 @@
+
+#TARGET_NAME= Org.Apache.Harmony
+#TARGET_TYPE= eco
+#
+#CAR_FLAGS += -n -u
+#LUBE_FLAGS += -n -u
+#
+#INCLUDES += $(MAKEDIR)/../../../../inc/common
+#
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Crypto/Internal
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Kernel/Vm
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Luni/Internal/Util
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Luni/Lang/Reflect
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Luni/Util
+#
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/Asn1
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/Fortress
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/Pkcs10
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/Pkcs8
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/Pkcs7
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/Provider/Cert
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/Provider/Crypto
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/Utils
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/X501
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/X509
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Security/X509/Tsp
+#
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Xml/Dom
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Xml/Parsers
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Xml
+#
+#INCLUDES += $(MAKEDIR)/../../../../inc/Org/Apache/Harmony/Xnet/Provider/Jsse
+#
+#
+#SOURCES = Org.Apache.Harmony.car
+#SOURCES += Elastos.Core.cpp
+#
+#LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+#LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+#LIBRARIES += $(XDK_TARGETS)/Elastos.Core.eco
+#LIBRARIES += $(XDK_USER_LIB)/Elastos.Core.lib
+#LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+#LIBRARIES += $(PREBUILD_LIB)/libm.a
+#
+#ELASTOS_LIBS += Crypto/Internal/internal.lib
+#ELASTOS_LIBS += Kernel/Vm/vm.lib
+#ELASTOS_LIBS += Kernel/Vm/vm.lib
+#ELASTOS_LIBS += Luni/Lang/Reflect/reflect.lib
+#ELASTOS_LIBS += Luni/Util/util.lib
+#
+#ELASTOS_LIBS += Security/Asn1/asn1.lib
+#ELASTOS_LIBS += Security/Fortress/fortress.lib
+#ELASTOS_LIBS += Security/Pkcs10/pkcs10.lib
+#ELASTOS_LIBS += Security/Pkcs7/pkcs7.lib
+#ELASTOS_LIBS += Security/Pkcs8/pkcs8.lib
+#ELASTOS_LIBS += Security/Provider/Cert/cert.lib
+#ELASTOS_LIBS += Security/Provider/Crypto/crypto.lib
+#ELASTOS_LIBS += Security/Utils/utils.lib
+#ELASTOS_LIBS += Security/X501/x501.lib
+#ELASTOS_LIBS += Security/X509/Tsp/tsp.lib
+#ELASTOS_LIBS += Security/X509/x509.lib
+#ELASTOS_LIBS += Security/Security.lib
+#ELASTOS_LIBS += Xml/Dom/dom.lib
+#ELASTOS_LIBS += Xml/Parsers/parsers.lib
+#ELASTOS_LIBS += Xml/xml.lib
+#
+#ELASTOS_LIBS += Xnet/Provider/Jsse/jsse.lib
+#
+#LIBRARIES += -lcutils#

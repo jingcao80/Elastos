@@ -1,0 +1,29 @@
+
+module
+{
+    interface Elastos.Security.ICertificate;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * @Involve
+     * interface IPermission
+     */
+    interface IUnresolvedPermission {
+        GetUnresolvedName(
+            [out] String* unresolvedName);
+
+        GetUnresolvedActions(
+            [out] String* unresolvedActions);
+
+        GetUnresolvedType(
+            [out] String* unresolvedType);
+
+        GetUnresolvedCerts(
+            [out, callee] ArrayOf<ICertificate*>* certs);
+    }
+
+    } // end namespace Security
+    } // end namespace Elastos
+}

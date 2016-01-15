@@ -1,0 +1,82 @@
+
+module
+{
+    using interface Elastos.Security.Cert.IX509Certificate;
+    using interface Elastos.Utility.IList;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the following structure which is a part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *
+     *   NameConstraints ::= SEQUENCE {
+     *        permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
+     *        excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
+     *
+     *   GeneralSubtrees ::= SEQUENCE SIZE (1..MAX) OF GeneralSubtree
+     *
+     * </pre>
+     *
+     * @see org.apache.harmony.security.x509.GeneralSubtree
+     * @see org.apache.harmony.security.x509.GeneralName
+     */
+    interface INameConstraints extends IExtensionValue {
+        /**
+         * Apply the name restrictions specified by this NameConstraints
+         * instance to the subject distinguished name and subject alternative
+         * names of specified X509Certificate. Restrictions apply only
+         * if specified name form is present in the certificate.
+         * The restrictions are applied according the RFC 3280
+         * (see 4.2.1.11 Name Constraints), excepting that restrictions are applied
+         * and to CA certificates, and to certificates which issuer and subject
+         * names the same (i.e. method does not check if it CA's certificate or not,
+         * or if the names differ or not. This check if it is needed should be done
+         * by caller before calling this method).
+         * @param   cert X.509 Certificate to be checked.
+         * @return  true if the certificate is acceptable according
+         *          these NameConstraints restrictions
+         */
+        IsAcceptable(
+            [in] IX509Certificate* cert,
+            [out] Boolean* isAcceptable);
+
+        /**
+         * Check if this list of names is acceptable according to this
+         * NameConstraints object.
+         */
+        IsAcceptableEx(
+            [in] IList* names,
+            [out] Boolean* isAcceptable);
+    }
+
+    [deprecated]
+    interface INameConstraintsHelper {
+        Decode(
+            [in] ArrayOf<Byte>* encoding,
+            [out] INameConstraints** object);
+
+        /**
+         * X.509 NameConstraints encoder/decoder.
+         */
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

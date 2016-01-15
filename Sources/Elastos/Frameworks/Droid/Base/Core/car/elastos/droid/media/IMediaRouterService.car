@@ -1,0 +1,46 @@
+
+module
+{
+	interface Elastos.Droid.Media.IMediaRouterClientState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IIMediaRouterService {
+		RegisterClientAsUser(
+			[in] IIMediaRouterClient * client,
+			[in] String packageName,
+			[in] Int32 userId);
+
+		UnregisterClient(
+			[in] IIMediaRouterClient * client);
+
+	    GetState(
+	    	[in] IIMediaRouterClient * client,
+	    	[out] IMediaRouterClientState ** result);
+
+		SetDiscoveryRequest(
+			[in] IIMediaRouterClient * client,
+			[in] Int32 routeTypes,
+			[in] Boolean activeScan);
+
+		SetSelectedRoute(
+			[in] IIMediaRouterClient * client,
+			[in] String routeId,
+			[in] Boolean isExplicit);
+
+		RequestSetVolume(
+			[in] IIMediaRouterClient * client,
+			[in] String routeId,
+			[in] Int32 volume);
+
+		RequestUpdateVolume(
+			[in] IIMediaRouterClient * client,
+			[in] String routeId,
+			[in] Int32 direction);
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

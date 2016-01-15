@@ -1,0 +1,24 @@
+module
+{
+    interface Elastos.Droid.App.ILocalActivityManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * Helper for monitoring the current importance of applications.
+     * @hide
+     */
+     /** @hide */
+    interface IAppImportanceMonitor {
+
+        GetImportance(
+            [in] Int32 uid,
+            [out] Int32* result);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

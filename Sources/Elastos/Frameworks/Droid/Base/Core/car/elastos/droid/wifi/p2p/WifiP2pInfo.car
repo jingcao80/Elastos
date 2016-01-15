@@ -1,0 +1,47 @@
+
+module
+{
+    using interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+
+    /**
+     * A class representing connection information about a Wi-Fi p2p group
+     *
+     * {@see WifiP2pManager}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiP2pInfo {
+        /** Indicates if a p2p group has been successfully formed */
+        GetGroupFormed(
+            [out] Boolean* result);
+
+        SetGroupFormed(
+            [in] Boolean groupFormed);
+
+        /** Indicates if the current device is the group owner */
+        GetIsGroupOwner(
+            [out] Boolean* result);
+
+        SetIsGroupOwner(
+            [in] Boolean isGroupOwner);
+
+        /** Group owner address */
+        GetGroupOwnerAddress(
+            [out] IInetAddress** result);
+
+        SetGroupOwnerAddress(
+            [in] IInetAddress* groupOwnerAddress);
+    }
+
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

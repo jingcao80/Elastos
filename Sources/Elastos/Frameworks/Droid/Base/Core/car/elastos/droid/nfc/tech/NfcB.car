@@ -1,0 +1,42 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Tech{
+
+    /**
+     * @Involve
+     * interace IBasicTagTechnology
+     */
+    [deprecated]
+    interface INfcB {
+        GetApplicationData(
+            [out, callee] ArrayOf<Byte>* data);
+
+        GetProtocolInfo(
+            [out, callee] ArrayOf<Byte>* info);
+
+        Transceive(
+            [in] ArrayOf<Byte>* data,
+            [out, callee] ArrayOf<Byte>* res);
+
+        GetMaxTransceiveLength(
+            [out] Int32* len);
+    }
+
+    interface INfcBHelper {
+        GetNfcB(
+            [in] ITag* tag,
+            [out] INfcB** nfcb);
+    }
+
+    }// namespace Tech
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

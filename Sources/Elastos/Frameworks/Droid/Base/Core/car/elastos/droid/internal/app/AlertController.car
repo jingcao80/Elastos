@@ -1,0 +1,381 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.View.ILayoutInflater;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Widget.IButton;
+    interface Elastos.Droid.Widget.IListView;
+    interface Elastos.Droid.Widget.IListAdapter;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IDialogInterface;
+    interface Elastos.Droid.Content.IDialogInterfaceOnKeyListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    interface Elastos.Droid.Content.IDialogInterfaceOnMultiChoiceClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    interface IAlertControllerAlertParamsOnPrepareListViewListener;
+
+    [local]
+    interface IAlertController {
+        InstallContent();
+
+        SetTitle(
+            [in] ICharSequence* title);
+
+        SetCustomTitle(
+            [in] IView* customTitleView);
+
+        SetMessage(
+            [in] ICharSequence* message);
+
+        SetView(
+            [in] Int32 layoutResId);
+
+        SetView(
+            [in] IView* view);
+
+        SetView(
+            [in] IView* view,
+            [in] Int32 viewSpacingLeft,
+            [in] Int32 viewSpacingTop,
+            [in] Int32 viewSpacingRight,
+            [in] Int32 viewSpacingBottom);
+
+        SetButtonPanelLayoutHint(
+            [in] Int32 layoutHint);
+
+        SetButton(
+            [in] Int32 whichButton,
+            [in] ICharSequence* text,
+            [in] IDialogInterfaceOnClickListener* listener,
+            [in] IMessage* msg);
+
+        SetIcon(
+            [in] Int32 resId);
+
+        SetIcon(
+            [in] IDrawable* icon);
+
+        GetIconAttributeResId(
+            [in] Int32 attrId,
+            [out] Int32* resId);
+
+        SetInverseBackgroundForced(
+            [in] Boolean forceInverseBackground);
+
+        SetListView(
+            [in] IListView* listview);
+
+        GetListView(
+            [out] IListView** listview);
+
+        GetButton(
+            [in] Int32 whichButton,
+            [out] IButton** button);
+
+        OnKeyDown(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OnKeyUp(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsListView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IOnGlobalLayoutListener
+     * interface Elastos.Droid.View.IOnTouchModeChangeListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.IListView
+     */
+    [local]
+    interface IRecycleListView {
+        SetRecycleOnMeasure(
+            [in] Boolean recycleOnMeasure);
+    }
+
+    [local, deprecated]
+    interface IAlertControllerAlertParams {
+        SetContext(
+            [in] IContext* cxt);
+
+        GetContext(
+            [out] IContext** cxt);
+
+        SetInflater(
+            [in] ILayoutInflater* inflater);
+
+        GetInflater(
+            [out] ILayoutInflater** inflater);
+
+        SetIconId(
+            [in] Int32 iconId);
+
+        GetIconId(
+            [out] Int32* iconId);
+
+        SetIcon(
+            [in] IDrawable* icon);
+
+        GetIcon(
+            [out] IDrawable** icon);
+
+        SetIconAttrId(
+            [in] Int32 id);
+
+        GetIconAttrId(
+            [out] Int32* id);
+
+        SetTitle(
+            [in] ICharSequence* title);
+
+        GetTitle(
+            [out] ICharSequence** title);
+
+        SetCustomTitleView(
+            [in] IView* view);
+
+        GetCustomTitleView(
+            [out] IView** view);
+
+        SetMessage(
+            [in] ICharSequence* message);
+
+        GetMessage(
+            [out] ICharSequence** message);
+
+        SetPositiveButtonText(
+            [in] ICharSequence* text);
+
+        GetPositiveButtonText(
+            [out] ICharSequence** text);
+
+        SetPositiveButtonListener(
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        GetPositiveButtonListener(
+            [out] IDialogInterfaceOnClickListener** listener);
+
+        SetNegativeButtonText(
+            [in] ICharSequence* text);
+
+        GetNegativeButtonText(
+            [out] ICharSequence** text);
+
+        SetNegativeButtonListener(
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        GetNegativeButtonListener(
+            [out] IDialogInterfaceOnClickListener** listener);
+
+        SetNeutralButtonText(
+            [in] ICharSequence* text);
+
+        GetNeutralButtonText(
+            [out] ICharSequence** text);
+
+        SetNeutralButtonListener(
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        GetNeutralButtonListener(
+            [out] IDialogInterfaceOnClickListener** listener);
+
+        SetCancelable(
+            [in] Boolean cancelable);
+
+        GetCancelable(
+            [out] Boolean* cancelable);
+
+        SetOnCancelListener(
+            [in] IDialogInterfaceOnCancelListener* listener);
+
+        GetOnCancelListener(
+            [out] IDialogInterfaceOnCancelListener** listener);
+
+        SetOnDismissListener(
+            [in] IDialogInterfaceOnDismissListener* listener);
+
+        GetOnDismissListener(
+            [out] IDialogInterfaceOnDismissListener** listener);
+
+        SetOnKeyListener(
+            [in] IDialogInterfaceOnKeyListener* listener);
+
+        GetOnKeyListener(
+            [out] IDialogInterfaceOnKeyListener** listener);
+
+        SetItems(
+            [in] ArrayOf<ICharSequence*>* items);
+
+        GetItems(
+            [out, callee] ArrayOf<ICharSequence*>* items);
+
+        SetAdapter(
+            [in] IListAdapter* adapter);
+
+        GetAdapter(
+            [out] IListAdapter** adapter);
+
+        SetOnClickListener(
+            [in] IDialogInterfaceOnClickListener* listener);
+
+        GetOnClickListener(
+            [out] IDialogInterfaceOnClickListener** listener);
+
+        SetViewLayoutResId(
+            [in] Int32 resId);
+
+        GetViewLayoutResId(
+            [out] Int32* resId);
+
+        SetView(
+            [in] IView* view);
+
+        GetView(
+            [out] IView** view);
+
+        SetViewSpacingLeft(
+            [in] Int32 left);
+
+        GetViewSpacingLeft(
+            [out] Int32* left);
+
+        SetViewSpacingTop(
+            [in] Int32 top);
+
+        GetViewSpacingTop(
+            [out] Int32* top);
+
+        SetViewSpacingRight(
+            [in] Int32 right);
+
+        GetViewSpacingRight(
+            [out] Int32* right);
+
+        SetViewSpacingBottom(
+            [in] Int32 bottom);
+
+        GetViewSpacingBottom(
+            [out] Int32* bottom);
+
+        SetViewSpacingSpecified(
+            [in] Boolean value);
+
+        GetViewSpacingSpecified(
+            [out] Boolean* value);
+
+        SetCheckedItems(
+            [in] ArrayOf<Boolean>* items);
+
+        GetCheckedItems(
+            [out, callee] ArrayOf<Boolean>* items);
+
+        SetIsMultiChoice(
+            [in] Boolean isMutiChoice);
+
+        GetIsMultiChoice(
+            [out] Boolean* isMutiChoice);
+
+        SetIsSingleChoice(
+            [in] Boolean isSingleChoice);
+
+        GetIsSingleChoice(
+            [out] Boolean* isSingleChoice);
+
+        SetCheckedItem(
+            [in] Int32 checkedItem);
+
+        GetCheckedItem(
+            [out] Int32* checkedItem);
+
+        SetOnCheckboxClickListener(
+            [in] IDialogInterfaceOnMultiChoiceClickListener* listener);
+
+        GetOnCheckboxClickListener(
+            [out] IDialogInterfaceOnMultiChoiceClickListener** listener);
+
+        SetCursor(
+            [in] ICursor* cursor);
+
+        GetCursor(
+            [out] ICursor** cursor);
+
+        SetLabelColumn(
+            [in] String labelColumn);
+
+        GetLabelColumn(
+            [out] String* labelColumn);
+
+        SetIsCheckedColumn(
+            [in] String column);
+
+        GetIsCheckedColumn(
+            [out] String* column);
+
+        SetForceInverseBackground(
+            [in] Boolean value);
+
+        GetForceInverseBackground(
+            [out] Boolean* value);
+
+        SetOnItemSelectedListener(
+            [in] IAdapterViewOnItemSelectedListener* listener);
+
+        GetOnItemSelectedListener(
+            [out] IAdapterViewOnItemSelectedListener** listener);
+
+        SetOnPrepareListViewListener(
+            [in] IAlertControllerAlertParamsOnPrepareListViewListener* listener);
+
+        GetOnPrepareListViewListener(
+            [out] IAlertControllerAlertParamsOnPrepareListViewListener** listener);
+
+        SetRecycleOnMeasure(
+            [in] Boolean recycleOnMeasure);
+
+        GetRecycleOnMeasure(
+            [out] Boolean* recycleOnMeasure);
+
+        Apply(
+            [in] IAlertController* dialog);
+    }
+
+    [local]
+    interface IAlertControllerAlertParamsOnPrepareListViewListener {
+        OnPrepareListView(
+            [in] IListView* listView);
+    }
+
+    } // namespace App
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

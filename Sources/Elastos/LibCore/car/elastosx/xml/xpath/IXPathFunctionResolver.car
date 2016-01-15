@@ -1,0 +1,33 @@
+
+module
+{
+    interface Elastosx.Xml.Namespace.IQName;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace XPath {
+
+    interface IXPathFunctionResolver {
+    /**
+    * <p>Find a function in the set of available functions.</p>
+    *
+    * <p>If <code>functionName</code> or <code>arity</code> is <code>null</code>, then a <code>NullPointerException</code> is thrown.</p>
+    *
+    * @param functionName The function name.
+    * @param arity The number of arguments that the returned function must accept.
+    *
+    * @return The function or <code>null</code> if no function named <code>functionName</code> with <code>arity</code> arguments exists.
+    *
+    * @throws NullPointerException If <code>functionName</code> or <code>arity</code> is <code>null</code>.
+    */
+        ResolveFunction(
+            [in] IQName* functionName,
+            [in] Int32 arity,
+            [out] IXPathFunction** func);
+    }
+
+    } // namespace XPath
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Notification {
+
+    /** @hide */
+    [oneway]
+    interface IIConditionProvider {
+        OnConnected();
+
+        OnRequestConditions(
+            [in] Int32 relevance);
+
+        OnSubscribe(
+            [in] IUri* conditionId);
+
+        OnUnsubscribe(
+            [in] IUri* conditionId);
+    }
+
+    } //Notification
+    } //Service
+    } //Droid
+    } //Elastos
+}

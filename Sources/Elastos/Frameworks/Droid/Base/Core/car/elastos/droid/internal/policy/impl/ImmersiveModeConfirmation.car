@@ -1,0 +1,50 @@
+
+module
+{
+    interface Elastos.Droid.View.IWindowManagerLayoutParams;
+    interface Elastos.Droid.Widget.IFrameLayoutLayoutParams;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+    namespace Impl {
+
+    /**
+     *  Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
+     *  entering immersive mode.
+     */
+    [local]
+    interface IImmersiveModeConfirmation {
+
+        LoadSetting(
+            [in] Int32 currentUserId);
+
+        ImmersiveModeChanged(
+            [in] String pkg,
+            [in] Boolean isImmersiveMode,
+            [in] Boolean userSetupComplete);
+
+        OnPowerKeyDown(
+            [in] Boolean isScreenOn,
+            [in] Int64 time,
+            [in] Boolean inImmersiveMode,
+            [out] Boolean* result);
+
+        ConfirmCurrentPrompt();
+
+        GetClingWindowLayoutParams(
+            [out] IWindowManagerLayoutParams** params);
+
+        GetBubbleLayoutParams(
+            [out] IFrameLayoutLayoutParams** params);
+    }
+
+
+
+    } // Impl
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

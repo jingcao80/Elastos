@@ -1,0 +1,77 @@
+
+module
+{
+    using interface Elastos.Utility.IHashMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Wifi Connection Statistics: gather various stats regarding WiFi connections,
+     * connection requests, auto-join
+     * and WiFi usage.
+     * @hide
+     */
+    // @SystemApi
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiConnectionStatistics {
+        /**
+         *  history of past connection to untrusted SSID
+         *  Key = SSID
+         *  Value = num connection
+         */
+        GetUntrustedNetworkHistory(
+            [out] IHashMap** result);
+
+        SetUntrustedNetworkHistory(
+            [in] IHashMap* untrustedNetworkHistory);
+
+        // Number of time we polled the chip and were on 5GHz
+        GetNum5GhzConnected(
+            [out] Int32* result);
+
+        SetNum5GhzConnected(
+            [in] Int32 num5GhzConnected);
+
+        // Number of time we polled the chip and were on 2.4GHz
+        GetNum24GhzConnected(
+            [out] Int32* result);
+
+        SetNum24GhzConnected(
+            [in] Int32 num24GhzConnected);
+
+        // Number autojoin attempts
+        GetNumAutoJoinAttempt(
+            [out] Int32* result);
+
+        SetNumAutoJoinAttempt(
+            [in] Int32 numAutoJoinAttempt);
+
+        // Number auto-roam attempts
+        GetNumAutoRoamAttempt(
+            [out] Int32* result);
+
+        SetNumAutoRoamAttempt(
+            [in] Int32 numAutoRoamAttempt);
+
+        // Number wifimanager join attempts
+        GetNumWifiManagerJoinAttempt(
+            [out] Int32* result);
+
+        SetNumWifiManagerJoinAttempt(
+            [in] Int32 numWifiManagerJoinAttempt);
+
+        IncrementOrAddUntrusted(
+            [in] String SSID,
+            [in] Int32 connection,
+            [in] Int32 usage);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

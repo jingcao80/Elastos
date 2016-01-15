@@ -1,0 +1,18 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "_${name}uuid.h"
+$
+#include <elatypes.h>
+
+$WITH all classes DO
+EXTERN_C const _ELASTOS ClassID ECLSID_${name};
+$END DO ;; all classes
+
+$WITH all interfaces DO
+EXTERN_C const _ELASTOS InterfaceID EIID_${name};
+$END DO ;; all interfaces
+$
+$END OUTPUT

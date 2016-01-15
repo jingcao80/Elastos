@@ -1,0 +1,321 @@
+module
+{
+    enum Elastos.Math.RoundingMode;
+
+    interface Elastos.Core.INumber;
+    interface Elastos.Core.IStringBuffer;
+    interface Elastos.Utility.ICurrency;
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Text.IFieldPosition;
+    interface Elastos.Text.IParsePosition;
+
+    namespace Elastos {
+    namespace Text {
+    /**
+     * The instances of this inner class are used as attribute keys and
+     * values in AttributedCharacterIterator that the
+     * formatToCharacterIterator(Object) method returns.
+     *
+     * @sa formatToCharacterIterator(Object)
+     * <p>
+     * There is no public constructor in this class, the only instances are the constants defined here.
+     *
+     * @implements Elastos.Text.IFormatField
+     */
+    /**
+     * @Involve
+     * interface IFormatField
+     */
+    interface INumberFormatField {
+    }
+
+     /**
+     * The base class for all formats.
+     * <p>
+     * This is an abstract base class which specifies the protocol for classes which
+     * convert other objects or values, such as numeric values and dates, and their
+     * string representations. In some cases these representations may be localized or
+     * contain localized characters or strings. For example, a numeric formatter such
+     * as DecimalFormat may convert a numeric value such as 12345 to the string
+     * "$12,345". It may also parse the string back into a numeric value. A date and
+     * time formatter like SimpleDateFormat may represent a specific date, encoded
+     * numerically, as a string such as "Wednesday, February 26, 1997 AD".
+     * <p>
+     * Many of the concrete subclasses of Format employ the notion of a pattern.
+     * A pattern is a string representation of the rules which govern the conversion
+     * between values and strings. For example, a DecimalFormat object may be
+     * associated with the pattern "$#,##0.00;($#,##0.00)", which is a common US
+     * English format for currency values, yielding strings such as "$1,234.45" for
+     * 1234.45, and "($987.65)" for -987.6543. The specific syntax of a pattern is
+     * defined by each subclass. Even though many subclasses use patterns, the notion
+     * of a pattern is not inherent to Format classes in general, and is not part of
+     * the explicit base class protocol.
+     * <p>
+     * Two complex formatting classes are worth mentioning: MessageFormat and
+     * ChoiceFormat. ChoiceFormat is a subclass of NumberFormat which allows the user
+     * to format different number ranges as strings. For instance, 0 may be
+     * represented as "no files", 1 as "one file", and any number greater than 1 as
+     * "many files". MessageFormat is a formatter which utilizes other Format objects
+     * to format a string containing multiple values. For instance, a MessageFormat
+     * object might produce the string "There are no files on the disk MyDisk on
+     * February 27, 1997." given the arguments 0, "MyDisk", and the date value of
+     * 2/27/97. See the ChoiceFormat and MessageFormat descriptions for further
+     * information.
+     *
+     * @implements Elastos.Text.IFormat
+     */
+    /**
+     * @Involve
+     * interface IFormat
+     */
+    [deprecated]
+    interface INumberFormat {
+        /**
+         * Field constant identifying the integer part of a number.
+         */
+        const Int32 INTEGER_FIELD = 0;
+
+        /**
+         * Field constant identifying the fractional part of a number.
+         */
+        const Int32 FRACTION_FIELD = 1;
+
+        /**
+         * Formats the specified double using the rules of this number format.
+         */
+        Format(
+            [in] Double value,
+            [out] String* format);
+
+        /**
+         * Formats the specified double value as a string using the pattern of this
+         * number format and appends the string to the specified string buffer.
+         * <p>
+         * If the {field} member of {position} contains a value
+         * specifying a format field, then its {beginIndex} and
+         * {endIndex} members will be updated with the position of the first
+         * occurrence of this field in the formatted text.
+         */
+        Format(
+            [in] Double value,
+            [in] IStringBuffer * inbuffer,
+            [in] IFieldPosition * field);
+
+        /**
+         * Formats the specified long using the rules of this number format.
+         */
+        Format(
+            [in] Int64 value,
+            [out] String* format);
+
+        /**
+         * Formats the specified long value as a string using the pattern of this
+         * number format and appends the string to the specified string buffer.
+         * <p>
+         * If the {field} member of {position} contains a value
+         * specifying a format field, then its {beginIndex} and
+         * {endIndex} members will be updated with the position of the first
+         * occurrence of this field in the formatted text.
+         */
+        Format(
+            [in] Int64 value,
+            [in] IStringBuffer * inbuffer,
+            [in] IFieldPosition * field);
+
+        /**
+         * Returns the currency used by this number format.
+         * <p>
+         * This implementation throws {UnsupportedOperationException},
+         * concrete subclasses should override this method if they support currency
+         * formatting.
+         */
+        GetCurrency(
+            [out] ICurrency** currency);
+
+        /**
+         * Returns the maximum number of fraction digits that are printed when
+         * formatting. If the maximum is less than the number of fraction digits,
+         * the least significant digits are truncated.
+         */
+        GetMaximumFractionDigits(
+            [out] Int32* max);
+
+        /**
+         * Returns the maximum number of integer digits that are printed when
+         * formatting. If the maximum is less than the number of integer digits, the
+         * most significant digits are truncated.
+         */
+        GetMaximumIntegerDigits(
+            [out] Int32* max);
+
+        /**
+         * Returns the minimum number of fraction digits that are printed when
+         * formatting.
+         */
+        GetMinimumFractionDigits(
+            [out] Int32* min);
+
+        /**
+         * Returns the minimum number of integer digits that are printed when
+         * formatting.
+         */
+        GetMinimumIntegerDigits(
+            [out] Int32* min);
+
+        /**
+         * Indicates whether this number format formats and parses numbers using a
+         * grouping separator.
+         */
+        IsGroupingUsed(
+            [out] Boolean* groupingUsed);
+
+        /**
+         * Indicates whether this number format only parses integer numbers. Parsing
+         * stops if a decimal separator is encountered.
+         */
+        IsParseIntegerOnly(
+            [out] Boolean* parseIntegerOnly);
+
+        /**
+         * Parses a {Number} from the specified string using the rules of this
+         * number format.
+         */
+        Parse(
+            [in] String string,
+            [out] INumber** value);
+
+        /**
+         * Parses a {Number} from the specified string starting at the index
+         * specified by {position}. If the string is successfully parsed then
+         * the index of the {ParsePosition} is updated to the index following
+         * the parsed text. On error, the index is unchanged and the error index of
+         * {ParsePosition} is set to the index where the error occurred.
+         */
+        Parse(
+            [in] String string,
+            [in] IParsePosition* position,
+            [out] INumber** value);
+
+        /**
+         * Sets the currency used by this number format when formatting currency
+         * values. The min and max fraction digits remain the same.
+         * <p>
+         * This implementation throws {UnsupportedOperationException},
+         * concrete subclasses should override this method if they support currency
+         * formatting.
+         */
+        SetCurrency(
+            [in] ICurrency* currency);
+
+        /**
+         * Sets whether this number format formats and parses numbers using a
+         * grouping separator.
+         */
+        SetGroupingUsed(
+            [in] Boolean value);
+
+        /**
+         * Sets the maximum number of fraction digits that are printed when
+         * formatting. If the maximum is less than the number of fraction digits,
+         * the least significant digits are truncated.
+         */
+        SetMaximumFractionDigits(
+            [in] Int32 value);
+
+        /**
+         * Sets the new maximum count of integer digits that are printed when
+         * formatting. If the maximum is less than the number of integer digits, the
+         * most significant digits are truncated.
+         */
+        SetMaximumIntegerDigits(
+            [in] Int32 value);
+
+        /**
+         * Sets the minimum number of fraction digits that are printed when
+         * formatting.
+         *
+         * @param value
+         *            the minimum number of fraction digits.
+         */
+        SetMinimumFractionDigits(
+            [in] Int32 value);
+
+        /**
+         * Sets the minimum number of integer digits that are printed when
+         * formatting.
+         */
+        SetMinimumIntegerDigits(
+            [in] Int32 value);
+
+        /**
+         * Specifies if this number format should parse numbers only as integers or
+         * else as any kind of number. If this method is called with a {true}
+         * value then subsequent parsing attempts will stop if a decimal separator
+         * is encountered.
+         */
+        SetParseIntegerOnly(
+            [in] Boolean value);
+
+        /**
+         * Returns the {RoundingMode} used by this {NumberFormat}. The default
+         * implementation in {NumberFormat} throws {UnsupportedOperationException}.
+         * Subclasses for which a rounding mode is meaningful are expected to override this method.
+         * @since 1.6
+         */
+        GetRoundingMode(
+            [out] RoundingMode * roundingMode);
+
+        /**
+         * Sets the {RoundingMode} used by this {NumberFormat}. The default
+         * implementation in {NumberFormat} throws {UnsupportedOperationException}.
+         * Subclasses for which a rounding mode is meaningful are expected to override this method.
+         * @since 1.6
+         */
+        SetRoundingMode(
+            [in] RoundingMode roundingMode);
+    }
+
+    interface INumberFormatHelper
+    {
+        GetAvailableLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetCurrencyInstance(
+            [out] INumberFormat** instance);
+
+        GetCurrencyInstance(
+            [in] ILocale* locale,
+            [out] INumberFormat** instance);
+
+        GetIntegerInstance(
+            [out] INumberFormat** instance);
+
+        GetIntegerInstance(
+            [in] ILocale* locale,
+            [out] INumberFormat** instance);
+
+        GetInstance(
+            [out] INumberFormat** instance);
+
+        GetInstance(
+            [in] ILocale* locale,
+            [out] INumberFormat** instance);
+
+        GetNumberInstance(
+            [out] INumberFormat** instance);
+
+        GetNumberInstance(
+            [in] ILocale* locale,
+            [out] INumberFormat** instance);
+
+        GetPercentInstance(
+            [out] INumberFormat** instance);
+
+        GetPercentInstance(
+            [in] ILocale* locale,
+            [out] INumberFormat** instance);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

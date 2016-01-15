@@ -1,0 +1,35 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface ICertPathValidatorSpi {
+        /**
+         * Validates the {@code CertPath} with the algorithm of this {@code
+         * CertPathValidator} using the specified algorithm parameters.
+         *
+         * @param certPath
+         *            the certification path to be validated.
+         * @param params
+         *            the certification path validator algorithm parameters.
+         * @return the validation result.
+         * @throws CertPathValidatorException
+         *             if the validation fails, or the algorithm of the specified
+         *             certification path cannot be validated using the algorithm of
+         *             this instance.
+         * @throws InvalidAlgorithmParameterException
+         *             if the specified algorithm parameters cannot be used with
+         *             this algorithm.
+         */
+        EngineValidate(
+            [in] ICertPath* certPath,
+            [in] ICertPathParameters* params,
+            [out] ICertPathValidatorResult** result);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

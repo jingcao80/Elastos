@@ -1,0 +1,170 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.IUndoOwner;
+    interface Elastos.Droid.Content.IUndoOperation;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Top-level class for managing and interacting with the global undo state for
+     * a document or application.  This class supports both undo and redo and has
+     * helpers for merging undoable operations together as they are performed.
+     *
+     * <p>A single undoable operation is represented by {@link UndoOperation} which
+     * apps implement to define their undo/redo behavior.  The UndoManager keeps
+     * a stack of undo states; each state can have one or more undo operations
+     * inside of it.</p>
+     *
+     * <p>Updates to the stack must be done inside of a {@link #beginUpdate}/{@link #endUpdate()}
+     * pair.  During this time you can add new operations to the stack with
+     * {@link #addOperation}, retrieve and modify existing operations with
+     * {@link #getLastOperation}, control the label shown to the user for this operation
+     * with {@link #setUndoLabel} and {@link #suggestUndoLabel}, etc.</p>
+     *
+     * <p>Every {link UndoOperation} is associated with an {@link UndoOwner}, which identifies
+     * the data it belongs to.  The owner is used to indicate how operations are dependent
+     * on each other -- operations with the same owner are dependent on others with the
+     * same owner.  For example, you may have a document with multiple embedded objects.  If the
+     * document itself and each embedded object use different owners, then you
+     * can provide undo semantics appropriate to the user's context: while within
+     * an embedded object, only edits to that object are seen and the user can
+     * undo/redo them without needing to impact edits in other objects; while
+     * within the larger document, all edits can be seen and the user must
+     * undo/redo them as a single stream.</p>
+     *
+     * @hide
+     */
+    [deprecated]
+    interface IUndoManager {
+
+        /**
+         * Never merge with the last undo state.
+         */
+        const Int32 MERGE_MODE_NONE = 0;
+
+        /**
+         * Allow merge with the last undo state only if it contains
+         * operations with the caller's owner.
+         */
+        const Int32 MERGE_MODE_UNIQUE = 1;
+
+        /**
+         * Always allow merge with the last undo state, if possible.
+         */
+        const Int32 MERGE_MODE_ANY = 2;
+
+        GetOwner(
+            [in] String tag,
+            [in] IInterface* data,
+            [out] IUndoOwner** owner);
+
+        SaveInstanceState(
+            [out] IParcelable** p);
+
+        RestoreInstanceState(
+            [in] IParcelable* p);
+
+        SetHistorySize(
+            [in] Int32 size);
+
+        GetHistorySize(
+            [out] Int32* size);
+
+        Undo(
+            [in] ArrayOf<IUndoOwner*> * owners,
+            [in] Int32 count,
+            [out] Int32* res);
+
+        Redo(
+            [in] ArrayOf<IUndoOwner*> * owners,
+            [in] Int32 count,
+            [out] Int32* res);
+
+        IsInUndo(
+            [out] Boolean* res);
+
+        ForgetUndos(
+            [in] ArrayOf<IUndoOwner*> * owners,
+            [in] Int32 count,
+            [out] Int32* res);
+
+        ForgetRedos(
+            [in] ArrayOf<IUndoOwner*> * owners,
+            [in] Int32 count,
+            [out] Int32* res);
+
+        CountUndos(
+            [in] ArrayOf<IUndoOwner*> * owners,
+            [out] Int32* res);
+
+        CountRedos(
+            [in] ArrayOf<IUndoOwner*> * owners,
+            [out] Int32* res);
+
+        GetUndoLabel(
+            [in] ArrayOf<IUndoOwner*> * owners,
+            [out] ICharSequence** csq);
+
+        GetRedoLabel(
+            [in] ArrayOf<IUndoOwner*> * owners,
+            [out] ICharSequence** csq);
+
+        BeginUpdate(
+            [in] ICharSequence* label);
+
+        IsInUpdate(
+            [out] Boolean* res);
+
+        SetUndoLabel(
+            [in] ICharSequence* label);
+
+        SuggestUndoLabel(
+            [in] ICharSequence* label);
+
+        GetUpdateNestingLevel(
+            [out] Int32* res);
+
+        HasOperation(
+            [in] IUndoOwner* owner,
+            [out] Boolean* res);
+
+        GetLastOperation(
+            [in] Int32 mergeMode,
+            [out] IUndoOperation** res);
+
+        GetLastOperation(
+            [in] IUndoOwner* owner,
+            [in] Int32 mergeMode,
+            [out] IUndoOperation** res);
+
+        GetLastOperation(
+            [in] ClassID clazz,
+            [in] IUndoOwner* owner,
+            [in] Int32 mergeMode,
+            [out] IInterface** res);
+
+        AddOperation(
+            [in] IUndoOperation* op,
+            [in] Int32 mergeMode);
+
+        EndUpdate();
+
+        CommitState(
+            [in] IUndoOwner* owner,
+            [out] Int32* res);
+
+        UncommitState(
+            [in] Int32 commitId,
+            [in] IUndoOwner* owner,
+            [out] Boolean* res);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

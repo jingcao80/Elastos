@@ -1,0 +1,91 @@
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Projection {
+
+    interface IMediaProjectionManagerCallback {
+        OnStart(
+            [in] IMediaProjectionInfo * info);
+        OnStop(
+            [in] IMediaProjectionInfo * info);
+    }
+
+    interface IMediaProjectionManager {
+        /** @hide */
+        const String EXTRA_APP_TOKEN = "android.media.projection.extra.EXTRA_APP_TOKEN";
+        /** @hide */
+        const String EXTRA_MEDIA_PROJECTION = "android.media.projection.extra.EXTRA_MEDIA_PROJECTION";
+
+        /** @hide */
+        const Int32 TYPE_SCREEN_CAPTURE = 0;
+        /** @hide */
+        const Int32 TYPE_MIRRORING = 1;
+        /** @hide */
+        const Int32 TYPE_PRESENTATION = 2;
+
+        /**
+         * Returns an Intent that <b>must</b> passed to startActivityForResult()
+         * in order to start screen capture. The activity will prompt
+         * the user whether to allow screen capture.  The result of this
+         * activity should be passed to getMediaProjection.
+         */
+        CreateScreenCaptureIntent(
+            [out] IIntent ** result);
+
+        /**
+         * Retrieve the MediaProjection obtained from a succesful screen
+         * capture request. Will be null if the result from the
+         * startActivityForResult() is anything other than RESULT_OK.
+         *
+         * @param resultCode The result code from {@link android.app.Activity#onActivityResult(int,
+         * int, android.content.Intent)}
+         * @param resultData The resulting data from {@link android.app.Activity#onActivityResult(int,
+         * int, android.content.Intent)}
+         */
+        GetMediaProjection(
+            [in] Int32 resultCode,
+            [in] IIntent * resultData,
+            [out] IMediaProjection ** result);
+
+        /**
+         * Get the {@link MediaProjectionInfo} for the active {@link MediaProjection}.
+         * @hide
+         */
+        GetActiveProjectionInfo(
+            [out] IMediaProjectionInfo ** result);
+
+        /**
+         * Stop the current projection if there is one.
+         * @hide
+         */
+        StopActiveProjection();
+
+        /**
+         * Add a callback to monitor all of the {@link MediaProjection}s activity.
+         * Not for use by regular applications, must have the MANAGE_MEDIA_PROJECTION permission.
+         * @hide
+         */
+        AddCallback(
+            [in] IMediaProjectionManagerCallback * cb,
+            [in] IHandler * handler);
+
+        /**
+         * Remove a MediaProjection monitoring callback.
+         * @hide
+         */
+        RemoveCallback(
+            [in] IMediaProjectionManagerCallback * cb);
+
+
+    }
+
+    } // namespace Projection
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,45 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Dispatch {
+
+    /**
+     * Invoke a method on a dispatchable by its name (without knowing the {@code Method} ahead of time).
+     *
+     * @param <T> destination dispatch type, methods will be looked up in the class of {@code T}
+     */
+    [deprecated]
+    interface IMethodNameInvoker {
+        /**
+         * Invoke a method by its name.
+         *
+         * <p>If more than one method exists in {@code targetClass}, the first method with the right
+         * number of arguments will be used, and later calls will all use that method.</p>
+         *
+         * @param methodName
+         *          The name of the method, which will be matched 1:1 to the destination method
+         * @param params
+         *          Variadic parameter list.
+         * @return
+         *          The same kind of value that would normally be returned by calling {@code methodName}
+         *          statically.
+         *
+         * @throws IllegalArgumentException if {@code methodName} does not exist on the target class
+         * @throws Throwable will rethrow anything that the target method would normally throw
+         */
+        // @SuppressWarnings("unchecked")
+        Invoke(
+            [in] String methodName,
+            [in] ArrayOf<IInterface*>* params);
+    }
+
+    } // namespace Dispatch
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

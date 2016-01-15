@@ -1,0 +1,31 @@
+module
+{
+    using interface Libcore.Utility.IZoneInfo;
+    using interface Libcore.Utility.IZoneInfoWallTime;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Format {
+
+    /**
+     * Formatting logic for {@link Time}. Contains a port of Bionic's broken strftime_tz to Java.
+     *
+     * <p>This class is not thread safe.
+     */
+    interface ITimeFormatter {
+        /**
+         * Format the specified {@code wallTime} using {@code pattern}. The output is returned.
+         */
+        Format(
+            [in] String pattern,
+            [in] IZoneInfoWallTime* wallTime,
+            [in] IZoneInfo* zoneInfo,
+            [out] String* ret);
+    }
+
+    }//namespace Format
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

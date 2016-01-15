@@ -1,0 +1,31 @@
+
+module
+{
+//    const FAMILY_SYSTEM = 0x28    // Sql exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Sql exception codes (Family: 0x28)
+    const E_SQL_EXCEPTION                                       = 0xA8010000;
+    const E_SQL_FEATURE_NOT_SUPPORTED_EXCEPTION                 = 0xA8010001;
+    const E_SQL_CLINET_INFO_EXCEPTION                           = 0xA8010002;
+    const E_SQL_DATA_EXCEPTION                                  = 0xA8010003;
+    const E_SQL_INTEGRITY_CONSTRAINT_VIOLATION_EXCEPTION        = 0xA8010004;
+    const E_SQL_INVALID_AUTHORIZATION_SPEC_EXCEPTION            = 0xA8010005;
+    const E_SQL_NON_TRANSIENT_CONNECTION_EXCEPTION              = 0xA8010006;
+    const E_SQL_NON_TRANSIENT_EXCEPTION                         = 0xA8010007;
+    const E_SQL_RECOVERABLE_EXCEPTION                           = 0xA8010008;
+    const E_SQL_SYNTAX_ERROR_EXCEPTION                          = 0xA8010009;
+    const E_SQL_TIMEOUT_EXCEPTION                               = 0xA801000A;
+    const E_SQL_TRANSACTION_ROLLBACK_EXCEPTION                  = 0xA801000B;
+    const E_SQL_TRANSIENT_CONNECTION_EXCEPTION                  = 0xA801000C;
+    const E_SQL_TRANSIENT_EXCEPTION                             = 0xA801000D;
+
+    const E_BATCH_UPDATE_EXCEPTION                              = 0xA801000E;
+
+    const E_SQL_SQLITE_JDBC_EXCEPTION                           = 0xA801000F;
+    const E_SQL_SQLITE_JDBC_BATCHUPDATE_EXCEPTION               = 0xA8010010;
+    const E_SQL_SQLITE_THROWEX_EXCEPTION                        = 0xA8010011;
+}

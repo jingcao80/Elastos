@@ -1,0 +1,43 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    /**
+     * This is used in conjunction with
+     * {@link DevicePolicyManager#addCrossProfileIntentFilter} to enable intents to
+     * be passed in and out of a managed profile.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.View.IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IOnCreateContextMenuListener
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IOnWindowDismissedCallback
+     * interface IActivity
+     */
+    [local]
+    interface IIntentForwarderActivity  {
+        const String TAG = "IntentForwarderActivity";
+
+        const String FORWARD_INTENT_TO_USER_OWNER
+                = "com.android.internal.app.ForwardIntentToUserOwner";
+
+        const String FORWARD_INTENT_TO_MANAGED_PROFILE
+                = "com.android.internal.app.ForwardIntentToManagedProfile";
+    }
+
+    } // namespace App
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

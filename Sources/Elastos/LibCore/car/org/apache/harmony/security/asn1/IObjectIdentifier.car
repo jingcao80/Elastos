@@ -1,0 +1,80 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    interface IObjectIdentifier {
+        Equals(
+            [in] PInterface o,
+            [out] Boolean* isEqual);
+
+        GetHashCode(
+            [out] Int32* result);
+
+        ToString(
+            [out] String* result);
+    }
+
+    [deprecated]
+    interface IObjectIdentifierHelper {
+        /**
+         * Validates ObjectIdentifier (OID).
+         *
+         * @param oid oid as array of integers
+         * @throws IllegalArgumentException if oid is invalid or null
+         */
+        Validate(
+            [in] ArrayOf<Int32>* oid);
+
+        /**
+         * Returns string representation of OID.
+         *
+         * Note: it is supposed that passed array of integers
+         * contains valid OID value, so no checks are performed.
+         *
+         * @param oid oid as array of integers
+         * @return oid string representation
+         */
+         ToString(
+            [in] ArrayOf<Int32>* oid,
+            [out] String* str);
+
+        /**
+         * Gets ObjectIdentifier (OID) from string representation.
+         *
+         * String representation is defined by the following syntax:
+         *     OID = subidentifier 1*("." subidentifier)
+         *     subidentifier = 1*(digit)
+         *
+         * @param str string representation of OID
+         * @return oid as array of integers
+         * @throws IllegalArgumentException if oid string is invalid or null
+         */
+         ToIntArray(
+            [in] String str,
+            [out, callee] ArrayOf<Int32>* intArray);
+
+        /**
+         * Returns whether the given string is a valid ObjectIdentifier
+         * (OID) representation.
+         *
+         * String representation is defined as for {@link #toIntArray}.
+         *
+         * @param str string representation of OID
+         * @return true if oidString has valid syntax or false if not
+         */
+         IsOID(
+            [in] String str,
+            [out] Boolean* isOID);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

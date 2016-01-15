@@ -1,0 +1,375 @@
+
+module
+{
+    merge("../elastosx/net/ISocketFactory.car");
+    merge("../elastosx/net/IServerSocketFactory.car");
+
+    merge("../elastosx/net/ssl/ICertPathTrustManagerParameters.car");
+    merge("../elastosx/net/ssl/IDefaultHostnameVerifier.car");
+    merge("../elastosx/net/ssl/IDistinguishedNameParser.car");
+    merge("../elastosx/net/ssl/IHandshakeCompletedEvent.car");
+    merge("../elastosx/net/ssl/IHandshakeCompletedListener.car");
+    merge("../elastosx/net/ssl/IHostnameVerifier.car");
+    merge("../elastosx/net/ssl/IHttpsURLConnection.car");
+    merge("../elastosx/net/ssl/IKeyManager.car");
+    merge("../elastosx/net/ssl/IKeyManagerFactory.car");
+    merge("../elastosx/net/ssl/IKeyManagerFactorySpi.car");
+    merge("../elastosx/net/ssl/IKeyStoreBuilderParameters.car");
+    merge("../elastosx/net/ssl/IManagerFactoryParameters.car");
+    merge("../elastosx/net/ssl/ISSLContext.car");
+    merge("../elastosx/net/ssl/ISSLContextSpi.car");
+    merge("../elastosx/net/ssl/ISSLEngine.car");
+    merge("../elastosx/net/ssl/ISSLEngineResult.car");
+    merge("../elastosx/net/ssl/ISSLParameters.car");
+    merge("../elastosx/net/ssl/ISSLServerSocket.car");
+    merge("../elastosx/net/ssl/ISSLServerSocketFactory.car");
+    merge("../elastosx/net/ssl/ISSLSession.car");
+    merge("../elastosx/net/ssl/ISSLSessionBindingEvent.car");
+    merge("../elastosx/net/ssl/ISSLSessionBindingListener.car");
+    merge("../elastosx/net/ssl/ISSLSessionContext.car");
+    merge("../elastosx/net/ssl/ISSLSocket.car");
+    merge("../elastosx/net/ssl/ISSLSocketFactory.car");
+    merge("../elastosx/net/ssl/ITrustManagerFactory.car");
+    merge("../elastosx/net/ssl/ITrustManagerFactorySpi.car");
+    merge("../elastosx/net/ssl/ITrustManager.car");
+    merge("../elastosx/net/ssl/IX509ExtendedKeyManager.car");
+    merge("../elastosx/net/ssl/IX509KeyManager.car");
+    merge("../elastosx/net/ssl/IX509TrustManager.car");
+
+    interface Elastos.Utility.IEventObject;
+    interface Elastos.IO.ISerializable;
+    interface Elastos.Security.IGuard;
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.IPermission;
+    interface Elastos.Security.Cert.ICertPathParameters;
+    interface Elastosx.Net.IServerSocketFactory;
+    interface Elastosx.Net.ISocketFactory;
+    interface Elastosx.Security.Auth.X500.IX500Principal;
+
+    namespace Elastosx {
+    namespace Net {
+
+    class CDefaultServerSocketFactory {
+        interface IServerSocketFactory;
+    }
+
+    /**
+     * Default implementation of {@link javax.net.SocketFactory}
+     */
+    class CDefaultSocketFactory {
+        constructor();
+
+        interface ISocketFactory;
+    }
+
+    singleton class CServerSocketFactoryHelper {
+        interface IServerSocketFactoryHelper;
+    }
+
+    singleton class CSocketFactoryHelper {
+        interface ISocketFactoryHelper;
+    }
+
+    namespace Ssl {
+        /**
+         * Certification path parameters to provide to certification path
+         * based {@link TrustManager}.
+         *
+         * @since 1.5
+         */
+        class CCertPathTrustManagerParameters {
+            /**
+             * Creates a new {@code CertPathTrustManagerParameters} with the specified
+             * certification path parameters.
+             *
+             * @param parameters
+             *            the certification path parameters.
+             */
+            constructor(
+                [in] ICertPathParameters* parameters);
+
+            interface ICertPathTrustManagerParameters;
+            interface IManagerFactoryParameters;
+        }
+
+        /**
+         * A HostnameVerifier consistent with <a
+         * href="http://www.ietf.org/rfc/rfc2818.txt">RFC 2818</a>.
+         *
+         * @hide accessible via HttpsURLConnection.getDefaultHostnameVerifier()
+         */
+        class CDefaultHostnameVerifier {
+            interface IDefaultHostnameVerifier;
+            interface IHostnameVerifier;
+        }
+
+        /**
+         * Default inoperative implementation of javax.net.ssl.SSLServerSocketFactory
+         */
+        class CDefaultSSLServerSocketFactory {
+            constructor(
+                [in] String mes);
+
+            interface ISSLServerSocketFactory;
+            interface IServerSocketFactory;
+        }
+
+        /**
+         * Default inoperative implementation of javax.net.ssl.SSLSocketFactory
+         *
+         */
+        class CDefaultSSLSocketFactory {
+            constructor(
+                [in] String mes);
+
+            interface ISSLSocketFactory;
+            interface ISocketFactory;
+        }
+
+        /**
+         * A distinguished name (DN) parser. This parser only supports extracting a
+         * string value from a DN. It doesn't support values in the hex-string style.
+         *
+         * @hide
+         */
+        class CDistinguishedNameParser {
+            constructor(
+                [in] IX500Principal* principal);
+
+            interface IDistinguishedNameParser;
+        }
+
+        /**
+         * The event object encapsulating the information about a completed SSL
+         * handshake on a SSL connection.
+         */
+        class CHandshakeCompletedEvent {
+            /**
+             * Creates a new {@code HandshakeCompletedEvent} with the specified SSL
+             * socket and SSL session.
+             *
+             * @param sock
+             *            the SSL socket.
+             * @param s
+             *            the SSL session.
+             */
+            constructor(
+                [in] ISSLSocket* sock,
+                [in] ISSLSession* s);
+
+            interface IHandshakeCompletedEvent;
+            interface IEventObject;
+            interface ISerializable;
+        }
+
+        /**
+         * The public API for {@code KeyManagerFactory} implementations.
+         */
+        class CKeyManagerFactory {
+            /**
+             * Creates a new {@code KeyManagerFactory}.
+             *
+             * @param factorySpi
+             *            the implementation delegate.
+             * @param provider
+             *            the provider.
+             * @param algorithm
+             *            the key management algorithm name.
+             */
+            constructor(
+                [in] IKeyManagerFactorySpi* factorySpi,
+                [in] IProvider* provider,
+                [in] String algorithm);
+
+            interface IKeyManagerFactory;
+        }
+
+        singleton class CKeyManagerFactoryHelper {
+            interface IKeyManagerFactoryHelper;
+        }
+
+        singleton class CHttpsURLConnectionHelper {
+            interface IHttpsURLConnectionHelper;
+        }
+
+        /**
+         * The public API for secure socket protocol implementations. It acts as factory
+         * for {@code SSLSocketFactory}'s and {@code SSLEngine}s.
+         */
+        class CSSLContext {
+            /**
+             * Creates a new {@code SSLContext}.
+             *
+             * @param contextSpi
+             *            the implementation delegate.
+             * @param provider
+             *            the provider.
+             * @param protocol
+             *            the protocol name.
+             */
+            constructor(
+                [in] ISSLContextSpi* contextSpi,
+                [in] IProvider* provider,
+                [in] String protocol);
+
+            interface ISSLContext;
+        }
+
+        singleton class CSSLContextHelper {
+            interface ISSLContextHelper;
+        }
+
+        /**
+         * The result object describing the state of the {@code SSLEngine} produced
+         * by the {@code wrap()} and {@code unwrap()} operations.
+         */
+        class CSSLEngineResult {
+            /**
+             * Creates a new {@code SSLEngineResult} instance with the specified state
+             * values.
+             *
+             * @param status
+             *            the return value of the {@code SSLEngine} operation.
+             * @param handshakeStatus
+             *            the status of the current handshake
+             * @param bytesConsumed
+             *            the number of bytes retrieved from the source buffer(s).
+             * @param bytesProduced
+             *            the number of bytes transferred to the destination buffer(s).
+             * @throws IllegalArgumentException
+             *             if {@code status} or {@code handshakeStatus} is {@code null},
+             *             or if {@code bytesConsumed} or {@code bytesProduces} are
+             *             negative.
+             */
+            constructor(
+                [in] enum SSLEngineResult_Status status,
+                [in] enum SSLEngineResult_HandshakeStatus handshakeStatus,
+                [in] Int32 bytesConsumed,
+                [in] Int32 bytesProduced);
+
+            interface ISSLEngineResult;
+        }
+
+        /**
+         * SSL handshake parameters that include protocols, cipher suites, and
+         * client authentication requirements.
+         * @since 1.6
+         */
+        [deprecated]
+        class CSSLParameters {
+            /**
+             * The default SSLParameters constructor. Cipher suites and
+             * protocols are initialized to null and client authentication
+             * options are initialized to false.
+             */
+            constructor();
+
+            /**
+             * A SSLParameters constructor that allows the values for the
+             * initial cipher suites array to be provided. Other values
+             * default as specified in {@link #SSLParameters()}.
+             *
+             * @param cipherSuites An array of cipherSuites that is cloned for
+             * use within the SSLParameters, or null.
+             */
+            constructor(
+                [in] ArrayOf<String>* cipherSuites);
+
+            /**
+             * A SSLParameters constructor that allows the values for initial
+             * cipher suites and protocols arrays to be provided. Other values
+             * default as specified in {@link #SSLParameters()}.
+             *
+             * @param cipherSuites An array of cipher names that is cloned for
+             * use within the SSLParameters, or null.
+             * @param protocols An array of protocol names that is cloned for
+             * use within the SSLParameters, or null.
+             */
+            constructor(
+                [in] ArrayOf<String>* cipherSuites,
+                [in] ArrayOf<String>* protocols);
+
+            interface ISSLParameters;
+        }
+
+        /**
+         * Legacy security code; do not use.
+         */
+        class CSSLPermission {
+            constructor(
+                [in] String name);
+
+            constructor(
+                [in] String name,
+                [in] String actions);
+
+            interface IPermission;
+            interface ISerializable;
+            interface IGuard;
+        }
+
+        singleton class CSSLServerSocketFactoryHelper {
+           interface ISSLServerSocketFactoryHelper;
+        }
+
+        /**
+         * The event sent to an {@code SSLSessionBindingListener} when the listener
+         * object is bound ({@link SSLSession#putValue(String, Object)}) or unbound
+         * ({@link SSLSession#removeValue(String)}) to an {@code SSLSession}.
+         */
+        class CSSLSessionBindingEvent {
+            /**
+             * Creates a new {@code SSLSessionBindingEvent} for the specified session
+             * indicating a binding event for the specified name.
+             *
+             * @param session
+             *            the session for which the event occurs.
+             * @param name
+             *            the name of the object being (un)bound.
+             */
+            constructor(
+                [in] ISSLSession* session,
+                [in] String name);
+
+            interface ISSLSessionBindingEvent;
+            interface IEventObject;
+            interface ISerializable;
+        }
+
+        singleton class CSSLSocketFactoryHelper {
+            interface ISSLSocketFactoryHelper;
+        }
+
+        /**
+         * The factory for {@code TrustManager}s based on {@code KeyStore} or provider
+         * specific implementation.
+         */
+        class CTrustManagerFactory {
+            /**
+             * Creates a new {@code TrustManagerFactory} instance.
+             *
+             * @param factorySpi
+             *            the implementation delegate.
+             * @param provider
+             *            the provider
+             * @param algorithm
+             *            the algorithm name.
+             */
+            constructor(
+                [in] ITrustManagerFactorySpi* factorySpi,
+                [in] IProvider* provider,
+                [in] String algorithm);
+
+            interface ITrustManagerFactory;
+
+        }
+
+        singleton class CTrustManagerFactoryHelper {
+            interface ITrustManagerFactoryHelper;
+        }
+
+    } // Ssl
+
+    } // Net
+    } // Elastos
+}

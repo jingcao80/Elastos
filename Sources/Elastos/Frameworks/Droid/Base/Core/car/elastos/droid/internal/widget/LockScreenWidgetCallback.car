@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * An interface used by LockScreenWidgets to send messages to lock screen.
+     */
+    [local]
+    interface ILockScreenWidgetCallback {
+        // Sends a message to lock screen requesting the given view be shown.  May be ignored, depending
+        // on lock screen state. View must be the top-level lock screen widget or it will be ignored.
+        RequestShow(
+            [in] IView* self);
+
+        // Sends a message to lock screen requesting the view to be hidden.
+        RequestHide(
+            [in] IView* self);
+
+        // Whether or not this view is currently visible on LockScreen
+        IsVisible(
+            [in] IView* self,
+            [out] Boolean* visible);
+
+        // Sends a message to lock screen that user has interacted with widget. This should be used
+        // exclusively in response to user activity, i.e. user hits a button in the view.
+        UserActivity(
+            [in] IView* self);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+}

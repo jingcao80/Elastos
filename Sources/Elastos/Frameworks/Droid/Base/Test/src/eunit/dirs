@@ -1,0 +1,4 @@
+
+DIRS += framework
+DIRS += runner
+DIRS += textui

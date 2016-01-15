@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.Location.ILocation;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * Fused Location hardware event sink interface.
+     * This interface defines the set of events that the FusedLocationHardware provides.
+     *
+     * @hide
+     */
+    [deprecated]
+    interface IIFusedLocationHardwareSink {
+        /**
+         * Event generated when a batch of location information is available.
+         *
+         * @param locations     The batch of location information available.
+         */
+        OnLocationAvailable(
+            [in] ArrayOf<ILocation*>* locations);
+
+        /**
+         * Event generated from FLP HAL to provide diagnostic data to the platform.
+         *
+         * @param data      The diagnostic data provided by FLP HAL.
+         */
+        OnDiagnosticDataAvailable(
+            [in] String data);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

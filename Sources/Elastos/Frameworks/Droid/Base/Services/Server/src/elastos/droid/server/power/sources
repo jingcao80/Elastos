@@ -1,0 +1,17 @@
+TARGET_NAME= power
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
+#INCLUDES += $(PREBUILD_INC)/skia/core
+
+C_DEFINES += -DDROID_SERVER
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+SOURCES += CMountShutdownObserver.cpp
+SOURCES += CPowerManagerServiceBinderService.cpp
+SOURCES += Notifier.cpp
+SOURCES += PowerManagerService.cpp
+SOURCES += ShutdownThread.cpp
+SOURCES += WirelessChargerDetector.cpp

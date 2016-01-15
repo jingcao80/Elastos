@@ -1,0 +1,29 @@
+
+module
+{
+    interface Elastos.IO.IFile;
+
+    namespace Elastos {
+    namespace IO {
+
+    interface IFilenameFilter {
+        /**
+         * Indicates if a specific filename matches this filter.
+         *
+         * @param dir
+         *            the directory in which the {filename} was found.
+         * @param filename
+         *            the name of the file in {dir} to test.
+         * @return  {true} if the filename matches the filter
+         *            and can be included in the list, {false}
+         *            otherwise.
+         */
+        Accept(
+            [in] IFile* dir,
+            [in] String filename,
+            [out] Boolean* succeeded);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

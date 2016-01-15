@@ -1,0 +1,51 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    /**
+     * Immutable container for a burst of capture results.
+     */
+    interface IBurstHolder {
+
+        /**
+         * Get the id of this request.
+         */
+        GetRequestId(
+            [out] Int32* value);
+
+        /**
+         * Return true if this repeating.
+         */
+        IsRepeating(
+            [out] Boolean* value);
+
+        /**
+         * Return the number of requests in this burst sequence.
+         */
+        GetNumberOfRequests(
+            [out] Int32* value);
+
+        /**
+         * Create a list of {@link RequestHolder} objects encapsulating the requests in this burst.
+         *
+         * @param frameNumber the starting framenumber for this burst.
+         * @return the list of {@link RequestHolder} objects.
+         */
+        ProduceRequestHolders(
+            [in] Int64 frameNumber,
+            [out] IList** outlist);
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

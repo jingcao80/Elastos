@@ -1,0 +1,34 @@
+
+module
+{
+    interface Elastos.Droid.View.ISurfaceHolderCallback2;
+    interface Elastos.Droid.View.IInputQueueCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    [local]
+    interface IRootViewSurfaceTaker {
+        WillYouTakeTheSurface(
+            [out] ISurfaceHolderCallback2** cb);
+
+        SetSurfaceType(
+            [in] Int32 type);
+
+        SetSurfaceFormat(
+            [in] Int32 format);
+
+        SetSurfaceKeepScreenOn(
+            [in] Boolean keepOn);
+
+        WillYouTakeTheInputQueue(
+            [out] IInputQueueCallback** cb);
+    }
+
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

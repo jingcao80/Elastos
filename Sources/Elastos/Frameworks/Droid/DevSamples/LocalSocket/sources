@@ -1,0 +1,24 @@
+TARGET_NAME = fwLocalSocket
+TARGET_TYPE = eco
+
+SOURCES  = fwLocalSocket.car
+SOURCES += CActivityOne.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+
+ifneq "$(TEST_TYPE)" ""
+C_DEFINES:= $(C_DEFINES) -DAutoExit
+endif
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Droid.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += $(XDK_USER_LIB)/tstcom.lib
+LIBRARIES += -lm -licuuc -llog
+LIBRARIES += -licuuc -lcutils -lutils
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+DIRRESOURCES += $(MAKEDIR)/data;

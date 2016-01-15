@@ -1,0 +1,24 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Backup {
+
+    /**
+     * Base class for the {@link android.app.backup.FileBackupHelper} implementation.
+    */
+    interface IFileBackupHelperBase {
+
+        WriteNewStateDescription(
+            [in] IParcelFileDescriptor* fd);
+    }
+
+    } // namespace Backup
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

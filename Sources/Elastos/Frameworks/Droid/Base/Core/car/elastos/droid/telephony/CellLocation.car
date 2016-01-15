@@ -1,0 +1,39 @@
+
+module
+{
+
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * Abstract class that represents the location of the device.  {@more}
+     */
+    interface ICellLocation {
+
+        FillInNotifierBundle(
+            [in] IBundle* bundle);
+
+        IsEmpty(
+            [out] Boolean* result);
+    }
+
+    interface ICellLocationHelper {
+
+        RequestLocationUpdate();
+
+        NewFromBundle(
+            [in] IBundle* bundle,
+            [out] ICellLocation** cl);
+
+        GetEmpty(
+            [out] ICellLocation** cl);
+
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

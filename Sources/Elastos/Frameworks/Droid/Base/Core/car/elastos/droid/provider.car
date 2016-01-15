@@ -1,0 +1,765 @@
+module
+{
+    merge("provider/AlarmClock.car");
+    merge("provider/BaseColumns.car");
+    merge("provider/Browser.car");
+    merge("provider/BrowserContract.car");
+    merge("provider/CalendarContract.car");
+    merge("provider/CallLog.car");
+    merge("provider/Contacts.car");
+    merge("provider/ContactsContract.car");
+    merge("provider/DocumentsContract.car");
+    merge("provider/DocumentsProvider.car");
+    merge("provider/Downloads.car");
+    merge("provider/LiveFolders.car");
+    merge("provider/MediaStore.car");
+    merge("provider/OpenableColumns.car");
+    merge("provider/SearchIndexableData.car");
+    merge("provider/SearchIndexableResource.car");
+    merge("provider/SearchIndexablesContract.car");
+    merge("provider/SearchIndexablesProvider.car");
+    merge("provider/SearchRecentSuggestions.car");
+    merge("provider/Settings.car");
+    merge("provider/SyncConstValue.car");
+    merge("provider/SyncStateContract.car");
+    merge("provider/UserDictionary.car");
+    merge("provider/VoicemailContract.car");
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    singleton class CBrowser
+    {
+        interface IBrowser;
+    }
+
+    singleton class CBrowserContract
+    {
+        interface IBrowserContract;
+    }
+
+    singleton class CBrowserContractChromeSyncColumns
+    {
+        interface IBrowserContractChromeSyncColumns;
+    }
+
+    singleton class CBrowserContractBookmarks
+    {
+        interface IBrowserContractBookmarks;
+    }
+
+    singleton class CBrowserContractAccounts
+    {
+        interface IBrowserContractAccounts;
+    }
+
+    singleton class CBrowserContractHistory
+    {
+        interface IBrowserContractHistory;
+    }
+
+    singleton class CBrowserContractSearches
+    {
+        interface IBrowserContractSearches;
+    }
+
+    singleton class CBrowserContractImages
+    {
+        interface IBrowserContractImages;
+    }
+
+    singleton class CBrowserContractSyncState
+    {
+        interface IBrowserContractSyncState;
+    }
+
+
+    singleton class CBrowserContractImageMappings
+    {
+        interface IBrowserContractImageMappings;
+    }
+
+    singleton class CBrowserContractCombined
+    {
+        interface IBrowserContractCombined;
+    }
+
+    singleton class CBrowserContractSettings
+    {
+        interface IBrowserContractSettings;
+    }
+
+    singleton class CSearchIndexablesContract
+    {
+        interface ISearchIndexablesContract;
+    }
+
+    singleton class CSearchIndexablesContractXmlResource
+    {
+        interface ISearchIndexablesContractXmlResource;
+    }
+
+    singleton class CSearchIndexablesContractRawData
+    {
+        interface ISearchIndexablesContractRawData;
+    }
+
+    singleton class CSearchIndexablesContractNonIndexableKey
+    {
+        interface ISearchIndexablesContractNonIndexableKey;
+    }
+
+    /**
+     * Search Indexable Resource.
+     *
+     * This class wraps a set of reference information representing data that can be indexed from a
+     * resource which would typically be a {@link android.preference.PreferenceScreen}.
+     *
+     * xmlResId: the resource ID of a {@link android.preference.PreferenceScreen} XML file.
+     *
+     * @see SearchIndexableData
+     * @see android.preference.PreferenceScreen
+     *
+     * @hide
+     */
+    [deprecated]
+    class CSearchIndexableResource
+    {
+        /**
+         * Constructor.
+         *
+         * @param context the Context associated with the data.
+         */
+        constructor(
+            [in] IContext* context);
+
+        /**
+         * Constructor.
+         *
+         * @param rank the rank of the data.
+         * @param xmlResId the resource ID of a {@link android.preference.PreferenceScreen} XML file.
+         * @param className the class name associated with the data (generally a
+         *                  {@link android.app.Fragment}).
+         * @param iconResId the resource ID associated with the data.
+         */
+        constructor(
+            [in] Int32 rank,
+            [in] Int32 xmlResId,
+            [in] String className,
+            [in] Int32 iconResId);
+
+        interface ISearchIndexableResource;
+        interface ISearchIndexableData;
+    }
+
+    singleton class CSettings
+    {
+        interface ISettings;
+    }
+
+    singleton class CSettingsBookmarks
+    {
+        interface ISettingsBookmarks;
+    }
+
+    singleton class CSettingsGlobal
+    {
+        interface ISettingsGlobal;
+    }
+
+    singleton class CSettingsNameValueTable
+    {
+        interface ISettingsNameValueTable;
+    }
+
+    singleton class CSettingsSecure
+    {
+        interface ISettingsSecure;
+    }
+
+    singleton class CSettingsSystem
+    {
+        interface ISettingsSystem;
+    }
+
+    singleton class CDownloads
+    {
+        interface IDownloads;
+    }
+
+    singleton class CMediaStore
+    {
+        interface IMediaStore;
+    }
+
+    singleton class CMediaStoreFiles
+    {
+        interface IMediaStoreFiles;
+    }
+
+    singleton class CMediaStoreInternalThumbnails
+    {
+        interface IMediaStoreInternalThumbnails;
+    }
+
+    singleton class CMediaStoreImagesMedia
+    {
+        interface IMediaStoreImagesMedia;
+    }
+
+    singleton class CMediaStoreImagesThumbnails
+    {
+        interface IMediaStoreImagesThumbnails;
+    }
+
+    singleton class CMediaStoreAudio
+    {
+        interface IMediaStoreAudio;
+    }
+
+    singleton class CMediaStoreAudioMedia
+    {
+        interface IMediaStoreAudioMedia;
+    }
+
+    singleton class CMediaStoreAudioGenres
+    {
+        interface IMediaStoreAudioGenres;
+    }
+
+    singleton class CMediaStoreAudioGenresMembers
+    {
+        interface IMediaStoreAudioGenresMembers;
+    }
+
+    singleton class CMediaStoreAudioPlaylists
+    {
+        interface IMediaStoreAudioPlaylists;
+    }
+
+    singleton class CMediaStoreAudioPlaylistsMembers
+    {
+        interface IMediaStoreAudioPlaylistsMembers;
+    }
+
+    singleton class CMediaStoreAudioArtists
+    {
+        interface IMediaStoreAudioArtists;
+    }
+
+    singleton class CMediaStoreAudioArtistsAlbums
+    {
+        interface IMediaStoreAudioArtistsAlbums;
+    }
+
+    singleton class CMediaStoreAudioAlbums
+    {
+        interface IMediaStoreAudioAlbums;
+    }
+
+    singleton class CMediaStoreVideo
+    {
+        interface IMediaStoreVideo;
+    }
+
+    singleton class CMediaStoreVideoMedia
+    {
+        interface IMediaStoreVideoMedia;
+    }
+
+    singleton class CMediaStoreVideoThumbnails
+    {
+        interface IMediaStoreVideoThumbnails;
+    }
+
+    singleton class CDownloadsImpl
+    {
+        interface IDownloadsImpl;
+    }
+
+    singleton class CCallLog
+    {
+        interface ICallLog;
+    }
+
+    singleton class CCalls
+    {
+        interface ICalls;
+    }
+
+    singleton class CContacts
+    {
+        interface IContacts;
+    }
+
+    singleton class CContactsSettings
+    {
+        interface IBaseColumns;
+        interface IContactsSettings;
+        interface IContactsSettingsColumns;
+    }
+
+    singleton class CContactsPeople
+    {
+
+        interface IContactsPeople;
+        interface IBaseColumns;
+        interface ISyncConstValue;
+        interface IContactsPeopleColumns;
+        interface IContactsPhonesColumns;
+        interface IContactsPresenceColumns;
+    }
+
+    singleton class CContactsGroups
+    {
+        interface IContactsGroups;
+        interface IBaseColumns;
+        interface ISyncConstValue;
+        interface IContactsGroupsColumns;
+    }
+
+    singleton class CContactsPhones
+    {
+        interface IContactsPhones;
+        interface IBaseColumns;
+        interface IContactsPhonesColumns;
+        interface IContactsPeopleColumns;
+    }
+
+    singleton class CContactsGroupMembership
+    {
+        interface IContactsGroupMembership;
+        interface IBaseColumns;
+        interface IContactsGroupsColumns;
+    }
+
+    class CContactsContactMethods
+    {
+        constructor();
+
+        interface IContactsContactMethods;
+        interface IBaseColumns;
+        interface IContactsContactMethodsColumns;
+        interface IContactsPeopleColumns;
+    }
+
+    singleton class CContactsContactMethodsHelper
+    {
+        interface IContactsContactMethodsHelper;
+    }
+
+    singleton class CContactsPresence
+    {
+        interface IContactsPresence;
+        interface IBaseColumns;
+        interface IContactsPresenceColumns;
+        interface IContactsPeopleColumns;
+    }
+
+    singleton class CContactsOrganizations
+    {
+        interface IContactsOrganizations;
+        interface IBaseColumns;
+        interface IContactsOrganizationColumns;
+    }
+
+    singleton class CContactsPhotos
+    {
+        interface IContactsPhotos;
+        interface IBaseColumns;
+        interface IContactsPhotosColumns;
+        interface ISyncConstValue;
+    }
+
+    singleton class CContactsExtensions
+    {
+        interface IContactsExtensions;
+        interface IBaseColumns;
+        interface IContactsExtensionsColumns;
+    }
+
+    singleton class CSyncStateContractHelpers
+    {
+        interface ISyncStateContractHelpers;
+    }
+
+    singleton class CContactsContract
+    {
+        interface IContactsContract;
+    }
+
+    singleton class CContactsContractDirectory
+    {
+        interface IContactsContractDirectory;
+        interface IBaseColumns;
+    }
+
+    singleton class CContactsContractSyncState
+    {
+        interface IContactsContractSyncState;
+        interface ISyncStateContractColumns;
+    }
+
+    singleton class CContactsContractProfileSyncState
+    {
+        interface IContactsContractProfileSyncState;
+        interface ISyncStateContractColumns;
+    }
+
+    singleton class CContactsContractContacts
+    {
+        interface IContactsContractContacts;
+        interface IBaseColumns;
+        interface IContactsContractContactsColumns;
+        interface IContactsContractContactOptionsColumns;
+        interface IContactsContractContactNameColumns;
+        interface IContactsContractContactStatusColumns;
+    }
+
+    class CContactsContractContactsAggregationSuggestionsBuilder
+    {
+        interface IContactsContractContactsAggregationSuggestionsBuilder;
+    }
+
+    singleton class CContactsContractContactsAggregationSuggestions
+    {
+        interface IContactsContractContactsAggregationSuggestions;
+        interface IBaseColumns;
+        interface IContactsContractContactsColumns;
+        interface IContactsContractContactOptionsColumns;
+        interface IContactsContractContactStatusColumns;
+    }
+
+    singleton class CContactsContractProfile
+    {
+        interface IContactsContractProfile;
+        interface IBaseColumns;
+        interface IContactsContractContactsColumns;
+        interface IContactsContractContactOptionsColumns;
+        interface IContactsContractContactNameColumns;
+        interface IContactsContractContactStatusColumns;
+    }
+
+    singleton class CContactsContractRawContacts
+    {
+        interface IContactsContractRawContacts;
+        interface IBaseColumns;
+        interface IContactsContractRawContactsColumns;
+        interface IContactsContractContactOptionsColumns;
+        interface IContactsContractContactNameColumns;
+        interface IContactsContractSyncColumns;
+    }
+
+    singleton class CContactsContractStreamItems
+    {
+        interface IContactsContractStreamItems;
+        interface IBaseColumns;
+        interface IContactsContractStreamItemsColumns;
+    }
+
+    singleton class CContactsContractData
+    {
+        interface IContactsContractData;
+        interface IContactsContractDataColumnsWithJoins;
+    }
+
+    singleton class CContactsContractRawContactsEntity
+    {
+        interface IContactsContractRawContactsEntityEx;
+        interface IBaseColumns;
+        interface IContactsContractDataColumns;
+        interface IContactsContractRawContactsColumns;
+    }
+
+    singleton class CContactsContractPhoneLookup
+    {
+        interface IContactsContractPhoneLookup;
+        interface IBaseColumns;
+        interface IContactsContractPhoneLookupColumns;
+        interface IContactsContractContactsColumns;
+        interface IContactsContractContactOptionsColumns;
+    }
+
+    singleton class CContactsContractStatusUpdates
+    {
+        interface IContactsContractStatusUpdates;
+        interface IContactsContractStatusColumns;
+        interface IContactsContractPresenceColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsPhone
+    {
+        interface IContactsContractCommonDataKindsPhone;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsEmail
+    {
+        interface IContactsContractCommonDataKindsEmail;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsStructuredPostal
+    {
+        interface IContactsContractCommonDataKindsStructuredPostal;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsIm
+    {
+        interface IContactsContractCommonDataKindsIm;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsOrganization
+    {
+        interface IContactsContractCommonDataKindsOrganization;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsRelation
+    {
+        interface IContactsContractCommonDataKindsRelation;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsEvent
+    {
+        interface IContactsContractCommonDataKindsEvent;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsSipAddress
+    {
+        interface IContactsContractCommonDataKindsSipAddress;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractCommonDataKindsCallable
+    {
+        interface IContactsContractCommonDataKindsCallable;
+        interface IContactsContractDataColumnsWithJoins;
+        interface IContactsContractCommonDataKindsCommonColumns;
+    }
+
+    singleton class CContactsContractGroups
+    {
+        interface IContactsContractGroups;
+        interface IBaseColumns;
+        interface IContactsContractGroupsColumns;
+        interface IContactsContractSyncColumns;
+    }
+
+    singleton class CContactsContractAggregationExceptions
+    {
+        interface IContactsContractAggregationExceptions;
+        interface IBaseColumns;
+    }
+
+    singleton class CContactsContractSettings
+    {
+        interface IContactsContractSettings;
+        interface IContactsContractSettingsColumns;
+    }
+
+    singleton class CContactsContractProviderStatus
+    {
+        interface IContactsContractProviderStatus;
+    }
+
+    singleton class CContactsContractDataUsageFeedback
+    {
+        interface IContactsContractDataUsageFeedback;
+    }
+
+    singleton class CContactsContractQuickContact
+    {
+        interface IContactsContractQuickContact;
+    }
+
+    singleton class CContactsContractDisplayPhoto
+    {
+        interface IContactsContractDisplayPhoto;
+    }
+
+    singleton class CCalendarContract
+    {
+        interface ICalendarContract;
+    }
+
+    singleton class CCalendarContractCalendarEntity
+    {
+        interface ICalendarContractCalendarEntity;
+        interface IBaseColumns;
+        interface ICalendarContractSyncColumns;
+        interface ICalendarContractCalendarColumns;
+    }
+
+    singleton class CCalendarContractCalendars
+    {
+        interface ICalendarContractCalendars;
+        interface IBaseColumns;
+        interface ICalendarContractSyncColumns;
+        interface ICalendarContractCalendarColumns;
+    }
+
+    singleton class CCalendarContractAttendees
+    {
+        interface ICalendarContractAttendees;
+        interface IBaseColumns;
+        interface ICalendarContractAttendeesColumns;
+        interface ICalendarContractEventsColumns;
+    }
+
+    singleton class CCalendarContractEventsEntity
+    {
+        interface ICalendarContractEventsEntity;
+        interface IBaseColumns;
+        interface ICalendarContractSyncColumns;
+        interface ICalendarContractEventsColumns;
+    }
+
+    singleton class CCalendarContractEvents
+    {
+        interface ICalendarContractEvents;
+        interface IBaseColumns;
+        interface ICalendarContractSyncColumns;
+        interface ICalendarContractEventsColumns;
+        interface ICalendarContractCalendarColumns;
+    }
+
+    singleton class CCalendarContractInstances
+    {
+        interface ICalendarContractInstances;
+        interface IBaseColumns;
+        interface ICalendarContractEventsColumns;
+        interface ICalendarContractCalendarColumns;
+    }
+
+    singleton class CCalendarContractCalendarCache
+    {
+        interface ICalendarContractCalendarCache;
+    }
+
+    singleton class CCalendarContractEventDays
+    {
+        interface ICalendarContractEventDays;
+    }
+
+    singleton class CCalendarContractReminders
+    {
+        interface ICalendarContractReminders;
+        interface IBaseColumns;
+        interface ICalendarContractRemindersColumns;
+        interface ICalendarContractEventsColumns;
+    }
+
+    singleton class CCalendarContractCalendarAlerts
+    {
+        interface ICalendarContractCalendarAlerts;
+        interface IBaseColumns;
+        interface ICalendarContractCalendarAlertsColumns;
+        interface ICalendarContractEventsColumns;
+        interface ICalendarContractCalendarColumns;
+    }
+
+    singleton class CCalendarContractColors
+    {
+        interface ICalendarContractColors;
+    }
+
+    singleton class CCalendarContractExtendedProperties
+    {
+        interface ICalendarContractExtendedProperties;
+        interface IBaseColumns;
+        interface ICalendarContractExtendedPropertiesColumns;
+        interface ICalendarContractEventsColumns;
+    }
+
+    singleton class CCalendarContractSyncState
+    {
+        interface ICalendarContractSyncState;
+    }
+
+    singleton class CDocumentsContract
+    {
+        interface IDocumentsContract;
+    }
+
+    singleton class CUserDictionary
+    {
+        interface IUserDictionary;
+    }
+
+    singleton class CUserDictionaryWords
+    {
+        interface IUserDictionaryWords;
+    }
+
+    singleton class CVoicemailContractVoicemails
+    {
+        interface IVoicemails;
+    }
+
+    singleton class CVoicemailContractStatus
+    {
+        interface IVoicemailContractStatus;
+    }
+
+    /**
+     * This is a utility class providing access to
+     * {@link android.content.SearchRecentSuggestionsProvider}.
+     *
+     * <p>Unlike some utility classes, this one must be instantiated and properly initialized, so that
+     * it can be configured to operate with the search suggestions provider that you have created.
+     *
+     * <p>Typically, you will do this in your searchable activity, each time you receive an incoming
+     * {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} Intent.  The code to record each
+     * incoming query is as follows:
+     * <pre class="prettyprint">
+     *      SearchSuggestions suggestions = new SearchSuggestions(this,
+     *              MySuggestionsProvider.AUTHORITY, MySuggestionsProvider.MODE);
+     *      suggestions.saveRecentQuery(queryString, null);
+     * </pre>
+     *
+     * <p>For a working example, see SearchSuggestionSampleProvider and SearchQueryResults in
+     * samples/ApiDemos/app.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For information about using search suggestions in your application, read the
+     * <a href="{@docRoot}guide/topics/search/adding-recent-query-suggestions.html">Adding Recent Query
+     * Suggestions</a> developer guide.</p>
+     * </div>
+     */
+    class CSearchRecentSuggestions
+    {
+        constructor(
+            [in] IContext* context,
+            [in] String authority,
+            [in] Int32 mode);
+
+        interface ISearchRecentSuggestions;
+    }
+
+    singleton class CContactsContractDeletedContacts
+    {
+        interface IContactsContractDeletedContacts;
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+}

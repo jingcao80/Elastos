@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="title_bar_background">#556655</color>
+    <color name="main_title_bgcolor">#585858</color>
+    
+    <color name="white">#FFFFFF</color> 
+    <color name="black">#000000</color> 
+
+</resources>

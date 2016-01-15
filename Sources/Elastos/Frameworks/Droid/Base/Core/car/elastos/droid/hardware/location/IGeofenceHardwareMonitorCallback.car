@@ -1,0 +1,22 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Location.IGeofenceHardwareMonitorEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /** @hide */
+    [oneway]
+    interface IIGeofenceHardwareMonitorCallback {
+        OnMonitoringSystemChange(
+            [in] IGeofenceHardwareMonitorEvent* event);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

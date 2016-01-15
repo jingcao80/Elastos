@@ -1,0 +1,28 @@
+module
+{
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     * interface IParcelableSpan
+     * interface IUpdateAppearance
+     * interface IUpdateLayout
+     * interface ICharacterStyle
+     * interface IMetricAffectingSpan
+     */
+    interface IRelativeSizeSpan {
+        GetSizeChange(
+            [out] Float* ret);
+    }
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

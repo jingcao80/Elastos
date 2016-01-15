@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    /**
+     * This interface is implemented by classes source of {@link AccessibilityEvent}s.
+     */
+    interface IAccessibilityEventSource {
+
+        /**
+         * Handles the request for sending an {@link AccessibilityEvent} given
+         * the event type. The method must first check if accessibility is on
+         * via calling {@link AccessibilityManager#isEnabled()}, obtain
+         * an {@link AccessibilityEvent} from the event pool through calling
+         * {@link AccessibilityEvent#obtain(int)}, populate the event, and
+         * send it for dispatch via calling
+         * {@link AccessibilityManager#sendAccessibilityEvent(AccessibilityEvent)}.
+         *
+         * @see AccessibilityEvent
+         * @see AccessibilityManager
+         *
+         * @param eventType The event type.
+         */
+        SendAccessibilityEvent(
+            [in] Int32 eventType);
+
+        /**
+         * Handles the request for sending an {@link AccessibilityEvent}. The
+         * method does not guarantee to check if accessibility is on before
+         * sending the event for dispatch. It is responsibility of the caller
+         * to do the check via calling {@link AccessibilityManager#isEnabled()}.
+         *
+         * @see AccessibilityEvent
+         * @see AccessibilityManager
+         *
+         * @param event The event.
+         */
+        SendAccessibilityEventUnchecked(
+            [in] IAccessibilityEvent* event);
+    }
+
+    } // namespace Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

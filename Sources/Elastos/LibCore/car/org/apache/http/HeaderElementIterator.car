@@ -1,0 +1,54 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHeaderElement;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * One element of an HTTP {@link Header header} value.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     *
+     * <!-- empty lines above to avoid 'svn diff' context problems -->
+     * @version $Revision: 569828 $ $Date: 2007-08-26 08:49:38 -0700 (Sun, 26 Aug 2007) $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IIterator;
+     */
+    interface IHeaderElementIterator {
+
+        /**
+         * Indicates whether there is another header element in this
+         * iteration.
+         *
+         * @return  <code>true</code> if there is another header element,
+         *          <code>false</code> otherwise
+         */
+        HasNext(
+            [out] Boolean* hasNext);
+
+        /**
+         * Obtains the next header element from this iteration.
+         * This method should only be called while {@link #hasNext hasNext}
+         * is true.
+         *
+         * @return  the next header element in this iteration
+         */
+        NextElement(
+            [out] IHeaderElement** element);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

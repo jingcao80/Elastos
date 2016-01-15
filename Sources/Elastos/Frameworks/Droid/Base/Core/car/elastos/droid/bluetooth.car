@@ -1,0 +1,175 @@
+
+module
+{
+    merge("bluetooth/BluetoothProfile.car");
+    merge("bluetooth/BluetoothA2dp.car");
+    merge("bluetooth/BluetoothAdapter.car");
+    merge("bluetooth/BluetoothAssignedNumbers.car");
+    merge("bluetooth/BluetoothClass.car");
+    merge("bluetooth/BluetoothDevice.car");
+    merge("bluetooth/BluetoothDevicePicker.car");
+    merge("bluetooth/BluetoothHeadset.car");
+    merge("bluetooth/BluetoothHealth.car");
+    merge("bluetooth/BluetoothHealthAppConfiguration.car");
+    merge("bluetooth/BluetoothHealthCallback.car");
+    merge("bluetooth/BluetoothServerSocket.car");
+    merge("bluetooth/BluetoothSocket.car");
+    merge("bluetooth/BluetoothTetheringDataTracker.car");
+    merge("bluetooth/IBluetooth.car");
+    merge("bluetooth/IBluetoothA2dp.car");
+    merge("bluetooth/IBluetoothCallback.car");
+    merge("bluetooth/IBluetoothHeadset.car");
+    merge("bluetooth/IBluetoothHeadsetPhone.car");
+    merge("bluetooth/IBluetoothHealth.car");
+    merge("bluetooth/IBluetoothHealthCallback.car");
+    merge("bluetooth/IBluetoothInputDevice.car");
+    merge("bluetooth/IBluetoothManager.car");
+    merge("bluetooth/IBluetoothManagerCallback.car");
+    merge("bluetooth/IBluetoothPan.car");
+    merge("bluetooth/IBluetoothPbap.car");
+    merge("bluetooth/IBluetoothStateChangeCallback.car");
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        class CBluetoothStateChangeCallbackWrapper {
+            constructor(
+                [in] IInterface* cb);
+
+            interface IIBluetoothStateChangeCallback;
+        }
+
+        [local]
+        class CBluetoothAdapterManagerCallback {
+            constructor(
+                [in] IBluetoothAdapter* host);
+
+            interface IIBluetoothManagerCallback;
+        }
+
+        class CBluetoothAdapter {
+            /**
+             * Use {@link #getDefaultAdapter} to get the BluetoothAdapter instance.
+             */
+            constructor(
+                [in] IIBluetoothManager* managerService);
+
+            interface IBluetoothAdapter;
+        }
+
+        singleton class CBluetoothAdapterHelper {
+            interface IBluetoothAdapterHelper;
+        }
+
+        class CBluetoothClass {
+            constructor();
+
+            constructor(
+                [in] Int32 classInt);
+
+            interface IBluetoothClass;
+            interface IParcelable;
+        }
+
+        class CBluetoothDevice {
+            constructor();
+
+            /*package*/ constructor(
+                [in] String address);
+
+            interface IBluetoothDevice;
+            interface IParcelable;
+        }
+
+        class CBluetoothDeviceManagerCallback {
+            interface IIBluetoothManagerCallback;
+        }
+
+        class CBluetoothHealthAppConfiguration {
+            constructor();
+
+            /**
+             * Constructor to register the SINK role
+             *
+             * @param name Friendly name associated with the application configuration
+             * @param dataType Data Type of the remote Bluetooth Health device
+             * @hide
+             */
+            constructor(
+                [in] String name,
+                [in] Int32 dataType);
+
+            /**
+             * Constructor to register the application configuration.
+             *
+             * @param name Friendly name associated with the application configuration
+             * @param dataType Data Type of the remote Bluetooth Health device
+             * @param role {@link BluetoothHealth#SOURCE_ROLE} or
+             *                     {@link BluetoothHealth#SINK_ROLE}
+             * @hide
+             */
+            constructor(
+                [in] String name,
+                [in] Int32 dataType,
+                [in] Int32 role,
+                [in] Int32 channelType);
+
+            interface IBluetoothHealthAppConfiguration;
+            interface IParcelable;
+        }
+
+        class CBluetoothInputDeviceStateChangeCallback {
+            constructor(
+                [in] IInterface* host);
+
+            interface IIBluetoothStateChangeCallback;
+        }
+
+        class CBluetoothPanStateChangeCallback {
+            constructor(
+                [in] IInterface* host);
+
+            interface IIBluetoothStateChangeCallback;
+        }
+
+        class CBluetoothPbapStateChangeCallback {
+            constructor(
+                [in] Handle32 host);
+
+            interface IIBluetoothStateChangeCallback;
+        }
+
+        class CBluetoothHeadsetStateChangeCallback {
+            constructor(
+                [in] IInterface* host);
+
+            interface IIBluetoothStateChangeCallback;
+        }
+
+        class CBluetoothHealthStateChangeCallback {
+            constructor(
+                [in] IInterface* host);
+
+            interface IIBluetoothStateChangeCallback;
+        }
+
+        class CBluetoothHealthCallbackWrapper {
+            constructor(
+                [in] IBluetoothHealthCallback* cb);
+
+            interface IIBluetoothHealthCallback;
+        }
+
+        class CBluetoothA2dpStateChangeCallback {
+            constructor(
+                [in] IInterface* host);
+
+            interface IIBluetoothStateChangeCallback;
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

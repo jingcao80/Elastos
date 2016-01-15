@@ -1,0 +1,45 @@
+module
+{
+    interface Elastos.Droid.Os.IPersistableBundle;
+    interface Elastos.Droid.App.Job.IIJobCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Job {
+
+    interface IJobParameters {
+
+        /**
+         * @return The unique id of this job, specified at creation time.
+         */
+        GetJobId(
+            [out] Int32* id);
+
+        /**
+         * @return The extras you passed in when constructing this job with
+         * {@link android.app.job.JobInfo.Builder#setExtras(android.os.PersistableBundle)}. This will
+         * never be null. If you did not set any extras this will be an empty bundle.
+         */
+        GetExtras(
+            [out] IPersistableBundle** extras);
+
+        /**
+         * For jobs with {@link android.app.job.JobInfo.Builder#setOverrideDeadline(long)} set, this
+         * provides an easy way to tell whether the job is being executed due to the deadline
+         * expiring. Note: If the job is running because its deadline expired, it implies that its
+         * constraints will not be met.
+         */
+        IsOverrideDeadlineExpired(
+            [out] Boolean* result);
+
+        /** @hide */
+        GetCallback(
+            [out] IIJobCallback** cb);
+    }
+
+    } // namespace Job
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

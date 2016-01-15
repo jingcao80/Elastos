@@ -1,0 +1,49 @@
+TARGET_NAME= wm
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+INCLUDES += $(PREBUILD_INC)/skia/utils
+INCLUDES += $(PREBUILD_INC)/skia/core
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = MagnificationSpec.cpp
+SOURCES += StrictModeFlash.cpp
+SOURCES += DimSurface.cpp
+SOURCES += StartingData.cpp
+SOURCES += Watermark.cpp
+SOURCES += BlackFrame.cpp
+SOURCES += FakeWindowImpl.cpp
+SOURCES += WindowToken.cpp
+SOURCES += DimAnimator.cpp
+SOURCES += DisplayContent.cpp
+SOURCES += AppWindowToken.cpp
+SOURCES += DragState.cpp
+SOURCES += ViewServer.cpp
+SOURCES += CSession.cpp
+SOURCES += WindowAnimator.cpp
+SOURCES += WindowStateAnimator.cpp
+SOURCES += WindowState.cpp
+SOURCES += AppWindowAnimator.cpp
+SOURCES += ScreenRotationAnimation.cpp
+SOURCES += KeyguardDisableHandler.cpp
+SOURCES += CWindowManagerService.cpp
+SOURCES += InputMonitor.cpp
+SOURCES += WindowBinder.cpp
+SROUCES += AccessibilityController.cpp
+SOURCES += AppTransition.cpp
+SOURCES += CircularDisplayMask.cpp
+SOURCES += DimLayer.cpp
+SOURCES += DisplaySettings.cpp
+SOURCES += EmulatorDisplayOverlay.cpp
+SOURCES += FocusedStackFrame.cpp
+SOURCES += PointerEventDispatcher.cpp
+SOURCES += StackTapPointerEventListener.cpp
+SOURCES += Task.cpp
+SOURCES += TaskGroup.cpp
+SOURCES += TaskStack.cpp
+SOURCES += CWindowId.cpp

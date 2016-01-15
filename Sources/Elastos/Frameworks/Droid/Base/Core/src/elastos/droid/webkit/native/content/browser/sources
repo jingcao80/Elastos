@@ -1,0 +1,69 @@
+
+TARGET_NAME= browser
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+
+INCLUDES += ../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = ActivityContentVideoViewClient.cpp
+SOURCES += BatteryStatusManager.cpp
+SOURCES += BindingManagerImpl.cpp
+SOURCES += BrowserStartupController.cpp
+SOURCES += ChildProcessConnection.cpp
+SOURCES += ChildProcessConnectionImpl.cpp
+SOURCES += ChildProcessLauncher.cpp
+SOURCES += ContentReadbackHandler.cpp
+SOURCES += ContentSettings.cpp
+SOURCES += ContentVideoView.cpp
+SOURCES += ContentVideoViewLegacy.cpp
+SOURCES += ContentView.cpp
+SOURCES += ContentViewClient.cpp
+SOURCES += ContentViewCore.cpp
+SOURCES += ContentViewRenderView.cpp
+SOURCES += ContentViewStatics.cpp
+SOURCES += DeviceSensors.cpp
+SOURCES += DeviceUtils.cpp
+SOURCES += DownloadController.cpp
+SOURCES += DownloadInfo.cpp
+SOURCES += FileDescriptorInfo.cpp
+SOURCES += GestureEventType.cpp
+SOURCES += InterstitialPageDelegateElastos.cpp
+SOURCES += JavascriptInterface.cpp
+SOURCES += JellyBeanContentView.cpp
+SOURCES += LoadUrlParams.cpp
+SOURCES += LocationProviderAdapter.cpp
+SOURCES += LocationProviderFactory.cpp
+SOURCES += MediaDrmCredentialManager.cpp
+SOURCES += MediaResourceGetter.cpp
+SOURCES += NavigationClient.cpp
+SOURCES += NavigationEntry.cpp
+SOURCES += NavigationHistory.cpp
+SOURCES += PageTransitionTypes.cpp
+SOURCES += PepperPluginManager.cpp
+SOURCES += PopupZoomer.cpp
+SOURCES += PositionObserver.cpp
+SOURCES += PowerSaveBlocker.cpp
+SOURCES += RenderCoordinates.cpp
+SOURCES += ResourceExtractor.cpp
+SOURCES += ScreenOrientationListener.cpp
+SOURCES += ScreenOrientationProvider.cpp
+SOURCES += SelectActionModeCallback.cpp
+SOURCES += SmartClipProvider.cpp
+SOURCES += SpeechRecognition.cpp
+SOURCES += SpeechRecognitionError.cpp
+SOURCES += TimeZoneMonitor.cpp
+SOURCES += TouchEventSynthesizer.cpp
+SOURCES += TracingControllerElastos.cpp
+SOURCES += VibrationProvider.cpp
+SOURCES += ViewPositionObserver.cpp
+SOURCES += WebContentsObserverElastos.cpp
+
+ELASTOS_LIBS += accessibility/accessibility.lib
+ELASTOS_LIBS += crypto/crypto.lib
+ELASTOS_LIBS += framehost/framehost.lib
+ELASTOS_LIBS += input/input.lib
+ELASTOS_LIBS += webcontents/webcontents.lib

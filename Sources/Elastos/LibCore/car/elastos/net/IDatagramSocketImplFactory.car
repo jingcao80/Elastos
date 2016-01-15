@@ -1,0 +1,28 @@
+
+module
+{
+    interface Elastos.Net.IDatagramSocketImpl;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * This interface defines a factory for datagram socket implementations. It is
+     * used by the class {DatagramSocket} to create a new datagram socket
+     * implementation.
+     *
+     * @see DatagramSocket
+     */
+    interface IDatagramSocketImplFactory {
+        /**
+         * Creates a new {DatagramSocketImpl} instance.
+         *
+         * @return the new datagram socket implementation.
+         */
+        CreateDatagramSocketImpl(
+            [out] IDatagramSocketImpl** impl);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

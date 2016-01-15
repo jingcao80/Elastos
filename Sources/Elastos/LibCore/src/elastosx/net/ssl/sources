@@ -1,0 +1,47 @@
+TARGET_NAME= ssl
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/net
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/net/ssl
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/net
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/utility
+INCLUDES += $(MAKEDIR)/../../../../inc/src/elastos
+INCLUDES += $(MAKEDIR)/../../../../../LibCore/inc/elastos/core/
+
+SOURCES =  CDefaultHostnameVerifier.cpp
+SOURCES += CDistinguishedNameParser.cpp
+SOURCES += CKeyManagerFactoryHelper.cpp
+SOURCES += CSSLContextHelper.cpp
+SOURCES += CSSLParameters.cpp
+SOURCES += CSSLPermission.cpp
+SOURCES += CSSLServerSocketFactoryHelper.cpp
+SOURCES += CSSLSocketFactoryHelper.cpp
+SOURCES += CTrustManagerFactoryHelper.cpp
+SOURCES += CertPathTrustManagerParameters.cpp
+SOURCES += DefaultSSLServerSocketFactory.cpp
+SOURCES += DefaultSSLSocketFactory.cpp
+SOURCES += HandshakeCompletedEvent.cpp
+SOURCES += HttpsURLConnection.cpp
+SOURCES += CHttpsURLConnectionHelper.cpp
+SOURCES += KeyManagerFactory.cpp
+SOURCES += KeyStoreBuilderParameters.cpp
+SOURCES += SSLContext.cpp
+SOURCES += SSLContextSpi.cpp
+SOURCES += SSLEngine.cpp
+SOURCES += SSLEngineResult.cpp
+SOURCES += SSLServerSocket.cpp
+SOURCES += SSLServerSocketFactory.cpp
+SOURCES += SSLSessionBindingEvent.cpp
+SOURCES += SSLSocket.cpp
+SOURCES += SSLSocketFactory.cpp
+SOURCES += TrustManagerFactory.cpp
+SOURCES += X509ExtendedKeyManager.cpp
+SOURCES += ssl.cpp

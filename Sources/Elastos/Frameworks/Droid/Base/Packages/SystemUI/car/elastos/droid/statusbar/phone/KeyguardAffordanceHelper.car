@@ -1,0 +1,94 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IMotionEvent;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IKeyguardAffordanceView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    [local]
+    interface IKeyguardAffordanceHelperCallback {
+        /**
+         * Notifies the callback when an animation to a side page was started.
+         *
+         * @param rightPage Is the page animated to the right page?
+         */
+        OnAnimationToSideStarted(
+            [in] Boolean rightPage);
+
+        /**
+         * Notifies the callback the animation to a side page has ended.
+         */
+        OnAnimationToSideEnded();
+
+        GetPageWidth(
+            [out] Float* result);
+
+        OnSwipingStarted();
+
+        GetLeftIcon(
+            [out] IKeyguardAffordanceView** result);
+
+        GetCenterIcon(
+            [out] IKeyguardAffordanceView** result);
+
+        GetRightIcon(
+            [out] IKeyguardAffordanceView** result);
+
+        GetLeftPreview(
+            [out] IView** result);
+
+        GetRightPreview(
+            [out] IView** result);
+
+        /**
+         * @return The factor the minimum swipe amount should be multiplied with.
+         */
+        GetAffordanceFalsingFactor(
+            [out] Float* result);
+    }
+
+    /**
+     * A touch handler of the keyguard which is responsible for launching phone and camera affordances.
+     */
+    interface IKeyguardAffordanceHelper {
+
+        const Float SWIPE_RESTING_ALPHA_AMOUNT = 0.5;
+        const Int64 HINT_PHASE1_DURATION = 200;
+
+        OnTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        StartHintAnimation(
+            [in] Boolean right,
+            [in] IRunnable* onFinishedListener);
+
+        AnimateHideLeftRightIcon();
+
+        OnConfigurationChanged();
+
+        Reset(
+            [in] Boolean animate);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

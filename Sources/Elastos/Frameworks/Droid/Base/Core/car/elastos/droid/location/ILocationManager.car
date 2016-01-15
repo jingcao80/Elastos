@@ -1,0 +1,187 @@
+
+module
+{
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Location.ILocationRequest;
+    interface Elastos.Droid.Location.ILocationListener;
+    interface Elastos.Droid.Location.IGeofence;
+    interface Elastos.Droid.Location.ICriteria;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Internal.Location.IProviderProperties;
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * System private API for talking with the location service.
+     *
+     * @hide
+     */
+    [local,deprecated]
+    interface IILocationManager {
+        RequestLocationUpdates(
+            [in] ILocationRequest* request,
+            [in] IILocationListener* listener,
+            [in] IPendingIntent* intent,
+            [in] String packageName);
+
+        RemoveUpdates(
+            [in] IILocationListener* listener,
+            [in] IPendingIntent* intent,
+            [in] String packageName);
+
+        RequestGeofence(
+            [in] ILocationRequest* request,
+            [in] IGeofence* geofence,
+            [in] IPendingIntent* intent,
+            [in] String packageName);
+
+        RemoveGeofence(
+            [in] IGeofence* fence,
+            [in] IPendingIntent* intent,
+            [in] String packageName);
+
+        GetLastLocation(
+            [in] ILocationRequest* request,
+            [in] String packageName,
+            [out] ILocation** location);
+
+        AddGpsStatusListener(
+            [in] IIGpsStatusListener* listener,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        RemoveGpsStatusListener(
+            [in] IIGpsStatusListener* listener);
+
+        GeocoderIsPresent(
+            [out] Boolean* result);
+
+        GetFromLocation(
+            [in] Double latitude,
+            [in] Double longitude,
+            [in] Int32 maxResults,
+            [in] IGeocoderParams* params,
+            [out] IList** addrs,
+            [out] String* result);
+
+        GetFromLocationName(
+            [in] String locationName,
+            [in] Double lowerLeftLatitude,
+            [in] Double lowerLeftLongitude,
+            [in] Double upperRightLatitude,
+            [in] Double upperRightLongitude,
+            [in] Int32 maxResults,
+            [in] IGeocoderParams* params,
+            [out] IList** addrs,
+            [out] String* result);
+
+        SendNiResponse(
+            [in] Int32 notifId,
+            [in] Int32 userResponse,
+            [out] Boolean* result);
+
+        AddGpsMeasurementsListener(
+            [in] IIGpsMeasurementsListener* listener,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        RemoveGpsMeasurementsListener(
+            [in] IIGpsMeasurementsListener* listener,
+            [out] Boolean* result);
+
+        AddGpsNavigationMessageListener(
+            [in] IIGpsNavigationMessageListener* listener,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        RemoveGpsNavigationMessageListener(
+            [in] IIGpsNavigationMessageListener* listener,
+            [out] Boolean* result);
+
+        // --- deprecated ---
+        GetAllProviders(
+            [out] IList** allProviders);
+
+        GetProviders(
+            [in] ICriteria* criteria,
+            [in] Boolean enabledOnly,
+            [out] IList** providers);
+
+        GetBestProvider(
+            [in] ICriteria* criteria,
+            [in] Boolean enabledOnly,
+            [out] String* result);
+
+        ProviderMeetsCriteria(
+            [in] String provider,
+            [in] ICriteria* criteria,
+            [out] Boolean* result);
+
+        GetProviderProperties(
+            [in] String provider,
+            [out] IProviderProperties** properties);
+
+        IsProviderEnabled(
+            [in] String provider,
+            [out] Boolean* result);
+
+        AddTestProvider(
+            [in] String name,
+            [in] IProviderProperties* properties);
+
+        RemoveTestProvider(
+            [in] String provider);
+
+        SetTestProviderLocation(
+            [in] String provider,
+            [in] ILocation* loc);
+
+        ClearTestProviderLocation(
+            [in] String provider);
+
+        SetTestProviderEnabled(
+            [in] String provider,
+            [in] Boolean enabled);
+
+        ClearTestProviderEnabled(
+            [in] String provider);
+
+
+        SetTestProviderStatus(
+            [in] String provider,
+            [in] Int32 status,
+            [in] IBundle* extras,
+            [in] Int64 updateTime);
+
+        ClearTestProviderStatus(
+            [in] String provider);
+
+        SendExtraCommand(
+            [in] String provider,
+            [in] String command,
+            [/*inout*/out] IBundle** extras,
+            [out] Boolean* result);
+
+        // --- internal ---
+
+        // Used by location providers to tell the location manager when it has a new location.
+        // Passive is true if the location is coming from the passive provider, in which case
+        // it need not be shared with other providers.
+        ReportLocation(
+            [in] ILocation* location,
+            [in] Boolean passive);
+
+        // for reporting callback completion
+        LocationCallbackFinished(
+            [in] IILocationListener* listener);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+
+}

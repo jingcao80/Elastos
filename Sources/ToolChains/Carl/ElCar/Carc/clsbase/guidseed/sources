@@ -1,0 +1,13 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= guidseed
+TARGET_TYPE= lib
+
+SOURCES = guidseed.cpp
+SOURCES += recode.cpp
+SOURCES += sysdict.cpp
+SOURCES += inscape.cpp
+SOURCES += statdict.cpp
+

@@ -1,0 +1,59 @@
+
+TARGET_NAME = text
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += text.cpp
+SOURCES += CAllCapsFilter.cpp
+SOURCES += AlteredCharSequence.cpp
+SOURCES += CAlteredCharSequenceHelper.cpp
+SOURCES += AndroidBidi.cpp
+SOURCES += CAndroidCharacter.cpp
+SOURCES += Annotation.cpp
+SOURCES += CAutoText.cpp
+SOURCES += CAutoTextHelper.cpp
+SOURCES += CBidiFormatter.cpp
+SOURCES += CBidiFormatterHelper.cpp
+SOURCES += CBidiFormatterBuilder.cpp
+SOURCES += BoringLayout.cpp
+SOURCES += CBoringLayoutHelper.cpp
+SOURCES += CBoringLayoutMetrics.cpp
+SOURCES += DynamicLayout.cpp
+SOURCES += CEditableFactory.cpp
+SOURCES += Html.cpp
+SOURCES += CHtml.cpp
+SOURCES += Layout.cpp
+SOURCES += CLayoutHelper.cpp
+SOURCES += CLayoutDirections.cpp
+SOURCES += CLengthFilter.cpp
+SOURCES += LoginFilter.cpp
+SOURCES += MeasuredText.cpp
+SOURCES += PackedIntVector.cpp
+SOURCES += Selection.cpp
+SOURCES += CSelection.cpp
+SOURCES += CSimpleStringSplitter.cpp
+SOURCES += CSpannableFactory.cpp
+SOURCES += SpannableStringInternal.cpp
+SOURCES += CSpannableString.cpp
+SOURCES += CSpannableStringHelper.cpp
+SOURCES += SpannableStringBuilder.cpp
+SOURCES += CSpannableStringBuilderHelper.cpp
+SOURCES += CSpannedString.cpp
+SOURCES += CSpannedStringHelper.cpp
+SOURCES += StaticLayout.cpp
+SOURCES += TextDirectionHeuristics.cpp
+SOURCES += TextLine.cpp
+SOURCES += TextPaint.cpp
+SOURCES += TextUtils.cpp
+SOURCES += CTextUtils.cpp
+
+ELASTOS_LIBS += format/format.lib
+ELASTOS_LIBS += method/method.lib
+ELASTOS_LIBS += style/style.lib
+ELASTOS_LIBS += utility/utility.lib

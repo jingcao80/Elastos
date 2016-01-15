@@ -1,0 +1,27 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= clsbase
+TARGET_TYPE= lib
+
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES = $(MAKEDIR)/../../inc;
+INCLUDES += $(INCLUDESTEMP);
+
+SOURCES = create.cpp
+SOURCES += select.cpp
+SOURCES += flat.cpp
+SOURCES += elfreader.cpp
+SOURCES += clsfile.cpp
+SOURCES += abridge.cpp
+SOURCES += relabrg.cpp
+SOURCES += util.cpp
+SOURCES += newop.cpp
+SOURCES += type.cpp
+SOURCES += implibs.cpp
+
+ELASTOS_LIBS = guidseed/guidseed.lib
+ELASTOS_LIBS += ../../../../../Elastos/Runtime/Library/clsmodule/clsinfo.lib
+

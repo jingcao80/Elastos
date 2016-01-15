@@ -1,0 +1,58 @@
+
+module
+{
+    using interface Eunit.Framework.ITest;
+    using interface Eunit.Framework.ITestListener;
+    using interface Eunit.Framework.ITestResult;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Droid.App.IInstrumentation;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Os.IPerformanceResultsWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Test {
+
+    [local]
+    interface IAndroidTestRunner {
+        SetTestClassName(
+            [in] String testPackageName,
+            [in] String testClassName,
+            [in] String testMethodName);
+
+        SetTest(
+            [in] ITest* test);
+
+        ClearTestListeners();
+
+        AddTestListener(
+            [in] ITestListener* testListener);
+
+        GetTestCases(
+            [out] IList** testCases);
+
+        GetTestClassName(
+            [out] String* className);
+
+        GetTestResult(
+            [out] ITestResult** result);
+
+        RunTest();
+
+        RunTest(
+            [in] ITestResult* testResult);
+
+        SetContext(
+            [in] IContext* context);
+
+        SetInstrumentation(
+            [in] IInstrumentation* instrumentation);
+
+        SetPerformanceResultsWriter(
+            [in] IPerformanceResultsWriter* writer);
+    }
+
+    } // namespace Test
+    } // namespace Droid
+    } // namespace Elastos
+}

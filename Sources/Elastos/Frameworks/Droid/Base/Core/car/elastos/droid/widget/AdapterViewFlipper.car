@@ -1,0 +1,93 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Simple {@link ViewAnimator} that will animate between two or more views
+     * that have been added to it.  Only one child is shown at a time.  If
+     * requested, can automatically flip between each child at a regular interval.
+     *
+     * @attr ref android.R.styleable#AdapterViewFlipper_flipInterval
+     * @attr ref android.R.styleable#AdapterViewFlipper_autoStart
+     */
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAdapterViewAnimator
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Widget.IAdvanceable
+     */
+    interface IAdapterViewFlipper {
+        /**
+         * Returns the flip interval, in milliseconds.
+         *
+         * @return the flip interval in milliseconds
+         *
+         * @see #setFlipInterval(Int32)
+         *
+         * @attr ref android.R.styleable#AdapterViewFlipper_flipInterval
+         */
+        GetFlipInterval(
+            [out] Int32* interval);
+
+        /**
+         * How long to wait before flipping to the next view.
+         *
+         * @param flipInterval flip interval in milliseconds
+         *
+         * @see #getFlipInterval()
+         *
+         * @attr ref android.R.styleable#AdapterViewFlipper_flipInterval
+         */
+        SetFlipInterval(
+            [in] Int32 flipInterval);
+
+        /**
+         * Start a timer to cycle through child views
+         */
+        StartFlipping();
+
+        /**
+         * No more flips
+         */
+        StopFlipping();
+
+        /**
+         * Returns true if the child views are flipping.
+         */
+        IsFlipping(
+            [out] Boolean* res);
+
+        /**
+         * Set if this view automatically calls {@link #startFlipping()} when it
+         * becomes attached to a window.
+         */
+        SetAutoStart(
+            [in] Boolean autoStart);
+
+        /**
+         * Returns true if this view automatically calls {@link #startFlipping()}
+         * when it becomes attached to a window.
+         */
+        IsAutoStart(
+            [out] Boolean* res);
+
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

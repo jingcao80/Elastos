@@ -1,0 +1,32 @@
+
+TARGET_NAME= elastos.droid.system
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/droid;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/droid/system;
+
+SOURCES = CStructAddrinfo.cpp
+SOURCES += CStructGroupReq.cpp
+SOURCES += CStructLinger.cpp
+SOURCES += CStructPasswd.cpp
+SOURCES += CStructPollfd.cpp
+SOURCES += CStructStat.cpp
+SOURCES += CStructStatVfs.cpp
+SOURCES += CStructTimeval.cpp
+SOURCES += CStructUtsname.cpp
+SOURCES += CStructGroupSourceReq.cpp
+SOURCES += OsConstants.cpp
+SOURCES += CStructFlock.cpp
+SOURCES += CStructUcred.cpp
+SOURCES += CZygoteHooks.cpp
+SOURCES += Os.cpp

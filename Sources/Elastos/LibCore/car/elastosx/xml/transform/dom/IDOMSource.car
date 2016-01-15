@@ -1,0 +1,43 @@
+
+module
+{
+    interface Org.W3c.Dom.INode;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Transform {
+    namespace Dom {
+
+    /**
+     * @Involve
+     * interface ISource;
+     */
+    interface IDOMSource {
+        /** If {@link javax.xml.transform.TransformerFactory#getFeature}
+         * returns true when passed this value as an argument,
+         * the Transformer supports Source input of this type.
+         */
+        const String FEATURE = "http://javax.xml.transform.dom.DOMSource/feature";
+
+        /**
+         * Set the node that will represents a Source DOM tree.
+         *
+         * @param node The node that is to be transformed.
+         */
+        SetNode(
+            [in] INode* node);
+
+        /**
+         * Get the node that represents a Source DOM tree.
+         *
+         * @return The node that is to be transformed.
+         */
+        GetNode(
+            [out] INode** node);
+    }
+
+    } // namespace Dom
+    } // namespace Transform
+    } // namespace Xml
+    } // namespace Elastosx
+}

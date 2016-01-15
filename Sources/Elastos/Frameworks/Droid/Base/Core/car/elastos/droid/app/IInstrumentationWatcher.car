@@ -1,0 +1,26 @@
+module
+{
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** @hide */
+    interface IInstrumentationWatcher {
+        InstrumentationStatus(
+            [in] IComponentName* name,
+            [in] Int32 resultCode,
+            [in] IBundle* results);
+
+        InstrumentationFinished(
+            [in] IComponentName* name,
+            [in] Int32 resultCode,
+            [in] IBundle* results);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

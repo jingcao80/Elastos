@@ -1,0 +1,18 @@
+
+module
+{
+    namespace Elastos {
+    namespace Namespace2 {
+
+    enum FooMode {
+        FooMode_mode1,
+        FooMode_mode2,
+    }
+
+    interface IFoo {
+        Foo();
+    }
+
+    }
+    }
+}

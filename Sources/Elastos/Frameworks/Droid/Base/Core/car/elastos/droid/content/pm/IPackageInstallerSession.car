@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.Content.IIntentSender;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /** {@hide} */
+    [oneway]
+    interface IIPackageInstallerSession {
+        SetClientProgress(
+            [in] Float progress);
+
+        AddClientProgress(
+            [in] Float progress);
+
+        GetNames(
+            [out, callee] ArrayOf<String>* names);
+
+        OpenWrite(
+            [in] String name,
+            [in] Int64 offsetBytes,
+            [in] Int64 lengthBytes,
+            [out] IParcelFileDescriptor** pfd);
+
+        OpenRead(
+            [in] String name,
+            [out] IParcelFileDescriptor** pfd);
+
+        Close();
+
+        Commit(
+            [in] IIntentSender* statusReceiver);
+
+        Abandon();
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

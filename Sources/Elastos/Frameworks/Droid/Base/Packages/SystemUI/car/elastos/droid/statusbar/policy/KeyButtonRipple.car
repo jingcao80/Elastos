@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    /**
+     * @Involve
+     * interface IDrawable
+     */
+    interface IKeyButtonRipple {
+
+        GetGlowAlpha(
+            [out] Float* alpha);
+
+        SetGlowAlpha(
+            [in] Float alpha);
+
+        GetGlowScale(
+            [out] Float* scale);
+
+        SetGlowScale(
+            [in] Float scale);
+
+        SetPressed(
+            [in] Boolean pressed);
+    }
+
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

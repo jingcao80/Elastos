@@ -1,0 +1,141 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+
+    /**
+     * The base class for services running in the system process. Override and implement
+     * the lifecycle event callback methods as needed.
+     * <p>
+     * The lifecycle of a SystemService:
+     * </p><ul>
+     * <li>The constructor is called and provided with the system {@link Context}
+     * to initialize the system service.
+     * <li>{@link #onStart()} is called to get the service running.  The service should
+     * publish its binder interface at this point using
+     * {@link #publishBinderService(String, IBinder)}.  It may also publish additional
+     * local interfaces that other services within the system server may use to access
+     * privileged internal functions.
+     * <li>Then {@link #onBootPhase(int)} is called as many times as there are boot phases
+     * until {@link #PHASE_BOOT_COMPLETE} is sent, which is the last boot phase. Each phase
+     * is an opportunity to do special work, like acquiring optional service dependencies,
+     * waiting to see if SafeMode is enabled, or registering with a service that gets
+     * started after this one.
+     * </ul><p>
+     * NOTE: All lifecycle methods are called from the system server's main looper thread.
+     * </p>
+     *
+     * {@hide}
+     */
+    interface ISystemService {
+        /*
+         * Boot Phases
+         */
+        const Int32 PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100; // maybe should be a dependency?
+
+        /**
+         * After receiving this boot phase, services can obtain lock settings data.
+         */
+        const Int32 PHASE_LOCK_SETTINGS_READY = 480;
+
+        /**
+         * After receiving this boot phase, services can safely call into core system services
+         * such as the PowerManager or PackageManager.
+         */
+        const Int32 PHASE_SYSTEM_SERVICES_READY = 500;
+
+        /**
+         * After receiving this boot phase, services can broadcast Intents.
+         */
+        const Int32 PHASE_ACTIVITY_MANAGER_READY = 550;
+
+        /**
+         * After receiving this boot phase, services can start/bind to third party apps.
+         * Apps will be able to make Binder calls into services at this point.
+         */
+        const Int32 PHASE_THIRD_PARTY_APPS_CAN_START = 600;
+
+        /**
+         * After receiving this boot phase, services can allow user interaction with the device.
+         * This phase occurs when boot has completed and the home application has started.
+         * System services may prefer to listen to this phase rather than registering a
+         * broadcast receiver for ACTION_BOOT_COMPLETED to reduce overall latency.
+         */
+        const Int32 PHASE_BOOT_COMPLETED = 1000;
+
+
+        /**
+         * Gets the system context.
+         */
+        GetContext(
+            [out] IContext** ctx);
+
+        /**
+         * Returns true if the system is running in safe mode.
+         * TODO: we should define in which phase this becomes valid
+         */
+        IsSafeMode(
+            [out] Boolean* safeMode);
+
+        /**
+         * Called when the dependencies listed in the @Service class-annotation are available
+         * and after the chosen start phase.
+         * When this method returns, the service should be published.
+         */
+        OnStart();
+
+        /**
+         * Called on each phase of the boot process. Phases before the service's start phase
+         * (as defined in the @Service annotation) are never received.
+         *
+         * @param phase The current boot phase.
+         */
+        OnBootPhase(
+            [in] Int32 phase);
+
+        /**
+         * Called when a new user is starting, for system services to initialize any per-user
+         * state they maintain for running users.
+         * @param userHandle The identifier of the user.
+         */
+        OnStartUser(
+            [in] Int32 userHandle);
+
+        /**
+         * Called when switching to a different foreground user, for system services that have
+         * special behavior for whichever user is currently in the foreground.  This is called
+         * before any application processes are aware of the new user.
+         * @param userHandle The identifier of the user.
+         */
+        OnSwitchUser(
+            [in] Int32 userHandle);
+
+        /**
+         * Called when an existing user is stopping, for system services to finalize any per-user
+         * state they maintain for running users.  This is called prior to sending the SHUTDOWN
+         * broadcast to the user; it is a good place to stop making use of any resources of that
+         * user (such as binding to a service running in the user).
+         * @param userHandle The identifier of the user.
+         */
+        OnStopUser(
+            [in] Int32 userHandle);
+
+        /**
+         * Called when an existing user is stopping, for system services to finalize any per-user
+         * state they maintain for running users.  This is called after all application process
+         * teardown of the user is complete.
+         * @param userHandle The identifier of the user.
+         */
+        OnCleanupUser(
+            [in] Int32 userHandle);
+
+    }
+
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

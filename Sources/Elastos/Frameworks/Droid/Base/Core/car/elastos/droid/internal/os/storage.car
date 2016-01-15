@@ -1,0 +1,36 @@
+module
+{
+    merge("storage/ExternalStorageFormatter.car");
+
+    interface Elastos.Droid.App.IService;
+    interface Elastos.Droid.Content.IComponentCallbacks;
+    interface Elastos.Droid.Content.IComponentCallbacks2;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContextWrapper;
+    interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+    namespace Storage {
+
+    class CExternalStorageFormatter {
+        constructor();
+
+        interface IExternalStorageFormatter;
+        interface IService;
+        interface IContextWrapper;
+        interface IContext;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IDialogInterfaceOnCancelListener;
+    }
+
+    } // namespace Storage
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+
+}

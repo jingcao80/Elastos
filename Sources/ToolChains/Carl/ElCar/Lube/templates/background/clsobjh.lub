@@ -1,0 +1,75 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "${fullname}.h"
+
+#ifndef __CAR_${fullname}_H__
+#define __CAR_${fullname}_H__
+
+${GenerateDependHeaderForClass(class)}
+
+${ClassNamespaceBegin(class)}
+class ${name} :
+    public IObject,
+    public I${ClassNameOfClassObj(name)}ClassObject
+{
+public:
+    ${name}(): m_cRef(0) {}
+
+    CARAPI_(PInterface) Probe(
+        /* [in] */ _ELASTOS REIID riid);
+
+    CARAPI_(UInt32) AddRef();
+
+    CARAPI_(UInt32) Release();
+
+    CARAPI GetInterfaceID(
+        /* [in] */ IInterface *pObject,
+        /* [out] */ InterfaceID *pIID);
+
+    CARAPI Aggregate(
+        /* [in] */ AggrType type,
+        /* [in] */ PInterface pObj);
+
+    CARAPI GetDomain(
+        /* [out] */ PInterface *ppObj);
+
+    CARAPI GetClassID(
+        /* [out] */ _ELASTOS ClassID *pCLSID);
+
+    CARAPI GetHashCode(
+        /* [out] */ Int32* pHashCode);
+
+    CARAPI Equals(
+        /* [in] */ IInterface* pInterface,
+        /* [out] */ Boolean* pEquals);
+
+    CARAPI ToString(
+        /* [out] */ String* pInfo);
+
+$WITH all methods DO
+    CARAPI ${name}($^
+$   WITH all parameters DO
+
+        /* [${attrib}] */ ${type} ${prefixingname(parameter)}$^
+$       IF parameter is not last
+,$^
+$       END IF
+$   END DO ;; all parameters
+);
+
+$END DO ;; all methods
+
+$IF type is "generic"
+$NewHeaderOfGenericClassObjects(class)
+$END IF
+private:
+    Int32 m_cRef;
+};
+
+${ClassNamespaceEnd(class)}
+#endif // __CAR_${fullname}_H__
+$
+$END OUTPUT

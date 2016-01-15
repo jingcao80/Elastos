@@ -1,0 +1,113 @@
+
+module
+{
+    interface Elastos.Droid.View.InputMethod.IEditorInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Inputmethods {
+    namespace PinyinIME {
+
+    [deprecated]
+    interface IToggleStates {
+        SetRowIdToEnable(
+            [in] Int32 id);
+
+        GetRowIdToEnable(
+            [out] Int32* id);
+
+        SetQwerty(
+            [in] Boolean qwerty);
+
+        GetQwerty(
+            [out] Boolean* qwerty);
+
+        SetQwertyUpperCase(
+            [in] Boolean qwertyUpperCase);
+
+        GetQwertyUpperCase(
+            [out] Boolean* qwertyUpperCase);
+
+        SetKeyStatesNum(
+            [in] Int32 keyStatesNum);
+
+        GetKeyStatesNum(
+            [out] Int32* keyStatesNum);
+
+        SetKeyStates(
+            [in] ArrayOf<Int32> * keyStates);
+
+        GetKeyStates(
+            [out, callee] ArrayOf<Int32> * keyStates);
+    }
+
+    interface IInputModeSwitcher {
+        GetInputMode(
+            [out] Int32* value);
+
+        GetSkbLayout(
+            [out] Int32* value);
+
+        // Return the icon to update.
+        SwitchLanguageWithHkb(
+            [out] Int32* icon);
+
+        // Return the icon to update.
+        SwitchModeForUserKey(
+            [in] Int32 userKey,
+            [out] Int32* icon);
+
+        // Return the icon to update.
+        RequestInputWithHkb(
+            [in] IEditorInfo* editorInfo,
+            [out] Int32* icon);
+
+        // Return the icon to update.
+        RequestInputWithSkb(
+            [in] IEditorInfo* editorInfo,
+            [out] Int32* icon);
+
+        // Return the icon to update.
+        RequestBackToPreviousSkb(
+            [out] Int32* value);
+
+        GetTooggleStateForCnCand(
+            [out] Int32* value);
+
+        IsEnglishWithHkb(
+            [out] Boolean* result);
+
+        IsEnglishWithSkb(
+            [out] Boolean* result);
+
+        IsEnglishUpperCaseWithSkb(
+            [out] Boolean* result);
+
+        IsChineseText(
+            [out] Boolean* result);
+
+        IsChineseTextWithHkb(
+            [out] Boolean* result);
+
+        IsChineseTextWithSkb(
+            [out] Boolean* result);
+
+        IsSymbolWithSkb(
+            [out] Boolean* result);
+
+        IsEnterNoramlState(
+            [out] Boolean* result);
+
+        TryHandleLongPressSwitch(
+            [in] Int32 keyCode,
+            [out] Boolean* result);
+
+        GetToggleStates(
+            [out] IToggleStates** states);
+    }
+
+    } // namespace PinyinIME
+    } // namespace Inputmethods
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,117 @@
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IReader;
+
+    namespace Libcore {
+    namespace IO {
+
+    [deprecated]
+    interface IStreams {
+        /**
+         * Implements InputStream.read(int) in terms of InputStream.read(byte[], int, int).
+         * InputStream assumes that you implement InputStream.read(int) and provides default
+         * implementations of the others, but often the opposite is more efficient.
+         */
+        ReadSingleByte(
+            [in] IInputStream* instream,
+            [out] Int32* singleByte);
+
+        /**
+         * Implements OutputStream.write(int) in terms of OutputStream.write(byte[], int, int).
+         * OutputStream assumes that you implement OutputStream.write(int) and provides default
+         * implementations of the others, but often the opposite is more efficient.
+         */
+        WriteSingleByte(
+            [in] IOutputStream* outstream,
+            [in] Int32 b);
+
+        /**
+         * Fills 'dst' with bytes from 'in', throwing EOFException if insufficient bytes are available.
+         */
+        ReadFully(
+            [in] IInputStream* instream,
+            [out, callee] ArrayOf<Byte>* dst);
+
+        /**
+         * Reads exactly 'byteCount' bytes from 'in' (into 'dst' at offset 'offset'), and throws
+         * EOFException if insufficient bytes are available.
+         *
+         * Used to implement
+         *
+         *@sa java.io.DataInputStream#readFully(byte[], int, int)
+         *
+         */
+        ReadFully(
+            [in] IInputStream* instream,
+            [in] ArrayOf<Byte>* dst,
+            [in] Int32 offset,
+            [in] Int32 byteCount);
+
+        /**
+         * Returns a byte[] containing the remainder of 'in', closing it when done.
+        */
+        ReadFullyCloseWhenDone(
+            [in] IInputStream* instream,
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns a byte[] containing the remainder of 'in'.
+         */
+        ReadFullyNoClose(
+            [in] IInputStream* instream,
+            [out, callee] ArrayOf<Byte>* byteArray);
+
+        /**
+         * Returns the remainder of 'reader' as a string, closing it when done.
+         */
+        ReadFully(
+            [in] IReader* reader,
+            [out] String* result);
+
+        SkipAll(
+            [in] IInputStream* instream);
+
+        /**
+         * Call {in.read()} repeatedly until either the stream is exhausted or
+         * {byteCount} bytes have been read.
+         *
+         * <p>This method reuses the skip buffer but is careful to never use it at
+         * the same time that another stream is using it. Otherwise streams that use
+         * the caller's buffer for consistency checks like CRC could be clobbered by
+         * other threads. A thread-local buffer is also insufficient because some
+         * streams may call other streams in their skip() method, also clobbering the
+         * buffer.
+         */
+        SkipByReading(
+            [in] IInputStream* instream,
+            [in] Int64 byteCount,
+            [out] Int64* result);
+
+        /**
+         * Copies all of the bytes from {in} to {out}. Neither stream is closed.
+         * Returns the total number of bytes transferred.
+         */
+        Copy(
+            [in] IInputStream* instream,
+            [in] IOutputStream* outstream,
+            [out] Int32* number);
+
+        /**
+         * Returns the ASCII characters up to but not including the next "\r\n", or
+         * "\n".
+         *
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * java.io.EOFException | if the stream is exhausted before the next newline character.
+         */
+        ReadAsciiLine(
+            [in] IInputStream* instream,
+            [out] String* characters);
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

@@ -1,0 +1,78 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+
+    interface Elastos.Droid.Packages.SystemUI.Qs.IQSTileDetailAdapter;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneQSTileHost;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBrightnessMirrorController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    [deprecated]
+    interface IQSPanelCallback {
+        OnShowingDetail(
+            [in] IQSTileDetailAdapter* detail);
+
+        OnToggleStateChanged(
+            [in] Boolean state);
+
+        OnScanStateChanged(
+            [in] Boolean state);
+    }
+
+    /** View that represents the quick settings tile panel.
+     *
+     * @Involve
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface IView
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup
+     */
+    interface IQSPanel {
+        SetBrightnessMirror(
+            [in] IBrightnessMirrorController* c);
+
+        SetCallback(
+            [in] IQSPanelCallback* _callback);
+
+        SetHost(
+            [in] IPhoneQSTileHost* host);
+
+        GetHost(
+            [out] IPhoneQSTileHost** ret);
+
+        UpdateResources();
+
+        SetExpanded(
+            [in] Boolean expanded);
+
+        SetListening(
+            [in] Boolean listening);
+
+        ShowDetailAdapter(
+            [in] Boolean show,
+            [in] IQSTileDetailAdapter* adapter);
+
+        SetTiles(
+            [in] ICollection* tiles);
+
+        IsShowingDetail(
+            [out] Boolean* ret);
+
+        CloseDetail();
+    }
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

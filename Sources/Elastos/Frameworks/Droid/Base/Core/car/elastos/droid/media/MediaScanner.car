@@ -1,0 +1,63 @@
+
+module
+{
+    interface Elastos.IO.IFileDescriptor;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    [deprecated]
+    interface IMediaScanner {
+        //for mediaprovider to stop all scan
+        StopScan();
+
+        ScanDirectories(
+            [in] ArrayOf<String>* directories,
+            [in] String volumeName);
+
+        ScanSingleFile(
+            [in] String path,
+            [in] String volumeName,
+            [in] String mimeType,
+            [out] IUri** result);
+
+        ScanMtpFile(
+            [in] String path,
+            [in] String volumeName,
+            [in] Int32 objectHandle,
+            [in] Int32 format);
+
+        SetLocale(
+            [in] String locale);
+
+        ExtractAlbumArt(
+            [in] IFileDescriptor* fd,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Releases resources associated with this MediaScanner object.
+         * It is considered good practice to call this method when
+         * one is done using the MediaScanner object. After this method
+         * is called, the MediaScanner object can no longer be used.
+         */
+        ReleaseReSources();
+    }
+
+    interface IMediaScannerHelper {
+
+        /* MediaProvider calls this when a .nomedia file is added or removed */
+        ClearMediaPathCache(
+            [in] Boolean clearMediaPaths,
+            [in] Boolean clearNoMediaPaths);
+
+        IsNoMediaPath(
+            [in] String path,
+            [out] Boolean* result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

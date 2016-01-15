@@ -1,0 +1,7 @@
+module
+{
+    merge("location/GpsNetInitiatedHandler.car");
+    merge("location/ILocationProvider.car");
+    merge("location/ProviderProperties.car");
+    merge("location/ProviderRequest.car");
+}

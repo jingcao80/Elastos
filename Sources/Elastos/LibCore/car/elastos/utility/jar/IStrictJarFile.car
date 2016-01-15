@@ -1,0 +1,58 @@
+module
+{
+    interface Elastos.Utility.IIterator;
+    interface Elastos.Utility.Jar.IManifest;
+    interface Elastos.Utility.Zip.IZipEntry;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.Core.IArrayOf;
+    interface Elastos.Security.Cert.ICertificate;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    /**
+     * A subset of the JarFile API implemented as a thin wrapper over
+     * system/core/libziparchive.
+     *
+     * @hide for internal use only. Not API compatible (or as forgiving) as
+     *        {@link java.util.jar.JarFile}
+     */
+    interface IStrictJarFile {
+        GetManifest(
+            [out] IManifest** manifest);
+
+        GetIterator(
+            [out] IIterator** it);
+
+        FindEntry(
+            [in] String name,
+            [out] IZipEntry** ze);
+
+        /**
+         * Return all certificate chains for a given {@link ZipEntry} belonging to this jar.
+         * This method MUST be called only after fully exhausting the InputStream belonging
+         * to this entry.
+         *
+         * Returns {@code null} if this jar file isn't signed or if this method is
+         * called before the stream is processed.
+         */
+        GetCertificateChains(
+            [in] IZipEntry* ze,
+            [out, callee] ArrayOf<IArrayOf *> * certificate);
+
+        GetCertificates(
+            [in] IZipEntry* ze,
+            [out, callee] ArrayOf<ICertificate *> * certificate);
+
+        GetInputStream(
+            [in] IZipEntry* ze,
+            [out] IInputStream** is);
+
+        Close();
+    }
+
+    } //Jar
+    } //Utility
+    } //Elastos
+}

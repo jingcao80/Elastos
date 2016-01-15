@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastosx.Net.IServerSocketFactory;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The factory for SSL server sockets.
+     */
+    /**
+     * @Involve
+     * interface Elastosx.Net.IServerSocketFactory
+     */
+    [deprecated]
+    interface ISSLServerSocketFactory {
+        /**
+         * Returns the names of the cipher suites that are enabled by default.
+         *
+         * @return the names of the cipher suites that are enabled by default
+         */
+        GetDefaultCipherSuites(
+            [out, callee] ArrayOf<String>* suites);
+
+        /**
+         * Returns the list of supported cipher suites that could be enabled for an
+         * SSL connection created by this factory.
+         *
+         * @return the list of supported cipher suites
+         */
+        GetSupportedCipherSuites(
+            [out, callee] ArrayOf<String>* suites);
+    }
+
+    interface ISSLServerSocketFactoryHelper {
+        /**
+         * Returns the default {@code SSLServerSocketFactory} instance. The default
+         * implementation is defined by the security property
+         * "ssl.ServerSocketFactory.provider".
+         *
+         * @return the default {@code SSLServerSocketFactory} instance.
+         */
+        GetDefault(
+            [out] IServerSocketFactory** factory);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

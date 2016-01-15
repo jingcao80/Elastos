@@ -1,0 +1,33 @@
+module
+{
+    interface Elastos.Droid.View.IViewOnClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    /**
+     * @Involve
+     * interface IStackScrollerDecorView
+     */
+    interface IDismissView {
+        SetOnButtonClickListener(
+            [in] IViewOnClickListener* listener);
+    }
+
+    /**
+     * @Involve
+     * interface IImageButton
+     */
+    interface IDismissViewImageButton {
+
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

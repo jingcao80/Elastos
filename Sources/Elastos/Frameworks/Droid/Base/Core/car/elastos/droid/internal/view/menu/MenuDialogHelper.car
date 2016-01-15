@@ -1,0 +1,46 @@
+module
+{
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+
+    /**
+     * Helper for menus that appear as Dialogs (context and submenus).
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IDialogInterfaceOnKeyListener
+     * interface IDialogInterfaceOnClickListener,
+     * interface IDialogInterfaceOnDismissListener,
+     * interface IMenuPresenterCallback
+     */
+    [local]
+    interface IMenuDialogHelper {
+        /**
+         * Shows menu as a dialog.
+         *
+         * @param windowToken Optional token to assign to the window.
+         */
+        Show(
+            [in] IBinder* windowToken);
+
+        SetPresenterCallback(
+            [in] IMenuPresenterCallback* cb);
+
+        Dismiss();
+    }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

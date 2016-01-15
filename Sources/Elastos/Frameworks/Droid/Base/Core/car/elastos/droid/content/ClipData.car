@@ -1,0 +1,712 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IStringBuilder;
+
+    interface Elastos.Droid.Content.IClipDataItem;
+    interface Elastos.Droid.Content.IClipDescription;
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+
+    /**
+     * Representation of a clipped data on the clipboard.
+     * <p>
+     * ClippedData is a complex type containing one or Item instances, each of which
+     * can hold one or more representations of an item of data. For display to the
+     * user, it also has a label and iconic representation.
+     * <p>
+     * A ClipData contains a ClipDescription, which describes important meta-data
+     * about the clip. In particular, its getDescription().getMimeType(int) must
+     * return correct MIME type(s) describing the data in the clip. For help in
+     * correctly constructing a clip with the correct MIME type, use
+     * newPlainText(CharSequence, CharSequence), newUri(ContentResolver,
+     * CharSequence, Uri), and newIntent(CharSequence, Intent).
+     *
+     * @sa ClipDescription
+     * @sa getDescription().getMimeType(int)
+     * @sa newPlainText(CharSequence, CharSequence)
+     * @sa newUri(ContentResolver,CharSequence, Uri)
+     * @sa newIntent(CharSequence, Intent)
+     * <p>
+     * Each Item instance can be one of three main classes of data: a simple
+     * CharSequence of text, a single Intent object, or a Uri. See ClipData.Item for more details.
+     *
+     * @sa ClipData.Item
+     * <p>
+     * <h3>Developer Guides</h3>
+     * <p>
+     * For more information about using the clipboard framework, read the Copy and Paste developer guide.
+     *
+     * @sa Copy and Paste
+     * <p>
+     * <h3>Implementing Paste or Drop</h3>
+     * <p>
+     * To implement a paste or drop of a ClippedData object into an application, the
+     * application must correctly interpret the data for its use. If the
+     * ClipData.Item it contains is simple text or an Intent, there is little to be
+     * done: text can only be interpreted as text, and an Intent will typically be
+     * used for creating shortcuts (such as placing icons on the home screen) or other actions.
+     *
+     * @sa ClipData.Item
+     * <p>
+     * If all you want is the textual representation of the clipped data, you can use
+     * the convenience method Item.coerceToText. In this case there is generally no
+     * need to worry about the MIME types reported by
+     * getDescription().getMimeType(int), since any clip item an always be converted to a string.
+     *
+     * @sa Item.coerceToText
+     * @sa getDescription().getMimeType(int)
+     * <p>
+     * More complicated exchanges will be done through URIs, in particular
+     * "content:" URIs. A content URI allows the recipient of a ClippedData item to
+     * interact closely with the ContentProvider holding the data in order to
+     * negotiate the transfer of that data. The clip must also be filled in with the
+     * available MIME types; newUri(ContentResolver, CharSequence, Uri) will take
+     * care of correctly doing this.
+     *
+     * @sa newUri(ContentResolver, CharSequence, Uri)
+     * <p>
+     * For example, here is the paste function of a simple NotePad application. When
+     * retrieving the data from the clipboard, it can do either two things: if the
+     * clipboard contains a URI reference to an existing note, it copies the entire
+     * structure of the note into a new note; otherwise, it simply coerces the clip
+     * into text and uses that as the new note's contents.
+     * <pre>
+     *
+     * // A helper method that replaces the note's data with the contents of the clipboard.
+     *
+     * private final void performPaste() {
+     *
+     *  // Gets a handle to the Clipboard Manager
+     *  ClipboardManager clipboard = (ClipboardManager)
+     *       getSystemService(Context.CLIPBOARD_SERVICE);
+     *
+     * // Gets a content resolver instance
+     * ContentResolver cr = getContentResolver();
+     *
+     * // Gets the clipboard data from the clipboard
+     * ClipData clip = clipboard.getPrimaryClip();
+     * if (clip != null) {
+     *
+     *   String text=null;
+     *   String title=null;
+     *
+     *   // Gets the first item from the clipboard data
+     *   ClipData.Item item = clip.getItemAt(0);
+     *
+     *   // Tries to get the item's contents as a URI pointing to a note
+     *   Uri uri = item.getUri();
+     *
+     *   // Tests to see that the item actually is an URI, and that the URI
+     *   // is a content URI pointing to a provider whose MIME type is the same
+     *   // as the MIME type supported by the Note pad provider.
+     *  if (uri != null && NotePad.Notes.CONTENT_ITEM_TYPE.equals(cr.getType(uri))) {
+     *
+     *       // The clipboard holds a reference to data with a note MIME type. This copies it.
+     *       Cursor orig = cr.query(
+     *               uri,            // URI for the content provider
+     *               PROJECTION,     // Get the columns referred to in the projection
+     *               null,           // No selection variables
+     *               null,           // No selection variables, so no criteria are needed
+     *                  null            // Use the default sort order
+     *       );
+     *
+     *       // If the Cursor is not null, and it contains at least one record
+     *       // (moveToFirst() returns true), then this gets the note data from it.
+     *       if (orig != null) {
+     *           if (orig.moveToFirst()) {
+     *               int colNoteIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_NOTE);
+     *               int colTitleIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_TITLE);
+     *               text = orig.getString(colNoteIndex);
+     *               title = orig.getString(colTitleIndex);
+     *           }
+     *
+     *         // Closes the cursor.
+     *          orig.close();
+     *       }
+     *   }
+     *
+     *   // If the contents of the clipboard wasn't a reference to a note, then
+     *   // this converts whatever it is to text.
+     *   if (text == null) {
+     *       text = item.coerceToText(this).toString();
+     *   }
+     *
+     *   // Updates the current note with the retrieved title and text.
+     *   updateNote(text, title);
+     *  }
+     * }
+     * </pre>
+     * <p>
+     * In many cases an application can paste various types of streams of data. For
+     * example, an e-mail application may want to allow the user to paste an image or
+     * other binary data as an attachment. This is accomplished through the
+     * ContentResolver getStreamTypes(Uri, String) and
+     * openTypedAssetFileDescriptor(Uri, String, android.os.Bundle) methods. These
+     * allow a client to discover the type(s) of data that a particular content URI
+     * can make available as a stream and retrieve the stream of data.
+     *
+     * @sa getStreamTypes(Uri, String)
+     * @sa openTypedAssetFileDescriptor(Uri, String, android.os.Bundle)
+     * <p>
+     * For example, the implementation of Item.coerceToText itself uses this to try
+     * to retrieve a URI clip as a stream of text:
+     *
+     * @sa Item.coerceToText
+     * <pre>
+     *
+     * public CharSequence coerceToText(Context context) {
+     * // If this Item has an explicit textual value, simply return that.
+     * CharSequence text = getText();
+     * if (text != null) {
+     *   return text;
+     * }
+     *
+     * // If this Item has a URI value, try using that.
+     * Uri uri = getUri();
+     * if (uri != null) {
+     *
+     *    // First see if the URI can be opened as a plain text stream
+     *    // (of any sub-type).  If so, this is the best textual
+     *   // representation for it.
+     *   FileInputStream stream = null;
+     *   try {
+     *       // Ask for a stream of the desired type.
+     *       AssetFileDescriptor descr = context.getContentResolver()
+     *               .openTypedAssetFileDescriptor(uri, "text/*", null);
+     *       stream = descr.createInputStream();
+     *       InputStreamReader reader = new InputStreamReader(stream, "UTF-8");
+     *
+     *       // Got it...  copy the stream into a local string and return it.
+     *       StringBuilder builder = new StringBuilder(128);
+     *       char[] buffer = new char[8192];
+     *       int len;
+     *       while ((len=reader.read(buffer)) > 0) {
+     *           builder.append(buffer, 0, len);
+     *       }
+     *       return builder.toString();
+     *
+     *   } catch (FileNotFoundException e) {
+     *       // Unable to open content URI as text...  not really an
+     *       // error, just something to ignore.
+     *
+     *   } catch (IOException e) {
+     *       // Something bad has happened.
+     *       Log.w("ClippedData", "Failure loading text", e);
+     *       return e.toString();
+     *
+     *   } finally {
+     *       if (stream != null) {
+     *           try {
+     *               stream.close();
+     *           } catch (IOException e) {
+     *           }
+     *       }
+     *   }
+     *
+     *   // If we couldn't open the URI as a stream, then the URI itself
+     *   // probably serves fairly well as a textual representation.
+     *   return uri.toString();
+     * }
+     *
+     * // Finally, if all we have is an Intent, then we can just turn that
+     * // into text.  Not the most user-friendly thing, but it's something.
+     * Intent intent = getIntent();
+     * if (intent != null) {
+     *   return intent.toUri(Intent.URI_INTENT_SCHEME);
+     * }
+     *
+     * // Shouldn't get here, but just in case...
+     * return "";
+     * }
+     * </pre>
+     * <p>
+     * <h3>Implementing Copy or Drag</h3>
+     * <p>
+     * To be the source of a clip, the application must construct a ClippedData
+     * object that any recipient can interpret best for their context. If the clip is
+     * to contain a simple text, Intent, or URI, this is easy: an ClipData.Item
+     * containing the appropriate data type can be constructed and used.
+     *
+     * @sa ClipData.Item
+     * <p>
+     * More complicated data types require the implementation of support in a
+     * ContentProvider for describing and generating the data for the recipient. A
+     * common scenario is one where an application places on the clipboard the
+     * content: URI of an object that the user has copied, with the data at that URI
+     * consisting of a complicated structure that only other applications with direct
+     * knowledge of the structure can use.
+     * <p>
+     * For applications that do not have intrinsic knowledge of the data structure,
+     * the content provider holding it can make the data available as an arbitrary
+     * number of types of data streams. This is done by implementing the
+     * ContentProvider getStreamTypes(Uri, String) and openTypedAssetFile(Uri,
+     * String, android.os.Bundle) methods.
+     *
+     * @sa getStreamTypes(Uri, String)
+     * @sa openTypedAssetFile(Uri, String, android.os.Bundle)
+     * <p>
+     * Going back to our simple NotePad application, this is the implementation it
+     * may have to convert a single note URI (consisting of a title and the note text)
+     * into a stream of plain text data.
+     * <pre>
+     *
+     *
+     * // This describes the MIME types that are supported for opening a note
+     * // URI as a stream.
+     *
+     * static ClipDescription NOTE_STREAM_TYPES = new ClipDescription(null,
+     *   new String[] { ClipDescription.MIMETYPE_TEXT_PLAIN });
+     *
+     *
+     * // Returns the types of available data streams.  URIs to specific notes are supported.
+     * // The application can convert such a note to a plain text stream.
+     * //
+     * // @param uri the URI to analyze
+     * // @param mimeTypeFilter The MIME type to check for. This method only returns a data stream
+     * // type for MIME types that match the filter. Currently, only text/plain MIME types match.
+     * // @return a data stream MIME type. Currently, only text/plan is returned.
+     * // @throws IllegalArgumentException if the URI pattern doesn't match any supported patterns.
+     *
+     * @Override
+     * public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
+     *
+     * //  Chooses the data stream type based on the incoming URI pattern.
+     *
+     * switch (sUriMatcher.match(uri)) {
+     *
+     *   // If the pattern is for notes or live folders, return null. Data streams are not
+     *   // supported for this type of URI.
+     *   case NOTES:
+     *   case LIVE_FOLDER_NOTES:
+     *       return null;
+     *
+     *   // If the pattern is for note IDs and the MIME filter is text/plain, then return
+     *    // text/plain
+     *   case NOTE_ID:
+     *       return NOTE_STREAM_TYPES.filterMimeTypes(mimeTypeFilter);
+     *
+     *       // If the URI pattern doesn't match any permitted patterns, throws an exception.
+     *   default:
+     *       throw new IllegalArgumentException("Unknown URI " + uri);
+     *   }
+     * }
+     *
+     *
+     *
+     * // Returns a stream of data for each supported stream type. This method does a query on the
+     * // incoming URI, then uses
+     * // {@link android.content.ContentProvider#openPipeHelper(Uri, String, Bundle, Object,
+     * // PipeDataWriter)} to start another thread in which to convert the data into a stream.
+     * //
+     * // @param uri The URI pattern that points to the data stream
+     * // @param mimeTypeFilter A String containing a MIME type. This method tries to get a stream of
+     * // data with this MIME type.
+     * // @param opts Additional options supplied by the caller.  Can be interpreted as
+     * // desired by the content provider.
+     * // @return AssetFileDescriptor A handle to the file.
+     * // @throws FileNotFoundException if there is no file associated with the incoming URI.
+     *
+     * @Override
+     * public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
+     *   throws FileNotFoundException {
+     *
+     * // Checks to see if the MIME type filter matches a supported MIME type.
+     * String[] mimeTypes = getStreamTypes(uri, mimeTypeFilter);
+     *
+     * // If the MIME type is supported
+     * if (mimeTypes != null) {
+     *
+     *   // Retrieves the note for this URI. Uses the query method defined for this provider,
+     *    // rather than using the database query method.
+     *   Cursor c = query(
+     *           uri,                    // The URI of a note
+     *           READ_NOTE_PROJECTION,   // Gets a projection containing the note's ID, title,
+     *                                        // and contents
+     *           null,                   // No WHERE clause, get all matching records
+     *           null,                   // Since there is no WHERE clause, no selection criteria
+     *          null                    // Use the default sort order (modification date,
+     *                                   // descending
+     *   );
+     *
+     *        // If the query fails or the cursor is empty, stop
+     *    if (c == null || !c.moveToFirst()) {
+     *
+     *       // If the cursor is empty, simply close the cursor and return
+     *       if (c != null) {
+     *           c.close();
+     *       }
+     *
+     *      // If the cursor is null, throw an exception
+     *       throw new FileNotFoundException("Unable to query " + uri);
+     *   }
+     *
+     *   // Start a new thread that pipes the stream data back to the caller.
+     *   return new AssetFileDescriptor(
+     *           openPipeHelper(uri, mimeTypes[0], opts, c, this), 0,
+     *           AssetFileDescriptor.UNKNOWN_LENGTH);
+     * }
+     *
+     * // If the MIME type is not supported, return a read-only handle to the file.
+     * return super.openTypedAssetFile(uri, mimeTypeFilter, opts);
+     * }
+     *
+     *
+     * // Implementation of {@link android.content.ContentProvider.PipeDataWriter}
+     * // to perform the actual work of converting the data in one of cursors to a
+     * // stream of data for the client to read.
+     *
+     * @Override
+     * public void writeDataToPipe(ParcelFileDescriptor output, Uri uri, String mimeType,
+     *   Bundle opts, Cursor c) {
+     * // We currently only support conversion-to-text from a single note entry,
+     * // so no need for cursor data type checking here.
+     * FileOutputStream fout = new FileOutputStream(output.getFileDescriptor());
+     * PrintWriter pw = null;
+     * try {
+     *   pw = new PrintWriter(new OutputStreamWriter(fout, "UTF-8"));
+     *   pw.println(c.getString(READ_NOTE_TITLE_INDEX));
+     *   pw.println("");
+     *   pw.println(c.getString(READ_NOTE_NOTE_INDEX));
+     * } catch (UnsupportedEncodingException e) {
+     *   Log.w(TAG, "Ooops", e);
+     * } finally {
+     *   c.close();
+     *   if (pw != null) {
+     *       pw.flush();
+     *   }
+     *   try {
+     *       fout.close();
+     *   } catch (IOException e) {
+     *   }
+     *  }
+     * }
+     * </pre>
+     * <p>
+     * The copy operation in our NotePad application is now just a simple matter of making a clip containing the URI of the note being copied:
+     * <pre>
+     * case R.id.context_copy:
+     * // Gets a handle to the clipboard service.
+     * ClipboardManager clipboard = (ClipboardManager)
+     *       getSystemService(Context.CLIPBOARD_SERVICE);
+     *
+     * // Copies the notes URI to the clipboard. In effect, this copies the note itself
+     * clipboard.setPrimaryClip(ClipData.newUri(   // new clipboard item holding a URI
+     *       getContentResolver(),               // resolver to retrieve URI info
+     *       "Note",                             // label for the clip
+     *       noteUri)                            // the URI
+     * );
+     *
+     * // Returns to the caller and skips further processing.
+     * return true;
+     * </pre>
+     * <p>
+     * Note if a paste operation needs this clip as text (for example to paste into
+     * an editor), then coerceToText(Context) will ask the content provider for the
+     * clip URI as text and successfully paste the entire note.
+     *
+     * @sa coerceToText(Context)
+     */
+     /**
+      * @Involve
+      * interface IParcelable
+      */
+     interface IClipData {
+          /**
+           * Return the {@link ClipDescription} associated with this data, describing
+           * what it contains.
+           */
+          GetDescription(
+               [out] IClipDescription** description);
+
+          /**
+           * Add a new Item to the overall ClipData container.
+           */
+          AddItem(
+            [in] IClipDataItem* item);
+
+          /** @hide */
+          GetIcon(
+            [out] IBitmap** icon);
+
+          /**
+           * Return the number of items in the clip data.
+           */
+          GetItemCount(
+            [out] Int32* itemCount);
+
+          /**
+           * Return a single item inside of the clip data.  The index can range
+           * from 0 to #getItemCount()-1.
+           *
+           * @sa #getItemCount()
+           */
+          GetItemAt(
+            [in] Int32 index,
+            [out] IClipDataItem** item);
+
+         /**
+          * Prepare this {@link ClipData} to leave an app process.
+          *
+          * @hide
+          */
+          PrepareToLeaveProcess();
+
+          /** @hide */
+          FixUris(
+               [in] Int32 contentUserHint);
+
+         /**
+          * Only fixing the data field of the intents
+          * @hide
+          */
+          FixUrisLight(
+               [in] Int32 contentUserHint);
+
+          ToString(
+               [out] String* str);
+
+          /** @hide */
+          ToShortString(
+            [in] IStringBuilder* sb);
+    }
+
+
+    /**
+     * Description of a single item in a ClippedData.
+     * <p>
+     * The types than an individual item can currently contain are:
+     * <p>
+     * <li>Text: a basic string of text. This is actually a CharSequence, so it can
+     * be formatted text supported by corresponding Android built-in style spans.
+     * (Custom application spans are not supported and will be stripped when
+     * transporting through the clipboard.)</li>
+     * <p>
+     * <li>Intent: an arbitrary Intent object. A typical use is the shortcut to
+     * create when pasting a clipped item on to the home screen.</li>
+     * <p>
+     * <li>Uri: a URI reference. This may be any URI (such as an http: URI
+     * representing a bookmark), however it is often a content: URI. Using content
+     * provider references as clips like this allows an application to share complex
+     * or large clips through the standard content provider facilities.</li>
+     */
+
+    interface IClipDataItem {
+        /**
+         * Retrieve the raw text contained in this Item.
+         */
+        GetText(
+            [out] ICharSequence** text);
+
+        /**
+         * Retrieve the raw HTML text contained in this Item.
+         */
+        GetHtmlText(
+            [out] String* htmlText);
+
+        /**
+         * Retrieve the raw Intent contained in this Item.
+         */
+        GetIntent(
+            [out] IIntent** intent);
+
+        /**
+         * Retrieve the raw URI contained in this Item.
+         */
+        GetUri(
+            [out] IUri** uri);
+
+        /**
+         * Turn this item into text, regardless of the type of data it
+         * actually contains.
+         *
+         * <p>The algorithm for deciding what text to return is:
+         * <ul>
+         * <li> If #getText is non-null, return that.
+         * <li> If #getUri is non-null, try to retrieve its data
+         * as a text stream from its content provider.  If this succeeds, copy
+         * the text into a String and return it.  If it is not a content: URI or
+         * the content provider does not supply a text representation, return
+         * the raw URI as a string.
+         * <li> If #getIntent is non-null, convert that to an intent:
+         * URI and return it.
+         * <li> Otherwise, return an empty string.
+         * </ul>
+         *
+         * @sa #getText
+         * @sa #getUri
+         * @sa #getIntent
+         *
+         * @param context The caller's Context, from which its ContentResolver
+         * and other things can be retrieved.
+         * @return Returns the item's textual representation.
+         */
+        CoerceToText(
+            [in] IContext* ctx,
+            [out] ICharSequence** text);
+
+        /**
+         * Like #coerceToHtmlText(Context), but any text that would
+         * be returned as HTML formatting will be returned as text with
+         * style spans.
+         *
+         * @sa #coerceToHtmlText(Context)
+         * @param context The caller's Context, from which its ContentResolver
+         * and other things can be retrieved.
+         * @return Returns the item's textual representation.
+         */
+        CoerceToStyledText(
+            [in] IContext* ctx,
+            [out] ICharSequence** text);
+
+        /**
+         * Turn this item into HTML text, regardless of the type of data it
+         * actually contains.
+         *
+         * <p>The algorithm for deciding what text to return is:
+         * <ul>
+         * <li> If #getHtmlText is non-null, return that.
+         * <li> If #getText is non-null, return that, converting to
+         * valid HTML text.  If this text contains style spans,
+         * Html#toHtml(Spanned) Html.toHtml(Spanned) is used to
+         * convert them to HTML formatting.
+         * <li> If #getUri is non-null, try to retrieve its data
+         * as a text stream from its content provider.  If the provider can
+         * supply text/html data, that will be preferred and returned as-is.
+         * Otherwise, any text/* data will be returned and escaped to HTML.
+         * If it is not a content: URI or the content provider does not supply
+         * a text representation, HTML text containing a link to the URI
+         * will be returned.
+         * <li> If #getIntent is non-null, convert that to an intent:
+         * URI and return as an HTML link.
+         * <li> Otherwise, return an empty string.
+         * </ul>
+         *
+         * @sa #getHtmlText
+         * @sa #getText
+         * @sa Html#toHtml(Spanned) Html.toHtml(Spanned)
+         * @sa #getUri
+         * @sa #getIntent
+         * @param context The caller's Context, from which its ContentResolver
+         * and other things can be retrieved.
+         * @return Returns the item's representation as HTML text.
+         */
+        CoerceToHtmlText(
+            [in] IContext* ctx,
+            [out] String* text);
+
+        ToString(
+            [out] String* str);
+
+        /** @hide */
+        ToShortString(
+            [in] IStringBuilder* sb);
+    }
+
+    interface IClipDataHelper {
+        /**
+         * Create a new ClipData holding data of the type
+         * ClipDescription#MIMETYPE_TEXT_PLAIN.
+         *
+         * @sa ClipDescription#MIMETYPE_TEXT_PLAIN
+         *
+         * @param label User-visible label for the clip data.
+         * @param text The actual text in the clip.
+         * @return Returns a new ClipData containing the specified data.
+         */
+        NewPlainText(
+            [in] ICharSequence* label,
+            [in] ICharSequence* text,
+            [out] IClipData** clipData);
+
+        /**
+         * Create a new ClipData holding data of the type
+         * ClipDescription#MIMETYPE_TEXT_HTML.
+         *
+         * @sa ClipDescription#MIMETYPE_TEXT_HTML
+         *
+         * @param label User-visible label for the clip data.
+         * @param text The text of clip as plain text, for receivers that don't
+         * handle HTML.  This is required.
+         * @param htmlText The actual HTML text in the clip.
+         * @return Returns a new ClipData containing the specified data.
+         */
+        NewHtmlText(
+            [in] ICharSequence* label,
+            [in] ICharSequence* text,
+            [in] String htmlText,
+            [out] IClipData** clipData);
+
+        /**
+         * Create a new ClipData holding an Intent with MIME type
+         * ClipDescription#MIMETYPE_TEXT_INTENT.
+         *
+         * @sa ClipDescription#MIMETYPE_TEXT_INTENT
+         *
+         * @param label User-visible label for the clip data.
+         * @param intent The actual Intent in the clip.
+         * @return Returns a new ClipData containing the specified data.
+         */
+        NewIntent(
+            [in] ICharSequence* label,
+            [in] IIntent* intent,
+            [out] IClipData** clipData);
+
+        /**
+         * Create a new ClipData holding a URI.  If the URI is a content: URI,
+         * this will query the content provider for the MIME type of its data and
+         * use that as the MIME type.  Otherwise, it will use the MIME type
+         * ClipDescription#MIMETYPE_TEXT_URILIST.
+         *
+         * @sa ClipDescription#MIMETYPE_TEXT_URILIST
+         *
+         * @param resolver ContentResolver used to get information about the URI.
+         * @param label User-visible label for the clip data.
+         * @param uri The URI in the clip.
+         * @return Returns a new ClipData containing the specified data.
+         */
+        NewUri(
+            [in] IContentResolver* resolver,
+            [in] ICharSequence* label,
+            [in] IUri* uri,
+            [out] IClipData** clipData);
+
+        /**
+         * Create a new ClipData holding an URI with MIME type
+         * ClipDescription#MIMETYPE_TEXT_URILIST.
+         * Unlike #newUri(ContentResolver, CharSequence, Uri), nothing
+         * is inferred about the URI -- if it is a content: URI holding a bitmap,
+         * the reported type will still be uri-list.  Use this with care!
+         *
+         * @sa ClipDescription#MIMETYPE_TEXT_URILIST
+         * @sa #newUri(ContentResolver, CharSequence, Uri)
+         *
+         * @param label User-visible label for the clip data.
+         * @param uri The URI in the clip.
+         * @return Returns a new ClipData containing the specified data.
+         */
+        NewRawUri(
+            [in] ICharSequence* label,
+            [in] IUri* uri,
+            [out] IClipData** clipData);
+
+          GetMimeTypes(
+              [in] String name,
+              [out, callee] ArrayOf<String>* types);
+
+
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

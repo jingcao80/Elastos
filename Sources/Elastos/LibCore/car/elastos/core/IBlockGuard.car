@@ -1,0 +1,57 @@
+
+module
+{
+    namespace Elastos {
+    namespace Core {
+
+    interface IBlockGuardPolicy {
+        /**
+         * Called on disk writes.
+         */
+        OnWriteToDisk();
+
+        /**
+         * Called on disk reads.
+         */
+        OnReadFromDisk();
+
+        /**
+         * Called on network operations.
+         */
+        OnNetwork();
+
+        /**
+         * Returns the policy bitmask, for shipping over Binder calls
+         * to remote threads/processes and reinstantiating the policy
+         * there.  The bits in the mask are from the DISALLOW_* and
+         * PENALTY_* constants.
+         */
+        GetPolicyMask(
+            [out] Int32* mask);
+    }
+
+    interface IBlockGuard {
+        // TODO: refactor class name to something more generic, since its scope is
+        // growing beyond just blocking/logging.
+
+        const Int32 DISALLOW_DISK_WRITE = 0x01;
+        const Int32 DISALLOW_DISK_READ = 0x02;
+        const Int32 DISALLOW_NETWORK = 0x04;
+        const Int32 PASS_RESTRICTIONS_VIA_RPC = 0x08;
+        const Int32 PENALTY_LOG = 0x10;
+        const Int32 PENALTY_DIALOG = 0x20;
+        const Int32 PENALTY_DEATH = 0x40;
+
+        GetThreadPolicy(
+            [out] IBlockGuardPolicy** policy);
+
+        SetThreadPolicy(
+            [in] IBlockGuardPolicy* policy);
+
+        GetLaxPolicy(
+            [out] IBlockGuardPolicy** policy);
+    }
+
+    } // namespace Core
+    } // namespace Elastos
+}

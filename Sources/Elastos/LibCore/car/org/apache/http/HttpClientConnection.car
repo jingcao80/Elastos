@@ -1,0 +1,101 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpRequest;
+    interface Org.Apache.Http.IHttpEntityEnclosingRequest;
+    interface Org.Apache.Http.IHttpResponse;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+
+    /**
+     * An HTTP connection for use on the client side.
+     * It is used for sending requests and receiving responses.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     *
+     * <!-- empty lines above to avoid 'svn diff' context problems -->
+     * @version $Revision: 542199 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IHttpConnection;
+     */
+    interface IHttpClientConnection {
+
+        /**
+         * Checks if response data is available from the connection. May wait for
+         * the specified time until some data becomes available. Note that some
+         * implementations may completely ignore the timeout parameter.
+         *
+         * @param timeout the maximum time in milliseconds to wait for data
+         * @return true if data is available; false if there was no data available
+         *         even after waiting for <code>timeout</code> milliseconds.
+         * @throws IOException if an error happens on the connection
+         */
+        IsResponseAvailable(
+            [in] Int32 timeout,
+            [out] Boolean* isAvailable);
+
+        /**
+         * Sends the request line and all headers over the connection.
+         * @param request the request whose headers to send.
+         * @throws HttpException
+         * @throws IOException
+         */
+        SendRequestHeader(
+            [in] IHttpRequest* request);
+
+        /**
+         * Sends the request entity over the connection.
+         * @param request the request whose entity to send.
+         * @throws HttpException
+         * @throws IOException
+         */
+        SendRequestEntity(
+            [in] IHttpEntityEnclosingRequest* request);
+
+        /**
+         * Receives the request line and headers of the next response available from
+         * this connection. The caller should examine the HttpResponse object to
+         * find out if it should try to receive a response entity as well.
+         *
+         * @return a new HttpResponse object with status line and headers
+         *         initialized.
+         * @throws HttpException
+         * @throws IOException
+         */
+        ReceiveResponseHeader(
+            [out] IHttpResponse** httpResponse);
+
+        /**
+         * Receives the next response entity available from this connection and
+         * attaches it to an existing HttpResponse object.
+         *
+         * @param response the response to attach the entity to
+         * @throws HttpException
+         * @throws IOException
+         */
+        ReceiveResponseEntity(
+            [in] IHttpResponse* response);
+
+        /**
+         * Writes out all pending buffered data over the open connection.
+         *
+         * @throws IOException
+         */
+        Flush();
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

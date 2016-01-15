@@ -1,0 +1,36 @@
+module{
+    using interface Elastos.Droid.Commands.Monkey.IMonkeyEvent;
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Monkey {
+
+    interface IMonkeyEventSource
+    {
+        /*
+         *return the next monkey event from the source
+         *@param return the next monkey event
+        */
+        GetNextEvent(
+            [out] IMonkeyEvent** event);
+
+        /*
+        * set verbose to allow different level of log
+        * param verbose output mode? 1 =verbose , 2 = very verbose
+        */
+        SetVerbose(
+            [in] Int32 verbose);
+
+        /*
+         * check whether precondition is satisfied
+         *@Param result return the result for validation
+        */
+        Validate(
+            [out] Boolean* result);
+    }
+
+    } //namespace Monkey
+    } //namespace Commands
+    } //namespace Droid
+    } //namespace Elastos
+}

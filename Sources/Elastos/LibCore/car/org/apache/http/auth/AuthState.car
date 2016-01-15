@@ -1,0 +1,87 @@
+
+module
+{
+
+    interface Org.Apache.Http.Auth.IAuthScheme;
+    interface Org.Apache.Http.Auth.ICredentials;
+    interface Org.Apache.Http.Auth.IAuthScope;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Auth {
+
+    /**
+     * This class provides detailed information about the state of the
+     * authentication process.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 4.0
+     */
+    interface IAuthState {
+
+        /**
+         * Invalidates the authentication state by resetting its parameters.
+         */
+        Invalidate();
+
+        IsValid(
+            [out] Boolean* isValid);
+
+        /**
+         * Assigns the given {@link AuthScheme authentication scheme}.
+         *
+         * @param authScheme the {@link AuthScheme authentication scheme}
+         */
+        SetAuthScheme(
+            [in] IAuthScheme* authScheme);
+
+        /**
+         * Returns the {@link AuthScheme authentication scheme}.
+         *
+         * @return {@link AuthScheme authentication scheme}
+         */
+        GetAuthScheme(
+            [out] IAuthScheme** scheme);
+
+        /**
+         * Returns user {@link Credentials} selected for authentication if available
+         *
+         * @return user credentials if available, <code>null</code otherwise
+         */
+        GetCredentials(
+            [out] ICredentials** credentials);
+
+        /**
+         * Sets user {@link Credentials} to be used for authentication
+         *
+         * @param credentials User credentials
+         */
+        SetCredentials(
+            [in] ICredentials* credentials);
+
+        /**
+         * Returns actual {@link AuthScope} if available
+         *
+         * @return actual authentication scope if available, <code>null</code otherwise
+         */
+        GetAuthScope(
+            [out] IAuthScope** authScope);
+
+        /**
+          * Sets actual {@link AuthScope}.
+          *
+          * @param authScope Authentication scope
+          */
+        SetAuthScope(
+            [in] IAuthScope* authScope);
+
+    }
+
+    } // namespace Auth
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

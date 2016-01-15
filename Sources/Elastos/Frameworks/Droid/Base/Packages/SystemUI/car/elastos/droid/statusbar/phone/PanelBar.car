@@ -1,0 +1,87 @@
+
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPanelView;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPanelHolder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * @Involve
+     * interface IFrameLayout
+     */
+    interface IPanelBar {
+        const Boolean DEBUG = FALSE;
+//        const String TAG = PanelBar.class.getSimpleName();
+
+        const Int32 STATE_CLOSED = 0;
+        const Int32 STATE_OPENING = 1;
+        const Int32 STATE_OPEN = 2;
+
+        Go(
+            [in] Int32 state);
+
+        AddPanel(
+            [in] IPanelView* pv);
+
+        SetPanelHolder(
+            [in] IPanelHolder* ph);
+
+        GetBarHeight(
+            [out] Float* result);
+
+        SelectPanelForTouch(
+            [in] IMotionEvent* touch,
+            [out] IPanelView** result);
+
+        PanelsEnabled(
+            [out] Boolean* result);
+
+        // called from PanelView when self-expanding, too
+        StartOpeningPanel(
+            [in] IPanelView* panel);
+
+        /**
+         * @param panel the panel which changed its expansion state
+         * @param frac the fraction from the expansion in [0, 1]
+         * @param expanded whether the panel is currently expanded; this is independent from the
+         *                 fraction as the panel also might be expanded if the fraction is 0
+         */
+        PanelExpansionChanged(
+            [in] IPanelView* panel,
+            [in] Float frac,
+            [in] Boolean expanded);
+
+        CollapseAllPanels(
+            [in] Boolean animate);
+
+        OnPanelPeeked();
+
+        OnAllPanelsCollapsed();
+
+        OnPanelFullyOpened(
+            [in] IPanelView* openPanel);
+
+        OnTrackingStarted(
+            [in] IPanelView* panel);
+
+        OnTrackingStopped(
+            [in] IPanelView* panel,
+            [in] Boolean expand);
+
+        OnExpandingFinished();
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

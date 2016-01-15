@@ -1,0 +1,137 @@
+
+module
+{
+    merge("icu/Exceptions.car");
+    merge("icu/ICollationKeyICU.car");
+    merge("icu/ILocaleData.car");
+    merge("icu/IICUUtil.car");
+    merge("icu/IRuleBasedCollatorICU.car");
+    merge("icu/ITimeZoneNames.car");
+    merge("icu/ICollationElementIteratorICU.car");
+    merge("icu/INativeDecimalFormat.car");
+    merge("icu/INativeBreakIterator.car");
+    merge("icu/INativeCollationHelper.car");
+    merge("icu/INativeIDNHelper.car");
+    merge("icu/INativePluralRules.car");
+    merge("icu/INativeNormalizerHelper.car");
+    merge("icu/IAlphabeticIndex.car");
+    merge("icu/IDateIntervalFormat.car");
+    merge("icu/ITransliterator.car");
+    merge("icu/INativeConverterHelper.car");
+
+    interface Elastos.Core.IComparable;
+    interface Elastos.Text.ICollationKey;
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Text.IDecimalFormatSymbols;
+
+    namespace Libcore {
+    namespace ICU {
+
+    singleton class CCollationElementIteratorICUHelper {
+        interface ICollationElementIteratorICUHelper;
+    }
+
+    singleton class CNativeCollationHelper {
+        interface INativeCollationHelper;
+    }
+
+    [deprecated]
+    class CCollationKeyICU {
+        constructor(
+            [in] String source,
+            [in] ArrayOf<Byte>* ab);
+
+        interface IComparable;
+        interface ICollationKey;
+        interface ICollationKeyICU;
+    }
+
+    class CLocaleData {
+        interface ILocaleData;
+    }
+
+    singleton class CLocaleDataHelper {
+        interface ILocaleDataHelper;
+    }
+
+    singleton class CTimeZoneNames {
+        interface ITimeZoneNames;
+    }
+
+    singleton class CNativeIDNHelper {
+        interface INativeIDNHelper;
+    }
+
+    singleton class CNativeNormalizerHelper {
+        interface INativeNormalizerHelper;
+    }
+
+    class CNativePluralRules {
+        constructor(
+            [in] Int64 address);
+
+        interface INativePluralRules;
+    }
+
+    singleton class CNativePluralRulesHelper {
+        interface INativePluralRulesHelper;
+    }
+
+    class CRuleBasedCollatorICU {
+        constructor(
+            [in] String rules);
+
+        constructor(
+            [in] ILocale * locale);
+
+        interface ICloneable;
+        interface IRuleBasedCollatorICU;
+    }
+
+    singleton class CNativeBreakIteratorHelper {
+        interface INativeBreakIteratorHelper;
+    }
+
+    class CAlphabeticIndex {
+        constructor(
+            [in] ILocale* locale);
+
+        interface IAlphabeticIndex;
+    }
+
+    singleton class CDateIntervalFormat {
+        interface IDateIntervalFormat;
+    }
+
+    class CTransliterator {
+        constructor(
+            [in] String id);
+
+        interface ITransliterator;
+    }
+
+    singleton class CICUUtil {
+        interface IICUUtil;
+    }
+
+    singleton class CNativeConverterHelper {
+        interface INativeConverterHelper;
+    }
+
+    class CNativeDecimalFormat {
+        constructor(
+            [in] String pattern,
+            [in] IDecimalFormatSymbols* dfs);
+
+        constructor(
+            [in] String pattern,
+            [in] ILocaleData* data);
+
+        interface ICloneable;
+        interface INativeDecimalFormat;
+    }
+
+    } // namespace ICU
+    } // namespace LibCore
+}

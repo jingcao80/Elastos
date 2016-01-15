@@ -1,0 +1,56 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IViewGroup;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IUserSwitcherController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+    namespace Tiles {
+
+    /**
+     * @Involve
+     * interface IOnClickListener
+     * interface IUserSwitcherControllerBaseUserAdapter
+     */
+    interface IUserDetailViewAdapter {}
+
+    /**
+     * Quick settings detail view for user switching.
+     *
+     * @Involve
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface IView
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup
+     * interface IPseudoGridView
+     */
+    interface IUserDetailView {
+        CreateAndSetAdapter(
+            [in] IUserSwitcherController* controller);
+    }
+
+    [local]
+    interface IUserDetailViewHelper {
+        Inflate(
+            [in] IContext* context,
+            [in] IViewGroup* parent,
+            [in] Boolean attach,
+            [out] IUserDetailView** ret);
+    }
+
+    } // namespace Tiles
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,68 @@
+
+module
+{
+    interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceClient;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.View.IInputEvent;
+    interface Elastos.Droid.View.IWindowContentFrameStats;
+    interface Elastos.Droid.View.IWindowAnimationFrameStats;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    /**
+     * This interface contains privileged operations a shell program can perform
+     * on behalf of an instrumentation that it runs. These operations require
+     * special permissions which the shell user has but the instrumentation does
+     * not. Running privileged operations by the shell user on behalf of an
+     * instrumentation is needed for running UiTestCases.
+     *
+     * {@hide}
+     */
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    [local]
+    interface IIUiAutomationConnection {
+        Connect(
+            [in] IIAccessibilityServiceClient* client);
+
+        Disconnect();
+
+        InjectInputEvent(
+            [in] IInputEvent* event,
+            [in] Boolean sync,
+            [out] Boolean* result);
+
+        SetRotation(
+            [in] Int32 rotation,
+            [out] Boolean* result);
+
+        TakeScreenshot(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] IBitmap** bitmap);
+
+        Shutdown();
+
+        ClearWindowContentFrameStats(
+            [in] Int32 windowId,
+            [out] Boolean* result);
+
+        GetWindowContentFrameStats(
+            [in] Int32 windowId,
+            [out] IWindowContentFrameStats** stats);
+
+        ClearWindowAnimationFrameStats();
+
+        GetWindowAnimationFrameStats(
+            [out] IWindowAnimationFrameStats** stats);
+
+        ExecuteShellCommand(
+            [in] String command,
+            [in] IParcelFileDescriptor* fd);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

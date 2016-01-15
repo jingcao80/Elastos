@@ -1,0 +1,51 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Auth {
+
+    /**
+     * Constants enumerating the HTTP status codes.
+     * All status codes defined in RFC1945 (HTTP/1.0), RFC2616 (HTTP/1.1), and
+     * RFC2518 (WebDAV) are listed.
+     *
+     * @see StatusLine
+     * @author Unascribed
+     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+     * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
+     *
+     * @version $Revision: 503381 $
+     */
+    interface IAUTH {
+
+        /**
+         * The www authenticate challange header.
+         */
+        const String WWW_AUTH = "WWW-Authenticate";
+
+        /**
+         * The www authenticate response header.
+         */
+        const String WWW_AUTH_RESP = "Authorization";
+
+        /**
+         * The proxy authenticate challange header.
+         */
+        const String PROXY_AUTH = "Proxy-Authenticate";
+
+        /**
+         * The proxy authenticate response header.
+         */
+        const String PROXY_AUTH_RESP = "Proxy-Authorization";
+
+    }
+
+    } // namespace Auth
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

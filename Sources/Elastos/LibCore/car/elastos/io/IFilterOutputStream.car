@@ -1,0 +1,18 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IFlushable;
+     * interface IOutputStream;
+     */
+    interface IFilterOutputStream {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

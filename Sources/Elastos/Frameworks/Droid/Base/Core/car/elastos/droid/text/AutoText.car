@@ -1,0 +1,45 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * This class accesses a dictionary of corrections to frequent misspellings.
+     */
+    interface IAutoText {
+    }
+
+    [local]
+    interface IAutoTextHelper {
+        /**
+         * Retrieves a possible spelling correction for the specified range
+         * of text.  Returns null if no correction can be found.
+         * The View is used to get the current Locale and Resources.
+         */
+        Get(
+            [in] ICharSequence* src,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] IView* view,
+            [out] String* ret);
+
+        /**
+         * Returns the size of the auto text dictionary. The return value can be zero if there is
+         * no auto correction data available for the current locale.
+         * @param view used to retrieve the current Locale and Resources.
+         * @return the number of entries in the auto text dictionary
+         */
+        GetSize(
+            [in] IView* view,
+            [out] Int32* ret);
+    }
+
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

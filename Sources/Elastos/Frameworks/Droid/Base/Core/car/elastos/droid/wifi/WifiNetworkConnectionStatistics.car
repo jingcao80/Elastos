@@ -1,0 +1,34 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Connection Statistics For a WiFi Network.
+     * @hide
+     */
+    // @SystemApi
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiNetworkConnectionStatistics {
+        GetNumConnection(
+            [out] Int32* result);
+
+        SetNumConnection(
+            [in] Int32 numConnection);
+
+        GetNumUsage(
+            [out] Int32* result);
+
+        SetNumUsage(
+            [in] Int32 numUsage);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

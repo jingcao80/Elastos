@@ -1,0 +1,74 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Utility.IList;
+    interface Elastosx.Security.Auth.X500.IX500Principal;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Pkcs7 {
+
+    /**
+     * As defined in PKCS #7: Cryptographic Message Syntax Standard
+     * (http://www.ietf.org/rfc/rfc2315.txt)
+     *
+     * SignerInfo ::= SEQUENCE {
+     *   version Version,
+     *   issuerAndSerialNumber IssuerAndSerialNumber,
+     *   digestAlgorithm DigestAlgorithmIdentifier,
+     *   authenticatedAttributes
+     *     [0] IMPLICIT Attributes OPTIONAL,
+     *   digestEncryptionAlgorithm
+     *     DigestEncryptionAlgorithmIdentifier,
+     *   encryptedDigest EncryptedDigest,
+     *   unauthenticatedAttributes
+     *     [1] IMPLICIT Attributes OPTIONAL
+     *  }
+     */
+    interface ISignerInfo {
+        GetIssuer(
+            [out] IX500Principal** issuer);
+
+        GetSerialNumber(
+            [out] IBigInteger** serialNumber);
+
+        GetDigestAlgorithm(
+            [out] String* algorithm);
+
+        GetDigestAlgorithmName(
+            [out] String* algoName);
+
+        GetDigestEncryptionAlgorithm(
+            [out] String* digestEncryptionAlgorithm);
+
+        GetDigestEncryptionAlgorithmName(
+            [out] String* algoName);
+
+        GetAuthenticatedAttributes(
+            [out] IList** authenticatedAttributes);
+
+        GetEncodedAuthenticatedAttributes(
+            [out, callee] ArrayOf<Byte>* encodedAuthenticatedAttributes);
+
+        GetEncryptedDigest(
+            [out, callee] ArrayOf<Byte>* encryptedDigest);
+    }
+
+    interface ISignerInfoHelper {
+        GetIssuerAndSerialNumber(
+            [out] IASN1Sequence** issuerAndSerialNumber);
+
+        GetAsn1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace Pkcs7
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,31 @@
+module
+{
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * A SuggestionRangeSpan is used to show which part of an EditText is affected by a suggestion
+     * popup window.
+     *
+     * @hide
+     *
+     * @Involve
+     * interface IParcelable
+     * interface IParcelableSpan
+     * interface ICharacterStyle
+     */
+    interface ISuggestionRangeSpan {
+        SetBackgroundColor(
+            [in] Int32 backgroundColor);
+    }
+
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

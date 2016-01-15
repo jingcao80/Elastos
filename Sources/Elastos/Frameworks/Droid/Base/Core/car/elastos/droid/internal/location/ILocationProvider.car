@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastos.Droid.Internal.Location.IProviderRequest;
+    interface Elastos.Droid.Internal.Location.IProviderProperties;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IWorkSource;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Location {
+
+    /**
+     * Binder interface for services that implement location providers.
+     * <p>Use {@link LocationProviderBase} as a helper to implement this
+     * interface.
+     * @hide
+     */
+    [deprecated]
+    interface IILocationProvider {
+        Enable();
+
+        Disable();
+
+        SetRequest(
+            [in] IProviderRequest* request,
+            [in] IWorkSource* ws);
+
+        // --- deprecated (but still supported) ---
+        GetProperties(
+            [out] IProviderProperties** properties);
+
+        GetStatus(
+            [out] IBundle** extras,
+            [out] Int32* status);
+
+        GetStatusUpdateTime(
+            [out] Int64* time);
+
+        SendExtraCommand(
+            [in] String command,
+            [in] IBundle* inExtras,
+            [out] IBundle** outExtras,
+            [out] Boolean* result);
+    }
+
+    } //namespace Location
+    } //namespace Internal
+    } //namespace Droid
+    } //namespace Elastos
+}

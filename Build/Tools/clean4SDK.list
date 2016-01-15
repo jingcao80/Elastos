@@ -1,0 +1,14 @@
+;
+; Purpose: Clean list for SDK
+;
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;clean for ENV 
+gcc_devtools.sh Setup/Config
+Arm_Android.desktop Setup/Shortcuts 
+Gcc_Devtools.desktop Setup/Shortcuts
+Gcc_Devtools.ico Setup/Shortcuts
+Arm_Android_Init Setup
+Gcc_Devtools_Init Setup
+dropSDK.sh Build/Tools
+clean4SDK.list Build/Tools

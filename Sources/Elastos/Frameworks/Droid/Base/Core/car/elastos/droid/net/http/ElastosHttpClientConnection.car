@@ -1,0 +1,138 @@
+
+module
+{
+    interface Elastos.Droid.Net.Http.IHeaders;
+
+    using interface Elastos.Net.IInetAddress;
+    using interface Elastos.Net.ISocket;
+    using interface Org.Apache.Http.IHttpConnectionMetrics;
+    using interface Org.Apache.Http.IHttpEntity;
+    using interface Org.Apache.Http.IHttpEntityEnclosingRequest;
+    using interface Org.Apache.Http.IHttpRequest;
+    using interface Org.Apache.Http.IStatusLine;
+    using interface Org.Apache.Http.Params.IHttpParams;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * A alternate class for (@link DefaultHttpClientConnection).
+     * It has better performance than DefaultHttpClientConnection
+     *
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * interface Org.Apache.Http.IHttpInetConnection;
+     * interface Org.Apache.Http.IHttpConnection;
+     */
+    interface IElastosHttpClientConnection {
+        /**
+         * Bind socket and set HttpParams to AndroidHttpClientConnection
+         * @param socket outgoing socket
+         * @param params HttpParams
+         * @throws IOException
+              */
+        Bind(
+            [in] ISocket* socket,
+            [in] IHttpParams* params);
+
+        IsOpen(
+            [out] Boolean* result);
+
+        GetLocalAddress(
+            [out] IInetAddress** result);
+
+        GetLocalPort(
+            [out] Int32* result);
+
+        GetRemoteAddress(
+            [out] IInetAddress** result);
+
+        GetRemotePort(
+            [out] Int32* result);
+
+        SetSocketTimeout(
+            [in] Int32 timeout);
+
+        GetSocketTimeout(
+            [out] Int32* result);
+
+        Shutdown();
+
+        Close();
+
+        /**
+         * Sends the request line and all headers over the connection.
+         * @param request the request whose headers to send.
+         * @throws HttpException
+         * @throws IOException
+         */
+        SendRequestHeader(
+            [in] IHttpRequest* request);
+
+        /**
+         * Sends the request entity over the connection.
+         * @param request the request whose entity to send.
+         * @throws HttpException
+         * @throws IOException
+         */
+        SendRequestEntity(
+            [in] IHttpEntityEnclosingRequest* request);
+
+        Flush();
+
+        /**
+         * Parses the response headers and adds them to the
+         * given {@code headers} object, and returns the response StatusLine
+         * @param headers store parsed header to headers.
+         * @throws IOException
+         * @return StatusLine
+         * @see HttpClientConnection#receiveResponseHeader()
+         */
+        ParseResponseHeader(
+            [in] IHeaders* headers,
+            [out] IStatusLine** result);
+
+        /**
+         * Return the next response entity.
+         * @param headers contains values for parsing entity
+         * @see HttpClientConnection#receiveResponseEntity(HttpResponse response)
+         */
+        ReceiveResponseEntity(
+            [in] IHeaders* headers,
+            [out] IHttpEntity** result);
+
+        /**
+         * Checks whether this connection has gone down.
+         * Network connections may get closed during some time of inactivity
+         * for several reasons. The next time a read is attempted on such a
+         * connection it will throw an IOException.
+         * This method tries to alleviate this inconvenience by trying to
+         * find out if a connection is still usable. Implementations may do
+         * that by attempting a read with a very small timeout. Thus this
+         * method may block for a small amount of time before returning a result.
+         * It is therefore an <i>expensive</i> operation.
+         *
+         * @return  <code>true</code> if attempts to use this connection are
+         *          likely to succeed, or <code>false</code> if they are likely
+         *          to fail and this connection should be closed
+         */
+        IsStale(
+            [out] Boolean* result);
+
+        /**
+         * Returns a collection of connection metrcis
+         * @return HttpConnectionMetrics
+         */
+        GetMetrics(
+            [out] IHttpConnectionMetrics** result);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

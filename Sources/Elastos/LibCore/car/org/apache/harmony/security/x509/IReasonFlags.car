@@ -1,0 +1,54 @@
+
+module
+{
+    using interface Elastos.Core.IStringBuilder;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1BitString;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the following part of X.509 CRL
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  ReasonFlags ::= BIT STRING {
+     *        unused                  (0),
+     *        keyCompromise           (1),
+     *        cACompromise            (2),
+     *        affiliationChanged      (3),
+     *        superseded              (4),
+     *        cessationOfOperation    (5),
+     *        certificateHold         (6),
+     *        privilegeWithdrawn      (7),
+     *        aACompromise            (8)
+     *  }
+     *  </pre>
+     */
+    interface IReasonFlags {
+        DumpValue(
+            [in] IStringBuilder* sb,
+            [in] String prefix);
+    }
+
+    interface IReasonFlagsHelper {
+        /**
+         * ASN.1 Encoder/Decoder.
+         */
+        GetASN1(
+            [out] IASN1BitString** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,77 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.IHardwareCamera;
+    interface Elastos.Droid.Hardware.Camera2.IICameraDeviceCallbacks;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    /*
+     * @ invoke
+     * interface IRunnable
+     * interface ICloseable
+     */
+    interface ICameraDeviceUserShimCameraLooper {
+        GetCamera(
+            [out] IHardwareCamera** camera);
+
+        /**
+         * Block until the camera opens; then return its initialization error code (if any).
+         *
+         * @param timeoutMs timeout in milliseconds
+         *
+         * @return int error code
+         *
+         * @throws CameraRuntimeException if the camera open times out with ({@code CAMERA_ERROR})
+         */
+        WaitForOpen(
+            [in] Int32 timeoutMs,
+            [out] Int32* result);
+    }
+
+    /*
+     * @ invoke
+     * interface IICameraDeviceCallbacks
+     */
+    interface ICameraDeviceUserShimCameraCallbackThread {
+        Close();
+    }
+
+    /**
+     * Compatibility implementation of the Camera2 API binder interface.
+     *
+     * <p>
+     * This is intended to be called from the same process as client
+     * {@link android.hardware.camera2.CameraDevice}, and wraps a
+     * {@link android.hardware.camera2.legacy.LegacyCameraDevice} that emulates Camera2 service using
+     * the Camera1 API.
+     * </p>
+     *
+     * <p>
+     * Keep up to date with ICameraDeviceUser.aidl.
+     * </p>
+     *
+     * @ invoke
+     * interface IICameraDeviceUser
+     */
+    //@SuppressWarnings("deprecation")
+    interface ICameraDeviceUserShim {
+    }
+
+    interface ICameraDeviceUserShimHelper {
+        ConnectBinderShim(
+            [in] IICameraDeviceCallbacks* _callbacks,
+            [in] Int32 cameraId,
+            [out] ICameraDeviceUserShim** shim);
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

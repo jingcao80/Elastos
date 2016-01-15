@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * This class provides an implementation of FilterOutputStream that
+     * compresses data using the DEFLATE algorithm. Basically it wraps the
+     * Deflater class and takes care of the buffering.
+     *
+     * @sa Deflater
+     *
+     * @implements Elastos.Utility.Zip.Elastos.IO.IFilterOutputStream
+     */
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IOutputStream;
+     * interface IFilterOutputStream;
+     */
+    interface IDeflaterOutputStream {
+        /**
+         * Writes any unwritten data to the underlying stream. Does not close the
+         * stream.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | If an error occurs.
+         */
+        Finish();
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

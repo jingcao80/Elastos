@@ -1,0 +1,14 @@
+
+module
+{
+    namespace Libcore {
+    namespace IO {
+
+    interface ILibcore {
+        GetOs(
+            [out] IOs** os);
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

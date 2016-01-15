@@ -1,0 +1,55 @@
+
+module
+{
+    interface Elastos.Utility.IArrayList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IRemoteDisplayStateRemoteDisplayInfo {
+        // Note: These constants are used by the remote display provider API.
+        // Do not change them!
+        const Int32 STATUS_NOT_AVAILABLE = 0;
+        const Int32 STATUS_IN_USE = 1;
+        const Int32 STATUS_AVAILABLE = 2;
+        const Int32 STATUS_CONNECTING = 3;
+        const Int32 STATUS_CONNECTED = 4;
+
+        const Int32 PLAYBACK_VOLUME_VARIABLE = 1; //MediaRouter.RouteInfo.PLAYBACK_VOLUME_VARIABLE;
+        const Int32 PLAYBACK_VOLUME_FIXED = 0; //MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED;
+
+        IsValid(
+            [out] Boolean * result);
+
+    }
+
+    /**
+     * Information available from IRemoteDisplayProvider about available remote displays.
+     *
+     * Clients must not modify the contents of this object.
+     * @hide
+     */
+    interface IRemoteDisplayState {
+        // Note: These constants are used by the remote display provider API.
+        // Do not change them!
+        const String SERVICE_INTERFACE =
+                "com.android.media.remotedisplay.RemoteDisplayProvider";
+        const Int32 DISCOVERY_MODE_NONE = 0;
+        const Int32 DISCOVERY_MODE_PASSIVE = 1;
+        const Int32 DISCOVERY_MODE_ACTIVE = 2;
+
+        IsValid(
+            [out] Boolean * result);
+
+        GetDisplays(
+            [out] IArrayList** displays);
+
+        SetDisplays(
+            [in] IArrayList* displays);
+
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

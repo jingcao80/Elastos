@@ -1,0 +1,31 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * This is the class for text whose content is immutable but to which
+     * markup objects can be attached and detached.
+     * For mutable text, see {@link SpannableStringBuilder}.
+     *
+     * @Involve
+     * interface ICharSequence
+     * interface IGetChars
+     * interface ISpannable
+     */
+    interface ISpannableString {
+    }
+
+    interface ISpannableStringHelper {
+        ValueOf(
+            [in] ICharSequence* source,
+            [out] ISpannableString** spanStr);
+    }
+
+    } // namespace Text
+    } // namespace Droid
+    } // namespace Elastos
+}

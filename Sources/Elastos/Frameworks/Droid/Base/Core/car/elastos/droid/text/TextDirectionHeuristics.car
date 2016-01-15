@@ -1,0 +1,44 @@
+
+module
+{
+    interface Elastos.Droid.Text.ITextDirectionHeuristic;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * Some objects that implement {@link TextDirectionHeuristic}. Use these with
+     * the {@link BidiFormatter#unicodeWrap unicodeWrap()} methods in {@link BidiFormatter}.
+     * Also notice that these direction heuristics correspond to the same types of constants
+     * provided in the {@link android.view.View} class for {@link android.view.View#setTextDirection
+     * setTextDirection()}, such as {@link android.view.View#TEXT_DIRECTION_RTL}.
+     * <p>To support versions lower than {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
+     * you can use the support library's {@link android.support.v4.text.TextDirectionHeuristicsCompat}
+     * class.
+     *
+     */
+    interface ITextDirectionHeuristics {
+        GetLTR(
+            [out] ITextDirectionHeuristic** tdh);
+
+        GetRTL(
+            [out] ITextDirectionHeuristic** tdh);
+
+        GetFIRSTSTRONG_LTR(
+            [out] ITextDirectionHeuristic** tdh);
+
+        GetFIRSTSTRONG_RTL(
+            [out] ITextDirectionHeuristic** tdh);
+
+        GetNYRTL_LTR(
+            [out] ITextDirectionHeuristic** tdh);
+
+        GetLOCALE(
+            [out] ITextDirectionHeuristic** tdh);
+    }
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,82 @@
+module
+{
+    using interface Elastos.Droid.View.Animation.IInterpolator;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    /**
+     * An ImageView which does not have overlapping renderings commands and therefore does not need a
+     * layer when alpha is changed.
+     */
+    [local]
+    interface IKeyguardAffordanceView {
+
+        SetPreviewView(
+            [in] IView* v);
+
+        FinishAnimation(
+            [in] Float velocity,
+            [in] IRunnable* mAnimationEndRunnable);
+
+        SetCircleRadius(
+            [in] Float circleRadius);
+
+        SetCircleRadius(
+            [in] Float circleRadius,
+            [in] Boolean slowAnimation);
+
+        SetCircleRadiusWithoutAnimation(
+            [in] Float circleRadius);
+
+        SetImageScale(
+            [in] Float imageScale,
+            [in] Boolean animate);
+
+        SetImageScale(
+            [in] Float imageScale,
+            [in] Boolean animate,
+            [in] Int64 duration,
+            [in] IInterpolator* interpolator);
+
+        SetImageAlpha(
+            [in] Float alpha,
+            [in] Boolean animate);
+
+        /**
+         * Sets the alpha of the containing image
+         *
+         * @param alpha The new alpha.
+         * @param animate Should an animation be performed
+         * @param duration If animate, whats the duration? When -1 we take the default duration
+         * @param interpolator If animate, whats the interpolator? When null we take the default
+         *                     interpolator.
+         */
+        SetImageAlpha(
+            [in] Float alpha,
+            [in] Boolean animate,
+            [in] Int64 duration,
+            [in] IInterpolator* interpolator,
+            [in] IRunnable* runnable);
+
+        GetCircleRadius(
+            [out] Float* result);
+
+        ShowArrow(
+            [in] Boolean show);
+
+        SetIsLeft(
+            [in] Boolean left);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

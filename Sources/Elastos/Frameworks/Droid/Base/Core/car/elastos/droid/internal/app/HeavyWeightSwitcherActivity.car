@@ -1,0 +1,55 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    /**
+     * This activity is displayed when the system attempts to start an Intent for
+     * which there is more than one matching activity, allowing the user to decide
+     * which to go to.  It is not normally used directly by application developers.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.View.IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IOnCreateContextMenuListener
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IOnWindowDismissedCallback
+     * interface IActivity
+     */
+    [local]
+    interface IHeavyWeightSwitcherActivity {
+
+        /** The PendingIntent of the new activity being launched. */
+        const String KEY_INTENT = "intent";
+
+        /** Set if the caller is requesting a result. */
+        const String KEY_HAS_RESULT = "has_result";
+
+        /** Package of current heavy-weight app. */
+        const String KEY_CUR_APP = "cur_app";
+
+        /** Task that current heavy-weight activity is running in. */
+        const String KEY_CUR_TASK = "cur_task";
+
+        /** Package of newly requested heavy-weight app. */
+        const String KEY_NEW_APP = "new_app";
+    }
+
+    }//namespace App
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

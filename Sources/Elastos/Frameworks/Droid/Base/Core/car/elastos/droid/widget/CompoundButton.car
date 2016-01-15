@@ -1,0 +1,145 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    enum Elastos.Droid.Graphics.PorterDuffMode;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface ICompoundButton;
+
+    /**
+     * Interface definition for a callback to be invoked when the checked state
+     * of a compound button changed.
+     */
+    interface ICompoundButtonOnCheckedChangeListener {
+        /**
+         * Called when the checked state of a compound button has changed.
+         *
+         * @param buttonView The compound button view whose state has changed.
+         * @param isChecked  The new checked state of buttonView.
+         */
+        OnCheckedChanged(
+            [in] ICompoundButton* buttonView,
+            [in] Boolean isChecked);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface ICompoundButtonSavedState {
+
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IButton
+     * extends Elastos.Droid.Widget.ITextView
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.ICheckable
+     */
+
+    interface ICompoundButton {
+        /**
+         * Register a callback to be invoked when the checked state of this button
+         * changes.
+         *
+         * @param listener the callback to call on checked state change
+         */
+        SetOnCheckedChangeListener(
+            [in] ICompoundButtonOnCheckedChangeListener* listener);
+
+        /**
+         * Register a callback to be invoked when the checked state of this button
+         * changes. This callback is used for internal purpose only.
+         *
+         * @param listener the callback to call on checked state change
+         * @hide
+         */
+        SetOnCheckedChangeWidgetListener(
+            [in] ICompoundButtonOnCheckedChangeListener* listener);
+
+        /**
+         * Set the button graphic to a given Drawable, identified by its resource
+         * id.
+         *
+         * @param resid the resource id of the drawable to use as the button
+         *        graphic
+         */
+        SetButtonDrawable(
+            [in] Int32 resid);
+
+        /**
+         * Set the button graphic to a given Drawable
+         *
+         * @param d The Drawable to use as the button graphic
+         */
+        SetButtonDrawable(
+            [in] IDrawable* d);
+
+        /**
+         * Applies a tint to the button drawable. Does not modify the current tint
+         * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+         * <p>
+         * Subsequent calls to {@link #setButtonDrawable(Drawable)} will
+         * automatically mutate the drawable and apply the specified tint and tint
+         * mode using
+         * {@link Drawable#setTintList(ColorStateList)}.
+         *
+         * @param tint the tint to apply, may be {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#CompoundButton_buttonTint
+         * @see #setButtonTintList(ColorStateList)
+         * @see Drawable#setTintList(ColorStateList)
+         */
+        SetButtonTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * @return the tint applied to the button drawable
+         * @attr ref android.R.styleable#CompoundButton_buttonTint
+         * @see #setButtonTintList(ColorStateList)
+         * @Nullable
+         */
+        GetButtonTintList(
+            [out] IColorStateList** tint);
+
+        /**
+         * Specifies the blending mode used to apply the tint specified by
+         * {@link #setButtonTintList(ColorStateList)}} to the button drawable. The
+         * default mode is {@link PorterDuff.Mode#SRC_IN}.
+         *
+         * @param tintMode the blending mode used to apply the tint, may be
+         *                 {@code null} to clear tint
+         * @attr ref android.R.styleable#CompoundButton_buttonTintMode
+         * @see #getButtonTintMode()
+         * @see Drawable#setTintMode(PorterDuff.Mode)
+         */
+        SetButtonTintMode(
+            [in] PorterDuffMode tintMode);
+
+        /**
+         * @return the blending mode used to apply the tint to the button drawable
+         * @attr ref android.R.styleable#CompoundButton_buttonTintMode
+         * @see #setButtonTintMode(PorterDuff.Mode)
+         * @Nullable
+         */
+        GetButtonTintMode(
+            [out] PorterDuffMode* tintMode);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

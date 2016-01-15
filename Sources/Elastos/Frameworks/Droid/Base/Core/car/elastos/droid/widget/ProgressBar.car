@@ -1,0 +1,499 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.Animation.IInterpolator;
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    enum Elastos.Droid.Graphics.PorterDuffMode;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     */
+    interface IProgressBarSavedState {
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+
+     */
+    [local]
+    interface IProgressBar {
+        /**
+         * <p>Indicate whether this progress bar is in indeterminate mode.</p>
+         *
+         * @return true if the progress bar is in indeterminate mode
+         */
+        IsIndeterminate(
+            [out] Boolean* indeterminate);
+
+        /**
+         * <p>Change the indeterminate mode for this progress bar. In indeterminate
+         * mode, the progress is ignored and the progress bar shows an infinite
+         * animation instead.</p>
+         *
+         * If this progress bar's style only supports indeterminate mode (such as the circular
+         * progress bars), then this will be ignored.
+         *
+         * @param indeterminate true to enable the indeterminate mode
+         */
+        SetIndeterminate(
+            [in] Boolean indeterminate);
+
+        /**
+         * <p>Get the drawable used to draw the progress bar in
+         * indeterminate mode.</p>
+         *
+         * @return a {@link android.graphics.drawable.Drawable} instance
+         *
+         * @see #setIndeterminateDrawable(android.graphics.drawable.Drawable)
+         * @see #setIndeterminate(boolean)
+         */
+        GetIndeterminateDrawable(
+            [out] IDrawable** d);
+
+        /**
+         * <p>Define the drawable used to draw the progress bar in
+         * indeterminate mode.</p>
+         *
+         * @param d the new drawable
+         *
+         * @see #getIndeterminateDrawable()
+         * @see #setIndeterminate(boolean)
+         */
+        SetIndeterminateDrawable(
+            [in] IDrawable* d);
+
+        /**
+         * Applies a tint to the indeterminate drawable. Does not modify the
+         * current tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+         * <p>
+         * Subsequent calls to {@link #setIndeterminateDrawable(Drawable)} will
+         * automatically mutate the drawable and apply the specified tint and
+         * tint mode using
+         * {@link Drawable#setTintList(ColorStateList)}.
+         *
+         * @param tint the tint to apply, may be {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#ProgressBar_indeterminateTint
+         * @see #getIndeterminateTintList()
+         * @see Drawable#setTintList(ColorStateList)
+         */
+        SetIndeterminateTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * @return the tint applied to the indeterminate drawable
+         * @attr ref android.R.styleable#ProgressBar_indeterminateTint
+         * @see #setIndeterminateTintList(ColorStateList)
+         * @Nullable
+         */
+        GetIndeterminateTintList(
+            [out] IColorStateList** tint);
+
+        /**
+         * Specifies the blending mode used to apply the tint specified by
+         * {@link #setIndeterminateTintList(ColorStateList)} to the indeterminate
+         * drawable. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+         *
+         * @param tintMode the blending mode used to apply the tint, may be
+         *                 {@code null} to clear tint
+         * @attr ref android.R.styleable#ProgressBar_indeterminateTintMode
+         * @see #setIndeterminateTintList(ColorStateList)
+         * @see Drawable#setTintMode(PorterDuff.Mode)
+         */
+        SetIndeterminateTintMode(
+            [in] PorterDuffMode tintMode);
+       /**
+         * Returns the blending mode used to apply the tint to the indeterminate
+         * drawable, if specified.
+         *
+         * @return the blending mode used to apply the tint to the indeterminate
+         *         drawable
+         * @attr ref android.R.styleable#ProgressBar_indeterminateTintMode
+         * @see #setIndeterminateTintMode(PorterDuff.Mode)
+         * @Nullable
+         */
+        GetIndeterminateTintMode(
+            [out] PorterDuffMode* tintMode);
+
+        /**
+         * Define the tileable drawable used to draw the progress bar in
+         * indeterminate mode.
+         * <p>
+         * If the drawable is a BitmapDrawable or contains BitmapDrawables, a
+         * tiled copy will be generated for display as a progress bar.
+         *
+         * @param d the new drawable
+         * @see #getIndeterminateDrawable()
+         * @see #setIndeterminate(boolean)
+         */
+        SetIndeterminateDrawableTiled(
+            [in] IDrawable* d);
+
+        /**
+         * Applies a tint to the progress indicator, if one exists, or to the
+         * entire progress drawable otherwise. Does not modify the current tint
+         * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+         * <p>
+         * The progress indicator should be specified as a layer with
+         * id {@link android.R.id#progress} in a {@link LayerDrawable}
+         * used as the progress drawable.
+         * <p>
+         * Subsequent calls to {@link #setProgressDrawable(Drawable)} will
+         * automatically mutate the drawable and apply the specified tint and
+         * tint mode using
+         * {@link Drawable#setTintList(ColorStateList)}.
+         *
+         * @param tint the tint to apply, may be {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#ProgressBar_progressTint
+         * @see #getProgressTintList()
+         * @see Drawable#setTintList(ColorStateList)
+         */
+        SetProgressTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * Returns the tint applied to the progress drawable, if specified.
+         *
+         * @return the tint applied to the progress drawable
+         * @attr ref android.R.styleable#ProgressBar_progressTint
+         * @see #setProgressTintList(ColorStateList)
+         * @Nullable
+         */
+        GetProgressTintList(
+            [out] IColorStateList** tint);
+
+        /**
+         * Returns the blending mode used to apply the tint to the progress
+         * drawable, if specified.
+         *
+         * @return the blending mode used to apply the tint to the progress
+         *         drawable
+         * @attr ref android.R.styleable#ProgressBar_progressTintMode
+         * @see #setProgressTintMode(PorterDuff.Mode)
+         * @Nullable
+         */
+        GetProgressTintMode(
+            [out] PorterDuffMode* tintMode);
+
+        /**
+         * Applies a tint to the progress background, if one exists. Does not
+         * modify the current tint mode, which is
+         * {@link PorterDuff.Mode#SRC_ATOP} by default.
+         * <p>
+         * The progress background must be specified as a layer with
+         * id {@link android.R.id#background} in a {@link LayerDrawable}
+         * used as the progress drawable.
+         * <p>
+         * Subsequent calls to {@link #setProgressDrawable(Drawable)} where the
+         * drawable contains a progress background will automatically mutate the
+         * drawable and apply the specified tint and tint mode using
+         * {@link Drawable#setTintList(ColorStateList)}.
+         *
+         * @param tint the tint to apply, may be {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#ProgressBar_progressBackgroundTint
+         * @see #getProgressBackgroundTintList()
+         * @see Drawable#setTintList(ColorStateList)
+         */
+        SetProgressBackgroundTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * Returns the tint applied to the progress background, if specified.
+         *
+         * @return the tint applied to the progress background
+         * @attr ref android.R.styleable#ProgressBar_progressBackgroundTint
+         * @see #setProgressBackgroundTintList(ColorStateList)
+         * @Nullable
+         */
+        GetProgressBackgroundTintList(
+            [out] IColorStateList** tint);
+
+        /**
+         * Specifies the blending mode used to apply the tint specified by
+         * {@link #setProgressBackgroundTintList(ColorStateList)}} to the progress
+         * background. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+         *
+         * @param tintMode the blending mode used to apply the tint, may be
+         *                 {@code null} to clear tint
+         * @attr ref android.R.styleable#ProgressBar_progressBackgroundTintMode
+         * @see #setProgressBackgroundTintList(ColorStateList)
+         * @see Drawable#setTintMode(PorterDuff.Mode)
+         */
+        SetProgressBackgroundTintMode(
+            [in] PorterDuffMode tintMode);
+
+        /**
+         * @return the blending mode used to apply the tint to the progress
+         *         background
+         * @attr ref android.R.styleable#ProgressBar_progressBackgroundTintMode
+         * @see #setProgressBackgroundTintMode(PorterDuff.Mode)
+         * @Nullable
+         */
+        GetProgressBackgroundTintMode(
+            [out] PorterDuffMode* tintMode);
+
+        /**
+         * Applies a tint to the secondary progress indicator, if one exists.
+         * Does not modify the current tint mode, which is
+         * {@link PorterDuff.Mode#SRC_ATOP} by default.
+         * <p>
+         * The secondary progress indicator must be specified as a layer with
+         * id {@link android.R.id#secondaryProgress} in a {@link LayerDrawable}
+         * used as the progress drawable.
+         * <p>
+         * Subsequent calls to {@link #setProgressDrawable(Drawable)} where the
+         * drawable contains a secondary progress indicator will automatically
+         * mutate the drawable and apply the specified tint and tint mode using
+         * {@link Drawable#setTintList(ColorStateList)}.
+         *
+         * @param tint the tint to apply, may be {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#ProgressBar_secondaryProgressTint
+         * @see #getSecondaryProgressTintList()
+         * @see Drawable#setTintList(ColorStateList)
+         */
+        SetSecondaryProgressTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * Returns the tint applied to the secondary progress drawable, if
+         * specified.
+         *
+         * @return the tint applied to the secondary progress drawable
+         * @attr ref android.R.styleable#ProgressBar_secondaryProgressTint
+         * @see #setSecondaryProgressTintList(ColorStateList)
+         * @Nullable
+         */
+        GetSecondaryProgressTintList(
+            [out] IColorStateList** tint);
+
+        /**
+         * Specifies the blending mode used to apply the tint specified by
+         * {@link #setSecondaryProgressTintList(ColorStateList)}} to the secondary
+         * progress indicator. The default mode is
+         * {@link PorterDuff.Mode#SRC_ATOP}.
+         *
+         * @param tintMode the blending mode used to apply the tint, may be
+         *                 {@code null} to clear tint
+         * @attr ref android.R.styleable#ProgressBar_secondaryProgressTintMode
+         * @see #setSecondaryProgressTintList(ColorStateList)
+         * @see Drawable#setTintMode(PorterDuff.Mode)
+         */
+        SetSecondaryProgressTintMode(
+            [in] PorterDuffMode tintMode);
+
+        /**
+         * Returns the blending mode used to apply the tint to the secondary
+         * progress drawable, if specified.
+         *
+         * @return the blending mode used to apply the tint to the secondary
+         *         progress drawable
+         * @attr ref android.R.styleable#ProgressBar_secondaryProgressTintMode
+         * @see #setSecondaryProgressTintMode(PorterDuff.Mode)
+         * @Nullable
+         */
+        GetSecondaryProgressTintMode(
+            [out] PorterDuffMode* tintMode);
+
+        /**
+         * Define the tileable drawable used to draw the progress bar in
+         * progress mode.
+         * <p>
+         * If the drawable is a BitmapDrawable or contains BitmapDrawables, a
+         * tiled copy will be generated for display as a progress bar.
+         *
+         * @param d the new drawable
+         * @see #getProgressDrawable()
+         * @see #setIndeterminate(boolean)
+         */
+        SetProgressDrawableTiled(
+            [in] IDrawable* d);
+
+        /**
+         * Specifies the blending mode used to apply the tint specified by
+         * {@link #setProgressTintList(ColorStateList)}} to the progress
+         * indicator. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+         *
+         * @param tintMode the blending mode used to apply the tint, may be
+         *                 {@code null} to clear tint
+         * @attr ref android.R.styleable#ProgressBar_progressTintMode
+         * @see #getProgressTintMode()
+         * @see Drawable#setTintMode(PorterDuff.Mode)
+         */
+        SetProgressTintMode(
+            [in] PorterDuffMode tintMode);
+
+        /**
+         * <p>Get the drawable used to draw the progress bar in
+         * progress mode.</p>
+         *
+         * @return a {@link android.graphics.drawable.Drawable} instance
+         *
+         * @see #setProgressDrawable(android.graphics.drawable.Drawable)
+         * @see #setIndeterminate(boolean)
+         */
+        GetProgressDrawable(
+            [out] IDrawable** d);
+
+        /**
+         * <p>Define the drawable used to draw the progress bar in
+         * progress mode.</p>
+         *
+         * @param d the new drawable
+         *
+         * @see #getProgressDrawable()
+         * @see #setIndeterminate(boolean)
+         */
+        SetProgressDrawable(
+            [in] IDrawable* d);
+
+        /**
+         * <p>Set the current progress to the specified value. Does not do anything
+         * if the progress bar is in indeterminate mode.</p>
+         *
+         * @param progress the new progress, between 0 and {@link #getMax()}
+         *
+         * @see #setIndeterminate(boolean)
+         * @see #isIndeterminate()
+         * @see #getProgress()
+         * @see #incrementProgressBy(int)
+         */
+        SetProgress(
+            [in] Int32 progress);
+
+        /**
+         * <p>
+         * Set the current secondary progress to the specified value. Does not do
+         * anything if the progress bar is in indeterminate mode.
+         * </p>
+         *
+         * @param secondaryProgress the new secondary progress, between 0 and {@link #getMax()}
+         * @see #setIndeterminate(boolean)
+         * @see #isIndeterminate()
+         * @see #getSecondaryProgress()
+         * @see #incrementSecondaryProgressBy(int)
+         */
+        SetSecondaryProgress(
+            [in] Int32 secondaryProgress);
+
+        /**
+         * <p>Get the progress bar's current level of progress. Return 0 when the
+         * progress bar is in indeterminate mode.</p>
+         *
+         * @return the current progress, between 0 and {@link #getMax()}
+         *
+         * @see #setIndeterminate(boolean)
+         * @see #isIndeterminate()
+         * @see #setProgress(int)
+         * @see #setMax(int)
+         * @see #getMax()
+         */
+        GetProgress(
+            [out] Int32* progress);
+
+        /**
+         * <p>Get the progress bar's current level of secondary progress. Return 0 when the
+         * progress bar is in indeterminate mode.</p>
+         *
+         * @return the current secondary progress, between 0 and {@link #getMax()}
+         *
+         * @see #setIndeterminate(boolean)
+         * @see #isIndeterminate()
+         * @see #setSecondaryProgress(int)
+         * @see #setMax(int)
+         * @see #getMax()
+         */
+        GetSecondaryProgress(
+            [out] Int32* secondaryProgress);
+
+        /**
+         * <p>Return the upper limit of this progress bar's range.</p>
+         *
+         * @return a positive integer
+         *
+         * @see #setMax(int)
+         * @see #getProgress()
+         * @see #getSecondaryProgress()
+         */
+        GetMax(
+            [out] Int32* max);
+
+        /**
+         * <p>Set the range of the progress bar to 0...<tt>max</tt>.</p>
+         *
+         * @param max the upper range of this progress bar
+         *
+         * @see #getMax()
+         * @see #setProgress(int)
+         * @see #setSecondaryProgress(int)
+         */
+        SetMax(
+            [in] Int32 max);
+
+        /**
+         * <p>Increase the progress bar's progress by the specified amount.</p>
+         *
+         * @param diff the amount by which the progress must be increased
+         *
+         * @see #setProgress(int)
+         */
+        IncrementProgressBy(
+            [in] Int32 diff);
+
+        /**
+         * <p>Increase the progress bar's secondary progress by the specified amount.</p>
+         *
+         * @param diff the amount by which the secondary progress must be increased
+         *
+         * @see #setSecondaryProgress(int)
+         */
+        IncrementSecondaryProgressBy(
+            [in] Int32 diff);
+
+        /**
+         * Sets the acceleration curve for the indeterminate animation.
+         * The interpolator is loaded as a resource from the specified context.
+         *
+         * @param context The application environment
+         * @param resID The resource identifier of the interpolator to load
+         */
+        SetInterpolator(
+            [in] IContext* ctx,
+            [in] Int32 resID);
+
+        /**
+         * Sets the acceleration curve for the indeterminate animation.
+         * Defaults to a linear interpolation.
+         *
+         * @param interpolator The interpolator which defines the acceleration curve
+         */
+        SetInterpolator(
+            [in] IInterpolator* interpolator);
+
+        /**
+         * Gets the acceleration curve type for the indeterminate animation.
+         *
+         * @return the {@link Interpolator} associated to this animation
+         */
+        GetInterpolator(
+            [out] IInterpolator** interpolator);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

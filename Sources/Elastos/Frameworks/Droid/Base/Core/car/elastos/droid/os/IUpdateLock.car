@@ -1,0 +1,83 @@
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * Direct interface to the UpdateLockService's functionality
+     *
+     * {@hide}
+     */
+    interface IIUpdateLock {
+        AcquireUpdateLock(
+            [in] IBinder* token,
+            [in] String tag);
+
+        ReleaseUpdateLock(
+            [in] IBinder* token);
+    }
+
+    /**
+     * Advisory wakelock-like mechanism by which processes that should not be interrupted for
+     * OTA/update purposes can so advise the OS.  This is particularly relevant for headless
+     * or kiosk-like operation.
+     *
+     * @hide
+     */
+    interface IUpdateLock {
+        /**
+         * Broadcast Intent action sent when the global update lock state changes,
+         * i.e. when the first locker acquires an update lock, or when the last
+         * locker releases theirs.  The broadcast is sticky but is sent only to
+         * registered receivers.
+         */
+        const String UPDATE_LOCK_CHANGED = "android.os.UpdateLock.UPDATE_LOCK_CHANGED";
+
+        /**
+         * Boolean Intent extra on the UPDATE_LOCK_CHANGED sticky broadcast, indicating
+         * whether now is an appropriate time to interrupt device activity with an
+         * update operation.  True means that updates are okay right now; false indicates
+         * that perhaps later would be a better time.
+         */
+        const String NOW_IS_CONVENIENT = "nowisconvenient";
+
+        /**
+         * Long Intent extra on the UPDATE_LOCK_CHANGED sticky broadcast, marking the
+         * wall-clock time [in UTC] at which the broadcast was sent.  Note that this is
+         * in the System.currentTimeMillis() time base, which may be non-monotonic especially
+         * around reboots.
+         */
+        const String TIMESTAMP = "timestamp";
+
+        /**
+         * Change the refcount behavior of this update lock.
+         */
+        SetReferenceCounted(
+            [in] Boolean isRefCounted);
+
+        /**
+         * Is this lock currently held?
+         */
+        IsHeld(
+            [out] Boolean* result);
+
+        /**
+         * Acquire an update lock.
+         */
+        AcquireLock();
+
+        /**
+         * Release this update lock.
+         */
+        ReleaseLock();
+
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+}

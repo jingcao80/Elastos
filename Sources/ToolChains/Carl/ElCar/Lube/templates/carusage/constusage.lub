@@ -1,0 +1,12 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}_const.txt"
+$
+$WITH all consts DO
+const ${name} = ${value};
+$END DO ;; all consts
+
+$END OUTPUT

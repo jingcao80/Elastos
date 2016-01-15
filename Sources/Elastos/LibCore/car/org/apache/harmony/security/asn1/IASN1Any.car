@@ -1,0 +1,22 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    interface IASN1Any extends IASN1Type {}
+
+    interface IASN1AnyHelper {
+        GetInstance(
+            [out] IASN1Any** instance);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

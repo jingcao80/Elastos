@@ -1,0 +1,50 @@
+
+module
+{
+    interface Elastos.Droid.Location.ILocation;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * A class that represents an event for each change in the state of a monitoring system.
+     *
+     * @hide
+     *
+     * @Involve
+     * interface IIActivityRecognitionHardware;
+     */
+    //@SystemApi
+    interface IGeofenceHardwareMonitorEvent {
+        /**
+         * Returns the type of the monitoring system that has a change on its state.
+         */
+        GetMonitoringType(
+            [out] Int32* type);
+
+        /**
+         * Returns the new status associated with the monitoring system.
+         */
+        GetMonitoringStatus(
+            [out] Int32* status);
+
+        /**
+         * Returns the source technologies that the status is associated to.
+         */
+        GetSourceTechnologies(
+            [out] Int32* technologies);
+
+        /**
+         * Returns the last known location according to the monitoring system.
+         */
+        GetLocation(
+            [out] ILocation** location);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

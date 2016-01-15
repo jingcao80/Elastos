@@ -1,0 +1,62 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+
+    /**
+     * Interface for releasing a connection.
+     * This can be implemented by various "trigger" objects which are
+     * associated with a connection, for example
+     * a {@link EofSensorInputStream stream}
+     * or an {@link BasicManagedEntity entity}
+     * or the {@link ManagedClientConnection connection} itself.
+     * <br/>
+     * The methods in this interface can safely be called multiple times.
+     * The first invocation releases the connection, subsequent calls
+     * are ignored.
+     *
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version $Revision: 672367 $
+     *
+     * @since 4.0
+     */
+    interface IConnectionReleaseTrigger {
+
+        /**
+         * Releases the connection with the option of keep-alive. This is a
+         * "graceful" release and may cause IO operations for consuming the
+         * remainder of a response entity. Use
+         * {@link #abortConnection abortConnection} for a hard release. The
+         * connection may be reused as specified by the duration.
+         *
+         * @throws IOException
+         *             in case of an IO problem. The connection will be released
+         *             anyway.
+         */
+        ReleaseConnection();
+
+        /**
+         * Releases the connection without the option of keep-alive.
+         * This is a "hard" release that implies a shutdown of the connection.
+         * Use {@link #releaseConnection releaseConnection} for a graceful release.
+         *
+         * @throws IOException      in case of an IO problem.
+         *         The connection will be released anyway.
+         */
+        AbortConnection();
+
+    }
+
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

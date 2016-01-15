@@ -1,0 +1,92 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Graphics.IRegion;
+    interface Elastos.Droid.View.IMagnificationSpec;
+    interface Elastos.Droid.View.Accessibility.IIAccessibilityInteractionConnectionCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    interface IAccessibilityInteractionController {
+
+        FindAccessibilityNodeInfoByAccessibilityIdClientThread(
+            [in] Int64 accessibilityNodeId,
+            [in] IRegion* interactiveRegion,
+            [in] Int32 interactionId,
+            [in] IIAccessibilityInteractionConnectionCallback* cb,
+            [in] Int32 flags,
+            [in] Int32 interrogatingPid,
+            [in] Int64 interrogatingTid,
+            [in] IMagnificationSpec* spec);
+
+        FindAccessibilityNodeInfosByViewIdClientThread(
+            [in] Int64 accessibilityNodeId,
+            [in] String viewId,
+            [in] IRegion* interactiveRegion,
+            [in] Int32 interactionId,
+            [in] IIAccessibilityInteractionConnectionCallback* cb,
+            [in] Int32 flags,
+            [in] Int32 interrogatingPid,
+            [in] Int64 interrogatingTid,
+            [in] IMagnificationSpec* spec);
+
+        FindAccessibilityNodeInfosByTextClientThread(
+            [in] Int64 accessibilityNodeId,
+            [in] String text,
+            [in] IRegion* interactiveRegion,
+            [in] Int32 interactionId,
+            [in] IIAccessibilityInteractionConnectionCallback* cb,
+            [in] Int32 flags,
+            [in] Int32 interrogatingPid,
+            [in] Int64 interrogatingTid,
+            [in] IMagnificationSpec* spec);
+
+        FindFocusClientThread(
+            [in] Int64 accessibilityNodeId,
+            [in] Int32 focusType,
+            [in] IRegion* interactiveRegion,
+            [in] Int32 interactionId,
+            [in] IIAccessibilityInteractionConnectionCallback* cb,
+            [in] Int32 flags,
+            [in] Int32 interogatingPid,
+            [in] Int64 interrogatingTid,
+            [in] IMagnificationSpec* spec);
+
+        FocusSearchClientThread(
+            [in] Int64 accessibilityNodeId,
+            [in] Int32 direction,
+            [in] IRegion* interactiveRegion,
+            [in] Int32 interactionId,
+            [in] IIAccessibilityInteractionConnectionCallback* cb,
+            [in] Int32 flags,
+            [in] Int32 interogatingPid,
+            [in] Int64 interrogatingTid,
+            [in] IMagnificationSpec* spec);
+
+        PerformAccessibilityActionClientThread(
+            [in] Int64 accessibilityNodeId,
+            [in] Int32 action,
+            [in] IBundle* arguments,
+            [in] Int32 interactionId,
+            [in] IIAccessibilityInteractionConnectionCallback* cb,
+            [in] Int32 flags,
+            [in] Int32 interogatingPid,
+            [in] Int64 interrogatingTid);
+
+        ComputeClickPointInScreenClientThread(
+            [in] Int64 accessibilityNodeId,
+            [in] IRegion* interactiveRegion,
+            [in] Int32 interactionId,
+            [in] IIAccessibilityInteractionConnectionCallback* cb,
+            [in] Int32 interrogatingPid,
+            [in] Int64 interrogatingTid,
+            [in] IMagnificationSpec* spec);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,94 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IPath;
+    interface Elastos.Droid.Graphics.IMatrix;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    [deprecated]
+    interface IPathMeasure {
+        const Int32 POSITION_MATRIX_FLAG = 0x01;    // must match flags in SkPathMeasure.h
+        const Int32 TANGENT_MATRIX_FLAG  = 0x02;    // must match flags in SkPathMeasure.h
+
+        /**
+         * Return the total length of the current contour, or 0 if no path is
+         * associated with this measure object.
+         */
+        GetLength(
+            [out] Float* length);
+
+        /**
+         * Pins distance to 0 <= distance <= getLength(), and then computes the
+         * corresponding matrix. Returns false if there is no path, or a zero-length
+         * path was specified, in which case matrix is unchanged.
+         *
+         * @param distance The distance along the associated path
+         * @param matrix Allocated by the caller, this is set to the transformation
+         *        associated with the position and tangent at the specified distance
+         * @param flags Specified what aspects should be returned in the matrix.
+         */
+        GetMatrix(
+            [in] Float distance,
+            [in] IMatrix* matrix,
+            [in] Int32 flags,
+            [out] Boolean* result);
+
+        /**
+         * Pins distance to 0 <= distance <= getLength(), and then computes the
+         * corresponding position and tangent. Returns false if there is no path,
+         * or a zero-length path was specified, in which case position and tangent
+         * are unchanged.
+         *
+         * @param distance The distance along the current contour to sample
+         * @param pos If not null, eturns the sampled position (x==[0], y==[1])
+         * @param tan If not null, returns the sampled tangent (x==[0], y==[1])
+         * @return false if there was no path associated with this measure object
+         */
+        GetPosTan(
+            [in] Float distance,
+            [in /* out*/] ArrayOf<Float>* pos,
+            [in /* out*/] ArrayOf<Float>* tan,
+            [out] Boolean* result);
+
+        /**
+         * Given a start and stop distance, return in dst the intervening
+         * segment(s). If the segment is zero-length, return false, else return
+         * true. startD and stopD are pinned to legal values (0..getLength()).
+         * If startD <= stopD then return false (and leave dst untouched).
+         * Begin the segment with a moveTo if startWithMoveTo is true
+         */
+        GetSegment(
+            [in] Float startD,
+            [in] Float stopD,
+            [in] IPath* dst,
+            [in] Boolean startWithMoveTo,
+            [out] Boolean* result);
+
+        /**
+         * Return true if the current contour is closed()
+         */
+        IsClosed(
+            [out] Boolean* result);
+
+        /**
+         * Move to the next contour in the path. Return true if one exists, or
+         * false if we're done with the path.
+         */
+        NextContour(
+            [out] Boolean* result);
+
+        /**
+         * Assign a new path, or null to have none.
+         */
+        SetPath(
+            [in] IPath* path,
+            [in] Boolean forceClosed);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

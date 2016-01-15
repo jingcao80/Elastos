@@ -1,0 +1,157 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace JSTestObject {
+
+    enum TestObjectState {
+        TestObjectState_State1,
+        TestObjectState_State2,
+    }
+
+    interface ITestCarDataType {
+        Test_NULL();
+
+        Test_Int16(
+            [in] Int16 inValue,
+            [out] Int16* outValue);
+
+        Test_Int32(
+            [in] Int32 inValue,
+            [out] Int32* outValue);
+
+        Test_Int64(
+            [in] Int64 inValue,
+            [out] Int64* outValue);
+
+        Test_Byte(
+            [in] Byte inValue,
+            [out] Byte* outValue);
+
+        Test_Float(
+            [in] Float inValue,
+            [out] Float* outValue);
+
+        Test_Double(
+            [in] Double inValue,
+            [out] Double* outValue);
+
+        Test_Char(
+            [in] Char32 inValue,
+            [out] Char32* outValue);
+
+        Test_String(
+            [in] String inStr,
+            [out] String* outStr);
+
+        Test_Boolean(
+            [in] Boolean inValue,
+            [out] Boolean* outValue);
+
+        Test_EMuid(
+            [in] EMuid inId,
+            [out] EMuid* outId);
+
+        Test_EGuid(
+            [in] EGuid inId,
+            [out] EGuid* outId);
+
+        Test_ECode(
+            [in] ECode inValue,
+            [out] ECode* outValue);
+
+        Test_Enum(
+            [in] TestObjectState inValue,
+            [out] TestObjectState* outValue);
+
+        Test_ArrayOf_Int16(
+            [in] ArrayOf<Int16> inValue,
+            [out, callee] ArrayOf<Int16>* outValue);
+
+        Test_ArrayOf_Int32(
+            [in] ArrayOf<Int32> inValue,
+            [out, callee] ArrayOf<Int32>* outValue);
+
+        Test_ArrayOf_Int64(
+            [in] ArrayOf<Int64> inValue,
+            [out, callee] ArrayOf<Int64>* outValue);
+
+        Test_ArrayOf_Byte(
+            [in] ArrayOf<Byte> inValue,
+            [out, callee] ArrayOf<Byte>* outValue);
+
+        Test_ArrayOf_Float(
+            [in] ArrayOf<Float> inValue,
+            [out, callee] ArrayOf<Float>* outValue);
+
+        Test_ArrayOf_Double(
+            [in] ArrayOf<Double> inValue,
+            [out, callee] ArrayOf<Double>* outValue);
+
+        Test_ArrayOf_Char(
+            [in] ArrayOf<Char32> inValue,
+            [out, callee] ArrayOf<Char32>* outValue);
+
+        Test_ArrayOf_String(
+            [in] ArrayOf<String> inValue,
+            [out, callee] ArrayOf<String>* outValue);
+
+        Test_ArrayOf_Boolean(
+            [in] ArrayOf<Boolean> inValue,
+            [out, callee] ArrayOf<Boolean>* outValue);
+
+        Test_ArrayOf_EMuid(
+            [in] ArrayOf<EMuid> inValue,
+            [out, callee] ArrayOf<EMuid>* outValue);
+
+        Test_ArrayOf_EGuid(
+            [in] ArrayOf<EGuid> inValue,
+            [out, callee] ArrayOf<EGuid>* outValue);
+
+        Test_ArrayOf_ECode(
+            [in] ArrayOf<ECode> inValue,
+            [out, callee] ArrayOf<ECode>* outValue);
+
+        Test_ArrayOf_Enum(
+            [in] ArrayOf<TestObjectState> inValue,
+            [out, callee] ArrayOf<TestObjectState>* outValue);
+
+        Test_ArrayOf_IInterface(
+            [in] ArrayOf<IInterface*> inValue,
+            [out, callee] ArrayOf<IInterface*>* outValue);
+
+        Test_Interface(
+            [in] IInterface* inObject,
+            [out] IInterface** outObject);
+    }
+
+    interface ITestEventListener {
+        OnEvent1(
+            [in] Int32 eventId);
+
+        OnEvent2(
+            [in] String eventStr);
+    }
+
+    interface ITestCarRuntime {
+        Test_CreateInstance(
+            [in] String moduleName,
+            [in] String className,
+            [out] IInterface** object);
+
+        Test_AddEventListener(
+            [in] ITestEventListener* listener);
+    }
+
+    class CTestObject {
+        interface ITestCarDataType;
+        interface ITestCarRuntime;
+    }
+
+    } // namespace JSTestObject
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}
+

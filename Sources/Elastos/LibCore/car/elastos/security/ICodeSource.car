@@ -1,0 +1,28 @@
+
+module
+{
+    interface Elastos.Net.IURL;
+    interface Elastos.Security.ICertificate;
+    interface Elastos.Security.ICodeSigner;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface ICodeSource {
+        GetCertificates(
+            [out, callee] ArrayOf<ICertificate*>* certs);
+
+        GetCodeSigners(
+            [out, callee] ArrayOf<ICodeSigner*>* codeSigners);
+
+        GetLocation(
+            [out] IURL** location);
+
+        Implies(
+            [in] ICodeSource* cs,
+            [out] Boolean* result);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

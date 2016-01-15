@@ -1,0 +1,142 @@
+
+
+module
+{
+    using interface Elastos.Core.IComparator;
+    using interface Elastos.Utility.ICollection;
+
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Common base class of common implementation for an {@link Adapter} that can be
+     * used in both {@link ListView} (by implementing the specialized
+     * {@link ListAdapter} interface} and {@link Spinner} (by implementing the
+     * specialized {@link SpinnerAdapter} interface.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IListAdapter
+     * extends Elastos.Droid.Widget.ISpinnerAdapter
+     * extends Elastos.Droid.Widget.IBaseAdapter
+     *
+     * interface Elastos.Droid.Widget.IAdapter
+     */
+    [local, deprecated]
+    interface IArrayAdapter {
+
+        /**
+         * Adds the specified object at the end of the array.
+         *
+         * @param object The object to add at the end of the array.
+         */
+        Add(
+            [in] IInterface* object);
+
+        /**
+         * Adds the specified Collection at the end of the array.
+         *
+         * @param collection The Collection to add at the end of the array.
+         */
+
+        AddAll(
+            [in] ICollection* collection);
+
+        /**
+         * Adds the specified items at the end of the array.
+         *
+         * @param items The items to add at the end of the array.
+         */
+        AddAll(
+            [in] ArrayOf<IInterface* >* items) ;
+
+        /**
+         * Inserts the specified object at the specified index in the array.
+         *
+         * @param object The object to insert into the array.
+         * @param index The index at which the object must be inserted.
+         */
+        Insert(
+            [in] IInterface* object,
+            [in] Int32 index);
+
+        /**
+         * Removes the specified object from the array.
+         *
+         * @param object The object to remove.
+         */
+        Remove(
+            [in] IInterface* object);
+
+        /**
+         * Remove all elements from the list.
+         */
+        Clear();
+
+        /**
+         * Sorts the content of this adapter using the specified comparator.
+         *
+         * @param comparator The comparator used to sort the objects contained
+         *        in this adapter.
+         */
+        Sort(
+            [in] IComparator* comparator);
+
+        /**
+         * Control whether methods that change the list ({@link #add},
+         * {@link #insert}, {@link #remove}, {@link #clear}) automatically call
+         * {@link #notifyDataSetChanged}.  If set to false, caller must
+         * manually call notifyDataSetChanged() to have the changes
+         * reflected in the attached view.
+         *
+         * The default is TRUE, and calling notifyDataSetChanged()
+         * resets the flag to TRUE.
+         *
+         * @param notifyOnChange if TRUE, modifications to the list will
+         *                       automatically call {@link
+         *                       #notifyDataSetChanged}
+         */
+        SetNotifyOnChange(
+            [in] Boolean notifyOnChange);
+
+        /**
+         * Returns the context associated with this array adapter. The context is used
+         * to create views from the resource passed to the constructor.
+         *
+         * @return The Context associated with this adapter.
+         */
+        GetContext(
+            [out] IContext** context);
+
+        GetPosition(
+            [in] IInterface* item,
+            [out] Int32* position);
+
+        /**
+         * <p>Sets the layout resource to create the drop down views.</p>
+         *
+         * @param resource the layout resource defining the drop down views
+         * @see #getDropDownView(Int32, android.view.View, android.view.ViewGroup)
+         */
+        SetDropDownViewResource(
+            [in] Int32 resource);
+    }
+
+    [local]
+    interface IArrayAdapterHelper {
+
+        CreateFromResource(
+            [in] IContext* ctx,
+            [in] Int32 textArrayResId,
+            [in] Int32 textViewResId,
+            [out] IArrayAdapter** result);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}
+

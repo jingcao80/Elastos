@@ -1,0 +1,33 @@
+TARGET_NAME= channels
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/channels;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/charset;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/channels/spi;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/io;
+
+SOURCES = CChannels.cpp
+SOURCES += DatagramChannel.cpp
+SOURCES += FileChannel.cpp
+SOURCES += FileLock.cpp
+SOURCES += Pipe.cpp
+SOURCES += SelectionKey.cpp
+SOURCES += Selector.cpp
+SOURCES += ServerSocketChannel.cpp
+SOURCES += SocketChannel.cpp
+SOURCES += SelectableChannel.cpp
+SOURCES += SinkChannel.cpp
+SOURCES += SourceChannel.cpp
+SOURCES += Pipe.cpp
+
+ELASTOS_LIBS += spi/spi.lib

@@ -1,0 +1,105 @@
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Internal.App.IIAppOpsCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    [deprecated]
+    interface IIAppOpsService {
+        // These first methods are also called by native code, so must
+        // be kept in sync with frameworks/native/include/binder/IAppOpsService.h
+        CheckOperation(
+            [in] Int32 code,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        NoteOperation(
+            [in] Int32 code,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        StartOperation(
+            [in] IBinder* token,
+            [in] Int32 code,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        FinishOperation(
+            [in] IBinder* token,
+            [in] Int32 code,
+            [in] Int32 uid,
+            [in] String packageName);
+
+        StartWatchingMode(
+            [in] Int32 op,
+            [in] String packageName,
+            [in] IIAppOpsCallback* clb);
+
+        StopWatchingMode(
+            [in] IIAppOpsCallback* clb);
+
+        GetToken(
+            [in] IBinder* clientToken,
+            [out] IBinder** result);
+
+        // Remaining methods are only used in Java.
+        CheckPackage(
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        GetPackagesForOps(
+            [in] ArrayOf<Int32>* ops,
+            [out] IList** result);
+
+        GetOpsForPackage(
+            [in] Int32 uid,
+            [in] String packageName,
+            [in] ArrayOf<Int32>* ops,
+            [out] IList** result);
+
+        SetMode(
+            [in] Int32 code,
+            [in] Int32 uid,
+            [in] String packageName,
+            [in] Int32 mode);
+
+        ResetAllModes();
+
+        CheckAudioOperation(
+            [in] Int32 code,
+            [in] Int32 usage,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        SetAudioRestriction(
+            [in] Int32 code,
+            [in] Int32 usage,
+            [in] Int32 uid,
+            [in] Int32 mode,
+            [in] ArrayOf<String>* exceptionPackages);
+
+        SetUserRestrictions(
+            [in] IBundle* restrictions,
+            [in] Int32 userHandle);
+
+        RemoveUser(
+            [in] Int32 userHandle);
+    }
+
+    }//namespace App
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

@@ -1,0 +1,107 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.ICollection;
+
+    interface Elastos.Droid.Hardware.Camera2.Utils.ILongParcelable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    interface IRequestThreadManagerFpsCounter {
+        CountFrame();
+
+        CheckFps(
+            [out] Double* result);
+
+        StaggeredLog();
+
+        CountAndLog();
+    }
+
+    /**
+     * This class executes requests to the {@link Camera}.
+     *
+     * <p>
+     * The main components of this class are:
+     * - A message queue of requests to the {@link Camera}.
+     * - A thread that consumes requests to the {@link Camera} and executes them.
+     * - A {@link GLThreadManager} that draws to the configured output {@link Surface}s.
+     * - An {@link CameraDeviceState} state machine that manages the callbacks for various operations.
+     * </p>
+     */
+    interface IRequestThreadManager {
+
+        /**
+         * Start the request thread.
+         */
+        Start();
+
+        /**
+         * Flush any pending requests.
+         *
+         * @return the last frame number.
+         */
+        Flush(
+            [out] Int64* value);
+
+        /**
+         * Quit the request thread, and clean up everything.
+         */
+        Quit();
+
+        /**
+         * Submit the given burst of requests to be captured.
+         *
+         * <p>If the burst is repeating, replace the current repeating burst.</p>
+         *
+         * @param requests the burst of requests to add to the queue.
+         * @param repeating true if the burst is repeating.
+         * @param frameNumber an output argument that contains either the frame number of the last frame
+         *                    that will be returned for this request, or the frame number of the last
+         *                    frame that will be returned for the current repeating request if this
+         *                    burst is set to be repeating.
+         * @return the request id.
+         */
+        SubmitCaptureRequests(
+            [in] IList* requests,
+            [in] Boolean repeating,
+            [in] ILongParcelable* frameNumber,
+            [out] Int32* value);
+
+        /**
+         * Cancel a repeating request.
+         *
+         * @param requestId the id of the repeating request to cancel.
+         * @return the last frame to be returned from the HAL for the given repeating request, or
+         *          {@code INVALID_FRAME} if none exists.
+         */
+        CancelRepeating(
+            [in] Int32 requestId,
+            [out] Int64* value);
+
+        /**
+         * Configure with the current list of output Surfaces.
+         *
+         * <p>
+         * This operation blocks until the configuration is complete.
+         * </p>
+         *
+         * <p>Using a {@code null} or empty {@code outputs} list is the equivalent of unconfiguring.</p>
+         *
+         * @param outputs a {@link java.util.Collection} of outputs to configure.
+         */
+        Configure(
+            [in] ICollection* outputs);
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

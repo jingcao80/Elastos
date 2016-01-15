@@ -1,0 +1,163 @@
+
+module
+{
+    namespace Elastos {
+    namespace Core {
+
+    /**
+     * Interface to allow customization of reporting behavior.
+     */
+    interface ICloseGuardReporter {
+        Report (
+            [in] String message,
+            [in] IThrowable* allocationSite);
+    }
+
+    /**
+     * CloseGuard is a mechanism for flagging implicit finalizer cleanup of
+     * resources that should have been cleaned up by explicit close
+     * methods (aka "explicit termination methods" in Effective Java).
+     * <p>
+     * A simple example: <pre>   {@code
+     *   class Foo {
+     *
+     *       private final CloseGuard guard = CloseGuard.get();
+     *
+     *       ...
+     *
+     *       public Foo() {
+     *           ...;
+     *           guard.open("cleanup");
+     *       }
+     *
+     *       public void cleanup() {
+     *          guard.close();
+     *          ...;
+     *       }
+     *
+     *       protected void finalize() throws Throwable {
+     *           try {
+     *               if (guard != null) {
+     *                   guard.warnIfOpen();
+     *               }
+     *               cleanup();
+     *           } finally {
+     *               super.finalize();
+     *           }
+     *       }
+     *   }
+     * }</pre>
+     *
+     * In usage where the resource to be explicitly cleaned up are
+     * allocated after object construction, CloseGuard protection can
+     * be deferred. For example: <pre>   {@code
+     *   class Bar {
+     *
+     *       private final CloseGuard guard = CloseGuard.get();
+     *
+     *       ...
+     *
+     *       public Bar() {
+     *           ...;
+     *       }
+     *
+     *       public void connect() {
+     *          ...;
+     *          guard.open("cleanup");
+     *       }
+     *
+     *       public void cleanup() {
+     *          guard.close();
+     *          ...;
+     *       }
+     *
+     *       protected void finalize() throws Throwable {
+     *           try {
+     *               if (guard != null) {
+     *                   guard.warnIfOpen();
+     *               }
+     *               cleanup();
+     *           } finally {
+     *               super.finalize();
+     *           }
+     *       }
+     *   }
+     * }</pre>
+     *
+     * When used in a constructor calls to {@code open} should occur at
+     * the end of the constructor since an exception that would cause
+     * abrupt termination of the constructor will mean that the user will
+     * not have a reference to the object to cleanup explicitly. When used
+     * in a method, the call to {@code open} should occur just after
+     * resource acquisition.
+     *
+     * <p>
+     *
+     * Note that the null check on {@code guard} in the finalizer is to
+     * cover cases where a constructor throws an exception causing the
+     * {@code guard} to be uninitialized.
+     *
+     * @hide
+     */
+    interface ICloseGuard {
+        /**
+         * If CloseGuard is enabled, {@code open} initializes the instance
+         * with a warning that the caller should have explicitly called the
+         * {@code closer} method instead of relying on finalization.
+         *
+         * @param closer non-null name of explicit termination method
+         * @throws NullPointerException if closer is null, regardless of
+         * whether or not CloseGuard is enabled
+         */
+        Open(
+            [in] String closer);
+
+        /**
+         * Marks this CloseGuard instance as closed to avoid warnings on
+         * finalization.
+         */
+        Close();
+
+        /**
+         * If CloseGuard is enabled, logs a warning if the caller did not
+         * properly cleanup by calling an explicit close method
+         * before finalization. If CloseGuard is disabled, no action is
+         * performed.
+         */
+        WarnIfOpen();
+    }
+
+    interface ICloseGuardHelper {
+        /**
+         * Returns a CloseGuard instance. If CloseGuard is enabled, {@code
+         * #open(String)} can be used to set up the instance to warn on
+         * failure to close. If CloseGuard is disabled, a non-null no-op
+         * instance is returned.
+         */
+        Get(
+            [out] ICloseGuard** guard);
+
+        /**
+         * Used to enable or disable CloseGuard. Note that CloseGuard only
+         * warns if it is enabled for both allocation and finalization.
+         */
+        SetEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Used to replace default Reporter used to warn of CloseGuard
+         * violations. Must be non-null.
+         */
+        SetReporter(
+            [in] ICloseGuardReporter* reporter);
+
+        /**
+         * Returns non-null CloseGuard.Reporter.
+         */
+        GetReporter(
+            [out] ICloseGuardReporter** report);
+    }
+
+    } // namespace Core
+    } // namespace Elastos
+}

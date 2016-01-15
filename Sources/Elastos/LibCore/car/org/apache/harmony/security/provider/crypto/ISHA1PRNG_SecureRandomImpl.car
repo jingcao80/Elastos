@@ -1,0 +1,28 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Crypto {
+
+    /**
+     * This class extends the SecureRandomSpi class implementing all its abstract methods. <BR>
+     * <BR>
+     * To generate pseudo-random bits, the implementation uses technique described in
+     * the "Random Number Generator (RNG) algorithms" section, Appendix A,
+     * JavaTM Cryptography Architecture, API Specification&Reference <BR>
+     * <BR>
+     * The class implements the Serializable interface.
+     */
+    interface ISHA1PRNG_SecureRandomImpl extends Elastos.Security.ISecureRandomSpi {}
+
+    } // namespace Crypto
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

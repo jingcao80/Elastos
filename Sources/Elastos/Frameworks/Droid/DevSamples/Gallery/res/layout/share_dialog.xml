@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="@dimen/dialog_layout_width"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/dialog_title_bg"
+            android:gravity="left|center_vertical"
+            android:paddingLeft="20dp"
+            android:text="分享"
+            android:textColor="@color/text_black"
+            android:textSize="@dimen/button_text_size"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:src="@color/title_line_bg" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:background="#ffffff"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="360dp"
+                android:layout_height="42dp"
+                android:background="@drawable/view_bg"
+                android:gravity="center"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/share_bluetooth" />
+
+                <TextView
+                    android:id="@+id/share_item_first_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:gravity="left|center_vertical"
+                    android:text="蓝牙"
+                    android:textColor="@color/text_black"
+                    android:textSize="@dimen/button_text_size" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="360dp"
+                android:layout_height="1dp"
+                android:src="@color/divide_line_bg" />
+
+            <LinearLayout
+                android:layout_width="360dp"
+                android:layout_height="42dp"
+                android:background="@drawable/view_bg"
+                android:gravity="center"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/share_email" />
+
+                <TextView
+                    android:id="@+id/share_item_second_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:gravity="left|center_vertical"
+                    android:text="邮件"
+                    android:textColor="@color/text_black"
+                    android:textSize="@dimen/button_text_size" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="360dp"
+                android:layout_height="1dp"
+                android:src="@color/divide_line_bg" />
+
+            <LinearLayout
+                android:layout_width="360dp"
+                android:layout_height="42dp"
+                android:background="@drawable/view_bg"
+                android:gravity="center"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/share_more" />
+
+                <TextView
+                    android:id="@+id/share_item_third_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:gravity="left|center_vertical"
+                    android:text="更多"
+                    android:textColor="@color/text_black"
+                    android:textSize="@dimen/button_text_size" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:src="@color/title_line_bg" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/dialog_title_bg"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/share_dialog_btn_cancel"
+                android:layout_width="@dimen/dialog_button_width"
+                android:layout_height="@dimen/dialog_button_height"
+                android:background="#a5a5a5"
+                android:text="取消"
+                android:textColor="@color/text_white"
+                android:textSize="@dimen/button_text_size" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

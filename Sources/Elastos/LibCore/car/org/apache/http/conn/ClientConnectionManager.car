@@ -1,0 +1,112 @@
+
+module
+{
+    using interface Elastos.Utility.Concurrent.ITimeUnit;
+
+    interface Org.Apache.Http.Conn.IClientConnectionRequest;
+    interface Org.Apache.Http.Conn.IManagedClientConnection;
+    interface Org.Apache.Http.Conn.Routing.IHttpRoute;
+    interface Org.Apache.Http.Conn.Scheme.ISchemeRegistry;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+
+    /**
+     * Management interface for {@link ManagedClientConnection client connections}.
+     *
+     * @author Michael Becke
+     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version   $Revision: 671717 $
+     *
+     * @since 4.0
+     */
+    interface IClientConnectionManager {
+
+        /**
+         * Obtains the scheme registry used by this manager.
+         *
+         * @return  the scheme registry, never <code>null</code>
+         */
+        GetSchemeRegistry(
+            [out] ISchemeRegistry** schemeRegistry);
+
+        /**
+         * Returns a new {@link ClientConnectionRequest}, from which a
+         * {@link ManagedClientConnection} can be obtained or the request can be
+         * aborted.
+         */
+        RequestConnection(
+            [in] IHttpRoute* route,
+            [in] IObject* state,
+            [out] IClientConnectionRequest** request);
+
+        /**
+         * Releases a connection for use by others.
+         * You may optionally specify how long the connection is valid
+         * to be reused.  Values <= 0 are considered to be valid forever.
+         * If the connection is not marked as reusable, the connection will
+         * not be reused regardless of the valid duration.
+         *
+         * If the connection has been released before,
+         * the call will be ignored.
+         *
+         * @param conn      the connection to release
+         * @param validDuration the duration of time this connection is valid for reuse
+         * @param timeUnit the unit of time validDuration is measured in
+         *
+         * @see #closeExpiredConnections()
+         */
+        ReleaseConnection(
+            [in] IManagedClientConnection* conn,
+            [in] Int64 validDuration,
+            [in] ITimeUnit* timeUnit);
+
+        /**
+         * Closes idle connections in the pool.
+         * Open connections in the pool that have not been used for the
+         * timespan given by the argument will be closed.
+         * Currently allocated connections are not subject to this method.
+         * Times will be checked with milliseconds precision
+         *
+         * All expired connections will also be closed.
+         *
+         * @param idletime  the idle time of connections to be closed
+         * @param tunit     the unit for the <code>idletime</code>
+         *
+         * @see #closeExpiredConnections()
+         */
+        CloseIdleConnections(
+            [in] Int64 validDuration,
+            [in] ITimeUnit* timeUnit);
+
+        /**
+         * Closes all expired connections in the pool.
+         * Open connections in the pool that have not been used for
+         * the timespan defined when the connection was released will be closed.
+         * Currently allocated connections are not subject to this method.
+         * Times will be checked with milliseconds precision.
+         */
+        CloseExpiredConnections();
+
+        /**
+         * Shuts down this connection manager and releases allocated resources.
+         * This includes closing all connections, whether they are currently
+         * used or not.
+         */
+        Shutdown();
+
+    }
+
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

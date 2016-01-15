@@ -1,0 +1,107 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * An adapter that returns the {@link Preference} contained in this group.
+     * In most cases, this adapter should be the base class for any custom
+     * adapters from {@link Preference#getAdapter()}.
+     * <p>
+     * This adapter obeys the
+     * {@link Preference}'s adapter rule (the
+     * {@link Adapter#getView(int, View, ViewGroup)} should be used instead of
+     * {@link Preference#getView(ViewGroup)} if a {@link Preference} has an
+     * adapter via {@link Preference#getAdapter()}).
+     * <p>
+     * This adapter also propagates data change/invalidated notifications upward.
+     * <p>
+     * This adapter does not include this {@link PreferenceGroup} in the returned
+     * adapter, use {@link PreferenceCategoryAdapter} instead.
+     *
+     * @see PreferenceCategoryAdapter
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IPreferenceOnPreferenceChangeInternalListener
+     * interface IBaseAdapter
+     * interface IListAdapter
+     * interface ISpinnerAdapter
+     * interface IAdapter
+     */
+     [local,deprecated]
+    interface IPreferenceGroupAdapter {
+        GetCount(
+            [out] Int32* result);
+
+        GetItem(
+            [in] Int32 position,
+            [out] IPreference** result);
+
+        GetItemId(
+            [in] Int32 position,
+            [out] Int64* result);
+
+        /**
+             * @hide
+             */
+        SetHighlighted(
+            [in] Int32 position);
+
+        /**
+             * @hide
+             */
+        SetHighlightedDrawable(
+            [in] IDrawable* drawable);
+
+        GetView(
+            [in] Int32 position,
+            [in] IView* convertView,
+            [in] IViewGroup* parent,
+            [out] IView** result);
+
+        OnPreferenceChange(
+            [in] IPreference* preference);
+
+        OnPreferenceHierarchyChange(
+            [in] IPreference* preference);
+
+    }
+
+    /**
+     * @Involve
+     * interface IComparable
+     */
+    interface IPreferenceLayout {
+        GetResId(
+            [out] Int32* resId);
+
+        SetResId(
+            [in] Int32 resId);
+
+        GetWidgetResId(
+            [out] Int32* resId);
+
+        SetWidgetResId(
+            [in] Int32 resId);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}
+

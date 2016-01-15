@@ -1,0 +1,121 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Audiofx {
+
+    interface IBassBoost;
+
+    /**
+     * The OnParameterChangeListener interface defines a method called by the BassBoost when a
+     * parameter value has changed.
+     */
+    interface IBassBoostOnParameterChangeListener {
+        /**
+         * Method called when a parameter value has changed. The method is called only if the
+         * parameter was changed by another application having the control of the same
+         * BassBoost engine.
+         * @param effect the BassBoost on which the interface is registered.
+         * @param status status of the set parameter operation.
+         * @param param ID of the modified parameter. See {@link #PARAM_STRENGTH} ...
+         * @param value the new parameter value.
+         */
+        OnParameterChange(
+            [in] IBassBoost* effect,
+            [in] Int32 status,
+            [in] Int32 param,
+            [in] Int16 value);
+    }
+
+    interface IBassBoostSettings {
+        GetStrength(
+            [out] Int16* result);
+
+        SetStrength(
+            [in] Int16 result);
+    }
+
+    /**
+     * @Involve
+     * interface IAudioEffect
+     */
+    interface IBassBoost {
+        /**
+         * Is strength parameter supported by bass boost engine. Parameter ID for getParameter().
+         */
+        const Int32 PARAM_STRENGTH_SUPPORTED = 0;
+        /**
+         * Bass boost effect strength. Parameter ID for
+         * {@link android.media.audiofx.BassBoost.OnParameterChangeListener}
+         */
+        const Int32 PARAM_STRENGTH = 1;
+
+        /**
+         * Indicates whether setting strength is supported. If this method returns false, only one
+         * strength is supported and the setStrength() method always rounds to that value.
+         * @return true is strength parameter is supported, false otherwise
+         */
+        GetStrengthSupported(
+            [out] Boolean* isSupported);
+
+        /**
+         * Sets the strength of the bass boost effect. If the implementation does not support per mille
+         * accuracy for setting the strength, it is allowed to round the given strength to the nearest
+         * supported value. You can use the {@link #getRoundedStrength()} method to query the
+         * (possibly rounded) value that was actually set.
+         * @param strength strength of the effect. The valid range for strength strength is [0, 1000],
+         * where 0 per mille designates the mildest effect and 1000 per mille designates the strongest.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetStrength(
+            [in] Int16 strength);
+
+        /**
+         * Gets the current strength of the effect.
+         * @return the strength of the effect. The valid range for strength is [0, 1000], where 0 per
+         * mille designates the mildest effect and 1000 per mille the strongest
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetRoundedStrength(
+            [out] Int16* strength);
+
+        /**
+         * Registers an OnParameterChangeListener interface.
+         * @param listener OnParameterChangeListener interface registered
+         */
+        SetParameterListener(
+            [in] IBassBoostOnParameterChangeListener* listener);
+
+
+        /**
+         * Gets the bass boost properties. This method is useful when a snapshot of current
+         * bass boost settings must be saved by the application.
+         * @return a BassBoost.Settings object containing all current parameters values
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetProperties(
+            [out] IBassBoostSettings** properties);
+
+        /**
+         * Sets the bass boost properties. This method is useful when bass boost settings have to
+         * be applied from a previous backup.
+         * @param settings a BassBoost.Settings object containing the properties to apply
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetProperties(
+            [in] IBassBoostSettings* settings);
+    }
+    } // namespace audiofx
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

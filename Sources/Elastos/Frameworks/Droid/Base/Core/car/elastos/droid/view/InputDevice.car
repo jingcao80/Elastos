@@ -1,0 +1,696 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.View.IKeyCharacterMap;
+    interface Elastos.Droid.Hardware.Input.IInputDeviceIdentifier;
+    interface Elastos.Droid.Os.IVibrator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Provides information about the range of values for a particular {@link MotionEvent} axis.
+     *
+     * @see InputDevice#getMotionRange(int)
+     */
+    interface IMotionRange {
+        /**
+         * Gets the axis id.
+         * @return The axis id.
+         */
+        GetAxis(
+            [out] Int32* axis);
+
+        /**
+         * Gets the source for which the axis is defined.
+         * @return The source.
+         */
+        GetSource(
+            [out] Int32* source);
+
+        /**
+         * Determines whether the event is from the given source.
+         *
+         * @param source The input source to check against. This can be a specific device type,
+         * such as {@link InputDevice#SOURCE_TOUCH_NAVIGATION}, or a more generic device class,
+         * such as {@link InputDevice#SOURCE_CLASS_POINTER}.
+         * @return Whether the event is from the given source.
+         */
+        IsFromSource(
+            [in] Int32 source,
+            [out] Boolean* result);
+
+        /**
+         * Gets the minimum value for the coordinate.
+         * @return The minimum value.
+         */
+        GetMin(
+            [out] Float* minimum);
+
+        /**
+         * Gets the maximum value for the coordinate.
+         * @return The minimum value.
+         */
+        GetMax(
+            [out] Float* maximum);
+
+        /**
+         * Gets the range of the coordinate (difference between maximum and minimum).
+         * @return The range of values.
+         */
+        GetRange(
+            [out] Float* range);
+
+        /**
+         * Gets the extent of the center flat position with respect to this coordinate.
+         * For example, a flat value of 8 means that the center position is between -8 and +8.
+         * This value is mainly useful for calibrating self-centering devices.
+         * @return The extent of the center flat position.
+         */
+        GetFlat(
+            [out] Float* flat);
+
+        /**
+         * Gets the error tolerance for input device measurements with respect to this coordinate.
+         * For example, a value of 2 indicates that the measured value may be up to +/- 2 units
+         * away from the actual value due to noise and device sensitivity limitations.
+         * @return The error tolerance.
+         */
+        GetFuzz(
+            [out] Float* fuzz);
+
+        /**
+         * Gets the resolution for input device measurements with respect to this axis.
+         * @return The resolution in units per millimeter, or units per radian for rotational axes.
+         */
+        GetResolution(
+            [out] Float* fuzz);
+    }
+
+    /**
+     * Describes the capabilities of a particular input device.
+     * <p>
+     * Each input device may support multiple classes of input.  For example, a multi-function
+     * keyboard may compose the capabilities of a standard keyboard together with a track pad mouse
+     * or other pointing device.
+     * </p><p>
+     * Some input devices present multiple distinguishable sources of input.
+     * Applications can query the framework about the characteristics of each distinct source.
+     * </p><p>
+     * As a further wrinkle, different kinds of input sources uses different coordinate systems
+     * to describe motion events.  Refer to the comments on the input source constants for
+     * the appropriate interpretation.
+     * </p>
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated]
+    interface IInputDevice {
+
+        /**
+         * A mask for input source classes.
+         *
+         * Each distinct input source constant has one or more input source class bits set to
+         * specify the desired interpretation for its input events.
+         */
+        const Int32 SOURCE_CLASS_MASK = 0x000000ff;
+
+        /**
+         * The input source has no class.
+         *
+         * It is up to the application to determine how to handle the device based on the device type.
+         */
+        const Int32 SOURCE_CLASS_NONE = 0x00000000;
+
+        /**
+         * The input source has buttons or keys.
+         * Examples: {@link #SOURCE_KEYBOARD}, {@link #SOURCE_DPAD}.
+         *
+         * A {@link KeyEvent} should be interpreted as a button or key press.
+         *
+         * Use {@link #getKeyCharacterMap} to query the device's button and key mappings.
+         */
+        const Int32 SOURCE_CLASS_BUTTON = 0x00000001;
+
+        /**
+         * The input source is a pointing device associated with a display.
+         * Examples: {@link #SOURCE_TOUCHSCREEN}, {@link #SOURCE_MOUSE}.
+         *
+         * A {@link MotionEvent} should be interpreted as absolute coordinates in
+         * display units according to the {@link View} hierarchy.  Pointer down/up indicated when
+         * the finger touches the display or when the selection button is pressed/released.
+         *
+         * Use {@link #getMotionRange} to query the range of the pointing device.  Some devices permit
+         * touches outside the display area so the effective range may be somewhat smaller or larger
+         * than the actual display size.
+         */
+        const Int32 SOURCE_CLASS_POINTER = 0x00000002;
+
+        /**
+         * The input source is a trackball navigation device.
+         * Examples: {@link #SOURCE_TRACKBALL}.
+         *
+         * A {@link MotionEvent} should be interpreted as relative movements in device-specific
+         * units used for navigation purposes.  Pointer down/up indicates when the selection button
+         * is pressed/released.
+         *
+         * Use {@link #getMotionRange} to query the range of motion.
+         */
+        const Int32 SOURCE_CLASS_TRACKBALL = 0x00000004;
+
+        /**
+         * The input source is an absolute positioning device not associated with a display
+         * (unlike {@link #SOURCE_CLASS_POINTER}).
+         *
+         * A {@link MotionEvent} should be interpreted as absolute coordinates in
+         * device-specific surface units.
+         *
+         * Use {@link #getMotionRange} to query the range of positions.
+         */
+        const Int32 SOURCE_CLASS_POSITION = 0x00000008;
+
+        /**
+         * The input source is a joystick.
+         *
+         * A {@link MotionEvent} should be interpreted as absolute joystick movements.
+         *
+         * Use {@link #getMotionRange} to query the range of positions.
+         */
+        const Int32 SOURCE_CLASS_JOYSTICK = 0x00000010;
+
+        /**
+         * The input source is unknown.
+         */
+        const Int32 SOURCE_UNKNOWN = 0x00000000;
+
+        /**
+         * The input source is a keyboard.
+         *
+         * This source indicates pretty much anything that has buttons.  Use
+         * {@link #getKeyboardType()} to determine whether the keyboard has alphabetic keys
+         * and can be used to enter text.
+         *
+         * @see #SOURCE_CLASS_BUTTON
+         */
+        const Int32 SOURCE_KEYBOARD = 0x00000100 | SOURCE_CLASS_BUTTON;
+
+        /**
+         * The input source is a DPad.
+         *
+         * @see #SOURCE_CLASS_BUTTON
+         */
+        const Int32 SOURCE_DPAD = 0x00000200 | SOURCE_CLASS_BUTTON;
+
+        /**
+         * The input source is a game pad.
+         * (It may also be a {@link #SOURCE_JOYSTICK}).
+         *
+         * @see #SOURCE_CLASS_BUTTON
+         */
+        const Int32 SOURCE_GAMEPAD = 0x00000400 | SOURCE_CLASS_BUTTON;
+
+        /**
+         * The input source is a touch screen pointing device.
+         *
+         * @see #SOURCE_CLASS_POINTER
+         */
+        const Int32 SOURCE_TOUCHSCREEN = 0x00001000 | SOURCE_CLASS_POINTER;
+
+        /**
+         * The input source is a mouse pointing device.
+         * This code is also used for other mouse-like pointing devices such as trackpads
+         * and trackpoints.
+         *
+         * @see #SOURCE_CLASS_POINTER
+         */
+        const Int32 SOURCE_MOUSE = 0x00002000 | SOURCE_CLASS_POINTER;
+
+        /**
+         * The input source is a stylus pointing device.
+         * <p>
+         * Note that this bit merely indicates that an input device is capable of obtaining
+         * input from a stylus.  To determine whether a given touch event was produced
+         * by a stylus, examine the tool type returned by {@link MotionEvent#getToolType(int)}
+         * for each individual pointer.
+         * </p><p>
+         * A single touch event may multiple pointers with different tool types,
+         * such as an event that has one pointer with tool type
+         * {@link MotionEvent#TOOL_TYPE_FINGER} and another pointer with tool type
+         * {@link MotionEvent#TOOL_TYPE_STYLUS}.  So it is important to examine
+         * the tool type of each pointer, regardless of the source reported
+         * by {@link MotionEvent#getSource()}.
+         * </p>
+         *
+         * @see #SOURCE_CLASS_POINTER
+         */
+        const Int32 SOURCE_STYLUS = 0x00004000 | SOURCE_CLASS_POINTER;
+
+        /**
+         * The input source is a trackball.
+         *
+         * @see #SOURCE_CLASS_TRACKBALL
+         */
+        const Int32 SOURCE_TRACKBALL = 0x00010000 | SOURCE_CLASS_TRACKBALL;
+
+        /**
+         * The input source is a touch pad or digitizer tablet that is not
+         * associated with a display (unlike {@link #SOURCE_TOUCHSCREEN}).
+         *
+         * @see #SOURCE_CLASS_POSITION
+         */
+        const Int32 SOURCE_TOUCHPAD = 0x00100000 | SOURCE_CLASS_POSITION;
+
+        /**
+         * The input source is a touch device whose motions should be interpreted as navigation events.
+         *
+         * For example, an upward swipe should be as an upward focus traversal in the same manner as
+         * pressing up on a D-Pad would be. Swipes to the left, right and down should be treated in a
+         * similar manner.
+         *
+         * @see #SOURCE_CLASS_NONE
+         */
+        const Int32 SOURCE_TOUCH_NAVIGATION = 0x00200000 | SOURCE_CLASS_NONE;
+
+        /**
+         * The input source is a joystick.
+         * (It may also be a {@link #SOURCE_GAMEPAD}).
+         *
+         * @see #SOURCE_CLASS_JOYSTICK
+         */
+        const Int32 SOURCE_JOYSTICK = 0x01000000 | SOURCE_CLASS_JOYSTICK;
+
+        /**
+         * The input source is a device connected through HDMI-based bus.
+         *
+         * The key comes in through HDMI-CEC or MHL signal line, and is treated as if it were
+         * generated by a locally connected DPAD or keyboard.
+         */
+        const Int32 SOURCE_HDMI = 0x02000000 | SOURCE_CLASS_BUTTON;
+
+        /**
+         * A special input source constant that is used when filtering input devices
+         * to match devices that provide any type of input source.
+         */
+        const Int32 SOURCE_ANY = 0xffffff00;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_X}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_X} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_X = 0;//MotionEvent.AXIS_X;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_Y}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_Y} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_Y = 1;//MotionEvent.AXIS_Y;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_PRESSURE}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_PRESSURE} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_PRESSURE = 2;//MotionEvent.AXIS_PRESSURE;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_SIZE}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_SIZE} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_SIZE = 3;//MotionEvent.AXIS_SIZE;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_TOUCH_MAJOR}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_TOUCH_MAJOR} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_TOUCH_MAJOR = 4;//MotionEvent.AXIS_TOUCH_MAJOR;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_TOUCH_MINOR}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_TOUCH_MINOR} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_TOUCH_MINOR = 5;//MotionEvent.AXIS_TOUCH_MINOR;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_TOOL_MAJOR}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_TOOL_MAJOR} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_TOOL_MAJOR = 6;//MotionEvent.AXIS_TOOL_MAJOR;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_TOOL_MINOR}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_TOOL_MINOR} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_TOOL_MINOR = 7;//MotionEvent.AXIS_TOOL_MINOR;
+
+        /**
+         * Constant for retrieving the range of values for {@link MotionEvent#AXIS_ORIENTATION}.
+         *
+         * @see #getMotionRange
+         * @deprecated Use {@link MotionEvent#AXIS_ORIENTATION} instead.
+         */
+        //@Deprecated
+        const Int32 MOTION_RANGE_ORIENTATION = 8;//MotionEvent.AXIS_ORIENTATION;
+
+        /**
+         * There is no keyboard.
+         */
+        const Int32 KEYBOARD_TYPE_NONE = 0;
+
+        /**
+         * The keyboard is not fully alphabetic.  It may be a numeric keypad or an assortment
+         * of buttons that are not mapped as alphabetic keys suitable for text input.
+         */
+        const Int32 KEYBOARD_TYPE_NON_ALPHABETIC = 1;
+
+        /**
+         * The keyboard supports a complement of alphabetic keys.
+         */
+        const Int32 KEYBOARD_TYPE_ALPHABETIC = 2;
+
+        /**
+         * Gets the input device id.
+         * <p>
+         * Each input device receives a unique id when it is first configured
+         * by the system.  The input device id may change when the system is restarted or if the
+         * input device is disconnected, reconnected or reconfigured at any time.
+         * If you require a stable identifier for a device that persists across
+         * boots and reconfigurations, use {@link #getDescriptor()}.
+         * </p>
+         *
+         * @return The input device id.
+         */
+        GetId(
+            [out] Int32* id);
+
+        /**
+         * The controller number for a given input device.
+         * <p>
+         * Each gamepad or joystick is given a unique, positive controller number when initially
+         * configured by the system. This number may change due to events such as device disconnects /
+         * reconnects or user initiated reassignment. Any change in number will trigger an event that
+         * can be observed by registering an {@link InputManager.InputDeviceListener}.
+         * </p>
+         * <p>
+         * All input devices which are not gamepads or joysticks will be assigned a controller number
+         * of 0.
+         * </p>
+         *
+         * @return The controller number of the device.
+         */
+        GetControllerNumber(
+            [out] Int32* id);
+
+        /**
+         * The set of identifying information for type of input device. This
+         * information can be used by the system to configure appropriate settings
+         * for the device.
+         *
+         * @return The identifier object for this device
+         * @hide
+         */
+        GetIdentifier(
+            [out] IInputDeviceIdentifier** id);
+
+        /**
+         * Gets a generation number for this input device.
+         * The generation number is incremented whenever the device is reconfigured and its
+         * properties may have changed.
+         *
+         * @return The generation number.
+         *
+         * @hide
+         */
+        GetGeneration(
+            [out] Int32* generation);
+
+        /**
+         * Gets the vendor id for the given device, if available.
+         * <p>
+         * A vendor id uniquely identifies the company who manufactured the device. A value of 0 will
+         * be assigned where a vendor id is not available.
+         * </p>
+         *
+         * @return The vendor id of a given device
+         */
+        GetVendorId(
+            [out] Int32* id);
+
+        /**
+         * Gets the product id for the given device, if available.
+         * <p>
+         * A product id uniquely identifies which product within the address space of a given vendor,
+         * identified by the device's vendor id. A value of 0 will be assigned where a product id is
+         * not available.
+         * </p>
+         *
+         * @return The product id of a given device
+         */
+        GetProductId(
+            [out] Int32* id);
+
+        /**
+         * Gets the input device descriptor, which is a stable identifier for an input device.
+         * <p>
+         * An input device descriptor uniquely identifies an input device.  Its value
+         * is intended to be persistent across system restarts, and should not change even
+         * if the input device is disconnected, reconnected or reconfigured at any time.
+         * </p><p>
+         * It is possible for there to be multiple {@link InputDevice} instances that have the
+         * same input device descriptor.  This might happen in situations where a single
+         * human input device registers multiple {@link InputDevice} instances (HID collections)
+         * that describe separate features of the device, such as a keyboard that also
+         * has a trackpad.  Alternately, it may be that the input devices are simply
+         * indistinguishable, such as two keyboards made by the same manufacturer.
+         * </p><p>
+         * The input device descriptor returned by {@link #getDescriptor} should only be
+         * used when an application needs to remember settings associated with a particular
+         * input device.  For all other purposes when referring to a logical
+         * {@link InputDevice} instance at runtime use the id returned by {@link #getId()}.
+         * </p>
+         *
+         * @return The input device descriptor.
+         */
+        GetDescriptor(
+            [out] String* descriptor);
+
+        /**
+         * Returns true if the device is a virtual input device rather than a real one,
+         * such as the virtual keyboard (see {@link KeyCharacterMap#VIRTUAL_KEYBOARD}).
+         * <p>
+         * Virtual input devices are provided to implement system-level functionality
+         * and should not be seen or configured by users.
+         * </p>
+         *
+         * @return True if the device is virtual.
+         *
+         * @see KeyCharacterMap#VIRTUAL_KEYBOARD
+         */
+        IsVirtual(
+            [out] Boolean* isVirtual);
+
+        /**
+         * Returns true if the device is external (connected to USB or Bluetooth or some other
+         * peripheral bus), otherwise it is built-in.
+         *
+         * @return True if the device is external.
+         *
+         * @hide
+         */
+        IsExternal(
+            [out] Boolean* isExternal);
+
+        /**
+         * Returns true if the device is a full keyboard.
+         *
+         * @return True if the device is a full keyboard.
+         *
+         * @hide
+         */
+        IsFullKeyboard(
+            [out] Boolean* isFullKeyboard);
+
+        /**
+         * Gets the name of this input device.
+         * @return The input device name.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Gets the input sources supported by this input device as a combined bitfield.
+         * @return The supported input sources.
+         */
+        GetSources(
+            [out] Int32* sources);
+
+        /**
+         * Determines whether the input device supports the given source or sources.
+         *
+         * @param source The input source or sources to check against. This can be a generic device
+         * type such as {@link InputDevice#SOURCE_MOUSE}, a more generic device class, such as
+         * {@link InputDevice#SOURCE_CLASS_POINTER}, or a combination of sources bitwise ORed together.
+         * @return Whether the device can produce all of the given sources.
+         */
+        SupportsSource(
+            [in] Int32 source,
+            [out] Boolean* result);
+
+        /**
+         * Gets the keyboard type.
+         * @return The keyboard type.
+         */
+        GetKeyboardType(
+            [out] Int32* type);
+
+        /**
+         * Gets the key character map associated with this input device.
+         * @return The key character map.
+         */
+        GetKeyCharacterMap(
+            [out] IKeyCharacterMap** keyCharacterMap);
+
+        /**
+         * Gets whether the device is capable of producing the list of keycodes.
+         * @param keys The list of android keycodes to check for.
+         * @return An array of booleans where each member specifies whether the device is capable of
+         * generating the keycode given by the corresponding value at the same index in the keys array.
+         */
+
+         HasKeys(
+            [in] ArrayOf<Int32>* keys,
+            [out, callee] ArrayOf<Boolean>* result);
+
+        /**
+         * Gets information about the range of values for a particular {@link MotionEvent} axis.
+         * If the device supports multiple sources, the same axis may have different meanings
+         * for each source.  Returns information about the first axis found for any source.
+         * To obtain information about the axis for a specific source, use
+         * {@link #getMotionRange(int, int)}.
+         *
+         * @param axis The axis constant.
+         * @return The range of values, or null if the requested axis is not
+         * supported by the device.
+         *
+         * @see MotionEvent#AXIS_X
+         * @see MotionEvent#AXIS_Y
+         * @see #getSupportedAxes()
+         */
+        GetMotionRange(
+            [in] Int32 axis,
+            [out] IMotionRange** motionRange);
+
+        /**
+         * Gets information about the range of values for a particular {@link MotionEvent} axis
+         * used by a particular source on the device.
+         * If the device supports multiple sources, the same axis may have different meanings
+         * for each source.
+         *
+         * @param axis The axis constant.
+         * @param source The source for which to return information.
+         * @return The range of values, or null if the requested axis is not
+         * supported by the device.
+         *
+         * @see MotionEvent#AXIS_X
+         * @see MotionEvent#AXIS_Y
+         * @see #getSupportedAxes()
+         */
+        GetMotionRange(
+            [in] Int32 axis,
+            [in] Int32 source,
+            [out] IMotionRange** motionRange);
+
+        /**
+         * Gets the ranges for all axes supported by the device.
+         * @return The motion ranges for the device.
+         *
+         * @see #getMotionRange(int, int)
+         */
+        GetMotionRanges(
+            [out] IList** motionRanges);
+
+        /**
+         * Gets the vibrator service associated with the device, if there is one.
+         * Even if the device does not have a vibrator, the result is never null.
+         * Use {@link Vibrator#hasVibrator} to determine whether a vibrator is
+         * present.
+         *
+         * Note that the vibrator associated with the device may be different from
+         * the system vibrator.  To obtain an instance of the system vibrator instead, call
+         * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as argument.
+         *
+         * @return The vibrator service associated with the device, never null.
+         */
+        GetVibrator(
+            [out] IVibrator** vibrator);
+
+        /**
+         * Reports whether the device has a button under its touchpad
+         * @return Whether the device has a button under its touchpad
+         * @hide
+         */
+        HasButtonUnderPad(
+            [out] Boolean* result);
+
+        AddMotionRange(
+            [in] Int32 axis,
+            [in] Int32 source,
+            [in] Float min,
+            [in] Float max,
+            [in] Float flat,
+            [in] Float fuzz,
+            [in] Float resolution);
+
+        ToString(
+            [out] String* str);
+    }
+
+    interface IInputDeviceHelper {
+        /**
+         * Gets information about the input device with the specified id.
+         * @param id The device id.
+         * @return The input device or NULL if not found.
+         */
+        GetDevice(
+            [in] Int32 id,
+            [out] IInputDevice** device);
+
+        /**
+         * Gets the ids of all input devices in the system.
+         * @return The input device ids.
+         */
+        GetDeviceIds(
+            [out, callee] ArrayOf<Int32>* deviceIds);
+    }
+
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

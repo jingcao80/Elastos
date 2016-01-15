@@ -1,0 +1,48 @@
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Graphics.IRect;
+
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    /**
+     * TextView uses TransformationMethods to do things like replacing the
+     * characters of passwords with dots, or keeping the newline characters
+     * from causing line breaks in single-line text fields.
+    */
+    [local]
+    interface ITransformationMethod {
+        /**
+         * Returns a CharSequence that is a transformation of the source text --
+         * for example, replacing each character with a dot in a password field.
+         * Beware that the returned text must be exactly the same length as
+         * the source text, and that if the source text is Editable, the returned
+         * text must mirror it dynamically instead of doing a one-time copy.
+         */
+        GetTransformation(
+            [in] ICharSequence* source,
+            [in] IView* view,
+            [out] ICharSequence** csq);
+
+        /**
+         * This method is called when the TextView that uses this
+         * TransformationMethod gains or loses focus.
+         */
+        OnFocusChanged(
+            [in] IView* view,
+            [in] ICharSequence* sourceText,
+            [in] Boolean focused,
+            [in] Int32 direction,
+            [in] IRect* previouslyFocusedRect);
+    }
+
+    }//namespace Method
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

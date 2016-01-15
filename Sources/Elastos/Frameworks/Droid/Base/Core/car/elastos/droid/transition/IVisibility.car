@@ -1,0 +1,205 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Animation.IAnimator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * This transition tracks changes to the visibility of target views in the
+     * start and end scenes. Visibility is determined not just by the
+     * {@link View#setVisibility(int)} state of views, but also whether
+     * views exist in the current view hierarchy. The class is intended to be a
+     * utility for subclasses such as {@link Fade}, which use this visibility
+     * information to determine the specific animations to run when visibility
+     * changes occur. Subclasses should implement one or both of the methods
+     * {@link #onAppear(ViewGroup, TransitionValues, int, TransitionValues, int)},
+     * {@link #onDisappear(ViewGroup, TransitionValues, int, TransitionValues, int)} or
+     * {@link #onAppear(ViewGroup, View, TransitionValues, TransitionValues)},
+     * {@link #onDisappear(ViewGroup, View, TransitionValues, TransitionValues)}.
+     */
+
+    /**
+     * involve interface ITransition
+     */
+    [local]
+    interface IVisibility  {
+
+        const String PROPNAME_VISIBILITY = "android:visibility:visibility";
+
+        /**
+         * Mode used in {@link #setMode(int)} to make the transition
+         * operate on targets that are appearing. Maybe be combined with
+         * {@link #MODE_OUT} to target Visibility changes both in and out.
+         */
+        const Int32 MODE_IN = 0x1;
+
+        /**
+         * Mode used in {@link #setMode(int)} to make the transition
+         * operate on targets that are disappearing. Maybe be combined with
+         * {@link #MODE_IN} to target Visibility changes both in and out.
+         */
+        const Int32 MODE_OUT = 0x2;
+
+        /**
+         * Changes the transition to support appearing and/or disappearing Views, depending
+         * on <code>mode</code>.
+         *
+         * @param mode The behavior supported by this transition, a combination of
+         *             {@link #MODE_IN} and {@link #MODE_OUT}.
+         * @attr ref android.R.styleable#VisibilityTransition_transitionVisibilityMode
+         */
+        SetMode(
+            [in] Int32 mode);
+
+        /**
+         * Returns whether appearing and/or disappearing Views are supported.
+         *
+         * Returns whether appearing and/or disappearing Views are supported. A combination of
+         *         {@link #MODE_IN} and {@link #MODE_OUT}.
+         * @attr ref android.R.styleable#VisibilityTransition_transitionVisibilityMode
+         */
+        GetMode(
+            [out] Int32* m);
+
+        /**
+         * Returns whether the view is 'visible' according to the given values
+         * object. This is determined by testing the same properties in the values
+         * object that are used to determine whether the object is appearing or
+         * disappearing in the {@link
+         * Transition#createAnimator(ViewGroup, TransitionValues, TransitionValues)}
+         * method. This method can be called by, for example, subclasses that want
+         * to know whether the object is visible in the same way that Visibility
+         * determines it for the actual animation.
+         *
+         * @param values The TransitionValues object that holds the information by
+         * which visibility is determined.
+         * @return True if the view reference by <code>values</code> is visible,
+         * false otherwise.
+         */
+        IsVisible(
+            [in] ITransitionValues* values,
+            [out] Boolean* result);
+
+        /**
+         * The default implementation of this method calls
+         * {@link #onAppear(ViewGroup, View, TransitionValues, TransitionValues)}.
+         * Subclasses should override this method or
+         * {@link #onAppear(ViewGroup, View, TransitionValues, TransitionValues)}.
+         * if they need to create an Animator when targets appear.
+         * The method should only be called by the Visibility class; it is
+         * not intended to be called from external classes.
+         *
+         * @param sceneRoot The root of the transition hierarchy
+         * @param startValues The target values in the start scene
+         * @param startVisibility The target visibility in the start scene
+         * @param endValues The target values in the end scene
+         * @param endVisibility The target visibility in the end scene
+         * @return An Animator to be started at the appropriate time in the
+         * overall transition for this scene change. A null value means no animation
+         * should be run.
+         */
+        OnAppear(
+            [in] IViewGroup* sceneRoot,
+            [in] ITransitionValues* startValues,
+            [in] Int32 startVisibility,
+            [in] ITransitionValues* endValues,
+            [in] Int32 endVisibility,
+            [out] IAnimator** result);
+
+        /**
+         * The default implementation of this method returns a null Animator. Subclasses should
+         * override this method to make targets appear with the desired transition. The
+         * method should only be called from
+         * {@link #onAppear(ViewGroup, TransitionValues, int, TransitionValues, int)}.
+         *
+         * @param sceneRoot The root of the transition hierarchy
+         * @param view The View to make appear. This will be in the target scene's View hierarchy and
+         *             will be VISIBLE.
+         * @param startValues The target values in the start scene
+         * @param endValues The target values in the end scene
+         * @return An Animator to be started at the appropriate time in the
+         * overall transition for this scene change. A null value means no animation
+         * should be run.
+         */
+        OnAppear(
+            [in] IViewGroup* sceneRoot,
+            [in] IView* view,
+            [in] ITransitionValues* startValues,
+            [in] ITransitionValues* endValues,
+            [out] IAnimator** result);
+
+        /**
+         * Subclasses should override this method or
+         * {@link #onDisappear(ViewGroup, View, TransitionValues, TransitionValues)}
+         * if they need to create an Animator when targets disappear.
+         * The method should only be called by the Visibility class; it is
+         * not intended to be called from external classes.
+         * <p>
+         * The default implementation of this method attempts to find a View to use to call
+         * {@link #onDisappear(ViewGroup, View, TransitionValues, TransitionValues)},
+         * based on the situation of the View in the View hierarchy. For example,
+         * if a View was simply removed from its parent, then the View will be added
+         * into a {@link android.view.ViewGroupOverlay} and passed as the <code>view</code>
+         * parameter in {@link #onDisappear(ViewGroup, View, TransitionValues, TransitionValues)}.
+         * If a visible View is changed to be {@link View#GONE} or {@link View#INVISIBLE},
+         * then it can be used as the <code>view</code> and the visibility will be changed
+         * to {@link View#VISIBLE} for the duration of the animation. However, if a View
+         * is in a hierarchy which is also altering its visibility, the situation can be
+         * more complicated. In general, if a view that is no longer in the hierarchy in
+         * the end scene still has a parent (so its parent hierarchy was removed, but it
+         * was not removed from its parent), then it will be left alone to avoid side-effects from
+         * improperly removing it from its parent. The only exception to this is if
+         * the previous {@link Scene} was {@link Scene#getSceneForLayout(ViewGroup, int,
+         * android.content.Context) created from a layout resource file}, then it is considered
+         * safe to un-parent the starting scene view in order to make it disappear.</p>
+         *
+         * @param sceneRoot The root of the transition hierarchy
+         * @param startValues The target values in the start scene
+         * @param startVisibility The target visibility in the start scene
+         * @param endValues The target values in the end scene
+         * @param endVisibility The target visibility in the end scene
+         * @return An Animator to be started at the appropriate time in the
+         * overall transition for this scene change. A null value means no animation
+         * should be run.
+         */
+        OnDisappear(
+            [in] IViewGroup* sceneRoot,
+            [in] ITransitionValues* startValues,
+            [in] Int32 startVisibility,
+            [in] ITransitionValues* endValues,
+            [in] Int32 endVisibility,
+            [out] IAnimator** result);
+
+        /**
+         * The default implementation of this method returns a null Animator. Subclasses should
+         * override this method to make targets disappear with the desired transition. The
+         * method should only be called from
+         * {@link #onDisappear(ViewGroup, TransitionValues, int, TransitionValues, int)}.
+         *
+         * @param sceneRoot The root of the transition hierarchy
+         * @param view The View to make disappear. This will be in the target scene's View
+         *             hierarchy or in an {@link android.view.ViewGroupOverlay} and will be
+         *             VISIBLE.
+         * @param startValues The target values in the start scene
+         * @param endValues The target values in the end scene
+         * @return An Animator to be started at the appropriate time in the
+         * overall transition for this scene change. A null value means no animation
+         * should be run.
+         */
+        OnDisappear(
+            [in] IViewGroup* sceneRoot,
+            [in] IView* view,
+            [in] ITransitionValues* startValues,
+            [in] ITransitionValues* endValues,
+            [out] IAnimator** result);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

@@ -1,0 +1,960 @@
+
+module
+{
+    //======================================================
+    // Elastos.Utility.Zip
+    //======================================================
+    merge("utility/zip/Errors.car");
+    merge("utility/zip/Exceptions.car");
+    merge("utility/zip/IZipConstants.car");
+    merge("utility/zip/IChecksum.car");
+    merge("utility/zip/IAdler32.car");
+    merge("utility/zip/ICRC32.car");
+    merge("utility/zip/IInflater.car");
+    merge("utility/zip/IDeflater.car");
+    merge("utility/zip/IZipEntry.car");
+    merge("utility/zip/IInflaterInputStream.car");
+    merge("utility/zip/IInflaterOutputStream.car");
+    merge("utility/zip/IDeflaterInputStream.car");
+    merge("utility/zip/IDeflaterOutputStream.car");
+    merge("utility/zip/IZipInputStream.car");
+    merge("utility/zip/IZipOutputStream.car");
+    merge("utility/zip/ICheckedInputStream.car");
+    merge("utility/zip/ICheckedOutputStream.car");
+    merge("utility/zip/IGZIPInputStream.car");
+    merge("utility/zip/IGZIPOutputStream.car");
+    merge("utility/zip/IZipFile.car");
+
+    interface Elastos.Core.ICloneable;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.IFile;
+    interface Elastos.IO.IFilterInputStream;
+    interface Elastos.IO.IFilterOutputStream;
+    interface Elastos.IO.IFlushable;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.Charset.ICharset;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * The Adler-32 class is used to compute the {@code Adler32} checksum from a set
+     * of data. Compared to {@link CRC32} it trades reliability for speed.
+     * Refer to RFC 1950 for the specification.
+     */
+    class CAdler32 {
+        interface IAdler32;
+        interface IChecksum;
+    }
+
+    /**
+     * The CRC32 class is used to compute a CRC32 checksum from data provided as
+     * input value.
+     */
+    class CCRC32 {
+        interface ICRC32;
+        interface IChecksum;
+    }
+
+    /**
+     * This class decompresses data that was compressed using the <i>DEFLATE</i>
+     * algorithm (see <a href="http://www.gzip.org/algorithm.txt">specification</a>).
+     *
+     * <p>It is usually more convenient to use {@link InflaterInputStream}.
+     *
+     * <p>To decompress an in-memory {@code byte[]} to another in-memory {@code byte[]} manually:
+     * <pre>
+     *     byte[] compressedBytes = ...
+     *     int decompressedByteCount = ... // From your format's metadata.
+     *     Inflater inflater = new Inflater();
+     *     inflater.setInput(compressedBytes, 0, compressedBytes.length);
+     *     byte[] decompressedBytes = new byte[decompressedByteCount];
+     *     if (inflater.inflate(decompressedBytes) != decompressedByteCount) {
+     *         throw new AssertionError();
+     *     }
+     *     inflater.end();
+     * </pre>
+     * <p>In situations where you don't have all the input in one array (or have so much
+     * input that you want to feed it to the inflater in chunks), it's possible to call
+     * {@link #setInput} repeatedly, but you're much better off using {@link InflaterInputStream}
+     * to handle all this for you.
+     *
+     * <p>If you don't know how big the decompressed data will be, you can call {@link #inflate}
+     * repeatedly on a temporary buffer, copying the bytes to a {@link java.io.ByteArrayOutputStream},
+     * but this is probably another sign you'd be better off using {@link InflaterInputStream}.
+     */
+    class CInflater {
+        /**
+         * This constructor creates an inflater that expects a header from the input
+         * stream. Use {@code Inflater(boolean)} if the input comes without a ZLIB
+         * header.
+         */
+        constructor();
+
+        /**
+         * This constructor allows to create an inflater that expects no header from
+         * the input stream.
+         *
+         * @param noHeader
+         *            {@code true} indicates that no ZLIB header comes with the
+         *            input.
+         */
+        constructor(
+            [in] Boolean noHeader);
+
+        interface IInflater;
+    }
+
+    /**
+     * This class compresses data using the <i>DEFLATE</i> algorithm (see <a
+     * href="http://www.gzip.org/algorithm.txt">specification</a>).
+     *
+     * <p>It is usually more convenient to use {@link DeflaterOutputStream}.
+     *
+     * <p>To compress an in-memory {@code byte[]} to another in-memory {@code byte[]} manually:
+     * <pre>
+     *     byte[] originalBytes = ...
+     *
+     *     Deflater deflater = new Deflater();
+     *     deflater.setInput(originalBytes);
+     *     deflater.finish();
+     *
+     *     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+     *     byte[] buf = new byte[8192];
+     *     while (!deflater.finished()) {
+     *         int byteCount = deflater.deflate(buf);
+     *         baos.write(buf, 0, byteCount);
+     *     }
+     *     deflater.end();
+     *
+     *     byte[] compressedBytes = baos.toByteArray();
+     * </pre>
+     * <p>In situations where you don't have all the input in one array (or have so much
+     * input that you want to feed it to the deflater in chunks), it's possible to call
+     * {@link #setInput setInput} repeatedly, but you're much better off using
+     * {@link DeflaterOutputStream} to handle all this for you. {@link DeflaterOutputStream} also helps
+     * minimize memory requirements&nbsp;&mdash; the sample code above is very expensive.
+     */
+    class CDeflater {
+        /**
+         * Constructs a new {@code Deflater} instance using the default compression
+         * level. The strategy can be specified with {@link #setStrategy}. A
+         * header is added to the output by default; use {@link
+         * #Deflater(int, boolean)} if you need to omit the header.
+         */
+        constructor();
+
+        /**
+         * Constructs a new {@code Deflater} instance using compression
+         * level {@code level}. The strategy can be specified with {@link #setStrategy}.
+         * A header is added to the output by default; use
+         * {@link #Deflater(int, boolean)} if you need to omit the header.
+         *
+         * @param level
+         *            the compression level in the range between 0 and 9.
+         */
+        constructor(
+            [in] Int32 level);
+
+        /**
+         * Constructs a new {@code Deflater} instance with a specific compression
+         * level. If {@code noHeader} is true, no ZLIB header is added to the
+         * output. In a ZIP archive every entry (compressed file) comes with such a
+         * header. The strategy can be specified using {@link #setStrategy}.
+         *
+         * @param level
+         *            the compression level in the range between 0 and 9.
+         * @param noHeader
+         *            {@code true} indicates that no ZLIB header should be written.
+         */
+        constructor(
+            [in] Int32 level,
+            [in] Boolean noHeader);
+
+        interface IDeflater;
+    }
+
+    /**
+     * This class provides an implementation of {@code FilterInputStream} that
+     * decompresses data that was compressed using the <i>DEFLATE</i> algorithm
+     * (see <a href="http://www.gzip.org/algorithm.txt">specification</a>).
+     * Basically it wraps the {@code Inflater} class and takes care of the
+     * buffering.
+     *
+     * @see Inflater
+     * @see DeflaterOutputStream
+     */
+    class CInflaterInputStream {
+        /**
+         * This is the most basic constructor. You only need to pass the {@code
+         * InputStream} from which the compressed data is to be read from. Default
+         * settings for the {@code Inflater} and internal buffer are be used. In
+         * particular the Inflater expects a ZLIB header from the input stream.
+         *
+         * @param is
+         *            the {@code InputStream} to read data from.
+         */
+        constructor(
+            [in] IInputStream* is);
+
+        /**
+         * This constructor lets you pass a specifically initialized Inflater,
+         * for example one that expects no ZLIB header.
+         *
+         * @param is
+         *            the {@code InputStream} to read data from.
+         * @param inflater
+         *            the specific {@code Inflater} for uncompressing data.
+         */
+        constructor(
+            [in] IInputStream* is,
+            [in] IInflater* inflater);
+
+        /**
+         * This constructor lets you specify both the {@code Inflater} as well as
+         * the internal buffer size to be used.
+         *
+         * @param is
+         *            the {@code InputStream} to read data from.
+         * @param inflater
+         *            the specific {@code Inflater} for uncompressing data.
+         * @param bsize
+         *            the size to be used for the internal buffer.
+         */
+        constructor(
+            [in] IInputStream* is,
+            [in] IInflater* inflater,
+            [in] Int32 bsize);
+
+        interface IInflaterInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    /**
+     * An {@code OutputStream} filter to decompress data. Callers write
+     * compressed data in the "deflate" format, and uncompressed data is
+     * written to the underlying stream.
+     * @since 1.6
+     */
+    class CInflaterOutputStream {
+        /**
+         * Constructs an {@code InflaterOutputStream} with a new {@code Inflater} and an
+         * implementation-defined default internal buffer size. {@code out} is a destination
+         * for uncompressed data, and compressed data will be written to this stream.
+         *
+         * @param out the destination {@code OutputStream}
+         */
+        constructor(
+            [in] IOutputStream* os);
+
+        /**
+         * Constructs an {@code InflaterOutputStream} with the given {@code Inflater} and an
+         * implementation-defined default internal buffer size. {@code out} is a destination
+         * for uncompressed data, and compressed data will be written to this stream.
+         *
+         * @param out the destination {@code OutputStream}
+         * @param inf the {@code Inflater} to be used for decompression
+
+        constructor(
+            [in] IOutputStream* os,
+            [in] IInflater* inf);
+
+        /**
+         * Constructs an {@code InflaterOutputStream} with the given {@code Inflater} and
+         * given internal buffer size. {@code out} is a destination
+         * for uncompressed data, and compressed data will be written to this stream.
+         *
+         * @param out the destination {@code OutputStream}
+         * @param inf the {@code Inflater} to be used for decompression
+         * @param bufferSize the length in bytes of the internal buffer
+         */
+        constructor(
+            [in] IOutputStream* os,
+            [in] IInflater* inf,
+            [in] Int32 bufferSize);
+
+        interface IInflaterOutputStream;
+        interface IFilterOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    /**
+     * An {@code InputStream} filter to compress data. Callers read
+     * compressed data in the "deflate" format from the uncompressed
+     * underlying stream.
+     * @since 1.6
+     */
+    class CDeflaterInputStream {
+        /**
+         * Constructs a {@code DeflaterInputStream} with a new {@code Deflater} and an
+         * implementation-defined default internal buffer size. {@code in} is a source of
+         * uncompressed data, and this stream will be a source of compressed data.
+         *
+         * @param in the source {@code InputStream}
+         */
+        constructor(
+            [in] IInputStream* is);
+
+        /**
+         * Constructs a {@code DeflaterInputStream} with the given {@code Deflater} and an
+         * implementation-defined default internal buffer size. {@code in} is a source of
+         * uncompressed data, and this stream will be a source of compressed data.
+         *
+         * @param in the source {@code InputStream}
+         * @param deflater the {@code Deflater} to be used for compression
+         */
+        constructor(
+            [in] IInputStream* is,
+            [in] IDeflater* deflater);
+
+        /**
+         * Constructs a {@code DeflaterInputStream} with the given {@code Deflater} and
+         * given internal buffer size. {@code in} is a source of
+         * uncompressed data, and this stream will be a source of compressed data.
+         *
+         * @param in the source {@code InputStream}
+         * @param deflater the {@code Deflater} to be used for compression
+         * @param bufferSize the length in bytes of the internal buffer
+         */
+        constructor(
+            [in] IInputStream* is,
+            [in] IDeflater* deflater,
+            [in] Int32 bufferSize);
+
+        interface IDeflaterInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    /**
+     * This class provides an implementation of {@code FilterOutputStream} that
+     * compresses data using the <i>DEFLATE</i> algorithm. Basically it wraps the
+     * {@code Deflater} class and takes care of the buffering.
+     *
+     * @see Deflater
+     */
+    class CDeflaterOutputStream {
+        /**
+         * This is the most basic constructor. You only need to pass the {@code
+         * OutputStream} to which the compressed data shall be written to. The
+         * default settings for the {@code Deflater} and internal buffer are used.
+         * In particular the {@code Deflater} produces a ZLIB header in the output
+         * stream.
+         *
+         * @param os
+         *            is the OutputStream where to write the compressed data to.
+         */
+        constructor(
+            [in] IOutputStream* os);
+
+        /**
+         * This constructor lets you pass the {@code Deflater} specifying the
+         * compression algorithm.
+         *
+         * @param os
+         *            is the {@code OutputStream} where to write the compressed data
+         *            to.
+         * @param def
+         *            is the specific {@code Deflater} that is used to compress
+         *            data.
+         */
+        constructor(
+            [in] IOutputStream* os,
+            [in] IDeflater* def);
+
+        /**
+         * This constructor lets you specify both the compression algorithm as well
+         * as the internal buffer size to be used.
+         *
+         * @param os
+         *            is the {@code OutputStream} where to write the compressed data
+         *            to.
+         * @param def
+         *            is the specific {@code Deflater} that will be used to compress
+         *            data.
+         * @param bsize
+         *            is the size to be used for the internal buffer.
+         */
+        constructor(
+            [in] IOutputStream* os,
+            [in] IDeflater* def,
+            [in] Int32 bsize);
+
+        interface IDeflaterOutputStream;
+        interface IFilterOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    /**
+     * The {@code CheckedInputStream} class is used to maintain a checksum at the
+     * same time as the data, on which the checksum is computed, is read from a
+     * stream. The purpose of this checksum is to establish data integrity,
+     * comparing the computed checksum against a published checksum value.
+     */
+    class CCheckedInputStream {
+        /**
+         * Constructs a new {@code CheckedInputStream} on {@code InputStream}
+         * {@code is}. The checksum will be calculated using the algorithm
+         * implemented by {@code csum}.
+         *
+         * <p><strong>Warning:</strong> passing a null source creates an invalid
+         * {@code CheckedInputStream}. All operations on such a stream will fail.
+         *
+         * @param is
+         *            the input stream to calculate checksum from.
+         * @param csum
+         *            an entity implementing the checksum algorithm.
+         */
+        constructor(
+            [in] IInputStream* is,
+            [in] IChecksum* csum);
+
+        interface ICheckedInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    /**
+     * The {@code CheckedOutputStream} class is used to maintain a running checksum
+     * of all data written to a stream. The purpose of this checksum is to establish
+     * data integrity, by publishing the checksum to other parties wanting to read
+     * the non corrupted data.
+     */
+    class CCheckedOutputStream {
+        /**
+         * Constructs a new {@code CheckedOutputStream} on {@code OutputStream}
+         * {@code os}. The checksum is calculated using the algorithm implemented
+         * by {@code csum}.
+         *
+         * @param os
+         *            the output stream to calculate checksum for.
+         * @param cs
+         *            an entity implementing the checksum algorithm.
+         */
+        constructor(
+            [in] IOutputStream* os,
+            [in] IChecksum* cs);
+
+        interface ICheckedOutputStream;
+        interface IFilterOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    /**
+     * The {@code GZIPInputStream} class is used to read data stored in the GZIP
+     * format, reading and decompressing GZIP data from the underlying stream into
+     * its buffer.
+     *
+     * <h3>Example</h3>
+     * <p>Using {@code GZIPInputStream} is easier than {@link ZipInputStream}
+     * because GZIP is only for compression, and is not a container for multiple files.
+     * This code decompresses the data from a GZIP stream, similar to the {@code gunzip(1)} utility.
+     * <pre>
+     * InputStream is = ...
+     * GZIPInputStream zis = new GZIPInputStream(new BufferedInputStream(is));
+     * try {
+     *     Reading from 'zis' gets you the uncompressed bytes...
+     *     processStream(zis);
+     * } finally {
+     *     zis.close();
+     * }
+     * </pre>
+     */
+    class CGZIPInputStream {
+        /**
+         * Construct a {@code GZIPInputStream} to read from GZIP data from the
+         * underlying stream.
+         *
+         * @param is
+         *            the {@code InputStream} to read data from.
+         * @throws IOException
+         *             if an {@code IOException} occurs.
+         */
+        constructor(
+            [in] IInputStream* is);
+
+        /**
+         * Construct a {@code GZIPInputStream} to read from GZIP data from the
+         * underlying stream. Set the internal buffer size to {@code size}.
+         *
+         * @param is
+         *            the {@code InputStream} to read data from.
+         * @param size
+         *            the internal read buffer size.
+         * @throws IOException
+         *             if an {@code IOException} occurs.
+         */
+        constructor(
+            [in] IInputStream* is,
+            [in] Int32 size);
+
+        interface IGZIPInputStream;
+        interface IInflaterInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    /**
+     * The {@code GZIPOutputStream} class is used to write data to a stream in the
+     * GZIP storage format.
+     *
+     * <h3>Example</h3>
+     * <p>Using {@code GZIPOutputStream} is a little easier than {@link ZipOutputStream}
+     * because GZIP is only for compression, and is not a container for multiple files.
+     * This code creates a GZIP stream, similar to the {@code gzip(1)} utility.
+     * <pre>
+     * OutputStream os = ...
+     * byte[] bytes = ...
+     * GZIPOutputStream zos = new GZIPOutputStream(new BufferedOutputStream(os));
+     * try {
+     *     zos.write(bytes);
+     * } finally {
+     *     zos.close();
+     * }
+     * </pre>
+     */
+    class CGZIPOutputStream {
+        /**
+         * Constructs a new {@code GZIPOutputStream} to write data in GZIP format to
+         * the given stream.
+         */
+        constructor(
+            [in] IOutputStream* os);
+
+        /**
+         * Constructs a new {@code GZIPOutputStream} to write data in GZIP format to
+         * the given stream with the given flushing behavior (see {@link DeflaterOutputStream#flush}).
+         * @since 1.7
+         */
+        constructor(
+            [in] IOutputStream* os,
+            [in] Boolean syncFlush);
+
+        /**
+         * Constructs a new {@code GZIPOutputStream} to write data in GZIP format to
+         * the given stream with the given internal buffer size.
+         */
+        constructor(
+            [in] IOutputStream* os,
+            [in] Int32 size);
+
+        /**
+         * Constructs a new {@code GZIPOutputStream} to write data in GZIP format to
+         * the given stream with the given internal buffer size and
+         * flushing behavior (see {@link DeflaterOutputStream#flush}).
+         * @since 1.7
+         */
+        constructor(
+            [in] IOutputStream* os,
+            [in] Int32 size,
+            [in] Boolean syncFlush);
+
+        interface IGZIPOutputStream;
+        interface IDeflaterOutputStream;
+        interface IFilterOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    /**
+     * This class provides an implementation of {@code FilterInputStream} that
+     * decompresses data from an {@code InputStream} containing a ZIP archive.
+     *
+     * <p>A ZIP archive is a collection of (possibly) compressed files.
+     * When reading from a {@code ZipInputStream}, you retrieve the
+     * entry's metadata with {@code getNextEntry} before you can read the userdata.
+     *
+     * <p>Although {@code InflaterInputStream} can only read compressed ZIP archive
+     * entries, this class can read non-compressed entries as well.
+     *
+     * <p>Use {@code ZipFile} if you can access the archive as a file directly,
+     * especially if you want random access to entries, rather than needing to
+     * iterate over all entries.
+     *
+     * <h3>Example</h3>
+     * <p>Using {@code ZipInputStream} is a little more complicated than {@link GZIPInputStream}
+     * because ZIP archives are containers that can contain multiple files. This code pulls all the
+     * files out of a ZIP archive, similar to the {@code unzip(1)} utility.
+     * <pre>
+     * InputStream is = ...
+     * ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
+     * try {
+     *     ZipEntry ze;
+     *     while ((ze = zis.getNextEntry()) != null) {
+     *         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+     *         byte[] buffer = new byte[1024];
+     *         int count;
+     *         while ((count = zis.read(buffer)) != -1) {
+     *             baos.write(buffer, 0, count);
+     *         }
+     *         String filename = ze.getName();
+     *         byte[] bytes = baos.toByteArray();
+     *         do something with 'filename' and 'bytes'...
+     *     }
+     * } finally {
+     *     zis.close();
+     * }
+     * </pre>
+     *
+     * @see ZipEntry
+     * @see ZipFile
+     */
+    class CZipInputStream {
+        /**
+         * Constructs a new {@code ZipInputStream} from the specified input stream.
+         *
+         * @param stream
+         *            the input stream to representing a ZIP archive.
+         */
+        constructor(
+            [in] IInputStream* stream);
+
+        interface IZipInputStream;
+        interface IInflaterInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    /**
+     * This class provides an implementation of {@code FilterOutputStream} that
+     * compresses data entries into a <i>ZIP-archive</i> output stream.
+     * <p>
+     * {@code ZipOutputStream} is used to write {@code ZipEntries} to the underlying
+     * stream. Output from {@code ZipOutputStream} conforms to the {@code ZipFile}
+     * file format.
+     * <p>
+     * While {@code DeflaterOutputStream} can write a compressed <i>ZIP-archive</i>
+     * entry, this extension can write uncompressed entries as well. In this case
+     * special rules apply, for this purpose refer to the <a
+     * href="http://www.pkware.com/documents/casestudies/APPNOTE.TXT">file format
+     * specification</a>.
+     *
+     * <h3>Example</h3>
+     * <p>Using {@code ZipOutputStream} is a little more complicated than {@link GZIPOutputStream}
+     * because ZIP archives are containers that can contain multiple files. This code creates a ZIP
+     * archive containing several files, similar to the {@code zip(1)} utility.
+     * <pre>
+     * OutputStream os = ...
+     * ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os));
+     * try {
+     *     for (int i = 0; i < fileCount; ++i) {
+     *         String filename = ...
+     *         byte[] bytes = ...
+     *         ZipEntry entry = new ZipEntry(filename);
+     *         zos.putNextEntry(entry);
+     *         zos.write(bytes);
+     *         zos.closeEntry();
+     *     }
+     * } finally {
+     *     zos.close();
+     * }
+     * </pre>
+     *
+     * @see ZipEntry
+     * @see ZipFile
+     */
+    class CZipOutputStream {
+        /**
+         * Constructs a new {@code ZipOutputStream} with the specified output
+         * stream.
+         *
+         * @param os
+         *            the {@code OutputStream} to write the data to.
+         */
+        constructor(
+            [in] IOutputStream* os);
+
+        interface IZipOutputStream;
+        interface IDeflaterOutputStream;
+        interface IFilterOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    /**
+     * An instance of {@code ZipEntry} represents an entry within a <i>ZIP-archive</i>.
+     * An entry has attributes such as name (= path) or the size of its data. While
+     * an entry identifies data stored in an archive, it does not hold the data
+     * itself. For example when reading a <i>ZIP-file</i> you will first retrieve
+     * all its entries in a collection and then read the data for a specific entry
+     * through an input stream.
+     *
+     * @see ZipFile
+     * @see ZipOutputStream
+     */
+    [deprecated]
+    class CZipEntry {
+        /**
+         * Constructs a new {@code ZipEntry} with the specified name.
+         *
+         * @param name
+         *            the name of the ZIP entry.
+         * @throws IllegalArgumentException
+         *             if the name length is outside the range (> 0xFFFF).
+         */
+        constructor(
+            [in] String name);
+
+        /**
+         * Constructs a new {@code ZipEntry} using the values obtained from {@code
+         * ze}.
+         *
+         * @param ze
+         *            the {@code ZipEntry} from which to obtain values.
+         */
+        constructor(
+            [in] IZipEntry* ze);
+
+        /*
+         * Internal constructor.  Creates a new ZipEntry by reading the
+         * Central Directory Entry from "in", which must be positioned at
+         * the CDE signature.
+         *
+         * On exit, "in" will be positioned at the start of the next entry.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* hdrBuf,
+            [in] IInputStream* is,
+            [in] ICharset* defaultCharset);
+
+        interface IZipEntry;
+        interface ICloneable;
+    }
+
+    /**
+     * This class provides random read access to a <i>ZIP-archive</i> file.
+     * <p>
+     * While {@code ZipInputStream} provides stream based read access to a
+     * <i>ZIP-archive</i>, this class implements more efficient (file based) access
+     * and makes use of the <i>central directory</i> within a <i>ZIP-archive</i>.
+     * <p>
+     * Use {@code ZipOutputStream} if you want to create an archive.
+     * <p>
+     * A temporary ZIP file can be marked for automatic deletion upon closing it.
+     *
+     * @see ZipEntry
+     * @see ZipOutputStream
+     */
+    class CZipFile {
+        /**
+         * Constructs a new {@code ZipFile} with the specified file.
+         *
+         * @param file
+         *            the file to read from.
+         * @throws ZipException
+         *             if a ZIP error occurs.
+         * @throws IOException
+         *             if an {@code IOException} occurs.
+         */
+        constructor(
+            [in] IFile* file);
+
+        /**
+         * Opens a file as <i>ZIP-archive</i>. "mode" must be {@code OPEN_READ} or
+         * {@code OPEN_DELETE} . The latter sets the "delete on exit" flag through a
+         * file.
+         *
+         * @param file
+         *            the ZIP file to read.
+         * @param mode
+         *            the mode of the file open operation.
+         * @throws IOException
+         *             if an {@code IOException} occurs.
+         */
+        constructor(
+            [in] IFile* file,
+            [in] Int32 mode);
+
+        /**
+         * Opens a ZIP archived file.
+         *
+         * @param name
+         *            the name of the ZIP file.
+         * @throws IOException
+         *             if an IOException occurs.
+         */
+        constructor(
+            [in] String name);
+
+        interface IZipFile;
+        interface IZipConstants;
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+
+    //======================================================
+    // Elastos.Utility.Jar
+    //======================================================
+    merge("utility/jar/IAttributes.car");
+    merge("utility/jar/IJarEntry.car");
+    merge("utility/jar/IManifest.car");
+    merge("utility/jar/IJarFile.car");
+    merge("utility/jar/IJarInputStream.Car");
+    merge("utility/jar/IJarOutputStream.car");
+    merge("utility/jar/IPack200.car");
+    merge("utility/jar/IStrictJarFile.car");
+
+    interface Elastos.Core.ICloneable;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.IFile;
+    interface Elastos.IO.IFilterInputStream;
+    interface Elastos.IO.IFilterOutputStream;
+    interface Elastos.IO.IFlushable;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.Utility.IMap;
+    interface Elastos.Utility.Zip.IDeflaterOutputStream;
+    interface Elastos.Utility.Zip.IInflaterInputStream;
+    interface Elastos.Utility.Zip.IZipFile;
+    interface Elastos.Utility.Zip.IZipInputStream;
+    interface Elastos.Utility.Zip.IZipOutputStream;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    class CName {
+        constructor(
+            [in] String name);
+
+        constructor(
+            [in] String name,
+            [in] Boolean validateName);
+
+        interface IName;
+    }
+
+    [deprecated]
+    class CAttributes {
+        constructor();
+
+        constructor(
+            [in] IAttributes* attributes);
+
+        constructor(
+            [in] Int32 size);
+
+        interface IAttributes;
+        interface ICloneable;
+        interface IMap;
+    }
+
+    class CJarEntry {
+        constructor(
+            [in] String name);
+
+        constructor(
+            [in] IZipEntry* zipEntry);
+
+        constructor(
+            [in] IJarEntry* jarEntry);
+
+        interface IJarEntry;
+        interface IZipEntry;
+        interface ICloneable;
+    }
+
+    [deprecated]
+    class CJarFile {
+        constructor(
+            [in] IFile* file);
+
+        constructor(
+            [in] IFile* file,
+            [in] Boolean verify);
+
+        constructor(
+            [in] IFile* file,
+            [in] Boolean verify,
+            [in] Int32 mode);
+
+        constructor(
+            [in] String filename);
+
+        constructor(
+            [in] String filename,
+            [in] Boolean verify);
+
+        interface IJarFile;
+        interface IZipFile;
+        interface ICloseable;
+    }
+
+    class CStrictJarFile {
+        constructor(
+            [in] String filename);
+
+        interface IStrictJarFile;
+    }
+
+    [deprecated]
+    class CJarInputStream {
+        constructor(
+            [in] IInputStream* stream,
+            [in] Boolean verify);
+
+        constructor(
+            [in] IInputStream* stream);
+
+        interface IJarInputStream;
+        interface IZipInputStream;
+        interface IInflaterInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class CJarOutputStream {
+        constructor(
+            [in] IOutputStream* os,
+            [in] IManifest* manifest);
+
+        constructor(
+            [in] IOutputStream* os);
+
+        interface IJarOutputStream;
+        interface IZipOutputStream;
+        interface IDeflaterOutputStream;
+        interface IFilterOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CManifest {
+        constructor();
+
+        constructor(
+            [in] IInputStream* is);
+
+        constructor(
+            [in] IManifest* mani);
+
+        interface IManifest;
+        interface ICloneable;
+    }
+
+    singleton class CPack200 {
+        interface IPack200;
+    }
+
+    } // namespace Jar
+    } // namespace Utility
+    } // namespace Elastos
+}

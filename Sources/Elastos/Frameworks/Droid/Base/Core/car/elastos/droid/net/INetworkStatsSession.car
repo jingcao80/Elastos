@@ -1,0 +1,49 @@
+
+module
+{
+    interface Elastos.Droid.Net.INetworkStats;
+    interface Elastos.Droid.Net.INetworkStatsHistory;
+    interface Elastos.Droid.Net.INetworkTemplate;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    interface IINetworkStatsSession {
+        /** Return network layer usage summary for traffic that matches template. */
+        GetSummaryForNetwork(
+            [in] INetworkTemplate* templateObj,
+            [in] Int64 start,
+            [in] Int64 end,
+            [out] INetworkStats** result);
+
+        /** Return historical network layer stats for traffic that matches template. */
+        GetHistoryForNetwork(
+            [in] INetworkTemplate* templateObj,
+            [in] Int32 fields,
+            [out] INetworkStatsHistory** result);
+
+        /** Return network layer usage summary per UID for traffic that matches template. */
+        GetSummaryForAllUid(
+            [in] INetworkTemplate* templateObj,
+            [in] Int64 start,
+            [in] Int64 end,
+            [in] Boolean includeTags,
+            [out] INetworkStats** result);
+
+        /** Return historical network layer stats for specific UID traffic that matches template. */
+        GetHistoryForUid(
+            [in] INetworkTemplate* templateObj,
+            [in] Int32 uid,
+            [in] Int32 set,
+            [in] Int32 tag,
+            [in] Int32 fields,
+            [out] INetworkStatsHistory** result);
+
+        Close();
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

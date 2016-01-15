@@ -1,0 +1,44 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * This transition captures the layout bounds of target views before and after
+     * the scene change and animates those changes during the transition.
+     *
+     * <p>A ChangeBounds transition can be described in a resource file by using the
+     * tag <code>changeBounds</code>, along with the other standard
+     * attributes of {@link android.R.styleable#Transition}.</p>
+     */
+
+    /**
+     * involve interface ITransition
+     */
+    interface IChangeBounds {
+
+        SetResizeClip(
+            [in] Boolean resizeClip);
+
+        /**
+         * Setting this flag tells ChangeBounds to track the before/after parent
+         * of every view using this transition. The flag is not enabled by
+         * default because it requires the parent instances to be the same
+         * in the two scenes or else all parents must use ids to allow
+         * the transition to determine which parents are the same.
+         *
+         * @param reparent true if the transition should track the parent
+         * container of target views and animate parent changes.
+         * @deprecated Use {@link android.transition.ChangeTransform} to handle
+         * transitions between different parents.
+         */
+        SetReparent(
+            [in] Boolean reparent);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

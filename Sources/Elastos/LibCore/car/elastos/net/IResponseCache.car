@@ -1,0 +1,94 @@
+
+module
+{
+    interface Elastos.Net.IURI;
+    interface Elastos.Utility.IMap;
+    interface Elastos.Net.IURLConnection;
+    interface Elastos.Net.ICacheResponse;
+    interface Elastos.Net.ICacheRequest;
+
+    namespace Elastos {
+    namespace Net {
+
+    enum ResponseSource {
+        /**
+         * Return the response from the cache immediately.
+         */
+        ResponseSource_CACHE,
+
+        /**
+         * Make a conditional request to the host, returning the cache response if
+         * the cache is valid and the network response otherwise.
+         */
+        ResponseSource_CONDITIONAL_CACHE,
+
+        /**
+         * Return the response from the network.
+         */
+        ResponseSource_NETWORK
+    }
+
+    interface IResponseCache {
+        /**
+         * Returns the cached response corresponding to the given request.
+         *
+         * @param uri
+         *            the request URI.
+         * @param requestMethod
+         *            the request method.
+         * @param requestHeaders
+         *            a map of request headers.
+         * @return the {@code CacheResponse} object if the request is available in the cache
+         *         or {@code null} otherwise.
+         * @throws IOException
+         *             if an I/O error occurs while getting the cached data.
+         * @throws IllegalArgumentException
+         *             if any one of the parameters is set to {@code null}.
+         */
+        Get(
+            [in] IURI* uri,
+            [in] String requestMethod,
+            [in] IMap* requestHeaders,
+            [out] ICacheResponse** cache);
+
+        /**
+         * Allows the protocol handler to cache data after retrieving resources. The
+         * {@code ResponseCache} decides whether the resource data should be cached
+         * or not. If so, this method returns a {@code CacheRequest} to write the
+         * resource data to. Otherwise, this method returns {@code null}.
+         *
+         * @param uri
+         *            the reference to the requested resource.
+         * @param conn
+         *            the connection to fetch the response.
+         * @return a CacheRequest object with a WriteableByteChannel if the resource
+         *         has to be cached, {@code null} otherwise.
+         * @throws IOException
+         *             if an I/O error occurs while adding the resource.
+         * @throws IllegalArgumentException
+         *             if any one of the parameters is set to {@code null}.
+         */
+        Put(
+            [in] IURI* uri,
+            [in] IURLConnection* conn,
+            [out] ICacheRequest** cache);
+    }
+
+    interface IResponseCacheHelper {
+        /**
+         * Returns the system's default response cache, or null.
+         */
+        GetDefault(
+            [out] IResponseCache** responseCache);
+
+        /**
+         * Sets the system's default response cache. Use null to remove the response cache.
+         */
+        SetDefault(
+            [in] IResponseCache* responseCache);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

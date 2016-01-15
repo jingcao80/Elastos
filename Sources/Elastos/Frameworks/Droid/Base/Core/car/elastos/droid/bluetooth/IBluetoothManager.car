@@ -1,0 +1,55 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IIBluetooth;
+    interface Elastos.Droid.Bluetooth.IIBluetoothManagerCallback;
+    interface Elastos.Droid.Bluetooth.IIBluetoothStateChangeCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * System private API for talking with the Bluetooth service.
+         *
+         * {@hide}
+         */
+        interface IIBluetoothManager
+        {
+            RegisterAdapter(
+                [in] IIBluetoothManagerCallback* bmCallback,
+                [out] IIBluetooth** bluetooth);
+
+            UnregisterAdapter(
+                [in] IIBluetoothManagerCallback* bmCallback);
+
+            RegisterStateChangeCallback(
+                [in] IIBluetoothStateChangeCallback* bmCallback);
+
+            UnregisterStateChangeCallback(
+                [in] IIBluetoothStateChangeCallback* bmCallback);
+
+            IsEnabled(
+                [out] Boolean* isEnabled);
+
+            Enable(
+                [out] Boolean* result);
+
+            EnableNoAutoConnect(
+                [out] Boolean* result);
+
+            Disable(
+                [in] Boolean persist,
+                [out] Boolean* result);
+
+            GetAddress(
+                [out] String* address);
+
+            GetName(
+                [out] String* name);
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

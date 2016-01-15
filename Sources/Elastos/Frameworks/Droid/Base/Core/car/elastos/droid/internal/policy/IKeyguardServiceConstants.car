@@ -1,0 +1,35 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+
+    /** {@hide} */
+    [local]
+    interface IIKeyguardServiceConstants {
+        /**
+         * Constant for {@link com.android.internal.policy.IKeyguardService#setHidden(boolean)}:
+         * Don't change the keyguard window flags.
+         */
+        const Int32 KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_NONE = 0;
+
+        /**
+         * Constant for {@link com.android.internal.policy.IKeyguardService#setHidden(boolean)}:
+         * Set the keyguard window flags to FLAG_SHOW_WALLPAPER and PRIVATE_FLAG_KEYGUARD.
+         */
+        const Int32 KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_SET_FLAGS = 1;
+
+        /**
+         * Constant for {@link com.android.internal.policy.IKeyguardService#setHidden(boolean)}:
+         * Unset the keyguard window flags to FLAG_SHOW_WALLPAPER and PRIVATE_FLAG_KEYGUARD.
+         */
+        const Int32 KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_UNSET_FLAGS = 2;
+    }
+
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

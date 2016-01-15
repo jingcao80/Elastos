@@ -1,0 +1,212 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    interface IDisplayMetrics {
+        /**
+         * Standard quantized DPI for low-density screens.
+         */
+        const Int32 DENSITY_LOW = 120;
+
+        /**
+         * Standard quantized DPI for medium-density screens.
+         */
+        const Int32 DENSITY_MEDIUM = 160;
+
+        /**
+         * This is a secondary density, added for some common screen configurations.
+         * It is recommended that applications not generally target this as a first
+         * class density -- that is, don't supply specific graphics for this
+         * density, instead allow the platform to scale from other densities
+         * (typically {@link #DENSITY_HIGH}) as
+         * appropriate.  In most cases (such as using bitmaps in
+         * {@link android.graphics.drawable.Drawable}) the platform
+         * can perform this scaling at load time, so the only cost is some slight
+         * startup runtime overhead.
+         *
+         * <p>This density was original introduced to correspond with a
+         * 720p TV screen: the density for 1080p televisions is
+         * {@link #DENSITY_XHIGH}, and the value here provides the same UI
+         * size for a TV running at 720p.  It has also found use in 7" tablets,
+         * when these devices have 1280x720 displays.
+         */
+        const Int32 DENSITY_TV = 213;
+
+        /**
+         * Standard quantized DPI for high-density screens.
+         */
+        const Int32 DENSITY_HIGH = 240;
+
+        /**
+         * Standard quantized DPI for extra-high-density screens.
+         */
+        const Int32 DENSITY_XHIGH = 320;
+
+        /**
+         * Intermediate density for screens that sit somewhere between
+         * {@link #DENSITY_XHIGH} (320 dpi) and {@link #DENSITY_XXHIGH} (480 dpi).
+         * This is not a density that applications should target, instead relying
+         * on the system to scale their {@link #DENSITY_XXHIGH} assets for them.
+         */
+        const Int32 DENSITY_400 = 400;
+
+        /**
+         * Standard quantized DPI for extra-extra-high-density screens.
+         */
+         const Int32 DENSITY_XXHIGH = 480;
+
+        /**
+         * Intermediate density for screens that sit somewhere between
+         * {@link #DENSITY_XXHIGH} (480 dpi) and {@link #DENSITY_XXXHIGH} (640 dpi).
+         * This is not a density that applications should target, instead relying
+         * on the system to scale their {@link #DENSITY_XXXHIGH} assets for them.
+         */
+        const Int32 DENSITY_560 = 560;
+
+        /**
+         * Standard quantized DPI for extra-extra-extra-high-density screens.  Applications
+         * should not generally worry about this density; relying on XHIGH graphics
+         * being scaled up to it should be sufficient for almost all cases.  A typical
+         * use of this density would be 4K television screens -- 3840x2160, which
+         * is 2x a traditional HD 1920x1080 screen which runs at DENSITY_XHIGH.
+         */
+        const Int32 DENSITY_XXXHIGH = 640;
+
+        /**
+         * The reference density used throughout the system.
+         */
+        const Int32 DENSITY_DEFAULT = 160; // DENSITY_MEDIUM;
+
+        /**
+         * Scaling factor to convert a density in DPI units to the density scale.
+         * @hide
+         */
+        const Float DENSITY_DEFAULT_SCALE = 0.00625; // 1.0f / DENSITY_DEFAULT;
+
+        SetTo(
+            [in] IDisplayMetrics* o);
+
+        SetToDefaults();
+
+        /**
+         * Returns true if these display metrics equal the other display metrics.
+         *
+         * @param other The display metrics with which to compare.
+         * @return True if the display metrics are equal.
+         */
+        Equals(
+            [in] IDisplayMetrics* dm,
+            [out] Boolean* resutl);
+
+        Equals(
+            [in] IInterface* dm,
+            [out] Boolean* resutl);
+
+        GetHashCode(
+            [out] Int32* hash);
+
+        /**
+         * Returns true if the physical aspects of the two display metrics
+         * are equal.  This ignores the scaled density, which is a logical
+         * attribute based on the current desired font size.
+         *
+         * @param other The display metrics with which to compare.
+         * @return True if the display metrics are equal.
+         * @hide
+         */
+        EqualsPhysical(
+            [in] IDisplayMetrics* dm,
+            [out] Boolean* resutl);
+
+        GetWidthPixels(
+            [out] Int32* value);
+
+        SetWidthPixels(
+            [in] Int32 value);
+
+        GetHeightPixels(
+            [out] Int32* value);
+
+        SetHeightPixels(
+            [in] Int32 value);
+
+        GetDensity(
+            [out] Float* density);
+
+        SetDensity(
+            [in] Float density);
+
+        GetDensityDpi(
+            [out] Int32* value);
+
+        SetDensityDpi(
+            [in] Int32 value);
+
+        GetScaledDensity(
+            [out] Float* value);
+
+        SetScaledDensity(
+            [in] Float value);
+
+        GetXdpi(
+            [out] Float* value);
+
+        SetXdpi(
+            [in] Float value);
+
+        GetYdpi(
+            [out] Float* value);
+
+        SetYdpi(
+            [in] Float value);
+
+        GetNoncompatWidthPixels(
+            [out] Int32* value);
+
+        SetNoncompatWidthPixels(
+            [in] Int32 value);
+
+        GetNoncompatHeightPixels(
+            [out] Int32* value);
+
+        SetNoncompatHeightPixels(
+            [in] Int32 value);
+
+        GetNoncompatDensity(
+            [out] Float* value);
+
+        SetNoncompatDensity(
+            [in] Float value);
+
+        GetNoncompatDensityDpi(
+            [out] Int32* value);
+
+        SetNoncompatDensityDpi(
+            [in] Int32 value);
+
+        GetNoncompatScaledDensity(
+            [out] Float* value);
+
+        SetNoncompatScaledDensity(
+            [in] Float value);
+
+        GetNoncompatXdpi(
+            [out] Float* value);
+
+        SetNoncompatXdpi(
+            [in] Float value);
+
+        GetNoncompatYdpi(
+            [out] Float* value);
+
+        SetNoncompatYdpi(
+            [in] Float value);
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+}

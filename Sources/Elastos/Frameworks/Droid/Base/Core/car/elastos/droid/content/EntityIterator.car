@@ -1,0 +1,68 @@
+
+module
+{
+    interface Elastos.Droid.Content.IEntity;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * A specialization of {@link Iterator} that allows iterating over a collection of
+     * {@link Entity} objects. In addition to the iteration functionality it also allows
+     * resetting the iterator back to the beginning and provides for an explicit {@link #close()}
+     * method to indicate that the iterator is no longer needed and that its resources
+     * can be released.
+     */
+    /*
+     * @Involve
+     * interface IIterator
+     */
+    interface IEntityIterator {
+        /**
+         * Returns true if there is at least one more element, false otherwise.
+         * @see #next
+         */
+        HasNext(
+            [out] Boolean* value);
+
+        /**
+         * Returns the next object and advances the iterator.
+         *
+         * @return the next object.
+         * @throws NoSuchElementException
+         *             if there are no more elements.
+         * @see #hasNext
+         */
+        GetNext(
+            [out] IEntity** entity);
+
+        /**
+         * Removes the last object returned by {@code next} from the collection.
+         * This method can only be called once between each call to {@code next}.
+         *
+         * @throws UnsupportedOperationException
+         *             if removing is not supported by the collection being
+         *             iterated.
+         * @throws IllegalStateException
+         *             if {@code next} has not been called, or {@code remove} has
+         *             already been called after the last call to {@code next}.
+         */
+        Remove();
+
+        /**
+         * Reset the iterator back to the beginning.
+         */
+        Reset();
+
+        /**
+         * Indicates that this iterator is no longer needed and that any associated resources
+         * may be released (such as a SQLite cursor).
+         */
+        Close();
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

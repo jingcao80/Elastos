@@ -1,0 +1,103 @@
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    /**
+     * A view that can be used for both the dimmed and normal background of an notification.
+     */
+    /**
+     * @Involve
+     * interface IView
+     */
+    [deprecated]
+    interface INotificationBackgroundView {
+        /**
+         * Sets a background drawable. As we need to change our bounds independently of layout, we need
+         * the notion of a background independently of the regular View background..
+         */
+        SetCustomBackground(
+            [in] IDrawable* background);
+
+        SetCustomBackground(
+            [in] Int32 drawableResId);
+
+        SetTint(
+            [in] Int32 tintColor);
+
+        SetActualHeight(
+            [in] Int32 actualHeight);
+
+        GetActualHeight(
+            [out] Int32* result);
+
+        SetClipTopAmount(
+            [in] Int32 clipTopAmount);
+
+        SetState(
+            [in] ArrayOf<Int32>* drawableState);
+
+        SetRippleColor(
+            [in] Int32 color);
+    }
+
+
+    /**
+     * A frame layout containing the actual payload of the notification, including the contracted and
+     * expanded layout. This class is responsible for clipping the content and and switching between the
+     * expanded and contracted view depending on its clipped size.
+     */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     */
+    [local]
+    interface INotificationContentView {
+        Reset();
+
+        GetContractedChild(
+            [out] IView** view);
+
+        GetExpandedChild(
+            [out] IView** view);
+
+        SetContractedChild(
+            [in] IView* child);
+
+        SetExpandedChild(
+            [in] IView* child);
+
+        SetActualHeight(
+            [in] Int32 actualHeight);
+
+        GetMaxHeight(
+            [out] Int32* height);
+
+        GetMinHeight(
+            [out] Int32* height);
+
+        SetClipTopAmount(
+            [in] Int32 clipTopAmount);
+
+        NotifyContentUpdated();
+
+        IsContentExpandable(
+            [out] Boolean* result);
+
+        SetDark(
+            [in] Boolean dark,
+            [in] Boolean fade);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

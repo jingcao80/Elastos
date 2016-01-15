@@ -1,0 +1,53 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "${name}.txt"
+$
+$   WITH all interfaces DO
+$       IF attrib is "callback" and attrib is not "clsobj"
+$           WITH all parents_and_me DO
+$           	WITH all methods DO
+${class.name}::Add${name}Callback(
+        PInterface pServerObj,
+        ${type} (*pFunc)(${DefaultInterface(class)} *$^
+$                   WITH all parameters DO
+, ${type}$^
+$                   END DO
+),
+        PVoid pUserData=NULL);
+${class.name}::Remove${name}Callback(
+        PInterface pServerObj,
+        ${type} (*pFunc)(${DefaultInterface(class)} *$^
+$                   WITH all parameters DO
+, ${type}$^
+$                   END DO
+),
+        PVoid pUserData=NULL);
+${class.name}::Add${name}Callback(
+        PInterface pServerObj,
+        T *pThis,
+        ${type} (CARAPICALLTYPE T::*pFunc)(
+                ${DefaultInterface(class)} *$^
+$                   WITH all parameters DO
+, ${type}$^
+$                   END DO
+));
+${class.name}::Remove${name}Callback(
+        PInterface pServerObj,
+        T *pThis,
+        ${type} (CARAPICALLTYPE T::*pFunc)(
+                ${DefaultInterface(class)} *$^
+$                   WITH all parameters DO
+, ${type}$^
+$                   END DO
+));
+$           	END DO ;; all methods
+$           END DO ;; all parents_and_me
+$       END IF ;; callback clsobj
+$   END DO ;; all interfaces
+$IF attrib is not "singleton"
+${class.name}::RemoveAllCallbacks(PInterface pServerObj);
+$END IF ;; "singleton"
+$END OUTPUT

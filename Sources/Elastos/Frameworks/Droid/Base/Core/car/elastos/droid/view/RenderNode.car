@@ -1,0 +1,756 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IMatrix;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.IOutline;
+    interface Elastos.Droid.View.IRenderNodeAnimator;
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * <p>A display list records a series of graphics related operations and can replay
+     * them later. Display lists are usually built by recording operations on a
+     * {@link HardwareCanvas}. Replaying the operations from a display list avoids
+     * executing application code on every frame, and is thus much more efficient.</p>
+     *
+     * <p>Display lists are used internally for all views by default, and are not
+     * typically used directly. One reason to consider using a display is a custom
+     * {@link View} implementation that needs to issue a large number of drawing commands.
+     * When the view invalidates, all the drawing commands must be reissued, even if
+     * large portions of the drawing command stream stay the same frame to frame, which
+     * can become a performance bottleneck. To solve this issue, a custom View might split
+     * its content into several display lists. A display list is updated only when its
+     * content, and only its content, needs to be updated.</p>
+     *
+     * <p>A text editor might for instance store each paragraph into its own display list.
+     * Thus when the user inserts or removes characters, only the display list of the
+     * affected paragraph needs to be recorded again.</p>
+     *
+     * <h3>Hardware acceleration</h3>
+     * <p>Display lists can only be replayed using a {@link HardwareCanvas}. They are not
+     * supported in software. Always make sure that the {@link android.graphics.Canvas}
+     * you are using to render a display list is hardware accelerated using
+     * {@link android.graphics.Canvas#isHardwareAccelerated()}.</p>
+     *
+     * <h3>Creating a display list</h3>
+     * <pre class="prettyprint">
+     *     HardwareRenderer renderer = myView.getHardwareRenderer();
+     *     if (renderer != null) {
+     *         DisplayList displayList = renderer.createDisplayList();
+     *         HardwareCanvas canvas = displayList.start(width, height);
+     *         try {
+     *             // Draw onto the canvas
+     *             // For instance: canvas.drawBitmap(...);
+     *         } finally {
+     *             displayList.end();
+     *         }
+     *     }
+     * </pre>
+     *
+     * <h3>Rendering a display list on a View</h3>
+     * <pre class="prettyprint">
+     *     protected void onDraw(Canvas canvas) {
+     *         if (canvas.isHardwareAccelerated()) {
+     *             HardwareCanvas hardwareCanvas = (HardwareCanvas) canvas;
+     *             hardwareCanvas.drawDisplayList(mDisplayList);
+     *         }
+     *     }
+     * </pre>
+     *
+     * <h3>Releasing resources</h3>
+     * <p>This step is not mandatory but recommended if you want to release resources
+     * held by a display list as soon as possible.</p>
+     * <pre class="prettyprint">
+     *     // Mark this display list invalid, it cannot be used for drawing anymore,
+     *     // and release resources held by this display list
+     *     displayList.clear();
+     * </pre>
+     *
+     * <h3>Properties</h3>
+     * <p>In addition, a display list offers several properties, such as
+     * {@link #setScaleX(float)} or {@link #setLeft(
+            [in] Int32)}, that can be used to affect all
+     * the drawing commands recorded within. For instance, these properties can be used
+     * to move around a large number of images without re-issuing all the individual
+     * <code>drawBitmap()</code> calls.</p>
+     *
+     * <pre class="prettyprint">
+     *     private void createDisplayList() {
+     *         mDisplayList = DisplayList.create("MyDisplayList");
+     *         HardwareCanvas canvas = mDisplayList.start(width, height);
+     *         try {
+     *             for (Bitmap b : mBitmaps) {
+     *                 canvas.drawBitmap(b, 0.0f, 0.0f, null);
+     *                 canvas.translate(0.0f, b.getHeight());
+     *             }
+     *         } finally {
+     *             displayList.end();
+     *         }
+     *     }
+     *
+     *     protected void onDraw(Canvas canvas) {
+     *         if (canvas.isHardwareAccelerated()) {
+     *             HardwareCanvas hardwareCanvas = (HardwareCanvas) canvas;
+     *             hardwareCanvas.drawDisplayList(mDisplayList);
+     *         }
+     *     }
+     *
+     *     private void moveContentBy(
+            [in] Int32 x) {
+     *          // This will move all the bitmaps recorded inside the display list
+     *          // by x pixels to the right and redraw this view. All the commands
+     *          // recorded in createDisplayList() won't be re-issued, only onDraw()
+     *          // will be invoked and will execute very quickly
+     *          mDisplayList.offsetLeftAndRight(x);
+     *          invalidate();
+     *     }
+     * </pre>
+     *
+     * <h3>Threading</h3>
+     * <p>Display lists must be created on and manipulated from the UI thread only.</p>
+     *
+     * @hide
+     */
+    interface IRenderNode {
+        /**
+         * Flag used when calling
+         * {@link HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, Int32)}
+         * When this flag is set, draw operations lying outside of the bounds of the
+         * display list will be culled early. It is recommeneded to always set this
+         * flag.
+         */
+        const Int32 FLAG_CLIP_CHILDREN = 0x1;
+
+        // NOTE: The STATUS_* values *must* match the enum in DrawGlInfo.h
+
+        /**
+         * Indicates that the display list is done drawing.
+         *
+         * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, Int32)
+         */
+        const Int32 STATUS_DONE = 0x0;
+
+        /**
+         * Indicates that the display list needs another drawing pass.
+         *
+         * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, Int32)
+         */
+        const Int32 STATUS_DRAW = 0x1;
+
+        /**
+         * Indicates that the display list needs to re-execute its GL functors.
+         *
+         * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, Int32)
+         * @see HardwareCanvas#callDrawGLFunction(long)
+         */
+        const Int32 STATUS_INVOKE = 0x2;
+
+        /**
+         * Indicates that the display list performed GL drawing operations.
+         *
+         * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, Int32)
+         */
+        const Int32 STATUS_DREW = 0x4;
+
+        /**
+         * Starts recording a display list for the render node. All
+         * operations performed on the returned canvas are recorded and
+         * stored in this display list.
+         *
+         * Calling this method will mark the render node invalid until
+         * {@link #end(HardwareCanvas)} is called.
+         * Only valid render nodes can be replayed.
+         *
+         * @param width The width of the recording viewport
+         * @param height The height of the recording viewport
+         *
+         * @return A canvas to record drawing operations.
+         *
+         * @see #end(HardwareCanvas)
+         * @see #isValid()
+         */
+        Start(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] IHardwareCanvas** canvas);
+
+        /**
+         * Ends the recording for this display list. A display list cannot be
+         * replayed if recording is not finished. Calling this method marks
+         * the display list valid and {@link #isValid()} will return true.
+         *
+         * @see #start(
+            [in] Int32, Int32)
+         * @see #isValid()
+         */
+        End(
+            [in] IHardwareCanvas* canvas);
+
+        /**
+         * Reset native resources. This is called when cleaning up the state of display lists
+         * during destruction of hardware resources, to ensure that we do not hold onto
+         * obsolete resources after related resources are gone.
+         */
+        DestroyDisplayListData();
+
+        /**
+         * Returns whether the RenderNode's display list content is currently usable.
+         * If this returns false, the display list should be re-recorded prior to replaying it.
+         *
+         * @return Boolean true if the display list is able to be replayed, false otherwise.
+         */
+        IsValid(
+            [out] Boolean* result);
+
+        ///////////////////////////////////////////////////////////////////////////
+        // Matrix manipulation
+        ///////////////////////////////////////////////////////////////////////////
+        HasIdentityMatrix(
+            [out] Boolean* result);
+
+        GetMatrix(
+            [in] IMatrix* outMatrix);
+
+        GetInverseMatrix(
+            [in] IMatrix* outMatrix);
+
+        ///////////////////////////////////////////////////////////////////////////
+        // RenderProperty Setters
+        ///////////////////////////////////////////////////////////////////////////
+        SetLayerType(
+            [in] Int32 layerType,
+            [out] Boolean* result);
+
+        SetLayerPaint(
+            [in] IPaint* paint,
+            [out] Boolean* result);
+
+        SetClipBounds(
+            [in] IRect* rect,
+            [out] Boolean* result);
+
+        /**
+         * Set whether the Render node should clip itself to its bounds. This property is controlled by
+         * the view's parent.
+         *
+         * @param clipToBounds true if the display list should clip to its bounds
+         */
+        SetClipToBounds(
+            [in] Boolean clipToBounds,
+            [out] Boolean* result);
+
+        /**
+         * Sets whether the display list should be drawn immediately after the
+         * closest ancestor display list containing a projection receiver.
+         *
+         * @param shouldProject true if the display list should be projected onto a
+         *            containing volume.
+         */
+        SetProjectBackwards(
+            [in] Boolean shouldProject,
+            [out] Boolean* result);
+
+        /**
+         * Sets whether the display list is a projection receiver - that its parent
+         * DisplayList should draw any descendent DisplayLists with
+         * ProjectBackwards=true directly on top of it. Default value is false.
+         */
+        SetProjectionReceiver(
+            [in] Boolean shouldRecieve,
+            [out] Boolean* result);
+
+        /**
+         * Sets the outline, defining the shape that casts a shadow, and the path to
+         * be clipped if setClipToOutline is set.
+         *
+         * Deep copies the data into native to simplify reference ownership.
+         */
+        SetOutline(
+            [in] IOutline* outline,
+            [out] Boolean* result);
+
+        HasShadow(
+            [out] Boolean* result);
+
+        /**
+         * Enables or disables clipping to the outline.
+         *
+         * @param clipToOutline true if clipping to the outline.
+         */
+        SetClipToOutline(
+            [in] Boolean clipToOutline,
+            [out] Boolean* result);
+
+        GetClipToOutline(
+            [out] Boolean* result);
+
+        /**
+         * Controls the RenderNode's circular reveal clip.
+         */
+        SetRevealClip(
+            [in] Boolean shouldClip,
+            [in] Float x,
+            [in] Float y,
+            [in] Float radius,
+            [out] Boolean* result);
+
+        /**
+         * Set the static matrix on the display list. The specified matrix is combined with other
+         * transforms (such as {@link #setScaleX(float)}, {@link #setRotation(float)}, etc.)
+         *
+         * @param matrix A transform matrix to apply to this display list
+         */
+        SetStaticMatrix(
+            [in] IMatrix* matrix,
+            [out] Boolean* result);
+
+        /**
+         * Set the Animation matrix on the display list. This matrix exists if an Animation is
+         * currently playing on a View, and is set on the display list during at draw() time. When
+         * the Animation finishes, the matrix should be cleared by sending <code>null</code>
+         * for the matrix parameter.
+         *
+         * @param matrix The matrix, null indicates that the matrix should be cleared.
+         */
+        SetAnimationMatrix(
+            [in] IMatrix* matrix,
+            [out] Boolean* result);
+
+        /**
+         * Sets the translucency level for the display list.
+         *
+         * @param alpha The translucency of the display list, must be a value between 0.0f and 1.0f
+         *
+         * @see View#setAlpha(float)
+         * @see #getAlpha()
+         */
+        SetAlpha(
+            [in] Float alpha,
+            [out] Boolean* result);
+
+        /**
+         * Returns the translucency level of this display list.
+         *
+         * @return A value between 0.0f and 1.0f
+         *
+         * @see #setAlpha(float)
+         */
+        GetAlpha(
+            [out] Float* result);
+
+        /**
+         * Sets whether the display list renders content which overlaps. Non-overlapping rendering
+         * can use a fast path for alpha that avoids rendering to an offscreen buffer. By default
+         * display lists consider they do not have overlapping content.
+         *
+         * @param hasOverlappingRendering False if the content is guaranteed to be non-overlapping,
+         *                                true otherwise.
+         *
+         * @see android.view.View#hasOverlappingRendering()
+         * @see #hasOverlappingRendering()
+         */
+        SetHasOverlappingRendering(
+            [in] Boolean hasOverlappingRendering,
+            [out] Boolean* result);
+
+        /**
+         * Indicates whether the content of this display list overlaps.
+         *
+         * @return True if this display list renders content which overlaps, false otherwise.
+         *
+         * @see #setHasOverlappingRendering(
+            [in] Boolean)
+         */
+        HasOverlappingRendering(
+            [out] Boolean* result);
+
+        SetElevation(
+            [in] Float lift,
+            [out] Boolean* result);
+
+        GetElevation(
+            [out] Float* result);
+
+        /**
+         * Sets the translation value for the display list on the X axis.
+         *
+         * @param translationX The X axis translation value of the display list, in pixels
+         *
+         * @see View#setTranslationX(float)
+         * @see #getTranslationX()
+         */
+        SetTranslationX(
+            [in] Float translationX,
+            [out] Boolean* result);
+
+        /**
+         * Returns the translation value for this display list on the X axis, in pixels.
+         *
+         * @see #setTranslationX(float)
+         */
+        GetTranslationX(
+            [out] Float* result);
+
+        /**
+         * Sets the translation value for the display list on the Y axis.
+         *
+         * @param translationY The Y axis translation value of the display list, in pixels
+         *
+         * @see View#setTranslationY(float)
+         * @see #getTranslationY()
+         */
+        SetTranslationY(
+            [in] Float translationY,
+            [out] Boolean* result);
+
+        /**
+         * Returns the translation value for this display list on the Y axis, in pixels.
+         *
+         * @see #setTranslationY(float)
+         */
+        GetTranslationY(
+            [out] Float* result);
+
+        /**
+         * Sets the translation value for the display list on the Z axis.
+         *
+         * @see View#setTranslationZ(float)
+         * @see #getTranslationZ()
+         */
+        SetTranslationZ(
+            [in] Float translationZ,
+            [out] Boolean* result);
+
+        /**
+         * Returns the translation value for this display list on the Z axis.
+         *
+         * @see #setTranslationZ(float)
+         */
+        GetTranslationZ(
+            [out] Float* result);
+
+        /**
+         * Sets the rotation value for the display list around the Z axis.
+         *
+         * @param rotation The rotation value of the display list, in degrees
+         *
+         * @see View#setRotation(float)
+         * @see #getRotation()
+         */
+        SetRotation(
+            [in] Float rotation,
+            [out] Boolean* result);
+
+        /**
+         * Returns the rotation value for this display list around the Z axis, in degrees.
+         *
+         * @see #setRotation(float)
+         */
+        GetRotation(
+            [out] Float* result);
+
+        /**
+         * Sets the rotation value for the display list around the X axis.
+         *
+         * @param rotationX The rotation value of the display list, in degrees
+         *
+         * @see View#setRotationX(float)
+         * @see #getRotationX()
+         */
+        SetRotationX(
+            [in] Float rotationX,
+            [out] Boolean* result);
+
+        /**
+         * Returns the rotation value for this display list around the X axis, in degrees.
+         *
+         * @see #setRotationX(float)
+         */
+        GetRotationX(
+            [out] Float* result);
+
+        /**
+         * Sets the rotation value for the display list around the Y axis.
+         *
+         * @param rotationY The rotation value of the display list, in degrees
+         *
+         * @see View#setRotationY(float)
+         * @see #getRotationY()
+         */
+        SetRotationY(
+            [in] Float rotationY,
+            [out] Boolean* result);
+
+        /**
+         * Returns the rotation value for this display list around the Y axis, in degrees.
+         *
+         * @see #setRotationY(float)
+         */
+        GetRotationY(
+            [out] Float* result);
+
+        /**
+         * Sets the scale value for the display list on the X axis.
+         *
+         * @param scaleX The scale value of the display list
+         *
+         * @see View#setScaleX(float)
+         * @see #getScaleX()
+         */
+        SetScaleX(
+            [in] Float scaleX,
+            [out] Boolean* result);
+
+        /**
+         * Returns the scale value for this display list on the X axis.
+         *
+         * @see #setScaleX(float)
+         */
+        GetScaleX(
+            [out] Float* result);
+
+        /**
+         * Sets the scale value for the display list on the Y axis.
+         *
+         * @param scaleY The scale value of the display list
+         *
+         * @see View#setScaleY(float)
+         * @see #getScaleY()
+         */
+        SetScaleY(
+            [in] Float scaleY,
+            [out] Boolean* result);
+
+        /**
+         * Returns the scale value for this display list on the Y axis.
+         *
+         * @see #setScaleY(float)
+         */
+        GetScaleY(
+            [out] Float* result);
+
+        /**
+         * Sets the pivot value for the display list on the X axis
+         *
+         * @param pivotX The pivot value of the display list on the X axis, in pixels
+         *
+         * @see View#setPivotX(float)
+         * @see #getPivotX()
+         */
+        SetPivotX(
+            [in] Float pivotX,
+            [out] Boolean* result);
+
+        /**
+         * Returns the pivot value for this display list on the X axis, in pixels.
+         *
+         * @see #setPivotX(float)
+         */
+        GetPivotX(
+            [out] Float* result);
+
+        /**
+         * Sets the pivot value for the display list on the Y axis
+         *
+         * @param pivotY The pivot value of the display list on the Y axis, in pixels
+         *
+         * @see View#setPivotY(float)
+         * @see #getPivotY()
+         */
+        SetPivotY(
+            [in] Float pivotY,
+            [out] Boolean* result);
+
+        /**
+         * Returns the pivot value for this display list on the Y axis, in pixels.
+         *
+         * @see #setPivotY(float)
+         */
+        GetPivotY(
+            [out] Float* result);
+
+        IsPivotExplicitlySet(
+            [out] Boolean* result);
+
+        /**
+         * Sets the camera distance for the display list. Refer to
+         * {@link View#setCameraDistance(float)} for more information on how to
+         * use this property.
+         *
+         * @param distance The distance in Z of the camera of the display list
+         *
+         * @see View#setCameraDistance(float)
+         * @see #getCameraDistance()
+         */
+        SetCameraDistance(
+            [in] Float distance,
+            [out] Boolean* result);
+
+        /**
+         * Returns the distance in Z of the camera of the display list.
+         *
+         * @see #setCameraDistance(float)
+         */
+        GetCameraDistance(
+            [out] Float* result);
+
+        /**
+         * Sets the left position for the display list.
+         *
+         * @param left The left position, in pixels, of the display list
+         *
+         * @see View#setLeft(
+            [in] Int32)
+         */
+        SetLeft(
+            [in] Int32 left,
+            [out] Boolean* result);
+
+        /**
+         * Sets the top position for the display list.
+         *
+         * @param top The top position, in pixels, of the display list
+         *
+         * @see View#setTop(
+            [in] Int32)
+         */
+        SetTop(
+            [in] Int32 top,
+            [out] Boolean* result);
+
+        /**
+         * Sets the right position for the display list.
+         *
+         * @param right The right position, in pixels, of the display list
+         *
+         * @see View#setRight(
+            [in] Int32)
+         */
+        SetRight(
+            [in] Int32 right,
+            [out] Boolean* result);
+
+        /**
+         * Sets the bottom position for the display list.
+         *
+         * @param bottom The bottom position, in pixels, of the display list
+         *
+         * @see View#setBottom(
+            [in] Int32)
+         */
+        SetBottom(
+            [in] Int32 bottom,
+            [out] Boolean* result);
+
+        /**
+         * Sets the left and top positions for the display list
+         *
+         * @param left The left position of the display list, in pixels
+         * @param top The top position of the display list, in pixels
+         * @param right The right position of the display list, in pixels
+         * @param bottom The bottom position of the display list, in pixels
+         *
+         * @see View#setLeft(
+            [in] Int32)
+         * @see View#setTop(
+            [in] Int32)
+         * @see View#setRight(
+            [in] Int32)
+         * @see View#setBottom(
+            [in] Int32)
+         */
+        SetLeftTopRightBottom(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [out] Boolean* result);
+
+        /**
+         * Offsets the left and right positions for the display list
+         *
+         * @param offset The amount that the left and right positions of the display
+         *               list are offset, in pixels
+         *
+         * @see View#offsetLeftAndRight(
+            [in] Int32)
+         */
+        OffsetLeftAndRight(
+            [in] Int32 offset,
+            [out] Boolean* result);
+
+        /**
+         * Offsets the top and bottom values for the display list
+         *
+         * @param offset The amount that the top and bottom positions of the display
+         *               list are offset, in pixels
+         *
+         * @see View#offsetTopAndBottom(
+            [in] Int32)
+         */
+        OffsetTopAndBottom(
+            [in] Int32 offset,
+            [out] Boolean* result);
+
+        /**
+         * Outputs the display list to the log. This method exists for use by
+         * tools to output display lists for selected nodes to the log.
+         */
+        Output();
+
+        /**
+         * Gets the size of the DisplayList for debug purposes.
+         */
+        GetDebugSize(
+            [out] Int32* size);
+
+        ///////////////////////////////////////////////////////////////////////////
+        // Animations
+        ///////////////////////////////////////////////////////////////////////////
+
+        AddAnimator(
+            [in] IRenderNodeAnimator* animator);
+
+        EndAllAnimators();
+    }
+
+    interface IRenderNodeHelper {
+
+
+        /**
+         * Creates a new RenderNode that can be used to record batches of
+         * drawing operations, and store / apply render properties when drawn.
+         *
+         * @param name The name of the RenderNode, used for debugging purpose. May be null.
+         *
+         * @return A new RenderNode.
+         */
+        Create(
+            [in] String name,
+            [in] IView* owningView,
+            [out] IRenderNode** node);
+
+        /**
+         * Adopts an existing native render node.
+         *
+         * Note: This will *NOT* incRef() on the native object, however it will
+         * decRef() when it is destroyed. The caller should have already incRef'd it
+         */
+        Adopt(
+            [in] Handle64 nativePtr,
+            [out] IRenderNode** node);
+
+
+
+
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

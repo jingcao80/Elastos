@@ -1,0 +1,227 @@
+
+module
+{
+    interface Elastos.Net.IPasswordAuthentication;
+    interface Elastos.Net.IInetAddress;
+    interface Elastos.Net.IURL;
+
+    /**
+     * Enumeration class for the origin of the authentication request.
+     */
+    enum AuthenticatorRequestorType {
+        /**
+         * Type of proxy server
+         */
+        AuthenticatorRequestorType_PROXY,
+
+        /**
+         * Type of origin server
+         */
+        AuthenticatorRequestorType_SERVER
+    }
+
+    namespace Elastos {
+    namespace Net {
+
+    interface IAuthenticator {
+        /**
+         * Returns the collected username and password for authorization. The
+         * subclass has to override this method to return a value different to the
+         * default which is {@code null}.
+         * <p>
+         * Returns {@code null} by default.
+         *
+         * @return collected password authentication data.
+         */
+        GetPasswordAuthentication(
+            [out] IPasswordAuthentication** passwordAuthentication);
+
+        /**
+         * Returns the port of the connection that requests authorization.
+         *
+         * @return port of the connection.
+         */
+        GetRequestingPort(
+            [out] Int32* port);
+
+        /**
+         * Returns the address of the connection that requests authorization or
+         * {@code null} if unknown.
+         *
+         * @return address of the connection.
+         */
+        GetRequestingSite(
+            [out] IInetAddress** address);
+
+        /**
+         * Returns the realm (prompt string) of the connection that requests
+         * authorization.
+         *
+         * @return prompt string of the connection.
+         */
+        GetRequestingPrompt(
+            [out] String* prompt);
+
+        /**
+         * Returns the protocol of the connection that requests authorization.
+         *
+         * @return protocol of the connection.
+         */
+        GetRequestingProtocol(
+            [out] String* protocol);
+
+        /**
+         * Returns the scheme of the connection that requests authorization, for
+         * example HTTP Basic Authentication.
+         *
+         * @return scheme of the connection.
+         */
+        GetRequestingScheme(
+            [out] String* scheme);
+
+        /**
+         * Returns the host name of the connection that requests authentication or
+         * {@code null} if unknown.
+         *
+         * @return name of the requesting host or {@code null}.
+         */
+        GetRequestingHost(
+            [out] String* hostName);
+
+        /**
+         * Returns the URL of the authentication request.
+         *
+         * @return authentication request url.
+         */
+        GetRequestingURL(
+            [out] IURL** url);
+
+        /**
+         * Returns the type of this request, it can be {@code PROXY} or {@code SERVER}.
+         *
+         * @return RequestorType of the authentication request.
+         */
+        GetRequestorType(
+            [out] AuthenticatorRequestorType* requestorType);
+    }
+
+    interface IAuthenticatorHelper {
+        /**
+         * If the permission check of the security manager does not result in a
+         * security exception, this method invokes the methods of the registered
+         * authenticator to get the authentication info.
+         *
+         * @return password authentication info or {@code null} if no authenticator
+         *         exists.
+         * @param rAddr
+         *            address of the connection that requests authentication.
+         * @param rPort
+         *            port of the connection that requests authentication.
+         * @param rProtocol
+         *            protocol of the connection that requests authentication.
+         * @param rPrompt
+         *            realm of the connection that requests authentication.
+         * @param rScheme
+         *            scheme of the connection that requests authentication.
+         * @throws SecurityException
+         *             if a security manager denies the password authentication
+         *             permission.
+         */
+        RequestPasswordAuthentication(
+            [in] IInetAddress* rAddr,
+            [in] Int32 rPort,
+            [in] String rProtocol,
+            [in] String rPrompt,
+            [in] String rScheme,
+            [out] IPasswordAuthentication** passwordAuthentication);
+
+        /**
+         * If the permission check of the security manager does not result in a
+         * security exception, this method invokes the methods of the registered
+         * authenticator to get the authentication info.
+         *
+         * @return password authentication info or {@code null} if no authenticator
+         *         exists.
+         * @param rHost
+         *            host name of the connection that requests authentication.
+         * @param rAddr
+         *            address of the connection that requests authentication.
+         * @param rPort
+         *            port of the connection that requests authentication.
+         * @param rProtocol
+         *            protocol of the connection that requests authentication.
+         * @param rPrompt
+         *            realm of the connection that requests authentication.
+         * @param rScheme
+         *            scheme of the connection that requests authentication.
+         * @throws SecurityException
+         *             if a security manager denies the password authentication
+         *             permission.
+         */
+        RequestPasswordAuthentication(
+            [in] String rHost,
+            [in] IInetAddress* rAddr,
+            [in] Int32 rPort,
+            [in] String rProtocol,
+            [in] String rPrompt,
+            [in] String rScheme,
+            [out] IPasswordAuthentication** passwordAuthentication);
+
+        /**
+         * If the permission check of the security manager does not result in a
+         * security exception, this method invokes the methods of the registered
+         * authenticator to get the authentication info.
+         *
+         * @return password authentication info or {@code null} if no authenticator
+         *         exists.
+         * @param rHost
+         *            host name of the connection that requests authentication.
+         * @param rAddr
+         *            address of the connection that requests authentication.
+         * @param rPort
+         *            port of the connection that requests authentication.
+         * @param rProtocol
+         *            protocol of the connection that requests authentication.
+         * @param rPrompt
+         *            realm of the connection that requests authentication.
+         * @param rScheme
+         *            scheme of the connection that requests authentication.
+         * @param rURL
+         *            url of the connection that requests authentication.
+         * @param reqType
+         *            requestor type of the connection that requests authentication.
+         * @throws SecurityException
+         *             if a security manager denies the password authentication
+         *             permission.
+         */
+        RequestPasswordAuthentication(
+            [in] String rHost,
+            [in] IInetAddress* rAddr,
+            [in] Int32 rPort,
+            [in] String rProtocol,
+            [in] String rPrompt,
+            [in] String rScheme,
+            [in] IURL* rURL,
+            [in] AuthenticatorRequestorType reqType,
+            [out] IPasswordAuthentication** passwordAuthentication);
+
+        /**
+         * Sets {@code a} as the default authenticator. It will be called whenever
+         * the realm that the URL is pointing to requires authorization. If there is
+         * a security manager set then the caller must have the appropriate {@code
+         * NetPermission}.
+         *
+         * @param a
+         *            authenticator which has to be set as default.
+         * @throws SecurityException
+         *             if a security manager denies the password authentication
+         *             permission.
+         */
+        SetDefault(
+            [in] IAuthenticator* a);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

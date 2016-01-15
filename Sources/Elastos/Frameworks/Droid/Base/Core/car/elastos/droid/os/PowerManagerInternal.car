@@ -1,0 +1,75 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface ILowPowerModeListener {
+        OnLowPowerModeChanged(
+            [in] Boolean enabled);
+    }
+
+    /**
+     * Power manager local system service interface.
+     *
+     * @hide Only for use within the system server.
+     */
+    interface IPowerManagerInternal {
+
+        /**
+         * Used by the window manager to override the screen brightness based on the
+         * current foreground activity.
+         *
+         * This method must only be called by the window manager.
+         *
+         * @param brightness The overridden brightness, or -1 to disable the override.
+         */
+        SetScreenBrightnessOverrideFromWindowManager(
+            [in] Int32 brightness);
+
+        /**
+         * Used by the window manager to override the button brightness based on the
+         * current foreground activity.
+         *
+         * This method must only be called by the window manager.
+         *
+         * @param brightness The overridden brightness, or -1 to disable the override.
+         */
+        SetButtonBrightnessOverrideFromWindowManager(
+            [in] Int32 brightness);
+
+        /**
+         * Used by the window manager to override the user activity timeout based on the
+         * current foreground activity.  It can only be used to make the timeout shorter
+         * than usual, not longer.
+         *
+         * This method must only be called by the window manager.
+         *
+         * @param timeoutMillis The overridden timeout, or -1 to disable the override.
+         */
+        SetUserActivityTimeoutOverrideFromWindowManager(
+            [in] Int64 timeoutMillis);
+
+        /**
+         * Used by the dream manager to override certain properties while dozing.
+         *
+         * @param screenState The overridden screen state, or {@link Display.STATE_UNKNOWN}
+         * to disable the override.
+         * @param screenBrightness The overridden screen brightness, or
+         * {@link PowerManager#BRIGHTNESS_DEFAULT} to disable the override.
+         */
+        SetDozeOverrideFromDreamManager(
+            [in] Int32 screenState,
+            [in] Int32 screenBrightness);
+
+        GetLowPowerModeEnabled(
+            [out] Boolean* result);
+
+        RegisterLowPowerModeObserver(
+            [in] ILowPowerModeListener* listener);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

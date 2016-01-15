@@ -1,0 +1,63 @@
+
+module
+{
+    interface Elastosx.Xml.Transform.IResult;
+    interface Elastosx.Xml.Transform.ITransformer;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Transform {
+    namespace Sax {
+
+    /**
+      * @Involve
+      * interface Org.Xml.Sax.IContentHandler
+      * interface Org.Xml.Sax.IDTDHandler
+      * interface Org.Xml.Sax.ILexicalHandler
+      */
+    interface ITransformerHandler {
+    /**
+     * <p>Set  the <code>Result</code> associated with this
+     * <code>TransformerHandler</code> to be used for the transformation.</p>
+     *
+     * @param result A <code>Result</code> instance, should not be
+     *   <code>null</code>.
+     *
+     * @throws IllegalArgumentException if result is invalid for some reason.
+     */
+        SetResult(
+            [in] IResult* result);
+
+    /**
+     * Set the base ID (URI or system ID) from where relative
+     * URLs will be resolved.
+     * @param systemID Base URI for the source tree.
+     */
+        SetSystemId(
+            [in] String systemID);
+
+    /**
+     * Get the base ID (URI or system ID) from where relative
+     * URLs will be resolved.
+     * @return The systemID that was set with {@link #setSystemId}.
+     */
+        GetSystemId(
+            [out] String* systemID);
+
+    /**
+     * <p>Get the <code>Transformer</code> associated with this handler, which
+     * is needed in order to set parameters and output properties.</p>
+     *
+     * @return <code>Transformer</code> associated with this
+     *   <code>TransformerHandler</code>.
+     */
+        GetTransformer(
+            [out] ITransformer** transformer);
+    }
+
+    } // namespace Sax
+    } // namespace Transform
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

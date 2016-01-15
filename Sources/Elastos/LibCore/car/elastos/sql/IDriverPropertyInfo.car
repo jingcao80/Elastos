@@ -1,0 +1,11 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    interface IDriverPropertyInfo {
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

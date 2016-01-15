@@ -1,0 +1,75 @@
+TARGET_NAME= webkit
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += CacheManager.cpp
+SOURCES += CCacheManager.cpp
+SOURCES += CConsoleMessage.cpp
+SOURCES += CCookieManagerHelper.cpp
+SOURCES += CCookieSyncManager.cpp
+SOURCES += CCookieSyncManagerHelper.cpp
+SOURCES += CDateSorter.cpp
+SOURCES += CGeolocationPermissions.cpp
+SOURCES += CGeolocationPermissionsHelper.cpp
+SOURCES += CHttpAuthHandler.cpp
+SOURCES += CJsDialogHelper.cpp
+SOURCES += CJsPromptResult.cpp
+SOURCES += CJsResult.cpp
+SOURCES += CMimeTypeMapHelper.cpp
+SOURCES += CPlugin.cpp
+SOURCES += CPluginData.cpp
+SOURCES += CPluginList.cpp
+SOURCES += CUrlInterceptRegistry.cpp
+SOURCES += CURLUtil.cpp
+SOURCES += CWebChromeClient.cpp
+SOURCES += CWebIconDatabaseHelper.cpp
+SOURCES += CWebResourceResponse.cpp
+SOURCES += CWebSettingsHelper.cpp
+SOURCES += CWebStorage.cpp
+SOURCES += CWebStorageHelper.cpp
+SOURCES += CWebViewClient.cpp
+SOURCES += CWebView.cpp
+SOURCES += CWebViewDatabaseHelper.cpp
+SOURCES += CWebViewFactory.cpp
+SOURCES += CWebViewFragment.cpp
+SOURCES += CWebViewHelper.cpp
+SOURCES += CWebViewHitTestResult.cpp
+SOURCES += CWebViewTransport.cpp
+SOURCES += CWebChromeClientFileChooserParamsHelper.cpp
+SOURCES += ConsoleMessage.cpp
+SOURCES += CookieManager.cpp
+SOURCES += CookieSyncManager.cpp
+SOURCES += DateSorter.cpp
+SOURCES += DebugFlags.cpp
+SOURCES += FindActionModeCallback.cpp
+SOURCES += GeolocationPermissions.cpp
+SOURCES += MimeTypeMap.cpp
+SOURCES += Plugin.cpp
+SOURCES += URLUtil.cpp
+SOURCES += UrlInterceptRegistry.cpp
+SOURCES += WebSyncManager.cpp
+SOURCES += WebViewClient.cpp
+SOURCES += WebView.cpp
+SOURCES += WebViewFactory.cpp
+SOURCES += WebViewFragment.cpp
+SOURCES += HttpAuthHandler.cpp
+SOURCES += JsDialogHelper.cpp
+SOURCES += JsPromptResult.cpp
+SOURCES += JsResult.cpp
+SOURCES += SslErrorHandler.cpp
+SOURCES += WebChromeClient.cpp
+SOURCES += WebIconDatabase.cpp
+SOURCES += WebResourceResponse.cpp
+SOURCES += WebSettings.cpp
+SOURCES += WebStorage.cpp
+SOURCES += WebViewDatabase.cpp
+
+ELASTOS_LIBS = native/native.lib
+#ELASTOS_LIBS += webview/webview.lib
+ELASTOS_LIBS += webview/chromium/chromium.lib

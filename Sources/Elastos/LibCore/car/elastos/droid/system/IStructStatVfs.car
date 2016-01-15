@@ -1,0 +1,62 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace System {
+    /**
+     * Corresponds to C's {@code struct ucred}.
+     *
+     * @hide
+     */
+    interface IStructStatVfs {
+        /** File system block size (used for block counts). */
+        GetBsize(
+            [out] Int64* bsize);
+
+        /** Fundamental file system block size. */
+        GetFrsize(
+            [out] Int64* frsize);
+
+        /** Total block count. */
+        GetBlocks(
+            [out] Int64* blocks);
+
+        /** Free block count. */
+        GetBfree(
+            [out] Int64* bfree);
+
+        /** Free block count available to non-root. */
+        GetBavail(
+            [out] Int64* bavail);
+
+        /** Total file (inode) count. */
+        GetFiles(
+            [out] Int64* files);
+
+        /** Free file (inode) count. */
+        GetFfree(
+            [out] Int64* ffree);
+
+        /** Free file (inode) count available to non-root. */
+        GetFavail(
+            [out] Int64* favail);
+
+        /** File system id. */
+        GetFsid(
+            [out] Int64* fsid);
+
+        /** Bit mask of ST_* flags. */
+        GetFlag(
+            [out] Int64* flag);
+
+        /** Maximum filename length. */
+        GetNamemax(
+            [out] Int64* namemax);
+    }
+
+    } // namespace System
+    } // namespace Droid
+    } // namespace Elastos
+}
+

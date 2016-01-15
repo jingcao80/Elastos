@@ -1,0 +1,52 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Crypto {
+
+    /**
+     *  The static class providing access on Linux platform
+     *  to system means for generating true random bits. <BR>
+     *
+     *  The source for true random bits is one of Linux's devices "/dev/urandom" or
+     *  "/dev/random" depends on which one is available; if both the first is used. <BR>
+     *
+     *  If no device available the service is not available,
+     *  that is, provider shouldn't register the algorithm. <BR>
+     */
+    interface IRandomBitsSupplier extends ISHA1_Data {}
+
+    interface IRandomBitsSupplierHelper {
+        /**
+         * The method is called by provider to determine if a device is available.
+         */
+        IsServiceAvailable(
+            [out] Boolean* available);
+
+        /**
+         * The method returns byte array of requested length provided service is available.
+         * ProviderException gets thrown otherwise.
+         *
+         * @param
+         *       numBytes - length of bytes requested
+         * @return
+         *       byte array
+         * @throws
+         *       InvalidArgumentException - if numBytes <= 0
+         */
+         GetRandomBits(
+            [in] Int32 numBytes,
+            [out, callee] ArrayOf<Byte>* randomBits);
+    }
+
+    } // namespace Crypto
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,31 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * @Involve
+     * interface IContextWrapper
+     * interface IContext
+     */
+    [local]
+    interface IMutableContextWrapper {
+        /**
+         * Change the base context for this ContextWrapper. All calls will then be
+         * delegated to the base context.  Unlike ContextWrapper, the base context
+         * can be changed even after one is already set.
+         *
+         * @param base The new base context for this wrapper.
+         */
+        SetBaseContext(
+            [in] IContext* base);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

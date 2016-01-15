@@ -1,0 +1,55 @@
+
+module
+{
+
+    using interface Elastos.IO.IInputStream;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Entity {
+
+    /**
+     * Abstract base class for entities.
+     * Provides the commonly used attributes for streamed and self-contained
+     * implementations of {@link HttpEntity HttpEntity}.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 496070 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IAbstractHttpEntity;
+     * interface IHttpEntity;
+     */
+    interface IBasicHttpEntity {
+
+        /**
+         * Specifies the length of the content.
+         *
+         * @param len       the number of bytes in the content, or
+         *                  a negative number to indicate an unknown length
+         */
+        SetContentLength(
+            [in] Int64 len);
+
+        /**
+         * Specifies the content.
+         *
+         * @param instream          the stream to return with the next call to
+         *                          {@link #getContent getContent}
+         */
+        SetContent(
+            [in] IInputStream* instream);
+
+    }
+
+    } // namespace Entity
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,33 @@
+// PreferenceCategory.car
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * Used to group {@link Preference} objects
+     * and provide a disabled title above the group.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For information about building a settings UI with Preferences,
+     * read the <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>
+     * guide.</p>
+     * </div>
+     */
+    /**
+     * @Involve
+     * interface IPreferenceGroup
+     * interface IPreference
+     * interface IComparable
+     * interface IGenericInflaterParent//=Generic from IInterface to IPreference
+     */
+    interface IPreferenceCategory {
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}
+

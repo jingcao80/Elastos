@@ -1,0 +1,180 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHeader;
+    interface Org.Apache.Http.IHeaderIterator;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Message {
+
+    /**
+     * A class for combining a set of headers.
+     * This class allows for multiple headers with the same name and
+     * keeps track of the order in which headers were added.
+     *
+     * @author Michael Becke
+     *
+     * @since 4.0
+     */
+    [deprecated]
+    interface IHeaderGroup {
+
+        /**
+         * Removes any contained headers.
+         */
+        Clear();
+
+        /**
+         * Adds the given header to the group.  The order in which this header was
+         * added is preserved.
+         *
+         * @param header the header to add
+         */
+        AddHeader(
+            [in] IHeader* header);
+
+        /**
+         * Removes the given header.
+         *
+         * @param header the header to remove
+         */
+        RemoveHeader(
+            [in] IHeader* header);
+
+        /**
+         * Replaces the first occurence of the header with the same name. If no header with
+         * the same name is found the given header is added to the end of the list.
+         *
+         * @param header the new header that should replace the first header with the same
+         * name if present in the list.
+         */
+        UpdateHeader(
+            [in] IHeader* header);
+
+        /**
+         * Sets all of the headers contained within this group overriding any
+         * existing headers. The headers are added in the order in which they appear
+         * in the array.
+         *
+         * @param headers the headers to set
+         */
+        SetHeaders(
+            [in] ArrayOf<IHeader*>* headers);
+
+        /**
+         * Gets a header representing all of the header values with the given name.
+         * If more that one header with the given name exists the values will be
+         * combined with a "," as per RFC 2616.
+         *
+         * <p>Header name comparison is case insensitive.
+         *
+         * @param name the name of the header(s) to get
+         * @return a header with a condensed value or <code>null</code> if no
+         * headers by the given name are present
+         */
+        GetCondensedHeader(
+            [in] String name,
+            [out] IHeader** condensedHeader);
+
+        /**
+         * Gets all of the headers with the given name.  The returned array
+         * maintains the relative order in which the headers were added.
+         *
+         * <p>Header name comparison is case insensitive.
+         *
+         * @param name the name of the header(s) to get
+         *
+         * @return an array of length >= 0
+         */
+        GetHeaders(
+            [in] String name,
+            [out, callee] ArrayOf<IHeader*>* headers);
+
+        /**
+         * Gets the first header with the given name.
+         *
+         * <p>Header name comparison is case insensitive.
+         *
+         * @param name the name of the header to get
+         * @return the first header or <code>null</code>
+         */
+        GetFirstHeader(
+            [in] String name,
+            [out] IHeader** firstHeader);
+
+        /**
+         * Gets the last header with the given name.
+         *
+         * <p>Header name comparison is case insensitive.
+         *
+         * @param name the name of the header to get
+         * @return the last header or <code>null</code>
+         */
+        GetLastHeader(
+            [in] String name,
+            [out] IHeader** lastHeader);
+
+        /**
+         * Gets all of the headers contained within this group.
+         *
+         * @return an array of length >= 0
+         */
+        GetAllHeaders(
+            [out, callee] ArrayOf<IHeader*>* allHeaders);
+
+        /**
+         * Tests if headers with the given name are contained within this group.
+         *
+         * <p>Header name comparison is case insensitive.
+         *
+         * @param name the header name to test for
+         * @return <code>true</code> if at least one header with the name is
+         * contained, <code>false</code> otherwise
+         */
+        ContainsHeader(
+            [in] String name,
+            [out] Boolean* containsHeader);
+
+        /**
+         * Returns an iterator over this group of headers.
+         *
+         * @return iterator over this group of headers.
+         *
+         * @since 4.0
+         */
+        GetIterator(
+            [out] IHeaderIterator** headerIterator);
+
+        /**
+         * Returns an iterator over the headers with a given name in this group.
+         *
+         * @param name      the name of the headers over which to iterate, or
+         *                  <code>null</code> for all headers
+         *
+         * @return iterator over some headers in this group.
+         *
+         * @since 4.0
+         */
+        GetIterator(
+            [in] String name,
+            [out] IHeaderIterator** headerIterator);
+
+        /**
+         * Returns a copy of this object
+         *
+         * @return copy of this object
+         */
+        Copy(
+            [out] IHeaderGroup** headerGroup);
+
+    }
+
+    } // namespace Message
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

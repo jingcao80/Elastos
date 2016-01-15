@@ -1,0 +1,54 @@
+
+module
+{
+
+    interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * Interface for deciding whether a connection should be kept alive.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     *
+     * <!-- empty lines above to avoid 'svn diff' context problems -->
+     * @version $Revision: 496070 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IHeader;
+     */
+    interface IFormattedHeader {
+
+        /**
+         * Obtains the buffer with the formatted header.
+         * The returned buffer MUST NOT be modified.
+         *
+         * @return  the formatted header, in a buffer that must not be modified
+         */
+        GetBuffer(
+            [out] ICharArrayBuffer** buffer);
+
+        /**
+         * Obtains the start of the header value in the {@link #getBuffer buffer}.
+         * By accessing the value in the buffer, creation of a temporary string
+         * can be avoided.
+         *
+         * @return  index of the first character of the header value
+         *          in the buffer returned by {@link #getBuffer getBuffer}.
+         */
+        GetValuePos(
+            [out] Int32* pos);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

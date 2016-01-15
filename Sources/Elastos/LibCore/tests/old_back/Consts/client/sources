@@ -1,0 +1,13 @@
+
+TARGET_NAME= testConsts
+TARGET_TYPE= ecx
+
+IMPORTS = TestConsts.eco
+
+SOURCES = main.cpp
+SOURCES += test.cpp
+SOURCES += TestConsts.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += -lgcc

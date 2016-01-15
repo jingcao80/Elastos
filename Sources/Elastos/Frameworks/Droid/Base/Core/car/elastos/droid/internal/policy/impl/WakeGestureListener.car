@@ -1,0 +1,36 @@
+
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+    namespace Impl {
+
+    /**
+     * Watches for wake gesture sensor events then invokes the listener.
+     */
+    interface IWakeGestureListener {
+        OnWakeUp();
+
+        IsSupported(
+            [out] Boolean* result);
+
+        RequestWakeUpTrigger();
+
+        CancelWakeUpTrigger();
+
+        Dump(
+            [in] IPrintWriter* pw,
+            [in] String prefix);
+    }
+
+
+    } // Impl
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

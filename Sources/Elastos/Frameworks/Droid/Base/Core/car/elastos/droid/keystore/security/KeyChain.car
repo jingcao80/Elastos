@@ -1,0 +1,295 @@
+
+module
+{
+    using interface Elastos.Security.IPrincipal;
+    using interface Elastos.Security.Cert.IX509Certificate;
+
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace KeyStore {
+    namespace Security {
+
+    /**
+     * @hide for reuse by CertInstaller and Settings.
+     * @see KeyChain#bind
+     *
+     * @Involve
+     * interface Elastos.Core.ICloneable
+     */
+    interface IKeyChainConnection {
+        GetService(
+            [out] IIKeyChainService** service);
+    }
+
+    /**
+     * The {@code KeyChain} class provides access to private keys and
+     * their corresponding certificate chains in credential storage.
+     *
+     * <p>Applications accessing the {@code KeyChain} normally go through
+     * these steps:
+     *
+     * <ol>
+     *
+     * <li>Receive a callback from an {@link javax.net.ssl.X509KeyManager
+     * X509KeyManager} that a private key is requested.
+     *
+     * <li>Call {@link #choosePrivateKeyAlias
+     * choosePrivateKeyAlias} to allow the user to select from a
+     * list of currently available private keys and corresponding
+     * certificate chains. The chosen alias will be returned by the
+     * callback {@link KeyChainAliasCallback#alias}, or null if no private
+     * key is available or the user cancels the request.
+     *
+     * <li>Call {@link #getPrivateKey} and {@link #getCertificateChain} to
+     * retrieve the credentials to return to the corresponding {@link
+     * javax.net.ssl.X509KeyManager} callbacks.
+     *
+     * </ol>
+     *
+     * <p>An application may remember the value of a selected alias to
+     * avoid prompting the user with {@link #choosePrivateKeyAlias
+     * choosePrivateKeyAlias} on subsequent connections. If the alias is
+     * no longer valid, null will be returned on lookups using that value
+     *
+     * <p>An application can request the installation of private keys and
+     * certificates via the {@code Intent} provided by {@link
+     * #createInstallIntent}. Private keys installed via this {@code
+     * Intent} will be accessible via {@link #choosePrivateKeyAlias} while
+     * Certificate Authority (CA) certificates will be trusted by all
+     * applications through the default {@code X509TrustManager}.
+     */
+    // TODO reference intent for credential installation when public
+    [local, deprecated]
+    interface IKeyChain {
+    /**
+     * @hide Also used by KeyChainService implementation
+     */
+        const String ACCOUNT_TYPE = "com.android.keychain";
+
+    /**
+     * Extra for use with {@link #ACTION_CHOOSER}
+     * @hide Also used by KeyChainActivity implementation
+     */
+        const String EXTRA_RESPONSE = "response";
+
+    /**
+     * Extra for use with {@link #ACTION_CHOOSER}
+     * @hide Also used by KeyChainActivity implementation
+     */
+        const String EXTRA_HOST = "host";
+
+    /**
+     * Extra for use with {@link #ACTION_CHOOSER}
+     * @hide Also used by KeyChainActivity implementation
+     */
+        const String EXTRA_PORT = "port";
+
+    /**
+     * Extra for use with {@link #ACTION_CHOOSER}
+     * @hide Also used by KeyChainActivity implementation
+     */
+        const String EXTRA_ALIAS = "alias";
+
+    /**
+     * Extra for use with {@link #ACTION_CHOOSER}
+     * @hide Also used by KeyChainActivity implementation
+     */
+        const String EXTRA_SENDER = "sender";
+
+    /**
+     * Optional extra to specify a {@code String} credential name on
+     * the {@code Intent} returned by {@link #createInstallIntent}.
+     */
+    // Compatible with old com.android.certinstaller.CredentialHelper.CERT_NAME_KEY
+        const String EXTRA_NAME = "name";
+
+    /**
+     * Optional extra to specify an X.509 certificate to install on
+     * the {@code Intent} returned by {@link #createInstallIntent}.
+     * The extra value should be a PEM or ASN.1 DER encoded {@code
+     * byte[]}. An {@link X509Certificate} can be converted to DER
+     * encoded bytes with {@link X509Certificate#getEncoded}.
+     *
+     * <p>{@link #EXTRA_NAME} may be used to provide a default alias
+     * name for the installed certificate.
+     */
+    // Compatible with old android.security.Credentials.CERTIFICATE
+        const String EXTRA_CERTIFICATE = "CERT";
+
+    /**
+     * Optional extra for use with the {@code Intent} returned by
+     * {@link #createInstallIntent} to specify a PKCS#12 key store to
+     * install. The extra value should be a {@code byte[]}. The bytes
+     * may come from an external source or be generated with {@link
+     * java.security.KeyStore#store} on a "PKCS12" instance.
+     *
+     * <p>The user will be prompted for the password to load the key store.
+     *
+     * <p>The key store will be scanned for {@link
+     * java.security.KeyStore.PrivateKeyEntry} entries and both the
+     * private key and associated certificate chain will be installed.
+     *
+     * <p>{@link #EXTRA_NAME} may be used to provide a default alias
+     * name for the installed credentials.
+     */
+    // Compatible with old android.security.Credentials.PKCS12
+        const String EXTRA_PKCS12 = "PKCS12";
+
+
+    /**
+     * Broadcast Action: Indicates the trusted storage has changed. Sent when
+     * one of this happens:
+     *
+     * <ul>
+     * <li>a new CA is added,
+     * <li>an existing CA is removed or disabled,
+     * <li>a disabled CA is enabled,
+     * <li>trusted storage is reset (all user certs are cleared),
+     * <li>when permission to access a private key is changed.
+     * </ul>
+     */
+        const String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
+
+    /**
+     * Returns an {@code Intent} that can be used for credential
+     * installation. The intent may be used without any extras, in
+     * which case the user will be able to install credentials from
+     * their own source.
+     *
+     * <p>Alternatively, {@link #EXTRA_CERTIFICATE} or {@link
+     * #EXTRA_PKCS12} maybe used to specify the bytes of an X.509
+     * certificate or a PKCS#12 key store for installation. These
+     * extras may be combined with {@link #EXTRA_NAME} to provide a
+     * default alias name for credentials being installed.
+     *
+     * <p>When used with {@link Activity#startActivityForResult},
+     * {@link Activity#RESULT_OK} will be returned if a credential was
+     * successfully installed, otherwise {@link
+     * Activity#RESULT_CANCELED} will be returned.
+     */
+        CreateInstallIntent(
+            [out] IIntent** intent);
+
+    /**
+     * Launches an {@code Activity} for the user to select the alias
+     * for a private key and certificate pair for authentication. The
+     * selected alias or null will be returned via the
+     * KeyChainAliasCallback callback.
+     *
+     * <p>{@code keyTypes} and {@code issuers} may be used to
+     * highlight suggested choices to the user, although to cope with
+     * sometimes erroneous values provided by servers, the user may be
+     * able to override these suggestions.
+     *
+     * <p>{@code host} and {@code port} may be used to give the user
+     * more context about the server requesting the credentials.
+     *
+     * <p>{@code alias} allows the chooser to preselect an existing
+     * alias which will still be subject to user confirmation.
+     *
+     * @param activity The {@link Activity} context to use for
+     *     launching the new sub-Activity to prompt the user to select
+     *     a private key; used only to call startActivity(); must not
+     *     be null.
+     * @param response Callback to invoke when the request completes;
+     *     must not be null
+     * @param keyTypes The acceptable types of asymmetric keys such as
+     *     "RSA" or "DSA", or a null array.
+     * @param issuers The acceptable certificate issuers for the
+     *     certificate matching the private key, or null.
+     * @param host The host name of the server requesting the
+     *     certificate, or null if unavailable.
+     * @param port The port number of the server requesting the
+     *     certificate, or -1 if unavailable.
+     * @param alias The alias to preselect if available, or null if
+     *     unavailable.
+     */
+        ChoosePrivateKeyAlias(
+            [in] IActivity* activity,
+            [in] IIKeyChainAliasCallback* response,
+            [in] ArrayOf<String>* keyTypes,
+            [in] ArrayOf<IPrincipal*>* issuers,
+            [in] String host,
+            [in] Int32 port,
+            [in] String alias);
+
+    /**
+     * Returns the {@code PrivateKey} for the requested alias, or null
+     * if no there is no result.
+     *
+     * @param alias The alias of the desired private key, typically
+     * returned via {@link KeyChainAliasCallback#alias}.
+     * @throws KeyChainException if the alias was valid but there was some problem accessing it.
+     */
+        GetPrivateKey(
+            [in] IContext* context,
+            [in] String alias);
+
+    /**
+     * Returns the {@code X509Certificate} chain for the requested
+     * alias, or null if no there is no result.
+     *
+     * @param alias The alias of the desired certificate chain, typically
+     * returned via {@link KeyChainAliasCallback#alias}.
+     * @throws KeyChainException if the alias was valid but there was some problem accessing it.
+     */
+        GetCertificateChain(
+            [in] IContext* context,
+            [in] String alias,
+            [out, callee] ArrayOf<IX509Certificate*>* chain);
+
+    /**
+     * Returns {@code true} if the current device's {@code KeyChain} supports a
+     * specific {@code PrivateKey} type indicated by {@code algorithm} (e.g.,
+     * "RSA").
+     */
+        IsKeyAlgorithmSupported(
+            [in] String algorithm,
+            [out] Boolean* sopported);
+
+    /**
+     * Returns {@code true} if the current device's {@code KeyChain} binds any
+     * {@code PrivateKey} of the given {@code algorithm} to the device once
+     * imported or generated. This can be used to tell if there is special
+     * hardware support that can be used to bind keys to the device in a way
+     * that makes it non-exportable.
+     */
+        IsBoundKeyAlgorithm(
+            [in] String algorithm,
+            [out] Boolean* ret);
+
+    /** @hide */
+        ToCertificate(
+            [in] ArrayOf<Byte>* bytes,
+            [out] IX509Certificate** certificate);
+
+    /**
+     * @hide for reuse by CertInstaller and Settings.
+     *
+     * Caller should call unbindService on the result when finished.
+     */
+        Bind(
+            [in] IContext* context,
+            [out] IKeyChainConnection** connection);
+
+    /**
+     * @hide
+     */
+        BindAsUser(
+            [in] IContext* context,
+            [in] IUserHandle* user,
+            [out] IKeyChainConnection** connection);
+    }
+
+    }// namespace Security
+    }// namespace KeyStore
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+

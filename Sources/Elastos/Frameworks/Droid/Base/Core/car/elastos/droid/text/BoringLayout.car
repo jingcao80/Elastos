@@ -1,0 +1,157 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Text.ITextPaint;
+    interface Elastos.Droid.Text.ILayoutDirections;
+    interface Elastos.Droid.Text.ITextDirectionHeuristic;
+
+    enum Elastos.Droid.Text.LayoutAlignment;
+    enum Elastos.Droid.Text.TextUtilsTruncateAt;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Graphics.IPaintFontMetricsInt
+     */
+    interface IBoringLayoutMetrics {
+        GetWidth(
+            [out] Int32* width);
+
+        SetWidth(
+            [in] Int32 width);
+
+        GetTop(
+            [out] Int32* top);
+
+        SetTop(
+            [in] Int32 top);
+
+        GetAscent(
+            [out] Int32* ascent);
+
+        SetAscent(
+            [in] Int32 ascent);
+
+        GetDescent(
+            [out] Int32* descent);
+
+        SetDescent(
+            [in] Int32 descent);
+
+        GetBottom(
+            [out] Int32* bottom);
+
+        SetBottom(
+            [in] Int32 bottom);
+
+        GetLeading(
+            [out] Int32* leading);
+
+        SetLeading(
+            [in] Int32 leading);
+    }
+
+    /**
+     * @Involve
+     * interface ITextUtilsEllipsizeCallback
+     * interface ILayout
+     */
+    interface IBoringLayout {
+        /**
+         * Returns a BoringLayout for the specified text, potentially reusing
+         * this one if it is already suitable.  The caller must make sure that
+         * no one is still using this Layout.
+         */
+        ReplaceOrMake(
+            [in] ICharSequence* source,
+            [in] ITextPaint* paint,
+            [in] Int32 outerwidth,
+            [in] LayoutAlignment align,
+            [in] Float spacingmult,
+            [in] Float spacingadd,
+            [in] IBoringLayoutMetrics* metrics,
+            [in] Boolean includepad,
+            [out] IBoringLayout** layout);
+
+        /**
+         * Returns a BoringLayout for the specified text, potentially reusing
+         * this one if it is already suitable.  The caller must make sure that
+         * no one is still using this Layout.
+         */
+        ReplaceOrMake(
+            [in] ICharSequence* source,
+            [in] ITextPaint* paint,
+            [in] Int32 outerwidth,
+            [in] LayoutAlignment align,
+            [in] Float spacingmult,
+            [in] Float spacingadd,
+            [in] IBoringLayoutMetrics* metrics,
+            [in] Boolean includepad,
+            [in] TextUtilsTruncateAt ellipsize,
+            [in] Int32 ellipsizedWidth,
+            [out] IBoringLayout** layout);
+    }
+
+    /**
+     * @Involve
+     * interface ILayoutHelper
+     */
+    interface IBoringLayoutHelper {
+        Make(
+            [in] ICharSequence* source,
+            [in] ITextPaint* paint,
+            [in] Int32 outerwidth,
+            [in] LayoutAlignment align,
+            [in] Float spacingmult,
+            [in] Float spacingadd,
+            [in] IBoringLayoutMetrics* metrics,
+            [in] Boolean includepad,
+            [out] IBoringLayout** ret);
+
+        Make(
+            [in] ICharSequence* source,
+            [in] ITextPaint* paint,
+            [in] Int32 outerwidth,
+            [in] LayoutAlignment align,
+            [in] Float spacingmult,
+            [in] Float spacingadd,
+            [in] IBoringLayoutMetrics* metrics,
+            [in] Boolean includepad,
+            [in] TextUtilsTruncateAt ellipsize,
+            [in] Int32 ellipsizedWidth,
+            [out] IBoringLayout** ret);
+
+        IsBoring(
+            [in] ICharSequence* text,
+            [in] ITextPaint* paint,
+            [out] IBoringLayoutMetrics** ret);
+
+        IsBoring(
+            [in] ICharSequence* text,
+            [in] ITextPaint* paint,
+            [in] ITextDirectionHeuristic* textDir,
+            [out] IBoringLayoutMetrics** ret);
+
+        IsBoring(
+            [in] ICharSequence* text,
+            [in] ITextPaint* paint,
+            [in] IBoringLayoutMetrics* metrics,
+            [out] IBoringLayoutMetrics** ret);
+
+        IsBoring(
+            [in] ICharSequence* text,
+            [in] ITextPaint* paint,
+            [in] ITextDirectionHeuristic* textDir,
+            [in] IBoringLayoutMetrics* metrics,
+            [out] IBoringLayoutMetrics** ret);
+    }
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

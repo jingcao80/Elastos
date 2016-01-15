@@ -1,0 +1,318 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Media.IAudioRecord;
+    interface Elastos.Droid.Media.IMediaSyncEvent;
+    interface Elastos.IO.IByteBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+
+    /**
+     * Interface definition for a callback to be invoked when an AudioRecord has
+     * reached a notification marker set by {@link AudioRecord#setNotificationMarkerPosition(int)}
+     * or for periodic updates on the progress of the record head, as set by
+     * {@link AudioRecord#setPositionNotificationPeriod(int)}.
+     */
+    interface IAudioRecordOnRecordPositionUpdateListener {
+        /**
+         * Called on the listener to notify it that the previously set marker has been reached
+         * by the recording head.
+         */
+        OnMarkerReached(
+            [in] IAudioRecord* recorder);
+
+        /**
+         * Called on the listener to periodically notify it that the record head has reached
+         * a multiple of the notification period.
+         */
+        OnPeriodicNotification(
+            [in] IAudioRecord* recorder);
+    }
+
+    [deprecated]
+    interface IAudioRecord {
+        /**
+         *  indicates AudioRecord state is not successfully initialized.
+         */
+        const Int32 STATE_UNINITIALIZED = 0;
+
+        /**
+         *  indicates AudioRecord state is ready to be used
+         */
+        const Int32 STATE_INITIALIZED = 1;
+
+        /**
+         * indicates AudioRecord recording state is not recording
+         */
+        const Int32 RECORDSTATE_STOPPED = 1;  // matches SL_RECORDSTATE_STOPPED
+
+        /**
+         * indicates AudioRecord recording state is recording
+         */
+        const Int32 RECORDSTATE_RECORDING = 3;// matches SL_RECORDSTATE_RECORDING
+
+        // Error codes:
+        // to keep in sync with frameworks/base/core/jni/android_media_AudioRecord.cpp
+        /**
+         * Denotes a successful operation.
+         */
+        const Int32 SUCCESS = 0;
+
+        /**
+         * Denotes a generic operation failure.
+         */
+        const Int32 ERROR = -1;
+
+        /**
+         * Denotes a failure due to the use of an invalid value.
+         */
+        const Int32 ERROR_BAD_VALUE = -2;
+
+        /**
+         * Denotes a failure due to the improper use of a method.
+         */
+        const Int32 ERROR_INVALID_OPERATION = -3;
+
+        const String SUBMIX_FIXED_VOLUME = "fixedVolume";
+
+        /**
+         * Releases the native AudioRecord resources.
+         * The object can no longer be used and the reference should be set to NULL
+         * after a call to release()
+         */
+        ReleaseResources();
+
+        /**
+         * Returns the configured audio data sample rate in Hz
+         */
+        GetSampleRate(
+            [out] Int32* result);
+
+        /**
+         * Returns the audio recording source.
+         * @see MediaRecorder.AudioSource
+         */
+        GetAudioSource(
+            [out] Int32* result);
+
+        /**
+         * Returns the configured audio data format. See {@link AudioFormat#ENCODING_PCM_16BIT}
+         * and {@link AudioFormat#ENCODING_PCM_8BIT}.
+         */
+        GetAudioFormat(
+            [out] Int32* result);
+
+        /**
+         * Returns the configured channel configuration.
+         * See {@link AudioFormat#CHANNEL_IN_MONO}
+         * and {@link AudioFormat#CHANNEL_IN_STEREO}.
+         */
+        GetChannelConfiguration(
+            [out] Int32* result);
+
+        /**
+         * Returns the configured number of channels.
+         */
+        GetChannelCount(
+            [out] Int32* result);
+
+        /**
+         * Returns the state of the AudioRecord instance. This is useful after the
+         * AudioRecord instance has been created to check if it was initialized
+         * properly. This ensures that the appropriate hardware resources have been
+         * acquired.
+         * @see AudioRecord#STATE_INITIALIZED
+         * @see AudioRecord#STATE_UNINITIALIZED
+         */
+        GetState(
+            [out] Int32* result);
+
+        /**
+         * Returns the recording state of the AudioRecord instance.
+         * @see AudioRecord#RECORDSTATE_STOPPED
+         * @see AudioRecord#RECORDSTATE_RECORDING
+         */
+        GetRecordingState(
+            [out] Int32* result);
+
+        /**
+         * Returns the notification marker position expressed in frames.
+         */
+        GetNotificationMarkerPosition(
+            [out] Int32* result);
+
+        /**
+         * Returns the notification update period expressed in frames.
+         */
+        GetPositionNotificationPeriod(
+            [out] Int32* result);
+
+        /**
+         * Returns the audio session ID.
+         *
+         * @return the ID of the audio session this AudioRecord belongs to.
+         */
+        GetAudioSessionId(
+            [out] Int32* result);
+
+        //---------------------------------------------------------
+        // Transport control methods
+        //---------------------------------------------------------
+
+        /**
+         * Starts recording from the AudioRecord instance.
+         * @throws IllegalStateException
+         */
+        StartRecording();
+
+        /**
+         * Starts recording from the AudioRecord instance when the specified synchronization event
+         * occurs on the specified audio session.
+         * @throws IllegalStateException
+         * @param syncEvent event that triggers the capture.
+         * @see MediaSyncEvent
+         */
+        StartRecording(
+            [in] IMediaSyncEvent* syncEvent);
+
+        /**
+         * Stops recording.
+         * @throws IllegalStateException
+         */
+        Stop();
+
+        //---------------------------------------------------------
+        // Audio data supply
+        //---------------------------------------------------------
+
+        /**
+         * Reads audio data from the audio hardware for recording into a buffer.
+         * @param audioData the array to which the recorded audio data is written.
+         * @param offsetInBytes index in audioData from which the data is written expressed in bytes.
+         * @param sizeInBytes the number of requested bytes.
+         * @return the number of bytes that were read or or {@link #ERROR_INVALID_OPERATION}
+         *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+         *    the parameters don't resolve to valid data and indexes.
+         *    The number of bytes will not exceed sizeInBytes.
+         */
+        Read(
+            [in] ArrayOf<Byte>* audioData,
+            [in] Int32 offsetInBytes,
+            [in] Int32 sizeInBytes,
+            [out] Int32* result);
+
+        /**
+         * Reads audio data from the audio hardware for recording into a buffer.
+         * @param audioData the array to which the recorded audio data is written.
+         * @param offsetInShorts index in audioData from which the data is written expressed in shorts.
+         * @param sizeInShorts the number of requested shorts.
+         * @return the number of shorts that were read or or {@link #ERROR_INVALID_OPERATION}
+         *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+         *    the parameters don't resolve to valid data and indexes.
+         *    The number of shorts will not exceed sizeInShorts.
+         */
+        Read(
+            [in] ArrayOf<Int16>* audioData,
+            [in] Int32 offsetInShorts,
+            [in] Int32 sizeInShorts,
+            [out] Int32* result);
+
+        /**
+         * Reads audio data from the audio hardware for recording into a direct buffer. If this buffer
+         * is not a direct buffer, this method will always return 0.
+         * @param audioBuffer the direct buffer to which the recorded audio data is written.
+         * @param sizeInBytes the number of requested bytes.
+         * @return the number of bytes that were read or or {@link #ERROR_INVALID_OPERATION}
+         *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+         *    the parameters don't resolve to valid data and indexes.
+         *    The number of bytes will not exceed sizeInBytes.
+         */
+        Read(
+            [in] IByteBuffer* audioBuffer,
+            [in] Int32 sizeInBytes,
+            [out] Int32* result);
+
+        //---------------------------------------------------------
+        // Initialization / configuration
+        //---------------------------------------------------------
+
+        /**
+         * Sets the listener the AudioRecord notifies when a previously set marker is reached or
+         * for each periodic record head position update.
+         * @param listener
+         */
+        SetRecordPositionUpdateListener(
+            [in] IAudioRecordOnRecordPositionUpdateListener* listener);
+
+        /**
+         * Sets the listener the AudioRecord notifies when a previously set marker is reached or
+         * for each periodic record head position update.
+         * Use this method to receive AudioRecord events in the Handler associated with another
+         * thread than the one in which you created the AudioTrack instance.
+         * @param listener
+         * @param handler the Handler that will receive the event notification messages.
+         */
+        SetRecordPositionUpdateListener(
+            [in] IAudioRecordOnRecordPositionUpdateListener* listener,
+            [in] IHandler* handler);
+
+        /**
+         * Sets the marker position at which the listener is called, if set with
+         * {@link #setRecordPositionUpdateListener(OnRecordPositionUpdateListener)} or
+         * {@link #setRecordPositionUpdateListener(OnRecordPositionUpdateListener, Handler)}.
+         * @param markerInFrames marker position expressed in frames
+         * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+         *  {@link #ERROR_INVALID_OPERATION}
+         */
+        SetNotificationMarkerPosition(
+            [in] Int32 markerInFrames,
+            [out] Int32* result);
+
+        /**
+         * Sets the period at which the listener is called, if set with
+         * {@link #setRecordPositionUpdateListener(OnRecordPositionUpdateListener)} or
+         * {@link #setRecordPositionUpdateListener(OnRecordPositionUpdateListener, Handler)}.
+         * @param periodInFrames update period expressed in frames
+         * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_INVALID_OPERATION}
+         */
+        SetPositionNotificationPeriod(
+            [in] Int32 periodInFrames,
+            [out] Int32* result);
+    }
+
+    interface IAudioRecordHelper {
+        /**
+         * Returns the minimum buffer size required for the successful creation of an AudioRecord
+         * object.
+         * Note that this size doesn't guarantee a smooth recording under load, and higher values
+         * should be chosen according to the expected frequency at which the AudioRecord instance
+         * will be polled for new data.
+         * @param sampleRateInHz the sample rate expressed in Hertz.
+         * @param channelConfig describes the configuration of the audio channels.
+         *   See {@link AudioFormat#CHANNEL_IN_MONO} and
+         *   {@link AudioFormat#CHANNEL_IN_STEREO}
+         * @param audioFormat the format in which the audio data is represented.
+         *   See {@link AudioFormat#ENCODING_PCM_16BIT}.
+         * @return {@link #ERROR_BAD_VALUE} if the recording parameters are not supported by the
+         *  hardware, or an invalid parameter was passed,
+         *  or {@link #ERROR} if the implementation was unable to query the hardware for its
+         *  output properties,
+         *   or the minimum buffer size expressed in bytes.
+         * @see #AudioRecord(int, int, int, int, int) for more information on valid
+         *   configuration values.
+         */
+        GetMinBufferSize(
+            [in] Int32 sampleRateInHz,
+            [in] Int32 channelConfig,
+            [in] Int32 audioFormat,
+            [out] Int32* result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

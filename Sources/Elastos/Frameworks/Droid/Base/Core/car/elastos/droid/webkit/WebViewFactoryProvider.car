@@ -1,0 +1,144 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Net.IUri;
+
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * This Interface provides glue for implementing the backend of WebView static methods which
+     * cannot be implemented in-situ in the proxy class.
+     */
+    interface IWebViewFactoryProviderStatics {
+
+        /**
+         * Implements the API method:
+         * {@link android.webkit.WebView#findAddress(String)}
+         */
+        FindAddress(
+            [in] String addr,
+            [out] String* addrOut);
+
+        /**
+         * Implements the API method:
+         * {@link android.webkit.WebSettings#getDefaultUserAgent(Context) }
+         */
+        GetDefaultUserAgent(
+            [in] IContext* context,
+            [out] String* ua);
+
+        /**
+         * Used for tests only.
+         */
+        FreeMemoryForTests();
+
+        /**
+         * Implements the API method:
+         * {@link android.webkit.WebView#setWebContentsDebuggingEnabled(boolean) }
+         */
+        SetWebContentsDebuggingEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Implements the API method:
+         * {@link android.webkit.WebView#clearClientCertPreferences(Runnable) }
+         */
+        ClearClientCertPreferences(
+            [in] IRunnable* onCleared);
+
+        /**
+         * Implements the API method:
+         * {@link android.webkit.WebView#setSlowWholeDocumentDrawEnabled(boolean) }
+         */
+        EnableSlowWholeDocumentDraw();
+
+        /**
+         * Implement the API method
+         * {@link android.webkit.WebChromeClient.FileChooserParams#parseResult(int, Intent)}
+         */
+        ParseFileChooserResult(
+            [in] Int32 resultCode,
+            [in] IIntent* intent,
+            [out, callee] ArrayOf<IUri*>* result);
+    }
+
+    /**
+     * This is the main entry-point into the WebView back end implementations, which the WebView
+     * proxy class uses to instantiate all the other objects as needed. The backend must provide an
+     * implementation of this interface, and make it available to the WebView via mechanism TBD.
+     * @hide
+     */
+    [local]
+    interface IWebViewFactoryProvider {
+
+        GetStatics(
+            [out] IWebViewFactoryProviderStatics** statics);
+
+        /**
+         * Construct a new WebViewProvider.
+         * @param webView the WebView instance bound to this implementation instance. Note it will not
+         * necessarily be fully constructed at the point of this call: defer real initialization to
+         * WebViewProvider.init().
+         * @param privateAccess provides access into WebView internal methods.
+         */
+        CreateWebView(
+            [in] IWebView* webView,
+            [in] IWebViewPrivateAccess* privateAccess,
+            [out] IWebViewProvider** webViewOut);
+
+        /**
+         * Gets the singleton GeolocationPermissions instance for this WebView implementation. The
+         * implementation must return the same instance on subsequent calls.
+         * @return the single GeolocationPermissions instance.
+         */
+        GetGeolocationPermissions(
+            [out] IGeolocationPermissions** geolocationPermissions);
+
+        /**
+         * Gets the singleton CookieManager instance for this WebView implementation. The
+         * implementation must return the same instance on subsequent calls.
+         *
+         * @return the singleton CookieManager instance
+         */
+        GetCookieManager(
+            [out] ICookieManager** cookieManager);
+
+        /**
+         * Gets the singleton WebIconDatabase instance for this WebView implementation. The
+         * implementation must return the same instance on subsequent calls.
+         *
+         * @return the singleton WebIconDatabase instance
+         */
+        GetWebIconDatabase(
+            [out] IWebIconDatabase** database);
+
+        /**
+         * Gets the singleton WebStorage instance for this WebView implementation. The
+         * implementation must return the same instance on subsequent calls.
+         *
+         * @return the singleton WebStorage instance
+         */
+        GetWebStorage(
+            [out] IWebStorage** webStorage);
+
+        /**
+         * Gets the singleton WebViewDatabase instance for this WebView implementation. The
+         * implementation must return the same instance on subsequent calls.
+         *
+         * @return the singleton WebViewDatabase instance
+         */
+        GetWebViewDatabase(
+            [in] IContext* context,
+            [out] IWebViewDatabase** database);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

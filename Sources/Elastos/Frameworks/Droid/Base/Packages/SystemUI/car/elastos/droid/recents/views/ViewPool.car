@@ -1,0 +1,54 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Views {
+
+    /* An interface to the consumer of a view pool */
+    interface IViewPoolConsumer {
+
+        CreateView(
+            [in] IContext* context,
+            [out] IInterface** result);
+
+        PrepareViewToEnterPool(
+            [in] IInterface* v);
+
+        PrepareViewToLeavePool(
+            [in] IInterface* v,
+            [in] IInterface* prepareData,
+            [in] Boolean isNewView);
+
+        HasPreferredData(
+            [in] IInterface* v,
+            [in] IInterface* preferredData,
+            [out] Boolean* result);
+    }
+
+    /* A view pool to manage more views than we can visibly handle */
+    interface IViewPool {
+
+        /** Returns a view into the pool */
+        ReturnViewToPool(
+            [in] IInterface* v);
+
+        /** Gets a view from the pool and prepares it */
+        PickUpViewFromPool(
+            [in] IInterface* preferredData,
+            [in] IInterface* prepareData,
+            [out] IInterface** result);
+    }
+
+    } // namespace Views
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,33 @@
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    [local]
+    interface IDump {
+        Dump(
+            [in] IPrintWriter* pw);
+    }
+
+    /**
+     * Helper functions for dumping the state of system services.
+     */
+    [local]
+    interface IDumpUtils {
+        DumpAsync(
+            [in] IHandler* handler,
+            [in] IDump* dump,
+            [in] IPrintWriter* pw,
+            [in] Int64 timeout);
+    }
+
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

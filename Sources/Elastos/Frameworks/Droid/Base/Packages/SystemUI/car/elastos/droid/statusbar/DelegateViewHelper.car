@@ -1,0 +1,53 @@
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    [deprecated, local]
+    interface IDelegateViewHelper {
+        SetDelegateView(
+            [in] IView* view);
+
+        SetBar(
+            [in] IBaseStatusBar* phoneStatusBar);
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        SetSourceView(
+            [in] IView* view);
+
+        /**
+         * Selects the initial touch region based on a list of views.  This is meant to be called by
+         * a container widget on children over which the initial touch should be detected.  Note this
+         * will compute a minimum bound that contains all specified views.
+         *
+         * @param views
+         */
+        SetInitialTouchRegion(
+            [in] ArrayOf<IView*>* views);
+
+        /**
+         * When rotation is set to NO_SENSOR, then this allows swapping x/y for gesture detection
+         * @param swap
+         */
+        SetSwapXY(
+            [in] Boolean swap);
+
+        SetDisabled(
+            [in] Boolean disabled);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

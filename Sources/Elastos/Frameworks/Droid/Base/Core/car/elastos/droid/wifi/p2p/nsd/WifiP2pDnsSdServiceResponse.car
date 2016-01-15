@@ -1,0 +1,64 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+    namespace Nsd {
+
+    /**
+     * A class for a response of bonjour service discovery.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     * interface IWifiP2pServiceResponse;
+     */
+    interface IWifiP2pDnsSdServiceResponse {
+        /**
+         * Returns query DNS name.
+         * @return DNS name.
+         */
+        GetDnsQueryName(
+            [out] String* result);
+
+        /**
+         * Return query DNS type.
+         * @return DNS type.
+         */
+        GetDnsType(
+            [out] Int32* result);
+
+        /**
+         * Return bonjour version number.
+         * @return version number.
+         */
+        GetVersion(
+            [out] Int32* result);
+
+        /**
+         * Return instance name.
+         * @return
+         */
+        GetInstanceName(
+            [out] String* result);
+
+        /**
+         * Return TXT record data.
+         * @return TXT record data.
+         */
+        GetTxtRecord(
+            [out] IMap** result);
+    }
+
+    } // namespace Nsd
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

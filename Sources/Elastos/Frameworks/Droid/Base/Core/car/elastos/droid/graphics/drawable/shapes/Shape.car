@@ -1,0 +1,82 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.IOutline;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+    namespace Shapes {
+
+    /**
+     * Defines a generic graphical "shape."
+     * Any Shape can be drawn to a Canvas with its own draw() method,
+     * but more graphical control is available if you instead pass
+     * it to a {@link android.graphics.drawable.ShapeDrawable}.
+
+     * @Involve
+     * interface ICloneable
+     */
+    interface IShape {
+        /**
+         * Draw this shape into the provided Canvas, with the provided Paint.
+         * Before calling this, you must call {@link #resize(float,float)}.
+         *
+         * @param canvas the Canvas within which this shape should be drawn
+         * @param paint  the Paint object that defines this shape's characteristics
+         */
+        Draw(
+            [in] ICanvas* canvas,
+            [in] IPaint* paint);
+
+        /**
+         * Returns the height of the Shape.
+         */
+        GetHeight(
+            [out] Float* height);
+
+        /**
+         * Returns the width of the Shape.
+         */
+        GetWidth(
+            [out] Float* width);
+
+        /**
+         * Checks whether the Shape is opaque.
+         * Default impl returns true. Override if your subclass can be opaque.
+         *
+         * @return true if any part of the drawable is <em>not</em> opaque.
+         */
+        HasAlpha(
+            [out] Boolean* hasAlpha);
+
+        /**
+         * Resizes the dimensions of this shape.
+         * Must be called before {@link #draw(Canvas,Paint)}.
+         *
+         * @param width the width of the shape (in pixels)
+         * @param height the height of the shape (in pixels)
+         */
+        Resize(
+            [in] Float width,
+            [in] Float height);
+
+        /**
+         * Compute the Outline of the shape and return it in the supplied Outline
+         * parameter. The default implementation does nothing and {@code outline} is not changed.
+         *
+         * @param outline The Outline to be populated with the result. Should not be null.
+         */
+        GetOutline(
+            [in] IOutline* outline);
+    }
+
+    } // namespace Shapes
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

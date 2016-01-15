@@ -1,0 +1,107 @@
+
+module
+{
+    interface Elastos.Droid.Media.IMediaCodecInfo;
+    interface Elastos.Droid.Media.IMediaFormat;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * Allows you to enumerate available codecs, each specified as a {@link MediaCodecInfo} object,
+     * find a codec supporting a given format and query the capabilities
+     * of a given codec.
+     * <p>See {@link MediaCodecInfo} for sample usage.
+     */
+    interface IMediaCodecList {
+        /**
+         * Use in {@link #MediaCodecList} to enumerate only codecs that are suitable
+         * for regular (buffer-to-buffer) decoding or encoding.
+         *
+         * <em>NOTE:</em> These are the codecs that are returned prior to API 21,
+         * using the now deprecated static methods.
+         */
+        const Int32 REGULAR_CODECS = 0;
+
+        /**
+         * Use in {@link #MediaCodecList} to enumerate all codecs, even ones that are
+         * not suitable for regular (buffer-to-buffer) decoding or encoding.  These
+         * include codecs, for example, that only work with special input or output
+         * surfaces, such as secure-only or tunneled-only codecs.
+         *
+         * @see MediaCodecInfo.CodecCapabilities#isFormatSupported
+         * @see MediaCodecInfo.CodecCapabilities#FEATURE_SecurePlayback
+         * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
+         */
+        const Int32 ALL_CODECS = 1;
+
+        /**
+         * Returns the list of {@link MediaCodecInfo} objects for the list
+         * of media-codecs.
+         */
+        GetCodecInfos(
+            [out, callee] ArrayOf<IMediaCodecInfo*>* result);
+
+        /**
+         * Find a decoder supporting a given {@link MediaFormat} in the list
+         * of media-codecs.
+         *
+         * @param format A decoder media format with optional feature directives.
+         * @throws IllegalArgumentException if format is not a valid media format.
+         * @throws NullPointerException if format is null.
+         * @return the name of a decoder that supports the given format and feature
+         *         requests, or {@code null} if no such codec has been found.
+         */
+        FindDecoderForFormat(
+            [in] IMediaFormat* format,
+            [out] String* result);
+
+        /**
+         * Find an encoder supporting a given {@link MediaFormat} in the list
+         * of media-codecs.
+         *
+         * @param format An encoder media format with optional feature directives.
+         * @throws IllegalArgumentException if format is not a valid media format.
+         * @throws NullPointerException if format is null.
+         * @return the name of an encoder that supports the given format and feature
+         *         requests, or {@code null} if no such codec has been found.
+         */
+        FindEncoderForFormat(
+            [in] IMediaFormat* format,
+            [out] String* result);
+    }
+
+    interface IMediaCodecListHelper {
+        /**
+         * Count the number of available (regular) codecs.
+         *
+         * @deprecated Use {@link #getCodecInfos} instead.
+         *
+         * @see #REGULAR_CODECS
+         */
+        GetCodecCount(
+            [out] Int32* result);
+
+        /**
+         * Return the {@link MediaCodecInfo} object for the codec at
+         * the given {@code index} in the regular list.
+         *
+         * @deprecated Use {@link #getCodecInfos} instead.
+         *
+         * @see #REGULAR_CODECS
+         */
+        GetCodecInfoAt(
+            [in] Int32 index,
+            [out] IMediaCodecInfo** result);
+
+        /** @hide */
+        GetInfoFor(
+            [in] String codec,
+            [out] IMediaCodecInfo** result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

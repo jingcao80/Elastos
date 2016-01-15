@@ -1,0 +1,27 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace AppWidgetDemo {
+
+    class CTimeService {
+        interface IService;
+    }
+
+    class CTimeWidgetProvider {
+        interface IBroadcastReceiver;
+    }
+
+    } // namespace AppWidgetDemo
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+
+}

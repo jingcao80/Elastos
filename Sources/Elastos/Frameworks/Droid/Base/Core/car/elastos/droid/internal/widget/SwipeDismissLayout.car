@@ -1,0 +1,59 @@
+
+module
+{
+    interface Elastos.Droid.Internal.Widget.IOnDismissedListener;
+    interface Elastos.Droid.Internal.Widget.IOnSwipeProgressChangedListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface ISwipeDismissLayout {
+        SetOnDismissedListener (
+            [in] IOnDismissedListener* listener);
+
+        SetOnSwipeProgressChangedListener (
+            [in] IOnSwipeProgressChangedListener* listener);
+    }
+
+    interface IOnDismissedListener {
+        OnDismissed(
+            [in] ISwipeDismissLayout* layout);
+    }
+
+    interface IOnSwipeProgressChangedListener {
+        /**
+         * Called when the layout has been swiped and the position of the window should change.
+         *
+         * @param progress A number in [0, 1] representing how far to the
+         * right the window has been swiped
+         * @param translate A number in [0, w], where w is the width of the
+         * layout. This is equivalent to progress * layout.getWidth().
+         */
+        OnSwipeProgressChanged(
+            [in] ISwipeDismissLayout* layout,
+            [in] Float progress,
+            [in] Float translate);
+
+        OnSwipeCancelled(
+            [in] ISwipeDismissLayout* layout);
+    }
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}

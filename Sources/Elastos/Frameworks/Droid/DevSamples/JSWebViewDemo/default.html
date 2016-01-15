@@ -1,0 +1,174 @@
+<head>
+
+<style>
+#test{positiion:absolute;width:95%;height:360px;background:blue;border:1px solid lightsteelblue;}
+</style>
+
+</head>
+
+<body style="background:green;width:100%;height:100%;padding:0px;margin:0px;">
+
+<div id="test">HELLO WORLD</div>
+
+</body>
+
+<script type="text/javascript">
+var o = document.getElementById("test");
+
+var r = '';
+
+try{
+r += '--'+window.CarObject.Test_NULL();
+}catch(e){}
+
+try{
+r += '--'+window.CarObject.Test_Int16(16);
+}catch(e){}
+
+try{
+r += '--'+window.CarObject.Test_Int32(32);
+}catch(e){}
+
+try{
+r += '--'+window.CarObject.Test_Int64(64);
+}catch(e){}
+
+try{
+r += '--'+window.CarObject.Test_Byte(8);
+}catch(e){}
+
+try{
+r += '--'+window.CarObject.Test_Float(12.34);
+}catch(e){}
+
+try{
+r += '--'+window.CarObject.Test_Double(1234.5678);
+}catch(e){}
+/*
+try{
+var r = window.CarObject.test_07_Char8();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_08_Char16();
+}catch(e){}
+*/
+/*
+try{
+var r = window.CarObject.test_09_CString();
+}catch(e){}
+*/
+try{
+r += '--'+window.CarObject.Test_Int32_String(123);
+}catch(e){}
+
+try{
+r += '--'+window.CarObject.Test_String_Int32_Int32_Int32_Int32_String_String_String_String('ab', 12, 34, 56, 78);
+}catch(e){}
+/*
+try{
+r += '--'+window.CarObject.test_10_String_PString('abcd');
+}catch(e){}
+*/
+try{
+r += '--'+window.CarObject.Test_String('abcd');
+}catch(e){}
+
+
+try{
+r += '--'+window.CarObject.Test_Boolean(true);
+}catch(e){}
+
+/*
+try{
+var r = window.CarObject.test_12_EMuid();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_13_EGuid();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_14_ECode();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_15_LocalPtr();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_16_LocalType();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_17_Enum();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_18_StringBuf();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_19_ArrayOf();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_20_BufferOf();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_21_MemoryOf();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_22_CppVector();
+}catch(e){}
+
+try{
+var r = window.CarObject. test_23_Struct();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_24_Interface();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_25_Object_native_function();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_26_Object_js_function();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_27_Object_js_array();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_28_Object_js_object();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_29_Object_js_car();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_30_reserved();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_31_reserved();
+}catch(e){}
+
+try{
+var r = window.CarObject.test_32_reserved();
+}catch(e){}
+*/
+
+o.innerHTML = '<div style="color:red;">'+'CAR--value:'+r+'</div>';
+
+</script>
+
+</html>
+
+

@@ -1,0 +1,200 @@
+module
+{
+    interface Elastos.Core.IInteger32;
+    interface Elastos.Utility.ILocale;
+
+    namespace Libcore {
+    namespace ICU {
+
+    enum DateFormat {
+        DateFormat_FULL,
+        DateFormat_LONG,
+        DateFormat_MEDIUM,
+        DateFormat_SHORT,
+    }
+
+    /**
+     * Passes locale-specific from ICU native code to Java.
+     * <p>
+     * Note that you share these; you must not alter any of the fields, nor their array elements
+     * in the case of arrays. If you ever expose any of these things to user code, you must give
+     * them a clone rather than the original.
+     */
+    interface ILocaleData {
+
+        GetDateFormat(
+            [in] DateFormat style,
+            [out] String* format);
+
+        GetTimeFormat(
+            [in] DateFormat style,
+            [out] String* format);
+
+        //
+        // Used by Calendar.
+        //
+        GetFirstDayOfWeek(
+            [out] IInteger32** day);
+
+        GetMinimalDaysInFirstWeek(
+            [out] IInteger32** days);
+
+        //
+        // Used by DateFormatSymbols.
+        //
+        // "AM", "PM".
+        GetAmPm(
+            [out, callee] ArrayOf<String>* amPm);
+
+        // "BC", "AD".
+        GetEras(
+            [out, callee] ArrayOf<String>* eras);
+
+        // "January", ...
+        GetLongMonthNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "Jan", ...
+        GetShortMonthNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "J", ...
+        GetTinyMonthNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "January", ...
+        GetLongStandAloneMonthNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "Jan", ...
+        GetShortStandAloneMonthNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "J", ...
+        GetTinyStandAloneMonthNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "Sunday", ...
+        GetLongWeekdayNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "Sun", ...
+        GetShortWeekdayNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "S", ...
+        GetTinyWeekdayNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "Sunday", ...
+        GetLongStandAloneWeekdayNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "Sun", ...
+        GetShortStandAloneWeekdayNames(
+            [out, callee] ArrayOf<String>* names);
+
+        // "S", ...
+        GetTinyStandAloneWeekdayNames(
+            [out, callee] ArrayOf<String>* names);
+
+        //
+        // Used by frameworks/base DateSorter and DateUtils.
+        //
+
+        // "Yesterday".
+        GetYesterday(
+            [out] String* yesterday);
+
+        // "Today".
+        GetToday(
+            [out] String* today);
+
+        // "Tomorrow".
+        GetTomorrow(
+            [out] String* tomorrow);
+
+        //
+        // Used by DecimalFormatSymbols.
+        //
+        GetZeroDigit(
+            [out] Char32* zeroDigit);
+
+        GetDecimalSeparator(
+            [out] Char32* decimalSeparator);
+
+        GetGroupingSeparator(
+            [out] Char32* groupingSeparator);
+
+        GetPatternSeparator(
+            [out] Char32* patternSeparator);
+
+        GetPercent(
+            [out] Char32* percent);
+
+        GetPerMill(
+            [out] Char32* perMill);
+
+        GetMonetarySeparator(
+            [out] Char32* monetarySeparator);
+
+        GetMinusSign(
+            [out] String* minusSign);
+
+        GetExponentSeparator(
+            [out] String* exponentSeparator);
+
+        GetInfinity(
+            [out] String* infinity);
+
+        GetNaN(
+            [out] String* naN);
+
+        //
+        // Also used by Currency.
+        //
+        GetCurrencySymbol(
+            [out] String* currencySymbol);
+
+        GetInternationalCurrencySymbol(
+            [out] String* internationalCurrencySymbol);
+
+        // Used by android.text.format.DateFormat.getTimeFormat.
+        GetTimeFormat12(
+            [out] String* format); // "hh:mm a"
+
+        GetTimeFormat24(
+            [out] String* format); // "HH:mm"
+
+        //
+        // Used by DecimalFormat and NumberFormat.
+        //
+        GetNumberPattern(
+            [out] String* numberPattern);
+
+        GetIntegerPattern(
+            [out] String* numberPattern);
+
+        GetCurrencyPattern(
+            [out] String* currencyPattern);
+
+        GetPercentPattern(
+            [out] String* percentPattern);
+    }
+
+    interface ILocaleDataHelper {
+        MapInvalidAndNullLocales(
+            [in] ILocale* locale,
+            [out] ILocale** rst);
+
+        /**
+         * Returns a shared LocaleData for the given locale.
+         */
+        Get(
+            [in] ILocale* locale,
+            [out] ILocaleData** localeData);
+    }
+
+    } // IO
+    } // namespace LibCore
+}

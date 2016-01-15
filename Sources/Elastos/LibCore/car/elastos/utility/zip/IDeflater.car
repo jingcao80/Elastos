@@ -1,0 +1,343 @@
+
+module
+{
+    namespace Elastos{
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * This class compresses data using the <i>DEFLATE</i> algorithm (see <a
+     * href="http://www.gzip.org/algorithm.txt">specification</a>).
+     *
+     * <p>It is usually more convenient to use {@link DeflaterOutputStream}.
+     *
+     * <p>To compress an in-memory {@code byte[]} to another in-memory {@code byte[]} manually:
+     * <pre>
+     *     byte[] originalBytes = ...
+     *
+     *     Deflater deflater = new Deflater();
+     *     deflater.setInput(originalBytes);
+     *     deflater.finish();
+     *
+     *     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+     *     byte[] buf = new byte[8192];
+     *     while (!deflater.finished()) {
+     *         int byteCount = deflater.deflate(buf);
+     *         baos.write(buf, 0, byteCount);
+     *     }
+     *     deflater.end();
+     *
+     *     byte[] compressedBytes = baos.toByteArray();
+     * </pre>
+     * <p>In situations where you don't have all the input in one array (or have so much
+     * input that you want to feed it to the deflater in chunks), it's possible to call
+     * {@link #setInput setInput} repeatedly, but you're much better off using
+     * {@link DeflaterOutputStream} to handle all this for you. {@link DeflaterOutputStream} also helps
+     * minimize memory requirements&nbsp;&mdash; the sample code above is very expensive.
+     *
+     * <a name="compression_level"><h3>Compression levels</h3></a>
+     * <p>A compression level must be {@link #DEFAULT_COMPRESSION} to compromise between speed and
+     * compression (currently equivalent to level 6), or between 0 ({@link #NO_COMPRESSION}, where
+     * the input is simply copied) and 9 ({@link #BEST_COMPRESSION}). Level 1 ({@link #BEST_SPEED})
+     * performs some compression, but with minimal speed overhead.
+     */
+    [deprecated]
+    interface IDeflater {
+        /**
+         * Upper bound for the compression level range.
+         */
+        const Int32 BEST_COMPRESSION = 9;
+
+        /**
+         * Lower bound for compression level range.
+         */
+        const Int32 BEST_SPEED = 1;
+
+        /**
+         * Usage of the default compression level.
+         */
+        const Int32 DEFAULT_COMPRESSION = -1;
+
+        /**
+         * Default value for compression strategy.
+         */
+        const Int32 DEFAULT_STRATEGY = 0;
+
+        /**
+         * Default value for compression method.
+         */
+        const Int32 DEFLATED = 8;
+
+        /**
+         * Possible value for compression strategy.
+         */
+        const Int32 FILTERED = 1;
+
+        /**
+         * Possible value for compression strategy.
+         */
+        const Int32 HUFFMAN_ONLY = 2;
+
+        /**
+         * Use buffering for best compression.
+         *
+         * @hide
+         * @since 1.7
+         */
+        const Int32 NO_FLUSH = 0;
+
+        /**
+         * Flush buffers so recipients can immediately decode the data sent thus
+         * far. This mode may degrade compression.
+         *
+         * @hide
+         * @since 1.7
+         */
+        const Int32 SYNC_FLUSH = 2;
+
+        /**
+         * Flush buffers so recipients can immediately decode the data sent thus
+         * far. The compression state is also reset to permit random access and
+         * recovery for clients who have discarded or damaged their own copy. This
+         * mode may degrade compression.
+         *
+         * @hide
+         * @since 1.7
+         */
+        const Int32 FULL_FLUSH = 3;
+
+        /**
+         * Deflates the data (previously passed to #setInput setInput) into the
+         * supplied buffer.
+         *
+         * @sa #setInput setInput
+         *
+         * @return number of bytes of compressed data written to {buf}.
+         */
+        Deflate(
+            [in] ArrayOf<Byte>* buf,
+            [out] Int32* number);
+
+        /**
+         * Deflates data (previously passed to #setInput setInput) into a specific
+         * region within the supplied buffer.
+         *
+         * @sa #setInput setInput
+         * @return the number of bytes of compressed data written to {buf}.
+         */
+        // synchronized
+        Deflate(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 offset,
+            [in] Int32 byteCount,
+            [out] Int32* number);
+
+        /**
+         * Deflates data (previously passed to #setInput setInput) into a specific
+         * region within the supplied buffer, optionally flushing the input buffer.
+         *
+         * @sa #setInput setInput
+         * @param flush one of #NO_FLUSH, #SYNC_FLUSH or #FULL_FLUSH.
+         * @return the number of compressed bytes written to {buf}. If this
+         *      equals {byteCount}, the number of bytes of input to be flushed
+         *      may have exceeded the output buffer's capacity. In this case,
+         *      finishing a flush will require the output buffer to be drained
+         *      and additional calls to #deflate to be made.
+         *
+         * @sa #NO_FLUSH
+         * @sa #SYNC_FLUSH
+         * @sa #FULL_FLUSH
+         * @sa #deflate
+         * @hide
+         * @since 1.7
+         */
+        // synchronized
+        Deflate(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 offset,
+            [in] Int32 byteCount,
+            [in] Int32 flush,
+            [out] Int32* number);
+
+        /**
+         * Frees all resources held onto by this deflating algorithm. Any unused
+         * input or output is discarded. This method should be called explicitly in
+         * order to free native resources as soon as possible. After {end()} is
+         * called, other methods will typically throw {IllegalStateException}.
+         */
+        // synchronized
+        End();
+
+        /**
+         * Indicates to the {Deflater} that all uncompressed input has been provided
+         * to it.
+         *
+         * @see #finished
+         */
+        // synchronized
+        Finish();
+
+        /**
+         * Returns true if #finish finish has been called and all
+         * data provided by #setInput setInput has been
+         * successfully compressed and consumed by #deflate deflate.
+         *
+         * @sa #finish finish
+         * @sa #setInput setInput
+         * @sa #deflate deflate
+         */
+        // synchronized
+        Finished(
+            [out] Boolean* finished);
+
+        /**
+         * Returns the Adler32 checksum of the uncompressed data read so far.
+         *
+         * @sa Adler32
+         */
+        // synchronized
+        GetAdler(
+            [out] Int32* checksum);
+
+        /**
+         * Returns the total number of bytes of input read by this {Deflater}. This
+         * method is limited to 32 bits; use #getBytesRead instead.
+         *
+         * @sa #getBytesRead
+         */
+        // synchronized
+        GetTotalIn(
+            [out] Int32* number);
+
+        /**
+         * Returns the total number of bytes written to the output buffer by this {
+         * Deflater}. The method is limited to 32 bits; use #getBytesWritten instead.
+         *
+         * @sa #getBytesWritten
+         */
+        // synchronized
+        GetTotalOut(
+            [out] Int32* number);
+
+        /**
+         * Returns true if #setInput setInput must be called before deflation can continue.
+         * If all uncompressed data has been provided to the {Deflater},
+         * #finish must be called to ensure the compressed data is output.
+         *
+         * @sa #setInput setInput
+         * @sa #finish
+         */
+        // synchronized
+        NeedsInput(
+            [out] Boolean* result);
+
+        /**
+         * Resets the {Deflater} to accept new input without affecting any
+         * previously made settings for the compression strategy or level. This
+         * operation <i>must</i> be called after #finished returns
+         * true if the {Deflater} is to be reused.
+         *
+         * @sa #finished
+         */
+        // synchronized
+        Reset();
+
+        /**
+         * Sets the dictionary to be used for compression by this {Deflater}.
+         * This method can only be called if this {Deflater} supports the writing
+         * of ZLIB headers. This is the default, but can be overridden
+         * using #Deflater(int, boolean).
+         *
+         * @sa #Deflater(int, boolean)
+         */
+        // synchronized
+        SetDictionary(
+            [in] ArrayOf<Byte>* buf);
+
+        /**
+         * Sets the dictionary to be used for compression by this {Deflater}.
+         * This method can only be called if this {Deflater} supports the writing
+         * of ZLIB headers. This is the default, but can be overridden
+         * using #Deflater(int, boolean).
+         *
+         * @sa #Deflater(int, boolean)
+         */
+        // synchronized
+        SetDictionary(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 offset,
+            [in] Int32 byteCount);
+
+        /**
+         * Sets the input buffer the {Deflater} will use to extract uncompressed bytes
+         * for later compression.
+         */
+        SetInput(
+            [in] ArrayOf<Byte>* buf);
+
+        /**
+         * Sets the input buffer the {Deflater} will use to extract uncompressed bytes
+         * for later compression.
+         */
+        // synchronized
+        SetInput(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 offset,
+            [in] Int32 byteCount);
+
+        /**
+         * Sets the compression level to be used when compressing data. The
+         * compression level must be a value between 0 and 9. This value must be set
+         * prior to calling #setInput setInput.
+         *
+         * @sa #setInput setInput
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | If the compression level is invalid.
+         */
+        // synchronized
+        SetLevel(
+            [in] Int32 level);
+
+        /**
+         * Sets the compression strategy to be used. The strategy must be one of
+         * FILTERED, HUFFMAN_ONLY or DEFAULT_STRATEGY. This value must be set prior
+         * to calling #setInput setInput.
+         *
+         * @sa #setInput setInput
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | If the strategy specified is not one of FILTERED, HUFFMAN_ONLY or DEFAULT_STRATEGY.
+         */
+        // synchronized
+        SetStrategy(
+            [in] Int32 strategy);
+
+        /**
+         * Returns the total number of bytes read by the {Deflater}. This
+         * method is the same as #getTotalIn except that it returns a
+         * {long} value instead of an integer.
+         *
+         * @sa #getTotalIn
+         */
+        // synchronized
+        GetBytesRead(
+            [out] Int64* number);
+
+         /**
+         * Returns a the total number of bytes written by this {Deflater}. This
+         * method is the same as {getTotalOut} except it returns a
+         * {long} value instead of an integer.
+         */
+        // synchronized
+        GetBytesWritten(
+            [out] Int64* number);
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,45 @@
+TARGET_NAME= elastosx.crypto
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/security
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/security/spec
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../inc/elastosx/crypto
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/crypto
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/io
+INCLUDES += $(MAKEDIR)/../../../inc/src/elastos
+INCLUDES += $(MAKEDIR)/../../../../LibCore/inc/elastos/core/
+INCLUDES += $(MAKEDIR)/../../../../LibCore/inc/elastos/io/
+#INCLUDES += $(MAKEDIR)/../../../inc/Org/Apache/Harmony/Security/Fortress
+
+SOURCES =  CCipher.cpp
+SOURCES += Cipher.cpp
+SOURCES += CCipherHelper.cpp
+SOURCES += CipherSpi.cpp
+SOURCES += CEncryptedPrivateKeyInfo.cpp
+SOURCES += CCipherInputStream.cpp
+SOURCES += CCipherOutputStream.cpp
+SOURCES += ExemptionMechanismSpi.cpp
+SOURCES += CExemptionMechanism.cpp
+SOURCES += CExemptionMechanismHelper.cpp
+SOURCES += CKeyAgreement.cpp
+SOURCES += CKeyAgreementHelper.cpp
+SOURCES += KeyAgreementSpi.cpp
+SOURCES += CKeyGenerator.cpp
+SOURCES += CKeyGeneratorHelper.cpp
+SOURCES += KeyGeneratorSpi.cpp
+SOURCES += MacSpi.cpp
+SOURCES += CMac.cpp
+SOURCES += CMacHelper.cpp
+SOURCES += SecretKeyFactorySpi.cpp
+SOURCES += CSecretKeyFactory.cpp
+SOURCES += CSecretKeyFactoryHelper.cpp
+SOURCES += CSealedObject.cpp
+SOURCES += CNullCipher.cpp
+
+ELASTOS_LIBS += spec/spec.lib

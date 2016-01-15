@@ -1,0 +1,79 @@
+﻿html{
+	overflow: hidden;
+}
+body{
+	position: absolute;margin:0px;
+	padding: 0px;
+	background: #fff;
+	width:100%;
+	height:100%;
+
+	background:none;
+
+	overflow: hidden;
+}
+div {
+	overflow: hidden;
+	position: absolute;
+}
+
+div.demo_div{
+	width:20.52%;
+	height:40.37%;
+	overflow:hidden;
+}
+div.demo_img{
+	width:7.8%;
+	height:2.7%;
+	overflow:hidden;
+}
+
+#ui_demo img{width:100%;height:100%;}
+
+/*-------------------------------*/
+
+.grp_out{
+	border:1px solid rgba(255,0,0,0);
+}
+.grp_over{
+	border:1px solid rgba(255,0,0,1);
+	box-shadow: 0px 0px 8px 2px rgba(255,0,0,1);
+
+}
+
+.btn_out{
+	border:1px solid rgba(255,255,255,0);
+}
+.btn_over{
+	border:1px solid rgba(255,255,255,1);
+	box-shadow: 0px 0px 8px 2px rgba(255,255,255,1);
+}
+.btn_blue_out{
+	border:2px solid rgba(255,255,255,0.0);
+}
+.btn_black{
+	border-left:1px solid steelblue;
+	border-top:1px solid steelblue;
+	border-right:1px solid lightsteelblue;
+	border-bottom:1px solid lightsteelblue;
+	box-shadow: 0px 0px 8px 4px rgba(0,0,0,1);
+}
+.btn_blue_over{
+	border:2px solid rgba(255,255,255,0.0);
+	box-shadow: 0px 0px 6px 3px rgba(128,128,128,1);
+}
+.btn_purple_out{
+	border:2px solid rgba(255,255,255,0.0);
+	background:none;
+}
+.btn_purple_out div.main_btn_bk{
+	display:none;
+}
+.btn_purple_over{
+	border:2px solid rgba(255,255,255,0.0);
+}
+.btn_purple_over div.main_btn_bk{
+	display:block;
+}
+
+

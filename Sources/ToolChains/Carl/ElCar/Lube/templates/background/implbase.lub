@@ -1,0 +1,59 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+
+ECode _${name}::_ChildConstruct(IInterface* pObj)
+{
+    //
+    // Query virtual interface(s) which child class implemented, so return
+    // value of Probe() is not cared.
+    //
+    _Impl_SetHelperInfoFlag(HELPER_CHILD_CALL_PARENT, TRUE);
+$WITH all interfaces DO
+$   IF attrib is "virtual"
+    _m_p${name} = ${name}::Probe(pObj);
+$   END IF ;; attrib is "virtual"
+$END DO ;; all interfaces
+$WITH all interfaces DO
+$   IF attrib is "virtual"
+$     WITH all parents DO
+    _m_p${name} = ${name}::Probe(pObj);
+$     END DO ;; all parents
+$   END IF ;; attrib is "virtual"
+$END DO ;; all interfaces
+
+$IF class.attrib is "hascallback"
+    _m_pChildCallbackTrigger = (_I${class.name}CallbackTrigger*)pObj->Probe(EIID_CALLBACK_TRIGGER);
+$END IF;; hascallback
+
+    if (_m_pChild == NULL) {
+        IObject* pObject = IObject::Probe(pObj);
+        assert(NULL != pObject);
+        _m_pChild = pObject;
+    }
+    else {
+        return E_CLASS_NO_AGGREGATION;
+    }
+    _Impl_SetHelperInfoFlag(HELPER_CHILD_CALL_PARENT, FALSE);
+
+    return NOERROR;
+}
+
+ECode _${name}::_ChildDestruct(PInterface pChild)
+{   
+    assert(NULL != _m_pChild);
+    if (pChild != _m_pChild) return E_CLASS_NO_AGGREGATION;
+    
+    _m_pChild = NULL;
+
+#ifndef _NO_${Upper(name)}_CLASSOBJECT_
+    ((${name}*)this)->~${name}();
+    free(this);
+#else
+    delete this;
+#endif // _NO_${Upper(name)}_CLASSOBJECT_
+        
+    return NOERROR;
+}

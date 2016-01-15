@@ -1,0 +1,67 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+
+    /**
+     * The point of access to the statistics of an {@link HttpConnection}.
+     */
+    interface IHttpConnectionMetrics {
+
+        /**
+         * Returns the number of requests transferred over the connection,
+         * 0 if not available.
+         */
+        GetRequestCount(
+            [out] Int64* count);
+
+        /**
+         * Returns the number of responses transferred over the connection,
+         * 0 if not available.
+         */
+        GetResponseCount(
+            [out] Int64* count);
+
+        /**
+         * Returns the number of bytes transferred over the connection,
+         * 0 if not available.
+         */
+        GetSentBytesCount(
+            [out] Int64* count);
+
+        /**
+         * Returns the number of bytes transferred over the connection,
+         * 0 if not available.
+         */
+        GetReceivedBytesCount(
+            [out] Int64* count);
+
+        /**
+         * Return the value for the specified metric.
+         *
+         *@param metricName the name of the metric to query.
+         *
+         *@return the object representing the metric requested,
+         *        <code>null</code> if the metric cannot not found.
+         */
+        GetMetric(
+            [in] String metricName,
+            [out] IObject** metric);
+
+        /**
+         * Resets the counts
+         *
+         */
+        Reset();
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

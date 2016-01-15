@@ -1,0 +1,35 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+
+    namespace Gallery {
+
+    class CAlbumActivity {
+        interface IActivity;
+    }
+
+    class CBrowserActivity {
+        interface IActivity;
+    }
+
+    class CPhotoActivity {
+        interface IActivity;
+    }
+
+    class CAboutActivity {
+        interface IActivity;
+    }
+
+    class CEditActivity {
+        interface IActivity;
+    }
+
+    class CWallpaperActivity {
+        interface IActivity;
+    }
+
+    } // namespace Gallery
+}

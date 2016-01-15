@@ -1,0 +1,260 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Animation {
+
+    /**
+     * This class holds a time/value pair for an animation. The Keyframe class is
+     * used by ValueAnimator to define the values that the animation target will have
+     * over the course of the animation. As the time proceeds from one keyframe to
+     * the other, the value of the target object will animate between the value at
+     * the previous keyframe and the value at the next keyframe. Each keyframe also
+     * holds an optional TimeInterpolator object, which defines the time
+     * interpolation over the intervalue preceding the keyframe.
+     *
+     * @sa ValueAnimator
+     * @sa TimeInterpolator
+     *
+     * <p>
+     * The Keyframe class itself is abstract. The type-specific factory methods will
+     * return a subclass of Keyframe specific to the type of value being stored. This
+     * is done to improve performance when dealing with the most common cases (e.g.,
+     * float and int values). Other types will fall into a more general Keyframe
+     * class that treats its values as Objects. Unless your animation requires
+     * dealing with a custom type or a data structure that needs to be animated
+     * directly (and evaluated using an implementation of TypeEvaluator), you should
+     * stick to using float and int as animations using those types have lower
+     * runtime overhead than other types.
+     *
+     * @sa TypeEvaluator
+     */
+
+    /**
+     * @Involve
+     * @implements Elastos.Core.ICloneable
+     */
+    interface IKeyframe {
+        /**
+         * Indicates whether this keyframe has a valid value. This method is called internally when
+         * an ObjectAnimator first starts; keyframes without values are assigned values at
+         * that time by deriving the value for the property from the target object.
+         *
+         * @sa ObjectAnimator
+         *
+         * @return boolean Whether this object has a value assigned.
+         */
+        HasValue(
+            [out] Boolean* hasValue);
+
+        /**
+         * Gets the value for this Keyframe.
+         *
+         * @return The value for this Keyframe.
+         */
+        GetValue(
+            [out] IInterface** value);
+
+        /**
+         * Sets the value for this Keyframe.
+         *
+         * @param value value for this Keyframe.
+         */
+        SetValue(
+            [in] IInterface* value);
+
+        /**
+         * Gets the time for this keyframe, as a fraction of the overall animation duration.
+         *
+         * @return The time associated with this keyframe, as a fraction of the overall animation
+         * duration. This should be a value between 0 and 1.
+         */
+        GetFraction(
+            [out] Float* fraction);
+
+        /**
+         * Sets the time for this keyframe, as a fraction of the overall animation duration.
+         *
+         * @param fraction time associated with this keyframe, as a fraction of the overall animation
+         * duration. This should be a value between 0 and 1.
+         */
+        SetFraction(
+            [in] Float fraction);
+
+        /**
+         * Gets the optional interpolator for this Keyframe. A value of <code>null</code> indicates
+         * that there is no interpolation, which is the same as linear interpolation.
+         *
+         * @return The optional interpolator for this Keyframe.
+         */
+        GetInterpolator(
+            [out] ITimeInterpolator** interpolator);
+
+        /**
+         * Sets the optional interpolator for this Keyframe. A value of <code>null</code> indicates
+         * that there is no interpolation, which is the same as linear interpolation.
+         *
+         * @return The optional interpolator for this Keyframe.
+         */
+        SetInterpolator(
+            [in] ITimeInterpolator* interpolator);
+
+        /**
+         * Gets the type of keyframe. This information is used by ValueAnimator to determine the type of
+         * TypeEvaluator to use when calculating values between keyframes. The type is based
+         * on the type of Keyframe created.
+         *
+         * @sa TypeEvaluator
+         *
+         * @return The type of the value stored in the Keyframe.
+         */
+        GetType(
+            [out] InterfaceID* type);
+    }
+
+    interface IKeyframeHelper {
+        /**
+         * Constructs a Keyframe object with the given time and value. The time defines the
+         * time, as a proportion of an overall animation's duration, at which the value will hold true
+         * for the animation. The value for the animation between keyframes will be calculated as
+         * an interpolation between the values at those keyframes.
+         *
+         * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+         * of time elapsed of the overall animation duration.
+         * @param value The value that the object will animate to as the animation time approaches
+         * the time in this keyframe, and the the value animated from as the time passes the time in
+         * this keyframe.
+         */
+        OfInt32(
+            [in] Float fraction,
+            [in] Int32 value,
+            [out] IKeyframe** obj);
+
+        /**
+         * Constructs a Keyframe object with the given time. The value at this time will be derived
+         * from the target object when the animation first starts (note that this implies that keyframes
+         * with no initial value must be used as part of an ObjectAnimator).
+         * The time defines the
+         * time, as a proportion of an overall animation's duration, at which the value will hold true
+         * for the animation. The value for the animation between keyframes will be calculated as
+         * an interpolation between the values at those keyframes.
+         *
+         * @sa ObjectAnimator
+         *
+         * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+         * of time elapsed of the overall animation duration.
+         */
+        OfInt32(
+            [in] Float fraction,
+            [out] IKeyframe** obj);
+
+        /**
+         * Constructs a Keyframe object with the given time and value. The time defines the
+         * time, as a proportion of an overall animation's duration, at which the value will hold true
+         * for the animation. The value for the animation between keyframes will be calculated as
+         * an interpolation between the values at those keyframes.
+         *
+         * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+         * of time elapsed of the overall animation duration.
+         * @param value The value that the object will animate to as the animation time approaches
+         * the time in this keyframe, and the the value animated from as the time passes the time in
+         * this keyframe.
+         */
+        OfFloat(
+            [in] Float fraction,
+            [in] Float value,
+            [out] IKeyframe** obj);
+
+        /**
+         * Constructs a Keyframe object with the given time. The value at this time will be derived
+         * from the target object when the animation first starts (note that this implies that keyframes
+         * with no initial value must be used as part of an ObjectAnimator).
+         * The time defines the
+         * time, as a proportion of an overall animation's duration, at which the value will hold true
+         * for the animation. The value for the animation between keyframes will be calculated as
+         * an interpolation between the values at those keyframes.
+         *
+         * @sa ObjectAnimator
+         *
+         * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+         * of time elapsed of the overall animation duration.
+         */
+        OfFloat(
+            [in] Float fraction,
+            [out] IKeyframe** obj);
+
+        /**
+         * Constructs a Keyframe object with the given time and value. The time defines the
+         * time, as a proportion of an overall animation's duration, at which the value will hold true
+         * for the animation. The value for the animation between keyframes will be calculated as
+         * an interpolation between the values at those keyframes.
+         *
+         * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+         * of time elapsed of the overall animation duration.
+         * @param value The value that the object will animate to as the animation time approaches
+         * the time in this keyframe, and the the value animated from as the time passes the time in
+         * this keyframe.
+         */
+        OfObject(
+            [in] Float fraction,
+            [in] IInterface* value,
+            [out] IKeyframe** obj);
+
+        /**
+         * Constructs a Keyframe object with the given time. The value at this time will be derived
+         * from the target object when the animation first starts (note that this implies that keyframes
+         * with no initial value must be used as part of an ObjectAnimator).
+         * The time defines the
+         * time, as a proportion of an overall animation's duration, at which the value will hold true
+         * for the animation. The value for the animation between keyframes will be calculated as
+         * an interpolation between the values at those keyframes.
+         *
+         * @sa ObjectAnimator
+         *
+         * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
+         * of time elapsed of the overall animation duration.
+         */
+        OfObject(
+            [in] Float fraction,
+            [out] IKeyframe** obj);
+    }
+
+    /**
+     * @extends Elastos.Droid.Animation.IKeyframe
+     */
+    /**
+     * @Involve
+     * interface IKeyframe
+     */
+    interface IObjectKeyframe {
+    }
+
+    /**
+     * @extends Elastos.Droid.Animation.IKeyframe
+     */
+    /**
+     * @Involve
+     * interface IKeyframe
+     */
+    interface IInt32Keyframe {
+        GetInt32Value(
+            [out] Int32* value);
+    }
+
+    /**
+     * @extends Elastos.Droid.Animation.IKeyframe
+     */
+    /**
+     * @Involve
+     * interface IKeyframe
+     */
+    interface IFloatKeyframe {
+        GetFloatValue(
+            [out] Float* value);
+    }
+
+    } // namespace Animation
+    } // namepsace Droid
+    } // namespace Elastos
+}

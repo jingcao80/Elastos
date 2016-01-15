@@ -1,0 +1,35 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPanelView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * @Involve
+     * interface IFrameLayout
+     */
+    interface IPanelHolder {
+        GetPanelIndex(
+            [in] IPanelView* pv,
+            [out] Int32* result);
+
+        SetSelectedPanel(
+            [in] IPanelView* pv);
+
+        SetBar(
+            [in] IPanelBar* panelBar);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

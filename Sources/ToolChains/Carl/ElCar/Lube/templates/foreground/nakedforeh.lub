@@ -1,0 +1,26 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "${name}.h"
+$
+
+#ifndef __${Upper(name)}_H__
+#define __${Upper(name)}_H__
+
+#include "_${name}.h"
+#include "XXX.h"
+
+CarClass(${name}), public XXX
+{
+public:
+    // TODO: Add your public member variables here.
+
+private:
+    // TODO: Add your private member variables here.
+};
+
+#endif // __${Upper(name)}_H__
+$
+$END OUTPUT

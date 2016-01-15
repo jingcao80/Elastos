@@ -1,0 +1,55 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+
+public:
+$WITH all interfaces DO
+$IF lubeoption is "HaveSandwichMethod" or attrib is "virtual"
+$  IF attrib is not "callback" and attrib is not "callbacksink" and attrib is not "delegate" and attrib is not "clsobj" and attrib is not "handler" and attrib is not "filter" and name is not "IObject" and name is not "IAspect"
+$    WITH all parents_and_me DO
+$      WITH all methods DO
+    CARAPI ${name}($^
+$        WITH all parameters DO
+${type}$^
+$          IF parameter is not last
+, $^
+$          END IF
+$        END DO
+);
+
+$      END DO ;; all methods
+$    END DO ;;parents_and_me
+$  END IF ;; !callback and !callbacksink and !clsobj and !handler and !filter
+$
+$  IF attrib is "callbacksink"
+$    WITH all parents_and_me DO
+$      WITH all methods DO
+    CARAPI On${name}(IInterface *pSender$^
+$    WITH all parameters DO
+,$^
+${type}$^
+$    END DO ;; all parameters
+);
+
+$      END DO ;; all methods
+$    END DO ;;parents_and_me
+$  END IF ;; is "callbacksink"
+$
+$  IF attrib is "delegatesink"
+$    WITH all parents_and_me DO
+$      WITH all methods DO
+    CARAPI Do${name}(IInterface *pSender$^
+$    WITH all parameters DO
+,$^
+${type}$^
+$    END DO ;; all parameters
+);
+
+$      END DO ;; all methods
+$    END DO ;;parents_and_me
+$   END IF ;; is "delegatesink"
+$  END IF ;;
+$END DO ;; all interfaces

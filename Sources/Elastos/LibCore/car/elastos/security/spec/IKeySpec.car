@@ -1,0 +1,18 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The marker interface for key specifications. The purpose is
+     * to group key specifications for cryptographic keys.
+     */
+    interface IKeySpec {
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

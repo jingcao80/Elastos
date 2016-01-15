@@ -1,0 +1,47 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+    namespace Charset {
+    /**
+     * @hide internal use only
+     */
+    [deprecated]
+    interface IModifiedUtf8 {
+         /**
+         * Decodes a byte array containing <i>modified UTF-8</i> bytes into a string.
+         *
+         * <p>Note that although this method decodes the (supposedly impossible) zero byte to U+0000,
+         * that's what the RI does too.
+         */
+        Decode(
+            [in] ArrayOf<Byte>* inBytes,
+            [in] ArrayOf<Char32>* outChars,
+            [in] Int32 offset,
+            [in] Int32 utfSize,
+            [out] String* string);
+
+        /*
+         * Get the bytes of a string
+         */
+        CountBytes(
+            [in]  String s,
+            [in]  Boolean shortLength,
+            [out] Int64* num);
+
+        Encode(
+            [in]  String s,
+            [out, callee] ArrayOf<Byte>* bytes);
+        /*
+         * Encode the bytes corresponding to string into dst bytes.
+         */
+        Encode(
+            [in] ArrayOf<Byte>* dst,
+            [in] Int32 offset,
+            [in] String s);
+    }
+
+    } // namespace Charset
+    } // namespace IO
+    } // namespace Elastos
+}

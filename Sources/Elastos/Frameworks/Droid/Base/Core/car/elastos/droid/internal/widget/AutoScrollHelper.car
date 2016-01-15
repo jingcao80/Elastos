@@ -1,0 +1,356 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * AutoScrollHelper is a utility class for adding automatic edge-triggered
+     * scrolling to Views.
+     * <p>
+     * <b>Note:</b> Implementing classes are responsible for overriding the
+     * {@link #scrollTargetBy}, {@link #canTargetScrollHorizontally}, and
+     * {@link #canTargetScrollVertically} methods. See
+     * {@link AbsListViewAutoScroller} for an {@link android.widget.AbsListView}
+     * -specific implementation.
+     * <p>
+     * <h1>Activation</h1> Automatic scrolling starts when the user touches within
+     * an activation area. By default, activation areas are defined as the top,
+     * left, right, and bottom 20% of the host view's total area. Touching within
+     * the top activation area scrolls up, left scrolls to the left, and so on.
+     * <p>
+     * As the user touches closer to the extreme edge of the activation area,
+     * scrolling accelerates up to a maximum velocity. When using the default edge
+     * type, {@link #EDGE_TYPE_INSIDE_EXTEND}, moving outside of the view bounds
+     * will scroll at the maximum velocity.
+     * <p>
+     * The following activation properties may be configured:
+     * <ul>
+     * <li>Delay after entering activation area before auto-scrolling begins, see
+     * {@link #setActivationDelay}. Default value is
+     * {@link ViewConfiguration#getTapTimeout()} to avoid conflicting with taps.
+     * <li>Location of activation areas, see {@link #setEdgeType}. Default value is
+     * {@link #EDGE_TYPE_INSIDE_EXTEND}.
+     * <li>Size of activation areas relative to view size, see
+     * {@link #setRelativeEdges}. Default value is 20% for both vertical and
+     * horizontal edges.
+     * <li>Maximum size used to constrain relative size, see
+     * {@link #setMaximumEdges}. Default value is {@link #NO_MAX}.
+     * </ul>
+     * <h1>Scrolling</h1> When automatic scrolling is active, the helper will
+     * repeatedly call {@link #scrollTargetBy} to apply new scrolling offsets.
+     * <p>
+     * The following scrolling properties may be configured:
+     * <ul>
+     * <li>Acceleration ramp-up duration, see {@link #setRampUpDuration}. Default
+     * value is 500 milliseconds.
+     * <li>Acceleration ramp-down duration, see {@link #setRampDownDuration}.
+     * Default value is 500 milliseconds.
+     * <li>Target velocity relative to view size, see {@link #setRelativeVelocity}.
+     * Default value is 100% per second for both vertical and horizontal.
+     * <li>Minimum velocity used to constrain relative velocity, see
+     * {@link #setMinimumVelocity}. When set, scrolling will accelerate to the
+     * larger of either this value or the relative target value. Default value is
+     * approximately 5 centimeters or 315 dips per second.
+     * <li>Maximum velocity used to constrain relative velocity, see
+     * {@link #setMaximumVelocity}. Default value is approximately 25 centimeters or
+     * 1575 dips per second.
+     * </ul>
+     *
+     * @Involve
+     * interface Elastos.Droid.View.IViewOnTouchListener
+     */
+    interface IAutoScrollHelper {
+        /**
+         * Constant passed to {@link #setRelativeEdges} or
+         * {@link #setRelativeVelocity}. Using this value ensures that the computed
+         * relative value is ignored and the absolute maximum value is always used.
+         */
+        const Float RELATIVE_UNSPECIFIED = 0;
+
+        /**
+         * Constant passed to {@link #setMaximumEdges}, {@link #setMaximumVelocity},
+         * or {@link #setMinimumVelocity}. Using this value ensures that the
+         * computed relative value is always used without constraining to a
+         * particular minimum or maximum value.
+         */
+        //const Float NO_MAX = 3.40282346638528860e+38F; // Float.MAX_VALUE
+
+        /**
+         * Constant passed to {@link #setMaximumEdges}, or
+         * {@link #setMaximumVelocity}, or {@link #setMinimumVelocity}. Using this
+         * value ensures that the computed relative value is always used without
+         * constraining to a particular minimum or maximum value.
+         */
+        const Float NO_MIN = 0;
+
+        /**
+         * Edge type that specifies an activation area starting at the view bounds
+         * and extending inward. Moving outside the view bounds will stop scrolling.
+         *
+         * @see #setEdgeType
+         */
+        const Int32 EDGE_TYPE_INSIDE = 0;
+
+        /**
+         * Edge type that specifies an activation area starting at the view bounds
+         * and extending inward. After activation begins, moving outside the view
+         * bounds will continue scrolling.
+         *
+         * @see #setEdgeType
+         */
+        const Int32 EDGE_TYPE_INSIDE_EXTEND = 1;
+
+        /**
+         * Edge type that specifies an activation area starting at the view bounds
+         * and extending outward. Moving inside the view bounds will stop scrolling.
+         *
+         * @see #setEdgeType
+         */
+        const Int32 EDGE_TYPE_OUTSIDE = 2;
+
+        /**
+         * Sets whether the scroll helper is enabled and should respond to touch
+         * events.
+         *
+         * @param enabled Whether the scroll helper is enabled.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * @return True if this helper is enabled and responding to touch events.
+         */
+        IsEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Enables or disables exclusive handling of touch events during scrolling.
+         * By default, exclusive handling is disabled and the target view receives
+         * all touch events.
+         * <p>
+         * When enabled, {@link #onTouch} will return true if the helper is
+         * currently scrolling and false otherwise.
+         *
+         * @param exclusive True to exclusively handle touch events during scrolling,
+         *            false to allow the target view to receive all touch events.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetExclusive(
+            [in] Boolean exclusive);
+
+        /**
+         * Indicates whether the scroll helper handles touch events exclusively
+         * during scrolling.
+         *
+         * @return True if exclusive handling of touch events during scrolling is
+         *         enabled, false otherwise.
+         * @see #setExclusive(Boolean)
+         */
+        IsExclusive(
+            [out] Boolean* isExclusive);
+
+        /**
+         * Sets the absolute maximum scrolling velocity.
+         * <p>
+         * If relative velocity is not specified, scrolling will always reach the
+         * same maximum velocity. If both relative and maximum velocities are
+         * specified, the maximum velocity will be used to clamp the calculated
+         * relative velocity.
+         *
+         * @param horizontalMax The maximum horizontal scrolling velocity, or
+         *            {@link #NO_MAX} to leave the relative value unconstrained.
+         * @param verticalMax The maximum vertical scrolling velocity, or
+         *            {@link #NO_MAX} to leave the relative value unconstrained.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetMaximumVelocity(
+            [in] Float horizontalMax,
+            [in] Float verticalMax);
+
+        /**
+         * Sets the absolute minimum scrolling velocity.
+         * <p>
+         * If both relative and minimum velocities are specified, the minimum
+         * velocity will be used to clamp the calculated relative velocity.
+         *
+         * @param horizontalMin The minimum horizontal scrolling velocity, or
+         *            {@link #NO_MIN} to leave the relative value unconstrained.
+         * @param verticalMin The minimum vertical scrolling velocity, or
+         *            {@link #NO_MIN} to leave the relative value unconstrained.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetMinimumVelocity(
+            [in] Float horizontalMin,
+            [in] Float verticalMin);
+
+        /**
+         * Sets the target scrolling velocity relative to the host view's
+         * dimensions.
+         * <p>
+         * If both relative and maximum velocities are specified, the maximum
+         * velocity will be used to clamp the calculated relative velocity.
+         *
+         * @param horizontal The target horizontal velocity as a fraction of the
+         *            host view width per second, or {@link #RELATIVE_UNSPECIFIED}
+         *            to ignore.
+         * @param vertical The target vertical velocity as a fraction of the host
+         *            view height per second, or {@link #RELATIVE_UNSPECIFIED} to
+         *            ignore.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetRelativeVelocity(
+            [in] Float horizontal,
+            [in] Float vertical);
+
+        /**
+         * Sets the activation edge type, one of:
+         * <ul>
+         * <li>{@link #EDGE_TYPE_INSIDE} for edges that respond to touches inside
+         * the bounds of the host view. If touch moves outside the bounds, scrolling
+         * will stop.
+         * <li>{@link #EDGE_TYPE_INSIDE_EXTEND} for inside edges that continued to
+         * scroll when touch moves outside the bounds of the host view.
+         * <li>{@link #EDGE_TYPE_OUTSIDE} for edges that only respond to touches
+         * that move outside the bounds of the host view.
+         * </ul>
+         *
+         * @param type The type of edge to use.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetEdgeType(
+            [in] Int32 type);
+
+        /**
+         * Sets the activation edge size relative to the host view's dimensions.
+         * <p>
+         * If both relative and maximum edges are specified, the maximum edge will
+         * be used to constrain the calculated relative edge size.
+         *
+         * @param horizontal The horizontal edge size as a fraction of the host view
+         *            width, or {@link #RELATIVE_UNSPECIFIED} to always use the
+         *            maximum value.
+         * @param vertical The vertical edge size as a fraction of the host view
+         *            height, or {@link #RELATIVE_UNSPECIFIED} to always use the
+         *            maximum value.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetRelativeEdges(
+            [in] Float horizontal,
+            [in] Float vertical);
+
+        /**
+         * Sets the absolute maximum edge size.
+         * <p>
+         * If relative edge size is not specified, activation edges will always be
+         * the maximum edge size. If both relative and maximum edges are specified,
+         * the maximum edge will be used to constrain the calculated relative edge
+         * size.
+         *
+         * @param horizontalMax The maximum horizontal edge size in pixels, or
+         *            {@link #NO_MAX} to use the unconstrained calculated relative
+         *            value.
+         * @param verticalMax The maximum vertical edge size in pixels, or
+         *            {@link #NO_MAX} to use the unconstrained calculated relative
+         *            value.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetMaximumEdges(
+            [in] Float horizontalMax,
+            [in] Float verticalMax);
+
+        /**
+         * Sets the delay after entering an activation edge before activation of
+         * auto-scrolling. By default, the activation delay is set to
+         * {@link ViewConfiguration#getTapTimeout()}.
+         * <p>
+         * Specifying a delay of zero will start auto-scrolling immediately after
+         * the touch position enters an activation edge.
+         *
+         * @param delayMillis The activation delay in milliseconds.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetActivationDelay(
+            [in] Int32 delayMillis);
+
+        /**
+         * Sets the amount of time after activation of auto-scrolling that is takes
+         * to reach target velocity for the current touch position.
+         * <p>
+         * Specifying a duration greater than zero prevents sudden jumps in
+         * velocity.
+         *
+         * @param durationMillis The ramp-up duration in milliseconds.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetRampUpDuration(
+            [in] Int32 durationMillis);
+
+        /**
+         * Sets the amount of time after de-activation of auto-scrolling that is
+         * takes to slow to a stop.
+         * <p>
+         * Specifying a duration greater than zero prevents sudden jumps in
+         * velocity.
+         *
+         * @param durationMillis The ramp-down duration in milliseconds.
+         * @return The scroll helper, which may used to chain setter calls.
+         */
+        SetRampDownDuration(
+            [in] Int32 durationMillis);
+
+        /**
+         * Override this method to scroll the target view by the specified number of
+         * pixels.
+         *
+         * @param deltaX The number of pixels to scroll by horizontally.
+         * @param deltaY The number of pixels to scroll by vertically.
+         */
+        ScrollTargetBy(
+            [in] Int32 deltaX,
+            [in] Int32 deltaY);
+
+        /**
+         * Override this method to return whether the target view can be scrolled
+         * horizontally in a certain direction.
+         *
+         * @param direction Negative to check scrolling left, positive to check
+         *            scrolling right.
+         * @return true if the target view is able to horizontally scroll in the
+         *         specified direction.
+         */
+        CanTargetScrollHorizontally(
+            [in] Int32 direction,
+            [out] Boolean* res);
+
+        /**
+         * Override this method to return whether the target view can be scrolled
+         * vertically in a certain direction.
+         *
+         * @param direction Negative to check scrolling up, positive to check
+         *            scrolling down.
+         * @return true if the target view is able to vertically scroll in the
+         *         specified direction.
+         */
+        CanTargetScrollVertically(
+            [in] Int32 direction,
+            [out] Boolean* res);
+    }
+
+    /**
+     * @Involve
+     * interface IAutoScrollHelper
+     */
+    interface IAbsListViewAutoScroller {
+
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}

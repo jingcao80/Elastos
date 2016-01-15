@@ -1,0 +1,69 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Params {
+
+    /**
+     * Parameter names for routing in HttpConn.
+     *
+     * @version $Revision: 613656 $
+     *
+     * @since 4.0
+     */
+    interface IConnRoutePNames {
+
+        /**
+         * Parameter for the default proxy.
+         * The default value will be used by some
+         * {@link org.apache.http.conn.routing.HttpRoutePlanner HttpRoutePlanner}
+         * implementations, in particular the default implementation.
+         * <p>
+         * This parameter expects a value of type {@link org.apache.http.HttpHost}.
+         * </p>
+         */
+        const String DEFAULT_PROXY = "http.route.default-proxy";
+
+
+        /**
+         * Parameter for the local address.
+         * On machines with multiple network interfaces, this parameter
+         * can be used to select the network interface from which the
+         * connection originates.
+         * It will be interpreted by the standard
+         * {@link org.apache.http.conn.routing.HttpRoutePlanner HttpRoutePlanner}
+         * implementations, in particular the default implementation.
+         * <p>
+         * This parameter expects a value of type {@link java.net.InetAddress}.
+         * </p>
+         */
+        const String LOCAL_ADDRESS = "http.route.local-address";
+
+
+        /**
+         * Parameter for an forced route.
+         * The forced route will be interpreted by the standard
+         * {@link org.apache.http.conn.routing.HttpRoutePlanner HttpRoutePlanner}
+         * implementations.
+         * Instead of computing a route, the given forced route will be
+         * returned, even if it points to the wrong target host.
+         * <p>
+         * This parameter expects a value of type
+         * {@link org.apache.http.conn.routing.HttpRoute HttpRoute}.
+         * </p>
+         */
+        const String FORCED_ROUTE = "http.route.forced-route";
+
+    }
+
+    } // namespace Params
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

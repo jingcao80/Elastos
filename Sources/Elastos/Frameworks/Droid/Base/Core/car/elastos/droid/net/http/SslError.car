@@ -1,0 +1,115 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * This class represents a set of one or more SSL errors and the associated SSL
+     * certificate.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    [local]
+    interface ISslError {
+        /**
+         * The certificate is not yet valid
+         */
+        const Int32 SSL_NOTYETVALID = 0;
+        /**
+         * The certificate has expired
+         */
+        const Int32 SSL_EXPIRED = 1;
+        /**
+         * Hostname mismatch
+         */
+        const Int32 SSL_IDMISMATCH = 2;
+        /**
+         * The certificate authority is not trusted
+         */
+        const Int32 SSL_UNTRUSTED = 3;
+        /**
+         * The date of the certificate is invalid
+         */
+        const Int32 SSL_DATE_INVALID = 4;
+        /**
+         * A generic error occurred
+         */
+        const Int32 SSL_INVALID = 5;
+
+        /**
+         * The number of different SSL errors.
+         * @deprecated This constant is not necessary for using the SslError API and
+         *             can change from release to release.
+         */
+        // Update if you add a new SSL error!!!
+        // @Deprecated
+        const Int32 SSL_MAX_ERROR = 6;
+
+        /**
+         * Gets the SSL certificate associated with this object.
+         * @return The SSL certificate, non-null.
+         */
+        GetCertificate(
+            [out] ISslCertificate** result);
+
+        /**
+         * Gets the URL associated with this object.
+         * @return The URL, non-null.
+         */
+        GetUrl(
+            [out] String* result);
+
+        /**
+         * Adds the supplied SSL error to the set.
+         * @param error The SSL error to add
+         * @return True if the error being added is a known SSL error, otherwise
+         *         false.
+         */
+        AddError(
+            [in] Int32 error,
+            [out] Boolean* result);
+
+        /**
+         * Determines whether this object includes the supplied error.
+         * @param error The SSL error to check for
+         * @return True if this object includes the error, otherwise false.
+         */
+        HasError(
+            [in] Int32 error,
+            [out] Boolean* result);
+
+        /**
+         * Gets the most severe SSL error in this object's set of errors.
+         * Returns -1 if the set is empty.
+         * @return The most severe SSL error, or -1 if the set is empty.
+         */
+        GetPrimaryError(
+            [out] Int32* result);
+    }
+
+    [local]
+    interface ISslErrorHelper {
+        /**
+         * Creates an SslError object from a chromium error code.
+         * @param error The chromium error code
+         * @param certificate The associated SSL certificate
+         * @param url The associated URL.
+         * @hide  chromium error codes only available inside the framework
+         */
+        SslErrorFromChromiumErrorCode(
+            [in] Int32 error,
+            [in] ISslCertificate* cert,
+            [in] String url,
+            [out] ISslError** result);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,58 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * @Involve
+     * interface IAlgorithmParameterSpec
+     */
+    interface IPSSParameterSpec {
+        /**
+         * Returns the length of the salt (in bits).
+         *
+         * @return the length of the salt (in bits).
+         */
+        GetSaltLength(
+            [out] Int32* saltLength);
+
+        /**
+         * Returns the name of the message digest algorithm.
+         *
+         * @return the name of the message digest algorithm.
+         */
+        GetDigestAlgorithm(
+            [out] String* digestAlgo);
+
+        /**
+         * Returns the name of the mask generation function algorithm.
+         *
+         * @return the name of the mask generation function algorithm.
+         */
+        GetMGFAlgorithm(
+            [out] String* mgfaAlgo);
+
+        /**
+         * Returns the parameter for the mask generation function algorithm.
+         *
+         * @return the parameter for the mask generation function algorithm, or
+         *         {@code null} if none specified.
+         */
+        GetMGFParameters(
+            [out] IAlgorithmParameterSpec** mgfParams);
+
+        /**
+         * Returns the trailer field value.
+         *
+         * @return the trailer field value.
+         */
+        GetTrailerField(
+            [out] Int32* trailerField);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

@@ -1,0 +1,20 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    interface IX509PublicKey extends Elastos.Security.IPublicKey {
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

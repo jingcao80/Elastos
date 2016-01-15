@@ -1,0 +1,176 @@
+module
+{
+    using interface Elastos.Utility.IObjectMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+        interface IDispListDispFormat {
+
+            Equals(
+                [in] IInterface* obj,
+                [out] Boolean* rst);
+
+            GetHashCode(
+                [out] Int32* hash);
+
+            ToString(
+                [out] String* str);
+
+            SetOutputType(
+                [in] Int32 type);
+
+            GetOutputType(
+                [out] Int32* type);
+
+            SetFormat(
+                [in] Int32 item);
+
+            GetFormat(
+                [out] Int32* item);
+
+        }
+
+        interface IDispListHelper {
+
+            GetDispList(
+                [out] IObjectContainer** list);
+
+            GetItemStringIdList(
+                [out] IObjectMap** map);
+
+            ItemCode2Name(
+                [in] IDispListDispFormat* item,
+                [out] String* rst);
+
+            ItemName2Code(
+                [in] String name,
+                [out] IDispListDispFormat** rst);
+
+            IsHDMI(
+                [in] IDispListDispFormat* fmt,
+                [out] Boolean* rst);
+
+            IsCVBS(
+                [in] IDispListDispFormat* fmt,
+                [out] Boolean* rst);
+
+            IsYPbPr(
+                [in] IDispListDispFormat* fmt,
+                [out] Boolean* rst);
+
+            IsVGA(
+                [in] IDispListDispFormat* fmt,
+                [out] Boolean* rst);
+
+            GetAdvancedDisplayType(
+                [in] IDispListDispFormat* fmt,
+                [out] Int32* rst);
+
+            GetStaticDispFormat(
+                [in] Int32 formatId,
+                [out] IDispListDispFormat** rst);
+        }
+
+        /**
+         * @Involve
+         * interface Elastos.Droid.Os.IHandler
+         */
+        interface IDispList {
+
+            const Int32 DISP_FORMAT_NTSC_ID                 =       0x54FA01;
+            const Int32 DISP_FORMAT_PAL_ID                  =       0x54FA02;
+            const Int32 DISP_FORMAT_YPBPR_480I_ID           =       0x54FA03;
+            const Int32 DISP_FORMAT_YPBPR_480P_ID           =       0x54FA04;
+            const Int32 DISP_FORMAT_YPBPR_576I_ID           =       0x54FA05;
+            const Int32 DISP_FORMAT_YPBPR_576P_ID           =       0x54FA06;
+            const Int32 DISP_FORMAT_YPBPR_720P_50HZ_ID      =       0x54FA07;
+            const Int32 DISP_FORMAT_YPBPR_720P_60HZ_ID      =       0x54FA08;
+            const Int32 DISP_FORMAT_YPBPR_1080P_50HZ_ID     =       0x54FA09;
+            const Int32 DISP_FORMAT_YPBPR_1080P_60HZ_ID     =       0x54FA0A;
+            const Int32 DISP_FORMAT_HDMI_480I_ID            =       0x54FA0B;
+            const Int32 DISP_FORMAT_HDMI_480P_ID            =       0x54FA0C;
+            const Int32 DISP_FORMAT_HDMI_576I_ID            =       0x54FA0D;
+            const Int32 DISP_FORMAT_HDMI_576P_ID            =       0x54FA0E;
+            const Int32 DISP_FORMAT_HDMI_720P_50HZ_ID       =       0x54FA0F;
+            const Int32 DISP_FORMAT_HDMI_720P_60HZ_ID       =       0x54FA11;
+            const Int32 DISP_FORMAT_HDMI_1080I_50HZ_ID      =       0x54FA12;
+            const Int32 DISP_FORMAT_HDMI_1080I_60HZ_ID      =       0x54FA13;
+            const Int32 DISP_FORMAT_HDMI_1080P_24HZ_ID      =       0x54FA14;
+            const Int32 DISP_FORMAT_HDMI_1080P_50HZ_ID      =       0x54FA15;
+            const Int32 DISP_FORMAT_HDMI_1080P_60HZ_ID      =       0x54FA16;
+            const Int32 DISP_FORMAT_VGA_640_480_ID          =       0x54FA17;
+            const Int32 DISP_FORMAT_VGA_800_600_ID          =       0x54FA18;
+            const Int32 DISP_FORMAT_VGA_1024_768_ID         =       0x54FA19;
+            const Int32 DISP_FORMAT_VGA_1280_720_ID         =       0x54FA1A;
+            const Int32 DISP_FORMAT_VGA_1280_1024_ID        =       0x54FA1B;
+            const Int32 DISP_FORMAT_VGA_1360_768_ID         =       0x54FA1C;
+            const Int32 DISP_FORMAT_VGA_1440_900_ID         =       0x54FA1D;
+            const Int32 DISP_FORMAT_VGA_1680_1050_ID        =       0x54FA1E;
+            const Int32 DISP_FORMAT_VGA_1920_1080_ID        =       0x54FA1F;
+
+            const String DISP_FORMAT_NAME_NTSC             = "NTSC";
+            const String DISP_FORMAT_NAME_PAL              = "PAL";
+            const String DISP_FORMAT_NAME_YPBPR_480I       = "YPbPr 480I";
+            const String DISP_FORMAT_NAME_YPBPR_480P       = "YPbPr 480P";
+            const String DISP_FORMAT_NAME_YPBPR_576I       = "YPbPr 576I";
+            const String DISP_FORMAT_NAME_YPBPR_576P       = "YPbPr 576P";
+            const String DISP_FORMAT_NAME_YPBPR_720P_50HZ  = "YPbPr 720P 50HZ";
+            const String DISP_FORMAT_NAME_YPBPR_720P_60HZ  = "YPbPr 720P 60HZ";
+            const String DISP_FORMAT_NAME_YPBPR_1080P_50HZ = "YPbPr 1080P 50HZ";
+            const String DISP_FORMAT_NAME_YPBPR_1080P_60HZ = "YPbPr 1080P 60HZ";
+            const String DISP_FORMAT_NAME_HDMI_480I        = "HDMI 480I";
+            const String DISP_FORMAT_NAME_HDMI_480P        = "HDMI 480P";
+            const String DISP_FORMAT_NAME_HDMI_576I        = "HDMI 576I";
+            const String DISP_FORMAT_NAME_HDMI_576P        = "HDMI 576P";
+            const String DISP_FORMAT_NAME_HDMI_720P_50HZ   = "HDMI 720P 50HZ";
+            const String DISP_FORMAT_NAME_HDMI_720P_60HZ   = "HDMI 720P 60HZ";
+            const String DISP_FORMAT_NAME_HDMI_1080I_50HZ  = "HDMI 1080I 50HZ";
+            const String DISP_FORMAT_NAME_HDMI_1080I_60HZ  = "HDMI 1080I 60HZ";
+            const String DISP_FORMAT_NAME_HDMI_1080P_24HZ  = "HDMI 1080P 24HZ";
+            const String DISP_FORMAT_NAME_HDMI_1080P_50HZ  = "HDMI 1080P 50HZ";
+            const String DISP_FORMAT_NAME_HDMI_1080P_60HZ  = "HDMI 1080P 60HZ";
+            const String DISP_FORMAT_NAME_VGA_640_480      = "VGA 640 x 480";
+            const String DISP_FORMAT_NAME_VGA_800_600      = "VGA 800 x 600";
+            const String DISP_FORMAT_NAME_VGA_1024_768     = "VGA 1024 x 768";
+            const String DISP_FORMAT_NAME_VGA_1280_720     = "VGA 1280 x 720";
+            const String DISP_FORMAT_NAME_VGA_1280_1024    = "VGA 1280 x 1024";
+            const String DISP_FORMAT_NAME_VGA_1360_768     = "VGA 1360 x 768";
+            const String DISP_FORMAT_NAME_VGA_1440_900     = "VGA 1440 x 900";
+            const String DISP_FORMAT_NAME_VGA_1680_1050    = "VGA 1680 x 1050";
+            const String DISP_FORMAT_NAME_VGA_1920_1080    = "VGA 1920 x 1080";
+
+            /* some default display format */
+            const Int32 HDMI_DEFAULT_FORMAT_ID  = 0x54FA11;
+            const Int32 CVBS_DEFAULT_FORMAT_ID  = 0x54FA01;
+            const Int32 YPBPR_DEFAULT_FORMAT_ID = 0x54FA08;
+            const Int32 VGA_DEFAULT_FORMAT_ID   = 0x54FA19;
+
+            const Int32 SYS_DISPLAY_DEFAULT_FORMAT_ID = 0x54FA01;
+
+            const Int32 ADVANCED_DISPLAY_TYPE_UNKNOWN   = 0;
+            const Int32 ADVANCED_DISPLAY_TYPE_HDMI      = 1;
+            const Int32 ADVANCED_DISPLAY_TYPE_CVBS      = 2;
+            const Int32 ADVANCED_DISPLAY_TYPE_YPBPR     = 3;
+            const Int32 ADVANCED_DISPLAY_TYPE_VGA       = 4;
+            const String TAG = "DispList";
+
+            ShowItem(
+                [in] IDispListDispFormat* item);
+
+            ShowNext();
+
+            IsShowing(
+                [out] Boolean* showing);
+
+            OnHide(
+                [in] IDispListDispFormat* item);
+
+
+        }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,384 @@
+module
+{
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.IInputEvent;
+    interface Elastos.Droid.Media.Tv.ITvContentRating;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Callback used to receive various status updates on the {@link TvView}.
+     */
+    interface ITvViewTvInputCallback {
+        /**
+         * This is invoked when an error occurred while establishing a connection to the underlying
+         * TV input.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         */
+        OnConnectionFailed(
+            [in] String inputId);
+
+        /**
+         * This is invoked when the existing connection to the underlying TV input is lost.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         */
+        OnDisconnected(
+            [in] String inputId);
+
+        /**
+         * This is invoked when the view is tuned to a specific channel and starts decoding video
+         * stream from there. It is also called later when the video size is changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param width The width of the video.
+         * @param height The height of the video.
+         */
+        OnVideoSizeChanged(
+            [in] String inputId,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * This is invoked when the channel of this TvView is changed by the underlying TV input
+         * with out any {@link TvView#tune(String, Uri)} request.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param channelUri The URI of a channel.
+         */
+        OnChannelRetuned(
+            [in] String inputId,
+            [in] IUri * channelUri);
+
+        /**
+         * This is called when the track information has been changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param tracks A list which includes track information.
+         */
+        OnTracksChanged(
+            [in] String inputId,
+            [in] IList * tracks);
+
+        /**
+         * This is called when there is a change on the selected tracks.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param type The type of the track selected. The type can be
+         *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
+         *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @param trackId The ID of the track selected.
+         */
+        OnTrackSelected(
+            [in] String inputId,
+            [in] Int32 type,
+            [in] String trackId);
+
+        /**
+         * This is called when the video is available, so the TV input starts the playback.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         */
+        OnVideoAvailable(
+            [in] String inputId);
+
+        /**
+         * This is called when the video is not available, so the TV input stops the playback.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param reason The reason why the TV input stopped the playback:
+         * <ul>
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         * </ul>
+         */
+        OnVideoUnavailable(
+            [in] String inputId,
+            [in] Int32 reason);
+
+        /**
+         * This is called when the current program content turns out to be allowed to watch since
+         * its content rating is not blocked by parental controls.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         */
+        OnContentAllowed(
+            [in] String inputId);
+
+        /**
+         * This is called when the current program content turns out to be not allowed to watch
+         * since its content rating is blocked by parental controls.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param rating The content rating of the blocked program.
+         */
+        OnContentBlocked(
+            [in] String inputId,
+            [in] ITvContentRating * rating);
+
+        /**
+         * This is invoked when a custom event from the bound TV input is sent to this view.
+         *
+         * @param eventType The type of the event.
+         * @param eventArgs Optional arguments of the event.
+         * @hide
+         */
+        // @SystemApi
+        OnEvent(
+            [in] String inputId,
+            [in] String eventType,
+            [in] IBundle * eventArgs);
+
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the unhandled input event is received.
+     */
+    interface ITvViewTvInputOnUnhandledInputEventListener {
+        /**
+         * Called when an input event was not handled by the bound TV input.
+         * <p>
+         * This is called asynchronously from where the event is dispatched. It gives the host
+         * application a chance to handle the unhandled input events.
+         *
+         * @param event The input event.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         */
+        OnUnhandledInputEvent(
+            [in] IInputEvent * event,
+            [out] Boolean * result);
+
+    }
+
+    /**
+     * Displays TV contents. The TvView class provides a high level interface for applications to show
+     * TV programs from various TV sources that implement {@link TvInputService}. (Note that the list of
+     * TV inputs available on the system can be obtained by calling
+     * {@link TvInputManager#getTvInputList() TvInputManager.getTvInputList()}.)
+     * <p>
+     * Once the application supplies the URI for a specific TV channel to {@link #tune(String, Uri)}
+     * method, it takes care of underlying service binding (and unbinding if the current TvView is
+     * already bound to a service) and automatically allocates/deallocates resources needed. In addition
+     * to a few essential methods to control how the contents are presented, it also provides a way to
+     * dispatch input events to the connected TvInputService in order to enable custom key actions for
+     * the TV input.
+     * </p>
+     */
+    interface ITvView {
+        /**
+         * Sets the callback to be invoked when an event is dispatched to this TvView.
+         *
+         * @param callback The callback to receive events. A value of {@code null} removes any existing
+         *            callbacks.
+         */
+        SetCallback(
+            [in] ITvViewTvInputCallback * cb);
+
+        /**
+         * Sets this as the main {@link TvView}.
+         * <p>
+         * The main {@link TvView} is a {@link TvView} whose corresponding TV input determines the
+         * HDMI-CEC active source device. For an HDMI port input, one of source devices that is
+         * connected to that HDMI port becomes the active source. For an HDMI-CEC logical device input,
+         * the corresponding HDMI-CEC logical device becomes the active source. For any non-HDMI input
+         * (including the tuner, composite, S-Video, etc.), the internal device (= TV itself) becomes
+         * the active source.
+         * </p><p>
+         * First tuned {@link TvView} becomes main automatically, and keeps to be main until either
+         * {@link #reset} is called for the main {@link TvView} or {@link #setMain} is called for other
+         * {@link TvView}.
+         * </p>
+         * @hide
+         */
+        // @SystemApi
+        SetMain();
+
+        /**
+         * Sets the Z order of a window owning the surface of this TvView above the normal TvView
+         * but below an application.
+         *
+         * @see SurfaceView#setZOrderMediaOverlay
+         * @hide
+         */
+        // @SystemApi
+        SetZOrderMediaOverlay(
+            [in] Boolean isMediaOverlay);
+
+        /**
+         * Sets the Z order of a window owning the surface of this TvView on top of an application.
+         *
+         * @see SurfaceView#setZOrderOnTop
+         * @hide
+         */
+        // @SystemApi
+        SetZOrderOnTop(
+            [in] Boolean onTop);
+
+        /**
+         * Sets the relative stream volume of this session to handle a change of audio focus.
+         *
+         * @param volume A volume value between 0.0f to 1.0f.
+         */
+        SetStreamVolume(
+            [in] Float volume);
+
+        /**
+         * Tunes to a given channel.
+         *
+         * @param inputId The ID of TV input which will play the given channel.
+         * @param channelUri The URI of a channel.
+         */
+        Tune(
+            [in] String inputId,
+            [in] IUri * channelUri);
+
+        /**
+         * Tunes to a given channel.
+         *
+         * @param inputId The ID of TV input which will play the given channel.
+         * @param channelUri The URI of a channel.
+         * @param params Extra parameters which might be handled with the tune event.
+         * @hide
+         */
+        // @SystemApi
+        Tune(
+            [in] String inputId,
+            [in] IUri * channelUri,
+            [in] IBundle * params);
+
+        /**
+         * Resets this TvView.
+         * <p>
+         * This method is primarily used to un-tune the current TvView.
+         */
+        Reset();
+
+        /**
+         * Requests to unblock TV content according to the given rating.
+         * <p>
+         * This notifies TV input that blocked content is now OK to play.
+         * </p>
+         *
+         * @param unblockedRating A TvContentRating to unblock.
+         * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
+         * @hide
+         */
+        // @SystemApi
+        RequestUnblockContent(
+            [in] ITvContentRating * unblockedRating);
+
+        /**
+         * Enables or disables the caption in this TvView.
+         * <p>
+         * Note that this method does not take any effect unless the current TvView is tuned.
+         *
+         * @param enabled {@code true} to enable, {@code false} to disable.
+         */
+        SetCaptionEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Selects a track.
+         *
+         * @param type The type of the track to select. The type can be {@link TvTrackInfo#TYPE_AUDIO},
+         *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @param trackId The ID of the track to select. {@code null} means to unselect the current
+         *            track for a given type.
+         * @see #getTracks
+         * @see #getSelectedTrack
+         */
+        SelectTrack(
+            [in] Int32 type,
+            [in] String trackId);
+
+        /**
+         * Returns the list of tracks. Returns {@code null} if the information is not available.
+         *
+         * @param type The type of the tracks. The type can be {@link TvTrackInfo#TYPE_AUDIO},
+         *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @see #selectTrack
+         * @see #getSelectedTrack
+         */
+        GetTracks(
+            [in] Int32 type,
+            [out] IList ** result);
+
+        /**
+         * Returns the ID of the selected track for a given type. Returns {@code null} if the
+         * information is not available or the track is not selected.
+         *
+         * @param type The type of the selected tracks. The type can be {@link TvTrackInfo#TYPE_AUDIO},
+         *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @see #selectTrack
+         * @see #getTracks
+         */
+        GetSelectedTrack(
+            [in] Int32 type,
+            [out] String * result);
+
+        /**
+         * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
+         * TvInputService.Session.appPrivateCommand()} on the current TvView.
+         *
+         * @param action Name of the command to be performed. This <em>must</em> be a scoped name, i.e.
+         *            prefixed with a package name you own, so that different developers will not create
+         *            conflicting commands.
+         * @param data Any data to include with the command.
+         * @hide
+         */
+        // @SystemApi
+        SendAppPrivateCommand(
+            [in] String action,
+            [in] IBundle * data);
+
+        /**
+         * Dispatches an unhandled input event to the next receiver.
+         * <p>
+         * Except system keys, TvView always consumes input events in the normal flow. This is called
+         * asynchronously from where the event is dispatched. It gives the host application a chance to
+         * dispatch the unhandled input events.
+         *
+         * @param event The input event.
+         * @return {@code true} if the event was handled by the view, {@code false} otherwise.
+         */
+        DispatchUnhandledInputEvent(
+            [in] IInputEvent * event,
+            [out] Boolean * result);
+
+        /**
+         * Called when an unhandled input event also has not been handled by the user provided
+         * callback. This is the last chance to handle the unhandled input event in the TvView.
+         *
+         * @param event The input event.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to be
+         *         handled by the next receiver, return {@code false}.
+         */
+        OnUnhandledInputEvent(
+            [in] IInputEvent * event,
+            [out] Boolean * result);
+
+        /**
+         * Registers a callback to be invoked when an input event is not handled by the bound TV input.
+         *
+         * @param listener The callback to be invoked when the unhandled input event is received.
+         */
+        SetOnUnhandledInputEventListener(
+            [in] ITvViewTvInputOnUnhandledInputEventListener * listener);
+    }
+
+
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,102 @@
+module
+{
+    interface Elastosx.Xml.Namespace.IQName;
+
+    interface Elastos.Utility.IDate;
+    interface Elastos.Utility.ICalendar;
+    interface Elastos.Core.INumber;
+    interface Elastos.Math.IBigDecimal;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Datatype {
+
+    interface IDuration {
+
+        GetXMLSchemaType(
+            [out] IQName** type);
+
+        GetSign(
+            [out] Int32* sign);
+
+        GetYears(
+            [out] Int32* years);
+
+        GetMonths(
+            [out] Int32* months);
+
+        GetDays(
+            [out] Int32* days);
+
+        GetHours(
+            [out] Int32* hours);
+
+        GetMinutes(
+            [out] Int32* minutes);
+
+        GetSeconds(
+            [out] Int32* seconds);
+
+        GetTimeInMillis(
+            [in] ICalendar* startInstant,
+            [out] Int64* time);
+
+        GetTimeInMillis(
+            [in] IDate* startInstant,
+            [out] Int64* time);
+
+        GetField(
+            [in] IDatatypeConstantsField* filed,
+            [out] INumber** rst);
+
+        IsSet(
+            [in] IDatatypeConstantsField* field,
+            [out] Boolean* time);
+
+        Add(
+            [in] IDuration* rhs,
+            [out] IDuration** duration);
+
+        AddTo(
+            [in] ICalendar* calendar);
+
+        AddTo(
+            [in] IDate* date);
+
+        Subtract(
+            [in] IDuration* rhs,
+            [out] IDuration** duration);
+
+        Multiply(
+            [in] Int32 factor,
+            [out] IDuration** duration);
+
+        Multiply(
+            [in] IBigDecimal* factor,
+            [out] IDuration** duration);
+
+        Negate(
+            [out] IDuration** duration);
+
+        NormalizeWith(
+            [in] ICalendar* startTimeInstant,
+            [out] IDuration** duration);
+
+        Compare(
+            [in] IDuration* duration,
+            [out] Int32* rst);
+
+        IsLongerThan(
+            [in] IDuration* rhs,
+            [out] Boolean* rst);
+
+        IsShorterThan(
+            [in] IDuration* rhs,
+            [out] Boolean* rst);
+    }
+
+    } // namespace Datatype
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

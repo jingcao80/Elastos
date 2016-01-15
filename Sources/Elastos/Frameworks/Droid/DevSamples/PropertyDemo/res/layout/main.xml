@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <TextView
+        android:id="@+id/tx_result"
+        android:layout_marginTop = "10dip"
+        android:layout_marginBottom = "10dip"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="反射结果：" />
+
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getByte"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Byte的值" />
+        <Button
+            android:id="@+id/bt_setByte"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Byte的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getChar8"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Char8的值" />
+        <Button
+            android:id="@+id/bt_setChar8"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Char8的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getChar16"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Char16的值" />
+        <Button
+            android:id="@+id/bt_setChar16"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Char16的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getBoolean"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Boolean的值" />
+        <Button
+            android:id="@+id/bt_setBoolean"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Boolean的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getInt16"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Int16的值" />
+        <Button
+            android:id="@+id/bt_setInt16"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Int16的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getInt32"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Int32的值" />
+        <Button
+            android:id="@+id/bt_setInt32"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Int32的值" />
+    </LinearLayout>
+
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getInt64"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Int64的值" />
+        <Button
+            android:id="@+id/bt_setInt64"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Int64的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getFloat"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Float的值" />
+        <Button
+            android:id="@+id/bt_setFloat"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Float的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        
+        <Button
+            android:id="@+id/bt_getDouble"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Double的值" />
+        <Button
+            android:id="@+id/bt_setDouble"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Double的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getString"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取String的值" />
+        <Button
+            android:id="@+id/bt_setString"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置String的值" />
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip" >
+        <Button
+            android:id="@+id/bt_getInterface"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射获取Interface的值" />
+        <Button
+            android:id="@+id/bt_setInterface"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight ="1"
+            android:text="通过反射设置Interface的值" />
+    </LinearLayout>
+</LinearLayout>

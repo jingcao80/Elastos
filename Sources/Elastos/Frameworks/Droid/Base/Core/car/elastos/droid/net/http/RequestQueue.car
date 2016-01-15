@@ -1,0 +1,154 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.IWebAddress;
+
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Utility.IMap;
+
+    using interface Org.Apache.Http.IHttpHost;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * A queue of bursts of requests.
+     *
+     * <p>This queue maintains the count of frames that have been produced, and is thread safe.</p>
+     *
+     * @Involved
+     * interface IRequestFeeder;
+     */
+    interface IRequestQueue {
+        /**
+         * Enables data state and proxy tracking
+         */
+        EnablePlatformNotifications();
+
+        /**
+         * If platform notifications have been enabled, call this method
+         * to disable before destroying RequestQueue
+         */
+        DisablePlatformNotifications();
+
+        /**
+         * used by webkit
+         * @return proxy host if set, null otherwise
+         */
+        GetProxyHost(
+            [out] IHttpHost** result);
+
+        /**
+         * Queues an HTTP request
+         * @param url The url to load.
+         * @param method "GET" or "POST."
+         * @param headers A hashmap of http headers.
+         * @param eventHandler The event handler for handling returned
+         * data.  Callbacks will be made on the supplied instance.
+         * @param bodyProvider InputStream providing HTTP body, null if none
+         * @param bodyLength length of body, must be 0 if bodyProvider is null
+         */
+        QueueRequest(
+            [in] String url,
+            [in] String method,
+            [in] IMap* headers,
+            [in] IEventHandler* eventHandler,
+            [in] IInputStream* bodyProvider,
+            [in] Int32 bodyLength,
+            [out] IRequestHandle** result);
+
+        /**
+         * Queues an HTTP request
+         * @param url The url to load.
+         * @param uri The uri of the url to load.
+         * @param method "GET" or "POST."
+         * @param headers A hashmap of http headers.
+         * @param eventHandler The event handler for handling returned
+         * data.  Callbacks will be made on the supplied instance.
+         * @param bodyProvider InputStream providing HTTP body, null if none
+         * @param bodyLength length of body, must be 0 if bodyProvider is null
+         */
+        QueueRequest(
+            [in] String url,
+            [in] IWebAddress* uri,
+            [in] String method,
+            [in] IMap* headers,
+            [in] IEventHandler* eventHandler,
+            [in] IInputStream* bodyProvider,
+            [in] Int32 bodyLength,
+            [out] IRequestHandle** result);
+
+        QueueSynchronousRequest(
+            [in] String url,
+            [in] IWebAddress* uri,
+            [in] String method,
+            [in] IMap* headers,
+            [in] IEventHandler* eventHandler,
+            [in] IInputStream* bodyProvider,
+            [in] Int32 bodyLength,
+            [out] IRequestHandle** result);
+
+        /*
+         * RequestFeeder implementation
+         */
+        GetRequest(
+            [out] IRequest** result);
+
+        /**
+         * @return a request for given host if possible
+         */
+        GetRequest(
+            [in] IHttpHost* host,
+            [out] IRequest** result);
+
+        /**
+         * @return true if a request for this host is available
+         */
+        HaveRequest(
+            [in] IHttpHost* host,
+            [out] Boolean* result);
+
+        /**
+         * Put request back on head of queue
+         */
+        RequeueRequest(
+            [in] IRequest* request);
+
+        /**
+         * This must be called to cleanly shutdown RequestQueue
+         */
+        Shutdown();
+
+        StartTiming();
+
+        StopTiming();
+    }
+
+    /**
+     * This interface is exposed to each connection
+     *
+     * @Involved
+     * no super interface ;
+     */
+    interface IRequestQueueConnectionManager {
+        GetProxyHost(
+            [out] IHttpHost** result);
+
+        GetConnection(
+            [in] IContext* context,
+            [in] IHttpHost* host,
+            [out] IConnection** result);
+
+        RecycleConnection(
+            [in] IConnection* connection,
+            [out] Boolean* result);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

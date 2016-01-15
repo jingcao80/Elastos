@@ -1,0 +1,38 @@
+
+TARGET_NAME= bluetooth
+TARGET_TYPE= lib
+
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = CBluetoothA2dpStateChangeCallback.cpp
+SOURCES += BluetoothA2dp.cpp
+SOURCES += CBluetoothStateChangeCallbackWrapper.cpp
+SOURCES += CBluetoothAdapterManagerCallback.cpp
+SOURCES += CBluetoothAdapter.cpp
+SOURCES += CBluetoothAdapterHelper.cpp
+SOURCES += CBluetoothClass.cpp
+SOURCES += CBluetoothDeviceManagerCallback.cpp
+SOURCES += CBluetoothDevice.cpp
+SOURCES += CBluetoothHeadsetStateChangeCallback.cpp
+SOURCES += BluetoothHeadset.cpp
+SOURCES += CBluetoothHealthStateChangeCallback.cpp
+SOURCES += CBluetoothHealthCallbackWrapper.cpp
+SOURCES += BluetoothHealth.cpp
+SOURCES += CBluetoothHealthAppConfiguration.cpp
+SOURCES += BluetoothHealthCallback.cpp
+SOURCES += CBluetoothInputDeviceStateChangeCallback.cpp
+SOURCES += BluetoothInputDevice.cpp
+SOURCES += BluetoothInputStream.cpp
+SOURCES += BluetoothOutputStream.cpp
+SOURCES += CBluetoothPanStateChangeCallback.cpp
+SOURCES += BluetoothPan.cpp
+SOURCES += CBluetoothPbapStateChangeCallback.cpp
+SOURCES += BluetoothPbap.cpp
+SOURCES += BluetoothServerSocket.cpp
+SOURCES += BluetoothSocket.cpp
+SOURCES += BluetoothTetheringDataTracker.cpp
+SOURCES += BluetoothUuid.cpp

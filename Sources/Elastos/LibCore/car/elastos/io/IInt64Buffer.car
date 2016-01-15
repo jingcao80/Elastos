@@ -1,0 +1,324 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * A buffer of longs.
+     * <p>
+     * A long buffer can be created in either of the following ways:
+     * <ul>
+     * <li>{@link #allocate(int) Allocate} a new long array and create a buffer
+     * based on it;</li>
+     * <li>{@link #wrap(long[]) Wrap} an existing long array to create a new
+     * buffer;</li>
+     * <li>Use {@link java.nio.ByteBuffer#asLongBuffer() ByteBuffer.asLongBuffer}
+     * to create a long buffer based on a byte buffer.</li>
+     * </ul>
+     */
+    /**
+     * @Involve
+     * interface IBuffer;
+     * interface IComparable;
+     */
+    [deprecated]
+    interface IInt64Buffer {
+        GetArray(
+            [out, callee] ArrayOf<Int64>* array);
+
+        /**
+         * Returns a read-only buffer that shares its content with this buffer.
+         * <p>
+         * The returned buffer is guaranteed to be a new instance, even if this
+         * buffer is read-only itself. The new buffer's position, limit, capacity
+         * and mark are the same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means this
+         * buffer's change of content will be visible to the new buffer. The two
+         * buffer's position, limit and mark are independent.
+         *
+         * @return a read-only version of this buffer.
+         */
+        AsReadOnlyBuffer(
+            [out] IInt64Buffer** buffer);
+
+        /**
+         * Compacts this long buffer.
+         * <p>
+         * The remaining longs will be moved to the head of the buffer, staring from
+         * position zero. Then the position is set to {remaining()}; the
+         * limit is set to capacity; the mark is cleared.
+         *
+         * @return this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Compact();
+
+        /**
+         * Returns a duplicated buffer that shares its content with this buffer.
+         * <p>
+         * The duplicated buffer's position, limit, capacity and mark are the same
+         * as this buffer. The duplicated buffer's read-only property and byte order
+         * are same as this buffer's, too.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a duplicated buffer that shares its content with this buffer.
+         */
+        Duplicate(
+            [out] IInt64Buffer** buffer);
+
+        /**
+         * Returns the long at the current position and increase the position by 1.
+         *
+         * @return the long at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is equal or greater than limit.
+         */
+        Get(
+            [out] Int64* value);
+
+        /**
+         * Returns the long at the specified index; the position is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and less than limit.
+         * @return the long at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         */
+        Get(
+            [in] Int32 index,
+            [out] Int64* value);
+
+        /**
+         * Reads longs from the current position into the specified long array and
+         * increases the position by the number of longs read.
+         * <p>
+         * Calling this method has the same effect as
+         * {get(dst, 0, dst.length)}.
+         *
+         * @param dst
+         *            the destination long array.
+         * @return this buffer.
+         * @exception BufferUnderflowException
+         *                if {dst.length} is greater than {remaining()}.
+         */
+        Get(
+            [out] ArrayOf<Int64> dst);
+
+        /**
+         * Reads longs from the current position into the specified long array,
+         * starting from the specified offset, and increase the position by the
+         * number of longs read.
+         *
+         * @param dst
+         *            the target long array.
+         * @param dstOffset
+         *            the offset of the long array, must not be negative and not
+         *            greater than {@code dst.length}.
+         * @param longCount
+         *            the number of longs to read, must be no less than zero and not
+         *            greater than {@code dst.length - dstOffset}.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code dstOffset} or {@code longCount} is invalid.
+         * @exception BufferUnderflowException
+         *                if {@code longCount} is greater than {@code remaining()}.
+         */
+        Get(
+            [out] ArrayOf<Int64> dst,
+            [in] Int32 dstOffset,
+            [in] Int32 int64Count);
+
+        /**
+         * Returns the byte order used by this buffer when converting longs from/to
+         * bytes.
+         * <p>
+         * If this buffer is not based on a byte buffer, then always return the
+         * platform's native byte order.
+         *
+         * @return the byte order used by this buffer when converting longs from/to
+         *         bytes.
+         */
+        GetOrder(
+            [out] ByteOrder* byteOrder);
+
+        /**
+         * Writes the given long to the current position and increases the position
+         * by 1.
+         *
+         * @param l
+         *            the long to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is equal or greater than limit.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Int64 l);
+
+        /**
+         * Writes a long to the specified index of this buffer; the position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and less than the limit.
+         * @param l
+         *            the long to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Int32 index,
+            [in] Int64 l);
+
+        /**
+         * Writes longs from the given long array to the current position and
+         * increases the position by the number of longs written.
+         * <p>
+         * Calling this method has the same effect as
+         * {put(src, 0, src.length)}.
+         *
+         * @param src
+         *            the source long array.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {remaining()} is less than {src.length}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Int64> src);
+
+        /**
+         * Writes longs from the given long array, starting from the specified
+         * offset, to the current position and increases the position by the number
+         * of longs written.
+         *
+         * @param src
+         *            the source long array.
+         * @param srcOffset
+         *            the offset of long array, must not be negative and not greater
+         *            than {@code src.length}.
+         * @param longCount
+         *            the number of longs to write, must be no less than zero and
+         *            not greater than {@code src.length - srcOffset}.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {@code remaining()} is less than {@code longCount}.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code srcOffset} or {@code longCount} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Int64> src,
+            [in] Int32 srcOffset,
+            [in] Int32 int64Count);
+
+        /**
+         * Writes all the remaining longs of the {src} long buffer to this
+         * buffer's current position, and increases both buffers' position by the
+         * number of longs copied.
+         *
+         * @param src
+         *            the source long buffer.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {src.remaining()} is greater than this buffer's
+         *                {remaining()}.
+         * @exception IllegalArgumentException
+         *                if {src} is this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] IInt64Buffer* src);
+
+        /**
+         * Returns a sliced buffer that shares its content with this buffer.
+         * <p>
+         * The sliced buffer's capacity will be this buffer's {remaining()},
+         * and its zero position will correspond to this buffer's current position.
+         * The new buffer's position will be 0, limit will be its capacity, and its
+         * mark is cleared. The new buffer's read-only property and byte order are
+         * same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a sliced buffer that shares its content with this buffer.
+         */
+        Slice(
+            [out] IInt64Buffer** buffer);
+    }
+
+    [deprecated]
+    interface IInt64BufferHelper {
+        /**
+         * Creates a long buffer based on a newly allocated long array.
+         *
+         * @param capacity
+         *            the capacity of the new buffer.
+         * @return the created long buffer.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {capacity} is less than zero.
+         */
+        Allocate(
+            [in] Int32 capacity,
+            [out] IInt64Buffer** int64Buffer);
+
+        /**
+         * Creates a new long buffer by wrapping the given long array.
+         * <p>
+         * Calling this method has the same effect as
+         * {wrap(array, 0, array.length)}.
+         *
+         * @param array
+         *            the long array which the new buffer will be based on.
+         * @return the created long buffer.
+         */
+        Wrap(
+            [in] ArrayOf<Int64>* array,
+            [out] IInt64Buffer** int64Buffer);
+
+        /**
+         * Creates a new long buffer by wrapping the given long array.
+         * <p>
+         * The new buffer's position will be {start}, limit will be
+         * {start + longCount}, capacity will be the length of the array.
+         *
+         * @param array
+         *            the long array which the new buffer will be based on.
+         * @param start
+         *            the start index, must not be negative and not greater than
+         *            {array.length}.
+         * @param longCount
+         *            the length, must not be negative and not greater than
+         *            {array.length - start}.
+         * @return the created long buffer.
+         * @exception IndexOutOfBoundsException
+         *                if either {start} or {longCount} is invalid.
+         */
+        Wrap(
+            [in] ArrayOf<Int64>* array,
+            [in] Int32 start,
+            [in] Int32 int64Count,
+            [out] IInt64Buffer** int64Buffer);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

@@ -1,0 +1,21 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    interface IProgressHandler {
+        /**
+         * Invoked for N SQLite VM opcodes.
+         * The method should return true to continue the
+         * current query, or false in order
+         * to abandon the action.<BR><BR>
+         */
+        Progress(
+            [out] Boolean* value);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

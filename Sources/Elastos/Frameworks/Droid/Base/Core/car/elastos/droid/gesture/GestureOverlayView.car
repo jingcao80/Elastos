@@ -1,0 +1,231 @@
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Graphics.IPath;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Gesture.IGesture;
+    interface Elastos.Droid.Gesture.IGestureOverlayView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Gesture {
+
+    interface IOnGesturingListener {
+        OnGesturingStarted(
+            [in] IGestureOverlayView* overlay);
+
+        OnGesturingEnded(
+            [in] IGestureOverlayView* overlay);
+    }
+
+    interface IOnGestureListener {
+        OnGestureStarted(
+            [in] IGestureOverlayView* overlay,
+            [in] IMotionEvent* event);
+
+        OnGesture(
+            [in] IGestureOverlayView* overlay,
+            [in] IMotionEvent* event);
+
+        OnGestureEnded(
+            [in] IGestureOverlayView* overlay,
+            [in] IMotionEvent* event);
+
+        OnGestureCancelled(
+            [in] IGestureOverlayView* overlay,
+            [in] IMotionEvent* event);
+    }
+
+    [local, deprecated]
+    interface IOnGesturePerformedListener {
+        OnGesturePerformed(
+            [in] IGestureOverlayView* overlay,
+            [in] IGesture* gesture);
+    }
+
+    /**
+     * A transparent overlay for gesture input that can be placed on top of other
+     * widgets or contain other widgets.
+     *
+     * @attr ref android.R.styleable#GestureOverlayView_eventsInterceptionEnabled
+     * @attr ref android.R.styleable#GestureOverlayView_fadeDuration
+     * @attr ref android.R.styleable#GestureOverlayView_fadeOffset
+     * @attr ref android.R.styleable#GestureOverlayView_fadeEnabled
+     * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeWidth
+     * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeAngleThreshold
+     * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeLengthThreshold
+     * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeSquarenessThreshold
+     * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeType
+     * @attr ref android.R.styleable#GestureOverlayView_gestureColor
+     * @attr ref android.R.styleable#GestureOverlayView_orientation
+     * @attr ref android.R.styleable#GestureOverlayView_uncertainGestureColor
+     *
+     * @Widget
+     * @Involve
+     * interface IViewManager
+     * interface IViewParent
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface IView
+     * interface IViewGroup
+     * interface Elastos.Droid.Widget.IFrameLayout
+     */
+    [local, deprecated]
+    interface IGestureOverlayView {
+        const Int32 GESTURE_STROKE_TYPE_SINGLE = 0;
+        const Int32 GESTURE_STROKE_TYPE_MULTIPLE = 1;
+
+        const Int32 ORIENTATION_HORIZONTAL = 0;
+        const Int32 ORIENTATION_VERTICAL = 1;
+
+        const Int32 FADE_ANIMATION_RATE = 16;
+        const Int32 GESTURE_RENDERING_ANTIALIAS = 1;
+        const Int32 DITHER_FLAG = 1;
+
+        GetCurrentStroke(
+            [out] IArrayList** stroke);
+
+        GetOrientation(
+            [out] Int32* orientation);
+
+        SetOrientation(
+            [in] Int32 orientation);
+
+        SetGestureColor(
+            [in] Int32 color);
+
+        SetUncertainGestureColor(
+            [in] Int32 color);
+
+        GetUncertainGestureColor(
+            [out] Int32* color);
+
+        GetGestureColor(
+            [out] Int32* color);
+
+        GetGestureStrokeWidth(
+            [out] Float* gestureStrokeWidth);
+
+        SetGestureStrokeWidth(
+            [in] Float gestureStrokeWidth);
+
+        GetGestureStrokeType(
+            [out] Int32* gestureStrokeType);
+
+        SetGestureStrokeType(
+            [in] Int32 gestureStrokeType);
+
+        GetGestureStrokeLengthThreshold(
+            [out] Float* gestureStrokeLengthThreshold);
+
+        SetGestureStrokeLengthThreshold(
+            [in] Float gestureStrokeLengthThreshold);
+
+        GetGestureStrokeSquarenessTreshold(
+            [out] Float* gestureStrokeSquarenessTreshold);
+
+        SetGestureStrokeSquarenessTreshold(
+            [in] Float gestureStrokeSquarenessTreshold);
+
+        GetGestureStrokeAngleThreshold(
+            [out] Float* gestureStrokeAngleThreshold);
+
+        SetGestureStrokeAngleThreshold(
+            [in] Float gestureStrokeAngleThreshold);
+
+        IsEventsInterceptionEnabled(
+            [out] Boolean* isEventsInterceptionEnabled);
+
+        SetEventsInterceptionEnabled(
+            [in] Boolean enabled);
+
+        IsFadeEnabled(
+            [out] Boolean* isFadeEnabled);
+
+        SetFadeEnabled(
+            [in] Boolean fadeEnabled);
+
+        GetGesture(
+            [out] IGesture** gesture);
+
+        SetGesture(
+            [in] IGesture* gesture);
+
+        GetGesturePath(
+            [out] IPath** gesturePath);
+
+        GetGesturePath(
+            [in] IPath* path,
+            [out] IPath** gesturePath);
+
+        IsGestureVisible(
+            [out] Boolean* isGestureVisible);
+
+        SetGestureVisible(
+            [in] Boolean visible);
+
+        GetFadeOffset(
+            [out] Int64* fadeOffset);
+
+        SetFadeOffset(
+            [in] Int64 fadeOffset);
+
+        AddOnGestureListener(
+            [in] IOnGestureListener* listener);
+
+        RemoveOnGestureListener(
+            [in] IOnGestureListener* listener);
+
+        RemoveAllOnGestureListeners();
+
+        AddOnGesturePerformedListener(
+            [in] IOnGesturePerformedListener* listener);
+
+        RemoveOnGesturePerformedListener(
+            [in] IOnGesturePerformedListener* listener);
+
+        RemoveAllOnGesturePerformedListeners();
+
+        AddOnGesturingListener(
+            [in] IOnGesturingListener* listener);
+
+        RemoveOnGesturingListener(
+            [in] IOnGesturingListener* listener);
+
+        RemoveAllOnGesturingListeners();
+
+        IsGesturing(
+            [out] Boolean* isGesturing);
+
+        GetGesturePaint(
+            [out] IPaint** gesturePaint);
+
+        Clear(
+            [in] Boolean animated);
+
+        CancelClearAnimation();
+
+        CancelGesture();
+    }
+
+    interface IFadeOutRunnable {
+        SetFireActionPerformed(
+            [in] Boolean fireActionPerformed);
+
+        SetResetMultipleStrokes(
+            [in] Boolean resetMultipleStrokes);
+
+        GetFireActionPerformed(
+            [out] Boolean* fireActionPerformed);
+
+        GetResetMultipleStrokes(
+            [out] Boolean* resetMultipleStrokes);
+    }
+
+    } // namespace Gesture
+    } // namespace Droid
+    } // namespace Elastos
+}

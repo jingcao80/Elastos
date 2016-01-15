@@ -1,0 +1,74 @@
+
+module
+{
+    interface Elastos.Droid.Net.Http.IHttpsConnection;
+    interface Elastos.Droid.Net.Http.ISslError;
+
+    using interface Elastos.Core.IArrayOf;
+    using interface Elastosx.Net.Ssl.ISSLSocket;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * Class responsible for all server certificate validation functionality
+     *
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ICertificateChainValidator {
+        /**
+         * Performs the handshake and server certificates validation
+         * Notice a new chain will be rebuilt by tracing the issuer and subject
+         * before calling checkServerTrusted().
+         * And if the last traced certificate is self issued and it is expired, it
+         * will be dropped.
+         * @param sslSocket The secure connection socket
+         * @param domain The website domain
+         * @return An SSL error object if there is an error and null otherwise
+         */
+        DoHandshakeAndValidateServerCertificates(
+            [in] IHttpsConnection* connection,
+            [in] ISSLSocket* sslSocket,
+            [in] String sDomain,
+            [out] ISslError** result);
+    }
+
+    [deprecated]
+    interface ICertificateChainValidatorHelper {
+        /**
+         * @return The singleton instance of the certificates chain validator
+         */
+        GetInstance(
+            [out] ICertificateChainValidator** result);
+
+        /**
+         * Similar to doHandshakeAndValidateServerCertificates but exposed to JNI for use
+         * by Chromium HTTPS stack to validate the cert chain.
+         * @param certChain The bytes for certificates in ASN.1 DER encoded certificates format.
+         * @param domain The full website hostname and domain
+         * @param authType The authentication type for the cert chain
+         * @return An SSL error object if there is an error and null otherwise
+         */
+        VerifyServerCertificates(
+            [in] ArrayOf<IArrayOf*>* certChain,
+            [in] String sDomain,
+            [in] String authType,
+            [out] ISslError** result);
+
+        /**
+         * Handles updates to credential storage.
+         */
+        HandleTrustStorageUpdate();
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

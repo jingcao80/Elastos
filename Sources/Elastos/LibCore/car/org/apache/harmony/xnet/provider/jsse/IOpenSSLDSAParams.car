@@ -1,0 +1,31 @@
+
+module
+{
+    using interface Elastos.Math.IBigInteger;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    interface IOpenSSLDSAParams extends Elastos.Security.Interfaces.IDSAParams {
+        GetY(
+            [out] IBigInteger** y);
+
+        GetX(
+            [out] IBigInteger** x);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* isEqual);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,24 @@
+TARGET_NAME= elastosx.xml
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastosx/xml/xpath;
+INCLUDES += $(MAKEDIR)/../../../inc/elastosx/xml/namespace;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility/logging;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/io;
+
+ELASTOS_LIBS += datatype/datatype.lib
+ELASTOS_LIBS += namespace/namespace.lib
+ELASTOS_LIBS += parsers/parsers.lib
+ELASTOS_LIBS += transform/transform.lib
+ELASTOS_LIBS += validation/validation.lib
+ELASTOS_LIBS += xpath/xpath.lib

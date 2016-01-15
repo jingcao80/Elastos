@@ -1,0 +1,356 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Hardware.Camera2.IICameraDeviceCallbacks;
+    interface Elastos.Droid.Hardware.Camera2.IICameraDeviceUser;
+    interface Elastos.Droid.Hardware.Camera2.ICaptureRequest;
+    interface Elastos.Droid.Hardware.Camera2.ICaptureResult;
+    interface Elastos.Droid.Hardware.Camera2.ICameraDevice;
+    interface Elastos.Droid.Hardware.Camera2.ICaptureFailure;
+    interface Elastos.Droid.Hardware.Camera2.ITotalCaptureResult;
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Impl {
+
+    /**
+     * <p>A callback for tracking the progress of a {@link CaptureRequest}
+     * submitted to the camera device.</p>
+     *
+     */
+    interface ICameraDeviceImplCaptureCallback {
+
+        /**
+         * This constant is used to indicate that no images were captured for
+         * the request.
+         *
+         * @hide
+         */
+        const Int32 NO_FRAMES_CAPTURED = -1;
+
+        /**
+         * This method is called when the camera device has started capturing
+         * the output image for the request, at the beginning of image exposure.
+         *
+         * @see android.media.MediaActionSound
+         */
+        OnCaptureStarted(
+            [in] ICameraDevice* camera,
+            [in] ICaptureRequest* request,
+            [in] Int64 timestamp,
+            [in] Int64 frameNumber);
+
+        /**
+         * This method is called when some results from an image capture are
+         * available.
+         *
+         * @hide
+         */
+        OnCapturePartial(
+            [in] ICameraDevice* camera,
+            [in] ICaptureRequest* request,
+            [in] ICaptureResult* result);
+
+        /**
+         * This method is called when an image capture makes partial forward progress; some
+         * (but not all) results from an image capture are available.
+         *
+         */
+        OnCaptureProgressed(
+            [in] ICameraDevice* camera,
+            [in] ICaptureRequest* request,
+            [in] ICaptureResult* partialResult);
+
+        /**
+         * This method is called when an image capture has fully completed and all the
+         * result metadata is available.
+         */
+        OnCaptureCompleted(
+            [in] ICameraDevice* camera,
+            [in] ICaptureRequest* request,
+            [in] ITotalCaptureResult* result);
+
+        /**
+         * This method is called instead of {@link #onCaptureCompleted} when the
+         * camera device failed to produce a {@link CaptureResult} for the
+         * request.
+         */
+        OnCaptureFailed(
+            [in] ICameraDevice* camera,
+            [in] ICaptureRequest* request,
+            [in] ICaptureFailure* failure);
+
+        /**
+         * This method is called independently of the others in CaptureCallback,
+         * when a capture sequence finishes and all {@link CaptureResult}
+         * or {@link CaptureFailure} for it have been returned via this callback.
+         */
+        OnCaptureSequenceCompleted(
+            [in] ICameraDevice* camera,
+            [in] Int32 sequenceId,
+            [in] Int64 frameNumber);
+
+        /**
+         * This method is called independently of the others in CaptureCallback,
+         * when a capture sequence aborts before any {@link CaptureResult}
+         * or {@link CaptureFailure} for it have been returned via this callback.
+         */
+        OnCaptureSequenceAborted(
+            [in] ICameraDevice* camera,
+            [in] Int32 sequenceId);
+    }
+
+    /**
+     * A callback for notifications about the state of a camera device, adding in the callbacks that
+     * were part of the earlier KK API design, but now only used internally.
+     *
+     * @invoke ICameraDeviceStateCallback
+     */
+    interface ICameraDeviceImplStateCallbackKK {
+        /**
+         * The method called when a camera device has no outputs configured.
+         *
+         */
+        OnUnconfigured(
+            [in] ICameraDevice* camera);
+
+        /**
+         * The method called when a camera device begins processing
+         * {@link CaptureRequest capture requests}.
+         *
+         */
+        OnActive(
+            [in] ICameraDevice* camera);
+
+        /**
+         * The method called when a camera device is busy.
+         *
+         */
+        OnBusy(
+            [in] ICameraDevice* camera);
+
+        /**
+         * The method called when a camera device has finished processing all
+         * submitted capture requests and has reached an idle state.
+         *
+         */
+        OnIdle(
+            [in] ICameraDevice* camera);
+    }
+
+    interface ICameraDeviceImplCaptureCallbackHolder {
+        IsRepeating(
+            [out] Boolean* result);
+
+        GetCallback(
+            [out] ICameraDeviceImplCaptureCallback** _callback);
+
+        GetRequest(
+            [in] Int32 subsequenceId,
+            [out] ICaptureRequest** request);
+
+        GetRequest(
+            [out] ICaptureRequest** request);
+
+        GetHandler(
+            [out] IHandler** handler);
+    }
+
+    interface ICameraDeviceImplFrameNumberTracker {
+        /**
+         * This function is called every time when a result or an error is received.
+         * @param frameNumber the frame number corresponding to the result or error
+         * @param isError true if it is an error, false if it is not an error
+         */
+        UpdateTracker(
+            [in] Int64 frameNumber,
+            [in] Boolean isError);
+
+        /**
+         * This function is called every time a result has been completed.
+         *
+         * <p>It keeps a track of all the partial results already created for a particular
+         * frame number.</p>
+         *
+         * @param frameNumber the frame number corresponding to the result
+         * @param result the total or partial result
+         * @param partial {@true} if the result is partial, {@code false} if total
+         */
+        UpdateTracker(
+            [in] Int64 frameNumber,
+            [in] ICaptureResult* result,
+            [in] Boolean partial);
+
+        /**
+         * Attempt to pop off all of the partial results seen so far for the {@code frameNumber}.
+         *
+         * <p>Once popped-off, the partial results are forgotten (unless {@code updateTracker}
+         * is called again with new partials for that frame number).</p>
+         *
+         * @param frameNumber the frame number corresponding to the result
+         * @return a list of partial results for that frame with at least 1 element,
+         *         or {@code null} if there were no partials recorded for that frame
+         */
+        PopPartialResults(
+            [in] Int64 frameNumber,
+            [out] IList** list);
+
+        GetCompletedFrameNumber(
+            [out] Int64* number);
+    }
+
+    /*
+    * @invoke
+    * interface IICameraDeviceCallbacks
+    *
+    */
+    interface ICameraDeviceImplCameraDeviceCallbacks {
+        //
+        // Constants below need to be kept up-to-date with
+        // frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
+        //
+
+        //
+        // Error codes for onCameraError
+        //
+
+        /**
+         * Camera has been disconnected
+         */
+        const Int32 ERROR_CAMERA_DISCONNECTED = 0;
+        /**
+         * Camera has encountered a device-level error
+         * Matches CameraDevice.StateCallback#ERROR_CAMERA_DEVICE
+         */
+        const Int32 ERROR_CAMERA_DEVICE = 1;
+        /**
+         * Camera has encountered a service-level error
+         * Matches CameraDevice.StateCallback#ERROR_CAMERA_SERVICE
+         */
+        const Int32 ERROR_CAMERA_SERVICE = 2;
+        /**
+         * Camera has encountered an error processing a single request.
+         */
+        const Int32 ERROR_CAMERA_REQUEST = 3;
+        /**
+         * Camera has encountered an error producing metadata for a single capture
+         */
+        const Int32 ERROR_CAMERA_RESULT = 4;
+        /**
+         * Camera has encountered an error producing an image buffer for a single capture
+         */
+        const Int32 ERROR_CAMERA_BUFFER = 5;
+    }
+
+    /**
+     * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
+     */
+    interface ICameraDeviceImpl {
+        GetCallbacks(
+            [out] ICameraDeviceImplCameraDeviceCallbacks** outcd);
+
+        SetRemoteDevice(
+            [in] IICameraDeviceUser* remoteDevice);
+
+        /**
+         * Call to indicate failed connection to a remote camera device.
+         *
+         * <p>This places the camera device in the error state and informs the callback.
+         * Use in place of setRemoteDevice() when startup fails.</p>
+         */
+        SetRemoteFailure(
+            [in] ECode failure);
+
+        ConfigureOutputs(
+            [in] IList* outputs);
+
+        /**
+         * Attempt to configure the outputs; the device goes to idle and then configures the
+         * new outputs if possible.
+         *
+         * <p>The configuration may gracefully fail, if there are too many outputs, if the formats
+         * are not supported, or if the sizes for that format is not supported. In this case this
+         * function will return {@code false} and the unconfigured callback will be fired.</p>
+         *
+         * <p>If the configuration succeeds (with 1 or more outputs), then the idle callback is fired.
+         * Unconfiguring the device always fires the idle callback.</p>
+         *
+         * @param outputs a list of one or more surfaces, or {@code null} to unconfigure
+         * @return whether or not the configuration was successful
+         *
+         * @throws CameraAccessException if there were any unexpected problems during configuration
+         */
+        ConfigureOutputsChecked(
+            [in] IList* outputs,
+            [out] Boolean* value);
+
+        /**
+         * For use by backwards-compatibility code only.
+         */
+        SetSessionListener(
+            [in] ICameraDeviceImplStateCallbackKK* sessionCallback);
+
+        Capture(
+            [in] ICaptureRequest* request,
+            [in] ICameraDeviceImplCaptureCallback* ccallback,
+            [in] IHandler* handler,
+            [out] Int32* value);
+
+        CaptureBurst(
+            [in] IList* requests,
+            [in] ICameraDeviceImplCaptureCallback* ccallback,
+            [in] IHandler* handler,
+            [out] Int32* value);
+
+        SetRepeatingRequest(
+            [in] ICaptureRequest* request,
+            [in] ICameraDeviceImplCaptureCallback* ccallback,
+            [in] IHandler* handler,
+            [out] Int32* value);
+
+        SetRepeatingBurst(
+            [in] IList* requests,
+            [in] ICameraDeviceImplCaptureCallback* ccallback,
+            [in] IHandler* handler,
+            [out] Int32* result);
+
+        StopRepeating();
+
+        Flush();
+    }
+
+    interface ICameraDeviceImplHelper {
+        /**
+         * Default handler management.
+         *
+         * <p>
+         * If handler is null, get the current thread's
+         * Looper to create a Handler with. If no looper exists, throw {@code IllegalArgumentException}.
+         * </p>
+         */
+        CheckHandler(
+            [in] IHandler* handler,
+            [out] IHandler** result);
+
+        /**
+         * Default handler management, conditional on there being a callback.
+         *
+         * <p>If the callback isn't null, check the handler, otherwise pass it through.</p>
+         */
+        CheckHandler(
+            [in] IHandler* handler,
+            [in] IInterface* _callback,
+            [out] IHandler** result);
+    }
+
+    } // namespace Impl
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

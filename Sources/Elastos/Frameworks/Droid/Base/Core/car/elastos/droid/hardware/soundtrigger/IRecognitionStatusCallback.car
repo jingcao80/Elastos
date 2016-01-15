@@ -1,0 +1,47 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Soundtrigger.ISoundTriggerKeyphraseRecognitionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Soundtrigger {
+
+    /**
+     * @hide
+     */
+    [oneway]
+    interface IIRecognitionStatusCallback {
+        /**
+         * Called when the keyphrase is spoken.
+         *
+         * @param data Optional trigger audio data, if it was requested and is available.
+         */
+        OnDetected(
+            [in] ISoundTriggerKeyphraseRecognitionEvent* recognitionEvent);
+
+        /**
+         * Called when the detection fails due to an error.
+         *
+         * @param status The error code that was seen.
+         */
+        OnError(
+            [in] Int32 status);
+
+        /**
+         * Called when the recognition is paused temporarily for some reason.
+         */
+        OnRecognitionPaused();
+
+        /**
+         * Called when the recognition is resumed after it was temporarily paused.
+         */
+        OnRecognitionResumed();
+    }
+
+    } // namespace Soundtrigger
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

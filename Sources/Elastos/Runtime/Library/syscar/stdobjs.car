@@ -1,0 +1,46 @@
+//==========================================================================
+//==========================================================================
+// Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+//==========================================================================
+
+library
+{
+    interface ICallbackRendezvous {
+        Wait(
+            [in] Int32 timeout,
+            [out] WaitResult* result);
+    }
+
+    interface ICallbackSink {
+        AddCallback(
+            [in] Int32 event,
+            [in] EventHandler handler);
+
+        RemoveCallback(
+            [in] Int32 event,
+            [in] EventHandler handler);
+
+        AcquireCallbackRendezvous(
+            [in] Int32 event,
+            [out] ICallbackRendezvous** rendezvous);
+
+        RemoveAllCallbacks();
+
+        CancelPendingCallback([in] Int32 event);
+
+        CancelAllPendingCallbacks();
+    }
+
+    interface IRegime {
+        ObjectEnter(
+            [in] PInterface object);
+
+        ObjectLeave(
+            [in] PInterface object);
+
+        CreateObject(
+            [in] ClassID clsid,
+            [in] InterfaceID iid,
+            [out] IInterface** object);
+    }
+}

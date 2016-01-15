@@ -1,0 +1,91 @@
+
+module
+{
+
+    using interface Elastos.IO.IInputStream;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+
+    /**
+     * A watcher for {@link EofSensorInputStream EofSensorInputStream}.
+     * Each stream will notify it's watcher at most once.
+     *
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version $Revision: 552264 $
+     *
+     * @since 4.0
+     */
+    interface IEofSensorWatcher {
+
+        /**
+         * Indicates that EOF is detected.
+         *
+         * @param wrapped   the underlying stream which has reached EOF
+         *
+         * @return  <code>true</code> if <code>wrapped</code> should be closed,
+         *          <code>false</code> if it should be left alone
+         *
+         * @throws IOException
+         *         in case of an IO problem, for example if the watcher itself
+         *         closes the underlying stream. The caller will leave the
+         *         wrapped stream alone, as if <code>false</code> was returned.
+         */
+        EofDetected(
+            [in] IInputStream* wrapped,
+            [out] Boolean* result);
+
+        /**
+         * Indicates that the {@link EofSensorInputStream stream} is closed.
+         * This method will be called only if EOF was <i>not</i> detected
+         * before closing. Otherwise, {@link #eofDetected eofDetected} is called.
+         *
+         * @param wrapped   the underlying stream which has not reached EOF
+         *
+         * @return  <code>true</code> if <code>wrapped</code> should be closed,
+         *          <code>false</code> if it should be left alone
+         *
+         * @throws IOException
+         *         in case of an IO problem, for example if the watcher itself
+         *         closes the underlying stream. The caller will leave the
+         *         wrapped stream alone, as if <code>false</code> was returned.
+         */
+        StreamClosed(
+            [in] IInputStream* wrapped,
+            [out] Boolean* result);
+
+        /**
+         * Indicates that the {@link EofSensorInputStream stream} is aborted.
+         * This method will be called only if EOF was <i>not</i> detected
+         * before aborting. Otherwise, {@link #eofDetected eofDetected} is called.
+         * <p/>
+         * This method will also be invoked when an input operation causes an
+         * IOException to be thrown to make sure the input stream gets shut down.
+         *
+         * @param wrapped   the underlying stream which has not reached EOF
+         *
+         * @return  <code>true</code> if <code>wrapped</code> should be closed,
+         *          <code>false</code> if it should be left alone
+         *
+         * @throws IOException
+         *         in case of an IO problem, for example if the watcher itself
+         *         closes the underlying stream. The caller will leave the
+         *         wrapped stream alone, as if <code>false</code> was returned.
+         */
+        StreamAbort(
+            [in] IInputStream* wrapped,
+            [out] Boolean* result);
+
+    }
+
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,26 @@
+TARGET_NAME = HelloService
+TARGET_TYPE = eco
+
+EXPORT_ALL_SYMBOLS = 1
+
+IMPORTS = Elastos.Droid.Core.eco
+
+SOURCES  = HelloService.car
+SOURCES += R.cpp
+SOURCES += CMainActivity.cpp
+SOURCES += CHelloService.cpp
+SOURCES += CBindHelloService.cpp
+SOURCES += Elastos.Core.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+LIBRARIES  = $(XDK_LIB_PATH)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Core.lib
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Droid.lib
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_LIB_PATH)/Elastos.Core.eco
+LIBRARIES += $(XDK_LIB_PATH)/crt0.lib
+LIBRARIES += -lm -licuuc -llog
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+

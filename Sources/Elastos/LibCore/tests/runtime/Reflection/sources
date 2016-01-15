@@ -1,0 +1,21 @@
+
+TARGET_NAME = testReflection
+TARGET_TYPE = ecx
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)/eco
+VPATH := $(MAKEDIR)/eco/
+
+IMPORTS += Reflection.eco
+IMPORTS += Elastos.CoreLibrary.eco
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += -lstdc++ -licuuc -licui18n -lm
+
+SOURCES = Elastos.CoreLibrary.cpp
+SOURCES += main.cpp
+SOURCES += Reflection.cpp

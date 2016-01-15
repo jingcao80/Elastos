@@ -1,0 +1,99 @@
+
+module
+{
+    interface Elastos.Security.IProviderService;
+    interface Elastos.Security.IProvider;
+    interface Elastos.Utility.IArrayList;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Fortress {
+
+    /**
+     * This class contains information about all registered providers and preferred
+     * implementations for all "serviceName.algName".
+     */
+    interface IServices {
+        /**
+         * Returns a copy of the registered providers as an array.
+         */
+        GetProviders(
+            [out] IArrayList** providers);
+
+        /**
+         * Returns the provider with the specified name.
+         */
+        GetProvider(
+            [in] String name,
+            [out] IProvider** provider);
+
+        /**
+         * Inserts a provider at a specified 1-based position.
+         */
+        InsertProviderAt(
+            [in] IProvider* provider,
+            [in] Int32 position,
+            [out] Int32* pos);
+
+        /**
+         * Removes the provider at the specified 1-based position.
+         */
+        RemoveProvider(
+            [in] Int32 providerNumber);
+
+        /**
+         * Adds information about provider services into HashMap.
+         */
+        InitServiceInfo(
+            [in] IProvider* p);
+
+        /**
+         * Returns true if services contain any provider information.
+         */
+        IsEmpty(
+            [out] Boolean* empty);
+
+        /**
+         * Looks up the requested service by type and algorithm. The
+         * service key should be provided in the same format used when
+         * registering a service with a provider, for example,
+         * "KeyFactory.RSA".
+         *
+         * Callers can cache the returned service information but such
+         * caches should be validated against the result of
+         * Service.getCacheVersion() before use.
+         */
+        GetServices(
+            [in] String key,
+            [out] IArrayList** services);
+
+        /**
+         * Returns the default SecureRandom service description.
+         */
+        GetSecureRandomService(
+            [out] IProviderService** service);
+
+        /**
+         * In addition to being used here when the list of providers
+         * changes, this method is also used by the Provider
+         * implementation to indicate that a provides list of services has
+         * changed.
+         */
+        SetNeedRefresh();
+
+        /**
+         * Returns the current cache version. This has the possible side
+         * effect of updating the cache if needed.
+         */
+        GetCacheVersion(
+            [out] Int32* cacheVersion);
+    }
+
+    } // namespace Fortress
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

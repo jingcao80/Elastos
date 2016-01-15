@@ -1,0 +1,932 @@
+
+module
+{
+    interface Elastos.IO.ICharBuffer;
+    interface Elastos.IO.IDoubleBuffer;
+    interface Elastos.IO.IFloatBuffer;
+    interface Elastos.IO.IInt16Buffer;
+    interface Elastos.IO.IInt32Buffer;
+    interface Elastos.IO.IInt64Buffer;
+
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * A buffer for bytes.
+     * <p>
+     * A byte buffer can be created in either one of the following ways:
+     * <ul>
+     * <li>{@link #allocate(int) Allocate} a new byte array and create a buffer
+     * based on it;</li>
+     * <li>{@link #allocateDirect(int) Allocate} a memory block and create a direct
+     * buffer based on it;</li>
+     * <li>{@link #wrap(byte[]) Wrap} an existing byte array to create a new
+     * buffer.</li>
+     * </ul>
+     *
+     */
+    /**
+     * @Involve
+     * interface IBuffer;
+     * interface IComparable
+     */
+    [deprecated]
+    interface IByteBuffer {
+        /**
+         * Returns the byte array which this buffer is based on, if there is one.
+         *
+         * @return the byte array which this buffer is based on.
+         * @exception ReadOnlyBufferException
+         *                if this buffer is based on a read-only array.
+         * @exception UnsupportedOperationException
+         *                if this buffer is not based on an array.
+         */
+        GetArray(
+            [out, callee] ArrayOf<Byte>* array);
+
+        /**
+         * Returns a char buffer which is based on the remaining content of this
+         * byte buffer.
+         * <p>
+         * The new buffer's position is zero, its limit and capacity is the number
+         * of remaining bytes divided by two, and its mark is not set. The new
+         * buffer's read-only property and byte order are the same as this buffer's.
+         * The new buffer is direct if this byte buffer is direct.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a char buffer which is based on the content of this byte buffer.
+         */
+        AsCharBuffer(
+            [out] ICharBuffer** buffer);
+
+        /**
+         * Returns a double buffer which is based on the remaining content of this
+         * byte buffer.
+         * <p>
+         * The new buffer's position is zero, its limit and capacity is the number
+         * of remaining bytes divided by eight, and its mark is not set. The new
+         * buffer's read-only property and byte order are the same as this buffer's.
+         * The new buffer is direct if this byte buffer is direct.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a double buffer which is based on the content of this byte
+         *         buffer.
+         */
+        AsDoubleBuffer(
+            [out] IDoubleBuffer** buffer);
+
+        /**
+         * Returns a float buffer which is based on the remaining content of this
+         * byte buffer.
+         * <p>
+         * The new buffer's position is zero, its limit and capacity is the number
+         * of remaining bytes divided by four, and its mark is not set. The new
+         * buffer's read-only property and byte order are the same as this buffer's.
+         * The new buffer is direct if this byte buffer is direct.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a float buffer which is based on the content of this byte buffer.
+         */
+        AsFloatBuffer(
+            [out] IFloatBuffer** buffer);
+
+        /**
+         * Returns a short buffer which is based on the remaining content of this
+         * byte buffer.
+         * <p>
+         * The new buffer's position is zero, its limit and capacity is the number
+         * of remaining bytes divided by two, and its mark is not set. The new
+         * buffer's read-only property and byte order are the same as this buffer's.
+         * The new buffer is direct if this byte buffer is direct.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a short buffer which is based on the content of this byte buffer.
+         */
+        AsInt16Buffer(
+            [out] IInt16Buffer** buffer);
+
+        /**
+         * Returns a int buffer which is based on the remaining content of this byte
+         * buffer.
+         * <p>
+         * The new buffer's position is zero, its limit and capacity is the number
+         * of remaining bytes divided by four, and its mark is not set. The new
+         * buffer's read-only property and byte order are the same as this buffer's.
+         * The new buffer is direct if this byte buffer is direct.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a int buffer which is based on the content of this byte buffer.
+         */
+        AsInt32Buffer(
+            [out] IInt32Buffer** buffer);
+
+        /**
+         * Returns a long buffer which is based on the remaining content of this
+         * byte buffer.
+         * <p>
+         * The new buffer's position is zero, its limit and capacity is the number
+         * of remaining bytes divided by eight, and its mark is not set. The new
+         * buffer's read-only property and byte order are the same as this buffer's.
+         * The new buffer is direct if this byte buffer is direct.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a long buffer which is based on the content of this byte buffer.
+         */
+        AsInt64Buffer(
+            [out] IInt64Buffer** buffer);
+
+        /**
+         * Returns a read-only buffer that shares its content with this buffer.
+         * <p>
+         * The returned buffer is guaranteed to be a new instance, even if this
+         * buffer is read-only itself. The new buffer's position, limit, capacity
+         * and mark are the same as this buffer.
+         * <p>
+         * The new buffer shares its content with this buffer, which means this
+         * buffer's change of content will be visible to the new buffer. The two
+         * buffer's position, limit and mark are independent.
+         *
+         * @return a read-only version of this buffer.
+         */
+        AsReadOnlyBuffer(
+            [out] IByteBuffer** buffer);
+
+        /**
+         * Compacts this byte buffer.
+         * <p>
+         * The remaining bytes will be moved to the head of the
+         * buffer, starting from position zero. Then the position is set to
+         * {remaining()}; the limit is set to capacity; the mark is
+         * cleared.
+         *
+         * @return this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Compact();
+
+        /**
+         * Compares the remaining bytes of this buffer to another byte buffer's
+         * remaining bytes.
+         *
+         * @param other
+         *      another byte buffer.
+         * @return a negative value if this is less than other; O if this euquals
+         *       to other; a positive value if this is greater than other.
+         * @Exception ClasscastException
+         *       if is not a byte byte buffer.
+         */
+        CompareTo(
+            [in]  IByteBuffer* other,
+            [out] Int32* rst);
+
+        /**
+         * Returns a duplicated buffer that shares its content with this buffer.
+         * <p>
+         * The duplicated buffer's position, limit, capacity and mark are the same
+         * as this buffer's. The duplicated buffer's read-only property and byte
+         * order are the same as this buffer's too.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a duplicated buffer that shares its content with this buffer.
+         */
+        Duplicate(
+            [out] IByteBuffer** buffer);
+
+        /**
+         * Returns the byte at the current position and increases the position by 1.
+         *
+         * @return the byte at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is equal or greater than limit.
+         */
+        Get(
+            [out] Byte* value);
+
+        /**
+         * Returns the byte at the specified index and does not change the position.
+         *
+         * @param index
+         *            the index, must not be negative and less than limit.
+         * @return the byte at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if index is invalid.
+         */
+        Get(
+            [in] Int32 index,
+            [out] Byte* value);
+
+        /**
+         * Reads bytes from the current position into the specified byte array and
+         * increases the position by the number of bytes read.
+         * <p>
+         * Calling this method has the same effect as
+         * {get(dst, 0, dst.length)}.
+         *
+         * @param dst
+         *            the destination byte array.
+         * @return this buffer.
+         * @exception BufferUnderflowException
+         *                if {dst.length} is greater than {remaining()}.
+         */
+        Get(
+            [in] ArrayOf<Byte>* dst);
+
+        /**
+         * Reads bytes from the current position into the specified byte array,
+         * starting at the specified offset, and increases the position by the
+         * number of bytes read.
+         *
+         * @param dst
+         *            the target byte array.
+         * @param dstOffset
+         *            the offset of the byte array, must not be negative and
+         *            not greater than {@code dst.length}.
+         * @param byteCount
+         *            the number of bytes to read, must not be negative and not
+         *            greater than {@code dst.length - dstOffset}
+         * @return {@code this}
+         * @exception IndexOutOfBoundsException if {@code dstOffset < 0 ||  byteCount < 0}
+         * @exception BufferUnderflowException if {@code byteCount > remaining()}
+         */
+        Get(
+            [in] ArrayOf<Byte>* dst,
+            [in] Int32 dstOffset,
+            [in] Int32 byteCount);
+
+        /**
+         * Returns the char at the current position and increases the position by 2.
+         * <p>
+         * The 2 bytes starting at the current position are composed into a char
+         * according to the current byte order and returned.
+         *
+         * @return the char at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is greater than {limit - 2}.
+         */
+        GetChar(
+            [out] Char32* value);
+
+        /**
+         * Returns the char at the specified index.
+         * <p>
+         * The 2 bytes starting from the specified index are composed into a char
+         * according to the current byte order and returned. The position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 2}.
+         * @return the char at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         */
+        GetChar(
+            [in] Int32 index,
+            [out] Char32* value);
+
+        /**
+         * Returns the double at the current position and increases the position by
+         * 8.
+         * <p>
+         * The 8 bytes starting from the current position are composed into a double
+         * according to the current byte order and returned.
+         *
+         * @return the double at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is greater than {limit - 8}.
+         */
+        GetDouble(
+            [out] Double* value);
+
+        /**
+         * Returns the double at the specified index.
+         * <p>
+         * The 8 bytes starting at the specified index are composed into a double
+         * according to the current byte order and returned. The position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 8}.
+         * @return the double at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         */
+        GetDouble(
+            [in] Int32 index,
+            [out] Double* value);
+
+        /**
+         * Returns the float at the current position and increases the position by
+         * 4.
+         * <p>
+         * The 4 bytes starting at the current position are composed into a float
+         * according to the current byte order and returned.
+         *
+         * @return the float at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is greater than {limit - 4}.
+         */
+        GetFloat(
+            [out] Float* value);
+
+        /**
+         * Returns the float at the specified index.
+         * <p>
+         * The 4 bytes starting at the specified index are composed into a float
+         * according to the current byte order and returned. The position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 4}.
+         * @return the float at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         */
+        GetFloat(
+            [in] Int32 index,
+            [out] Float* value);
+
+        /**
+         * Returns the int at the current position and increases the position by 4.
+         * <p>
+         * The 4 bytes starting at the current position are composed into a int
+         * according to the current byte order and returned.
+         *
+         * @return the int at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is greater than {limit - 4}.
+         */
+        GetInt32(
+            [out] Int32* value);
+
+        /**
+         * Returns the int at the specified index.
+         * <p>
+         * The 4 bytes starting at the specified index are composed into a int
+         * according to the current byte order and returned. The position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 4}.
+         * @return the int at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         */
+        GetInt32(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        /**
+         * Returns the long at the current position and increases the position by 8.
+         * <p>
+         * The 8 bytes starting at the current position are composed into a long
+         * according to the current byte order and returned.
+         *
+         * @return the long at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is greater than {limit - 8}.
+         */
+        GetInt64(
+            [out] Int64* value);
+
+        /**
+         * Returns the long at the specified index.
+         * <p>
+         * The 8 bytes starting at the specified index are composed into a long
+         * according to the current byte order and returned. The position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 8}.
+         * @return the long at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         */
+        GetInt64(
+            [in] Int32 index,
+            [out] Int64* value);
+
+        /**
+         * Returns the short at the current position and increases the position by 2.
+         * <p>
+         * The 2 bytes starting at the current position are composed into a short
+         * according to the current byte order and returned.
+         *
+         * @return the short at the current position.
+         * @exception BufferUnderflowException
+         *                if the position is greater than {limit - 2}.
+         */
+        GetInt16(
+            [out] Int16* value);
+
+        /**
+         * Returns the short at the specified index.
+         * <p>
+         * The 2 bytes starting at the specified index are composed into a short
+         * according to the current byte order and returned. The position is not
+         * changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 2}.
+         * @return the short at the specified index.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         */
+        GetInt16(
+            [in] Int32 index,
+            [out] Int16* value);
+
+        /**
+         * Returns the byte order used by this buffer when converting bytes from/to
+         * other primitive types.
+         * <p>
+         * The default byte order of byte buffer is always BIG_ENDIAN BIG_ENDIAN.
+         *
+         * @sa ByteOrder#BIG_ENDIAN BIG_ENDIAN
+         *
+         * @return the byte order used by this buffer when converting bytes from/to
+         *         other primitive types.
+         */
+        GetOrder(
+            [out] ByteOrder* byteOrder);
+
+        /**
+         * Sets the byte order of this buffer.
+         *
+         * @param byteOrder
+         *            the byte order to set. If {null} then the order
+         *            will be LITTLE_ENDIAN LITTLE_ENDIAN.
+         *
+         * @sa ByteOrder#LITTLE_ENDIAN LITTLE_ENDIAN
+         * @return this buffer.
+         * @see ByteOrder
+         */
+        SetOrder(
+            [in] ByteOrder byteOrder);
+
+        /**
+         * Indicates whether this buffer is still accessible.
+         *
+         * @return {@code true} if this buffer is accessible, {@code false} if the
+         *         buffer was made inaccessible (e.g. freed) and should not be used.
+         * @hide
+         */
+        IsAccessible(
+            [out] Boolean* value);
+
+        /**
+         * Sets buffer accessibility (only supported for direct byte buffers). If
+         * {@code accessible} is {@code false}, {@link #isAccessible} will return
+         * false, and any attempt to access the buffer will throw an exception. If
+         * {@code true}, the buffer will become useable again, unless it has been
+         * freed.
+         *
+         * @hide
+         */
+        SetAccessible(
+            [in] Boolean accessible);
+
+        /**
+         * Writes the given byte to the current position and increases the position
+         * by 1.
+         *
+         * @param b
+         *            the byte to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is equal or greater than limit.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Byte b);
+
+        /**
+         * Write a byte to the specified index of this buffer without changing the
+         * position.
+         *
+         * @param index
+         *            the index, must not be negative and less than the limit.
+         * @param b
+         *            the byte to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] Int32 index,
+            [in] Byte b);
+
+        /**
+         * Writes bytes in the given byte array to the current position and
+         * increases the position by the number of bytes written.
+         * <p>
+         * Calling this method has the same effect as
+         * {put(src, 0, src.length)}.
+         *
+         * @param src
+         *            the source byte array.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {remaining()} is less than {src.length}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Byte>* src);
+
+        /**
+         * Writes bytes in the given byte array, starting from the specified offset,
+         * to the current position and increases the position by the number of bytes
+         * written.
+         *
+         * @param src
+         *            the source byte array.
+         * @param srcOffset
+         *            the offset of byte array, must not be negative and not greater
+         *            than {@code src.length}.
+         * @param byteCount
+         *            the number of bytes to write, must not be negative and not
+         *            greater than {@code src.length - srcOffset}.
+         * @return {@code this}
+         * @exception BufferOverflowException
+         *                if {@code remaining()} is less than {@code byteCount}.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code srcOffset} or {@code byteCount} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] ArrayOf<Byte>* src,
+            [in] Int32 srcOffset,
+            [in] Int32 byteCount);
+
+        /**
+         * Writes all the remaining bytes of the {src} byte buffer to this
+         * buffer's current position, and increases both buffers' position by the
+         * number of bytes copied.
+         *
+         * @param src
+         *            the source byte buffer.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if {src.remaining()} is greater than this buffer's
+         *                {remaining()}.
+         * @exception IllegalArgumentException
+         *                if {src} is this buffer.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        Put(
+            [in] IByteBuffer* src);
+
+        /**
+         * Writes the given char to the current position and increases the position
+         * by 2.
+         * <p>
+         * The char is converted to bytes using the current byte order.
+         *
+         * @param value
+         *            the char to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is greater than {limit - 2}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutChar(
+            [in] Char32 value);
+
+        /**
+         * Writes the given char to the specified index of this buffer.
+         * <p>
+         * The char is converted to bytes using the current byte order. The position
+         * is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 2}.
+         * @param value
+         *            the char to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutChar(
+            [in] Int32 index,
+            [in] Char32 value);
+
+        /**
+         * Writes the given double to the current position and increases the position
+         * by 8.
+         * <p>
+         * The double is converted to bytes using the current byte order.
+         *
+         * @param value
+         *            the double to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is greater than {limit - 8}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutDouble(
+            [in] Double value);
+
+        /**
+         * Writes the given double to the specified index of this buffer.
+         * <p>
+         * The double is converted to bytes using the current byte order. The
+         * position is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 8}.
+         * @param value
+         *            the double to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutDouble(
+            [in] Int32 index,
+            [in] Double value);
+
+        /**
+         * Writes the given float to the current position and increases the position
+         * by 4.
+         * <p>
+         * The float is converted to bytes using the current byte order.
+         *
+         * @param value
+         *            the float to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is greater than {limit - 4}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutFloat(
+            [in] Float value);
+
+        /**
+         * Writes the given float to the specified index of this buffer.
+         * <p>
+         * The float is converted to bytes using the current byte order. The
+         * position is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 4}.
+         * @param value
+         *            the float to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutFloat(
+            [in] Int32 index,
+            [in] Float value);
+
+        /**
+         * Writes the given short to the current position and increases the position
+         * by 2.
+         * <p>
+         * The short is converted to bytes using the current byte order.
+         *
+         * @param value
+         *            the short to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is greater than {limit - 2}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutInt16(
+            [in] Int16 value);
+
+        /**
+         * Writes the given short to the specified index of this buffer.
+         * <p>
+         * The short is converted to bytes using the current byte order. The
+         * position is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 2}.
+         * @param value
+         *            the short to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutInt16(
+            [in] Int32 index,
+            [in] Int16 value);
+
+        /**
+         * Writes the given int to the current position and increases the position by
+         * 4.
+         * <p>
+         * The int is converted to bytes using the current byte order.
+         *
+         * @param value
+         *            the int to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is greater than {limit - 4}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutInt32(
+            [in] Int32 value);
+
+        /**
+         * Writes the given int to the specified index of this buffer.
+         * <p>
+         * The int is converted to bytes using the current byte order. The position
+         * is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 4}.
+         * @param value
+         *            the int to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutInt32(
+            [in] Int32 index,
+            [in] Int32 value);
+
+        /**
+         * Writes the given long to the current position and increases the position
+         * by 8.
+         * <p>
+         * The long is converted to bytes using the current byte order.
+         *
+         * @param value
+         *            the long to write.
+         * @return this buffer.
+         * @exception BufferOverflowException
+         *                if position is greater than {limit - 8}.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutInt64(
+            [in] Int64 value);
+
+        /**
+         * Writes the given long to the specified index of this buffer.
+         * <p>
+         * The long is converted to bytes using the current byte order. The position
+         * is not changed.
+         *
+         * @param index
+         *            the index, must not be negative and equal or less than
+         *            {limit - 8}.
+         * @param value
+         *            the long to write.
+         * @return this buffer.
+         * @exception IndexOutOfBoundsException
+         *                if {index} is invalid.
+         * @exception ReadOnlyBufferException
+         *                if no changes may be made to the contents of this buffer.
+         */
+        PutInt64(
+            [in] Int32 index,
+            [in] Int64 value);
+
+        /**
+         * Returns a sliced buffer that shares its content with this buffer.
+         * <p>
+         * The sliced buffer's capacity will be this buffer's
+         * {remaining()}, and it's zero position will correspond to
+         * this buffer's current position. The new buffer's position will be 0,
+         * limit will be its capacity, and its mark is cleared. The new buffer's
+         * read-only property and byte order are the same as this buffer's.
+         * <p>
+         * The new buffer shares its content with this buffer, which means either
+         * buffer's change of content will be visible to the other. The two buffer's
+         * position, limit and mark are independent.
+         *
+         * @return a sliced buffer that shares its content with this buffer.
+         */
+        Slice(
+            [out] IByteBuffer** buffer);
+    }
+
+    [deprecated]
+    interface IByteBufferHelper {
+        /**
+         * Creates a byte buffer based on a newly allocated byte array.
+         *
+         * @param capacity
+         *            the capacity of the new buffer
+         * @return the created byte buffer.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {capacity < 0}.
+         */
+        Allocate(
+            [in] Int32 capacity,
+            [out] IByteBuffer** byteBuf);
+
+        /**
+         * Creates a direct byte buffer based on a newly allocated memory block.
+         *
+         * @param capacity
+         *            the capacity of the new buffer
+         * @return the created byte buffer.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {capacity < 0}.
+         */
+        AllocateDirect(
+            [in] Int32 capacity,
+            [out] IByteBuffer** byteBuf);
+
+        /**
+         * Creates a new byte buffer by wrapping the given byte array.
+         * <p>
+         * Calling this method has the same effect as
+         * {wrap(array, 0, array.length)}.
+         *
+         * @param array
+         *            the byte array which the new buffer will be based on
+         * @return the created byte buffer.
+         */
+        Wrap(
+            [in] ArrayOf<Byte>* array,
+            [out] IByteBuffer** byteBuf);
+
+        /**
+         * Creates a new byte buffer by wrapping the given byte array.
+         * <p>
+         * The new buffer's position will be {@code start}, limit will be
+         * {@code start + byteCount}, capacity will be the length of the array.
+         *
+         * @param array
+         *            the byte array which the new buffer will be based on.
+         * @param start
+         *            the start index, must not be negative and not greater than
+         *            {@code array.length}.
+         * @param byteCount
+         *            the length, must not be negative and not greater than
+         *            {@code array.length - start}.
+         * @return the created byte buffer.
+         * @exception IndexOutOfBoundsException
+         *                if either {@code start} or {@code byteCount} is invalid.
+         */
+        Wrap(
+            [in] ArrayOf<Byte>* array,
+            [in] Int32 start,
+            [in] Int32 byteCount,
+            [out] IByteBuffer** byteBuf);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

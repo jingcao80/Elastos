@@ -1,0 +1,256 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * A view that shows items in two-dimensional scrolling grid. The items in the
+     * grid come from the {@link ListAdapter} associated with this view.
+     *
+     * <p>See the <a href="{@docRoot}guide/topics/ui/layout/gridview.html">Grid
+     * View</a> guide.</p>
+     *
+     * @attr ref android.R.styleable#GridView_horizontalSpacing
+     * @attr ref android.R.styleable#GridView_verticalSpacing
+     * @attr ref android.R.styleable#GridView_stretchMode
+     * @attr ref android.R.styleable#GridView_columnWidth
+     * @attr ref android.R.styleable#GridView_numColumns
+     * @attr ref android.R.styleable#GridView_gravity
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsListView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IOnGlobalLayoutListener
+     * interface Elastos.Droid.View.IOnTouchModeChangeListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IGridView {
+        /**
+         * Disables stretching.
+         *
+         * @see #setStretchMode(int)
+         */
+        const Int32 NO_STRETCH = 0;
+        /**
+         * Stretches the spacing between columns.
+         *
+         * @see #setStretchMode(int)
+         */
+        const Int32 STRETCH_SPACING = 1;
+        /**
+         * Stretches columns.
+         *
+         * @see #setStretchMode(int)
+         */
+        const Int32 STRETCH_COLUMN_WIDTH = 2;
+        /**
+         * Stretches the spacing between columns. The spacing is uniform.
+         *
+         * @see #setStretchMode(int)
+         */
+        const Int32 STRETCH_SPACING_UNIFORM = 3;
+
+        /**
+         * Creates as many columns as can fit on screen.
+         *
+         * @see #setNumColumns(int)
+         */
+        const Int32 AUTO_FIT = -1;
+
+        /**
+         * Describes how the child views are horizontally aligned. Defaults to Gravity.LEFT
+         *
+         * @return the gravity that will be applied to this grid's children
+         *
+         * @attr ref android.R.styleable#GridView_gravity
+         */
+        GetGravity(
+            [out] Int32* gravity);
+
+        /**
+         * Describes how the child views are horizontally aligned. Defaults to Gravity.LEFT
+         *
+         * @param gravity the gravity to apply to this grid's children
+         *
+         * @attr ref android.R.styleable#GridView_gravity
+         */
+        SetGravity(
+            [in] Int32 gravity);
+
+        /**
+         * Set the amount of horizontal (x) spacing to place between each item
+         * in the grid.
+         *
+         * @param horizontalSpacing The amount of horizontal space between items,
+         * in pixels.
+         *
+         * @attr ref android.R.styleable#GridView_horizontalSpacing
+         */
+        SetHorizontalSpacing(
+            [in] Int32 horizontalSpacing);
+
+        /**
+         * Set the amount of vertical (y) spacing to place between each item
+         * in the grid.
+         *
+         * @param verticalSpacing The amount of vertical space between items,
+         * in pixels.
+         *
+         * @attr ref android.R.styleable#GridView_verticalSpacing
+         */
+        SetVerticalSpacing(
+            [in] Int32 verticalSpacing);
+
+        /**
+         * Control how items are stretched to fill their space.
+         *
+         * @param stretchMode Either {@link #NO_STRETCH},
+         * {@link #STRETCH_SPACING}, {@link #STRETCH_SPACING_UNIFORM}, or {@link #STRETCH_COLUMN_WIDTH}.
+         *
+         * @attr ref android.R.styleable#GridView_stretchMode
+         */
+        SetStretchMode(
+            [in] Int32 stretchMode);
+
+        GetStretchMode(
+            [out] Int32* mode);
+
+        /**
+         * Set the width of columns in the grid.
+         *
+         * @param columnWidth The column width, in pixels.
+         *
+         * @attr ref android.R.styleable#GridView_columnWidth
+         */
+        SetColumnWidth(
+            [in] Int32 columnWidth);
+
+        /**
+         * Set the number of columns in the grid
+         *
+         * @param numColumns The desired number of columns.
+         *
+         * @attr ref android.R.styleable#GridView_numColumns
+         */
+        SetNumColumns(
+            [in] Int32 numColumns);
+
+        /**
+         * Smoothly scroll to the specified adapter position offset. The view will
+         * scroll such that the indicated position is displayed.
+         * @param offset The amount to offset from the adapter position to scroll to.
+         */
+        SmoothScrollByOffset(
+            [in] Int32 offset);
+
+        /**
+         * Returns the amount of horizontal spacing currently used between each item in the grid.
+         *
+         * <p>This is only accurate for the current layout. If {@link #setHorizontalSpacing(int)}
+         * has been called but layout is not yet complete, this method may return a stale value.
+         * To get the horizontal spacing that was explicitly requested use
+         * {@link #getRequestedHorizontalSpacing()}.</p>
+         *
+         * @return Current horizontal spacing between each item in pixels
+         *
+         * @see #setHorizontalSpacing(int)
+         * @see #getRequestedHorizontalSpacing()
+         *
+         * @attr ref android.R.styleable#GridView_horizontalSpacing
+         */
+        GetHorizontalSpacing(
+            [out] Int32* spacing);
+
+        /**
+         * Returns the requested amount of horizontal spacing between each item in the grid.
+         *
+         * <p>The value returned may have been supplied during inflation as part of a style,
+         * the default GridView style, or by a call to {@link #setHorizontalSpacing(int)}.
+         * If layout is not yet complete or if GridView calculated a different horizontal spacing
+         * from what was requested, this may return a different value from
+         * {@link #getHorizontalSpacing()}.</p>
+         *
+         * @return The currently requested horizontal spacing between items, in pixels
+         *
+         * @see #setHorizontalSpacing(int)
+         * @see #getHorizontalSpacing()
+         *
+         * @attr ref android.R.styleable#GridView_horizontalSpacing
+         */
+        GetRequestedHorizontalSpacing(
+            [out] Int32* spacing);
+
+        /**
+         * Returns the amount of vertical spacing between each item in the grid.
+         *
+         * @return The vertical spacing between items in pixels
+         *
+         * @see #setVerticalSpacing(int)
+         *
+         * @attr ref android.R.styleable#GridView_verticalSpacing
+         */
+        GetVerticalSpacing(
+            [out] Int32* spacing);
+
+        /**
+         * Return the width of a column in the grid.
+         *
+         * <p>This may not be valid yet if a layout is pending.</p>
+         *
+         * @return The column width in pixels
+         *
+         * @see #setColumnWidth(int)
+         * @see #getRequestedColumnWidth()
+         *
+         * @attr ref android.R.styleable#GridView_columnWidth
+         */
+        GetColumnWidth(
+            [out] Int32* width);
+
+        /**
+         * Return the requested width of a column in the grid.
+         *
+         * <p>This may not be the actual column width used. Use {@link #getColumnWidth()}
+         * to retrieve the current real width of a column.</p>
+         *
+         * @return The requested column width in pixels
+         *
+         * @see #setColumnWidth(int)
+         * @see #getColumnWidth()
+         *
+         * @attr ref android.R.styleable#GridView_columnWidth
+         */
+        GetRequestedColumnWidth(
+            [out] Int32* width);
+
+        /**
+         * Get the number of columns in the grid.
+         * Returns {@link #AUTO_FIT} if the Grid has never been laid out.
+         *
+         * @attr ref android.R.styleable#GridView_numColumns
+         *
+         * @see #setNumColumns(int)
+         */
+        GetNumColumns(
+            [out] Int32* columns);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

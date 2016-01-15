@@ -1,0 +1,53 @@
+
+TARGET_NAME= elastos.text
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/text;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/math;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/icu;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/utility;
+
+SOURCES = CAnnotation.cpp
+SOURCES += AttributedCharacterIteratorAttribute.cpp
+SOURCES += AttributedString.cpp
+SOURCES += Bidi.cpp
+SOURCES += CBidiHelper.cpp
+SOURCES += BreakIterator.cpp
+SOURCES += CBreakIteratorHelper.cpp
+SOURCES += ChoiceFormat.cpp
+SOURCES += CChoiceFormatHelper.cpp
+SOURCES += CCollationElementIterator.cpp
+SOURCES += CCollationElementIteratorHelper.cpp
+SOURCES += CollationKey.cpp
+SOURCES += Collator.cpp
+SOURCES += CCollatorHelper.cpp
+SOURCES += DateFormat.cpp
+SOURCES += CDateFormatHelper.cpp
+SOURCES += DateFormatSymbols.cpp
+SOURCES += CDateFormatSymbolsHelper.cpp
+SOURCES += DecimalFormat.cpp
+SOURCES += DecimalFormatSymbols.cpp
+SOURCES += CDecimalFormatSymbolsHelper.cpp
+SOURCES += CFieldPosition.cpp
+SOURCES += FormatBase.cpp
+SOURCES += MessageFormat.cpp
+SOURCES += Normalizer.cpp
+SOURCES += CNormalizerHelper.cpp
+SOURCES += NumberFormat.cpp
+SOURCES += CNumberFormatHelper.cpp
+SOURCES += CParsePosition.cpp
+SOURCES += RuleBasedBreakIterator.cpp
+SOURCES += RuleBasedCollator.cpp
+SOURCES += SimpleDateFormat.cpp
+SOURCES += StringCharacterIterator.cpp
+SOURCES += text.cpp

@@ -1,0 +1,11 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+
+    class CMainActivity {
+        interface IActivity;
+    }
+}

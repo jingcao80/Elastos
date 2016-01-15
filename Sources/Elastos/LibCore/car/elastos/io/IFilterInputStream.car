@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+    * Wraps an existing InputStream and performs some transformation on the input data
+    * while it is being read. Transformations can be anything from a simple byte-wise
+    * filtering input data to an on-the-fly compression or decompression of the
+    * underlying stream. Input streams that wrap another input stream and provide some
+    * additional functionality on top of it usually inherit from this class.
+    * @sa FilterOutputStream
+    * @implement Elastos.IO.IInputStream
+    */
+    /**
+    * @Involved
+    * interface Elastos.IO.ICloseable;
+    * interface IInputStream;
+    */
+    interface IFilterInputStream {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

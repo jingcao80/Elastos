@@ -1,0 +1,240 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Core.IArrayOf;
+
+    interface Elastos.Droid.Animation.IValueAnimator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    enum DisplayMode {
+
+        /**
+         * The pattern drawn is correct (i.e draw it in a friendly color)
+         */
+        DisplayMode_Correct,
+
+        /**
+         * Animate the pattern (for demo, and help).
+         */
+        DisplayMode_Animate,
+
+        /**
+         * The pattern is wrong (i.e draw a foreboding color)
+         */
+        DisplayMode_Wrong
+    }
+
+    interface ILockPatternViewCellState {
+        GetScale(
+            [out] Float* scale);
+
+        SetScale(
+            [in] Float scale);
+
+        GetTranslateY(
+            [out] Float* translateY);
+
+        SetTranslateY(
+            [in] Float translateY);
+
+        GetAlpha(
+            [out] Float* alpha);
+
+        SetAlpha(
+            [in] Float alpha);
+
+        GetSize(
+            [out] Float* size);
+
+        SetSize(
+            [in] Float size);
+
+        GetLineEndX(
+            [out] Float* lineEndX);
+
+        SetLineEndX(
+            [in] Float lineEndX);
+
+        GetLineEndY(
+            [out] Float* lineEndY);
+
+        SetLineEndY(
+            [in] Float lineEndY);
+
+        GetLineAnimator(
+            [out] IValueAnimator** animator);
+
+        SetLineAnimator(
+            [in] IValueAnimator* animator);
+     }
+
+    interface ILockPatternViewCell {
+        GetRow(
+            [out] Int32* row);
+
+        GetColumn(
+            [out] Int32* column);
+    }
+
+    interface ILockPatternViewCellHelper {
+        Of(
+            [in] Int32 row,
+            [in] Int32 column,
+            [out] ILockPatternViewCell** result);
+    }
+
+    /**
+     * The call back interface for detecting patterns entered by the user.
+     */
+    interface IOnPatternListener {
+        /**
+         * A new pattern has begun.
+         */
+        OnPatternStart();
+
+        /**
+         * The pattern was cleared.
+         */
+        OnPatternCleared();
+
+        /**
+         * The user extended the pattern currently being drawn by one cell.
+         * @param pattern The pattern with newly added cell.
+         */
+        OnPatternCellAdded(
+            [in] IList* pattern);
+
+        /**
+         * A pattern was detected from the user.
+         * @param pattern The pattern.
+         */
+        OnPatternDetected(
+            [in] IList* pattern);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     */
+    interface ILockPatternViewSavedState {
+        GetSerializedPattern(
+            [out] String* result);
+
+        GetDisplayMode(
+            [out] Int32* result);
+
+        IsInputEnabled(
+            [out] Boolean* result);
+
+        IsInStealthMode(
+            [out] Boolean* result);
+
+        IsTactileFeedbackEnabled(
+            [out] Boolean* result);
+    }
+
+    /**
+     * Displays and detects the user's unlock attempt, which is a drag of a finger
+     * across 9 regions of the screen.
+     *
+     * Is also capable of displaying a static pattern in "in progress", "wrong" or
+     * "correct" states.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+     [deprecated]
+    interface ILockPatternView {
+        GetCellStates(
+            [out, callee] ArrayOf<IArrayOf*>* states);
+
+        /**
+         * @return Whether the view is in stealth mode.
+         */
+        IsInStealthMode(
+            [out] Boolean* mode);
+
+        /**
+         * @return Whether the view has tactile feedback enabled.
+         */
+        IsTactileFeedbackEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Set whether the view is in stealth mode.  If true, there will be no
+         * visible feedback as the user enters the pattern.
+         *
+         * @param inStealthMode Whether in stealth mode.
+         */
+        SetInStealthMode(
+            [in] Boolean inStealthMode);
+
+        /**
+         * Set whether the view will use tactile feedback.  If true, there will be
+         * tactile feedback as the user enters the pattern.
+         *
+         * @param tactileFeedbackEnabled Whether tactile feedback is enabled
+         */
+        SetTactileFeedbackEnabled(
+            [in] Boolean tactileFeedbackEnabled);
+
+        /**
+         * Set the call back for pattern detection.
+         * @param onPatternListener The call back.
+         */
+        SetOnPatternListener(
+            [in] IOnPatternListener* onPatternListener);
+
+        /**
+         * Set the pattern explicitely (rather than waiting for the user to input
+         * a pattern).
+         * @param displayMode How to display the pattern.
+         * @param pattern The pattern.
+         */
+        SetPattern(
+            [in] DisplayMode displayMode,
+            [in] IList* pattern);
+
+        /**
+         * Set the display mode of the current pattern.  This can be useful, for
+         * instance, after detecting a pattern to tell this view whether change the
+         * in progress result to correct or wrong.
+         * @param displayMode The display mode.
+         */
+        SetDisplayMode(
+            [in] DisplayMode displayMode);
+
+        /**
+         * Clear the pattern.
+         */
+        ClearPattern();
+
+        /**
+         * Disable input (for instance when displaying a message that will
+         * timeout so user doesn't get view into messy state).
+         */
+        DisableInput();
+
+        /**
+         * Enable input.
+         */
+        EnableInput();
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}

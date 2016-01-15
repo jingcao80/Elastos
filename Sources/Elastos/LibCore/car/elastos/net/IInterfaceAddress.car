@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * Identifies one of a network interface's addresses. These are passed back
+     * from the JNI behind NetworkInterface.getNetworkInterfaces. Multiple addresses
+     * for the same interface are collected together on the Java side.
+     */
+
+    interface IInterfaceAddress {
+        /**
+         * Returns the InetAddress for this address.
+         */
+        GetAddress(
+            [out] IInetAddress** address);
+
+        /**
+         * Returns the subnet-directed broadcast address if this is an IPv4 interface, null otherwise.
+         */
+        GetBroadcast(
+            [out] IInetAddress** broadcast);
+
+        /**
+         * Returns the network prefix length in bits.
+         * (In IPv4 parlance, this is known as the subnet mask,
+         * but this method applies to IPv6 addresses too.)
+         */
+        GetNetworkPrefixLength(
+            [out] Int16* length);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

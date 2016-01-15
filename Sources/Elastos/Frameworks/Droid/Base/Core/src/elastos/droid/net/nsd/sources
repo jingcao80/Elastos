@@ -1,0 +1,11 @@
+TARGET_NAME= nsd
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES += DnsSdTxtRecord.cpp
+SOURCES += NsdManager.cpp
+SOURCES += NsdServiceInfo.cpp

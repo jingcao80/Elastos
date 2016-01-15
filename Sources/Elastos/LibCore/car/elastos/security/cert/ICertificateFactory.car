@@ -1,0 +1,223 @@
+
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.Utility.IIterator;
+    interface Elastos.Utility.IList;
+    interface Elastos.Utility.ICollection;
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.Cert.ICertPath;
+    interface Elastos.Security.Cert.ICertificate;
+    interface Elastos.Security.Cert.ICRL;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface ICertificateFactory {
+        /**
+         * Returns the {@code Provider} of the certificate factory represented by
+         * the certificate.
+         *
+         * @return the provider of this certificate factory.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Returns the Certificate type.
+         *
+         * @return type of certificate being used.
+         */
+        GetType(
+            [out] String* type);
+
+        /**
+         * Generates and initializes a {@code Certificate} from the provided input
+         * stream.
+         *
+         * @param inStream
+         *            the stream from where data is read to create the {@code
+         *            Certificate}.
+         * @return an initialized Certificate.
+         * @throws CertificateException
+         *             if parsing problems are detected.
+         */
+        GenerateCertificate(
+            [in] IInputStream* inStream,
+            [out] ICertificate** cert);
+
+        /**
+         * Returns an {@code Iterator} over the supported {@code CertPath} encodings
+         * (as Strings). The first element is the default encoding scheme to apply.
+         *
+         * @return an iterator over supported {@link CertPath} encodings (as
+         *         Strings).
+         */
+        GetCertPathEncodings(
+            [out] IIterator** it);
+
+        /**
+         * Generates a {@code CertPath} (a certificate chain) from the provided
+         * {@code InputStream}. The default encoding scheme is applied.
+         *
+         * @param inStream
+         *            {@code InputStream} with encoded data.
+         * @return a {@code CertPath} initialized from the provided data.
+         * @throws CertificateException
+         *             if parsing problems are detected.
+         */
+        GenerateCertPath(
+            [in] IInputStream* inStream,
+            [out] ICertPath** certPath);
+
+        /**
+         * Generates a {@code CertPath} (a certificate chain) from the provided
+         * {@code InputStream} and the specified encoding scheme.
+         *
+         * @param inStream
+         *            {@code InputStream} containing certificate path data in
+         *            specified encoding.
+         * @param encoding
+         *            encoding of the data in the input stream.
+         * @return a {@code CertPath} initialized from the provided data.
+         * @throws CertificateException
+         *             if parsing problems are detected.
+         * @throws UnsupportedOperationException
+         *             if the provider does not implement this method.
+         */
+        GenerateCertPath(
+            [in] IInputStream* inStream,
+            [in] String encoding,
+            [out] ICertPath** certPath);
+
+        /**
+         * Generates a {@code CertPath} from the provided list of certificates. The
+         * encoding is the default encoding.
+         *
+         * @param certificates
+         *            the list containing certificates in a format supported by the
+         *            {@code CertificateFactory}.
+         * @return a {@code CertPath} initialized from the provided data.
+         * @throws CertificateException
+         *             if parsing problems are detected.
+         * @throws UnsupportedOperationException
+         *             if the provider does not implement this method.
+         */
+        GenerateCertPath(
+            [in] IList* certificates,
+            [out] ICertPath** certPath);
+
+        /**
+         * Generates and initializes a collection of (unrelated) certificates from
+         * the provided input stream.
+         *
+         * @param inStream
+         *            the stream from which the data is read to create the
+         *            collection.
+         * @return an initialized collection of certificates.
+         * @throws CertificateException
+         *             if parsing problems are detected.
+         */
+        GenerateCertificates(
+            [in] IInputStream* inStream,
+            [out] ICollection** certs);
+
+        /**
+         * Generates and initializes a <i>Certificate Revocation List</i> (CRL) from
+         * the provided input stream.
+         *
+         * @param inStream
+         *            the stream from where data is read to create the CRL.
+         * @return an initialized CRL.
+         * @exception CRLException
+         *                if parsing problems are detected.
+         */
+        GenerateCRL(
+            [in] IInputStream* inStream,
+            [out] ICRL** crl);
+
+        /**
+         * Generates and initializes a collection of <i>Certificate Revocation
+         * List</i> (CRL) from the provided input stream.
+         *
+         * @param inStream
+         *            the stream from which the data is read to create the CRLs.
+         * @return an initialized collection of CRLs.
+         * @exception CRLException
+         *                if parsing problems are detected.
+         */
+        GenerateCRLs(
+            [in] IInputStream* inStream,
+            [out] ICollection** crls);
+    }
+
+    interface ICertificateFactoryHelper {
+        /**
+         * Creates a new {@code CertificateFactory} instance that provides the
+         * requested certificate type.
+         *
+         * @param type
+         *            the certificate type.
+         * @return the new {@code CertificateFactory} instance.
+         * @throws CertificateException
+         *             if the specified certificate type is not available at any
+         *             installed provider.
+         * @throws NullPointerException if {@code type == null}
+         */
+        GetInstance(
+            [in] String type,
+            [out] ICertificateFactory** factory);
+
+        /**
+         * Creates a new {@code CertificateFactory} instance from the specified
+         * provider that provides the requested certificate type.
+         *
+         * @param type
+         *            the certificate type.
+         * @param provider
+         *            the name of the provider providing certificates of the
+         *            specified type.
+         * @return the new {@code CertificateFactory} instance.
+         * @throws CertificateException
+         *             if the specified certificate type is not available by the
+         *             specified provider.
+         * @throws NoSuchProviderException
+         *             if no provider with the specified name can be found.
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         * @throws NullPointerException
+         *             it {@code type} is {@code null}.
+         */
+        GetInstance(
+            [in] String type,
+            [in] String provider,
+            [out] ICertificateFactory** factory);
+
+        /**
+         * Creates a new {@code CertificateFactory} instance from the specified
+         * provider that provides the requested certificate type.
+         *
+         * @param type
+         *            the certificate type.
+         * @param provider
+         *            the name of the provider providing certificates of the
+         *            specified type.
+         * @return the new {@code CertificateFactory} instance.
+         * @throws CertificateException
+         *             if the specified certificate type is not available at the
+         *             specified provider.
+         * @throws IllegalArgumentException
+         *             if the specified provider is {@code null}.
+         * @throws NullPointerException if {@code type == null}
+         * @throws IllegalArgumentException if {@code provider == null}
+         */
+        GetInstance(
+            [in] String type,
+            [in] IProvider* provider,
+            [out] ICertificateFactory** factory);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

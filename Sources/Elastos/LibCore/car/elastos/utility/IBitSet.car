@@ -1,0 +1,290 @@
+
+module
+{
+	interface Elastos.IO.IInt64Buffer;
+	interface Elastos.IO.IByteBuffer;
+
+    namespace Elastos {
+    namespace Utility {
+
+    interface IBitSet {
+        /**
+         * Returns the bit at index {@code index}. Indexes greater than the current length return false.
+         *
+         * @throws IndexOutOfBoundsException if {@code index < 0}.
+         */
+        Get(
+            [in] Int32 index,
+            [out] Boolean* value);
+
+        /**
+         * Returns a new {@code BitSet} containing the
+         * range of bits {@code [fromIndex, toIndex)}, shifted down so that the bit
+         * at {@code fromIndex} is at bit 0 in the new {@code BitSet}.
+         *
+         * @throws IndexOutOfBoundsException
+         *             if {@code fromIndex} or {@code toIndex} is negative, or if
+         *             {@code toIndex} is smaller than {@code fromIndex}.
+         */
+        Get(
+            [in] Int32 fromIndex,
+            [in] Int32 toIndex,
+            [out] IBitSet** bs);
+
+        /**
+         * Sets the bit at index {@code index} to true.
+         *
+         * @throws IndexOutOfBoundsException if {@code index < 0}.
+         */
+        Set(
+            [in] Int32 index);
+
+        /**
+         * Sets the bit at index {@code index} to {@code state}.
+         *
+         * @throws IndexOutOfBoundsException if {@code index < 0}.
+         */
+        Set(
+            [in] Int32 index,
+            [in] Boolean state);
+
+        /**
+         * Sets the range of bits {@code [fromIndex, toIndex)}.
+         *
+         * @throws IndexOutOfBoundsException
+         *             if {@code fromIndex} or {@code toIndex} is negative, or if
+         *             {@code toIndex} is smaller than {@code fromIndex}.
+         */
+        Set(
+            [in] Int32 fromIndex,
+            [in] Int32 toIndex);
+
+        /**
+         * Sets the range of bits {@code [fromIndex, toIndex)} to {@code state}.
+         *
+         * @throws IndexOutOfBoundsException
+         *             if {@code fromIndex} or {@code toIndex} is negative, or if
+         *             {@code toIndex} is smaller than {@code fromIndex}.
+         */
+        Set(
+            [in] Int32 fromIndex,
+            [in] Int32 toIndex,
+            [in] Boolean state);
+
+        /**
+         * Clears the bit at index {@code index}.
+         *
+         * @throws IndexOutOfBoundsException if {@code index < 0}.
+         */
+        Clear(
+            [in] Int32 index);
+
+        /**
+         * Clears the range of bits {@code [fromIndex, toIndex)}.
+         *
+         * @throws IndexOutOfBoundsException
+         *             if {@code fromIndex} or {@code toIndex} is negative, or if
+         *             {@code toIndex} is smaller than {@code fromIndex}.
+         */
+        Clear(
+            [in] Int32 fromIndex,
+            [in] Int32 toIndex);
+
+        /**
+         * Clears all the bits in this {@code BitSet}. This method does not change the capacity.
+         * Use {@code clear} if you want to reuse this {@code BitSet} with the same capacity, but
+         * create a new {@code BitSet} if you're trying to potentially reclaim memory.
+         */
+        Clear();
+
+        /**
+         * Flips the bit at index {@code index}.
+         *
+         * @throws IndexOutOfBoundsException if {@code index < 0}.
+         */
+        Flip(
+            [in] Int32 index);
+
+        /**
+         * Flips the range of bits {@code [fromIndex, toIndex)}.
+         *
+         * @throws IndexOutOfBoundsException
+         *             if {@code fromIndex} or {@code toIndex} is negative, or if
+         *             {@code toIndex} is smaller than {@code fromIndex}.
+         */
+        Flip(
+            [in] Int32 fromIndex,
+            [in] Int32 toIndex);
+
+        /**
+         * Returns true if {@code this.and(bs)} is non-empty, but may be faster than computing that.
+         */
+        Intersects(
+            [in] IBitSet* bs,
+            [out] Boolean* result);
+
+        /**
+         * Logically ands the bits of this {@code BitSet} with {@code bs}.
+         */
+        And(
+            [in] IBitSet* bs);
+
+        /**
+         * Clears all bits in this {@code BitSet} which are also set in {@code bs}.
+         */
+        AndNot(
+            [in] IBitSet* bs);
+
+        /**
+         * Logically ors the bits of this {@code BitSet} with {@code bs}.
+         */
+        Or(
+            [in] IBitSet* bs);
+
+        /**
+         * Logically xors the bits of this {@code BitSet} with {@code bs}.
+         */
+        Xor(
+            [in] IBitSet* bs);
+
+        /**
+         * Returns the capacity in bits of the array implementing this {@code BitSet}. This is
+         * unrelated to the length of the {@code BitSet}, and not generally useful.
+         * Use {@link #nextSetBit} to iterate, or {@link #length} to find the highest set bit.
+         */
+        GetSize(
+            [out] Int32* size);
+
+        /**
+         * Returns the number of bits up to and including the highest bit set. This is unrelated to
+         * the {@link #size} of the {@code BitSet}.
+         */
+        GetLength(
+            [out] Int32* len);
+
+        /**
+         * Returns the index of the first bit that is set on or after {@code index}, or -1
+         * if no higher bits are set.
+         * @throws IndexOutOfBoundsException if {@code index < 0}.
+         */
+        NextSetBit(
+            [in] Int32 index,
+            [out] Int32* next);
+
+        /**
+         * Returns the index of the first bit that is clear on or after {@code index}.
+         * Since all bits past the end are implicitly clear, this never returns -1.
+         * @throws IndexOutOfBoundsException if {@code index < 0}.
+         */
+        NextClearBit(
+            [in] Int32 index,
+            [out] Int32* next);
+
+        /**
+         * Returns the index of the first bit that is set on or before {@code index}, or -1 if
+         * no lower bits are set or {@code index == -1}.
+         * @throws IndexOutOfBoundsException if {@code index < -1}.
+         * @hide 1.7
+         */
+        PreviousSetBit(
+            [in] Int32 index,
+            [out] Int32* previous);
+
+        /**
+         * Returns the index of the first bit that is clear on or before {@code index}, or -1 if
+         * no lower bits are clear or {@code index == -1}.
+         * @throws IndexOutOfBoundsException if {@code index < -1}.
+         * @hide 1.7
+         */
+        PreviousClearBit(
+            [in] Int32 index,
+            [out] Int32* previous);
+
+        /**
+         * Returns true if all the bits in this {@code BitSet} are set to false, false otherwise.
+         */
+        IsEmpty(
+            [out] Boolean* result);
+
+        /**
+         * Returns the number of bits that are {@code true} in this {@code BitSet}.
+         */
+        Cardinality(
+            [out] Int32* number);
+
+        /**
+         * Returns a new {@code long[]} containing a little-endian representation of the bits of
+         * this {@code BitSet}, suitable for passing to {@code valueOf} to reconstruct
+         * this {@code BitSet}.
+         * @hide 1.7
+         */
+        ToArray(
+            [out, callee] ArrayOf<Int64>* int64Arr);
+
+        /**
+         * Returns a new {@code byte[]} containing a little-endian representation the bits of
+         * this {@code BitSet}, suitable for passing to {@code valueOf} to reconstruct
+         * this {@code BitSet}.
+         * @hide 1.7
+         */
+        ToArray(
+            [out, callee] ArrayOf<Byte>* byteArr);
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        /**
+        * Returns a string containing a concise, human-readable description of the
+        * receiver: a comma-delimited list of the indexes of all set bits.
+        * For example: {@code "{0,1,8}"}.
+        */
+        ToString(
+            [out] String* value);
+    }
+
+    [deprecated]
+    interface IBitSetHelper {
+        /**
+         * Equivalent to {@code BitSet.valueOf(LongBuffer.wrap(longs))}, but likely to be faster.
+         * This is likely to be the fastest way to create a {@code BitSet} because it's closest
+         * to the internal representation.
+         * @hide 1.7
+         */
+        ValueOf(
+            [in] ArrayOf<Int64>* int64Arr,
+            [out] IBitSet** bs);
+
+        /**
+         * Returns a {@code BitSet} corresponding to {@code longBuffer}, interpreted as a little-endian
+         * sequence of bits. This method does not alter the {@code LongBuffer}.
+         * @hide 1.7
+         */
+        ValueOf(
+            [in] IInt64Buffer* int64Arr,
+            [out] IBitSet** bs);
+
+        /**
+         * Equivalent to {@code BitSet.valueOf(ByteBuffer.wrap(bytes))}.
+         * @hide 1.7
+         */
+        ValueOf(
+            [in] ArrayOf<Byte>* byteArr,
+            [out] IBitSet** bs);
+
+        /**
+         * Returns a {@code BitSet} corresponding to {@code byteBuffer}, interpreted as a little-endian
+         * sequence of bits. This method does not alter the {@code ByteBuffer}.
+         * @hide 1.7
+         */
+        ValueOf(
+            [in] IByteBuffer* byteArr,
+            [out] IBitSet** bs);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

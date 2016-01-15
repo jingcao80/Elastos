@@ -1,0 +1,138 @@
+module
+{
+    interface Org.Xmlpull.V1.IXmlPullParser;
+    interface Org.Xmlpull.V1.IXmlSerializer;
+
+    namespace Org {
+    namespace Xmlpull {
+    namespace V1 {
+
+    /**
+     * This class is used to create implementations of XML Pull Parser defined in XMPULL V1 API.
+     *
+     * @see XmlPullParser
+     *
+     * @author <a href="http://www.extreme.indiana.edu/~aslom/">Aleksander Slominski</a>
+     * @author Stefan Haustein
+     */
+    interface IXmlPullParserFactory
+    {
+        /** Name of the system or midlet property that should be used for
+         a system property containing a comma separated list of factory
+         or parser class names (value:
+         org.xmlpull.v1.XmlPullParserFactory).
+        */
+        const String PROPERTY_NAME = "org.xmlpull.v1.XmlPullParserFactory";
+
+        /**
+         * Set the features to be set when XML Pull Parser is created by this factory.
+         * <p><b>NOTE:</b> factory features are not used for XML Serializer.
+         *
+         * @param name string with URI identifying feature
+         * @param state if true feature will be set; if false will be ignored
+         */
+        SetFeature(
+            [in] String name,
+            [in] Boolean state);
+
+        /**
+         * Return the current value of the feature with given name.
+         * <p><b>NOTE:</b> factory features are not used for XML Serializer.
+         *
+         * @param name The name of feature to be retrieved.
+         * @return The value of named feature.
+         *     Unknown features are <string>always</strong> returned as false
+         */
+        GetFeature(
+            [in] String name,
+            [out] Boolean* isGot);
+
+        /**
+         * Specifies that the parser produced by this factory will provide
+         * support for XML namespaces.
+         * By default the value of this is set to false.
+         *
+         * @param awareness true if the parser produced by this code
+         *    will provide support for XML namespaces;  false otherwise.
+         */
+        SetNamespaceAware(
+            [in] Boolean awareness);
+
+        /**
+         * Indicates whether or not the factory is configured to produce
+         * parsers which are namespace aware
+         * (it simply set feature XmlPullParser.FEATURE_PROCESS_NAMESPACES to true or false).
+         *
+         * @return  true if the factory is configured to produce parsers
+         *    which are namespace aware; false otherwise.
+         */
+        IsNamespaceAware(
+            [out] Boolean* isNspAware);
+
+        /**
+         * Specifies that the parser produced by this factory will be validating
+         * (it simply set feature XmlPullParser.FEATURE_VALIDATION to true or false).
+         *
+         * By default the value of this is set to false.
+         *
+         * @param validating - if true the parsers created by this factory  must be validating.
+         */
+        SetValidating(
+            [in] Boolean validating);
+
+        /**
+         * Indicates whether or not the factory is configured to produce parsers
+         * which validate the XML content during parse.
+         *
+         * @return   true if the factory is configured to produce parsers
+         * which validate the XML content during parse; false otherwise.
+         */
+        IsValidating(
+            [out] Boolean* isValidating);
+
+        /**
+         * Creates a new instance of a XML Pull Parser
+         * using the currently configured factory features.
+         *
+         * @return A new instance of a XML Pull Parser.
+         * @throws XmlPullParserException if a parser cannot be created which satisfies the
+         * requested configuration.
+         */
+        NewPullParser(
+            [out] IXmlPullParser** pullParser);
+
+        /**
+         * Creates a new instance of a XML Serializer.
+         *
+         * <p><b>NOTE:</b> factory features are not used for XML Serializer.
+         *
+         * @return A new instance of a XML Serializer.
+         * @throws XmlPullParserException if a parser cannot be created which satisfies the
+         * requested configuration.
+         */
+        NewSerializer(
+            [out] IXmlSerializer** serial);
+    }
+
+    interface IXmlPullParserFactoryHelper
+    {
+        /**
+         * Create a new instance of a PullParserFactory that can be used
+         * to create XML pull parsers (see class description for more
+         * details).
+         *
+         * @return a new instance of a PullParserFactory, as returned by newInstance (null, null);
+         */
+        NewInstance(
+            [out] IXmlPullParserFactory** xmlPullParserFac);
+
+        NewInstance(
+            [in] String classNames,
+//            [in] Class context,
+            [out] IXmlPullParserFactory** xmlPullParserFac);
+    }
+
+    } // namespace V1
+    } // namespace Xmlpull
+    } // namespace Org
+}

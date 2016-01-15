@@ -1,0 +1,16 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    interface IRowId{
+        /**
+         * Returns an array of bytes representing the value of the corresponding SQL ROWID.
+         */
+        GetBytes(
+            [out, callee] ArrayOf<Byte>* array);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

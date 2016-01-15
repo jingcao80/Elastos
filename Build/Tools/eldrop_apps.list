@@ -1,0 +1,12 @@
+;
+; Purpose: Drop/Pack List for SDK
+;
+; Format:  SrcFile/Folder or
+;          SrcFile/Folder [DestFolder]
+;
+XBMC dir
+Snowfox dir
+Launcher dir
+WifiSetting dir
+VideoViewDemo dir
+Sandalwood dir

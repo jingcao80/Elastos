@@ -1,0 +1,831 @@
+
+module
+{
+    using interface Elastos.IO.IBuffer;
+    using interface Elastos.IO.IInt16Buffer;
+    using interface Elastos.IO.IInt32Buffer;
+    using interface Elastos.IO.IFloatBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    [deprecated]
+    interface IGLES11Ext {
+        const Int32 _GL_BLEND_EQUATION_RGB_OES                               = 0x8009;
+        const Int32 _GL_BLEND_EQUATION_ALPHA_OES                             = 0x883D;
+        const Int32 _GL_BLEND_DST_RGB_OES                                    = 0x80C8;
+        const Int32 _GL_BLEND_SRC_RGB_OES                                    = 0x80C9;
+        const Int32 _GL_BLEND_DST_ALPHA_OES                                  = 0x80CA;
+        const Int32 _GL_BLEND_SRC_ALPHA_OES                                  = 0x80CB;
+        const Int32 _GL_BLEND_EQUATION_OES                                   = 0x8009;
+        const Int32 _GL_FUNC_ADD_OES                                         = 0x8006;
+        const Int32 _GL_FUNC_SUBTRACT_OES                                    = 0x800A;
+        const Int32 _GL_FUNC_REVERSE_SUBTRACT_OES                            = 0x800B;
+        const Int32 _GL_ETC1_RGB8_OES                                        = 0x8D64;
+        const Int32 _GL_DEPTH_COMPONENT24_OES                                = 0x81A6;
+        const Int32 _GL_DEPTH_COMPONENT32_OES                                = 0x81A7;
+        const Int32 _GL_TEXTURE_CROP_RECT_OES                                = 0x8B9D;
+        const Int32 _GL_FIXED_OES                                            = 0x140C;
+        const Int32 _GL_NONE_OES                                             = 0;
+        const Int32 _GL_FRAMEBUFFER_OES                                      = 0x8D40;
+        const Int32 _GL_RENDERBUFFER_OES                                     = 0x8D41;
+        const Int32 _GL_RGBA4_OES                                            = 0x8056;
+        const Int32 _GL_RGB5_A1_OES                                          = 0x8057;
+        const Int32 _GL_RGB565_OES                                           = 0x8D62;
+        const Int32 _GL_DEPTH_COMPONENT16_OES                                = 0x81A5;
+        const Int32 _GL_RENDERBUFFER_WIDTH_OES                               = 0x8D42;
+        const Int32 _GL_RENDERBUFFER_HEIGHT_OES                              = 0x8D43;
+        const Int32 _GL_RENDERBUFFER_INTERNAL_FORMAT_OES                     = 0x8D44;
+        const Int32 _GL_RENDERBUFFER_RED_SIZE_OES                            = 0x8D50;
+        const Int32 _GL_RENDERBUFFER_GREEN_SIZE_OES                          = 0x8D51;
+        const Int32 _GL_RENDERBUFFER_BLUE_SIZE_OES                           = 0x8D52;
+        const Int32 _GL_RENDERBUFFER_ALPHA_SIZE_OES                          = 0x8D53;
+        const Int32 _GL_RENDERBUFFER_DEPTH_SIZE_OES                          = 0x8D54;
+        const Int32 _GL_RENDERBUFFER_STENCIL_SIZE_OES                        = 0x8D55;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES               = 0x8CD0;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_OES               = 0x8CD1;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_OES             = 0x8CD2;
+        const Int32 _GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_OES     = 0x8CD3;
+        const Int32 _GL_COLOR_ATTACHMENT0_OES                                = 0x8CE0;
+        const Int32 _GL_DEPTH_ATTACHMENT_OES                                 = 0x8D00;
+        const Int32 _GL_STENCIL_ATTACHMENT_OES                               = 0x8D20;
+        const Int32 _GL_FRAMEBUFFER_COMPLETE_OES                             = 0x8CD5;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES                = 0x8CD6;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES        = 0x8CD7;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES                = 0x8CD9;
+        const Int32 _GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES                   = 0x8CDA;
+        const Int32 _GL_FRAMEBUFFER_UNSUPPORTED_OES                          = 0x8CDD;
+        const Int32 _GL_FRAMEBUFFER_BINDING_OES                              = 0x8CA6;
+        const Int32 _GL_RENDERBUFFER_BINDING_OES                             = 0x8CA7;
+        const Int32 _GL_MAX_RENDERBUFFER_SIZE_OES                            = 0x84E8;
+        const Int32 _GL_INVALID_FRAMEBUFFER_OPERATION_OES                    = 0x0506;
+        const Int32 _GL_WRITE_ONLY_OES                                       = 0x88B9;
+        const Int32 _GL_BUFFER_ACCESS_OES                                    = 0x88BB;
+        const Int32 _GL_BUFFER_MAPPED_OES                                    = 0x88BC;
+        const Int32 _GL_BUFFER_MAP_POINTER_OES                               = 0x88BD;
+        const Int32 _GL_MODELVIEW_MATRIX_FLOAT_AS_INT_BITS_OES               = 0x898D;
+        const Int32 _GL_PROJECTION_MATRIX_FLOAT_AS_INT_BITS_OES              = 0x898E;
+        const Int32 _GL_TEXTURE_MATRIX_FLOAT_AS_INT_BITS_OES                 = 0x898F;
+        const Int32 _GL_MAX_VERTEX_UNITS_OES                                 = 0x86A4;
+        const Int32 _GL_MAX_PALETTE_MATRICES_OES                             = 0x8842;
+        const Int32 _GL_MATRIX_PALETTE_OES                                   = 0x8840;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_OES                               = 0x8844;
+        const Int32 _GL_WEIGHT_ARRAY_OES                                     = 0x86AD;
+        const Int32 _GL_CURRENT_PALETTE_MATRIX_OES                           = 0x8843;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_SIZE_OES                          = 0x8846;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_TYPE_OES                          = 0x8847;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_STRIDE_OES                        = 0x8848;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_POINTER_OES                       = 0x8849;
+        const Int32 _GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES                = 0x8B9E;
+        const Int32 _GL_WEIGHT_ARRAY_SIZE_OES                                = 0x86AB;
+        const Int32 _GL_WEIGHT_ARRAY_TYPE_OES                                = 0x86A9;
+        const Int32 _GL_WEIGHT_ARRAY_STRIDE_OES                              = 0x86AA;
+        const Int32 _GL_WEIGHT_ARRAY_POINTER_OES                             = 0x86AC;
+        const Int32 _GL_WEIGHT_ARRAY_BUFFER_BINDING_OES                      = 0x889E;
+        const Int32 _GL_DEPTH_STENCIL_OES                                    = 0x84F9;
+        const Int32 _GL_UNSIGNED_INT_24_8_OES                                = 0x84FA;
+        const Int32 _GL_DEPTH24_STENCIL8_OES                                 = 0x88F0;
+        const Int32 _GL_RGB8_OES                                             = 0x8051;
+        const Int32 _GL_RGBA8_OES                                            = 0x8058;
+        const Int32 _GL_STENCIL_INDEX1_OES                                   = 0x8D46;
+        const Int32 _GL_STENCIL_INDEX4_OES                                   = 0x8D47;
+        const Int32 _GL_STENCIL_INDEX8_OES                                   = 0x8D48;
+        const Int32 _GL_INCR_WRAP_OES                                        = 0x8507;
+        const Int32 _GL_DECR_WRAP_OES                                        = 0x8508;
+        const Int32 _GL_NORMAL_MAP_OES                                       = 0x8511;
+        const Int32 _GL_REFLECTION_MAP_OES                                   = 0x8512;
+        const Int32 _GL_TEXTURE_CUBE_MAP_OES                                 = 0x8513;
+        const Int32 _GL_TEXTURE_BINDING_CUBE_MAP_OES                         = 0x8514;
+        const Int32 _GL_TEXTURE_CUBE_MAP_POSITIVE_X_OES                      = 0x8515;
+        const Int32 _GL_TEXTURE_CUBE_MAP_NEGATIVE_X_OES                      = 0x8516;
+        const Int32 _GL_TEXTURE_CUBE_MAP_POSITIVE_Y_OES                      = 0x8517;
+        const Int32 _GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_OES                      = 0x8518;
+        const Int32 _GL_TEXTURE_CUBE_MAP_POSITIVE_Z_OES                      = 0x8519;
+        const Int32 _GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_OES                      = 0x851A;
+        const Int32 _GL_MAX_CUBE_MAP_TEXTURE_SIZE_OES                        = 0x851C;
+        const Int32 _GL_TEXTURE_GEN_MODE_OES                                 = 0x2500;
+        const Int32 _GL_TEXTURE_GEN_STR_OES                                  = 0x8D60;
+        const Int32 _GL_MIRRORED_REPEAT_OES                                  = 0x8370;
+        const Int32 _GL_3DC_X_AMD                                            = 0x87F9;
+        const Int32 _GL_3DC_XY_AMD                                           = 0x87FA;
+        const Int32 _GL_ATC_RGB_AMD                                          = 0x8C92;
+        const Int32 _GL_ATC_RGBA_EXPLICIT_ALPHA_AMD                          = 0x8C93;
+        const Int32 _GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD                      = 0x87EE;
+        const Int32 _GL_TEXTURE_MAX_ANISOTROPY_EXT                           = 0x84FE;
+        const Int32 _GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT                       = 0x84FF;
+        const Int32 _GL_BGRA                                                 = 0x80E1;
+        const Int32 _GL_TEXTURE_EXTERNAL_OES                                 = 0x8D65;
+        const Int32 _GL_SAMPLER_EXTERNAL_OES                                 = 0x8D66;
+        const Int32 _GL_TEXTURE_BINDING_EXTERNAL_OES                         = 0x8D67;
+        const Int32 _GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES                     = 0x8D68;
+
+        glBlendEquationSeparateOES(
+            [in] Int32 modeRGB,
+            [in] Int32 modeAlpha);
+
+        // C function void glBlendFuncSeparateOES ( GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha )
+        glBlendFuncSeparateOES(
+            [in] Int32 srcRGB,
+            [in] Int32 dstRGB,
+            [in] Int32 srcAlpha,
+            [in] Int32 dstAlpha);
+
+        // C function void glBlendEquationOES ( GLenum mode )
+        glBlendEquationOES(
+            [in] Int32 mode);
+
+        // C function void glDrawTexsOES ( GLshort x, GLshort y, GLshort z, GLshort width, GLshort height )
+        glDrawTexsOES(
+            [in] Int16 x,
+            [in] Int16 y,
+            [in] Int16 z,
+            [in] Int16 width,
+            [in] Int16 height);
+
+        // C function void glDrawTexiOES ( GLint x, GLint y, GLint z, GLint width, GLint height )
+        glDrawTexiOES(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        // C function void glDrawTexxOES ( GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfixed height )
+        glDrawTexxOES(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        // C function void glDrawTexsvOES ( const GLshort *coords )
+        glDrawTexsvOES(
+            [in] ArrayOf<Int16>* coords,
+            [in] Int32 offset);
+
+        // C function void glDrawTexsvOES ( const GLshort *coords )
+        glDrawTexsvOES(
+            [in] IInt16Buffer* coords);
+
+        // C function void glDrawTexivOES ( const GLint *coords )
+        glDrawTexivOES(
+            [in] ArrayOf<Int32>* coords,
+            [in] Int32 offset);
+
+        // C function void glDrawTexivOES ( const GLint *coords )
+        glDrawTexivOES(
+            [in] IInt32Buffer* coords);
+
+        // C function void glDrawTexxvOES ( const GLfixed *coords )
+        glDrawTexxvOES(
+            [in] ArrayOf<Int32>* coords,
+            [in] Int32 offset);
+
+        // C function void glDrawTexxvOES ( const GLfixed *coords )
+        glDrawTexxvOES(
+            [in] IInt32Buffer* coords);
+
+        // C function void glDrawTexfOES ( GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLfloat height )
+        glDrawTexfOES(
+            [in] Float x,
+            [in] Float y,
+            [in] Float z,
+            [in] Float width,
+            [in] Float height);
+
+        // C function void glDrawTexfvOES ( const GLfloat *coords )
+        glDrawTexfvOES(
+            [in] ArrayOf<Float>* coords,
+            [in] Int32 offset);
+
+        // C function void glDrawTexfvOES ( const GLfloat *coords )
+        glDrawTexfvOES(
+            [in] IFloatBuffer* coords);
+
+        // C function void glEGLImageTargetTexture2DOES ( GLenum target, GLeglImageOES image )
+        glEGLImageTargetTexture2DOES(
+            [in] Int32 target,
+            [in] IBuffer* image);
+
+        // C function void glEGLImageTargetRenderbufferStorageOES ( GLenum target, GLeglImageOES image )
+        glEGLImageTargetRenderbufferStorageOES(
+            [in] Int32 target,
+            [in] IBuffer* image);
+
+        // C function void glAlphaFuncxOES ( GLenum func, GLclampx ref )
+        glAlphaFuncxOES(
+            [in] Int32 func,
+            [in] Int32 ref);
+
+        // C function void glClearColorxOES ( GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha )
+        glClearColorxOES(
+            [in] Int32 red,
+            [in] Int32 green,
+            [in] Int32 blue,
+            [in] Int32 alpha);
+
+        // C function void glClearDepthxOES ( GLclampx depth )
+        glClearDepthxOES(
+            [in] Int32 depth);
+
+        // C function void glClipPlanexOES ( GLenum plane, const GLfixed *equation )
+        glClipPlanexOES(
+            [in] Int32 plane,
+            [in] ArrayOf<Int32>* equation,
+            [in] Int32 offset);
+
+        // C function void glClipPlanexOES ( GLenum plane, const GLfixed *equation )
+        glClipPlanexOES(
+            [in] Int32 plane,
+            [in] IInt32Buffer* equation);
+
+        // C function void glColor4xOES ( GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha )
+        glColor4xOES(
+            [in] Int32 red,
+            [in] Int32 green,
+            [in] Int32 blue,
+            [in] Int32 alpha);
+
+        // C function void glDepthRangexOES ( GLclampx zNear, GLclampx zFar )
+        glDepthRangexOES(
+            [in] Int32 zNear,
+            [in] Int32 zFar);
+
+        // C function void glFogxOES ( GLenum pname, GLfixed param )
+        glFogxOES(
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glFogxvOES ( GLenum pname, const GLfixed *params )
+        glFogxvOES(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glFogxvOES ( GLenum pname, const GLfixed *params )
+        glFogxvOES(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glFrustumxOES ( GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar )
+        glFrustumxOES(
+            [in] Int32 left,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [in] Int32 top,
+            [in] Int32 zNear,
+            [in] Int32 zFar);
+
+        // C function void glGetClipPlanexOES ( GLenum pname, GLfixed *eqn )
+        glGetClipPlanexOES(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* eqn,
+            [in] Int32 offset);
+
+        // C function void glGetClipPlanexOES ( GLenum pname, GLfixed *eqn )
+        glGetClipPlanexOES(
+            [in] Int32 pname,
+            [in] IInt32Buffer* eqn);
+
+        // C function void glGetFixedvOES ( GLenum pname, GLfixed *params )
+        glGetFixedvOES(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetFixedvOES ( GLenum pname, GLfixed *params )
+        glGetFixedvOES(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetLightxvOES ( GLenum light, GLenum pname, GLfixed *params )
+        glGetLightxvOES(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetLightxvOES ( GLenum light, GLenum pname, GLfixed *params )
+        glGetLightxvOES(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetMaterialxvOES ( GLenum face, GLenum pname, GLfixed *params )
+        glGetMaterialxvOES(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetMaterialxvOES ( GLenum face, GLenum pname, GLfixed *params )
+        glGetMaterialxvOES(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetTexEnvxvOES ( GLenum env, GLenum pname, GLfixed *params )
+        glGetTexEnvxvOES(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexEnvxvOES ( GLenum env, GLenum pname, GLfixed *params )
+        glGetTexEnvxvOES(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetTexParameterxvOES ( GLenum target, GLenum pname, GLfixed *params )
+        glGetTexParameterxvOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexParameterxvOES ( GLenum target, GLenum pname, GLfixed *params )
+        glGetTexParameterxvOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glLightModelxOES ( GLenum pname, GLfixed param )
+        glLightModelxOES(
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glLightModelxvOES ( GLenum pname, const GLfixed *params )
+        glLightModelxvOES(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glLightModelxvOES ( GLenum pname, const GLfixed *params )
+        glLightModelxvOES(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glLightxOES ( GLenum light, GLenum pname, GLfixed param )
+        glLightxOES(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glLightxvOES ( GLenum light, GLenum pname, const GLfixed *params )
+        glLightxvOES(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glLightxvOES ( GLenum light, GLenum pname, const GLfixed *params )
+        glLightxvOES(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glLineWidthxOES ( GLfixed width )
+        glLineWidthxOES(
+            [in] Int32 width);
+
+        // C function void glLoadMatrixxOES ( const GLfixed *m )
+        glLoadMatrixxOES(
+            [in] ArrayOf<Int32>* m,
+            [in] Int32 offset);
+
+        // C function void glLoadMatrixxOES ( const GLfixed *m )
+        glLoadMatrixxOES(
+            [in] IInt32Buffer* m);
+
+        // C function void glMaterialxOES ( GLenum face, GLenum pname, GLfixed param )
+        glMaterialxOES(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glMaterialxvOES ( GLenum face, GLenum pname, const GLfixed *params )
+        glMaterialxvOES(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glMaterialxvOES ( GLenum face, GLenum pname, const GLfixed *params )
+        glMaterialxvOES(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glMultMatrixxOES ( const GLfixed *m )
+        glMultMatrixxOES(
+            [in] ArrayOf<Int32>* m,
+            [in] Int32 offset);
+
+        // C function void glMultMatrixxOES ( const GLfixed *m )
+        glMultMatrixxOES(
+            [in] IInt32Buffer* m);
+
+        // C function void glMultiTexCoord4xOES ( GLenum target, GLfixed s, GLfixed t, GLfixed r, GLfixed q )
+        glMultiTexCoord4xOES(
+            [in] Int32 target,
+            [in] Int32 s,
+            [in] Int32 t,
+            [in] Int32 r,
+            [in] Int32 q);
+
+        // C function void glNormal3xOES ( GLfixed nx, GLfixed ny, GLfixed nz )
+        glNormal3xOES(
+            [in] Int32 nx,
+            [in] Int32 ny,
+            [in] Int32 nz);
+
+        // C function void glOrthoxOES ( GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar )
+        glOrthoxOES(
+            [in] Int32 left,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [in] Int32 top,
+            [in] Int32 zNear,
+            [in] Int32 zFar);
+
+        // C function void glPointParameterxOES ( GLenum pname, GLfixed param )
+        glPointParameterxOES(
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glPointParameterxvOES ( GLenum pname, const GLfixed *params )
+        glPointParameterxvOES(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glPointParameterxvOES ( GLenum pname, const GLfixed *params )
+        glPointParameterxvOES(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glPointSizexOES ( GLfixed size )
+        glPointSizexOES(
+            [in] Int32 size);
+
+        // C function void glPolygonOffsetxOES ( GLfixed factor, GLfixed units )
+        glPolygonOffsetxOES(
+            [in] Int32 factor,
+            [in] Int32 units);
+
+        // C function void glRotatexOES ( GLfixed angle, GLfixed x, GLfixed y, GLfixed z )
+        glRotatexOES(
+            [in] Int32 angle,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z);
+
+        // C function void glSampleCoveragexOES ( GLclampx value, GLboolean invert )
+        glSampleCoveragexOES(
+            [in] Int32 value,
+            [in] Boolean invert);
+
+        // C function void glScalexOES ( GLfixed x, GLfixed y, GLfixed z )
+        glScalexOES(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z);
+
+        // C function void glTexEnvxOES ( GLenum target, GLenum pname, GLfixed param )
+        glTexEnvxOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glTexEnvxvOES ( GLenum target, GLenum pname, const GLfixed *params )
+        glTexEnvxvOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glTexEnvxvOES ( GLenum target, GLenum pname, const GLfixed *params )
+        glTexEnvxvOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glTexParameterxOES ( GLenum target, GLenum pname, GLfixed param )
+        glTexParameterxOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glTexParameterxvOES ( GLenum target, GLenum pname, const GLfixed *params )
+        glTexParameterxvOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glTexParameterxvOES ( GLenum target, GLenum pname, const GLfixed *params )
+        glTexParameterxvOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glTranslatexOES ( GLfixed x, GLfixed y, GLfixed z )
+        glTranslatexOES(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z);
+
+        // C function GLboolean glIsRenderbufferOES ( GLuint renderbuffer )
+        glIsRenderbufferOES(
+            [in] Int32 renderbuffer,
+            [out] Boolean* result);
+
+        // C function void glBindRenderbufferOES ( GLenum target, GLuint renderbuffer )
+        glBindRenderbufferOES(
+            [in] Int32 target,
+            [in] Int32 renderbuffer);
+
+        // C function void glDeleteRenderbuffersOES ( GLsizei n, const GLuint *renderbuffers )
+        glDeleteRenderbuffersOES(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* renderbuffers,
+            [in] Int32 offset);
+
+        // C function void glDeleteRenderbuffersOES ( GLsizei n, const GLuint *renderbuffers )
+        glDeleteRenderbuffersOES(
+            [in] Int32 n,
+            [in] IInt32Buffer* renderbuffers);
+
+        // C function void glGenRenderbuffersOES ( GLsizei n, GLuint *renderbuffers )
+        glGenRenderbuffersOES(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* renderbuffers,
+            [in] Int32 offset);
+
+        // C function void glGenRenderbuffersOES ( GLsizei n, GLuint *renderbuffers )
+        glGenRenderbuffersOES(
+            [in] Int32 n,
+            [in] IInt32Buffer* renderbuffers);
+
+        // C function void glRenderbufferStorageOES ( GLenum target, GLenum internalformat, GLsizei width, GLsizei height )
+        glRenderbufferStorageOES(
+            [in] Int32 target,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        // C function void glGetRenderbufferParameterivOES ( GLenum target, GLenum pname, GLint *params )
+        glGetRenderbufferParameterivOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetRenderbufferParameterivOES ( GLenum target, GLenum pname, GLint *params )
+        glGetRenderbufferParameterivOES(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function GLboolean glIsFramebufferOES ( GLuint framebuffer )
+        glIsFramebufferOES(
+            [in] Int32 framebuffer,
+            [out] Boolean* result);
+
+        // C function void glBindFramebufferOES ( GLenum target, GLuint framebuffer )
+        glBindFramebufferOES(
+            [in] Int32 target,
+            [in] Int32 framebuffer);
+
+        // C function void glDeleteFramebuffersOES ( GLsizei n, const GLuint *framebuffers )
+        glDeleteFramebuffersOES(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* framebuffers,
+            [in] Int32 offset);
+
+        // C function void glDeleteFramebuffersOES ( GLsizei n, const GLuint *framebuffers )
+        glDeleteFramebuffersOES(
+            [in] Int32 n,
+            [in] IInt32Buffer* framebuffers);
+
+        // C function void glGenFramebuffersOES ( GLsizei n, GLuint *framebuffers )
+        glGenFramebuffersOES(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* framebuffers,
+            [in] Int32 offset);
+
+        // C function void glGenFramebuffersOES ( GLsizei n, GLuint *framebuffers )
+        glGenFramebuffersOES(
+            [in] Int32 n,
+            [in] IInt32Buffer* framebuffers);
+
+        // C function GLenum glCheckFramebufferStatusOES ( GLenum target )
+        glCheckFramebufferStatusOES(
+            [in] Int32 target,
+            [out] Int32* status);
+
+        // C function void glFramebufferRenderbufferOES ( GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer )
+        glFramebufferRenderbufferOES(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 renderbuffertarget,
+            [in] Int32 renderbuffer);
+
+        // C function void glFramebufferTexture2DOES ( GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level )
+        glFramebufferTexture2DOES(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 textarget,
+            [in] Int32 texture,
+            [in] Int32 level);
+
+        // C function void glGetFramebufferAttachmentParameterivOES ( GLenum target, GLenum attachment, GLenum pname, GLint *params )
+        glGetFramebufferAttachmentParameterivOES(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetFramebufferAttachmentParameterivOES ( GLenum target, GLenum attachment, GLenum pname, GLint *params )
+        glGetFramebufferAttachmentParameterivOES(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGenerateMipmapOES ( GLenum target )
+        glGenerateMipmapOES(
+            [in] Int32 target);
+
+        // C function void glCurrentPaletteMatrixOES ( GLuint matrixpaletteindex )
+        glCurrentPaletteMatrixOES(
+            [in] Int32 matrixpaletteindex);
+
+        // C function void glLoadPaletteFromModelViewMatrixOES ( void )
+        glLoadPaletteFromModelViewMatrixOES();
+
+        glMatrixIndexPointerOES(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] IBuffer* pointer);
+
+        glWeightPointerOES(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] IBuffer* pointer);
+
+        // C function void glDepthRangefOES ( GLclampf zNear, GLclampf zFar )
+        glDepthRangefOES(
+            [in] Float zNear,
+            [in] Float zFar);
+
+        // C function void glFrustumfOES ( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar )
+        glFrustumfOES(
+            [in] Float left,
+            [in] Float right,
+            [in] Float bottom,
+            [in] Float top,
+            [in] Float zNear,
+            [in] Float zFar);
+
+        // C function void glOrthofOES ( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar )
+        glOrthofOES(
+            [in] Float left,
+            [in] Float right,
+            [in] Float bottom,
+            [in] Float top,
+            [in] Float zNear,
+            [in] Float zFar);
+
+        // C function void glClipPlanefOES ( GLenum plane, const GLfloat *equation )
+        glClipPlanefOES(
+            [in] Int32 plane,
+            [in] ArrayOf<Float>* equation,
+            [in] Int32 offset);
+
+        // C function void glClipPlanefOES ( GLenum plane, const GLfloat *equation )
+        glClipPlanefOES(
+            [in] Int32 plane,
+            [in] IFloatBuffer* equation);
+
+        // C function void glGetClipPlanefOES ( GLenum pname, GLfloat *eqn )
+        glGetClipPlanefOES(
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* eqn,
+            [in] Int32 offset);
+
+        // C function void glGetClipPlanefOES ( GLenum pname, GLfloat *eqn )
+        glGetClipPlanefOES(
+            [in] Int32 pname,
+            [in] IFloatBuffer* eqn);
+
+        // C function void glClearDepthfOES ( GLclampf depth )
+        glClearDepthfOES(
+            [in] Float depth);
+
+        // C function void glTexGenfOES ( GLenum coord, GLenum pname, GLfloat param )
+        glTexGenfOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] Float param);
+
+        // C function void glTexGenfvOES ( GLenum coord, GLenum pname, const GLfloat *params )
+        glTexGenfvOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glTexGenfvOES ( GLenum coord, GLenum pname, const GLfloat *params )
+        glTexGenfvOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glTexGeniOES ( GLenum coord, GLenum pname, GLint param )
+        glTexGeniOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glTexGenivOES ( GLenum coord, GLenum pname, const GLint *params )
+        glTexGenivOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glTexGenivOES ( GLenum coord, GLenum pname, const GLint *params )
+        glTexGenivOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glTexGenxOES ( GLenum coord, GLenum pname, GLfixed param )
+        glTexGenxOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glTexGenxvOES ( GLenum coord, GLenum pname, const GLfixed *params )
+        glTexGenxvOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glTexGenxvOES ( GLenum coord, GLenum pname, const GLfixed *params )
+        glTexGenxvOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetTexGenfvOES ( GLenum coord, GLenum pname, GLfloat *params )
+        glGetTexGenfvOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexGenfvOES ( GLenum coord, GLenum pname, GLfloat *params )
+        glGetTexGenfvOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glGetTexGenivOES ( GLenum coord, GLenum pname, GLint *params )
+        glGetTexGenivOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexGenivOES ( GLenum coord, GLenum pname, GLint *params )
+        glGetTexGenivOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetTexGenxvOES ( GLenum coord, GLenum pname, GLfixed *params )
+        glGetTexGenxvOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexGenxvOES ( GLenum coord, GLenum pname, GLfixed *params )
+        glGetTexGenxvOES(
+            [in] Int32 coord,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}

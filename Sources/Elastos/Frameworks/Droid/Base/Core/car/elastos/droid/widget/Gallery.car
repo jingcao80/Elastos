@@ -1,0 +1,124 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Gallery extends LayoutParams to provide a place to hold current
+     * Transformation information along with previous position/transformation
+     * info.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupLayoutParams
+     */
+    interface IGalleryLayoutParams {
+    }
+
+    /**
+     * A view that shows items in a center-locked, horizontally scrolling list.
+     * <p>
+     * The default values for the Gallery assume you will be using
+     * {@link android.R.styleable#Theme_galleryItemBackground} as the background for
+     * each View given to the Gallery from the Adapter. If you are not doing this,
+     * you may need to adjust some Gallery properties, such as the spacing.
+     * <p>
+     * Views given to the Gallery should use {@link Gallery.LayoutParams} as their
+     * layout parameters type.
+     *
+     * @attr ref android.R.styleable#Gallery_animationDuration
+     * @attr ref android.R.styleable#Gallery_spacing
+     * @attr ref android.R.styleable#Gallery_gravity
+     *
+     * @deprecated This widget is no longer supported. Other horizontally scrolling
+     * widgets include {@link HorizontalScrollView} and {@link android.support.v4.view.ViewPager}
+     * from the support library.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsSpinner
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IGallery {
+        /**
+         * Whether or not to callback on any {@link #getOnItemSelectedListener()}
+         * while the items are being flinged. If false, only the final selected item
+         * will cause the callback. If true, all items between the first and the
+         * final will cause callbacks.
+         *
+         * @param shouldCallback Whether or not to callback on the listener while
+         *            the items are being flinged.
+         */
+        SetCallbackDuringFling(
+            [in] Boolean shouldCallback);
+
+        /**
+         * Whether or not to callback when an item that is not selected is clicked.
+         * If false, the item will become selected (and re-centered). If true, the
+         * {@link #getOnItemClickListener()} will get the callback.
+         *
+         * @param shouldCallback Whether or not to callback on the listener when a
+         *            item that is not selected is clicked.
+         * @hide
+         */
+        SetCallbackOnUnselectedItemClick(
+            [in] Boolean shouldCallback);
+
+        /**
+         * Sets how long the transition animation should run when a child view
+         * changes position. Only relevant if animation is turned on.
+         *
+         * @param animationDurationMillis The duration of the transition, in
+         *        milliseconds.
+         *
+         * @attr ref android.R.styleable#Gallery_animationDuration
+         */
+        SetAnimationDuration(
+            [in] Int32 animationDurationMillis);
+
+        /**
+         * Sets the spacing between items in a Gallery
+         *
+         * @param spacing The spacing in pixels between items in the Gallery
+         *
+         * @attr ref android.R.styleable#Gallery_spacing
+         */
+        SetSpacing(
+            [in] Int32 spacing);
+
+        /**
+         * Sets the alpha of items that are not selected in the Gallery.
+         *
+         * @param unselectedAlpha the alpha for the items that are not selected.
+         *
+         * @attr ref android.R.styleable#Gallery_unselectedAlpha
+         */
+        SetUnselectedAlpha(
+            [in] Float unselectedAlpha);
+
+        /**
+         * Describes how the child views are aligned.
+         * @param gravity
+         *
+         * @attr ref android.R.styleable#Gallery_gravity
+         */
+        SetGravity(
+            [in] Int32 gravity);
+
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

@@ -1,0 +1,267 @@
+
+module {
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InputMethodService {
+
+
+    interface IKeyboardRow {
+        GetDefaultWidth(
+            [out] Int32* value);
+
+        SetDefaultWidth(
+            [in] Int32 value);
+
+        GetDefaultHeight(
+            [out] Int32* value);
+
+        SetDefaultHeight(
+            [in] Int32 value);
+
+        GetDefaultHorizontalGap(
+            [out] Int32* value);
+
+        SetDefaultHorizontalGap(
+            [in] Int32 value);
+
+        GetVerticalGap(
+            [out] Int32* value);
+
+        SetVerticalGap(
+            [in] Int32 value);
+
+        GetRowEdgeFlags(
+            [out] Int32* value);
+
+        SetRowEdgeFlags(
+            [in] Int32 value);
+
+        GetMode(
+            [out] Int32* value);
+
+        SetMode(
+            [in] Int32 value);
+    }
+
+    [deprecated]
+    interface IKeyboardKey {
+        /**
+         * Informs the key that it has been pressed, in case it needs to change its appearance or
+         * state.
+         * @see #onReleased(Boolean)
+         */
+        OnPressed();
+
+        /**
+         * Changes the pressed state of the key. If it is a sticky key, it will also change the
+         * toggled state of the key if the finger was release inside.
+         * @param inside whether the finger was released inside the key
+         * @see #onPressed()
+         */
+        OnReleased(
+            [in] Boolean inside);
+
+        /**
+         * Detects if a point falls inside this key.
+         * @param x the x-coordinate of the point
+         * @param y the y-coordinate of the point
+         * @return whether or not the point falls inside the key. If the key is attached to an edge,
+         * it will assume that all points between the key and the edge are considered to be inside
+         * the key.
+         */
+        IsInside(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Boolean* isInside);
+
+        /**
+         * Returns the square of the distance between the center of the key and the given point.
+         * @param x the x-coordinate of the point
+         * @param y the y-coordinate of the point
+         * @return the square of the distance of the point from the center of the key
+         */
+        SquaredDistanceFrom(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Int32* dis);
+
+        /**
+         * Returns the drawable state for the key, based on the current state and type of the key.
+         * @return the drawable state of the key.
+         * @see android.graphics.drawable.StateListDrawable#setState(Int32[])
+         */
+        GetCurrentDrawableState(
+            [out, callee] ArrayOf<Int32>* drawableStates);
+
+        GetCodes(
+            [out, callee] ArrayOf<Int32>* codes);
+
+        SetCodes(
+            [in] ArrayOf<Int32>* codes);
+
+        GetLabel(
+            [in] ICharSequence** label);
+
+        SetLabel(
+            [in] ICharSequence* label);
+
+        GetIcon(
+            [out] IDrawable** icon);
+
+        SetIcon(
+            [in] IDrawable* icon);
+
+        GetIconPreview(
+            [out] IDrawable** preview);
+
+        SetIconPreview(
+            [in] IDrawable* preview);
+
+        GetWidth(
+            [out] Int32* value);
+
+        SetWidth(
+            [in] Int32 value);
+
+        GetHeight(
+            [out] Int32* value);
+
+        SetHeight(
+            [in] Int32 value);
+
+        GetGap(
+            [out] Int32* value);
+
+        SetGap(
+            [in] Int32 value);
+
+        GetX(
+            [out] Int32* value);
+
+        SetX(
+            [in] Int32 value);
+
+        GetY(
+            [out] Int32* value);
+
+        SetY(
+            [in] Int32 value);
+
+        IsSticky(
+            [out] Boolean* value);
+
+        SetSticky(
+            [in] Boolean value);
+
+        GetText(
+            [out] ICharSequence** text);
+
+        GetPopupCharacters(
+            [out] ICharSequence** popupCharacters);
+
+        GetPopupResId(
+            [out] Int32* popupResId);
+
+        IsRepeatable(
+            [out] Boolean* repeatable);
+    }
+
+    /**
+     * Loads an XML description of a keyboard and stores the attributes of the keys. A keyboard
+     * consists of rows of keys.
+     * <p>The layout file for a keyboard contains XML that looks like the following snippet:</p>
+     * <pre>
+     * &lt;Keyboard
+     *         android:keyWidth="%10p"
+     *         android:keyHeight="50px"
+     *         android:horizontalGap="2px"
+     *         android:verticalGap="2px" &gt;
+     *     &lt;Row android:keyWidth="32px" &gt;
+     *         &lt;Key android:keyLabel="A" /&gt;
+     *         ...
+     *     &lt;/Row&gt;
+     *     ...
+     * &lt;/Keyboard&gt;
+     * </pre>
+     * @attr ref android.R.styleable#Keyboard_keyWidth
+     * @attr ref android.R.styleable#Keyboard_keyHeight
+     * @attr ref android.R.styleable#Keyboard_horizontalGap
+     * @attr ref android.R.styleable#Keyboard_verticalGap
+     */
+    [deprecated]
+    interface IKeyboard {
+        const Int32 EDGE_LEFT = 0x01;
+        const Int32 EDGE_RIGHT = 0x02;
+        const Int32 EDGE_TOP = 0x04;
+        const Int32 EDGE_BOTTOM = 0x08;
+
+        const Int32 KEYCODE_SHIFT = -1;
+        const Int32 KEYCODE_MODE_CHANGE = -2;
+        const Int32 KEYCODE_CANCEL = -3;
+        const Int32 KEYCODE_DONE = -4;
+        const Int32 KEYCODE_DELETE = -5;
+        const Int32 KEYCODE_ALT = -6;
+
+        GetKeys(
+            [out] IList** keys);
+
+        GetModifierKeys(
+            [out] IList** keys);
+
+        GetHorizontalGap(
+            [out] Int32* hGap);
+
+        SetHorizontalGap(
+            [in] Int32 gap);
+
+        GetVerticalGap(
+            [out] Int32* vGap);
+
+        SetVerticalGap(
+            [in] Int32 gap);
+
+        GetKeyHeight(
+            [out] Int32* h);
+
+        SetKeyHeight(
+            [in] Int32 height);
+
+        GetKeyWidth(
+            [out] Int32* w);
+
+        SetKeyWidth(
+            [in] Int32 width);
+
+        GetHeight(
+            [out] Int32* h);
+
+        GetMinWidth(
+            [out] Int32* minW);
+
+        SetShifted(
+            [in] Boolean shiftState,
+            [out] Boolean* res);
+
+        IsShifted(
+            [out] Boolean* res);
+
+        GetShiftKeyIndex(
+            [out] Int32* index);
+
+        GetShiftKeyIndices(
+            [out, callee] ArrayOf<Int32>* keyIndices);
+
+        GetNearestKeys(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out, callee] ArrayOf<Int32>* nearestKeys);
+    }
+
+    } // namespace InputMethodService
+    } // namespace Droid
+    } // namespace Elastos
+}

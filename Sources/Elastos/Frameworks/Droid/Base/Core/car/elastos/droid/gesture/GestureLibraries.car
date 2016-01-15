@@ -1,0 +1,36 @@
+module
+{
+    using interface Elastos.IO.IFile;
+
+    interface Elastos.Droid.Gesture.IGestureLibrary;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Gesture {
+
+    [local]
+    interface IGestureLibraries {
+        FromFile(
+            [in] String path,
+            [out] IGestureLibrary** gestureLib);
+
+        FromFile(
+            [in] IFile* path,
+            [out] IGestureLibrary** gestureLib);
+
+        FromPrivateFile(
+            [in] IContext* ctx,
+            [in] String name,
+            [out] IGestureLibrary** gestureLib);
+
+        FromRawResource(
+            [in] IContext* ctx,
+            [in] Int32 resourceId,
+            [out] IGestureLibrary** gestureLib);
+    }
+
+    } // namespace Gesture
+    } // namespace Droid
+    } // namespace Elastos
+}

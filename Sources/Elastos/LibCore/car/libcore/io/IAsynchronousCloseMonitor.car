@@ -1,0 +1,17 @@
+
+module
+{
+    interface Elastos.IO.IFileDescriptor;
+
+    namespace Libcore {
+    namespace IO {
+
+    interface IAsynchronousCloseMonitor {
+
+        SignalBlockedThreads(
+            [in] IFileDescriptor* fd);
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

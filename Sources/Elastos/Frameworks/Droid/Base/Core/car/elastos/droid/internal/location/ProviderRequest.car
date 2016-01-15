@@ -1,0 +1,40 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Location {
+
+    /** @hide */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IProviderRequest {
+        GetReportLocation(
+            [out] Boolean* reportLocation);
+
+        SetReportLocation(
+            [in] Boolean reportLocation);
+
+        GetInterval(
+            [out] Int64* interval);
+
+        SetInterval(
+            [in] Int64 interval);
+
+        GetLocationRequests(
+            [out] IList** requests);
+
+        SetLocationRequest(
+            [in] IList* request);
+    }
+
+    } //namespace Location
+    } //namespace Internal
+    } //namespace Droid
+    } //namespace Elastos
+}

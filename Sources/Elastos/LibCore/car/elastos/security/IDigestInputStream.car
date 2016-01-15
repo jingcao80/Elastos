@@ -1,0 +1,45 @@
+
+module
+{
+    interface Elastos.Security.IMessageDigest;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * @Involve
+     * interface Elastos.IO.IFilterInputStream
+     */
+    interface IDigestInputStream {
+        /**
+         * Returns the message digest for this stream.
+         *
+         * @return the message digest for this stream.
+         */
+        GetMessageDigest(
+            [out] IMessageDigest** msgDigest);
+
+        /**
+         * Sets the message digest which this stream will use.
+         *
+         * @param digest
+         *            the message digest which this stream will use.
+         */
+        SetMessageDigest(
+            [in] IMessageDigest* digest);
+
+        /**
+         * Enables or disables the digest function (default is on).
+         *
+         * @param on
+         *            {@code true} if the digest should be computed, {@code false}
+         *            otherwise.
+         * @see MessageDigest
+         */
+        On(
+            [in] Boolean on);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

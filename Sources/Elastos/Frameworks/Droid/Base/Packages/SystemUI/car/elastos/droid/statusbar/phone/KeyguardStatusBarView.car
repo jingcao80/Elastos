@@ -1,0 +1,48 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBatteryController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IKeyguardUserSwitcher;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IUserInfoController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * The header group on Keyguard.
+     */
+    /**
+     * @Involve
+     * interface IRelativeLayout
+     * interface IBatteryControllerBatteryStateChangeCallback
+     */
+    interface IKeyguardStatusBarView {
+
+        SetListening(
+            [in] Boolean listening);
+
+        SetBatteryController(
+            [in] IBatteryController* batteryController);
+
+        SetUserInfoController(
+            [in] IUserInfoController* userInfoController);
+
+        SetKeyguardUserSwitcher(
+            [in] IKeyguardUserSwitcher* keyguardUserSwitcher);
+
+        SetKeyguardUserSwitcherShowing(
+            [in] Boolean showing,
+            [in] Boolean animate);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

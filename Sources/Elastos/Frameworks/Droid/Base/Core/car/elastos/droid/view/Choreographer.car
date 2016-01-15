@@ -1,0 +1,284 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Implement this interface to receive a callback when a new display frame is
+     * being rendered.  The callback is invoked on the {@link Looper} thread to
+     * which the {@link Choreographer} is attached.
+     */
+    interface IFrameCallback {
+        /**
+         * Called when a new display frame is being rendered.
+         * <p>
+         * This method provides the time in nanoseconds when the frame started being rendered.
+         * The frame time provides a stable time base for synchronizing animations
+         * and drawing.  It should be used instead of {@link SystemClock#uptimeMillis()}
+         * or {@link System#nanoTime()} for animations and drawing in the UI.  Using the frame
+         * time helps to reduce inter-frame jitter because the frame time is fixed at the time
+         * the frame was scheduled to start, regardless of when the animations or drawing
+         * callback actually runs.  All callbacks that run as part of rendering a frame will
+         * observe the same frame time so using the frame time also helps to synchronize effects
+         * that are performed by different callbacks.
+         * </p><p>
+         * Please note that the framework already takes care to process animations and
+         * drawing using the frame time as a stable time base.  Most applications should
+         * not need to use the frame time information directly.
+         * </p>
+         *
+         * @param frameTimeNanos The time in nanoseconds when the frame started being rendered,
+         * in the {@link System#nanoTime()} timebase.  Divide this value by {@code 1000000}
+         * to convert it to the {@link SystemClock#uptimeMillis()} time base.
+         */
+        DoFrame(
+            [in] Int64 frameTimeNanos);
+    }
+
+    interface IChoreographer {
+        /**
+         * Callback type: Input callback.  Runs first.
+         * @hide
+         */
+        const Int32 CALLBACK_INPUT = 0;
+
+        /**
+         * Callback type: Animation callback.  Runs before traversals.
+         * @hide
+         */
+        const Int32 CALLBACK_ANIMATION = 1;
+
+        /**
+         * Callback type: Traversal callback.  Handles layout and draw.  Runs last
+         * after all other asynchronous messages have been handled.
+         * @hide
+         */
+        const Int32 CALLBACK_TRAVERSAL = 2;
+
+        /**
+         * @return The refresh rate as the nanoseconds between frames
+         * @hide
+         */
+        GetFrameIntervalNanos(
+            [out] Int64* result);
+
+        /**
+         * Posts a callback to run on the next frame.
+         * <p>
+         * The callback runs once then is automatically removed.
+         * </p>
+         *
+         * @param callbackType The callback type.
+         * @param action The callback action to run during the next frame.
+         * @param token The callback token, or NULL if none.
+         *
+         * @see #removeCallbacks
+         * @hide
+         */
+        PostCallback(
+            [in] Int32 callbackType,
+            [in] IRunnable* action,
+            [in] IObject* token);
+
+        /**
+         * Posts a callback to run on the next frame after the specified delay.
+         * <p>
+         * The callback runs once then is automatically removed.
+         * </p>
+         *
+         * @param callbackType The callback type.
+         * @param action The callback action to run during the next frame after the specified delay.
+         * @param token The callback token, or NULL if none.
+         * @param delayMillis The delay time in milliseconds.
+         *
+         * @see #removeCallback
+         * @hide
+         */
+        PostCallbackDelayed(
+            [in] Int32 callbackType,
+            [in] IRunnable* action,
+            [in] IObject* token,
+            [in] Int64 delayMillis);
+
+        /**
+         * Removes callbacks that have the specified action and token.
+         *
+         * @param callbackType The callback type.
+         * @param action The action property of the callbacks to remove, or NULL to remove
+         * callbacks with any action.
+         * @param token The token property of the callbacks to remove, or NULL to remove
+         * callbacks with any token.
+         *
+         * @see #postCallback
+         * @see #postCallbackDelayed
+         * @hide
+         */
+        RemoveCallbacks(
+            [in] Int32 callbackType,
+            [in] IRunnable* action,
+            [in] IObject* token);
+
+        /**
+         * Posts a frame callback to run on the next frame.
+         * <p>
+         * The callback runs once then is automatically removed.
+         * </p>
+         *
+         * @param callback The frame callback to run during the next frame.
+         *
+         * @see #postFrameCallbackDelayed
+         * @see #removeFrameCallback
+         */
+        PostFrameCallback(
+            [in] IFrameCallback* cb);
+
+        /**
+         * Posts a frame callback to run on the next frame after the specified delay.
+         * <p>
+         * The callback runs once then is automatically removed.
+         * </p>
+         *
+         * @param callback The frame callback to run during the next frame.
+         * @param delayMillis The delay time in milliseconds.
+         *
+         * @see #postFrameCallback
+         * @see #removeFrameCallback
+         */
+        PostFrameCallbackDelayed(
+            [in] IFrameCallback* cb,
+            [in] Int64 delayMillis);
+
+        /**
+         * Removes a previously posted frame callback.
+         *
+         * @param callback The frame callback to remove.
+         *
+         * @see #postFrameCallback
+         * @see #postFrameCallbackDelayed
+         */
+        RemoveFrameCallback(
+            [in] IFrameCallback* cb);
+
+        /**
+         * Gets the time when the current frame started.
+         * <p>
+         * This method provides the time in nanoseconds when the frame started being rendered.
+         * The frame time provides a stable time base for synchronizing animations
+         * and drawing.  It should be used instead of {@link SystemClock#uptimeMillis()}
+         * or {@link System#nanoTime()} for animations and drawing in the UI.  Using the frame
+         * time helps to reduce inter-frame jitter because the frame time is fixed at the time
+         * the frame was scheduled to start, regardless of when the animations or drawing
+         * callback actually runs.  All callbacks that run as part of rendering a frame will
+         * observe the same frame time so using the frame time also helps to synchronize effects
+         * that are performed by different callbacks.
+         * </p><p>
+         * Please note that the framework already takes care to process animations and
+         * drawing using the frame time as a stable time base.  Most applications should
+         * not need to use the frame time information directly.
+         * </p><p>
+         * This method should only be called from within a callback.
+         * </p>
+         *
+         * @return The frame start time, in the {@link SystemClock#uptimeMillis()} time base.
+         *
+         * @throws IllegalStateException if no frame is in progress.
+         * @hide
+         */
+        GetFrameTime(
+            [out] Int64* frameTime);
+
+        /**
+         * Same as {@link #getFrameTime()} but with nanosecond precision.
+         *
+         * @return The frame start time, in the {@link System#nanoTime()} time base.
+         *
+         * @throws IllegalStateException if no frame is in progress.
+         * @hide
+         */
+        GetFrameTimeNanos(
+            [out] Int64* frameTimeNanos);
+    }
+
+    interface IChoreographerHelper {
+
+        /**
+         * Gets the choreographer for the calling thread.  Must be called from
+         * a thread that already has a {@link android.os.Looper} associated with it.
+         *
+         * @return The choreographer for this thread.
+         * @throws IllegalStateException if the thread does not have a looper.
+         */
+        GetInstance(
+            [out] IChoreographer** c);
+
+        /**
+         * The amount of time, in milliseconds, between each frame of the animation.
+         * <p>
+         * This is a requested time that the animation will attempt to honor, but the actual delay
+         * between frames may be different, depending on system load and capabilities. This is a static
+         * function because the same delay will be applied to all animations, since they are all
+         * run off of a single timing loop.
+         * </p><p>
+         * The frame delay may be ignored when the animation system uses an external timing
+         * source, such as the display refresh rate (vsync), to govern animations.
+         * </p>
+         *
+         * @return the requested time between frames, in milliseconds
+         * @hide
+         */
+        GetFrameDelay(
+            [out] Int64* result);
+
+        /**
+         * The amount of time, in milliseconds, between each frame of the animation.
+         * <p>
+         * This is a requested time that the animation will attempt to honor, but the actual delay
+         * between frames may be different, depending on system load and capabilities. This is a static
+         * function because the same delay will be applied to all animations, since they are all
+         * run off of a single timing loop.
+         * </p><p>
+         * The frame delay may be ignored when the animation system uses an external timing
+         * source, such as the display refresh rate (vsync), to govern animations.
+         * </p>
+         *
+         * @param frameDelay the requested time between frames, in milliseconds
+         * @hide
+         */
+        SetFrameDelay(
+            [in] Int64 delay);
+
+        /**
+         * Subtracts typical frame delay time from a delay interval in milliseconds.
+         * <p>
+         * This method can be used to compensate for animation delay times that have baked
+         * in assumptions about the frame delay.  For example, it's quite common for code to
+         * assume a 60Hz frame time and bake in a 16ms delay.  When we call
+         * {@link #postAnimationCallbackDelayed} we want to know how long to wait before
+         * posting the animation callback but let the animation timer take care of the remaining
+         * frame delay time.
+         * </p><p>
+         * This method is somewhat conservative about how much of the frame delay it
+         * subtracts.  It uses the same value returned by {@link #getFrameDelay} which by
+         * default is 10ms even though many parts of the system assume 16ms.  Consequently,
+         * we might still wait 6ms before posting an animation callback that we want to run
+         * on the next frame, but this is much better than waiting a whole 16ms and likely
+         * missing the deadline.
+         * </p>
+         *
+         * @param delayMillis The original delay time including an assumed frame delay.
+         * @return The adjusted delay time with the assumed frame delay subtracted out.
+         * @hide
+         */
+        SubtractFrameDelay(
+            [in] Int64 delayMillis,
+            [out] Int64* result);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

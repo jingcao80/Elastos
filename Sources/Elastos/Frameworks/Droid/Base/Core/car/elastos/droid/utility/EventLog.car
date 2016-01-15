@@ -1,0 +1,24 @@
+module
+{
+    interface IEventLog
+    {
+        /**
+         * Get the name associated with an event type tag code.
+         * @param tag code to look up
+         * @return the name of the tag, or null if no tag has that number
+         */
+         GetTagName(
+             [in] Int32 tag,
+             [out] String* name);
+
+        /**
+         * Get the event type tag code associated with an event name.
+         * @param name of event to look up
+         * @return the tag code, or -1 if no tag has that name
+         */
+        GetTagCode(
+            [in] String name,
+            [out] Int32* code);
+    }
+
+}

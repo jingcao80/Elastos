@@ -1,0 +1,305 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Hardware.Soundtrigger.ISoundTriggerModule;
+
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IUUID;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Soundtrigger {
+
+    /*****************************************************************************
+     * A ModuleProperties describes a given sound trigger hardware module
+     * managed by the native sound trigger service. Each module has a unique
+     * ID used to target any API call to this paricular module. Module
+     * properties are returned by listModules() method.
+     *
+     * @Involve
+     * interface IParcelable;
+     ****************************************************************************/
+    interface ISoundTriggerModuleProperties {
+    }
+
+    /*****************************************************************************
+     * A SoundModel describes the attributes and contains the binary data used by the hardware
+     * implementation to detect a particular sound pattern.
+     * A specialized version {@link KeyphraseSoundModel} is defined for key phrase
+     * sound models.
+     ****************************************************************************/
+    interface ISoundTriggerSoundModel {
+        /** Undefined sound model type */
+        const Int32 TYPE_UNKNOWN = -1;
+
+        /** Keyphrase sound model */
+        const Int32 TYPE_KEYPHRASE = 0;
+
+        /** Unique sound model identifier */
+        GetUuid(
+            [out] IUUID** uuid);
+
+        /** Sound model type (e.g. TYPE_KEYPHRASE); */
+        GetType(
+            [out] Int32* type);
+
+        /** Unique sound model vendor identifier */
+        GetVendorUuid(
+            [out] IUUID** uuid);
+
+        /** Opaque data. For use by vendor implementation and enrollment application */
+        Getdata(
+            [out, callee] ArrayOf<Byte>* data);
+    }
+
+    /*****************************************************************************
+     * A Keyphrase describes a key phrase that can be detected by a
+     * {@link KeyphraseSoundModel}
+     *
+     * @Involve
+     * interface IParcelable;
+     ****************************************************************************/
+    interface ISoundTriggerKeyphrase {
+        GetId(
+            [out] Int32* id);
+
+        GetRecognitionModes(
+            [out] Int32* modes);
+
+        GetLocale(
+            [out] String* locale);
+
+        GetText(
+            [out] String* text);
+
+        GetUsers(
+            [out, callee] ArrayOf<Int32>* users);
+    }
+
+    /*****************************************************************************
+     * A KeyphraseSoundModel is a specialized {@link SoundModel} for key phrases.
+     * It contains data needed by the hardware to detect a certain number of key phrases
+     * and the list of corresponding {@link Keyphrase} descriptors.
+     *
+     * @Involve
+     * interface ISoundTriggerSoundModel;
+     * interface IParcelable;
+     ****************************************************************************/
+    interface ISoundTriggerKeyphraseSoundModel {
+        GetKeyphrases(
+            [out, callee] ArrayOf<ISoundTriggerKeyphrase*>* keyphrases);
+    }
+
+    /**
+     *  A RecognitionEvent is provided by the
+     *  {@link StatusListener#onRecognition(RecognitionEvent)}
+     *  callback upon recognition success or failure.
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+    interface ISoundTriggerRecognitionEvent {
+    }
+
+    interface ISoundTriggerKeyphraseRecognitionExtra;
+    /**
+     *  A RecognitionConfig is provided to
+     *  {@link SoundTriggerModule#startRecognition(int, RecognitionConfig)} to configure the
+     *  recognition request.
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+    interface ISoundTriggerRecognitionConfig {
+        GetCaptureRequested(
+            [out] Boolean* requested);
+
+        GetAllowMultipleTriggers(
+            [out] Boolean* result);
+
+        GetKeyphrases(
+            [out, callee] ArrayOf<ISoundTriggerKeyphraseRecognitionExtra*>* phrases);
+
+        GetData(
+            [out, callee] ArrayOf<Byte>* data);
+    }
+
+    /**
+     * Confidence level for users defined in a keyphrase.
+     * - The confidence level is expressed in percent (0% -100%).
+     * When used in a {@link KeyphraseRecognitionEvent} it indicates the detected confidence level
+     * When used in a {@link RecognitionConfig} it indicates the minimum confidence level that
+     * should trigger a recognition.
+     * - The user ID is derived from the system ID {@link android.os.UserHandle#getIdentifier()}.
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+    interface ISoundTriggerConfidenceLevel {
+        GetUserId(
+            [out] Int32* id);
+
+        GetConfidenceLevel(
+            [out] Int32* level);
+    }
+
+    /**
+     *  Additional data conveyed by a {@link KeyphraseRecognitionEvent}
+     *  for a key phrase detection.
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+    interface ISoundTriggerKeyphraseRecognitionExtra {
+        GetId(
+            [out] Int32* id);
+
+        GetRecognitionModes(
+            [out] Int32* modes);
+
+        GetCoarseConfidenceLevel(
+            [out] Int32* level);
+
+        GetConfidenceLevels(
+            [out, callee] ArrayOf<ISoundTriggerConfidenceLevel*>* levels);
+    }
+
+    /**
+     *  Specialized {@link RecognitionEvent} for a key phrase detection.
+     *
+     * @Involve
+     * interface ISoundTriggerRecognitionEvent;
+     * interface IParcelable;
+     */
+    interface ISoundTriggerKeyphraseRecognitionEvent {
+    }
+
+    /**
+     *  A SoundModelEvent is provided by the
+     *  {@link StatusListener#onSoundModelUpdate(SoundModelEvent)}
+     *  callback when a sound model has been updated by the implementation
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+    interface ISoundTriggerSoundModelEvent {
+    }
+
+    /**
+     * Interface provided by the client application when attaching to a {@link SoundTriggerModule}
+     * to received recognition and error notifications.
+     */
+    interface ISoundTriggerStatusListener {
+        /**
+         * Called when recognition succeeds of fails
+         */
+        OnRecognition(
+            [in] ISoundTriggerRecognitionEvent* event);
+
+        /**
+         * Called when a sound model has been updated
+         */
+        OnSoundModelUpdate(
+            [in] ISoundTriggerSoundModelEvent* event);
+
+        /**
+         * Called when the sound trigger native service state changes.
+         * @param state Native service state. One of {@link SoundTrigger#SERVICE_STATE_ENABLED},
+         * {@link SoundTrigger#SERVICE_STATE_DISABLED}
+         */
+        OnServiceStateChange(
+            [in] Int32 state);
+
+        /**
+         * Called when the sound trigger native service dies
+         */
+        OnServiceDied();
+    }
+
+    /**
+     * The SoundTrigger class provides access via JNI to the native service managing
+     * the sound trigger HAL.
+     *
+     * @hide
+     */
+    interface ISoundTrigger {
+        const Int32 STATUS_OK = 0;
+        const Int32 STATUS_ERROR = 0x80000000; //Integer.MIN_VALUE
+        const Int32 STATUS_PERMISSION_DENIED = -1;
+        const Int32 STATUS_NO_INIT = -19;
+        const Int32 STATUS_BAD_VALUE = -22;
+        const Int32 STATUS_DEAD_OBJECT = -32;
+        const Int32 STATUS_INVALID_OPERATION = -38;
+
+        /**
+         *  Modes for key phrase recognition
+         */
+        /** Simple recognition of the key phrase */
+        const Int32 RECOGNITION_MODE_VOICE_TRIGGER = 0x1;
+        /** Trigger only if one user is identified */
+        const Int32 RECOGNITION_MODE_USER_IDENTIFICATION = 0x2;
+        /** Trigger only if one user is authenticated */
+        const Int32 RECOGNITION_MODE_USER_AUTHENTICATION = 0x4;
+
+        /**
+         *  Status codes for {@link RecognitionEvent}
+         */
+        /** Recognition success */
+        const Int32 RECOGNITION_STATUS_SUCCESS = 0;
+        /** Recognition aborted (e.g. capture preempted by anotehr use case */
+        const Int32 RECOGNITION_STATUS_ABORT = 1;
+        /** Recognition failure */
+        const Int32 RECOGNITION_STATUS_FAILURE = 2;
+
+        /**
+         *  Status codes for {@link SoundModelEvent}
+         */
+        /** Sound Model was updated */
+        const Int32 SOUNDMODEL_STATUS_UPDATED = 0;
+
+        /**
+         *  Native service state. {@link StatusListener#onServiceStateChange(int)}
+         */
+        // Keep in sync with system/core/include/system/sound_trigger.h
+        /** Sound trigger service is enabled */
+        const Int32 SERVICE_STATE_ENABLED = 0;
+        /** Sound trigger service is disabled */
+        const Int32 SERVICE_STATE_DISABLED = 1;
+
+        /**
+         * Returns a list of descriptors for all harware modules loaded.
+         * @param modules A ModuleProperties array where the list will be returned.
+         * @return - {@link #STATUS_OK} in case of success
+         *         - {@link #STATUS_ERROR} in case of unspecified error
+         *         - {@link #STATUS_PERMISSION_DENIED} if the caller does not have system permission
+         *         - {@link #STATUS_NO_INIT} if the native service cannot be reached
+         *         - {@link #STATUS_BAD_VALUE} if modules is null
+         *         - {@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails
+         */
+        NativeListModules(
+            [in] IList* modules,
+            [out] Int32* result);
+
+        /**
+         * Get an interface on a hardware module to control sound models and recognition on
+         * this module.
+         * @param moduleId Sound module system identifier {@link ModuleProperties#id}. mandatory.
+         * @param listener {@link StatusListener} interface. Mandatory.
+         * @param handler the Handler that will receive the callabcks. Can be null if default handler
+         *                is OK.
+         * @return a valid sound module in case of success or null in case of error.
+         */
+        AttachModule(
+            [in] Int32 moduleId,
+            [in] ISoundTriggerStatusListener* listener,
+            [in] IHandler* handler,
+            [out] ISoundTriggerModule** _module);
+    }
+
+    } // namespace Soundtrigger
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

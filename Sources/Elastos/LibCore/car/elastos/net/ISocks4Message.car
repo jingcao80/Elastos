@@ -1,0 +1,94 @@
+module
+{
+    namespace Elastos{
+    namespace Net{
+
+    [deprecated]
+    interface ISocks4Message {
+
+        const Int32 COMMAND_CONNECT = 1;
+
+        const Int32 COMMAND_BIND = 2;
+
+        const Int32 RETURN_SUCCESS = 90;
+
+        const Int32 RETURN_FAILURE = 91;
+
+        const Int32 RETURN_CANNOT_CONNECT_TO_IDENTD = 92;
+
+        const Int32 RETURN_DIFFERENT_USER_IDS = 93;
+
+        const Int32 REPLY_LENGTH = 8;
+
+        const Int32 INDEX_VERSION = 0;
+
+        /**
+         * Get the request's command or result.
+         */
+        GetCommandOrResult(
+            [out] Int32* result);
+
+        /**
+         * Set the request's command or result.
+         */
+        SetCommandOrResult(
+            [in] Int32 command);
+
+        /**
+         * Returns the request's port number.
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /**
+         * Set the request's port number.
+         */
+        SetPort(
+            [in] Int32 port);
+        /**
+         * Returns the IP address of the request as an integer.
+         */
+        GetIP(
+            [out] Int32* ip);
+
+        /**
+         * Set the IP address. This expects an array of four bytes in host order.
+         */
+        SetIP(
+            [in] ArrayOf<Byte>* ip);
+
+        /**
+         * Returns the user id for authentication.
+         */
+        GetUserId(
+            [out] String* id);
+        /**
+         * Set the user id for authentication.
+         */
+        SetUserId(
+            [in] String id);
+
+        /**
+         * Returns the total number of bytes used for the request. This method
+         * searches for the end of the user id, then searches for the end of the
+         * password and returns the final index as the requests length.
+         */
+        GetLength(
+            [out] Int32* length);
+        /**
+         * Returns an error string corresponding to the given error value.
+         */
+        GetErrorString(
+            [in] Int32 error,
+            [out] String* str);
+        /**
+         * Returns the message's byte buffer.
+         */
+        GetBytes(
+            [out, callee] ArrayOf<Byte>* bytes);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

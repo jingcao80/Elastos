@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /**
+     * @Involve
+     * interface Elastos.Core.IThread
+     * interface IHandlerThread
+     */
+    [local]
+    interface IBackgroundThread {
+    }
+
+    [local]
+    interface IBackgroundThreadHelper {
+        GetInstance(
+            [out] IBackgroundThread** instance);
+
+        GetHandler(
+            [out] IHandler** handler);
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

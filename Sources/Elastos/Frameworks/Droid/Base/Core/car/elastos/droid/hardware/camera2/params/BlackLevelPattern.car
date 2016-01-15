@@ -1,0 +1,58 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Params {
+
+    /**
+     * Immutable class to store a 4-element vector of integers corresponding to a 2x2 pattern
+     * of color channel offsets used for the black level offsets of each color channel.
+     */
+    [deprecated]
+    interface IBlackLevelPattern {
+        /**
+         * The number of offsets in this vector.
+         */
+        const Int32 COUNT = 4;
+
+        /**
+         * Return the color channel offset for a given index into the array of raw pixel values.
+         *
+         * @param column the column index in the the raw pixel array.
+         * @param row the row index in the raw pixel array.
+         * @return a color channel offset.
+         *
+         * @throws IllegalArgumentException if a column or row given is negative.
+         */
+        GetOffsetForIndex(
+            [in] Int32 column,
+            [in] Int32 row,
+            [out] Int32* value);
+
+        /**
+         * Copy the ColorChannel offsets into the destination vector.
+         *
+         * <p>Offsets are given in row-column scan order for a given 2x2 color pattern.</p>
+         *
+         * @param destination an array big enough to hold at least {@value #COUNT} elements after the
+         *          {@code offset}
+         * @param offset a non-negative offset into the array
+         *
+         * @throws IllegalArgumentException if the offset is invalid.
+         * @throws ArrayIndexOutOfBoundsException if the destination vector is too small.
+         * @throws NullPointerException if the destination is null.
+         */
+        CopyTo(
+            [in] ArrayOf<Int32>* destination,
+            [in] Int32 offset);
+    }
+
+    } // namespace Params
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

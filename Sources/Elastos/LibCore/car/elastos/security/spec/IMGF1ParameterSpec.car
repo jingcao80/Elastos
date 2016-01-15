@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * @Involve
+     * interface IAlgorithmParameterSpec
+     */
+    interface IMGF1ParameterSpec {
+        /**
+         * Returns the name of the message digest algorithm.
+         *
+         * @return the name of the message digest algorithm.
+         */
+        GetDigestAlgorithm(
+            [out] String* algorithm);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

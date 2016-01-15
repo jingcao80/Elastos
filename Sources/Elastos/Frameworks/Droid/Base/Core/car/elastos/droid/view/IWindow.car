@@ -1,0 +1,110 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * API back to a client window that the Window Manager uses to inform it of
+     * interesting things happening.
+     *
+     * {@hide}
+     */
+    [oneway]
+    interface IIWindow {
+        /**
+         * ===== NOTICE =====
+         * The first method must remain the first method. Scripts
+         * and tools rely on their transaction number to work properly.
+         */
+
+        /**
+         * Invoked by the view server to tell a window to execute the specified
+         * command. Any response from the receiver must be sent through the
+         * specified file descriptor.
+         */
+        ExecuteCommand(
+            [in] String command,
+            [in] String parameters,
+            [in] IParcelFileDescriptor* descriptor);
+
+        Resized(
+            [in] IRect* frame,
+            [in] IRect* overscanInsets,
+            [in] IRect* contentInsets,
+            [in] IRect* visibleInsets,
+            [in] IRect* stableInsets,
+            [in] Boolean reportDraw,
+            [in] IConfiguration* newConfig);
+
+        Moved(
+            [in] Int32 newX,
+            [in] Int32 newY);
+
+        DispatchAppVisibility(
+            [in] Boolean visible);
+
+        DispatchGetNewSurface();
+
+        /**
+         * Tell the window that it is either gaining or losing focus.  Keep it up
+         * to date on the current state showing navigational focus (touch mode) too.
+         */
+        WindowFocusChanged(
+            [in] Boolean hasFocus,
+            [in] Boolean inTouchMode);
+
+        CloseSystemDialogs(
+            [in] String reason);
+
+        /**
+         * Called for wallpaper windows when their offsets change.
+         */
+        DispatchWallpaperOffsets(
+            [in] Float x,
+            [in] Float y,
+            [in] Float xStep,
+            [in] Float yStep,
+            [in] Boolean sync);
+
+        DispatchWallpaperCommand(
+            [in] String action,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 z,
+            [in] IBundle* extras,
+            [in] Boolean sync);
+
+        /**
+         * Drag/drop events
+         */
+        DispatchDragEvent(
+            [in] IDragEvent* event);
+
+        /**
+         * System chrome visibility changes
+         */
+        DispatchSystemUiVisibilityChanged(
+            [in] Int32 seq,
+            [in] Int32 globalVisibility,
+            [in] Int32 localValue,
+            [in] Int32 localChanges);
+
+        /**
+         * If the window manager returned RELAYOUT_RES_ANIMATING
+         * from relayout(), this method will be called when the animation
+         * is done.
+         */
+        DoneAnimating();
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

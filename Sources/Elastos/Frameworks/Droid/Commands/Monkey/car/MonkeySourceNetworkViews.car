@@ -1,0 +1,125 @@
+module
+{
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+    interface Elastos.Droid.Commands.Monkey.IMonkeyCommand;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Monkey {
+
+    interface IMonkeySourceNetworkViews {
+
+    }
+
+    interface IListViewsCommand extends IMonkeyCommand {
+    }
+
+    interface IQueryViewCommand extends IMonkeyCommand {
+    }
+
+    interface IGetRootViewCommand extends IMonkeyCommand {
+    }
+
+    interface IGetViewsWithTextCommand extends IMonkeyCommand {
+    }
+
+    interface IGetLocation  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetText  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetClass  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetChecked  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetEnabled  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetSelected  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface ISetSelected  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetFocused  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface ISetFocused  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetAccessibilityIds  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetParent  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+    interface IGetChildren  {
+        Query(
+            [in] IAccessibilityNodeInfo* node,
+            [in] IObjectContainer* args,
+            [out] IMonkeyCommandReturn** ret);
+    }
+
+
+    interface IMonkeySourceNetworkViewsHelper {
+        /**
+         * Registers the event Listener for AccessibilityEvents.
+         * Also sets up a communication connection so we can query the
+         * accessibility service.
+         */
+        Setup();
+    }
+
+    } //namespace Monkey
+    } //namespace Commands
+    } //namespace Droid
+    } // namespace Elastos
+}

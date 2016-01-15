@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    [local]
+    interface ISimpleCursorTreeAdapterViewBinder {
+        SetViewValue(
+            [in] IView* view,
+            [in] ICursor* cursor,
+            [in] Int32 columnIndex,
+            [out] Boolean* rst);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IBaseExpandableListAdapter
+     * extends Elastos.Droid.Widget.ICursorTreeAdapter
+     * extends Elastos.Droid.Widget.IResourceCursorTreeAdapter
+     *
+     * interface Elastos.Droid.Widget.IExpandableListAdapter
+     * interface Elastos.Droid.Widget.HeterogeneousExpandableList
+     * interface Elastos.Droid.Widget.IFilterable
+     * interface Elastos.Droid.Widget.ICursorFilterClient
+     */
+    [local]
+    interface ISimpleCursorTreeAdapter {
+        /**
+         * Returns the {@link ViewBinder} used to bind data to views.
+         *
+         * @return a ViewBinder or null if the binder does not exist
+         *
+         * @see #setViewBinder(android.widget.SimpleCursorTreeAdapter.ViewBinder)
+         */
+        GetViewBinder(
+            [out] ISimpleCursorTreeAdapterViewBinder** viewBinder);
+
+        /**
+         * Sets the binder used to bind data to views.
+         *
+         * @param viewBinder the binder used to bind data to views, can be null to
+         *        remove the existing binder
+         *
+         * @see #getViewBinder()
+         */
+        SetViewBinder(
+            [in] ISimpleCursorTreeAdapterViewBinder* viewBinder);
+
+        /**
+         * Called by bindView() to set the text for a TextView but only if
+         * there is no existing ViewBinder or if the existing ViewBinder cannot
+         * handle binding to a TextView.
+         *
+         * Intended to be overridden by Adapters that need to filter strings
+         * retrieved from the database.
+         *
+         * @param v TextView to receive text
+         * @param text the text to be set for the TextView
+         */
+        SetViewText(
+            [in] ITextView* v,
+            [in] String text);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

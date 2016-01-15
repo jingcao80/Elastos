@@ -1,0 +1,9 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$
+$TEMPLATE "clienth.lub"
+$TEMPLATE "baseh.lub"
+$TEMPLATE "classobj.lub"

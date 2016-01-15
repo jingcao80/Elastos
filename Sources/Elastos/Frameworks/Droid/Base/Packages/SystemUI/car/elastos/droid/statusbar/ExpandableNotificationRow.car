@@ -1,0 +1,148 @@
+module
+{
+    using interface Elastos.Droid.Service.Notification.IStatusBarNotification;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    interface IExpansionLogger {
+        LogNotificationExpansion(
+            [in] String key,
+            [in] Boolean userAction,
+            [in] Boolean expanded);
+    }
+
+    /**
+     * @Involve
+     * interface IActivatableNotificationView
+     * interface Elastos.Droid.SystemUI.StatusBar.IExpandableOutlineView
+     * interface IExpandableView
+     * interface Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IExpandableNotificationRow {
+        SetIconAnimationRunning(
+            [in] Boolean running);
+
+        SetStatusBarNotification(
+            [in] IStatusBarNotification* statusBarNotification);
+
+        GetStatusBarNotification(
+            [out] IStatusBarNotification** sbn);
+
+        ResetHeight();
+
+        SetHeightRange(
+            [in] Int32 rowMinHeight,
+            [in] Int32 rowMaxHeight);
+
+        IsExpandable(
+            [out] Boolean* exp);
+
+        SetExpandable(
+            [in] Boolean expandable);
+
+        /**
+         * @return whether the user has changed the expansion state
+         */
+        HasUserChangedExpansion(
+            [out] Boolean* result);
+
+        IsUserExpanded(
+            [out] Boolean* result);
+
+        /**
+         * Set this notification to be expanded by the user
+         *
+         * @param userExpanded whether the user wants this notification to be expanded
+         */
+        SetUserExpanded(
+            [in] Boolean userExpanded);
+
+        ResetUserExpansion();
+
+        IsUserLocked(
+            [out] Boolean* result);
+
+        SetUserLocked(
+            [in] Boolean userLocked);
+
+        /**
+         * @return has the system set this notification to be expanded
+         */
+        IsSystemExpanded(
+            [out] Boolean* result);
+
+        /**
+         * Set this notification to be expanded by the system.
+         *
+         * @param expand whether the system wants this notification to be expanded.
+         */
+        SetSystemExpanded(
+            [in] Boolean expand);
+
+        /**
+         * @param expansionDisabled whether to prevent notification expansion
+         */
+        SetExpansionDisabled(
+            [in] Boolean expansionDisabled);
+
+        /**
+         * @return Can the underlying notification be cleared?
+         */
+        SetClearable(
+            [in] Boolean clearable);
+
+        /**
+         * Apply an expansion state to the layout.
+         */
+        ApplyExpansionToLayout();
+
+        GetIntrinsicHeight(
+            [out] Int32* result);
+
+        SetSensitive(
+            [in] Boolean sensitive);
+
+        SetHideSensitiveForIntrinsicHeight(
+            [in] Boolean hideSensitive);
+
+        SetHideSensitive(
+            [in] Boolean hideSensitive,
+            [in] Boolean animated,
+            [in] Int64 delay,
+            [in] Int64 duration);
+
+        GetMaxExpandHeight(
+            [out] Int32* result);
+
+        NotifyContentUpdated();
+
+        IsMaxExpandHeightInitialized(
+            [out] Boolean* result);
+
+        SetExpansionLogger(
+            [in] IExpansionLogger* logger,
+            [in] String key);
+
+        LogExpansionEvent(
+            [in] Boolean userAction,
+            [in] Boolean wasExpanded);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

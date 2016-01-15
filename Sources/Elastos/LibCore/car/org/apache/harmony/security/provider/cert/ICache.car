@@ -1,0 +1,121 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Cert {
+
+    /**
+     * The caching mechanism designed to speed up the process
+     * of Certificates/CRLs generation in the case of their repeated
+     * generation.
+     *
+     * It keeps correspondences between Objects (Certificates or CLRs)
+     * and arrays of bytes on the base of which the Objects have been generated,
+     * and provides the means to determine whether it contains the object built on
+     * the base of particular encoded form or not. If there are such
+     * objects they are returned from the cache, if not - newly generated
+     * objects can be saved in the cache.<br>
+     *
+     * The process of Certificate/CRL generation
+     * (implemented in <code>X509CertFactoryImpl</code>) is accompanied with
+     * prereading of the beginning of encoded form. This prefix is used to determine
+     * whether provided form is PEM encoding or not.<br>
+     *
+     * So the use of the prefix is the first point to (approximately)
+     * determine whether object to be generated is in the cache or not.
+     *
+     * The failure of the predetermination process tells us that there were not
+     * object generated from the encoded form with such prefix and we should
+     * generate (decode) the object. If predetermination is successful,
+     * we conduct the accurate search on the base of whole encoded form. <br>
+     *
+     * So to speed up the object generation process this caching mechanism provides
+     * the following functionality:<br>
+     *
+     *      1. With having of the beginning of the encoded form (prefix)
+     * it is possible to predetermine whether object has already been
+     * generated on the base of the encoding with the SIMILAR prefix or not.
+     * This process is not computationally expensive and takes a little time.
+     * But it prevents us from use of expensive full encoding
+     * search in the case of its failure.<br>
+     *
+     *      2. If predetermination ends with success, the whole encoding
+     * form should be provided to make the final answer: whether object has
+     * already been generated on the base of this PARTICULAR encoded form or not.
+     * If it is so - the cached object is returned from the cache,
+     * if not - new object should be generated and saved in the cache.<br>
+     *
+     * Note: The length of the prefixes of the encoded forms should not be
+     * less than correspondence (default value is 28).
+     */
+    [deprecated]
+    interface ICache {
+        /**
+         * Returns the hash code for the array. This code is used to
+         * predetermine whether the object was built on the base of the
+         * similar encoding or not (by means of <code>contains(long)</code> method),
+         * to exactly determine whether object is contained in the cache or not,
+         * and to put the object in the cache.
+         * Note: parameter array should be of length not less than
+         * specified by <code>prefix_size</code> (default 28)
+         * @param arr the byte array containing at least prefix_size leading bytes
+         * of the encoding.
+         * @return hash code for specified encoding prefix
+         */
+        GetHash(
+            [in] ArrayOf<Byte>* arr,
+            [out] Int64* hash);
+
+        /**
+         * Checks if there are any object in the cache generated
+         * on the base of encoding with prefix corresponding
+         * to the specified hash code.
+         * @param prefix_hash the hash code for the prefix
+         * of the encoding (retrieved by method <code>getHash(byte[]))</code>
+         * @return false if there were not any object generated
+         * on the base of encoding with specified hash code, true
+         * otherwise.
+         */
+        Contains(
+            [in] Int64 prefix_hash,
+            [out] Boolean* isContained);
+
+        /**
+         * Returns the object built on the base on the specified encoded
+         * form if it is contained in the cache and null otherwise.
+         * This method is computationally expensive and should be called only if
+         * the method <code>contains(long)</code> for the hash code returned true.
+         * @param hash the hash code for the prefix of the encoding
+         * (retrieved by method <code>getHash(byte[])</code>)
+         * @param encoding encoded form of the required object.
+         * @return the object corresponding to specified encoding or null if
+         * there is no such correspondence.
+         */
+        Get(
+            [in] Int64 hash,
+            [in] ArrayOf<Byte>* encoding,
+            [out] IInterface** object);
+
+        /**
+         * Puts the object into the cache.
+         * @param hash hash code for the prefix of the encoding
+         * @param encoding the encoded form of the object
+         * @param object the object to be saved in the cache
+         */
+        Put(
+            [in] Int64 hash,
+            [in] ArrayOf<Byte>* encoding,
+            [in] IInterface* object);
+    }
+
+    } // namespace Cert
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

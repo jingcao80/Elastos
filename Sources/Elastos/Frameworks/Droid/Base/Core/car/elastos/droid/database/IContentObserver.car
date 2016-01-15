@@ -1,0 +1,25 @@
+module
+{
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+    * @hide
+    */
+    interface IIContentObserver {
+        OnChange(
+            [in] Boolean selfUpdate,
+            [in] IUri* uri,
+            [in] Int32 userId);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

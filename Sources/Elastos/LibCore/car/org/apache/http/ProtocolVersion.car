@@ -1,0 +1,135 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * An HTTP connection over the Internet Protocol (IP).
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 613298 $
+     *
+     * @since 4.0
+     */
+    interface IProtocolVersion {
+
+        /**
+         * Returns the name of the protocol.
+         *
+         * @return the protocol name
+         */
+        GetProtocol(
+            [out] String* protocol);
+
+        /**
+         * Returns the major version number of the protocol.
+         *
+         * @return the major version number.
+         */
+        GetMajor(
+            [out] Int32* major);
+
+        /**
+         * Returns the minor version number of the HTTP protocol.
+         *
+         * @return the minor version number.
+         */
+        GetMinor(
+            [out] Int32* minor);
+
+
+        /**
+         * Obtains a specific version of this protocol.
+         * This can be used by derived classes to instantiate themselves instead
+         * of the base class, and to define constants for commonly used versions.
+         * <br/>
+         * The default implementation in this class returns <code>this</code>
+         * if the version matches, and creates a new {@link ProtocolVersion}
+         * otherwise.
+         *
+         * @param major     the major version
+         * @param minor     the minor version
+         *
+         * @return  a protocol version with the same protocol name
+         *          and the argument version
+         */
+        ForVersion(
+            [in] Int32 major,
+            [in] Int32 minor,
+            [out] IProtocolVersion** ver);
+
+        /**
+         * Checks whether this protocol can be compared to another one.
+         * Only protocol versions with the same protocol name can be
+         * {@link #compareToVersion compared}.
+         *
+         * @param that      the protocol version to consider
+         *
+         * @return  <code>true</code> if {@link #compareToVersion compareToVersion}
+         *          can be called with the argument, <code>false</code> otherwise
+         */
+        IsComparable(
+            [in] IProtocolVersion* that,
+            [out] Boolean* isComparable);
+
+
+        /**
+         * Compares this protocol version with another one.
+         * Only protocol versions with the same protocol name can be compared.
+         * This method does <i>not</i> define a total ordering, as it would be
+         * required for {@link java.lang.Comparable}.
+         *
+         * @param that      the protocl version to compare with
+         *
+         * @return   a negative integer, zero, or a positive integer
+         *           as this version is less than, equal to, or greater than
+         *           the argument version.
+         *
+         * @throws IllegalArgumentException
+         *         if the argument has a different protocol name than this object,
+         *         or if the argument is <code>null</code>
+         */
+        CompareToVersion(
+            [in] IProtocolVersion* that,
+            [out] Int32* ver);
+
+
+        /**
+         * Tests if this protocol version is greater or equal to the given one.
+         *
+         * @param version   the version against which to check this version
+         *
+         * @return  <code>true</code> if this protocol version is
+         *          {@link #isComparable comparable} to the argument
+         *          and {@link #compareToVersion compares} as greater or equal,
+         *          <code>false</code> otherwise
+         */
+        GreaterEquals(
+            [in] IProtocolVersion* ver,
+            [out] Boolean* result);
+
+        /**
+         * Tests if this protocol version is less or equal to the given one.
+         *
+         * @param version   the version against which to check this version
+         *
+         * @return  <code>true</code> if this protocol version is
+         *          {@link #isComparable comparable} to the argument
+         *          and {@link #compareToVersion compares} as less or equal,
+         *          <code>false</code> otherwise
+         */
+        LessEquals(
+            [in] IProtocolVersion* ver,
+            [out] Boolean* result);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

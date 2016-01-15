@@ -1,0 +1,89 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Webkit.IPlugin;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * A simple list of initialized plugins. This list gets
+     * populated when the plugins are initialized (at
+     * browser startup, at the moment).
+     *
+     * @hide
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    //@Deprecated
+    [local]
+    interface IPluginList {
+
+       /**
+        * Returns the list of plugins as a java.util.List.
+        *
+        * @hide
+        * @deprecated This interface was intended to be used by Gears. Since Gears was
+        * deprecated, so is this class.
+        */
+        //@Deprecated
+        GetList(
+            [out] IList** plugins);
+
+       /**
+        * Adds a plugin to the list.
+        *
+        * @hide
+        * @deprecated This interface was intended to be used by Gears. Since Gears was
+        * deprecated, so is this class.
+        */
+        //@Deprecated
+        //synchronized
+        AddPlugin(
+            [in] IPlugin* plugin);
+
+       /**
+        * Removes a plugin from the list.
+        *
+        * @hide
+        * @deprecated This interface was intended to be used by Gears. Since Gears was
+        * deprecated, so is this class.
+        */
+        //@Deprecated
+        //synchronized
+        RemovePlugin(
+            [in] IPlugin* plugin);
+
+       /**
+        * Clears the plugin list.
+        *
+        * @hide
+        * @deprecated This interface was intended to be used by Gears. Since Gears was
+        * deprecated, so is this class.
+        */
+        //@Deprecated
+        //synchronized
+        Clear();
+
+       /**
+        * Dispatches the click event to the appropriate plugin.
+        *
+        * @hide
+        * @deprecated This interface was intended to be used by Gears. Since Gears was
+        * deprecated, so is this class.
+        */
+        //@Deprecated
+        //synchronized
+        PluginClicked(
+            [in] IContext* ctx,
+            [in] Int32 position);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

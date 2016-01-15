@@ -1,0 +1,215 @@
+module
+{
+    interface Elastos.Utility.IList;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Media.IIRemoteVolumeController;
+    interface Elastos.Droid.Media.Session.IISession;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    /**
+     * Listens for changes to the list of active sessions. This can be added
+     * using {@link #addOnActiveSessionsChangedListener}.
+     */
+    interface IMediaSessionManagerOnActiveSessionsChangedListener {
+        OnActiveSessionsChanged(
+            [in] IList * controllers);
+    }
+
+    /**
+     * Provides support for interacting with {@link MediaSession media sessions}
+     * that applications have published to express their ongoing media playback
+     * state.
+     * <p>
+     * Use <code>Context.getSystemService(Context.MEDIA_SESSION_SERVICE)</code> to
+     * get an instance of this class.
+     *
+     * @see MediaSession
+     * @see MediaController
+     */
+    interface IMediaSessionManager {
+        /**
+         * Create a new session in the system and get the binder for it.
+         *
+         * @param tag A short name for debugging purposes.
+         * @return The binder object from the system
+         * @hide
+         */
+        CreateSession(
+            [in] IISessionCallback * cbStub,
+            [in] String tag,
+            [in] Int32 userId,
+            [out] IISession ** result);
+
+        /**
+         * Get a list of controllers for all ongoing sessions. The controllers will
+         * be provided in priority order with the most important controller at index
+         * 0.
+         * <p>
+         * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL
+         * permission be held by the calling app. You may also retrieve this list if
+         * your app is an enabled notification listener using the
+         * {@link NotificationListenerService} APIs, in which case you must pass the
+         * {@link ComponentName} of your enabled listener.
+         *
+         * @param notificationListener The enabled notification listener component.
+         *            May be null.
+         * @return A list of controllers for ongoing sessions.
+         */
+        GetActiveSessions(
+            [in] IComponentName * notificationListener,
+            [out] IList ** result);
+
+        /**
+         * Get active sessions for a specific user. To retrieve actions for a user
+         * other than your own you must hold the
+         * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission
+         * in addition to any other requirements. If you are an enabled notification
+         * listener you may only get sessions for the users you are enabled for.
+         *
+         * @param notificationListener The enabled notification listener component.
+         *            May be null.
+         * @param userId The user id to fetch sessions for.
+         * @return A list of controllers for ongoing sessions.
+         * @hide
+         */
+        GetActiveSessionsForUser(
+            [in] IComponentName * notificationListener,
+            [in] Int32 userId,
+            [out] IList ** result);
+
+        /**
+         * Add a listener to be notified when the list of active sessions
+         * changes.This requires the
+         * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
+         * the calling app. You may also retrieve this list if your app is an
+         * enabled notification listener using the
+         * {@link NotificationListenerService} APIs, in which case you must pass the
+         * {@link ComponentName} of your enabled listener. Updates will be posted to
+         * the thread that registered the listener.
+         *
+         * @param sessionListener The listener to add.
+         * @param notificationListener The enabled notification listener component.
+         *            May be null.
+         */
+        AddOnActiveSessionsChangedListener(
+            [in] IMediaSessionManagerOnActiveSessionsChangedListener * sessionListener,
+            [in] IComponentName * notificationListener);
+
+        /**
+         * Add a listener to be notified when the list of active sessions
+         * changes.This requires the
+         * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
+         * the calling app. You may also retrieve this list if your app is an
+         * enabled notification listener using the
+         * {@link NotificationListenerService} APIs, in which case you must pass the
+         * {@link ComponentName} of your enabled listener. Updates will be posted to
+         * the handler specified or to the caller's thread if the handler is null.
+         *
+         * @param sessionListener The listener to add.
+         * @param notificationListener The enabled notification listener component.
+         *            May be null.
+         * @param handler The handler to post events to.
+         */
+        AddOnActiveSessionsChangedListener(
+            [in] IMediaSessionManagerOnActiveSessionsChangedListener * sessionListener,
+            [in] IComponentName * notificationListener,
+            [in] IHandler * handler);
+
+        /**
+         * Add a listener to be notified when the list of active sessions
+         * changes.This requires the
+         * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
+         * the calling app. You may also retrieve this list if your app is an
+         * enabled notification listener using the
+         * {@link NotificationListenerService} APIs, in which case you must pass the
+         * {@link ComponentName} of your enabled listener.
+         *
+         * @param sessionListener The listener to add.
+         * @param notificationListener The enabled notification listener component.
+         *            May be null.
+         * @param userId The userId to listen for changes on.
+         * @param handler The handler to post updates on.
+         * @hide
+         */
+        AddOnActiveSessionsChangedListener(
+            [in] IMediaSessionManagerOnActiveSessionsChangedListener * sessionListener,
+            [in] IComponentName * notificationListener,
+            [in] Int32 userId,
+            [in] IHandler * handler);
+
+        /**
+         * Stop receiving active sessions updates on the specified listener.
+         *
+         * @param listener The listener to remove.
+         */
+        RemoveOnActiveSessionsChangedListener(
+            [in] IMediaSessionManagerOnActiveSessionsChangedListener * listener);
+
+        /**
+         * Set the remote volume controller to receive volume updates on. Only for
+         * use by system UI.
+         *
+         * @param rvc The volume controller to receive updates on.
+         * @hide
+         */
+        SetRemoteVolumeController(
+            [in] IIRemoteVolumeController * rvc);
+
+        /**
+         * Send a media key event. The receiver will be selected automatically.
+         *
+         * @param keyEvent The KeyEvent to send.
+         * @hide
+         */
+        DispatchMediaKeyEvent(
+            [in] IKeyEvent * keyEvent);
+
+        /**
+         * Send a media key event. The receiver will be selected automatically.
+         *
+         * @param keyEvent The KeyEvent to send.
+         * @param needWakeLock True if a wake lock should be held while sending the key.
+         * @hide
+         */
+        DispatchMediaKeyEvent(
+            [in] IKeyEvent * keyEvent,
+            [in] Boolean needWakeLock);
+
+        /**
+         * Dispatch an adjust volume request to the system. It will be sent to the
+         * most relevant audio stream or media session. The direction must be one of
+         * {@link AudioManager#ADJUST_LOWER}, {@link AudioManager#ADJUST_RAISE},
+         * {@link AudioManager#ADJUST_SAME}.
+         *
+         * @param suggestedStream The stream to fall back to if there isn't a
+         *            relevant stream
+         * @param direction The direction to adjust volume in.
+         * @param flags Any flags to include with the volume change.
+         * @hide
+         */
+        DispatchAdjustVolume(
+            [in] Int32 suggestedStream,
+            [in] Int32 direction,
+            [in] Int32 flags);
+
+        /**
+         * Check if the global priority session is currently active. This can be
+         * used to decide if media keys should be sent to the session or to the app.
+         *
+         * @hide
+         */
+        IsGlobalPriorityActive(
+            [out] Boolean * result);
+    }
+
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

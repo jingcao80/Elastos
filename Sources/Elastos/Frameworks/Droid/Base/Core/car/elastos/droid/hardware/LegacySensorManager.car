@@ -1,0 +1,33 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.ISensorListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /**
+     * Helper class for implementing the legacy sensor manager API.
+     * @hide
+     */
+    //@SuppressWarnings("deprecation")
+    interface ILegacySensorManager {
+        GetSensors(
+            [out] Int32* num);
+
+        RegisterListener(
+            [in] ISensorListener* listener,
+            [in] Int32 sensors,
+            [in] Int32 rate,
+            [out] Boolean* result);
+
+        UnregisterListener(
+            [in] ISensorListener* listener,
+            [in] Int32 sensors);
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

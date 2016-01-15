@@ -1,0 +1,23 @@
+TARGET_NAME = recent
+TARGET_TYPE = lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+
+SOURCES = StatusBarTouchProxy.cpp
+SOURCES += CStatusBarTouchProxy.cpp
+SOURCES += RecentsPanelView.cpp
+SOURCES += CRecentsPanelView.cpp
+SOURCES += CRecentTasksLoader.cpp
+SOURCES += CRecentTasksLoaderHelper.cpp
+SOURCES += CTaskDescription.cpp
+SOURCES += RecentsScrollViewPerformanceHelper.cpp
+SOURCES += RecentsVerticalScrollView.cpp
+SOURCES += CRecentsVerticalScrollView.cpp
+SOURCES += RecentsHorizontalScrollView.cpp
+SOURCES += CRecentsHorizontalScrollView.cpp

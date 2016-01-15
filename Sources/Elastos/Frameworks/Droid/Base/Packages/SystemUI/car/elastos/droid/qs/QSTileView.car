@@ -1,0 +1,47 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    /* View that represents a standard quick settings tile.
+     *
+     * @Involve
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface IView
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup
+     */
+    [local]
+    interface IQSTileView {
+        SetDual(
+            [in] Boolean dual);
+
+        //TODO: Init(
+        //    [in] IOnClickListener* clickPrimary,
+        //    [in] IOnClickListener* clickSecondary);
+
+        CreateIcon(
+            [out] IView** icon);
+
+        HandleStateChanged(
+            [in] IQSTileState* state);
+
+        OnStateChanged(
+            [in] IQSTileState* state);
+    }
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

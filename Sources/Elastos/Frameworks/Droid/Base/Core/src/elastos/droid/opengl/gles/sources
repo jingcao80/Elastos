@@ -1,0 +1,26 @@
+
+TARGET_NAME= gles
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+INCLUDES += $(PREBUILD_INC)/GLES
+INCLUDES += $(PREBUILD_INC)/utils
+INCLUDES += $(PREBUILD_INC)/skia
+INCLUDES += $(PREBUILD_INC)/ETC1
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += CEGLConfigImpl.cpp
+SOURCES += CEGLContextImpl.cpp
+SOURCES += CEGLDisplayImpl.cpp
+SOURCES += CEGLSurfaceImpl.cpp
+SOURCES += CGLImpl.cpp
+SOURCES += CEGLImpl.cpp
+SOURCES += CEGL10Helper.cpp

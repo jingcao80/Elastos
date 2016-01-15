@@ -1,0 +1,47 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+    importlib("Elastos.Core.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace AnimationsDemo {
+
+    interface ISample {
+    }
+
+    [local]
+    class CSample {
+        constructor(
+            [in] IActivity* host,
+            [in] Int32 titleResId,
+            [in] IClassInfo* cls);
+
+        interface ISample;
+    }
+
+    class CCrossfadeActivity {
+        interface IActivity;
+    }
+
+    class CLayoutChangesActivity {
+        interface IActivity;
+    }
+
+    class CMainActivity {
+        interface IActivity;
+    }
+
+//    class CZoomActivity {
+//        interface IActivity;
+//    }
+
+    } // namespace AnimationsDemo
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}

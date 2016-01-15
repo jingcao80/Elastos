@@ -1,0 +1,45 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Prefs {
+    /**
+     * This interface is used to handle preference node change events. The
+     * implementation of this interface can be installed by the {@code Preferences}
+     * instance.
+     *
+     * @see Preferences
+     * @see NodeChangeEvent
+     *
+     * @since 1.4
+     */
+
+    /**
+     * @Involve
+     * interface IEventListener;
+     */
+    interface INodeChangeListener {
+        /**
+         * This method gets called whenever a child node is added to another node.
+         *
+         * @param e
+         *            the node change event.
+         */
+        ChildAdded(
+            [in] INodeChangeEvent* e);
+
+        /**
+         * This method gets called whenever a child node is removed from another
+         * node.
+         *
+         * @param e
+         *            the node change event.
+         */
+        ChildRemoved(
+            [in] INodeChangeEvent* e);
+    }
+
+    } // namespace Prefs
+    } // namespace Utility
+    } // namespace Elastos
+}

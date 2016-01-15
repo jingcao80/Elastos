@@ -1,0 +1,154 @@
+
+module
+{
+
+    interface Elastos.Droid.Net.ILinkProperties;
+    interface Elastos.Droid.Net.INetworkCapabilities;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Telephony.ICellInfo;
+    interface Elastos.Droid.Telephony.IDataConnectionRealTimeInfo;
+    interface Elastos.Droid.Telephony.IVoLteServiceState;
+    interface Elastos.Droid.Telephony.IServiceState;
+    interface Elastos.Droid.Telephony.ISignalStrength;
+    interface Elastos.Droid.Internal.Telephony.IIPhoneStateListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    [deprecated]
+    interface IITelephonyRegistry {
+        Listen(
+            [in] String pkg,
+            [in] IIPhoneStateListener* clb,
+            [in] Int32 events,
+            [in] Boolean notifyNow);
+
+        ListenForSubscriber(
+            [in] Int64 subId,
+            [in] String pkg,
+            [in] IIPhoneStateListener* clb,
+            [in] Int32 events,
+            [in] Boolean notifyNow);
+
+        NotifyCallState(
+            [in] Int32 state,
+            [in] String incomingNumber);
+
+        NotifyCallStateForSubscriber(
+            [in] Int64 subId,
+            [in] Int32 state,
+            [in] String incomingNumber);
+
+        NotifyServiceStateForPhoneId(
+            [in] Int32 phoneId,
+            [in] Int64 subId,
+            [in] IServiceState* state);
+
+        NotifySignalStrength(
+            [in] ISignalStrength* signalStrength);
+
+        NotifySignalStrengthForSubscriber(
+            [in] Int64 subId,
+            [in] ISignalStrength* signalStrength);
+
+        NotifyMessageWaitingChangedForPhoneId(
+            [in] Int32 phoneId,
+            [in] Int64 subId,
+            [in] Boolean mwi);
+
+        NotifyCallForwardingChanged(
+            [in] Boolean cfi);
+
+        NotifyCallForwardingChangedForSubscriber(
+            [in] Int64 subId,
+            [in] Boolean cfi);
+
+        NotifyDataActivity(
+            [in] Int32 state);
+
+        NotifyDataActivityForSubscriber(
+            [in] Int64 subId,
+            [in] Int32 state);
+
+        NotifyDataConnection(
+            [in] Int32 state,
+            [in] Boolean isDataConnectivityPossible,
+            [in] String reason,
+            [in] String apn,
+            [in] String apnType,
+            [in] ILinkProperties* linkProperties,
+            [in] INetworkCapabilities* networkCapabilities,
+            [in] Int32 networkType,
+            [in] Boolean roaming);
+
+        NotifyDataConnectionForSubscriber(
+            [in] Int64 subId,
+            [in] Int32 state,
+            [in] Boolean isDataConnectivityPossible,
+            [in] String reason,
+            [in] String apn,
+            [in] String apnType,
+            [in] ILinkProperties* linkProperties,
+            [in] INetworkCapabilities* networkCapabilities,
+            [in] Int32 networkType,
+            [in] Boolean roaming);
+
+        NotifyDataConnectionFailed(
+            [in] String reason,
+            [in] String apnType);
+
+        NotifyDataConnectionFailedForSubscriber(
+            [in] Int64 subId,
+            [in] String reason,
+            [in] String apnType);
+
+        NotifyCellLocation(
+            [in] IBundle* cellLocation);
+
+        NotifyCellLocationForSubscriber(
+            [in] Int64 subId,
+            [in] IBundle* cellLocation);
+
+        NotifyOtaspChanged(
+            [in] Int32 otaspMode);
+
+        NotifyCellInfo(
+            [in] ArrayOf<ICellInfo*>* cellInfo);
+
+        NotifyPreciseCallState(
+            [in] Int32 ringingCallState,
+            [in] Int32 foregroundCallState,
+            [in] Int32 backgroundCallState);
+
+        NotifyDisconnectCause(
+            [in] Int32 disconnectCause,
+            [in] Int32 preciseDisconnectCause);
+
+        NotifyPreciseDataConnectionFailed(
+            [in] String reason,
+            [in] String apnType,
+            [in] String apn,
+            [in] String failCause);
+
+        NotifyCellInfoForSubscriber(
+            [in] Int64 subId,
+            [in] ArrayOf<ICellInfo*>* cellInfo);
+
+        NotifyDataConnectionRealTimeInfo(
+            [in] IDataConnectionRealTimeInfo* dcRtInfo);
+
+        NotifyVoLteServiceStateChanged(
+            [in] IVoLteServiceState* lteState);
+
+        NotifyOemHookRawEventForSubscriber(
+            [in] Int64 subId,
+            [in] ArrayOf<Byte>* rawData);
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

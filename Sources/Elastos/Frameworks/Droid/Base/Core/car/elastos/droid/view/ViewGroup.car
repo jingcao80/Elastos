@@ -1,0 +1,1225 @@
+
+module
+{
+    interface Elastos.Droid.Animation.ILayoutTransition;
+    interface Elastos.Droid.View.Animation.IAnimationParameters;
+    interface Elastos.Droid.View.Animation.IAnimationAnimationListener;
+    interface Elastos.Droid.View.Animation.ILayoutAnimationController;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Utility.IAttributeSet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+        /**
+         * Interface definition for a callback to be invoked when the hierarchy
+         * within this view changed. The hierarchy changes whenever a child is added
+         * to or removed from this view.
+         */
+        [local]
+        interface IViewGroupOnHierarchyChangeListener {
+            /**
+             * Called when a new child is added to a parent view.
+             *
+             * @param parent the view in which a child was added
+             * @param child the new child view added in the hierarchy
+             */
+            OnChildViewAdded(
+                [in] IView* parent,
+                [in] IView* child);
+
+            /**
+             * Called when a child is removed from a parent view.
+             *
+             * @param parent the view from which the child was removed
+             * @param child the child removed from the hierarchy
+             */
+            OnChildViewRemoved(
+                [in] IView* parent,
+                [in] IView* child);
+        }
+
+        /**
+         * LayoutParams are used by views to tell their parents how they want to be
+         * laid out. See
+         * {@link android.R.styleable#ViewGroup_Layout ViewGroup Layout Attributes}
+         * for a list of all child view attributes that this class supports.
+         *
+         * <p>
+         * The base LayoutParams class just describes how big the view wants to be
+         * for both width and height. For each dimension, it can specify one of:
+         * <ul>
+         * <li>FILL_PARENT (renamed MATCH_PARENT in API Level 8 and higher), which
+         * means that the view wants to be as big as its parent (minus padding)
+         * <li> WRAP_CONTENT, which means that the view wants to be just big enough
+         * to enclose its content (plus padding)
+         * <li> an exact number
+         * </ul>
+         * There are subclasses of LayoutParams for different subclasses of
+         * ViewGroup. For example, AbsoluteLayout has its own subclass of
+         * LayoutParams which adds an X and Y value.</p>
+         *
+         * <div class="special reference">
+         * <h3>Developer Guides</h3>
+         * <p>For more information about creating user interface layouts, read the
+         * <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a> developer
+         * guide.</p></div>
+         *
+         * @attr ref android.R.styleable#ViewGroup_Layout_layout_height
+         * @attr ref android.R.styleable#ViewGroup_Layout_layout_width
+         */
+        [local, parcelable]
+        interface IViewGroupLayoutParams {
+            /**
+             * Special value for the height or width requested by a View.
+             * FILL_PARENT means that the view wants to be as big as its parent,
+             * minus the parent's padding, if any. This value is deprecated
+             * starting in API Level 8 and replaced by {@link #MATCH_PARENT}.
+             */
+            // @SuppressWarnings({"UnusedDeclaration"})
+            // @Deprecated
+            const Int32 FILL_PARENT = -1;
+
+            /**
+             * Special value for the height or width requested by a View.
+             * MATCH_PARENT means that the view wants to be as big as its parent,
+             * minus the parent's padding, if any. Introduced in API Level 8.
+             */
+            const Int32 MATCH_PARENT = -1;
+
+            /**
+             * Special value for the height or width requested by a View.
+             * WRAP_CONTENT means that the view wants to be just large enough to fit
+             * its own internal content, taking its own padding into account.
+             */
+            const Int32 WRAP_CONTENT = -2;
+
+            SetWidth(
+                [in] Int32 width);
+
+            SetHeight(
+                [in] Int32 height);
+
+            GetWidth(
+                [out] Int32* width);
+
+            GetHeight(
+                [out] Int32* height);
+
+            SetLayoutAnimationParameters(
+                [in] IAnimationParameters* ap);
+
+            GetLayoutAnimationParameters(
+                [out] IAnimationParameters** ap);
+
+            /**
+             * Resolve layout parameters depending on the layout direction. Subclasses that care about
+             * layoutDirection changes should override this method. The default implementation does
+             * nothing.
+             *
+             * @param layoutDirection the direction of the layout
+             *
+             * {@link View#LAYOUT_DIRECTION_LTR}
+             * {@link View#LAYOUT_DIRECTION_RTL}
+             */
+            ResolveLayoutDirection(
+                [in] Int32 layoutDirection);
+
+            /**
+             * Use {@code canvas} to draw suitable debugging annotations for these LayoutParameters.
+             *
+             * @param view the view that contains these layout parameters
+             * @param canvas the canvas on which to draw
+             *
+             * @hide
+             */
+            OnDebugDraw(
+                [in] IView* view,
+                [in] ICanvas* canvas,
+                [in] IPaint* paint);
+        }
+
+        /**
+         * @Involve
+         * interface IViewGroupLayoutParams
+         */
+        interface IViewGroupMarginLayoutParams {
+            /**
+             * The default start and end margin.
+             * @hide
+             */
+            const Int32 DEFAULT_MARGIN_RELATIVE = 0x80000000;//Integer.MIN_VALUE
+
+            GetLeftMargin(
+                [out] Int32* leftMargin);
+
+            SetLeftMargin(
+                [in] Int32 leftMargin);
+
+            GetMarginFlags(
+                [out] Byte* leftMargin);
+
+            SetMarginFlags(
+                [in] Byte leftMargin);
+
+            /**
+             * The top margin in pixels of the child.
+             * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+             * to this field.
+             */
+            GetTopMargin(
+                [out] Int32* topMargin);
+
+            SetTopMargin(
+                [in] Int32 topMargin);
+
+            /**
+             * The right margin in pixels of the child.
+             * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+             * to this field.
+             */
+            GetRightMargin(
+                [out] Int32* rightMargin);
+
+            SetRightMargin(
+                [in] Int32 rightMargin);
+
+            /**
+             * The bottom margin in pixels of the child.
+             * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+             * to this field.
+             */
+            GetBottomMargin(
+                [out] Int32* bottomMargin);
+
+            SetBottomMargin(
+                [in] Int32 bottomMargin);
+
+            /**
+             * Sets the margins, in pixels. A call to {@link android.view.View#requestLayout()} needs
+             * to be done so that the new margins are taken into account. Left and right margins may be
+             * overriden by {@link android.view.View#requestLayout()} depending on layout direction.
+             *
+             * @param left the left margin size
+             * @param top the top margin size
+             * @param right the right margin size
+             * @param bottom the bottom margin size
+             *
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginLeft
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginTop
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginRight
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginBottom
+             */
+            SetMargins(
+                [in] Int32 left,
+                [in] Int32 top,
+                [in] Int32 right,
+                [in] Int32 bottom);
+
+            GetMargins(
+                [out] Int32* left,
+                [out] Int32* top,
+                [out] Int32* right,
+                [out] Int32* bottom);
+
+            /**
+             * Sets the relative margins, in pixels. A call to {@link android.view.View#requestLayout()}
+             * needs to be done so that the new relative margins are taken into account. Left and right
+             * margins may be overriden by {@link android.view.View#requestLayout()} depending on layout
+             * direction.
+             *
+             * @param start the start margin size
+             * @param top the top margin size
+             * @param end the right margin size
+             * @param bottom the bottom margin size
+             *
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginTop
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginBottom
+             *
+             * @hide
+             */
+            SetMarginsRelative(
+                [in] Int32 start,
+                [in] Int32 top,
+                [in] Int32 end,
+                [in] Int32 bottom);
+
+            /**
+             * Sets the relative start margin.
+             *
+             * @param start the start margin size
+             *
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+             */
+            SetMarginStart(
+                [in] Int32 start);
+
+            /**
+             * Returns the start margin in pixels.
+             *
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+             *
+             * @return the start margin in pixels.
+             */
+            GetMarginStart(
+                [out] Int32* startMargin);
+
+            /**
+             * Sets the relative end margin.
+             *
+             * @param end the end margin size
+             *
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
+             */
+            SetMarginEnd(
+                [in] Int32 end);
+
+            /**
+             * Returns the end margin in pixels.
+             *
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
+             *
+             * @return the end margin in pixels.
+             */
+            GetMarginEnd(
+                [out] Int32* endMargin);
+
+            /**
+             * Check if margins are relative.
+             *
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+             * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
+             *
+             * @return true if either marginStart or marginEnd has been set.
+             */
+            IsMarginRelative(
+                [out] Boolean* set);
+
+            /**
+             * Set the layout direction
+             * @param layoutDirection the layout direction.
+             *        Should be either {@link View#LAYOUT_DIRECTION_LTR}
+             *                     or {@link View#LAYOUT_DIRECTION_RTL}.
+             */
+            SetLayoutDirection(
+                [in] Int32 layoutDirection);
+
+            /**
+             * Retuns the layout direction. Can be either {@link View#LAYOUT_DIRECTION_LTR} or
+             * {@link View#LAYOUT_DIRECTION_RTL}.
+             *
+             * @return the layout direction.
+             */
+            GetLayoutDirection(
+                [out] Int32* layoutDirection);
+
+            /**
+             * @hide
+             */
+            IsLayoutRtl(
+                [out] Boolean* rtl);
+        }
+
+        /**
+         * @Involve
+         * interface IView;
+         * interface IDrawableCallback;
+         * interface IKeyEventCallback;
+         * interface IAccessibilityEventSource;
+         * interface IViewParent;
+         * interface IViewManager;
+         */
+        [deprecated, local]
+        interface IViewGroup {
+            /**
+             * This view will get focus before any of its descendants.
+             */
+            const Int32 FOCUS_BEFORE_DESCENDANTS = 0x20000;
+
+            /**
+             * This view will get focus only if none of its descendants want it.
+             */
+            const Int32 FOCUS_AFTER_DESCENDANTS = 0x40000;
+
+            /**
+             * This view will block any of its descendants from getting focus, even
+             * if they are focusable.
+             */
+            const Int32 FOCUS_BLOCK_DESCENDANTS = 0x60000;
+
+            /**
+             * Used to indicate that no drawing cache should be kept in memory.
+             */
+            const Int32 PERSISTENT_NO_CACHE = 0x0;
+
+            /**
+             * Used to indicate that the animation drawing cache should be kept in memory.
+             */
+            const Int32 PERSISTENT_ANIMATION_CACHE = 0x1;
+
+            /**
+             * Used to indicate that the scrolling drawing cache should be kept in memory.
+             */
+            const Int32 PERSISTENT_SCROLLING_CACHE = 0x2;
+
+            /**
+             * Used to indicate that all drawing caches should be kept in memory.
+             */
+            const Int32 PERSISTENT_ALL_CACHES = 0x3;
+
+            // Layout Modes
+
+            /**
+             * This constant is a {@link #setLayoutMode(int) layoutMode}.
+             * Clip bounds are the raw values of {@link #getLeft() left}, {@link #getTop() top},
+             * {@link #getRight() right} and {@link #getBottom() bottom}.
+             */
+            const Int32 LAYOUT_MODE_CLIP_BOUNDS = 0;
+
+            /**
+             * This constant is a {@link #setLayoutMode(int) layoutMode}.
+             * Optical bounds describe where a widget appears to be. They sit inside the clip
+             * bounds which need to cover a larger area to allow other effects,
+             * such as shadows and glows, to be drawn.
+             */
+            const Int32 LAYOUT_MODE_OPTICAL_BOUNDS = 1;
+
+            /** @hide */
+            const Int32 LAYOUT_MODE_DEFAULT = 0;//LAYOUT_MODE_CLIP_BOUNDS;
+
+            /**
+             * Gets the descendant focusability of this view group.  The descendant
+             * focusability defines the relationship between this view group and its
+             * descendants when looking for a view to take focus in
+             * {@link #requestFocus(int, android.graphics.Rect)}.
+             *
+             * @return one of {@link #FOCUS_BEFORE_DESCENDANTS}, {@link #FOCUS_AFTER_DESCENDANTS},
+             *   {@link #FOCUS_BLOCK_DESCENDANTS}.
+             */
+            GetDescendantFocusability(
+                [out] Int32* focusability);
+
+            /**
+             * Set the descendant focusability of this view group. This defines the relationship
+             * between this view group and its descendants when looking for a view to
+             * take focus in {@link #requestFocus(int, android.graphics.Rect)}.
+             *
+             * @param focusability one of {@link #FOCUS_BEFORE_DESCENDANTS}, {@link #FOCUS_AFTER_DESCENDANTS},
+             *   {@link #FOCUS_BLOCK_DESCENDANTS}.
+             */
+            SetDescendantFocusability(
+                [in] Int32 focusability);
+
+            /**
+             * Find the nearest view in the specified direction that wants to take
+             * focus.
+             *
+             * @param focused The view that currently has focus
+             * @param direction One of FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, and
+             *        FOCUS_RIGHT, or 0 for not applicable.
+             */
+            FocusSearch(
+                [in] IView* focused,
+                [in] Int32 direction,
+                [out] IView** result);
+
+            /**
+             * Called when a child has requested sending an {@link AccessibilityEvent} and
+             * gives an opportunity to its parent to augment the event.
+             * <p>
+             * If an {@link android.view.View.AccessibilityDelegate} has been specified via calling
+             * {@link android.view.View#setAccessibilityDelegate(android.view.View.AccessibilityDelegate)} its
+             * {@link android.view.View.AccessibilityDelegate#onRequestSendAccessibilityEvent(ViewGroup, View, AccessibilityEvent)}
+             * is responsible for handling this call.
+             * </p>
+             *
+             * @param child The child which requests sending the event.
+             * @param event The event to be sent.
+             * @return True if the event should be sent.
+             *
+             * @see #requestSendAccessibilityEvent(View, AccessibilityEvent)
+             */
+            OnRequestSendAccessibilityEvent(
+                [in] IView* child,
+                [in] IAccessibilityEvent* event,
+                [out] Boolean* sent);
+
+            /**
+             * Called when a child view has changed whether or not it is tracking transient state.
+             *
+             * @hide
+             */
+            ChildHasTransientStateChanged(
+                [in] IView* child,
+                [in] Boolean childHasTransientState);
+
+            /**
+             * Set whether this ViewGroup should ignore focus requests for itself and its children.
+             * If this option is enabled and the ViewGroup or a descendant currently has focus, focus
+             * will proceed forward.
+             *
+             * @param touchscreenBlocksFocus true to enable blocking focus in the presence of a touchscreen
+             */
+            SetTouchscreenBlocksFocus(
+                [in] Boolean touchscreenBlocksFocus);
+
+            /**
+             * Check whether this ViewGroup should ignore focus requests for itself and its children.
+             */
+            GetTouchscreenBlocksFocus(
+                [out] Boolean* result);
+
+            ShouldBlockFocusForTouchscreen(
+                [out] Boolean* result);
+
+            /**
+             * Returns the focused child of this view, if any. The child may have focus
+             * or contain focus.
+             *
+             * @return the focused child or null.
+             */
+            GetFocusedChild(
+                [out] IView** focusedChild);
+
+            /**
+             * Implement this method to intercept all touch screen motion events.  This
+             * allows you to watch events as they are dispatched to your children, and
+             * take ownership of the current gesture at any point.
+             *
+             * <p>Using this function takes some care, as it has a fairly complicated
+             * interaction with {@link View#onTouchEvent(MotionEvent)
+             * View.onTouchEvent(MotionEvent)}, and using it requires implementing
+             * that method as well as this one in the correct way.  Events will be
+             * received in the following order:
+             *
+             * <ol>
+             * <li> You will receive the down event here.
+             * <li> The down event will be handled either by a child of this view
+             * group, or given to your own onTouchEvent() method to handle; this means
+             * you should implement onTouchEvent() to return true, so you will
+             * continue to see the rest of the gesture (instead of looking for
+             * a parent view to handle it).  Also, by returning true from
+             * onTouchEvent(), you will not receive any following
+             * events in onInterceptTouchEvent() and all touch processing must
+             * happen in onTouchEvent() like normal.
+             * <li> For as long as you return false from this function, each following
+             * event (up to and including the final up) will be delivered first here
+             * and then to the target's onTouchEvent().
+             * <li> If you return true from here, you will not receive any
+             * following events: the target view will receive the same event but
+             * with the action {@link MotionEvent#ACTION_CANCEL}, and all further
+             * events will be delivered to your onTouchEvent() method and no longer
+             * appear here.
+             * </ol>
+             *
+             * @param ev The motion event being dispatched down the hierarchy.
+             * @return Return true to steal motion events from the children and have
+             * them dispatched to this ViewGroup through onTouchEvent().
+             * The current target will receive an ACTION_CANCEL event, and no further
+             * messages will be delivered here.
+             */
+            OnInterceptTouchEvent(
+                [in] IMotionEvent* ev,
+                [out] Boolean* value);
+
+            /**
+             * Returns whether this group's children are clipped to their bounds before drawing.
+             * The default value is true.
+             * @see #setClipChildren(boolean)
+             *
+             * @return True if the group's children will be clipped to their bounds,
+             * false otherwise.
+             */
+            GetClipChildren(
+                [out] Boolean* clipChildren);
+
+            /**
+             * By default, children are clipped to their bounds before drawing. This
+             * allows view groups to override this behavior for animations, etc.
+             *
+             * @param clipChildren true to clip children to their bounds,
+             *        false otherwise
+             * @attr ref android.R.styleable#ViewGroup_clipChildren
+             */
+            SetClipChildren(
+                [in] Boolean clipChildren);
+
+            /**
+             * By default, children are clipped to the padding of the ViewGroup. This
+             * allows view groups to override this behavior
+             *
+             * @param clipToPadding true to clip children to the padding of the
+             *        group, false otherwise
+             * @attr ref android.R.styleable#ViewGroup_clipToPadding
+             */
+            SetClipToPadding(
+                [in] Boolean clipToPadding);
+
+            /**
+             * Check if this ViewGroup is configured to clip child views to its padding.
+             *
+             * @return true if this ViewGroup clips children to its padding, false otherwise
+             *
+             * @attr ref android.R.styleable#ViewGroup_clipToPadding
+             */
+            GetClipToPadding(
+                [out] Boolean* clipToPadding);
+
+            /**
+             * <p>Adds a child view. If no layout parameters are already set on the child, the
+             * default parameters for this ViewGroup are set on the child.</p>
+             *
+             * <p><strong>Note:</strong> do not invoke this method from
+             * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+             * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+             *
+             * @param child the child view to add
+             *
+             * @see #generateDefaultLayoutParams()
+             */
+            AddView(
+                [in] IView* child);
+
+            /**
+             * Adds a child view. If no layout parameters are already set on the child, the
+             * default parameters for this ViewGroup are set on the child.
+             *
+             * <p><strong>Note:</strong> do not invoke this method from
+             * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+             * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+             *
+             * @param child the child view to add
+             * @param index the position at which to add the child
+             *
+             * @see #generateDefaultLayoutParams()
+             */
+            AddView(
+                [in] IView* child,
+                [in] Int32 index);
+
+            /**
+             * Adds a child view with this ViewGroup's default layout parameters and the
+             * specified width and height.
+             *
+             * <p><strong>Note:</strong> do not invoke this method from
+             * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+             * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+             *
+             * @param child the child view to add
+             */
+            AddView(
+                [in] IView* child,
+                [in] Int32 width,
+                [in] Int32 height);
+
+            /**
+             * Adds a child view with the specified layout parameters.
+             *
+             * <p><strong>Note:</strong> do not invoke this method from
+             * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+             * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+             *
+             * @param child the child view to add
+             * @param params the layout parameters to set on the child
+             */
+            AddView(
+                [in] IView* child,
+                [in] IViewGroupLayoutParams* params);
+
+            /**
+             * Adds a child view with the specified layout parameters.
+             *
+             * <p><strong>Note:</strong> do not invoke this method from
+             * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+             * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+             *
+             * @param child the child view to add
+             * @param index the position at which to add the child
+             * @param params the layout parameters to set on the child
+             */
+            AddView(
+                [in] IView* child,
+                [in] Int32 index,
+                [in] IViewGroupLayoutParams* params);
+
+            /**
+             * Register a callback to be invoked when a child is added to or removed
+             * from this view.
+             *
+             * @param listener the callback to invoke on hierarchy change
+             */
+            SetOnHierarchyChangeListener(
+                [in] IViewGroupOnHierarchyChangeListener* listener);
+
+            /**
+             * Removes a view during layout. This is useful if in your onLayout() method,
+             * you need to remove more views.
+             *
+             * @param view the view to remove from the group
+             */
+            RemoveViewInLayout(
+                [in] IView* view);
+
+            /**
+             * Removes a range of views during layout. This is useful if in your onLayout() method,
+             * you need to remove more views.
+             *
+             * @param start the index of the first view to remove from the group
+             * @param count the number of views to remove from the group
+             */
+            RemoveViewsInLayout(
+                [in] Int32 start,
+                [in] Int32 count);
+
+            /**
+             * Removes the view at the specified position in the group.
+             *
+             * @param index the position in the group of the view to remove
+             */
+            RemoveViewAt(
+                [in] Int32 index);
+
+            /**
+             * Removes the specified range of views from the group.
+             *
+             * @param start the first position in the group of the range of views to remove
+             * @param count the number of views to remove
+             */
+            RemoveViews(
+                [in] Int32 start,
+                [in] Int32 count);
+
+            /**
+             * Implement this method to intercept hover events before they are handled
+             * by child views.
+             * <p>
+             * This method is called before dispatching a hover event to a child of
+             * the view group or to the view group's own {@link #onHoverEvent} to allow
+             * the view group a chance to intercept the hover event.
+             * This method can also be used to watch all pointer motions that occur within
+             * the bounds of the view group even when the pointer is hovering over
+             * a child of the view group rather than over the view group itself.
+             * </p><p>
+             * The view group can prevent its children from receiving hover events by
+             * implementing this method and returning <code>true</code> to indicate
+             * that it would like to intercept hover events.  The view group must
+             * continuously return <code>true</code> from {@link #onInterceptHoverEvent}
+             * for as long as it wishes to continue intercepting hover events from
+             * its children.
+             * </p><p>
+             * Interception preserves the invariant that at most one view can be
+             * hovered at a time by transferring hover focus from the currently hovered
+             * child to the view group or vice-versa as needed.
+             * </p><p>
+             * If this method returns <code>true</code> and a child is already hovered, then the
+             * child view will first receive a hover exit event and then the view group
+             * itself will receive a hover enter event in {@link #onHoverEvent}.
+             * Likewise, if this method had previously returned <code>true</code> to intercept hover
+             * events and instead returns <code>false</code> while the pointer is hovering
+             * within the bounds of one of a child, then the view group will first receive a
+             * hover exit event in {@link #onHoverEvent} and then the hovered child will
+             * receive a hover enter event.
+             * </p><p>
+             * The default implementation always returns false.
+             * </p>
+             *
+             * @param event The motion event that describes the hover.
+             * @return True if the view group would like to intercept the hover event
+             * and prevent its children from receiving it.
+             */
+            OnInterceptHoverEvent(
+                [in] IMotionEvent* event,
+                [out] Boolean* like);
+
+            /**
+             * Enable or disable the splitting of MotionEvents to multiple children during touch event
+             * dispatch. This behavior is enabled by default for applications that target an
+             * SDK version of {@link Build.VERSION_CODES#HONEYCOMB} or newer.
+             *
+             * <p>When this option is enabled MotionEvents may be split and dispatched to different child
+             * views depending on where each pointer initially went down. This allows for user interactions
+             * such as scrolling two panes of content independently, chording of buttons, and performing
+             * independent gestures on different pieces of content.
+             *
+             * @param split <code>true</code> to allow MotionEvents to be split and dispatched to multiple
+             *              child views. <code>false</code> to only allow one child view to be the target of
+             *              any MotionEvent received by this ViewGroup.
+             */
+            SetMotionEventSplittingEnabled(
+                [in] Boolean split);
+
+            /**
+             * Returns true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
+             * @return true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
+             */
+            IsMotionEventSplittingEnabled(
+                [out] Boolean* dispatched);
+
+            /**
+             * Returns true if this ViewGroup should be considered as a single entity for removal
+             * when executing an Activity transition. If this is false, child elements will move
+             * individually during the transition.
+             * @return True if the ViewGroup should be acted on together during an Activity transition.
+             * The default value is false when the background is null and true when the background
+             * is not null or if {@link #getTransitionName()} is not null.
+             */
+            IsTransitionGroup(
+                [out] Boolean* result);
+
+            /**
+             * Sets the LayoutTransition object for this ViewGroup. If the LayoutTransition object is
+             * not null, changes in layout which occur because of children being added to or removed from
+             * the ViewGroup will be animated according to the animations defined in that LayoutTransition
+             * object. By default, the transition object is null (so layout changes are not animated).
+             *
+             * @param transition The LayoutTransition object that will animated changes in layout. A value
+             * of <code>null</code> means no transition will run on layout changes.
+             * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
+             */
+            SetLayoutTransition(
+                [in] ILayoutTransition* transition);
+
+            /**
+             * Gets the LayoutTransition object for this ViewGroup. If the LayoutTransition object is
+             * not null, changes in layout which occur because of children being added to or removed from
+             * the ViewGroup will be animated according to the animations defined in that LayoutTransition
+             * object. By default, the transition object is null (so layout changes are not animated).
+             *
+             * @return LayoutTranstion The LayoutTransition object that will animated changes in layout.
+             * A value of <code>null</code> means no transition will run on layout changes.
+             */
+            GetLayoutTransition(
+                [out] ILayoutTransition** transition);
+
+            /**
+             * Call this method to remove all child views from the
+             * ViewGroup.
+             *
+             * <p><strong>Note:</strong> do not invoke this method from
+             * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+             * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+             */
+            RemoveAllViews();
+
+            /**
+             * Called by a ViewGroup subclass to remove child views from itself,
+             * when it must first know its size on screen before it can calculate how many
+             * child views it will render. An example is a Gallery or a ListView, which
+             * may "have" 50 children, but actually only render the number of children
+             * that can currently fit inside the object on screen. Do not call
+             * this method unless you are extending ViewGroup and understand the
+             * view measuring and layout pipeline.
+             *
+             * <p><strong>Note:</strong> do not invoke this method from
+             * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+             * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+             */
+            RemoveAllViewsInLayout();
+
+            /**
+             * Don't call or override this method. It is used for the implementation of
+             * the view hierarchy.
+             */
+            InvalidateChild(
+                [in] IView* child,
+                [in] IRect* dirty);
+
+            /**
+             * Native-calculated damage path
+             * Returns false if this path was unable to complete successfully. This means
+             * it hit a ViewParent it doesn't recognize and needs to fall back to calculating
+             * damage area
+             * @hide
+             */
+            DamageChildDeferred(
+                [in] IView* child,
+                [out] Boolean* result);
+
+            /**
+             * Quick invalidation method called by View.invalidateViewProperty. This doesn't set the
+             * DRAWN flags and doesn't handle the Animation logic that the default invalidation methods
+             * do; all we want to do here is schedule a traversal with the appropriate dirty rect.
+             *
+             * @hide
+             */
+            DamageChild(
+                [in] IView* child,
+                [in] IRect* dirty);
+
+            /**
+             * Offset a rectangle that is in a descendant's coordinate
+             * space into our coordinate space.
+             * @param descendant A descendant of this view
+             * @param rect A rectangle defined in descendant's coordinate space.
+             */
+            OffsetDescendantRectToMyCoords(
+                [in] IView* descendant,
+                [in] IRect* rect);
+
+            /**
+             * Offset a rectangle that is in our coordinate space into an ancestor's
+             * coordinate space.
+             * @param descendant A descendant of this view
+             * @param rect A rectangle defined in descendant's coordinate space.
+             */
+            OffsetRectIntoDescendantCoords(
+                [in] IView* descendant,
+                [in] IRect* rect);
+
+            /**
+             * Offset the vertical location of all children of this view by the specified number of pixels.
+             *
+             * @param offset the number of pixels to offset
+             *
+             * @hide
+             */
+            OffsetChildrenTopAndBottom(
+                [in] Int32 offset);
+
+            /**
+             * Runs the layout animation. Calling this method triggers a relayout of
+             * this view group.
+             */
+            StartLayoutAnimation();
+
+            /**
+             * Schedules the layout animation to be played after the next layout pass
+             * of this view group. This can be used to restart the layout animation
+             * when the content of the view group changes or when the activity is
+             * paused and resumed.
+             */
+            ScheduleLayoutAnimation();
+
+            /**
+             * Sets the layout animation controller used to animate the group's
+             * children after the first layout.
+             *
+             * @param controller the animation controller
+             */
+            SetLayoutAnimation(
+                [in] ILayoutAnimationController* controller);
+
+            /**
+             * Returns the layout animation controller used to animate the group's
+             * children.
+             *
+             * @return the current animation controller
+             */
+            GetLayoutAnimation(
+                [out] ILayoutAnimationController** controller);
+
+            /**
+             * Indicates whether the children's drawing cache is used during a layout
+             * animation. By default, the drawing cache is enabled but this will prevent
+             * nested layout animations from working. To nest animations, you must disable
+             * the cache.
+             *
+             * @return true if the animation cache is enabled, false otherwise
+             *
+             * @see #setAnimationCacheEnabled(boolean)
+             * @see View#setDrawingCacheEnabled(boolean)
+             */
+            IsAnimationCacheEnabled(
+                [out] Boolean* enabled);
+
+            /**
+             * Enables or disables the children's drawing cache during a layout animation.
+             * By default, the drawing cache is enabled but this will prevent nested
+             * layout animations from working. To nest animations, you must disable the
+             * cache.
+             *
+             * @param enabled true to enable the animation cache, false otherwise
+             *
+             * @see #isAnimationCacheEnabled()
+             * @see View#setDrawingCacheEnabled(boolean)
+             */
+            SetAnimationCacheEnabled(
+                [in] Boolean enabled);
+
+            /**
+             * Indicates whether this ViewGroup will always try to draw its children using their
+             * drawing cache. By default this property is enabled.
+             *
+             * @return true if the animation cache is enabled, false otherwise
+             *
+             * @see #setAlwaysDrawnWithCacheEnabled(boolean)
+             * @see #setChildrenDrawnWithCacheEnabled(boolean)
+             * @see View#setDrawingCacheEnabled(boolean)
+             */
+            IsAlwaysDrawnWithCacheEnabled(
+                [out] Boolean* always);
+
+            /**
+             * Indicates whether this ViewGroup will always try to draw its children using their
+             * drawing cache. This property can be set to true when the cache rendering is
+             * slightly different from the children's normal rendering. Renderings can be different,
+             * for instance, when the cache's quality is set to low.
+             *
+             * When this property is disabled, the ViewGroup will use the drawing cache of its
+             * children only when asked to. It's usually the task of subclasses to tell ViewGroup
+             * when to start using the drawing cache and when to stop using it.
+             *
+             * @param always true to always draw with the drawing cache, false otherwise
+             *
+             * @see #isAlwaysDrawnWithCacheEnabled()
+             * @see #setChildrenDrawnWithCacheEnabled(boolean)
+             * @see View#setDrawingCacheEnabled(boolean)
+             * @see View#setDrawingCacheQuality(int)
+             */
+            SetAlwaysDrawnWithCacheEnabled(
+                [in] Boolean always);
+
+            /**
+             * Returns an integer indicating what types of drawing caches are kept in memory.
+             *
+             * @see #setPersistentDrawingCache(int)
+             * @see #setAnimationCacheEnabled(boolean)
+             *
+             * @return one or a combination of {@link #PERSISTENT_NO_CACHE},
+             *         {@link #PERSISTENT_ANIMATION_CACHE}, {@link #PERSISTENT_SCROLLING_CACHE}
+             *         and {@link #PERSISTENT_ALL_CACHES}
+             */
+            GetPersistentDrawingCache(
+                [out] Int32* drawingCacheToKeep);
+
+            /**
+             * Indicates what types of drawing caches should be kept in memory after
+             * they have been created.
+             *
+             * @see #getPersistentDrawingCache()
+             * @see #setAnimationCacheEnabled(boolean)
+             *
+             * @param drawingCacheToKeep one or a combination of {@link #PERSISTENT_NO_CACHE},
+             *        {@link #PERSISTENT_ANIMATION_CACHE}, {@link #PERSISTENT_SCROLLING_CACHE}
+             *        and {@link #PERSISTENT_ALL_CACHES}
+             */
+            SetPersistentDrawingCache(
+                [in] Int32 drawingCacheToKeep);
+
+            /**
+             * Returns the basis of alignment during layout operations on this ViewGroup:
+             * either {@link #LAYOUT_MODE_CLIP_BOUNDS} or {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
+             * <p>
+             * If no layoutMode was explicitly set, either programmatically or in an XML resource,
+             * the method returns the layoutMode of the view's parent ViewGroup if such a parent exists,
+             * otherwise the method returns a default value of {@link #LAYOUT_MODE_CLIP_BOUNDS}.
+             *
+             * @return the layout mode to use during layout operations
+             *
+             * @see #setLayoutMode(int)
+             */
+            GetLayoutMode(
+                [out] Int32* mode);
+
+            /**
+             * Sets the basis of alignment during the layout of this ViewGroup.
+             * Valid values are either {@link #LAYOUT_MODE_CLIP_BOUNDS} or
+             * {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
+             *
+             * @param layoutMode the layout mode to use during layout operations
+             *
+             * @see #getLayoutMode()
+             * @attr ref android.R.styleable#ViewGroup_layoutMode
+             */
+            SetLayoutMode(
+                [in] Int32 mode);
+
+            /**
+             * Returns a new set of layout parameters based on the supplied attributes set.
+             *
+             * @param attrs the attributes to build the layout parameters from
+             *
+             * @return an instance of {@link android.view.ViewGroup.LayoutParams} or one
+             *         of its descendants
+             */
+            GenerateLayoutParams(
+                [in] IAttributeSet* attrs,
+                [out] IViewGroupLayoutParams** layoutParams);
+
+            /**
+             * Returns the position in the group of the specified child view.
+             *
+             * @param child the view for which to get the position
+             * @return a positive integer representing the position of the view in the
+             *         group, or -1 if the view does not exist in the group
+             */
+            IndexOfChild(
+                [in] IView* child,
+                [out] Int32* index);
+
+            /**
+             * Returns the number of children in the group.
+             *
+             * @return a positive integer representing the number of children in
+             *         the group
+             */
+            GetChildCount(
+                [out] Int32* count);
+
+            /**
+             * Returns the view at the specified position in the group.
+             *
+             * @param index the position at which to get the view from
+             * @return the view at the specified position or null if the position
+             *         does not exist within the group
+             */
+            GetChildAt(
+                [in] Int32 index,
+                [out] IView** child);
+
+            /**
+             * Removes any pending animations for views that have been removed. Call
+             * this if you don't want animations for exiting views to stack up.
+             */
+            ClearDisappearingChildren();
+
+            /**
+             * This method tells the ViewGroup that the given View object, which should have this
+             * ViewGroup as its parent,
+             * should be kept around  (re-displayed when the ViewGroup draws its children) even if it
+             * is removed from its parent. This allows animations, such as those used by
+             * {@link android.app.Fragment} and {@link android.animation.LayoutTransition} to animate
+             * the removal of views. A call to this method should always be accompanied by a later call
+             * to {@link #endViewTransition(View)}, such as after an animation on the View has finished,
+             * so that the View finally gets removed.
+             *
+             * @param view The View object to be kept visible even if it gets removed from its parent.
+             */
+            StartViewTransition(
+                [in] IView* view);
+
+            /**
+             * This method should always be called following an earlier call to
+             * {@link #startViewTransition(View)}. The given View is finally removed from its parent
+             * and will no longer be displayed. Note that this method does not perform the functionality
+             * of removing a view from its parent; it just discontinues the display of a View that
+             * has previously been removed.
+             *
+             * @return view The View object that has been removed but is being kept around in the visible
+             * hierarchy by an earlier call to {@link #startViewTransition(View)}.
+             */
+            EndViewTransition(
+                [in] IView* view);
+
+            /**
+             * Tells this ViewGroup to suppress all layout() calls until layout
+             * suppression is disabled with a later call to suppressLayout(false).
+             * When layout suppression is disabled, a requestLayout() call is sent
+             * if layout() was attempted while layout was being suppressed.
+             *
+             * @hide
+             */
+            SuppressLayout(
+                [in] Boolean suppress);
+
+            /**
+             * Returns whether layout calls on this container are currently being
+             * suppressed, due to an earlier call to {@link #suppressLayout(boolean)}.
+             *
+             * @return true if layout calls are currently suppressed, false otherwise.
+             *
+             * @hide
+             */
+            IsLayoutSuppressed(
+                [out] Boolean* result);
+
+            /**
+             * Returns the animation listener to which layout animation events are
+             * sent.
+             *
+             * @return an {@link android.view.animation.Animation.AnimationListener}
+             */
+            GetLayoutAnimationListener(
+                [out] IAnimationAnimationListener** listener);
+
+            /**
+             * Sets whether this ViewGroup's drawable states also include
+             * its children's drawable states.  This is used, for example, to
+             * make a group appear to be focused when its child EditText or button
+             * is focused.
+             */
+            SetAddStatesFromChildren(
+                [in] Boolean addsStates);
+
+            /**
+             * Returns whether this ViewGroup's drawable states also include
+             * its children's drawable states.  This is used, for example, to
+             * make a group appear to be focused when its child EditText or button
+             * is focused.
+             */
+            AddStatesFromChildren(
+                [out] Boolean* drawable);
+
+            /**
+             * Specifies the animation listener to which layout animation events must
+             * be sent. Only
+             * {@link android.view.animation.Animation.AnimationListener#onAnimationStart(Animation)}
+             * and
+             * {@link android.view.animation.Animation.AnimationListener#onAnimationEnd(Animation)}
+             * are invoked.
+             *
+             * @param animationListener the layout animation listener
+             */
+            SetLayoutAnimationListener(
+                [in] IAnimationAnimationListener* animationListener);
+
+            /**
+             * This method is called by LayoutTransition when there are 'changing' animations that need
+             * to start after the layout/setup phase. The request is forwarded to the ViewAncestor, who
+             * starts all pending transitions prior to the drawing phase in the current traversal.
+             *
+             * @param transition The LayoutTransition to be started on the next traversal.
+             *
+             * @hide
+             */
+            RequestTransitionStart(
+                [in] ILayoutTransition* transition);
+
+            /**
+             * Return true if the pressed state should be delayed for children or descendants of this
+             * ViewGroup. Generally, this should be done for containers that can scroll, such as a List.
+             * This prevents the pressed state from appearing when the user is actually trying to scroll
+             * the content.
+             *
+             * The default implementation returns true for compatibility reasons. Subclasses that do
+             * not scroll should generally override this method and return false.
+             */
+            ShouldDelayChildPressedState(
+                [out] Boolean* compatibility);
+
+            /**
+             * Return the current axes of nested scrolling for this ViewGroup.
+             *
+             * <p>A ViewGroup returning something other than {@link #SCROLL_AXIS_NONE} is currently
+             * acting as a nested scrolling parent for one or more descendant views in the hierarchy.</p>
+             *
+             * @return Flags indicating the current axes of nested scrolling
+             * @see #SCROLL_AXIS_HORIZONTAL
+             * @see #SCROLL_AXIS_VERTICAL
+             * @see #SCROLL_AXIS_NONE
+             */
+            GetNestedScrollAxes(
+                [out] Int32* axes);
+
+			/**
+		     * {@inheritDoc}
+		     *
+		     * <p><strong>Note:</strong> do not invoke this method from
+		     * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
+		     * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
+		     */
+            RemoveView(
+            	[in] IView* view);
+        }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

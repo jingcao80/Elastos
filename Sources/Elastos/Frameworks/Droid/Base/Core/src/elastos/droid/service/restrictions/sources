@@ -1,0 +1,11 @@
+TARGET_NAME= restrictions
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+
+SOURCES += RestrictionsReceiver.cpp

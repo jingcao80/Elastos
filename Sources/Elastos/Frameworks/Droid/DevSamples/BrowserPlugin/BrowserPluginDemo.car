@@ -1,0 +1,15 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace BrowserPlugin {
+        class CBrowserPlugin {
+        }
+    }
+    }
+    }
+    }
+}

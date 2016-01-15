@@ -1,0 +1,89 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * An overlay is an extra layer that sits on top of a View (the "host view")
+     * which is drawn after all other content in that view (including children,
+     * if the view is a ViewGroup). Interaction with the overlay layer is done
+     * by adding and removing drawables.
+     *
+     * <p>An overlay requested from a ViewGroup is of type {@link ViewGroupOverlay},
+     * which also supports adding and removing views.</p>
+     *
+     * @see View#getOverlay() View.getOverlay()
+     * @see ViewGroup#getOverlay() ViewGroup.getOverlay()
+     * @see ViewGroupOverlay
+     */
+    [local]
+    interface IViewOverlay {
+        /**
+         * Adds a Drawable to the overlay. The bounds of the drawable should be relative to
+         * the host view. Any drawable added to the overlay should be removed when it is no longer
+         * needed or no longer visible.
+         *
+         * @param drawable The Drawable to be added to the overlay. This drawable will be
+         * drawn when the view redraws its overlay.
+         * @see #remove(Drawable)
+         */
+        Add(
+            [in] IDrawable* drawable);
+
+        /**
+         * Removes the specified Drawable from the overlay.
+         *
+         * @param drawable The Drawable to be removed from the overlay.
+         * @see #add(Drawable)
+         */
+        Remove(
+            [in] IDrawable* drawable);
+
+        /**
+         * Removes all content from the overlay.
+         */
+        Clear();
+
+        IsEmpty(
+            [out] Boolean* isEmpty);
+
+        GetOverlayView(
+            [out] IViewGroup** res);
+    }
+
+    /**
+     * @Involve
+     * interface IViewGroup;
+     * interface IView;
+     * interface IViewParent;
+     * interface IViewManager;
+     */
+    [local]
+    interface IOverlayViewGroup {
+        Add(
+            [in] IDrawable* drawable);
+
+        Remove(
+            [in] IDrawable* drawable);
+
+        Add(
+            [in] IView* child);
+
+        Remove(
+            [in] IView* view);
+
+        Clear();
+
+        IsEmpty(
+            [out] Boolean* empty);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

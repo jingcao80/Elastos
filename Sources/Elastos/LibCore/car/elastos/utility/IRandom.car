@@ -1,0 +1,79 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * @Involve
+     * interface ISerializable
+     */
+    interface IRandom {
+        /**
+         * Returns a pseudo-random uniformly distributed {@code boolean}.
+         */
+        NextBoolean(
+            [out] Boolean* value);
+
+        /**
+         * Fills {@code buf} with random bytes.
+         */
+        NextBytes(
+            [out] ArrayOf<Byte> buf);
+
+        /**
+         * Returns a pseudo-random uniformly distributed {@code double}
+         * in the half-open range [0.0, 1.0).
+         */
+        NextDouble(
+            [out] Double* value);
+
+        /**
+         * Returns a pseudo-random uniformly distributed {@code float}
+         * in the half-open range [0.0, 1.0).
+         */
+        NextFloat(
+            [out] Float* value);
+
+        /**
+         * Returns a pseudo-random (approximately) normally distributed
+         * {@code double} with mean 0.0 and standard deviation 1.0.
+         * This method uses the <i>polar method</i> of G. E. P. Box, M.
+         * E. Muller, and G. Marsaglia, as described by Donald E. Knuth in <i>The
+         * Art of Computer Programming, Volume 2: Seminumerical Algorithms</i>,
+         * section 3.4.1, subsection C, algorithm P.
+         */
+        NextGaussian(
+            [out] Double* value);
+
+        /**
+         * Returns a pseudo-random uniformly distributed {@code int}.
+         */
+        NextInt32(
+            [out] Int32* value);
+
+        /**
+         * Returns a pseudo-random uniformly distributed {@code int}
+         * in the half-open range [0, n).
+         */
+        NextInt32(
+            [in] Int32 n,
+            [out] Int32* value);
+
+        /**
+         * Returns a pseudo-random uniformly distributed {@code long}.
+         */
+        NextInt64(
+            [out] Int64* value);
+
+        /**
+         * Modifies the seed using a linear congruential formula presented in <i>The
+         * Art of Computer Programming, Volume 2</i>, Section 3.2.1.
+         */
+        SetSeed(
+            [in] Int64 seed);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

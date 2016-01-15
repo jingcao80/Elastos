@@ -1,0 +1,50 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace TextService {
+
+    /**
+     * This class contains a metadata of the input of TextService
+     */
+    /**
+     * @Invovle
+     * interface IParcelable
+     */
+    interface ITextInfo {
+
+        /**
+         * @return the text which is an input of a text service
+         */
+        GetText(
+            [out] String* text);
+
+        /**
+         * @return the charSequence which is an input of a text service. This may have some parcelable
+         * spans.
+         */
+        GetCharSequence(
+            [out] ICharSequence** seq);
+
+        /**
+         * @return the cookie of TextInfo
+         */
+        GetCookie(
+            [out] Int32* cookie);
+
+        /**
+         * @return the sequence of TextInfo
+         */
+        GetSequence(
+            [out] Int32* sequeue);
+    }
+
+    }   //namespace TextService
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

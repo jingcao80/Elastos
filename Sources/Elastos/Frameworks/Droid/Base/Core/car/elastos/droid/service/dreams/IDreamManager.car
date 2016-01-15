@@ -1,0 +1,51 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Content.IComponentName;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Dreams {
+
+    /** @hide */
+    [deprecated]
+    interface IIDreamManager {
+        Dream();
+
+        Awaken();
+
+        SetDreamComponents(
+            [in] ArrayOf<IComponentName*>* componentNames);
+
+        GetDreamComponents(
+            [out,callee] ArrayOf<IComponentName*>* result);
+
+        GetDefaultDreamComponent(
+            [out] IComponentName** result);
+
+        TestDream(
+            [in] IComponentName* componentName);
+
+        IsDreaming(
+            [out] Boolean* result);
+
+        FinishSelf(
+            [in] IBinder* token,
+            [in] Boolean immediate);
+
+        StartDozing(
+            [in] IBinder* token,
+            [in] Int32 screenState,
+            [in] Int32 screenBrightness);
+
+        StopDozing(
+            [in] IBinder* token);
+    }
+
+    } // namespace Dreams
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

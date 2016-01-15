@@ -1,0 +1,22 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /** {@hide} */
+    interface IIWindowFocusObserver {
+        FocusGained(
+            [in] IBinder* inputToken);
+
+        FocusLost(
+            [in] IBinder* inputToken);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

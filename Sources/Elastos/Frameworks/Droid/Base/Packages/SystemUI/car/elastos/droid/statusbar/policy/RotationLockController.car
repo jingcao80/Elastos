@@ -1,0 +1,46 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    interface IRotationLockControllerCallback {
+        OnRotationLockStateChanged(
+            [in] Boolean rotationLocked,
+            [in] Boolean affordanceVisible);
+    }
+
+    /**
+     * @Involve
+     * interface IListenable
+     */
+    interface IRotationLockController {
+        GetRotationLockOrientation(
+            [out] Int32* result);
+
+        IsRotationLockAffordanceVisible(
+            [out] Boolean* result);
+
+        IsRotationLocked(
+            [out] Boolean* result);
+
+        SetRotationLocked(
+            [in] Boolean locked);
+
+        AddRotationLockControllerCallback(
+            [in] IRotationLockControllerCallback* cb);
+
+        RemoveRotationLockControllerCallback(
+            [in] IRotationLockControllerCallback* cb);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

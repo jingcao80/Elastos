@@ -1,0 +1,16 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= Elastos.Runtime
+TARGET_TYPE= lib
+
+EXPORT_LIBRARY= 1
+
+ELASTOS_LIBS = ../../libusr/lib4car/lib4car.lib
+ELASTOS_LIBS += ../../../Library/eltypes/elstring/elstring.lib
+ELASTOS_LIBS += ../../../Library/eltypes/elrefbase/elrefbase.lib
+ELASTOS_LIBS += ../../../Library/eltypes/elcontainer/elcontainer.lib
+ifeq "$(XDK_TARGET_PLATFORM)" "win32"
+ELASTOS_LIBS += ../dll/Elastos.Runtime.lib
+endif

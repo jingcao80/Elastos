@@ -1,0 +1,21 @@
+TARGET_NAME= location
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = ComprehensiveCountryDetector.cpp
+SOURCES += GeocoderProxy.cpp
+SOURCES += GeofenceManager.cpp
+SOURCES += GeofenceState.cpp
+#SOURCES += GpsLocationProvider.cpp
+#SOURCES += GpsXtraDownloader.cpp
+SOURCES += LocationBasedCountryDetector.cpp
+SOURCES += LocationBlacklist.cpp
+SOURCES += LocationFudger.cpp
+SOURCES += LocationProviderProxy.cpp
+SOURCES += MockProvider.cpp
+SOURCES += PassiveProvider.cpp

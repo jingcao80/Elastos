@@ -1,0 +1,94 @@
+
+module
+{
+    using interface Elastos.Security.IPublicKey;
+    using interface Elastos.Security.Cert.ICertificateFactory;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+
+    /**
+     * Opaque, immutable representation of a signature associated with an application package.
+     */
+
+    [deprecated]
+    interface ISignature {
+        /**
+         * Encode the Signature as ASCII text.
+         */
+        ToChars(
+            [out, callee] ArrayOf<Char32>* text);
+
+        /**
+         * Encode the Signature as ASCII text in to an existing array.
+         *
+         * @param existingArray Existing char array or null.
+         * @param outLen Output parameter for the number of characters written in
+         * to the array.
+         * @return Returns either <var>existingArray</var> if it was large enough
+         * to hold the ASCII representation, or a newly created char[] array if
+         * needed.
+         */
+        ToChars(
+            [in] ArrayOf<Char32>* existingArray,
+            [in] ArrayOf<Int32>* outLen,
+            [out, callee] ArrayOf<Char32>* text);
+
+        /**
+         * Return the result of #toChars() as a String.
+         *
+         * @sa #toChars()
+         */
+        ToCharsString(
+            [out] String* str);
+
+        /**
+         * @return the contents of this signature as a byte array.
+         */
+        ToByteArray(
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns the public key for this signature.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * CertificateException | when Signature isn't a valid X.509
+         *             certificate; shouldn't happen.
+         * @hide
+         */
+        GetPublicKey(
+            [out] IPublicKey** publicKey);
+
+        GetChainSignatures(
+            [out, callee] ArrayOf<ISignature*>* result);
+    }
+
+    [deprecated]
+    interface ISignatureHelper {
+
+        AreExactMatch(
+            [in] ArrayOf<ISignature*>* a,
+            [in] ArrayOf<ISignature*>* b,
+            [out] Boolean* match);
+
+        AreEffectiveMatch(
+            [in] ArrayOf<ISignature*>* a,
+            [in] ArrayOf<ISignature*>* b,
+            [out] Boolean* match);
+
+        Bounce(
+            [in] ICertificateFactory* cf,
+            [in] ISignature* s,
+            [out] ISignature** sig);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

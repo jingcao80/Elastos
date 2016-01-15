@@ -1,0 +1,122 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IMap;
+
+    interface Org.Apache.Http.IHttpHost;
+    interface Org.Apache.Http.Conn.Scheme.IScheme;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Scheme {
+
+    /**
+     * A set of supported protocol {@link Scheme schemes}.
+     * Schemes are identified by lowercase names.
+     *
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version   $Revision: 648356 $ $Date: 2008-04-15 10:57:53 -0700 (Tue, 15 Apr 2008) $
+     *
+     * @since 4.0
+     */
+    interface ISchemeRegistry {
+
+        /**
+         * Obtains a scheme by name.
+         *
+         * @param name      the name of the scheme to look up (in lowercase)
+         *
+         * @return  the scheme, never <code>null</code>
+         *
+         * @throws IllegalStateException
+         *          if the scheme with the given name is not registered
+         */
+        GetScheme(
+            [in] String name,
+            [out] IScheme** scheme);
+
+        /**
+         * Obtains the scheme for a host.
+         * Convenience method for <code>getScheme(host.getSchemeName())</pre>
+         *
+         * @param host      the host for which to obtain the scheme
+         *
+         * @return  the scheme for the given host, never <code>null</code>
+         *
+         * @throws IllegalStateException
+         *          if a scheme with the respective name is not registered
+         */
+        GetScheme(
+            [in] IHttpHost* host,
+            [out] IScheme** scheme);
+
+        /**
+         * Obtains a scheme by name, if registered.
+         *
+         * @param name      the name of the scheme to look up (in lowercase)
+         *
+         * @return  the scheme, or
+         *          <code>null</code> if there is none by this name
+         */
+        Get(
+            [in] String name,
+            [out] IScheme** scheme);
+
+        /**
+         * Registers a scheme.
+         * The scheme can later be retrieved by its name
+         * using {@link #getScheme(String) getScheme} or {@link #get get}.
+         *
+         * @param sch       the scheme to register
+         *
+         * @return  the scheme previously registered with that name, or
+         *          <code>null</code> if none was registered
+         */
+        Register(
+            [in] IScheme* sch,
+            [out] IScheme** scheme);
+
+        /**
+         * Unregisters a scheme.
+         *
+         * @param name      the name of the scheme to unregister (in lowercase)
+         *
+         * @return  the unregistered scheme, or
+         *          <code>null</code> if there was none
+         */
+        Unregister(
+            [in] String name,
+            [out] IScheme** scheme);
+
+        /**
+         * Obtains the names of the registered schemes in their default order.
+         *
+         * @return  List containing registered scheme names.
+         */
+        GetSchemeNames(
+            [out] IList** names);
+
+        /**
+         * Populates the internal collection of registered {@link Scheme protocol schemes}
+         * with the content of the map passed as a parameter.
+         *
+         * @param map protocol schemes
+         */
+        SetItems(
+            [in] IMap* map);
+
+    }
+
+    } // namespace Scheme
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

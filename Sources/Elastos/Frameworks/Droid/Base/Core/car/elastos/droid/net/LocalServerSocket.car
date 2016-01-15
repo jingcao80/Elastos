@@ -1,0 +1,60 @@
+
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+
+    interface Elastos.Droid.Net.ILocalSocket;
+    interface Elastos.Droid.Net.ILocalSocketAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * non-standard class for creating inbound UNIX-domain socket
+     * on the Android platform, this is created in the Linux non-filesystem
+     * namespace.
+     *
+     * On simulator platforms, this may be created in a temporary directory on
+     * the filesystem
+     */
+    interface ILocalServerSocket {
+
+        /**
+         * Obtains the socket's local address
+         *
+         * @return local address
+         */
+        GetLocalSocketAddress(
+            [out] ILocalSocketAddress** result);
+
+        /**
+         * Accepts a new connection to the socket. Blocks until a new
+         * connection arrives.
+         *
+         * @return a socket representing the new connection.
+         * @throws IOException
+         */
+        Accept(
+            [out] ILocalSocket** result);
+
+        /**
+         * Returns file descriptor or null if not yet open/already closed
+         *
+         * @return fd or null
+         */
+        GetFileDescriptor(
+            [out] IFileDescriptor** result);
+
+        /**
+         * Closes server socket.
+         *
+         * @throws IOException
+         */
+        Close();
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

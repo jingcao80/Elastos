@@ -1,0 +1,209 @@
+
+module
+{
+    using interface Elastos.Droid.App.IActivityOptions;
+    using interface Elastos.Droid.App.IActivityManager;
+    using interface Elastos.Droid.AppWidget.IAppWidgetProviderInfo;
+    using interface Elastos.Droid.AppWidget.IAppWidgetHost;
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.Pm.IActivityInfo;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Utility.IPair;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Misc {
+
+    /**
+     * Acts as a shim around the real system services that we need to access data from, and provides
+     * a point of injection when testing UI.
+     */
+    [local]
+    interface ISystemServicesProxy {
+
+        /** Returns a list of the recents tasks */
+        GetRecentTasks(
+            [in] Int32 numLatestTasks,
+            [in] Int32 userId,
+            [in] Boolean isTopTaskHome,
+            [out] IList** result);
+
+        /** Returns a list of the running tasks */
+        GetRunningTasks(
+            [in] Int32 numTasks,
+            [out] IList** result);
+
+        /** Returns whether the specified task is in the home stack */
+        IsInHomeStack(
+            [in] Int32 taskId,
+            [out] Boolean* result);
+
+        /** Returns the top task thumbnail for the given task id */
+        GetTaskThumbnail(
+            [in] Int32 taskId,
+            [out] IBitmap** result);
+
+        /** Moves a task to the front with the specified activity options */
+        MoveTaskToFront(
+            [in] Int32 taskId,
+            [in] IActivityOptions* opts);
+
+        /** Removes the task and kills the process */
+        RemoveTask(
+            [in] Int32 taskId,
+            [in] Boolean isDocument);
+
+        /**
+         * Returns the activity info for a given component name.
+         *
+         * @param cn The component name of the activity.
+         * @param userId The userId of the user that this is for.
+         */
+        GetActivityInfo(
+            [in] IComponentName* cn,
+            [in] Int32 userId,
+            [out] IActivityInfo** result);
+
+        /**
+         * Returns the activity info for a given component name.
+         *
+         * @param cn The component name of the activity.
+         */
+        GetActivityInfo(
+            [in] IComponentName* cn,
+            [out] IActivityInfo** result);
+
+        /** Returns the activity label */
+        GetActivityLabel(
+            [in] IActivityInfo* info,
+            [out] String* result);
+
+        /**
+         * Returns the activity icon for the ActivityInfo for a user, badging if
+         * necessary.
+         */
+        GetActivityIcon(
+            [in] IActivityInfo* info,
+            [in] Int32 userId,
+            [out] IDrawable** result);
+
+        /**
+         * Returns the given icon for a user, badging if necessary.
+         */
+        GetBadgedIcon(
+            [in] IDrawable* icon,
+            [in] Int32 userId,
+            [out] IDrawable** result);
+
+        /** Returns the package name of the home activity. */
+        GetHomeActivityPackageName(
+            [out] String* result);
+
+        /**
+         * Resolves and returns the first Recents widget from the same package as the global
+         * assist activity.
+         */
+        ResolveSearchAppWidget(
+            [out] IAppWidgetProviderInfo** result);
+
+        /**
+         * Resolves and binds the search app widget that is to appear in the recents.
+         */
+        BindSearchAppWidget(
+            [in] IAppWidgetHost* host,
+            [out] IPair** result);
+
+        /**
+         * Returns the app widget info for the specified app widget id.
+         */
+        GetAppWidgetInfo(
+            [in] Int32 appWidgetId,
+            [out] IAppWidgetProviderInfo** result);
+
+        /**
+         * Destroys the specified app widget.
+         */
+        UnbindSearchAppWidget(
+            [in] IAppWidgetHost* host,
+            [in] Int32 appWidgetId);
+
+        /**
+         * Returns whether touch exploration is currently enabled.
+         */
+        IsTouchExplorationEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Returns a global setting.
+         */
+        GetGlobalSetting(
+            [in] IContext* context,
+            [in] String setting,
+            [out] Int32* result);
+
+        /**
+         * Returns a system setting.
+         */
+        GetSystemSetting(
+            [in] IContext* context,
+            [in] String setting,
+            [out] Int32* result);
+
+        /**
+         * Returns the window rect.
+         */
+        GetWindowRect(
+            [out] IRect** result);
+
+        /**
+         * Locks the current task.
+         */
+        LockCurrentTask();
+
+        /**
+         * Takes a screenshot of the current surface.
+         */
+        TakeScreenshot(
+            [out] IBitmap** result);
+
+        /**
+         * Takes a screenshot of the current app.
+         */
+        TakeAppScreenshot(
+            [out] IBitmap** result);
+
+        /** Starts an activity from recents. */
+        StartActivityFromRecents(
+            [in] IContext* context,
+            [in] Int32 taskId,
+            [in] String taskName,
+            [in] IActivityOptions* options,
+            [out] Boolean* result);
+    }
+
+    [local]
+    interface ISystemServicesProxyHelper {
+
+        /**
+         * Returns a task thumbnail from the activity manager
+         */
+        GetThumbnail(
+            [in] IActivityManager* activityManager,
+            [in] Int32 taskId,
+            [out] IBitmap** result);
+    }
+
+    } // namespace Misc
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,44 @@
+
+module
+{
+//    interface Elastos.IO.Channels.IFileChannel;
+    interface Elastos.IO.IFileDescriptor;
+
+    namespace Elastos {
+    namespace IO {
+    /**
+    * An input stream that reads bytes from a file.
+    * This stream is not buffered. Most callers should wrap this stream with a
+    * BufferedInputStream.
+    * <p>
+    * Use FileReader to read characters, as opposed to bytes, from a file.
+    * @sa BufferedInputStream
+    * @sa FileOutputStream
+    * @implement Elastos.IO.IInputStream
+    */
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IInputStream;
+     */
+    interface IFileInputStream {
+        /**
+         * Returns a read-only FileChannel that shares its position with
+         * this stream.
+         *
+         * @sa FileChannel
+         */
+//        GetChannel(
+//            [out] IFileChannel** channel);
+
+        /**
+         * Returns the underlying file descriptor.
+         */
+        GetFD(
+            [out] IFileDescriptor** fd);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

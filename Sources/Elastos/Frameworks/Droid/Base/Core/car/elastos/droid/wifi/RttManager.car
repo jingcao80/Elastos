@@ -1,0 +1,300 @@
+
+module
+{
+    interface Elastos.Droid.Wifi.IRttManagerCapabilities;
+    interface Elastos.Droid.Wifi.IRttManagerRttListener;
+    interface Elastos.Droid.Wifi.IRttManagerRttParams;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /** @hide */
+    // @SystemApi
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IRttManager {
+        const Int32 RTT_TYPE_UNSPECIFIED    = 0;
+        const Int32 RTT_TYPE_ONE_SIDED      = 1;
+        const Int32 RTT_TYPE_11_V           = 2;
+        const Int32 RTT_TYPE_11_MC          = 4;
+
+        const Int32 RTT_PEER_TYPE_UNSPECIFIED   = 0;
+        const Int32 RTT_PEER_TYPE_AP            = 1;
+        const Int32 RTT_PEER_TYPE_STA           = 2;        /* requires NAN */
+
+        const Int32 RTT_CHANNEL_WIDTH_20        = 0;
+        const Int32 RTT_CHANNEL_WIDTH_40        = 1;
+        const Int32 RTT_CHANNEL_WIDTH_80        = 2;
+        const Int32 RTT_CHANNEL_WIDTH_160       = 3;
+        const Int32 RTT_CHANNEL_WIDTH_80P80     = 4;
+        const Int32 RTT_CHANNEL_WIDTH_5         = 5;
+        const Int32 RTT_CHANNEL_WIDTH_10        = 6;
+        const Int32 RTT_CHANNEL_WIDTH_UNSPECIFIED = -1;
+
+        const Int32 RTT_STATUS_SUCCESS                  = 0;
+        const Int32 RTT_STATUS_FAILURE                  = 1;
+        const Int32 RTT_STATUS_FAIL_NO_RSP              = 2;
+        const Int32 RTT_STATUS_FAIL_REJECTED            = 3;
+        const Int32 RTT_STATUS_FAIL_NOT_SCHEDULED_YET   = 4;
+        const Int32 RTT_STATUS_FAIL_TM_TIMEOUT          = 5;
+        const Int32 RTT_STATUS_FAIL_AP_ON_DIFF_CHANNEL  = 6;
+        const Int32 RTT_STATUS_FAIL_NO_CAPABILITY       = 7;
+        const Int32 RTT_STATUS_ABORTED                  = 8;
+
+        const Int32 REASON_UNSPECIFIED              = -1;
+        const Int32 REASON_NOT_AVAILABLE            = -2;
+        const Int32 REASON_INVALID_LISTENER         = -3;
+        const Int32 REASON_INVALID_REQUEST          = -4;
+
+        const String DESCRIPTION_KEY = "android.net.wifi.RttManager.Description";
+
+        /* private methods */
+        const Int32 BASE = 0x00027200;
+
+        const Int32 CMD_OP_START_RANGING            = BASE + 0;
+        const Int32 CMD_OP_STOP_RANGING             = BASE + 1;
+        const Int32 CMD_OP_FAILED                   = BASE + 2;
+        const Int32 CMD_OP_SUCCEEDED                = BASE + 3;
+        const Int32 CMD_OP_ABORTED                  = BASE + 4;
+
+        GetCapabilities(
+            [out] IRttManagerCapabilities** result);
+
+        StartRanging(
+            [in] ArrayOf<IRttManagerRttParams*>* params,
+            [in] IRttManagerRttListener* listener);
+
+        StopRanging(
+            [in] IRttManagerRttListener* listener);
+    }
+
+
+    /** specifies parameters for RTT request */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IRttManagerRttParams {
+        /** type of device being ranged; one of RTT_PEER_TYPE_AP or RTT_PEER_TYPE_STA */
+        GetDeviceType(
+            [out] Int32* result);
+
+        SetDeviceType(
+            [in] Int32 deviceType);
+
+        /** type of RTT being sought; one of RTT_TYPE_ONE_SIDED
+                         *  RTT_TYPE_11_V or RTT_TYPE_11_MC or RTT_TYPE_UNSPECIFIED */
+        GetRequestType(
+            [out] Int32* result);
+
+        SetRequestType(
+            [in] Int32 requestType);
+
+        /** mac address of the device being ranged */
+        GetBssid(
+            [out] String* result);
+
+        SetBssid(
+            [in] String bssid);
+
+        /** channel frequency that the device is on; optional */
+        GetFrequency(
+            [out] Int32* result);
+
+        SetFrequency(
+            [in] Int32 frequency);
+
+        /** optional channel width. wider channels result in better accuracy,
+                         *  but they take longer time, and even get aborted may times; use
+                         *  RTT_CHANNEL_WIDTH_UNSPECIFIED if not specifying */
+        GetChannelWidth(
+            [out] Int32* result);
+
+        SetChannelWidth(
+            [in] Int32 channelWidth);
+
+        /** number of samples to be taken */
+        GetNum_samples(
+            [out] Int32* result);
+
+        SetNum_samples(
+            [in] Int32 num_samples);
+
+        /** number of retries if a sample fails */
+        GetNum_retries(
+            [out] Int32* result);
+
+        SetNum_retries(
+            [in] Int32 num_retries);
+    }
+
+
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IRttManagerCapabilities {
+        GetSupportedType(
+            [out] Int32* result);
+
+        SetSupportedType(
+            [in] Int32 supportedType);
+
+        GetSupportedPeerType(
+            [out] Int32* result);
+
+        SetSupportedPeerType(
+            [in] Int32 supportedPeerType);
+    }
+
+
+    /** pseudo-private class used to parcel arguments */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IRttManagerParcelableRttParams {
+        GetParams(
+            [out, callee] ArrayOf<IRttManagerRttParams*>* result);
+
+        SetParams(
+            [in] ArrayOf<IRttManagerRttParams*>* mParams);
+    }
+
+    /** specifies RTT results */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IRttManagerRttResult {
+        /** mac address of the device being ranged */
+        GetBssid(
+            [out] String* result);
+
+        SetBssid(
+            [in] String bssid);
+
+        /** status of the request */
+        GetStatus(
+            [out] Int32* result);
+
+        SetStatus(
+            [in] Int32 status);
+
+        /** type of the request used */
+        GetRequestType(
+            [out] Int32* result);
+
+        SetRequestType(
+            [in] Int32 requestType);
+
+        /** timestamp of completion, in microsecond since boot */
+        GetTs(
+            [out] Int64* result);
+
+        SetTs(
+            [in] Int64 ts);
+
+        /** average RSSI observed */
+        GetRssi(
+            [out] Int32* result);
+
+        SetRssi(
+            [in] Int32 rssi);
+
+        /** RSSI spread (i.e. max - min) */
+        GetRssi_spread(
+            [out] Int32* result);
+
+        SetRssi_spread(
+            [in] Int32 rssi_spread);
+
+        /** average transmit rate */
+        GetTx_rate(
+            [out] Int32* result);
+
+        SetTx_rate(
+            [in] Int32 tx_rate);
+
+        /** average round trip time in nano second */
+        GetRtt_ns(
+            [out] Int64* result);
+
+        SetRtt_ns(
+            [in] Int64 rtt_ns);
+
+        /** standard deviation observed in round trip time */
+        GetRtt_sd_ns(
+            [out] Int64* result);
+
+        SetRtt_sd_ns(
+            [in] Int64 rtt_sd_ns);
+
+        /** spread (i.e. max - min) round trip time */
+        GetRtt_spread_ns(
+            [out] Int64* result);
+
+        SetRtt_spread_ns(
+            [in] Int64 rtt_spread_ns);
+
+        /** average distance in centimeter, computed based on rtt_ns */
+        GetDistance_cm(
+            [out] Int32* result);
+
+        SetDistance_cm(
+            [in] Int32 distance_cm);
+
+        /** standard deviation observed in distance */
+        GetDistance_sd_cm(
+            [out] Int32* result);
+
+        SetDistance_sd_cm(
+            [in] Int32 distance_sd_cm);
+
+        /** spread (i.e. max - min) distance */
+        GetDistance_spread_cm(
+            [out] Int32* result);
+
+        SetDistance_spread_cm(
+            [in] Int32 distance_spread_cm);
+    }
+
+    /** pseudo-private class used to parcel results */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IRttManagerParcelableRttResults {
+        GetResults(
+            [out, callee] ArrayOf<IRttManagerRttResult*>* result);
+
+        SetResults(
+            [in] ArrayOf<IRttManagerRttResult*>* mResults);
+    }
+
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IRttManagerRttListener {
+        OnSuccess(
+            [in] ArrayOf<IRttManagerRttResult*>* results);
+
+        OnFailure(
+            [in] Int32 reason,
+            [in] String description);
+
+        OnAborted();
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,107 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Content.Pm.IXmlSerializerAndParser;
+    interface Elastos.Droid.Content.Pm.IRegisteredServicesCacheListener;
+    interface Elastos.Droid.Utility.IAttributeSet;
+
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    interface IRegisteredServicesCacheServiceInfo {
+        SetType(
+            [in] IInterface* type);
+
+        GetType(
+            [out] IInterface** type);
+
+        SetComponentName(
+            [in] IComponentName* cn);
+
+        GetComponentName(
+            [out] IComponentName** cn);
+
+        SetUid(
+            [in] Int32 uid);
+
+        GetUid(
+            [out] Int32* uid);
+    }
+
+    /**
+     * Cache of registered services. This cache is lazily built by interrogating
+     * {@link PackageManager} on a per-user basis. It's updated as packages are
+     * added, removed and changed. Users are responsible for calling
+     * {@link #invalidateCache(int)} when a user is started, since
+     * {@link PackageManager} broadcasts aren't sent for stopped users.
+     * <p>
+     * The services are referred to by type V and are made available via the
+     * {@link #getServiceInfo} method.
+     *
+     * @hide
+     */
+    [deprecated, local]
+    interface IRegisteredServicesCache {
+
+        GetContext(
+            [out] IContext** ctx);
+
+        SetContext(
+            [in] IContext* ctx);
+
+        InvalidateCache(
+            [in] Int32 userId);
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* fout,
+            [in] ArrayOf<String>* args,
+            [in] Int32 userId);
+
+        GetListener(
+            [out] IRegisteredServicesCacheListener** listener);
+
+        SetListener(
+            [in] IRegisteredServicesCacheListener* listener,
+            [in] IHandler* handler);
+
+        /**
+         * Accessor for the registered authenticators.
+         * @param type the account type of the authenticator
+         * @return the AuthenticatorInfo that matches the account type or null if none is present
+         */
+        GetServiceInfo(
+            [in] IInterface* type,
+            [in] Int32 userId,
+            [out] IRegisteredServicesCacheServiceInfo** info);
+
+        /**
+         * @return a collection of {@link RegisteredServicesCache.ServiceInfo} objects for all
+         * registered authenticators.
+         */
+        GetAllServices(
+            [in] Int32 userId,
+            [out] IList** list);
+
+        ParseServiceAttributes(
+            [in] IResources* res,
+            [in] String packageName,
+            [in] IAttributeSet* attrs,
+            [out] IInterface** attributes);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,23 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The key specification of an X.509 encoded key in ASN.1 format.
+     */
+    /**
+     * @Involve
+     * interface IEncodedKeySpec
+     * interface IKeySpec
+     */
+    interface IX509EncodedKeySpec {
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

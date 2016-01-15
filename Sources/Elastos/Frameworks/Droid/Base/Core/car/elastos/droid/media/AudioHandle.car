@@ -1,0 +1,20 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * The AudioHandle is used by the audio framework implementation to
+     * uniquely identify a particular component of the routing topology
+     * (AudioPort or AudioPatch)
+     * It is not visible or used at the API.
+     */
+    interface IAudioHandle {
+
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

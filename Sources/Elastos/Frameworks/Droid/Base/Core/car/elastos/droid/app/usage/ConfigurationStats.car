@@ -1,0 +1,64 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Usage {
+
+    /**
+     * Private API to be notified about trust changes.
+     *
+     * {@hide}
+     */
+    interface IConfigurationStats {
+
+        GetConfiguration(
+            [out] IConfiguration** config);
+
+        /**
+         * Get the beginning of the time range this {@link ConfigurationStats} represents,
+         * measured in milliseconds since the epoch.
+         * <p/>
+         * See {@link System#currentTimeMillis()}.
+         */
+        GetFirstTimeStamp(
+            [out] Int64* result);
+
+        /**
+         * Get the end of the time range this {@link ConfigurationStats} represents,
+         * measured in milliseconds since the epoch.
+         * <p/>
+         * See {@link System#currentTimeMillis()}.
+         */
+        GetLastTimeStamp(
+            [out] Int64* result);
+
+        /**
+         * Get the last time this configuration was active, measured in milliseconds since the epoch.
+         * <p/>
+         * See {@link System#currentTimeMillis()}.
+         */
+        GetLastTimeActive(
+            [out] Int64* result);
+
+        /**
+         * Get the total time this configuration was active, measured in milliseconds.
+         */
+        GetTotalTimeActive(
+            [out] Int64* result);
+
+        /**
+         * Get the number of times this configuration was active.
+         */
+        GetActivationCount(
+            [out] Int32* result);
+    }
+
+    } // namespace Usage
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,75 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * SSL handshake parameters that include protocols, cipher suites, and
+     * client authentication requirements.
+     * @since 1.6
+     */
+    [deprecated]
+    interface ISSLParameters {
+        /**
+         * Returns a copy of the cipher suites, or null if none have been
+         * specified.
+         */
+        GetCipherSuites(
+            [out, callee] ArrayOf<String>* suites);
+
+        /**
+         * Sets the cipher suites to a copy of the input, or null
+         */
+        SetCipherSuites(
+            [in] ArrayOf<String>* cipherSuites);
+
+        /**
+         * Returns a copy of the protocols, or null if none have been
+         * specified.
+         */
+        GetProtocols(
+            [out, callee] ArrayOf<String>* protocols);
+
+        /**
+         * Sets the protocols to a copy of the input, or null
+         */
+        SetProtocols(
+            [in] ArrayOf<String>* protocols);
+
+        /**
+         * Returns true if a server requires authentication from a client
+         * during handshaking. If this returns true, {@link
+         * #getWantClientAuth} will return false.
+         */
+        GetNeedClientAuth(
+            [out] Boolean* auth);
+
+        /**
+         * Sets whether or not to a server needs client authentication.
+         * After calling this, #getWantClientAuth() will return false.
+         */
+        SetNeedClientAuth(
+            [in] Boolean needClientAuth);
+
+        /**
+         * Returns true if a server optionally wants to authenticate a
+         * client during handshaking. If this returns true, {@link
+         * #getNeedClientAuth} will return false.
+         */
+        GetWantClientAuth(
+            [out] Boolean* auth);
+
+        /**
+         * Sets whether or not to a server wants client authentication.
+         * After calling this, #getNeedClientAuth() will return false.
+         */
+        SetWantClientAuth(
+            [in] Boolean wantClientAuth);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

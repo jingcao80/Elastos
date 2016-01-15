@@ -1,0 +1,173 @@
+module
+{
+    interface Elastos.Core.IThread;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+    namespace Locks {
+
+    /**
+     * @Involve
+     * interface IReadWriteLock;
+     */
+    interface IReentrantReadWriteLock {
+        // Instrumentation and status
+
+        /**
+         * Returns {@code true} if this lock has fairness set true.
+         *
+         * @return {@code true} if this lock has fairness set true
+         */
+        IsFair(
+            [out] Boolean* value);
+
+        /**
+         * Queries the number of read locks held for this lock. This
+         * method is designed for use in monitoring system state, not for
+         * synchronization control.
+         * @return the number of read locks held.
+         */
+        GetReadLockCount(
+            [out] Int32* value);
+
+        /**
+         * Queries if the write lock is held by any thread. This method is
+         * designed for use in monitoring system state, not for
+         * synchronization control.
+         *
+         * @return {@code true} if any thread holds the write lock and
+         *         {@code false} otherwise
+         */
+        IsWriteLocked(
+            [out] Boolean* value);
+
+        /**
+         * Queries if the write lock is held by the current thread.
+         *
+         * @return {@code true} if the current thread holds the write lock and
+         *         {@code false} otherwise
+         */
+        IsWriteLockedByCurrentThread(
+            [out] Boolean* value);
+
+        /**
+         * Queries the number of reentrant write holds on this lock by the
+         * current thread.  A writer thread has a hold on a lock for
+         * each lock action that is not matched by an unlock action.
+         *
+         * @return the number of holds on the write lock by the current thread,
+         *         or zero if the write lock is not held by the current thread
+         */
+        GetWriteHoldCount(
+            [out] Int32* value);
+
+        /**
+         * Queries the number of reentrant read holds on this lock by the
+         * current thread.  A reader thread has a hold on a lock for
+         * each lock action that is not matched by an unlock action.
+         *
+         * @return the number of holds on the read lock by the current thread,
+         *         or zero if the read lock is not held by the current thread
+         * @since 1.6
+         */
+        GetReadHoldCount(
+            [out] Int32* value);
+
+        /**
+         * Queries whether any threads are waiting to acquire the read or
+         * write lock. Note that because cancellations may occur at any
+         * time, a {@code true} return does not guarantee that any other
+         * thread will ever acquire a lock.  This method is designed
+         * primarily for use in monitoring of the system state.
+         *
+         * @return {@code true} if there may be other threads waiting to
+         *         acquire the lock
+         */
+        HasQueuedThreads(
+            [out] Boolean* value);
+
+        /**
+         * Queries whether the given thread is waiting to acquire either
+         * the read or write lock. Note that because cancellations may
+         * occur at any time, a {@code true} return does not guarantee
+         * that this thread will ever acquire a lock.  This method is
+         * designed primarily for use in monitoring of the system state.
+         *
+         * @param thread the thread
+         * @return {@code true} if the given thread is queued waiting for this lock
+         * @throws NullPointerException if the thread is null
+         */
+        HasQueuedThread(
+            [in] IThread* thread,
+            [out] Boolean* value);
+
+        /**
+         * Returns an estimate of the number of threads waiting to acquire
+         * either the read or write lock.  The value is only an estimate
+         * because the number of threads may change dynamically while this
+         * method traverses internal data structures.  This method is
+         * designed for use in monitoring of the system state, not for
+         * synchronization control.
+         *
+         * @return the estimated number of threads waiting for this lock
+         */
+        GetQueueLength(
+            [out] Int32* value);
+
+        /**
+         * Queries whether any threads are waiting on the given condition
+         * associated with the write lock. Note that because timeouts and
+         * interrupts may occur at any time, a {@code true} return does
+         * not guarantee that a future {@code signal} will awaken any
+         * threads.  This method is designed primarily for use in
+         * monitoring of the system state.
+         *
+         * @param condition the condition
+         * @return {@code true} if there are any waiting threads
+         * @throws IllegalMonitorStateException if this lock is not held
+         * @throws IllegalArgumentException if the given condition is
+         *         not associated with this lock
+         * @throws NullPointerException if the condition is null
+         */
+        HasWaiters(
+            [in] ICondition* condition,
+            [out] Boolean* value);
+
+        /**
+         * Returns an estimate of the number of threads waiting on the
+         * given condition associated with the write lock. Note that because
+         * timeouts and interrupts may occur at any time, the estimate
+         * serves only as an upper bound on the actual number of waiters.
+         * This method is designed for use in monitoring of the system
+         * state, not for synchronization control.
+         *
+         * @param condition the condition
+         * @return the estimated number of waiting threads
+         * @throws IllegalMonitorStateException if this lock is not held
+         * @throws IllegalArgumentException if the given condition is
+         *         not associated with this lock
+         * @throws NullPointerException if the condition is null
+         */
+        GetWaitQueueLength(
+            [in] ICondition* condition,
+            [out] Int32* value);
+
+        /**
+         * Returns a string identifying this lock, as well as its lock state.
+         * The state, in brackets, includes the String {@code "Write locks ="}
+         * followed by the number of reentrantly held write locks, and the
+         * String {@code "Read locks ="} followed by the number of held
+         * read locks.
+         *
+         * @return a string identifying this lock, as well as its lock state
+         */
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Locks
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

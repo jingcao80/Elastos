@@ -1,0 +1,231 @@
+
+module
+{
+    interface Elastos.IO.IByteBuffer;
+    interface Elastos.Security.IProvider;
+
+    namespace Elastos {
+    namespace Security {
+
+    [deprecated]
+    interface IMessageDigest {
+        /**
+         * Puts this {@code MessageDigest} back in an initial state, such that it is
+         * ready to compute a one way hash value.
+         */
+        Reset();
+
+        /**
+         * Updates this {@code MessageDigest} using the given {@code byte}.
+         *
+         * @param arg0
+         *            the {@code byte} to update this {@code MessageDigest} with
+         * @see #reset()
+         */
+        Update(
+            [in] Byte arg0);
+
+        /**
+         * Updates this {@code MessageDigest} using the given {@code byte[]}.
+         *
+         * @param input
+         *            the {@code byte} array
+         * @param offset
+         *            the index of the first byte in {@code input} to update from
+         * @param len
+         *            the number of bytes in {@code input} to update from
+         * @throws IllegalArgumentException
+         *             if {@code offset} or {@code len} are not valid in respect to
+         *             {@code input}
+         */
+        Update(
+            [in] ArrayOf<Byte>* input,
+            [in] Int32 offset,
+            [in] Int32 len);
+
+        /**
+         * Updates this {@code MessageDigest} using the given {@code byte[]}.
+         *
+         * @param input
+         *            the {@code byte} array
+         * @throws NullPointerException
+         *             if {@code input} is {@code null}
+         */
+        Update(
+            [in] ArrayOf<Byte>* input);
+
+        /**
+         * Computes and returns the final hash value for this {@link MessageDigest}.
+         * After the digest is computed the receiver is reset.
+         *
+         * @return the computed one way hash value
+         * @see #reset
+         */
+        Digest(
+            [out, callee] ArrayOf<Byte>* hashValue);
+
+        /**
+         * Computes and stores the final hash value for this {@link MessageDigest}.
+         * After the digest is computed the receiver is reset.
+         *
+         * @param buf
+         *            the buffer to store the result
+         * @param offset
+         *            the index of the first byte in {@code buf} to store
+         * @param len
+         *            the number of bytes allocated for the digest
+         * @return the number of bytes written to {@code buf}
+         * @throws DigestException
+         *             if an error occurs
+         * @throws IllegalArgumentException
+         *             if {@code offset} or {@code len} are not valid in respect to
+         *             {@code buf}
+         * @see #reset()
+         */
+        Digest(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 offset,
+            [in] Int32 len,
+            [out] Int32* number);
+
+        /**
+         * Performs the final update and then computes and returns the final hash
+         * value for this {@link MessageDigest}. After the digest is computed the
+         * receiver is reset.
+         *
+         * @param input
+         *            the {@code byte} array
+         * @return the computed one way hash value
+         * @see #reset()
+         */
+        Digest(
+            [in] ArrayOf<Byte>* input,
+            [out, callee] ArrayOf<Byte>* hashValue);
+
+        ToString(
+            [out] String* str);
+
+        /**
+         * Returns the name of the algorithm of this {@code MessageDigest}.
+         *
+         * @return the name of the algorithm of this {@code MessageDigest}
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the provider associated with this {@code MessageDigest}.
+         *
+         * @return the provider associated with this {@code MessageDigest}
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Returns the engine digest length in bytes. If the implementation does not
+         * implement this function or is not an instance of {@code Cloneable},
+         * {@code 0} is returned.
+         *
+         * @return the digest length in bytes, or {@code 0}
+         */
+        GetDigestLength(
+            [out] Int32* length);
+
+        /**
+         * Updates this {@code MessageDigest} using the given {@code input}.
+         *
+         * @param input
+         *            the {@code ByteBuffer}
+         */
+        Update(
+            [in] IByteBuffer* input);
+
+        SetProvider(
+            [in] IProvider* provider);
+
+        SetAlgorithm(
+            [in] String algorithm);
+    }
+
+    [deprecated]
+    interface IMessageDigestHelper {
+        /**
+         * Returns a new instance of {@code MessageDigest} that utilizes the
+         * specified algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use
+         * @return a new instance of {@code MessageDigest} that utilizes the
+         *         specified algorithm
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] IMessageDigest** instance);
+
+        /**
+         * Returns a new instance of {@code MessageDigest} that utilizes the
+         * specified algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use
+         * @param provider
+         *            the name of the provider
+         * @return a new instance of {@code MessageDigest} that utilizes the
+         *         specified algorithm from the specified provider
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available
+         * @throws NoSuchProviderException
+         *             if the specified provider is not available
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] IMessageDigest** instance);
+
+        /**
+         * Returns a new instance of {@code MessageDigest} that utilizes the
+         * specified algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use
+         * @param provider
+         *            the provider
+         * @return a new instance of {@code MessageDigest} that utilizes the
+         *         specified algorithm from the specified provider
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}
+         * @throws IllegalArgumentException if {@code provider == null}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] IMessageDigest** instance);
+
+        /**
+         * Indicates whether to digest are equal by performing a simply
+         * byte-per-byte compare of the two digests.
+         *
+         * @param digesta
+         *            the first digest to be compared
+         * @param digestb
+         *            the second digest to be compared
+         * @return {@code true} if the two hashes are equal, {@code false} otherwise
+         */
+        IsEqual(
+            [in] ArrayOf<Byte>* digesta,
+            [in] ArrayOf<Byte>* digestb,
+            [out] Boolean* result);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

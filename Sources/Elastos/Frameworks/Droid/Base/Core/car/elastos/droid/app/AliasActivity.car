@@ -1,0 +1,34 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+
+    /**
+     * Stub activity that launches another activity (and then finishes itself)
+     * based on information in its component's manifest meta-data.  This is a
+     * simple way to implement an alias-like mechanism.
+     *
+     * To use this activity, you should include in the manifest for the associated
+     * component an entry named "android.app.alias".  It is a reference to an XML
+     * resource describing an intent that launches the real application.
+     */
+    /**
+     * @Invovle
+     * interface IActivity
+     */
+    interface IAliasActivity {
+        /**
+         * This is the name under which you should store in your component the
+         * meta-data information about the alias.  It is a reference to an XML
+         * resource describing an intent that launches the real application.
+         * {@hide}
+         */
+        const String ALIAS_META_DATA = "android.app.alias";
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

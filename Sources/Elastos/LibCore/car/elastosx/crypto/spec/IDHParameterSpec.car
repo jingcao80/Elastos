@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The algorithm parameter specification for the Diffie-Hellman algorithm.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+     */
+    interface IDHParameterSpec {
+        /**
+         * Returns the <i>prime modulus</i> of this parameter specification.
+         *
+         * @return the prime modulus.
+         */
+        GetP(
+            [out] IBigInteger ** bi);
+
+        /**
+         * Returns the <i>base generator</i> of this parameter specification.
+         *
+         * @return the base generator.
+         */
+        GetG(
+            [out] IBigInteger ** bi);
+
+        /**
+         * Returns the size (in bits) of the <i>random exponent</i>.
+         *
+         * @return the size (in bits) of the random exponent.
+         */
+        GetL(
+            [out] Int32 * result);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

@@ -1,0 +1,40 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    interface IFunction {
+        /**
+         * Callback for regular function.
+         *
+         * @param fc function's context for reporting result
+         * @param args String array of arguments
+         */
+        Function(
+            [in] IFunctionContext* fc,
+            [in] ArrayOf<String> args);
+
+        /**
+         * Callback for one step in aggregate function.
+         *
+         * @param fc function's context for reporting result
+         * @param args String array of arguments
+         */
+        Step(
+            [in] IFunctionContext* fc,
+            [in] ArrayOf<String> args);
+
+        /**
+         * Callback for final step in aggregate function.
+         *
+         * @param fc function's context for reporting result
+         */
+        LastStep(
+            [in] IFunctionContext* fc);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

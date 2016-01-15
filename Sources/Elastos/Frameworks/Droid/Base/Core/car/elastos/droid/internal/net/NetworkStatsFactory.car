@@ -1,0 +1,76 @@
+module
+{
+    using interface Elastos.IO.IFile;
+
+    interface Elastos.Droid.Net.INetworkStats;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Net {
+
+    [local, deprecated]
+    interface INetworkStatsFactory {
+        /**
+         * Parse and return interface-level summary {@link NetworkStats} measured
+         * using {@code /proc/net/dev} style hooks, which may include non IP layer
+         * traffic. Values monotonically increase since device boot, and may include
+         * details about inactive interfaces.
+         *
+         * @throws IllegalStateException when problem parsing stats.
+         */
+        ReadNetworkStatsSummaryDev(
+            [out] INetworkStats** stats);
+
+        /**
+         * Parse and return interface-level summary {@link NetworkStats}. Designed
+         * to return only IP layer traffic. Values monotonically increase since
+         * device boot, and may include details about inactive interfaces.
+         *
+         * @throws IllegalStateException when problem parsing stats.
+         */
+        ReadNetworkStatsSummaryXt(
+            [out] INetworkStats** stats);
+
+        ReadNetworkStatsDetail(
+            [out] INetworkStats** stats);
+
+        ReadNetworkStatsDetail(
+            [in] Int32 limitUid,
+            [in] ArrayOf<String>* limitIfaces,
+            [in] Int32 limitTag,
+            [in] INetworkStats* lastStats,
+            [out] INetworkStats** stats);
+
+        AssertEquals(
+            [in] INetworkStats* expected,
+            [in] INetworkStats* actual);
+    }
+
+    [local, deprecated]
+    interface INetworkStatsFactoryHelper {
+        NoteStackedIface(
+            [in] String stackedIface,
+            [in] String baseIface);
+
+        JavaReadNetworkStatsDetail(
+            [in] IFile* detailPath,
+            [in] Int32 limitUid,
+            [in] ArrayOf<String>* limitIfaces,
+            [in] Int32 limitTag,
+            [out] INetworkStats** stats);
+
+        NativeReadNetworkStatsDetail(
+            [in] INetworkStats* stats,
+            [in] String path,
+            [in] Int32 limitUid,
+            [in] ArrayOf<String>* limitIfaces,
+            [in] Int32 limitTag,
+            [out] Int32* result);
+    }
+
+    } // namespace Net
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

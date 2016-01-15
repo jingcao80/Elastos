@@ -1,0 +1,161 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * @Involve
+     * interface IIterable;
+     * interface ICollection;
+     * interface ISet;
+     * interface ICloneable;
+     * interface ISerializable;
+     */
+    [deprecated]
+    interface IEnumSet {
+
+        Complement();
+
+        SetRange(
+            [in] IInterface* start,
+            [in] IInterface* end);
+
+        /**
+         * interfaces from ICollection
+         *
+         */
+        GetIterator(
+            [out] IIterator** it);
+
+        Add(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Add(
+            [in] IInterface* object);
+
+        AddAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] ICollection* collection);
+
+        Clear();
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        ContainsAll(
+            [in] ICollection* collection,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        Remove(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Remove(
+            [in] IInterface* object);
+
+        RemoveAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RemoveAll(
+            [in] ICollection* collection);
+
+        RetainAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RetainAll(
+            [in] ICollection* collection);
+
+        GetSize(
+            [out] Int32* size);
+
+        ToArray(
+            [out, callee] ArrayOf<IInterface*>* array);
+
+        ToArray(
+            [in] ArrayOf<IInterface*>* inArray,
+            [out, callee] ArrayOf<IInterface*>* outArray);
+    }
+
+    [deprecated]
+    interface IEnumSetHelper {
+        NoneOf(
+            [in] InterfaceID type,
+            [out] IEnumSet** res);
+
+        AllOf(
+            [in] InterfaceID type,
+            [out] IEnumSet** res);
+
+        CopyOf(
+            [in] IEnumSet* s,
+            [out] IEnumSet** res);
+
+        CopyOf(
+            [in] ICollection* c,
+            [out] IEnumSet** set);
+
+        ComplementOf(
+            [in] IEnumSet* s,
+            [out] IEnumSet** res);
+
+        Of(
+            [in] IInterface* i,
+            [out] IEnumSet** res);
+
+        Of(
+            [in] IInterface* i1,
+            [in] IInterface* i2,
+            [out] IEnumSet** res);
+
+        Of(
+            [in] IInterface* i1,
+            [in] IInterface* i2,
+            [in] IInterface* i3,
+            [out] IEnumSet** res);
+
+        Of(
+            [in] IInterface* i1,
+            [in] IInterface* i2,
+            [in] IInterface* i3,
+            [in] IInterface* i4,
+            [out] IEnumSet** res);
+
+        Of(
+            [in] IInterface* i1,
+            [in] IInterface* i2,
+            [in] IInterface* i3,
+            [in] IInterface* i4,
+            [in] IInterface* i5,
+            [out] IEnumSet** res);
+
+        Of(
+            [in] ArrayOf<IInterface*>* array,
+            [out] IEnumSet** res);
+
+        Range(
+            [in] IInterface* start,
+            [in] IInterface* end,
+            [out] IEnumSet** set);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

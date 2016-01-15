@@ -1,0 +1,84 @@
+$INPUT class
+$
+$with all interface do
+$ IF attrib is not "callback" and attrib is not "clsobj" and attrib is not "filter"
+$
+    static CARAPI NewViaDynamicBinding(
+        /*[in]*/ const String& name,
+        /*[out]*/ ${name} ** pp${name})
+    {
+        if (NULL == pp${name}) return E_INVALID_ARGUMENT;
+
+        Int32 i;
+        IModuleInfo *pModuleInfo = NULL;
+        Int32 nClassCount;
+        BufferOf<IClassInfo *> *pClassInfos = NULL;
+        IClassInfo *pClassInfo = NULL;
+        IClassInfo *pGenericInfo = NULL;
+        Boolean hasGeneric = FALSE;
+        ECode ec;
+        ClassID cid;
+        cid.pUunm = (char *)malloc(256*sizeof(char));
+        if (NULL == cid.pUunm) {
+            ec = E_OUT_OF_MEMORY;
+            goto Exit;
+        }
+
+        ec = _CReflector_AcquireModuleInfo(name, &pModuleInfo);
+        if (FAILED(ec)) goto Exit;
+
+        ec = pModuleInfo->GetClassCount(&nClassCount);
+        if (FAILED(ec)) goto Exit;
+
+        pClassInfos = BufferOf<IClassInfo *>::Alloc(nClassCount);
+        if (NULL == pClassInfos) {
+            ec = E_OUT_OF_MEMORY;
+            goto Exit;
+        }
+        else {
+            pClassInfos->SetUsed(nClassCount);
+            for (i = 0; i < nClassCount; i++) (*pClassInfos)[i] = NULL;
+        }
+
+        ec = pModuleInfo->GetAllClassInfos(pClassInfos);
+        if (FAILED(ec)) goto Exit;
+
+        for (i = 0; i < nClassCount; i++) {
+            pClassInfo = (*pClassInfos)[i];
+            ec = pClassInfo->HasGeneric(&hasGeneric);
+            if (FAILED(ec)) goto Exit;
+
+            if (!hasGeneric) continue;
+
+            ec = pClassInfo->GetGenericInfo(&pGenericInfo);
+            if (FAILED(ec)) goto Exit;
+
+            ec = pGenericInfo->GetId(&cid);
+            if (FAILED(ec)) goto Exit;
+
+            if (ECLSID_${class.name}.clsid == cid.clsid) {
+                ec = pClassInfo->CreateObject((IInterface **)pp${name});
+                goto Exit;
+            }
+        }
+
+        ec = E_NOT_IMPLEMENTED;
+
+Exit:
+        if (NULL != pModuleInfo) pModuleInfo->Release();
+        if (NULL != pClassInfos) {
+            for (i = 0; i < nClassCount; i++) {
+                if (NULL != (*pClassInfos)[i]) {
+                    (*pClassInfos)[i]->Release();
+                }
+            }
+            BufferOf<IClassInfo *>::Free(pClassInfos);
+        }
+        if (NULL != pGenericInfo) pGenericInfo->Release();
+        if (NULL != cid.pUunm) free(cid.pUunm);
+
+        return ec;
+    }
+
+$ end if
+$end do

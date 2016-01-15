@@ -1,0 +1,93 @@
+
+module
+{
+    merge("net/ethernet/EthernetDevInfo.car");
+    // merge("net/ethernet/EthernetNative.car");
+    merge("net/ethernet/IEthernetManager.car");
+    merge("net/ethernet/EthernetManager.car");
+
+    merge("net/nsd/NsdServiceInfo.car");
+    merge("net/nsd/NsdManager.car");
+    merge("net/nsd/INsdManager.car");
+    merge("net/nsd/DnsSdTxtRecord.car");
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Net.IINetworkManagementEventObserver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Ethernet {
+
+        singleton class CEthernetManager {
+            constructor();
+
+            interface IEthernetManager;
+        }
+
+        class CEthernetDevInfo {
+            constructor();
+
+            interface IEthernetDevInfo;
+            interface IParcelable;
+        }
+
+        class CEDTInterfaceObserver {
+            constructor(
+                [in] Handle32 tracker);
+
+            interface IINetworkManagementEventObserver;
+            interface IBinder;
+        }
+    }
+    }
+    }
+    }
+
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Nsd {
+
+        [deprecated, local]
+        class CNsdManager {
+            constructor(
+                [in] IContext* ctx,
+                [in] IINsdManager* service);
+
+            interface INsdManager;
+        }
+
+        class CNsdServiceInfo {
+            constructor();
+
+            constructor(
+                [in] String sn,
+                [in] String rt,
+                [in] IDnsSdTxtRecord* tr);
+
+            interface INsdServiceInfo;
+            interface IParcelable;
+        }
+
+        [deprecated]
+        class CDnsSdTxtRecord {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Byte>* data);
+
+            constructor(
+                [in] IDnsSdTxtRecord* src);
+
+            interface IDnsSdTxtRecord;
+            interface IParcelable;
+        }
+
+    } // namespace Nsd
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,17 @@
+
+TARGET_NAME= api
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AwByteBuffer.cpp
+SOURCES += AwCancellatioinSignal.cpp
+SOURCES += AwSurface.cpp
+SOURCES += AwHashSet.cpp
+SOURCES += AwMotionEvent.cpp
+SOURCES += AwNativeWindow.cpp

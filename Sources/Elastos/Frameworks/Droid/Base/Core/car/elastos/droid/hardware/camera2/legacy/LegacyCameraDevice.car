@@ -1,0 +1,114 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Hardware.Camera2.ICaptureRequest;
+    interface Elastos.Droid.Hardware.Camera2.Utils.ILongParcelable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    /**
+     * This class emulates the functionality of a Camera2 device using a the old Camera class.
+     *
+     * <p>
+     * There are two main components that are used to implement this:
+     * - A state machine containing valid Camera2 device states ({@link CameraDeviceState}).
+     * - A message-queue based pipeline that manages an old Camera class, and executes capture and
+     *   configuration requests.
+     * </p>
+     * @ invoke
+     * interface ICloseable
+     */
+    interface ILegacyCameraDevice {
+
+        /**
+         * Configure the device with a set of output surfaces.
+         *
+         * <p>Using empty or {@code null} {@code outputs} is the same as unconfiguring.</p>
+         *
+         * <p>Every surface in {@code outputs} must be non-{@code null}.</p>
+         *
+         * @param outputs a list of surfaces to set.
+         * @return an error code for this binder operation, or {@link NO_ERROR}
+         *          on success.
+         */
+        ConfigureOutputs(
+            [in] IList* outputs,
+            [out] Int32* value);
+
+        /**
+         * Submit a burst of capture requests.
+         *
+         * @param requestList a list of capture requests to execute.
+         * @param repeating {@code true} if this burst is repeating.
+         * @param frameNumber an output argument that contains either the frame number of the last frame
+         *                    that will be returned for this request, or the frame number of the last
+         *                    frame that will be returned for the current repeating request if this
+         *                    burst is set to be repeating.
+         * @return the request id.
+         */
+         SubmitRequestList(
+            [in] IList* requestList,
+            [in] Boolean repeating,
+            [in] ILongParcelable* frameNumber,
+            [out] Int32* value);
+
+        /**
+         * Submit a single capture request.
+         *
+         * @param request the capture request to execute.
+         * @param repeating {@code true} if this request is repeating.
+         * @param frameNumber an output argument that contains either the frame number of the last frame
+         *                    that will be returned for this request, or the frame number of the last
+         *                    frame that will be returned for the current repeating request if this
+         *                    request is set to be repeating.
+         * @return the request id.
+         */
+        SubmitRequest(
+            [in] ICaptureRequest* request,
+            [in] Boolean repeating,
+            [in] ILongParcelable* frameNumber,
+            [out] Int32* value);
+
+        /**
+         * Cancel the repeating request with the given request id.
+         *
+         * @param requestId the request id of the request to cancel.
+         * @return the last frame number to be returned from the HAL for the given repeating request, or
+         *          {@code INVALID_FRAME} if none exists.
+         */
+        CancelRequest(
+            [in] Int32 requestId,
+            [out] Int64* value);
+
+        /**
+         * Block until the {@link ICameraDeviceCallbacks#onCameraIdle()} callback is received.
+         */
+        WaitUntilIdle();
+
+        /**
+         * Flush any pending requests.
+         *
+         * @return the last frame number.
+         */
+        Flush(
+            [out] Int64* value);
+
+        /**
+         * Return {@code true} if the device has been closed.
+         */
+        IsClosed(
+            [out] Boolean* value);
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

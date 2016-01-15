@@ -1,0 +1,179 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    [local]
+    interface IToast {
+        /**
+         * Show the view or text notification for a short period of time.  This time
+         * could be user-definable.  This is the default.
+         * @see #setDuration
+         */
+        const Int32 LENGTH_SHORT = 0;
+
+         /**
+         * Show the view or text notification for a long period of time.  This time
+         * could be user-definable.
+         * @see #setDuration
+         */
+        const Int32 LENGTH_LONG = 1;
+
+        /**
+        * Show the view for the specified duration.
+        */
+        Show();
+
+        /**
+        * Close the view if it's showing, or don't show it if it isn't showing yet.
+        * You do not normally have to call this.  Normally view will disappear on its own
+        * after the appropriate duration.
+        */
+        Cancel();
+
+        /**
+        * Set the view to show.
+        * @see #getView
+        */
+        SetView(
+            [in] IView* view);
+
+        /**
+        * Return the view.
+        * @see #setView
+        */
+        GetView(
+            [out] IView** view);
+
+        /**
+        * Set how long to show the view for.
+        * @see #LENGTH_SHORT
+        * @see #LENGTH_LONG
+        */
+        SetDuration(
+            [in] Int32 duration);
+
+        /**
+        * Return the duration.
+        * @see #setDuration
+        */
+        GetDuration(
+            [out] Int32* duration);
+
+        /**
+        * Set the margins of the view.
+        *
+        * @param horizontalMargin The horizontal margin, in percentage of the
+        *        container width, between the container's edges and the
+        *        notification
+        * @param verticalMargin The vertical margin, in percentage of the
+        *        container height, between the container's edges and the
+        *        notification
+        */
+        SetMargin(
+            [in] Float horizontalMargin,
+            [in] Float verticalMargin);
+
+        /**
+        * Return the horizontal margin.
+        */
+        GetHorizontalMargin(
+            [out] Float* horizontalMargin);
+
+        /**
+        * Return the vertical margin.
+        */
+        GetVerticalMargin(
+            [out] Float* verticalMargin);
+
+        /**
+        * Set the location at which the notification should appear on the screen.
+        * @see android.view.Gravity
+        * @see #getGravity
+        */
+        SetGravity(
+            [in] Int32 gravity,
+            [in] Int32 xOffset,
+            [in] Int32 yOffset);
+
+        /**
+        * Get the location at which the notification should appear on the screen.
+        * @see android.view.Gravity
+        * @see #getGravity
+        */
+        GetGravity(
+            [out] Int32* gravity);
+
+        /**
+        * Return the X offset in pixels to apply to the gravity's location.
+        */
+        GetXOffset(
+            [out] Int32* xOffset);
+
+        /**
+        * Return the Y offset in pixels to apply to the gravity's location.
+        */
+        GetYOffset(
+            [out] Int32* yOffset);
+
+        /**
+         * Update the text in a Toast that was previously created using one of the makeText() methods.
+         * @param resId The new text for the Toast.
+         */
+        SetText(
+            [in] Int32 resId);
+
+        /**
+         * Update the text in a Toast that was previously created using one of the makeText() methods.
+         * @param s The new text for the Toast.
+         */
+        SetText(
+            [in] ICharSequence* s);
+    }
+
+    [local]
+    interface IToastHelper {
+        /**
+         * Make a standard toast that just contains a text view.
+         *
+         * @param context  The context to use.  Usually your {@link android.app.Application}
+         *                 or {@link android.app.Activity} object.
+         * @param text     The text to show.  Can be formatted text.
+         * @param duration How long to display the message.  Either {@link #LENGTH_SHORT} or
+         *                 {@link #LENGTH_LONG}
+         *
+         */
+        MakeText(
+            [in] IContext* ctx,
+            [in] ICharSequence* text,
+            [in] Int32 duration,
+            [out] IToast** toast);
+
+        /**
+         * Make a standard toast that just contains a text view with the text from a resource.
+         *
+         * @param context  The context to use.  Usually your {@link android.app.Application}
+         *                 or {@link android.app.Activity} object.
+         * @param resId    The resource id of the string resource to use.  Can be formatted text.
+         * @param duration How long to display the message.  Either {@link #LENGTH_SHORT} or
+         *                 {@link #LENGTH_LONG}
+         *
+         * @throws Resources.NotFoundException if the resource can't be found.
+         */
+        MakeText(
+            [in] IContext* ctx,
+            [in] Int32 resId,
+            [in] Int32 duration,
+            [out] IToast** toast);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

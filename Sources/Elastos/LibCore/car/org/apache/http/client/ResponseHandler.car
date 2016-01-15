@@ -1,0 +1,43 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpResponse;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+
+    /**
+     * Handler that encapsulates the process of generating a response object
+     * from a {@link HttpResponse}.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 4.0
+     */
+    interface IResponseHandler {
+
+        /**
+         * Processes an {@link HttpResponse} and returns some value
+         * corresponding to that response.
+         *
+         * @param response The response to process
+         * @return A value determined by the response
+         *
+         * @throws ClientProtocolException in case of an http protocol error
+         * @throws IOException in case of a problem or the connection was aborted
+         */
+        HandleResponse(
+            [in] IHttpResponse* response,
+            [out] IInterface** value);
+
+    }
+
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

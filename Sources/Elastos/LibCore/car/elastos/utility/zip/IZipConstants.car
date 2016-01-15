@@ -1,0 +1,55 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    interface IZipConstants {
+        const Int64 LOCSIG = 0x4034b50;
+        const Int64 EXTSIG = 0x8074b50;
+        const Int64 CENSIG = 0x2014b50;
+        const Int64 ENDSIG = 0x6054b50;
+
+        const Int32 LOCHDR = 30;
+        const Int32 EXTHDR = 16;
+        const Int32 CENHDR = 46;
+        const Int32 ENDHDR = 22;
+        const Int32 LOCVER = 4;
+        const Int32 LOCFLG = 6;
+        const Int32 LOCHOW = 8;
+        const Int32 LOCTIM = 10;
+        const Int32 LOCCRC = 14;
+        const Int32 LOCSIZ = 18;
+        const Int32 LOCLEN = 22;
+        const Int32 LOCNAM = 26;
+        const Int32 LOCEXT = 28;
+        const Int32 EXTCRC = 4;
+        const Int32 EXTSIZ = 8;
+        const Int32 EXTLEN = 12;
+        const Int32 CENVEM = 4;
+        const Int32 CENVER = 6;
+        const Int32 CENFLG = 8;
+        const Int32 CENHOW = 10;
+        const Int32 CENTIM = 12;
+        const Int32 CENCRC = 16;
+        const Int32 CENSIZ = 20;
+        const Int32 CENLEN = 24;
+        const Int32 CENNAM = 28;
+        const Int32 CENEXT = 30;
+        const Int32 CENCOM = 32;
+        const Int32 CENDSK = 34;
+        const Int32 CENATT = 36;
+        const Int32 CENATX = 38;
+        const Int32 CENOFF = 42;
+        const Int32 ENDSUB = 8;
+        const Int32 ENDTOT = 10;
+        const Int32 ENDSIZ = 12;
+        const Int32 ENDOFF = 16;
+        const Int32 ENDCOM = 20;
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

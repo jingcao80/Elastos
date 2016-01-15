@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+     * @Involve
+     * interface ICertStoreParameters
+     * interface Elastos.Core.ICloneable;
+     */
+    interface ICollectionCertStoreParameters {
+        /**
+         * Returns the collection where the {@code Certificate}s and {@code CRL}s
+         * are retrieved from.
+         *
+         * @return the collection where the {@code Certificate}s and {@code CRL}s
+         *         will be retrieved from.
+         */
+        GetCollection(
+            [out] ICollection** collection);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

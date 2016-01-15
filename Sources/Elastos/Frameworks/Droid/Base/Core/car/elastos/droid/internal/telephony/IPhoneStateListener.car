@@ -1,0 +1,76 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Telephony.ICellInfo;
+    interface Elastos.Droid.Telephony.IServiceState;
+    interface Elastos.Droid.Telephony.ISignalStrength;
+    interface Elastos.Droid.Telephony.IPreciseCallState;
+    interface Elastos.Droid.Telephony.IPreciseDataConnectionState;
+    interface Elastos.Droid.Telephony.IDataConnectionRealTimeInfo;
+    interface Elastos.Droid.Telephony.IVoLteServiceState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    [oneway, deprecated]
+    interface IIPhoneStateListener {
+        OnServiceStateChanged(
+            [in] IServiceState* serviceState);
+
+        OnSignalStrengthChanged(
+            [in] Int32 asu);
+
+        OnMessageWaitingIndicatorChanged(
+            [in] Boolean mwi);
+
+        OnCallForwardingIndicatorChanged(
+            [in] Boolean cfi);
+
+        // we use bundle here instead of CellLocation so it can get the right subclass
+        OnCellLocationChanged(
+            [in] IBundle* location);
+
+        OnCallStateChanged(
+            [in] Int32 state,
+            [in] String incomingNumber);
+
+        OnDataConnectionStateChanged(
+            [in] Int32 state,
+            [in] Int32 networkType);
+
+        OnDataActivity(
+            [in] Int32 direction);
+
+        OnSignalStrengthsChanged(
+            [in] ISignalStrength* signalStrength);
+
+        OnOtaspChanged(
+            [in] Int32 otaspMode);
+
+        OnCellInfoChanged(
+            [in] ArrayOf<ICellInfo*>* cellInfo);
+
+        OnPreciseCallStateChanged(
+            [in] IPreciseCallState* callState);
+
+        OnPreciseDataConnectionStateChanged(
+            [in] IPreciseDataConnectionState* dataConnectionState);
+
+        OnDataConnectionRealTimeInfoChanged(
+            [in] IDataConnectionRealTimeInfo* dcRtInfo);
+
+        OnVoLteServiceStateChanged(
+            [in] IVoLteServiceState* lteState);
+
+        OnOemHookRawEvent(
+            [in] ArrayOf<Byte>* rawData);
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,36 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ICellIdentityCdma {
+
+        Copy(
+            [out] ICellIdentityCdma** cid);
+
+        GetNetworkId(
+            [out] Int32* networkid);
+
+        GetSystemId(
+            [out] Int32* systemid);
+
+        GetBasestationId(
+            [out] Int32* basestationid);
+
+        GetLongitude(
+            [out] Int32* longitude);
+
+        GetLatitude(
+            [out] Int32* latitude);
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

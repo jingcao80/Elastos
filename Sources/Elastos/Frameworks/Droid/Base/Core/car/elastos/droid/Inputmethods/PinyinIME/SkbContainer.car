@@ -1,0 +1,47 @@
+
+module
+{
+    interface Elastos.Droid.View.IGestureDetector;
+    interface Elastos.Droid.Inputmethods.PinyinIME.IInputModeSwitcher;
+    interface Elastos.Droid.InputMethodService.IInputMethodService;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Inputmethods {
+    namespace PinyinIME {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IRelativeLayout
+     */
+    [local]
+    interface ISkbContainer {
+        SetService(
+            [in] IInputMethodService* service);
+
+        SetInputModeSwitcher(
+            [in] IInputModeSwitcher* inputModeSwitcher);
+
+        SetGestureDetector(
+            [in] IGestureDetector* gestureDetector);
+
+        IsCurrentSkbSticky(
+            [out] Boolean* sticky);
+
+        ToggleCandidateMode(
+            [in] Boolean candidatesShowing);
+
+        UpdateInputMode();
+
+        HandleBack(
+            [in] Boolean realAction,
+            [out] Boolean* result);
+
+        DismissPopups();
+    }
+
+    } // namespace PinyinIME
+    } // namespace Inputmethods
+    } // namespace Droid
+    } // namespace Elastos
+}

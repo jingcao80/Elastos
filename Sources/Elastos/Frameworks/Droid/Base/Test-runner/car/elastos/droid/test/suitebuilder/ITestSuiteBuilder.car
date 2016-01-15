@@ -1,0 +1,96 @@
+
+module
+{
+    using interface Eunit.Framework.ITestSuite;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Internal.Utility.IPredicate;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Test {
+    namespace SuiteBuilder {
+
+    [deprecated, local]
+    interface ITestSuiteBuilder {
+        AddTestClassByName(
+            [in] String testPackageName,
+            [in] String testClassName,
+            [in] String testMethodName,
+            [in] IContext* context);
+
+        AddTestSuite(
+            [in] ITestSuite* testSuite);
+
+        /**
+         * Include all tests that satisfy the requirements in the given packages and all sub-packages,
+         * unless otherwise specified.
+         *
+         * @param packageNames Names of packages to add.
+         * @return The builder for method chaining.
+         */
+        IncludePackages(
+            [in] ArrayOf<String>* packageNames);
+
+        /**
+         * Exclude all tests in the given packages and all sub-packages, unless otherwise specified.
+         *
+         * @param packageNames Names of packages to remove.
+         * @return The builder for method chaining.
+         */
+        ExcludePackages(
+            [in] ArrayOf<String>* packageNames);
+
+        /**
+         * Exclude tests that fail to satisfy all of the given predicates.
+         *
+         * @param predicates Predicates to add to the list of requirements.
+         * @return The builder for method chaining.
+         */
+        AddRequirements(
+            [in] IList* predicates);
+
+        /**
+         * Include all junit tests that satisfy the requirements in the calling class' package and all
+         * sub-packages.
+         *
+         * @return The builder for method chaining.
+         */
+        IncludeAllPackagesUnderHere();
+
+        /**
+         * Override the default name for the suite being built. This should generally be called if you
+         * call {@link #addRequirements(com.android.internal.util.Predicate[])} to make it clear which
+         * tests will be included. The name you specify is automatically prefixed with the package
+         * containing the tests to be run. If more than one package is specified, the first is used.
+         *
+         * @param newSuiteName Prefix of name to give the suite being built.
+         * @return The builder for method chaining.
+         */
+        Named(
+            [in] String newSuiteName);
+
+        /**
+         * Call this method once you've configured your builder as desired.
+         *
+         * @return The suite containing the requested tests.
+         */
+        Build(
+            [out] ITestSuite** suite);
+
+        /**
+         * Exclude tests that fail to satisfy all of the given predicates. If you call this method, you
+         * probably also want to call {@link #named(String)} to override the default suite name.
+         *
+         * @param predicates Predicates to add to the list of requirements.
+         * @return The builder for method chaining.
+         */
+        AddRequirements(
+            [in] ArrayOf<IPredicate*>* predicates);
+    }
+
+    } // namespace SuiteBuilder
+    } // namespace Test
+    } // namespace Droid
+    } // namespace Elastos
+}

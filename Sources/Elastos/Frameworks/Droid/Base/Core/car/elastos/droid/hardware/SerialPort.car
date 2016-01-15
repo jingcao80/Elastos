@@ -1,0 +1,74 @@
+
+module
+{
+    using interface Elastos.IO.IByteBuffer;
+
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /**
+     * @hide
+     */
+    interface ISerialPort {
+        /**
+         * SerialPort should only be instantiated by SerialManager
+         * Speed must be one of 50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600,
+         * 19200, 38400, 57600, 115200, 230400, 460800, 500000, 576000, 921600, 1000000, 1152000,
+         * 1500000, 2000000, 2500000, 3000000, 3500000, 4000000
+         *
+         * @hide
+         */
+        Open(
+            [in] IParcelFileDescriptor* pfd,
+            [in] Int32 speed);
+
+        /**
+         * Closes the serial port
+         */
+        Close();
+
+        /**
+         * Returns the name of the serial port
+         *
+         * @return the serial port's name
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Reads data into the provided buffer.
+         * Note that the value returned by {@link java.nio.Buffer#position()} on this buffer is
+         * unchanged after a call to this method.
+         *
+         * @param buffer to read into
+         * @return number of bytes read
+         */
+        Read(
+            [in] IByteBuffer* buffer,
+            [out] Int32* num);
+
+        /**
+         * Writes data from provided buffer.
+         * Note that the value returned by {@link java.nio.Buffer#position()} on this buffer is
+         * unchanged after a call to this method.
+         *
+         * @param buffer to write
+         * @param length number of bytes to write
+         */
+        Write(
+            [in] IByteBuffer* buffer,
+            [in] Int32 length);
+
+        /**
+         * Sends a stream of zero valued bits for 0.25 to 0.5 seconds
+         */
+        SendBreak();
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

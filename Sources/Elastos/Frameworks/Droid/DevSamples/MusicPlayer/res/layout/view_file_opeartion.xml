@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/title_bar_height"
+    android:orientation="horizontal" >
+
+    <Button
+        android:id="@+file_opt/btn_all_pick"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/title_bar_height"
+        android:layout_alignParentLeft="true"
+        android:text="@string/all_pick" />
+
+    <Button
+        android:id="@+file_opt/btn_share"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/title_bar_height"
+        android:layout_toRightOf="@+file_opt/btn_all_pick"
+        android:gravity="center_vertical"
+        android:text="@string/share" />
+
+    <Button
+        android:id="@+file_opt/btn_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/title_bar_height"
+        android:layout_marginLeft="5dip"
+        android:layout_toRightOf="@+file_opt/btn_share"
+        android:text="@string/delete" />
+
+    <Button
+        android:id="@+file_opt/btn_folder"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/title_bar_height"
+        android:layout_toRightOf="@+file_opt/btn_delete"
+        android:text="@string/detail_info" />
+
+</RelativeLayout>

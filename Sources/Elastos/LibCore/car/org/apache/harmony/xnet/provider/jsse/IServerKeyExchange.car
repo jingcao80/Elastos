@@ -1,0 +1,48 @@
+
+module
+{
+    using interface Elastos.Security.Interfaces.IRSAPublicKey;
+    using interface Elastos.Math.IBigInteger;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     *
+     * Represents server key exchange message.
+     * @see <a href="http://www.ietf.org/rfc/rfc2246.txt">TLS 1.0 spec., 7.4.3.
+     * Server key exchange message.</a>
+     *
+     */
+    interface IServerKeyExchange extends IMessage {
+        /**
+         * Returns RSAPublicKey generated using ServerRSAParams
+         * (rsa_modulus and rsa_exponent).
+         *
+         * @return
+         */
+        GetRSAPublicKey(
+            [out] IRSAPublicKey** key);
+    }
+
+    interface IServerKeyExchangeHelper {
+        /**
+         * Remove first byte if 0. Needed because BigInteger.toByteArray() sometimes
+         * returns a zero prefix.
+         */
+        ToUnsignedByteArray(
+            [in] IBigInteger* bi,
+            [out, callee] ArrayOf<Byte>* byteArray);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,32 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= lube
+TARGET_TYPE= exe
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES += $(MAKEDIR)/../inc;
+INCLUDES += $(MAKEDIR)/../../inc;
+INCLUDES += $(INCLUDESTEMP);
+
+SOURCES = lube.cpp
+SOURCES += cmdarg.cpp
+SOURCES += lube.rc
+
+ELASTOS_LIBS = ../lubase/lubase.lib
+ELASTOS_LIBS += ../userfunc/userfunc.lib
+ELASTOS_LIBS += ../../Carc/clsutil/clsutil.lib
+ELASTOS_LIBS += ../../Carc/clsbase/clsbase.lib
+ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+LIBRARIES += -lz
+else
+LIBRARIES += $(XDK_USER_LIB)/libz.lib
+EXTERN_LIBS = user32
+EXTERN_LIBS += msvcrt
+EXTERN_LIBS += kernel32
+EXTERN_LIBS += uuid
+EXTERN_LIBS += oleaut32
+endif
+LIBRARIES += -lstdc++
+

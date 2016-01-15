@@ -1,0 +1,25 @@
+
+TARGET_NAME = libcore.utility
+TARGET_TYPE = lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/libcore;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/utility;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility;
+
+SOURCES = BasicLruCache.cpp
+SOURCES += CBasicLruCache.cpp
+SOURCES += EmptyArray.cpp
+SOURCES += CZoneInfoDB.cpp
+SOURCES += CCollectionUtils.cpp
+SOURCES += ZoneInfo.cpp
+SOURCES += CZoneInfoWallTime.cpp
+SOURCES += COffsetIntervalHelper.cpp
+SOURCES += CZoneInfoHelper.cpp

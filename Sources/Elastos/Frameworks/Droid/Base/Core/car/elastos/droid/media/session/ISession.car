@@ -1,0 +1,74 @@
+module
+{
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Media.IAudioAttributes;
+    interface Elastos.Droid.Media.IMediaMetadata;
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+    interface Elastos.Droid.Media.Session.IISessionController;
+    interface Elastos.Droid.Media.Session.IPlaybackState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    interface IISession {
+        SendEvent(
+            [in] String event,
+            [in] IBundle * data);
+
+        GetController(
+            [out] IISessionController ** result);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        SetActive(
+            [in] Boolean active);
+
+        SetMediaButtonReceiver(
+            [in] IPendingIntent * mbr);
+
+        SetLaunchPendingIntent(
+            [in] IPendingIntent * pi);
+
+        Destroy();
+
+        // These commands are for the TransportPerformer
+        SetMetadata(
+            [in] IMediaMetadata * metadata);
+
+        SetPlaybackState(
+            [in] IPlaybackState * state);
+
+        SetQueue(
+            [in] IParceledListSlice * queue);
+
+        SetQueueTitle(
+            [in] ICharSequence * title);
+
+        SetExtras(
+            [in] IBundle * extras);
+
+        SetRatingType(
+            [in] Int32 type);
+
+        // These commands relate to volume handling
+        SetPlaybackToLocal(
+            [in] IAudioAttributes * attributes);
+
+        SetPlaybackToRemote(
+            [in] Int32 control,
+            [in] Int32 max);
+
+        SetCurrentVolume(
+            [in] Int32 currentVolume);
+    }
+
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

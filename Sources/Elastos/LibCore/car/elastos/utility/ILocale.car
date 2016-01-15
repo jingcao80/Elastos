@@ -1,0 +1,1106 @@
+module
+{
+    interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+    * Locale represents a language/country/variant combination. Locales are used to alter the
+    * presentation of information such as numbers or dates to suit the conventions in the region they
+    * describe.
+    * <p>
+    * The language codes are two-letter lowercase ISO language codes (such as "en") as defined by ISO * 639-1. The country codes are two-letter uppercase ISO country codes (such as "US") as defined by
+    * ISO 3166-1. The variant codes are unspecified.
+    *
+    * @sa ISO * 639-1
+    * @sa ISO 3166-1.
+    *
+    * <p>
+    * Note that Java uses several deprecated two-letter codes. The Hebrew ("he") language code is
+    * rewritten as "iw", Indonesian ("id") as "in", and Yiddish ("yi") as "ji". This rewriting happens
+    * even if you construct your own Locale object, not just for instances returned by the various
+    * lookup methods.
+    * <p>
+    * <strong>Available locales</strong>
+    * <p>
+    * This class' constructors do no error checking. You can create a Locale for languages and
+    * countries that don't exist, and you can create instances for combinations that don't exist (such
+    * as "de_US" for "German as spoken in the US").
+    * <p>
+    * Note that locale data is not necessarily available for any of the locales pre-defined as
+    * constants in this class except for en_US, which is the only locale Java guarantees is always
+    * available.
+    * <p>
+    * It is also a mistake to assume that all devices have the same locales available. A device sold in
+    * the US will almost certainly support en_US and es_US, but not necessarily any locales with the
+    * same language but different countries (such as en_GB or es_ES), nor any locales for other
+    * languages (such as de_DE). The opposite may well be true for a device sold in Europe.
+    * <p>
+    * You can use getDefault() to get an appropriate locale for the user of the device you're running * on, or getAvailableLocales() to get a list of all the locales available on the device you're
+    * running on.
+    *
+    * @sa getDefault()
+    * @sa getAvailableLocales()
+    *
+    * <p>
+    * <strong>Locale data</strong>
+    * <p>
+    * Note that locale data comes solely from ICU. User-supplied locale service providers (using the
+    * java.text.spi or java.util.spi mechanisms) are not supported.
+    * <p>
+    * Here are the versions of ICU (and the corresponding CLDR and Unicode versions) used in various
+    * Android releases:
+    * <p>
+    * :---|:-------|:--------|:------|
+    * Cupcake/Donut/Eclair      ICU 3.8    CLDR 1.5    Unicode 5.0
+    * Froyo                     ICU 4.2    CLDR 1.7    Unicode 5.1
+    * Gingerbread/Honeycomb     ICU 4.4    CLDR 1.8    Unicode 5.2
+    * Ice Cream Sandwich        ICU 4.6    CLDR 1.9    Unicode 6.0
+    * Jelly Bean                ICU 4.8    CLDR 2.0    Unicode 6.0
+    * Jelly Bean MR2            ICU 50     CLDR 22.1   Unicode 6.2
+    *
+    * @sa CLDR 1.5
+    * @sa Unicode 5.0
+    * @sa CLDR 1.7
+    * @sa Unicode 5.1
+    * @sa CLDR 1.8
+    * @sa Unicode 5.2
+    * @sa CLDR 1.9
+    * @sa Unicode 6.0
+    * @sa CLDR 2.0
+    * @sa Unicode 6.0
+    * @sa CLDR 22.1
+    * @sa Unicode 6.2
+    *
+    * <p>
+    * <strong>Be wary of the default locale</strong>
+    * <p>
+    * Note that there are many convenience methods that automatically use the default locale, but using
+    * them may lead to subtle bugs.
+    * <p>
+    * The default locale is appropriate for tasks that involve presenting data to the user. In this
+    * case, you want to use the user's date/time formats, number formats, rules for conversion to
+    * lowercase, and so on. In this case, it's safe to use the convenience methods.
+    * <p>
+    * The default locale is not appropriate for machine-readable output. The best choice there is
+    * usually Locale.US – this locale is guaranteed to be available on all devices, and the fact that
+    * it has no surprising special cases and is frequently used (especially for computer-computer
+    * communication) means that it tends to be the most efficient choice too.
+    * <p>
+    * A common mistake is to implicitly use the default locale when producing output meant to be machine
+    * -readable. This tends to work on the developer's test devices (especially because so many
+    * developers use en_US), but fails when run on a device whose user is in a more complex locale.
+    * <p>
+    * For example, if you're formatting integers some locales will use non-ASCII decimal digits. As
+    * another example, if you're formatting floating-point numbers some locales will use ',' as the
+    * decimal point and '.' for digit grouping. That's correct for human-readable output, but likely
+    * to cause problems if presented to another computer (parseDouble(String) can't parse such a
+    * number, for example). You should also be wary of the toLowerCase() and toUpperCase() overloads
+    * that don't take a Locale: in Turkey, for example, the characters 'i' and 'I' won't be converted
+    * to 'I' and 'i'. This is the correct behavior for Turkish text (such as user input), but
+    * inappropriate for, say, HTTP headers.
+    *
+    * @sa parseDouble(String)
+    * @sa toLowerCase()
+    * @sa toUpperCase()
+    *
+    */
+    /**
+     * @Involve
+     * interface ICloneable
+     * interface ISerializable
+     */
+    interface ILocale {
+        /**
+         * BCP-47 extension identifier (or "singleton") for the private
+         * use extension.
+         *
+         * See {@link #getExtension(char)} and {@link Builder#setExtension(char, String)}.
+         *
+         * @since 1.7
+         */
+        const Char32 PRIVATE_USE_EXTENSION = 'x';
+
+        /**
+         * BCP-47 extension identifier (or "singleton") for the unicode locale extension.
+         *
+         *
+         * See {@link #getExtension(char)} and {@link Builder#setExtension(char, String)}.
+         *
+         * @since 1.7
+         */
+        const Char32 UNICODE_LOCALE_EXTENSION = 'u';
+
+        /**
+         * Returns the country code for this locale, or {""} if this locale
+         * doesn't correspond to a specific country.
+         */
+        GetCountry(
+            [out] String* country);
+
+        /**
+         * Equivalent to {getDisplayCountry(Locale.getDefault())}.
+         */
+        GetDisplayCountry(
+            [out] String* country);
+
+         /**
+         * Returns the name of this locale's country, localized to {locale}.
+         * Returns the empty string if this locale does not correspond to a specific
+         * country.
+         */
+        GetDisplayCountry(
+            [in] ILocale* locale,
+            [out] String* country);
+
+        /**
+         * Equivalent to {getDisplayLanguage(Locale.getDefault())}.
+         */
+        GetDisplayLanguage(
+            [out] String* language);
+
+        /**
+         * Returns the name of this locale's language, localized to {locale}.
+         * If the language name is unknown, the language code is returned.
+         */
+        GetDisplayLanguage(
+            [in] ILocale* locale,
+            [out] String* language);
+
+        /**
+         * Equivalent to {getDisplayName(Locale.getDefault())}.
+         */
+        GetDisplayName(
+            [out] String* name);
+
+        /**
+         * Returns this locale's language name, country name, and variant, localized
+         * to {locale}. The exact output form depends on whether this locale
+         * corresponds to a specific language, country and variant, such as:
+         * {English}, {English (United States)}, {English (United
+         * States,Computer)}, {anglais (&#x00c9;tats-Unis)}, {anglais
+         * (&#x00c9;tats-Unis,informatique)}.
+         */
+        GetDisplayName(
+            [in] ILocale* locale,
+            [out] String* name);
+
+        /**
+         * Gets the full variant name in the default {Locale} for the variant code of
+         * this {Locale}. If there is no matching variant name, the variant code is
+         * returned.
+         *
+         * @return a variant name.
+         */
+        GetDisplayVariant(
+            [out] String* displayVariant);
+
+        /**
+         * Returns the script code for this {@code Locale} or an empty {@code String} if no script
+         * was set.
+         *
+         * If set, the script code will be a title cased string of length 4, as per the ISO 15924
+         * specification.
+         *
+         * @since 1.7
+         */
+        GetScript(
+            [out] String* script);
+
+        /**
+         * Equivalent to {@code getDisplayScript(Locale.getDefault()))}
+         *
+         * @since 1.7
+         */
+        GetDisplayScript(
+            [out] String* script);
+
+        /**
+         * Returns the name of this locale's script code, localized to {@link Locale}. If the
+         * script code is unknown, the return value of this method is the same as that of
+         * {@link #getScript()}.
+         *
+         * @since 1.7
+         */
+        GetDisplayScript(
+            [in] ILocale* locale,
+            [out] String* script);
+
+        /**
+         * Returns a well formed BCP-47 language tag that identifies this locale.
+         *
+         * Note that this locale itself might consist of ill formed fields, since the
+         * public {@code Locale} constructors do not perform validity checks to maintain
+         * backwards compatibility. When this is the case, this method will either replace
+         * ill formed fields with standard BCP-47 subtags (For eg. "und" (undetermined)
+         * for invalid languages) or omit them altogether.
+         *
+         * Additionally, ill formed variants will result in the remainder of the tag
+         * (both variants and extensions) being moved to the private use extension,
+         * where they will appear after a subtag whose value is {@code "lvariant"}.
+         *
+         * It's also important to note that the BCP-47 tag is well formed in the sense
+         * that it is unambiguously parseable into its specified components. We do not
+         * require that any of the components are registered with the applicable registries.
+         * For example, we do not require scripts to be a registered ISO 15924 scripts or
+         * languages to appear in the ISO-639-2 code list.
+         *
+         * @since 1.7
+         */
+        ToLanguageTag(
+            [out] String* tag);
+
+        /**
+         * Returns the set of BCP-47 extensions this locale contains.
+         *
+         * See <a href="https://tools.ietf.org/html/bcp47#section-2.1">
+         *     the IETF BCP-47 specification</a> (Section 2.2.6) for details.
+         *
+         * @since 1.7
+         */
+        GetExtensionKeys(
+            [out] ISet** keys);
+
+        /**
+         * Returns the BCP-47 extension whose key is {@code extensionKey}, or {@code null}
+         * if this locale does not contain the extension.
+         *
+         * Individual Keywords and attributes for the unicode
+         * locale extension can be fetched using {@link #getUnicodeLocaleAttributes()},
+         * {@link #getUnicodeLocaleKeys()}  and {@link #getUnicodeLocaleType}.
+         *
+         * @since 1.7
+         */
+        GetExtension(
+            [in] Char32 extensionKey,
+            [out] String* extension);
+
+        /**
+         * Returns the {@code type} for the specified unicode locale extension {@code key}.
+         *
+         * For more information about types and keywords, see {@link Builder#setUnicodeLocaleKeyword}
+         * and <a href="http://www.unicode.org/reports/tr35/#BCP47">Unicode Technical Standard #35</a>
+         *
+         * @since 1.7
+         */
+        GetUnicodeLocaleType(
+            [in] String keyWord,
+            [out] String* type);
+
+        /**
+         * Returns the set of unicode locale extension attributes this locale contains.
+         *
+         * For more information about attributes, see {@link Builder#addUnicodeLocaleAttribute}
+         * and <a href="http://www.unicode.org/reports/tr35/#BCP47">Unicode Technical Standard #35</a>
+         *
+         * @since 1.7
+         */
+        GetUnicodeLocaleAttributes(
+            [out] ISet** keys);
+
+        /**
+         * Returns the set of unicode locale extension keywords this locale contains.
+         *
+         * For more information about types and keywords, see {@link Builder#setUnicodeLocaleKeyword}
+         * and <a href="http://www.unicode.org/reports/tr35/#BCP47">Unicode Technical Standard #35</a>
+         *
+         * @since 1.7
+         */
+        GetUnicodeLocaleKeys(
+            [out] ISet** keys);
+
+        /**
+         * Gets the full variant name in the specified {Locale} for the variant code
+         * of this {Locale}. If there is no matching variant name, the variant code is
+         * returned.
+         *
+         * @param locale
+         *            the {Locale} for which the display name is retrieved.
+         * @return a variant name.
+         */
+        GetDisplayVariant(
+            [in] ILocale* locale,
+            [out] String* displayVariant);
+
+         /**
+         * Gets the three letter ISO country code which corresponds to the country
+         * code for this {Locale}.
+         *
+         * @return a three letter ISO language code.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * MissingResourceException | if there is no matching three letter ISO country code.
+         */
+        GetISO3Country(
+            [out] String* country);
+
+        /**
+         * Gets the three letter ISO language code which corresponds to the language
+         * code for this {Locale}.
+         *
+         * @return a three letter ISO language code.
+         * MissingResourceException | if there is no matching three letter ISO language code.
+         */
+        GetISO3Language(
+            [out] String* language);
+
+        /**
+         * Gets the language code for this {Locale} or the empty string of no language
+         * was set.
+         *
+         * @return a language code.
+         */
+        GetLanguage(
+            [out] String* language);
+
+        /**
+         * Gets the variant code for this {Locale} or an empty {String} if no variant
+         * was set.
+         *
+         * @return a variant code.
+         */
+        GetVariant(
+            [out] String* variant);
+
+        /**
+         * Returns true if {object} is a locale with the same language,
+         * country and variant.
+         */
+        Equals(
+            [in] IInterface* o,
+            [out] Boolean* result);
+
+        ToString(
+            [out] String* str);
+
+        Clone(
+            [out] IInterface** obj);
+
+        GetHashCode(
+            [out] Int32* value);
+    }
+
+    /**
+     * A class that helps construct {@link Locale} instances.
+     *
+     * Unlike the public {@code Locale} constructors, the methods of this class
+     * perform much stricter checks on their input.
+     *
+     * Validity checks on the {@code language}, {@code country}, {@code variant}
+     * and {@code extension} values are carried out as per the
+     * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a> specification.
+     *
+     * In addition, we treat the <a href="http://www.unicode.org/reports/tr35/">
+     * Unicode locale extension</a> specially and provide methods to manipulate
+     * the structured state (keywords and attributes) specified therein.
+     *
+     * @since 1.7
+     */
+    interface IBuilder {
+        /**
+         * Sets the locale language. If {@code language} is {@code null} or empty, the
+         * previous value is cleared.
+         *
+         * As per BCP-47, the language must be between 2 and 3 ASCII characters
+         * in length and must only contain characters in the range {@code [a-zA-Z]}.
+         *
+         * This value is usually an <a href="http://www.loc.gov/standards/iso639-2/">
+         * ISO-639-2</a> alpha-2 or alpha-3 code, though no explicit checks are
+         * carried out that it's a valid code in that namespace.
+         *
+         * Values are normalized to lower case.
+         *
+         * Note that we don't support BCP-47 "extlang" languages because they were
+         * only ever used to substitute for a lack of 3 letter language codes.
+         *
+         * @throws IllformedLocaleException if the language was invalid.
+         */
+        SetLanguage(
+            [in] String language);
+
+        /**
+         * Set the state of this builder to the parsed contents of the BCP-47 language
+         * tag {@code languageTag}.
+         *
+         * This method is equivalent to a call to {@link #clear} if {@code languageTag}
+         * is {@code null} or empty.
+         *
+         * <b>NOTE:</b> In contrast to {@link Locale#forLanguageTag(String)}, which
+         * simply ignores malformed input, this method will throw an exception if
+         * its input is malformed.
+         *
+         * @throws IllformedLocaleException if {@code languageTag} is not a well formed
+         *         BCP-47 tag.
+         */
+        SetLanguageTag(
+            [in] String languageTag);
+
+        /**
+         * Sets the locale region. If {@code region} is {@code null} or empty, the
+         * previous value is cleared.
+         *
+         * As per BCP-47, the region must either be a 2 character ISO-3166-1 code
+         * (each character in the range [a-zA-Z]) OR a 3 digit UN M.49 code.
+         *
+         * Values are normalized to upper case.
+         *
+         * @throws IllformedLocaleException if {@code} region is invalid.
+         */
+        SetRegion(
+            [in] String region);
+
+        /**
+         * Sets the locale variant. If {@code variant} is {@code null} or empty,
+         * the previous value is cleared.
+         *
+         * The input string my consist of one or more variants separated by
+         * valid separators ('-' or '_').
+         *
+         * As per BCP-47, each variant must be between 5 and 8 alphanumeric characters
+         * in length (each character in the range {@code [a-zA-Z0-9]}) but
+         * can be exactly 4 characters in length if the first character is a digit.
+         *
+         * Note that this is a much stricter interpretation of {@code variant}
+         * than the public {@code Locale} constructors. The latter allowed free form
+         * variants.
+         *
+         * Variants are case sensitive and all separators are normalized to {@code '_'}.
+         *
+         * @throws IllformedLocaleException if {@code} variant is invalid.
+         */
+        SetVariant(
+            [in] String variant);
+
+        /**
+         * Sets the locale script. If {@code script} is {@code null} or empty,
+         * the previous value is cleared.
+         *
+         * As per BCP-47, the script must be 4 characters in length, and
+         * each character in the range {@code [a-zA-Z]}.
+         *
+         * A script usually represents a valid ISO 15924 script code, though no
+         * other registry or validity checks are performed.
+         *
+         * Scripts are normalized to title cased values.
+         *
+         * @throws IllformedLocaleException if {@code script} is invalid.
+         */
+        SetScript(
+            [in] String script);
+
+        /**
+         * Sets the state of the builder to the {@link Locale} represented by
+         * {@code locale}.
+         *
+         * Note that the locale's language, region and variant are validated as per
+         * the rules specified in {@link #setLanguage}, {@link #setRegion} and
+         * {@link #setVariant}.
+         *
+         * All existing builder state is discarded.
+         *
+         * @throws IllformedLocaleException if {@code locale} is invalid.
+         * @throws NullPointerException if {@code locale} is null.
+         */
+        SetLocale(
+            [in] ILocale* locale);
+
+        /**
+         * Adds the specified attribute to the list of attributes in the unicode
+         * locale extension.
+         *
+         * Attributes must be between 3 and 8 characters in length, and each character
+         * must be in the range {@code [a-zA-Z0-9]}.
+         *
+         * Attributes are normalized to lower case values. All added attributes and
+         * keywords are combined to form a complete unicode locale extension on
+         * {@link Locale} objects built by this builder, and accessible via
+         * {@link Locale#getExtension(char)} with the {@link Locale#UNICODE_LOCALE_EXTENSION}
+         * key.
+         *
+         * @throws IllformedLocaleException if {@code attribute} is invalid.
+         * @throws NullPointerException if {@code attribute} is null.
+         */
+        AddUnicodeLocaleAttribute(
+            [in] String attribute);
+
+        /**
+         * Removes an attribute from the list of attributes in the unicode locale
+         * extension.
+         *
+         * {@code attribute} must be valid as per the rules specified in
+         * {@link #addUnicodeLocaleAttribute}.
+         *
+         * This method has no effect if {@code attribute} hasn't already been
+         * added.
+         *
+         * @throws IllformedLocaleException if {@code attribute} is invalid.
+         * @throws NullPointerException if {@code attribute} is null.
+         */
+        RemoveUnicodeLocaleAttribute(
+            [in] String attribute);
+
+        /**
+         * Sets the extension identified by {@code key} to {@code value}.
+         *
+         * {@code key} must be in the range {@code [a-zA-Z0-9]}.
+         *
+         * If {@code value} is {@code null} or empty, the extension is removed.
+         *
+         * In the general case, {@code value} must be a series of subtags separated
+         * by ({@code "-"} or {@code "_"}). Each subtag must be between
+         * 2 and 8 characters in length, and each character in the subtag must be in
+         * the range {@code [a-zA-Z0-9]}.
+         *
+         * <p>
+         * There are two special cases :
+         * <li>
+         *     <ul>
+         *         The unicode locale extension
+         *         ({@code key == 'u'}, {@link Locale#UNICODE_LOCALE_EXTENSION}) : Setting
+         *         the unicode locale extension results in all existing keyword and attribute
+         *         state being replaced by the parsed result of {@code value}. For example,
+         *         {@code  builder.setExtension('u', "baaaz-baaar-fo-baar-ba-baaz")}
+         *         is equivalent to:
+         *         <pre>
+         *             builder.addUnicodeLocaleAttribute("baaaz");
+         *             builder.addUnicodeLocaleAttribute("baaar");
+         *             builder.setUnicodeLocaleKeyword("fo", "baar");
+         *             builder.setUnicodeLocaleKeyword("ba", "baaa");
+         *         </pre>
+         *     </ul>
+         *     <ul>
+         *         The private use extension
+         *         ({@code key == 'x'}, {@link Locale#PRIVATE_USE_EXTENSION}) : Each subtag in a
+         *         private use extension can be between 1 and 8 characters in length (in contrast
+         *         to a minimum length of 2 for all other extensions).
+         *     </ul>
+         * </li>
+         *
+         * @throws IllformedLocaleException if {@code value} is invalid.
+         */
+        SetExtension(
+            [in] Char32 key,
+            [in] String value);
+
+        /**
+         * Clears all extensions from this builder. Note that this also implicitly
+         * clears all state related to the unicode locale extension; all attributes
+         * and keywords set by {@link #addUnicodeLocaleAttribute} and
+         * {@link #setUnicodeLocaleKeyword} are cleared.
+         */
+        ClearExtensions();
+
+        /**
+         * Adds a key / type pair to the list of unicode locale extension keys.
+         *
+         * {@code key} must be 2 characters in length, and each character must be
+         * in the range {@code [a-zA-Z0-9]}.
+         *
+         * {#code type} can either be empty, or a series of one or more subtags
+         * separated by a separator ({@code "-"} or {@code "_"}). Each subtag must
+         * be between 3 and 8 characters in length and each character in the subtag
+         * must be in the range {@code [a-zA-Z0-9]}.
+         *
+         * Note that the type is normalized to lower case, and all separators
+         * are normalized to {@code "-"}. All added attributes and
+         * keywords are combined to form a complete unicode locale extension on
+         * {@link Locale} objects built by this builder, and accessible via
+         * {@link Locale#getExtension(char)} with the {@link Locale#UNICODE_LOCALE_EXTENSION}
+         * key.
+         *
+         * @throws IllformedLocaleException if {@code key} or {@code value} are
+         *         invalid.
+         */
+        SetUnicodeLocaleKeyword(
+            [in] String key,
+            [in] String type);
+
+        /**
+         * Clears all existing state from this builder.
+         */
+        Clear();
+
+        /**
+         * Constructs a locale from the existing state of the builder. Note that this
+         * method is guaranteed to succeed since field validity checks are performed
+         * at the point of setting them.
+         */
+        Build(
+            [out] ILocale** locale);
+    }
+
+    interface ILocaleHelper {
+        /**
+         * Returns a locale for a given BCP-47 language tag. This method is more
+         * lenient than {@link Builder#setLanguageTag}. For a given language tag, parsing
+         * will proceed up to the first malformed subtag. All subsequent tags are discarded.
+         * Note that language tags use {@code -} rather than {@code _}, for example {@code en-US}.
+         *
+         * @throws NullPointerException if {@code languageTag} is {@code null}.
+         *
+         * @since 1.7
+         */
+        ForLanguageTag(
+            [in] String languageTag,
+            [out] ILocale** locale);
+
+        /**
+         * Returns the system's installed locales. This array always includes
+         * {Locale.US}, and usually several others. Most locale-sensitive classes
+         * offer their own {getAvailableLocales} method, which should be
+         * preferred over this general purpose method.
+         *
+         * @see java.text.BreakIterator#getAvailableLocales()
+         * @see java.text.Collator#getAvailableLocales()
+         * @see java.text.DateFormat#getAvailableLocales()
+         * @see java.text.DateFormatSymbols#getAvailableLocales()
+         * @see java.text.DecimalFormatSymbols#getAvailableLocales()
+         * @see java.text.NumberFormat#getAvailableLocales()
+         * @see java.util.Calendar#getAvailableLocales()
+         */
+        GetAvailableLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        /**
+         * Returns the user's preferred locale. This may have been overridden for
+         * this process with #setDefault.
+         *
+         * @sa #setDefault
+         *
+         * <p>Since the user's locale changes dynamically, avoid caching this value.
+         * Instead, use this method to look it up for each use.
+         */
+        GetDefault(
+            [out] ILocale** defaultLocale);
+
+        GetLocale(
+            [in] String localeName,
+            [out] ILocale** locale);
+
+        /**
+         * Gets the list of two letter ISO country codes which can be used as the
+         * country code for a {Locale}.
+         *
+         * @return an array of strings.
+         */
+        GetISOCountries(
+            [out, callee] ArrayOf<String>* codes);
+
+        /**
+         * Gets the list of two letter ISO language codes which can be used as the
+         * language code for a {Locale}.
+         *
+         * @return an array of strings.
+         */
+        GetISOLanguages(
+            [out, callee] ArrayOf<String>* codes);
+
+        /**
+         * Overrides the default locale. This does not affect system configuration,
+         * and attempts to override the system-provided default locale may
+         * themselves be overridden by actual changes to the system configuration.
+         * Code that calls this method is usually incorrect, and should be fixed by
+         * passing the appropriate locale to each locale-sensitive method that's
+         * called.
+         */
+        SetDefault(
+            [in] ILocale* locale);
+
+        /**
+         * Locale constant for en_CA.
+         */
+        GetCANADA(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for fr_CA.
+         */
+        GetCANADA_FRENCH(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for zh_CN.
+         */
+        GetCHINA(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for zh.
+         */
+        GetCHINESE(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for en.
+         */
+        GetENGLISH(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for fr_FR.
+         */
+        GetFRANCE(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for fr.
+         */
+        GetFRENCH(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for de.
+         */
+        GetGERMAN(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for de_DE.
+         */
+        GetGERMANY(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for it.
+         */
+        GetITALIAN(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for it_IT.
+         */
+        GetITALY(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for ja_JP.
+         */
+        GetJAPAN(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for ja.
+         */
+        GetJAPANESE(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for ko_KR.
+         */
+        GetKOREA(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for ko.
+         */
+        GetKOREAN(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for zh_CN.
+         */
+        GetPRC(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for the root locale. The root locale has an empty language,
+         * country, and variant.
+         *
+         * @since 1.6
+         */
+        GetROOT(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for zh_CN.
+         */
+        GetSIMPLIFIED_CHINESE(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for zh_TW.
+         */
+        GetTAIWAN(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for zh_TW.
+         */
+        GetTRADITIONAL_CHINESE(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for en_GB.
+         */
+        GetUK(
+            [out] ILocale** locale);
+
+        /**
+         * Locale constant for en_US.
+         */
+        GetUS(
+            [out] ILocale** locale);
+
+        /**
+         * @hide for internal use only.
+         */
+        AdjustLanguageCode(
+            [in] String languageCode,
+            [out] String* result);
+    }
+
+    /**
+     * A class that helps construct {@link Locale} instances.
+     *
+     * Unlike the public {@code Locale} constructors, the methods of this class
+     * perform much stricter checks on their input.
+     *
+     * Validity checks on the {@code language}, {@code country}, {@code variant}
+     * and {@code extension} values are carried out as per the
+     * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a> specification.
+     *
+     * In addition, we treat the <a href="http://www.unicode.org/reports/tr35/">
+     * Unicode locale extension</a> specially and provide methods to manipulate
+     * the structured state (keywords and attributes) specified therein.
+     *
+     * @since 1.7
+     */
+    interface ILocaleBuilder {
+        /**
+         * Sets the locale language. If {@code language} is {@code null} or empty, the
+         * previous value is cleared.
+         *
+         * As per BCP-47, the language must be between 2 and 3 ASCII characters
+         * in length and must only contain characters in the range {@code [a-zA-Z]}.
+         *
+         * This value is usually an <a href="http://www.loc.gov/standards/iso639-2/">
+         * ISO-639-2</a> alpha-2 or alpha-3 code, though no explicit checks are
+         * carried out that it's a valid code in that namespace.
+         *
+         * Values are normalized to lower case.
+         *
+         * Note that we don't support BCP-47 "extlang" languages because they were
+         * only ever used to substitute for a lack of 3 letter language codes.
+         *
+         * @throws IllformedLocaleException if the language was invalid.
+         */
+        SetLanguage(
+            [in] String language);
+
+        /**
+         * Set the state of this builder to the parsed contents of the BCP-47 language
+         * tag {@code languageTag}.
+         *
+         * This method is equivalent to a call to {@link #clear} if {@code languageTag}
+         * is {@code null} or empty.
+         *
+         * <b>NOTE:</b> In contrast to {@link Locale#forLanguageTag(String)}, which
+         * simply ignores malformed input, this method will throw an exception if
+         * its input is malformed.
+         *
+         * @throws IllformedLocaleException if {@code languageTag} is not a well formed
+         *         BCP-47 tag.
+         */
+        SetLanguageTag(
+            [in] String tag);
+
+        /**
+         * Sets the locale region. If {@code region} is {@code null} or empty, the
+         * previous value is cleared.
+         *
+         * As per BCP-47, the region must either be a 2 character ISO-3166-1 code
+         * (each character in the range [a-zA-Z]) OR a 3 digit UN M.49 code.
+         *
+         * Values are normalized to upper case.
+         *
+         * @throws IllformedLocaleException if {@code} region is invalid.
+         */
+        SetRegion(
+            [in] String region);
+
+        /**
+         * Sets the locale variant. If {@code variant} is {@code null} or empty,
+         * the previous value is cleared.
+         *
+         * The input string my consist of one or more variants separated by
+         * valid separators ('-' or '_').
+         *
+         * As per BCP-47, each variant must be between 5 and 8 alphanumeric characters
+         * in length (each character in the range {@code [a-zA-Z0-9]}) but
+         * can be exactly 4 characters in length if the first character is a digit.
+         *
+         * Note that this is a much stricter interpretation of {@code variant}
+         * than the public {@code Locale} constructors. The latter allowed free form
+         * variants.
+         *
+         * Variants are case sensitive and all separators are normalized to {@code '_'}.
+         *
+         * @throws IllformedLocaleException if {@code} variant is invalid.
+         */
+        SetVariant(
+            [in] String variant);
+
+        /**
+         * Sets the locale script. If {@code script} is {@code null} or empty,
+         * the previous value is cleared.
+         *
+         * As per BCP-47, the script must be 4 characters in length, and
+         * each character in the range {@code [a-zA-Z]}.
+         *
+         * A script usually represents a valid ISO 15924 script code, though no
+         * other registry or validity checks are performed.
+         *
+         * Scripts are normalized to title cased values.
+         *
+         * @throws IllformedLocaleException if {@code script} is invalid.
+         */
+        SetScript(
+            [in] String script);
+
+        /**
+         * Sets the state of the builder to the {@link Locale} represented by
+         * {@code locale}.
+         *
+         * Note that the locale's language, region and variant are validated as per
+         * the rules specified in {@link #setLanguage}, {@link #setRegion} and
+         * {@link #setVariant}.
+         *
+         * All existing builder state is discarded.
+         *
+         * @throws IllformedLocaleException if {@code locale} is invalid.
+         * @throws NullPointerException if {@code locale} is null.
+         */
+        SetLocale(
+            [in] ILocale* locale);
+
+        /**
+         * Adds the specified attribute to the list of attributes in the unicode
+         * locale extension.
+         *
+         * Attributes must be between 3 and 8 characters in length, and each character
+         * must be in the range {@code [a-zA-Z0-9]}.
+         *
+         * Attributes are normalized to lower case values. All added attributes and
+         * keywords are combined to form a complete unicode locale extension on
+         * {@link Locale} objects built by this builder, and accessible via
+         * {@link Locale#getExtension(char)} with the {@link Locale#UNICODE_LOCALE_EXTENSION}
+         * key.
+         *
+         * @throws IllformedLocaleException if {@code attribute} is invalid.
+         * @throws NullPointerException if {@code attribute} is null.
+         */
+        AddUnicodeLocaleAttribute(
+            [in] String attribute);
+
+        /**
+         * Removes an attribute from the list of attributes in the unicode locale
+         * extension.
+         *
+         * {@code attribute} must be valid as per the rules specified in
+         * {@link #addUnicodeLocaleAttribute}.
+         *
+         * This method has no effect if {@code attribute} hasn't already been
+         * added.
+         *
+         * @throws IllformedLocaleException if {@code attribute} is invalid.
+         * @throws NullPointerException if {@code attribute} is null.
+         */
+        RemoveUnicodeLocaleAttribute(
+            [in] String attribute);
+
+        /**
+         * Sets the extension identified by {@code key} to {@code value}.
+         *
+         * {@code key} must be in the range {@code [a-zA-Z0-9]}.
+         *
+         * If {@code value} is {@code null} or empty, the extension is removed.
+         *
+         * In the general case, {@code value} must be a series of subtags separated
+         * by ({@code "-"} or {@code "_"}). Each subtag must be between
+         * 2 and 8 characters in length, and each character in the subtag must be in
+         * the range {@code [a-zA-Z0-9]}.
+         *
+         * <p>
+         * There are two special cases :
+         * <li>
+         *     <ul>
+         *         The unicode locale extension
+         *         ({@code key == 'u'}, {@link Locale#UNICODE_LOCALE_EXTENSION}) : Setting
+         *         the unicode locale extension results in all existing keyword and attribute
+         *         state being replaced by the parsed result of {@code value}. For example,
+         *         {@code  builder.setExtension('u', "baaaz-baaar-fo-baar-ba-baaz")}
+         *         is equivalent to:
+         *         <pre>
+         *             builder.addUnicodeLocaleAttribute("baaaz");
+         *             builder.addUnicodeLocaleAttribute("baaar");
+         *             builder.setUnicodeLocaleKeyword("fo", "baar");
+         *             builder.setUnicodeLocaleKeyword("ba", "baaa");
+         *         </pre>
+         *     </ul>
+         *     <ul>
+         *         The private use extension
+         *         ({@code key == 'x'}, {@link Locale#PRIVATE_USE_EXTENSION}) : Each subtag in a
+         *         private use extension can be between 1 and 8 characters in length (in contrast
+         *         to a minimum length of 2 for all other extensions).
+         *     </ul>
+         * </li>
+         *
+         * @throws IllformedLocaleException if {@code value} is invalid.
+         */
+        SetExtension(
+            [in] Char32 key,
+            [in] String value);
+
+        /**
+         * Clears all extensions from this builder. Note that this also implicitly
+         * clears all state related to the unicode locale extension; all attributes
+         * and keywords set by {@link #addUnicodeLocaleAttribute} and
+         * {@link #setUnicodeLocaleKeyword} are cleared.
+         */
+        ClearExtensions();
+
+        /**
+         * Adds a key / type pair to the list of unicode locale extension keys.
+         *
+         * {@code key} must be 2 characters in length, and each character must be
+         * in the range {@code [a-zA-Z0-9]}.
+         *
+         * {#code type} can either be empty, or a series of one or more subtags
+         * separated by a separator ({@code "-"} or {@code "_"}). Each subtag must
+         * be between 3 and 8 characters in length and each character in the subtag
+         * must be in the range {@code [a-zA-Z0-9]}.
+         *
+         * Note that the type is normalized to lower case, and all separators
+         * are normalized to {@code "-"}. All added attributes and
+         * keywords are combined to form a complete unicode locale extension on
+         * {@link Locale} objects built by this builder, and accessible via
+         * {@link Locale#getExtension(char)} with the {@link Locale#UNICODE_LOCALE_EXTENSION}
+         * key.
+         *
+         * @throws IllformedLocaleException if {@code key} or {@code value} are
+         *         invalid.
+         */
+        SetUnicodeLocaleKeyword(
+            [in] String key,
+            [in] String type);
+
+        /**
+         * Clears all existing state from this builder.
+         */
+        Clear();
+
+        /**
+         * Constructs a locale from the existing state of the builder. Note that this
+         * method is guaranteed to succeed since field validity checks are performed
+         * at the point of setting them.
+         */
+        Build(
+            [out] ILocale** locale);
+    }
+
+
+    } // namespace Utility
+    } // namespace Elastos
+}

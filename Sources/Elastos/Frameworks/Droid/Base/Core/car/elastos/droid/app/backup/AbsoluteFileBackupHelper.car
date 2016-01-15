@@ -1,0 +1,49 @@
+
+module
+{
+    interface Elastos.Droid.App.Backup.IBackupDataOutput;
+    interface Elastos.Droid.App.Backup.IBackupDataInputStream;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Backup {
+
+    /**
+    * Like FileBackupHelper, but takes absolute paths for the files instead of
+    * subpaths of getFilesDir()
+    *
+    * @hide
+    */
+    /**
+     * @Involve
+     * interface IFileBackupHelperBase
+     * interface IBackupHelper
+     */
+    interface IAbsoluteFileBackupHelper {
+        /**
+        * Based on oldState, determine which of the files from the application's data directory
+        * need to be backed up, write them to the data stream, and fill in newState with the
+        * state as it exists now.
+        */
+        PerformBackup(
+            [in] IParcelFileDescriptor* oldState,
+            [in] IBackupDataOutput* data,
+            [in] IParcelFileDescriptor* newState);
+
+        /**
+         * Restore one record [representing a single file] from the restore dataset.
+         * <p>
+         * This should only be called directly from within the {@link BackupAgentHelper}
+         * implementation.
+         */
+        RestoreEntity(
+            [in] IBackupDataInputStream* data);
+
+    }
+    } // namespace Backup
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

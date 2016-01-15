@@ -1,0 +1,72 @@
+module
+{
+    using interface Elastos.IO.IPrintStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    [local, deprecated]
+    interface IBaseCommand {
+        // These are magic strings understood by the Eclipse plugin.
+        const String FATAL_ERROR_CODE = "Error type 1";
+        const String NO_SYSTEM_ERROR_CODE = "Error type 2";
+        const String NO_CLASS_ERROR_CODE = "Error type 3";
+
+        /**
+         * Call to run the command.
+         */
+        Run(
+            [in] ArrayOf<String>* args);
+
+        /**
+         * Convenience to show usage information to error output.
+         */
+        ShowUsage();
+
+        /**
+         * Convenience to show usage information to error output along
+         * with an error message.
+         */
+        ShowError(
+            [in] String message);
+
+        /**
+         * Implement the command.
+         */
+        OnRun();
+
+        /**
+         * Print help text for the command.
+         */
+        OnShowUsage(
+            [in] IPrintStream* outPrint);
+
+        /**
+         * Return the next option on the command line -- that is an argument that
+         * starts with '-'.  If the next argument is not an option, null is returned.
+         */
+        NextOption(
+            [out] String* str);
+
+        /**
+         * Return the next argument on the command line, whatever it is; if there are
+         * no arguments left, return null.
+         */
+        NextArg(
+            [out] String* str);
+
+        /**
+         * Return the next argument on the command line, whatever it is; if there are
+         * no arguments left, throws an IllegalArgumentException to report this to the user.
+         */
+        NextArgRequired(
+            [out] String* str);
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

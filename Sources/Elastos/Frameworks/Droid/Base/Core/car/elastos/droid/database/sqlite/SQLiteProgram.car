@@ -1,0 +1,99 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+    namespace Sqlite {
+
+    /**
+     * A base class for compiled SQLite programs.
+     * <p>
+     * This class is not thread-safe.
+     * </p>
+     *
+     * @Involve
+     * interface ICloseable;
+     * interface ISQLiteClosable
+     */
+    [deprecated]
+    interface ISQLiteProgram {
+        /**
+         * Returns a unique identifier for this program.
+         *
+         * @return a unique identifier for this program
+         */
+        GetUniqueId(
+            [out] Int32* value);
+
+        /**
+         * Bind a NULL value to this statement. The value remains bound until
+         * {@link #clearBindings} is called.
+         *
+         * @param index The 1-based index to the parameter to bind null to
+         */
+        BindNull(
+            [in] Int32 index);
+
+        /**
+         * Bind a long value to this statement. The value remains bound until
+         * {@link #clearBindings} is called.
+         *
+         * @param index The 1-based index to the parameter to bind
+         * @param value The value to bind
+         */
+        BindInt64(
+            [in] Int32 index,
+            [in] Int64 value);
+
+        /**
+         * Bind a double value to this statement. The value remains bound until
+         * {@link #clearBindings} is called.
+         *
+         * @param index The 1-based index to the parameter to bind
+         * @param value The value to bind
+         */
+        BindDouble(
+            [in] Int32 index,
+            [in] Double value);
+
+        /**
+         * Bind a String value to this statement. The value remains bound until
+         * {@link #clearBindings} is called.
+         *
+         * @param index The 1-based index to the parameter to bind
+         * @param value The value to bind
+         */
+        BindString(
+            [in] Int32 index,
+            [in] String value);
+
+        /**
+         * Bind a byte array value to this statement. The value remains bound until
+         * {@link #clearBindings} is called.
+         *
+         * @param index The 1-based index to the parameter to bind
+         * @param value The value to bind
+         */
+        BindBlob(
+            [in] Int32 index,
+            [in] ArrayOf<Byte> value);
+
+        /**
+         * Clears all existing bindings. Unset bindings are treated as NULL.
+         */
+        ClearBindings();
+
+        /**
+         * Given an array of String bindArgs, this method binds all of them in one single call.
+         *
+         * @param bindArgs the String array of bind args, none of which must be null.
+         */
+        BindAllArgsAsStrings(
+            [in] ArrayOf<String>* bindArgs);
+    }
+
+    } // namespace Sqlite
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

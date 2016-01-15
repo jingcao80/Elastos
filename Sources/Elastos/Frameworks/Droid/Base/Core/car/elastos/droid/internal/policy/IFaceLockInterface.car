@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Internal.Policy.IIFaceLockCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+
+    /** {@hide} */
+    interface IIFaceLockInterface {
+        StartUi(
+            [in] IBinder* containingWindowToken,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Boolean useLiveliness);
+
+        StopUi();
+
+        StartWithoutUi();
+
+        RegisterCallback(
+            [in] IIFaceLockCallback* cb);
+
+        UnregisterCallback(
+            [in] IIFaceLockCallback* cb);
+    }
+
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

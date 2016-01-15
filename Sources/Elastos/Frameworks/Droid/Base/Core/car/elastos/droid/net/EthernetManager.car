@@ -1,0 +1,38 @@
+
+module
+{
+
+    interface Elastos.Droid.Net.IIpConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * A class representing the IP configuration of the Ethernet network.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IEthernetManager {
+        /**
+         * Get Ethernet configuration.
+         * @return the Ethernet Configuration, contained in {@link IpConfiguration}.
+         */
+        GetConfiguration(
+            [out] IIpConfiguration** result);
+
+        /**
+         * Set Ethernet configuration.
+         */
+        SetConfiguration(
+            [in] IIpConfiguration* config);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

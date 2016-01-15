@@ -1,0 +1,26 @@
+
+module
+{
+    interface Elastos.Droid.Animation.IAnimatorListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    /** Helper for quick settings detail panel clip animations. **/
+    interface IQSDetailClipper {
+        AnimateCircularClip(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Boolean _in,
+            [in] IAnimatorListener* listener);
+    }
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

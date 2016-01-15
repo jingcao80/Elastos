@@ -1,0 +1,49 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Wifi Channel
+     *
+     * @see ScanSettings
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiChannel {
+        /** frequency */
+        GetFreqMHz(
+            [out] Int32* result);
+
+        SetFreqMHz(
+            [in] Int32 freqMHz);
+
+        /** channel number */
+        GetChannelNum(
+            [out] Int32* result);
+
+        SetChannelNum(
+            [in] Int32 channelNum);
+
+        /** is it a DFS channel? */
+        GetIsDFS(
+            [out] Boolean* result);
+
+        SetIsDFS(
+            [in] Boolean isDFS);
+
+        /** check for validity */
+        IsValid(
+            [out] Boolean* result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

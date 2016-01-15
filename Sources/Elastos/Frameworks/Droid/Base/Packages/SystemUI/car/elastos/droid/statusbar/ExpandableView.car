@@ -1,0 +1,229 @@
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    interface IExpandableView;
+
+    /**
+     * @Involve
+     * interface IStackScrollerDecorView
+     */
+    interface IEmptyShadeView {
+
+    }
+
+    /**
+     * Like {@link ExpandableView}, but setting an outline for the height and clipping.
+     */
+    /**
+     * @Involve
+     * interface IExpandableView
+     * interface Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IExpandableOutlineView {
+
+    }
+
+    /**
+     * A listener notifying when {@link #getActualHeight} changes.
+     */
+    interface IExpandableViewOnHeightChangedListener {
+
+        /**
+         * @param view the view for which the height changed, or {@code null} if just the top
+         *             padding or the padding between the elements changed
+         */
+        OnHeightChanged(
+            [in] IExpandableView* view);
+
+        /**
+         * Called when the view is reset and therefore the height will change abruptly
+         *
+         * @param view The view which was reset.
+         */
+        OnReset(
+            [in] IExpandableView* view);
+    }
+
+    /**
+     * An abstract view for expandable views.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IExpandableView {
+        /**
+         * Sets the actual height of this notification. This is different than the laid out
+         * {@link View#getHeight()}, as we want to avoid layouting during scrolling and expanding.
+         *
+         * @param actualHeight The height of this notification.
+         * @param notifyListeners Whether the listener should be informed about the change.
+         */
+        SetActualHeight(
+            [in] Int32 actualHeight,
+            [in] Boolean notifyListeners);
+
+        SetActualHeight(
+            [in] Int32 actualHeight);
+
+        /**
+         * See {@link #setActualHeight}.
+         *
+         * @return The current actual height of this notification.
+         */
+        GetActualHeight(
+            [out] Int32* result);
+
+        /**
+         * @return The maximum height of this notification.
+         */
+        GetMaxHeight(
+            [out] Int32* result);
+
+        /**
+         * @return The minimum height of this notification.
+         */
+        GetMinHeight(
+            [out] Int32* result);
+
+        /**
+         * Sets the notification as dimmed. The default implementation does nothing.
+         *
+         * @param dimmed Whether the notification should be dimmed.
+         * @param fade Whether an animation should be played to change the state.
+         */
+        SetDimmed(
+            [in] Boolean dimmed,
+            [in] Boolean fade);
+
+        /**
+         * Sets the notification as dark. The default implementation does nothing.
+         *
+         * @param dark Whether the notification should be dark.
+         * @param fade Whether an animation should be played to change the state.
+         */
+        SetDark(
+            [in] Boolean dark,
+            [in] Boolean fade);
+
+        /**
+         * See {@link #setHideSensitive}. This is a variant which notifies this view in advance about
+         * the upcoming state of hiding sensitive notifications. It gets called at the very beginning
+         * of a stack scroller update such that the updated intrinsic height (which is dependent on
+         * whether private or public layout is showing) gets taken into account into all layout
+         * calculations.
+         */
+        SetHideSensitiveForIntrinsicHeight(
+            [in] Boolean hideSensitive);
+
+        /**
+         * Sets whether the notification should hide its private contents if it is sensitive.
+         */
+        SetHideSensitive(
+            [in] Boolean hideSensitive,
+            [in] Boolean animated,
+            [in] Int64 delay,
+            [in] Int64 duration);
+
+        /**
+         * @return The desired notification height.
+         */
+        GetIntrinsicHeight(
+            [out] Int32* result);
+
+        /**
+         * Sets the amount this view should be clipped from the top. This is used when an expanded
+         * notification is scrolling in the top or bottom stack.
+         *
+         * @param clipTopAmount The amount of pixels this view should be clipped from top.
+         */
+        SetClipTopAmount(
+            [in] Int32 clipTopAmount);
+
+        GetClipTopAmount(
+            [out] Int32* result);
+
+        SetOnHeightChangedListener(
+            [in] IExpandableViewOnHeightChangedListener* listener);
+
+        /**
+         * @return Whether we can expand this views content.
+         */
+        IsContentExpandable(
+            [out] Boolean* result);
+
+        NotifyHeightChanged();
+
+        IsTransparent(
+            [out] Boolean* result);
+
+        /**
+         * Perform a remove animation on this view.
+         *
+         * @param duration The duration of the remove animation.
+         * @param translationDirection The direction value from [-1 ... 1] indicating in which the
+         *                             animation should be performed. A value of -1 means that The
+         *                             remove animation should be performed upwards,
+         *                             such that the  child appears to be going away to the top. 1
+         *                             Should mean the opposite.
+         * @param onFinishedRunnable A runnable which should be run when the animation is finished.
+         */
+        PerformRemoveAnimation(
+            [in] Int64 duration,
+            [in] Float translationDirection,
+            [in] IRunnable* onFinishedRunnable);
+
+        PerformAddAnimation(
+            [in] Int64 delay,
+            [in] Int64 duration);
+
+        SetBelowSpeedBump(
+            [in] Boolean below);
+
+        OnHeightReset();
+
+        /**
+         * This method returns the drawing rect for the view which is different from the regular
+         * drawing rect, since we layout all children in the {@link NotificationStackScrollLayout} at
+         * position 0 and usually the translation is neglected. Since we are manually clipping this
+         * view,we also need to subtract the clipTopAmount from the top. This is needed in order to
+         * ensure that accessibility and focusing work correctly.
+         *
+         * @param outRect The (scrolled) drawing bounds of the view.
+         */
+        //@Override
+        GetDrawingRect(
+            [in] IRect* outRect);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

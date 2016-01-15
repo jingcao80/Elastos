@@ -1,0 +1,413 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.IRegion;
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.View.IWindowContentFrameStats;
+    interface Elastos.Droid.View.IWindowAnimationFrameStats;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    interface IPhysicalDisplayInfo {
+        GetWidth(
+            [out] Int32* width);
+
+        GetHeight(
+            [out] Int32* height);
+
+        GetRefreshRate(
+            [out] Float* refreshRate);
+
+        GetDensity(
+            [out] Float* density);
+
+        GetXDpi(
+            [out] Float* xDpi);
+
+        GetYDpi(
+            [out] Float* yDpi);
+
+        GetSecure(
+            [out] Boolean* secure);
+
+        GetAppVsyncOffsetNanos(
+            [out] Int64* nanos);
+
+        GetPresentationDeadlineNanos(
+            [out] Int64* nanos);
+
+        SetWidth(
+            [in] Int32 width);
+
+        SetHeight(
+            [in] Int32 height);
+
+        SetRefreshRate(
+            [in] Float refreshRate);
+
+        SetDensity(
+            [in] Float density);
+
+        SetXDpi(
+            [in] Float xDpi);
+
+        SetYDpi(
+            [in] Float yDpi);
+
+        SetSecure(
+            [in] Boolean secure);
+
+        SetAppVsyncOffsetNanos(
+            [in] Int64 nanos);
+
+        SetPresentationDeadlineNanos(
+            [in] Int64 nanos);
+
+        CopyFrom(
+            [in] IPhysicalDisplayInfo* other);
+    }
+
+    interface ISurfaceControl {
+
+        /* flags used in constructor (keep in sync with ISurfaceComposerClient.h) */
+
+        /**
+         * Surface creation flag: Surface is created hidden
+         */
+        const Int32 HIDDEN = 0x00000004;
+
+        /**
+         * Surface creation flag: The surface contains secure content, special
+         * measures will be taken to disallow the surface's content to be copied
+         * from another process. In particular, screenshots and VNC servers will
+         * be disabled, but other measures can take place, for instance the
+         * surface might not be hardware accelerated.
+         *
+         */
+        const Int32 SECURE = 0x00000080;
+
+        /**
+         * Surface creation flag: Creates a surface where color components are interpreted
+         * as "non pre-multiplied" by their alpha channel. Of course this flag is
+         * meaningless for surfaces without an alpha channel. By default
+         * surfaces are pre-multiplied, which means that each color component is
+         * already multiplied by its alpha value. In this case the blending
+         * equation used is:
+         * <p>
+         *    <code>DEST = SRC + DEST * (1-SRC_ALPHA)</code>
+         * <p>
+         * By contrast, non pre-multiplied surfaces use the following equation:
+         * <p>
+         *    <code>DEST = SRC * SRC_ALPHA * DEST * (1-SRC_ALPHA)</code>
+         * <p>
+         * pre-multiplied surfaces must always be used if transparent pixels are
+         * composited on top of each-other into the surface. A pre-multiplied
+         * surface can never lower the value of the alpha component of a given
+         * pixel.
+         * <p>
+         * In some rare situations, a non pre-multiplied surface is preferable.
+         *
+         */
+        const Int32 NON_PREMULTIPLIED = 0x00000100;
+
+        /**
+         * Surface creation flag: Indicates that the surface must be considered opaque,
+         * even if its pixel format is set to translucent. This can be useful if an
+         * application needs full RGBA 8888 support for instance but will
+         * still draw every pixel opaque.
+         * <p>
+         * This flag is ignored if setAlpha() is used to make the surface non-opaque.
+         * Combined effects are (assuming a buffer format with an alpha channel):
+         * <ul>
+         * <li>OPAQUE + alpha(1.0) == opaque composition
+         * <li>OPAQUE + alpha(0.x) == blended composition
+         * <li>!OPAQUE + alpha(1.0) == blended composition
+         * <li>!OPAQUE + alpha(0.x) == blended composition
+         * </ul>
+         * If the underlying buffer lacks an alpha channel, the OPAQUE flag is effectively
+         * set automatically.
+         */
+        const Int32 OPAQUE = 0x00000400;
+
+        /**
+         * Surface creation flag: Application requires a hardware-protected path to an
+         * external display sink. If a hardware-protected path is not available,
+         * then this surface will not be displayed on the external sink.
+         *
+         */
+        const Int32 PROTECTED_APP = 0x00000800;
+
+        // 0x1000 is reserved for an independent DRM protected flag in framework
+
+        /**
+         * Surface creation flag: Window represents a cursor glyph.
+         */
+        const Int32 CURSOR_WINDOW = 0x00002000;
+
+        /**
+         * Surface creation flag: Creates a normal surface.
+         * This is the default.
+         *
+         */
+        const Int32 FX_SURFACE_NORMAL   = 0x00000000;
+
+        /**
+         * Surface creation flag: Creates a Dim surface.
+         * Everything behind this surface is dimmed by the amount specified
+         * in {@link #setAlpha}.  It is an error to lock a Dim surface, since it
+         * doesn't have a backing store.
+         *
+         */
+        const Int32 FX_SURFACE_DIM = 0x00020000;
+
+        /**
+         * Mask used for FX values above.
+         *
+         */
+        const Int32 FX_SURFACE_MASK = 0x000F0000;
+
+        /* built-in physical display ids (keep in sync with ISurfaceComposer.h)
+         * these are different from the logical display ids used elsewhere in the framework */
+
+        /**
+         * Built-in physical display id: Main display.
+         * Use only with {@link SurfaceControl#getBuiltInDisplay(int)}.
+         */
+        const Int32 BUILT_IN_DISPLAY_ID_MAIN = 0;
+
+        /**
+         * Built-in physical display id: Attached HDMI display.
+         * Use only with {@link SurfaceControl#getBuiltInDisplay(int)}.
+         */
+        const Int32 BUILT_IN_DISPLAY_ID_HDMI = 1;
+
+        /* Display power modes * /
+
+        /**
+         * Display power mode off: used while blanking the screen.
+         * Use only with {@link SurfaceControl#setDisplayPowerMode}.
+         */
+        const Int32 POWER_MODE_OFF = 0;
+
+        /**
+         * Display power mode doze: used while putting the screen into low power mode.
+         * Use only with {@link SurfaceControl#setDisplayPowerMode}.
+         */
+        const Int32 POWER_MODE_DOZE = 1;
+
+        /**
+         * Display power mode normal: used while unblanking the screen.
+         * Use only with {@link SurfaceControl#setDisplayPowerMode}.
+         */
+        const Int32 POWER_MODE_NORMAL = 2;
+
+        /**
+         * Display power mode doze: used while putting the screen into a suspended
+         * low power mode.  Use only with {@link SurfaceControl#setDisplayPowerMode}.
+         */
+        const Int32 POWER_MODE_DOZE_SUSPEND = 3;
+
+        ReleaseSurfaceControl();
+
+        SetLayer(
+            [in] Int32 zorder);
+
+        Destroy();
+
+        SetPosition(
+            [in] Float x,
+            [in] Float y);
+
+        SetSize(
+            [in] Int32 w,
+            [in] Int32 h);
+
+        Hide();
+
+        Show();
+
+        SetTransparentRegionHint(
+            [in] IRegion* region);
+
+        ClearContentFrameStats(
+            [out] Boolean* result);
+
+        GetContentFrameStats(
+            [in] IWindowContentFrameStats* outStats,
+            [out] Boolean* result);
+
+        SetAlpha(
+            [in] Float alpha);
+
+        SetMatrix(
+            [in] Float dsdx,
+            [in] Float dtdx,
+            [in] Float dsdy,
+            [in] Float dtdy);
+
+        SetWindowCrop(
+            [in] IRect* crop);
+
+        SetLayerStack(
+            [in] Int32 layerStack);
+
+        SetOpaque(
+            [in] Boolean isOpaque);
+    }
+
+    interface ISurfaceControlHelper {
+        /*
+         * set surface parameters.
+         * needs to be inside open/closeTransaction block
+         */
+
+        /** start a transaction */
+        OpenTransaction();
+
+        /** end a transaction */
+        CloseTransaction();
+
+        /** flag the transaction as an animation */
+        SetAnimationTransaction();
+
+        ClearAnimationFrameStats(
+            [out] Boolean* stats);
+
+        GetAnimationFrameStats(
+            [in] IWindowAnimationFrameStats* outStats,
+            [out] Boolean* stats);
+
+        SetDisplayPowerMode(
+            [in] IBinder* displayToken,
+            [in] Int32 mode);
+
+        GetDisplayConfigs(
+            [in] IBinder* displayToken,
+            [out, callee] ArrayOf<IPhysicalDisplayInfo*>* infos);
+
+        GetActiveConfig(
+            [in] IBinder* displayToken,
+            [out] Int32* config);
+
+        SetActiveConfig(
+            [in] IBinder* displayToken,
+            [in] Int32 id,
+            [out] Boolean* result);
+
+        SetDisplayProjection(
+            [in] IBinder* displayToken,
+            [in] Int32 orientation,
+            [in] IRect* layerStackRect,
+            [in] IRect* displayRect);
+
+        SetDisplayLayerStack(
+            [in] IBinder* displayToken,
+            [in] Int32 layerStack);
+
+        SetDisplaySurface(
+            [in] IBinder* displayToken,
+            [in] ISurface* surface);
+
+        SetDisplaySize(
+            [in] IBinder* displayToken,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        CreateDisplay(
+            [in] String name,
+            [in] Boolean secure,
+            [out] IBinder** display);
+
+        DestroyDisplay(
+            [in] IBinder* displayToken);
+
+        GetBuiltInDisplay(
+            [in] Int32 builtInDisplayId,
+            [out] IBinder** display);
+
+        Screenshot(
+            [in] IBinder* display,
+            [in] ISurface* consumer,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 minLayer,
+            [in] Int32 maxLayer,
+            [in] Boolean useIdentityTransform);
+
+        Screenshot(
+            [in] IBinder* display,
+            [in] ISurface* consumer,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        Screenshot(
+            [in] IBinder* display,
+            [in] ISurface* consumer) ;
+
+        /**
+         * Copy the current screen contents into a bitmap and return it.
+         *
+         * CAVEAT: Versions of screenshot that return a {@link Bitmap} can
+         * be extremely slow; avoid use unless absolutely necessary; prefer
+         * the versions that use a {@link Surface} instead, such as
+         * {@link SurfaceControl#screenshot(IBinder, Surface)}.
+         *
+         * @param sourceCrop The portion of the screen to capture into the Bitmap;
+         * caller may pass in 'new Rect()' if no cropping is desired.
+         * @param width The desired width of the returned bitmap; the raw
+         * screen will be scaled down to this size.
+         * @param height The desired height of the returned bitmap; the raw
+         * screen will be scaled down to this size.
+         * @param minLayer The lowest (bottom-most Z order) surface layer to
+         * include in the screenshot.
+         * @param maxLayer The highest (top-most Z order) surface layer to
+         * include in the screenshot.
+         * @param useIdentityTransform Replace whatever transformation (rotation,
+         * scaling, translation) the surface layers are currently using with the
+         * identity transformation while taking the screenshot.
+         * @param rotation Apply a custom clockwise rotation to the screenshot, i.e.
+         * Surface.ROTATION_0,90,180,270. Surfaceflinger will always take
+         * screenshots in its native portrait orientation by default, so this is
+         * useful for returning screenshots that are independent of device
+         * orientation.
+         * @return Returns a Bitmap containing the screen contents, or null
+         * if an error occurs. Make sure to call Bitmap.recycle() as soon as
+         * possible, once its content is not needed anymore.
+         */
+        Screenshot(
+            [in] IRect* sourceCrop,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 minLayer,
+            [in] Int32 maxLayer,
+            [in] Boolean useIdentityTransform,
+            [in] Int32 rotation,
+            [out] IBitmap** bm);
+
+        /**
+         * Like {@link SurfaceControl#screenshot(int, int, int, int, boolean)} but
+         * includes all Surfaces in the screenshot.
+         *
+         * @param width The desired width of the returned bitmap; the raw
+         * screen will be scaled down to this size.
+         * @param height The desired height of the returned bitmap; the raw
+         * screen will be scaled down to this size.
+         * @return Returns a Bitmap containing the screen contents, or null
+         * if an error occurs. Make sure to call Bitmap.recycle() as soon as
+         * possible, once its content is not needed anymore.
+         */
+        Screenshot(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] IBitmap** bm);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

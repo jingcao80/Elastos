@@ -1,0 +1,136 @@
+
+module
+{
+    interface Elastos.Droid.View.IInputEvent;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Checks whether a sequence of input events is self-consistent.
+     * Logs a description of each problem detected.
+     * <p>
+     * When a problem is detected, the event is tainted.  This mechanism prevents the same
+     * error from being reported multiple times.
+     * </p>
+     *
+     * @hide
+     */
+    interface IInputEventConsistencyVerifier {
+
+        /**
+         * Indicates that the verifier is intended to act on raw device input event streams.
+         * Disables certain checks for invariants that are established by the input dispatcher
+         * itself as it delivers input events, such as key repeating behavior.
+         */
+        const Int32 FLAG_RAW_DEVICE_INPUT = 1 << 0;
+
+        /**
+         * Resets the state of the input event consistency verifier.
+         */
+        Reset();
+
+        /**
+         * Checks an arbitrary input event.
+         * @param event The event.
+         * @param nestingLevel The nesting level: 0 if called from the base class,
+         * or 1 from a subclass.  If the event was already checked by this consistency verifier
+         * at a higher nesting level, it will not be checked again.  Used to handle the situation
+         * where a subclass dispatching method delegates to its superclass's dispatching method
+         * and both dispatching methods call into the consistency verifier.
+         */
+        OnInputEvent(
+            [in] IInputEvent* event,
+            [in] Int32 nestingLevel);
+
+        /**
+         * Checks a key event.
+         * @param event The event.
+         * @param nestingLevel The nesting level: 0 if called from the base class,
+         * or 1 from a subclass.  If the event was already checked by this consistency verifier
+         * at a higher nesting level, it will not be checked again.  Used to handle the situation
+         * where a subclass dispatching method delegates to its superclass's dispatching method
+         * and both dispatching methods call into the consistency verifier.
+         */
+        OnKeyEvent(
+            [in] IKeyEvent* event,
+            [in] Int32 nestingLevel);
+
+        /**
+         * Checks a trackball event.
+         * @param event The event.
+         * @param nestingLevel The nesting level: 0 if called from the base class,
+         * or 1 from a subclass.  If the event was already checked by this consistency verifier
+         * at a higher nesting level, it will not be checked again.  Used to handle the situation
+         * where a subclass dispatching method delegates to its superclass's dispatching method
+         * and both dispatching methods call into the consistency verifier.
+         */
+        OnTrackballEvent(
+            [in] IMotionEvent* event,
+            [in] Int32 nestingLevel);
+
+        /**
+         * Checks a touch event.
+         * @param event The event.
+         * @param nestingLevel The nesting level: 0 if called from the base class,
+         * or 1 from a subclass.  If the event was already checked by this consistency verifier
+         * at a higher nesting level, it will not be checked again.  Used to handle the situation
+         * where a subclass dispatching method delegates to its superclass's dispatching method
+         * and both dispatching methods call into the consistency verifier.
+         */
+        OnTouchEvent(
+            [in] IMotionEvent* event,
+            [in] Int32 nestingLevel);
+
+        /**
+         * Checks a generic motion event.
+         * @param event The event.
+         * @param nestingLevel The nesting level: 0 if called from the base class,
+         * or 1 from a subclass.  If the event was already checked by this consistency verifier
+         * at a higher nesting level, it will not be checked again.  Used to handle the situation
+         * where a subclass dispatching method delegates to its superclass's dispatching method
+         * and both dispatching methods call into the consistency verifier.
+         */
+        OnGenericMotionEvent(
+            [in] IMotionEvent* event,
+            [in] Int32 nestingLevel);
+
+        /**
+         * Notifies the verifier that a given event was unhandled and the rest of the
+         * trace for the event should be ignored.
+         * This method should only be called if the event was previously checked by
+         * the consistency verifier using {@link #onInputEvent} and other methods.
+         * @param event The event.
+         * @param nestingLevel The nesting level: 0 if called from the base class,
+         * or 1 from a subclass.  If the event was already checked by this consistency verifier
+         * at a higher nesting level, it will not be checked again.  Used to handle the situation
+         * where a subclass dispatching method delegates to its superclass's dispatching method
+         * and both dispatching methods call into the consistency verifier.
+         */
+        OnUnhandledEvent(
+            [in] IInputEvent* event,
+            [in] Int32 nestingLevel);
+    }
+
+    /**
+     * Determines whether the instrumentation should be enabled.
+     * @return True if it should be enabled.
+     */
+    interface IInputEventConsistencyVerifierHelper {
+
+        /**
+         * Determines whether the instrumentation should be enabled.
+         * @return True if it should be enabled.
+         */
+        IsInstrumentationEnabled(
+            [out] Boolean* result);
+
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

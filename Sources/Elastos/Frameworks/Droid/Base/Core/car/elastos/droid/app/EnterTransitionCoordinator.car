@@ -1,0 +1,45 @@
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Transition.ITransition;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * This ActivityTransitionCoordinator is created in ActivityOptions#makeSceneTransitionAnimation
+     * to govern the exit of the Scene and the shared elements when calling an Activity as well as
+     * the reentry of the Scene when coming back from the called Activity.
+     */
+    /**
+     * @Involve
+     * interface IActivityTransitionCoordinator
+     */
+    interface IEnterTransitionCoordinator {
+        ViewInstancesReady(
+            [in] IArrayList* accepted,
+            [in] IArrayList* localNames,
+            [in] IArrayList* localViews);
+
+        NamedViewsReady(
+            [in] IArrayList* accepted,
+            [in] IArrayList* localNames);
+
+        GetEnterViewsTransition(
+            [out] ITransition** transition);
+
+        IsReturning(
+            [out] Boolean* returning);
+
+        Stop();
+
+        CancelEnter();
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

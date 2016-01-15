@@ -1,0 +1,78 @@
+
+module
+{
+    using interface Elastos.Core.IThread;
+    interface Elastos.Droid.Accounts.IAccount;
+    interface Elastos.Droid.Content.IContentProviderClient;
+    interface Elastos.Droid.Content.ISyncResult;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    [local]
+    interface IAbstractThreadedSyncAdapter {
+        /**
+         * Kernel event log tag.  Also listed in data/etc/event-log-tags.
+         * @deprecated Private constant.  May go away in the next release.
+         */
+        // @Deprecated
+        const Int32 LOG_SYNC_DETAILS = 2743;
+
+        GetContext(
+            [out] IContext** context);
+
+        /**
+         * @return a reference to the IBinder of the SyncAdapter service.
+         */
+        GetSyncAdapterBinder(
+            [out] IBinder** binder);
+
+        /**
+         * Perform a sync for this account. SyncAdapter-specific parameters may
+         * be specified in extras, which is guaranteed to not be null. Invocations
+         * of this method are guaranteed to be serialized.
+         *
+         * @param account the account that should be synced
+         * @param extras SyncAdapter-specific parameters
+         * @param authority the authority of this sync request
+         * @param provider a ContentProviderClient that points to the ContentProvider for this
+         *   authority
+         * @param syncResult SyncAdapter-specific parameters
+         */
+        OnPerformSync(
+            [in] IAccount* account,
+            [in] IBundle* extras,
+            [in] String authority,
+            [in] IContentProviderClient* provider,
+            [in] ISyncResult* syncResult);
+
+        /**
+         * Indicates that a sync operation has been canceled. This will be invoked on a separate
+         * thread than the sync thread and so you must consider the multi-threaded implications
+         * of the work that you do in this method.
+         * <p>
+         * This will only be invoked when the SyncAdapter indicates that it doesn't support
+         * parallel syncs.
+         */
+        OnSyncCanceled();
+
+        /**
+         * Indicates that a sync operation has been canceled. This will be invoked on a separate
+         * thread than the sync thread and so you must consider the multi-threaded implications
+         * of the work that you do in this method.
+         * <p>
+         * This will only be invoked when the SyncAdapter indicates that it does support
+         * parallel syncs.
+         * @param thread the Thread of the sync that is to be canceled.
+         */
+        OnSyncCanceled(
+            [in] IThread* thread);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

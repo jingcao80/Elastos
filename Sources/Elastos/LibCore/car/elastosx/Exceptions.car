@@ -1,0 +1,32 @@
+
+module
+{
+//    const FAMILY_CORE = 0x30 - B0   // Elastosx.Crypto exception codes
+
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastosx.Crypto exception codes (Family: 0x30 - B0)
+    const E_AEAD_BAD_TAG_EXCEPTION                                  = 0xB0010000;
+    const E_BAD_PADDING_EXCEPTION                                   = 0xB0020000;
+    const E_EXEMPTION_MECHANISM_EXCEPTION                           = 0xB0030000;
+    const E_ILLEGAL_BLOCK_SIZE_EXCEPTION                            = 0xB0040000;
+    const E_NO_SUCH_PADDING_EXCEPTION                               = 0xB0050000;
+    const E_SHORT_BUFFER_EXCEPTION                                  = 0xB0060000;
+    const E_DATATYPE_CONFIGURATION_EXCEPTION                        = 0xB0070000;
+    const E_FACTORY_CONFIGURATION_EXCEPTION                         = 0xB0080000;
+    const E_INVALID_TRANSFORMATION                                  = 0xB0090000;
+    const E_PROVIDER_EXCEPTION                                      = 0xB00a0000;
+    const E_XPATH_EXCEPTION                                         = 0xB0070000;
+    const E_XPATH_EXPRESSION_EXCEPTION                              = 0xB0080000;
+
+    //==========================================================================
+    // Elastosx.Net exception codes (Family: 0x30 - B0)
+    const E_SSL_PEER_UNVERIFIED_EXCEPTION                           = 0xB1010000;
+    const E_SSL_EXCEPTION                                           = 0xB1020000;
+    const E_SSL_PROTOCOL_EXCEPTION                                  = 0xB1030000;
+    const E_SSL_KEY_EXCEPTION                                       = 0xB1040000;
+    const E_SSL_HANDSHAKE_EXCEPTION                                 = 0xB1050000;
+}

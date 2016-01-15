@@ -1,0 +1,64 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Animation {
+
+    interface ITimeListener;
+
+    /**
+     * This class provides a simple callback mechanism to listeners that is
+     * synchronized with all other animators in the system. There is no duration,
+     * interpolation, or object value-setting with this Animator. Instead, it is
+     * simply started, after which it proceeds to send out events on every animation
+     * frame to its TimeListener (if set), with information about this animator, the
+     * total elapsed time, and the elapsed time since the previous animation frame.
+     *
+     * @implements Elastos.Droid.Animation.IValueAnimator
+     */
+    /**
+     * @Involve
+     * interface IValueAnimator
+     */
+    interface ITimeAnimator {
+        /**
+         * Sets a listener that is sent update events throughout the life of
+         * an animation.
+         *
+         * @param listener the listener to be set.
+         */
+        SetTimeListener(
+            [in] ITimeListener* listener);
+    }
+
+    /**
+    * Implementors of this interface can set themselves as update listeners
+    * to a <code>TimeAnimator</code> instance to receive callbacks on every animation
+    * frame to receive the total time since the animator started and the delta time
+    * since the last frame. The first time the listener is called,
+    * deltaTime will be zero. The same is true for totalTime, unless the animator was
+    * set to a specific ValueAnimator#setCurrentPlayTime(long) currentPlayTime
+    * prior to starting.
+    *
+    * @sa ValueAnimator#setCurrentPlayTime(long) currentPlayTime
+    */
+    interface ITimeListener {
+        /**
+         * <p>Notifies listeners of the occurrence of another frame of the animation,
+         * along with information about the elapsed time.</p>
+         *
+         * @param animation The animator sending out the notification.
+         * @param totalTime The total time elapsed since the animator started, in milliseconds.
+         * @param deltaTime The time elapsed since the previous frame, in milliseconds.
+         */
+        OnTimeUpdate(
+            [in] ITimeAnimator* animation,
+            [in] Int64 totalTime,
+            [in] Int64 deltaTime);
+    }
+
+    } // namespace Animation
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,34 @@
+
+TARGET_NAME= jar
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += $(PREBUILD_INC)/ziparchive;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/charset;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/zip;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/jar;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/io;
+
+SOURCES = CAttributes.cpp
+SOURCES += ManifestReader.cpp
+SOURCES += CName.cpp
+SOURCES += CManifest.cpp
+SOURCES += JarVerifier.cpp
+SOURCES += CJarInputStream.cpp
+SOURCES += CJarOutputStream.cpp
+SOURCES += CPack200.cpp
+SOURCES += CJarEntry.cpp
+SOURCES += CJarFile.cpp
+SOURCES += CStrictJarFile.cpp

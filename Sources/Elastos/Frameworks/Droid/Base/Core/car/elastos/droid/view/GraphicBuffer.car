@@ -1,0 +1,165 @@
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Simple wrapper for the native GraphicBuffer class.
+     *
+     * @hide
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    interface IGraphicBuffer {
+        // Note: keep usage flags in sync with GraphicBuffer.h and gralloc.h
+        const Int32 USAGE_SW_READ_NEVER = 0x0;
+        const Int32 USAGE_SW_READ_RARELY = 0x2;
+        const Int32 USAGE_SW_READ_OFTEN = 0x3;
+        const Int32 USAGE_SW_READ_MASK = 0xF;
+
+        const Int32 USAGE_SW_WRITE_NEVER = 0x0;
+        const Int32 USAGE_SW_WRITE_RARELY = 0x20;
+        const Int32 USAGE_SW_WRITE_OFTEN = 0x30;
+        const Int32 USAGE_SW_WRITE_MASK = 0xF0;
+
+        const Int32 USAGE_SOFTWARE_MASK = USAGE_SW_READ_MASK | USAGE_SW_WRITE_MASK;
+
+        const Int32 USAGE_PROTECTED = 0x4000;
+
+        const Int32 USAGE_HW_TEXTURE = 0x100;
+        const Int32 USAGE_HW_RENDER = 0x200;
+        const Int32 USAGE_HW_2D = 0x400;
+        const Int32 USAGE_HW_COMPOSER = 0x800;
+        const Int32 USAGE_HW_VIDEO_ENCODER = 0x10000;
+        const Int32 USAGE_HW_MASK = 0x71F00;
+
+        /**
+         * Returns the width of this buffer in pixels.
+         */
+        GetWidth(
+            [out] Int32* width);
+
+        /**
+         * Returns the height of this buffer in pixels.
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * Returns the pixel format of this buffer. The pixel format must be one of
+         * the formats defined in {@link PixelFormat}.
+         */
+        GetFormat(
+            [out] Int32* format);
+
+        /**
+         * Returns the usage hint set on this buffer.
+         */
+        GetUsage(
+            [out] Int32* usage);
+
+        /**
+         * <p>Start editing the pixels in the buffer. A null is returned if the buffer
+         * cannot be locked for editing.</p>
+         *
+         * <p>The content of the buffer is preserved between unlockCanvas()
+         * and lockCanvas().</p>
+         *
+         * <p>If this method is called after {@link #destroy()}, the return value will
+         * always be null.</p>
+         *
+         * @return A Canvas used to draw into the buffer, or null.
+         *
+         * @see #lockCanvas(android.graphics.Rect)
+         * @see #unlockCanvasAndPost(android.graphics.Canvas)
+         * @see #isDestroyed()
+         */
+        LockCanvas(
+            [out] ICanvas** canvas);
+
+        /**
+         * Just like {@link #lockCanvas()} but allows specification of a dirty
+         * rectangle.
+         *
+         * <p>If this method is called after {@link #destroy()}, the return value will
+         * always be null.</p>
+         *
+         * @param dirty Area of the buffer that may be modified.
+
+         * @return A Canvas used to draw into the surface, or null.
+         *
+         * @see #lockCanvas()
+         * @see #unlockCanvasAndPost(android.graphics.Canvas)
+         * @see #isDestroyed()
+         */
+        LockCanvas(
+            [in] IRect* dirty,
+            [out] ICanvas** canvas);
+
+        /**
+         * Finish editing pixels in the buffer.
+         *
+         * <p>This method doesn't do anything if {@link #destroy()} was
+         * previously called.</p>
+         *
+         * @param canvas The Canvas previously returned by lockCanvas()
+         *
+         * @see #lockCanvas()
+         * @see #lockCanvas(android.graphics.Rect)
+         * @see #isDestroyed()
+         */
+        UnlockCanvasAndPost(
+            [in] ICanvas* canvas);
+
+        /**
+         * Destroyes this buffer immediately. Calling this method frees up any
+         * underlying native resources. After calling this method, this buffer
+         * must not be used in any way ({@link #lockCanvas()} must not be called,
+         * etc.)
+         *
+         * @see #isDestroyed()
+         */
+        Destroy();
+
+        /**
+         * Indicates whether this buffer has been destroyed. A destroyed buffer
+         * cannot be used in any way: locking a Canvas will return null, the buffer
+         * cannot be written to a parcel, etc.
+         *
+         * @return True if this <code>GraphicBuffer</code> is in a destroyed state,
+         *         false otherwise.
+         *
+         * @see #destroy()
+         */
+        IsDestroyed(
+            [out] Boolean* isDestroyed);
+    }
+
+    interface IGraphicBufferHelper {
+        /**
+         * Creates new <code>GraphicBuffer</code> instance. This method will return null
+         * if the buffer cannot be created.
+         *
+         * @param width The width in pixels of the buffer
+         * @param height The height in pixels of the buffer
+         * @param format The format of each pixel as specified in {@link PixelFormat}
+         * @param usage Hint indicating how the buffer will be used
+         *
+         * @return A <code>GraphicBuffer</code> instance or null
+         */
+        Create(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 format,
+            [in] Int32 usage,
+            [out] IGraphicBuffer** buf);
+    }
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

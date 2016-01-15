@@ -1,0 +1,36 @@
+
+module
+{
+    interface Elastos.Droid.View.TextService.ITextInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Internal {
+    namespace TextService {
+
+    /**
+     * @hide
+     */
+    [oneway, deprecated]
+    interface IISpellCheckerSession {
+        OnGetSuggestionsMultiple(
+            [in] ArrayOf<ITextInfo*>* textInfos,
+            [in] Int32 suggestionsLimit,
+            [in] Boolean multipleWords);
+
+        OnGetSentenceSuggestionsMultiple(
+            [in] ArrayOf<ITextInfo*>* textInfos,
+            [in] Int32 suggestionsLimit);
+
+        OnCancel();
+
+        OnClose();
+    }
+
+    } // namespace TextService
+    } // namespace Internal
+    } // namespace View
+    } // namespace Droid
+    } // namespace Elastos
+}

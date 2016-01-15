@@ -1,0 +1,62 @@
+
+module
+{
+    interface Elastos.Net.ISocketAddress;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * {Enum} class for the proxy type. Possible options are
+     * {DIRECT}, {HTTP} and {SOCKS}.
+     */
+    enum ProxyType {
+        /**
+         * Direct connection. Connect without any proxy.
+         */
+        ProxyType_DIRECT,
+
+        /**
+         * HTTP type proxy. It's often used by protocol handlers such as HTTP,
+         * HTTPS and FTP.
+         */
+        ProxyType_HTTP,
+
+        /**
+         * SOCKS type proxy.
+         */
+        ProxyType_SOCKS
+    }
+
+    /**
+     * Proxy defines methods for creating dynamic proxy classes and instances.
+     * A proxy class implements a declared set of interfaces and delegates
+     * method invocations to an InvocationHandler.
+     */
+    interface IProxy {
+        /**
+         * Gets the type of this {Proxy} instance.
+         *
+         * @return the stored proxy type.
+         */
+        GetType(
+            [out] ProxyType* type);
+
+        /**
+         * Gets the address of this {Proxy} instance.
+         *
+         * @return the stored proxy address or {null} if the proxy type is {DIRECT}.
+         */
+        GetAddress(
+            [out] ISocketAddress** address);
+
+    }
+
+    interface IProxyHelper {
+        GetNO_PROXY(
+            [out] IProxy** proxy);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

@@ -1,0 +1,29 @@
+
+module
+{
+
+    using interface Elastos.Utility.ICollection;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Cookie {
+    namespace Params {
+
+    interface ICookieSpecParamBean {
+
+        SetDatePatterns(
+            [in] ICollection* patterns);
+
+        SetSingleHeader(
+            [in] Boolean singleHeader);
+
+    }
+
+    } // namespace Params
+    } // namespace Cookie
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

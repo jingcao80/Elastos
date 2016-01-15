@@ -1,0 +1,24 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IParceledListSlice {
+        GetList(
+            [out] IList** list);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

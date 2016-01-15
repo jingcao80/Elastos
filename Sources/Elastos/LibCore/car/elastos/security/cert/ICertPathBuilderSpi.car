@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    interface ICertPathBuilderSpi {
+        /**
+         * Builds a certification path with the specified algorithm parameters.
+         *
+         * @param params
+         *            the algorithm parameters.
+         * @return a result of the build.
+         * @throws CertPathBuilderException
+         *             if the build fails.
+         * @throws InvalidAlgorithmParameterException
+         *             if the specified parameters cannot be used to build the path
+         *             with this builder.
+         */
+        EngineBuild(
+            [in] ICertPathParameters *params,
+            [out] ICertPathBuilderResult **result);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

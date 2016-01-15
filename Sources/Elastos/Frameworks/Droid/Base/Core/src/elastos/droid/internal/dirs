@@ -1,0 +1,14 @@
+DIRS += app
+DIRS += content
+DIRS += database
+DIRS += http
+DIRS += inputmethod
+DIRS += net
+DIRS += os
+DIRS += policy
+DIRS += preference
+DIRS += statusbar
+DIRS += transition
+DIRS += utility
+DIRS += view
+DIRS += widget

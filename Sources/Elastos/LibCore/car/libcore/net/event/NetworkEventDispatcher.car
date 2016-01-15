@@ -1,0 +1,39 @@
+module
+{
+    namespace Libcore {
+    namespace Net {
+    namespace Event {
+
+    interface INetworkEventDispatcher{
+        /**
+        * Registers a listener to be notified when network events occur.
+        * It can be deregistered using {@link #removeListener(NetworkEventListener)}
+        */
+        AddListener(
+            [in] INetworkEventListener* toAdd);
+
+        /**
+        * De-registers a listener previously added with {@link #addListener(NetworkEventListener)}. If
+        * the listener was not previously registered this is a no-op.
+        */
+        RemoveListener(
+            [in] INetworkEventListener* toRemove);
+
+        /**
+        * Notifies registered listeners of a network configuration change.
+        */
+        OnNetworkConfigurationChanged();
+    }
+
+    interface INetworkEventDispatcherHelper {
+        /**
+           * Returns the shared {@link NetworkEventDispatcher} instance.
+           */
+        GetInstance(
+            [out] INetworkEventDispatcher** result);
+    }
+
+    } // namespace Event
+    } // namespace Net
+    } // namespace Libcore
+}

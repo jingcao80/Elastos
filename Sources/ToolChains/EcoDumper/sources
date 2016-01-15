@@ -1,0 +1,9 @@
+
+TARGET_NAME= dumpeco
+TARGET_TYPE= exe
+
+SOURCES = main.cpp
+
+ELASTOS_LIBS += ../../Elastos/Runtime/Library/clsmodule/clsinfo.lib
+LIBRARIES += -lz
+LIBRARIES += -lstdc++

@@ -1,0 +1,144 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Widget.IRemoteViewsOnClickHandler;
+    interface Elastos.Droid.Widget.IRemoteViews;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace AppWidget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IFrameLayout
+     * interface Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface IAppWidgetHostView {
+
+        /**
+         * Pass the given handler to RemoteViews when updating this widget. Unless this
+         * is done immediatly after construction, a call to #updateAppWidget(RemoteViews)
+         * should be made.
+         *
+         * @sa #updateAppWidget(RemoteViews)
+         * @param handler
+         * @hide
+         */
+        SetOnClickHandler(
+            [in] IRemoteViewsOnClickHandler* handler);
+
+        /**
+         * Set the AppWidget that will be displayed by this view. This method also adds default padding
+         * to widgets, as described in #getDefaultPaddingForWidget(Context, ComponentName, Rect)
+         * and can be overridden in order to add custom padding.
+         *
+         * @sa #getDefaultPaddingForWidget(Context, ComponentName, Rect)
+         */
+        SetAppWidget(
+            [in] Int32 appWidgetId,
+            [in] IAppWidgetProviderInfo* info);
+
+        GetAppWidgetId(
+            [out] Int32* appWidgetId);
+
+        GetAppWidgetInfo(
+            [out] IAppWidgetProviderInfo** info);
+
+        /**
+         * Provide guidance about the size of this widget to the AppWidgetManager. The widths and
+         * heights should correspond to the full area the AppWidgetHostView is given. Padding added by
+         * the framework will be accounted for automatically. This information gets embedded into the
+         * AppWidget options and causes a callback to the AppWidgetProvider.
+         * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
+         *
+         * @param newOptions The bundle of options, in addition to the size information,
+         *          can be null.
+         * @param minWidth The minimum width in dips that the widget will be displayed at.
+         * @param minHeight The maximum height in dips that the widget will be displayed at.
+         * @param maxWidth The maximum width in dips that the widget will be displayed at.
+         * @param maxHeight The maximum height in dips that the widget will be displayed at.
+         *
+         */
+        UpdateAppWidgetSize(
+            [in] IBundle* newOptions,
+            [in] Int32 minWidth,
+            [in] Int32 minHeight,
+            [in] Int32 maxWidth,
+            [in] Int32 maxHeight);
+
+        /**
+         * @hide
+         */
+        UpdateAppWidgetSize(
+            [in] IBundle* newOptions,
+            [in] Int32 minWidth,
+            [in] Int32 minHeight,
+            [in] Int32 maxWidth,
+            [in] Int32 maxHeight,
+            [in] Boolean ignorePadding);
+
+        /**
+         * Specify some extra information for the widget provider. Causes a callback to the
+         * AppWidgetProvider.
+         * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
+         *
+         * @param options The bundle of options information.
+         */
+        UpdateAppWidgetOptions(
+            [in] IBundle* options);
+
+        /**
+         * Update the AppWidgetProviderInfo for this view, and reset it to the
+         * initial layout.
+         */
+        ResetAppWidget(
+            [in] IAppWidgetProviderInfo* info);
+
+        /**
+         * Process a set of RemoteViews coming in as an update from the
+         * AppWidget provider. Will animate into these new views as needed
+         *
+         * @sa RemoteViews
+         */
+        UpdateAppWidget(
+            [in] IRemoteViews* remoteViews);
+
+        /**
+         * Process data-changed notifications for the specified view in the specified
+         * set of {@link RemoteViews} views.
+         */
+        ViewDataChanged(
+            [in] Int32 viewId);
+    }
+
+    [local]
+    interface IAppWidgetHostViewHelper {
+        GetDefaultPaddingForWidget(
+            [in] IContext* ctx,
+            [in] IComponentName* component,
+            [in] IRect* padding,
+            [out] IRect** rect);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Utility.ISparseArray
+     */
+    interface IParcelableSparseArray {
+    }
+
+    }//namespace AppWidget
+    }//namespace Droid
+    }//namespace Elastos
+}

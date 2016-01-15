@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/digit" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:orientation="horizontal"
+	android:gravity="center">
+
+	<!-- 定义19个ImageView来显示液晶数字 -->
+
+	<ImageView android:id="@+id/img01" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img02" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img03" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img04" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img05" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:src="@drawable/digity" />
+
+	<ImageView android:id="@+id/img06" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img07" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img08" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:src="@drawable/digity" />
+
+	<ImageView android:id="@+id/img09" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img10" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img11" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:src="@drawable/digite" />
+
+	<ImageView android:id="@+id/img12" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img13" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img14" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:src="@drawable/digit" />
+
+	<ImageView android:id="@+id/img15" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img16" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+
+	<ImageView android:id="@+id/img17" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:src="@drawable/digit" />
+
+	<ImageView android:id="@+id/img18" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:src="@drawable/digit" />
+
+	<ImageView android:id="@+id/img19" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+</LinearLayout>

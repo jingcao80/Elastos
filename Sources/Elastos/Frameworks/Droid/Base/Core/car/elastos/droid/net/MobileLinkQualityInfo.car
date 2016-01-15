@@ -1,0 +1,203 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     *  Class that represents useful attributes of mobile network links
+     *  such as the upload/download throughput or error rate etc.
+     *  @hide
+     */
+    /**
+     * @Involved
+     * interface ILinkQualityInfo;
+     * interface IParcelable;
+     */
+    interface IMobileLinkQualityInfo {
+        /**
+         * returns mobile network type as defined by {@link android.telephony.TelephonyManager}
+         * @return network type or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetMobileNetworkType(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetMobileNetworkType(
+            [in] Int32 mobileNetworkType);
+
+        /**
+         * returns signal strength for GSM networks
+         * @return signal strength in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetRssi(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetRssi(
+            [in] Int32 Rssi);
+
+        /**
+         * returns error rates for GSM networks
+         * @return error rate or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetGsmErrorRate(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetGsmErrorRate(
+            [in] Int32 gsmErrorRate);
+
+        /**
+         * returns signal strength for CDMA networks
+         * @return signal strength in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetCdmaDbm(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetCdmaDbm(
+            [in] Int32 cdmaDbm);
+
+        /**
+         * returns signal to noise ratio for CDMA networks
+         * @return signal to noise ratio in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetCdmaEcio(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetCdmaEcio(
+            [in] Int32 cdmaEcio);
+
+        /**
+         * returns signal strength for EVDO networks
+         * @return signal strength in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetEvdoDbm(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetEvdoDbm(
+            [in] Int32 evdoDbm);
+
+        /**
+         * returns signal to noise ratio for EVDO spectrum
+         * @return signal to noise ration in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetEvdoEcio(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetEvdoEcio(
+            [in] Int32 evdoEcio);
+
+        /**
+         * returns end-to-end signal to noise ratio for EVDO networks
+         * @return signal to noise ration in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetEvdoSnr(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetEvdoSnr(
+            [in] Int32 evdoSnr);
+
+        /**
+         * returns signal strength for LTE network
+         * @return signal strength in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetLteSignalStrength(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetLteSignalStrength(
+            [in] Int32 lteSignalStrength);
+
+        /**
+         * returns RSRP (Reference Signal Received Power) for LTE network
+         * @return RSRP in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetLteRsrp(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetLteRsrp(
+            [in] Int32 lteRsrp);
+
+        /**
+         * returns RSRQ (Reference Signal Received Quality) for LTE network
+         * @return RSRQ ??? or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetLteRsrq(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetLteRsrq(
+            [in] Int32 lteRsrq);
+
+        /**
+         * returns signal to noise ratio for LTE networks
+         * @return signal to noise ration in db or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetLteRssnr(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetLteRssnr(
+            [in] Int32 lteRssnr);
+
+        /**
+         * returns channel quality indicator for LTE networks
+         * @return CQI or {@link android.net.LinkQualityInfo#UNKNOWN_INT}
+         */
+        GetLteCqi(
+            [out] Int32* result);
+
+        /**
+         * @hide
+         */
+        SetLteCqi(
+            [in] Int32 lteCqi);
+    }
+
+    interface IMobileLinkQualityInfoHelper {
+        /**
+         * @hide
+         */
+        CreateFromParcelBody(
+            [in] IParcel* parcel,
+            [out] IMobileLinkQualityInfo** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}
+
+

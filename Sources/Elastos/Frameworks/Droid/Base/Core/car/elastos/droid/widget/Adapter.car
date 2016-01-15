@@ -1,0 +1,158 @@
+
+module
+{
+    interface Elastos.Droid.Database.IDataSetObserver;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * An Adapter object acts as a bridge between an {@link AdapterView} and the
+     * underlying data for that view. The Adapter provides access to the data items.
+     * The Adapter is also responsible for making a {@link android.view.View} for
+     * each item in the data set.
+     *
+     * @see android.widget.ArrayAdapter
+     * @see android.widget.CursorAdapter
+     * @see android.widget.SimpleCursorAdapter
+     */
+    [local]
+    interface IAdapter {
+        /**
+         * An item view type that causes the {@link AdapterView} to ignore the item
+         * view. For example, this can be used if the client does not want a
+         * particular view to be given for conversion in
+         * {@link #getView(int, View, ViewGroup)}.
+         *
+         * @see #getItemViewType(int)
+         * @see #getViewTypeCount()
+         */
+        const Int32 IGNORE_ITEM_VIEW_TYPE = -1; //AdapterView.ITEM_VIEW_TYPE_IGNORE;
+
+        const Int32 NO_SELECTION = 0x80000000; //Integer.MIN_VALUE;
+
+        /**
+         * Register an observer that is called when changes happen to the data used by this adapter.
+         *
+         * @param observer the object that gets notified when the data set changes.
+         */
+        RegisterDataSetObserver(
+            [in] IDataSetObserver* observer);
+
+        /**
+         * Unregister an observer that has previously been registered with this
+         * adapter via {@link #registerDataSetObserver}.
+         *
+         * @param observer the object to unregister.
+         */
+        UnregisterDataSetObserver(
+            [in] IDataSetObserver* observer);
+
+        /**
+         * How many items are in the data set represented by this Adapter.
+         *
+         * @return Count of items.
+         */
+        GetCount(
+            [out] Int32* count);
+
+        /**
+         * Get the data item associated with the specified position in the data set.
+         *
+         * @param position Position of the item whose data we want within the adapter's
+         * data set.
+         * @return The data at the specified position.
+         */
+        GetItem(
+            [in] Int32 position,
+            [out] IInterface** item);
+
+        /**
+         * Get the row id associated with the specified position in the list.
+         *
+         * @param position The position of the item within the adapter's data set whose row id we want.
+         * @return The id of the item at the specified position.
+         */
+        GetItemId(
+            [in] Int32 position,
+            [out] Int64* itemId);
+
+        /**
+         * Indicated whether the item ids are stable across changes to the
+         * underlying data.
+         *
+         * @return True if the same id always refers to the same object.
+         */
+        HasStableIds(
+            [out] Boolean* hasStableIds);
+
+        /**
+         * Get a View that displays the data at the specified position in the data set. You can either
+         * create a View manually or inflate it from an XML layout file. When the View is inflated, the
+         * parent View (GridView, ListView...) will apply default layout parameters unless you use
+         * {@link android.view.LayoutInflater#inflate(int, android.view.ViewGroup, boolean)}
+         * to specify a root view and to prevent attachment to the root.
+         *
+         * @param position The position of the item within the adapter's data set of the item whose view
+         *        we want.
+         * @param convertView The old view to reuse, if possible. Note: You should check that this view
+         *        is non-null and of an appropriate type before using. If it is not possible to convert
+         *        this view to display the correct data, this method can create a new view.
+         * @param parent The parent that this view will eventually be attached to
+         * @return A View corresponding to the data at the specified position.
+         */
+        GetView(
+            [in] Int32 position,
+            [in] IView* convertView,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        /**
+         * Get the type of View that will be created by {@link #getView} for the specified item.
+         *
+         * @param position The position of the item within the adapter's data set whose view type we
+         *        want.
+         * @return An integer representing the type of View. Two views should share the same type if one
+         *         can be converted to the other in {@link #getView}. Note: Integers must be in the
+         *         range 0 to {@link #getViewTypeCount} - 1. {@link #IGNORE_ITEM_VIEW_TYPE} can
+         *         also be returned.
+         * @see #IGNORE_ITEM_VIEW_TYPE
+         */
+        GetItemViewType(
+            [in] Int32 position,
+            [out] Int32* viewType);
+
+        /**
+         * <p>
+         * Returns the number of types of Views that will be created by
+         * {@link #getView}. Each type represents a set of views that can be
+         * converted in {@link #getView}. If the adapter always returns the same
+         * type of View for all items, this method should return 1.
+         * </p>
+         * <p>
+         * This method will only be called when when the adapter is set on the
+         * the {@link AdapterView}.
+         * </p>
+         *
+         * @return The number of types of Views that will be created by this adapter
+         */
+        GetViewTypeCount(
+            [out] Int32* count);
+
+         /**
+          * @return true if this adapter doesn't contain any data.  This is used to determine
+          * whether the empty view should be displayed.  A typical implementation will return
+          * getCount() == 0 but since getCount() includes the headers and footers, specialized
+          * adapters might want a different behavior.
+          */
+        IsEmpty(
+             [out] Boolean* isEmpty);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

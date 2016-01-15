@@ -1,0 +1,33 @@
+module
+{
+    using interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Content {
+
+    /**  Bare bones representation of a sync target. */
+    interface ISyncStorageEngineEndPoint {
+        MatchesSpec(
+            [in] ISyncStorageEngineEndPoint* spec,
+            [out] Boolean* match);
+    }
+
+    /**
+     * Interface used to update the actual display state.
+     */
+    interface IOnSyncRequestListener {
+
+        /** Called when a sync is needed on an account(s) due to some change in state. */
+        OnSyncRequest(
+            [in] ISyncStorageEngineEndPoint* info,
+            [in] Int32 reason,
+            [in] IBundle* extras);
+    }
+
+    } // namespace Content
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

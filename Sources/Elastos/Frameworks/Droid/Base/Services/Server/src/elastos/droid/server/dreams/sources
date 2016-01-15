@@ -1,0 +1,11 @@
+TARGET_NAME= dreams
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+SOURCES = DreamController.cpp
+SOURCES += CDreamManagerService.cpp

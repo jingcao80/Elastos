@@ -1,0 +1,45 @@
+
+
+module
+{
+    using interface Elastos.IO.IFile;
+    interface Org.Apache.Harmony.Xnet.Provider.Jsse.ISSLClientSessionCache;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * File-based cache implementation. Only one process should access the
+     * underlying directory at a time.
+     */
+    interface IFileClientSessionCache {
+        const Int32 MAX_SIZE = 12; // ~72k
+    }
+
+    interface IFileClientSessionCacheHelper {
+        /**
+         * Returns a cache backed by the given directory. Creates the directory
+         * (including parent directories) if necessary. This cache should have
+         * exclusive access to the given directory.
+         *
+         * @param directory to store files in
+         * @return a cache backed by the given directory
+         * @throws IOException if the file exists and is not a directory or if
+         *  creating the directories fails
+         */
+         UsingDirectory(
+            [in] IFile* directory,
+            [out] ISSLClientSessionCache** cache);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

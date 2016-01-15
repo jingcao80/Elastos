@@ -1,0 +1,52 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Pkcs10.ICertificationRequestInfo;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Pkcs10 {
+
+    /**
+     * The class implements the ASN.1 DER encoding and decoding of the PKCS#10
+     * Certificate Signing Request (CSR). Its ASN notation is as follows:
+     *
+     * CertificationRequest ::= SEQUENCE {
+     *   certificationRequestInfo CertificationRequestInfo,
+     *   signatureAlgorithm SignatureAlgorithmIdentifier,
+     *   signature Signature
+     * }
+     *
+     * SignatureAlgorithmIdentifier ::= AlgorithmIdentifier
+     *
+     * Signature ::= BIT STRING
+    */
+    interface ICertificationRequest {
+        GetInfo(
+            [out] ICertificationRequestInfo** info);
+
+        GetSignature(
+            [out, callee] ArrayOf<Byte>* signature);
+
+        /**
+         * Returns ASN.1 encoded form of this CertificationRequest value.
+         * @return a byte array containing ASN.1 encode form.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface ICertificationRequestHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace Pkcs10
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

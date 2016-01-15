@@ -1,0 +1,97 @@
+
+module
+{
+    using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Egg {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface IFrameLayout
+     */
+    [local]
+    interface ILLand {
+        const String TAG = "LLand";
+
+        //TODO: const Boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+        const Boolean DEBUG_DRAW = FALSE; // DEBUG
+
+        const Boolean AUTOSTART = TRUE;
+        const Boolean HAVE_STARS = TRUE;
+
+        const Float DEBUG_SPEED_MULTIPLIER = 1; // 0.1f;
+        const Boolean DEBUG_IDDQD = FALSE;
+
+        GetGameWidth(
+            [out] Int32* witch);
+
+        GetGameHeight(
+            [out] Int32* height);
+
+        getGameTime(
+            [out] Float* time);
+
+        GetLastTimeStep(
+            [out] Float* step);
+
+        SetScoreField(
+            [in] ITextView* tv);
+
+        SetSplash(
+            [in] IView* v);
+    }
+
+    [deprecated]
+    interface ILLandHelper {
+        L(
+            [in] String s,
+            [in] ArrayOf<IInterface*>* objects);
+
+        Lerp(
+            [in] Float x,
+            [in] Float a,
+            [in] Float b,
+            [out] Float* ret);
+
+        Rlerp(
+            [in] Float v,
+            [in] Float a,
+            [in] Float b,
+            [out] Float* ret);
+
+        Clamp(
+            [in] Float f,
+            [out] Float* ret);
+
+        Frand(
+            [out] Float* ret);
+
+        Frand(
+            [in] Float a,
+            [in] Float b,
+            [out] Float* ret);
+
+        Irand(
+            [in] Int32 a,
+            [in] Int32 b,
+            [out] Int32* ret);
+    }
+
+    } // namespace Egg
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,41 @@
+module
+{
+    interface Elastos.Droid.Media.Projection.IIMediaProjectionCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Projection {
+
+    interface IIMediaProjection {
+        Start(
+            [in] IIMediaProjectionCallback * cb);
+
+        Stop();
+
+        CanProjectAudio(
+            [out] Boolean * result);
+
+        CanProjectVideo(
+            [out] Boolean * result);
+
+        CanProjectSecureVideo(
+            [out] Boolean * result);
+
+        ApplyVirtualDisplayFlags(
+            [in] Int32 flags,
+            [out] Int32 * result);
+
+        RegisterCallback(
+            [in] IIMediaProjectionCallback * cb);
+
+        UnregisterCallback(
+            [in] IIMediaProjectionCallback * cb);
+
+    }
+
+    } // namespace Projection
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

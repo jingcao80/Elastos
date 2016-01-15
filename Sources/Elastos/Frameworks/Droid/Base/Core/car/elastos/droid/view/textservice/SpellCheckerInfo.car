@@ -1,0 +1,102 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Content.Pm.IServiceInfo;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.TextService.ISpellCheckerSubtype;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace TextService {
+
+    /**
+     * This class is used to specify meta information of a spell checker.
+     */
+    /**
+     * @Invovle
+     * interface IParcelable
+     */
+    [deprecated, local, parcelable]
+    interface ISpellCheckerInfo {
+
+        /**
+         * Return a unique ID for this spell checker.  The ID is generated from
+         * the package and class name implementing the method.
+         */
+        GetId(
+            [out] String* id);
+
+        /**
+         * Return the component of the service that implements.
+         */
+        GetComponent(
+            [out] IComponentName** component);
+
+        /**
+         * Return the .apk package that implements this.
+         */
+        GetPackageName(
+            [out] String* name);
+
+        /**
+         * Load the user-displayed label for this spell checker.
+         *
+         * @param pm Supply a PackageManager used to load the spell checker's resources.
+         */
+        LoadLabel(
+            [in] IPackageManager* pm,
+            [out] ICharSequence** label);
+
+        /**
+         * Load the user-displayed icon for this spell checker.
+         *
+         * @param pm Supply a PackageManager used to load the spell checker's resources.
+         */
+        LoadIcon(
+            [in] IPackageManager* pm,
+            [out] IDrawable** drawable);
+
+        /**
+         * Return the raw information about the Service implementing this
+         * spell checker.  Do not modify the returned object.
+         */
+        GetServiceInfo(
+            [out] IServiceInfo** info);
+
+        /**
+         * Return the class name of an activity that provides a settings UI.
+         * You can launch this activity be starting it with
+         * an {@link android.content.Intent} whose action is MAIN and with an
+         * explicit {@link android.content.ComponentName}
+         * composed of {@link #getPackageName} and the class name returned here.
+         *
+         * <p>A null will be returned if there is no settings activity.
+         */
+        GetSettingsActivity(
+            [out] String* name);
+
+        /**
+         * Return the count of the subtypes.
+         */
+        GetSubtypeCount(
+            [out] Int32* count);
+
+        /**
+         * Return the subtype at the specified index.
+         *
+         * @param index the index of the subtype to return.
+         */
+        GetSubtypeAt(
+            [in] Int32 index,
+            [out] ISpellCheckerSubtype** subtype);
+    }
+
+    }   //namespace TextService
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

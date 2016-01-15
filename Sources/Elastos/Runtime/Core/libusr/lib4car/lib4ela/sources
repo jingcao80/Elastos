@@ -1,0 +1,13 @@
+#==========================================================================
+# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= lib4ela
+TARGET_TYPE= lib
+
+
+C_DEFINES= -D_CAR_RUNTIME
+
+
+SOURCES = lib4ela.cpp
+

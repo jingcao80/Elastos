@@ -1,0 +1,19 @@
+
+TARGET_NAME = speech
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = CRecognizerIntent.cpp
+SOURCES += CSpeechRecognizer.cpp
+SOURCES += CSpeechRecognizerHelper.cpp
+SOURCES += RecognitionService.cpp
+SOURCES += SpeechRecognizer.cpp
+
+ELASTOS_LIBS += srec/srec.lib
+ELASTOS_LIBS += tts/tts.lib

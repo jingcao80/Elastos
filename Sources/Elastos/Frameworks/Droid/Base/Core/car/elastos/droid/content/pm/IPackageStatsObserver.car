@@ -1,0 +1,28 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IPackageStats;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * API for package data change related callbacks from the Package Manager.
+     * Some usage scenarios include deletion of cache directory, generate
+     * statistics related to code, data, cache usage(TODO)
+     * {@hide}
+     */
+    [oneway]
+    interface IIPackageStatsObserver {
+        OnGetStatsCompleted(
+            [in] IPackageStats* pStats,
+            [in] Boolean succeeded);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

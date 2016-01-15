@@ -1,0 +1,27 @@
+
+module
+{
+    using interface Org.Xmlpull.V1.IXmlSerializer;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /** @hide */
+    interface IXmlSerializerAndParser {
+        WriteAsXml(
+            [in] IInterface* item,
+            [in] IXmlSerializer* serializer);
+
+        CreateFromXml(
+            [in] IXmlPullParser* parser,
+            [out] IInterface** serializer);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

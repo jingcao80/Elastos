@@ -1,0 +1,33 @@
+module
+{
+    using interface Elastos.Droid.App.INotification;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Notification {
+
+    [deprecated]
+    interface INotificationManagerInternal {
+        EnqueueNotification(
+            [in] String pkg,
+            [in] String basePkg,
+            [in] Int32 callingUid,
+            [in] Int32 callingPid,
+            [in] String tag,
+            [in] Int32 id,
+            [in] INotification* notification,
+            [in] ArrayOf<Int32>* idReceived,
+            [in] Int32 userId);
+
+        RemoveForegroundServiceFlagFromNotification(
+            [in] String pkg,
+            [in] Int32 notificationId,
+            [in] Int32 userId);
+    }
+
+    } // namespace Notification
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

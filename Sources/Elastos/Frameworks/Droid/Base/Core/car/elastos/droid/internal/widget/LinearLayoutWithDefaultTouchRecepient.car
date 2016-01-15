@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    [local]
+    /**
+     * Like a normal linear layout, but supports dispatching all otherwise unhandled
+     * touch events to a particular descendant.  This is for the unlock screen, so
+     * that a wider range of touch events than just the lock pattern widget can kick
+     * off a lock pattern if the finger is eventually dragged into the bounds of the
+     * lock pattern view.
+     *
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.ILinearLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface ILinearLayoutWithDefaultTouchRecepient {
+        SetDefaultTouchRecepient(
+            [in] IView* defaultTouchRecepient);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}

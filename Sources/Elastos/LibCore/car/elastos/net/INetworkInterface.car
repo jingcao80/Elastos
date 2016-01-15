@@ -1,0 +1,256 @@
+
+module
+{
+    interface Elastos.Utility.IEnumeration;
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * This class is used to represent a network interface of the local device.
+     * <p>
+     * An interface is defined by its address and a platform dependent name.
+     * The class provides methods to get all information about the available
+     * interfaces of the system or to identify the local interface of a joined multicast group.</p>
+     */
+
+    interface INetworkInterface {
+        /**
+         * Returns the index for the network interface, or -1 if unknown.
+         *
+         * @hide 1.7
+         */
+        GetIndex(
+            [out] Int32* index);
+
+        /**
+         * Returns the name of this network interface (such as "eth0" or "lo").
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns an enumeration of the addresses bound to this network interface.
+         */
+        GetInetAddresses(
+            [out] IEnumeration** addresses);
+
+        /**
+         * Returns a human-readable name for this network interface. On Android, this is the same
+         * string as returned by getName.
+         *
+         * @sa #getName
+         */
+        GetDisplayName(
+            [out] String* name);
+
+        /**
+         * Compares the specified object to this {@code NetworkInterface} and
+         * returns whether they are equal or not. The object must be an instance of
+         * {@code NetworkInterface} with the same name, display name, and list
+         * of interface addresses.
+         *
+         * @param obj
+         *            the object to compare with this instance.
+         * @return {@code true} if the specified object is equal to this {@code
+         *         NetworkInterface}, {@code false} otherwise.
+         * @see #hashCode()
+         */
+
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* result);
+
+        /**
+         * Returns a string containing details of this network interface.
+         * The exact format is deliberately unspecified. Callers that require a specific
+         * format should build a string themselves, using this class' accessor methods.
+         */
+        ToString(
+                [out] String* str);
+
+        /**
+         * Returns a List of the InterfaceAddresses for this network interface.
+         * @since 1.6
+         */
+        GetInterfaceAddresses(
+            [out] IList** addresses);
+
+        /**
+         * Returns an enumeration of all the sub-interfaces of this network interface.
+         * Sub-interfaces are also known as virtual interfaces.
+         *
+         * <p>For example, {eth0:1} would be a sub-interface of {eth0}.
+         *
+         * @return an Enumeration of all the sub-interfaces of this network interface
+         * @since 1.6
+         */
+        GetSubInterfaces(
+            [out] IEnumeration** subInterfaces);
+
+        /**
+         * Returns the parent NetworkInterface of this interface if this is a
+         * sub-interface, or null if it's a physical (non virtual) interface.
+         *
+         * @return the NetworkInterface this interface is attached to.
+         * @since 1.6
+         */
+        GetParent(
+            [out] INetworkInterface** parent);
+
+        /**
+         * Returns true if this network interface is up.
+         *
+         * @return true if the interface is up.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an I/O error occurs.
+         * @since 1.6
+         */
+        IsUp(
+            [out] Boolean* isUp);
+
+        /**
+         * Returns true if this network interface is a loopback interface.
+         *
+         * @return true if the interface is a loopback interface.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an I/O error occurs.
+         * @since 1.6
+         */
+        IsLoopback(
+            [out] Boolean* isLoopback);
+
+        /**
+         * Returns true if this network interface is a point-to-point interface.
+         * (For example, a PPP connection using a modem.)
+         *
+         * @return true if the interface is point-to-point.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an I/O error occurs.
+         * @since 1.6
+         */
+        IsPointToPoint(
+            [out] Boolean* isPointToPoint);
+
+        /**
+         * Returns true if this network interface supports multicast.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an I/O error occurs.
+         * @since 1.6
+         */
+        SupportsMulticast(
+            [out] Boolean* multicast);
+
+        /**
+         * Returns the hardware address of the interface, if it has one, or null otherwise.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an I/O error occurs.
+         * @since 1.6
+         */
+        GetHardwareAddress(
+            [out, callee] ArrayOf<Byte>* address);
+
+        /**
+         * Returns the Maximum Transmission Unit (MTU) of this interface.
+         *
+         * @return the value of the MTU for the interface.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an I/O error occurs.
+         * @since 1.6
+         */
+        GetMTU(
+            [out] Int32* mtu);
+
+        /**
+         * Returns true if this interface is a virtual interface (also called
+         * a sub-interface). Virtual interfaces are, on some systems, interfaces
+         * created as a child of a physical interface and given different settings
+         * (like address or MTU). Usually the name of the interface will the name of
+         * the parent followed by a colon (:) and a number identifying the child,
+         * since there can be several virtual interfaces attached to a single
+         * physical interface.
+         *
+         * @return true if this interface is a virtual interface.
+         * @since 1.6
+         */
+        IsVirtual(
+            [out] Boolean* isVirtual);
+    }
+
+    interface INetworkInterfaceHelper {
+
+        /**
+         * Returns the {NetworkInterface} corresponding to the named network interface, or null
+         * if no interface has this name.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs.
+         * NullPointerException | if {interfaceName == null}.
+         */
+        GetByName(
+            [in] String interfaceName,
+            [out] INetworkInterface** networkInterface);
+
+        /**
+         * Returns the {NetworkInterface} corresponding to the given address, or null if no
+         * interface has this address.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs.
+         * NullPointerException | if {address == null}.
+         */
+        GetByInetAddress(
+            [in] IInetAddress* address,
+            [out] INetworkInterface** networkInterface);
+
+        /**
+         * Returns the NetworkInterface corresponding to the given interface index, or null if no
+         * interface has this index.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs.
+         * @hide 1.7
+         */
+        GetByIndex(
+            [in] Int32 index,
+            [out] INetworkInterface** networkInterface);
+
+        /**
+         * Gets a list of all network interfaces available on the local system or
+         * {null} if no interface is available.
+         *
+         * @return the list of {NetworkInterface} instances representing the
+         *         available interfaces.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs while getting the network interface information.
+         */
+        GetNetworkInterfaces(
+            [out] IEnumeration** networkInterfaceList);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

@@ -1,0 +1,54 @@
+
+module
+{
+
+    interface Elastos.Droid.Webkit.IWebHistoryItem;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * This class contains the back/forward list for a WebView.
+     * WebView.copyBackForwardList() will return a copy of this class used to
+     * inspect the entries in the list.
+     */
+    interface IWebBackForwardList /*implements Cloneable, Serializable*/ {
+
+        /**
+         * Return the current history item. This method returns null if the list is
+         * empty.
+         * @return The current history item.
+         */
+        GetCurrentItem(
+            [out] IWebHistoryItem** item);
+
+        /**
+         * Get the index of the current history item. This index can be used to
+         * directly index into the array list.
+         * @return The current index from 0...n or -1 if the list is empty.
+         */
+        GetCurrentIndex(
+            [out] Int32* index);
+
+        /**
+         * Get the history item at the given index. The index range is from 0...n
+         * where 0 is the first item and n is the last item.
+         * @param index The index to retrieve.
+         */
+        GetItemAtIndex(
+            [in] Int32 index,
+            [out] IWebHistoryItem** item);
+
+        /**
+         * Get the total size of the back/forward list.
+         * @return The size of the list.
+         */
+        GetSize(
+            [out] Int32* size);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

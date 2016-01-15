@@ -1,0 +1,60 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * This class is a base for all input stream classes used
+     * in protocol implementation. It extends an InputStream with
+     * some additional read methods allowing to read TLS specific
+     * data types such as uint8, uint32 etc (see TLS v 1 specification
+     * at http://www.ietf.org/rfc/rfc2246.txt).
+     */
+    interface ISSLInputStream extends Elastos.IO.IInputStream {
+        /**
+         * Reads and returns uint8 value.
+         */
+        ReadUint8(
+            [out] Int32* value);
+
+        /**
+         * Reads and returns uint16 value.
+         */
+        ReadUint16(
+            [out] Int32* value);
+
+        /**
+         * Reads and returns uint24 value.
+         */
+        ReadUint24(
+            [out] Int32* value);
+
+        /**
+         * Reads and returns uint32 value.
+         */
+        ReadUint32(
+            [out] Int64* value);
+
+        /**
+         * Reads and returns uint64 value.
+         */
+        ReadUint64(
+            [out] Int64* value);
+
+        ReadSpecifiedBytes(
+            [in] Int32 length,
+            [out, callee] ArrayOf<Byte>* buffer);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

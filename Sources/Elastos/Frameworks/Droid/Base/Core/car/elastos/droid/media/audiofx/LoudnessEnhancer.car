@@ -1,0 +1,120 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Audiofx {
+
+    interface ILoudnessEnhancer;
+
+    /**
+     * @hide
+     * The OnParameterChangeListener interface defines a method called by the LoudnessEnhancer
+     * when a parameter value has changed.
+     */
+    interface ILoudnessEnhancerOnParameterChangeListener  {
+        /**
+         * Method called when a parameter value has changed. The method is called only if the
+         * parameter was changed by another application having the control of the same
+         * LoudnessEnhancer engine.
+         * @param effect the LoudnessEnhancer on which the interface is registered.
+         * @param param ID of the modified parameter. See {@link #PARAM_GENERIC_PARAM1} ...
+         * @param value the new parameter value.
+         */
+        OnParameterChange(
+            [in] ILoudnessEnhancer* effect,
+            [in] Int32 param,
+            [in] Int16 value);
+    }
+
+    /**
+     * @hide
+     * The Settings class regroups the LoudnessEnhancer parameters. It is used in
+     * conjunction with the getProperties() and setProperties() methods to backup and restore
+     * all parameters in a single call.
+     */
+    interface ILoudnessEnhancerSettings {
+    }
+
+    /**
+     * LoudnessEnhancer is an audio effect for increasing audio loudness.
+     * The processing is parametrized by a target gain value, which determines the maximum amount
+     * by which an audio signal will be amplified; signals amplified outside of the sample
+     * range supported by the platform are compressed.
+     * An application creates a LoudnessEnhancer object to instantiate and control a
+     * this audio effect in the audio framework.
+     * To attach the LoudnessEnhancer to a particular AudioTrack or MediaPlayer,
+     * specify the audio session ID of this AudioTrack or MediaPlayer when constructing the effect
+     * (see {@link AudioTrack#getAudioSessionId()} and {@link MediaPlayer#getAudioSessionId()}).
+     */
+    /**
+     * @Involve
+     * interface IAudioEffect
+     */
+    interface ILoudnessEnhancer {
+
+        /**
+         * Is strength parameter supported by virtualizer engine. Parameter ID for getParameter().
+         */
+        const Int32 PARAM_TARGET_GAIN_MB = 0;
+
+        /**
+         * Set the target gain for the audio effect.
+         * The target gain is the maximum value by which a sample value will be amplified when the
+         * effect is enabled.
+         * @param gainmB the effect target gain expressed in mB. 0mB corresponds to no amplification.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetTargetGain(
+            [in] Int32 gainmB);
+
+        /**
+         * Return the target gain.
+         * @return the effect target gain expressed in mB.
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetTargetGain(
+            [out] Float * result);
+
+        /**
+         * @hide
+         * Registers an OnParameterChangeListener interface.
+         * @param listener OnParameterChangeListener interface registered
+         */
+        SetParameterListener(
+            [in] ILoudnessEnhancerOnParameterChangeListener * listener);
+
+        /**
+         * @hide
+         * Gets the LoudnessEnhancer properties. This method is useful when a snapshot of current
+         * effect settings must be saved by the application.
+         * @return a LoudnessEnhancer.Settings object containing all current parameters values
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        GetProperties(
+            [out] ILoudnessEnhancerSettings ** result);
+
+        /**
+         * @hide
+         * Sets the LoudnessEnhancer properties. This method is useful when bass boost settings
+         * have to be applied from a previous backup.
+         * @param settings a LoudnessEnhancer.Settings object containing the properties to apply
+         * @throws IllegalStateException
+         * @throws IllegalArgumentException
+         * @throws UnsupportedOperationException
+         */
+        SetProperties(
+            [in] ILoudnessEnhancerSettings * settings);
+
+    }
+    } // namespace audiofx
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

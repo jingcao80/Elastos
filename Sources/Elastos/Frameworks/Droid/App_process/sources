@@ -1,0 +1,15 @@
+
+TARGET_NAME = ElApp_process
+TARGET_TYPE = ecx
+
+IMPORTS = Elastos.Droid.Core.eco
+
+SOURCES = app_main.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/DroidRuntime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += -lm -lcutils -lbinder -lutils -licuuc -licui18n -lskia

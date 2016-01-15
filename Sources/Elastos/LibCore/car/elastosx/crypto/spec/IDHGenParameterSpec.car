@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The algorithm parameter specification for generating Diffie-Hellman
+     * parameters used in Diffie-Hellman key agreement.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+     */
+    interface IDHGenParameterSpec {
+        /**
+         * Returns the size of the <i>prime modulus</i> in bits.
+         *
+         * @return the size of the prime modulus in bits.
+         */
+        GetPrimeSize(
+            [out] Int32 * result);
+
+        /**
+         * Returns the size of the <i>random exponent</i> in bits.
+         *
+         * @return the size of the random exponent in bits.
+         */
+        GetExponentSize(
+            [out] Int32 * result);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

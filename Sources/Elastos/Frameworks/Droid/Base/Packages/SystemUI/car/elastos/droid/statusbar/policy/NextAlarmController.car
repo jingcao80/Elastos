@@ -1,0 +1,37 @@
+module
+{
+    using interface Elastos.Droid.App.IAlarmClockInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    interface INextAlarmChangeCallback {
+
+        OnNextAlarmChanged(
+            [in] IAlarmClockInfo* nextAlarm);
+    }
+
+    /**
+     * @involve
+     * interface IBroadcastReceiver
+     */
+    interface INextAlarmController {
+        AddStateChangedCallback(
+            [in] INextAlarmChangeCallback* cb);
+
+        RemoveStateChangedCallback(
+            [in] INextAlarmChangeCallback* cb);
+
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

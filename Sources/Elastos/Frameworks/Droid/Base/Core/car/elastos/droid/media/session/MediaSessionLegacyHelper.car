@@ -1,0 +1,76 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Media.IMediaMetadata;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    /**
+     * Helper for connecting existing APIs up to the new session APIs. This can be
+     * used by RCC, AudioFocus, etc. to create a single session that translates to
+     * all those components.
+     *
+     * @hide
+     */
+    interface IMediaSessionLegacyHelper {
+
+        GetSession(
+            [in] IPendingIntent * pi,
+            [out] IMediaSession ** reseult);
+
+        SendMediaButtonEvent(
+            [in] IKeyEvent * keyEvent,
+            [in] Boolean needWakeLock);
+
+        SendVolumeKeyEvent(
+            [in] IKeyEvent * keyEvent,
+            [in] Boolean musicOnly);
+
+        SendAdjustVolumeBy(
+            [in] Int32 suggestedStream,
+            [in] Int32 delta,
+            [in] Int32 flags);
+
+        IsGlobalPriorityActive(
+            [out] Boolean * result);
+
+        AddRccListener(
+            [in] IPendingIntent * pi,
+            [in] IMediaSessionCallback * listener);
+
+        RemoveRccListener(
+            [in] IPendingIntent * pi);
+
+        AddMediaButtonListener(
+            [in] IPendingIntent * pi,
+            [in] IComponentName * mbrComponent,
+            [in] IContext * context);
+
+        RemoveMediaButtonListener(
+            [in] IPendingIntent * pi);
+    }
+
+    interface IMediaSessionLegacyHelperHelper {
+        GetHelper(
+            [in] IContext * context,
+            [out] IMediaSessionLegacyHelper ** result);
+
+        GetOldMetadata(
+            [in] IMediaMetadata * metadata,
+            [in] Int32 artworkWidth,
+            [in] Int32 artworkHeight,
+            [out] IBundle ** result);
+
+    }
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,32 @@
+module
+{
+
+    namespace Elastos {
+    namespace HelloCar {
+
+    interface IAnimal {                 // 接口定义
+        SetName(
+            [in] String name);
+
+        GetName(
+            [out] String* name);
+
+        SetAge(
+            [in] Int32 age);
+
+        GetAge(
+            [out] Int32* age);
+
+        CanFly(
+            [out] Boolean* canFly);
+    }
+
+    interface IAnimalHelper {           // 接口定义
+        CanFly(
+            [in] IAnimal* animal,
+            [out] Boolean* canFly);
+    }
+
+    } // HelloCar
+    } // Elastos
+}

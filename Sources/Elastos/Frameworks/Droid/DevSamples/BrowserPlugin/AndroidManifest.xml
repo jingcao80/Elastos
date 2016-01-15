@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="BrowserPluginDemo">
+
+    <uses-permission android:name="android.webkit.permission.PLUGIN"/>
+
+    <application android:icon="@drawable/sample_browser_plugin"
+                 android:label="@string/sample_browser_plugin">
+        <service android:name=".BrowserPlugin">
+            <intent-filter>
+                <action android:name="android.webkit.PLUGIN" />
+            </intent-filter>
+            <meta-data android:name="type" android:value="native" />
+        </service>
+    </application>
+
+</manifest>

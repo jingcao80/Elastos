@@ -1,0 +1,54 @@
+
+module
+{
+    interface Elastos.Droid.View.InputMethod.IInputMethodSubtype;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * An array-like container that stores multiple instances of {@link InputMethodSubtype}.
+     *
+     * <p>This container is designed to reduce the risk of {@link TransactionTooLargeException}
+     * when one or more instancess of {@link InputMethodInfo} are transferred through IPC.
+     * Basically this class does following three tasks.</p>
+     * <ul>
+     * <li>Applying compression for the marshalled data</li>
+     * <li>Lazily unmarshalling objects</li>
+     * <li>Caching the marshalled data when appropriate</li>
+     * </ul>
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IInputMethodSubtypeArray {
+
+        /**
+         * Return {@link InputMethodSubtype} specified with the given index.
+         *
+         * <p>This methods may take a bit additional time to decompress data lazily when called
+         * first time.</p>
+         *
+         * @param index The index of {@link InputMethodSubtype}.
+         */
+        Get(
+            [in] Int32 index,
+            [out] IInputMethodSubtype** result);
+
+        /**
+         * Return the number of {@link InputMethodSubtype} objects.
+         */
+        GetCount(
+            [out] Int32* result);
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

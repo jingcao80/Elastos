@@ -1,0 +1,27 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace WebViewDemo {
+
+        interface IElastos
+        {
+                test_01();
+                test_02();
+        }
+        class CElastos
+        {
+                interface IElastos;
+        }
+
+    } // namespace WebViewDemo
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+
+
+}
+

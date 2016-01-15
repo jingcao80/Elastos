@@ -1,0 +1,42 @@
+
+module
+{
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneQSTileHost;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    /*
+     * @Involve
+     * interface IDialogInterface.OnClickListener
+     * interface IViewOnClickListener
+     */
+    [local]
+    interface IQSFooter {
+        SetHost(
+            [in] IPhoneQSTileHost* host);
+
+        SetListening(
+            [in] Boolean listening);
+
+        OnConfigurationChanged();
+
+        GetView(
+            [out] IView** view);
+
+        HasFooter(
+            [out] Boolean* ret);
+
+        RefreshState();
+    }
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

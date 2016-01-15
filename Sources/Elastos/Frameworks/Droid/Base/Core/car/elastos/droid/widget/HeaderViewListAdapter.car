@@ -1,0 +1,45 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * ListAdapter used when a ListView has header views. This ListAdapter
+     * wraps another one and also keeps track of the header views and their
+     * associated data objects.
+     *<p>This is intended as a base class; you will probably not need to
+     * use this class directly in your own code.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IWrapperListAdapter
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     * interface Elastos.Droid.Widget.IFilterable
+     */
+    [local]
+    interface IHeaderViewListAdapter {
+        GetHeadersCount(
+            [out] Int32* count);
+
+        GetFootersCount(
+            [out] Int32* count);
+
+        RemoveHeader(
+            [in] IView* v,
+            [out] Boolean* result);
+
+        RemoveFooter(
+            [in] IView* v,
+            [out] Boolean* result);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

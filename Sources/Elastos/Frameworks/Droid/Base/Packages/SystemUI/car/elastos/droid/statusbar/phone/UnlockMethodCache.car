@@ -1,0 +1,58 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    interface IOnUnlockMethodChangedListener {
+
+        OnMethodSecureChanged(
+            [in] Boolean methodSecure);
+    }
+
+    /**
+     * Caches whether the current unlock method is insecure, taking trust into account. This information
+     * might be a little bit out of date and should not be used for actual security decisions; it should
+     * be only used for visual indications.
+     */
+    interface IUnlockMethodCache {
+
+        /**
+         * @return whether the current security method is secure, i. e. the bouncer will be shown
+         */
+        IsMethodInsecure(
+            [out] Boolean* result);
+
+        AddListener(
+            [in] IOnUnlockMethodChangedListener* listener);
+
+        RemoveListener(
+            [in] IOnUnlockMethodChangedListener* listener);
+
+        IsTrustManaged(
+            [out] Boolean* result);
+
+        IsFaceUnlockRunning(
+            [out] Boolean* result);
+    }
+
+    interface IUnlockMethodCacheHelper {
+
+        GetInstance(
+            [in] IContext* context,
+            [out] IUnlockMethodCache** result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

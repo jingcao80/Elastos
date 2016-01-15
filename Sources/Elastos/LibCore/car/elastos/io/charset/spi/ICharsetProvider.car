@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.IO.Charset.ICharset;
+    interface Elastos.Utility.IIterator;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Charset {
+    namespace Spi {
+
+    interface ICharsetProvider {
+        /**
+         * Returns an iterator over all the available charsets.
+         *
+         * @return the iterator.
+         */
+        Charsets(
+            [out] IIterator** charsetsIterator);    // Iterator<Charset>
+
+        /**
+         * Returns the named charset.
+         * <p>
+         * If the charset is unavailable the method returns <code>null</code>.
+         * </p>
+         *
+         * @param charsetName
+         *            the canonical or alias name of a character set.
+         * @return the charset, or <code>null</code> if unavailable.
+         */
+        CharsetForName(
+            [in] String name,
+            [out] ICharset** charset);
+    }
+
+    } // namespace Spi
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

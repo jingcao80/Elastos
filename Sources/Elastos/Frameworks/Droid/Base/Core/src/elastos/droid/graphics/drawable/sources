@@ -1,0 +1,64 @@
+
+TARGET_NAME = drawable
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(PREBUILD_INC)/skia/utils
+INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/effects
+#INCLUDES += $(PREBUILD_INC)/libcxx
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = Drawable.cpp
+SOURCES += CDrawableHelper.cpp
+SOURCES += DrawableContainer.cpp
+SOURCES += BitmapDrawable.cpp
+SOURCES += CBitmapDrawable.cpp
+SOURCES += ColorDrawable.cpp
+SOURCES += CColorDrawable.cpp
+SOURCES += NinePatchDrawable.cpp
+SOURCES += CNinePatchDrawable.cpp
+SOURCES += StateListDrawable.cpp
+SOURCES += CStateListDrawable.cpp
+SOURCES += AnimatedStateListDrawable.cpp
+SOURCES += CAnimatedStateListDrawable.cpp
+SOURCES += AnimatedRotateDrawable.cpp
+SOURCES += CAnimatedRotateDrawable.cpp
+SOURCES += LayerDrawable.cpp
+SOURCES += CLayerDrawable.cpp
+SOURCES += GradientDrawable.cpp
+SOURCES += CGradientDrawable.cpp
+SOURCES += ClipDrawable.cpp
+SOURCES += CClipDrawable.cpp
+SOURCES += AnimationDrawable.cpp
+SOURCES += CAnimationDrawable.cpp
+SOURCES += ShapeDrawable.cpp
+SOURCES += CShapeDrawable.cpp
+SOURCES += RotateDrawable.cpp
+SOURCES += CRotateDrawable.cpp
+SOURCES += InsetDrawable.cpp
+SOURCES += CInsetDrawable.cpp
+SOURCES += ScaleDrawable.cpp
+SOURCES += CScaleDrawable.cpp
+SOURCES += TransitionDrawable.cpp
+SOURCES += CTransitionDrawable.cpp
+SOURCES += LevelListDrawable.cpp
+SOURCES += CLevelListDrawable.cpp
+SOURCES += PaintDrawable.cpp
+SOURCES += CPaintDrawable.cpp
+SOURCES += PictureDrawable.cpp
+SOURCES += CPictureDrawable.cpp
+SOURCES += AnimatedVectorDrawable.cpp
+SOURCES += CAnimatedVectorDrawable.cpp
+SOURCES += VectorDrawable.cpp
+SOURCES += CVectorDrawable.cpp
+SOURCES += Ripple.cpp
+SOURCES += RippleDrawable.cpp
+SOURCES += CRippleDrawable.cpp
+SOURCES += RippleBackground.cpp
+
+ELASTOS_LIBS += shapes/shapes.lib

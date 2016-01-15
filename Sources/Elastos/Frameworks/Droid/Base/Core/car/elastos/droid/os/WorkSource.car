@@ -1,0 +1,113 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IWorkSource {
+        /**
+         * Compare this WorkSource with another.
+         * @param other The WorkSource to compare against.
+         * @return If there is a difference, true is returned.
+         */
+        Diff(
+            [in] IWorkSource* other,
+            [out] Boolean* difference);
+
+        /**
+         * Replace the current contents of this work source with the given
+         * work source.  If <var>other</var> is null, the current work source
+         * will be made empty.
+         */
+        Set(
+            [in] IWorkSource* other);
+
+        /** @hide */
+        Set(
+            [in] Int32 uid);
+
+        /** @hide */
+        Set(
+            [in] Int32 uid,
+            [in] String name);
+
+        /** @hide */
+        SetReturningDiffs(
+            [in] IWorkSource* other,
+            [out, callee] ArrayOf<IWorkSource*>* result);
+
+        /**
+         * Merge the contents of <var>other</var> WorkSource in to this one.
+         *
+         * @param other The other WorkSource whose contents are to be merged.
+         * @return Returns true if any new sources were added.
+         */
+        Add(
+            [in] IWorkSource* other,
+            [out] Boolean* added);
+
+        /** @hide */
+        AddReturningNewbs(
+            [in] IWorkSource* other,
+            [out] IWorkSource** result);
+
+        /** @hide */
+        Add(
+            [in] Int32 uid,
+            [out] Boolean* added);
+
+        /** @hide */
+        Add(
+            [in] Int32 uid,
+            [in] String name,
+            [out] Boolean* added);
+
+        /** @hide */
+        AddReturningNewbs(
+            [in] Int32 uid,
+            [out] IWorkSource** result);
+
+        Remove(
+            [in] IWorkSource* other,
+            [out] Boolean* successed);
+
+        /** @hide */
+        GetSize(
+            [out] Int32* value);
+
+        /** @hide */
+        Get(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        /** @hide */
+        GetName(
+            [in] Int32 index,
+            [out] String* value);
+
+        /**
+         * Clear this WorkSource to be empty.
+         */
+        Clear();
+
+        /**
+         * Clear names from this WorkSource.  Uids are left intact.
+         *
+         * <p>Useful when combining with another WorkSource that doesn't have names.
+         * @hide
+         */
+        ClearNames();
+
+        StripNames(
+            [out] IWorkSource** result);
+    }
+
+    } // namespace Os
+    } // namepsace Droid
+    } // namespace Elastos
+}

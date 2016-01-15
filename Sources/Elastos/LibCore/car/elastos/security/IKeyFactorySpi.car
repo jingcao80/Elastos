@@ -1,0 +1,79 @@
+
+module
+{
+    interface Elastos.Security.IKey;
+    interface Elastos.Security.Spec.IKeySpec;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * {@code KeyFactorySpi} is the Service Provider Interface (SPI) definition for
+     * {@link KeyFactory}.
+     *
+     * @see KeyFactory
+     */
+    interface IKeyFactorySpi {
+        /**
+         * Generates a instance of {@code PublicKey} from the given key
+         * specification.
+         *
+         * @param keySpec
+         *            the specification of the public key.
+         * @return the public key.
+         * @throws InvalidKeySpecException
+         *             if the specified {@code keySpec} is invalid.
+         */
+         EngineGeneratePublic(
+            [in] IKeySpec* keySpec,
+            [out] IPublicKey** pubKey);
+
+        /**
+         * Generates a instance of {@code PrivateKey} from the given key
+         * specification.
+         *
+         * @param keySpec
+         *            the specification of the private key.
+         * @return the private key.
+         * @throws InvalidKeySpecException
+         *             if the specified {@code keySpec} is invalid.
+         */
+        EngineGeneratePrivate(
+            [in] IKeySpec* keySpec,
+            [out] IPrivateKey** priKey);
+
+        /**
+         * Returns the key specification for the specified key.
+         *
+         * @param key
+         *            the key from which the specification is requested.
+         * @param keySpec
+         *            the type of the requested {@code KeySpec}.
+         * @return the key specification for the specified key.
+         * @throws InvalidKeySpecException
+         *             if the key can not be processed, or the requested requested
+         *             {@code KeySpec} is inappropriate for the given key.
+         */
+        EngineGetKeySpec(
+            [in] IKey* key,
+            [in] ClassID keySpec,
+            [out] IKeySpec** retkeySpec);
+
+        /**
+         * Translates the given key into a key from this key factory.
+         *
+         * @param key
+         *            the key to translate.
+         * @return the translated key.
+         * @throws InvalidKeyException
+         *             if the specified key can not be translated by this key
+         *             factory.
+         */
+        EngineTranslateKey(
+            [in] IKey* key,
+            [out] IKey** translatedKey);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

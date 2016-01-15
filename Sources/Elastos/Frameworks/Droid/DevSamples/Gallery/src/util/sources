@@ -1,0 +1,9 @@
+TARGET_NAME = util
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../sources.inc
+INCLUDES += ../../
+
+IMPORTS = Elastos.Droid.Core.eco
+
+SOURCES = Utils.cpp

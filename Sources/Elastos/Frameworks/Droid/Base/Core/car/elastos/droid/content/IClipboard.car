@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastos.Droid.Content.IClipData;
+    interface Elastos.Droid.Content.IClipDescription;
+    interface Elastos.Droid.Content.IOnPrimaryClipChangedListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Programming interface to the clipboard, which allows copying and pasting
+     * between applications.
+     * {@hide}
+     */
+    interface IIClipboard {
+        SetPrimaryClip(
+            [in] IClipData* clip,
+            [in] String callingPackage);
+
+        GetPrimaryClip(
+            [in] String pkg,
+            [out] IClipData** clipData);
+
+        GetPrimaryClipDescription(
+            [in] String callingPackage,
+            [out] IClipDescription** clipDescription);
+
+        HasPrimaryClip(
+            [in] String callingPackage,
+            [out] Boolean* result);
+
+        AddPrimaryClipChangedListener(
+            [in] IOnPrimaryClipChangedListener* listener,
+            [in] String callingPackage);
+
+        RemovePrimaryClipChangedListener(
+            [in] IOnPrimaryClipChangedListener* listener);
+
+        /**
+         * Returns true if the clipboard contains text; false otherwise.
+         */
+        HasClipboardText(
+            [in] String callingPackage,
+            [out] Boolean* result);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

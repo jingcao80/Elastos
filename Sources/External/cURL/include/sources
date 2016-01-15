@@ -1,0 +1,10 @@
+EXPORT_HEADERS+=curl/curl.h
+EXPORT_HEADERS+=curl/curlbuild.h
+EXPORT_HEADERS+=curl/curlrules.h
+EXPORT_HEADERS+=curl/curlver.h
+EXPORT_HEADERS+=curl/easy.h
+EXPORT_HEADERS+=curl/mprintf.h
+EXPORT_HEADERS+=curl/multi.h
+EXPORT_HEADERS+=curl/stdcheaders.h
+EXPORT_HEADERS+=curl/typecheck-gcc.h
+EXPORT_HEADERS+=curl/types.h

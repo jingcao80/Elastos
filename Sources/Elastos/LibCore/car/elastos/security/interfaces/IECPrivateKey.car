@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Security.Interfaces.IECKey;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Interfaces {
+
+    /**
+     * The interface for an Elliptic Curve (EC) private key.
+     */
+    interface IECPrivateKey /*extends Elastos.Security.IPrivateKey, Elastos.Security.Interfaces.IECKey */{
+        /**
+         * Returns the private value {@code S}.
+         *
+         * @return the private value {@code S}.
+         */
+        GetS(
+            [out] IBigInteger** s);
+    }
+
+    } // namespace Interfaces
+    } // namespace Security
+    } // namespace Elastos
+}

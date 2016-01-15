@@ -1,0 +1,73 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The key specification for a DES key.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IKeySpec;
+     */
+    interface IDESKeySpec {
+        /**
+         * The length of a DES key in bytes.
+         */
+        const Int32 DES_KEY_LEN = 8;
+
+        /**
+         * Returns a copy of the key.
+         *
+         * @return a copy of the key.
+         */
+        GetKey(
+            [out, callee] ArrayOf<Byte> * key);
+    }
+
+    [deprecated]
+    interface IDESKeySpecHelper {
+        /**
+         * Returns whether the specified key data starting at <code>offset</code> is
+         * <i>parity-adjusted</i>.
+         *
+         * @param key
+         *            the key data.
+         * @param offset
+         *            the offset to start checking at.
+         * @return {@code true} if the specified key data is parity-adjusted,
+         *            {@code false} otherwise.
+         * @throws InvalidKeyException
+         *             if the length of the key data starting at offset is less than
+         *             8, or the key is null.
+         */
+        IsParityAdjusted(
+            [in] ArrayOf<Byte> * key,
+            [in] Int32 offset,
+            [out] Boolean * result);
+
+        /**
+         * Returns whether the specified key data starting at <code>offset</code> is
+         * weak or semi-weak.
+         *
+         * @param key
+         *            the key data.
+         * @param offset
+         *            the offset to start checking at.
+         * @return {@code true} if the specified key data is weak or semi-weak.
+         * @throws InvalidKeyException
+         *             if the length of the key data starting at offset is less than
+         *             8, or it is null.
+         */
+        IsWeak(
+            [in] ArrayOf<Byte> * key,
+            [in] Int32 offset,
+            [out] Boolean * result);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

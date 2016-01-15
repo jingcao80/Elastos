@@ -1,0 +1,40 @@
+
+module
+{
+
+    using interface Elastos.Net.IInetAddress;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * An HTTP connection over the Internet Protocol (IP).
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 613298 $
+     *
+     * @since 4.0
+     */
+    interface IHttpInetConnection {
+
+        GetLocalAddress(
+            [out] IInetAddress** address);
+
+        GetLocalPort(
+            [out] Int32* port);
+
+        GetRemoteAddress(
+            [out] IInetAddress** address);
+
+        GetRemotePort(
+            [out] Int32* port);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,203 @@
+
+module
+{
+    interface Elastos.IO.IByteBuffer;
+    interface Elastos.Net.IDatagramSocket;
+    interface Elastos.Net.ISocketAddress;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+
+    /**
+     * A { DatagramChannel} is a selectable channel that represents a partial
+     * abstraction of a datagram socket. The {socket} method of this class can
+     * return the related {DatagramSocket} instance, which can handle the
+     * socket.
+     * <p>
+     * A datagram channel is open but not connected when created with the
+     * { open()} method. After it is connected, it will keep the connected
+     * status until it is disconnected or closed. The benefit of a connected channel
+     * is the reduced effort of security checks during send and receive. When
+     * invoking { read} or { write}, a connected channel is required.
+     * <p>
+     * Datagram channels are thread-safe; only one thread can read or write at the
+     * same time.
+     */
+    /**
+     * @Involve
+     * interface Elastos.IO.Channels.IChannel;
+     * interface Elastos.IO.Channels.ISelectableChannel;
+     * interface Elastos.IO.Channels.IByteChannel;
+     * interface Elastos.IO.Channels.ScatteringByteChannel;
+     * interface Elastos.IO.Channels.GatheringByteChannel;
+     */
+    interface IDatagramChannel {
+        /**
+         * Returns the related datagram socket of this channel, which does not
+         * define additional public methods to those defined by DatagramSocket.
+         *
+         * @sa DatagramSocket
+         *
+         * @return the related DatagramSocket instance.
+         */
+        GetSocket(
+            [out] IDatagramSocket** socket);
+
+        /**
+         * Returns whether this channel's socket is connected or not.
+         *
+         * @return <code>true</code> if this channel's socket is connected;
+         *         <code>false</code> otherwise.
+         */
+        IsConnected(
+            [out] Boolean* isConnected);
+
+        /**
+         * Connects the socket of this channel to a remote address, which is the
+         * only communication peer for getting and sending datagrams after being
+         * connected.
+         * <p>
+         * This method can be called at any time without affecting the read and
+         * write operations being processed at the time the method is called. The
+         * connection status does not change until the channel is disconnected or
+         * closed.
+         * <p>
+         * This method executes the same security checks as the connect method of
+         * the  DatagramSocket class.
+         *
+         * @sa DatagramSocket
+         *
+         * @param address
+         *            the address to be connected to.
+         * @return this channel.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         *  ClosedChannelException |    if the channel is already closed.
+         *  AsynchronousCloseException| if the channel is closed by another thread while this method  is in operation.
+         * ClosedByInterruptException|  if another thread interrupts the calling thread while the operation is in progress. The calling thread will have the interrupt state set and the channel will be closed.
+         *  SecurityException | if there is a security manager, and the address is not permitted to be accessed.
+         *  IOException |   if some other I/O error occurrs.
+         */
+        Connect(
+            [in] ISocketAddress* address,
+            [out] IDatagramChannel** channel);
+
+        /**
+         * Disconnects the socket of this channel, which has been connected before
+         * in order to send and receive datagrams.
+         * <p>
+         * This method can be called at any time without affecting the read and
+         * write operations being underway. It does not have any effect if the
+         * socket is not connected or the channel is closed.
+         *
+         * @return this channel.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         *  IOException  | some other I/O error occurs.
+         */
+        Disconnect();
+
+        /**
+         * Gets a datagram from this channel.
+         * <p>
+         * This method transfers a datagram from the channel into the target byte
+         * buffer. If this channel is in blocking mode, it waits for the datagram
+         * and returns its address when it is available. If this channel is in
+         * non-blocking mode and no datagram is available, it returns { null}
+         * immediately. The transfer starts at the current position of the buffer,
+         * and if there is not enough space remaining in the buffer to store the
+         * datagram then the part of the datagram that does not fit is discarded.
+         * <p>
+         * This method can be called at any time and it will block if there is
+         * another thread that has started a read operation on the channel.
+         * <p>
+         * This method executes the same security checks as the receive method of
+         * the  DatagramSocket class.
+         *
+         * @sa DatagramSocket
+         *
+         * @param target
+         *            the byte buffer to store the received datagram.
+         * @return the address of the datagram if the transfer is performed, or null
+         *         if the channel is in non-blocking mode and no datagram is
+         *         available.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         *  ClosedChannelException |        if the channel is already closed.
+         *  AsynchronousCloseException| if the channel is closed by another thread while this method is in operation.
+         * ClosedByInterruptException | if another thread interrupts the calling thread while the operation is in progress. The calling thread will have the interrupt state set and the channel will be closed.
+         *  SecurityException | if there is a security manager, and the address is not permitted to be accessed.
+         *  IOException | some other I/O error occurs.
+         */
+        Receive(
+            [in] IByteBuffer* target,
+            [out] ISocketAddress** address);
+
+        /**
+         * Sends a datagram through this channel. The datagram consists of the
+         * remaining bytes in { source}.
+         * <p>
+         * If this channel is in blocking mode then the datagram is sent as soon as
+         * there is enough space in the underlying output buffer. If this channel is
+         * in non-blocking mode then the datagram is only sent if there is enough
+         * space in the underlying output buffer at that moment. The transfer action
+         * is just like a regular write operation.
+         * <p>
+         * This method can be called at any time and it will block if another thread
+         * has started a send operation on this channel.
+         * <p>
+         * This method executes the same security checks as the send method of the
+         * DatagramSocket class.
+         *
+         * @sa DatagramSocket
+         *
+         * @param source
+         *            the byte buffer with the datagram to be sent.
+         * @param address
+         *            the destination address for the datagram.
+         * @return the number of bytes sent. This is the number of bytes remaining
+         *         in { source} or zero if the channel is in non-blocking mode
+         *         and there is not enough space for the datagram in the underlying
+         *         output buffer.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         *  ClosedChannelException | if the channel is already closed.
+         *  AsynchronousCloseException |  if the channel is closed by another thread while this method is in operation.
+         * ClosedByInterruptException |if another thread interrupts the calling thread while the operation is in progress. The calling thread will have the interrupt state set and the channel will be closed.
+         *  SecurityException |  if there is a security manager, and the address is not permitted to access.
+         * IOException | some other I/O error occurs.
+         */
+        Send(
+            [in] IByteBuffer* source,
+            [in] ISocketAddress* address,
+            [out] Int32* number);
+    }
+
+    interface IDatagramChannelHelper{
+        /**
+         * Creates an opened and not-connected datagram channel.
+         * <p>
+         * This channel is created by calling the <code>openDatagramChannel</code>
+         * method of the default SelectorProvider instance.
+         *
+         * @sa SelectorProvider
+         *
+         * @return the new channel which is open but not connected.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException|   if some I/O error occurs.
+         */
+        Open(
+            [out] IDatagramChannel** channel);
+    }
+
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

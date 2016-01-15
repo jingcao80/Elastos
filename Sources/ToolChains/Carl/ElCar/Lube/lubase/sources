@@ -1,0 +1,23 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= lubase
+TARGET_TYPE= lib
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES += $(MAKEDIR)/../inc;
+INCLUDES += $(MAKEDIR)/../../inc;
+INCLUDES += $(INCLUDESTEMP);
+
+SOURCES = states.cpp
+SOURCES += with.cpp
+SOURCES += withall.cpp
+SOURCES += if.cpp
+SOURCES += func.cpp
+SOURCES += memstr.cpp
+SOURCES += lubectx.cpp
+SOURCES += template.cpp
+SOURCES += savelube.cpp
+SOURCES += loadlube.cpp
+

@@ -1,0 +1,59 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Net.IUriBuilder;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Notification {
+
+    /**
+     * Condition information from condition providers.
+     *
+     * @hide
+     * @Involve
+     * interface IParcelable
+     */
+    //@SystemApi
+    interface ICondition {
+        const String SCHEME = "condition";
+
+        const Int32 STATE_FALSE = 0;
+        const Int32 STATE_TRUE = 1;
+        const Int32 STATE_UNKNOWN = 2;
+        const Int32 STATE_ERROR = 3;
+
+        const Int32 FLAG_RELEVANT_NOW = 1 << 0;
+        const Int32 FLAG_RELEVANT_ALWAYS = 1 << 1;
+
+        Copy(
+            [out] ICondition** ret);
+    }
+
+    interface IConditionHelper {
+        StateToString(
+            [in] Int32 state,
+            [out] String* str);
+
+        RelevanceToString(
+            [in] Int32 flags,
+            [out] String* str);
+
+        NewId(
+            [in] IContext* context,
+            [out] IUriBuilder** id);
+
+        IsValidId(
+            [in] IUri* id,
+            [in] String pkg,
+            [out] Boolean* ret);
+    }
+
+    } //Notification
+    } //Service
+    } //Droid
+    } //Elastos
+}

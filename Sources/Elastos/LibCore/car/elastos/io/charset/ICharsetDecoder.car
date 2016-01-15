@@ -1,0 +1,450 @@
+
+module
+{
+    interface Elastos.IO.Charset.ICharset;
+    interface Elastos.IO.Charset.ICoderResult;
+    interface Elastos.IO.Charset.ICodingErrorAction;
+    interface Elastos.IO.IByteBuffer;
+    interface Elastos.IO.ICharBuffer;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Charset {
+
+    /**
+     * A converter that can convert a byte sequence from a charset into a 16-bit
+     * Unicode character sequence.
+     * <p>
+     * The input byte sequence is wrapped by a
+     * ByteBuffer and the output character sequence is a CharBuffer.
+     *
+     * @sa java.nio.ByteBuffer ByteBuffer
+     * @sa java.nio.CharBuffer CharBuffer
+     * A decoder instance should be used in
+     * the following sequence, which is referred to as a decoding operation:
+     * <ol>
+     * <li>invoking the reset method to reset the decoder if the
+     * decoder has been used;</li>
+     *
+     * @sa #reset() reset
+     * <li>invoking the decode
+     * method until the additional input is not needed, the <code>endOfInput</code>
+     * parameter must be set to false, the input buffer must be filled and the
+     * output buffer must be flushed between invocations;</li>
+     *
+     * @sa #decode(ByteBuffer, CharBuffer, boolean) decode
+     * <li>invoking the decode
+     * method for the last time, and then the <code>endOfInput</code> parameter
+     * must be set to true;</li>
+     *
+     * @sa #decode(ByteBuffer, CharBuffer, boolean) decode
+     * <li>invoking the flush method to flush the
+     * output.</li>
+     *
+     * @sa #flush(CharBuffer) flush
+     * </ol>
+     * <p>
+     * The decode method will
+     * convert as many bytes as possible, and the process won't stop until the input
+     * bytes have run out, the output buffer has been filled or some error has
+     * happened.
+     *
+     * @sa #decode(ByteBuffer, CharBuffer, boolean) decode
+     * A CoderResult instance will be returned to
+     * indicate the stop reason, and the invoker can identify the result and choose
+     * further action, which includes filling the input buffer, flushing the output
+     * buffer or recovering from an error and trying again.
+     *
+     * @sa CoderResult CoderResult
+     * <p>
+     * There are two common decoding errors. One is named malformed and it is
+     * returned when the input byte sequence is illegal for the current specific
+     * charset, the other is named unmappable character and it is returned when a
+     * problem occurs mapping a legal input byte sequence to its Unicode character
+     * equivalent.
+     * <p>
+     * Both errors can be handled in three ways, the default one is to report the
+     * error to the invoker by a CoderResult instance, and the
+     * alternatives are to ignore it or to replace the erroneous input with the
+     * replacement string.
+     *
+     * @sa CoderResult CoderResult
+     * The replacement string is "\uFFFD" by default and can be
+     * changed by invoking replaceWith} method.
+     *
+     * @sa #replaceWith(String) replaceWith
+     * The
+     * invoker of this decoder can choose one way by specifying a
+     * CodingErrorAction instance for each error type via onMalformedInput method and
+     * onUnmappableCharacter method.
+     *
+     * @sa CodingErrorAction CodingErrorAction
+     * @sa #onMalformedInput(CodingErrorAction) onMalformedInput
+     * @sa #onUnmappableCharacter(CodingErrorAction) onUnmappableCharacter
+     * <p>
+     * This is an abstract class and encapsulates many common operations of the
+     * decoding process for all charsets. Decoders for a specific charset should
+     * extend this class and need only to implement the
+     * decodeLoop method for the basic decoding. If a subclass maintains an internal state, it should override the implFlush method and the implReset method in addition.
+     *
+     * @sa #decodeLoop(ByteBuffer, CharBuffer) decodeLoop
+     * @sa #implFlush(CharBuffer) implFlush
+     * @sa #implReset() implReset
+     * <p>
+     * This class is not thread-safe.
+     *
+     * @see java.nio.charset.Charset
+     * @see java.nio.charset.CharsetEncoder
+     */
+    [deprecated]
+    interface ICharsetDecoder {
+        /**
+         * Gets the average number of characters created by this decoder for a
+         * single input byte.
+         *
+         * @return the average number of characters created by this decoder for a
+         *         single input byte.
+         */
+        AverageCharsPerByte(
+            [out] Float* average);
+
+        /**
+         * Gets the <code>Charset</code> which this decoder uses.
+         *
+         * @return the <code>Charset</code> which this decoder uses.
+         */
+        Charset(
+            [out] ICharset** charset);
+
+        /**
+         * This is a facade method for the decoding operation.
+         * <p>
+         * This method decodes the remaining byte sequence of the given byte buffer
+         * into a new character buffer. This method performs a complete decoding
+         * operation, resets at first, then decodes, and flushes at last.
+         * <p>
+         * This method should not be invoked while another {decode} operation
+         * is ongoing.
+         *
+         * @param in
+         *            the input buffer.
+         * @return a new <code>CharBuffer</code> containing the the characters
+         *         produced by this decoding operation. The buffer's limit will be
+         *         the position of the last character in the buffer, and the
+         *         position will be zero.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if another decoding operation is ongoing.
+         * MalformedInputException |if an illegal input byte sequence for this charset was encountered, and the action for malformed error is  CodingErrorAction.REPORT
+         * UnmappableCharacterException |if a legal but unmappable input byte sequence for this  charset was encountered, and the action for unmappable character error is CodingErrorAction.REPORT. Unmappable means the byte sequence at the input buffer's current position cannot be mapped to a Unicode character sequence.
+         * CharacterCodingException | if another exception happened during the decode operation.
+         *
+         * @sa CodingErrorAction#REPORT CodingErrorAction.REPORT
+         * @sa CodingErrorAction#REPORT CodingErrorAction.REPORT
+         */
+        Decode(
+            [in] IByteBuffer* byteBuffer,
+            [out] ICharBuffer** charBuffer);
+
+        /**
+         * Decodes bytes starting at the current position of the given input buffer,
+         * and writes the equivalent character sequence into the given output buffer
+         * from its current position.
+         * <p>
+         * The buffers' position will be changed with the reading and writing
+         * operation, but their limits and marks will be kept intact.
+         * <p>
+         * A <code>CoderResult</code> instance will be returned according to
+         * following rules:
+         * <ul>
+         * <li> CoderResult.OVERFLOW indicates that
+         * even though not all of the input has been processed, the buffer the
+         * output is being written to has reached its capacity. In the event of this
+         * code being returned this method should be called once more with an
+         * <code>out</code> argument that has not already been filled.</li>
+         *
+         * @sa CoderResult#OVERFLOW CoderResult.OVERFLOW
+         * <li>CoderResult.UNDERFLOW indicates that
+         * as many bytes as possible in the input buffer have been decoded. If there
+         * is no further input and no remaining bytes in the input buffer then this
+         * operation may be regarded as complete. Otherwise, this method should be
+         * called once more with additional input.</li>
+         *
+         * @sa CoderResult#UNDERFLOW CoderResult.UNDERFLOW
+         * <li>A malformed input result
+         * indicates that some malformed input error has been encountered, and the
+         * erroneous bytes start at the input buffer's position and their number can
+         * be got by result's length. This kind of
+         * result can be returned only if the malformed action is CodingErrorAction.REPORT. </li>
+         *
+         * @sa CoderResult#malformedForLength(int) malformed input
+         * @sa CoderResult#length() length
+         * @sa CodingErrorAction#REPORT CodingErrorAction.REPORT
+         * <li>An unmappable character
+         * result indicates that some unmappable character error has been
+         * encountered, and the erroneous bytes start at the input buffer's position
+         * and their number can be got by result's
+         * length. This kind of result can be returned
+         * only if the unmappable character action is CodingErrorAction.REPORT. </li>
+         *
+         * @sa CoderResult#unmappableForLength(int) unmappable character
+         * @sa CoderResult#length() length
+         * @sa CodingErrorAction#REPORT CodingErrorAction.REPORT
+         * </ul>
+         * <p>
+         * The <code>endOfInput</code> parameter indicates that the invoker cannot
+         * provide further input. This parameter is true if and only if the bytes in
+         * current input buffer are all inputs for this decoding operation. Note
+         * that it is common and won't cause an error if the invoker sets false and
+         * then can't provide more input, while it may cause an error if the invoker
+         * always sets true in several consecutive invocations. This would make the
+         * remaining input to be treated as malformed input.
+         * <p>
+         * This method invokes the decodeLoop method to
+         * implement the basic decode logic for a specific charset.
+         *
+         * @sa #decodeLoop(ByteBuffer, CharBuffer) decodeLoop
+         *
+         * @param in
+         *            the input buffer.
+         * @param out
+         *            the output buffer.
+         * @param endOfInput
+         *            true if all the input characters have been provided.
+         * @return a <code>CoderResult</code> instance which indicates the reason
+         *         of termination.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if decoding has started or no more input is needed in this decoding progress.
+         * CoderMalfunctionError | if the decodeLoop method threw an <code>BufferUnderflowException</code> or <code>BufferOverflowException</code>.
+         *
+         * @sa #decodeLoop(ByteBuffer, CharBuffer) decodeLoop
+         */
+        Decode(
+            [in] IByteBuffer* byteBuffer,
+            [in] ICharBuffer* charBuffer,
+            [in] Boolean endOfInput,
+            [out] ICoderResult** result);
+
+        /**
+         * Gets the charset detected by this decoder; this method is optional.
+         * <p>
+         * If implementing an auto-detecting charset, then this decoder returns the
+         * detected charset from this method when it is available. The returned
+         * charset will be the same for the rest of the decode operation.
+         * <p>
+         * If insufficient bytes have been read to determine the charset, an
+         * <code>IllegalStateException</code> will be thrown.
+         * <p>
+         * The default implementation always throws
+         * <code>UnsupportedOperationException</code>, so it should be overridden
+         * by a subclass if needed.
+         *
+         * @return the charset detected by this decoder, or null if it is not yet
+         *         determined.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * UnsupportedOperationException | if this decoder does not implement an auto-detecting charset.
+         * IllegalStateException | if insufficient bytes have been read to determine the charset.
+         */
+        DetectedCharset(
+            [out] ICharset** charset);
+
+        /**
+         * Flushes this decoder.
+         *
+         * This method will call implFlush.
+         *
+         * @sa #implFlush(CharBuffer) implFlush
+         * Some decoders may need to write some characters to the output buffer when they
+         * have read all input bytes; subclasses can override implFlush to perform the writing     * operation.
+         *
+         * @sa #implFlush(CharBuffer) implFlush
+         * <p>
+         * The maximum number of written bytes won't be larger than out.remaining().
+         *
+         * @sa CharBuffer#remaining() out.remaining()
+         *If some decoder wants to
+         * write more bytes than an output buffer's remaining space allows, then a
+         * <code>CoderResult.OVERFLOW</code> will be returned, and this method
+         * must be called again with a character buffer that has more remaining
+         * space. Otherwise this method will return
+         * <code>CoderResult.UNDERFLOW</code>, which means one decoding process
+         * has been completed successfully.
+         * <p>
+         * During the flush, the output buffer's position will be changed
+         * accordingly, while its mark and limit will be intact.
+         *
+         * @param out
+         *            the given output buffer.
+         * @return <code>CoderResult.UNDERFLOW</code> or
+         *         <code>CoderResult.OVERFLOW</code>.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if this decoder hasn't read all input bytes during one decoding process, which means neither after calling decode(ByteBuffer) nor after calling decode(ByteBuffer, CharBuffer, boolean) with true as value for the last boolean parameter.
+         *
+         * @sa #decode(ByteBuffer) decode(ByteBuffer)
+         * @sa #decode(ByteBuffer, CharBuffer, boolean) decode(ByteBuffer, CharBuffer, boolean)
+         *
+         */
+        Flush(
+            [in] ICharBuffer* charBuffer,
+            [out] ICoderResult** result);
+
+        /**
+         * Indicates whether this decoder implements an auto-detecting charset.
+         *
+         * @return <code>true</code> if this decoder implements an auto-detecting
+         *         charset.
+         */
+        IsAutoDetecting(
+            [out] Boolean* result);
+
+        /**
+         * Indicates whether this decoder has detected a charset; this method is
+         * optional.
+         * <p>
+         * If this decoder implements an auto-detecting charset, then this method
+         * may start to return true during decoding operation to indicate that a
+         * charset has been detected in the input bytes and that the charset can be
+         * retrieved by invoking the  detectedCharset method.
+         *
+         * @sa #detectedCharset() detectedCharset
+         * <p>
+         * Note that a decoder that implements an auto-detecting charset may still
+         * succeed in decoding a portion of the given input even when it is unable
+         * to detect the charset. For this reason users should be aware that a
+         * <code>false</code> return value does not indicate that no decoding took
+         * place.
+         * <p>
+         * The default implementation always throws an
+         * <code>UnsupportedOperationException</code>; it should be overridden by
+         * a subclass if needed.
+         *
+         * @return <code>true</code> if this decoder has detected a charset.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * UnsupportedOperationException | if this decoder doesn't implement an auto-detecting charset.
+         */
+        IsCharsetDetected(
+            [out] Boolean* result);
+
+        /**
+         * Gets this decoder's <code>CodingErrorAction</code> when malformed input
+         * occurred during the decoding process.
+         *
+         * @return this decoder's <code>CodingErrorAction</code> when malformed
+         *         input occurred during the decoding process.
+         */
+        MalformedInputAction(
+            [out] ICodingErrorAction** codingErrorAction);
+
+        /**
+         * Gets the maximum number of characters which can be created by this
+         * decoder for one input byte, must be positive.
+         *
+         * @return the maximum number of characters which can be created by this
+         *         decoder for one input byte, must be positive.
+         */
+        MaxCharsPerByte(
+            [out] Float* maxNumber);
+
+        /**
+         * Sets this decoder's action on malformed input errors.
+         *
+         * This method will call the implOnMalformedInput
+
+         * method with the given new action as argument.
+         *
+         * @sa #implOnMalformedInput(CodingErrorAction) implOnMalformedInput
+         *
+         * @param newAction
+         *            the new action on malformed input error.
+         * @return this decoder.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {newAction} is {null}.
+         */
+        OnMalformedInput(
+            [in] ICodingErrorAction* newAction);
+
+        /**
+         * Sets this decoder's action on unmappable character errors.
+         *
+         * This method will call the implOnUnmappableCharacter
+         * method with the given new action as argument.
+         *
+         * @sa #implOnUnmappableCharacter(CodingErrorAction) implOnUnmappableCharacter
+         *
+         * @param newAction
+         *            the new action on unmappable character error.
+         * @return this decoder.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         *  IllegalArgumentException | if {newAction} is {null}.
+         */
+        OnUnmappableCharacter(
+            [in] ICodingErrorAction* newAction);
+
+        /**
+         * Gets the replacement string, which is never null or empty.
+         *
+         * @return the replacement string, cannot be null or empty.
+         */
+        Replacement(
+            [out] String* replacement);
+
+        /**
+         * Sets the new replacement string.
+         *
+         * This method first checks the given replacement's validity, then changes
+         * the replacement value, and at last calls the implReplaceWith method with the given
+         * new replacement as argument.
+         *
+         * @sa #implReplaceWith(String) implReplaceWith
+         *
+         * @param newReplacement
+         *            the replacement string, cannot be null or empty. Its length
+         *            cannot be larger than maxCharsPerByte().
+         *
+         * @sa #maxCharsPerByte()
+         * @return this decoder.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the given replacement cannot satisfy the requirement  mentioned above.
+         */
+        ReplaceWith(
+            [in] String newReplacement);
+
+        /**
+         * Resets this decoder. This method will reset the internal status, and then
+         * calls <code>implReset()</code> to reset any status related to the
+         * specific charset.
+         *
+         * @return this decoder.
+         */
+        Reset();
+
+        /**
+         * Gets this decoder's <code>CodingErrorAction</code> when an unmappable
+         * character error occurred during the decoding process.
+         *
+         * @return this decoder's <code>CodingErrorAction</code> when an
+         *         unmappable character error occurred during the decoding process.
+         */
+        UnmappableCharacterAction(
+            [out] ICodingErrorAction** codingErrorAction);
+    }
+
+    } // namespace Charset
+    } // namespace IO
+    } // namespace Elastos
+}

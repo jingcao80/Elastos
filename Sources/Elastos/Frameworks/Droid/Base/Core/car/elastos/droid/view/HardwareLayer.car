@@ -1,0 +1,101 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.IMatrix;
+    interface Elastos.Droid.Graphics.ISurfaceTexture;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * A hardware layer can be used to render graphics operations into a hardware
+     * friendly buffer. For instance, with an OpenGL backend a hardware layer
+     * would use a Frame Buffer Object (FBO.) The hardware layer can be used as
+     * a drawing cache when a complex set of graphics operations needs to be
+     * drawn several times.
+     *
+     * @hide
+     */
+    interface IHardwareLayer {
+        /**
+         * Update the paint used when drawing this layer.
+         *
+         * @param paint The paint used when the layer is drawn into the destination canvas.
+         * @see View#setLayerPaint(android.graphics.Paint)
+         */
+        SetLayerPaint(
+            [in] IPaint* paint);
+
+        /**
+         * Indicates whether this layer can be rendered.
+         *
+         * @return True if the layer can be rendered into, false otherwise
+         */
+        IsValid(
+            [out] Boolean* valid);
+
+        /**
+         * Destroys resources without waiting for a GC.
+         */
+        Destory();
+
+        GetDeferredLayerUpdater(
+            [out] Int64* result);
+
+        /**
+         * Copies this layer into the specified bitmap.
+         *
+         * @param bitmap The bitmap to copy they layer into
+         *
+         * @return True if the copy was successful, false otherwise
+         */
+        CopyInto(
+            [in] IBitmap* bitmap,
+            [out] Boolean* result);
+
+        /**
+         * Update the layer's properties. Note that after calling this isValid() may
+         * return false if the requested width/height cannot be satisfied
+         *
+         * @param width The new width of this layer
+         * @param height The new height of this layer
+         * @param isOpaque Whether this layer is opaque
+         *
+         * @return true if the layer's properties will change, false if they already
+         *         match the desired values.
+         */
+        Prepare(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Boolean isOpaque,
+            [out] Boolean* result);
+
+        /**
+         * Sets an optional transform on this layer.
+         *
+         * @param matrix The transform to apply to the layer.
+         */
+        SetTransform(
+            [in] IMatrix* matrix);
+
+        /**
+         * Indicates that this layer has lost its texture.
+         */
+        DetachSurfaceTexture();
+
+        GetLayer(
+            [out] Int64* result);
+
+        SetSurfaceTexture(
+            [in] ISurfaceTexture* surface);
+
+        UpdateSurfaceTexture();
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

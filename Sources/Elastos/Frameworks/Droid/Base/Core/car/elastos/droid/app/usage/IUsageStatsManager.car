@@ -1,0 +1,43 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+    interface Elastos.Droid.App.Usage.IUsageEvents;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Usage {
+
+    /**
+     * System private API for talking with the UsageStatsManagerService.
+     *
+     * {@hide}
+     */
+    interface IIUsageStatsManager {
+        QueryUsageStats(
+            [in] Int32 bucketType,
+            [in] Int64 beginTime,
+            [in] Int64 endTime,
+            [in] String callingPackage,
+            [out] IParceledListSlice** slice);
+
+        QueryConfigurationStats(
+            [in] Int32 bucketType,
+            [in] Int64 beginTime,
+            [in] Int64 endTime,
+            [in] String callingPackage,
+            [out] IParceledListSlice** slice);
+
+        QueryEvents(
+            [in] Int64 beginTime,
+            [in] Int64 endTime,
+            [in] String callingPackage,
+            [out] IUsageEvents** events);
+    }
+
+    } // namespace Usage
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

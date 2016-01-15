@@ -1,0 +1,21 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    /**
+      * @Involve
+      * interface Elastos.Sql.SQLite.ICallback;
+      */
+    interface ITableResult {
+        /**
+         * Make String representation of result set.
+         */
+        Clear();
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

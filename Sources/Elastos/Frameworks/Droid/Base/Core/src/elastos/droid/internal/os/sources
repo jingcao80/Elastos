@@ -1,0 +1,35 @@
+TARGET_NAME = os
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../..
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+VPATH += $(MAKEDIR)/storage
+
+SOURCES += CExternalStorageFormatter.cpp
+SOURCES += AndroidPrintStream.cpp
+SOURCES += BackgroundThread.cpp
+SOURCES += BaseCommand.cpp
+SOURCES += CAtomicFile.cpp
+SOURCES += CBackgroundThreadHelper.cpp
+SOURCES += CBatterySipper.cpp
+SOURCES += CBatteryStatsHelper.cpp
+SOURCES += CBatteryStatsHelperHelper.cpp
+SOURCES += CHandlerCaller.cpp
+SOURCES += CPowerProfile.cpp
+SOURCES += CRuntimeInit.cpp
+SOURCES += CSomeArgsHelper.cpp
+SOURCES += CTransferPipe.cpp
+SOURCES += CZygoteInit.cpp
+SOURCES += InstallerConnection.cpp
+SOURCES += LoggingPrintStream.cpp
+SOURCES += ProcessCpuTracker.cpp
+SOURCES += RuntimeInit.cpp
+SOURCES += SomeArgs.cpp
+SOURCES += Zygote.cpp
+SOURCES += ZygoteConnection.cpp
+SOURCES += CInstallerConnection.cpp

@@ -1,0 +1,21 @@
+
+TARGET_NAME= sax
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../sources.inc
+
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastosx/xml/transform
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastosx/xml/transform/dom
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastosx/xml/transform/sax
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastosx/xml/transform/stream
+INCLUDES += $(MAKEDIR)/../../../../../inc/org/xml/sax
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/io
+
+SOURCES += CSAXResult.cpp
+SOURCES += CSAXSource.cpp
+SOURCES += SAXTransformerFactory.cpp

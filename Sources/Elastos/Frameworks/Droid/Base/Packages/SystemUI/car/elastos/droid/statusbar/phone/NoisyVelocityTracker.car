@@ -1,0 +1,49 @@
+
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * A very simple low-pass velocity filter for motion events for noisy touch screens.
+     */
+    /**
+     * @Involve
+     * interface IVelocityTrackerInterface
+     */
+    interface INoisyVelocityTracker {
+
+        AddMovement(
+            [in] IMotionEvent* event);
+
+        ComputeCurrentVelocity(
+            [in] Int32 units);
+
+        GetXVelocity(
+            [out] Float* result);
+
+        GetYVelocity(
+            [out] Float* result);
+
+        Recycle();
+    }
+
+    interface INoisyVelocityTrackerHelper {
+
+        Obtain(
+            [out] INoisyVelocityTracker** result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

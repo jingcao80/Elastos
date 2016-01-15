@@ -1,0 +1,155 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IOutputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * A connected or connecting Bluetooth socket.
+         *
+         * <p>The interface for Bluetooth Sockets is similar to that of TCP sockets:
+         * java.net.Socket and java.net.ServerSocket. On the server
+         * side, use a BluetoothServerSocket to create a listening server
+         * socket. When a connection is accepted by the BluetoothServerSocket,
+         * it will return a new BluetoothSocket to manage the connection.
+         * On the client side, use a single BluetoothSocket to both initiate
+         * an outgoing connection and to manage the connection.
+         *
+         * @sa java.net.Socket
+         * @sa java.net.ServerSocket
+         * @sa BluetoothServerSocket
+         * @sa BluetoothServerSocket
+         * @sa BluetoothSocket
+         * @sa BluetoothSocket
+         *
+         * <p>The most common type of Bluetooth socket is RFCOMM, which is the type
+         * supported by the Android APIs. RFCOMM is a connection-oriented, streaming
+         * transport over Bluetooth. It is also known as the Serial Port Profile (SPP).
+         *
+         * <p>To create a BluetoothSocket for connecting to a known device, use
+         * BluetoothDevice#createRfcommSocketToServiceRecord
+         * BluetoothDevice.createRfcommSocketToServiceRecord()
+         * Then call #connect() to attempt a connection to the remote device.
+         * This call will block until a connection is established or the connection
+         * fails.
+         *
+         * @sa BluetoothSocket
+         * @sa BluetoothDevice#createRfcommSocketToServiceRecord BluetoothDevice.createRfcommSocketToServiceRecord()
+         * @sa #connect()
+         *
+         * <p>To create a BluetoothSocket as a server (or "host"), see the
+         * BluetoothServerSocket documentation.
+         *
+         * @sa BluetoothSocket
+         * @sa BluetoothServerSocket
+         * <p>Once the socket is connected, whether initiated as a client or accepted
+         * as a server, open the IO streams by calling #getInputStream and
+         * #getOutputStream in order to retrieve java.io.InputStream
+         * and java.io.OutputStream objects, respectively, which are
+         * automatically connected to the socket.
+         *
+         * @sa #getInputStream
+         * @sa #getOutputStream
+         * @sa java.io.InputStream
+         * @sa java.io.OutputStream
+         *
+         * <p>BluetoothSocket is thread
+         * safe. In particular, #close will always immediately abort ongoing
+         * operations and close the socket.
+         *
+         * @sa BluetoothSocket
+         * @sa #close
+         *
+         * <p class="note"><strong>Note:</strong>
+         * Requires the android.Manifest.permission#BLUETOOTH permission.
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * <div class="special reference">
+         * <h3>Developer Guides</h3>
+         * <p>For more information about using Bluetooth, read the
+         * <a href="{@docRoot}guide/topics/wireless/bluetooth.html">Bluetooth</a> developer guide.</p>
+         * </div>
+         *
+         * {@see BluetoothServerSocket}
+         * {@see java.io.InputStream}
+         * {@see java.io.OutputStream}
+         *
+         * @implements Elastos.Droid.Bluetooth.Elastos.IO.ICloseable
+         */
+        [deprecated]
+        interface IBluetoothSocket {
+            /** @hide */
+            const Int32 MAX_RFCOMM_CHANNEL = 30;
+
+            /**
+             * Get the remote device this socket is connecting, or connected, to.
+             * @return remote device
+             */
+            GetRemoteDevice(
+                [out] IBluetoothDevice** device);
+
+            /**
+             * Get the input stream associated with this socket.
+             * <p>The input stream will be returned even if the socket is not yet
+             * connected, but operations on that stream will throw IOException until
+             * the associated socket is connected.
+             * @return InputStream
+             */
+            GetInputStream(
+                [out] IInputStream** inputstream);
+
+            /**
+             * Get the output stream associated with this socket.
+             * <p>The output stream will be returned even if the socket is not yet
+             * connected, but operations on that stream will throw IOException until
+             * the associated socket is connected.
+             * @return OutputStream
+             */
+            GetOutputStream(
+                [out] IOutputStream** outputstream);
+
+            /**
+             * Get the connection status of this socket, ie, whether there is an active connection with
+             * remote device.
+             * @return true if connected
+             *         false if not connected
+             */
+            IsConnected(
+                [out] Boolean* isConnected);
+
+            /**
+             * Attempt to connect to a remote device.
+             * <p>This method will block until a connection is made or the connection
+             * fails. If this method returns without an exception then this socket
+             * is now connected.
+             * <p>Creating new connections to
+             * remote Bluetooth devices should not be attempted while device discovery
+             * is in progress. Device discovery is a heavyweight procedure on the
+             * Bluetooth adapter and will significantly slow a device connection.
+             * Use BluetoothAdapter#cancelDiscovery() to cancel an ongoing
+             * discovery. Discovery is not managed by the Activity,
+             * but is run as a system service, so an application should always call
+             * BluetoothAdapter#cancelDiscovery() even if it
+             * did not directly request a discovery, just to be sure.
+             * <p>#close can be used to abort this call from another thread.
+             *
+             * @sa BluetoothAdapter#cancelDiscovery()
+             * @sa BluetoothAdapter#cancelDiscovery()
+             * @sa #close
+             * @return ECode = NOERROR(0) if success, else as follows:
+             * Value | Meaning |
+             * :-|:------------|
+             * IOException on error | for example connection failure
+             */
+            Connect();
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

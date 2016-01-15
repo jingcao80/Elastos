@@ -1,0 +1,64 @@
+
+module
+{
+
+    interface Org.Apache.Http.IStatusLine;
+    interface Org.Apache.Http.IProtocolVersion;
+    interface Org.Apache.Http.IHttpResponse;
+    interface Org.Apache.Http.Protocol.IHttpContext;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * A factory for {@link HttpResponse HttpResponse} objects.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 573864 $
+     *
+     * @since 4.0
+     */
+    interface IHttpResponseFactory {
+
+        /**
+         * Creates a new response from status line elements.
+         *
+         * @param ver       the protocol version
+         * @param status    the status code
+         * @param context   the context from which to determine the locale
+         *                  for looking up a reason phrase to the status code, or
+         *                  <code>null</code> to use the default locale
+         *
+         * @return  the new response with an initialized status line
+         */
+        NewHttpResponse(
+            [in] IProtocolVersion* ver,
+            [in] Int32 status,
+            [in] IHttpContext* context,
+            [out] IHttpResponse** response);
+
+        /**
+         * Creates a new response from a status line.
+         *
+         * @param statusline the status line
+         * @param context    the context from which to determine the locale
+         *                   for looking up a reason phrase if the status code
+         *                   is updated, or
+         *                   <code>null</code> to use the default locale
+         *
+         * @return  the new response with the argument status line
+         */
+        NewHttpResponse(
+            [in] IStatusLine* statusline,
+            [in] IHttpContext* context,
+            [out] IHttpResponse** response);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,96 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+
+        /**
+         * An extension of LayerDrawables that is intended to cross-fade between
+         * the first and second layer. To start the transition, call this:
+         *
+         * @sa #startTransition(int)
+         * To display just the first layer, call this:
+         *
+         * @sa #resetTransition()
+         * <p>
+         * It can be defined in an XML file with the <code>&lt;transition></code> element.
+         * Each Drawable in the transition is defined in a nested <code>&lt;item></code>. For more
+         * information, see the guide to <a
+         * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
+         *
+         * @attr ref android.R.styleable#LayerDrawableItem_left
+         * @attr ref android.R.styleable#LayerDrawableItem_top
+         * @attr ref android.R.styleable#LayerDrawableItem_right
+         * @attr ref android.R.styleable#LayerDrawableItem_bottom
+         * @attr ref android.R.styleable#LayerDrawableItem_drawable
+         * @attr ref android.R.styleable#LayerDrawableItem_id
+         *
+         */
+
+         /**
+         * A Drawable that manages an array of other Drawables. These are drawn in 
+         * array order, so the element with the largest index will be drawn on top.
+         * <p>
+         * It can be defined in an XML file with the <layer-list> element. Each
+         * Drawable in the layer is defined in a nested <item>. For more information, 
+         * see the guide to Drawable Resources.
+         * 
+         * @sa Drawable Resources
+         */
+        /**
+         * @Involve
+         * interface ILayerDrawable
+         */
+        interface ITransitionDrawable {
+            /**
+             * Begin the second layer on top of the first layer.
+             *
+             * @param durationMillis The length of the transition in milliseconds
+             */
+            StartTransition(
+                [in] Int32 durationMillis);
+
+            /**
+             * Show only the first layer.
+             */
+            ResetTransition();
+
+            /**
+             * Reverses the transition, picking up where the transition currently is.
+             * If the transition is not currently running, this will start the transition
+             * with the specified duration. If the transition is already running, the last
+             * known duration will be used.
+             *
+             * @param duration The duration to use if no transition is running.
+             */
+            ReverseTransition(
+                [in] Int32 duration);
+
+            /**
+             * Enables or disables the cross fade of the drawables. When cross fade
+             * is disabled, the first drawable is always drawn opaque. With cross
+             * fade enabled, the first drawable is drawn with the opposite alpha of
+             * the second drawable. Cross fade is disabled by default.
+             *
+             * @param enabled True to enable cross fading, false otherwise.
+             */
+            SetCrossFadeEnabled(
+                [in] Boolean enabled);
+
+            /**
+             * Indicates whether the cross fade is enabled for this transition.
+             *
+             * @return True if cross fading is enabled, false otherwise.
+             */
+            IsCrossFadeEnabled(
+                [out] Boolean* enabled);
+        }
+
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

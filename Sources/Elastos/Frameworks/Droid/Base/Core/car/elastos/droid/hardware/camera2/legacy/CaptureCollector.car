@@ -1,0 +1,163 @@
+
+module
+{
+    using interface Elastos.Core.IInteger64;
+    using interface Elastos.Utility.Concurrent.ITimeUnit;
+
+    interface Elastos.Droid.Utility.IPair;
+    interface Elastos.Droid.Hardware.Camera2.Legacy.ILegacyRequest;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    interface ICaptureCollectorCaptureHolder
+    {}
+
+    /**
+     * Collect timestamps and state for each {@link CaptureRequest} as it passes through
+     * the Legacy camera pipeline.
+     */
+    interface ICaptureCollector {
+
+        /**
+         * Queue a new request.
+         *
+         * <p>
+         * For requests that use the Camera1 API preview output stream, this will block if there are
+         * already {@code maxInFlight} requests in progress (until at least one prior request has
+         * completed). For requests that use the Camera1 API jpeg callbacks, this will block until
+         * all prior requests have been completed to avoid stopping preview for
+         * {@link android.hardware.Camera#takePicture} before prior preview requests have been
+         * completed.
+         * </p>
+         * @param holder the {@link RequestHolder} for this request.
+         * @param legacy the {@link LegacyRequest} for this request; this will not be mutated.
+         * @param timeout a timeout to use for this call.
+         * @param unit the units to use for the timeout.
+         * @return {@code false} if this method timed out.
+         * @throws InterruptedException if this thread is interrupted.
+         */
+        QueueRequest(
+            [in] IRequestHolder* holder,
+            [in] ILegacyRequest* legacy,
+            [in] Int64 timeout,
+            [in] ITimeUnit* unit,
+            [out] Boolean* value);
+
+        /**
+         * Wait all queued requests to complete.
+         *
+         * @param timeout a timeout to use for this call.
+         * @param unit the units to use for the timeout.
+         * @return {@code false} if this method timed out.
+         * @throws InterruptedException if this thread is interrupted.
+         */
+        WaitForEmpty(
+            [in] Int64 timeout,
+            [in] ITimeUnit* unit,
+            [out] Boolean* value);
+
+        /**
+         * Wait all queued requests that use the Camera1 API preview output to complete.
+         *
+         * @param timeout a timeout to use for this call.
+         * @param unit the units to use for the timeout.
+         * @return {@code false} if this method timed out.
+         * @throws InterruptedException if this thread is interrupted.
+         */
+        WaitForPreviewsEmpty(
+            [in] Int64 timeout,
+            [in] ITimeUnit* unit,
+            [out] Boolean* value);
+
+        /**
+         * Wait for the specified request to be completed (all buffers available).
+         *
+         * <p>May not wait for the same request more than once, since a successful wait
+         * will erase the history of that request.</p>
+         *
+         * @param holder the {@link RequestHolder} for this request.
+         * @param timeout a timeout to use for this call.
+         * @param unit the units to use for the timeout.
+         * @param timestamp the timestamp of the request will be written out to here, in ns
+         *
+         * @return {@code false} if this method timed out.
+         *
+         * @throws InterruptedException if this thread is interrupted.
+         */
+        WaitForRequestCompleted(
+            [in] IRequestHolder* holder,
+            [in] Int64 timeout,
+            [in] ITimeUnit* unit,
+            [in] IInteger64* timestamp,
+            [out] Boolean* value);
+
+        /**
+         * Called to alert the {@link CaptureCollector} that the jpeg capture has begun.
+         *
+         * @param timestamp the time of the jpeg capture.
+         * @return the {@link RequestHolder} for the request associated with this capture.
+         */
+        JpegCaptured(
+            [in] Int64 timestamp,
+            [out] IRequestHolder** outrh);
+
+        /**
+         * Called to alert the {@link CaptureCollector} that the jpeg capture has completed.
+         *
+         * @return a pair containing the {@link RequestHolder} and the timestamp of the capture.
+         */
+        JpegProduced(
+            [out] IPair** outpair);
+
+        /**
+         * Check if there are any pending capture requests that use the Camera1 API preview output.
+         *
+         * @return {@code true} if there are pending preview requests.
+         */
+        HasPendingPreviewCaptures(
+            [out] Boolean* value);
+
+        /**
+         * Called to alert the {@link CaptureCollector} that the preview capture has begun.
+         *
+         * @param timestamp the time of the preview capture.
+         * @return a pair containing the {@link RequestHolder} and the timestamp of the capture.
+         */
+        PreviewCaptured(
+            [in] Int64 timestamp,
+            [out] IPair** outpair);
+
+        /**
+         * Called to alert the {@link CaptureCollector} that the preview capture has completed.
+         *
+         * @return the {@link RequestHolder} for the request associated with this capture.
+         */
+        PreviewProduced(
+            [out] IRequestHolder** outrh);
+
+        /**
+         * Called to alert the {@link CaptureCollector} that the next pending preview capture has failed.
+         */
+        FailNextPreview();
+
+        /**
+         * Called to alert the {@link CaptureCollector} that the next pending jpeg capture has failed.
+         */
+        FailNextJpeg();
+
+        /**
+         * Called to alert the {@link CaptureCollector} all pending captures have failed.
+         */
+        FailAll();
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

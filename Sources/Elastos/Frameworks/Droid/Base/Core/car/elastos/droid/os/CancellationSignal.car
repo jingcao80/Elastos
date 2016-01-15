@@ -1,0 +1,92 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * Listens for cancellation.
+     */
+    interface ICancellationSignalOnCancelListener {
+        /**
+         * Called when {@link CancellationSignal#cancel} is invoked.
+         */
+        OnCancel();
+    }
+
+    interface IICancellationSignal {
+        Cancel();
+    }
+
+    interface ICancellationSignal {
+        /**
+         * Returns true if the operation has been canceled.
+         *
+         * @return True if the operation has been canceled.
+         */
+        IsCanceled(
+            [out] Boolean* result);
+
+        /**
+         * Throws {@link OperationCanceledException} if the operation has been canceled.
+         *
+         * @throws OperationCanceledException if the operation has been canceled.
+         */
+         ThrowIfCanceled();
+
+        /**
+         * Cancels the operation and signals the cancellation listener.
+         * If the operation has not yet started, then it will be canceled as soon as it does.
+         */
+        Cancel();
+
+        /**
+         * Sets the cancellation listener to be called when canceled.
+         *
+         * This method is intended to be used by the recipient of a cancellation signal
+         * such as a database or a content provider to handle cancellation requests
+         * while performing a long-running operation.  This method is not intended to be
+         * used by applications themselves.
+         *
+         * If {@link CancellationSignal#cancel} has already been called, then the provided
+         * listener is invoked immediately.
+         *
+         * This method is guaranteed that the listener will not be called after it
+         * has been removed.
+         *
+         * @param listener The cancellation listener, or null to remove the current listener.
+         */
+        SetOnCancelListener(
+            [in] ICancellationSignalOnCancelListener* listener);
+
+        /**
+         * Sets the remote transport.
+         *
+         * If {@link CancellationSignal#cancel} has already been called, then the provided
+         * remote transport is canceled immediately.
+         *
+         * This method is guaranteed that the remote transport will not be called after it
+         * has been removed.
+         *
+         * @param remote The remote transport, or null to remove.
+         *
+         * @hide
+         */
+        SetRemote(
+            [in] IICancellationSignal* remote);
+    }
+
+    interface ICancellationSignalHelper {
+        CreateTransport(
+            [out] IICancellationSignal** cancellationSignal);
+
+        FromTransport(
+            [in] IICancellationSignal* transport,
+            [out] ICancellationSignal** cancellationSignal);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

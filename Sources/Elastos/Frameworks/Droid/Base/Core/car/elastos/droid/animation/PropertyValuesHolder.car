@@ -1,0 +1,311 @@
+
+module
+{
+    interface Elastos.Droid.Utility.IProperty;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Animation {
+
+    /**
+     * This class holds information about a property and the values that that
+     * property should take on during an animation. PropertyValuesHolder objects can
+     * be used to create animations with ValueAnimator or ObjectAnimator that operate
+     * on several different properties in parallel.
+     */
+
+    [deprecated, local]
+    interface IPropertyValuesHolder {
+        /**
+         * Set the animated values for this object to this set of ints.
+         * If there is only one value, it is assumed to be the end value of an animation,
+         * and an initial value will be derived, if possible, by calling a getter function
+         * on the object. Also, if any value is NULL, the value will be filled in when the animation
+         * starts in the same way. This mechanism of automatically getting NULL values only works
+         * if the PropertyValuesHolder object is used in conjunction
+         * ObjectAnimator, and with a getter function
+         * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
+         * no way of determining what the value should be.
+         *
+         * @sa ObjectAnimator
+         *
+         * @param values One or more values that the animation will animate between.
+         */
+        SetInt32Values(
+            [in] ArrayOf<Int32>* values);
+
+        /**
+         * Set the animated values for this object to this set of floats.
+         * If there is only one value, it is assumed to be the end value of an animation,
+         * and an initial value will be derived, if possible, by calling a getter function
+         * on the object. Also, if any value is NULL, the value will be filled in when the animation
+         * starts in the same way. This mechanism of automatically getting NULL values only works
+         * if the PropertyValuesHolder object is used in conjunction
+         * ObjectAnimator, and with a getter function
+         * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
+         * no way of determining what the value should be.
+         *
+         * @sa ObjectAnimator
+         *
+         * @param values One or more values that the animation will animate between.
+         */
+        SetFloatValues(
+            [in] ArrayOf<Float>* values);
+
+        /**
+         * Set the animated values for this object to this set of Keyframes.
+         *
+         * @param values One or more values that the animation will animate between.
+         */
+        SetKeyframes(
+            [in] ArrayOf<IKeyframe*>* values);
+
+        /**
+         * Set the animated values for this object to this set of Objects.
+         * If there is only one value, it is assumed to be the end value of an animation,
+         * and an initial value will be derived, if possible, by calling a getter function
+         * on the object. Also, if any value is NULL, the value will be filled in when the animation
+         * starts in the same way. This mechanism of automatically getting NULL values only works
+         * if the PropertyValuesHolder object is used in conjunction
+         * ObjectAnimator, and with a getter function
+         * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
+         * no way of determining what the value should be.
+         *
+         * @sa ObjectAnimator
+         *
+         * @param values One or more values that the animation will animate between.
+         */
+        SetObjectValues(
+            [in] ArrayOf<IInterface*>* values);
+
+        /**
+         * The TypeEvaluator will the automatically determined based on the type of values
+         * supplied to PropertyValuesHolder. The evaluator can be manually set, however, if so
+         * desired. This may be important in cases where either the type of the values supplied
+         * do not match the way that they should be interpolated between, or if the values
+         * are of a custom type or one not currently understood by the animation system. Currently,
+         * only values of type Float and Int32 (and their Object equivalents: Float
+         * and Integer) are  correctly interpolated; all other types require setting a TypeEvaluator.
+         * @param evaluator
+         */
+        SetEvaluator(
+            [in] ITypeEvaluator* evaluator);
+
+        /**
+         * Sets the name of the property that will be animated. This name is used to derive
+         * a setter function that will be called to set animated values.
+         * For example, a property name of <code>foo</code> will result
+         * in a call to the function <code>setFoo()</code> on the target object. If either
+         * <code>valueFrom</code> or <code>valueTo</code> is NULL, then a getter function will
+         * also be derived and called.
+         *
+         * <p>Note that the setter function derived from this property name
+         * must take the same parameter type as the
+         * <code>valueFrom</code> and <code>valueTo</code> properties, otherwise the call to
+         * the setter function will fail.</p>
+         *
+         * @param propertyName The name of the property being animated.
+         */
+        SetPropertyName(
+            [in] String propertyName);
+
+        /**
+         * Sets the property that will be animated.
+         *
+         * <p>Note that if this PropertyValuesHolder object is used with ObjectAnimator, the property
+         * must exist on the target object specified in that ObjectAnimator.</p>
+         *
+         * @param property The property being animated.
+         */
+        SetProperty(
+            [in] IProperty* property);
+
+        /**
+         * Gets the name of the property that will be animated. This name will be used to derive
+         * a setter function that will be called to set animated values.
+         * For example, a property name of <code>foo</code> will result
+         * in a call to the function <code>setFoo()</code> on the target object. If either
+         * <code>valueFrom</code> or <code>valueTo</code> is NULL, then a getter function will
+         * also be derived and called.
+         */
+        GetPropertyName(
+            [out] String* name);
+    }
+
+    /**
+     * @Involve
+     * interface IPropertyValuesHolder
+     */
+    interface IInt32PropertyValuesHolder {
+    }
+
+    /**
+     * @Involve
+     * interface IPropertyValuesHolder
+     */
+    interface IFloatPropertyValuesHolder {
+    }
+
+    /**
+     * @Involve
+     * interface IPropertyValuesHolder
+     */
+    interface IMultiFloatValuesHolder {
+    }
+
+    /**
+     * @Involve
+     * interface IPropertyValuesHolder
+     */
+    interface IMultiInt32ValuesHolder {
+    }
+
+    [deprecated, local]
+    interface IPropertyValuesHolderHelper {
+        /**
+         * Constructs and returns a PropertyValuesHolder with a given property name and
+         * set of int values.
+         * @param propertyName The name of the property being animated.
+         * @param values The values that the named property will animate between.
+         * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+         */
+        OfInt32(
+            [in] String propertyName,
+            [in] ArrayOf<Int32>* values,
+            [out] IPropertyValuesHolder** obj);
+
+        /**
+         * Constructs and returns a PropertyValuesHolder with a given property and
+         * set of int values.
+         * @param property The property being animated. Should not be null.
+         * @param values The values that the property will animate between.
+         * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+         */
+        OfInt32(
+            [in] IProperty* property,
+            [in] ArrayOf<Int32>* values,
+            [out] IPropertyValuesHolder** obj);
+
+        /**
+         * Constructs and returns a PropertyValuesHolder with a given property name and
+         * set of float values.
+         * @param propertyName The name of the property being animated.
+         * @param values The values that the named property will animate between.
+         * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+         */
+        OfFloat(
+            [in] String propertyName,
+            [in] ArrayOf<Float>* values,
+            [out] IPropertyValuesHolder** obj);
+
+        /**
+         * Constructs and returns a PropertyValuesHolder with a given property and
+         * set of float values.
+         * @param property The property being animated. Should not be null.
+         * @param values The values that the property will animate between.
+         * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+         */
+        OfFloat(
+            [in] IProperty* property,
+            [in] ArrayOf<Float>* values,
+            [out] IPropertyValuesHolder** obj);
+
+        /**
+         * Constructs and returns a PropertyValuesHolder with a given property name and
+         * set of Object values. This variant also takes a TypeEvaluator because the system
+         * cannot automatically interpolate between objects of unknown type.
+         *
+         * @param propertyName The name of the property being animated.
+         * @param evaluator A TypeEvaluator that will be called on each animation frame to
+         * provide the necessary interpolation between the Object values to derive the animated
+         * value.
+         * @param values The values that the named property will animate between.
+         * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+         */
+        OfObject(
+            [in] String propertyName,
+            [in] ITypeEvaluator* evaluator,
+            [in] ArrayOf<IInterface*>* values,
+            [out] IPropertyValuesHolder** obj);
+
+        /**
+         * Constructs and returns a PropertyValuesHolder with a given property and
+         * set of Object values. This variant also takes a TypeEvaluator because the system
+         * cannot automatically interpolate between objects of unknown type.
+         *
+         * @param property The property being animated. Should not be null.
+         * @param evaluator A TypeEvaluator that will be called on each animation frame to
+         * provide the necessary interpolation between the Object values to derive the animated
+         * value.
+         * @param values The values that the property will animate between.
+         * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+         */
+        OfObject(
+            [in] IProperty* property,
+            [in] ITypeEvaluator* evaluator,
+            [in] ArrayOf<IInterface*>* values,
+            [out] IPropertyValuesHolder** obj);
+
+        /**
+         * Constructs and returns a PropertyValuesHolder object with the specified property name and set
+         * of values. These values can be of any type, but the type should be consistent so that
+         * an appropriate android.animation.TypeEvaluator can be found that matches
+         * the common type.
+         *
+         * @sa android.animation.TypeEvaluator
+         * <p>If there is only one value, it is assumed to be the end value of an animation,
+         * and an initial value will be derived, if possible, by calling a getter function
+         * on the object. Also, if any value is null, the value will be filled in when the animation
+         * starts in the same way. This mechanism of automatically getting null values only works
+         * if the PropertyValuesHolder object is used in conjunction
+         * ObjectAnimator, and with a getter function
+         * derived automatically from <code>propertyName</code>, since otherwise PropertyValuesHolder has
+         * no way of determining what the value should be.
+         *
+         * @sa ObjectAnimator
+         * @param propertyName The name of the property associated with this set of values. This
+         * can be the actual property name to be used when using a ObjectAnimator object, or
+         * just a name used to get animated values, such as if this object is used with an
+         * ValueAnimator object.
+         * @param values The set of values to animate between.
+         */
+        OfKeyframe(
+            [in] String propertyName,
+            [in] ArrayOf<IKeyframe*>* values,
+            [out] IPropertyValuesHolder** obj);
+
+        /**
+         * Constructs and returns a PropertyValuesHolder object with the specified property and set
+         * of values. These values can be of any type, but the type should be consistent so that
+         * an appropriate android.animation.TypeEvaluator can be found that matches
+         * the common type.
+         *
+         * @sa android.animation.TypeEvaluator
+         *
+         * <p>If there is only one value, it is assumed to be the end value of an animation,
+         * and an initial value will be derived, if possible, by calling the property's
+         * android.util.Property#get(Object) function.
+         *
+         * @sa android.util.Property#get(Object)
+         *
+         * Also, if any value is null, the value will be filled in when the animation
+         * starts in the same way. This mechanism of automatically getting null values only works
+         * if the PropertyValuesHolder object is used in conjunction with
+         * ObjectAnimator, since otherwise PropertyValuesHolder has
+         * no way of determining what the value should be.
+         *
+         * @sa ObjectAnimator
+         *
+         * @param property The property associated with this set of values. Should not be null.
+         * @param values The set of values to animate between.
+         */
+        OfKeyframe(
+            [in] IProperty* property,
+            [in] ArrayOf<IKeyframe*>* values,
+            [out] IPropertyValuesHolder** obj);
+    }
+
+    } // namespace Animation
+    } // namepsace Droid
+    } // namespace Elastos
+}

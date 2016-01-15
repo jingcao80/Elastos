@@ -1,0 +1,14 @@
+TARGET_NAME= usb
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = CUsbService.cpp
+SOURCES += UsbHostManager.cpp
+SOURCES += UsbSettingsManager.cpp
+SOURCES += UsbDeviceManager.cpp
+SOURCES += UsbDebuggingManager.cpp

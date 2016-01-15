@@ -1,0 +1,254 @@
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Core.IClassLoader;
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IIContentProvider;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.Content.Res.ICompatibilityInfo;
+    interface Elastos.Droid.Content.Pm.IProviderInfo;
+    interface Elastos.Droid.Content.Pm.IIPackageManager;
+    interface Elastos.Droid.Content.Pm.IActivityInfo;
+    interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    interface Elastos.Droid.App.IResultInfo;
+    interface Elastos.Droid.App.IOnActivityPausedListener;
+    interface Elastos.Droid.App.IApplicationThread;
+    interface Elastos.Droid.App.IContextImpl;
+    interface Elastos.Droid.App.ILoadedPkg;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface IActivityClientRecord {
+        IsPreHoneycomb(
+            [out] Boolean* result);
+
+        IsPersistable(
+            [out] Boolean* result);
+    }
+
+    interface IRequestAssistContextExtras {
+    }
+
+    /**
+     * This manages the execution of the main thread in an
+     * application process, scheduling and executing activities,
+     * broadcasts, and other operations on it as the activity
+     * manager requests.
+     *
+     * {@hide}
+     */
+    [deprecated, local]
+    interface IActivityThread {
+        GetPackageInfo(
+            [in] String packageName,
+            [in] ICompatibilityInfo* compatInfo,
+            [in] Int32 flags,
+            [out] ILoadedPkg** pkg);
+
+        GetPackageInfo(
+            [in] String packageName,
+            [in] ICompatibilityInfo* compatInfo,
+            [in] Int32 flags,
+            [in] Int32 userId,
+            [out] ILoadedPkg** pkg);
+
+        GetPackageInfo(
+            [in] IApplicationInfo* info,
+            [in] ICompatibilityInfo* compatInfo,
+            [in] Int32 flags,
+            [out] ILoadedPkg** pkg);
+
+        GetPackageInfoNoCheck(
+            [in] IApplicationInfo* info,
+            [in] ICompatibilityInfo* compatInfo,
+            [out] ILoadedPkg** pkg);
+
+        PeekPackageInfo(
+            [in] String packageName,
+            [in] Boolean includeCode,
+            [out] ILoadedPkg** pkg);
+
+        GetHandler(
+            [out] IHandler** h);
+
+        GetApplicationThread(
+            [out] IApplicationThread** thread);
+
+        GetInstrumentation(
+            [out] IInstrumentation** instrumentation);
+
+        IsProfiling(
+            [out] Boolean* profiled);
+
+        GetProfileFilePath(
+            [out] String* path);
+
+        GetLooper(
+            [out] ILooper** looper);
+
+        GetApplication(
+            [out] IApplication** app);
+
+        GetProcessName(
+            [out] String* name);
+
+        GetSystemContext(
+            [out] IContextImpl** context);
+
+        InstallSystemApplicationInfo(
+            [in] IApplicationInfo* info,
+            [in] IClassLoader* cl);
+
+        RegisterOnActivityPausedListener(
+            [in] IActivity* activity,
+            [in] IOnActivityPausedListener* listener);
+
+        UnregisterOnActivityPausedListener(
+            [in] IActivity* activity,
+            [in] IOnActivityPausedListener* listener);
+
+        ResolveActivityInfo(
+            [in] IIntent* intent,
+            [out] IActivityInfo** info);
+
+        StartActivityNow(
+            [in] IActivity* parent,
+            [in] String id,
+            [in] IIntent* intent,
+            [in] IActivityInfo* activityInfo,
+            [in] IBinder* token,
+            [in] IBundle* state,
+            [in] IActivityNonConfigurationInstances* lastNonConfigurationInstances,
+            [out] IActivity** activity);
+
+        GetActivity(
+            [in] IBinder* token,
+            [out] IActivity** activity);
+
+        SendActivityResult(
+            [in] IBinder* token,
+            [in] String id,
+            [in] Int32 requestCode,
+            [in] Int32 resultCode,
+            [in] IIntent* data);
+
+        PerformNewIntents(
+            [in] IBinder* token,
+            [in] IList* intents);
+
+        HandleRequestAssistContextExtras(
+            [in] IRequestAssistContextExtras* cmd);
+
+        HandleTranslucentConversionComplete(
+            [in] IBinder* token,
+            [in] Boolean drawComplete);
+
+        OnNewActivityOptions(
+            [in] IBinder* token,
+            [in] IActivityOptions* options);
+
+        HandleCancelVisibleBehind(
+            [in] IBinder* token);
+
+        HandleOnBackgroundVisibleBehindChanged(
+            [in] IBinder* token,
+            [in] Boolean visible);
+
+        HandleInstallProvider(
+            [in] IProviderInfo* info);
+
+        PerformPauseActivity(
+            [in] IBinder* token,
+            [in] Boolean finished,
+            [in] Boolean saveState,
+            [out] IBundle** state);
+
+        PerformResumeActivity(
+            [in] IBinder* token,
+            [in] Boolean clearHide,
+            [out] IActivityClientRecord** record);
+
+        PerformStopActivity(
+            [in] IBinder* token,
+            [in] Boolean saveState);
+
+        PerformRestartActivity(
+            [in] IBinder* token);
+
+        PerformDestroyActivity(
+            [in] IBinder* token,
+            [in] Boolean finishing,
+            [out] IActivityClientRecord** record);
+
+        RequestRelaunchActivity(
+            [in] IBinder* token,
+            [in] IList* pendingResults,
+            [in] IList* pendingNewIntents,
+            [in] Int32 configChanges,
+            [in] Boolean notResumed,
+            [in] IConfiguration* config,
+            [in] Boolean fromServer);
+
+        ApplyConfigurationToResources(
+            [in] IConfiguration* config);
+
+        AcquireProvider(
+            [in] IContext* ctx,
+            [in] String auth,
+            [in] Int32 userId,
+            [in] Boolean stable,
+            [out] IIContentProvider** provider);
+
+        ReleaseProvider(
+            [in] IIContentProvider* provider,
+            [in] Boolean stable,
+            [out] Boolean* released);
+
+        InstallSystemProviders(
+            [in] IList* providers);
+
+        GetIntCoreSetting(
+            [in] String key,
+            [in] Int32 defaultValue,
+            [out] Int32* setting);
+    }
+
+    [local]
+    interface IActivityThreadHelper {
+        GetCurrentActivityThread(
+            [out] IActivityThread** thread);
+
+        GetCurrentPackageName(
+            [out] String* name);
+
+        GetCurrentProcessName(
+            [out] String* name);
+
+        GetCurrentApplication(
+            [out] IApplication** app);
+
+        GetPackageManager(
+            [out] IIPackageManager** manager);
+
+        GetIntentBeingBroadcast(
+            [out] IIntent** intent);
+
+        GetSystemMain(
+            [out] IActivityThread** thread);
+
+        Main(
+            [in] ArrayOf<String> args);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

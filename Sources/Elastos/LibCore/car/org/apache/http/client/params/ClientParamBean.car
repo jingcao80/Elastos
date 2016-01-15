@@ -1,0 +1,58 @@
+
+module
+{
+
+    using interface Elastos.Utility.ICollection;
+
+    interface Org.Apache.Http.IHttpHost;
+    interface Org.Apache.Http.Conn.IClientConnectionManagerFactory;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+    namespace Params {
+
+    interface IClientParamBean {
+
+        SetConnectionManagerFactoryClassName(
+            [in] String factory);
+
+        SetConnectionManagerFactory(
+            [in] IClientConnectionManagerFactory* factory);
+
+        SetHandleRedirects(
+            [in] Boolean handle);
+
+        SetRejectRelativeRedirect(
+            [in] Boolean reject);
+
+        SetMaxRedirects(
+            [in] Int32 maxRedirects);
+
+        SetAllowCircularRedirects(
+            [in] Boolean allow);
+
+        SetHandleAuthentication(
+            [in] Boolean handle);
+
+        SetCookiePolicy(
+            [in] String policy);
+
+        SetVirtualHost(
+            [in] IHttpHost* host);
+
+        SetDefaultHeaders(
+            [in] ICollection* headers);
+
+        SetDefaultHost(
+            [in] IHttpHost* host);
+
+    }
+
+    } // namespace Params
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

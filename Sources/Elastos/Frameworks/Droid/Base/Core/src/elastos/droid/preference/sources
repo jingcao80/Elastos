@@ -1,0 +1,47 @@
+TARGET_NAME= preference
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc
+
+SOURCES = preference.cpp
+SOURCES += Preference.cpp
+SOURCES += PreferenceBaseSavedState.cpp
+SOURCES += TwoStatePreference.cpp
+SOURCES += TwoStatePreferenceSavedState.cpp
+SOURCES += CheckBoxPreference.cpp
+SOURCES += DialogPreference.cpp
+SOURCES += DialogPreferenceSavedState.cpp
+SOURCES += EditTextPreference.cpp
+SOURCES += EditTextPreferenceSavedState.cpp
+SOURCES += ListPreference.cpp
+SOURCES += ListPreferenceSavedState.cpp
+SOURCES += MultiCheckPreference.cpp
+SOURCES += MultiCheckPreferenceSavedState.cpp
+SOURCES += MultiSelectListPreference.cpp
+SOURCES += MultiSelectListPreferenceSavedState.cpp
+SOURCES += SeekBarDialogPreference.cpp
+SOURCES += CSeekBarDialogPreferenceHelper.cpp
+SOURCES += SeekBarVolumizer.cpp
+SOURCES += SwitchPreference.cpp
+SOURCES += VolumePreference.cpp
+SOURCES += VolumePreferenceSavedState.cpp
+SOURCES += GenericInflater.cpp
+SOURCES += PreferenceInflater.cpp
+SOURCES += PreferenceGroup.cpp
+SOURCES += PreferenceCategory.cpp
+SOURCES += PreferenceManager.cpp
+SOURCES += CPreferenceManagerHelper.cpp
+SOURCES += RingtonePreference.cpp
+SOURCES += PreferenceFragment.cpp
+SOURCES += PreferenceFrameLayout.cpp
+SOURCES += PreferenceScreen.cpp
+SOURCES += PreferenceScreenSavedState.cpp
+SOURCES += SeekBarPreference.cpp
+SOURCES += SeekBarPreferenceSavedState.cpp
+SOURCES += PreferenceGroupAdapter.cpp
+SOURCES += PreferenceActivity.cpp

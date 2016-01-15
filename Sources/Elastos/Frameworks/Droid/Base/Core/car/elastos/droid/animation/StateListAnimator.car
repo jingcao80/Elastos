@@ -1,0 +1,93 @@
+
+module
+{
+    using interface Elastos.Utility.IArrayList;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Animation {
+
+    /**
+     * Lets you define a number of Animators that will run on the attached View depending on the View's
+     * drawable state.
+     * <p>
+     * It can be defined in an XML file with the <code>&lt;selector></code> element.
+     * Each State Animator is defined in a nested <code>&lt;item></code> element.
+     *
+     * @attr ref android.R.styleable#DrawableStates_state_focused
+     * @attr ref android.R.styleable#DrawableStates_state_window_focused
+     * @attr ref android.R.styleable#DrawableStates_state_enabled
+     * @attr ref android.R.styleable#DrawableStates_state_checkable
+     * @attr ref android.R.styleable#DrawableStates_state_checked
+     * @attr ref android.R.styleable#DrawableStates_state_selected
+     * @attr ref android.R.styleable#DrawableStates_state_activated
+     * @attr ref android.R.styleable#DrawableStates_state_active
+     * @attr ref android.R.styleable#DrawableStates_state_single
+     * @attr ref android.R.styleable#DrawableStates_state_first
+     * @attr ref android.R.styleable#DrawableStates_state_middle
+     * @attr ref android.R.styleable#DrawableStates_state_last
+     * @attr ref android.R.styleable#DrawableStates_state_pressed
+     * @attr ref android.R.styleable#StateListAnimatorItem_animation
+     */
+    [deprecated]
+    interface IStateListAnimator {
+        /**
+         * Associates the given animator with the provided drawable state specs so that it will be run
+         * when the View's drawable state matches the specs.
+         *
+         * @param specs The drawable state specs to match against
+         * @param animator The animator to run when the specs match
+         */
+        AddState(
+            [in] ArrayOf<Int32>* specs,
+            [in] IAnimator* animator);
+
+        /**
+         * Returns the current {@link android.animation.Animator} which is started because of a state
+         * change.
+         *
+         * @return The currently running Animator or null if no Animator is running
+         * @hide
+         */
+        GetRunningAnimator(
+            [out] IAnimator** animator);
+
+        /**
+         * @hide
+         */
+        GetTarget(
+            [out] IView** view);
+
+        /**
+         * Called by View
+         * @hide
+         */
+        SetTarget(
+            [in] IView* view);
+
+        /**
+         * Called by View
+         * @hide
+         */
+        SetState(
+            [in] ArrayOf<Int32>* state);
+
+        /**
+         * @hide
+         */
+        GetTuples(
+            [out] IArrayList** list);
+
+        /**
+         * If there is an animation running for a recent state change, ends it.
+         * <p>
+         * This causes the animation to assign the end value(s) to the View.
+         */
+        JumpToCurrentState();
+    }
+
+    }   //namespace Animation
+    }   //namespace Droid
+    }   //namespace Elastos
+}

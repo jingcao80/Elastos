@@ -1,0 +1,142 @@
+module
+{
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Math.IBigDecimal;
+    interface Elastosx.Xml.Namespace.IQName;
+    interface Elastos.Utility.IGregorianCalendar;
+    interface Elastos.Utility.ITimeZone;
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Datatype {
+
+    /**
+     * @Involve
+     * interface ICloneable;
+     */
+    interface IXMLGregorianCalendar {
+
+        Clear();
+
+        Reset();
+
+        SetYear(
+            [in] IBigInteger* year);
+
+        SetYear(
+            [in] Int32 year);
+
+        SetMonth(
+            [in] Int32 month);
+
+        SetDay(
+            [in] Int32 day);
+
+        SetTimezone(
+            [in] Int32 offset);
+
+        SetTime(
+            [in] Int32 hour,
+            [in] Int32 minute,
+            [in] Int32 second);
+
+        SetHour(
+            [in] Int32 hour);
+
+        SetMinute(
+            [in] Int32 minute);
+
+        SetSecond(
+            [in] Int32 second);
+
+        SetMillisecond(
+            [in] Int32 millisecond);
+
+        SetFractionalSecond(
+            [in] IBigDecimal* year);
+
+        SetTime(
+            [in] Int32 hour,
+            [in] Int32 minute,
+            [in] Int32 second,
+            [in] IBigDecimal* fractional);
+
+        SetTime(
+            [in] Int32 hour,
+            [in] Int32 minute,
+            [in] Int32 second,
+            [in] Int32 millisecond);
+
+        GetEon(
+            [out] IBigInteger** eon);
+
+        GetYear(
+            [out] Int32* eon);
+
+        GetEonAndYear(
+            [out] IBigInteger** eon);
+
+        GetMonth(
+            [out] Int32* month);
+
+        GetDay(
+            [out] Int32* day);
+
+        GetTimezone(
+            [out] Int32* timezone);
+
+        GetHour(
+            [out] Int32* hour);
+
+        GetMinute(
+            [out] Int32* minute);
+
+        GetSecond(
+            [out] Int32* second);
+
+        GetMillisecond(
+            [out] Int32* millisecond);
+
+        GetFractionalSecond(
+            [out] IBigDecimal** second);
+
+        Compare(
+            [in] IXMLGregorianCalendar* xmlGregorianCalendar,
+            [out] Int32* minute);
+
+        Normalize(
+            [out] IXMLGregorianCalendar** xmlGregorianCalendar);
+
+        ToXMLFormat(
+            [out] String* str);
+
+        GetXMLSchemaType(
+            [out] IQName** qName);
+
+        IsValid(
+            [out] Boolean* str);
+
+        Add(
+            [in] IDuration* duration);
+
+        ToGregorianCalendar(
+            [out] IGregorianCalendar** cdr);
+
+        ToGregorianCalendar(
+            [in] ITimeZone* timezone,
+            [in] ILocale* aLocale,
+            [in] IXMLGregorianCalendar* defaults,
+            [out] IGregorianCalendar** cdr);
+
+        GetTimeZone(
+            [in] Int32 defaultZoneoffset,
+            [in] ITimeZone* timezone);
+
+    }
+
+    } // namespace Datatype
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

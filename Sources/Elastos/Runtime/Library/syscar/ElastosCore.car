@@ -1,0 +1,49 @@
+/** @addtogroup SystemRef
+  *   @{
+  */
+
+
+//==========================================================================
+// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+//==========================================================================
+
+library Elastos:System:elastos.eco
+{
+    /**
+     * Specifies the event that causes the end of waiting for synchronous object.
+     */
+    enum WaitResult {
+        WaitResult_OK           = 0x00, /**< Successful waiting. */
+        WaitResult_Interrupted  = 0x01, /**< The waiting has been interrupted, and the synchronous object is not signaled. */
+        WaitResult_TimedOut     = 0x02  /**< The time-out interval elapsed, and the synchronous object is not signaled. */
+    }
+
+    merge("stdobjs.car");
+
+    enum CallbackPriority {
+        CallbackPriority_Highest     = 0x00,
+        CallbackPriority_AboveNormal = 0x07,
+        CallbackPriority_Normal      = 0x10,
+        CallbackPriority_BelowNormal = 0x17,
+        CallbackPriority_Lowest      = 0x1F,
+    }
+
+    enum CallbackContextStatus {
+        CallbackContextStatus_Created = 0x01,
+        CallbackContextStatus_Idling,
+        CallbackContextStatus_Working,
+        CallbackContextStatus_Finishing,
+    }
+
+    enum CallbackContextFinish {
+        CallbackContextFinish_Nice = 0x01,
+        CallbackContextFinish_ASAP,
+    }
+
+    merge("ElReflection.car");
+    merge("ElMarshal.car");
+}
+
+/** @} */
+
+

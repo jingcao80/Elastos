@@ -1,0 +1,790 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface IZigbeeService
+    {
+        /********************************* Device Management API ******************************************/
+        /*
+         *  Get all device information
+         *  Parameters: void
+         *  Returns: device information in 2-D array(List<List<String>>)
+         *
+         *  First array format: device counts, group counts
+         *  Device format:
+         *  (a) Bulb: (1)device name, (2)device online status, (3)device type, (4)device zone type, (5)onOffState
+         *  (b) Temperature Sensor: (1)device name, (2)device online status, (3)device type, (4)device zone type, (5)sensor temperature, (6) is temperature warning
+         *                          (7)warning enable setting_lower limit, (8)warning enable setting_upper limit, (9)lower limit warning temperature, (10)upper limit warning temperature,
+         *                          (11)last alert time, (12)last alert temperature, (13)history record enable setting, (14)history record start time, (15)history record end time, (16)history average temperature,
+         *                          (17)history minimum temperature occurred time, (18)history minimum temperature,
+         *                          (19)history maximum temperature occurred time, (20)history maximum temperature
+         *  (c) Door Sensor:    (1)device name, (2)device online status, (3)device type, (4)device zone type, (5)door on/off state, (6) is door state warning
+         *                      (7)warning enable setting, (8)warning door state, (9)last alert time, (10)last alert door state, (11)history record enable setting
+         *                      (12)history door state changed occured time, (13)history door state, ... (Max 5 records)
+         *  (d) TH Sensor:  Temperature/Humidity
+         *                  (1)device name, (2)device online status, (3)device type, (4)device zone type,
+         *                  (5)sensor temperature, (6) is temperature warning
+         *                  (7)warning enable setting_lower limit, (8)warning enable setting_upper limit, (9)lower limit warning temperature, (10)upper limit warning temperature,
+         *                  (11)last alert time, (12)last alert temperature, (13)history record enable setting, (14)history record start time, (15)history record end time, (16)history average temperature,
+         *                  (17)history minimum temperature occurred time, (18)history minimum temperature,
+         *                  (19)history maximum temperature occurred time, (20)history maximum temperature,
+         *                  (21)/
+         *                  (22)sensor humidity, (23) is humidity warning
+         *                  (24)warning enable setting_lower limit, (25)warning enable setting_upper limit, (26)lower limit warning humidity, (27)upper limit warning humidity,
+         *                  (28)last alert time, (29)last alert humidity, (30)history record enable setting, (31)history record start time, (32)history record end time, (33)history average humidity,
+         *                  (34)history minimum humidity occurred time, (35)history minimum humidity,
+         *                  (36)history maximum humidity occurred time, (37)history maximum humidity
+         *  Group format: (1)group name, (2)group type, (3)group zone type, (4)device name in the group, ...
+         *  <Ex>: 2 bulb devices(zigbee1/zigbee2), 1 door sensor(zigbee3), 1 temperature sensor(zigbee4), and 1 group(abc), "zigbee1/zigbee2" is in group "abc"
+         *          2 1
+         *          zigbee1 1 258 65535 0
+         *          zigbee2 1 258 65535 0
+         *          zigbee3 1 1026 21 0 false 1 NA 2 false 2014-12-09-14-53-05 0 2014-12-09-14-53-52 1 2014-12-09-14-53-56 0 2014-12-09-14-54-36 1 2014-12-09-14-54-40 0
+         *          zigbee4 1 1026 13 25 false false -9999 9999 NA 9999 false 2014-01-01-8-00-46 2014-01-01-8-06-04 25 2014-01-01-7-00-46 23 2014-01-01-8-00-46 27
+         *          abc 258 65535 zigbee1 zigbee2
+        */
+        GetAllDeviceInfo(
+            [out, callee] ArrayOf<IParcelStringList*>* infoList);
+
+        ResetCoordinator();
+
+        PermitJoinNet(
+            [in] Int32 cmd);
+
+        /*
+         *  Reset a device, will remove the device from current Zigbee network
+         *  Parameters: device name
+         *  Returns: void
+        */
+        ResetDevice(
+            [in] String deviceName);
+
+        /*
+         *  Get online device count
+         *  Parameters: void
+         *  Returns: online device count
+        */
+        GetOnlineDeviceCount(
+            [out] Int32* deviceCount);
+
+        /*
+         *  Read device/group configuration
+         *  Parameters:
+         *  Returns: 0 - success, 1 - fail
+        */
+        ReadDeviceConfig(
+            [out] Int32* res);
+
+        /*
+         *  Save device/group configuration
+         *  Parameters:
+         *  Returns: 0 - success, 1 - fail
+        */
+        SaveDeviceConfig(
+            [out] Int32* res);
+
+        //=================================== Device Management =======================================
+        /*
+         *  get total device count
+         *  Parameters: void
+         *  Returns: device number-success, -1-fail
+        */
+        GetDeviceCount(
+            [out] Int32* deviceCount);
+
+        /*
+         *  [short-term solution] Remote client can only access "String"
+         *  (For Remote Client) Get all device name
+         *  Parameters: void
+         *  Returns: device name - success, null- fail
+        */
+        GetDeviceNameByID(
+            [out] String* deviceName);
+
+        /*
+         *  Get device name list
+         *  Parameters: void
+         *  Returns: device name list - success, null- fail
+        */
+        GetDevices(
+            [out, callee] ArrayOf<String>* devices);
+
+        /*
+         *  Get device online status
+         *  OnlineStatus defined in ZigbeeManager.java (Ex.ZigbeeManager.STATUS_ONLINE/ZigbeeManager.STATUS_OFFLINE)
+         *  Parameters: device name
+         *  Returns: online status- success, -1- fail
+        */
+        GetDeviceOnlineStatus(
+            [in] String devName,
+            [out] Int32* status);
+
+        /*
+         *  Get device short address
+         *  Parameters: device name
+         *  Returns: short address- success, null- fail
+        */
+        GetDeviceShortAddr(
+            [in] String devName,
+            [out] String* address);
+
+        /*
+         *  Get device MAC address
+         *  Parameters: device name
+         *  Returns: MAC address- success, null- fail
+        */
+        GetDeviceMacAddr(
+            [in] String devName,
+            [out] String* macAddr);
+
+        /*
+         *  Get device type
+         *  Type defined in ZigbeeManager.java (Ex.ZigbeeManager.DeviceType.DEV_TYPE_BULB.toInt())
+         *  Parameters: device name
+         *  Returns: type - success, -1 - fail
+        */
+        GetDeviceType(
+            [in] String devName,
+            [out] Int32* type);
+
+        /*
+         *  Get device zone type
+         *  Type defined in ZigbeeManager.java (Ex.ZigbeeManager.ZoneType.ZONE_TYPE_TEMPERATURE.toInt())
+         *  Parameters: device name
+         *  Returns: zone type - success, -1 - fail
+        */
+        GetDeviceZoneType(
+            [in] String devName,
+            [out] Int32* zoneType);
+
+        /*
+         *  Change device name
+         *  Parameters: original device name, new device name
+         *  Returns: 0-success, 1-fail
+        */
+        SetDeviceName(
+            [in] String targetDevName,
+            [in] String newDevName,
+            [out] Int32* res);
+
+        //================================== Group Management =======================================
+        /*
+         *  Create a group
+         *  Parameters: group name, group type, group zone type
+         *  Returns: 0-success, 1-fail
+        */
+        CreateGroup(
+            [in] String groupName,
+            [in] Int32 groupType,
+            [in] Int32 groupZoneType,
+            [out] Int32* res);
+
+        /*
+         *  Remove a group
+         *  Parameters: group name
+         *  Returns: 0-success, 1-fail
+        */
+        RemoveGroup(
+            [in] String groupName,
+            [out] Int32* res);
+
+        /*
+         *  Get all group names
+         *  Parameters: void
+         *  Returns: group name list - success, null- fail
+        */
+        GetGroups(
+            [out, callee] ArrayOf<String>* groups);
+
+        /*
+         *  Add a device to a group
+         *  Parameters: group name, device name
+         *  Returns: 0-success, 1-fail
+        */
+        AddDeviceToGroup(
+            [in] String groupName,
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Add multiple devices to group
+         *  Parameters: group name, device name list
+         *  Return value: 0-success, 1-fail
+        */
+        AddDevicesToGroup(
+            [in] String groupName,
+            [in] ArrayOf<String> deviceNameList,
+            [out] Int32* res);
+
+        /*
+         *  Remove a device from a group
+         *  Parameters: group name, device name
+         *  Returns: 0-success, 1-fail
+        */
+        RemoveDeviceFromGroup(
+            [in] String groupName,
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Remove all devices from a group
+         *  Parameters: group name
+         *  Returns: 0-success, 1-fail
+        */
+        RemoveAllDevicesFromGroup(
+            [in] String groupName,
+            [out] Int32* res);
+
+        /*
+         *  Change group name
+         *  Parameters: original group name, new group name
+         *  Returns: 0-success, 1-fail
+        */
+        SetGroupName(
+            [in] String groupName,
+            [in] String newGroupName,
+            [out] Int32* res);
+
+        /*
+         *  Get group type
+         *  Type defined in ZigbeeManager.java (Ex.ZigbeeManager.DeviceType.DEV_TYPE_BULB.toInt())
+         *  Parameters: group name
+         *  Returns: group type - success, (-1)-fail
+        */
+        GetGroupType(
+            [in] String groupName,
+            [out] Int32* res);
+
+        /*
+         *  Get group zone type
+         *  Type defined in ZigbeeManager.java (Ex.ZigbeeManager.ZoneType.ZONE_TYPE_TEMPERATURE.toInt())
+         *  Parameters: group name
+         *  Returns: group zone type - success, (-1)-fail
+        */
+        GetGroupZoneType(
+            [in] String groupName,
+            [out] Int32* res);
+
+        /*
+         *  Get device count of a group
+         *  Parameters: group name
+         *  Returns: device count-success, -1- fail
+        */
+        GetDeviceCountOfGroup(
+            [in] String groupName,
+            [out] Int32* res);
+
+        /*
+         *  Get group count
+         *  Parameters: void
+         *  Returns: group count
+        */
+        GetGroupCount(
+            [out] Int32* groupCount);
+
+        /*
+         *  Get all devices of a group
+         *  Parameters: group name
+         *  Returns: List<String> all devices - success, null -fail
+        */
+        GetGroupDevices(
+            [in] String groupName,
+            [out, callee] ArrayOf<String>* devices);
+
+        /*
+         *  [short-term solution] Remote client can only access "String"
+         *  (For Remote Client) Get group name
+         *  Parameters: void
+         *  Returns: group name - success, null- fail
+        */
+        GetGroupsByID(
+            [out] String* groupName);
+
+        /*
+         *  [short-term solution] Remote client can only access "String"
+         *  (For Remote Client) Get device name in a group
+         *  Parameters: group name
+         *  Returns: device name in a group - success, null- fail
+        */
+        GetGroupDevicesByID(
+            [in] String groupName,
+            [out] String* deviceName);
+
+        //===================================== Switch Control =========================================
+        /*
+         *  Turn on/off a switch device
+         *  Switch state defined in ZigbeeManager.java (Ex.ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Parameters: on/off state, device name
+         *  Returns: 0-success, 1-fail
+        */
+        SetSwitchOnOffState(
+            [in] Int32 command,
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Turn on/off all devices in a switch group
+         *  Switch state defined in ZigbeeManager.java (Ex.ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Parameters: on/off state, group device list
+         *  Returns: 0-success, 1-fail
+        */
+        SetSwitchGroupOnOffState(
+            [in] Int32 command,
+            [in] String groupName,
+            [out] Int32* res);
+
+        /*
+         *  Get on/off state of a switch device
+         *  Switch state defined in ZigbeeManager.java (Ex.ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Parameters: device name
+         *  Returns: on/off state-success, -1-fail
+        */
+        GetSwitchOnOffState(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        //===================================== Bulb Control =========================================
+        /*
+         *  Start scenario mode of a bulb type device
+         *  Parameters:   Par1: group name, Par2: SM mode (1: random color, 2: RGB cycle color)
+         *                           Par3(delayTime) and Par4(randomDelay) now is not used
+         *  Returns: 0-success, 1-fail
+        */
+        SetBulbScenarioMode(
+            [in] String devName,
+            [in] Int32 mode,
+            [in] Int32 delayTime,
+            [in] Boolean randomDelay,
+            [out] Int32* res);
+
+        /*
+         *  Turn on/off a bulb device
+         *  Switch state defined in ZigbeeManager.java (Ex.ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Parameters: on/off state, device name
+         *  Returns: 0-success, 1-fail
+        */
+        SetBulbOnOffState(
+            [in] Int32 command,
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Get on/off state of a bulb device
+         *  Switch state defined in ZigbeeManager.java (Ex.ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Parameters: device name
+         *  Returns: on/off state-success, -1-fail
+        */
+        GetBulbOnOffState(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Set brightness of a bulb type device
+         *  Parameters: level, device name
+         *  Returns: 0-success, 1-fail
+        */
+        SetBulbLuminance(
+            [in] Int32 level,
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Get brightness of a bulb type device
+         *  Parameters: device name
+         *  Returns: brightness of the device-success, 1-fail
+        */
+        GetBulbLuminance(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Set color of a bulb type device
+         *  Parameters: R, G, B, device name
+         *  Returns: 0-success, 1-fail
+        */
+        SetBulbColor(
+            [in] Int32 red,
+            [in] Int32 green,
+            [in] Int32 blue,
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Get color of a bulb type device
+         *  Parameters: device name
+         *  Returns: 0-success, 1-fail
+        */
+        GetBulbColor(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Turn on/off all devices in a group
+         *  Switch state defined in ZigbeeManager.java (Ex.ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Parameters: on/off state, group device list
+         *  Returns: 0-success, 1-fail
+        */
+        SetBulbGroupOnOffState(
+            [in] Int32 command,
+            [in] String groupName,
+            [out] Int32* res);
+
+        /*
+         *  Set luminance of a bulb type group
+         *  Parameters: level, group name
+         *  Returns: 0-success, 1-fail
+        */
+        SetBulbGroupLuminance(
+            [in] Int32 level,
+            [in] String groupName,
+            [out] Int32* res);
+        /*
+         *  Set color of a bulb type group
+         *  Parameters: R, G, B, group name
+         *  Returns: 0-success, 1-fail
+        */
+        SetBulbGroupColor(
+            [in] Int32 red,
+            [in] Int32 green,
+            [in] Int32 blue,
+            [in] String groupName,
+            [out] Int32* res);
+
+        /*
+         *  Start scenario mode of a bulb type group
+         *  Parameters:   Par1: group name, Par2: SM mode (1: random color, 2: RGB cycle color)
+         *                           Par3(delayTime) and Par4(randomDelay) now is not used
+         *  Returns: 0-success, 1-fail
+        */
+        SetBulbGroupScenarioMode(
+            [in] String groupName,
+            [in] Int32 mode,
+            [in] Int32 delayTime,
+            [in] Boolean randomDelay,
+            [out] Int32* res);
+
+        //===================================== Humidity Sensor =======================================
+        /*
+         *  Get sensor humidity
+         *  Parameters: device name
+         *  Returns: humidity (0~100) - success, -1 - fail
+        */
+        GetSensorHumidity(
+            [in] String deviceName,
+            [out] Int32* res);
+        /*
+         *  Set humidity sensor's history record setting
+         *  Parameters: device name, true-enable history record/false-disable history record, history record filename(null if disable setting)
+         *  Returns: 0-success, 1-fail
+        */
+        SetHumiditySensorHistorySetting(
+            [in] String deviceName,
+            [in] Boolean enabled,
+            [in] String filename,
+            [out] Int32* res);
+
+        /*
+         *  Set humidity sensor's all warning setting
+         *  Parameters: device name, lower limit setting, lower limit humidity, upper limit setting, upper limit humidity
+         *  Returns: 0-success, 1-fail
+        */
+        SetHumiditySensorAllWarningSetting(
+            [in] String deviceName,
+            [in] Boolean lowerLimitSetting,
+            [in] Int32 lowerLimitHumidity,
+            [in] Boolean upperLimitSetting,
+            [in] Int32 upperLimitHumidity,
+            [out] Int32* res);
+
+        /*
+         *  Set humidity sensor's warning enable setting
+         *  Parameters: device name, ZigbeeManager.WARNING_HUMIDITY_UPPER_LIMIT/ZigbeeManager.WARNING_HUMIDITY_LOWER_LIMIT, true: enable/false: disable
+         *  Returns: 0-success, 1-fail
+        */
+        SetHumiditySensorWarningSetting(
+            [in] String deviceName,
+            [in] Int32 limitSelection,
+            [in] Boolean setting,
+            [out] Int32* res);
+
+        //===================================== Temperature Sensor ======================================
+        /*
+         *  Get temperature sensor's history record start time
+         *  Parameters: device name
+         *  Returns: start time(format: yyyy-MM-dd-H-mm-ss) - success, NA - fail
+        */
+        GetTemperatureHistoryStartTime(
+            [in] String deviceName,
+            [out] String* startTime);
+
+        /*
+         *  Get temperature sensor's history record end time
+         *  Parameters: device name
+         *  Returns: end time(format: yyyy-MM-dd-H-mm-ss) - success, NA - fail
+        */
+        GetTemperatureHistoryEndTime(
+            [in] String deviceName,
+            [out] String* endTime);
+
+
+        /*
+         *  Get temperature sensor's history record average temperature
+         *  Parameters: device name
+         *  Returns: average temperature - success, -9999 - fail
+        */
+        GetHistoryAverageTemperature(
+            [in] String deviceName,
+            [out] Int32* res);
+
+
+        /*
+         *  Get temperature sensor's max temperature in history record
+         *  Parameters: device name
+         *  Returns: max temperature - success, -9999 - fail
+        */
+        GetHistoryMaxTemperature(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Get temperature sensor's min temperature in history record
+         *  Parameters: device name
+         *  Returns: min temperature - success, 9999 - fail
+        */
+        GetHistoryMinTemperature(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        /*
+         *  Get temperature sensor's min temperature time in history record
+         *  Parameters: device name
+         *  Returns: min temperature time(format: yyyy-MM-dd-H-mm-ss) - success, NA - fail
+        */
+        GetHistoryMinTemperatureTime(
+            [in] String deviceName,
+            [out] String* time);
+
+        /*
+         *  Get temperature sensor's max temperature time in history record
+         *  Parameters: device name
+         *  Returns: max temperature time(format: yyyy-MM-dd-H-mm-ss) - success, NA - fail
+        */
+        GetHistoryMaxTemperatureTime(
+            [in] String deviceName,
+            [out] String* time);
+
+        /*
+         *  Set temperature sensor's all warning setting
+         *  Parameters: device name, lower limit setting, lower limit temperature, upper limit setting, upper limit temperature
+         *  Returns: 0-success, 1-fail
+        */
+        SetTemperatureSensorAllWarningSetting(
+            [in] String deviceName,
+            [in] Boolean lowerLimitSetting,
+            [in] Int32 lowerLimitTemp,
+            [in] Boolean upperLimitSetting,
+            [in] Int32 upperLimitTemp,
+            [out] Int32* res);
+
+        /*
+         *  Set temperature sensor's warning enable setting
+         *  Parameters: device name, ZigbeeManager.WARNING_TEMPERATURE_UPPER_LIMIT/ZigbeeManager.WARNING_TEMPERATURE_LOWER_LIMIT
+         *  Returns: 0-success, 1-fail
+        */
+        SetTemperatureSensorWarningSetting(
+            [in] String deviceName,
+            [in] Int32 limitSelection,
+            [in] Boolean setting,
+            [out] Int32* res);
+
+        /*
+         *  Get temperature sensor's warning enable setting
+         *  Parameters: device name, ZigbeeManager.WARNING_TEMPERATURE_UPPER_LIMIT/ZigbeeManager.WARNING_TEMPERATURE_LOWER_LIMIT
+         *  Returns: true-warning is enabled/false-warning is disabled/error
+        */
+        GetTemperatureSensorWarningSetting(
+            [in] String deviceName,
+            [in] Int32 limitSelection,
+            [out] Boolean* enabled);
+
+        /*
+         *  Set temperature sensor's warning temperature
+         *  Parameters: device name, ZigbeeManager.WARNING_TEMPERATURE_UPPER_LIMIT/ZigbeeManager.WARNING_TEMPERATURE_LOWER_LIMIT, temperature
+         *  Returns: 0-success, 1-fail
+        */
+        SetTemperatureSensorWarningTemperature(
+            [in] String deviceName,
+            [in] Int32 limitSelection,
+            [in] Int32 temperature,
+            [out] Int32* res);
+
+        /*
+         *  Get temperature sensor's warning temperature
+         *  Parameters: device name, ZigbeeManager.WARNING_TEMPERATURE_UPPER_LIMIT/ZigbeeManager.WARNING_TEMPERATURE_LOWER_LIMIT
+         *  Returns: temperature -success/9999-fail
+        */
+        GetTemperatureSensorWarningTemperature(
+            [in] String deviceName,
+            [in] Int32 limitSelection,
+            [out] Int32* res);
+
+        /*
+         *  Set temperature sensor's history record setting
+         *  Parameters: device name, true-enable history record/false-disable history record, history record filename(null if disable setting)
+         *  Returns: 0-success, 1-fail
+        */
+        SetTemperatureSensorHistorySetting(
+            [in] String deviceName,
+            [in] Boolean enabled,
+            [in] String filename,
+            [out] Int32* res);
+
+        /*
+         *  Get temperature sensor's history record setting
+         *  Parameters: device name
+         *  Returns: true-history record is enabled/false-history record is disabled/error
+        */
+        GetTemperatureSensorHistorySetting(
+            [in] String deviceName,
+            [out] Boolean* enabled);
+
+        /*
+         *  Get sensor temperature
+         *  Parameters: device name
+         *  Returns: temperture-success, 9999-fail
+        */
+        GetSensorTemperature(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        //===================================== Sensor ======================================
+        /*
+         *  Get sensor voltage
+         *  Parameters: device name
+         *  Returns: voltage-success, -1-fail
+        */
+        GetSensorVoltage(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        //===================================== Door Sensor ======================================
+        /*
+         *  Get door sensor's history time
+         *  Parameters: device name
+         *  Returns: door history time list(format: yyyy-MM-dd-H-mm-ss) - success, null - fail
+        */
+        GetDoorHistoryTime(
+            [in] String deviceName,
+            [out, callee] ArrayOf<String>* list);
+
+        /*
+         *  Get door sensor's history state
+         *  Parameters: device name
+         *  Returns: door history state list - success, null - fail
+        */
+        GetDoorHistoryState(
+            [in] String deviceName,
+            [out, callee] ArrayOf<String>* list);
+
+       /*
+         *  Set door sensor's all warning setting
+         *  Parameters: device name, warning enable/disable setting, warning door state(ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Returns: 0-success, 1-fail
+        */
+        SetDoorSensorAllWarningSetting(
+            [in] String deviceName,
+            [in] Boolean warningSetting,
+            [in] Int32 warningState,
+            [out] Int32* res);
+
+        /*
+         *  Set door sensor's warning enable setting
+         *  Parameters: device name, warning setting
+         *  Returns: 0-success, 1-fail
+        */
+        SetDoorSensorWarningSetting(
+            [in] String deviceName,
+            [in] Boolean setting,
+            [out] Int32* res);
+
+        /*
+         *  Get door sensor's warning enable setting
+         *  Parameters: device name
+         *  Returns: true-warning is enabled/false-warning is disabled/error
+        */
+        GetDoorSensorWarningSetting(
+            [in] String deviceNam,
+            [out] Boolean* enabled);
+
+        /*
+         *  Set door sensor's warning state
+         *  Parameters: device name, door warning state(ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Returns: 0-success, 1-fail
+        */
+        SetDoorWarningState(
+            [in] String deviceName,
+            [in] Int32 warningState,
+            [out] Int32* res);
+
+        /*
+         *  Get door sensor's warning state
+         *  Parameters: device name
+         *  Returns: door warning state(ZigbeeManager.STATE_ON/OFF) -success/ZigbeeManager.STATE_UNKNOWN -fail
+        */
+        GetDoorSensorWarningState(
+            [in] String deviceName,
+            [out] Int32* state);
+
+        /*
+         *  Set door sensor's history record setting
+         *  Parameters: device name, true-enable history record/false-disable history record, history record filename(null if disable setting)
+         *  Returns: 0-success, 1-fail
+        */
+        SetDoorSensorHistorySetting(
+            [in] String deviceName,
+            [in] Boolean enabled,
+            [in] String filename,
+            [out] Int32* res);
+
+        /*
+         *  Get door sensor's history record setting
+         *  Parameters: device name
+         *  Returns: true-history record is enabled/false-history record is disabled/error
+        */
+        GetDoorHistorySetting(
+            [in] String deviceName,
+            [out] Boolean* enabled);
+
+        /*
+         *  Get door sensor on/off state
+         *  Switch state defined in ZigbeeManager.java (Ex.ZigbeeManager.STATE_ON/ZigbeeManager.STATE_OFF)
+         *  Parameters: device name
+         *  Returns: door on/off state -success, -1 -fail
+        */
+        GetDoorOnOffState(
+            [in] String deviceName,
+            [out] Int32* res);
+
+        //===================================== Debug Function =========================================
+        /*
+         *  Dump all device and group information
+         *  Parameters: void
+         *  Returns: void
+        */
+        DumpLog();
+
+        /*
+         *  Update all devices' information in the Zigbee network
+         *  Parameters: void
+         *  Returns: 0-success, 1-fail
+        */
+        ScanZigbeeDevices(
+            [out] Int32* res);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

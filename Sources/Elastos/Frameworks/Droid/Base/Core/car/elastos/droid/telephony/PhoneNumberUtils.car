@@ -1,0 +1,251 @@
+
+module
+{
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Text.IEditable;
+    using interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    interface IPhoneNumberUtils {
+
+        const Char32 PAUSE = ',';
+        const Char32 WAIT = ';';
+        const Char32 WILD = 'N';
+        const Int32 TOA_International = 0x91;
+        const Int32 TOA_Unknown = 0x81;
+        const Int32 FORMAT_UNKNOWN = 0;
+        const Int32 FORMAT_NANP = 1;
+        const Int32 FORMAT_JAPAN = 2;
+
+    }
+
+    [local, deprecated]
+    interface IPhoneNumberUtilsHelper {
+
+        IsISODigit (
+            [in] Char32 c,
+            [out] Boolean* res);
+
+        GetNumberFromIntent(
+            [in] IIntent* intent,
+            [in] IContext* ctx,
+            [out] String* res);
+
+        ExtractNetworkPortion(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        ExtractNetworkPortionAlt(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        StripSeparators(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        ConvertAndStrip(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        ConvertPreDial(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        ExtractPostDialPortion(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        Compare(
+            [in] String a,
+            [in] String b,
+            [out] Boolean* res);
+
+        Compare(
+            [in] IContext* ctx,
+            [in] String a,
+            [in] String b,
+            [out] Boolean* res);
+
+        Compare(
+            [in] String a,
+            [in] String b,
+            [in] Boolean useStrictComparation,
+            [out] Boolean* res);
+
+        CompareLoosely(
+            [in] String a,
+            [in] String b,
+            [out] Boolean* res);
+
+        CompareStrictly(
+            [in] String a,
+            [in] String b,
+            [out] Boolean* res);
+
+        CompareStrictly(
+            [in] String a,
+            [in] String b,
+            [in] Boolean acceptInvalidCCCPrefix,
+            [out] Boolean* res);
+
+        ToCallerIDMinMatch(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        GetStrippedReversed(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        StringFromStringAndTOA(
+            [in] String s,
+            [in] Int32 TOA,
+            [out] String* res);
+
+        ToaFromString(
+            [in] String s,
+            [out] Int32* res);
+
+        CalledPartyBCDToString (
+            [in] ArrayOf<Byte>* bytes,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out] String* res);
+
+        CalledPartyBCDFragmentToString(
+            [in] ArrayOf<Byte>* bytes,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out] String* res);
+
+        IsWellFormedSmsAddress(
+            [in] String address,
+            [out] Boolean* res);
+
+        IsGlobalPhoneNumber(
+            [in] String phoneNumber,
+            [out] Boolean* res);
+
+        NetworkPortionToCalledPartyBCD(
+            [in] String s,
+            [out, callee] ArrayOf<Byte>* res);
+
+        NetworkPortionToCalledPartyBCDWithLength(
+            [in] String s,
+            [out, callee] ArrayOf<Byte>* res);
+
+        NumberToCalledPartyBCD(
+            [in] String number,
+            [out, callee] ArrayOf<Byte>* res);
+
+        FormatNumber(
+            [in] String source,
+            [out] String* res);
+
+        FormatNumber(
+            [in] String source,
+            [in] Int32 defaultFormattingType,
+            [out] String* res);
+
+        GetFormatTypeForLocale(
+            [in] ILocale* locale,
+            [out] Int32* res);
+
+        FormatNumber(
+            [in] IEditable* text,
+            [in] Int32 defaultFormattingType);
+
+        FormatNanpNumber(
+            [in] IEditable* text);
+
+        FormatJapaneseNumber(
+            [in] IEditable* text);
+
+        FormatNumberToE164(
+            [in] String phoneNumber,
+            [in] String defaultCountryIso,
+            [out] String* res);
+
+        FormatNumber(
+            [in] String phoneNumber,
+            [in] String defaultCountryIso,
+            [out] String* res);
+
+        FormatNumber(
+            [in] String phoneNumber,
+            [in] String phoneNumberE164,
+            [in] String defaultCountryIso,
+            [out] String* res);
+
+        NormalizeNumber(
+            [in] String phoneNumber,
+            [out] String* res);
+
+        ReplaceUnicodeDigits(
+            [in] String number,
+            [out] String* res);
+
+        IsEmergencyNumber(
+            [in] String number,
+            [out] Boolean* res);
+
+        IsPotentialEmergencyNumber(
+            [in] String number,
+            [out] Boolean* res);
+
+        IsEmergencyNumber(
+            [in] String number,
+            [in] String defaultCountryIso,
+            [out] Boolean* res);
+
+        IsPotentialEmergencyNumber(
+            [in] String number,
+            [in] String defaultCountryIso,
+            [out] Boolean* res);
+
+        IsLocalEmergencyNumber(
+            [in] String number,
+            [in] IContext* ctx,
+            [out] Boolean* res);
+
+        IsPotentialLocalEmergencyNumber(
+            [in] String number,
+            [in] IContext* ctx,
+            [out] Boolean* res);
+
+        IsVoiceMailNumber(
+            [in] String number,
+            [out] Boolean* res);
+
+        ConvertKeypadLettersToDigits(
+            [in] String input,
+            [out] String* res);
+
+        CdmaCheckAndProcessPlusCode(
+            [in] String dialStr,
+            [out] String* res);
+
+        CdmaCheckAndProcessPlusCodeByNumberFormat(
+            [in] String dialStr,
+            [in] Int32 currFormat,
+            [in] Int32 defaultFormat,
+            [out] String* res);
+
+        IsUriNumber(
+            [in] String number,
+            [out] Boolean* res);
+
+        GetUsernameFromUriNumber(
+            [in] String number,
+            [out] String* res);
+
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,350 @@
+module
+{
+    using interface Elastos.Utility.IVector;
+    using interface Elastos.Core.IArrayOf;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IStringBuilder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * @Involve
+     * interface ISubtitleControllerRenderer
+     */
+    interface IWebVttRenderer
+    {
+    }
+
+    interface ITextTrackCueSpan
+    {
+        GetTimeStampMs(
+            [out] Int64* timestampMs);
+
+        SetTimeStampMs(
+            [in] Int64 timestampMs);
+
+        GetText(
+            [out] String* result);
+
+        SetText(
+            [in] String result);
+
+        GetEnabled(
+            [out] Boolean* result);
+
+        SetEnabled(
+            [in] Boolean result);
+    }
+
+    /**
+     * @hide
+     *
+     * Extract all text without style, but with timestamp spans.
+     */
+    /**
+     * @Involve
+     * interface ITokenizerOnTokenListener
+     */
+    interface IUnstyledTextExtractor
+    {
+        GetText(
+            [out, callee] ArrayOf<IArrayOf*>* result);
+    }
+
+    /**
+     * @hide
+     *
+     * Tokenizer tokenizes the WebVTT Cue Text into tags and data
+     */
+    interface ITokenizer
+    {
+        Reset();
+
+        Tokenize(
+            [in] String s);
+    }
+
+    interface ITokenizerTokenizerPhase
+    {
+        Start(
+            [out] ITokenizerTokenizerPhase** result);
+
+        Tokenize();
+    }
+
+    /**
+     * @Involve
+     * interface ITokenizerTokenizerPhase
+     */
+    interface ITokenizerDataTokenizer
+    {
+    }
+
+    /**
+     * @Involve
+     * interface ITokenizerTokenizerPhase
+     */
+    interface ITokenizerTagTokenizer
+    {
+    }
+
+    /**
+     * @Involve
+     * interface ITokenizerTokenizerPhase
+     */
+    [deprecated]
+    interface ITokenizerOnTokenListener
+    {
+        OnData(
+            [in] String s);
+
+        OnStart(
+            [in] String tag,
+            [in] ArrayOf<String>* classes,
+            [in] String annotation);
+
+        OnEnd(
+            [in] String tag);
+
+        OnTimeStamp(
+            [in] Int64 timestampMs);
+
+        OnLineEnd();
+    }
+
+    interface ITextTrackRegion
+    {
+        const Int32 SCROLL_VALUE_NONE = 300;
+        const Int32 SCROLL_VALUE_SCROLL_UP = 301;
+
+        GetId(
+            [out] String* id);
+
+        SetId(
+            [in] String id);
+
+        GetWidth(
+            [out] Float* width);
+
+        SetWidth(
+            [in] Float width);
+
+        GetLines(
+            [out] Int32* lines);
+
+        SetLines(
+            [in] Int32 lines);
+
+        GetAnchorPointX(
+            [out] Float* anchorPointX);
+
+        SetAnchorPointX(
+            [in] Float anchorPointX);
+
+        GetAnchorPointY(
+            [out] Float* anchorPointY);
+
+        SetAnchorPointY(
+            [in] Float anchorPointY);
+
+        GetViewportAnchorPointX(
+            [out] Float* pointX);
+
+        SetViewportAnchorPointX(
+            [in] Float pointX);
+
+        GetViewportAnchorPointY(
+            [out] Float* pointY);
+
+        SetViewportAnchorPointY(
+            [in] Float pointY);
+
+        GetScrollValue(
+            [out] Int32* scrollValue);
+
+        SetScrollValue(
+            [in] Int32 scrollValue);
+    }
+
+    /**
+     * @Involve
+     * interface ISubtitleTrackCue
+     */
+    [deprecated]
+    interface ITextTrackCue
+    {
+        const Int32 WRITING_DIRECTION_HORIZONTAL = 100;
+        const Int32 WRITING_DIRECTION_VERTICAL_RL = 101;
+        const Int32 WRITING_DIRECTION_VERTICAL_LR = 102;
+
+        const Int32 ALIGNMENT_MIDDLE = 200;
+        const Int32 ALIGNMENT_START = 201;
+        const Int32 ALIGNMENT_END = 202;
+        const Int32 ALIGNMENT_LEFT = 203;
+        const Int32 ALIGNMENT_RIGHT = 204;
+
+        AppendStringsToBuilder(
+            [in] IStringBuilder* builder,
+            [out] IStringBuilder** result);
+
+        AppendLinesToBuilder(
+            [in] IStringBuilder* builder,
+            [out] IStringBuilder** result);
+
+        SetId(
+            [in] String id);
+
+        GetId(
+            [out] String* id);
+
+        SetPauseOnExit(
+            [in] Boolean bPause);
+
+        GetPauseOnExit(
+            [out] Boolean* bPause);
+
+        SetWritingDirection(
+            [in] Int32 wd);
+
+        GetWritingDirection(
+            [out] Int32* wd);
+
+        SetRegionId(
+            [in] String regionId);
+
+        GetRegionId(
+            [out] String* regionId);
+
+        SetSnapToLines(
+            [in] Boolean bSnapToLines);
+
+        GetSnapToLines(
+            [out] Boolean* bSnapToLines);
+
+        SetLinePosition(
+            [in] Int32 linePosition);
+
+        GetLinePosition(
+            [out] Int32* linePosition);
+
+        SetTextPosition(
+            [in] Int32 textPosition);
+
+        GetTextPosition(
+            [out] Int32* textPosition);
+
+        SetSize(
+            [in] Int32 size);
+
+        GetSize(
+            [out] Int32* size);
+
+        SetAlignment(
+            [in] Int32 alignment);
+
+        GetAlignment(
+            [out] Int32* alignment);
+
+        GetStrings(
+            [out, callee] ArrayOf<ICharSequence*>* strings);
+
+        SetStrings(
+            [in] ArrayOf<ICharSequence*>* strings);
+
+        GetLines(
+            [out, callee] ArrayOf<IArrayOf*>* lines);
+
+        SetLines(
+            [in] ArrayOf<IArrayOf*>* lines);
+
+        GetRegion(
+            [out] ITextTrackRegion** result);
+
+        SetRegion(
+            [in] ITextTrackRegion* ttr);
+    }
+
+    /**
+     *  Supporting July 10 2013 draft version
+     *
+     *  @hide
+     */
+    interface IWebVttParser
+    {
+        Parse(
+            [in] String s);
+
+        Eos();
+
+        YieldCue();
+    }
+
+    interface IWebVttParserHelper
+    {
+        /* parsePercentageString */
+        ParseFloatPercentage(
+            [in] String s,
+            [out] Float* result);
+
+        ParseIntPercentage(
+            [in] String s,
+            [out] Int32* result);
+
+        ParseTimestampMs(
+            [in] String s,
+            [out] Int64* result);
+
+        TimeToString(
+            [in] Int64 timeMs,
+            [out] String* result);
+    }
+
+    interface IWebVttParserPhase
+    {
+        Parse(
+            [in] String s);
+    }
+
+    /** @hide */
+    interface IWebVttCueListener
+    {
+        OnCueParsed(
+            [in] ITextTrackCue* cue);
+
+        OnRegionParsed(
+            [in] ITextTrackRegion* region);
+    }
+
+    /** @hide */
+    /**
+     * @Involve
+     * interface ISubtitleTrack
+     * interface IWebVttCueListener
+     */
+    interface IWebVttTrack
+    {
+    }
+
+    /**
+     * Widget capable of rendering WebVTT captions.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface ISubtitleTrackRenderingWidget
+     * interface IViewGroup
+     */
+    [deprecated]
+    interface IWebVttRenderingWidget
+    {
+        SetActiveCues(
+            [in] IVector* activeCues);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

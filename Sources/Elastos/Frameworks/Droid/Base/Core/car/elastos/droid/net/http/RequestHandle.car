@@ -1,0 +1,123 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * RequestHandle: handles a request session that may include multiple
+     * redirects, HTTP authentication requests, etc.
+     *
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IRequestHandle {
+        const Int32 MAX_REDIRECT_COUNT = 16;
+
+        /**
+         * Cancels this request
+         */
+        Cancel();
+
+        /**
+         * Pauses the loading of this request. For example, called from the WebCore thread
+         * when the plugin can take no more data.
+         */
+        PauseRequest(
+            [in] Boolean pause);
+
+        /**
+         * Handles SSL error(s) on the way down from the user (the user
+         * has already provided their feedback).
+         */
+        HandleSslErrorResponse(
+            [in] Boolean proceed);
+
+        /**
+         * @return true if we've hit the max redirect count
+         */
+        IsRedirectMax(
+            [out] Boolean* result);
+
+        GetRedirectCount(
+            [out] Int32* result);
+
+        SetRedirectCount(
+            [in] Int32 count);
+
+        /**
+         * Create and queue a redirect request.
+         *
+         * @param redirectTo URL to redirect to
+         * @param statusCode HTTP status code returned from original request
+         * @param cacheHeaders Cache header for redirect URL
+         * @return true if setup succeeds, false otherwise (redirect loop
+         * count exceeded, body provider unable to rewind on 307 redirect)
+         */
+        SetupRedirect(
+            [in] String redirectTo,
+            [in] Int32 statusCode,
+            [in] IMap* cacheHeaders,
+            [out] Boolean* result);
+
+        /**
+         * Create and queue an HTTP authentication-response (basic) request.
+         */
+        SetupBasicAuthResponse(
+            [in] Boolean isProxy,
+            [in] String username,
+            [in] String password);
+
+        /**
+         * Create and queue an HTTP authentication-response (digest) request.
+         */
+        SetupDigestAuthResponse(
+            [in] Boolean isProxy,
+            [in] String username,
+            [in] String password,
+            [in] String realm,
+            [in] String nonce,
+            [in] String QOP,
+            [in] String algorithm,
+            [in] String opaque);
+
+        /**
+         * @return HTTP request method (GET, PUT, etc).
+         */
+        GetMethod(
+            [out] String* result);
+
+        WaitUntilComplete();
+
+        ProcessRequest();
+    }
+
+    interface IRequestHandleHelper {
+        /**
+         * @return Basic-scheme authentication response: BASE64(username:password).
+         */
+        ComputeBasicAuthResponse(
+            [in] String username,
+            [in] String password,
+            [out] String* result);
+
+        /**
+         * @return The right authorization header (dependeing on whether it is a proxy or not).
+         */
+        AuthorizationHeader(
+            [in] Boolean isProxy,
+            [out] String* result);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

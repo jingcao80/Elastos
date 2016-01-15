@@ -1,0 +1,23 @@
+
+TARGET_NAME= entity
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc;
+
+SOURCES = AbstractHttpEntity.cpp
+SOURCES += HttpEntityWrapper.cpp
+SOURCES += CBasicHttpEntity.cpp
+SOURCES += CBufferedHttpEntity.cpp
+SOURCES += CByteArrayEntity.cpp
+SOURCES += CEntityTemplate.cpp
+SOURCES += CFileEntity.cpp
+SOURCES += CInputStreamEntity.cpp
+SOURCES += CSerializableEntity.cpp
+SOURCES += StringEntity.cpp
+SOURCES += CStringEntity.cpp

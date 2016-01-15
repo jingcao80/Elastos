@@ -1,0 +1,32 @@
+
+module
+{
+    using interface Eunit.Framework.ITestCase;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Test {
+    namespace SuiteBuilder {
+
+    [local]
+    interface ITestMethod {
+        GetName(
+            [out] String* name);
+
+        GetEnclosingClassname(
+            [out] String* classname);
+
+        // public <T extends Annotation> T getAnnotation(Class<T> annotationClass);
+
+        GetEnclosingClass(
+            [out] IClassInfo** clazz);
+
+        CreateTest(
+            [out] ITestCase** test);
+    }
+
+    } // namespace SuiteBuilder
+    } // namespace Test
+    } // namespace Droid
+    } // namespace Elastos
+}

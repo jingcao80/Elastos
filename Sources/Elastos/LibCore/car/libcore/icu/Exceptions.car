@@ -1,0 +1,11 @@
+module
+{
+//    const FAMILY_CORE = 0x2A    // Platform exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Platform exception codes (Family: 0x2A)
+    const E_NO_SUCH_ELEMENT_EXCEPTION                       = 0xAB000000;
+}

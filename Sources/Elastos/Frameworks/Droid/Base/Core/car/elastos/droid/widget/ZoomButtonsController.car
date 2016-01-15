@@ -1,0 +1,138 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Interface that will be called when the user performs an interaction that
+     * triggers some action, for example zooming.
+     */
+    interface IOnZoomListener {
+
+        /**
+         * Called when the zoom controls' visibility changes.
+         *
+         * @param visible Whether the zoom controls are visible.
+         */
+        OnVisibilityChanged(
+            [in] Boolean visible);
+
+        /**
+         * Called when the owner view needs to be zoomed.
+         *
+         * @param zoomIn The direction of the zoom: true to zoom in, false to zoom out.
+         */
+        OnZoom(
+            [in] Boolean zoomIn);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewOnTouchListener
+     */
+    [local]
+    interface IZoomButtonsController {
+        /**
+         * Whether to enable the zoom in control.
+         *
+         * @param enabled Whether to enable the zoom in control.
+         */
+        SetZoomInEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Whether to enable the zoom out control.
+         *
+         * @param enabled Whether to enable the zoom out control.
+         */
+        SetZoomOutEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Sets the delay between zoom callbacks as the user holds a zoom button.    }
+         *
+         * @param speed The delay in milliseconds between zoom callbacks.
+         */
+        SetZoomSpeed(
+            [in] Int64 speed);
+
+        /**
+         * Sets the {@link OnZoomListener} listener that receives callbacks to zoom.
+         *
+         * @param listener The listener that will be told to zoom.
+         */
+        SetOnZoomListener(
+            [in] IOnZoomListener* listener);
+
+        /**
+         * Sets whether the zoom controls should be focusable. If the controls are
+         * focusable, then trackball and arrow key interactions are possible.
+         * Otherwise, only touch interactions are possible.
+         *
+         * @param focusable Whether the zoom controls should be focusable.
+         */
+        SetFocusable(
+            [in] Boolean focusable);
+
+        /**
+         * Whether the zoom controls will be automatically dismissed after showing.
+         *
+         * @return Whether the zoom controls will be auto dismissed after showing.
+         */
+        IsAutoDismissed(
+            [out] Boolean* dimissed);
+
+        /**
+         * Sets whether the zoom controls will be automatically dismissed after
+         * showing.
+         */
+        SetAutoDismissed(
+            [in] Boolean autoDismiss);
+
+        /**
+         * Whether the zoom controls are visible to the user.
+         *
+         * @return Whether the zoom controls are visible to the user.
+         */
+        IsVisible(
+            [out] Boolean* visible);
+
+        /**
+         * Sets whether the zoom controls should be visible to the user.
+         *
+         * @param visible Whether the zoom controls should be visible to the user.
+         */
+        SetVisible(
+            [in] Boolean visible);
+
+        /**
+         * Gets the container that is the parent of the zoom controls.
+         * <p>
+         * The client can add other views to this container to link them with the
+         * zoom controls.
+         *
+         * @return The container of the zoom controls. It will be a layout that
+         *         respects the gravity of a child's layout parameters.
+         */
+        GetContainer(
+            [out] IViewGroup** container);
+
+        /**
+         * Gets the view for the zoom controls.
+         *
+         * @return The zoom controls view.
+         */
+        GetZoomControls(
+            [out] IView** controls);
+
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

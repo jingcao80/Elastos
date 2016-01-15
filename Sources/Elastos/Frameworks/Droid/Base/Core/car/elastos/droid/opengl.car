@@ -1,0 +1,242 @@
+
+module
+{
+    merge("opengl/microedition/khronos/egl/EGL.car");
+    merge("opengl/microedition/khronos/egl/EGL10.car");
+    merge("opengl/microedition/khronos/egl/EGL11.car");
+    merge("opengl/microedition/khronos/egl/EGLConfig.car");
+    merge("opengl/microedition/khronos/egl/EGLContext.car");
+    merge("opengl/microedition/khronos/egl/EGLDisplay.car");
+    merge("opengl/microedition/khronos/egl/EGLSurface.car");
+
+    merge("opengl/microedition/khronos/opengles/GL.car");
+    merge("opengl/microedition/khronos/opengles/GL10.car");
+    merge("opengl/microedition/khronos/opengles/GL10Ext.car");
+    merge("opengl/microedition/khronos/opengles/GL11.car");
+    merge("opengl/microedition/khronos/opengles/GL11Ext.car");
+    merge("opengl/microedition/khronos/opengles/GL11ExtensionPack.car");
+
+    merge("opengl/EGL14.car");
+    merge("opengl/EGLConfig.car");
+    merge("opengl/EGLContext.car");
+    merge("opengl/EGLDisplay.car");
+    merge("opengl/EGLExt.car");
+    merge("opengl/EGLObjectHandle.car");
+    merge("opengl/EGLSurface.car");
+    merge("opengl/ETC1.car");
+    merge("opengl/ETC1Util.car");
+    merge("opengl/GLDebugHelper.car");
+    merge("opengl/GLES10.car");
+    merge("opengl/GLES10Ext.car");
+    merge("opengl/GLES11.car");
+    merge("opengl/GLES11Ext.car");
+    merge("opengl/GLES20.car");
+    merge("opengl/GLES30.car");
+    merge("opengl/GLES31.car");
+    merge("opengl/GLES31Ext.car");
+
+    merge("opengl/GLSurfaceView.car");
+    merge("opengl/GLU.car");
+    merge("opengl/GLUtils.car");
+    merge("opengl/Matrix.car");
+    merge("opengl/Visibility.car");
+
+    // using interface Elastos.IO.IByteBuffer;
+    // interface Elastosx.Microedition.Khronos.Egl.IEGL10;
+    // interface Elastosx.Microedition.Khronos.Egl.IEGL10Helper;
+    // interface Elastosx.Microedition.Khronos.Egl.IEGLConfig;
+    // interface Elastosx.Microedition.Khronos.Egl.IEGLContext;
+    // interface Elastosx.Microedition.Khronos.Egl.IEGLDisplay;
+    // interface Elastosx.Microedition.Khronos.Egl.IEGLSurface;
+    // interface Elastosx.Microedition.Khronos.Opengles.IGL;
+    // interface Elastosx.Microedition.Khronos.Opengles.IGL10;
+    // interface Elastosx.Microedition.Khronos.Opengles.IGL10Ext;
+    // interface Elastosx.Microedition.Khronos.Opengles.IGL11;
+    // interface Elastosx.Microedition.Khronos.Opengles.IGL11Ext;
+    // interface Elastosx.Microedition.Khronos.Opengles.IGL11ExtensionPack;
+    // interface Elastos.Droid.View.ISurfaceHolderCallback;
+    // interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    // interface Elastos.Droid.View.IKeyEventCallback;
+    // interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    // interface Elastos.Droid.Content.IContext;
+    // interface Elastos.Droid.Utility.IAttributeSet;
+
+    // namespace Elastos {
+    // namespace Droid {
+    // namespace Opengl {
+
+    // /**
+    //  * EGL 1.4
+    //  *
+    //  */
+    // singleton class CEGL14 {
+    //     interface IEGL14;
+    // }
+
+    // singleton class CEGL14Helper {
+    //     interface IEGL14Helper;
+    // }
+
+    // *
+    //  * Methods for encoding and decoding ETC1 textures.
+    //  * <p>
+    //  * The standard for the ETC1 texture format can be found at
+    //  * http://www.khronos.org/registry/gles/extensions/OES/OES_compressed_ETC1_RGB8_texture.txt
+    //  * <p>
+    //  * The PKM file format is of a 16-byte header that describes the image bounds
+    //  * followed by the encoded ETC1 texture data.
+    //  * <p>
+    //  * @see ETC1Util
+
+    // singleton class CETC1 {
+    //     interface IETC1;
+    // }
+
+    // /**
+    //  * Utility methods for using ETC1 compressed textures.
+    //  *
+    //  */
+    // singleton class CETC1Util {
+    //     interface IETC1Util;
+    // }
+
+    // /**
+    //  * A utility class encapsulating a compressed ETC1 texture.
+    //  */
+    // class CETC1Texture {
+    //     constructor(
+    //         [in] Int32 width,
+    //         [in] Int32 height,
+    //         [in] IByteBuffer* data);
+
+    //     interface IETC1Texture;
+    // }
+
+    // [local]
+    // class CGLSurfaceView {
+    //     constructor(
+    //         [in] IContext* ctx);
+
+    //     constructor(
+    //         [in] IContext* ctx,
+    //         [in] IAttributeSet* attrs);
+
+    //     interface IGLSurfaceView;
+    //     interface IDrawableCallback;
+    //     interface IKeyEventCallback;
+    //     interface IAccessibilityEventSource;
+    //     interface ISurfaceHolderCallback;
+    // }
+
+    // /**
+    //  * A helper class for debugging OpenGL ES applications.
+    //  *
+    //  * Wraps the supplied GL interface with a new GL interface that adds support for
+    //  * error checking and logging.
+    //  *
+    //  */
+    // singleton class CGLDebugHelper {
+    //     interface IGLDebugHelper;
+    // }
+
+    // singleton class CGLES10 {
+    //     interface IGLES10;
+    // }
+
+    // singleton class CGLES10Ext {
+    //     interface IGLES10Ext;
+    // }
+
+    // singleton class CGLES11 {
+    //     interface IGLES11;
+    // }
+
+    // singleton class CGLES11Ext {
+    //     interface IGLES11Ext;
+    // }
+
+    // singleton class CGLES20 {
+    //     interface IGLES20;
+    // }
+
+    // singleton class CGLU {
+    //     interface IGLU;
+    // }
+
+    // singleton class CGLUtils {
+    //     interface IGLUtils;
+    // }
+
+    // singleton class CMatrixGL {
+    //     interface IMatrix;
+    // }
+
+    // singleton class CVisibilityGL {
+    //     interface IVisibility;
+    // }
+
+    // } // namespace Opengl
+    // } // namespace Droid
+    // } // namespace Elastos
+
+
+
+    // namespace Elastos {
+    // namespace Droid {
+    // namespace Opengl {
+    // namespace Gles {
+
+    // class CEGLConfigImpl {
+    //     constructor(
+    //         [in] Int32 cfg);
+
+    //     interface IEGLConfig;
+    // }
+
+    // class CEGLContextImpl {
+    //     constructor(
+    //         [in] Int32 ctx);
+
+    //     interface IEGLContext;
+    // }
+
+    // class CEGLDisplayImpl {
+    //     constructor(
+    //         [in] Int32 dpy);
+
+    //     interface IEGLDisplay;
+    // }
+
+    // class CEGLSurfaceImpl {
+    //     constructor();
+
+    //     constructor(
+    //         [in] Int32 surface);
+
+    //     interface IEGLSurface;
+    // }
+
+    // class CEGLImpl {
+    //     constructor();
+
+    //     interface IEGL10;
+    // }
+
+    // class CGLImpl {
+    //     constructor();
+
+    //     interface IGL10Ext;
+    //     interface IGL11;
+    //     interface IGL11Ext;
+    //     interface IGL11ExtensionPack;
+    // }
+
+    // singleton class CEGL10Helper {
+    //     interface IEGL10Helper;
+    // }
+
+    // } // namespace Gles
+    // } // namespace Opengl
+    // } // namespace Droid
+    // } // namespace Elastos
+}

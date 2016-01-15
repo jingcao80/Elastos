@@ -1,0 +1,16 @@
+module
+{
+    namespace Elastos{
+    namespace Sql {
+
+    enum RowIdLifeTime {
+        RowIdLifeTime_UNSUPPORTED,
+        RowIdLifeTime_VALID_OTHER,
+        RowIdLifeTime_VALID_SESSION,
+        RowIdLifeTime_VALID_TRANSACTION,
+        RowIdLifeTime_VALID_FOREVER,
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

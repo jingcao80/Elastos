@@ -1,0 +1,98 @@
+
+module
+{
+    using interface Elastos.Net.IInetAddress;
+    using interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Nsd {
+
+    /**
+     * A class representing service information for network service discovery
+     * {@see NsdManager}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface INsdServiceInfo {
+        /** Get the service name */
+        GetServiceName(
+            [out] String* result);
+
+        /** Set the service name */
+        SetServiceName(
+            [in] String s);
+
+        /** Get the service type */
+        GetServiceType(
+            [out] String* result);
+
+        /** Set the service type */
+        SetServiceType(
+            [in] String s);
+
+        /** Get the host address. The host address is valid for a resolved service. */
+        GetHost(
+            [out] IInetAddress** result);
+
+        /** Set the host address */
+        SetHost(
+            [in] IInetAddress* s);
+
+        /** Get port number. The port number is valid for a resolved service. */
+        GetPort(
+            [out] Int32* result);
+
+        /** Set port number */
+        SetPort(
+            [in] Int32 p);
+
+        /** @hide */
+        SetAttribute(
+            [in] String key,
+            [in] ArrayOf<Byte>* value);
+
+        /**
+         * Add a service attribute as a key/value pair.
+         *
+         * <p> Service attributes are included as DNS-SD TXT record pairs.
+         *
+         * <p> The key must be US-ASCII printable characters, excluding the '=' character.  Values may
+         * be UTF-8 strings or null.  The total length of key + value must be less than 255 bytes.
+         *
+         * <p> Keys should be short, ideally no more than 9 characters, and unique per instance of
+         * {@link NsdServiceInfo}.  Calling {@link #setAttribute} twice with the same key will overwrite
+         * first value.
+         */
+        SetAttribute(
+            [in] String key,
+            [in] String value);
+
+        /** Remove an attribute by key */
+        RemoveAttribute(
+            [in] String key);
+
+        /**
+         * Retrive attributes as a map of String keys to byte[] values.
+         *
+         * <p> The returned map is unmodifiable; changes must be made through {@link #setAttribute} and
+         * {@link #removeAttribute}.
+         */
+        GetAttributes(
+            [out] IMap** result);
+
+        /** @hide */
+        GetTxtRecord(
+            [out, callee] ArrayOf<Byte>* result);
+    }
+
+    } // namespace Nsd
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}
+

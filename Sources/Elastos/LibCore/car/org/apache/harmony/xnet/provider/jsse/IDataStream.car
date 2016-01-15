@@ -1,0 +1,42 @@
+
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * This interface represents the ability of the
+     * classes to provide the chunks of data.
+     */
+    interface IDataStream {
+        /**
+         * Checks if there is data to be read.
+         * @return true if there is the input data in the stream,
+         * false otherwise
+         */
+        HasData(
+            [out] Boolean* hasData);
+
+        /**
+         * Retrieves the data of specified length from the stream.
+         * If the data size in the stream is less than specified length,
+         * method returns all the data contained in the stream.
+         * @return byte array containing the demanded data.
+         */
+        GetData(
+            [in] Int32 length,
+            [out, callee] ArrayOf<Byte>* data);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

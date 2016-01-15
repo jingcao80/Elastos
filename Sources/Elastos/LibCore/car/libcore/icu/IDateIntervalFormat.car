@@ -1,0 +1,54 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Utility.ITimeZone;
+
+    namespace Libcore {
+    namespace ICU {
+
+    /**
+     * Exposes icu4c's DateIntervalFormat.
+     */
+    [deprecated]
+    interface IDateIntervalFormat {
+        // These are all public API in DateUtils. There are others, but they're either for use with
+        // other methods (like FORMAT_ABBREV_RELATIVE), don't internationalize (like FORMAT_CAP_AMPM),
+        // or have never been implemented anyway.
+
+        const Int32 FORMAT_SHOW_TIME      = 0x00001;
+        const Int32 FORMAT_SHOW_WEEKDAY   = 0x00002;
+        const Int32 FORMAT_SHOW_YEAR      = 0x00004;
+        const Int32 FORMAT_NO_YEAR        = 0x00008;
+        const Int32 FORMAT_SHOW_DATE      = 0x00010;
+        const Int32 FORMAT_NO_MONTH_DAY   = 0x00020;
+        const Int32 FORMAT_12HOUR         = 0x00040;
+        const Int32 FORMAT_24HOUR         = 0x00080;
+        const Int32 FORMAT_UTC            = 0x02000;
+        const Int32 FORMAT_ABBREV_TIME    = 0x04000;
+        const Int32 FORMAT_ABBREV_WEEKDAY = 0x08000;
+        const Int32 FORMAT_ABBREV_MONTH   = 0x10000;
+        const Int32 FORMAT_NUMERIC_DATE   = 0x20000;
+        const Int32 FORMAT_ABBREV_ALL     = 0x80000;
+
+        // This is public DateUtils API in frameworks/base.
+        FormatDateRange(
+            [in] Int64 startMs,
+            [in] Int64 endMs,
+            [in] Int32 flags,
+            [in] String olsonId,
+            [out] String* rst);
+
+        // This is our slightly more sensible internal API. (A truly sane replacement would take a
+        // skeleton instead of int flags.)
+        FormatDateRange(
+            [in] ILocale* locale,
+            [in] ITimeZone* tz,
+            [in] Int64 startMs,
+            [in] Int64 endMs,
+            [in] Int32 flags,
+            [out] String* rst);
+    }
+
+    } // namespace ICU
+    } // namespace Libcore
+}

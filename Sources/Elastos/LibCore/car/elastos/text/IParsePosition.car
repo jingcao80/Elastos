@@ -1,0 +1,39 @@
+module
+{
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * Tracks the current position in a parsed string. In case of an error the error
+     * index can be set to the position where the error occurred without having to
+     * change the parse position.
+     */
+    interface IParsePosition {
+        /**
+         * Returns the index at which the parse could not continue.
+         */
+        GetErrorIndex(
+            [out] Int32* index);
+
+        /**
+         * Returns the current parse position.
+         */
+        GetIndex(
+            [out] Int32* index);
+
+        /**
+         * Sets the index at which the parse could not continue.
+         */
+        SetErrorIndex(
+            [in] Int32 index);
+
+        /**
+         * Sets the current parse position.
+         */
+        SetIndex(
+            [in] Int32 index);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

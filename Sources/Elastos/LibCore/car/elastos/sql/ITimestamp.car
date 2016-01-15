@@ -1,0 +1,82 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    /**
+      * @Involve
+      * interface Elastos.Utility.IDate;
+      */
+    interface ITimestamp {
+        /**
+         * Returns {@code true} if this timestamp object is later than the supplied
+         * timestamp, otherwise returns {@code false}.
+         *
+         * @param theTimestamp
+         *            the timestamp to compare with this timestamp object.
+         * @return {@code true} if this {@code Timestamp} object is later than the
+         *         supplied timestamp, {@code false} otherwise.
+         */
+        After(
+            [in] ITimestamp* theTimestamp,
+            [out] Boolean* isAfter);
+
+        /**
+         * Returns {@code true} if this {@code Timestamp} object is earlier than the
+         * supplied timestamp, otherwise returns {@code false}.
+         *
+         * @param theTimestamp
+         *            the timestamp to compare with this {@code Timestamp} object.
+         * @return {@code true} if this {@code Timestamp} object is earlier than the
+         *         supplied timestamp, {@code false} otherwise.
+         */
+        Before(
+            [in] ITimestamp* theTimestamp,
+            [out] Boolean* isBefore);
+
+        /**
+         * Compares this {@code Timestamp} object with a supplied {@code Timestamp}
+         * object.
+         *
+         * @param theTimestamp
+         *            the timestamp to compare with this {@code Timestamp} object,
+         *            passed in as a {@code Timestamp}.
+         * @return one of the following:
+         *         <ul>
+         *         <li>{@code 0}, if the two {@code Timestamp} objects are
+         *         equal in time</li>
+         *         <li>{@code < 0}, if this {@code Timestamp} object is before the
+         *         supplied {@code Timestamp}</li>
+         *         <li> {@code > 0}, if this {@code Timestamp} object is after the
+         *         supplied {@code Timestamp}</li>
+         *         </ul>
+         */
+        CompareTo(
+            [in] ITimestamp* theTimestamp,
+            [out] Int32* value);
+
+        /**
+         * Gets this {@code Timestamp}'s nanosecond value
+         *
+         * @return The timestamp's nanosecond value, an integer between 0 and
+         *         999,999,999.
+         */
+        GetNanos(
+            [out] Int32* nano);
+
+        /**
+         * Sets the nanosecond value for this {@code Timestamp}.
+         *
+         * @param n
+         *            number of nanoseconds.
+         * @throws IllegalArgumentException
+         *             if number of nanoseconds smaller than 0 or greater than
+         *             999,999,999.
+         */
+        SetNanos(
+            [in] Int32 n);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

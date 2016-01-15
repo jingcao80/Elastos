@@ -1,0 +1,76 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.View.IKeyEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * A class which manages the bouncer on the lockscreen.
+     */
+    interface IKeyguardBouncer {
+
+        Show();
+
+//        ShowWithDismissAction(
+//            [in] IOnDismissAction* r);
+
+        Hide(
+            [in] Boolean destroyView);
+
+        /**
+         * See {@link StatusBarKeyguardViewManager#startPreHideAnimation}.
+         */
+        StartPreHideAnimation(
+            [in] IRunnable* runnable);
+
+        /**
+         * Reset the state of the view.
+         */
+        Reset();
+
+        OnScreenTurnedOff();
+
+        GetUserActivityTimeout(
+            [out] Int64* result);
+
+        IsShowing(
+            [out] Boolean* result);
+
+        Prepare();
+
+        OnBackPressed(
+            [out] Boolean* result);
+
+        /**
+         * @return True if and only if the current security method should be shown before showing
+         *         the notifications on Keyguard, like SIM PIN/PUK.
+         */
+        NeedsFullscreenBouncer(
+            [out] Boolean* result);
+
+        IsSecure(
+            [out] Boolean* result);
+
+        OnMenuPressed(
+            [out] Boolean* result);
+
+        InterceptMediaKey(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

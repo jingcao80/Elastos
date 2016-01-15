@@ -1,0 +1,18 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= carusage
+TARGET_TYPE= exe
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES += $(MAKEDIR)/../inc;
+INCLUDES += $(INCLUDESTEMP);
+
+SOURCES = carusage.cpp
+SOURCES += cmdarg.cpp
+
+EXTERN_LIBS = user32
+EXTERN_LIBS += msvcrt
+EXTERN_LIBS += kernel32
+

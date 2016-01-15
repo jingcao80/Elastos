@@ -1,0 +1,72 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * Handles launching the secure camera properly even when other applications may be using the camera
+     * hardware.
+     *
+     * When other applications (e.g., Face Unlock) are using the camera, they must close the camera to
+     * allow the secure camera to open it.  Since we want to minimize the delay when opening the secure
+     * camera, other apps should close the camera at the first possible opportunity (i.e., as soon as
+     * the user begins swiping to go to the secure camera).
+     *
+     * If the camera is unavailable when the user begins to swipe, the SecureCameraLaunchManager sends a
+     * broadcast to tell other apps to close the camera.  When and if the user completes their swipe to
+     * launch the secure camera, the SecureCameraLaunchManager delays launching the secure camera until
+     * a callback indicates that the camera has become available.  If it doesn't receive that callback
+     * within a specified timeout period, the secure camera is launched anyway.
+     *
+     * Ideally, the secure camera would handle waiting for the camera to become available.  This allows
+     * some of the time necessary to close the camera to happen in parallel with starting the secure
+     * camera app.  We can't rely on all third-party camera apps to handle this.  However, an app can
+     * put com.android.systemui.statusbar.phone.will_wait_for_camera_available in its meta-data to
+     * indicate that it will be responsible for waiting for the camera to become available.
+     *
+     * It is assumed that the functions in this class, including the constructor, will be called from
+     * the UI thread.
+     */
+    interface ISecureCameraLaunchManager {
+
+        /**
+         * Initializes the SecureCameraManager and starts listening for camera availability.
+         */
+        Create();
+
+        /**
+         * Stops listening for camera availability and cleans up the SecureCameraManager.
+         */
+        Destroy();
+
+        /**
+         * Called when the user is starting to swipe horizontally, possibly to start the secure camera.
+         * Although this swipe ultimately may not result in the secure camera opening, we need to stop
+         * all other camera usage (e.g., Face Unlock) as soon as possible.  We send out a broadcast to
+         * notify other apps that they should close the camera immediately.  The broadcast is sent even
+         * if the camera appears to be available, because there could be an app that is about to open
+         * the camera.
+         */
+        OnSwipingStarted();
+
+        /**
+         * Called when the secure camera should be started.  If the camera is available or the secure
+         * camera app has indicated that it will wait for camera availability, the secure camera app is
+         * launched immediately.  Otherwise, we wait for the camera to become available (or timeout)
+         * before launching the secure camera.
+         */
+        StartSecureCameraLaunch();
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

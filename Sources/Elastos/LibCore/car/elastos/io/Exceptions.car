@@ -1,0 +1,51 @@
+
+module
+{
+//    const FAMILY_SYSTEM = 0x22    // IO exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos IO exception codes (Family: 0x22)
+    const E_IO_EXCEPTION                                = 0xA2010000;
+    const E_EOF_EXCEPTION                               = 0xA2020000;
+    const E_FILE_NOT_FOUND_EXCEPTION                    = 0xA2030000;
+    const E_SYNC_FAILED_EXCEPTION                       = 0xA2040000;
+    const E_ALREADY_CONNECTED_EXCEPTION                 = 0xA2050000;
+    const E_ASYNCHRONOUS_CLOSE_EXCEPTION                = 0xA2060000;
+    const E_CANCELLED_KEY_EXCEPTION                     = 0xA2070000;
+    const E_CLOSED_BY_INTERRUPT_EXCEPTION               = 0xA2080000;
+    const E_CLOSED_CHANNEL_EXCEPTION                    = 0xA2090000;
+    const E_CLOSED_SELECTOR_EXCEPTION                   = 0xA20A0000;
+    const E_CONNECTION_PENDING_EXCEPTION                = 0xA20B0000;
+    const E_FILE_LOCK_INTERRUPTION_EXCEPTION            = 0xA20C0000;
+    const E_ILLEGAL_BLOCKING_MODE_EXCEPTION             = 0xA20D0000;
+    const E_ILLEGAL_SELECTOR_EXCEPTION                  = 0xA20E0000;
+    //const E_ILLEGAL_ARGUMENT_EXCEPTION                  = 0xA20F0000;
+    const E_NO_CONNECTION_PENDING_EXCEPTION             = 0xA2100000;
+    const E_NON_READABLE_CHANNEL_EXCEPTION              = 0xA2110000;
+    const E_NON_WRITABLE_CHANNEL_EXCEPTION              = 0xA2120000;
+    const E_NOT_YET_BOUND_EXCEPTION                     = 0xA2130000;
+    const E_NOT_YET_CONNECTED_EXCEPTION                 = 0xA2140000;
+    const E_OVER_LAPPING_FILE_LOCK_EXCEPTION            = 0xA2150000;
+    const E_UNRESOLVED_ADDRESS_EXCEPTION                = 0xA2160000;
+    const E_UNSUPPORTED_ADDRESS_TYPE_EXCEPTION          = 0xA2170000;
+    const E_BUFFER_UNDER_FLOW_EXCEPTION                 = 0xA2180000;
+    const E_BUFFER_OVER_FLOW_EXCEPTION                  = 0xA2190000;
+    const E_INVALID_MARK_EXCEPTION                      = 0xA21A0000;
+    const E_READ_ONLY_BUFFER_EXCEPTION                  = 0xA21B0000;
+    const E_UNSUPPORTED_ENCODING_EXCEPTION              = 0xA21C0000;
+    const E_INVALID_OBJECT_EXCEPTION                    = 0xA21D0000;
+    const E_ILLEGAL_CHARSET_NAME_EXCEPTION              = 0xA21E0000;
+    const E_UNSUPPORTED_CHARSET_EXCEPTION               = 0xA21F0000;
+    const E_CHARACTER_CODING_EXCEPTION                  = 0xA2200000;
+    const E_UNMAPPABLE_CHARACTER_EXCEPTION              = 0xA2210000;
+    const E_MALFORMED_INPUT_EXCEPTION                   = 0xA2220000;
+    const E_UTF_DATA_FORMAT_EXCEPTION                   = 0xA2230000;
+    const E_BUFFER_UNDERFLOW_EXCEPTION                  = 0xA2240000;
+    const E_BUFFER_OVERFLOW_EXCEPTION                   = 0xA2250000;
+    const E_OVERLAPPING_FILE_LOCK_EXCEPTION             = 0xA2260000;
+    const E_INTERRUPTED_IO_EXCEPTION                    = 0xA2270000;
+
+}

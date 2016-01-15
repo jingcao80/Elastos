@@ -1,0 +1,132 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+    namespace Tts {
+
+    /**
+     * Contains data required by engines to synthesize speech. This data is:
+     * <ul>
+     *   <li>The text to synthesize</li>
+     *   <li>The synthesis locale, represented as a language, country and a variant.
+     *   The language is an ISO 639-3 letter language code, and the country is an
+     *   ISO 3166 alpha 3 code. The variant is not specified.</li>
+     *   <li>The name of the voice requested for this synthesis. May be empty if
+     *   the client uses {@link TextToSpeech#setLanguage} instead of
+     *   {@link TextToSpeech#setVoice}</li>
+     *   <li>The synthesis speech rate, with 100 being the normal, and
+     *   higher values representing higher speech rates.</li>
+     *   <li>The voice pitch, with 100 being the default pitch.</li>
+     * </ul>
+     *
+     * Any additional parameters sent to the text to speech service are passed in
+     * uninterpreted, see the {@code params} argument in {@link TextToSpeech#speak}
+     * and {@link TextToSpeech#synthesizeToFile}.
+     */
+    interface ISynthesisRequest {
+        /**
+         * Gets the text which should be synthesized.
+         * @deprecated As of API level 21, replaced by {@link #getCharSequenceText}.
+         * @Deprecated
+         */
+        GetText(
+            [out] String* ret);
+
+        /**
+         * Gets the text which should be synthesized.
+         */
+        GetCharSequenceText(
+            [out] ICharSequence** text);
+
+        /**
+         * Gets the name of the voice to use.
+         */
+        GetVoiceName(
+            [out] String* name);
+
+        /**
+         * Gets the ISO 3-letter language code for the language to use.
+         */
+        GetLanguage(
+            [out] String* ret);
+
+        /**
+         * Gets the ISO 3-letter country code for the language to use.
+         */
+        GetCountry(
+            [out] String* ret);
+
+        /**
+         * Gets the language variant to use.
+         */
+        GetVariant(
+            [out] String* ret);
+
+        /**
+         * Gets the speech rate to use. The normal rate is 100.
+         */
+        GetSpeechRate(
+            [out] Int32* ret);
+
+        /**
+         * Gets the pitch to use. The normal pitch is 100.
+         */
+        GetPitch(
+            [out] Int32* ret);
+
+        /**
+         * Gets the additional params, if any.
+         */
+        GetParams(
+            [out] IBundle** ret);
+
+        /**
+         * Gets the request caller Uid.
+         */
+        GetCallerUid(
+            [out] Int32* uid);
+
+        /**
+         * Sets the locale for the request.
+         */
+        SetLanguage(
+            [in] String language,
+            [in] String country,
+            [in] String variant);
+
+        /**
+         * Sets the voice name for the request.
+         */
+        SetVoiceName(
+            [in] String voiceName);
+
+        /**
+         * Sets the speech rate.
+         */
+        SetSpeechRate(
+            [in] Int32 speechRate);
+
+        /**
+         * Sets the pitch.
+         */
+        SetPitch(
+            [in] Int32 pitch);
+
+        /**
+         * Sets Caller Uid
+         */
+        SetCallerUid(
+            [in] Int32 uid);
+    }
+
+    } // namespace Tts
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

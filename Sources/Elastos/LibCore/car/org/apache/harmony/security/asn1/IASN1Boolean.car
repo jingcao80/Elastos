@@ -1,0 +1,28 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    interface IASN1BooleanHelper {
+        /**
+         * Returns ASN.1 Boolean type default implementation
+         *
+         * The default implementation works with encoding
+         * that is represented as Boolean object.
+         *
+         * @return ASN.1 Boolean type default implementation
+        */
+        GetInstance(
+            [out] IASN1Boolean** instance);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

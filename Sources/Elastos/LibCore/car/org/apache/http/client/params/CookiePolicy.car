@@ -1,0 +1,46 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+    namespace Params {
+
+    interface ICookiePolicy {
+
+        /**
+         * The policy that provides high degree of compatibilty
+         * with common cookie management of popular HTTP agents.
+         */
+        const String BROWSER_COMPATIBILITY = "compatibility";
+
+        /**
+         * The Netscape cookie draft compliant policy.
+         */
+        const String NETSCAPE = "netscape";
+
+        /**
+         * The RFC 2109 compliant policy.
+         */
+        const String RFC_2109 = "rfc2109";
+
+        /**
+         * The RFC 2965 compliant policy.
+         */
+        const String RFC_2965 = "rfc2965";
+
+        /**
+         * The default 'best match' policy.
+         */
+        const String BEST_MATCH = "best-match";
+
+    }
+
+    } // namespace Params
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

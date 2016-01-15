@@ -1,0 +1,248 @@
+
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Content.IContentProvider;
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.ICancellationSignal;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * The public interface object used to interact with a {@link ContentProvider}. This is obtained by
+     * calling {@link ContentResolver#acquireContentProviderClient}. This object must be released
+     * using {@link #release} in order to indicate to the system that the {@link ContentProvider} is
+     * no longer needed and can be killed to free up resources.
+     *
+     * <p>Note that you should generally create a new ContentProviderClient instance
+     * for each thread that will be performing operations.  Unlike
+     * {@link ContentResolver}, the methods here such as {@link #query} and
+     * {@link #openFile} are not thread safe -- you must not call
+     * {@link #release()} on the ContentProviderClient those calls are made from
+     * until you are finished with the data they have returned.
+     */
+    [deprecated]
+    interface IContentProviderClient {
+        /** See {@link ContentProvider#query ContentProvider.query} */
+        Query(
+            [in] IUri* uri,
+            [in] ArrayOf<String>* projection,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs,
+            [in] String sortOrder,
+            [out] ICursor** cursor);
+
+        /** See {@link ContentProvider#query ContentProvider.query} */
+        Query(
+            [in] IUri* uri,
+            [in] ArrayOf<String>* projection,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs,
+            [in] String sortOrder,
+            [in] ICancellationSignal* cancellationSignal,
+            [out] ICursor** cursor);
+
+        /**
+         * See ContentProvider#getType ContentProvider.getType
+         *
+         * @sa ContentProvider#getType ContentProvider.getType
+         */
+        GetType(
+            [in] IUri* uri,
+            [out] String* type);
+
+        /**
+         * See ContentProvider#getStreamTypes ContentProvider.getStreamTypes
+         *
+         * @sa ContentProvider#getStreamTypes ContentProvider.getStreamTypes
+         */
+        GetStreamTypes(
+            [in] IUri* uri,
+            [in] String mimeTypeFilter,
+            [out, callee] ArrayOf<String>* streamTypes);
+
+        /** See {@link ContentProvider#canonicalize} */
+        Canonicalize(
+            [in] IUri* uri,
+            [out] IUri** result);
+
+        /** See {@link ContentProvider#uncanonicalize} */
+        Uncanonicalize(
+            [in] IUri* uri,
+            [out] IUri** result);
+
+        /**
+         * See ContentProvider#insert ContentProvider.insert
+         *
+         * @sa ContentProvider#insert ContentProvider.insert
+         */
+        Insert(
+            [in] IUri* uri,
+            [in] IContentValues* initialValues,
+            [out] IUri** insertedUri);
+
+        /**
+         * See ContentProvider#bulkInsert ContentProvider.bulkInsert
+         *
+         * @sa ContentProvider#bulkInsert ContentProvider.bulkInsert
+         */
+        BulkInsert(
+            [in] IUri* uri,
+            [in] ArrayOf<IContentValues*>* initialValues,
+            [out] Int32* number);
+
+        /**
+         * See ContentProvider#delete ContentProvider.delete
+         *
+         * @sa ContentProvider#delete ContentProvider.delete
+         */
+        Delete(
+            [in] IUri* uri,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] Int32* rowsAffected);
+
+        /**
+         * See ContentProvider#update ContentProvider.update
+         *
+         * @sa ContentProvider#update ContentProvider.update
+         */
+        Update(
+            [in] IUri* uri,
+            [in] IContentValues* values,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] Int32* rowsAffected);
+
+        /**
+         * See ContentProvider#openFile ContentProvider.openFile.  Note that
+         * this <em>does not</em>
+         * take care of non-content: URIs such as file:.  It is strongly recommended
+         * you use the ContentResolver#openFileDescriptor
+         * ContentResolver.openFileDescriptor API instead.
+         *
+         * @sa ContentProvider#openFile ContentProvider.openFile
+         * @sa ContentResolver#openFileDescriptor ContentResolver.openFileDescriptor
+         */
+        OpenFile(
+            [in] IUri* uri,
+            [in] String mode,
+            [out] IParcelFileDescriptor** fileDescriptor);
+
+        /**
+         * See {@link ContentProvider#openFile ContentProvider.openFile}.  Note that
+         * this <em>does not</em>
+         * take care of non-content: URIs such as file:.  It is strongly recommended
+         * you use the {@link ContentResolver#openFileDescriptor
+         * ContentResolver.openFileDescriptor} API instead.
+         */
+        OpenFile(
+            [in] IUri* uri,
+            [in] String mode,
+            [in] ICancellationSignal* signal,
+            [out] IParcelFileDescriptor** fileDescriptor);
+
+        /**
+         * See ContentProvider#openAssetFile ContentProvider.openAssetFile.
+         * Note that this <em>does not</em>
+         * take care of non-content: URIs such as file:.  It is strongly recommended
+         * you use the ContentResolver#openAssetFileDescriptor
+         * ContentResolver.openAssetFileDescriptor API instead.
+         *
+         * @sa ContentProvider#openAssetFile ContentProvider.openAssetFile
+         * @sa ContentResolver#openAssetFileDescriptor ContentResolver.openAssetFileDescriptor
+         */
+        OpenAssetFile(
+            [in] IUri* uri,
+            [in] String mode,
+            [out] IAssetFileDescriptor** fileDescriptor);
+
+        /**
+         * See {@link ContentProvider#openAssetFile ContentProvider.openAssetFile}.
+         * Note that this <em>does not</em>
+         * take care of non-content: URIs such as file:.  It is strongly recommended
+         * you use the {@link ContentResolver#openAssetFileDescriptor
+         * ContentResolver.openAssetFileDescriptor} API instead.
+         */
+        OpenAssetFile(
+            [in] IUri* uri,
+            [in] String mode,
+            [in] ICancellationSignal* signal,
+            [out] IAssetFileDescriptor** fileDescriptor);
+
+        /**
+         * See ContentProvider#openTypedAssetFile ContentProvider.openTypedAssetFile
+         *
+         * @sa ContentProvider#openTypedAssetFile ContentProvider.openTypedAssetFile
+         */
+        OpenTypedAssetFileDescriptor(
+            [in] IUri* uri,
+            [in] String mimeType,
+            [in] IBundle* opts,
+            [out] IAssetFileDescriptor** fileDescriptor);
+
+        OpenTypedAssetFileDescriptor(
+            [in] IUri* uri,
+            [in] String mimeType,
+            [in] IBundle* opts,
+            [in] ICancellationSignal* signal,
+            [out] IAssetFileDescriptor** fileDescriptor);
+
+        /**
+         * See ContentProvider#applyBatch ContentProvider.applyBatch
+         *
+         * @sa ContentProvider#applyBatch ContentProvider.applyBatch
+         */
+        ApplyBatch(
+            [in] IArrayList* operations,
+            [out, callee] ArrayOf<IContentProviderResult*>* providerResults);
+
+        /**
+         * See ContentProvider#call(String, String, Bundle)
+         *
+         * @sa ContentProvider#call(String, String, Bundle)
+         */
+        Call(
+            [in] String method,
+            [in] String arg,
+            [in] IBundle* extras,
+            [out] IBundle** bundle);
+
+        /**
+         * Call this to indicate to the system that the associated ContentProvider is no
+         * longer needed by this ContentProviderClient.
+         *
+         * @sa ContentProvider
+         * @sa ContentProviderClient
+         * @return true if this was release, false if it was already released
+         */
+        ReleaseProvider(
+            [out] Boolean* isRelease);
+
+        /**
+         * Get a reference to the ContentProvider that is associated with this
+         * client. If the ContentProvider is running in a different process then
+         * null will be returned. This can be used if you know you are running in the same
+         * process as a provider, and want to get direct access to its implementation details.
+         *
+         * @return If the associated ContentProvider is local, returns it.
+         * Otherwise returns null.
+         *
+         * @sa ContentProvider
+         */
+        GetLocalContentProvider(
+            [out] IContentProvider** localContentProvider);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

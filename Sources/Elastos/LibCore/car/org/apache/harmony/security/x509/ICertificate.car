@@ -1,0 +1,59 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+    interface Org.Apache.Harmony.Security.X509.ITBSCertificate;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the X.509 certificate. Its ASN notation is as follows
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  Certificate  ::=  SEQUENCE  {
+     *      tbsCertificate       TBSCertificate,
+     *      signatureAlgorithm   AlgorithmIdentifier,
+     *      signatureValue       BIT STRING
+     *  }
+     * </pre>
+     */
+    interface ICertificate {
+        /**
+         * Returns the value of tbsCertificate field of the structure.
+         */
+        GetTbsCertificate(
+            [out] ITBSCertificate** tbsCertificate);
+
+        /**
+         * Returns the value of signatureValue field of the structure.
+         */
+        GetSignatureValue(
+            [out, callee] ArrayOf<Byte>* signatureValue);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 TBSCertificate value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encode);
+    }
+
+    interface ICertificateHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

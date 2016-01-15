@@ -1,0 +1,51 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Internal.Widget.IScrollingTabContainerView;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IFrameLayout
+     */
+    [local]
+    interface IActionBarContainer {
+        SetPrimaryBackground(
+            [in] IDrawable* bg);
+
+        SetStackedBackground(
+            [in] IDrawable* bg);
+
+        SetSplitBackground(
+            [in] IDrawable* bg);
+
+        /**
+         * Set the action bar into a "transitioning" state. While transitioning
+         * the bar will block focus and touch from all of its descendants. This
+         * prevents the user from interacting with the bar while it is animating
+         * in or out.
+         *
+         * @param isTransitioning true if the bar is currently transitioning, false otherwise.
+         */
+        SetTransitioning(
+            [in] Boolean isTransitioning);
+
+        SetTabContainer(
+            [in] IScrollingTabContainerView* tabView);
+
+        GetTabContainer(
+            [out] IView** container);
+    }
+
+    } // namespace Widget
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}
+

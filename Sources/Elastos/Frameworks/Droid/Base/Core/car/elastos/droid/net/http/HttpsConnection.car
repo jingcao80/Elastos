@@ -1,0 +1,39 @@
+module
+{
+    using interface Elastos.IO.IFile;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    /**
+     * A Connection connecting to a secure http server or tunneling through
+     * a http proxy server to a https server.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Sql.IWrapper;
+     * interface ICloseable;
+     * interface IConnection
+     */
+    interface IHttpsConnection {
+    }
+
+    interface IHttpsConnectionHelper {
+        /**
+         * @hide
+         *
+         * @param sessionDir directory to cache SSL sessions
+         */
+        InitializeEngine(
+            [in] IFile* sessionDir);
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

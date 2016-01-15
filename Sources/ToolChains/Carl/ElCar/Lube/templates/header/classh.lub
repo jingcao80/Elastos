@@ -1,0 +1,55 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+
+$   WITH all interfaces DO
+$       IF attrib is not "callback" and attrib is not "clsobj" and class.type is not "aspect" and attrib is not "filter" and name is not "IObject"
+$IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingleton($^
+$ELSE
+    static _ELASTOS ECode New($^
+$END IF
+/*[out]*/ ${namespace}${name} **pp${name})
+    {
+        return _CObject_CreateInstance(ECLSID_${class.name}, RGM_SAME_DOMAIN, ${namespace}EIID_${name}, (PInterface*)pp${name});
+    }
+
+$IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingletonInDomain($^
+$ELSE
+    static _ELASTOS ECode NewInRegime($^
+$END IF
+/*[in]*/  PRegime pRegime,/*[out]*/ ${namespace}${name} **pp${name})
+    {
+        return _CObject_CreateInstance(ECLSID_${class.name}, pRegime, ${namespace}EIID_${name}, (PInterface*)pp${name});
+    }
+
+$IF class.attrib is "singleton"
+    static _ELASTOS ECode AcquireSingletonInDomain($^
+$ELSE
+    static _ELASTOS ECode NewInRegime($^
+$END IF
+/*[in]*/  PInterface pObject,/*[out]*/ ${namespace}${name} **pp${name})
+    {
+        PRegime pRegime = IRegime::Probe(pObject);
+        if (!pRegime) return E_NO_INTERFACE;
+        return _CObject_CreateInstance(ECLSID_${class.name}, pRegime, ${namespace}EIID_${name}, (PInterface*)pp${name});
+    }
+$       END IF
+
+$   END DO ;; all interfaces
+$   IF class.type is "aspect"
+    static _ELASTOS ECode Attach(/*[in]*/ IInterface* pObj )
+    {
+        return _CObject_AttachAspect(pObj, ECLSID_${name});
+    }
+
+    static _ELASTOS ECode Detach(/*[in]*/ IInterface* pObj )
+    {
+        return _CObject_DetachAspect(pObj, ECLSID_${name});
+    }
+
+$   END IF
+

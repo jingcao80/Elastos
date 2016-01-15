@@ -1,0 +1,28 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}.h"
+$
+#ifndef __CAR_${Upper(name)}_H__
+#define __CAR_${Upper(name)}_H__
+
+#ifndef _NO_INCLIST
+#include <elastos.h>
+using namespace Elastos;
+$WITH all libraries DO
+${CreateHFiles(name)}
+${CreateCPPFiles(name)}
+$
+$END DO
+#endif // !_NO_INCLIST
+$
+
+$
+$TEMPLATE "decltype.lub"
+$
+
+#endif // __CAR_${Upper(name)}_H__
+$
+$END OUTPUT

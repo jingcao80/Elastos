@@ -1,0 +1,25 @@
+
+module
+{
+//    const FAMILY_CORE = 0x2C    // Security exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Security exception codes (Family: 0x2C)
+    const E_ACCESS_CONTROL_EXCEPTION                        = 0xAC100000;
+    const E_DIGEST_EXCEPTION                                = 0xAC110000;
+    const E_GENERAL_SECURITY_EXCEPTION                      = 0xAC120000;
+    const E_INVALID_ALGORITHM_PARAMETER_EXCEPTION           = 0xAC130000;
+    const E_INVALID_KEY_EXCEPTION                           = 0xAC140000;
+    const E_INVALID_PARAMETER_EXCEPTION                     = 0xAC150000;
+    const E_KEY_EXCEPTION                                   = 0xAC160000;
+    const E_KEY_MANAGEMENT_EXCEPTION                        = 0xAC170000;
+    const E_KEY_STORE_EXCEPTION                             = 0xAC180000;
+    const E_NO_SUCH_ALGORITHM_EXCEPTION                     = 0xAC190000;
+    const E_NO_SUCH_PROVIDER_EXCEPTION                      = 0xAC1A0000;
+    const E_PRIVILEGED_ACTION_EXCEPTION                     = 0xAC1B0000;
+    const E_SIGNATURE_EXCEPTION                             = 0xAC1C0000;
+    const E_UNRECOVERABLE_ENTRY_EXCEPTION                   = 0xAC1D0000;
+}

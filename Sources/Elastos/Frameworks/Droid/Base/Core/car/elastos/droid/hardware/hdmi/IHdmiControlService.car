@@ -1,0 +1,148 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    interface Elastos.Droid.Hardware.Hdmi.IIHdmiHotplugEventListener;
+    interface Elastos.Droid.Hardware.Hdmi.IIHdmiDeviceEventListener;
+    interface Elastos.Droid.Hardware.Hdmi.IIHdmiSystemAudioModeChangeListener;
+    interface Elastos.Droid.Hardware.Hdmi.IIHdmiInputChangeListener;
+    interface Elastos.Droid.Hardware.Hdmi.IIHdmiVendorCommandListener;
+    interface Elastos.Droid.Hardware.Hdmi.IIHdmiMhlVendorCommandListener;
+    interface Elastos.Droid.Hardware.Hdmi.IIHdmiRecordListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+    /**
+     * Binder interface that clients running in the application process
+     * will use to perform HDMI-CEC features by communicating with other devices
+     * on the bus.
+     *
+     * @hide
+     */
+    [deprecated]
+    interface IIHdmiControlService {
+        GetSupportedTypes(
+            [out, callee] ArrayOf<Int32>* types);
+
+        GetActiveSource(
+            [out] IHdmiDeviceInfo** source);
+
+        OneTouchPlay(
+            [in] IIHdmiControlCallback* _callback);
+
+        QueryDisplayStatus(
+            [in] IIHdmiControlCallback* _callback);
+
+        AddHotplugEventListener(
+            [in] IIHdmiHotplugEventListener* listener);
+
+        RemoveHotplugEventListener(
+            [in] IIHdmiHotplugEventListener* listener);
+
+        AddDeviceEventListener(
+            [in] IIHdmiDeviceEventListener* listener);
+
+        DeviceSelect(
+            [in] Int32 deviceId,
+            [in] IIHdmiControlCallback* _callback);
+
+        PortSelect(
+            [in] Int32 portId,
+            [in] IIHdmiControlCallback* _callback);
+
+        SendKeyEvent(
+            [in] Int32 deviceType,
+            [in] Int32 keyCode,
+            [in] Boolean isPressed);
+
+        GetPortInfo(
+            [out] IList** info);
+
+        CanChangeSystemAudioMode(
+            [out] Boolean* result);
+
+        GetSystemAudioMode(
+            [out] Boolean* result);
+
+        SetSystemAudioMode(
+            [in] Boolean enabled,
+            [in] IIHdmiControlCallback* _callback);
+
+        AddSystemAudioModeChangeListener(
+            [in] IIHdmiSystemAudioModeChangeListener* listener);
+
+        RemoveSystemAudioModeChangeListener(
+            [in] IIHdmiSystemAudioModeChangeListener* listener);
+
+        SetArcMode(
+            [in] Boolean enabled);
+
+        SetProhibitMode(
+            [in] Boolean enabled);
+
+        SetSystemAudioVolume(
+            [in] Int32 oldIndex,
+            [in] Int32 newIndex,
+            [in] Int32 maxIndex);
+
+        SetSystemAudioMute(
+            [in] Boolean mute);
+
+        SetInputChangeListener(
+            [in] IIHdmiInputChangeListener* listener);
+
+        GetInputDevices(
+            [out] IList** info);
+
+        SendVendorCommand(
+            [in] Int32 deviceType,
+            [in] Int32 targetAddress,
+            [in] ArrayOf<Byte>* params,
+            [in] Boolean hasVendorId);
+
+        AddVendorCommandListener(
+            [in] IIHdmiVendorCommandListener* listener,
+            [in] Int32 deviceType);
+
+        SendStandby(
+            [in] Int32 deviceType,
+            [in] Int32 deviceId);
+
+        SetHdmiRecordListener(
+            [in] IIHdmiRecordListener* _callback);
+
+        StartOneTouchRecord(
+            [in] Int32 recorderAddress,
+            [in] ArrayOf<Byte>* recordSource);
+
+        StopOneTouchRecord(
+            [in] Int32 recorderAddress);
+
+        StartTimerRecording(
+            [in] Int32 recorderAddress,
+            [in] Int32 sourceType,
+            [in] ArrayOf<Byte>* recordSource);
+
+        ClearTimerRecording(
+            [in] Int32 recorderAddress,
+            [in] Int32 sourceType,
+            [in] ArrayOf<Byte>* recordSource);
+
+        SendMhlVendorCommand(
+            [in] Int32 portId,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] ArrayOf<Byte>* data);
+
+        AddHdmiMhlVendorCommandListener(
+            [in] IIHdmiMhlVendorCommandListener* listener);
+    }
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

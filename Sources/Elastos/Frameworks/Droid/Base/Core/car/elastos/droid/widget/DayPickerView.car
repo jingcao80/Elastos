@@ -1,0 +1,36 @@
+
+module
+{
+	interface Elastos.Utility.ICalendar;
+	interface Elastos.Droid.Widget.IDatePickerController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IDayPickerView {
+		SetController(
+			[in] IDatePickerController* controller);
+
+		Init();
+
+		OnChange();
+
+		GoTo(
+			[in] ICalendar* day,
+			[in] Boolean animate,
+			[in] Boolean setSelected,
+            [in] Boolean forceScroll,
+        	[out] Boolean* result);
+
+		PostSetSelection(
+			[in] Int32 position);
+
+		GetMostVisiblePosition(
+			[out] Int32* result);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

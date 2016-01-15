@@ -1,0 +1,101 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Regex {
+
+    /**
+     * Holds the results of a successful match of a Pattern against a
+     * given string. The result is divided into groups, with one group for each
+     * pair of parentheses in the regular expression and an additional group for
+     * the whole regular expression. The start, end, and contents of each group
+     * can be queried.
+     *
+     * @sa Pattern
+     *
+     * @see Matcher
+     * @see Matcher#toMatchResult()
+     */
+    interface IMatchResult {
+        /**
+         * Returns the index of the first character following the text that matched
+         * the whole regular expression.
+         *
+         * @return the character index.
+         */
+        End(
+            [out] Int32* index);
+
+        /**
+         * Returns the index of the first character following the text that matched
+         * a given group.
+         *
+         * @param group
+         *            the group, ranging from 0 to groupCount() - 1, with 0
+         *            representing the whole pattern.
+         *
+         * @return the character index.
+         */
+        End(
+            [in] Int32 group,
+            [out] Int32* index);
+
+        /**
+         * Returns the text that matched the whole regular expression.
+         *
+         * @return the text.
+         */
+        Group(
+            [out] String* text);
+
+        /**
+         * Returns the text that matched a given group of the regular expression.
+         *
+         * @param group
+         *            the group, ranging from 0 to groupCount() - 1, with 0
+         *            representing the whole pattern.
+         *
+         * @return the text that matched the group.
+         */
+        Group(
+            [in] Int32 group,
+            [out] String* text);
+
+        /**
+         * Returns the number of groups in the result, which is always equal to
+         * the number of groups in the original regular expression.
+         *
+         * @return the number of groups.
+         */
+        GroupCount(
+            [out] Int32* count);
+
+        /**
+         * Returns the index of the first character of the text that matched
+         * the whole regular expression.
+         *
+         * @return the character index.
+         */
+        Start(
+            [out] Int32* index);
+
+        /**
+         * Returns the index of the first character of the text that matched a given
+         * group.
+         *
+         * @param group
+         *            the group, ranging from 0 to groupCount() - 1, with 0
+         *            representing the whole pattern.
+         *
+         * @return the character index.
+         */
+        Start(
+            [in] Int32 group,
+            [out] Int32* index);
+    }
+
+    } // namespace Regex
+    } // namespace Utility
+    } // namespace Elastos
+}

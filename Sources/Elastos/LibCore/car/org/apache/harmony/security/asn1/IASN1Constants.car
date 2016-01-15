@@ -1,0 +1,83 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    interface IASN1Constants {
+        /**
+         * Tag classes
+        */
+        const Int32 CLASS_UNIVERSAL = 0;
+        const Int32 CLASS_APPLICATION = 64;
+        const Int32 CLASS_CONTEXTSPECIFIC = 128;
+        const Int32 CLASS_PRIVATE = 192;
+
+        /**
+         * Tag Primitive/Constructed (P/C) flag
+        */
+        const Int32 PC_PRIMITIVE = 0;
+        const Int32 PC_CONSTRUCTED = 32;
+
+        /**
+         * Universal class tag assignments
+         */
+        const Int32 TAG_BOOLEAN = 1;
+        const Int32 TAG_INTEGER = 2;
+        const Int32 TAG_BITSTRING = 3;
+        const Int32 TAG_OCTETSTRING = 4;
+        const Int32 TAG_NULL = 5;
+        const Int32 TAG_OID = 6;
+        const Int32 TAG_OBJDESCRIPTOR = 7;
+        const Int32 TAG_EXTERNAL = 8;
+        const Int32 TAG_INSTANCEOF = TAG_EXTERNAL;
+        const Int32 TAG_REAL = 9;
+        const Int32 TAG_ENUM = 10;
+        const Int32 TAG_EMBEDDEDPDV = 11;
+        const Int32 TAG_UTF8STRING = 12;
+        const Int32 TAG_RELATIVEOID = 13;
+        const Int32 TAG_SEQUENCE = 16;
+        const Int32 TAG_SEQUENCEOF = TAG_SEQUENCE;
+        const Int32 TAG_SET = 17;
+        const Int32 TAG_SETOF = TAG_SET;
+        const Int32 TAG_NUMERICSTRING = 18;
+        const Int32 TAG_PRINTABLESTRING = 19;
+        const Int32 TAG_TELETEXSTRING = 20;
+        const Int32 TAG_T61STRING = TAG_TELETEXSTRING;
+        const Int32 TAG_VIDEOTEXSTRING = 21;
+        const Int32 TAG_IA5STRING = 22;
+        const Int32 TAG_UTCTIME = 23;
+        const Int32 TAG_GENERALIZEDTIME = 24;
+        const Int32 TAG_GRAPHICSTRING = 25;
+        const Int32 TAG_VISIBLESTRING = 26;
+        const Int32 TAG_ISO646STRING = TAG_VISIBLESTRING;
+        const Int32 TAG_GENERALSTRING = 27;
+        const Int32 TAG_UNIVERSALSTRING = 28;
+        const Int32 TAG_BMPSTRING = 30;
+
+        const Int32 TAG_C_BITSTRING = TAG_BITSTRING | PC_CONSTRUCTED;
+        const Int32 TAG_C_OCTETSTRING = TAG_OCTETSTRING | PC_CONSTRUCTED;
+        const Int32 TAG_C_UTF8STRING = TAG_UTF8STRING | PC_CONSTRUCTED;
+        const Int32 TAG_C_SEQUENCE = TAG_SEQUENCE | PC_CONSTRUCTED;
+        const Int32 TAG_C_SEQUENCEOF = TAG_SEQUENCEOF | PC_CONSTRUCTED;
+        const Int32 TAG_C_SET = TAG_SET | PC_CONSTRUCTED;
+        const Int32 TAG_C_SETOF = TAG_SETOF | PC_CONSTRUCTED;
+        const Int32 TAG_C_UTCTIME = TAG_UTCTIME | PC_CONSTRUCTED;
+        const Int32 TAG_C_GENERALIZEDTIME = TAG_GENERALIZEDTIME | PC_CONSTRUCTED;
+
+        /**
+         * Not from the ASN.1 specs. For implementation purposes.
+         */
+        const Int32 TAG_ANY = 0;
+        const Int32 TAG_CHOICE = TAG_ANY;
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

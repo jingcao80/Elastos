@@ -1,0 +1,21 @@
+TARGET_NAME= PYDictbuilder
+TARGET_TYPE= ecx
+
+VPATH := $(MAKEDIR)/../share
+
+SOURCES += main.cpp
+SOURCES += dictbuilder.cpp
+SOURCES += dictlist.cpp
+SOURCES += dicttrie.cpp
+SOURCES += lpicache.cpp
+SOURCES += mystdlib.cpp
+SOURCES += ngram.cpp
+SOURCES += searchutility.cpp
+SOURCES += spellingtable.cpp
+SOURCES += spellingtrie.cpp
+SOURCES += splparser.cpp
+SOURCES += utf16char.cpp
+SOURCES += utf16reader.cpp
+
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lcutils -lutils

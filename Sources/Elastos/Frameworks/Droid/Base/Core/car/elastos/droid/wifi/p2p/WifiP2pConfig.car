@@ -1,0 +1,74 @@
+
+module
+{
+    interface Elastos.Droid.Wifi.IWpsInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+
+    /**
+     * A class representing a Wi-Fi P2p configuration for setting up a connection
+     *
+     * {@see WifiP2pManager}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiP2pConfig {
+        /** @hide */
+        const Int32 MAX_GROUP_OWNER_INTENT = 15;
+
+        /** @hide */
+        const Int32 MIN_GROUP_OWNER_INTENT = 0;
+
+        /**
+         * The device MAC address uniquely identifies a Wi-Fi p2p device
+         */
+        GetDeviceAddress(
+            [out] String* result);
+
+        SetDeviceAddress(
+            [in] String deviceAddress);
+
+        /**
+         * Wi-Fi Protected Setup information
+         */
+        GetWps(
+            [out] IWpsInfo** result);
+
+        SetWps(
+            [in] IWpsInfo* wps);
+
+        /**
+         * This is an integer value between 0 and 15 where 0 indicates the least
+         * inclination to be a group owner and 15 indicates the highest inclination
+         * to be a group owner.
+         *
+         * A value of -1 indicates the system can choose an appropriate value.
+         */
+        GetGroupOwnerIntent(
+            [out] Int32* result);
+
+        SetGroupOwnerIntent(
+            [in] Int32 groupOwnerIntent);
+
+        /** @hide */
+        GetNetId(
+            [out] Int32* result);
+
+        SetNetId(
+            [in] Int32 netId);
+
+        /** @hide */
+        Invalidate();
+    }
+
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}
+

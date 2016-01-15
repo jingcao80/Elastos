@@ -1,0 +1,22 @@
+TARGET_NAME= accounts
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+SOURCES = AccountManagerServiceSession.cpp
+SOURCES += AccountAuthenticatorCache.cpp
+SOURCES += GrantCredentialsPermissionActivity.cpp
+SOURCES += CAccountManagerService.cpp
+SOURCES += CTestFeaturesSession.cpp
+SOURCES += CRemoveAccountSession.cpp
+SOURCES += CGetAuthTokenLabelSession.cpp
+SOURCES += CGetAuthTokenSession.cpp
+SOURCES += CAddAcountSession.cpp
+SOURCES += CConfirmCredentialsAsUserSession.cpp
+SOURCES += CUpdateCredentialsSession.cpp
+SOURCES += CGetAccountsByTypeAndFeatureSession.cpp
+SOURCES += CEditPropertiesSession.cpp

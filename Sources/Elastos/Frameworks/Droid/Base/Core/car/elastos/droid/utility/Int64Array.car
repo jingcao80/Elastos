@@ -1,0 +1,69 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+    /**
+     * @Involve
+     * interface ICloneable;
+     */
+    [deprecated]
+    interface IInt64Array {
+        /**
+         * Appends the specified value to the end of this array.
+         */
+        Add(
+            [in] Int64 value);
+
+        /**
+         * Inserts a value at the specified position in this array.
+         *
+         * @throws IndexOutOfBoundsException when index &lt; 0 || index &gt; size()
+         */
+        Add(
+            [in] Int32 index,
+            [in] Int64 value);
+
+        /**
+         * Adds the values in the specified array to this array.
+         */
+        AddAll(
+            [in] IInt64Array* values);
+
+        /**
+         * Removes all values from this array.
+         */
+        Clear();
+
+        /**
+         * Returns the value at the specified position in this array.
+         */
+        Get(
+            [in] Int32 index,
+            [out] Int64* value);
+
+        /**
+         * Returns the index of the first occurrence of the specified value in this
+         * array, or -1 if this array does not contain the value.
+         */
+        IndexOf(
+            [in] Int64 value,
+            [out] Int32* index);
+
+        /**
+         * Removes the value at the specified index from this array.
+         */
+        Remove(
+            [in] Int32 index);
+
+        /**
+         * Returns the number of values in this array.
+         */
+        GetSize(
+            [out] Int32* value);
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+}

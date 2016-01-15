@@ -1,0 +1,10 @@
+
+DIRS = asn1
+DIRS += fortress
+#DIRS += Pkcs10
+DIRS += pkcs7
+#DIRS += Pkcs8
+#DIRS += Provider
+DIRS += utils
+#DIRS += X501
+#DIRS += X509

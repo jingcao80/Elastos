@@ -1,0 +1,66 @@
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    /**
+     * This activity is displayed when the system attempts to start an Intent for
+     * which there is more than one matching activity, allowing the user to decide
+     * which to go to.  It is not normally used directly by application developers.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.View.IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IOnCreateContextMenuListener
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IOnWindowDismissedCallback
+     * interface IActivity
+     * interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener
+     */
+    [local]
+    interface IResolverActivity {
+
+        /**
+         * Turn on launch mode that is safe to use when forwarding intents received from
+         * applications and running in system processes.  This mode uses Activity.startActivityAsCaller
+         * instead of the normal Activity.startActivity for launching the activity selected
+         * by the user.
+         *
+         * <p>This mode is set to true by default if the activity is initialized through
+         * {@link #onCreate(android.os.Bundle)}.  If a subclass calls one of the other onCreate
+         * methods, it is set to false by default.  You must set it before calling one of the
+         * more detailed onCreate methods, so that it will be set correctly in the case where
+         * there is only one intent to resolve and it is thus started immediately.</p>
+         */
+        SetSafeForwardingMode(
+            [in] Boolean safeForwarding);
+
+        OnButtonClick(
+            [in] IView* v);
+
+        GetReplacementIntent(
+            [in] String packageName,
+            [in] IIntent* defIntent,
+            [out] IIntent** intent);
+
+        SafelyStartActivity(
+            [in] IIntent* intent);
+    }
+
+    } // namespace App
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

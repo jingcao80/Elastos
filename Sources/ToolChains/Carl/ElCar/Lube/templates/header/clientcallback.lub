@@ -1,0 +1,226 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+$   WITH all interfaces DO
+$       IF attrib is "callback" and attrib is not "clsobj"
+$           WITH all parents_and_me DO
+
+    // callback interface ${name}
+$           	WITH all methods DO
+
+    static _ELASTOS ECode $^
+$                 IF interface.attrib is "delegate"
+Assign${name}Delegate($^
+$                 ELSE
+Add${name}Callback($^
+$                 END IF;;
+PInterface pServerObj,
+                    _ELASTOS ECode (*pFunc)(_ELASTOS PVoid, PInterface$^
+$                   WITH all parameters DO
+, ${ParamNamespaceType(type)}$^
+$                   END DO
+),_ELASTOS PVoid pUserData=NULL)
+    {
+        assert(pServerObj);
+$     IF class.type is "aspect"
+        IAspect* pAspect;
+        _ELASTOS ClassID clsid;
+        _ELASTOS ECode ec;
+        
+        pAspect = IAspect::Probe(pServerObj);
+        assert(pAspect);
+        ec = pAspect->GetAspectID(&clsid);
+        if (FAILED(ec) || (*(_ELASTOS EMuid *)&clsid != *(_ELASTOS EMuid *)&ECLSID_${class.name})) {
+            return E_INVALID_ARGUMENT;
+        }
+$     ELSE
+        _ELASTOS ECode ec = _Impl_CheckClsId(pServerObj, &ECLSID_${class.name}, &pServerObj);
+        if (FAILED(ec)) return ec;
+$     END IF;;
+
+        return _CObject_AddCallback(pServerObj, ${class.name}_${name}, Elastos::EventHandler::Make((void*)pUserData, *(void**)&pFunc));
+    }
+
+    static _ELASTOS ECode $^
+$                 IF interface.attrib is "delegate"
+Revoke${name}Delegate($^
+$                 ELSE
+Remove${name}Callback($^
+$                 END IF;;
+PInterface pServerObj,
+                    _ELASTOS ECode (*pFunc)(_ELASTOS PVoid, PInterface$^
+$                   WITH all parameters DO
+, ${ParamNamespaceType(type)}$^
+$                   END DO
+),_ELASTOS PVoid pUserData=NULL)
+    {
+        assert(pServerObj);
+$     IF class.type is "aspect"
+        IAspect* pAspect;
+        _ELASTOS ClassID clsid;
+        _ELASTOS ECode ec;
+        
+        pAspect = IAspect::Probe(pServerObj);
+        assert(pAspect);
+        ec = pAspect->GetAspectID(&clsid);
+        if (FAILED(ec) || (*(_ELASTOS EMuid *)&clsid != *(_ELASTOS EMuid *)&ECLSID_${class.name})) {
+            return E_INVALID_ARGUMENT;
+        }
+$     ELSE
+        _ELASTOS ECode ec = _Impl_CheckClsId(pServerObj, &ECLSID_${class.name}, &pServerObj);
+        if (FAILED(ec)) return ec;
+$     END IF;;
+
+        return _CObject_RemoveCallback(pServerObj, ${class.name}_${name},Elastos::EventHandler::Make((void*)pUserData, *(void**)&pFunc));
+    }
+
+$                 IF interface.attrib is not "delegate"
+    static _ELASTOS ECode Acquire${name}Rendezvous(PInterface pServerObj, ICallbackRendezvous** ppRendezvous)
+    {
+        assert(pServerObj);
+$     IF class.type is "aspect"
+        IAspect* pAspect;
+        _ELASTOS ClassID clsid;
+        _ELASTOS ECode ec;
+        
+        pAspect = IAspect::Probe(pServerObj);
+        assert(pAspect);
+        ec = pAspect->GetAspectID(&clsid);
+        if (FAILED(ec) || (*(_ELASTOS EMuid *)&clsid != *(_ELASTOS EMuid *)&ECLSID_${class.name})) {
+            return E_INVALID_ARGUMENT;
+        }
+$     ELSE
+        _ELASTOS ECode ec = _Impl_CheckClsId(pServerObj, &ECLSID_${class.name}, &pServerObj);
+        if (FAILED(ec)) return ec;
+$     END IF;;
+
+        return _CObject_AcquireCallbackRendezvous(pServerObj,${class.name}_${name},ppRendezvous);
+    }
+$                 END IF;; not delegate
+
+    template <class T>
+    static _ELASTOS ECode $^
+$                 IF interface.attrib is "delegate"
+Assign${name}Delegate($^
+$                 ELSE
+Add${name}Callback($^
+$                 END IF;;
+PInterface pServerObj,
+                T *pThis,
+                _ELASTOS ECode (CARAPICALLTYPE T::*pFunc)(
+$                   IF interface.attrib is not "async"
+PInterface$^
+$                   END IF;; async
+$                   WITH all parameters DO
+$                     IF interface.attrib is not "async" and parameters is first
+, $^
+$                     END IF;;
+${ParamNamespaceType(type)}$^
+$                     IF parameters is not last
+, $^
+$                     END IF;;
+$                   END DO
+))
+    {
+        assert(pServerObj);
+$     IF class.type is "aspect"
+        IAspect* pAspect;
+        _ELASTOS ClassID clsid;
+        _ELASTOS ECode ec;
+        
+        pAspect = IAspect::Probe(pServerObj);
+        assert(pAspect);
+        ec = pAspect->GetAspectID(&clsid);
+        if (FAILED(ec) || (*(_ELASTOS EMuid *)&clsid != *(_ELASTOS EMuid *)&ECLSID_${class.name})) {
+            return E_INVALID_ARGUMENT;
+        }
+$     ELSE
+        _ELASTOS ECode ec = _Impl_CheckClsId(pServerObj, &ECLSID_${class.name}, &pServerObj);
+        if (FAILED(ec)) return ec;
+$     END IF;;
+
+        if (Conversion<T, CCarObject>::exists) {
+            return _CObject_AddCallback(pServerObj,${class.name}_${name},Elastos::EventHandler::Make(pThis,*(void**)&pFunc, CallbackType_CAR));
+        }
+        else {
+            return _CObject_AddCallback(pServerObj,${class.name}_${name},Elastos::EventHandler::Make(pThis,*(void**)&pFunc, CallbackType_CPP));
+        }
+    }
+
+    template <class T>
+    static _ELASTOS ECode $^
+$                 IF interface.attrib is "delegate"
+Revoke${name}Delegate($^
+$                 ELSE
+Remove${name}Callback($^
+$                 END IF;;
+PInterface pServerObj,
+                T *pThis,
+                _ELASTOS ECode (CARAPICALLTYPE T::*pFunc)(
+$                   IF interface.attrib is not "async"
+PInterface$^
+$                   END IF;; async
+$                   WITH all parameters DO
+$                     IF interface.attrib is not "async" and parameters is first
+, $^
+$                     END IF;;
+${ParamNamespaceType(type)}$^
+$                     IF parameters is not last
+, $^
+$                     END IF;;
+$                   END DO
+))
+    {
+        assert(pServerObj);
+$     IF class.type is "aspect"
+        IAspect* pAspect;
+        _ELASTOS ClassID clsid;
+        _ELASTOS ECode ec;
+        
+        pAspect = IAspect::Probe(pServerObj);
+        assert(pAspect);
+        ec = pAspect->GetAspectID(&clsid);
+        if (FAILED(ec) || (*(_ELASTOS EMuid *)&clsid != *(_ELASTOS EMuid *)&ECLSID_${class.name})) {
+            return E_INVALID_ARGUMENT;
+        }
+$     ELSE
+        _ELASTOS ECode ec = _Impl_CheckClsId(pServerObj, &ECLSID_${class.name}, &pServerObj);
+        if (FAILED(ec)) return ec;
+$     END IF;;
+
+       return _CObject_RemoveCallback(pServerObj,${class.name}_${name},Elastos::EventHandler::Make(pThis,*(void**)&pFunc));
+    }
+$
+$           	END DO ;; all methods
+$           END DO ;; all parents_and_me
+$       END IF ;; callback clsobj
+$   END DO ;; all interfaces
+
+$ IF attrib is not "singleton"
+
+    static _ELASTOS ECode RemoveAllCallbacks(PInterface pServerObj)
+    {
+        assert(pServerObj);
+$     IF class.type is "aspect"
+        IAspect* pAspect;
+        _ELASTOS ClassID clsid;
+        _ELASTOS ECode ec;
+        
+        pAspect = IAspect::Probe(pServerObj);
+        assert(pAspect);
+        ec = pAspect->GetAspectID(&clsid);
+        if (FAILED(ec) || (*(_ELASTOS EMuid *)&clsid != *(_ELASTOS EMuid *)&ECLSID_${class.name})) {
+            return E_INVALID_ARGUMENT;
+        }
+$     ELSE
+        _ELASTOS ECode ec = _Impl_CheckClsId(pServerObj, &ECLSID_${class.name}, &pServerObj);
+        if (FAILED(ec)) return ec;
+$     END IF;;
+        return _CObject_RemoveAllCallbacks(pServerObj);
+    }
+$ END IF ;; "singleton"
+
+

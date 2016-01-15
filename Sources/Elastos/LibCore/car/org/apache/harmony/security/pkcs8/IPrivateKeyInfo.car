@@ -1,0 +1,65 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.X509.IAlgorithmIdentifier;
+    using interface Elastos.Utility.IList;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Pkcs8 {
+
+    /**
+     * The class implements the ASN.1 DER encoding and decoding of the PKCS#8
+     * PrivateKeyInfo having the following ASN.1 notation:
+     *
+     *  PrivateKeyInfo ::= SEQUENCE {
+     *      version Version,
+     *      privateKeyAlgorithm PrivateKeyAlgorithmIdentifier,
+     *      privateKey PrivateKey,
+     *      attributes [0] IMPLICIT Attributes OPTIONAL }
+     *
+     *  Version ::= INTEGER
+     *
+     *  PrivateKeyAlgorithmIdentifier ::= AlgorithmIdentifier
+     *
+     *  PrivateKey ::= OCTET STRING
+     *
+     *  Attributes ::= SET OF Attribute
+     */
+    interface IPrivateKeyInfo {
+        GetVersion(
+            [out] Int32* ver);
+
+        GetAlgorithmIdentifier(
+            [out] IAlgorithmIdentifier** identifier);
+
+        GetAttributes(
+            [out] IList** attributes);
+
+        /**
+         * Returns the OCTET STRING.
+         */
+        GetPrivateKey(
+            [out, callee] ArrayOf<Byte>* privateKey);
+
+        /**
+         * Returns ASN.1 encoded form of this PrivateKeyInfo.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface IPrivateKeyInfoHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace Pkcs8
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,86 @@
+
+module
+{
+
+    interface Elastos.Droid.Graphics.IPointF;
+    interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IFace
+    {
+        /** The minimum confidence factor of good face recognition */
+        const Float CONFIDENCE_THRESHOLD = 0.4;
+        /** The x-axis Euler angle of a face. */
+        const Int32 EULER_X = 0;
+        /** The y-axis Euler angle of a face. */
+        const Int32 EULER_Y = 1;
+        /** The z-axis Euler angle of a face. */
+        const Int32 EULER_Z = 2;
+
+        /**
+         * Returns a confidence factor between 0 and 1. This indicates how
+         * certain what has been found is actually a face. A confidence
+         * factor above 0.3 is usually good enough.
+         */
+        Confidence(
+            [out] Float* factor);
+
+        /**
+         * Sets the position of the mid-point between the eyes.
+         * @param point the PointF coordinates (Float values) of the
+         *              face's mid-point
+         */
+        GetMidPoint(
+            [in] IPointF* point);
+
+        /**
+         * Returns the distance between the eyes.
+         */
+        EyesDistance(
+            [out] Float* distance);
+
+        /**
+         * Returns the face's pose. That is, the rotations around either
+         * the X, Y or Z axis (the positions in 3-dimensional Euclidean space).
+         *
+         * @param euler the Euler axis to retrieve an angle from
+         *              (<var>EULER_X</var>, <var>EULER_Y</var> or
+         *              <var>EULER_Z</var>)
+         * @return the Euler angle of the of the face, for the given axis
+         */
+        Pose(
+            [in] Int32 euler,
+            [out] Float* angle);
+    }
+
+    [deprecated]
+    interface IFaceDetector
+    {
+        /**
+         * Finds all the faces found in a given {@link android.graphics.Bitmap}.
+         * The supplied array is populated with {@link FaceDetector.Face}s for each
+         * face found. The bitmap must be in 565 format (for now).
+         *
+         * @param bitmap the {@link android.graphics.Bitmap} graphic to be analyzed
+         * @param faces  an array in which to place all found
+         *               {@link FaceDetector.Face}s. The array must be sized equal
+         *               to the <var>maxFaces</var> value set at initialization
+         * @return the number of faces found
+         * @throws IllegalArgumentException if the Bitmap dimensions don't match
+         *               the dimensions defined at initialization or the given array
+         *               is not sized equal to the <var>maxFaces</var> value defined
+         *               at initialization
+         */
+        FindFaces(
+            [in] IBitmap* bitmap,
+            [in] ArrayOf<IFace*>* faces,
+            [out] Int32* num);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

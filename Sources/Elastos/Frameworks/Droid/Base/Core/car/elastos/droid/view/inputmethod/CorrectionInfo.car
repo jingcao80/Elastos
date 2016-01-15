@@ -1,0 +1,44 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * Information about a single text correction that an editor has reported to
+     * an input method.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ICorrectionInfo {
+        /**
+         * Return the offset position of this correction in the text. Both the {@link #getOldText()} and
+         * {@link #getNewText()} start at this offset.
+         */
+        GetOffset(
+            [out] Int32* offset);
+
+        /**
+         * Return the text that has actually been typed by the user, and which has been corrected.
+         */
+        GetOldText(
+            [out] ICharSequence** text);
+
+        /**
+         * Return the new text that corrects what was typed by the user.
+         */
+        GetNewText(
+            [out] ICharSequence** text);
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

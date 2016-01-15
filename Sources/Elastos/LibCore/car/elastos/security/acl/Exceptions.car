@@ -1,0 +1,14 @@
+
+module
+{
+//    const FAMILY_CORE = 0x2C    // Security exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Security exception codes (Family: 0x2C)
+    const E_ACL_NOT_FOUND_EXCEPTION                         = 0xAC010000;
+    const E_LAST_OWNER_EXCEPTION                            = 0xAC020000;
+    const E_NOT_OWNER_EXCEPTION                             = 0xAC030000;
+}

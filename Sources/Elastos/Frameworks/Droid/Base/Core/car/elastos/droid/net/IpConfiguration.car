@@ -1,0 +1,76 @@
+
+module
+{
+    interface Elastos.Droid.Net.IStaticIpConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    enum IpConfigurationIpAssignment {
+        /* Use statically configured IP settings. Configuration can be accessed
+         * with staticIpConfiguration */
+        STATIC_IpAssignment,
+        /* Use dynamically configured IP settigns */
+        DHCP_IpAssignment,
+        /* no IP details are assigned, this is used to indicate
+         * that any existing IP settings should be retained */
+        UNASSIGNED_IpAssignment
+    }
+
+    enum IpConfigurationProxySettings {
+        /* No proxy is to be used. Any existing proxy settings
+         * should be cleared. */
+        NONE_ProxySettings,
+        /* Use statically configured proxy. Configuration can be accessed
+         * with httpProxy. */
+        STATIC_ProxySettings,
+        /* no proxy details are assigned, this is used to indicate
+         * that any existing proxy settings should be retained */
+        UNASSIGNED_ProxySettings,
+        /* Use a Pac based proxy.
+         */
+        PAC_ProxySettings
+    }
+
+    /**
+     * A class representing a configured network.
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IIpConfiguration {
+
+        GetIpAssignment(
+            [out] IpConfigurationIpAssignment* result);
+
+        SetIpAssignment(
+            [in] IpConfigurationIpAssignment ipAssignment);
+
+        GetStaticIpConfiguration(
+            [out] IStaticIpConfiguration** result);
+
+        SetStaticIpConfiguration(
+            [in] IStaticIpConfiguration* staticIpConfiguration);
+
+        GetProxySettings(
+            [out] IpConfigurationProxySettings* result);
+
+        SetProxySettings(
+            [in] IpConfigurationProxySettings proxySettings);
+
+        GetHttpProxy(
+            [out] IProxyInfo** result);
+
+        SetHttpProxy(
+            [in] IProxyInfo* httpProxy);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}
+
+

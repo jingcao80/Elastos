@@ -1,0 +1,79 @@
+
+module
+{
+    interface Elastos.Net.ISocket;
+    interface Elastosx.Net.ISocketFactory;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The abstract factory implementation to create {@code SSLSocket}s.
+     */
+    /**
+     * @Involve
+     * interface Elastosx.Net.ISocketFactory
+     */
+    [deprecated]
+    interface ISSLSocketFactory {
+        /**
+         * Returns the names of the cipher suites that are enabled by default.
+         *
+         * @return the names of the cipher suites that are enabled by default.
+         */
+        GetDefaultCipherSuites(
+            [out, callee] ArrayOf<String>* suites);
+
+        /**
+         * Returns the names of the cipher suites that are supported and could be
+         * enabled for an SSL connection.
+         *
+         * @return the names of the cipher suites that are supported.
+         */
+        GetSupportedCipherSuites(
+            [out, callee] ArrayOf<String>* suites);
+
+        /**
+         * Creates an {@code SSLSocket} over the specified socket that is connected
+         * to the specified host at the specified port.
+         *
+         * @param s
+         *            the socket.
+         * @param host
+         *            the host.
+         * @param port
+         *            the port number.
+         * @param autoClose
+         *            {@code true} if socket {@code s} should be closed when the
+         *            created socket is closed, {@code false} if the socket
+         *            {@code s} should be left open.
+         * @return the creates ssl socket.
+         * @throws IOException
+         *             if creating the socket fails.
+         * @throws java.net.UnknownHostException
+         *             if the host is unknown.
+         */
+        CreateSocket(
+            [in] ISocket* s,
+            [in] String host,
+            [in] Int32 port,
+            [in] Boolean autoClose,
+            [out] ISocket** sock);
+    }
+
+    interface ISSLSocketFactoryHelper {
+        /**
+         * Returns the default {@code SSLSocketFactory} instance. The default is
+         * defined by the security property {@code 'ssl.SocketFactory.provider'}.
+         *
+         * @return the default ssl socket factory instance.
+         */
+        GetDefault(
+            [out] ISocketFactory** factory);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

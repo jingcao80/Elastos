@@ -1,0 +1,137 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "${name}.cpp"
+
+#include "${name}.h"
+
+${ClassNamespaceBegin(class)}
+$IF class.attrib is "hascoalescence"
+$  WITH ALL coalescences DO
+ECode ${interface.name}_${name}Coalescer(
+$ WITH ALL parameters DO
+    /* [in] */ ${type} ${prefixingnameByName(parameter)}$^
+,
+$    END DO
+$ WITH ALL parameters DO
+    /* [in, out] */ ${type}* p${PrefixingNameByName(parameter)}$^
+$       IF parameters is not last
+,
+$       END IF
+$    END DO
+)
+{
+    // TODO: Add your code here
+    return NOERROR;
+}
+$  END DO;; all coalescence methods
+$END IF;; hascoalescence
+
+$WITH all interfaces DO
+$   IF attrib is not "callback" and attrib is not "callbacksink" and attrib is not "clsobj" and attrib is not "filter" and name is not "IRegime" and name is not "IObject"
+$       WITH all parents_and_me DO
+$       WITH all methods DO
+$           IF interface.attrib is "inherited" and interface.name is not "IAppletMain"
+$               WITH all supers DO
+$                   IF super is last
+// inherits from ${super.name}, implement to override ${super.name}::${method.name}
+$                   END IF ;; is last
+$               END DO ;; all supers
+// $^
+$           END IF ;; is "inherited" and is not "IAppletMain"
+${type} ${class.name}::${name}($^
+$           WITH all parameters DO
+
+$   IF interface.attrib is "inherited" and interface.name is not "IAppletMain"
+// $^
+$   END IF ;; is "inherited" is "inherited" and is not "IAppletMain"
+    /* [${attrib}] */ ${type} ${PrefixingNameByName(parameter)}$^
+$           IF parameter is not last
+,$^
+$           END IF
+$           END DO ;; all parameters
+)
+$   IF interface.attrib is "inherited" and interface.name is not "IAppletMain"
+// {
+//     // TODO: Add your code here
+//     return E_NOT_IMPLEMENTED;
+// }
+$   ELSE
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+$   END IF ;; is "inherited" and not "IAppletMain"
+
+$       END DO ;; all methods
+$       END DO ;; parents_and_me
+$   END IF ;; is not "callback" and not "callbacksink" and not "clsobj" and not "filter" and name is not "IRegime" and name is not "IObject"
+$
+$   IF attrib is "callbacksink"
+$       WITH all parents_and_me DO
+$       WITH all methods DO
+ECode ${class.name}::On${name}(
+    /* [in] */ IInterface *pSender$^
+$    WITH all parameters DO
+,$^
+    /* [${attrib}] */ ${type} ${PrefixingNameByName(parameter)}$^
+$    END DO ;; all parameters
+)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+$       END DO ;; all methods
+$       END DO ;; parents_and_me
+$   END IF ;; is "callbacksink"
+$
+$   IF attrib is "delegatesink"
+$       WITH all parents_and_me DO
+$       WITH all methods DO
+ECode ${class.name}::Do${name}(
+    /* [in] */ IInterface *pSender$^
+$    WITH all parameters DO
+,$^
+    /* [${attrib}] */ ${type} ${PrefixingNameByName(parameter)}$^
+$    END DO ;; all parameters
+)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+$       END DO ;; all methods
+$       END DO ;; parents_and_me
+$   END IF ;; is "delegatesink"
+$END DO ;; all interfaces
+$
+$IF class.attrib is not "hasTrivialCtor"
+$  WITH all interfaces DO
+$    IF attrib is "clsobj"
+$      WITH all methods DO
+${type} ${class.name}::constructor($^
+$        WITH all parameters DO
+$          IF parameter is not last
+$            IF parameter is not first
+,$^
+$            END IF
+
+    /* [${attrib}] */ ${type} ${PrefixingNameByName(parameter)}$^
+$          END IF
+$        END DO ;; all parameters
+)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+$      END DO ;; all methods
+$
+$    END IF
+$  END DO ;; all interfaces
+$END IF;;
+${ClassNamespaceEnd(class)}
+$END OUTPUT

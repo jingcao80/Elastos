@@ -1,0 +1,31 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+    namespace Shapes {
+
+    /**
+     * Creates an arc shape. The arc shape starts at a specified
+     * angle and sweeps clockwise, drawing slices of pie.
+     * The arc can be drawn to a Canvas with its own draw() method,
+     * but more graphical control is available if you instead pass
+     * the ArcShape to a {@link android.graphics.drawable.ShapeDrawable}.
+     */
+    /**
+     * @Involve
+     * interface IRectShape
+     * interface IShape
+     * interface ICloneable
+     */
+    interface IArcShape {
+    }
+
+    } // namespace Shapes
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

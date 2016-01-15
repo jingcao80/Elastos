@@ -1,0 +1,38 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    interface IWrapper {
+        /**
+         * Returns an object that implements the given interface. If the caller is
+         * not a wrapper, a SQLException will be thrown.
+         *
+         * @param iface -
+         *            the class that defines the interface
+         * @return - an object that implements the interface
+         * @throws SQLException -
+         *             if there is no object implementing the specific interface
+         */
+         Unwrap(
+            [in] IInterface * iface,
+            [out] IInterface ** oface);
+
+        /**
+         * If the caller is a wrapper of the class or implements the given
+         * interface, the methods return false and vice versa.
+         *
+         * @param iface -
+         *            the class that defines the interface
+         * @return - true if the instance implements the interface
+         * @throws SQLException -
+         *             when an error occurs when judges the object
+         */
+        IsWrapperFor(
+            [in] IInterface * iface,
+            [out] Boolean * value);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

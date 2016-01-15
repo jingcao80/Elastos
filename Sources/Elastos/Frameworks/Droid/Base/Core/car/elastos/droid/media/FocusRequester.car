@@ -1,0 +1,57 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * @hide
+     * Class to handle all the information about a user of audio focus. The lifecycle of each
+     * instance is managed by android.media.MediaFocusControl, from its addition to the audio focus
+     * stack to its release.
+     */
+    interface IFocusRequester {
+        HasSameClient(
+            [in] String otherClient,
+            [out] Boolean* result);
+
+        HasSameBinder(
+            [in] IBinder* ib,
+            [out] Boolean* result);
+
+        HasSamePackage(
+            [in] String pack,
+            [out] Boolean* result);
+
+        HasSameUid(
+            [in] Int32 uid,
+            [out] Boolean* result);
+
+        GetGainRequest(
+            [out] Int32* result);
+
+        GetStreamType(
+            [out] Int32* result);
+
+        Dump(
+            [in] IPrintWriter* pw);
+
+        ReleaseResources();
+
+        HandleExternalFocusGain(
+            [in] Int32 focusGain);
+
+        HandleFocusGain(
+            [in] Int32 focusGain);
+
+        HandleFocusLoss(
+            [in] Int32 focusLoss);
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

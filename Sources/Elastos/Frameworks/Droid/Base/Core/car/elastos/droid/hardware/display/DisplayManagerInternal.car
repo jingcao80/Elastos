@@ -1,0 +1,261 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.View.IDisplayInfo;
+    interface Elastos.Droid.Hardware.ISensorManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Display {
+
+    /**
+     * Describes the requested power state of the display.
+     *
+     * This object is intended to describe the general characteristics of the
+     * power state, such as whether the screen should be on or off and the current
+     * brightness controls leaving the DisplayPowerController to manage the
+     * details of how the transitions between states should occur.  The goal is for
+     * the PowerManagerService to focus on the global power state and not
+     * have to micro-manage screen off animations, auto-brightness and other effects.
+     */
+    interface IDisplayPowerRequest
+    {
+        // Policy: Turn screen off as if the user pressed the power button
+        // including playing a screen off animation if applicable.
+        const Int32 POLICY_OFF = 0;
+
+        // Policy: Enable dozing and always-on display functionality.
+        const Int32 POLICY_DOZE = 1;
+
+        // Policy: Make the screen dim when the user activity timeout is
+        // about to expire.
+        const Int32 POLICY_DIM = 2;
+
+        // Policy: Make the screen bright as usual.
+        const Int32 POLICY_BRIGHT = 3;
+
+        IsBrightOrDim(
+            [out] Boolean* result);
+
+        CopyFrom(
+            [in] IDisplayPowerRequest* other);
+
+        PolicyToString(
+            [in] Int32 policy,
+            [out] String* result);
+
+        SetPolicy(
+            [in] Int32 value);
+
+        SetUseProximitySensor(
+            [in] Boolean value);
+
+        SetScreenBrightness(
+            [in] Int32 value);
+
+        SetScreenAutoBrightnessAdjustment(
+            [in] Float value);
+
+        SetUseAutoBrightness(
+            [in] Boolean value);
+
+        SetLowPowerMode(
+            [in] Boolean value);
+
+        SetBlockScreenOn(
+            [in] Boolean value);
+
+        SetDozeScreenBrightness(
+            [in] Int32 value);
+
+        SetDozeScreenState(
+            [in] Int32 value);
+
+        GetPolicy(
+            [out] Int32* value);
+
+        GetUseProximitySensor(
+            [out] Boolean* value);
+
+        GetScreenBrightness(
+            [out] Int32* value);
+
+        GetScreenAutoBrightnessAdjustment(
+            [out] Float* value);
+
+        GetUseAutoBrightness(
+            [out] Boolean* value);
+
+        GetLowPowerMode(
+            [out] Boolean* value);
+
+        GetBlockScreenOn(
+            [out] Boolean* value);
+
+        GetDozeScreenBrightness(
+            [out] Int32* value);
+
+        GetDozeScreenState(
+            [out] Int32* value);
+    }
+
+    /**
+     * Asynchronous callbacks from the power controller to the power manager service.
+     */
+    interface IDisplayPowerCallbacks
+    {
+        OnStateChanged();
+
+        OnProximityPositive();
+
+        OnProximityNegative();
+
+        OnDisplayStateChange(
+            [in] Int32 state); // one of the Display state constants
+
+        AcquireSuspendBlocker();
+
+        ReleaseSuspendBlocker();
+    }
+
+    /**
+     * Called within a Surface transaction whenever the size or orientation of a
+     * display may have changed.  Provides an opportunity for the client to
+     * update the position of its surfaces as part of the same transaction.
+     */
+    interface IDisplayTransactionListener
+    {
+        OnDisplayTransaction();
+    }
+
+    /**
+     * Display manager local system service interface.
+     *
+     * @hide Only for use within the system server.
+     */
+    interface IDisplayManagerInternal
+    {
+        /**
+         * Called by the power manager to initialize power management facilities.
+         */
+        InitPowerManagement(
+            [in] IDisplayPowerCallbacks* cbs,
+            [in] IHandler* handler,
+            [in] ISensorManager* sensorManager);
+
+        /**
+         * Called by the power manager to request a new power state.
+         * <p>
+         * The display power controller makes a copy of the provided object and then
+         * begins adjusting the power state to match what was requested.
+         * </p>
+         *
+         * @param request The requested power state.
+         * @param waitForNegativeProximity If true, issues a request to wait for
+         * negative proximity before turning the screen back on, assuming the screen
+         * was turned off by the proximity sensor.
+         * @return True if display is ready, false if there are important changes that must
+         * be made asynchronously (such as turning the screen on), in which case the caller
+         * should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged()}
+         * then try the request again later until the state converges.
+         */
+        RequestPowerState(
+            [in] IDisplayPowerRequest* request,
+            [in] Boolean waitForNegativeProximity,
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the proximity sensor screen-off function is available.
+         */
+        IsProximitySensorAvailable(
+            [out] Boolean* result);
+
+        /**
+         * Returns information about the specified logical display.
+         *
+         * @param displayId The logical display id.
+         * @return The logical display info, or null if the display does not exist.  The
+         * returned object must be treated as immutable.
+         */
+        GetDisplayInfo(
+            [in] Int32 displayId,
+            [out] IDisplayInfo** result);
+
+        /**
+         * Registers a display transaction listener to provide the client a chance to
+         * update its surfaces within the same transaction as any display layout updates.
+         *
+         * @param listener The listener to register.
+         */
+        RegisterDisplayTransactionListener(
+            [in] IDisplayTransactionListener* listener);
+
+        /**
+         * Unregisters a display transaction listener to provide the client a chance to
+         * update its surfaces within the same transaction as any display layout updates.
+         *
+         * @param listener The listener to unregister.
+         */
+        UnregisterDisplayTransactionListener(
+            [in] IDisplayTransactionListener* listener);
+
+        /**
+         * Overrides the display information of a particular logical display.
+         * This is used by the window manager to control the size and characteristics
+         * of the default display.  It is expected to apply the requested change
+         * to the display information synchronously so that applications will immediately
+         * observe the new state.
+         *
+         * NOTE: This method must be the only entry point by which the window manager
+         * influences the logical configuration of displays.
+         *
+         * @param displayId The logical display id.
+         * @param info The new data to be stored.
+         */
+        SetDisplayInfoOverrideFromWindowManager(
+            [in] Int32 displayId,
+            [in] IDisplayInfo* info);
+
+        /**
+         * Called by the window manager to perform traversals while holding a
+         * surface flinger transaction.
+         */
+        PerformTraversalInTransactionFromWindowManager();
+
+        /**
+         * Tells the display manager about properties of the display that depend on the windows on it.
+         * This includes whether there is interesting unique content on the specified logical display,
+         * and whether the one of the windows has a preferred refresh rate.
+         * <p>
+         * If the display has unique content, then the display manager arranges for it
+         * to be presented on a physical display if appropriate.  Otherwise, the display manager
+         * may choose to make the physical display mirror some other logical display.
+         * </p>
+         *
+         * <p>
+         * If one of the windows on the display has a preferred refresh rate that's supported by the
+         * display, then the display manager will request its use.
+         * </p>
+         *
+         * @param displayId The logical display id to update.
+         * @param hasContent True if the logical display has content. This is used to control automatic
+         * mirroring.
+         * @param requestedRefreshRate The preferred refresh rate for the top-most visible window that
+         * has a preference.
+         * @param inTraversal True if called from WindowManagerService during a window traversal
+         * prior to call to performTraversalInTransactionFromWindowManager.
+         */
+        SetDisplayProperties(
+            [in] Int32 displayId,
+            [in] Boolean hasContent,
+            [in] Float requestedRefreshRate,
+            [in] Boolean inTraversal);
+    }
+
+    } // namespace Display
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

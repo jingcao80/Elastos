@@ -1,0 +1,115 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IIntentFilterComparison;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+    interface IRemoteViewsOnClickHandler;
+
+    [local]
+    interface IRemoteViewsCacheKey {
+        GetFilter(
+            [out] IIntentFilterComparison** filter);
+
+        SetFilter(
+            [in] IIntentFilterComparison* filter);
+
+        GetWidgetId(
+            [out] Int32* id);
+
+        SetWidgetId(
+            [in] Int32 id);
+    }
+
+    /**
+     * An interface for the RemoteAdapter to notify other classes when adapters
+     * are actually connected to/disconnected from their actual services.
+     */
+    interface IRemoteAdapterConnectionCallback {
+        /**
+         * @return whether the adapter was set or not.
+         */
+        OnRemoteAdapterConnected(
+            [out] Boolean* res);
+
+        OnRemoteAdapterDisconnected();
+
+        /**
+         * This defers a notifyDataSetChanged on the pending RemoteViewsAdapter if it has not
+         * connected yet.
+         */
+        DeferNotifyDataSetChanged();
+    }
+
+    /**
+     * A FrameLayout which contains a loading view, and manages the re/applying of RemoteViews when
+     * they are loaded.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IFrameLayout
+     * interface Elastos.Droid.Widget.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     */
+     [local]
+    interface IRemoteViewsFrameLayout {
+        /**
+         * Updates this RemoteViewsFrameLayout depending on the view that was loaded.
+         * @param view the RemoteViews that was loaded. If null, the RemoteViews was not loaded
+         *             successfully.
+         */
+        OnRemoteViewsLoaded(
+            [in] IRemoteViews* view,
+            [in] IRemoteViewsOnClickHandler* handler);
+    }
+
+    /**
+     * An adapter to a RemoteViewsService which fetches and caches RemoteViews
+     * to be later inflated as child views.
+     */
+    /** @hide */
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IBaseAdapter
+     *
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     * interface Elastos.Droid.Os.IHandlerCallback
+     */
+    [local]
+    interface IRemoteViewsAdapter {
+        IsDataReady(
+            [out] Boolean* res);
+
+        SetRemoteViewsOnClickHandler(
+            [in] IRemoteViewsOnClickHandler* handler);
+
+        SaveRemoteViewsCache();
+
+        GetRemoteViewsServiceIntent(
+            [out] IIntent** intent);
+
+        /**
+         * This method allows an AdapterView using this Adapter to provide information about which
+         * views are currently being displayed. This allows for certain optimizations and preloading
+         * which  wouldn't otherwise be possible.
+         */
+        SetVisibleRangeHint(
+            [in] Int32 lowerBound,
+            [in] Int32 upperBound);
+
+        SuperNotifyDataSetChanged();
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

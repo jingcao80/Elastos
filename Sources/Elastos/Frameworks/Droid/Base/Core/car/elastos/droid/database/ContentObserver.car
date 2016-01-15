@@ -1,0 +1,141 @@
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Database.IIContentObserver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+     * Receives call backs for changes to content.
+     * Must be implemented by objects which are added to a {@link ContentObservable}.
+     */
+    interface IContentObserver {
+        /**
+         * Gets access to the binder transport object. Not for public consumption.
+         *
+         * {@hide}
+         */
+        GetContentObserver(
+            [out] IIContentObserver** observer);
+
+        /**
+         * Gets access to the binder transport object, and unlinks the transport object
+         * from the ContentObserver. Not for public consumption.
+         *
+         * {@hide}
+         */
+        ReleaseContentObserver(
+            [out] IIContentObserver** oldObserver);
+
+        /**
+         * Returns true if this observer is interested in notifications for changes
+         * made through the cursor the observer is registered with.
+         */
+        DeliverSelfNotifications(
+            [out] Boolean* result);
+
+        /**
+         * This method is called when a change occurs to the cursor that
+         * is being observed.
+         *
+         * @param selfChange true if the update was caused by a call to <code>commit</code> on the
+         *  cursor that is being observed.
+         */
+        OnChange(
+            [in] Boolean selfChange);
+
+        /**
+         * This method is called when a content change occurs.
+         * Includes the changed content Uri when available.
+         * <p>
+         * Subclasses should override this method to handle content changes.
+         * To ensure correct operation on older versions of the framework that
+         * did not provide a Uri argument, applications should also implement
+         * the {@link #onChange(boolean)} overload of this method whenever they
+         * implement the {@link #onChange(boolean, Uri)} overload.
+         * </p><p>
+         * Example implementation:
+         * <pre><code>
+         * // Implement the onChange(boolean) method to delegate the change notification to
+         * // the onChange(boolean, Uri) method to ensure correct operation on older versions
+         * // of the framework that did not have the onChange(boolean, Uri) method.
+         * {@literal @Override}
+         * public void onChange(boolean selfChange) {
+         *     onChange(selfChange, null);
+         * }
+         *
+         * // Implement the onChange(boolean, Uri) method to take advantage of the new Uri argument.
+         * {@literal @Override}
+         * public void onChange(boolean selfChange, Uri uri) {
+         *     // Handle change.
+         * }
+         * </code></pre>
+         * </p>
+         *
+         * @param selfChange True if this is a self-change notification.
+         * @param uri The Uri of the changed content, or null if unknown.
+         */
+        OnChange(
+            [in] Boolean selfChange,
+            [in] IUri* uri);
+
+        /**
+         * Dispatches a change notification to the observer. Includes the changed
+         * content Uri when available and also the user whose content changed.
+         *
+         * @param selfChange True if this is a self-change notification.
+         * @param uri The Uri of the changed content, or null if unknown.
+         * @param userId The user whose content changed. Can be either a specific
+         *         user or {@link UserHandle#USER_ALL}.
+         *
+         * @hide
+         */
+        OnChange(
+            [in] Boolean selfChange,
+            [in] IUri* uri,
+            [in] Int32 userId);
+
+        DispatchChange(
+            [in] Boolean selfChange);
+
+        /**
+         * Dispatches a change notification to the observer.
+         * Includes the changed content Uri when available.
+         * <p>
+         * If a {@link Handler} was supplied to the {@link ContentObserver} constructor,
+         * then a call to the {@link #onChange} method is posted to the handler's message queue.
+         * Otherwise, the {@link #onChange} method is invoked immediately on this thread.
+         * </p>
+         *
+         * @param selfChange True if this is a self-change notification.
+         * @param uri The Uri of the changed content, or null if unknown.
+         */
+        DispatchChange(
+            [in] Boolean selfChange,
+            [in] IUri* uri);
+
+        /**
+         * Dispatches a change notification to the observer. Includes the changed
+         * content Uri when available and also the user whose content changed.
+         * <p>
+         * If a {@link Handler} was supplied to the {@link ContentObserver} constructor,
+         * then a call to the {@link #onChange} method is posted to the handler's message queue.
+         * Otherwise, the {@link #onChange} method is invoked immediately on this thread.
+         * </p>
+         *
+         * @param selfChange True if this is a self-change notification.
+         * @param uri The Uri of the changed content, or null if unknown.
+         * @param userId The user whose content changed.
+         */
+        DispatchChange(
+            [in] Boolean selfChange,
+            [in] IUri* uri,
+            [in] Int32 userId);
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

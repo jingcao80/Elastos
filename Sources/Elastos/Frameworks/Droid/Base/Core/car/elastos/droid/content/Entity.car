@@ -1,0 +1,38 @@
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    interface IEntity {
+        GetEntityValues(
+            [out] IContentValues** entityValues);
+
+        GetSubValues(
+            [out] IArrayList** subValues);
+
+        AddSubValue(
+            [in] IUri* uri,
+            [in] IContentValues* values);
+
+        ToString(
+            [out] String* str);
+    }
+
+    interface IEntityNamedContentValues {
+        GetUri(
+            [out] IUri** uri);
+
+        GetValues(
+            [out] IContentValues** values);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

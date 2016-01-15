@@ -1,0 +1,37 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Prefs {
+    /**
+     * This interface is used by the {@link Preferences} class as factory class to
+     * create {@code Preferences} instances. This interface can be implemented and
+     * installed to replace the default preferences implementation.
+     *
+     * @see java.util.prefs.Preferences
+     *
+     * @since 1.4
+     */
+    interface IPreferencesFactory {
+        /**
+         * Returns the root node of the preferences hierarchy for the calling user
+         * context.
+         *
+         * @return the user preferences hierarchy root node.
+         */
+        UserRoot(
+            [out] IPreferences** outpre);
+
+        /**
+         * Returns the root node of the system preferences hierarchy.
+         *
+         * @return the system preferences hierarchy root node.
+         */
+        SystemRoot(
+            [out] IPreferences** outpre);
+    }
+
+    } // namespace Prefs
+    } // namespace Utility
+    } // namespace Elastos
+}

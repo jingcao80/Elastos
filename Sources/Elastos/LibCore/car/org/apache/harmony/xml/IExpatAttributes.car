@@ -1,0 +1,32 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xml {
+
+    /**
+     * Wraps native attribute array.
+     */
+    interface IExpatAttributes extends Org.Xml.Sax.IAttributes {
+        /**
+         * Gets the pointer to the parser. We need this so we can get to the
+         * interned string pool.
+         */
+        GetParserPointer(
+            [out] Int32* pointer);
+
+        /**
+         * Gets the pointer to the underlying attribute array. Can be 0 if the
+         * length is 0.
+         */
+        GetPointer(
+            [out] Int32* pointer);
+    }
+
+    } // namespace Xml
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

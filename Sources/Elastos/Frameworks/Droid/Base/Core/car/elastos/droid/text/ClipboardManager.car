@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * @deprecated Old text-only interface to the clipboard.  See
+     * {@link android.content.ClipboardManager} for the modern API.
+     */
+    //@Deprecated
+    interface IClipboardManager {
+        /**
+         * Returns the text on the clipboard.  It will eventually be possible
+         * to store types other than text too, in which case this will return
+         * null if the type cannot be coerced to text.
+         */
+        GetText(
+            [out] ICharSequence** text);
+
+        /**
+         * Sets the contents of the clipboard to the specified text.
+         */
+        SetText(
+            [in] ICharSequence* text);
+
+        /**
+         * Returns true if the clipboard contains text; false otherwise.
+         */
+        HasText(
+            [out] Boolean* result);
+    }
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

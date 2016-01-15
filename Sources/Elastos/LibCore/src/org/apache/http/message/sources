@@ -1,0 +1,49 @@
+
+TARGET_NAME= message
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc;
+
+SOURCES = BasicRequestLine.cpp
+SOURCES += BasicLineParser.cpp
+SOURCES += CBasicLineParser.cpp
+SOURCES += BasicTokenIterator.cpp
+SOURCES += CBasicTokenIterator.cpp
+SOURCES += BasicHeaderValueFormatter.cpp
+SOURCES += CBasicHeaderValueFormatter.cpp
+SOURCES += BasicHeaderValueParser.cpp
+SOURCES += CBasicHeaderValueParser.cpp
+SOURCES += BasicLineFormatter.cpp
+SOURCES += CBasicLineFormatter.cpp
+SOURCES += BasicHeaderElement.cpp
+SOURCES += CBasicHeaderElement.cpp
+SOURCES += AbstractHttpMessage.cpp
+SOURCES += CHeaderGroup.cpp
+SOURCES += BasicHttpResponse.cpp
+SOURCES += CBasicHttpResponse.cpp
+SOURCES += BasicHttpRequest.cpp
+SOURCES += CBasicHttpRequest.cpp
+SOURCES += BasicNameValuePair.cpp
+SOURCES += CBasicNameValuePair.cpp
+SOURCES += BasicListHeaderIterator.cpp
+SOURCES += CBasicListHeaderIterator.cpp
+SOURCES += BasicHeaderElementIterator.cpp
+SOURCES += CBasicHeaderElementIterator.cpp
+SOURCES += BasicHeaderIterator.cpp
+SOURCES += CBasicHeaderIterator.cpp
+SOURCES += BasicHeader.cpp
+SOURCES += CBasicHeader.cpp
+SOURCES += BufferedHeader.cpp
+SOURCES += CBufferedHeader.cpp
+SOURCES += BasicStatusLine.cpp
+SOURCES += CBasicStatusLine.cpp
+SOURCES += CParserCursor.cpp
+SOURCES += CBasicRequestLine.cpp
+SOURCES += BasicHttpEntityEnclosingRequest.cpp
+SOURCES += CBasicHttpEntityEnclosingRequest.cpp

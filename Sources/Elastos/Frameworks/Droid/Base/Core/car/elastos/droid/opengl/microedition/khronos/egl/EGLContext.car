@@ -1,0 +1,32 @@
+
+module
+{
+    interface Elastosx.Microedition.Khronos.Opengles.IGL;
+
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Egl {
+
+    interface IEGLContext {
+        GetGL(
+            [out] IGL** gl);
+
+        Equals(
+            [in] IInterface *object,
+            [out] Boolean *equals);
+
+        GetHashCode(
+            [out] Int32 *hashCode);
+    }
+
+    interface IEGLContextHelper {
+        GetEGL(
+            [out] IEGL** egl);
+    }
+
+    } // namepsace Egl
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

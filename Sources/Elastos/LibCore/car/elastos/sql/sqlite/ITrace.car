@@ -1,0 +1,20 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    interface ITrace {
+        /**
+         * Callback to trace (ie log) one SQL statement.
+         *
+         * @param stmt SQL statement string
+         */
+        Trace(
+            [in] String stmt);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

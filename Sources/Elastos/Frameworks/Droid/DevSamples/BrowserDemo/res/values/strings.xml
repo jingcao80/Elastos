@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, BrowserActivity!</string>
+    <string name="app_name">Browser</string>
+    <string name="edata">http://www.baidu.com</string>
+
+</resources>

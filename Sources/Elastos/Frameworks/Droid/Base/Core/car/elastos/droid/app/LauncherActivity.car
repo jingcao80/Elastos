@@ -1,0 +1,94 @@
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * An item in the list
+     */
+    [local]
+    interface ILauncherActivityListItem {
+        GetResolveInfo(
+            [out] IResolveInfo** resolveInfo);
+
+        SetResolveInfo(
+            [in] IResolveInfo* resolveInfo);
+
+        GetLabel(
+            [out] ICharSequence** label);
+
+        SetLabel(
+            [in] ICharSequence* label);
+
+        GetIcon(
+            [out] IDrawable** icon);
+
+        SetIcon(
+            [in] IDrawable* icon);
+
+        GetPackageName(
+            [out] String* result);
+
+        SetPackageName(
+            [in] String result);
+
+        GetClassName(
+            [out] String* name);
+
+        SetClassName(
+            [in] String name);
+
+        SetExtras(
+            [in] IBundle* bundle);
+
+        GetExtras(
+            [out] IBundle** bundle);
+    }
+
+    /**
+     * Utility class to resize icons to match default icon size.
+     */
+    interface ILauncherActivityIconResizer {
+        /**
+         * Returns a Drawable representing the thumbnail of the specified Drawable.
+         * The size of the thumbnail is defined by the dimension
+         * android.R.dimen.launcher_application_icon_size.
+         *
+         * This method is not thread-safe and should be invoked on the UI thread only.
+         *
+         * @param icon The icon to get a thumbnail of.
+         *
+         * @return A thumbnail for the specified icon or the icon itself if the
+         *         thumbnail could not be created.
+         */
+        CreateIconThumbnail(
+            [in] IDrawable* icon,
+            [out] IDrawable** result);
+    }
+
+    /**
+     * Displays a list of all activities which can be performed
+     * for a given intent. Launches when clicked.
+     *
+     */
+    /**
+     * @Invovle
+     * interface IListActivity
+     */
+    interface ILauncherActivity {
+        MakeListItems(
+            [out] IList** items);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

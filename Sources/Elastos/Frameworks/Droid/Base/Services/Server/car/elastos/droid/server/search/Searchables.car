@@ -1,0 +1,43 @@
+module
+{
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.App.ISearchableInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Search {
+
+    [local]
+    interface ISearchables
+    {
+        const String GOOGLE_SEARCH_COMPONENT_NAME = "com.android.googlesearch/.GoogleSearch";
+        const String ENHANCED_GOOGLE_SEARCH_COMPONENT_NAME = "com.google.android.providers.enhancedgooglesearch/.Launcher";
+
+        GetSearchableInfo(
+            [in] IComponentName* cName,
+            [out] ISearchableInfo** info);
+
+        BuildSearchableList();
+
+        GetSearchablesList(
+            [out] IObjectContainer** infos);
+
+        GetSearchablesInGlobalSearchList(
+            [out] IObjectContainer** infos);
+
+        GetGlobalSearchActivities(
+            [out] IObjectContainer** infos);
+
+        GetGlobalSearchActivity(
+            [out] IComponentName** cName);
+
+        GetWebSearchActivity(
+            [out] IComponentName** cName);
+    }
+
+    } // namespace Power
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

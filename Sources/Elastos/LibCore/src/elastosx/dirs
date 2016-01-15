@@ -1,0 +1,6 @@
+
+DIRS = crypto
+DIRS += net
+DIRS += security
+DIRS += sql
+DIRS += xml

@@ -1,0 +1,71 @@
+
+module
+{
+    interface Elastos.Droid.Utility.ISize;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Params {
+
+    /**
+     * Immutable class to store a time duration for any given format/size combination.
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
+     * @see CameraCharacteristics#SCALER_AVAILABLE_MIN_FRAME_DURATIONS
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STALL_DURATIONS
+     *
+     * @hide
+     */
+    interface IStreamConfigurationDuration {
+        /**
+         * Get the internal image {@code format} in this stream configuration duration
+         *
+         * @return an integer format
+         *
+         * @see ImageFormat
+         * @see PixelFormat
+         */
+        GetFormat(
+            [out] Int32* format);
+
+        /**
+         * Return the width of the stream configuration.
+         *
+         * @return width > 0
+         */
+        GetWidth(
+            [out] Int32* width);
+
+        /**
+         * Return the height of the stream configuration duration
+         *
+         * @return height > 0
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * Convenience method to return the size of this stream configuration duration.
+         *
+         * @return a Size with positive width and height
+         */
+        GetSize(
+            [out] ISize** size);
+
+        /**
+         * Get the time duration (in nanoseconds).
+         *
+         * @return long >= 0
+         */
+        GetDuration(
+            [out] Int64* duration);
+    }
+
+    } // namespace Params
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

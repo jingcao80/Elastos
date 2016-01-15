@@ -1,0 +1,147 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    interface INetworkControllerDataUsageInfo {
+        SetCarrier(
+            [in] String carrier);
+
+        GetCarrier(
+            [out] String* carrier);
+
+        SetPeriod(
+            [in] String period);
+
+        GetPeriod(
+            [out] String* period);
+
+        SetLimitLevel(
+            [in] Int64 level);
+
+        GetLimitLevel(
+            [out] Int64* level);
+
+        SetWarningLevel(
+            [in] Int64 level);
+
+        GetWarningLevel(
+            [out] Int64* level);
+
+        SetUsageLevel(
+            [in] Int64 level);
+
+        GetUsageLevel(
+            [out] Int64* level);
+    }
+
+    interface INetworkControllerAccessPoint {
+        const Int32 NO_NETWORK = -1;  // see WifiManager
+
+        SetNetworkId(
+            [in] Int32 id);
+
+        GetNetworkId(
+            [out] Int32* id);
+
+        SetIconId(
+            [in] Int32 id);
+
+        GetIconId(
+            [out] Int32* id);
+
+        SetSsid(
+            [in] String ssid);
+
+        GetSsid(
+            [out] String* ssid);
+
+        IsConnected(
+            [out] Boolean* result);
+
+        SetIsConnected(
+            [in] Boolean connected);
+
+        // 0 - 5
+        SetLevel(
+            [in] Int32 id);
+
+        GetLevel(
+            [out] Int32* id);
+    }
+
+    [deprecated]
+    interface INetworkControllerAccessPointCallback {
+        OnAccessPointsChanged(
+            [in] ArrayOf<INetworkControllerAccessPoint*>* accessPoints);
+    }
+
+    interface INetworkSignalChangedCallback {
+        OnWifiSignalChanged(
+            [in] Boolean enabled,
+            [in] Int32 wifiSignalIconId,
+            [in] String wifitSignalContentDescriptionId,
+            [in] String description);
+
+        OnMobileDataSignalChanged(
+            [in] Boolean enabled,
+            [in] Int32 mobileSignalIconId,
+            [in] String mobileSignalContentDescriptionId,
+            [in] Int32 dataTypeIconId,
+            [in] String dataTypeContentDescriptionId,
+            [in] String description);
+
+        OnAirplaneModeChanged(
+            [in] Boolean enabled);
+    }
+
+    [local]
+    interface INetworkController {
+        HasMobileDataFeature(
+            [out] Boolean* result);
+
+        AddNetworkSignalChangedCallback(
+            [in] INetworkSignalChangedCallback* cb);
+
+        RemoveNetworkSignalChangedCallback(
+            [in] INetworkSignalChangedCallback* cb);
+
+        SetWifiEnabled(
+            [in] Boolean stacked);
+
+        AddAccessPointCallback(
+            [in] INetworkControllerAccessPointCallback* cb);
+
+        RemoveAccessPointCallback(
+            [in] INetworkControllerAccessPointCallback* cb);
+
+        ScanForAccessPoints();
+
+        Connect(
+            [in] INetworkControllerAccessPoint* ap);
+
+        IsMobileDataSupported(
+            [out] Boolean* result);
+
+        IsMobileDataEnabled(
+            [out] Boolean* result);
+
+        SetMobileDataEnabled(
+            [in] Boolean enabled);
+
+        GetDataUsageInfo(
+            [out] INetworkControllerDataUsageInfo** result);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

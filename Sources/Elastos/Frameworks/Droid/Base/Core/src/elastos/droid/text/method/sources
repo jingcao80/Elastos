@@ -1,0 +1,53 @@
+
+TARGET_NAME= method
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AllCapsTransformationMethod.cpp
+SOURCES += ArrowKeyMovementMethod.cpp
+SOURCES += BaseKeyListener.cpp
+SOURCES += CBaseKeyListenerHelper.cpp
+SOURCES += BaseMovementMethod.cpp
+SOURCES += CArrowKeyMovementMethodHelper.cpp
+SOURCES += CDateKeyListenerHelper.cpp
+SOURCES += CDateTimeKeyListenerHelper.cpp
+SOURCES += CDialerKeyListenerHelper.cpp
+SOURCES += CDigitsKeyListenerHelper.cpp
+SOURCES += CLinkMovementMethodHelper.cpp
+SOURCES += CPasswordTransformationMethod.cpp
+SOURCES += CPasswordTransformationMethodHelper.cpp
+SOURCES += CQwertyKeyListenerHelper.cpp
+SOURCES += CScrollingMovementMethodHelper.cpp
+SOURCES += CSingleLineTransformationMethod.cpp
+SOURCES += CSingleLineTransformationMethodHelper.cpp
+SOURCES += CTextKeyListenerHelper.cpp
+SOURCES += CTimeKeyListenerHelper.cpp
+SOURCES += CTouch.cpp
+SOURCES += DateKeyListener.cpp
+SOURCES += DateTimeKeyListener.cpp
+SOURCES += DialerKeyListener.cpp
+SOURCES += DigitsKeyListener.cpp
+SOURCES += LinkMovementMethod.cpp
+SOURCES += MetaKeyKeyListener.cpp
+SOURCES += CMetaKeyKeyListenerHelper.cpp
+SOURCES += NumberKeyListener.cpp
+SOURCES += QwertyKeyListener.cpp
+SOURCES += ReplacementTransformationMethod.cpp
+SOURCES += ScrollingMovementMethod.cpp
+SOURCES += TextKeyListener.cpp
+SOURCES += TimeKeyListener.cpp
+SOURCES += Touch.cpp
+SOURCES += WordIterator.cpp
+SOURCES += CMultiTapKeyListenerHelper.cpp
+SOURCES += CHideReturnsTransformationMethodHelper.cpp
+SOURCES += HideReturnsTransformationMethod.cpp
+SOURCES += MultiTapKeyListener.cpp
+SOURCES += CharacterPickerDialog.cpp
+SOURCES += method.cpp
+

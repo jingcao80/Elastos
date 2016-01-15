@@ -1,0 +1,141 @@
+module {
+
+    using interface Elastos.Utility.ILocale;
+
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    /**
+     * A provider of user defined words for input methods to use for predictive text input.
+     * Applications and input methods may add words into the dictionary. Words can have associated
+     * frequency information and locale information.
+     */
+    interface IUserDictionary {
+        /** Authority string for this provider. */
+        const String AUTHORITY = "user_dictionary";
+
+        /**
+         * The content:// style URL for this provider
+         */
+        GetCONTENT_URI(
+            [out] IUri** uri);
+    }
+
+    /**
+     * Contains the user defined words.
+     */
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    [local]
+    interface IUserDictionaryWords {
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of words.
+         */
+        const String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.google.userword";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} sub-directory of a single word.
+         */
+        const String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.google.userword";
+
+        const String _ID = "_id";//BaseColumns._ID;
+
+        /**
+         * The word column.
+         * <p>TYPE: TEXT</p>
+         */
+        const String WORD = "word";
+
+        /**
+         * The frequency column. A value between 1 and 255. Higher values imply higher frequency.
+         * <p>TYPE: INTEGER</p>
+         */
+        const String FREQUENCY = "frequency";
+
+        /**
+         * The locale that this word belongs to. Null if it pertains to all
+         * locales. Locale is as defined by the string returned by Locale.toString().
+         * <p>TYPE: TEXT</p>
+         */
+        const String LOCALE = "locale";
+
+        /**
+         * The uid of the application that inserted the word.
+         * <p>TYPE: INTEGER</p>
+         */
+        const String APP_ID = "appid";
+
+        /**
+         * An optional shortcut for this word. When the shortcut is typed, supporting IMEs should
+         * suggest the word in this row as an alternate spelling too.
+         */
+        const String SHORTCUT = "shortcut";
+
+        /**
+         * //@Deprecated Use {@link #addWord(Context, String, int, String, Locale)}.
+         */
+        //@Deprecated
+        const Int32 LOCALE_TYPE_ALL = 0;
+
+        /**
+         * //@Deprecated Use {@link #addWord(Context, String, int, String, Locale)}.
+         */
+        //@Deprecated
+        const Int32 LOCALE_TYPE_CURRENT = 1;
+
+        /**
+         * Sort by descending order of frequency.
+         */
+        const String DEFAULT_SORT_ORDER = /*FREQUENCY + */"frequency DESC";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        /** Adds a word to the dictionary, with the given frequency and the specified
+         *  specified locale type.
+         *
+         *  @Deprecated Please use
+         *  {@link #addWord(Context, String, int, String, Locale)} instead.
+         *
+         *  @param context the current application context
+         *  @param word the word to add to the dictionary. This should not be null or
+         *  empty.
+         *  @param localeType the locale type for this word. It should be one of
+         *  {@link #LOCALE_TYPE_ALL} or {@link #LOCALE_TYPE_CURRENT}.
+         */
+        AddWord(
+            [in] IContext* context,
+            [in] String word,
+            [in] Int32 frequency,
+            [in] Int32 localeType);
+
+        /** Adds a word to the dictionary, with the given frequency and the specified
+         *  locale type.
+         *
+         *  @param context the current application context
+         *  @param word the word to add to the dictionary. This should not be null or
+         *  empty.
+         *  @param shortcut optional shortcut spelling for this word. When the shortcut
+         *  is typed, the word may be suggested by applications that support it. May be null.
+         *  @param locale the locale to insert the word for, or null to insert the word
+         *  for all locales.
+         */
+        AddWord(
+            [in] IContext* context,
+            [in] String word,
+            [in] Int32 frequency,
+            [in] String shortcut,
+            [in] ILocale* locale);
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+}

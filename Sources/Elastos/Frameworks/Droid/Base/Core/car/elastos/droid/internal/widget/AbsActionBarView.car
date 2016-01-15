@@ -1,0 +1,80 @@
+
+module
+{
+    interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface IAbsActionBarView {
+        /**
+         * Sets whether the bar should be split right now, no questions asked.
+         * @param split true if the bar should split
+         */
+        SetSplitToolbar(
+            [in] Boolean split);
+
+        /**
+         * Sets whether the bar should split if we enter a narrow screen configuration.
+         * @param splitWhenNarrow true if the bar should check to split after a config change
+         */
+        SetSplitWhenNarrow(
+            [in] Boolean splitWhenNarrow);
+
+        SetContentHeight(
+            [in] Int32 height);
+
+        GetContentHeight(
+            [out] Int32* height);
+
+        SetSplitView(
+            [in] IViewGroup* splitView);
+
+        GetAnimatedVisibility(
+            [out] Int32* visible);
+
+        AnimateToVisibility(
+            [in] Int32 visibility);
+
+        ShowOverflowMenu(
+            [out] Boolean* menu);
+
+        PostShowOverflowMenu();
+
+        HideOverflowMenu(
+            [out] Boolean* menu);
+
+        IsOverflowMenuShowing(
+            [out] Boolean* showing);
+
+        IsOverflowMenuShowPending(
+            [out] Boolean* isOverflowMenuShowPending);
+
+        IsOverflowReserved(
+            [out] Boolean* reserved);
+
+        CanShowOverflowMenu(
+            [out] Boolean* canShowOverflowMenu);
+
+        DismissPopupMenus();
+    }
+
+    } // namespace Widget
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

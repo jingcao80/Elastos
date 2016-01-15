@@ -1,0 +1,26 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Interfaces {
+
+    /**
+     * The base interface for PKCS#1 RSA public and private keys.
+     */
+    interface IRSAKey {
+        /**
+         * Returns the modulus.
+         *
+         * @return the modulus.
+         */
+        GetModulus(
+            [out] IBigInteger** modulus);
+    }
+
+    } // namespace Interfaces
+    } // namespace Security
+    } // namespace Elastos
+}

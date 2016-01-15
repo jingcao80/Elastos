@@ -1,0 +1,84 @@
+
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * @Involve
+     * interface IFrameLayout
+     */
+    [deprecated]
+    interface IPanelView {
+        const Boolean DEBUG = FALSE;
+//        const String TAG = PanelView.class.getSimpleName();
+
+        SetTouchDisabled(
+            [in] Boolean disabled);
+
+        GetName(
+            [out] String* result);
+
+        SetExpandedHeight(
+            [in] Float height);
+
+        SetExpandedHeightInternal(
+            [in] Float h);
+
+        SetExpandedFraction(
+            [in] Float frac);
+
+        GetExpandedHeight(
+            [out] Float* result);
+
+        GetExpandedFraction(
+            [out] Float* result);
+
+        IsFullyExpanded(
+            [out] Boolean* result);
+
+        IsFullyCollapsed(
+            [out] Boolean* result);
+
+        IsCollapsing(
+            [out] Boolean* result);
+
+        IsTracking(
+            [out] Boolean* result);
+
+        SetBar(
+            [in] IPanelBar* panelBar);
+
+        Collapse(
+            [in] Boolean delayed);
+
+        Expand();
+
+        CancelPeek();
+
+        InstantExpand();
+
+        InstantCollapse();
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
+
+        ResetViews();
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

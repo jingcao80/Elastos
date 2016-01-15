@@ -1,0 +1,31 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Scheme {
+
+    interface IPlainSocketFactory {
+    }
+
+    interface IPlainSocketFactoryHelper {
+
+        /**
+         * Gets the singleton instance of this class.
+         * @return the one and only plain socket factory
+         */
+        GetSocketFactory(
+            [out] IPlainSocketFactory** socketFactory);
+
+    }
+
+    } // namespace Scheme
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,143 @@
+module
+{
+    merge("droid/system/IStructAddrinfo.car");
+    merge("droid/system/IStructFlock.car");
+    merge("droid/system/IStructGroupReq.car");
+    merge("droid/system/IStructGroupSourceReq.car");
+    merge("droid/system/IStructLinger.car");
+    merge("droid/system/IStructPasswd.car");
+    merge("droid/system/IStructPollfd.car");
+    merge("droid/system/IStructStat.car");
+    merge("droid/system/IStructStatVfs.car");
+    merge("droid/system/IStructTimeval.car");
+    merge("droid/system/IStructUcred.car");
+    merge("droid/system/IStructUtsname.car");
+    merge("droid/system/IZygoteHooks.car");
+
+    interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace System {
+
+    class CStructAddrinfo {
+        interface IStructAddrinfo;
+    }
+
+    class CStructGroupReq {
+        constructor(
+            [in] Int32 gr_interface,
+            [in] IInetAddress* gr_group);
+
+        interface IStructGroupReq;
+    }
+
+    class CStructLinger {
+        constructor(
+            [in] Int32 l_onoff,
+            [in] Int32 l_linger);
+
+        interface IStructLinger;
+    }
+
+    class CStructPasswd {
+        constructor(
+            [in] String pw_name,
+            [in] Int32 pw_uid,
+            [in] Int32 pw_gid,
+            [in] String pw_dir,
+            [in] String pw_shell);
+
+        interface IStructPasswd;
+    }
+
+    class CStructPollfd {
+        interface IStructPollfd;
+    }
+
+    class CStructStat {
+        constructor(
+            [in] Int64 dev,
+            [in] Int64 ino,
+            [in] Int32 mode,
+            [in] Int64 nlink,
+            [in] Int32 uid,
+            [in] Int32 gid,
+            [in] Int64 rdev,
+            [in] Int64 size,
+            [in] Int64 atime,
+            [in] Int64 mtime,
+            [in] Int64 ctime,
+            [in] Int64 blksize,
+            [in] Int64 blocks);
+
+        interface IStructStat;
+    }
+
+    class CStructStatVfs {
+        constructor(
+            [in] Int64 f_bsize,
+            [in] Int64 f_frsize,
+            [in] Int64 f_blocks,
+            [in] Int64 f_bfree,
+            [in] Int64 f_bavail,
+            [in] Int64 f_files,
+            [in] Int64 f_ffree,
+            [in] Int64 f_favail,
+            [in] Int64 f_fsid,
+            [in] Int64 f_flag,
+            [in] Int64 f_namemax);
+
+        interface IStructStatVfs;
+    }
+
+    class CStructFlock {
+        interface IStructFlock;
+    }
+
+    class CStructTimeval {
+        constructor(
+            [in] Int64 sec,
+            [in] Int64 usec);
+
+        interface IStructTimeval;
+    }
+
+    class CStructUcred {
+        constructor(
+            [in] Int32 pid,
+            [in] Int32 uid,
+            [in] Int32 gid);
+
+        interface IStructUcred;
+    }
+
+    class CStructUtsname {
+        constructor(
+            [in] String sysname,
+            [in] String nodename,
+            [in] String release,
+            [in] String ver,
+            [in] String machine);
+
+        interface IStructUtsname;
+    }
+
+    class CStructGroupSourceReq {
+        constructor(
+            [in] Int32 itf,
+            [in] IInetAddress* group,
+            [in] IInetAddress* source);
+
+        interface IStructGroupSourceReq;
+    }
+
+    class CZygoteHooks {
+        interface IZygoteHooks;
+    }
+
+    } // namespace System
+    } // namespace Droid
+    } // namespace Elastos
+
+}

@@ -1,0 +1,67 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * An input channel specifies the file descriptors used to send input events to
+     * a window in another process.  It is Parcelable so that it can be sent
+     * to the process that is to receive events.  Only one thread should be reading
+     * from an InputChannel at a time.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IInputChannel {
+        /**
+         * Gets the name of the input channel.
+         * @return The input channel name.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Disposes the input channel.
+         * Explicitly releases the reference this object is holding on the input channel.
+         * When all references are released, the input channel will be closed.
+         */
+        Dispose();
+
+        /**
+         * Transfers ownership of the internal state of the input channel to another
+         * instance and invalidates this instance.  This is used to pass an input channel
+         * as an out parameter in a binder call.
+         * @param other The other input channel instance.
+         */
+        TransferTo(
+            [in] IInputChannel* outParameter);
+
+        /**
+         * Duplicates the input channel.
+         */
+        Dup(
+            [out] IInputChannel** ic);
+    }
+
+    interface IInputChannelHelper {
+        /**
+         * Creates a new input channel pair.  One channel should be provided to the input
+         * dispatcher and the other to the application's input queue.
+         * @param name The descriptive (non-unique) name of the channel pair.
+         * @return A pair of input channels.  The first channel is designated as the
+         * server channel and should be used to publish input events.  The second channel
+         * is designated as the client channel and should be used to consume input events.
+         */
+        OpenInputChannelPair(
+            [in] String name,
+            [out, callee] ArrayOf<IInputChannel*>* inputChannel);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

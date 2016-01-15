@@ -1,0 +1,48 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+$WITH all interfaces DO
+$   IF attrib is "filter"
+$       WITH all parents_and_me DO
+$           WITH all methods DO
+
+${type} _${class.name}::${name}WithPriority(Int32 cFlags$^
+$           WITH all parameters DO
+, ${type} ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+)
+{
+    ECode ec;
+
+    Boolean _bFirst_ = !_Impl_CheckHelperInfoFlag(HELPER_CALLING_CALLBACK_FILTER);
+
+    if (_bFirst_) {
+        _Impl_SetHelperInfoFlag(HELPER_CALLING_CALLBACK_FILTER, TRUE);
+        ec = ${name}Filter(cFlags$^
+$           WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+        _Impl_SetHelperInfoFlag(HELPER_CALLING_CALLBACK_FILTER, FALSE);
+        return ec;
+    }
+    else {
+        _Impl_SetHelperInfoFlag(HELPER_CHILD_CALL_PARENT, TRUE);
+
+        ec = _m_pSuperCallbackTrigger->${name}WithPriority(cFlags$^
+$           WITH all parameters DO
+, ${prefixingname(parameter)}$^
+$           END DO ;; all parameters
+);
+        _Impl_SetHelperInfoFlag(HELPER_CHILD_CALL_PARENT, FALSE);
+        return ec;   
+    }
+}
+
+$           END DO ;; all methods
+$       END DO ;; all parents_and_me
+$   END IF ;; attrib is "filter"
+$END DO ;; all interfaces

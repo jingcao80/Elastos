@@ -1,0 +1,83 @@
+module
+{
+    merge("text/utility/Rfc822Token.car");
+    merge("text/utility/Rfc822Tokenizer.car");
+    merge("text/method/CharacterPickerDialog.car");
+
+    interface Elastos.Droid.App.IDialog;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IDialogInterface;
+    interface Elastos.Droid.Text.IEditable;
+    interface Elastos.Droid.View.IKeyEventCallback;
+    interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewOnClickListener;
+    interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Droid.Widget.ITokenizer;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Utility {
+
+    class CRfc822Token {
+        constructor(
+            [in] String name,
+            [in] String address,
+            [in] String comment);
+
+        interface IRfc822Token;
+    }
+
+    singleton class CRfc822TokenHelper{
+        interface IRfc822TokenHelper;
+    }
+
+    class CRfc822Tokenizer {
+        interface IRfc822Tokenizer;
+        interface ITokenizer;
+    }
+
+    singleton class CRfc822TokenizerHelper{
+        interface IRfc822TokenizerHelper;
+    }
+
+
+    } // Utility
+    } // Text
+    } // Droid
+    } // Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    [deprecated, local]
+    class CCharacterPickerDialog {
+        constructor(
+            [in] IContext* context,
+            [in] IView* view,
+            [in] IEditable* text,
+            [in] String options,
+            [in] Boolean insert);
+
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+        interface ICharacterPickerDialog;
+        interface IAdapterViewOnItemClickListener;
+        interface IViewOnClickListener;
+    }
+
+    } // namespace Method
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+
+}

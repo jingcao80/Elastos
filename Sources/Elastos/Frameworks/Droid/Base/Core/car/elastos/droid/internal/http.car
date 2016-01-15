@@ -1,0 +1,243 @@
+module
+{
+    merge("http/multipart/Part.car");
+    merge("http/multipart/PartBase.car");
+    merge("http/multipart/PartSource.car");
+    merge("http/multipart/ByteArrayPartSource.car");
+    merge("http/multipart/FilePart.car");
+    merge("http/multipart/FilePartSource.car");
+    merge("http/multipart/MultipartEntity.car");
+    merge("http/multipart/StringPart.car");
+    merge("http/HttpDateTime.car");
+
+    using interface Elastos.IO.IFile;
+    using interface Org.Apache.Http.IHttpEntity;
+    using interface Org.Apache.Http.Entity.IAbstractHttpEntity;
+    using interface Org.Apache.Http.Params.IHttpParams;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Http {
+    namespace Multipart {
+
+    [deprecated]
+    class CByteArrayPartSource {
+        /**
+         * Constructor for ByteArrayPartSource.
+         *
+         * @param fileName the name of the file these bytes represent
+         * @param bytes the content of this part
+         */
+        constructor(
+            [in] String fileName,
+            [in] ArrayOf<Byte>* bytes);
+
+        interface IByteArrayPartSource;
+        interface IPartSource;
+    }
+
+    class CFilePart {
+        /**
+         * FilePart Constructor.
+         *
+         * @param name the name for this part
+         * @param partSource the source for this part
+         * @param contentType the content type for this part, if <code>null</code> the
+         * {@link #DEFAULT_CONTENT_TYPE default} is used
+         * @param charset the charset encoding for this part, if <code>null</code> the
+         * {@link #DEFAULT_CHARSET default} is used
+         */
+        constructor(
+            [in] String name,
+            [in] IPartSource* partSource,
+            [in] String contentType,
+            [in] String charset);
+
+        /**
+         * FilePart Constructor.
+         *
+         * @param name the name for this part
+         * @param partSource the source for this part
+         */
+        constructor(
+            [in] String name,
+            [in] IPartSource* partSource);
+
+        /**
+         * FilePart Constructor.
+         *
+         * @param name the name of the file part
+         * @param file the file to post
+         *
+         * @throws FileNotFoundException if the <i>file</i> is not a normal
+         * file or if it is not readable.
+         */
+        constructor(
+            [in] String name,
+            [in] IFile* file);
+
+        /**
+         * FilePart Constructor.
+         *
+         * @param name the name of the file part
+         * @param file the file to post
+         * @param contentType the content type for this part, if <code>null</code> the
+         * {@link #DEFAULT_CONTENT_TYPE default} is used
+         * @param charset the charset encoding for this part, if <code>null</code> the
+         * {@link #DEFAULT_CHARSET default} is used
+         *
+         * @throws FileNotFoundException if the <i>file</i> is not a normal
+         * file or if it is not readable.
+         */
+        constructor(
+            [in] String name,
+            [in] IFile* file,
+            [in] String contentType,
+            [in] String charset);
+
+        /**
+         * FilePart Constructor.
+         *
+         * @param name the name of the file part
+         * @param fileName the file name
+         * @param file the file to post
+         *
+         * @throws FileNotFoundException if the <i>file</i> is not a normal
+         * file or if it is not readable.
+         */
+        constructor(
+            [in] String name,
+            [in] String fileName,
+            [in] IFile* file);
+
+        /**
+         * FilePart Constructor.
+         *
+         * @param name the name of the file part
+         * @param fileName the file name
+         * @param file the file to post
+         * @param contentType the content type for this part, if <code>null</code> the
+         * {@link #DEFAULT_CONTENT_TYPE default} is used
+         * @param charset the charset encoding for this part, if <code>null</code> the
+         * {@link #DEFAULT_CHARSET default} is used
+         *
+         * @throws FileNotFoundException if the <i>file</i> is not a normal
+         * file or if it is not readable.
+         */
+        constructor(
+            [in] String name,
+            [in] String fileName,
+            [in] IFile* file,
+            [in] String contentType,
+            [in] String charset);
+
+        interface IFilePart;
+        interface IPartBase;
+        interface IPart;
+    }
+
+    class CFilePartSource {
+        /**
+         * Constructor for FilePartSource.
+         *
+         * @param file the FilePart source File.
+         *
+         * @throws FileNotFoundException if the file does not exist or
+         * cannot be read
+         */
+        constructor(
+            [in] IFile* file);
+
+        /**
+         * Constructor for FilePartSource.
+         *
+         * @param fileName the file name of the FilePart
+         * @param file the source File for the FilePart
+         *
+         * @throws FileNotFoundException if the file does not exist or
+         * cannot be read
+         */
+        constructor(
+            [in] String fileName,
+            [in] IFile* file);
+
+        interface IFilePartSource;
+        interface IPartSource;
+    }
+
+    [deprecated, local]
+    class CMultipartEntity {
+        /**
+         * Creates a new multipart entity containing the given parts.
+         * @param parts The parts to include.
+         * @param params The params of the HttpMethod using this entity.
+         */
+        constructor(
+            [in] ArrayOf<IPart*>* parts,
+            [in] IHttpParams* params);
+
+        constructor(
+            [in] ArrayOf<IPart*>* parts);
+
+        interface IMultipartEntity;
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+    }
+
+    singleton class CPartHelper {
+        interface IPartHelper;
+    }
+
+    class CStringPart {
+        /**
+         * Constructor.
+         *
+         * @param name The name of the part
+         * @param value the string to post
+         */
+        constructor(
+            [in] String name,
+            [in] String value);
+
+        /**
+         * Constructor.
+         *
+         * @param name The name of the part
+         * @param value the string to post
+         * @param charset the charset to be used to encode the string, if <code>null</code>
+         * the {@link #DEFAULT_CHARSET default} is used
+         */
+        constructor(
+            [in] String name,
+            [in] String value,
+            [in] String charset);
+
+        interface IStringPart;
+        interface IPartBase;
+        interface IPart;
+    }
+
+    } // namespace Multipart
+    } // namespace Http
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Http {
+
+    /**
+     * Helper for parsing an HTTP date.
+     */
+    singleton class CHttpDateTime {
+        interface IHttpDateTime;
+    }
+
+    } // namespace Http
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

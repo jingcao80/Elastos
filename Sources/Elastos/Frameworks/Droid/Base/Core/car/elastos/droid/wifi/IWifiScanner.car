@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IMessenger;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IIWifiScanner {
+        GetMessenger(
+            [out] IMessenger** result);
+
+        GetAvailableChannels(
+            [in] Int32 band,
+            [out] IBundle** result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,67 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * The interface common to checksum classes such as Adler32 and CRC32.
+     *
+     * @sa Adler32
+     * @sa CRC32
+     */
+    [deprecated]
+    interface IChecksum {
+        /**
+         * Returns the current calculated checksum value.
+         *
+         * @return the checksum.
+         */
+        GetValue(
+            [out] Int64* value);
+
+        /**
+         * Resets the checksum value applied before beginning calculations on a new
+         * stream of data.
+         */
+        Reset();
+
+        /**
+         * Updates the checksum value with the given byte.
+         *
+         * @param val
+         *            the byte to update the checksum with.
+         */
+        Update(
+            [in] Int32 val);
+
+        /**
+         * Updates this checksum with the bytes contained in buffer {buf}.
+         *
+         * @param buf
+         *            the buffer holding the data to update the checksum with.
+         */
+        Update(
+            [in] ArrayOf<Byte>* buffer);
+
+        /**
+         * Updates the checksum with the given bytes.
+         *
+         * @param buf
+         *            the byte array from which to read the bytes.
+         * @param off
+         *            the initial position in {buf} to read the bytes from.
+         * @param nbytes
+         *            the number of bytes to read from {buf}.
+         */
+        Update(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 off,
+            [in] Int32 nbytes);
+    }
+
+    } // namespace Zip
+    } // namespace Utility
+    } // namespace Elastos
+}

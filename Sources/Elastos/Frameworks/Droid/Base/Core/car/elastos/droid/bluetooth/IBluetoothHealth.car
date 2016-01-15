@@ -1,0 +1,69 @@
+
+module
+{
+    using interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+    interface Elastos.Droid.Bluetooth.IBluetoothHealthAppConfiguration;
+    interface Elastos.Droid.Bluetooth.IIBluetoothHealthCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * API for Bluetooth Health service
+         *
+         * {@hide}
+         */
+        [deprecated]
+        interface IIBluetoothHealth
+        {
+            RegisterAppConfiguration(
+                [in] IBluetoothHealthAppConfiguration* config,
+                [in] IIBluetoothHealthCallback* healthCallback,
+                [out] Boolean* result);
+
+            UnregisterAppConfiguration(
+                [in] IBluetoothHealthAppConfiguration* config,
+                [out] Boolean* result);
+
+            ConnectChannelToSource(
+                [in] IBluetoothDevice* device,
+                [in] IBluetoothHealthAppConfiguration* config,
+                [out] Boolean* result);
+
+            ConnectChannelToSink(
+                [in] IBluetoothDevice* device,
+                [in] IBluetoothHealthAppConfiguration* config,
+                [in] Int32 channelType,
+                [out] Boolean* result);
+
+            DisconnectChannel(
+                [in] IBluetoothDevice* device,
+                [in] IBluetoothHealthAppConfiguration* config,
+                [in] Int32 id,
+                [out] Boolean* result);
+
+            GetMainChannelFd(
+                [in] IBluetoothDevice* device,
+                [in] IBluetoothHealthAppConfiguration* config,
+                [out] IParcelFileDescriptor** fd);
+
+            // Mike TODO: wait for List car interface
+            GetConnectedHealthDevices(
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetHealthDevicesMatchingConnectionStates(
+                [in] ArrayOf<Int32>* states,
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetHealthDeviceConnectionState(
+                [in] IBluetoothDevice* device,
+                [out] Int32* state);
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

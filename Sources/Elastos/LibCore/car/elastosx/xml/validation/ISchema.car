@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Xml {
+    namespace Validation {
+
+    interface ISchema {
+
+    /**
+     * Creates a new {@link Validator} for this {@link Schema}.
+     *
+     * <p>
+     * A validator enforces/checks the set of constraints this object
+     * represents.
+     *
+     * @return
+     *      Always return a non-null valid object.
+     */
+        NewValidator(
+            [out] IValidator** validator);
+
+    /**
+     * Creates a new {@link ValidatorHandler} for this {@link Schema}.
+     *
+     * @return
+     *      Always return a non-null valid object.
+     */
+        NewValidatorHandler(
+            [out] IValidatorHandler** handler);
+
+    }
+
+    } // namespace Validation
+    } // namespace Xml
+    } // namespace Elastosx
+}

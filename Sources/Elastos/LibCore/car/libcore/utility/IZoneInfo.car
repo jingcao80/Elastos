@@ -1,0 +1,120 @@
+module
+{
+    interface Libcore.IO.IBufferIterator;
+
+    namespace Libcore{
+    namespace Utility{
+
+    /**
+     * @Involve
+     * interface ITimeZone;
+     */
+
+    interface IZoneInfo {
+    }
+
+    interface IZoneInfoHelper {
+        MakeTimeZone(
+            [in] String id,
+            [in] IBufferIterator* it,
+            [out] IZoneInfo** zoneInfo);
+    }
+
+    interface IOffsetInterval {
+         ContainsWallTime(
+            [in] Int64 wallTimeSeconds,
+            [out] Boolean* result);
+
+         GetIsDst(
+            [out] Int32* result);
+
+         GetTotalOffsetSeconds(
+            [out] Int32* result);
+
+         GetEndWallTimeSeconds(
+            [out] Int64* result);
+
+         GetStartWallTimeSeconds(
+            [out] Int64* result);
+    }
+
+    interface IOffsetIntervalHelper {
+        Create(
+            [in] IZoneInfo* timeZone,
+            [in] Int32 transitionIndex,
+            [out] IOffsetInterval** result);
+    }
+
+    interface IZoneInfoWallTime {
+        Localtime(
+            [in] Int32 timeSeconds,
+            [in] IZoneInfo* zoneInfo);
+
+        Mktime(
+            [in] IZoneInfo* zoneInfo,
+            [out] Int32* rst);
+
+        SetYear(
+            [in] Int32 year);
+
+        SetMonth(
+            [in] Int32 month);
+
+        SetMonthDay(
+            [in] Int32 monthDay);
+
+        SetHour(
+            [in] Int32 hour);
+
+        SetMinute(
+            [in] Int32 minute);
+
+        SetSecond(
+            [in] Int32 second);
+
+        SetWeekDay(
+            [in] Int32 weekDay);
+
+        SetYearDay(
+            [in] Int32 yearDay);
+
+        SetIsDst(
+            [in] Int32 isDst);
+
+        SetGmtOffset(
+            [in] Int32 gmtoff);
+
+        GetYear(
+            [out] Int32* year);
+
+        GetMonth(
+            [out] Int32* month);
+
+        GetMonthDay(
+            [out] Int32* monthDay);
+
+        GetHour(
+            [out] Int32* hour);
+
+        GetMinute(
+            [out] Int32* minute);
+
+        GetSecond(
+            [out] Int32* second);
+
+        GetWeekDay(
+            [out] Int32* weekDay);
+
+        GetYearDay(
+            [out] Int32* yearDay);
+
+        GetIsDst(
+            [out] Int32* isDst);
+
+        GetGmtOffset(
+            [out] Int32* gmtoff);
+    }
+
+    } // namespace Utility
+    } // namespace Libcore
+}

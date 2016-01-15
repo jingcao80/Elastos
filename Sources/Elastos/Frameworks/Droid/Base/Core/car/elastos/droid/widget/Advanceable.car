@@ -1,0 +1,30 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * This interface can be implemented by any collection-type view which has a notion of
+     * progressing through its set of children. The interface exists to give AppWidgetHosts a way of
+     * taking responsibility for automatically advancing such collections.
+     *
+     */
+    interface IAdvanceable {
+        /**
+         * Advances this collection, eg. shows the next view.
+         */
+        Advance();
+
+        /**
+         * Called by the AppWidgetHost once before it begins to call advance(), allowing the
+         * collection to do any required setup.
+         */
+        FyiWillBeAdvancedByHostKThx();
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

@@ -1,0 +1,21 @@
+
+TARGET_NAME= camera2
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES =  CameraCharacteristics.cpp
+SOURCES += CameraMetadata.cpp
+SOURCES += CaptureRequest.cpp
+SOURCES += CaptureResult.cpp
+SOURCES += CaptureFailure.cpp
+SOURCES += TotalCaptureResult.cpp
+SOURCES += CameraCaptureSession.cpp
+SOURCES += CameraDevice.cpp
+SOURCES += CameraManager.cpp
+SOURCES += DngCreator.cpp
+
+SOURCES += camera2.cpp

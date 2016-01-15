@@ -1,0 +1,18 @@
+
+TARGET_NAME= utility
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += Linkify.cpp
+SOURCES += CLinkify.cpp
+SOURCES += CRfc822Token.cpp
+SOURCES += CRfc822TokenHelper.cpp
+SOURCES += Rfc822Token.cpp
+SOURCES += CRfc822Tokenizer.cpp
+SOURCES += CRfc822TokenizerHelper.cpp

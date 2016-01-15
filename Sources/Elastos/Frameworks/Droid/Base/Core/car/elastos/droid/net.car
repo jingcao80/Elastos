@@ -1,0 +1,1620 @@
+module
+{
+    merge("net/BaseNetworkStateTracker.car");
+    merge("net/ConnectivityManager.car");
+    merge("net/Credentials.car");
+    merge("net/DhcpInfo.car");
+    merge("net/DhcpResults.car");
+    merge("net/DhcpStateMachine.car");
+    merge("net/DhcpStateMachineHelper.car");
+    merge("net/DnsPinger.car");
+    merge("net/EthernetManager.car");
+    merge("net/InterfaceConfiguration.car");
+    merge("net/IEthernetManager.car");
+    merge("net/IConnectivityManager.car");
+    merge("net/INetworkManagementEventObserver.car");
+    merge("net/INetworkPolicyListener.car");
+    merge("net/INetworkPolicyManager.car");
+    merge("net/INetworkScoreCache.car");
+    merge("net/INetworkScoreService.car");
+    merge("net/INetworkStatsSession.car");
+    merge("net/INetworkStatsService.car");
+    merge("net/IpConfiguration.car");
+    merge("net/IpPrefix.car");
+    merge("net/LinkAddress.car");
+    merge("net/LinkProperties.car");
+    merge("net/LinkQualityInfo.car");
+    merge("net/LocalServerSocket.car");
+    merge("net/LocalSocket.car");
+    merge("net/LocalSocketAddress.car");
+    merge("net/LocalSocketImpl.car");
+    merge("net/MailTo.car");
+    merge("net/MobileDataStateTracker.car");
+    merge("net/MobileLinkQualityInfo.car");
+    merge("net/Network.car");
+    merge("net/NetworkAgent.car");
+    merge("net/NetworkCapabilities.car");
+    merge("net/NetworkConfig.car");
+    merge("net/NetworkFactory.car");
+    merge("net/NetworkIdentity.car");
+    merge("net/NetworkInfo.car");
+    merge("net/NetworkKey.car");
+    merge("net/NetworkMisc.car");
+    merge("net/NetworkPolicy.car");
+    merge("net/NetworkPolicyManager.car");
+    merge("net/NetworkPolicyManagerHelper.car");
+    merge("net/NetworkQuotaInfo.car");
+    merge("net/NetworkRequest.car");
+    merge("net/NetworkScoreManager.car");
+    merge("net/NetworkScorerAppManager.car");
+    merge("net/NetworkState.car");
+    merge("net/NetworkStateTracker.car");
+    merge("net/NetworkStats.car");
+    merge("net/NetworkStatsHelper.car");
+    merge("net/NetworkStatsHistory.car");
+    merge("net/NetworkStatsHistoryHelper.car");
+    merge("net/NetworkTemplate.car");
+    merge("net/NetworkUtils.car");
+    merge("net/PacProxySelector.car");
+    merge("net/Proxy.car");
+    merge("net/ProxyDataTracker.car");
+    merge("net/ProxyInfo.car");
+    merge("net/ProxyProperties.car");
+    merge("net/PskKeyManager.car");
+    merge("net/RouteInfo.car");
+    merge("net/RssiCurve.car");
+    merge("net/SSLCertificateSocketFactory.car");
+    merge("net/SSLSessionCache.car");
+    merge("net/SamplingDataTracker.car");
+    merge("net/ScoredNetwork.car");
+    merge("net/SntpClient.car");
+    merge("net/StaticIpConfiguration.car");
+    merge("net/TrafficStats.car");
+    merge("net/UidRange.car");
+    merge("net/Uri.car");
+    merge("net/UrlQuerySanitizer.car");
+    merge("net/VpnService.car");
+    merge("net/WebAddress.car");
+    merge("net/WifiKey.car");
+    merge("net/WifiLinkQualityInfo.car");
+
+    merge("net/http/ElastosHttpClient.car");
+    merge("net/http/ElastosHttpClientConnection.car");
+    merge("net/http/CertificateChainValidator.car");
+    merge("net/http/Connection.car");
+    merge("net/http/DelegatingSSLSession.car");
+    merge("net/http/ErrorStrings.car");
+    merge("net/http/EventHandler.car");
+    merge("net/http/Headers.car");
+    merge("net/http/HttpAuthHeader.car");
+    merge("net/http/HttpResponseCache.car");
+    merge("net/http/HttpsConnection.car");
+    merge("net/http/LoggingEventHandler.car");
+    merge("net/http/Request.car");
+    merge("net/http/RequestFeeder.car");
+    merge("net/http/RequestHandle.car");
+    merge("net/http/RequestQueue.car");
+    merge("net/http/SslCertificate.car");
+    merge("net/http/SslError.car");
+    merge("net/http/X509TrustManagerExtensions.car");
+
+    merge("net/nsd/NsdServiceInfo.car");
+    merge("net/nsd/INsdManager.car");
+    merge("net/nsd/NsdManager.car");
+    merge("net/nsd/DnsSdTxtRecord.car");
+
+    merge("net/wimax/WimaxManagerConstants.car");
+
+    interface Elastos.Droid.App.IService;
+    interface Elastos.Droid.Content.IComponentCallbacks2;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContextWrapper;
+    interface Elastos.Droid.Internal.Utility.IStateMachine;
+    interface Elastos.Droid.Net.IWebAddress;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.ILooper;
+
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IComparable;
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.IO.IFile;
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Net.IInetAddress;
+    using interface Elastos.Net.IInterfaceAddress;
+    using interface Elastos.Net.IResponseCache;
+    using interface Elastos.Security.Cert.ICertificate;
+    using interface Elastos.Security.Cert.IX509Certificate;
+    using interface Elastos.Utility.IDate;
+    using interface Elastos.Utility.IMap;
+    using interface Elastosx.Net.ISocketFactory;
+    using interface Elastosx.Net.Ssl.ISSLSession;
+    using interface Elastosx.Net.Ssl.ISSLSocketFactory;
+    using interface Elastosx.Net.Ssl.IX509TrustManager;
+
+    using interface Org.Apache.Http.Client.IHttpClient;
+    using interface Org.Apache.Http.IHttpConnection;
+    using interface Org.Apache.Http.IHttpHost;
+    using interface Org.Apache.Http.IHttpInetConnection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    [deprecated, local]
+    class CConnectivityManager {
+        constructor(
+            [in] IIConnectivityManager* service);
+
+        interface IConnectivityManager;
+    }
+
+    singleton class CConnectivityManagerHelper {
+        interface IConnectivityManagerHelper;
+    }
+
+    class CConnectivityManagerNetworkCallback {
+        constructor();
+
+        interface IConnectivityManagerNetworkCallback;
+    }
+
+    class CCredentials {
+        constructor(
+            [in] Int32 pid,
+            [in] Int32 uid,
+            [in] Int32 gid);
+
+        interface ICredentials;
+    }
+
+    class CDhcpInfo {
+        constructor();
+
+        constructor(
+            [in] IDhcpInfo* service);
+
+        interface IDhcpInfo;
+        interface IParcelable;
+    }
+
+    class CDhcpResults {
+        constructor();
+
+        constructor(
+            [in] IStaticIpConfiguration* staticIpConfigruation);
+
+        constructor(
+            [in] IDhcpResults* dhcpResults);
+
+        interface IDhcpResults;
+        interface IStaticIpConfiguration;
+        interface IParcelable;
+    }
+
+    class CDhcpStateMachine {
+        interface IStateMachine;
+        interface IDhcpStateMachine;
+    }
+
+    singleton class CDhcpStateMachineHelper {
+        interface IDhcpStateMachineHelper;
+    }
+
+    [local]
+    class CDnsPinger {
+
+        constructor(
+            [in] IContext* ctx,
+            [in] String tagstr,
+            [in] ILooper* looper,
+            [in] IHandler* target,
+            [in] Int32 connectionType);
+
+        interface IDnsPinger;
+    }
+
+    class CEthernetManager {
+        constructor(
+            [in] IContext* context,
+            [in] IIEthernetManager* service);
+
+        interface IEthernetManager;
+    }
+
+    class CInterfaceConfiguration {
+        constructor();
+
+        interface IInterfaceConfiguration;
+        interface IParcelable;
+    }
+
+    class CIpConfiguration {
+        constructor();
+
+        constructor(
+            [in] IpConfigurationIpAssignment ipAssignment,
+            [in] IpConfigurationProxySettings proxySettings,
+            [in] IStaticIpConfiguration* staticIpConfiguration,
+            [in] IProxyInfo* httpProxy);
+
+        constructor(
+            [in] IIpConfiguration* source);
+
+        interface IIpConfiguration;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CIpPrefix {
+        constructor(
+            [in] ArrayOf<Byte>* address1,
+            [in] Int32 prefixLength);
+
+        constructor(
+            [in] IInetAddress* address2,
+            [in] Int32 prefixLength);
+
+        constructor(
+            [in] String prefix);
+
+        interface IParcelable;
+        interface IIpPrefix;
+    }
+
+    class CLinkAddress {
+        constructor(
+            [in] IInetAddress* address,
+            [in] Int32 prefixLength,
+            [in] Int32 flags,
+            [in] Int32 scope);
+
+        constructor(
+            [in] IInetAddress* address,
+            [in] Int32 prefixLength);
+
+        constructor(
+            [in] IInterfaceAddress* interfaceAddress);
+
+        constructor(
+            [in] String address);
+
+        constructor(
+            [in] String address,
+            [in] Int32 flags,
+            [in] Int32 scope);
+
+        interface ILinkAddress;
+        interface IParcelable;
+    }
+
+    class CLinkProperties {
+        constructor();
+
+        constructor(
+            [in] ILinkProperties* source);
+
+        interface ILinkProperties;
+        interface IParcelable;
+    }
+
+    singleton class CLinkPropertiesHelper {
+        interface ILinkPropertiesHelper;
+    }
+
+    class CLinkPropertiesCompareResult {
+        constructor();
+
+        interface ILinkPropertiesCompareResult;
+    }
+
+    class CLinkQualityInfo {
+        constructor();
+
+        interface IParcelable;
+        interface ILinkQualityInfo;
+    }
+
+    class CLocalServerSocket {
+        constructor(
+            [in] String name);
+
+        constructor(
+            [in] IFileDescriptor* fd);
+
+        interface ILocalServerSocket;
+    }
+
+    class CLocalSocket {
+        constructor();
+
+        constructor(
+            [in] Int32 sockType);
+
+        constructor(
+            [in] IFileDescriptor* fd);
+
+        constructor(
+            [in] ILocalSocketImpl* impl,
+            [in] Int32 sockType);
+
+        interface Elastos.IO.ICloseable;
+        interface ILocalSocket;
+    }
+
+    class CLocalSocketAddress {
+        constructor(
+            [in] String name,
+            [in] LocalSocketAddressNamespace ns);
+
+        constructor(
+            [in] String name);
+
+        interface ILocalSocketAddress;
+    }
+
+    class CMailTo {
+        interface IMailTo;
+    }
+
+    singleton class CMailToHelper {
+        interface IMailToHelper;
+    }
+
+    class CMobileDataStateTracker {
+        constructor(
+            [in] Int32 netType,
+            [in] String tag);
+
+        interface IBaseNetworkStateTracker;
+        interface INetworkStateTracker;
+        interface IMobileDataStateTracker;
+    }
+
+    singleton class CMobileDataStateTrackerHelper {
+        interface IMobileDataStateTrackerHelper;
+    }
+
+    singleton class CMobileLinkQualityInfoHelper {
+        interface IMobileLinkQualityInfoHelper;
+    }
+
+    [local]
+    class CNetwork {
+        constructor(
+            [in] Int32 netId);
+
+        constructor(
+            [in] INetwork* that);
+
+        interface IParcelable;
+        interface INetwork;
+    }
+
+    class CNetworkCapabilities {
+        constructor();
+
+        constructor(
+            [in] INetworkCapabilities* nc);
+
+        interface IParcelable;
+        interface INetworkCapabilities;
+    }
+
+    class CNetworkConfig {
+        constructor(
+            [in] String init);
+
+        interface INetworkConfig;
+    }
+
+    class CNetworkFactory {
+        constructor(
+            [in] ILooper* looper,
+            [in] IContext* context,
+            [in] String logTag,
+            [in] INetworkCapabilities* filter);
+
+        interface IHandler;
+        interface INetworkFactory;
+    }
+
+    class CNetworkIdentity {
+        constructor(
+            [in] Int32 type,
+            [in] Int32 subType,
+            [in] String subscriberId,
+            [in] String networkId,
+            [in] Boolean roaming);
+
+        interface INetworkIdentity;
+    }
+
+    singleton class CNetworkIdentityHelper {
+        interface INetworkIdentityHelper;
+    }
+
+    class CNetworkInfo {
+        constructor(
+            [in] Int32 type,
+            [in] Int32 subtype,
+            [in] String typeName,
+            [in] String subtypeName);
+
+        constructor(
+            [in] INetworkInfo* source);
+
+        interface IParcelable;
+        interface INetworkInfo;
+    }
+
+    class CNetworkKey {
+        constructor(
+            [in] IWifiKey* wifiKey);
+
+        interface IParcelable;
+        interface INetworkKey;
+    }
+
+    class CNetworkMisc {
+        constructor();
+
+        constructor(
+            [in] INetworkMisc* nm);
+
+        interface IParcelable;
+        interface INetworkMisc;
+    }
+
+    class CNetworkPolicy {
+        constructor(
+            [in] INetworkTemplate* networkTemplate,
+            [in] Int32 cycleDay,
+            [in] String cycleTimezone,
+            [in] Int64 warningBytes,
+            [in] Int64 limitBytes,
+            [in] Boolean metered);
+
+        constructor(
+            [in] INetworkTemplate* networkTemplate,
+            [in] Int32 cycleDay,
+            [in] String cycleTimezone,
+            [in] Int64 warningBytes,
+            [in] Int64 limitBytes,
+            [in] Int64 lastWarningSnooze,
+            [in] Int64 lastLimitSnooze,
+            [in] Boolean metered,
+            [in] Boolean inferred);
+
+        interface INetworkPolicy;
+        interface IParcelable;
+        interface IComparable;
+    }
+
+    class CNetworkPolicyManager {
+        constructor(
+            [in] IINetworkPolicyManager* service);
+
+        interface INetworkPolicyManager;
+    }
+
+    singleton class CNetworkPolicyManagerHelper {
+        interface INetworkPolicyManagerHelper;
+    }
+
+    class CNetworkQuotaInfo {
+        constructor(
+            [in] Int64 estimatedBytes,
+            [in] Int64 softLimitBytes,
+            [in] Int64 hardLimitBytes);
+
+        interface INetworkQuotaInfo;
+        interface IParcelable;
+    }
+
+    class CNetworkRequest {
+        constructor(
+            [in] INetworkCapabilities* nc,
+            [in] Int32 legacyType,
+            [in] Int32 rId);
+
+        constructor(
+            [in] INetworkRequest* that);
+
+        interface INetworkRequest;
+        interface IParcelable;
+    }
+
+    class CNetworkRequestBuilder {
+        constructor();
+
+        interface INetworkRequestBuilder;
+    }
+
+    class CNetworkScoreManager {
+        constructor(
+            [in] IContext* context);
+
+        interface INetworkScoreManager;
+    }
+
+    singleton class CNetworkScorerAppManager {
+        interface INetworkScorerAppManager;
+    }
+
+    class CNetworkScorerAppData {
+        constructor(
+            [in] String packageName,
+            [in] ICharSequence* scorerName,
+            [in] String configurationActivityClassName);
+
+        interface INetworkScorerAppData;
+    }
+
+    class CNetworkState {
+        constructor(
+            [in] INetworkInfo* networkInfo,
+            [in] ILinkProperties* linkProperties,
+            [in] INetworkCapabilities* networkCapabilities);
+
+        constructor(
+            [in] INetworkInfo* networkInfo,
+            [in] ILinkProperties* linkProperties,
+            [in] INetworkCapabilities* networkCapabilities,
+            [in] String subscriberId,
+            [in] String networkId);
+
+        interface INetworkState;
+        interface IParcelable;
+    }
+
+    class CNetworkStats {
+        constructor(
+            [in] Int64 elapsedRealtime,
+            [in] Int32 initialSize);
+
+        interface INetworkStats;
+        interface IParcelable;
+    }
+
+    singleton class CNetworkStatsHelper {
+        interface INetworkStatsHelper;
+    }
+
+    class CNetworkStatsEntry {
+        constructor();
+
+        constructor(
+            [in] Int64 rxBytes,
+            [in] Int64 rxPackets,
+            [in] Int64 txBytes,
+            [in] Int64 txPackets,
+            [in] Int64 operations);
+
+        constructor(
+            [in] String iface,
+            [in] Int32 uid,
+            [in] Int32 set,
+            [in] Int32 tag,
+            [in] Int64 rxBytes,
+            [in] Int64 rxPackets,
+            [in] Int64 txBytes,
+            [in] Int64 txPackets,
+            [in] Int64 operations);
+
+        interface INetworkStatsEntry;
+    }
+
+    [local]
+    class CNetworkStatsHistory {
+        constructor(
+            [in] Int64 bucketDuration);
+
+        constructor(
+            [in] Int64 bucketDuration,
+            [in] Int32 initialSize);
+
+        constructor(
+            [in] Int64 bucketDuration,
+            [in] Int32 initialSize,
+            [in] Int32 fields);
+
+        constructor(
+            [in] INetworkStatsHistory* existing,
+            [in] Int64 bucketDuration);
+
+        interface INetworkStatsHistory;
+        interface IParcelable;
+    }
+
+    singleton class CNetworkStatsHistoryHelper {
+        interface INetworkStatsHistoryHelper;
+    }
+
+    singleton class CNetworkStatsHistoryDataStreamUtils {
+        interface INetworkStatsHistoryDataStreamUtils;
+    }
+
+    singleton class CNetworkStatsHistoryParcelUtils {
+        interface INetworkStatsHistoryParcelUtils;
+    }
+
+    class CNetworkStatsHistoryEntry {
+        constructor();
+
+        interface INetworkStatsHistoryEntry;
+    }
+
+    class CNetworkTemplate {
+        constructor(
+            [in] Int32 matchRule,
+            [in] String subscriberId,
+            [in] String networkId);
+
+        interface INetworkTemplate;
+        interface IParcelable;
+    }
+
+    singleton class CNetworkTemplateHelper {
+        interface INetworkTemplateHelper;
+    }
+
+    singleton class CNetworkUtils {
+        interface INetworkUtils;
+    }
+
+    class CPacProxySelector {
+        constructor();
+
+        interface IPacProxySelector;
+    }
+
+    singleton class CProxy {
+        interface IProxy;
+    }
+
+    class CProxyDataTracker {
+        constructor();
+
+        interface IBaseNetworkStateTracker;
+        interface INetworkStateTracker;
+        interface IProxyDataTracker;
+    }
+
+    class CProxyInfo {
+        constructor(
+            [in] String host,
+            [in] Int32 port,
+            [in] String exclList);
+
+        constructor(
+            [in] IUri* pacFileUrl);
+
+        constructor(
+            [in] String sPacFileUrl);
+
+        constructor(
+            [in] IUri* pacFileUrl,
+            [in] Int32 localProxyPort);
+
+        constructor(
+            [in] IProxyInfo* source);
+
+        interface IProxyInfo;
+        interface IParcelable;
+    }
+
+    class CRouteInfo {
+        constructor(
+            [in] IIpPrefix* destination,
+            [in] IInetAddress* gateway,
+            [in] String iface,
+            [in] Int32 type);
+
+        constructor(
+            [in] IIpPrefix* destination,
+            [in] IInetAddress* gateway,
+            [in] String iface);
+
+        constructor(
+            [in] ILinkAddress* destination2,
+            [in] IInetAddress* gateway,
+            [in] String iface);
+
+        constructor(
+            [in] IIpPrefix* destination,
+            [in] IInetAddress* gateway);
+
+        constructor(
+            [in] ILinkAddress* destination2,
+            [in] IInetAddress* gateway);
+
+        constructor(
+            [in] IInetAddress* gateway);
+
+        constructor(
+            [in] IIpPrefix* destination);
+
+        constructor(
+            [in] ILinkAddress* destination2);
+
+        constructor(
+            [in] IIpPrefix* destination,
+            [in] Int32 type);
+
+        interface IRouteInfo;
+        interface IParcelable;
+    }
+
+    singleton class CRouteInfoHelper {
+        interface IRouteInfoHelper;
+    }
+
+    [deprecated]
+    class CRssiCurve {
+        constructor(
+            [in] Int32 start,
+            [in] Int32 bucketWidth,
+            [in] ArrayOf<Byte>* rssiBuckets);
+
+        interface IRssiCurve;
+        interface IParcelable;
+    }
+
+    class CSSLCertificateSocketFactory {
+        constructor(
+            [in] Int32 handshakeTimeoutMillis);
+
+        interface ISSLSocketFactory;
+        interface ISocketFactory;
+        interface ISSLCertificateSocketFactory;
+    }
+
+    singleton class CSSLCertificateSocketFactoryHelper {
+        interface ISSLCertificateSocketFactoryHelper;
+    }
+
+    class CSSLSessionCache {
+        constructor(
+            [in] IInterface* cache);
+
+        constructor(
+            [in] IFile* dir);
+
+        constructor(
+            [in] IContext* context);
+
+        interface ISSLSessionCache;
+    }
+
+    singleton class CSSLSessionCacheHelper {
+        interface ISSLSessionCacheHelper;
+    }
+
+    class CSamplingDataTracker {
+        constructor();
+
+        interface ISamplingDataTracker;
+    }
+
+    singleton class CSamplingDataTrackerHelper {
+        interface ISamplingDataTrackerHelper;
+    }
+
+    class CSamplingDataTrackerSamplingSnapshot {
+        constructor();
+
+        interface ISamplingDataTrackerSamplingSnapshot;
+    }
+
+    class CScoredNetwork {
+        constructor(
+            [in] INetworkKey* networkKey,
+            [in] IRssiCurve* rssiCurve);
+
+        interface IScoredNetwork;
+        interface IParcelable;
+    }
+
+    class CSntpClient {
+        constructor();
+
+        interface ISntpClient;
+    }
+
+    class CStaticIpConfiguration {
+        constructor();
+
+        constructor(
+            [in] IStaticIpConfiguration* source);
+
+        interface IStaticIpConfiguration;
+        interface IParcelable;
+    }
+
+    singleton class CTrafficStats {
+        interface ITrafficStats;
+    }
+
+    class CUriBuilder {
+        constructor();
+
+        interface IUriBuilder;
+    }
+
+    class CUidRange {
+        constructor(
+            [in] Int32 startUid,
+            [in] Int32 stopUid);
+
+        interface IUidRange;
+        interface IParcelable;
+    }
+
+    singleton class CUidRangeHelper {
+        interface IUidRangeHelper;
+    }
+
+    singleton class CUriHelper {
+        interface IUriHelper;
+    }
+
+    class CUrlQuerySanitizer {
+        constructor();
+
+        constructor(
+            [in] String url);
+
+        interface IUrlQuerySanitizer;
+    }
+
+    singleton class CUrlQuerySanitizerHelper {
+        interface IUrlQuerySanitizerHelper;
+    }
+
+    class CUrlQuerySanitizerParameterValuePair {
+        constructor(
+            [in] String parameter,
+            [in] String value);
+
+        interface IUrlQuerySanitizerParameterValuePair;
+    }
+
+    class CUrlQuerySanitizerIllegalCharacterValueSanitizer {
+        constructor(
+            [in] Int32 flags);
+
+        interface IUrlQuerySanitizerIllegalCharacterValueSanitizer;
+    }
+
+    class CVpnService {
+        constructor();
+
+        interface IService;
+        interface IComponentCallbacks2;
+        interface IContextWrapper;
+        interface IContext;
+        interface IVpnService;
+    }
+
+    singleton class CVpnServiceHelper {
+        interface IVpnServiceHelper;
+    }
+
+    class CVpnServiceBuilder {
+        constructor(
+            [in] IVpnService* host);
+
+        interface IVpnServiceBuilder;
+    }
+
+    class CWebAddress {
+        constructor(
+            [in] String address);
+
+        interface IWebAddress;
+    }
+
+    class CWifiKey {
+        constructor(
+            [in] String ssid,
+            [in] String bssid);
+
+        interface IWifiKey;
+        interface IParcelable;
+    }
+
+    class CWifiLinkQualityInfo {
+        constructor();
+
+        interface IWifiLinkQualityInfo;
+        interface ILinkQualityInfo;
+        interface IParcelable;
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Http {
+
+    class CElastosHttpClient {
+        interface IElastosHttpClient;
+        interface IHttpClient;
+    }
+
+    singleton class CElastosHttpClientHelper {
+        interface IElastosHttpClientHelper;
+    }
+
+    class CElastosHttpClientConnection {
+        constructor();
+
+        interface IElastosHttpClientConnection;
+        interface IHttpInetConnection;
+        interface IHttpConnection;
+    }
+
+    class CCertificateChainValidator {
+        interface ICertificateChainValidator;
+    }
+
+    singleton class CCertificateChainValidatorHelper {
+        interface ICertificateChainValidatorHelper;
+    }
+
+    class CDelegatingSSLSession {
+        constructor();
+
+        interface ISSLSession;
+        interface IDelegatingSSLSession;
+    }
+
+    class CDelegatingSSLSessionCertificateWrap {
+        constructor(
+            [in] ICertificate* certificate);
+
+        interface ISSLSession;
+        interface IDelegatingSSLSession;
+        interface IDelegatingSSLSessionCertificateWrap;
+    }
+
+    singleton class CErrorStrings {
+         interface IErrorStrings;
+    }
+
+    class CHeaders {
+        constructor();
+
+        interface IHeaders;
+    }
+
+    class CHttpAuthHeader {
+        constructor(
+            [in] String header);
+
+        interface IHttpAuthHeader;
+    }
+
+    class CHttpResponseCache {
+        interface IResponseCache;
+        interface ICloseable;
+        interface IHttpResponseCache;
+    }
+
+    singleton class CHttpResponseCacheHelper {
+        interface IHttpResponseCacheHelper;
+    }
+
+    class CHttpsConnection {
+        constructor(
+            [in] IContext* context,
+            [in] IHttpHost* host,
+            [in] IHttpHost* proxy,
+            [in] IRequestFeeder* requestFeeder);
+
+        interface IConnection;
+        interface IHttpsConnection;
+    }
+
+    singleton class CHttpsConnectionHelper {
+        interface IHttpsConnectionHelper;
+    }
+
+    class CLoggingEventHandler {
+        constructor();
+
+        interface IEventHandler;
+        interface ILoggingEventHandler;
+    }
+
+    class CRequestHandle {
+        constructor(
+            [in] IRequestQueue* requestQueue,
+            [in] String url,
+            [in] IWebAddress* uri,
+            [in] String method,
+            [in] IMap* headers,
+            [in] IInputStream* bodyProvider,
+            [in] Int32 bodyLength,
+            [in] IRequest* request);
+
+        constructor(
+            [in] IRequestQueue* requestQueue,
+            [in] String url,
+            [in] IWebAddress* uri,
+            [in] String method,
+            [in] IMap* headers,
+            [in] IInputStream* bodyProvider,
+            [in] Int32 bodyLength,
+            [in] IRequest* request,
+            [in] IConnection* conn);
+
+        interface IRequestHandle;
+
+    }
+
+    singleton class CRequestHandleHelper {
+        interface IRequestHandleHelper;
+    }
+
+    class CRequestQueue {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] Int32 connectionCount);
+
+        interface IRequestFeeder;
+        interface IRequestQueue;
+    }
+
+    class CSslCertificate {
+        constructor(
+            [in] String issuedTo,
+            [in] String issuedBy,
+            [in] String validNotBefore,
+            [in] String validNotAfter);
+
+        constructor(
+            [in] String issuedTo2,
+            [in] String issuedBy,
+            [in] IDate* validNotBefore,
+            [in] IDate* validNotAfter);
+
+        constructor(
+            [in] IX509Certificate* certificate);
+
+        interface ISslCertificate;
+    }
+
+    singleton class CSslCertificateHelper {
+        interface ISslCertificateHelper;
+    }
+
+    class CSslCertificateDName {
+        constructor(
+            [in] String dName);
+
+        interface ISslCertificateDName;
+    }
+
+    [local]
+    class CSslError {
+        constructor(
+            [in] Int32 error,
+            [in] ISslCertificate* certificate);
+
+        constructor(
+            [in] Int32 error2,
+            [in] IX509Certificate* certificate);
+
+        constructor(
+            [in] Int32 error,
+            [in] ISslCertificate* certificate,
+            [in] String url);
+
+        constructor(
+            [in] Int32 error2,
+            [in] IX509Certificate* certificate,
+            [in] String url);
+
+        interface ISslError;
+    }
+
+    singleton class CSslErrorHelper {
+        interface ISslErrorHelper;
+    }
+
+    [local]
+    class CX509TrustManagerExtensions {
+        constructor(
+            [in] IX509TrustManager* tm);
+
+        interface IX509TrustManagerExtensions;
+    }
+
+    } // namespace Http
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Nsd {
+
+    [deprecated]
+    class CDnsSdTxtRecord {
+        constructor();
+
+        constructor(
+            [in] ArrayOf<Byte>* data);
+
+        constructor(
+            [in] IDnsSdTxtRecord* src);
+
+        interface IDnsSdTxtRecord;
+        interface IParcelable;
+    }
+
+    class CNsdManager {
+        constructor(
+            [in] IContext* context,
+            [in] IINsdManager* service);
+
+        interface INsdManager;
+    }
+
+    class CNsdServiceInfo {
+        constructor();
+
+        constructor(
+            [in] String sn,
+            [in] String rt);
+
+        interface INsdServiceInfo;
+        interface IParcelable;
+    }
+
+    } // namespace Nsd
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+//
+//    class CCaptivePortalTracker {
+//        interface ICaptivePortalTracker;
+//    }
+//
+//    singleton class CCaptivePortalTrackerHelper {
+//        interface ICaptivePortalTrackerHelper;
+//    }
+//
+//    /**
+//     * Thrown when parsing a URL fails.
+//     */
+//    class CParseException {
+//        interface IParseException;
+//    }
+//
+//
+//    /**
+//    * File-based cache of established SSL sessions.  When re-establishing a
+//    * connection to the same server, using an SSL session cache can save some time,
+//    * power, and bandwidth by skipping directly to an encrypted stream.
+//    * This is a persistent cache which can span executions of the application.
+//    *
+//    * @see SSLCertificateSocketFactory
+//    */
+//    [local]
+//    class CSSLSessionCache {
+//        constructor(
+//            [in] IFile* dir);
+//
+//        constructor(
+//            [in] IContext* ctx);
+//
+//        interface ISSLSessionCache;
+//    }
+//
+//    /**
+//     * SSLSocketFactory implementation with several extra features:
+//     *
+//     * <ul>
+//     * <li>Timeout specification for SSL handshake operations
+//     * <li>Hostname verification in most cases (see WARNINGs below)
+//     * <li>Optional SSL session caching with {@link SSLSessionCache}
+//     * <li>Optionally bypass all SSL certificate checks
+//     * </ul>
+//     *
+//     * The handshake timeout does not apply to actual TCP socket connection.
+//     * If you want a connection timeout as well, use {@link #createSocket()}
+//     * and {@link Socket#connect(SocketAddress, int)}, after which you
+//     * must verify the identity of the server you are connected to.
+//     *
+//     * <p class="caution"><b>Most {@link SSLSocketFactory} implementations do not
+//     * verify the server's identity, allowing man-in-the-middle attacks.</b>
+//     * This implementation does check the server's certificate hostname, but only
+//     * for createSocket variants that specify a hostname.  When using methods that
+//     * use {@link InetAddress} or which return an unconnected socket, you MUST
+//     * verify the server's identity yourself to ensure a secure connection.</p>
+//     *
+//     * <p>One way to verify the server's identity is to use
+//     * {@link HttpsURLConnection#getDefaultHostnameVerifier()} to get a
+//     * {@link HostnameVerifier} to verify the certificate hostname.
+//     *
+//     * <p>On development devices, "setprop socket.relaxsslcheck yes" bypasses all
+//     * SSL certificate and hostname checks for testing purposes.  This setting
+//     * requires root access.
+//     */
+//    class CSSLCertificateSocketFactory {
+//        // @Deprecated
+//        constructor(
+//            [in] Int32 handshakeTimeoutMillis);
+//
+//        interface ISSLCertificateSocketFactory;
+//    }
+//
+//    singleton class CSSLCertificateSocketFactoryHelper {
+//        interface ISSLCertificateSocketFactoryHelper;
+//    }
+//
+//
+//    class CVpnService {
+//        constructor();
+//
+//       interface IVpnService;
+//    }
+//
+//    singleton class CVpnServiceHelper {
+//        interface IVpnServiceHelper;
+//   }
+//
+//    class CVpnServiceBuilder {
+//        constructor();
+//
+//        interface IVpnServiceBuilder;
+//    }
+//
+//
+//    class CUrlQuerySanitizer{
+//        constructor();
+//
+//        interface IUrlQuerySanitizer;
+//    }
+//
+//    class CIllegalCharacterValueSanitizer{
+//        constructor(
+//            [in] Int32 flags);
+//
+//        interface IIllegalCharacterValueSanitizer;
+//    }
+//
+//    class CMailTo{
+//        interface IMailTo;
+//    }
+//
+//    class CPathSegments{
+//        constructor(
+//            [in]  ArrayOf<String> segments,
+//            [in] Int32 size);
+//
+//        interface IPathSegments;
+//    }
+//
+//    class CPathSegmentsBuilder{
+//        interface IPathSegmentsBuilder;
+//    }
+//
+//    } // namespace Net
+//    } // namespace Droid
+//    } // namespace Elastos
+//
+//    namespace Elastos {
+//    namespace Droid {
+//    namespace Net {
+//    namespace Internal {
+//    namespace Http {
+//
+//    /**
+//     * Helper for parsing an HTTP date.
+//     */
+//    singleton class CHttpDateTime {
+//        interface IHttpDateTime;
+//    }
+//
+//    } // namespace Http
+//    } // namespace Internal
+//    } // namespace Net
+//    } // namespace Droid
+//    } // namespace Elastos
+//
+//    //using interface Elastos.IO.IFile;
+//
+//    interface Org.Apache.Http.Params.IHttpParams;
+//
+//    namespace Elastos {
+//    namespace Droid {
+//    namespace Net {
+//    namespace Internal {
+//    namespace Http {
+//    namespace Multipart {
+//
+//    /**
+//     * A PartSource that reads from a byte array.  This class should be used when
+//     * the data to post is already loaded into memory.
+//     *
+//     * @author <a href="mailto:becke@u.washington.edu">Michael Becke</a>
+//     *
+//     * @since 2.0
+//     */
+//    [deprecated]
+//    class CByteArrayPartSource {
+//        /**
+//         * Constructor for ByteArrayPartSource.
+//         *
+//         * @param fileName the name of the file these bytes represent
+//         * @param bytes the content of this part
+//         */
+//        constructor(
+//            [in] String fileName,
+//            [in] ArrayOf<Byte>* bytes);
+//
+//        interface IByteArrayPartSource;
+//        interface IPartSource;
+//    }
+//
+//    /**
+//     * This class implements a part of a Multipart post object that
+//     * consists of a file.
+//     *
+//     * @author <a href="mailto:mattalbright@yahoo.com">Matthew Albright</a>
+//     * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
+//     * @author <a href="mailto:adrian@ephox.com">Adrian Sutton</a>
+//     * @author <a href="mailto:becke@u.washington.edu">Michael Becke</a>
+//     * @author <a href="mailto:mdiggory@latte.harvard.edu">Mark Diggory</a>
+//     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+//     * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
+//     *
+//     * @since 2.0
+//     *
+//     */
+//    class CFilePart {
+//        /**
+//         * FilePart Constructor.
+//         *
+//         * @param name the name for this part
+//         * @param partSource the source for this part
+//         * @param contentType the content type for this part, if <code>null</code> the
+//         * {@link #DEFAULT_CONTENT_TYPE default} is used
+//         * @param charset the charset encoding for this part, if <code>null</code> the
+//         * {@link #DEFAULT_CHARSET default} is used
+//         */
+//        constructor(
+//            [in] String name,
+//            [in] IPartSource* partSource,
+//            [in] String contentType,
+//            [in] String charset);
+//
+//        /**
+//         * FilePart Constructor.
+//         *
+//         * @param name the name for this part
+//         * @param partSource the source for this part
+//         */
+//        constructor(
+//            [in] String name,
+//            [in] IPartSource* partSource);
+//
+//        /**
+//         * FilePart Constructor.
+//         *
+//         * @param name the name of the file part
+//         * @param file the file to post
+//         *
+//         * @throws FileNotFoundException if the <i>file</i> is not a normal
+//         * file or if it is not readable.
+//         */
+//        constructor(
+//            [in] String name,
+//            [in] IFile* file);
+//
+//        /**
+//         * FilePart Constructor.
+//         *
+//         * @param name the name of the file part
+//         * @param file the file to post
+//         * @param contentType the content type for this part, if <code>null</code> the
+//         * {@link #DEFAULT_CONTENT_TYPE default} is used
+//         * @param charset the charset encoding for this part, if <code>null</code> the
+//         * {@link #DEFAULT_CHARSET default} is used
+//         *
+//         * @throws FileNotFoundException if the <i>file</i> is not a normal
+//         * file or if it is not readable.
+//         */
+//        constructor(
+//            [in] String name,
+//            [in] IFile* file,
+//            [in] String contentType,
+//            [in] String charset);
+//
+//        /**
+//         * FilePart Constructor.
+//         *
+//         * @param name the name of the file part
+//         * @param fileName the file name
+//         * @param file the file to post
+//         *
+//         * @throws FileNotFoundException if the <i>file</i> is not a normal
+//         * file or if it is not readable.
+//         */
+//        constructor(
+//            [in] String name,
+//            [in] String fileName,
+//            [in] IFile* file);
+//
+//        /**
+//         * FilePart Constructor.
+//         *
+//         * @param name the name of the file part
+//         * @param fileName the file name
+//         * @param file the file to post
+//         * @param contentType the content type for this part, if <code>null</code> the
+//         * {@link #DEFAULT_CONTENT_TYPE default} is used
+//         * @param charset the charset encoding for this part, if <code>null</code> the
+//         * {@link #DEFAULT_CHARSET default} is used
+//         *
+//         * @throws FileNotFoundException if the <i>file</i> is not a normal
+//         * file or if it is not readable.
+//         */
+//        constructor(
+//            [in] String name,
+//            [in] String fileName,
+//            [in] IFile* file,
+//            [in] String contentType,
+//            [in] String charset);
+//
+//        interface IFilePart;
+//    }
+//
+//    singleton class CFilePartHelper {
+//        interface IFilePartHelper;
+//    }
+//
+//    class CFilePartSource {
+//        /**
+//         * Constructor for FilePartSource.
+//         *
+//         * @param file the FilePart source File.
+//         *
+//         * @throws FileNotFoundException if the file does not exist or
+//         * cannot be read
+//         */
+//        constructor(
+//            [in] IFile* file);
+//
+//        /**
+//         * Constructor for FilePartSource.
+//         *
+//         * @param fileName the file name of the FilePart
+//         * @param file the source File for the FilePart
+//         *
+//         * @throws FileNotFoundException if the file does not exist or
+//         * cannot be read
+//         */
+//        constructor(
+//            [in] String fileName,
+//            [in] IFile* file);
+//
+//        interface IFilePartSource;
+//        interface IPartSource;
+//    }
+//
+//    [deprecated]
+//    class CMultipartEntity {
+//        /**
+//         * Creates a new multipart entity containing the given parts.
+//         * @param parts The parts to include.
+//         * @param params The params of the HttpMethod using this entity.
+//         */
+//        constructor(
+//            [in] ArrayOf<IPart*>* parts,
+//            [in] IHttpParams* params);
+//
+//        constructor(
+//            [in] ArrayOf<IPart*>* parts);
+//
+//        interface IMultipartEntity;
+//    }
+//
+//    class CStringPart {
+//        /**
+//         * Constructor.
+//         *
+//         * @param name The name of the part
+//         * @param value the string to post
+//         */
+//        constructor(
+//            [in] String name,
+//            [in] String value);
+//
+//        /**
+//         * Constructor.
+//         *
+//         * @param name The name of the part
+//         * @param value the string to post
+//         * @param charset the charset to be used to encode the string, if <code>null</code>
+//         * the {@link #DEFAULT_CHARSET default} is used
+//         */
+//        constructor(
+//            [in] String name,
+//            [in] String value,
+//            [in] String charset);
+//
+//        interface IStringPart;
+//    }
+//
+//    singleton class CStringPartHelper {
+//        interface IStringPartHelper;
+//    }
+//
+//
+//
+//
+//    } // namespace Multipart
+//    } // namespace Http
+//    } // namespace Internal
+//    } // namespace Net
+//    } // namespace Droid
+//    } // namespace Elastos
+//
+//    namespace Elastos {
+//    namespace Droid {
+//    namespace Net {
+//    namespace Nsd {
+//
+//        class CNsdManager {
+//            CARAPI constructor(
+//                [in] IContext* ctx,
+//                [in] IINsdManager* service);
+//
+//            interface INsdManager;
+//        }
+//
+//        class CNsdServiceInfo {
+//            CARAPI constructor();
+//
+//            CARAPI constructor(
+//                [in] String sn,
+//                [in] String rt,
+//                [in] IDnsSdTxtRecord* tr);
+//
+//            interface INsdServiceInfo;
+//            interface IParcelable;
+//        }
+//
+//        class CDnsSdTxtRecord {
+//            CARAPI constructor();
+//
+//            CARAPI constructor(
+//                [in] ArrayOf<Byte>* data);
+//
+//            CARAPI constructor(
+//                [in] IDnsSdTxtRecord* src);
+//
+//            interface IDnsSdTxtRecord;
+//            interface IParcelable;
+//        }
+//
+//
+//    } // namespace Nsd
+//    } // namespace Net
+//    } // namespace Droid
+//    } // namespace Elastos
+
+}

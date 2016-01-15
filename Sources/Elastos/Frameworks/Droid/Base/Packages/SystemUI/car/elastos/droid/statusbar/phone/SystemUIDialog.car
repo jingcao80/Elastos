@@ -1,0 +1,44 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * Base class for dialogs that should appear over panels and keyguard.
+     */
+    /**
+     * @Involve
+     * interface IAlertDialog
+     * interface IDialog
+     * interface IDialogInterface
+     */
+    interface ISystemUIDialog {
+        SetShowForAllUsers(
+            [in] Boolean show);
+
+        SetMessage(
+            [in] Int32 resId);
+
+        SetPositiveButton(
+            [in] Int32 resId,
+            [in] IDialogInterfaceOnClickListener* onClick);
+
+        SetNegativeButton(
+            [in] Int32 resId,
+            [in] IDialogInterfaceOnClickListener* onClick);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    interface IPackageCleanItem {
+        Equals(
+            [in] IPackageCleanItem* obj,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* code);
+
+        GetUserId(
+            [out] Int32* userId);
+
+        SetUserId(
+            [in] Int32 userId);
+
+        GetPackageName(
+            [out] String* packageName);
+
+        SetPackageName(
+            [in] String packageName);
+
+        GetAndCode(
+            [out] Boolean* andCode);
+
+        SetAndCode(
+            [in] Boolean andCode);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

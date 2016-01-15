@@ -1,0 +1,516 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPath;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Text.ITextPaint;
+    interface Elastos.Droid.Text.ITextDirectionHeuristic;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    enum LayoutAlignment {
+        ALIGN_NONE = -1,
+        ALIGN_NORMAL,
+        ALIGN_OPPOSITE,
+        ALIGN_CENTER,
+        /** @hide */
+        ALIGN_LEFT,
+        /** @hide */
+        ALIGN_RIGHT,
+    }
+
+    [deprecated]
+    interface ILayoutDirections {
+        SetDirections(
+            [in] ArrayOf<Int32>* direction);
+
+        GetDirections(
+            [out, callee] ArrayOf<Int32>* direction);
+    }
+
+    [deprecated]
+    interface ILayout {
+
+        const Int32 DIR_LEFT_TO_RIGHT = 1;
+        const Int32 DIR_RIGHT_TO_LEFT = -1;
+
+        const Int32 DIR_REQUEST_LTR = 1;
+        const Int32 DIR_REQUEST_RTL = -1;
+        const Int32 DIR_REQUEST_DEFAULT_LTR = 2;
+        const Int32 DIR_REQUEST_DEFAULT_RTL = -2;
+
+        const Int32 RUN_LENGTH_MASK = 0x03ffffff;
+        const Int32 RUN_LEVEL_SHIFT = 26;
+        const Int32 RUN_LEVEL_MASK = 0x3f;
+        const Int32 RUN_RTL_FLAG = 1 << 26; //RUN_LEVEL_SHIFT;
+
+        /**
+         * Draw this Layout on the specified Canvas.
+         */
+        Draw(
+            [in] ICanvas* c);
+
+        /**
+         * Draw this Layout on the specified canvas, with the highlight path drawn
+         * between the background and the text.
+         *
+         * @param canvas the canvas
+         * @param highlight the path of the highlight or cursor; can be null
+         * @param highlightPaint the paint for the highlight
+         * @param cursorOffsetVertical the amount to temporarily translate the
+         *        canvas while rendering the highlight
+         */
+        Draw(
+            [in] ICanvas* canvas,
+            [in] IPath* highlight,
+            [in] IPaint* highlightPaint,
+            [in] Int32 cursorOffsetVertical);
+
+        /**
+         * @hide
+         */
+        DrawText(
+            [in] ICanvas* canvas,
+            [in] Int32 firstLine,
+            [in] Int32 lastLine);
+
+        /**
+         * @hide
+         */
+        DrawBackground(
+            [in] ICanvas* canvas,
+            [in] IPath* highlight,
+            [in] IPaint* highlightPaint,
+            [in] Int32 cursorOffsetVertical,
+            [in] Int32 firstLine,
+            [in] Int32 lastLine);
+
+        /**
+         * @param canvas
+         * @return The range of lines that need to be drawn, possibly empty.
+         * @hide
+         */
+        GetLineRangeForDraw(
+            [in] ICanvas* canvas,
+            [out] Int64* range);
+
+        /**
+         * Return the text that is displayed by this Layout.
+         */
+        GetText(
+            [out] ICharSequence** text);
+
+        /**
+         * Return the base Paint properties for this layout.
+         * Do NOT change the paint, which may result in funny
+         * drawing for this layout.
+         */
+        GetPaint(
+            [out] ITextPaint** paint);
+
+        /**
+         * Return the width of this layout.
+         */
+        GetWidth(
+            [out] Int32* width);
+
+        /**
+         * Return the width to which this Layout is ellipsizing, or
+         * {@link #getWidth} if it is not doing anything special.
+         */
+        GetEllipsizedWidth(
+            [out] Int32* width);
+
+        /**
+         * Increase the width of this layout to the specified width.
+         * Be careful to use this only when you know it is appropriate&mdash;
+         * it does not cause the text to reflow to use the full new width.
+         */
+        IncreaseWidthTo(
+            [in] Int32 wid);
+
+        /**
+         * Return the total height of this layout.
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * Return the base alignment of this layout.
+         */
+        GetAlignment(
+            [out] LayoutAlignment* alignment);
+
+        /**
+         * Return what the text height is multiplied by to get the line height.
+         */
+        GetSpacingMultiplier(
+            [out] Float* spacingMutlt);
+
+        /**
+         * Return the number of units of leading that are added to each line.
+         */
+        GetSpacingAdd(
+            [out] Float* spacingAdd);
+
+        /**
+         * Return the heuristic used to determine paragraph text direction.
+         * @hide
+         */
+        GetTextDirectionHeuristic(
+            [out] ITextDirectionHeuristic** textDir);
+
+        /**
+         * Return the number of lines of text in this layout.
+         */
+        GetLineCount(
+            [out] Int32* number);
+
+        /**
+         * Return the baseline for the specified line (0&hellip;getLineCount() - 1)
+         * If bounds is not null, return the top, left, right, bottom extents
+         * of the specified line in it.
+         * @param line which line to examine (0..getLineCount() - 1)
+         * @param bounds Optional. If not null, it returns the extent of the line
+         * @return the Y-coordinate of the baseline
+         */
+        GetLineBounds(
+            [in] Int32 line,
+            [in] IRect* bounds,
+            [out] Int32* baseline);
+
+        /**
+         * Return the vertical position of the top of the specified line
+         * (0&hellip;getLineCount()).
+         * If the specified line is equal to the line count, returns the
+         * bottom of the last line.
+         */
+        GetLineTop(
+            [in] Int32 line,
+            [out] Int32* pos);
+
+        /**
+         * Return the descent of the specified line(0&hellip;getLineCount() - 1).
+         */
+        GetLineDescent(
+            [in] Int32 line,
+            [out] Int32* descent);
+
+        /**
+         * Return the text offset of the beginning of the specified line (
+         * 0&hellip;getLineCount()). If the specified line is equal to the line
+         * count, returns the length of the text.
+         */
+        GetLineStart(
+            [in] Int32 line,
+            [out] Int32* offset);
+
+        /**
+         * Returns the primary directionality of the paragraph containing the
+         * specified line, either 1 for left-to-right lines, or -1 for right-to-left
+         * lines (see {@link #DIR_LEFT_TO_RIGHT}, {@link #DIR_RIGHT_TO_LEFT}).
+         */
+        GetParagraphDirection(
+            [in] Int32 line,
+            [out] Int32* direction);
+
+        /**
+         * Returns whether the specified line contains one or more
+         * characters that need to be handled specially, like tabs
+         * or emoji.
+         */
+        GetLineContainsTab(
+            [in] Int32 line,
+            [out] Boolean* result);
+
+        /**
+         * Returns the directional run information for the specified line.
+         * The array alternates counts of characters in left-to-right
+         * and right-to-left segments of the line.
+         *
+         * <p>NOTE: this is inadequate to support bidirectional text, and will change.
+         */
+        GetLineDirections(
+            [in] Int32 line,
+            [out] ILayoutDirections** dirctions);
+
+        /**
+         * Returns the (negative) number of extra pixels of ascent padding in the
+         * top line of the Layout.
+         */
+        GetTopPadding(
+            [out] Int32* number);
+
+        /**
+         * Returns the number of extra pixels of descent padding in the
+         * bottom line of the Layout.
+         */
+        GetBottomPadding(
+            [out] Int32* number);
+
+        /**
+         * Returns true if the character at offset and the preceding character
+         * are at different run levels (and thus there's a split caret).
+         * @param offset the offset
+         * @return true if at a level boundary
+         * @hide
+         */
+        IsLevelBoundary(
+            [in] Int32 offset,
+            [out] Boolean* flag);
+
+        /**
+         * Returns true if the character at offset is right to left (RTL).
+         * @param offset the offset
+         * @return true if the character is RTL, false if it is LTR
+         */
+        IsRtlCharAt(
+            [in] Int32 offset,
+            [out] Boolean* flag);
+
+        /**
+         * Get the primary horizontal position for the specified text offset.
+         * This is the location where a new character would be inserted in
+         * the paragraph's primary direction.
+         */
+        GetPrimaryHorizontal(
+            [in] Int32 offset,
+            [out] Float* pos);
+
+        /**
+         * Get the primary horizontal position for the specified text offset, but
+         * optionally clamp it so that it doesn't exceed the width of the layout.
+         * @hide
+         */
+        GetPrimaryHorizontal(
+            [in] Int32 offset,
+            [in] Boolean clamped,
+            [out] Float* pos);
+
+        /**
+         * Get the secondary horizontal position for the specified text offset.
+         * This is the location where a new character would be inserted in
+         * the direction other than the paragraph's primary direction.
+         */
+        GetSecondaryHorizontal(
+            [in] Int32 offset,
+            [out] Float* pos);
+
+        /**
+         * Get the secondary horizontal position for the specified text offset, but
+         * optionally clamp it so that it doesn't exceed the width of the layout.
+         * @hide
+         */
+        GetSecondaryHorizontal(
+            [in] Int32 offset,
+            [in] Boolean clamped,
+            [out] Float* pos);
+
+        /**
+         * Get the leftmost position that should be exposed for horizontal
+         * scrolling on the specified line.
+         */
+        GetLineLeft(
+            [in] Int32 line,
+            [out] Float* pos);
+
+        /**
+         * Get the rightmost position that should be exposed for horizontal
+         * scrolling on the specified line.
+         */
+        GetLineRight(
+            [in] Int32 line,
+            [out] Float* pos);
+
+        /**
+         * Gets the unsigned horizontal extent of the specified line, including
+         * leading margin indent, but excluding trailing whitespace.
+         */
+        GetLineMax(
+            [in] Int32 line,
+            [out] Float* extent);
+
+        /**
+         * Gets the unsigned horizontal extent of the specified line, including
+         * leading margin indent and trailing whitespace.
+         */
+        GetLineWidth(
+            [in] Int32 line,
+            [out] Float* extent);
+
+        /**
+         * Get the line number corresponding to the specified vertical position.
+         * If you ask for a position above 0, you get 0; if you ask for a position
+         * below the bottom of the text, you get the last line.
+         */
+        // FIXME: It may be faster to do a linear search for layouts without many lines.
+        GetLineForVertical(
+            [in] Int32 vertical,
+            [out] Int32* number);
+
+        /**
+         * Get the line number on which the specified text offset appears.
+         * If you ask for a position before 0, you get 0; if you ask for a position
+         * beyond the end of the text, you get the last line.
+         */
+        GetLineForOffset(
+            [in] Int32 offset,
+            [out] Int32* number);
+
+        /**
+         * Get the character offset on the specified line whose position is
+         * closest to the specified horizontal position.
+         */
+        GetOffsetForHorizontal(
+            [in] Int32 line,
+            [in] Float horiz,
+            [out] Int32* offset);
+
+        /**
+         * Return the text offset after the last character on the specified line.
+         */
+        GetLineEnd(
+            [in] Int32 line,
+            [out] Int32* end);
+
+        /**
+         * Return the text offset after the last visible character (so whitespace
+         * is not counted) on the specified line.
+         */
+        GetLineVisibleEnd(
+            [in] Int32 line,
+            [out] Int32* offset);
+
+        /**
+         * Return the vertical position of the bottom of the specified line.
+         */
+        GetLineBottom(
+            [in] Int32 line,
+            [out] Int32* pos);
+
+        /**
+         * Return the vertical position of the baseline of the specified line.
+         */
+        GetLineBaseline(
+            [in] Int32 line,
+            [out] Int32* pos);
+
+        /**
+         * Get the ascent of the text on the specified line.
+         * The return value is negative to match the Paint.ascent() convention.
+         */
+        GetLineAscent(
+            [in] Int32 line,
+            [out] Int32* ascent);
+
+        GetOffsetToLeftOf(
+            [in] Int32 offset,
+            [out] Int32* retOffset);
+
+        GetOffsetToRightOf(
+            [in] Int32 offset,
+            [out] Int32* retOffset);
+
+        /**
+         * Determine whether we should clamp cursor position. Currently it's
+         * only robust for left-aligned displays.
+         * @hide
+         */
+        ShouldClampCursor(
+            [in] Int32 line,
+            [out] Boolean* cursor);
+
+        /**
+         * Fills in the specified Path with a representation of a cursor
+         * at the specified offset.  This will often be a vertical line
+         * but can be multiple discontinuous lines in text with multiple
+         * directionalities.
+         */
+        GetCursorPath(
+            [in] Int32 point,
+            [in] IPath* dest,
+            [in] ICharSequence* editingBuffer);
+
+        /**
+         * Fills in the specified Path with a representation of a highlight
+         * between the specified offsets.  This will often be a rectangle
+         * or a potentially discontinuous set of rectangles.  If the start
+         * and end are the same, the returned path is empty.
+         */
+        GetSelectionPath(
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] IPath* dest);
+
+        /**
+         * Get the alignment of the specified paragraph, taking into account
+         * markup attached to it.
+         */
+        GetParagraphAlignment(
+            [in] Int32 line,
+            [out] LayoutAlignment* align);
+
+        /**
+         * Get the left edge of the specified paragraph, inset by left margins.
+         */
+        GetParagraphLeft(
+            [in] Int32 line,
+            [out] Int32* leftEdge);
+
+        /**
+         * Get the right edge of the specified paragraph, inset by right margins.
+         */
+        GetParagraphRight(
+            [in] Int32 line,
+            [out] Int32* rigthEdge);
+
+        /**
+         * Return the offset of the first character to be ellipsized away,
+         * relative to the start of the line.  (So 0 if the beginning of the
+         * line is ellipsized, not getLineStart().)
+         */
+        GetEllipsisStart(
+            [in] Int32 line,
+            [out] Int32* ellipsisStart);
+
+        /**
+         * Returns the number of characters to be ellipsized away, or 0 if
+         * no ellipsis is to take place.
+         */
+        GetEllipsisCount(
+            [in] Int32 line,
+            [out] Int32* ellipsisiCount);
+    }
+
+    interface ILayoutHelper {
+        /**
+         * Return how wide a layout must be in order to display the
+         * specified text with one line per paragraph.
+         */
+        GetDesiredWidth(
+            [in] ICharSequence* source,
+            [in] ITextPaint* paint,
+            [out] Float* ret);
+
+        /**
+         * Return how wide a layout must be in order to display the
+         * specified text slice with one line per paragraph.
+         */
+        GetDesiredWidth(
+            [in] ICharSequence* source,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] ITextPaint* paint,
+            [out] Float* ret);
+    }
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

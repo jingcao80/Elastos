@@ -1,0 +1,21 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Egl {
+
+    /**
+     * @Involve
+     * interface Elastosx.Microedition.Khronos.Egl.IEGL10
+     */
+    interface IEGL11 {
+        const Int32 _EGL_CONTEXT_LOST = 0x300E;
+    }
+
+    } // namepsace Egl
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

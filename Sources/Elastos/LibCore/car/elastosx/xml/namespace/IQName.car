@@ -1,0 +1,89 @@
+
+module
+{
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Namespace {
+
+    interface IQName {
+        /**
+         * <p>Get the Namespace URI of this <code>QName</code>.</p>
+         *
+         * @return Namespace URI of this <code>QName</code>
+         */
+        GetNamespaceURI(
+            [out] String* uri);
+
+        /**
+         * <p>Get the local part of this <code>QName</code>.</p>
+         *
+         *  @return local part of this <code>QName</code>
+         */
+        GetLocalPart(
+            [out] String* part);
+
+        /**
+         * <p>Get the prefix of this <code>QName</code>.</p>
+         *
+         * <p>The prefix assigned to a <code>QName</code> might
+         * <strong><em>NOT</em></strong> be valid in a different
+         * context. For example, a <code>QName</code> may be assigned a
+         * prefix in the context of parsing a document but that prefix may
+         * be invalid in the context of a different document.</p>
+         *
+         *  @return prefix of this <code>QName</code>
+         */
+        GetPrefix(
+            [out] String* prefix);
+    }
+
+    interface IQNameHelper {
+        /**
+         * <p><code>QName</code> derived from parsing the formatted
+         * <code>String</code>.</p>
+         *
+         * <p>If the <code>String</code> is <code>null</code> or does not conform to
+         * {@link #toString() QName.toString()} formatting, an
+         * <code>IllegalArgumentException</code> is thrown.</p>
+         *
+         * <p><em>The <code>String</code> <strong>MUST</strong> be in the
+         * form returned by {@link #toString() QName.toString()}.</em></p>
+         *
+         * <p>The commonly accepted way of representing a <code>QName</code>
+         * as a <code>String</code> was <a href="http://jclark.com/xml/xmlns.htm">defined</a>
+         * by James Clark.  Although this is not a <em>standard</em>
+         * specification, it is in common use,  e.g. {@link javax.xml.transform.Transformer#setParameter(String name, Object value)}.
+         * This implementation parses a <code>String</code> formatted
+         * as: "{" + Namespace URI + "}" + local part.  If the Namespace
+         * URI <code>.equals(XMLConstants.NULL_NS_URI)</code>, only the
+         * local part should be provided.</p>
+         *
+         * <p>The prefix value <strong><em>CANNOT</em></strong> be
+         * represented in the <code>String</code> and will be set to
+         * {@link javax.xml.XMLConstants#DEFAULT_NS_PREFIX
+         * XMLConstants.DEFAULT_NS_PREFIX}.</p>
+         *
+         * <p>This method does not do full validation of the resulting
+         * <code>QName</code>.
+         * <p>The Namespace URI is not validated as a
+         * <a href="http://www.ietf.org/rfc/rfc2396.txt">URI reference</a>.
+         * The local part is not validated as a
+         * <a href="http://www.w3.org/TR/REC-xml-names/#NT-NCName">NCName</a>
+         * as specified in
+         * <a href="http://www.w3.org/TR/REC-xml-names/">Namespaces in XML</a>.</p>
+         *
+         * @param qNameAsString <code>String</code> representation
+         * of the <code>QName</code>
+         * @return <code>QName</code> corresponding to the given <code>String</code>
+         * @see #toString() QName.toString()
+         */
+        ValueOf(
+            [in] String qNameAsString,
+            [out] IQName** name);
+    }
+
+    } // namespace Namespace
+    } // namespace Xml
+    } // namespace Elastosx
+}

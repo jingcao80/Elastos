@@ -1,0 +1,381 @@
+module {
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Webkit.IWebIconDatabaseIconListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    [local]
+    interface IBrowser {
+        /**
+         * The name of extra data when starting Browser with ACTION_VIEW or
+         * ACTION_SEARCH intent.
+         * <p>
+         * The value should be an integer between 0 and 1000. If not set or set to
+         * 0, the Browser will use default. If set to 100, the Browser will start
+         * with 100%.
+         */
+        const String INITIAL_ZOOM_LEVEL = "browser.initialZoomLevel";
+
+        /**
+         * The name of the extra data when starting the Browser from another
+         * application.
+         * <p>
+         * The value is a unique identification string that will be used to
+         * identify the calling application. The Browser will attempt to reuse the
+         * same window each time the application launches the Browser with the same
+         * identifier.
+         */
+        const String EXTRA_APPLICATION_ID = "com.android.browser.application_id";
+
+        /**
+         * The name of the extra data in the VIEW intent. The data are key/value
+         * pairs in the format of Bundle. They will be sent in the HTTP request
+         * headers for the provided url. The keys can't be the standard HTTP headers
+         * as they are set by the WebView. The url's schema must be http(s).
+         * <p>
+         */
+        const String EXTRA_HEADERS = "com.android.browser.headers";
+
+        /* these indices dependent on HISTORY_PROJECTION */
+        const Int32 HISTORY_PROJECTION_ID_INDEX = 0;
+        const Int32 HISTORY_PROJECTION_URL_INDEX = 1;
+        const Int32 HISTORY_PROJECTION_VISITS_INDEX = 2;
+        const Int32 HISTORY_PROJECTION_DATE_INDEX = 3;
+        const Int32 HISTORY_PROJECTION_BOOKMARK_INDEX = 4;
+        const Int32 HISTORY_PROJECTION_TITLE_INDEX = 5;
+        const Int32 HISTORY_PROJECTION_FAVICON_INDEX = 6;
+
+        /**
+         * @hide
+         */
+        const Int32 HISTORY_PROJECTION_THUMBNAIL_INDEX = 7;
+        /**
+         * @hide
+         */
+        const Int32 HISTORY_PROJECTION_TOUCH_ICON_INDEX = 8;
+
+        const Int32 TRUNCATE_HISTORY_PROJECTION_ID_INDEX = 0;
+
+        /* truncate this many history items at a time */
+        const Int32 TRUNCATE_N_OLDEST = 5;
+
+        /* these indices dependent on SEARCHES_PROJECTION */
+        const Int32 SEARCHES_PROJECTION_SEARCH_INDEX = 1;
+        const Int32 SEARCHES_PROJECTION_DATE_INDEX = 2;
+
+        /**
+         * Boolean extra passed along with an Intent to a browser, specifying that
+         * a new tab be created.  Overrides EXTRA_APPLICATION_ID; if both are set,
+         * a new tab will be used, rather than using the same one.
+         */
+        const String EXTRA_CREATE_NEW_TAB = "create_new_tab";
+
+        /**
+         * Stores a Bitmap extra in an {@link Intent} representing the screenshot of
+         * a page to share.  When receiving an {@link Intent#ACTION_SEND} from the
+         * Browser, use this to access the screenshot.
+         * @hide
+         */
+        const String EXTRA_SHARE_SCREENSHOT = "share_screenshot";
+
+        /**
+         * Stores a Bitmap extra in an {@link Intent} representing the favicon of a
+         * page to share.  When receiving an {@link Intent#ACTION_SEND} from the
+         * Browser, use this to access the favicon.
+         * @hide
+         */
+        const String EXTRA_SHARE_FAVICON = "share_favicon";
+
+        /* if you change column order you must also change indices
+           below */
+        GetHISTORY_PROJECTION(
+            [out, callee] ArrayOf<String>* projections);
+
+        /* columns needed to determine whether to truncate history */
+        GetTRUNCATE_HISTORY_PROJECTION(
+            [out, callee] ArrayOf<String>* projections);
+
+        /**
+         * A projection of {@link #SEARCHES_URI} that contains {@link SearchColumns#_ID},
+         * {@link SearchColumns#SEARCH}, and {@link SearchColumns#DATE}.
+         */
+        GetSEARCHES_PROJECTION(
+            [out, callee] ArrayOf<String>* projections);
+
+        /**
+         *  Open an activity to save a bookmark. Launch with a title
+         *  and/or a url, both of which can be edited by the user before saving.
+         *
+         *  @param c        Context used to launch the activity to add a bookmark.
+         *  @param title    Title for the bookmark. Can be null or empty string.
+         *  @param url      Url for the bookmark. Can be null or empty string.
+         */
+        SaveBookmark(
+            [in] IContext* c,
+            [in] String title,
+            [in] String url);
+
+        /**
+         * Sends the given string using an Intent with {@link Intent#ACTION_SEND} and a mime type
+         * of text/plain. The string is put into {@link Intent#EXTRA_TEXT}.
+         *
+         * @param context the context used to start the activity
+         * @param string the string to send
+         */
+        SendString(
+            [in] IContext* ctx,
+            [in] String string);
+
+        /**
+         *  Find an application to handle the given string and, if found, invoke
+         *  it with the given string as a parameter.
+         *  @param c Context used to launch the new activity.
+         *  @param stringToSend The string to be handled.
+         *  @param chooserDialogTitle The title of the dialog that allows the user
+         *  to select between multiple applications that are all capable of handling
+         *  the string.
+         *  @hide pending API council approval
+         */
+        SendString(
+            [in] IContext* c,
+            [in] String stringToSend,
+            [in] String chooserDialogTitle);
+
+        /**
+         *  Return a cursor pointing to a list of all the bookmarks. The cursor will have a single
+         *  column, {@link BookmarkColumns#URL}.
+         *  <p>
+         *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+         *
+         *  @param cr   The ContentResolver used to access the database.
+         */
+        GetAllBookmarks(
+            [in] IContentResolver* cr,
+            [out] ICursor** bookmarks);
+
+        /**
+         *  Return a cursor pointing to a list of all visited site urls. The cursor will
+         *  have a single column, {@link BookmarkColumns#URL}.
+         *  <p>
+         *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+         *
+         *  @param cr   The ContentResolver used to access the database.
+         */
+        GetAllVisitedUrls(
+            [in] IContentResolver* cr,
+            [out] ICursor** urls);
+
+        /**
+         *  Update the visited history to acknowledge that a site has been
+         *  visited.
+         *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+         *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
+         *  @param cr   The ContentResolver used to access the database.
+         *  @param url  The site being visited.
+         *  @param real If true, this is an actual visit, and should add to the
+         *              number of visits.  If false, the user entered it manually.
+         */
+        UpdateVisitedHistory(
+            [in] IContentResolver* cr,
+            [in] String url,
+            [in] Boolean real);
+
+        /**
+         *  Returns all the URLs in the history.
+         *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+         *  @param cr   The ContentResolver used to access the database.
+         *  @hide pending API council approval
+         */
+        GetVisitedHistory(
+            [in] IContentResolver* cr,
+            [out, callee] ArrayOf<String>* urls);
+
+        /**
+         * If there are more than MAX_HISTORY_COUNT non-bookmark history
+         * items in the bookmark/history table, delete TRUNCATE_N_OLDEST
+         * of them.  This is used to keep our history table to a
+         * reasonable size.  Note: it does not prune bookmarks.  If the
+         * user wants 1000 bookmarks, the user gets 1000 bookmarks.
+         *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+         *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
+         *
+         * @param cr The ContentResolver used to access the database.
+         */
+        TruncateHistory(
+            [in] IContentResolver* cr);
+
+        /**
+         * Returns whether there is any history to clear.
+         *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+         * @param cr   The ContentResolver used to access the database.
+         * @return boolean  True if the history can be cleared.
+         */
+        CanClearHistory(
+            [in] IContentResolver* cr,
+            [out] Boolean* res);
+
+        /**
+         *  Delete all entries from the bookmarks/history table which are
+         *  not bookmarks.  Also set all visited bookmarks to unvisited.
+         *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
+         *  @param cr   The ContentResolver used to access the database.
+         */
+        ClearHistory(
+            [in] IContentResolver* cr);
+
+        /**
+         * Delete all history items from begin to end.
+         *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
+         * @param cr    The ContentResolver used to access the database.
+         * @param begin First date to remove.  If -1, all dates before end.
+         *              Inclusive.
+         * @param end   Last date to remove. If -1, all dates after begin.
+         *              Non-inclusive.
+         */
+        DeleteHistoryTimeFrame(
+            [in] IContentResolver* cr,
+            [in] Int64 begin,
+            [in] Int64 end);
+
+        /**
+         * Remove a specific url from the history database.
+         *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
+         * @param cr    The ContentResolver used to access the database.
+         * @param url   url to remove.
+         */
+        DeleteFromHistory(
+            [in] IContentResolver* cr,
+            [in] String url);
+
+        /**
+         * Add a search string to the searches database.
+         *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+         *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
+         * @param cr   The ContentResolver used to access the database.
+         * @param search    The string to add to the searches database.
+         */
+        AddSearchUrl(
+            [in] IContentResolver* cr,
+            [in] String search);
+
+        /**
+         * Remove all searches from the search database.
+         *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
+         * @param cr   The ContentResolver used to access the database.
+         */
+        ClearSearches(
+            [in] IContentResolver* cr);
+
+        /**
+         *  Request all icons from the database.  This call must either be called
+         *  in the main thread or have had Looper.prepare() invoked in the calling
+         *  thread.
+         *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+         *  @param  cr The ContentResolver used to access the database.
+         *  @param  where Clause to be used to limit the query from the database.
+         *          Must be an allowable string to be passed into a database query.
+         *  @param  listener IconListener that gets the icons once they are
+         *          retrieved.
+         */
+        RequestAllIcons(
+            [in] IContentResolver* cr,
+            [in] String where,
+            [in] IWebIconDatabaseIconListener* listener);
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IBrowserBookmarkColumns {
+        /**
+         * The URL of the bookmark or history item.
+         * <p>Type: TEXT (URL)</p>
+         */
+        const String URL = "url";
+
+        /**
+         * The number of time the item has been visited.
+         * <p>Type: NUMBER</p>
+         */
+        const String VISITS = "visits";
+
+        /**
+         * The date the item was last visited, in milliseconds since the epoch.
+         * <p>Type: NUMBER (date in milliseconds since January 1, 1970)</p>
+         */
+        const String DATE = "date";
+
+        /**
+         * Flag indicating that an item is a bookmark. A value of 1 indicates a bookmark, a value
+         * of 0 indicates a history item.
+         * <p>Type: INTEGER (boolean)</p>
+         */
+        const String BOOKMARK = "bookmark";
+
+        /**
+         * The user visible title of the bookmark or history item.
+         * <p>Type: TEXT</p>
+         */
+        const String TITLE = "title";
+
+        /**
+         * The date the item created, in milliseconds since the epoch.
+         * <p>Type: NUMBER (date in milliseconds since January 1, 1970)</p>
+         */
+        const String CREATED = "created";
+
+        /**
+         * The favicon of the bookmark. Must decode via {@link BitmapFactory#decodeByteArray}.
+         * <p>Type: BLOB (image)</p>
+         */
+        const String FAVICON = "favicon";
+
+        /**
+         * @hide
+         */
+        const String THUMBNAIL = "thumbnail";
+
+        /**
+         * @hide
+         */
+        const String TOUCH_ICON = "touch_icon";
+
+        /**
+         * @hide
+         */
+        const String USER_ENTERED = "user_entered";
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IBrowserSearchColumns {
+        /**
+         * @deprecated Not used.
+         */
+        //@Deprecated
+        const String URL = "url";
+
+        /**
+         * The user entered search term.
+         */
+        const String SEARCH = "search";
+
+        /**
+         * The date the search was performed, in milliseconds since the epoch.
+         * <p>Type: NUMBER (date in milliseconds since January 1, 1970)</p>
+         */
+        const String DATE = "date";
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+}

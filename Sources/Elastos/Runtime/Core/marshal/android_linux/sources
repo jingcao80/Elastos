@@ -1,0 +1,16 @@
+
+TARGET_NAME = marshal
+TARGET_TYPE = lib
+
+C_DEFINES+=-D_CAR_RUNTIME
+C_DEFINES+=-DHAVE_PTHREADS
+
+SOURCES += rot.cpp
+SOURCES += mshproc.cpp
+SOURCES += imarshal.cpp
+SOURCES += proxy.cpp
+SOURCES += stub.cpp
+SOURCES += CRemoteParcel.cpp
+
+INCLUDES += $(MAKEDIR)/../../../Library/inc/elasys
+INCLUDES += $(MAKEDIR)/../

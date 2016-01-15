@@ -1,0 +1,451 @@
+module
+{
+    interface Elastos.Droid.Database.ICharArrayBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+     * A buffer containing multiple cursor rows.
+     * <p>
+     * A {@link CursorWindow} is read-write when initially created and used locally.
+     * When sent to a remote process (by writing it to a {@link Parcel}), the remote process
+     * receives a read-only view of the cursor window.  Typically the cursor window
+     * will be allocated by the producer, filled with data, and then sent to the
+     * consumer for reading.
+     * </p>
+     *
+     * @Involve
+     * interface IParcelable
+     * interface ICloseable
+     * interface Elastos.Droid.Database.Sqlite.ISQLiteClosable
+     */
+    [deprecated]
+    interface ICursorWindow
+    {
+        /**
+         * Clears out the existing contents of the window, making it safe to reuse
+         * for new data. Note that the number of columns in the window may NOT
+         * change across a call to clear().
+         */
+        Clear();
+
+        /**
+         * Returns the starting position of this window within the entire
+         * Cursor's result set.
+         */
+        GetStartPosition(
+            [out] Int32* pos);
+
+        /**
+         * Set the start position of cursor window
+         */
+        SetStartPosition(
+            [in] Int32 pos);
+
+        /**
+         * Returns the number of rows in this window.
+         */
+        GetNumRows(
+            [out] Int32* num);
+
+        /**
+         * Set number of Columns
+         */
+        SetNumColumns(
+            [in] Int32 columnNum,
+            [out] Boolean* succeeded);
+
+        /**
+         * Allocate a row in cursor window
+         * @return false if cursor window is out of memory
+         */
+        AllocRow(
+            [out] Boolean* succeeded);
+
+        /**
+         * Free the last row
+         */
+        FreeLastRow();
+
+        /**
+         * Returns true if the field at the specified row and column index
+         * has type {@link Cursor#FIELD_TYPE_NULL}.
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if the field has type {@link Cursor#FIELD_TYPE_NULL}.
+         * @deprecated Use {@link #getType(int, int)} instead.
+         */
+        //@Deprecated
+        IsNull(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* succeeded);
+
+        /**
+         * Returns true if the field at the specified row and column index
+         * has type {@link Cursor#FIELD_TYPE_BLOB} or {@link Cursor#FIELD_TYPE_NULL}.
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if the field has type {@link Cursor#FIELD_TYPE_BLOB} or
+         * {@link Cursor#FIELD_TYPE_NULL}.
+         * @deprecated Use {@link #getType(int, int)} instead.
+         */
+        //@Deprecated
+        IsBlob(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* isBlob);
+
+        /**
+         * Returns true if the field at the specified row and column index
+         * has type {@link Cursor#FIELD_TYPE_INTEGER}.
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if the field has type {@link Cursor#FIELD_TYPE_INTEGER}.
+         * @deprecated Use {@link #getType(int, int)} instead.
+         */
+        //@Deprecated
+        IsInt64(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* isInt64);
+
+        /**
+         * Returns true if the field at the specified row and column index
+         * has type {@link Cursor#FIELD_TYPE_FLOAT}.
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if the field has type {@link Cursor#FIELD_TYPE_FLOAT}.
+         * @deprecated Use {@link #getType(int, int)} instead.
+         */
+        //@Deprecated
+        IsFloat(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* isFloat);
+
+        /**
+         * Returns true if the field at the specified row and column index
+         * has type {@link Cursor#FIELD_TYPE_STRING} or {@link Cursor#FIELD_TYPE_NULL}.
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if the field has type {@link Cursor#FIELD_TYPE_STRING}
+         * or {@link Cursor#FIELD_TYPE_NULL}.
+         * @deprecated Use {@link #getType(int, int)} instead.
+         */
+        //@Deprecated
+        IsString(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* isString);
+
+        /**
+         * Returns the type of the field at the specified row and column index.
+         * <p>
+         * The returned field types are:
+         * <ul>
+         * <li>{@link Cursor#FIELD_TYPE_NULL}</li>
+         * <li>{@link Cursor#FIELD_TYPE_INTEGER}</li>
+         * <li>{@link Cursor#FIELD_TYPE_FLOAT}</li>
+         * <li>{@link Cursor#FIELD_TYPE_STRING}</li>
+         * <li>{@link Cursor#FIELD_TYPE_BLOB}</li>
+         * </ul>
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return The field type.
+         */
+        GetType(
+            [in] Int32 row,
+            [in] Int32 column,
+            [out] Int32* type);
+
+        /**
+         * Gets the value of the field at the specified row and column index as a byte array.
+         * <p>
+         * The result is determined as follows:
+         * <ul>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_NULL}, then the result
+         * is <code>null</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_BLOB}, then the result
+         * is the blob value.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_STRING}, then the result
+         * is the array of bytes that make up the internal representation of the
+         * string value.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_INTEGER} or
+         * {@link Cursor#FIELD_TYPE_FLOAT}, then a {@link SQLiteException} is thrown.</li>
+         * </ul>
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return The value of the field as a byte array.
+         */
+        GetBlob(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out,callee] ArrayOf<Byte>* blob);
+
+        /**
+         * Gets the value of the field at the specified row and column index as a string.
+         * <p>
+         * The result is determined as follows:
+         * <ul>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_NULL}, then the result
+         * is <code>null</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_STRING}, then the result
+         * is the string value.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_INTEGER}, then the result
+         * is a string representation of the integer in decimal, obtained by formatting the
+         * value with the <code>printf</code> family of functions using
+         * format specifier <code>%lld</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_FLOAT}, then the result
+         * is a string representation of the floating-point value in decimal, obtained by
+         * formatting the value with the <code>printf</code> family of functions using
+         * format specifier <code>%g</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_BLOB}, then a
+         * {@link SQLiteException} is thrown.</li>
+         * </ul>
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return The value of the field as a string.
+         */
+        GetString(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] String* rst);
+
+        /**
+         * Copies the text of the field at the specified row and column index into
+         * a {@link CharArrayBuffer}.
+         * <p>
+         * The buffer is populated as follows:
+         * <ul>
+         * <li>If the buffer is too small for the value to be copied, then it is
+         * automatically resized.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_NULL}, then the buffer
+         * is set to an empty string.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_STRING}, then the buffer
+         * is set to the contents of the string.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_INTEGER}, then the buffer
+         * is set to a string representation of the integer in decimal, obtained by formatting the
+         * value with the <code>printf</code> family of functions using
+         * format specifier <code>%lld</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_FLOAT}, then the buffer is
+         * set to a string representation of the floating-point value in decimal, obtained by
+         * formatting the value with the <code>printf</code> family of functions using
+         * format specifier <code>%g</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_BLOB}, then a
+         * {@link SQLiteException} is thrown.</li>
+         * </ul>
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @param buffer The {@link CharArrayBuffer} to hold the string.  It is automatically
+         * resized if the requested string is larger than the buffer's current capacity.
+          */
+        CopyStringToBuffer(
+            [in] Int32 row,
+            [in] Int32 col,
+            [in] ICharArrayBuffer* buffer);
+
+        /**
+         * Gets the value of the field at the specified row and column index as a <code>long</code>.
+         * <p>
+         * The result is determined as follows:
+         * <ul>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_NULL}, then the result
+         * is <code>0L</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_STRING}, then the result
+         * is the value obtained by parsing the string value with <code>strtoll</code>.
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_INTEGER}, then the result
+         * is the <code>long</code> value.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_FLOAT}, then the result
+         * is the floating-point value converted to a <code>long</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_BLOB}, then a
+         * {@link SQLiteException} is thrown.</li>
+         * </ul>
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return The value of the field as a <code>long</code>.
+         */
+        GetInt64(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Int64* value);
+
+        /**
+         * Gets the value of the field at the specified row and column index as a
+         * <code>double</code>.
+         * <p>
+         * The result is determined as follows:
+         * <ul>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_NULL}, then the result
+         * is <code>0.0</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_STRING}, then the result
+         * is the value obtained by parsing the string value with <code>strtod</code>.
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_INTEGER}, then the result
+         * is the integer value converted to a <code>double</code>.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_FLOAT}, then the result
+         * is the <code>double</code> value.</li>
+         * <li>If the field is of type {@link Cursor#FIELD_TYPE_BLOB}, then a
+         * {@link SQLiteException} is thrown.</li>
+         * </ul>
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return The value of the field as a <code>double</code>.
+         */
+        GetDouble(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Double* value);
+
+        /**
+         * Gets the value of the field at the specified row and column index as a
+         * <code>short</code>.
+         * <p>
+         * The result is determined by invoking {@link #getLong} and converting the
+         * result to <code>short</code>.
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return The value of the field as a <code>short</code>.
+         */
+        GetInt16(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Int16* value);
+
+        /**
+         * Gets the value of the field at the specified row and column index as an
+         * <code>int</code>.
+         * <p>
+         * The result is determined by invoking {@link #getLong} and converting the
+         * result to <code>int</code>.
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return The value of the field as an <code>int</code>.
+         */
+        GetInt32(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Int32* value);
+
+        /**
+         * Gets the value of the field at the specified row and column index as a
+         * <code>float</code>.
+         * <p>
+         * The result is determined by invoking {@link #getDouble} and converting the
+         * result to <code>float</code>.
+         * </p>
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return The value of the field as an <code>float</code>.
+         */
+        GetFloat(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Float* value);
+
+        /**
+         * Copies a byte array into the field at the specified row and column index.
+         *
+         * @param value The value to store.
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if successful.
+         */
+        PutBlob(
+            [in] ArrayOf<Byte> value,
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* succeeded);
+
+        /**
+         * Copies a string into the field at the specified row and column index.
+         *
+         * @param value The value to store.
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if successful.
+         */
+        PutString(
+            [in] String value,
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* succeeded);
+
+        /**
+         * Puts a long integer into the field at the specified row and column index.
+         *
+         * @param value The value to store.
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if successful.
+         */
+        PutInt64(
+            [in] Int64 value,
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* succeeded);
+
+        /**
+         * Puts a double-precision floating point value into the field at the
+         * specified row and column index.
+         *
+         * @param value The value to store.
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if successful.
+         */
+        PutDouble(
+            [in] Double value,
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* succeeded);
+
+        /**
+         * Puts a null value into the field at the specified row and column index.
+         *
+         * @param row The zero-based row index.
+         * @param column The zero-based column index.
+         * @return True if successful.
+         */
+        PutNull(
+            [in] Int32 row,
+            [in] Int32 col,
+            [out] Boolean* succeeded);
+
+        ToString(
+            [out] String* str);
+    }
+
+    interface ICursorWindowHelper {
+        NewFromParcel(
+            [in] IParcel* p,
+            [out] ICursorWindow** result);
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,120 @@
+module
+{
+    interface Elastos.Text.ICharacterIterator;
+
+    namespace Libcore {
+    namespace ICU {
+
+    [deprecated]
+    interface ICollationElementIteratorICU {
+        /**
+         * Reset the collation elements to their initial state.
+         * This will move the 'cursor' to the beginning of the text.
+         * @stable ICU 2.4
+         */
+        Reset();
+
+        /**
+         * Get the ordering priority of the next collation element in the text.
+         * A single character may contain more than one collation element.
+         * @return next collation elements ordering, or NULLORDER if the end of the
+         *         text is reached.
+         * @stable ICU 2.4
+         */
+        GetNext(
+            [out] Int32 * value);
+
+        /**
+         * Get the ordering priority of the previous collation element in the text.
+         * A single character may contain more than one collation element.
+         * @return previous collation element ordering, or NULLORDER if the end of
+         *         the text is reached.
+         * @stable ICU 2.4
+         */
+        GetPrevious(
+            [out] Int32 * value);
+
+        /**
+         * Get the maximum length of any expansion sequences that end with the
+         * specified comparison order.
+         * @param order collation order returned by previous or next.
+         * @return maximum size of the expansion sequences ending with the collation
+         *              element or 1 if collation element does not occur at the end of
+         *              any expansion sequence
+         * @stable ICU 2.4
+         */
+        GetMaxExpansion(
+            [in] Int32 order,
+            [out] Int32 * value);
+
+        /**
+         * Set the text containing the collation elements.
+         * @param source text containing the collation elements.
+         * @stable ICU 2.4
+         */
+        SetText(
+            [in] String source);
+
+        SetText(
+            [in] ICharacterIterator * source);
+
+        /**
+         * Get the offset of the current source character.
+         * This is an offset into the text of the character containing the current
+         * collation elements.
+         * @return offset of the current source character.
+         * @stable ICU 2.4
+         */
+        GetOffset(
+            [out] Int32 * value);
+
+        /**
+         * Set the offset of the current source character.
+         * This is an offset into the text of the character to be processed.
+         * @param offset The desired character offset.
+         * @stable ICU 2.4
+         */
+        SetOffset(
+            [in] Int32 offset);
+    }
+
+    interface ICollationElementIteratorICUHelper {
+        /**
+         * Gets the primary order of a collation order.
+         * @param order the collation order
+         * @return the primary order of a collation order.
+         * @stable ICU 2.4
+         */
+        PrimaryOrder(
+            [in] Int32 order,
+            [out] Int32 * value);
+
+        /**
+         * Gets the secondary order of a collation order.
+         * @param order the collation order
+         * @return the secondary order of a collation order.
+         * @stable ICU 2.4
+         */
+        SecondaryOrder(
+            [in] Int32 order,
+            [out] Int32 * value);
+
+        /**
+         * Gets the tertiary order of a collation order.
+         * @param order the collation order
+         * @return the tertiary order of a collation order.
+         * @stable ICU 2.4
+         */
+        TertiaryOrder(
+            [in] Int32 order,
+            [out] Int32 * value);
+
+        GetInstance(
+            [in] Int64 collatorAddress,
+            [in] String source,
+            [out] ICollationElementIteratorICU ** outiterICU);
+    }
+
+    } // namespace ICU
+    } // namespace LibCore
+}

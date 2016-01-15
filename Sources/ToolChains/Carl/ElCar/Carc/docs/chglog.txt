@@ -1,0 +1,75 @@
+//==========================================================================
+// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+//==========================================================================
+2005-06-10:
+    1) CARC 2.0 first delivered.
+
+2005-06-13:
+    1) Do not support 'mscom' again.
+    2) Define interface IObject, all interface will inherit from it.
+    3) Fix bug: 'import' can not right work on NT VM.
+
+2005-06-16:
+    1) XOR generated clsid with header uuid.
+    2) Summary class info struct align 4.
+
+2005-06-17:
+    1) Rename keyword 'component' to 'module'.
+    2) Rename attribute 'aspect' to 'aggregate'.
+    3) 'aggregate' support multi-aspects aggregated.
+    4) Rename attribute 'maspect' to 'aspect'.
+    5) Do not permit multi-inheriting of class.
+    6) Rename 'SummaryCLS' to 'AbridgedCLS'.
+
+2005-06-18:
+    1) The attribute 'aspect' do not conflict with 'rwlock', 'monitor' now.
+    2) Do not auto-import IVirxxxHelper while class has virtual interface.
+    3) Recomment the processing code of 'scriptable'.
+    4) Generate reverted text of AbridgedCLS in class info's CPP file.
+
+2005-06-25:
+    1) Eliminate parent-son relation of class interfaces.
+
+2005-07-04:
+    1) Treat module name as an optional identify and parser will ignore it.
+    2) Make CAR source file name as real module name.
+
+2005-07-07:
+    1) Fix bug: merge can't work properly.
+    2) Generate iid string from tail to head.
+    3) Assure the first class interface(main interface) is not local.
+    4) Add 'async' attrib for interface.
+    5) Default using com pointer, change 'usecomptr' to 'smartptr'.
+    6) Remove 'icallback' type of interface.
+    7) Add 'callback' attribute to class interface.
+
+2005-07-11:
+    1) Automatically add interface 'IContext' into context.
+
+2005-07-12:
+    1) Automatically generate sink class for callback interface.
+
+2005-07-14:
+    1) Cancel code of automatically add 'IContext';
+    2) Add current source directory to search path;
+
+2005-07-17:
+    1) Add size of seed string to first 6 bits of uuid.
+
+2005-07-20:
+    1) Add command arg '-F' to specify manufactory URL.
+    2) If uunm is not specified, manufactory URL and CAR file name is used.
+    3) Remove 'smartptr' and 'rwlock' attribs from class.
+    4) Remove return type of method, using ECode default.
+    5) Make parameter attribute as an option.
+
+2005-08-01:
+    1) Change uuid generating algorithm.
+    2) Change syntax of service from "service" to "service(string)".
+
+2007-12-18
+    1) remove thread model option
+    2) add command arg "-A" to specify non synchronization
+    3) don't support "naked" in car file
+    4) aspect may specify classes for aggregating
+

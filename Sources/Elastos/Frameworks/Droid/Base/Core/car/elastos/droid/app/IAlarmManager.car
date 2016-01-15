@@ -1,0 +1,46 @@
+module
+{
+    interface Elastos.Droid.Os.IWorkSource;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.App.IAlarmClockInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * System private API for talking with the alarm manager service.
+     *
+     * {@hide}
+     */
+    interface IIAlarmManager {
+        /** windowLength == 0 means exact; windowLength < 0 means the let the OS decide */
+        Set(
+            [in] Int32 type,
+            [in] Int64 triggerAtTime,
+            [in] Int64 windowLength,
+            [in] Int64 interval,
+            [in] IPendingIntent* operation,
+            [in] IWorkSource* workSource,
+            [in] IAlarmClockInfo* alarmClock);
+
+        SetTime(
+            [in] Int64 millis,
+            [out] Boolean* result);
+
+        SetTimeZone(
+            [in] String zone);
+
+        Remove(
+            [in] IPendingIntent* operation);
+
+        GetNextAlarmClock(
+            [in] Int32 userId,
+            [out] IAlarmClockInfo** info);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}
+

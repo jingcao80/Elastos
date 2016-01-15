@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The event sent to an {@code SSLSessionBindingListener} when the listener
+     * object is bound ({@link SSLSession#putValue(String, Object)}) or unbound
+     * ({@link SSLSession#removeValue(String)}) to an {@code SSLSession}.
+     *
+     * @Involve
+     * interface Elastos.Utility.IEventObject;
+     * interface Elastos.IO.ISerializable;
+     */
+    interface ISSLSessionBindingEvent {
+        /**
+         * Returns the name of the binding being added or removed.
+         *
+         * @return the name of the binding.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns the session to which the binding is added or from which it is
+         * removed.
+         *
+         * @return the session to which the binding is added or from which it is
+         *         removed.
+         */
+        GetSession(
+            [out] ISSLSession** session);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

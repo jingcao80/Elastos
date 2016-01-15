@@ -1,0 +1,49 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHeader;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+
+    /**
+     * A type-safe iterator for {@link Header Header} objects.
+     *
+     * @version $Revision: 581981 $
+     */
+    /**
+     * @Involve
+     * interface IIterator;
+     */
+    interface IHeaderIterator {
+
+        /**
+         * Indicates whether there is another header in this iteration.
+         *
+         * @return  <code>true</code> if there is another header,
+         *          <code>false</code> otherwise
+         */
+        HasNext(
+           [out] Boolean* hasNext);
+
+
+        /**
+         * Obtains the next header from this iteration.
+         * This method should only be called while {@link #hasNext hasNext}
+         * is true.
+         *
+         * @return  the next header in this iteration
+         */
+        NextHeader(
+            [out] IHeader** nextHeader);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

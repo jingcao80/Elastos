@@ -1,0 +1,24 @@
+module
+{
+
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /** @hide */
+    [oneway]
+    interface IIResultReceiver {
+        Send(
+            [in] Int32 resultCode,
+            [in] IBundle* resultData);
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

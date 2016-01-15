@@ -1,0 +1,95 @@
+
+module
+{
+    interface Elastos.Droid.Wifi.P2p.IWifiP2pDevice;
+
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+
+    /**
+     * A class representing a Wi-Fi P2p device list.
+     *
+     * Note that the operations are not thread safe.
+     * {@see WifiP2pManager}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiP2pDeviceList {
+        /** Clear the list @hide */
+        Clear(
+            [out] Boolean* result);
+
+        /**
+         * Add/update a device to the list. If the device is not found, a new device entry
+         * is created. If the device is already found, the device details are updated
+         * @param device to be updated
+         * @hide
+         */
+        Update(
+            [in] IWifiP2pDevice* device);
+
+        /** Only updates details fetched from the supplicant @hide */
+        UpdateSupplicantDetails(
+            [in] IWifiP2pDevice* device);
+
+        /** @hide */
+        UpdateGroupCapability(
+            [in] String deviceAddress,
+            [in] Int32 groupCapab);
+
+        /** @hide */
+        UpdateStatus(
+            [in] String deviceAddress,
+            [in] Int32 status);
+
+        /**
+         * Fetch a device from the list
+         * @param deviceAddress is the address of the device
+         * @return WifiP2pDevice device found, or null if none found
+         */
+        Get(
+            [in] String deviceAddress,
+            [out] IWifiP2pDevice** result);
+
+        /** @hide */
+        Remove(
+            [in] IWifiP2pDevice* device,
+            [out] Boolean* result);
+
+        /**
+         * Remove a device from the list
+         * @param deviceAddress is the address of the device
+         * @return WifiP2pDevice device removed, or null if none removed
+         * @hide
+         */
+        Remove(
+            [in] String deviceAddress,
+            [out] IWifiP2pDevice** result);
+
+        /** Returns true if any device the list was removed @hide */
+        Remove(
+            [in] IWifiP2pDeviceList* list,
+            [out] Boolean* result);
+
+        /** Get the list of devices */
+        GetDeviceList(
+            [out] ICollection** result);
+
+        /** @hide */
+        IsGroupOwner(
+            [in] String deviceAddress,
+            [out] Boolean* result);
+    }
+
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}
+

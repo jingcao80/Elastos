@@ -1,0 +1,36 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpVersion;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Params {
+
+    interface IHttpProtocolParamBean {
+
+        SetHttpElementCharset(
+            [in] String httpElementCharset);
+
+        SetContentCharset(
+            [in] String contentCharset);
+
+        SetVersion(
+            [in] IHttpVersion* ver);
+
+        SetUserAgent(
+            [in] String userAgent);
+
+        SetUseExpectContinue(
+            [in] Boolean useExpectContinue);
+
+    }
+
+    } // namespace Params
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

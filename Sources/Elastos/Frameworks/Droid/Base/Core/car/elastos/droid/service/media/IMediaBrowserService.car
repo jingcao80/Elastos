@@ -1,0 +1,158 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Media.Session.IMediaSessionToken;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Media {
+
+    /**
+     * Completion handler for asynchronous callback methods in {@link MediaBrowserService}.
+     * <p>
+     * Each of the methods that takes one of these to send the result must call
+     * {@link #sendResult} to respond to the caller with the given results.  If those
+     * functions return without calling {@link #sendResult}, they must instead call
+     * {@link #detach} before returning, and then may call {@link #sendResult} when
+     * they are done.  If more than one of those methods is called, an exception will
+     * be thrown.
+     *
+     * @see MediaBrowserService#onLoadChildren
+     * @see MediaBrowserService#onLoadIcon
+     */
+    interface IMediaBrowserServiceResult {
+
+        /**
+         * Send the result back to the caller.
+         */
+        SendResult(
+            [in] IObject * result);
+
+        /**
+         * Detach this message from the current thread and allow the {@link #sendResult}
+         * call to happen later.
+         */
+        Detach();
+    }
+
+    interface IMediaBrowserServiceBrowserRoot {
+        /**
+         * Gets the root id for browsing.
+         */
+        GetRootId(
+            [out] String * result);
+
+        /**
+         * Gets any extras about the brwoser service.
+         */
+        GetExtras(
+            [out] IBundle ** result);
+    }
+
+    /**
+     * Base class for media browse services.
+     * <p>
+     * Media browse services enable applications to browse media content provided by an application
+     * and ask the application to start playing it.  They may also be used to control content that
+     * is already playing by way of a {@link MediaSession}.
+     * </p>
+     *
+     * To extend this class, you must declare the service in your manifest file with
+     * an intent filter with the {@link #SERVICE_INTERFACE} action.
+     *
+     * For example:
+     * </p><pre>
+     * &lt;service android:name=".MyMediaBrowserService"
+     *          android:label="&#64;string/service_name" >
+     *     &lt;intent-filter>
+     *         &lt;action android:name="android.media.browse.MediaBrowserService" />
+     *     &lt;/intent-filter>
+     * &lt;/service>
+     * </pre>
+     *
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.IService;
+     */
+    interface IMediaBrowserService {
+        const String SERVICE_INTERFACE = "android.media.browse.MediaBrowserService";
+
+        /**
+         * Called to get the root information for browsing by a particular client.
+         * <p>
+         * The implementation should verify that the client package has
+         * permission to access browse media information before returning
+         * the root id; it should return null if the client is not
+         * allowed to access this information.
+         * </p>
+         *
+         * @param clientPackageName The package name of the application
+         * which is requesting access to browse media.
+         * @param clientUid The uid of the application which is requesting
+         * access to browse media.
+         * @param rootHints An optional bundle of service-specific arguments to send
+         * to the media browse service when connecting and retrieving the root id
+         * for browsing, or null if none.  The contents of this bundle may affect
+         * the information returned when browsing.
+         */
+        OnGetRoot(
+            [in] String clientPackageName,
+            [in] Int32 clientUid,
+            [in] IBundle * rootHints,
+            [out] IMediaBrowserServiceBrowserRoot ** result);
+
+        /**
+         * Called to get information about the children of a media item.
+         * <p>
+         * Implementations must call result.{@link Result#sendResult result.sendResult} with the list
+         * of children. If loading the children will be an expensive operation that should be performed
+         * on another thread, result.{@link Result#detach result.detach} may be called before returning
+         * from this function, and then {@link Result#sendResult result.sendResult} called when
+         * the loading is complete.
+         *
+         * @param parentId The id of the parent media item whose
+         * children are to be queried.
+         * @return The list of children, or null if the id is invalid.
+         */
+        OnLoadChildren(
+            [in] String parentId,
+            [in] IMediaBrowserServiceResult * result);
+
+        /**
+         * Call to set the media session.
+         * <p>
+         * This must be called before onCreate returns.
+         *
+         * @return The media session token, must not be null.
+         */
+        SetSessionToken(
+            [in] IMediaSessionToken * token);
+
+        /**
+         * Gets the session token, or null if it has not yet been created
+         * or if it has been destroyed.
+         */
+        GetSessionToken(
+            [out] IMediaSessionToken ** result);
+
+        /**
+         * Notifies all connected media browsers that the children of
+         * the specified parent id have changed in some way.
+         * This will cause browsers to fetch subscribed content again.
+         *
+         * @param parentId The id of the parent media item whose
+         * children changed.
+         */
+        NotifyChildrenChanged(
+            [in] String parentId);
+
+    }
+
+    } // namespace Media
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

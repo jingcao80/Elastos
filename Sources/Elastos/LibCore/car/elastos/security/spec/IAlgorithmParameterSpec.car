@@ -1,0 +1,18 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The marker interface for algorithm parameter specifications. The purpose is
+     * to group parameter specifications for algorithms.
+     */
+    interface IAlgorithmParameterSpec {
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

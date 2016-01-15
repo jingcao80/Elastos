@@ -1,0 +1,80 @@
+
+module
+{
+    interface Elastos.Droid.Utility.IPrinter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+
+    /**
+     * Information you can retrieve about a particular application service. This
+     * corresponds to information collected from the AndroidManifest.xml's <service> tags.
+     *
+     * @implements Elastos.Droid.Content.Pm.Elastos.Droid.Content.Pm.IComponentInfo
+     */
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.Pm.IComponentInfo
+     * interface Elastos.Droid.Content.Pm.IPackageItemInfo
+     */
+    interface IServiceInfo {
+        /**
+         * Bit in #flags: If set, the service will automatically be
+         * stopped by the system if the user removes a task that is rooted
+         * in one of the application's activities.  Set from the
+         * android.R.attr#stopWithTask attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#stopWithTask
+         */
+        const Int32 FLAG_STOP_WITH_TASK = 0x0001;
+
+        /**
+         * Bit in #flags: If set, the service will run in its own
+         * isolated process.  Set from the
+         * android.R.attr#isolatedProcess attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#isolatedProcess
+         */
+        const Int32 FLAG_ISOLATED_PROCESS = 0x0002;
+
+        /**
+         * Bit in #flags: If set, a single instance of the service will
+         * run for all users on the device.  Set from the
+         * android.R.attr#singleUser attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#singleUser
+         */
+        const Int32 FLAG_SINGLE_USER = 0x40000000;
+
+        Dump(
+            [in] IPrinter* pw,
+            [in] String prefix);
+
+        ToString(
+            [out] String* str);
+
+        GetPermission(
+            [out] String* permission);
+
+        SetPermission(
+            [in] String permission);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

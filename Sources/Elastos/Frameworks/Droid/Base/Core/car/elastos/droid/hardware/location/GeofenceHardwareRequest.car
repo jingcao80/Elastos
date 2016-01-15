@@ -1,0 +1,126 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * This class represents the characteristics of the geofence.
+     *
+     * <p> Use this in conjunction with {@link GeofenceHardware} APIs.
+     *
+     * @hide
+     */
+    //@SystemApi
+    interface IGeofenceHardwareRequest {
+        /**
+         * Set the last known transition of the geofence.
+         *
+         * @param lastTransition The current state of the geofence. Can be one of
+         *        {@link GeofenceHardware#GEOFENCE_ENTERED}, {@link GeofenceHardware#GEOFENCE_EXITED},
+         *        {@link GeofenceHardware#GEOFENCE_UNCERTAIN}.
+         */
+        SetLastTransition(
+            [in] Int32 lastTransition);
+
+        /**
+         * Set the unknown timer for this geofence.
+         *
+         * @param unknownTimer  The time limit after which the
+         *        {@link GeofenceHardware#GEOFENCE_UNCERTAIN} transition
+         *        should be triggered. This paramter is defined in milliseconds.
+         */
+        SetUnknownTimer(
+            [in] Int32 unknownTimer);
+
+        /**
+         * Set the transitions to be monitored.
+         *
+         * @param monitorTransitions Bitwise OR of {@link GeofenceHardware#GEOFENCE_ENTERED},
+         *        {@link GeofenceHardware#GEOFENCE_EXITED}, {@link GeofenceHardware#GEOFENCE_UNCERTAIN}
+         */
+        SetMonitorTransitions(
+            [in] Int32 monitorTransitions);
+
+        /**
+         * Set the notification responsiveness of the geofence.
+         *
+         * @param notificationResponsiveness (milliseconds) Defines the best-effort description
+         *        of how soon should the callback be called when the transition
+         *        associated with the Geofence is triggered. For instance, if
+         *        set to 1000 millseconds with {@link GeofenceHardware#GEOFENCE_ENTERED},
+         *        the callback will be called 1000 milliseconds within entering
+         *        the geofence.
+         */
+        SetNotificationResponsiveness(
+            [in] Int32 notificationResponsiveness);
+
+        /**
+         * Set the source technologies to use while tracking the geofence.
+         * The value is the bit-wise of one or several source fields defined in
+         * {@link GeofenceHardware}.
+         *
+         * @param sourceTechnologies The set of source technologies to use.
+         */
+        SetSourceTechnologies(
+            [in] Int32 sourceTechnologies);
+
+        /**
+         * Returns the latitude of this geofence.
+         */
+        GetLatitude(
+            [out] Double* latitude);
+
+        /**
+         * Returns the longitude of this geofence.
+         */
+        GetLongitude(
+            [out] Double* longitude);
+
+        /**
+         * Returns the radius of this geofence.
+         */
+        GetRadius(
+            [out] Double* radius);
+
+        /**
+         * Returns transitions monitored for this geofence.
+         */
+        GetMonitorTransitions(
+            [out] Int32* transitions);
+
+        /**
+         * Returns the unknownTimer of this geofence.
+         */
+        GetUnknownTimer(
+            [out] Int32* timer);
+
+        /**
+         * Returns the notification responsiveness of this geofence.
+         */
+        GetNotificationResponsiveness(
+            [out] Int32* responsiveness);
+
+        /**
+         * Returns the last transition of this geofence.
+         */
+        GetLastTransition(
+            [out] Int32* transition);
+
+        /**
+         * Returns the source technologies to track this geofence.
+         */
+        GetSourceTechnologies(
+            [out] Int32* technologies);
+
+        GetType(
+            [out] Int32* type);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

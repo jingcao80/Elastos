@@ -1,0 +1,29 @@
+module
+{
+    interface Elastos.Utility.Logging.ILogRecord;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Logging {
+    /**
+     * A {@code Filter} provides a mechanism for exercising fine-grained control
+     * over which records get logged.
+     */
+    interface IFilter {
+        /**
+         * Checks {@code record} to determine if it should be logged.
+         *
+         * @param record
+         *            the {@link LogRecord} to be checked.
+         * @return {@code true} if the supplied log record needs to be logged,
+         *         {@code false} otherwise.
+         */
+        IsLoggable(
+            [in] ILogRecord* record,
+            [out] Boolean* value);
+    }
+
+    } // namespace Logging
+    } // namespace Utility
+    } // namespace Elastos
+}

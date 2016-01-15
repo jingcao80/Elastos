@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg.2092916633">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg.2092916633" moduleId="org.eclipse.cdt.core.settings" name="Elastos_Application_Project">
+				<externalSettings/>
+				<extensions>
+					<extension id="com.kortide.edt.LubeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.kortide.edt.ElastosGCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.kortide.edt.ElastosVCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.kortide.edt.ElastosGLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.kortide.edt.ElastosGASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.kortide.edt.CarCompilerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.kortide.edt.ElastosMakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="eco" artifactName="${ProjName}" buildArtefactType="com.kortide.edt.build.core.buildArtefactType.ElastosApplication" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,com.kortide.edt.core.CPUType=com.kortide.edt.core.CPUType.arm,org.eclipse.cdt.build.core.buildArtefactType=com.kortide.edt.build.core.buildArtefactType.ElastosApplication" cleanCommand="rm -f" description="" errorParsers="com.kortide.edt.CarCompilerErrorParser;com.kortide.edt.LubeErrorParser;com.kortide.edt.ElastosMakeErrorParser;com.kortide.edt.ElastosGCCErrorParser;com.kortide.edt.ElastosGLDErrorParser;com.kortide.edt.ElastosGASErrorParser;com.kortide.edt.ElastosVCErrorParser;" id="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg.2092916633" name="Elastos_Application_Project" parent="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg">
+					<folderInfo id="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg.2092916633." name="/" resourcePath="">
+						<toolChain id="openkode.application.dbg.341815357" name="Default OpenKODE ToolChain" superClass="openkode.application.dbg">
+							<targetPlatform id="com.kortide.edt.targetPlatform.elastos.application.1735470951" name="Target Platform" superClass="com.kortide.edt.targetPlatform.elastos.application"/>
+							<builder buildPath="${workspace_loc:/ElMediaplayer}/Elastos_Application_Project" id="openkode.kortide.edt.core.toolchain.gnu.default.builder.326509160" managedBuildOn="true" name="Elastos OpenKODE Toolchain Builder.Elastos_Application_Project" superClass="openkode.kortide.edt.core.toolchain.gnu.default.builder"/>
+							<tool id="com.kortide.edt.core.tools.carc.1823166264" name="Elastos CAR Compiler" superClass="com.kortide.edt.core.tools.carc">
+								<inputType id="com.kortide.edt.core.tools.carc.input.17721326" superClass="com.kortide.edt.core.tools.carc.input"/>
+							</tool>
+							<tool id="com.kortide.edt.core.tools.ellangc.606544557" name="Elastos I18N Compiler" superClass="com.kortide.edt.core.tools.ellangc"/>
+							<tool id="com.kortide.edt.core.tools.g++.1114566995" name="Elastos GCC C++ Compiler" superClass="com.kortide.edt.core.tools.g++">
+								<option id="gnu.cpp.compiler.option.optimization.level.1224911579" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1074886895" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1821677834" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="com.kortide.edt.core.tools.gcc.1962304787" name="Elastos GCC C Compiler" superClass="com.kortide.edt.core.tools.gcc">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.691600942" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.1585081678" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.183320297" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="com.kortide.edt.core.tools.linker.2124281071" name="Elastos GCC Linker" superClass="com.kortide.edt.core.tools.linker">
+								<option id="com.kortide.edt.core.tools.gnu.linker.option.entry.125438177" superClass="com.kortide.edt.core.tools.gnu.linker.option.entry" value="com.kortide.edt.core.tools.gnu.linker.option.entry.armdll" valueType="enumerated"/>
+								<option id="com.kortide.edt.core.tools.gnu.linker.option.imagebase.1535501754" superClass="com.kortide.edt.core.tools.gnu.linker.option.imagebase"/>
+								<option id="com.kortide.edt.core.tools.gnu.linker.option.optimization.level.1527979503" superClass="com.kortide.edt.core.tools.gnu.linker.option.optimization.level"/>
+							</tool>
+							<tool id="com.kortide.edt.core.tools.archiver.15650693" name="Elastos Archiver" superClass="com.kortide.edt.core.tools.archiver"/>
+							<tool id="com.kortide.edt.core.tools.assembler.1472408170" name="Elastos Assembler" superClass="com.kortide.edt.core.tools.assembler">
+								<inputType id="com.kortide.edt.core.tools.gnu.assembler.input.1133206854" superClass="com.kortide.edt.core.tools.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="ElMediaplayer.com.kortide.edt.core.projectType.ElastosApplication.217430122" name="Elastos C++ Application" projectType="com.kortide.edt.core.projectType.ElastosApplication"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg.2092916633;com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg.2092916633.;com.kortide.edt.core.tools.g++.1114566995;cdt.managedbuild.tool.gnu.cpp.compiler.input.1821677834">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg.2092916633;com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.pc.dbg.2092916633.;com.kortide.edt.core.tools.gcc.1962304787;cdt.managedbuild.tool.gnu.c.compiler.input.183320297">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+</cproject>

@@ -1,0 +1,125 @@
+
+module
+{
+    interface Elastos.Security.IPrivateKey;
+    interface Elastos.Security.IPrincipal;
+    interface Elastos.Net.ISocket;
+    interface Elastos.Security.Cert.IX509Certificate;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * A Key Manager for X509 certificate-based key pairs.
+     *
+     * @Involve
+     * interface Elastosx.Net.Ssl.IKeyManager
+     */
+    [deprecated]
+    interface IX509KeyManager {
+        /**
+         * Chooses an alias for the client side of an SSL connection to authenticate
+         * it with the specified public key type and certificate issuers.
+         *
+         * @param keyType
+         *            the list of public key algorithm names.
+         * @param issuers
+         *            the list of certificate issuers, or {@code null} if any issuer
+         *            will do.
+         * @param socket
+         *            the socket for the connection, or {@code null} if
+         *            the alias selected does not depend on a specific socket.
+         * @return the alias name of a matching key or {@code null} if there are no
+         *         matches.
+         */
+        ChooseClientAlias(
+            [in] ArrayOf<String>* keyType,
+            [in] ArrayOf<IPrincipal*>* issuers,
+            [in] ISocket* socket,
+            [out] String* alias);
+
+        /**
+         * Chooses an alias for the server side of an SSL connection to authenticate
+         * it with the specified public key type and certificate issuers.
+         *
+         * @param keyType
+         *            the list of public key algorithm type names.
+         * @param issuers
+         *            the list of certificate issuers, or {@code null} if any issuer
+         *            will do.
+         * @param socket
+         *            the socket for the connection, or {@code null} if
+         *            the alias selected does not depend on a specific socket.
+         * @return the alias name of a matching key or {@code null} if there are no
+         *         matches.
+         */
+        ChooseServerAlias(
+            [in] String keyType,
+            [in] ArrayOf<IPrincipal*>* issuers,
+            [in] ISocket* socket,
+            [out] String* alias);
+
+        /**
+         * Returns the certificate chain for the specified alias.
+         *
+         * @param alias
+         *            the alias to get the certificate chain for.
+         * @return the certificate chain for the specified alias, or {@code null} if
+         *         the alias cannot be found.
+         */
+        GetCertificateChain(
+            [in] String alias,
+            [out, callee] ArrayOf<IX509Certificate*>* chain);
+
+        /**
+         * Returns the client aliases for the specified public key type and list of
+         * certificate issuers.
+         *
+         * @param keyType
+         *            the public key algorithm type name.
+         * @param issuers
+         *            the list of certificate issuers, or {@code null} if any issuer
+         *            will do.
+         * @return the client aliases for the specified public key type, or
+         *         {@code null} if there are no matching aliases.
+         */
+        GetClientAliases(
+            [in] String keyType,
+            [in] ArrayOf<IPrincipal*>* issuers,
+            [out, callee] ArrayOf<String>* alias);
+
+        /**
+         * Returns the server aliases for the specified public key type and list of
+         * certificate issuers.
+         *
+         * @param keyType
+         *            the public key algorithm type name.
+         * @param issuers
+         *            the list of certificate issuers, or {@code null} if any issuer
+         *            will do.
+         * @return the client aliases for the specified public key type, or
+         *         {@code null} if there are no matching aliases.
+         */
+        GetServerAliases(
+            [in] String keyType,
+            [in] ArrayOf<IPrincipal*>* issuers,
+            [out, callee] ArrayOf<String>* alias);
+
+        /**
+         * Returns the private key for the specified alias.
+         *
+         * @param alias
+         *            the alias to get the private key for.
+         * @return the private key for the specified alias, or {@code null} if the
+         *         alias cannot be found.
+         */
+        GetPrivateKey(
+            [in] String alias,
+            [out] IPrivateKey** key);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

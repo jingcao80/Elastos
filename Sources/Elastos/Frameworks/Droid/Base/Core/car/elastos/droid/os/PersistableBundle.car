@@ -1,0 +1,56 @@
+module
+{
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+    using interface Org.Xmlpull.V1.IXmlSerializer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * @Involve
+     * interface IBaseBundle;
+     * interface ICloneable;
+     * interface IParcelable
+     * interface IXmlUtilsWriteMapCallback;
+     */
+    [deprecated]
+    interface IPersistableBundle {
+        PutPersistableBundle(
+            [in] String key,
+            [in] IPersistableBundle* value);
+
+        GetPersistableBundle(
+            [in] String key,
+            [out] IPersistableBundle** value);
+
+        SaveToXml(
+            [in] IXmlSerializer* outXml);
+    }
+
+    interface IPersistableBundleHelper {
+        GetEMPTY(
+            [out] IPersistableBundle** bundle);
+
+        /**
+         * Make a PersistableBundle for a single key/value pair.
+         *
+         * @hide
+         */
+        ForPair(
+            [in] String key,
+            [in] String value,
+            [out] IPersistableBundle** pb);
+
+        /** @hide */
+        RestoreFromXml(
+            [in] IXmlPullParser* inParser,
+            [out] IPersistableBundle** pb);
+    }
+
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

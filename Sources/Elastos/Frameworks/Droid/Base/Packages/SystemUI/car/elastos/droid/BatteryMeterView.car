@@ -1,0 +1,25 @@
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBatteryController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+
+    /**
+     * @Involve
+     * interface IView
+     * interface IDemoMode
+     * interface IBatteryControllerBatteryStateChangeCallback
+     */
+    interface IBatteryMeterView {
+        SetBatteryController(
+            [in] IBatteryController* batteryController);
+    }
+
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

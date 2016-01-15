@@ -1,0 +1,111 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Utility {
+
+    /**
+     * A resizable char array.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 496070 $
+     *
+     * @since 4.0
+     */
+    [deprecated]
+    interface ICharArrayBuffer {
+
+        Append(
+            [in] ArrayOf<Char32>* b,
+            [in] Int32 off,
+            [in] Int32 len);
+
+        Append(
+            [in] String str);
+
+        Append(
+            [in] ICharArrayBuffer* b,
+            [in] Int32 off,
+            [in] Int32 len);
+
+        Append(
+            [in] ICharArrayBuffer* b);
+
+        Append(
+            [in] Char32 ch);
+
+        Append(
+            [in] ArrayOf<Byte>* b,
+            [in] Int32 off,
+            [in] Int32 len);
+
+        Append(
+            [in] IByteArrayBuffer* b,
+            [in] Int32 off,
+            [in] Int32 len);
+
+        Append(
+            [in] IInterface* obj);
+
+        Clear();
+
+        ToCharArray(
+            [out, callee] ArrayOf<Char32>* charArray);
+
+        CharAt(
+            [in] Int32 i,
+            [out] Char32* charAt);
+
+        GetBuffer(
+            [out, callee] ArrayOf<Char32>* buffer);
+
+        GetCapacity(
+            [out] Int32* capacity);
+
+        GetLength(
+            [out] Int32* length);
+
+        EnsureCapacity(
+            [in] Int32 required);
+
+        SetLength(
+            [in] Int32 len);
+
+        IsEmpty(
+            [out] Boolean* isEmpty);
+
+        IsFull(
+            [out] Boolean* isFull);
+
+        IndexOf(
+            [in] Int32 ch,
+            [in] Int32 beginIndex,
+            [in] Int32 endIndex,
+            [out] Int32* index);
+
+        IndexOf(
+            [in] Int32 ch,
+            [out] Int32* index);
+
+        Substring(
+            [in] Int32 beginIndex,
+            [in] Int32 endIndex,
+            [out] String* string);
+
+        SubstringTrimmed(
+            [in] Int32 beginIndex,
+            [in] Int32 endIndex,
+            [out] String* string);
+
+    }
+
+    } // namespace Utility
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

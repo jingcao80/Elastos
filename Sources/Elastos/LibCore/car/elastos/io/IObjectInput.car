@@ -1,0 +1,118 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+    * Defines an interface for classes that allow reading serialized objects.
+    * @implement Elastos.IO.IDataInput
+    * @sa ObjectInputStream
+    * @sa ObjectOutput
+    *
+    */
+     /**
+     * @Involve
+     * interface IDataInput;
+     */
+    [deprecated]
+    interface IObjectInput {
+        /**
+         * Indicates the number of bytes of primitive data that can be read without
+         * blocking.
+         *
+         * @return the number of bytes available.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs.
+         */
+        Available(
+            [out] Int32* num);
+
+        /**
+         * Closes this stream. Implementations of this method should free any
+         * resources used by the stream.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while closing the input stream.
+         */
+        Close();
+
+        /**
+         * Reads a single byte from this stream and returns it as an integer in the
+         * range from 0 to 255. Returns -1 if the end of this stream has been
+         * reached. Blocks if no input is available.
+         *
+         * @return the byte read or -1 if the end of this stream has been reached.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if this stream is closed or another I/O error occurs.
+         */
+        Read(
+            [out] Int32* num);
+
+        /**
+         * Reads bytes from this stream into the byte array {@code buffer}. Blocks
+         * while waiting for input. Returns the number of bytes read,
+         * or -1 if the end of this stream has been reached.
+         *
+         * @throws IOException
+         *             if this stream is closed or another I/O error occurs.
+         */
+        // original ReadBytes
+        Read(
+            [in] ArrayOf<Byte>* buffer,
+            [out] Int32* num);
+
+        /**
+         * Reads up to {@code byteCount} bytes from this stream and stores them in
+         * byte array {@code buffer} starting at offset {@code byteOffset}. Blocks while
+         * waiting for input. Returns the number of bytes read or -1 if the end of this stream has been
+         * reached.
+         *
+         * @throws IOException
+         *             if this stream is closed or another I/O error occurs.
+         */
+        // original ReadBytes
+        Read(
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 byteOffset,
+            [in] Int32 byteCount,
+            [out] Int32* num);
+
+        /**
+         * Reads the next object from this stream.
+         *
+         * @return the object read.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * ClassNotFoundException | if the object's class cannot be found.
+         * IOException | if this stream is closed or another I/O error occurs.
+         */
+        ReadObject(
+            [out] IInterface** obj);
+
+        /**
+         * Skips {byteCount} bytes on this stream. Less than {byteCount} byte are
+         * skipped if the end of this stream is reached before the operation
+         * completes.
+         *
+         * @return the number of bytes actually skipped.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if this stream is closed or another I/O error occurs.
+         */
+        Skip(
+            [in] Int64 byteCount,
+            [out] Int64* num);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

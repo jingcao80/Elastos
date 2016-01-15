@@ -1,0 +1,34 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /**
+     * Used for receiving a notification when a flush() has been successfully completed.
+     *
+     * @invoke
+     * interface ISensorEventListener
+     */
+    interface ISensorEventListener2 {
+        /**
+         * Called after flush() is completed. All the events in the batch at the point when
+         * the flush was called have been delivered to the applications registered for those
+         * sensor events. Flush Complete Events are sent ONLY to the application that has
+         * explicitly called flush(). If the hardware FIFO is flushed due to some other
+         * application calling flush(), flush complete event is not delivered to this application.
+         * <p>
+         *
+         * @param sensor The {@link android.hardware.Sensor Sensor} on which flush was called.
+         *
+         * @see android.hardware.SensorManager#flush(SensorEventListener)
+         */
+        OnFlushCompleted(
+            [in] ISensor* sensor);
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

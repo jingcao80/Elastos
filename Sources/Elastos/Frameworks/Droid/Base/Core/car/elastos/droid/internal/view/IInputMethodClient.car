@@ -1,0 +1,36 @@
+module
+{
+    interface Elastos.Droid.Internal.View.IInputBindResult;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    /**
+     * Interface a client of the IInputMethodManager implements, to identify
+     * itself and receive information about changes to the global manager state.
+     */
+    [oneway]
+    interface IInputMethodClient {
+        SetUsingInputMethod(
+            [in] Boolean state);
+
+        OnBindMethod(
+            [in] IInputBindResult* res);
+
+        OnUnbindMethod(
+            [in] Int32 sequence);
+
+        SetActive(
+            [in] Boolean active);
+
+        SetUserActionNotificationSequenceNumber(
+            [in] Int32 sequenceNumber);
+    }
+
+    }//namespace View
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

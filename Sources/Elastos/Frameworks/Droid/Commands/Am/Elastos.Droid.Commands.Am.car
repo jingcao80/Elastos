@@ -1,0 +1,47 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/Am.car");
+
+    using interface Elastos.Droid.App.IActivityController;
+    using interface Elastos.Droid.Content.IIntentReceiver;
+    using interface Elastos.Droid.App.IInstrumentationWatcher;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Am {
+
+        singleton class CAm {
+            interface IAm;
+        }
+
+        class CMyActivityController {
+            constructor(
+                [in] Handle32 am);
+
+            constructor(
+                [in] Handle32 am,
+                [in] String gdbPort);
+
+            interface IActivityController;
+        }
+
+        class CIntentReceiver {
+            interface IIntentReceiver;
+        }
+
+        class CInstrumentationWatcher {
+            constructor(
+                [in] Handle32 am);
+
+            interface IInstrumentationWatcher;
+        }
+
+    } // namespace Am
+    } // namespace Commands
+    } // namespace Droid
+    } // namespace Elastos
+}

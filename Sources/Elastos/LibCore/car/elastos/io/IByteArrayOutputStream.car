@@ -1,0 +1,98 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+    @ Involve
+    * interface ICloseable;
+    * interface IOutputStream;
+    */
+    interface IByteArrayOutputStream {
+        /**
+         * Resets this stream to the beginning of the underlying byte array. All
+         * subsequent writes will overwrite any bytes previously stored in this
+         * stream.
+         */
+        Reset();
+
+        /**
+         * Returns the total number of bytes written to this stream so far.
+         *
+         * @return the number of bytes written to this stream.
+         */
+        GetSize(
+            [out] Int32* size);
+
+        /**
+         * Returns the contents of this ByteArrayOutputStream as a byte array. Any
+         * changes made to the receiver after returning will not be reflected in the
+         * byte array returned to the caller.
+         *
+         * @return this stream's current contents as a byte array.
+         */
+        ToByteArray(
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns the contents of this ByteArrayOutputStream as a string. Any
+         * changes made to the receiver after returning will not be reflected in the
+         * string returned to the caller.
+         *
+         * @return this stream's current contents as a string.
+         */
+        ToString(
+            [out] String* str);
+
+        /**
+         * Returns the contents of this ByteArrayOutputStream as a string. Each byte
+         * {@code b} in this stream is converted to a character {@code c} using the
+         * following function:
+         * {@code c == (char)(((hibyte & 0xff) << 8) | (b & 0xff))}. This method is
+         * deprecated and either {@link #toString()} or {@link #toString(String)}
+         * should be used.
+         *
+         * @param hibyte
+         *            the high byte of each resulting Unicode character.
+         * @return this stream's current contents as a string with the high byte set
+         *         to {@code hibyte}.
+         * @deprecated Use {@link #toString()} instead.
+         */
+        // @Deprecated
+        ToString(
+            [in] Int32 hibyte,
+            [out] String* rev);
+
+
+        /**
+         * Returns the contents of this ByteArrayOutputStream as a string converted
+         * according to the encoding declared in {@code charsetName}.
+         *
+         * @param charsetName
+         *            a string representing the encoding to use when translating
+         *            this stream to a string.
+         * @return this stream's current contents as an encoded string.
+         * @throws UnsupportedEncodingException
+         *             if the provided encoding is not supported.
+         */
+        ToString(
+            [in] String charsetName,
+            [out] String* str);
+
+        /**
+         * Takes the contents of this stream and writes it to the output stream
+         * {@code out}.
+         *
+         * @param out
+         *            an OutputStream on which to write the contents of this stream.
+         * @throws IOException
+         *             if an error occurs while writing to {@code out}.
+         */
+        WriteTo(
+            [in] IOutputStream* os);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

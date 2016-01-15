@@ -1,0 +1,34 @@
+
+module
+{
+    interface Elastos.Utility.IList;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace XPath {
+
+    interface IXPathFunction {
+    /**
+    * <p>Evaluate the function with the specified arguments.</p>
+    *
+    * <p>To the greatest extent possible, side-effects should be avoided in the
+    * definition of extension functions. The implementation evaluating an
+    * XPath expression is under no obligation to call extension functions in
+    * any particular order or any particular number of times.</p>
+    *
+    * @param args The arguments, <code>null</code> is a valid value.
+    *
+    * @return The result of evaluating the <code>XPath</code> function as an <code>Object</code>.
+    *
+    * @throws XPathFunctionException If <code>args</code> cannot be evaluated with this <code>XPath</code> function.
+    */
+        Evaluate(
+            [in] IList* args,
+            [out] IInterface** obj);
+    }
+
+    } // namespace XPath
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

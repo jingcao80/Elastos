@@ -1,0 +1,70 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.Qs.IQSPanel;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBatteryController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INextAlarmController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IUserInfoController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * The view to manage the header area in the expanded status bar.
+     */
+    /**
+     * @Involve
+     * interface IRelativeLayout
+     * interface IViewOnClickListener
+     * interface IBatteryControllerBatteryStateChangeCallback
+     * interface INextAlarmControllerNextAlarmChangeCallback
+     */
+    interface IStatusBarHeaderView {
+
+        SetActivityStarter(
+            [in] IActivityStarter* activityStarter);
+
+        SetBatteryController(
+            [in] IBatteryController* batteryController);
+
+        SetNextAlarmController(
+            [in] INextAlarmController* nextAlarmController);
+
+        GetCollapsedHeight(
+            [out] Int32* result);
+
+        GetExpandedHeight(
+            [out] Int32* result);
+
+        SetListening(
+            [in] Boolean listening);
+
+        SetExpanded(
+            [in] Boolean expanded);
+
+        UpdateEverything();
+
+        SetExpansion(
+            [in] Float t);
+
+        SetUserInfoController(
+            [in] IUserInfoController* userInfoController);
+
+        SetQSPanel(
+            [in] IQSPanel* qsp);
+
+        SetShowEmergencyCallsOnly(
+            [in] Boolean show);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,168 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IRectF;
+    interface Elastos.Droid.Graphics.IRegion;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    /**
+     * Struct of inset information attached to a 9 patch bitmap.
+     *
+     * Present on a 9 patch bitmap if it optical insets were manually included,
+     * or if outline insets were automatically included by aapt.
+     *
+     * @hide
+     */
+
+     interface INinePatchInsetStruct {
+        GetOpticalRect(
+            [out] IRect** rect);
+
+        GetOutlineRect(
+            [out] IRect** rect);
+
+        GetOutlineRadius(
+            [out] Float* radius);
+
+        GetOutlineAlpha(
+            [out] Float* alpha);
+     }
+    /**
+     * The NinePatch class permits drawing a bitmap in nine sections.
+     * The four corners are unscaled; the four edges are scaled in one axis,
+     * and the middle is scaled in both axes. Normally, the middle is
+     * transparent so that the patch can provide a selection about a rectangle.
+     * Essentially, it allows the creation of custom graphics that will scale the
+     * way that you define, when content added within the image exceeds the normal
+     * bounds of the graphic. For a thorough explanation of a NinePatch image,
+     * read the discussion in the
+     * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D
+     * Graphics</a> document.
+     * <p>
+     * The <a href="{@docRoot}guide/developing/tools/draw9patch.html">Draw 9-Patch</a>
+     * tool offers an extremely handy way to create your NinePatch images,
+     * using a WYSIWYG graphics editor.
+     * </p>
+     */
+    [deprecated]
+    interface INinePatch {
+        /**
+         * Returns the name of this NinePatch object if one was specified
+         * when calling the constructor.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns the paint used to draw this NinePatch. The paint can be null.
+         *
+         * @see #setPaint(Paint)
+         * @see #draw(Canvas, Rect)
+         * @see #draw(Canvas, RectF)
+         */
+        GetPaint(
+            [out] IPaint** paint);
+
+        /**
+         * Sets the paint to use when drawing the NinePatch.
+         *
+         * @param p The paint that will be used to draw this NinePatch.
+         *
+         * @see #getPaint()
+         * @see #draw(Canvas, Rect)
+         * @see #draw(Canvas, RectF)
+         */
+        SetPaint(
+            [in] IPaint* p);
+
+        /**
+         * Returns the bitmap used to draw this NinePatch.
+         */
+        GetBitmap(
+            [out] IBitmap** bp);
+
+        /**
+         * Draw a bitmap of nine patches.
+         *
+         * @param canvas    A container for the current matrix and clip used to draw the bitmap.
+         * @param location  Where to draw the bitmap.
+         */
+        Draw(
+            [in] ICanvas* canvas,
+            [in] IRectF* location);
+
+        /**
+         * Draw a bitmap of nine patches.
+         *
+         * @param canvas    A container for the current matrix and clip used to draw the bitmap.
+         * @param location  Where to draw the bitmap.
+         */
+        Draw(
+            [in] ICanvas* canvas,
+            [in] IRect* location);
+
+        /**
+         * Draw a bitmap of nine patches.
+         *
+         * @param canvas    A container for the current matrix and clip used to draw the bitmap.
+         * @param location  Where to draw the bitmap.
+         * @param paint     The Paint to draw through.
+         */
+        Draw(
+            [in] ICanvas* canvas,
+            [in] IRect* location,
+            [in] IPaint* paint);
+
+        /**
+         * Return the underlying bitmap's density, as per
+         * Bitmap#getDensity() Bitmap.getDensity().
+         *
+         * @sa Bitmap#getDensity() Bitmap.getDensity()
+         */
+        GetDensity(
+            [out] Int32* density);
+
+        GetHeight(
+            [out] Int32* height);
+
+        GetTransparentRegion(
+            [in] IRect* location,
+            [out] IRegion** region);
+
+        GetWidth(
+            [out] Int32* width);
+
+        HasAlpha(
+            [out] Boolean* hasAlpha);
+
+        /**
+         * Verifies that the specified byte array is a valid 9-patch data chunk.
+         *
+         * @param chunk A byte array representing a 9-patch data chunk.
+         *
+         * @return True if the specified byte array represents a 9-patch data chunk,
+         *         false otherwise.
+         */
+        IsNinePatchChunk(
+            [in] ArrayOf<Byte>* chunk,
+            [out] Boolean* rst);
+    }
+
+    [deprecated]
+    interface INinePatchHelper {
+        IsNinePatchChunk(
+            [in] ArrayOf<Byte>* chunk,
+            [out] Boolean* result);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}
+

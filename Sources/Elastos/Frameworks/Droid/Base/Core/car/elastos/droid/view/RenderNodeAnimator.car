@@ -1,0 +1,59 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IAnimator
+     */
+    interface IRenderNodeAnimator {
+        // Keep in sync with enum RenderProperty in Animator.h
+        const Int32 TRANSLATION_X = 0;
+        const Int32 TRANSLATION_Y = 1;
+        const Int32 TRANSLATION_Z = 2;
+        const Int32 SCALE_X = 3;
+        const Int32 SCALE_Y = 4;
+        const Int32 ROTATION = 5;
+        const Int32 ROTATION_X = 6;
+        const Int32 ROTATION_Y = 7;
+        const Int32 X = 8;
+        const Int32 Y = 9;
+        const Int32 Z = 10;
+        const Int32 ALPHA = 11;
+        // The last value in the enum, used for array size initialization
+        const Int32 LAST_VALUE = ALPHA;
+
+        // Keep in sync with enum PaintFields in Animator.h
+        const Int32 PAINT_STROKE_WIDTH = 0;
+
+        /**
+         * Field for the Paint alpha channel, which should be specified as a value
+         * between 0 and 255.
+         */
+        const Int32 PAINT_ALPHA = 1;
+
+        SetTarget(
+            [in] IView* view);
+
+        SetTarget(
+            [in] ICanvas* view);
+
+        SetStartValue(
+            [in] Float startValue);
+
+        GetNativeAnimator(
+            [out] Int64* ptr);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

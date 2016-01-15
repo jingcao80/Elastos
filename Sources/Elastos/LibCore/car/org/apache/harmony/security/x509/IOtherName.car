@@ -1,0 +1,54 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with OtherName structure which is a subpart of GeneralName
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *   OtherName ::= SEQUENCE {
+     *        type-id    OBJECT IDENTIFIER,
+     *        value      [0] EXPLICIT ANY DEFINED BY type-id
+     *   }
+     * </pre>
+     */
+    interface IOtherName {
+        /**
+         * Returns the value of value field of the structure.
+         */
+        GetValue(
+            [out, callee] ArrayOf<Byte>* value);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 OtherName value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface IOtherNameHelper {
+        /**
+         * ASN.1 DER X.509 ORAddress encoder/decoder class.
+         */
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

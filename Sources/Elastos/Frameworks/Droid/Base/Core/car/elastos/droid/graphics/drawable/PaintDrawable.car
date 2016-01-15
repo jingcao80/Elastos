@@ -1,0 +1,55 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+
+        /**
+         * Drawable that draws its bounds in the given paint, with optional
+         * rounded corners.
+        */
+
+        /**
+        * A Drawable object that draws primitive shapes. A ShapeDrawable takes a Shape
+        * object and manages its presence on the screen. If no Shape is given, then the
+        * ShapeDrawable will default to a RectShape.
+        * <p>
+        * This object can be defined in an XML file with the <shape> element.
+        *
+        * @sa shape
+        * @sa RectShape
+        * @implements Elastos.Droid.Graphics. Drawable.IShapeDrawable
+        */
+        /**
+         * @Involve
+         * interface IDrawable
+         * interface IShapeDrawable
+         */
+        [deprecated]
+        interface IPaintDrawable {
+            /**
+             * Specify radius for the corners of the rectangle. If this is > 0, then the
+             * drawable is drawn in a round-rectangle, rather than a rectangle.
+             * @param radius the radius for the corners of the rectangle
+             */
+            SetCornerRadius(
+                [in] Float radius);
+
+            /**
+             * Specify radii for each of the 4 corners. For each corner, the array
+             * contains 2 values, [X_radius, Y_radius]. The corners are ordered
+             * top-left, top-right, bottom-right, bottom-left
+             * @param radii the x and y radii of the corners
+             */
+            SetCornerRadii(
+                [in] ArrayOf<Float>* radii);
+        }
+
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

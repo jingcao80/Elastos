@@ -1,0 +1,139 @@
+
+TARGET_NAME= elastos.io
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io/charset;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io/charset/spi;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io/channels;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io/channels/spi;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/net;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/droid/system;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/security;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility/logging;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/io;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/icu;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/net;
+
+SOURCES = io.cpp
+SOURCES += PipedInputStream.cpp
+SOURCES += PipedOutputStream.cpp
+SOURCES += PipedReader.cpp
+SOURCES += PipedWriter.cpp
+SOURCES += InputStream.cpp
+SOURCES += OutputStream.cpp
+SOURCES += FilterInputStream.cpp
+SOURCES += BufferedInputStream.cpp
+SOURCES += FilterOutputStream.cpp
+SOURCES += BufferedOutputStream.cpp
+SOURCES += Reader.cpp
+SOURCES += BufferedReader.cpp
+SOURCES += BufferedWriter.cpp
+SOURCES += Writer.cpp
+SOURCES += StringWriter.cpp
+SOURCES += ByteArrayInputStream.cpp
+SOURCES += ByteArrayOutputStream.cpp
+SOURCES += CharArrayReader.cpp
+SOURCES += CharArrayWriter.cpp
+SOURCES += DataInputStream.cpp
+SOURCES += PushbackInputStream.cpp
+SOURCES += DataOutputStream.cpp
+SOURCES += CFileDescriptor.cpp
+SOURCES += File.cpp
+SOURCES += CFileHelper.cpp
+SOURCES += FilterReader.cpp
+SOURCES += FilterWriter.cpp
+SOURCES += InputStreamReader.cpp
+SOURCES += PrintWriter.cpp
+SOURCES += LineNumberInputStream.cpp
+SOURCES += LineNumberReader.cpp
+SOURCES += OutputStreamWriter.cpp
+SOURCES += PrintStream.cpp
+SOURCES += PushbackReader.cpp
+SOURCES += CRandomAccessFile.cpp
+SOURCES += SequenceInputStream.cpp
+SOURCES += StringBufferInputStream.cpp
+SOURCES += StringReader.cpp
+SOURCES += FileInputStream.cpp
+SOURCES += FileOutputStream.cpp
+SOURCES += CFilePermission.cpp
+SOURCES += FileReader.cpp
+SOURCES += FileWriter.cpp
+SOURCES += StreamTokenizer.cpp
+
+SOURCES += CByteOrderHelper.cpp
+SOURCES += MemoryBlock.cpp
+SOURCES += Buffer.cpp
+SOURCES += ByteBuffer.cpp
+SOURCES += CByteBufferHelper.cpp
+SOURCES += ByteArrayBuffer.cpp
+SOURCES += CharBuffer.cpp
+SOURCES += CCharBufferHelper.cpp
+SOURCES += CharSequenceAdapter.cpp
+SOURCES += Buffer.cpp
+SOURCES += CByteOrderHelper.cpp
+SOURCES += CharArrayBuffer.cpp
+SOURCES += ByteBuffer.cpp
+SOURCES += NioUtils.cpp
+SOURCES += DirectByteBuffer.cpp
+SOURCES += FileChannelImpl.cpp
+SOURCES += MappedByteBuffer.cpp
+SOURCES += DoubleBuffer.cpp
+SOURCES += FloatBuffer.cpp
+SOURCES += Int16Buffer.cpp
+SOURCES += Int32Buffer.cpp
+SOURCES += Int64Buffer.cpp
+SOURCES += DoubleArrayBuffer.cpp
+SOURCES += FloatArrayBuffer.cpp
+SOURCES += Int16ArrayBuffer.cpp
+SOURCES += Int32ArrayBuffer.cpp
+SOURCES += Int64ArrayBuffer.cpp
+SOURCES += IoVec.cpp
+SOURCES += NIOAccess.cpp
+SOURCES += CNIOAccess.cpp
+SOURCES += PipeImpl.cpp
+SOURCES += SelectionKeyImpl.cpp
+SOURCES += SelectorImpl.cpp
+SOURCES += nio.cpp
+SOURCES += SocketChannelImpl.cpp
+SOURCES += SelectorProviderImpl.cpp
+SOURCES += ByteBufferAsCharBuffer.cpp
+SOURCES += ByteBufferAsDoubleBuffer.cpp
+SOURCES += ByteBufferAsFloatBuffer.cpp
+SOURCES += ByteBufferAsInt16Buffer.cpp
+SOURCES += ByteBufferAsInt32Buffer.cpp
+SOURCES += ByteBufferAsInt64Buffer.cpp
+SOURCES += ServerSocketChannelImpl.cpp
+SOURCES += CNioUtils.cpp
+SOURCES += DatagramChannelImpl.cpp
+
+# For Serializable(not surport now)
+# EmulatedFields
+# EmulatedFieldsForDumping
+# EmulatedFieldsForLoading
+# Externalizable
+# ObjectInput
+# ObjectInputStream
+# ObjectInputValidation
+# ObjectOutput
+# ObjectOutputStream
+# ObjectStreamClass
+# ObjectStreamConstants
+# ObjectStreamField
+# SerializablePermission
+# SerializationHandleMap
+#
+
+ELASTOS_LIBS += channels/channels.lib
+ELASTOS_LIBS += charset/charset.lib

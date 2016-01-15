@@ -1,0 +1,41 @@
+TARGET_NAME = sqlite
+TARGET_TYPE = lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/net
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/text
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/regex
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/sql
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/sql/sqlite
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/sql/sqlite/jdbc
+
+SOURCES += CBackup.cpp
+SOURCES += CBlob.cpp
+SOURCES += CBlobR.cpp
+SOURCES += CBlobW.cpp
+SOURCES += Constants.cpp
+SOURCES += Database.cpp
+SOURCES += CDatabase.cpp
+SOURCES += CDatabaseHelper.cpp
+SOURCES += CFunctionContext.cpp
+SOURCES += CJDBCDriver.cpp
+SOURCES += CShell.cpp
+SOURCES += CDBDump.cpp
+SOURCES += CStmt.cpp
+SOURCES += StringEncoder.cpp
+SOURCES += CStringEncoderHelper.cpp
+SOURCES += TableResult.cpp
+SOURCES += CTableResult.cpp
+SOURCES += CVm.cpp
+
+ELASTOS_LIBS += jdbc/jdbc.lib

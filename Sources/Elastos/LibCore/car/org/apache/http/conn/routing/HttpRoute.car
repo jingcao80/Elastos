@@ -1,0 +1,37 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Routing {
+
+    /**
+     * The route for a request.
+     * Instances of this class are unmodifiable and therefore suitable
+     * for use as lookup keys.
+     *
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version $Revision: 653041 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IRouteInfo;
+     */
+    interface IHttpRoute {
+    }
+
+    } // namespace Routing
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

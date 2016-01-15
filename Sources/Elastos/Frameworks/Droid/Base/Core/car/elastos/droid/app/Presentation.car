@@ -1,0 +1,77 @@
+module
+{
+    interface Elastos.Droid.View.IDisplay;
+    interface Elastos.Droid.Content.Res.IResources;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     *
+     *@implements Elastos.Droid.App>IDialog
+     */
+    /**
+     * @Involve
+     * interface IDialog
+     */
+    interface IPresentation {
+        const Int32 MSG_CANCEL = 1;
+
+        /**
+         * Gets the Display that this presentation appears on.
+         *
+         * @sa Display
+         * @return The display.
+         */
+        GetDisplay(
+            [out] IDisplay** display);
+
+        /**
+         * Gets the Resources that should be used to inflate the layout of this presentation.
+         * This resources object has been configured according to the metrics of the
+         * display that the presentation appears on.
+         *
+         * @sa Resources
+         *
+         * @return The presentation resources object.
+         */
+        GetResources(
+            [out] IResources** resources);
+
+        /**
+         * Called by the system when the Display to which the presentation
+         * is attached has been removed.
+         *
+         * @sa Display
+         *
+         * The system automatically calls #cancel to dismiss the presentation
+         * after sending this event.
+         *
+         * @sa #cancel
+         *
+         * @see #getDisplay
+         */
+        OnDisplayRemoved();
+
+        /**
+         * Called by the system when the properties of the Display to which
+         * the presentation is attached have changed.
+         *
+         * @sa Display
+         *
+         * If the display metrics have changed (for example, if the display has been
+         * resized or rotated), then the system automatically calls
+         * #cancel to dismiss the presentation.
+         *
+         * @sa #cancel
+         *
+         * @see #getDisplay
+         */
+        OnDisplayChanged();
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

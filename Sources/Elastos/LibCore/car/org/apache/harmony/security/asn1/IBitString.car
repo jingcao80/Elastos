@@ -1,0 +1,43 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    [deprecated]
+    interface IBitString {
+        GetBit(
+            [in] Int32 bit,
+            [out] Boolean* value);
+
+        SetBit(
+            [in] Int32 bit,
+            [in] Boolean value);
+
+        ToBooleanArray(
+            [out, callee] ArrayOf<Boolean>* array);
+
+//        /** Sequence of bits padded with unused bits. */
+//        SetBytes(
+//            [in] ArrayOf<Byte>* bytes);
+//
+        GetBytes(
+            [out, callee] ArrayOf<Byte>* bytes);
+
+//        /** Number of unused bits in the last byte. */
+//        SetUnusedBits(
+//            [in] Int32 unusedBits);
+//
+        GetUnusedBits(
+            [out] Int32* unusedBits);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

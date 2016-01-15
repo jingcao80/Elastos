@@ -1,0 +1,132 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Mtp {
+
+    interface IMtpObjectInfo {
+        GetObjectHandle(
+            [out] Int32* result);
+
+        GetStorageId(
+            [out] Int32* result);
+
+        GetFormat(
+            [out] Int32* result);
+
+        GetProtectionStatus(
+            [out] Int32* result);
+
+        GetCompressedSize(
+            [out] Int32* result);
+
+        GetThumbFormat(
+            [out] Int32* result);
+
+        GetThumbCompressedSize(
+            [out] Int32* result);
+
+        GetThumbPixWidth(
+            [out] Int32* result);
+
+        GetThumbPixHeight(
+            [out] Int32* result);
+
+        GetImagePixWidth(
+            [out] Int32* result);
+
+        GetImagePixHeight(
+            [out] Int32* result);
+
+        GetImagePixDepth(
+            [out] Int32* result);
+
+        GetParent(
+            [out] Int32* result);
+
+        GetAssociationType(
+            [out] Int32* result);
+
+        GetAssociationDesc(
+            [out] Int32* result);
+
+        GetSequenceNumber(
+            [out] Int32* result);
+
+        GetName(
+            [out] String* result);
+
+        GetDateCreated(
+            [out] Int64* result);
+
+        GetDateModified(
+            [out] Int64* result);
+
+        GetKeywords(
+            [out] String* result);
+
+        SetObjectHandle(
+            [in] Int32 result);
+
+        SetStorageId(
+            [in] Int32 result);
+
+        SetFormat(
+            [in] Int32 result);
+
+        SetProtectionStatus(
+            [in] Int32 result);
+
+        SetCompressedSize(
+            [in] Int32 result);
+
+        SetThumbFormat(
+            [in] Int32 result);
+
+        SetThumbCompressedSize(
+            [in] Int32 result);
+
+        SetThumbPixWidth(
+            [in] Int32 result);
+
+        SetThumbPixHeight(
+            [in] Int32 result);
+
+        SetImagePixWidth(
+            [in] Int32 result);
+
+        SetImagePixHeight(
+            [in] Int32 result);
+
+        SetImagePixDepth(
+            [in] Int32 result);
+
+        SetParent(
+            [in] Int32 result);
+
+        SetAssociationType(
+            [in] Int32 result);
+
+        SetAssociationDesc(
+            [in] Int32 result);
+
+        SetSequenceNumber(
+            [in] Int32 result);
+
+        SetName(
+            [in] String result);
+
+        SetDateCreated(
+            [in] Int64 result);
+
+        SetDateModified(
+            [in] Int64 result);
+
+        SetKeywords(
+            [in] String result);
+    }
+    } // namespace mtp
+    } // namepsace Droid
+    } // namespace Elastos
+}

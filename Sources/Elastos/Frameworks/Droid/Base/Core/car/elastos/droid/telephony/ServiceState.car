@@ -1,0 +1,430 @@
+
+module
+{
+
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IServiceState {
+
+
+        /**
+         * Normal operation condition, the phone is registered
+         * with an operator either in home network or in roaming.
+         */
+        const Int32 STATE_IN_SERVICE = 0;
+
+        /**
+         * Phone is not registered with any operator, the phone
+         * can be currently searching a new operator to register to, or not
+         * searching to registration at all, or registration is denied, or radio
+         * signal is not available.
+         */
+        const Int32 STATE_OUT_OF_SERVICE = 1;
+
+        /**
+         * The phone is registered and locked.  Only emergency numbers are allowed. {@more}
+         */
+        const Int32 STATE_EMERGENCY_ONLY = 2;
+
+        /**
+         * Radio of telephony is explicitly powered off.
+         */
+        const Int32 STATE_POWER_OFF = 3;
+
+        /**
+         * RIL level registration state values from ril.h
+         * ((const char **)response)[0] is registration state 0-6,
+         *              0 - Not registered, MT is not currently searching
+         *                  a new operator to register
+         *              1 - Registered, home network
+         *              2 - Not registered, but MT is currently searching
+         *                  a new operator to register
+         *              3 - Registration denied
+         *              4 - Unknown
+         *              5 - Registered, roaming
+         *             10 - Same as 0, but indicates that emergency calls
+         *                  are enabled.
+         *             12 - Same as 2, but indicates that emergency calls
+         *                  are enabled.
+         *             13 - Same as 3, but indicates that emergency calls
+         *                  are enabled.
+         *             14 - Same as 4, but indicates that emergency calls
+         *                  are enabled.
+         * @hide
+         */
+        const Int32 RIL_REG_STATE_NOT_REG = 0;
+        /** @hide */
+        const Int32 RIL_REG_STATE_HOME = 1;
+        /** @hide */
+        const Int32 RIL_REG_STATE_SEARCHING = 2;
+        /** @hide */
+        const Int32 RIL_REG_STATE_DENIED = 3;
+        /** @hide */
+        const Int32 RIL_REG_STATE_UNKNOWN = 4;
+        /** @hide */
+        const Int32 RIL_REG_STATE_ROAMING = 5;
+        /** @hide */
+        const Int32 RIL_REG_STATE_NOT_REG_EMERGENCY_CALL_ENABLED = 10;
+        /** @hide */
+        const Int32 RIL_REG_STATE_SEARCHING_EMERGENCY_CALL_ENABLED = 12;
+        /** @hide */
+        const Int32 RIL_REG_STATE_DENIED_EMERGENCY_CALL_ENABLED = 13;
+        /** @hide */
+        const Int32 RIL_REG_STATE_UNKNOWN_EMERGENCY_CALL_ENABLED = 14;
+
+        /**
+         * Available radio technologies for GSM, UMTS and CDMA.
+         * Duplicates the constants from hardware/radio/include/ril.h
+         * This should only be used by agents working with the ril.  Others
+         * should use the equivalent TelephonyManager.NETWORK_TYPE_*
+         */
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_UNKNOWN = 0;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_GPRS = 1;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_EDGE = 2;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_UMTS = 3;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_IS95A = 4;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_IS95B = 5;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_1xRTT = 6;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_EVDO_0 = 7;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_EVDO_A = 8;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_HSDPA = 9;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_HSUPA = 10;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_HSPA = 11;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_EVDO_B = 12;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_EHRPD = 13;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_LTE = 14;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_HSPAP = 15;
+        /**
+         * GSM radio technology only supports voice. It does not support data.
+         * @hide
+         */
+        const Int32 RIL_RADIO_TECHNOLOGY_GSM = 16;
+        /** @hide */
+        const Int32 RIL_RADIO_TECHNOLOGY_TD_SCDMA = 17;
+
+        /**
+         * Available registration states for GSM, UMTS and CDMA.
+         */
+        /** @hide */
+        const Int32 REGISTRATION_STATE_NOT_REGISTERED_AND_NOT_SEARCHING = 0;
+        /** @hide */
+        const Int32 REGISTRATION_STATE_HOME_NETWORK = 1;
+        /** @hide */
+        const Int32 REGISTRATION_STATE_NOT_REGISTERED_AND_SEARCHING = 2;
+        /** @hide */
+        const Int32 REGISTRATION_STATE_REGISTRATION_DENIED = 3;
+        /** @hide */
+        const Int32 REGISTRATION_STATE_UNKNOWN = 4;
+        /** @hide */
+        const Int32 REGISTRATION_STATE_ROAMING = 5;
+
+        /**
+         * Get current voice service state
+         */
+        GetState(
+            [out] Int32* state);
+
+        /**
+         * Get current voice service state
+         *
+         * @see #STATE_IN_SERVICE
+         * @see #STATE_OUT_OF_SERVICE
+         * @see #STATE_EMERGENCY_ONLY
+         * @see #STATE_POWER_OFF
+         *
+         * @hide
+         */
+        GetVoiceRegState(
+            [out] Int32* state);
+
+        /**
+         * Get current data service state
+         *
+         * @see #STATE_IN_SERVICE
+         * @see #STATE_OUT_OF_SERVICE
+         * @see #STATE_EMERGENCY_ONLY
+         * @see #STATE_POWER_OFF
+         *
+         * @hide
+         */
+        GetDataRegState(
+            [out] Int32* state);
+
+        /**
+         * Get current roaming indicator of phone
+         * (note: not just decoding from TS 27.007 7.2)
+         *
+         * @return true if TS 27.007 7.2 roaming is true
+         *              and ONS is different from SPN
+         *
+         */
+        GetRoaming(
+            [out] Boolean* roaming);
+
+        /**
+         * @hide
+         */
+        IsEmergencyOnly(
+            [out] Boolean* res);
+
+        /**
+         * @hide
+         */
+        GetCdmaRoamingIndicator(
+            [out] Int32* cdmaRoamingIndicator);
+
+        /**
+         * @hide
+         */
+        GetCdmaDefaultRoamingIndicator(
+            [out] Int32* cdmaDefaultRoamingIndicator);
+
+        /**
+         * @hide
+         */
+        GetCdmaEriIconIndex(
+            [out] Int32* cdmaEriIconIndex);
+
+        /**
+         * @hide
+         */
+        GetCdmaEriIconMode(
+            [out] Int32* cdmaEriIconMode);
+
+        /**
+         * Get current registered operator name in long alphanumeric format.
+         *
+         * In GSM/UMTS, long format can be up to 16 characters long.
+         * In CDMA, returns the ERI text, if set. Otherwise, returns the ONS.
+         *
+         * @return long name of operator, null if unregistered or unknown
+         */
+        GetOperatorAlphaLong(
+            [out] String* operatorAlphaLong);
+
+        /**
+         * Get current registered operator name in short alphanumeric format.
+         *
+         * In GSM/UMTS, short format can be up to 8 characters long.
+         *
+         * @return short name of operator, null if unregistered or unknown
+         */
+        GetOperatorAlphaShort(
+            [out] String* operatorAlphaShort);
+
+        /**
+         * Get current registered operator numeric id.
+         *
+         * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
+         * network code.
+         *
+         * @return numeric format of operator, null if unregistered or unknown
+         */
+        /*
+         * The country code can be decoded using
+         * {@link com.android.internal.telephony.MccTable#countryCodeForMcc(int)}.
+         */
+        GetOperatorNumeric(
+            [out] String* operatorNumeric);
+
+        /**
+         * Get current network selection mode.
+         *
+         * @return true if manual mode, false if automatic mode
+         */
+        GetIsManualSelection(
+            [out] Boolean* isManualSelection);
+
+        SetStateOutOfService();
+
+        SetStateOff();
+
+        SetState(
+            [in] Int32 state);
+
+        /** @hide */
+        SetVoiceRegState(
+            [in] Int32 state);
+
+        /** @hide */
+        SetDataRegState(
+            [in] Int32 state);
+
+        SetRoaming(
+            [in] Boolean roaming);
+
+        /**
+         * @hide
+         */
+        SetEmergencyOnly(
+            [in] Boolean emergencyOnly);
+
+        /**
+         * @hide
+         */
+        SetCdmaRoamingIndicator(
+            [in] Int32 roaming);
+
+        /**
+         * @hide
+         */
+        SetCdmaDefaultRoamingIndicator (
+            [in] Int32 roaming);
+
+        /**
+         * @hide
+         */
+        SetCdmaEriIconIndex(
+            [in] Int32 index);
+
+        /**
+         * @hide
+         */
+        SetCdmaEriIconMode(
+            [in] Int32 mode);
+
+        SetOperatorName(
+            [in] String longName,
+            [in] String shortName,
+            [in] String numeric);
+
+        /**
+         * @hide
+         */
+        SetOperatorAlphaLong(
+            [in] String longName);
+
+        SetIsManualSelection(
+            [in] Boolean isManual);
+
+        /**
+         * Set intent notifier Bundle based on service state.
+         *
+         * @param m intent notifier Bundle
+         * @hide
+         */
+        FillInNotifierBundle(
+            [in] IBundle* m);
+
+        /** @hide */
+        SetRilVoiceRadioTechnology(
+            [in] Int32 rt);
+
+        /** @hide */
+        SetRilDataRadioTechnology(
+            [in] Int32 rt);
+
+        /** @hide */
+        SetCssIndicator(
+            [in] Int32 css);
+
+        /** @hide */
+        SetSystemAndNetworkId(
+            [in] Int32 systemId,
+            [in] Int32 networkId);
+
+        /** @hide */
+        GetRilVoiceRadioTechnology(
+            [out] Int32* rt);
+
+        /** @hide */
+        GetRilDataRadioTechnology(
+            [out] Int32* rt);
+
+        /** @hide */
+        GetRadioTechnology(
+            [out] Int32* rt);
+
+        /**
+         * @Deprecated to be removed Q3 2013 use {@link #getVoiceNetworkType}
+         * @hide
+         */
+        GetNetworkType(
+            [out] Int32* networkType);
+
+        /** @hide */
+        GetDataNetworkType(
+            [out] Int32* networkType);
+
+        /** @hide */
+        GetVoiceNetworkType(
+            [out] Int32* networkType);
+
+        GetCssIndicator(
+            [out] Int32* cssIndicator);
+
+        /** @hide */
+        GetNetworkId(
+            [out] Int32* networkId);
+
+        /** @hide */
+        GetSystemId(
+            [out] Int32* systemId);
+    }
+
+    interface IServiceStateHelper {
+        /**
+         * Create a new ServiceState from a intent notifier Bundle
+         *
+         * This method is used by PhoneStateIntentReceiver and maybe by
+         * external applications.
+         *
+         * @param m Bundle from intent notifier
+         * @return newly created ServiceState
+         * @hide
+         */
+        NewFromBundle(
+            [in] IBundle* m,
+            [out] IServiceState** res);
+
+        /**
+         * Convert radio technology to String
+         *
+         * @param radioTechnology
+         * @return String representation of the RAT
+         *
+         * @hide
+         */
+        RilRadioTechnologyToString(
+            [in] Int32 rt,
+            [out] String* res);
+
+        /** @hide */
+        IsGsm(
+            [in] Int32 radioTechnology,
+            [out] Boolean* res);
+
+        /** @hide */
+        IsCdma(
+            [in] Int32 radioTechnology,
+            [out] Boolean* res);
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

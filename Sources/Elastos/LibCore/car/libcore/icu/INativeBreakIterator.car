@@ -1,0 +1,80 @@
+module
+{
+
+    interface Elastos.Text.ICharacterIterator;
+    interface Elastos.Utility.ILocale;
+
+    namespace Libcore {
+    namespace ICU {
+
+    /**
+     * @Involve
+     * interface ICloneable;
+     */
+    interface INativeBreakIterator {
+        GetCurrent(
+            [out] Int32 * value);
+
+        GetFirst(
+            [out] Int32 * value);
+
+        GetFollowing(
+            [in] Int32 offset,
+            [out] Int32 * value);
+
+        GetText(
+            [out] ICharacterIterator ** outiter);
+
+        GetLast(
+            [out] Int32 * value);
+
+        GetNext(
+            [in] Int32 n,
+            [out] Int32 * value);
+
+        GetNext(
+            [out] Int32 * value);
+
+        GetPrevious(
+            [out] Int32 * value);
+
+        SetText(
+            [in] ICharacterIterator * newText);
+
+        SetText(
+            [in] String newText);
+
+        HasText(
+            [out] Boolean* hasText);
+
+        IsBoundary(
+            [in] Int32 offset,
+            [out] Boolean * value);
+
+        GetPreceding(
+            [in] Int32 offset,
+            [out] Int32 * value);
+    }
+
+    interface INativeBreakIteratorHelper {
+
+        GetCharacterInstance(
+            [in] ILocale * where,
+            [out] INativeBreakIterator ** outiter);
+
+        GetLineInstance(
+            [in] ILocale * where,
+            [out] INativeBreakIterator ** outiter);
+
+        GetSentenceInstance(
+            [in] ILocale * where,
+            [out] INativeBreakIterator ** outiter);
+
+        GetWordInstance(
+            [in] ILocale * where,
+            [out] INativeBreakIterator ** outiter);
+    }
+
+    } // namespace ICU
+    } // namespace Libcore
+}

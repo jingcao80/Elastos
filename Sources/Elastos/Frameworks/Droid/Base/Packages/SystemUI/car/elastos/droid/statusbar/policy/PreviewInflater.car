@@ -1,0 +1,37 @@
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    /**
+     * Utility class to inflate previews for phone and camera affordance.
+     */
+    [local]
+    interface IPreviewInflater {
+        InflatePreview(
+            [in] IIntent* intent,
+            [out] IView** view);
+    }
+
+    interface IPreviewInflaterHelper {
+        WouldLaunchResolverActivity(
+            [in] IContext* ctx,
+            [in] IIntent* intent,
+            [in] Int32 currentUserId);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

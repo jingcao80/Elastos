@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IAssetManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    /**
+     * A family of typefaces with different styles.
+     *
+     * @hide
+     */
+    interface IFontFamily {
+
+        AddFont(
+          [in] String path,
+          [out] Boolean* rst);
+
+        AddFontWeightStyle(
+          [in] String path,
+          [in] Int32 weight,
+          [in] Boolean style,
+          [out] Boolean* rst);
+
+        AddFontFromAsset(
+          [in] IAssetManager* mgr,
+          [in] String path,
+          [out] Boolean* rst);
+
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

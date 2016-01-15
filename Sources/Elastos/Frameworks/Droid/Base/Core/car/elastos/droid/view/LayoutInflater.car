@@ -1,0 +1,343 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Org.Xmlpull.V1.IXmlPullParser;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * @Involve
+     * interface IView;
+     * interface IDrawableCallback;
+     * interface IKeyEventCallback;
+     * interface IAccessibilityEventSource;
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IFrameLayout;
+     * interface IViewGroup;
+     */
+    interface IBlinkLayout {
+    }
+    /**
+     * Hook to allow clients of the LayoutInflater to restrict the set of Views that are allowed
+     * to be inflated.
+     *
+     */
+    [local]
+    interface ILayoutInflaterFilter {
+        /**
+         * Hook to allow clients of the LayoutInflater to restrict the set of Views
+         * that are allowed to be inflated.
+         *
+         * @param clazz The class object for the View that is about to be inflated
+         *
+         * @return True if this class is allowed to be inflated, or false otherwise
+         */
+        OnLoadClass(
+            [in] IClassInfo* clazz,
+            [out] Boolean* allowed);
+    }
+
+    [local]
+    interface ILayoutInflaterFactory {
+        /**
+         * Hook you can supply that is called when inflating from a LayoutInflater.
+         * You can use this to customize the tag names available in your XML
+         * layout files.
+         *
+         * <p>
+         * Note that it is good practice to prefix these custom names with your
+         * package (i.e., com.coolcompany.apps) to avoid conflicts with system
+         * names.
+         *
+         * @param name Tag name to be inflated.
+         * @param context The context the view is being created in.
+         * @param attrs Inflation attributes as specified in XML file.
+         *
+         * @return View Newly created view. Return null for the default
+         *         behavior.
+         */
+        OnCreateView(
+            [in] String name,
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [out] IView** view);
+    }
+
+    /**
+     * @Involve
+     * interface ILayoutInflaterFactory
+     */
+    [local]
+    interface ILayoutInflaterFactory2 {
+        /**
+         * Version of {@link #onCreateView(String, Context, AttributeSet)}
+         * that also supplies the parent that the view created view will be
+         * placed in.
+         *
+         * @param parent The parent that the created view will be placed
+         * in; <em>note that this may be null</em>.
+         * @param name Tag name to be inflated.
+         * @param context The context the view is being created in.
+         * @param attrs Inflation attributes as specified in XML file.
+         *
+         * @return View Newly created view. Return null for the default
+         *         behavior.
+         */
+        OnCreateView(
+            [in] IView* parent,
+            [in] String name,
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [out] IView** view);
+    }
+
+    /**
+     * Instantiates a layout XML file into its corresponding {@link android.view.View}
+     * objects. It is never used directly. Instead, use
+     * {@link android.app.Activity#getLayoutInflater()} or
+     * {@link Context#getSystemService} to retrieve a standard LayoutInflater instance
+     * that is already hooked up to the current context and correctly configured
+     * for the device you are running on.  For example:
+     *
+     * <pre>LayoutInflater inflater = (LayoutInflater)context.getSystemService
+     *      (Context.LAYOUT_INFLATER_SERVICE);</pre>
+     *
+     * <p>
+     * To create a new LayoutInflater with an additional {@link Factory} for your
+     * own views, you can use {@link #cloneInContext} to clone an existing
+     * ViewFactory, and then call {@link #setFactory} on it to include your
+     * Factory.
+     *
+     * <p>
+     * For performance reasons, view inflation relies heavily on pre-processing of
+     * XML files that is done at build time. Therefore, it is not currently possible
+     * to use LayoutInflater with an XmlPullParser over a plain XML file at runtime;
+     * it only works with an XmlPullParser returned from a compiled resource
+     * (R.<em>something</em> file.)
+     *
+     * @see Context#getSystemService
+     */
+    [local]
+    interface ILayoutInflater {
+        /**
+         * Create a copy of the existing LayoutInflater object, with the copy
+         * pointing to a different Context than the original.  This is used by
+         * {@link ContextThemeWrapper} to create a new LayoutInflater to go along
+         * with the new Context theme.
+         *
+         * @param newContext The new Context to associate with the new LayoutInflater.
+         * May be the same as the original Context if desired.
+         *
+         * @return Returns a brand spanking new LayoutInflater object associated with
+         * the given Context.
+         */
+        CloneInContext(
+            [in] IContext* newContext,
+            [out] ILayoutInflater** newInflater);
+
+        /**
+         * Return the context we are running in, for access to resources, class
+         * loader, etc.
+         */
+        GetContext(
+            [out] IContext** ctx);
+
+        /**
+         * Return the current {@link Factory} (or null). This is called on each element
+         * name. If the factory returns a View, add that to the hierarchy. If it
+         * returns null, proceed to call onCreateView(name).
+         */
+        GetFactory(
+            [out] ILayoutInflaterFactory** factory);
+
+        /**
+         * Return the current {@link Factory2}.  Returns null if no factory is set
+         * or the set factory does not implement the {@link Factory2} interface.
+         * This is called on each element
+         * name. If the factory returns a View, add that to the hierarchy. If it
+         * returns null, proceed to call onCreateView(name).
+         */
+        GetFactory2(
+            [out] ILayoutInflaterFactory2** factory);
+
+        /**
+         * Attach a custom Factory interface for creating views while using
+         * this LayoutInflater.  This must not be null, and can only be set once;
+         * after setting, you can not change the factory.  This is
+         * called on each element name as the xml is parsed. If the factory returns
+         * a View, that is added to the hierarchy. If it returns null, the next
+         * factory default {@link #onCreateView} method is called.
+         *
+         * <p>If you have an existing
+         * LayoutInflater and want to add your own factory to it, use
+         * {@link #cloneInContext} to clone the existing instance and then you
+         * can use this function (once) on the returned new instance.  This will
+         * merge your own factory with whatever factory the original instance is
+         * using.
+         */
+        SetFactory(
+            [in] ILayoutInflaterFactory* factory);
+
+        /**
+         * Like {@link #setFactory}, but allows you to set a {@link Factory2}
+         * interface.
+         */
+        SetFactory2(
+            [in] ILayoutInflaterFactory2* factory);
+
+        /**
+         * @hide for use by framework
+         */
+        SetPrivateFactory(
+            [in] ILayoutInflaterFactory2* factory);
+
+        /**
+         * @return The {@link Filter} currently used by this LayoutInflater to restrict the set of Views
+         * that are allowed to be inflated.
+         */
+        GetFilter(
+            [out] ILayoutInflaterFilter** filter);
+
+        /**
+         * Sets the {@link Filter} to by this LayoutInflater. If a view is attempted to be inflated
+         * which is not allowed by the {@link Filter}, the {@link #inflate(int, ViewGroup)} call will
+         * throw an {@link InflateException}. This filter will replace any previous filter set on this
+         * LayoutInflater.
+         *
+         * @param filter The Filter which restricts the set of Views that are allowed to be inflated.
+         *        This filter will replace any previous filter set on this LayoutInflater.
+         */
+        SetFilter(
+            [in] ILayoutInflaterFilter* filter);
+
+        /**
+         * Inflate a new view hierarchy from the specified xml resource. Throws
+         * {@link InflateException} if there is an error.
+         *
+         * @param resource ID for an XML layout resource to load (e.g.,
+         *        <code>R.layout.main_page</code>)
+         * @param root Optional view to be the parent of the generated hierarchy.
+         * @return The root View of the inflated hierarchy. If root was supplied,
+         *         this is the root View; otherwise it is the root of the inflated
+         *         XML file.
+         */
+        Inflate(
+            [in] Int32 resource,
+            [in] IViewGroup* root,
+            [out] IView** view);
+
+        /**
+         * Inflate a new view hierarchy from the specified xml node. Throws
+         * {@link InflateException} if there is an error. *
+         * <p>
+         * <em><strong>Important</strong></em>&nbsp;&nbsp;&nbsp;For performance
+         * reasons, view inflation relies heavily on pre-processing of XML files
+         * that is done at build time. Therefore, it is not currently possible to
+         * use LayoutInflater with an XmlPullParser over a plain XML file at runtime.
+         *
+         * @param parser XML dom node containing the description of the view
+         *        hierarchy.
+         * @param root Optional view to be the parent of the generated hierarchy.
+         * @return The root View of the inflated hierarchy. If root was supplied,
+         *         this is the root View; otherwise it is the root of the inflated
+         *         XML file.
+         */
+        Inflate(
+            [in] IXmlPullParser* parser,
+            [in] IViewGroup* root,
+            [out] IView** view);
+
+        /**
+         * Inflate a new view hierarchy from the specified xml resource. Throws
+         * {@link InflateException} if there is an error.
+         *
+         * @param resource ID for an XML layout resource to load (e.g.,
+         *        <code>R.layout.main_page</code>)
+         * @param root Optional view to be the parent of the generated hierarchy (if
+         *        <em>attachToRoot</em> is true), or else simply an object that
+         *        provides a set of LayoutParams values for root of the returned
+         *        hierarchy (if <em>attachToRoot</em> is false.)
+         * @param attachToRoot Whether the inflated hierarchy should be attached to
+         *        the root parameter? If false, root is only used to create the
+         *        correct subclass of LayoutParams for the root view in the XML.
+         * @return The root View of the inflated hierarchy. If root was supplied and
+         *         attachToRoot is true, this is root; otherwise it is the root of
+         *         the inflated XML file.
+         */
+        Inflate(
+            [in] Int32 resource,
+            [in] IViewGroup* root,
+            [in] Boolean attachToRoot,
+            [out] IView** view);
+
+        /**
+         * Inflate a new view hierarchy from the specified XML node. Throws
+         * {@link InflateException} if there is an error.
+         * <p>
+         * <em><strong>Important</strong></em>&nbsp;&nbsp;&nbsp;For performance
+         * reasons, view inflation relies heavily on pre-processing of XML files
+         * that is done at build time. Therefore, it is not currently possible to
+         * use LayoutInflater with an XmlPullParser over a plain XML file at runtime.
+         *
+         * @param parser XML dom node containing the description of the view
+         *        hierarchy.
+         * @param root Optional view to be the parent of the generated hierarchy (if
+         *        <em>attachToRoot</em> is true), or else simply an object that
+         *        provides a set of LayoutParams values for root of the returned
+         *        hierarchy (if <em>attachToRoot</em> is false.)
+         * @param attachToRoot Whether the inflated hierarchy should be attached to
+         *        the root parameter? If false, root is only used to create the
+         *        correct subclass of LayoutParams for the root view in the XML.
+         * @return The root View of the inflated hierarchy. If root was supplied and
+         *         attachToRoot is true, this is root; otherwise it is the root of
+         *         the inflated XML file.
+         */
+        Inflate(
+            [in] IXmlPullParser* parser,
+            [in] IViewGroup* root,
+            [in] Boolean attachToRoot,
+            [out] IView** view);
+
+
+        /**
+         * Low-level function for instantiating a view by name. This attempts to
+         * instantiate a view class of the given <var>name</var> found in this
+         * LayoutInflater's ClassLoader.
+         *
+         * <p>
+         * There are two things that can happen in an error case: either the
+         * exception describing the error will be thrown, or a null will be
+         * returned. You must deal with both possibilities -- the former will happen
+         * the first time createView() is called for a class of a particular name,
+         * the latter every time there-after for that class name.
+         *
+         * @param name The full name of the class to be instantiated.
+         * @param attrs The XML attributes supplied for this instance.
+         *
+         * @return View The newly instantiated view, or null.
+         */
+        CreateView(
+            [in] String name,
+            [in] String prefix,
+            [in] IAttributeSet* attrs,
+            [out] IView** view);
+    }
+
+    [local]
+    interface ILayoutInflaterHelper {
+        From(
+            [in] IContext* context,
+            [out] ILayoutInflater** flater);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

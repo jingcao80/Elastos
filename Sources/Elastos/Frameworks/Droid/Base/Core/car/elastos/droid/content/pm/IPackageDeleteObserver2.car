@@ -1,0 +1,32 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * API for deletion callbacks from the Package Manager.
+     *
+     * {@hide}
+     */
+    [oneway]
+    interface IIPackageDeleteObserver2 {
+        OnUserActionRequired(
+            [in] IIntent* intent);
+
+        OnPackageDeleted(
+            [in] String packageName,
+            [in] Int32 returnCode,
+            [in] String msg);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}
+

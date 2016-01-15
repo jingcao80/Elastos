@@ -1,0 +1,136 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Trust {
+
+    /**
+     * Communication channel from TrustManagerService to the TrustAgent.
+     * @hide
+     *
+     * @Involve
+     * extends Elastos.Droid.Content.IContext
+     * extends Elastos.Droid.Content.IContextWrapper
+     * extends Elastos.Droid.App.IService
+     *
+     * interface Elastos.Droid.View.IWindowCallback
+     */
+    interface ITrustAgentService {
+        /**
+         * The {@link Intent} that must be declared as handled by the service.
+         * @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+         */
+        const String SERVICE_INTERFACE
+                = "android.service.trust.TrustAgentService";
+
+        /**
+         * The name of the {@code meta-data} tag pointing to additional configuration of the trust
+         * agent.
+         */
+        const String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
+
+        /**
+         * A white list of features that the given trust agent should support when otherwise disabled
+         * by device policy.
+         * @hide
+         */
+        const String KEY_FEATURES = "trust_agent_features";
+
+        /**
+         * Called after the user attempts to authenticate in keyguard with their device credentials,
+         * such as pin, pattern or password.
+         *
+         * @param successful true if the user successfully completed the challenge.
+         */
+        OnUnlockAttempt(
+            [in] Boolean successful);
+
+        /**
+         * Called when the timeout provided by the agent expires.  Note that this may be called earlier
+         * than requested by the agent if the trust timeout is adjusted by the system or
+         * {@link DevicePolicyManager}.  The agent is expected to re-evaluate the trust state and only
+         * call {@link #grantTrust(CharSequence, long, boolean)} if the trust state should be
+         * continued.
+         */
+        OnTrustTimeout();
+
+        /**
+         * Called when device policy wants to restrict features in the agent in response to
+         * {@link DevicePolicyManager#setTrustAgentFeaturesEnabled(ComponentName, ComponentName, java.util.List) }
+         * Agents that support this feature should overload this method and return 'true'.
+         *
+         * The list of options can be obtained by calling
+         * options.getStringArrayList({@link #KEY_FEATURES}). Presence of a feature string in the list
+         * means it should be enabled ("white-listed"). Absence of the feature means it should be
+         * disabled. An empty list means all features should be disabled.
+         *
+         * This function is only called if {@link DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} is
+         * set.
+         *
+         * @param options Option feature bundle.
+         * @return true if the {@link TrustAgentService} supports this feature.
+         * @hide
+         */
+        OnSetTrustAgentFeaturesEnabled(
+            [in] IBundle* options,
+            [out] Boolean* enabled);
+
+        /**
+         * Call to grant trust on the device.
+         *
+         * @param message describes why the device is trusted, e.g. "Trusted by location".
+         * @param durationMs amount of time in milliseconds to keep the device in a trusted state.
+         *    Trust for this agent will automatically be revoked when the timeout expires unless
+         *    extended by a subsequent call to this function. The timeout is measured from the
+         *    invocation of this function as dictated by {@link SystemClock#elapsedRealtime())}.
+         *    For security reasons, the value should be no larger than necessary.
+         *    The value may be adjusted by the system as necessary to comply with a policy controlled
+         *    by the system or {@link DevicePolicyManager} restrictions. See {@link #onTrustTimeout()}
+         *    for determining when trust expires.
+         * @param initiatedByUser this is a hint to the system that trust is being granted as the
+         *    direct result of user action - such as solving a security challenge. The hint is used
+         *    by the system to optimize the experience. Behavior may vary by device and release, so
+         *    one should only set this parameter if it meets the above criteria rather than relying on
+         *    the behavior of any particular device or release.
+         * @throws IllegalStateException if the agent is not currently managing trust.
+         */
+        GrantTrust(
+            [in] ICharSequence* message,
+            [in] Int64 durationMs,
+            [in] Boolean initiatedByUser);
+
+        /**
+         * Call to revoke trust on the device.
+         */
+        RevokeTrust();
+
+        /**
+         * Call to notify the system if the agent is ready to manage trust.
+         *
+         * This property is not persistent across recreating the service and defaults to false.
+         * Therefore this method is typically called when initializing the agent in {@link #onCreate}.
+         *
+         * @param managingTrust indicates if the agent would like to manage trust.
+         */
+        SetManagingTrust(
+            [in] Boolean managingTrust);
+    }
+
+    /**
+     * @Involve
+     * implements Elastos.Droid.Service.Trust.IITrustAgentService
+     * implements Elastos.Droid.Os.IBinder
+     */
+    interface ITrustAgentServiceWrapper {
+    }
+
+    } // namespace Trust
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

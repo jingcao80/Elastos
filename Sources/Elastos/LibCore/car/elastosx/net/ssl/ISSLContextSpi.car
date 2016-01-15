@@ -1,0 +1,131 @@
+
+module
+{
+    interface Elastos.Security.ISecureRandom;
+    interface Elastosx.Net.Ssl.ISSLEngine;
+    interface Elastosx.Net.Ssl.ISSLSocketFactory;
+    interface Elastosx.Net.Ssl.ISSLServerSocketFactory;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The <i>Service Provider Interface</i> (SPI) for the {@code SSLContext} class.
+     */
+    [deprecated]
+    interface ISSLContextSpi {
+        /**
+         * Initializes this {@code SSLContext} instance. All of the arguments are
+         * optional, and the security providers will be searched for the required
+         * implementations of the needed algorithms.
+         *
+         * @param km
+         *            the key sources or {@code null}.
+         * @param tm
+         *            the trust decision sources or {@code null}.
+         * @param sr
+         *            the randomness source or {@code null.}
+         * @throws KeyManagementException
+         *             if initializing this instance fails.
+         */
+        EngineInit(
+            [in] ArrayOf<IKeyManager*>* km,
+            [in] ArrayOf<ITrustManager*>* tm,
+            [in] ISecureRandom* sr);
+
+        /**
+         * Returns a socket factory for this instance.
+         *
+         * @return a socket factory for this instance.
+         */
+        EngineGetSocketFactory(
+            [out] ISSLSocketFactory** factory);
+
+        /**
+         * Returns a server socket factory for this instance.
+         *
+         * @return a server socket factory for this instance.
+         */
+        EngineGetServerSocketFactory(
+            [out] ISSLServerSocketFactory** factory);
+
+        /**
+         * Creates an {@code SSLEngine} instance from this context with the
+         * specified hostname and port.
+         *
+         * @param host
+         *            the name of the host
+         * @param port
+         *            the port
+         * @return an {@code SSLEngine} instance from this context.
+         * @throws UnsupportedOperationException
+         *             if the provider does not support the operation.
+         */
+        EngineCreateSSLEngine(
+            [in] String host,
+            [in] Int32 port,
+            [out] ISSLEngine** engine);
+
+        /**
+         * Creates an {@code SSLEngine} instance from this context.
+         *
+         * @return an {@code SSLEngine} instance from this context.
+         * @throws UnsupportedOperationException
+         *             if the provider does not support the operation.
+         */
+        EngineCreateSSLEngine(
+            [out] ISSLEngine** engine);
+
+        /**
+         * Returns the SSL session context that encapsulates the set of SSL sessions
+         * that can be used for the server side of the SSL handshake.
+         *
+         * @return the SSL server session context for this context or {@code null}
+         *         if the underlying provider does not provide an implementation of
+         *         the {@code SSLSessionContext} interface.
+         */
+        EngineGetServerSessionContext(
+            [out] ISSLSessionContext** context);
+
+        /**
+         * Returns the SSL session context that encapsulates the set of SSL sessions
+         * that can be used for the client side of the SSL handshake.
+         *
+         * @return the SSL client session context for this context or {@code null}
+         *         if the underlying provider does not provide an implementation of
+         *         the {@code SSLSessionContext} interface.
+         */
+        EngineGetClientSessionContext(
+            [out] ISSLSessionContext** context);
+
+        /**
+         * Returns a new SSLParameters instance that includes the default
+         * SSL handshake parameters values including cipher suites,
+         * protocols, and client authentication.
+         *
+         * <p>The default implementation returns an SSLParameters with values
+         * based an SSLSocket created from this instances SocketFactory.
+         *
+         * @since 1.6
+         */
+        EngineGetDefaultSSLParameters(
+            [out] ISSLParameters** param);
+
+        /**
+         * Returns a new SSLParameters instance that includes all
+         * supported cipher suites and protocols.
+         *
+         * <p>The default implementation returns an SSLParameters with values
+         * based an SSLSocket created from this instances SocketFactory.
+         *
+         * @since 1.6
+         */
+        EngineGetSupportedSSLParameters(
+            [out] ISSLParameters** param);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

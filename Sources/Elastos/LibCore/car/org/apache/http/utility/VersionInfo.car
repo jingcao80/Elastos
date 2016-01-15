@@ -1,0 +1,93 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Utility {
+
+    /**
+     * Provides access to version information for HTTP components.
+     * Instances of this class provide version information for a single module
+     * or informal unit, as explained
+     * <a href="http://wiki.apache.org/jakarta-httpclient/HttpComponents">here</a>.
+     * Static methods are used to extract version information from property
+     * files that are automatically packaged with HTTP component release JARs.
+     * <br/>
+     * All available version information is provided in strings, where
+     * the string format is informal and subject to change without notice.
+     * Version information is provided for debugging output and interpretation
+     * by humans, not for automated processing in applications.
+     *
+     * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
+     * @author and others
+     */
+    interface IVersionInfo {
+
+        /** A string constant for unavailable information. */
+        const String UNAVAILABLE = "UNAVAILABLE";
+
+        /** The filename of the version information files. */
+        const String VERSION_PROPERTY_FILE = "version.properties";
+
+        // the property names
+        const String PROPERTY_MODULE    = "info.module";
+        const String PROPERTY_RELEASE   = "info.release";
+        const String PROPERTY_TIMESTAMP = "info.timestamp";
+
+        /**
+         * Obtains the package name.
+         * The package name identifies the module or informal unit.
+         *
+         * @return  the package name, never <code>null</code>
+         */
+        GetPackage(
+            [out] String* name);
+
+        /**
+         * Obtains the name of the versioned module or informal unit.
+         * This data is read from the version information for the package.
+         *
+         * @return  the module name, never <code>null</code>
+         */
+        GetModule(
+            [out] String* name);
+
+        /**
+         * Obtains the release of the versioned module or informal unit.
+         * This data is read from the version information for the package.
+         *
+         * @return  the release version, never <code>null</code>
+         */
+        GetRelease(
+            [out] String* name);
+
+        /**
+         * Obtains the timestamp of the versioned module or informal unit.
+         * This data is read from the version information for the package.
+         *
+         * @return  the timestamp, never <code>null</code>
+         */
+        GetTimestamp(
+            [out] String* name);
+
+        /**
+         * Obtains the classloader used to read the version information.
+         * This is just the <code>toString</code> output of the classloader,
+         * since the version information should not keep a reference to
+         * the classloader itself. That could prevent garbage collection.
+         *
+         * @return  the classloader description, never <code>null</code>
+         */
+        GetClassloader(
+            [out] String* name);
+
+    }
+
+    } // namespace Utility
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,29 @@
+
+TARGET_NAME= utils
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES =  ArrayUtils.cpp
+SOURCES += CArrayUtils.cpp
+SOURCES += BinderHolder.cpp
+SOURCES += CameraBinderDecorator.cpp
+SOURCES += CameraServiceBinderDecorator.cpp
+SOURCES += CloseableLock.cpp
+#SOURCES += Decorator.cpp
+SOURCES += HashCodeHelpers.cpp
+SOURCES += CHashCodeHelpers.cpp
+SOURCES += ListUtils.cpp
+SOURCES += CListUtils.cpp
+SOURCES += LongParcelable.cpp
+SOURCES += ParamsUtils.cpp
+SOURCES += CParamsUtils.cpp
+SOURCES += UtilsSizeAreaComparator.cpp
+SOURCES += CUtilsSizeAreaComparatorHelper.cpp
+SOURCES += TaskDrainer.cpp
+SOURCES += TaskSingleDrainer.cpp
+#SOURCES += TypeReference.cpp
+SOURCES += utils.cpp

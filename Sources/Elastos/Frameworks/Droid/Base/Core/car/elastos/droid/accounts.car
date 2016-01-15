@@ -1,0 +1,148 @@
+
+module
+{
+    merge("accounts/AbstractAccountAuthenticator.car");
+    merge("accounts/AccountAuthenticatorActivity.car");
+    merge("accounts/IAccountManager.car");
+    merge("accounts/AccountManagerFuture.car");
+    merge("accounts/IAccountAuthenticatorResponse.car");
+    merge("accounts/AccountAuthenticatorResponse.car");
+    merge("accounts/IAccountManagerResponse.car");
+    merge("accounts/IAccountAuthenticator.car");
+    merge("accounts/Account.car");
+    merge("accounts/AuthenticatorDescription.car");
+    merge("accounts/AccountManagerCallback.car");
+    merge("accounts/OnAccountsUpdateListener.car");
+    merge("accounts/AccountManager.car");
+    merge("accounts/AccountAndUser.car");
+    merge("accounts/CantAddAccountActivity.car");
+
+    // interface Elastos.Droid.Content.IContext;
+    // interface Elastos.Droid.Os.IHandler;
+
+    // namespace Elastos {
+    // namespace Droid {
+    // namespace Accounts {
+
+    // [local]
+    // class CAccountManager {
+    //     /**
+    //      * @hide
+    //      */
+    //     constructor(
+    //         [in] IContext* ctx,
+    //         [in] IIAccountManager* service);
+
+    //     /**
+    //      * @hide used for testing only
+    //      */
+    //     constructor(
+    //         [in] IContext* ctx,
+    //         [in] IIAccountManager* service,
+    //         [in] IHandler* handler);
+
+    //     interface IAccountManager;
+    // }
+
+    // singleton class CAccountManagerHelper {
+    //     interface IAccountManagerHelper;
+    // }
+
+    // class CAccountManagerAmsResponse {
+    //     constructor(
+    //         [in] Handle32 host);
+
+    //     interface IAccountManagerResponse;
+    // }
+
+    // class CAccountManagerFutureResponse {
+    //     constructor(
+    //         [in] Handle32 host);
+
+    //     interface IAccountManagerResponse;
+    // }
+
+    // class CChooseResponse {
+    //     constructor(
+    //         [in] Handle32 host);
+
+    //     interface IAccountManagerResponse;
+    // }
+
+    // class CAccount {
+    //     constructor();
+
+    //     constructor(
+    //         [in] String name,
+    //         [in] String type);
+
+    //     interface IAccount;
+    //     interface IParcelable;
+    // }
+
+    // /**
+    //  * A {@link Parcelable} value type that contains information about an account authenticator.
+    //  */
+    // class CAuthenticatorDescription {
+    //     constructor(
+    //         [in] String type,
+    //         [in] String packageName,
+    //         [in] Int32 labelId,
+    //         [in] Int32 iconId,
+    //         [in] Int32 smallIconId,
+    //         [in] Int32 prefId,
+    //         [in] Boolean customTokens);
+
+    //     constructor(
+    //         [in] String type,
+    //         [in] String packageName,
+    //         [in] Int32 labelId,
+    //         [in] Int32 iconId,
+    //         [in] Int32 smallIconId,
+    //         [in] Int32 prefId);
+
+    //     constructor(
+    //         [in] String type);
+
+    //     constructor();
+
+    //     interface IAuthenticatorDescription;
+    //     interface IParcelable;
+    // }
+
+    // singleton class CAuthenticatorDescriptionHelper {
+    //     interface IAuthenticatorDescriptionHelper;
+    // }
+
+    // /**
+    //  * Object used to communicate responses back to the AccountManager
+    //  */
+    // class CAccountAuthenticatorResponse {
+    //     constructor(
+    //         [in] IIAccountAuthenticatorResponse* response);
+
+    //     constructor();
+
+    //     interface IAccountAuthenticatorResponse;
+    //     interface IParcelable;
+    // }
+
+    // class CAccountAuthenticatorTransport {
+    //     constructor(
+    //         [in] Handle32 host);
+
+    //     interface IAccountAuthenticator;
+    // }
+
+    // class CAccountAndUser {
+    //     constructor(
+    //         [in] IAccount *account,
+    //         [in] Int32 userId);
+
+    //     interface IAccountAndUser;
+    // }
+
+    // } // Accounts
+    // } // Droid
+    // } // Elastos
+}

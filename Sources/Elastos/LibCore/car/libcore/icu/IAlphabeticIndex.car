@@ -1,0 +1,105 @@
+
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Libcore {
+    namespace ICU {
+
+    /**
+     * Exposes icu4c's ImmutableIndex (new to icu 51). This exposes a read-only,
+     * thread safe snapshot view of an AlphabeticIndex at the moment it was
+     * created, and allows for random access to buckets by index.
+     */
+    interface IImmutableIndex {
+        /**
+         * Returns the number of the label buckets in this index.
+         */
+        GetBucketCount(
+            [out] Int32* count);
+
+        /**
+         * Returns the index of the bucket in which 's' should appear.
+         * Function is synchronized because underlying routine walks an iterator
+         * whose state is maintained inside the index object.
+         */
+        GetBucketIndex(
+            [in] String s,
+            [out] Int32* index);
+
+        /**
+         * Returns the label for the bucket at the given index (as returned by getBucketIndex).
+         */
+        GetBucketLabel(
+            [in] Int32 index,
+            [out] String* label);
+    }
+
+    /**
+     * Exposes icu4c's AlphabeticIndex.
+     */
+    interface IAlphabeticIndex {
+        /**
+        * Returns the max number of the label buckets allowed in this index.
+        */
+        GetMaxLabelCount(
+            [out] Int32* count);
+
+        /**
+        * Sets the max number of the label buckets in this index.
+        * (ICU 51 default is 99)
+        */
+        SetMaxLabelCount(
+            [in] Int32 count);
+
+        /**
+        * Adds the index characters from the given locale to the index.
+        * The labels are added to those that are already in the index;
+        * they do not replace the existing index characters.
+        * The collation order for this index is not changed;
+        * it remains that of the locale that was originally specified
+        * when creating this index.
+        */
+        AddLabels(
+            [in] ILocale* locale);
+
+        /**
+        * Adds the index characters in the range between the specified start and
+        * end code points, inclusive.
+        */
+        AddLabelRange(
+            [in] Int32 codePointStart,
+            [in] Int32 codePointEnd);
+
+        /**
+        * Returns the number of the label buckets in this index.
+        */
+        GetBucketCount(
+            [out] Int32* count);
+
+        /**
+        * Returns the index of the bucket in which 's' should appear.
+        * Function is synchronized because underlying routine walks an iterator
+        * whose state is maintained inside the index object.
+        */
+        GetBucketIndex(
+            [in] String s,
+            [out] Int32* index);
+
+        /**
+        * Returns the label for the bucket at the given index (as returned by getBucketIndex).
+        */
+        GetBucketLabel(
+            [in] Int32 index,
+            [out] String* label);
+
+        /**
+        * Returns an ImmutableIndex created from this AlphabeticIndex.
+        */
+        GetImmutableIndex(
+            [out] IImmutableIndex** index);
+    }
+
+    } // ICU
+    } // namespace LibCore
+}

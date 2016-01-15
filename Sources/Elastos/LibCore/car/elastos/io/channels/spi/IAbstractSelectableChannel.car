@@ -1,0 +1,26 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+    namespace Spi {
+
+    /**
+     * {@code AbstractSelectableChannel} is the base implementation class for
+     * selectable channels. It declares methods for registering, unregistering and
+     * closing selectable channels. It is thread-safe.
+     */
+    /**
+     * @Involve
+     * interface Elastos.IO.Channels.ISelectableChannel;
+     */
+    interface IAbstractSelectableChannel {
+    } // end interface
+
+    } // namespace Spi
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

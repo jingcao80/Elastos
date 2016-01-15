@@ -1,0 +1,702 @@
+
+module
+{
+    interface Elastos.Droid.Media.IAudioTrack;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.IO.IByteBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * Interface definition for a callback to be invoked when the playback head position of
+     * an AudioTrack has reached a notification marker or has increased by a certain period.
+     */
+    interface IAudioTrackOnPlaybackPositionUpdateListener {
+        /**
+         * Called on the listener to notify it that the previously set marker has been reached
+         * by the playback head.
+         */
+        OnMarkerReached(
+            [in] IAudioTrack* track);
+
+        /**
+         * Called on the listener to periodically notify it that the playback head has reached
+         * a multiple of the notification period.
+         */
+        OnPeriodicNotification(
+            [in] IAudioTrack* track);
+    }
+
+    /**
+     * The AudioTrack class manages and plays a single audio resource for Java applications.
+     * It allows streaming of PCM audio buffers to the audio sink for playback. This is
+     * achieved by "pushing" the data to the AudioTrack object using one of the
+     *  {@link #write(byte[], int, int)}, {@link #write(short[], int, int)},
+     *  and {@link #write(float[], int, int, int)} methods.
+     *
+     * <p>An AudioTrack instance can operate under two modes: static or streaming.<br>
+     * In Streaming mode, the application writes a continuous stream of data to the AudioTrack, using
+     * one of the {@code write()} methods. These are blocking and return when the data has been
+     * transferred from the Java layer to the native layer and queued for playback. The streaming
+     * mode is most useful when playing blocks of audio data that for instance are:
+     *
+     * <ul>
+     *   <li>too big to fit in memory because of the duration of the sound to play,</li>
+     *   <li>too big to fit in memory because of the characteristics of the audio data
+     *         (high sampling rate, bits per sample ...)</li>
+     *   <li>received or generated while previously queued audio is playing.</li>
+     * </ul>
+     *
+     * The static mode should be chosen when dealing with short sounds that fit in memory and
+     * that need to be played with the smallest latency possible. The static mode will
+     * therefore be preferred for UI and game sounds that are played often, and with the
+     * smallest overhead possible.
+     *
+     * <p>Upon creation, an AudioTrack object initializes its associated audio buffer.
+     * The size of this buffer, specified during the construction, determines how long an AudioTrack
+     * can play before running out of data.<br>
+     * For an AudioTrack using the static mode, this size is the maximum size of the sound that can
+     * be played from it.<br>
+     * For the streaming mode, data will be written to the audio sink in chunks of
+     * sizes less than or equal to the total buffer size.
+     *
+     * AudioTrack is not final and thus permits subclasses, but such use is not recommended.
+     */
+    [deprecated]
+     interface IAudioTrack {
+        /** indicates AudioTrack state is stopped */
+        const Int32 PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
+        /** indicates AudioTrack state is paused */
+        const Int32 PLAYSTATE_PAUSED  = 2;  // matches SL_PLAYSTATE_PAUSED
+        /** indicates AudioTrack state is playing */
+        const Int32 PLAYSTATE_PLAYING = 3;  // matches SL_PLAYSTATE_PLAYING
+
+        // keep these values in sync with android_media_AudioTrack.cpp
+        /**
+         * Creation mode where audio data is transferred from Java to the native layer
+         * only once before the audio starts playing.
+         */
+        const Int32 MODE_STATIC = 0;
+        /**
+         * Creation mode where audio data is streamed from Java to the native layer
+         * as the audio is playing.
+         */
+        const Int32 MODE_STREAM = 1;
+
+        /**
+         * State of an AudioTrack that was not successfully initialized upon creation.
+         */
+        const Int32 STATE_UNINITIALIZED = 0;
+        /**
+         * State of an AudioTrack that is ready to be used.
+         */
+        const Int32 STATE_INITIALIZED   = 1;
+        /**
+         * State of a successfully initialized AudioTrack that uses static data,
+         * but that hasn't received that data yet.
+         */
+        const Int32 STATE_NO_STATIC_DATA = 2;
+
+        /**
+         * Denotes a successful operation.
+         */
+        const Int32 SUCCESS                               = 0; //AudioSystem.SUCCESS;
+        /**
+         * Denotes a generic operation failure.
+         */
+        const Int32 ERROR                                 = -1; //AudioSystem.ERROR;
+        /**
+         * Denotes a failure due to the use of an invalid value.
+         */
+        const Int32 ERROR_BAD_VALUE                       = -2; //AudioSystem.BAD_VALUE;
+        /**
+         * Denotes a failure due to the improper use of a method.
+         */
+        const Int32 ERROR_INVALID_OPERATION               = -3; //AudioSystem.INVALID_OPERATION;
+
+        /**
+         * The write mode indicating the write operation will block until all data has been written,
+         * to be used in {@link #write(ByteBuffer, int, int)}
+         */
+        const Int32 WRITE_BLOCKING = 0;
+        /**
+         * The write mode indicating the write operation will return immediately after
+         * queuing as much audio data for playback as possible without blocking, to be used in
+         * {@link #write(ByteBuffer, int, int)}.
+         */
+        const Int32 WRITE_NON_BLOCKING = 1;
+
+        /**
+         * Releases the native AudioTrack resources.
+         */
+        ReleaseResources();
+
+        /**
+         * Returns the configured audio data sample rate in Hz
+         */
+        GetSampleRate(
+            [out] Int32* result);
+
+        /**
+         * Returns the current playback rate in Hz.
+         */
+        GetPlaybackRate(
+            [out] Int32* result);
+
+        /**
+         * Returns the configured audio data format. See {@link AudioFormat#ENCODING_PCM_16BIT}
+         * and {@link AudioFormat#ENCODING_PCM_8BIT}.
+         */
+        GetAudioFormat(
+            [out] Int32* result);
+
+        /**
+         * Returns the type of audio stream this AudioTrack is configured for.
+         * Compare the result against {@link AudioManager#STREAM_VOICE_CALL},
+         * {@link AudioManager#STREAM_SYSTEM}, {@link AudioManager#STREAM_RING},
+         * {@link AudioManager#STREAM_MUSIC}, {@link AudioManager#STREAM_ALARM},
+         * {@link AudioManager#STREAM_NOTIFICATION}, or {@link AudioManager#STREAM_DTMF}.
+         */
+        GetStreamType(
+            [out] Int32* result);
+
+        /**
+         * Returns the configured channel configuration.
+         * See {@link AudioFormat#CHANNEL_OUT_MONO}
+         * and {@link AudioFormat#CHANNEL_OUT_STEREO}.
+         */
+        GetChannelConfiguration(
+            [out] Int32* result);
+
+        /**
+         * Returns the configured number of channels.
+         */
+        GetChannelCount(
+            [out] Int32* result);
+
+        /**
+         * Returns the state of the AudioTrack instance. This is useful after the
+         * AudioTrack instance has been created to check if it was initialized
+         * properly. This ensures that the appropriate resources have been acquired.
+         * @see #STATE_INITIALIZED
+         * @see #STATE_NO_STATIC_DATA
+         * @see #STATE_UNINITIALIZED
+         */
+        GetState(
+            [out] Int32* result);
+
+        /**
+         * Returns the playback state of the AudioTrack instance.
+         * @see #PLAYSTATE_STOPPED
+         * @see #PLAYSTATE_PAUSED
+         * @see #PLAYSTATE_PLAYING
+         */
+        GetPlayState(
+            [out] Int32* result);
+
+        /**
+         * Returns marker position expressed in frames.
+         * @return marker position in wrapping frame units similar to {@link #getPlaybackHeadPosition},
+         * or zero if marker is disabled.
+         */
+        GetNotificationMarkerPosition(
+            [out] Int32* result);
+
+        /**
+         * Returns the notification update period expressed in frames.
+         * Zero means that no position update notifications are being delivered.
+         */
+        GetPositionNotificationPeriod(
+            [out] Int32* result);
+
+        /**
+         * Returns the playback head position expressed in frames.
+         * Though the "int" type is signed 32-bits, the value should be reinterpreted as if it is
+         * unsigned 32-bits.  That is, the next position after 0x7FFFFFFF is (int) 0x80000000.
+         * This is a continuously advancing counter.  It will wrap (overflow) periodically,
+         * for example approximately once every 27:03:11 hours:minutes:seconds at 44.1 kHz.
+         * It is reset to zero by flush(), reload(), and stop().
+         */
+        GetPlaybackHeadPosition(
+            [out] Int32* result);
+
+        /**
+         * Returns this track's estimated latency in milliseconds. This includes the latency due
+         * to AudioTrack buffer size, AudioMixer (if any) and audio hardware driver.
+         *
+         * DO NOT UNHIDE. The existing approach for doing A/V sync has too many problems. We need
+         * a better solution.
+         * @hide
+         */
+        GetLatency(
+            [out] Int32* result);
+
+        /**
+         * Returns the audio session ID.
+         *
+         * @return the ID of the audio session this AudioTrack belongs to.
+         */
+        GetAudioSessionId(
+            [out] Int32* result);
+
+       /**
+        * Poll for a timestamp on demand.
+        * <p>
+        * If you need to track timestamps during initial warmup or after a routing or mode change,
+        * you should request a new timestamp once per second until the reported timestamps
+        * show that the audio clock is stable.
+        * Thereafter, query for a new timestamp approximately once every 10 seconds to once per minute.
+        * Calling this method more often is inefficient.
+        * It is also counter-productive to call this method more often than recommended,
+        * because the short-term differences between successive timestamp reports are not meaningful.
+        * If you need a high-resolution mapping between frame position and presentation time,
+        * consider implementing that at application level, based on low-resolution timestamps.
+        * <p>
+        * The audio data at the returned position may either already have been
+        * presented, or may have not yet been presented but is committed to be presented.
+        * It is not possible to request the time corresponding to a particular position,
+        * or to request the (fractional) position corresponding to a particular time.
+        * If you need such features, consider implementing them at application level.
+        *
+        * @param timestamp a reference to a non-null AudioTimestamp instance allocated
+        *        and owned by caller.
+        * @return true if a timestamp is available, or false if no timestamp is available.
+        *         If a timestamp if available,
+        *         the AudioTimestamp instance is filled in with a position in frame units, together
+        *         with the estimated time when that frame was presented or is committed to
+        *         be presented.
+        *         In the case that no timestamp is available, any supplied instance is left unaltered.
+        *         A timestamp may be temporarily unavailable while the audio clock is stabilizing,
+        *         or during and immediately after a route change.
+        */
+        // Add this text when the "on new timestamp" API is added:
+        //   Use if you need to get the most recent timestamp outside of the event callback handler.
+        GetTimestamp(
+            [in] IAudioTimestamp* timestamp,
+            [out] Boolean* result);
+
+        //--------------------------------------------------------------------------
+        // Initialization / configuration
+        //--------------------
+        /**
+         * Sets the listener the AudioTrack notifies when a previously set marker is reached or
+         * for each periodic playback head position update.
+         * Notifications will be received in the same thread as the one in which the AudioTrack
+         * instance was created.
+         * @param listener
+         */
+        SetPlaybackPositionUpdateListener(
+            [in] IAudioTrackOnPlaybackPositionUpdateListener* listener);
+
+        /**
+         * Sets the listener the AudioTrack notifies when a previously set marker is reached or
+         * for each periodic playback head position update.
+         * Use this method to receive AudioTrack events in the Handler associated with another
+         * thread than the one in which you created the AudioTrack instance.
+         * @param listener
+         * @param handler the Handler that will receive the event notification messages.
+         */
+        SetPlaybackPositionUpdateListener(
+            [in] IAudioTrackOnPlaybackPositionUpdateListener* listener,
+            [in] IHandler* handler);
+
+         /**
+         * Sets the specified left and right output gain values on the AudioTrack.
+         * <p>Gain values are clamped to the closed interval [0.0, max] where
+         * max is the value of {@link #getMaxVolume}.
+         * A value of 0.0 results in zero gain (silence), and
+         * a value of 1.0 means unity gain (signal unchanged).
+         * The default value is 1.0 meaning unity gain.
+         * <p>The word "volume" in the API name is historical; this is actually a linear gain.
+         * @param leftGain output gain for the left channel.
+         * @param rightGain output gain for the right channel
+         * @return error code or success, see {@link #SUCCESS},
+         *    {@link #ERROR_INVALID_OPERATION}
+         * @deprecated Applications should use {@link #setVolume} instead, as it
+         * more gracefully scales down to mono, and up to multi-channel content beyond stereo.
+         */
+        SetStereoVolume(
+            [in] Float leftGain,
+            [in] Float rightGain,
+            [out] Int32* result);
+
+        /**
+         * Sets the specified output gain value on all channels of this track.
+         * <p>Gain values are clamped to the closed interval [0.0, max] where
+         * max is the value of {@link #getMaxVolume}.
+         * A value of 0.0 results in zero gain (silence), and
+         * a value of 1.0 means unity gain (signal unchanged).
+         * The default value is 1.0 meaning unity gain.
+         * <p>This API is preferred over {@link #setStereoVolume}, as it
+         * more gracefully scales down to mono, and up to multi-channel content beyond stereo.
+         * <p>The word "volume" in the API name is historical; this is actually a linear gain.
+         * @param gain output gain for all channels.
+         * @return error code or success, see {@link #SUCCESS},
+         *    {@link #ERROR_INVALID_OPERATION}
+         */
+        SetVolume(
+            [in] Float gain,
+            [out] Int32* result);
+
+        /**
+         * Sets the playback sample rate for this track. This sets the sampling rate at which
+         * the audio data will be consumed and played back
+         * (as set by the sampleRateInHz parameter in the
+         * {@link #AudioTrack(int, int, int, int, int, int)} constructor),
+         * not the original sampling rate of the
+         * content. For example, setting it to half the sample rate of the content will cause the
+         * playback to last twice as long, but will also result in a pitch shift down by one octave.
+         * The valid sample rate range is from 1 Hz to twice the value returned by
+         * {@link #getNativeOutputSampleRate(int)}.
+         * @param sampleRateInHz the sample rate expressed in Hz
+         * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+         *    {@link #ERROR_INVALID_OPERATION}
+         */
+        SetPlaybackRate(
+            [in] Int32 sampleRateInHz,
+            [out] Int32* result);
+
+
+        /**
+         * Sets the position of the notification marker.  At most one marker can be active.
+         * @param markerInFrames marker position in wrapping frame units similar to
+         * {@link #getPlaybackHeadPosition}, or zero to disable the marker.
+         * To set a marker at a position which would appear as zero due to wraparound,
+         * a workaround is to use a non-zero position near zero, such as -1 or 1.
+         * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+         *  {@link #ERROR_INVALID_OPERATION}
+         */
+        SetNotificationMarkerPosition(
+            [in] Int32 markerInFrames,
+            [out] Int32* result);
+
+        /**
+         * Sets the period for the periodic notification event.
+         * @param periodInFrames update period expressed in frames
+         * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_INVALID_OPERATION}
+         */
+        SetPositionNotificationPeriod(
+            [in] Int32 periodInFrames,
+            [out] Int32* result);
+
+        /**
+         * Sets the playback head position.
+         * The track must be stopped or paused for the position to be changed,
+         * and must use the {@link #MODE_STATIC} mode.
+         * @param positionInFrames playback head position expressed in frames
+         * Zero corresponds to start of buffer.
+         * The position must not be greater than the buffer size in frames, or negative.
+         * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+         *    {@link #ERROR_INVALID_OPERATION}
+         */
+        SetPlaybackHeadPosition(
+            [in] Int32 positionInFrames,
+            [out] Int32* result);
+
+        /**
+         * Sets the loop points and the loop count. The loop can be infinite.
+         * Similarly to setPlaybackHeadPosition,
+         * the track must be stopped or paused for the loop points to be changed,
+         * and must use the {@link #MODE_STATIC} mode.
+         * @param startInFrames loop start marker expressed in frames
+         * Zero corresponds to start of buffer.
+         * The start marker must not be greater than or equal to the buffer size in frames, or negative.
+         * @param endInFrames loop end marker expressed in frames
+         * The total buffer size in frames corresponds to end of buffer.
+         * The end marker must not be greater than the buffer size in frames.
+         * For looping, the end marker must not be less than or equal to the start marker,
+         * but to disable looping
+         * it is permitted for start marker, end marker, and loop count to all be 0.
+         * @param loopCount the number of times the loop is looped.
+         *    A value of -1 means infinite looping, and 0 disables looping.
+         * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+         *    {@link #ERROR_INVALID_OPERATION}
+         */
+        SetLoopPoints(
+            [in] Int32 startInFrames,
+            [in] Int32 endInFrames,
+            [in] Int32 loopCount,
+            [out] Int32* result);
+
+        //---------------------------------------------------------
+        // Transport control methods
+        //--------------------
+        /**
+         * Starts playing an AudioTrack.
+         * If track's creation mode is {@link #MODE_STATIC}, you must have called write() prior.
+         *
+         * @throws IllegalStateException
+         */
+        Play();
+
+        /**
+         * Stops playing the audio data.
+         * When used on an instance created in {@link #MODE_STREAM} mode, audio will stop playing
+         * after the last buffer that was written has been played. For an immediate stop, use
+         * {@link #pause()}, followed by {@link #flush()} to discard audio data that hasn't been played
+         * back yet.
+         * @throws IllegalStateException
+         */
+        Stop();
+
+        /**
+         * Pauses the playback of the audio data. Data that has not been played
+         * back will not be discarded. Subsequent calls to {@link #play} will play
+         * this data back. See {@link #flush()} to discard this data.
+         *
+         * @throws IllegalStateException
+         */
+        Pause();
+
+        //---------------------------------------------------------
+        // Audio data supply
+        //--------------------
+
+        /**
+         * Flushes the audio data currently queued for playback. Any data that has
+         * not been played back will be discarded.  No-op if not stopped or paused,
+         * or if the track's creation mode is not {@link #MODE_STREAM}.
+         */
+        Flush();
+
+        /**
+         * Writes the audio data to the audio sink for playback (streaming mode),
+         * or copies audio data for later playback (static buffer mode).
+         * In streaming mode, will block until all data has been written to the audio sink.
+         * In static buffer mode, copies the data to the buffer starting at offset 0.
+         * Note that the actual playback of this data might occur after this function
+         * returns. This function is thread safe with respect to {@link #stop} calls,
+         * in which case all of the specified data might not be written to the audio sink.
+         *
+         * @param audioData the array that holds the data to play.
+         * @param offsetInBytes the offset expressed in bytes in audioData where the data to play
+         *    starts.
+         * @param sizeInBytes the number of bytes to read in audioData after the offset.
+         * @return the number of bytes that were written or {@link #ERROR_INVALID_OPERATION}
+         *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+         *    the parameters don't resolve to valid data and indexes, or
+         *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+         *    needs to be recreated.
+         */
+
+        Write(
+            [in] ArrayOf<Byte>* audioData,
+            [in] Int32 offsetInBytes,
+            [in] Int32 sizeInBytes,
+            [out] Int32* result);
+
+        /**
+         * Writes the audio data to the audio sink for playback (streaming mode),
+         * or copies audio data for later playback (static buffer mode).
+         * In streaming mode, will block until all data has been written to the audio sink.
+         * In static buffer mode, copies the data to the buffer starting at offset 0.
+         * Note that the actual playback of this data might occur after this function
+         * returns. This function is thread safe with respect to {@link #stop} calls,
+         * in which case all of the specified data might not be written to the audio sink.
+         *
+         * @param audioData the array that holds the data to play.
+         * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
+         *     starts.
+         * @param sizeInShorts the number of shorts to read in audioData after the offset.
+         * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
+         *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+         *    the parameters don't resolve to valid data and indexes.
+         */
+
+        Write(
+            [in] ArrayOf<Int16>* audioData,
+            [in] Int32 offsetInShorts,
+            [in] Int32 sizeInShorts,
+            [out] Int32* result);
+
+        /**
+         * Writes the audio data to the audio sink for playback (streaming mode),
+         * or copies audio data for later playback (static buffer mode).
+         * In static buffer mode, copies the data to the buffer starting at offset 0,
+         * and the write mode is ignored.
+         * In streaming mode, the blocking behavior will depend on the write mode.
+         * <p>
+         * Note that the actual playback of this data might occur after this function
+         * returns. This function is thread safe with respect to {@link #stop} calls,
+         * in which case all of the specified data might not be written to the audio sink.
+         * <p>
+         * @param audioData the array that holds the data to play.
+         *     The implementation does not clip for sample values within the nominal range
+         *     [-1.0f, 1.0f], provided that all gains in the audio pipeline are
+         *     less than or equal to unity (1.0f), and in the absence of post-processing effects
+         *     that could add energy, such as reverb.  For the convenience of applications
+         *     that compute samples using filters with non-unity gain,
+         *     sample values +3 dB beyond the nominal range are permitted.
+         *     However such values may eventually be limited or clipped, depending on various gains
+         *     and later processing in the audio path.  Therefore applications are encouraged
+         *     to provide samples values within the nominal range.
+         * @param offsetInFloats the offset, expressed as a number of floats,
+         *     in audioData where the data to play starts.
+         * @param sizeInFloats the number of floats to read in audioData after the offset.
+         * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
+         *     effect in static mode.
+         *     <BR>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
+         *         to the audio sink.
+         *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
+         *     queuing as much audio data for playback as possible without blocking.
+         * @return the number of floats that were written, or {@link #ERROR_INVALID_OPERATION}
+         *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+         *    the parameters don't resolve to valid data and indexes.
+         */
+        Write(
+            [in] ArrayOf<Float>* audioData,
+            [in] Int32 offsetInFloats,
+            [in] Int32 sizeInFloats,
+            [in] Int32 writeMode,
+            [out] Int32* result);
+
+        /**
+         * Writes the audio data to the audio sink for playback (streaming mode),
+         * or copies audio data for later playback (static buffer mode).
+         * In static buffer mode, copies the data to the buffer starting at its 0 offset, and the write
+         * mode is ignored.
+         * In streaming mode, the blocking behavior will depend on the write mode.
+         * @param audioData the buffer that holds the data to play, starting at the position reported
+         *     by <code>audioData.position()</code>.
+         *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
+         *     have been advanced to reflect the amount of data that was successfully written to
+         *     the AudioTrack.
+         * @param sizeInBytes number of bytes to write.
+         *     <BR>Note this may differ from <code>audioData.remaining()</code>, but cannot exceed it.
+         * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
+         *     effect in static mode.
+         *     <BR>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
+         *         to the audio sink.
+         *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
+         *     queuing as much audio data for playback as possible without blocking.
+         * @return 0 or a positive number of bytes that were written, or
+         *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
+         */
+        Write(
+            [in] IByteBuffer* audioData,
+            [in] Int32 sizeInBytes,
+            [in] Int32 writeMode,
+            [out] Int32* result);
+
+        /**
+         * Notifies the native resource to reuse the audio data already loaded in the native
+         * layer, that is to rewind to start of buffer.
+         * The track's creation mode must be {@link #MODE_STATIC}.
+         * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+         *  {@link #ERROR_INVALID_OPERATION}
+         */
+        ReloadStaticData(
+            [out] Int32* result);
+
+        //--------------------------------------------------------------------------
+        // Audio effects management
+        //--------------------
+
+        /**
+         * Attaches an auxiliary effect to the audio track. A typical auxiliary
+         * effect is a reverberation effect which can be applied on any sound source
+         * that directs a certain amount of its energy to this effect. This amount
+         * is defined by setAuxEffectSendLevel().
+         * {@see #setAuxEffectSendLevel(float)}.
+         * <p>After creating an auxiliary effect (e.g.
+         * {@link android.media.audiofx.EnvironmentalReverb}), retrieve its ID with
+         * {@link android.media.audiofx.AudioEffect#getId()} and use it when calling
+         * this method to attach the audio track to the effect.
+         * <p>To detach the effect from the audio track, call this method with a
+         * null effect id.
+         *
+         * @param effectId system wide unique id of the effect to attach
+         * @return error code or success, see {@link #SUCCESS},
+         *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR_BAD_VALUE}
+         */
+        AttachAuxEffect(
+            [in] Int32 effectId,
+            [out] Int32* result);
+
+        /**
+         * Sets the send level of the audio track to the attached auxiliary effect
+         * {@link #attachAuxEffect(int)}.  Effect levels
+         * are clamped to the closed interval [0.0, max] where
+         * max is the value of {@link #getMaxVolume}.
+         * A value of 0.0 results in no effect, and a value of 1.0 is full send.
+         * <p>By default the send level is 0.0f, so even if an effect is attached to the player
+         * this method must be called for the effect to be applied.
+         * <p>Note that the passed level value is a linear scalar. UI controls should be scaled
+         * logarithmically: the gain applied by audio framework ranges from -72dB to at least 0dB,
+         * so an appropriate conversion from linear UI input x to level is:
+         * x == 0 -&gt; level = 0
+         * 0 &lt; x &lt;= R -&gt; level = 10^(72*(x-R)/20/R)
+         *
+         * @param level linear send level
+         * @return error code or success, see {@link #SUCCESS},
+         *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR}
+         */
+        SetAuxEffectSendLevel(
+            [in] Float level,
+            [out] Int32* result);
+    }
+
+    interface IAudioTrackHelper {
+        //--------------------------------------------------------------------------
+        // Getters
+        //--------------------
+        /**
+         * Returns the minimum gain value, which is the constant 0.0.
+         * Gain values less than 0.0 will be clamped to 0.0.
+         * <p>The word "volume" in the API name is historical; this is actually a linear gain.
+         * @return the minimum value, which is the constant 0.0.
+         */
+        GetMinVolume(
+            [out] Float* result);
+
+        /**
+         * Returns the maximum gain value, which is greater than or equal to 1.0.
+         * Gain values greater than the maximum will be clamped to the maximum.
+         * <p>The word "volume" in the API name is historical; this is actually a gain.
+         * expressed as a linear multiplier on sample values, where a maximum value of 1.0
+         * corresponds to a gain of 0 dB (sample values left unmodified).
+         * @return the maximum value, which is greater than or equal to 1.0.
+         */
+        GetMaxVolume(
+            [out] Float* result);
+
+        /**
+         *  Returns the output sample rate in Hz for the specified stream type.
+         */
+        GetNativeOutputSampleRate(
+            [in] Int32 streamType,
+            [out] Int32* result);
+
+        /**
+         * Returns the minimum buffer size required for the successful creation of an AudioTrack
+         * object to be created in the {@link #MODE_STREAM} mode. Note that this size doesn't
+         * guarantee a smooth playback under load, and higher values should be chosen according to
+         * the expected frequency at which the buffer will be refilled with additional data to play.
+         * For example, if you intend to dynamically set the source sample rate of an AudioTrack
+         * to a higher value than the initial source sample rate, be sure to configure the buffer size
+         * based on the highest planned sample rate.
+         * @param sampleRateInHz the source sample rate expressed in Hz.
+         * @param channelConfig describes the configuration of the audio channels.
+         *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
+         *   {@link AudioFormat#CHANNEL_OUT_STEREO}
+         * @param audioFormat the format in which the audio data is represented.
+         *   See {@link AudioFormat#ENCODING_PCM_16BIT} and
+         *   {@link AudioFormat#ENCODING_PCM_8BIT},
+         *   and {@link AudioFormat#ENCODING_PCM_FLOAT}.
+         * @return {@link #ERROR_BAD_VALUE} if an invalid parameter was passed,
+         *   or {@link #ERROR} if unable to query for output properties,
+         *   or the minimum buffer size expressed in bytes.
+         */
+        GetMinBufferSize(
+            [in] Int32 sampleRateInHz,
+            [in] Int32 channelConfig,
+            [in] Int32 audioFormat,
+            [out] Int32* result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

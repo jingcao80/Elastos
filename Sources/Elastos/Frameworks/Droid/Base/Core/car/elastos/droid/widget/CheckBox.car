@@ -1,0 +1,61 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface ICompoundButton;
+
+    /**
+     * <p>
+     * A checkbox is a specific type of two-states button that can be either
+     * checked or unchecked. A example usage of a checkbox inside your activity
+     * would be the following:
+     * </p>
+     *
+     * <pre class="prettyprint">
+     * public class MyActivity extends Activity {
+     *     protected void onCreate(Bundle icicle) {
+     *         super.onCreate(icicle);
+     *
+     *         setContentView(R.layout.content_layout_id);
+     *
+     *         final CheckBox checkBox = (CheckBox) findViewById(R.id.checkbox_id);
+     *         if (checkBox.isChecked()) {
+     *             checkBox.setChecked(false);
+     *         }
+     *     }
+     * }
+     * </pre>
+     *
+     * <p>See the <a href="{@docRoot}guide/topics/ui/controls/checkbox.html">Checkboxes</a>
+     * guide.</p>
+     *
+     * <p><strong>XML attributes</strong></p>
+     * <p>
+     * See {@link android.R.styleable#CompoundButton CompoundButton Attributes},
+     * {@link android.R.styleable#Button Button Attributes},
+     * {@link android.R.styleable#TextView TextView Attributes},
+     * {@link android.R.styleable#View View Attributes}
+     * </p>
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.ITextView
+     * extends Elastos.Droid.View.ICompoundButton
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.ICheckable
+     */
+    interface ICheckBox {
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

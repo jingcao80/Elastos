@@ -1,0 +1,14 @@
+
+TARGET_NAME= content
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+ELASTOS_LIBS += app/app.lib
+ELASTOS_LIBS += browser/browser.lib
+ELASTOS_LIBS += common/common.lib

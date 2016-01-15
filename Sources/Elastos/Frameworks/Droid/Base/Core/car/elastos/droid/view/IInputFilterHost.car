@@ -1,0 +1,24 @@
+
+module
+{
+    interface Elastos.Droid.View.IInputEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Interface for calls from an input filter to its host.
+     *
+     * @hide
+     */
+    interface IInputFilterHost {
+        SendInputEvent(
+            [in] IInputEvent* event,
+            [in] Int32 policyFlags);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

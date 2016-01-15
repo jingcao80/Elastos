@@ -1,0 +1,28 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /** @hide */
+    [deprecated]
+    interface IIConsumerIrService {
+        HasIrEmitter(
+            [out] Boolean* value);
+
+        Transmit(
+            [in] String packageName,
+            [in] Int32 carrierFrequency,
+            [in] ArrayOf<Int32>* pattern);
+
+        GetCarrierFrequencies(
+            [out, callee] ArrayOf<Int32>* outarr);
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

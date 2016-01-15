@@ -1,0 +1,23 @@
+
+TARGET_NAME = locks
+TARGET_TYPE = lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/utility/concurrent;
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/utility/concurrent/atomic;
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/utility/concurrent/locks;
+
+SOURCES += AbstractQueuedSynchronizer.cpp
+SOURCES += CLockSupport.cpp
+SOURCES += CReentrantLock.cpp
+SOURCES += CReentrantReadWriteLock.cpp
+SOURCES += LockSupport.cpp
+SOURCES += ReentrantLock.cpp

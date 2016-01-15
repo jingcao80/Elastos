@@ -1,0 +1,23 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Egl {
+
+    interface IEGLDisplay {
+
+        Equals(
+            [in] IInterface *object,
+            [out] Boolean *equals);
+
+        GetHashCode(
+            [out] Int32 *hashCode);
+    }
+
+    } // namepsace Egl
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

@@ -1,0 +1,108 @@
+
+module
+{
+    interface Elastos.Core.IRunnable;
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IContextMenuInfo;
+    interface Elastos.Droid.Internal.View.Menu.ISubMenuBuilder;
+    interface Elastos.Droid.Internal.View.Menu.IMenuItemView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+        /**
+         * @Involve
+         * interface Elastos.Droid.View.IMenuItem
+         */
+        [local]
+        interface IMenuItemImpl {
+            /**
+             * Invokes the item by calling various listeners or callbacks.
+             *
+             * @return true if the invocation was handled, false otherwise
+             */
+            Invoke(
+                [out] Boolean* handled);
+
+            GetOrdering(
+                [out] Int32* ordering);
+
+            SetCallback(
+                [in] IRunnable* cb);
+
+            SetExclusiveCheckable(
+                [in] Boolean exclusive);
+
+            IsExclusiveCheckable(
+                [out] Boolean* checkable);
+
+            ActionFormatChanged();
+
+            /**
+             * @return Whether the menu should show icons for menu items.
+             */
+            ShouldShowIcon(
+                [out] Boolean* show);
+
+            IsActionButton(
+                [out] Boolean* action);
+
+            RequestsActionButton(
+                [out] Boolean* result);
+
+            RequiresActionButton(
+                [out] Boolean* result);
+
+            SetIsActionButton(
+                [in] Boolean isActionButton);
+
+            ShowsTextAsAction(
+                [out] Boolean* shows);
+
+            HasCollapsibleActionView(
+                [out] Boolean* result);
+
+            SetActionViewExpanded(
+                [in] Boolean isExpanded);
+
+            /*********** following method is not public *********/
+            GetShortcut(
+                [out] Char32* c);
+
+            GetShortcutLabel(
+                [out] String* label);
+
+            ShouldShowShortcut(
+                [out] Boolean* result);
+
+            SetSubMenu(
+                [in] ISubMenuBuilder* subMenu);
+
+            GetTitleForItemView(
+                [in] IMenuItemView* itemView,
+                [out] ICharSequence** title);
+
+            SetCheckedInt(
+                [in] Boolean checked);
+
+            SetVisibleInt(
+                [in] Boolean show,
+                [out] Boolean* isVisible);
+
+            SetMenuInfo(
+                [in] IContextMenuInfo* menuInfo);
+
+            GetActionView(
+                [out] IView** result);
+        }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}
+

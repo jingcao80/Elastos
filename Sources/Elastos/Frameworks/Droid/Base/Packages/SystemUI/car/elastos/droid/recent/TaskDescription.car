@@ -1,0 +1,90 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recent {
+
+    [local]
+    interface ITaskDescription {
+        SetLoaded(
+            [in] Boolean loaded);
+
+        IsLoaded(
+            [out] Boolean* loaded);
+
+        IsNull(
+            [out] Boolean* result);
+
+        GetLabel(
+            [out] ICharSequence** label);
+
+        SetLabel(
+            [in] ICharSequence* label);
+
+        GetIcon(
+            [out] IDrawable** drawable);
+
+        SetIcon(
+            [in] IDrawable* drawable);
+
+        SetThumbnail(
+            [in] IBitmap* bitmap);
+
+        GetThumbnail(
+            [out] IBitmap** bitmap);
+
+        SetResolveInfo(
+            [in] IResolveInfo* resolveInfo);
+
+        GetResolveInfo(
+            [out] IResolveInfo** resolveInfo);
+
+        SetTaskId(
+            [in] Int32 taskId);
+
+        GetTaskId(
+            [out] Int32* taskId);
+
+        SetPersistentTaskId(
+            [in] Int32 persistentTaskId);
+
+        GetPersistentTaskId(
+            [out] Int32* persistentTaskId);
+
+        SetIntent(
+            [in] IIntent* intent);
+
+        GetIntent(
+            [out] IIntent** intent);
+
+        SetPackageName(
+            [in] String packageName);
+
+        GetPackageName(
+            [out] String* packageName);
+
+        SetDescription(
+            [in] ICharSequence* description);
+
+        GetDescription(
+            [out] ICharSequence** description);
+
+        Lock();
+
+        Unlock();
+    }
+
+    } // namespace Recent
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

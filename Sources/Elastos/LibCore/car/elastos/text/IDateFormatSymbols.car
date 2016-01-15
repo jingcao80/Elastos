@@ -1,0 +1,220 @@
+module
+{
+    interface Elastos.Core.IArrayOf;
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * Encapsulates localized date-time formatting data, such as the names of the
+     * months, the names of the days of the week, and the time zone data. DateFormat
+     * and SimpleDateFormat both use DateFormatSymbols to encapsulate this information.
+     * <p>
+     * Typically you shouldn't use DateFormatSymbols directly. Rather, you are
+     * encouraged to create a date/time formatter with the DateFormat class's factory
+     * methods: getTimeInstance, getDateInstance, or getDateTimeInstance. These
+     * methods automatically create a DateFormatSymbols for the formatter so that you
+     * don't have to. After the formatter is created, you may modify its format
+     * pattern using the setPattern method. For more information about creating
+     * formatters using DateFormat's factory methods, see DateFormat.
+     * <p>
+     * Direct use of DateFormatSymbols is likely to be less efficient because the
+     * implementation cannot make assumptions about user-supplied/user-modifiable data
+     * to the same extent that it can with its own built-in data.
+     *
+     * @sa DateFormat
+     * @sa SimpleDateForma
+     */
+    /**
+     * @Involve
+     * interface ISerializable;
+     * interface ICloneable;
+     */
+    [deprecated]
+    interface IDateFormatSymbols {
+
+        /**
+         * Returns the array of strings which represent AM and PM. Use the
+         * java.util.Calendar constants {Calendar.AM} and
+         * {Calendar.PM} as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        GetAmPmStrings(
+            [out, callee] ArrayOf<String>* amPmStrings);
+
+        /**
+         * Returns the array of strings which represent BC and AD. Use the
+         * java.util.Calendar constants {GregorianCalendar.BC} and
+         * {GregorianCalendar.AD} as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        GetEras(
+            [out, callee] ArrayOf<String>* eras);
+
+        /**
+         * Returns the pattern characters used by SimpleDateFormat to
+         * specify date and time fields.
+         *
+         * @sa SimpleDateFormat
+         */
+        GetLocalPatternChars(
+            [out] String* localPatternChars);
+
+        /**
+         * Returns the array of strings containing the full names of the months. Use
+         * the java.util.Calendar constants {Calendar.JANUARY} etc. as
+         * indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        GetMonths(
+            [out, callee] ArrayOf<String>* months);
+
+        /**
+         * Returns the array of strings containing the abbreviated names of the
+         * months. Use the java.util.Calendar constants
+         * {Calendar.JANUARY} etc. as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        GetShortMonths(
+            [out, callee] ArrayOf<String>* shortMonths);
+
+        /**
+         * Returns the array of strings containing the abbreviated names of the days
+         * of the week. Use the java.util.Calendar constants
+         * {Calendar.SUNDAY} etc. as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        GetShortWeekdays(
+            [out, callee] ArrayOf<String>* shortWeekdays);
+
+        /**
+         * Returns the array of strings containing the full names of the days of the
+         * week. Use the java.util.Calendar constants
+         * {Calendar.SUNDAY} etc. as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        GetWeekdays(
+            [out, callee] ArrayOf<String>* weekdays);
+
+        /**
+         * Returns the two-dimensional array of strings containing localized names for time zones.
+         * Each row is an array of five strings:
+         * <ul>
+         * <li>The time zone ID, for example "America/Los_Angeles".
+         * This is not localized, and is used as a key into the table.
+         * <li>The long display name, for example "Pacific Standard Time".
+         * <li>The short display name, for example "PST".
+         * <li>The long display name for DST, for example "Pacific Daylight Time".
+         * <li>The short display name for DST, for example "PDT".
+         * </ul>
+         */
+        GetZoneStrings(
+            [out, callee] ArrayOf<IArrayOf*>* outarray);
+
+        /**
+         * Sets the array of strings which represent AM and PM. Use the
+         * java.util.Calendar constants {Calendar.AM} and
+         * {Calendar.PM} as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        SetAmPmStrings(
+            [in] ArrayOf<String>* data);
+
+        /**
+         * Sets the array of Strings which represent BC and AD. Use the
+         * java.util.Calendar constants {GregorianCalendar.BC} and
+         * {GregorianCalendar.AD} as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        SetEras(
+            [in] ArrayOf<String>* data);
+
+        /**
+         * Sets the pattern characters used by SimpleDateFormat to specify
+         * date and time fields.
+         *
+         * @sa SimpleDateFormat
+         */
+        SetLocalPatternChars(
+            [in] String data);
+
+        /**
+         * Sets the array of strings containing the full names of the months. Use
+         * the java.util.Calendar constants {Calendar.JANUARY} etc. as
+         * indices for the array
+         *
+         * @sa java.util.Calendar
+         */
+        SetMonths(
+            [in] ArrayOf<String>* data);
+
+        /**
+         * Sets the array of strings containing the abbreviated names of the months.
+         * Use the java.util.Calendar constants {Calendar.JANUARY}
+         * etc. as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        SetShortMonths(
+            [in] ArrayOf<String>* data);
+
+        /**
+         * Sets the array of strings containing the abbreviated names of the days of
+         * the week. Use the java.util.Calendar constants
+         * {Calendar.SUNDAY} etc. as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        SetShortWeekdays(
+            [in] ArrayOf<String>* data);
+
+        /**
+         * Sets the array of strings containing the full names of the days of the
+         * week. Use the java.util.Calendar constants
+         * {Calendar.SUNDAY} etc. as indices for the array.
+         *
+         * @sa java.util.Calendar
+         */
+        SetWeekdays(
+            [in] ArrayOf<String>* data);
+
+        /**
+         * Sets the two-dimensional array of strings containing localized names for time zones.
+         * See #getZoneStrings for details.
+         *
+         * @sa #getZoneStrings
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if any row has fewer than 5 elements.
+         * NullPointerException | if {zoneStrings == null}.
+         */
+        SetZoneStrings(
+            [in] ArrayOf<IArrayOf*>* zoneStrings);
+    }
+
+    interface IDateFormatSymbolsHelper
+    {
+        GetInstance(
+            [out] IDateFormatSymbols** instance);
+
+        GetInstance(
+            [in] ILocale* locale,
+            [out] IDateFormatSymbols** instance);
+
+        GetAvailableLocales(
+            [out, callee] ArrayOf<ILocale*>* arrayOfLocales);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

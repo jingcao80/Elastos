@@ -1,0 +1,338 @@
+
+module
+{
+    merge("text/Exceptions.car");
+    merge("text/IAnnotation.car");
+    merge("text/IAttributedCharacterIterator.car");
+    merge("text/IAttributedString.car");
+    merge("text/IBidi.car");
+    merge("text/IBreakIterator.car");
+    merge("text/ICharacterIterator.car");
+    merge("text/IChoiceFormat.car");
+    merge("text/ICollationElementIterator.car");
+    merge("text/ICollationKey.car");
+    merge("text/ICollator.car");
+    merge("text/IDateFormat.car");
+    merge("text/IDateFormatSymbols.car");
+    merge("text/IDecimalFormat.car");
+    merge("text/IDecimalFormatSymbols.car");
+    merge("text/IFieldPosition.car");
+    merge("text/IFormat.car");
+    merge("text/IMessageFormat.car");
+    merge("text/INormalizer.car");
+    merge("text/INumberFormat.car");
+    merge("text/IParsePosition.car");
+    merge("text/IRuleBasedCollator.car");
+    merge("text/ISimpleDateFormat.car");
+    merge("text/IStringCharacterIterator.car");
+
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Core.IComparator;
+    interface Elastos.Text.IAnnotation;
+    interface Elastos.Text.IAttributedCharacterIteratorAttribute;
+    interface Elastos.IO.ISerializable;
+    interface Elastos.Utility.ILocale;
+    interface Libcore.ICU.INativeBreakIterator;
+    interface Libcore.ICU.ICollationElementIteratorICU;
+    interface Libcore.ICU.IRuleBasedCollatorICU;
+
+    namespace Elastos {
+    namespace Text {
+
+    class CAnnotation {
+        constructor(
+            [in] IInterface* attribute);
+
+        interface IAnnotation;
+    }
+
+    class CAttributedCharacterIteratorAttribute {
+        constructor(
+            [in] String name);
+
+        interface IAttributedCharacterIteratorAttribute;
+        interface ISerializable;
+    }
+
+    [deprecated]
+    class CBidi {
+        constructor(
+            [in] IAttributedCharacterIterator* paragraph);
+
+        constructor(
+            [in] ArrayOf<Char32>* text,
+            [in] Int32 textStart,
+            [in] ArrayOf<Byte>* embeddings,
+            [in] Int32 embStart,
+            [in] Int32 paragraphLength,
+            [in] Int32 flags);
+
+        constructor(
+            [in] String paragraph,
+            [in] Int32 flags);
+
+        interface IBidi;
+    }
+
+    singleton class CBidiHelper {
+        interface IBidiHelper;
+    }
+
+    singleton class CBreakIteratorHelper {
+        interface IBreakIteratorHelper;
+    }
+
+    [deprecated]
+    class CRuleBasedBreakIterator {
+        constructor(
+            [in] INativeBreakIterator * iterator);
+
+        interface IBreakIterator;
+        interface ICloneable;
+    }
+
+    class CFieldPosition {
+        constructor(
+            [in] Int32 field);
+
+        constructor(
+            [in] IAttributedCharacterIteratorAttribute* attribute);
+
+        constructor(
+            [in] IAttributedCharacterIteratorAttribute* attribute,
+            [in] Int32 field);
+
+        interface IFieldPosition;
+    }
+
+    class CParsePosition {
+        constructor(
+            [in] Int32 index);
+
+        interface IParsePosition;
+    }
+
+    [deprecated]
+    class CAttributedString {
+        constructor(
+            [in] IAttributedCharacterIterator* iterator);
+
+        constructor(
+            [in] IAttributedCharacterIterator* iterator,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        constructor(
+            [in] IAttributedCharacterIterator* iterator,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] ArrayOf<IAttributedCharacterIteratorAttribute*>* attributes);
+
+        constructor(
+            [in] String value);
+
+        // constructor(
+        //     [in] String value,
+        //     [in] IMap * attributes);
+
+        interface IAttributedString;
+    }
+
+    [deprecated]
+    class CChoiceFormat {
+        constructor(
+            [in] ArrayOf<Double> * limits,
+            [in] ArrayOf<String> * formats);
+
+        constructor(
+            [in] String tem);
+
+        interface IChoiceFormat;
+        interface INumberFormat;
+        interface IFormat;
+        interface ISerializable;
+        interface ICloneable;
+    }
+
+    singleton class CChoiceFormatHelper {
+        interface IChoiceFormatHelper;
+    }
+
+    class CNumberFormatField {
+        constructor(
+            [in] String fieldName);
+
+        interface INumberFormatField;
+        interface IAttributedCharacterIteratorAttribute;
+        interface ISerializable;
+    }
+
+    singleton class CNumberFormatHelper {
+        interface INumberFormatHelper;
+    }
+
+    class CDecimalFormat {
+        constructor();
+
+        constructor(
+            [in] String pattern);
+
+        constructor(
+            [in] String pattern,
+            [in] IDecimalFormatSymbols* value);
+
+        constructor(
+            [in] String pattern,
+            [in] ILocale* locale);
+
+        interface IDecimalFormat;
+        interface INumberFormat;
+        interface IFormat;
+        interface ISerializable;
+        interface ICloneable;
+    }
+
+    class CDecimalFormatSymbols {
+        constructor();
+
+        constructor(
+            [in] ILocale* locale);
+
+        interface IDecimalFormatSymbols;
+        interface ISerializable;
+        interface ICloneable;
+    }
+
+    singleton class CDecimalFormatSymbolsHelper {
+        interface IDecimalFormatSymbolsHelper;
+    }
+
+    class CMessageFormat {
+        constructor(
+            [in] String tem,
+            [in] ILocale* locale);
+
+        constructor(
+            [in] String tem);
+
+        interface IMessageFormat;
+        interface IFormat;
+        interface ISerializable;
+        interface ICloneable;
+    }
+
+    class CSimpleDateFormat {
+        constructor();
+
+        constructor(
+            [in] String pattern);
+
+        constructor(
+            [in] String temp,
+            [in] IDateFormatSymbols* value);
+
+        constructor(
+            [in] String temp,
+            [in] ILocale* locale);
+
+        interface ISimpleDateFormat;
+        interface IDateFormat;
+        interface IFormat;
+        interface ISerializable;
+        interface ICloneable;
+    }
+
+    singleton class CDateFormatHelper {
+        interface IDateFormatHelper;
+    }
+
+    singleton class CNormalizerHelper {
+        interface INormalizer;
+    }
+
+    class CMessageFormatField {
+        constructor(
+            [in] String name);
+
+        interface IMessageFormatField;
+        interface IAttributedCharacterIteratorAttribute;
+        interface ISerializable;
+    }
+
+    class CDateFormatSymbols {
+        constructor();
+
+        constructor(
+            [in] ILocale* locale);
+
+        interface IDateFormatSymbols;
+        interface ISerializable;
+        interface ICloneable;
+    }
+
+    class CDateFormatField {
+        constructor(
+            [in] String fieldName,
+            [in] Int32 calendarField);
+
+        interface IDateFormatField;
+        interface IAttributedCharacterIteratorAttribute;
+        interface ISerializable;
+    }
+
+    singleton class CDateFormatSymbolsHelper {
+        interface IDateFormatSymbolsHelper;
+    }
+
+    class CCollationElementIterator {
+        constructor(
+            [in] ICollationElementIteratorICU* iterator);
+
+        interface ICollationElementIterator;
+    }
+
+    singleton class CCollationElementIteratorHelper {
+        interface ICollationElementIteratorHelper;
+    }
+
+    class CRuleBasedCollator {
+        constructor(
+            [in] IRuleBasedCollatorICU* wrapper);
+
+        constructor(
+            [in] String rules);
+
+        interface IRuleBasedCollator;
+        interface ICollator;
+        interface IComparator;
+        interface ICloneable;
+    }
+
+    class CStringCharacterIterator {
+        constructor(
+            [in] String value);
+
+        constructor(
+            [in] String value,
+            [in] Int32 location);
+
+        constructor(
+            [in] String value,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Int32 location);
+
+        interface IStringCharacterIterator;
+        interface ICharacterIterator;
+        interface ICloneable;
+    }
+
+    singleton class CCollatorHelper {
+        interface ICollatorHelper;
+    }
+
+
+    } // Text
+    } // Elastos
+
+}

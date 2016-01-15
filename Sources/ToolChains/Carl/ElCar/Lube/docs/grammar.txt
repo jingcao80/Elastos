@@ -1,0 +1,86 @@
+//==========================================================================
+// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+//==========================================================================
+
+Lube Template Script Grammar, Version 1.0, Revision 14
+
+Symbols of mealanguage in this text
+    |    : or
+    { }  : repeat 0-n times
+    { }+ : repeat 1-n times
+    [ ]  : optional item
+    < >  : nesessary item
+
+Used symbols in LUBE language
+    lparen  => (    rparen  => )    dot     => .
+
+G(LUBE) = { VN, VT, S, P };
+
+VN = {
+    LUBE,           INPUT,          STATEMENT,
+
+    OUTPUT,         TEMPLATE,       WITH,           IF,
+    FUNC,           MEMBER,         TEXT,           OBJECT,
+
+    CONDITION,      OBJCOND,        MEMCOND,        FUNCOND,
+};
+
+VT = {
+    // symbols
+    s_lparen,       s_rparen,       s_dot,
+
+    // keywords
+    k_input,        k_output,       k_template,
+
+    k_with,         k_all,          k_do,           k_end,
+    k_if,           k_else,         k_is,           k_and,
+    k_or,           k_not,          k_first,        k_last,
+    k_true,         k_false,
+
+    k_module,       k_class,        k_interface,    k_struct,
+    k_enum,         k_typedef,      k_parent,       k_aggregate,
+    k_aspect,       k_method,       k_parameter,    k_member,
+    k_library,      k_super,
+
+    k_name,         k_attrib,       k_version,      k_uuid,
+    k_uunm,         k_type,         k_clsid,        k_iid,
+    k_value,		k_dimention,
+
+    // others
+    ident,          string,         text,
+};
+
+S = LUBE;
+
+P = {
+    LUBE        -> INPUT { STATEMENT }
+    INPUT       -> k_input < k_module | k_class | k_interface >
+    STATEMENT   -> OUTPUT | TEMPLATE | WITH | IF | FUNC | MEMBER | TEXT
+
+    OUTPUT      -> k_output string { STATEMENT } k_end k_output
+
+    TEMPLATE    -> k_template string
+
+    WITH        -> k_with [ k_all | k_first | k_last ] OBJECT
+                   k_do { STATEMENT } k_end k_do
+
+    IF          -> k_if CONDITION { < k_and | k_or > CONDITION }
+                   { STATEMENT } [ k_else { STATEMENT } ] k_end k_if
+    CONDITION   -> OBJCOND | MEMCOND | FUNCOND
+    MEMCOND     -> MEMBER k_is [ k_not ] string
+    OBJCOND     -> OBJECT k_is [ k_not ] < k_first | k_last >
+    FUNCOND     -> FUNC k_is [ k_not ] < k_true | k_false >
+
+    FUNC        -> ident s_lparen [ MEMBER | OBJECT | string ] s_rparen
+
+    OBJECT      -> k_module | k_class | k_parent | k_interface | k_super |
+                   k_struct | k_enum | k_typedef | k_aggregate | k_aspect |
+                   k_method | k_parameter | k_member | k_library | k_const
+
+    MEMBER      -> [ OBJECT s_dot ] <
+                   k_type | k_name | k_attrib | k_version | k_uuid | k_uunm |
+                   k_clsid | k_iid | k_value  | k_dimention>
+
+    TEXT        -> text
+};
+

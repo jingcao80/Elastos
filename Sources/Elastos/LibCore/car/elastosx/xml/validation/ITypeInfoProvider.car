@@ -1,0 +1,151 @@
+
+module
+{
+    interface Org.W3c.Dom.ITypeInfo;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Validation {
+
+    interface ITypeInfoProvider {
+    /**
+     * <p>Returns the immutable {@link TypeInfo} object for the current element.</p>
+     *
+     * <p>
+     * The method may only be called by the startElement and endElement event of
+     * the {@link org.xml.sax.ContentHandler} that the application sets to the
+     * {@link ValidatorHandler}.</p>
+     *
+     * @throws IllegalStateException
+     *      If this method is called from other {@link org.xml.sax.ContentHandler}
+     *      methods.
+     * @return
+     *      An immutable {@link TypeInfo} object that represents the
+     *      type of the current element.
+     *      Note that the caller can keep references to the obtained
+     *      {@link TypeInfo} longer than the callback scope.
+     *
+     *      Otherwise, this method returns
+     *      null if the validator is unable to
+     *      determine the type of the current element for some reason
+     *      (for example, if the validator is recovering from
+     *      an earlier error.)
+     *
+     */
+        GetElementTypeInfo(
+            [out] ITypeInfo** info);
+
+    /**
+     * Returns the immutable {@link TypeInfo} object for the specified
+     * attribute of the current element.
+     *
+     * <p>
+     * The method may only be called by the startElement event of
+     * the {@link org.xml.sax.ContentHandler} that the application sets to the
+     * {@link ValidatorHandler}.
+     *
+     * @param index
+     *      The index of the attribute. The same index for
+     *      the {@link org.xml.sax.Attributes} object passed to the
+     *      <tt>startElement</tt> callback.
+     *
+     * @throws IndexOutOfBoundsException
+     *      If the index is invalid.
+     * @throws IllegalStateException
+     *      If this method is called from other {@link org.xml.sax.ContentHandler}
+     *      methods.
+     *
+     * @return
+     *      An immutable {@link TypeInfo} object that represents the
+     *      type of the specified attribute.
+     *      Note that the caller can keep references to the obtained
+     *      {@link TypeInfo} longer than the callback scope.
+     *
+     *      Otherwise, this method returns
+     *      null if the validator is unable to
+     *      determine the type.
+     */
+        GetAttributeTypeInfo(
+            [in] Int32 index,
+            [out] ITypeInfo** info);
+
+    /**
+     * Returns <tt>true</tt> if the specified attribute is determined
+     * to be ID.
+     *
+     * <p>
+     * Exactly how an attribute is "determined to be ID" is up to the
+     * schema language. In case of W3C XML Schema, this means
+     * that the actual type of the attribute is the built-in ID type
+     * or its derived type.
+     *
+     * <p>
+     * A {@link javax.xml.parsers.DocumentBuilder} uses this information
+     * to properly implement {@link org.w3c.dom.Attr#isId()}.
+     *
+     * <p>
+     * The method may only be called by the startElement event of
+     * the {@link org.xml.sax.ContentHandler} that the application sets to the
+     * {@link ValidatorHandler}.
+     *
+     * @param index
+     *      The index of the attribute. The same index for
+     *      the {@link org.xml.sax.Attributes} object passed to the
+     *      <tt>startElement</tt> callback.
+     *
+     * @throws IndexOutOfBoundsException
+     *      If the index is invalid.
+     * @throws IllegalStateException
+     *      If this method is called from other {@link org.xml.sax.ContentHandler}
+     *      methods.
+     *
+     * @return true
+     *      if the type of the specified attribute is ID.
+     */
+        IsIdAttribute(
+            [in] Int32 index,
+            [out] Boolean* state);
+
+    /**
+     * Returns <tt>false</tt> if the attribute was added by the validator.
+     *
+     * <p>
+     * This method provides information necessary for
+     * a {@link javax.xml.parsers.DocumentBuilder} to determine what
+     * the DOM tree should return from the {@link org.w3c.dom.Attr#getSpecified()} method.
+     *
+     * <p>
+     * The method may only be called by the startElement event of
+     * the {@link org.xml.sax.ContentHandler} that the application sets to the
+     * {@link ValidatorHandler}.
+     *
+     * <p>
+     * A general guideline for validators is to return true if
+     * the attribute was originally present in the pipeline, and
+     * false if it was added by the validator.
+     *
+     * @param index
+     *      The index of the attribute. The same index for
+     *      the {@link org.xml.sax.Attributes} object passed to the
+     *      <tt>startElement</tt> callback.
+     *
+     * @throws IndexOutOfBoundsException
+     *      If the index is invalid.
+     * @throws IllegalStateException
+     *      If this method is called from other {@link org.xml.sax.ContentHandler}
+     *      methods.
+     *
+     * @return
+     *      <tt>true</tt> if the attribute was present before the validator
+     *      processes input. <tt>false</tt> if the attribute was added
+     *      by the validator.
+     */
+        IsSpecified(
+            [in] Int32 index,
+            [out] Boolean* specified);
+    }
+
+    } // namespace Validation
+    } // namespace Xml
+    } // namespace Elastosx
+}

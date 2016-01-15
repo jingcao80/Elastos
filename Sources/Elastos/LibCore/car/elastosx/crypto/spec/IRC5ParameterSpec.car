@@ -1,0 +1,55 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The algorithm parameter specification for the <a
+     * href="http://www.ietf.org/rfc/rfc2040.txt">RC5</a> algorithm.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+     */
+    interface IRC5ParameterSpec {
+
+        /**
+         * Returns the version.
+         *
+         * @return the version.
+         */
+        GetVersion(
+            [out] Int32 * value);
+
+        /**
+         * Returns the round count.
+         *
+         * @return the round count.
+         */
+        GetRounds(
+            [out] Int32 * value);
+
+        /**
+         * Returns the word size (in bits).
+         *
+         * @return the word size (in bits).
+         */
+        GetWordSize(
+            [out] Int32 * value);
+
+        /**
+         * Returns a copy of the initialization vector.
+         *
+         * @return a copy of the initialization vector, or null if none specified.
+         */
+        GetIV(
+            [out, callee] ArrayOf<Byte> * iv);
+    }
+
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

@@ -1,0 +1,9 @@
+ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+DIRS += crt0
+else
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
+DIRS += crt0
+else
+DIRS += win32
+endif
+endif

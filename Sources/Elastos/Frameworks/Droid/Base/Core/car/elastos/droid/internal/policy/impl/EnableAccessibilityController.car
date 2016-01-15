@@ -1,0 +1,42 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Policy {
+    namespace Impl {
+
+    [local]
+    interface IEnableAccessibilityController {
+        const Int32 MESSAGE_SPEAK_WARNING = 1;
+        const Int32 MESSAGE_SPEAK_ENABLE_CANCELED = 2;
+        const Int32 MESSAGE_ENABLE_ACCESSIBILITY = 3;
+
+        OnDestroy();
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        OnTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+    }
+
+    interface IEnableAccessibilityControllerHelper {
+        CanEnableAccessibilityViaGesture(
+            [in] IContext* context,
+            [out] Boolean* result);
+    }
+
+
+    } // Impl
+    } // Policy
+    } // Internal
+    } // Droid
+    } // Elastos
+}

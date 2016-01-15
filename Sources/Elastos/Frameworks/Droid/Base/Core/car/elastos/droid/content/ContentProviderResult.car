@@ -1,0 +1,42 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Contains the result of the application of a ContentProviderOperation. It is
+     * guaranteed to have exactly one of uri or count set.
+     *
+     * @sa ContentProviderOperation
+     * @sa uri
+     * @sa count
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IContentProviderResult {
+        GetUri(
+            [out] IUri** uri);
+
+        GetCount(
+            [out] Int32* count);
+
+        SetUri(
+            [in] IUri* uri);
+
+        SetCount(
+            [in] Int32 count);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

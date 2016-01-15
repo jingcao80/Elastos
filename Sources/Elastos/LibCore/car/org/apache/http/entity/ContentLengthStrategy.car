@@ -1,0 +1,38 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpMessage;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Entity {
+
+    /**
+     * Represents a strategy to determine the content length based on the properties
+     * of an HTTP message.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 613298 $
+     *
+     * @since 4.0
+     */
+    interface IContentLengthStrategy {
+
+        const Int32 IDENTITY         = -1;
+        const Int32 CHUNKED          = -2;
+
+        DetermineLength(
+            [in] IHttpMessage* message,
+            [out] Int64* length);
+
+    }
+
+    } // namespace Entity
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

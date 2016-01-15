@@ -1,0 +1,56 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Security.Spec.IEllipticCurve;
+    interface Elastos.Security.Spec.IECPoint;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The parameter specification used with Elliptic Curve Cryptography (ECC).
+     */
+    /**
+     * @Involve
+     * interface IAlgorithmParameterSpec
+     */
+    interface IECParameterSpec {
+        /**
+         * Returns the {@code cofactor}.
+         *
+         * @return the {@code cofactor}.
+         */
+        GetCofactor(
+            [out] Int32* cofactor);
+
+        /**
+         * Returns the elliptic curve.
+         *
+         * @return the elliptic curve.
+         */
+        GetCurve(
+            [out] IEllipticCurve** curve);
+
+        /**
+         * Returns the generator (or base point).
+         *
+         * @return the generator (or base point).
+         */
+        GetGenerator(
+            [out] IECPoint** generator);
+
+        /**
+         * Returns the order of the generator.
+         *
+         * @return the order of the generator.
+         */
+        GetOrder(
+            [out] IBigInteger** order);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

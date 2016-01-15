@@ -1,0 +1,17 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * Legacy security code; do not use.
+     */
+    interface IPrivilegedAction {
+        Run(
+            [out] IInterface** result);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

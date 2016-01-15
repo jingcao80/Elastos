@@ -1,0 +1,114 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "_${fullname}.h"
+
+#ifndef __CAR_${fullname}_H__
+#define __CAR_${fullname}_H__
+
+${GenerateDependHeaderForClass(class)}
+$IF attrib is "singleton"
+#include <spinlock.h>
+$END IF
+
+${ClassNamespaceBegin(class)}
+class ${class.name};
+
+$IF class.type is not "sink"
+$  IF class.attrib is not "hasctor"
+CARAPI _${class.name}CreateObject(
+    /* [out] */ ${class.name} **newObj);
+$  ELSE
+$  WITH all constructors DO
+
+CARAPI _${class.name}CreateObject(
+$    WITH all parameters DO
+$       IF parameter is not last
+    /* [${attrib}] */ ${type} ${prefixingname(parameter)},
+$       END IF
+$    END DO ;; all parameters
+    /* [out] */ ${class.name} **newObj);
+$  END DO
+$  END IF
+$END IF
+
+class _${name}
+{
+public:
+$
+$;; TEMPLATE "nakedbasenew.lub"
+$
+$
+$IF type is not "generic" and attrib is not "private"
+$TEMPLATE "nakedclassnew.lub"
+$END IF
+$
+$IF attrib is not "hasctor"
+$  IF type is not "aspect"
+$   IF class.attrib is not "singleton"
+    static ECode NewByFriend(${name} **ppNewObj);
+
+    static ECode NewByFriend(REIID iid, PInterface* itfObj);
+$   ELSE
+    static ECode AcquireSingletonByFriend(${name} **ppNewObj);
+
+    static ECode AcquireSingletonByFriend(REIID iid, PInterface* itfObj);
+$   END IF ;; "singleton"
+$  END IF
+$ELSE ;; not "hasctor"
+$  IF type is not "generic" and type is not "aspect"
+$   WITH all interfaces DO
+$       IF attrib is "clsobj"
+$           WITH all methods DO
+$               IF class.attrib is not "singleton"
+
+    static ECode NewByFriend(
+$               ELSE
+
+    static ECode AcquireSingletonByFriend(
+$               END IF ;; "singleton"
+$               WITH all parameters DO
+$                   IF parameter is not last
+        /* [${attrib}] */ ${type} ${name},
+$                   ELSE
+        /* [out] */ ${class.name} **${name});
+$                   END IF
+$               END DO ;; all parameters
+$           END DO ;; all methods
+$
+$           WITH all methods DO
+$               IF class.attrib is not "singleton"
+
+    static ECode NewByFriend(
+$               ELSE
+
+    static ECode AcquireSingletonByFriend(
+$               END IF ;; "singleton"
+$               WITH all parameters DO
+$                   IF parameter is not last
+        /* [${attrib}] */ ${type} ${name},
+$                   ELSE
+        /* [in] */ REIID iid,
+        /* [out] */ PInterface* itfObj);
+$                   END IF
+$               END DO ;; all parameters
+$           END DO ;; all methods
+$       END IF ;; attrib is "clsobj"
+$    END DO ;; all interfaces
+$   END IF ;;
+$END IF ;;
+
+$IF attrib is "singleton"
+    CARAPI_(void) OnLastStrongRef(
+        /* [in] */ const void* id);
+
+    CARAPI_(SpinLock&) GetSelfSpinLock();
+$END IF ;;
+};
+
+${ClassNamespaceEnd(class)}
+#endif // __CAR_${fullname}_H__
+$
+$END OUTPUT

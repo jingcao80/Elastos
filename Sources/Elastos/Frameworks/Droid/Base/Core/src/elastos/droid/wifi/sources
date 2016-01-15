@@ -1,0 +1,74 @@
+TARGET_NAME= wifi
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += BatchedScanResult.cpp
+SOURCES += NetworkUpdateResult.cpp
+SOURCES += CWifiSsid.cpp
+SOURCES += CWifiSsidHelper.cpp
+SOURCES += CScanResult.cpp
+SOURCES += CScanResultHelper.cpp
+SOURCES += CScanResultInformationElement.cpp
+SOURCES += CRssiPacketCountInfo.cpp
+SOURCES += CSupplicantStateHelper.cpp
+#SOURCES += CStateChangeResult.cpp
+SOURCES += CSupplicantState.cpp
+SOURCES += CWpsInfo.cpp
+SOURCES += CWpsResult.cpp
+#SOURCES += CEnterpriseField.cpp
+SOURCES += CWifiConfigurationKeyMgmt.cpp
+SOURCES += CWifiConfigurationProtocol.cpp
+SOURCES += CWifiConfigurationAuthAlgorithm.cpp
+SOURCES += CWifiConfigurationPairwiseCipher.cpp
+SOURCES += CWifiConfigurationGroupCipher.cpp
+SOURCES += CWifiConfigurationStatus.cpp
+SOURCES += CWifiConfiguration.cpp
+SOURCES += CWifiConfigurationVisibility.cpp
+SOURCES += CWifiConfigurationHelper.cpp
+SOURCES += CWifiManager.cpp
+SOURCES += CWifiManagerHelper.cpp
+# TODO SOURCES += WifiNative.cpp
+SOURCES += CWifiInfo.cpp
+SOURCES += CWifiInfoHelper.cpp
+#SOURCES += WifiConfigStore.cpp
+#SOURCES += WifiMonitor.cpp
+#SOURCES += WifiApConfigStore.cpp
+#SOURCES += SupplicantStateHelper.cpp
+#SOURCES += SupplicantStateTracker.cpp
+#SOURCES += WifiStateTracker.cpp
+#SOURCES += WifiStateMachine.cpp
+#SOURCES += WifiWatchdogStateMachine.cpp
+
+SOURCES += BatchedScanResult.cpp
+SOURCES += CBatchedScanSettings.cpp
+SOURCES += CRttManager.cpp
+SOURCES += CRttManagerCapabilities.cpp
+SOURCES += CRttManagerParcelableRttParams.cpp
+SOURCES += CRttManagerParcelableRttResults.cpp
+SOURCES += CRttManagerRttParams.cpp
+SOURCES += CRttManagerRttResult.cpp
+SOURCES += CScanSettings.cpp
+SOURCES += CWifiActivityEnergyInfo.cpp
+SOURCES += CWifiChannel.cpp
+SOURCES += CWifiConnectionStatistics.cpp
+SOURCES += CWifiEnterpriseConfig.cpp
+SOURCES += CWifiEnterpriseConfigEap.cpp
+SOURCES += CWifiEnterpriseConfigPhase2.cpp
+SOURCES += CWifiLinkLayerStats.cpp
+SOURCES += CWifiNetworkConnectionStatistics.cpp
+SOURCES += CWifiScanner.cpp
+SOURCES += CWifiScannerBssidInfo.cpp
+SOURCES += CWifiScannerChannelSpec.cpp
+SOURCES += CWifiScannerHotlistSettings.cpp
+SOURCES += CWifiScannerOperationResult.cpp
+SOURCES += CWifiScannerParcelableScanResults.cpp
+SOURCES += CWifiScannerScanSettings.cpp
+SOURCES += CWifiScannerWifiChangeSettings.cpp
+
+ELASTOS_LIBS += p2p/p2p.lib

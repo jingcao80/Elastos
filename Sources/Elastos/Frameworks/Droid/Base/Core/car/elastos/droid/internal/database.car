@@ -1,0 +1,32 @@
+module
+{
+    merge("database/SortCursor.car");
+
+    interface Elastos.Droid.Database.IAbstractCursor;
+    interface Elastos.Droid.Database.ICrossProcessCursor;
+    interface Elastos.Droid.Database.ICursor;
+    using interface Elastos.IO.ICloseable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Database {
+
+    [deprecated]
+    class CSortCursor {
+        constructor(
+            [in] ArrayOf<ICursor*>* cursors,
+            [in] String sortcolumn);
+
+        interface ISortCursor;
+        interface IAbstractCursor;
+        interface ICrossProcessCursor;
+        interface ICursor;
+        interface ICloseable;
+    }
+
+    } // namespace Database
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

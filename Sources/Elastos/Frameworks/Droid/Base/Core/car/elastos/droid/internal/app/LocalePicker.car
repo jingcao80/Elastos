@@ -1,0 +1,79 @@
+module
+{
+    using interface Elastos.Utility.ILocale;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Widget.IArrayAdapter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    interface ILocaleSelectionListener {
+        // You can add any argument if you really need it...
+        OnLocaleSelected(
+            [in] ILocale* locale);
+    }
+
+    /**
+     * @Involve
+     * interface IComparable
+     */
+    interface ILocaleInfo {
+        GetLabel(
+            [out] String* label);
+
+        GetLocale(
+            [out] ILocale** locale);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Droid.App.IListFragment
+     */
+    [local]
+    interface ILocalePicker {
+        SetLocaleSelectionListener(
+            [in] ILocaleSelectionListener* listener);
+    }
+
+    [local]
+    interface ILocalePickerHelper {
+        GetAllAssetLocales(
+            [in] IContext* context,
+            [in] Boolean isInDeveloperMode,
+            [out] IList** result);
+
+        /**
+         * Constructs an Adapter object containing Locale information. Content is sorted by
+         * {@link LocaleInfo#label}.
+         */
+        ConstructAdapter(
+            [in] IContext* context,
+            [out] IArrayAdapter** result);
+
+        ConstructAdapter(
+            [in] IContext* context,
+            [in] Int32 layoutId,
+            [in] Int32 fieldId,
+            [out] IArrayAdapter** result);
+
+        /**
+         * Requests the system to update the system locale. Note that the system looks halted
+         * for a while during the Locale migration, so the caller need to take care of it.
+         */
+        UpdateLocale(
+            [in] ILocale* locale);
+    }
+
+    } // namespace App
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

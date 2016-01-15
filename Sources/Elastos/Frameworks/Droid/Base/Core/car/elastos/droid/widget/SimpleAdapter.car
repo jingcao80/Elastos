@@ -1,0 +1,163 @@
+
+module
+{
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Widget.IImageView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+
+    /**
+     * This class can be used by external clients of SimpleAdapter to bind
+     * values to views.
+     *
+     * You should use this class to bind values to views that are not
+     * directly supported by SimpleAdapter or to change the way binding
+     * occurs for views supported by SimpleAdapter.
+     *
+     * @see SimpleAdapter#setViewImage(ImageView, Int32)
+     * @see SimpleAdapter#setViewImage(ImageView, String)
+     * @see SimpleAdapter#setViewText(TextView, String)
+     */
+    [local]
+    interface ISimpleAdapterViewBinder {
+        /**
+         * Binds the specified data to the specified view.
+         *
+         * When binding is handled by this ViewBinder, this method must return true.
+         * If this method returns false, SimpleAdapter will attempts to handle
+         * the binding on its own.
+         *
+         * @param view the view to bind the data to
+         * @param data the data to bind to the view
+         * @param textRepresentation a safe String representation of the supplied data:
+         *        it is either the result of data.toString() or an empty String but it
+         *        is never null
+         *
+         * @return true if the data was bound to the view, false otherwise
+         */
+        SetViewValue(
+            [in] IView* view,
+            [in] IInterface* data,
+            [in] String textRepresentation,
+            [out] Boolean* result);
+    }
+
+    /**
+     * An easy adapter to map static data to views defined in an XML file. You can specify the data
+     * backing the list as an ArrayList of Maps. Each entry in the ArrayList corresponds to one row
+     * in the list. The Maps contain the data for each row. You also specify an XML file that
+     * defines the views used to display the row, and a mapping from keys in the Map to specific
+     * views.
+     *
+     * Binding data to views occurs in two phases. First, if a
+     * {@link android.widget.SimpleAdapter.ViewBinder} is available,
+     * {@link ViewBinder#setViewValue(android.view.View, Object, String)}
+     * is invoked. If the returned value is true, binding has occurred.
+     * If the returned value is false, the following views are then tried in order:
+     * <ul>
+     * <li> A view that implements Checkable (e.g. CheckBox).  The expected bind value is a boolean.
+     * <li> TextView.  The expected bind value is a string and {@link #setViewText(TextView, String)}
+     * is invoked.
+     * <li> ImageView. The expected bind value is a resource id or a string and
+     * {@link #setViewImage(ImageView, int)} or {@link #setViewImage(ImageView, String)} is invoked.
+     * </ul>
+     * If no appropriate binding can be found, an {@link IllegalStateException} is thrown.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IBaseAdapter
+     *
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     */
+    [local]
+    interface ISimpleAdapter {
+        /**
+         * <p>Sets the layout resource to create the drop down views.</p>
+         *
+         * @param resource the layout resource defining the drop down views
+         * @see #getDropDownView(Int32, android.view.View, android.view.ViewGroup)
+         */
+        SetDropDownViewResource(
+            [in] Int32 resource);
+
+        /**
+         * Returns the {@link ViewBinder} used to bind data to views.
+         *
+         * @return a ViewBinder or NULL if the binder does not exist
+         *
+         * @see #setViewBinder(android.widget.SimpleAdapter.ViewBinder)
+         */
+        GetViewBinder(
+            [out] ISimpleAdapterViewBinder** viewBinder);
+
+        /**
+         * Sets the binder used to bind data to views.
+         *
+         * @param viewBinder the binder used to bind data to views, can be NULL to
+         *        remove the existing binder
+         *
+         * @see #getViewBinder()
+         */
+        SetViewBinder(
+            [in] ISimpleAdapterViewBinder* viewBinder);
+
+        /**
+         * Called by bindView() to set the image for an ImageView but only if
+         * there is no existing ViewBinder or if the existing ViewBinder cannot
+         * handle binding to an ImageView.
+         *
+         * This method is called instead of {@link #setViewImage(ImageView, String)}
+         * if the supplied data is an Int32 or Integer.
+         *
+         * @param v ImageView to receive an image
+         * @param value the value retrieved from the data set
+         *
+         * @see #setViewImage(ImageView, String)
+         */
+        SetViewImage(
+            [in] IImageView* v,
+            [in] Int32 value);
+
+        /**
+         * Called by bindView() to set the image for an ImageView but only if
+         * there is no existing ViewBinder or if the existing ViewBinder cannot
+         * handle binding to an ImageView.
+         *
+         * By default, the value will be treated as an image resource. If the
+         * value cannot be used as an image resource, the value is used as an
+         * image Uri.
+         *
+         * This method is called instead of {@link #setViewImage(ImageView, Int32)}
+         * if the supplied data is not an Int32 or Integer.
+         *
+         * @param v ImageView to receive an image
+         * @param value the value retrieved from the data set
+         *
+         * @see #setViewImage(ImageView, Int32)
+         */
+        SetViewImage(
+            [in] IImageView* v,
+            [in] String value);
+
+        /**
+         * Called by bindView() to set the text for a TextView but only if
+         * there is no existing ViewBinder or if the existing ViewBinder cannot
+         * handle binding to an TextView.
+         *
+         * @param v TextView to receive text
+         * @param text the text to be set for the TextView
+         */
+        SetViewText(
+            [in] ITextView* v,
+            [in] String text);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,709 @@
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.Utility.IMap;
+    interface Elastos.Security.IPermission;
+    interface Elastos.Net.IURL;
+    interface Elastos.Net.IFileNameMap;
+    interface Elastos.Net.IContentHandlerFactory;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * A connection to a URL for reading or writing. For HTTP connections,
+     * see HttpURLConnection for documentation of HTTP-specific features.
+     *
+     * @sa HttpURLConnection
+     * <p>
+     * For example, to retrieve ftp://mirror.csclub.uwaterloo.ca/index.html:
+     * <pre>
+     *   URL url = new URL("ftp://mirror.csclub.uwaterloo.ca/index.html");
+     *   URLConnection urlConnection = url.openConnection();
+     *   InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+     *   try {
+     *   readStream(in);
+     *   finally {
+     *   in.close();
+     *   }
+     *  }
+     * </pre> </p>
+     * <p>
+     * URLConnection must be configured before it has connected to the remote
+     * resource. Instances of URLConnection are not reusable: you must use a
+     * different instance for each connection to a resource.</p>
+     *
+     * <strong>Timeouts</strong>
+     * <p>
+     * URLConnection supports two timeouts: a connect timeout and a read timeout. By default, operations never time out.</p>
+     *
+     * @sa connect timeout
+     * @sa read timeout
+     * <p>
+     * <strong>Built-in Protocols</strong>
+     * <p>
+     * <li><strong>File</strong></li>
+     * <p>
+     * Resources from the local file system can be loaded using file: URIs. File connections can only be used for input.
+     * <p>
+     * <li><strong>FTP</strong></li>
+     * <p>
+     * File Transfer Protocol (RFC 959) is supported, but with no public subclass. FTP connections can be used for input or output but not both.
+     * By default, FTP connections will be made using anonymous as the username and the empty string as the password. Specify alternate usernames and passwords in the URL: ftp://username:password@host/path.
+     *
+     * @sa RFC 959
+     * <p>
+     * <li><strong>HTTP and HTTPS</strong><li>
+     * <p>
+     * Refer to the HttpURLConnection and HttpsURLConnection subclasses.
+     *
+     * @sa HttpURLConnection
+     * @sa HttpsURLConnection
+     * <p>
+     * <li><strong>Jar</strong></li>
+     * <p>
+     * Refer to the JarURLConnection subclass.</p>
+     *
+     * @sa JarURLConnection
+     *
+     * <strong>Registering Additional Protocols</strong>
+     * <p>
+     * Use setURLStreamHandlerFactory(URLStreamHandlerFactory) to register handlers for other protocol types.
+     *
+     * @sa setURLStreamHandlerFactory(URLStreamHandlerFactory)
+     */
+    [deprecated]
+    interface IURLConnection {
+        /**
+         * Opens a connection to the resource. This method will <strong>not</strong>
+         * reconnect to a resource after the initial connection has been closed.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while connecting to the resource.
+         */
+        Connect();
+
+        /**
+         * Returns the option value which indicates whether user interaction is allowed
+         * on this {URLConnection}.
+         *
+         * @return the value of the option {allowUserInteraction}.
+         * @see #allowUserInteraction
+         */
+        GetAllowUserInteraction(
+            [out] Boolean* value);
+
+        /**
+         * Returns an object representing the content of the resource this {
+         * URLConnection} is connected to. First, it attempts to get the content
+         * type from the method {getContentType()} which looks at the response
+         * header field "Content-Type". If none is found it will guess the content
+         * type from the filename extension. If that fails the stream itself will be
+         * used to guess the content type.
+         *
+         * @return the content representing object.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs obtaining the content.
+         */
+        GetContent(
+            [out] IInterface** content);
+
+        /**
+         * Returns an object representing the content of the resource this {
+         * URLConnection} is connected to. First, it attempts to get the content
+         * type from the method {getContentType()} which looks at the response
+         * header field "Content-Type". If none is found it will guess the content
+         * type from the filename extension. If that fails the stream itself will be
+         * used to guess the content type. The content type must match with one of
+         * the list {types}.
+         *
+         * @param types
+         *            the list of acceptable content types.
+         * @return the content representing object or {null} if the content
+         *         type does not match with one of the specified types.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs obtaining the content.
+         */
+        GetContent(
+            [in] ArrayOf<InterfaceID> * types,
+            [out] IInterface** obj);
+
+        /**
+         * Returns the content encoding type specified by the response header field
+         * {content-encoding} or {null} if this field is not set.
+         *
+         * @return the value of the response header field {content-encoding}.
+         */
+        GetContentEncoding(
+            [out] String* encoding);
+
+        /**
+         * Returns the content length in bytes specified by the response header field
+         * {content-length} or {-1} if this field is not set.
+         *
+         * @return the value of the response header field {content-length}.
+         */
+        GetContentLength(
+            [out] Int32* length);
+
+        /**
+         * Returns the MIME-type of the content specified by the response header field
+         * {content-type} or {null} if type is unknown.
+         *
+         * @return the value of the response header field {content-type}.
+         */
+        GetContentType(
+            [out] String* type);
+
+        /**
+         * Returns the timestamp when this response has been sent as a date in
+         * milliseconds since January 1, 1970 GMT or {0} if this timestamp is
+         * unknown.
+         *
+         * @return the sending timestamp of the current response.
+         */
+        GetDate(
+            [out] Int64* date);
+
+        /**
+         * Returns the default setting whether this connection allows using caches.
+         *
+         * @return the value of the default setting {defaultUseCaches}.
+         * @see #useCaches
+         */
+        GetDefaultUseCaches(
+            [out] Boolean* value);
+
+        /**
+         * Returns the value of the option {doInput} which specifies whether this
+         * connection allows to receive data.
+         *
+         * @return {true} if this connection allows input, {false}
+         *         otherwise.
+         * @see #doInput
+         */
+        GetDoInput(
+            [out] Boolean* allowed);
+
+        /**
+         * Returns the value of the option {doOutput} which specifies whether
+         * this connection allows to send data.
+         *
+         * @return {true} if this connection allows output, {false}
+         *         otherwise.
+         * @see #doOutput
+         */
+        GetDoOutput(
+            [out] Boolean* allowed);
+
+        /**
+         * Returns the timestamp when this response will be expired in milliseconds
+         * since January 1, 1970 GMT or {0} if this timestamp is unknown.
+         *
+         * @return the value of the response header field {expires}.
+         */
+        GetExpiration(
+            [out] Int64* expiration);
+
+        /**
+         * Returns the header value at the field position {pos} or {null}
+         * if the header has fewer than {pos} fields. The base
+         * implementation of this method returns always {null}.
+         *
+         * <p>Some implementations (notably {HttpURLConnection}) include a mapping
+         * for the null key; in HTTP's case, this maps to the HTTP status line and is
+         * treated as being at position 0 when indexing into the header fields.
+         *
+         * @param pos
+         *            the field position of the response header.
+         * @return the value of the field at position {pos}.
+         */
+        GetHeaderField(
+            [in] Int32 pos,
+            [out] String* value);
+
+        /**
+         * Returns an unchangeable map of the response-header fields and values. The
+         * response-header field names are the key values of the map. The map values
+         * are lists of header field values associated with a particular key name.
+         *
+         * <p>Some implementations (notably {HttpURLConnection}) include a mapping
+         * for the null key; in HTTP's case, this maps to the HTTP status line and is
+         * treated as being at position 0 when indexing into the header fields.
+         *
+         * @return the response-header representing generic map.
+         * @since 1.4
+         */
+        GetHeaderFields(
+            [out] IMap** headerFields);
+
+         /**
+         * Returns an unchangeable map of general request properties used by this
+         * connection. The request property names are the key values of the map. The
+         * map values are lists of property values of the corresponding key name.
+         *
+         * @return the request-property representing generic map.
+         * @since 1.4
+         */
+        GetRequestProperties(
+            [out] IMap** properties);
+
+        /**
+         * Adds the given property to the request header. Existing properties with
+         * the same name will not be overwritten by this method.
+         *
+         * @param field
+         *            the request property field name to add.
+         * @param newValue
+         *            the value of the property which is to add.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if the connection has been already established.
+         * NullPointerException | if the property name is {null}.
+         * @since 1.4
+         */
+        AddRequestProperty(
+            [in] String field,
+            [in] String newValue);
+
+        /**
+         * Returns the value of the header field specified by {key} or {
+         * null} if there is no field with this name. The base implementation of
+         * this method returns always {null}.
+         *
+         * <p>Some implementations (notably {HttpURLConnection}) include a mapping
+         * for the null key; in HTTP's case, this maps to the HTTP status line and is
+         * treated as being at position 0 when indexing into the header fields.
+         *
+         * @param key
+         *            the name of the header field.
+         * @return the value of the header field.
+         */
+        GetHeaderField(
+            [in] String key,
+            [out] String* value);
+
+        /**
+         * Returns the specified header value as a date in milliseconds since January
+         * 1, 1970 GMT. Returns the {defaultValue} if no such header field
+         * could be found.
+         *
+         * @param field
+         *            the header field name whose value is needed.
+         * @param defaultValue
+         *            the default value if no field has been found.
+         * @return the value of the specified header field as a date in
+         *         milliseconds.
+         */
+        GetHeaderFieldDate(
+            [in] String field,
+            [in] Int64 defaultValue,
+            [out] Int64* value);
+
+        /**
+         * Returns the specified header value as a number. Returns the {
+         * defaultValue} if no such header field could be found or the value could
+         * not be parsed as an {Integer}.
+         *
+         * @param field
+         *            the header field name whose value is needed.
+         * @param defaultValue
+         *            the default value if no field has been found.
+         * @return the value of the specified header field as a number.
+         */
+        GetHeaderFieldInt32(
+            [in] String field,
+            [in] Int32 defaultValue,
+            [out] Int32* value);
+
+        /**
+         * Returns the name of the header field at the given position {posn} or
+         * {null} if there are fewer than {posn} fields. The base
+         * implementation of this method returns always {null}.
+         *
+         * <p>Some implementations (notably {HttpURLConnection}) include a mapping
+         * for the null key; in HTTP's case, this maps to the HTTP status line and is
+         * treated as being at position 0 when indexing into the header fields.
+         *
+         * @param posn
+         *            the position of the header field which has to be returned.
+         * @return the header field name at the given position.
+         */
+        GetHeaderFieldKey(
+            [in] Int32 posn,
+            [out] String* key);
+
+        /**
+         * Returns the point of time since when the data must be modified to be
+         * transmitted. Some protocols transmit data only if it has been modified
+         * more recently than a particular time.
+         *
+         * @return the time in milliseconds since January 1, 1970 GMT.
+         * @see #ifModifiedSince
+         */
+        GetIfModifiedSince(
+            [out] Int64* time);
+
+        /**
+         * Returns an {InputStream} for reading data from the resource pointed by
+         * this {URLConnection}. It throws an UnknownServiceException by
+         * default. This method must be overridden by its subclasses.
+         *
+         * @return the InputStream to read data from.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if no InputStream could be created.
+         */
+        GetInputStream(
+            [out] IInputStream** is);
+
+        /**
+         * Returns the value of the response header field {last-modified} or
+         * {0} if this value is not set.
+         *
+         * @return the value of the {last-modified} header field.
+         */
+        GetLastModified(
+            [out] Int64* value);
+
+        /**
+         * Returns an {OutputStream} for writing data to this {
+         * URLConnection}. It throws an {UnknownServiceException} by default.
+         * This method must be overridden by its subclasses.
+         *
+         * @return the OutputStream to write data.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if no OutputStream could be created.
+         */
+        GetOutputStream(
+            [out] IOutputStream** os);
+
+        /**
+         * Returns a {Permission} object representing all needed permissions to
+         * open this connection. The returned permission object depends on the state
+         * of the connection and will be {null} if no permissions are
+         * necessary. By default, this method returns {AllPermission}.
+         * Subclasses should overwrite this method to return an appropriate
+         * permission object.
+         *
+         * @return the permission object representing the needed permissions to open
+         *         this connection.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while creating the permission object.
+         */
+        GetPermission(
+            [out] IPermission** perm);
+
+        /**
+         * Returns the value of the request header property specified by {code field}
+         * or {null} if there is no field with this name. The base
+         * implementation of this method returns always {null}.
+         *
+         * @param field
+         *            the name of the request header property.
+         * @return the value of the property.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if the connection has been already established.
+         */
+        GetRequestProperty(
+            [in] String field,
+            [out] String* property);
+
+        /**
+         * Returns the URL represented by this {URLConnection}.
+         *
+         * @return the URL of this connection.
+         */
+        GetURL(
+            [out] IURL** url);
+
+        /**
+         * Returns the value of the flag which specifies whether this {
+         * URLConnection} allows to use caches.
+         *
+         * @return {true} if using caches is allowed, {false} otherwise.
+         */
+        GetUseCaches(
+            [out] Boolean* allowed);
+
+        /**
+         * Sets the flag indicating whether this connection allows user interaction
+         * or not. This method can only be called prior to the connection
+         * establishment.
+         *
+         * @param newValue
+         *            the value of the flag to be set.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if this method attempts to change the flag after the connection has been established.
+         * @see #allowUserInteraction
+         */
+        SetAllowUserInteraction(
+            [in] Boolean newValue);
+
+        /**
+         * Sets the default value for the flag indicating whether this connection
+         * allows to use caches. Existing {URLConnection}s are unaffected.
+         *
+         * @param newValue
+         *            the default value of the flag to be used for new connections.
+         * @see #defaultUseCaches
+         * @see #useCaches
+         */
+        SetDefaultUseCaches(
+            [in] Boolean newValue);
+
+        /**
+         * Sets the flag indicating whether this {URLConnection} allows input.
+         * It cannot be set after the connection is established.
+         *
+         * @param newValue
+         *            the new value for the flag to be set.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalAccessError | if this method attempts to change the value after the connection has been already established.
+         * @see #doInput
+         */
+        SetDoInput(
+            [in] Boolean newValue);
+
+        /**
+         * Sets the flag indicating whether this {URLConnection} allows
+         * output. It cannot be set after the connection is established.
+         *
+         * @param newValue
+         *            the new value for the flag to be set.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalAccessError | if this method attempts to change the value after the connection has been already established.
+         * @see #doOutput
+         */
+        SetDoOutput(
+            [in] Boolean newValue);
+
+        /**
+         * Sets the point of time since when the data must be modified to be
+         * transmitted. Some protocols transmit data only if it has been modified
+         * more recently than a particular time. The data will be transmitted
+         * regardless of its timestamp if this option is set to {0}.
+         *
+         * @param newValue
+         *            the time in milliseconds since January 1, 1970 GMT.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if this {URLConnection} has already been connected.
+         * @see #ifModifiedSince
+         */
+        SetIfModifiedSince(
+            [in] Int64 newValue);
+
+        /**
+         * Sets the value of the specified request header field. The value will only
+         * be used by the current {URLConnection} instance. This method can
+         * only be called before the connection is established.
+         *
+         * @param field
+         *            the request header field to be set.
+         * @param newValue
+         *            the new value of the specified property.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if the connection has been already established.
+         * NullPointerException | if the parameter {field} is {null}.
+         */
+        SetRequestProperty(
+            [in] String field,
+            [in] String newValue);
+
+         /**
+         * Sets the flag indicating whether this connection allows to use caches or
+         * not. This method can only be called prior to the connection
+         * establishment.
+         *
+         * @param newValue
+         *            the value of the flag to be set.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalStateException | if this method attempts to change the flag after the connection has been established.
+         * @see #useCaches
+         */
+        SetUseCaches(
+            [in] Boolean newValue);
+
+        /**
+         * Sets the timeout value in milliseconds for establishing the connection to
+         * the resource pointed by this {URLConnection} instance. A {
+         * SocketTimeoutException} is thrown if the connection could not be
+         * established in this time. Default is {0} which stands for an
+         * infinite timeout.
+         *
+         * @param timeout
+         *            the connecting timeout in milliseconds.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the parameter {timeout} is less than zero.
+         */
+        SetConnectTimeout(
+            [in] Int32 timeout);
+
+        /**
+         * Returns the configured connecting timeout.
+         *
+         * @return the connecting timeout value in milliseconds.
+         */
+        GetConnectTimeout(
+            [out] Int32* timeout);
+
+        /**
+         * Sets the timeout value in milliseconds for reading from the input stream
+         * of an established connection to the resource. A {
+         * SocketTimeoutException} is thrown if the connection could not be
+         * established in this time. Default is {0} which stands for an
+         * infinite timeout.
+         *
+         * @param timeout
+         *            the reading timeout in milliseconds.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the parameter {timeout} is less than zero.
+         */
+        SetReadTimeout(
+            [in] Int32 timeout);
+
+        /**
+         * Returns the configured timeout for reading from the input stream of an
+         * established connection to the resource.
+         *
+         * @return the reading timeout value in milliseconds.
+         */
+        GetReadTimeout(
+            [out] Int32* timeout);
+    }
+
+    interface IURLConnectionHelper {
+        /**
+         * Returns the default value of {allowUserInteraction}. Unused by Android.
+         */
+        GetDefaultAllowUserInteraction(
+            [out] Boolean* value);
+
+        /**
+         * Returns null.
+         *
+         * @deprecated Use getRequestProperty
+         *
+         * @sa #getRequestProperty
+         */
+        GetDefaultRequestProperty(
+            [in] String field,
+            [out] String* value);
+
+        /**
+         * Returns the table which is used by all {URLConnection} instances to
+         * determine the MIME-type according to a file extension.
+         *
+         * @return the file name map to determine the MIME-type.
+         */
+        GetFileNameMap(
+            [out] IFileNameMap** nameMap);
+
+        /**
+         * Determines the MIME-type of the given resource {url} by resolving
+         * the filename extension with the internal FileNameMap. Any fragment
+         * identifier is removed before processing.
+         *
+         * @param url
+         *            the URL with the filename to get the MIME type.
+         * @return the guessed content type or {null} if the type could not be
+         *         determined.
+         */
+        GuessContentTypeFromName(
+            [in] String url,
+            [out] String* type);
+
+        /**
+         * Determines the MIME-type of the resource represented by the input stream
+         * {is} by reading its first few characters.
+         *
+         * @param is
+         *            the resource representing input stream to determine the
+         *            content type.
+         * @return the guessed content type or {null} if the type could not be
+         *         determined.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while reading from the input stream.
+         */
+        GuessContentTypeFromStream(
+            [in] IInputStream* is,
+            [out] String* type);
+
+        /**
+         * Sets the internally used content handler factory. The content factory can
+         * only be set once during the lifetime of the application.
+         *
+         * @param contentFactory
+         *            the content factory to be set.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * Error | if the factory has been already set.
+         */
+        SetContentHandlerFactory(
+            [in] IContentHandlerFactory* contentFactory);
+
+        /**
+         * Sets the default value for {allowUserInteraction}. Unused by Android.
+         */
+        SetDefaultAllowUserInteraction(
+            [in] Boolean allows);
+
+        /**
+         * Does nothing.
+         *
+         * @deprecated Use URLConnection#setRequestProperty(String, String).
+         *
+         * @sa URLConnection#setRequestProperty(String, String)
+         */
+        SetDefaultRequestProperty(
+            [in] String field,
+            [in] String value);
+
+        /**
+         * Sets the internal map which is used by all {URLConnection}
+         * instances to determine the MIME-type according to a filename extension.
+         *
+         * @param map
+         *            the MIME table to be set.
+         */
+        SetFileNameMap(
+            [in] IFileNameMap* map);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

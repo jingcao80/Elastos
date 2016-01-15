@@ -1,0 +1,44 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+     * @Involve
+     * interface IPKIXParameters
+     */
+    interface IPKIXBuilderParameters {
+        /**
+         * Returns the maximum length of a certification path.
+         * <p>
+         * This is the maximum number of non-self-signed certificates in a
+         * certification path.
+         *
+         * @return the maximum length of a certification path, or {@code -1} if it
+         *         is unlimited.
+         */
+        GetMaxPathLength(
+            [out] Int32* length);
+
+        /**
+         * Set the maximum length of a certification path.
+         * <p>
+         * This is the maximum number of non-self-signed certificates in a
+         * certification path.
+         *
+         * @param maxPathLength
+         *            the maximum length of a certification path.
+         * @throws InvalidParameterException
+         *             if {@code maxPathLength} is less than {@code -1}.
+         */
+        SetMaxPathLength(
+            [in] Int32 maxPathLength);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

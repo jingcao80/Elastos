@@ -1,0 +1,93 @@
+
+module
+{
+    using interface IMethodInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Utils {
+
+    [deprecated, local]
+    interface IDecoratorListener {
+        /**
+         * This method is called before the target method is invoked
+         * @param args arguments to target method
+         * @param m Method being called
+         */
+        OnBeforeInvocation(
+            [in] IMethodInfo* m,
+            [in] ArrayOf<IInterface*>* args);
+
+        /**
+         * This function is called after the target method is invoked
+         * if there were no uncaught exceptions
+         * @param args arguments to target method
+         * @param m Method being called
+         * @param result return value of target method
+         */
+        OnAfterInvocation(
+            [in] IMethodInfo* m,
+            [in] ArrayOf<IInterface*>* args,
+            [in] IInterface* result);
+
+        /**
+         * This method is called only if there was an exception thrown by the target method
+         * during its invocation.
+         *
+         * @param args arguments to target method
+         * @param m Method being called
+         * @param t Throwable that was thrown
+         * @return false to rethrow exception, true if the exception was handled
+         */
+        OnCatchException(
+            [in] IMethodInfo* m,
+            [in] ArrayOf<IInterface*>* args,
+            [in] ECode t,
+            [out] Boolean* result);
+
+        /**
+         * This is called after the target method is invoked, regardless of whether or not
+         * there were any exceptions.
+         * @param args arguments to target method
+         * @param m Method being called
+         */
+        OnFinally(
+            [in] IMethodInfo* m,
+            [in] ArrayOf<IInterface*>* args);
+    }
+
+    /**
+     * This is an implementation of the 'decorator' design pattern using Java's proxy mechanism.
+     *
+     * @see android.hardware.camera2.utils.Decorator#newInstance
+     *
+     * @hide
+     *
+     * @invoke
+     * IInterface InvocationHandler
+     */
+    [deprecated, local]
+    interface IDecorator {
+        Invoke(
+            [in] IInterface* proxy,
+            [in] IMethodInfo* m,
+            [in] ArrayOf<IInterface*>* args,
+            [out] IInterface** result);
+    }
+
+    [local]
+    interface IDecoratorHelper {
+        NewInstance(
+            [in] IInterface* obj,
+            [in] IDecoratorListener* listener,
+            [out] IInterface** result);
+    }
+
+    } // namespace Utils
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

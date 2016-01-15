@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Service.Fingerprint.IIFingerprintServiceReceiver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Fingerprint {
+
+    /**
+     * Communication channel from client to the fingerprint service.
+     * @hide
+     */
+    [oneway]
+    interface IIFingerprintService {
+        // Any errors resulting from this call will be returned to the listener
+        Enroll(
+            [in] IBinder* token,
+            [in] Int64 timeout,
+            [in] Int32 userId);
+
+        // Any errors resulting from this call will be returned to the listener
+        EnrollCancel(
+            [in] IBinder* token,
+            [in] Int32 userId);
+
+        // Any errors resulting from this call will be returned to the listener
+        Remove(
+            [in] IBinder* token,
+            [in] Int32 fingerprintId,
+            [in] Int32 userId);
+
+        // Start listening for fingerprint events.  This has the side effect of starting
+        // the hardware if not already started.
+        StartListening(
+            [in] IBinder* token,
+            [in] IIFingerprintServiceReceiver* receiver,
+            [in] Int32 userId);
+
+        // Stops listening for fingerprints
+        StopListening(
+            [in] IBinder* token,
+            [in] Int32 userId);
+    }
+
+    } // namespace Fingerprint
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

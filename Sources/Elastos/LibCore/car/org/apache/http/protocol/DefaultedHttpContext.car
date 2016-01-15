@@ -1,0 +1,36 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+    /**
+     * {@link HttpContext} implementation that delegates resolution of an attribute
+     * to the given default {@link HttpContext} instance if the attribute is not
+     * present in the local one. The state of the local context can be mutated,
+     * whereas the default context is treated as read-only.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 654882 $
+     */
+    /**
+     * @Involve
+     * interface IHttpContext;
+     */
+    interface IDefaultedHttpContext {
+
+        GetDefaults(
+            [out] IHttpContext** defaults);
+
+    }
+
+    } // namespace Protocol
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

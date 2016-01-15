@@ -1,0 +1,64 @@
+
+module
+{
+    interface Elastos.Droid.Media.IAudioGainConfig;
+    interface Elastos.Droid.Media.IAudioDevicePortConfig;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * The AudioDevicePort is a specialized type of AudioPort
+     * describing an input (e.g microphone) or output device (e.g speaker)
+     * of the system.
+     * An AudioDevicePort is an AudioPort controlled by the audio HAL, almost always a physical
+     * device at the boundary of the audio system.
+     * In addition to base audio port attributes, the device descriptor contains:
+     * - the device type (e.g AudioManager.DEVICE_OUT_SPEAKER)
+     * - the device address (e.g MAC adddress for AD2P sink).
+     * @see AudioPort
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Media.IAudioPort
+     */
+    [deprecated]
+    interface IAudioDevicePort {
+        /**
+         * Get the device type (e.g AudioManager.DEVICE_OUT_SPEAKER)
+         */
+        Type(
+            [out] Int32* result);
+
+        /**
+         * Get the device address. Address format varies with the device type.
+         * - USB devices ({@link AudioManager#DEVICE_OUT_USB_DEVICE},
+         * {@link AudioManager#DEVICE_IN_USB_DEVICE}) use an address composed of the ALSA card number
+         * and device number: "card=2;device=1"
+         * - Bluetooth devices ({@link AudioManager#DEVICE_OUT_BLUETOOTH_SCO},
+         * {@link AudioManager#DEVICE_OUT_BLUETOOTH_SCO}, {@link AudioManager#DEVICE_OUT_BLUETOOTH_A2DP})
+         * use the MAC address of the bluetooth device in the form "00:11:22:AA:BB:CC" as reported by
+         * {@link BluetoothDevice#getAddress()}.
+         * - Deivces that do not have an address will indicate an empty string "".
+         */
+        Address(
+            [out] String* result);
+
+        /**
+         * Build a specific configuration of this audio device port for use by methods
+         * like AudioManager.connectAudioPatch().
+         */
+        BuildConfig(
+            [in] Int32 samplingRate,
+            [in] Int32 channelMask,
+            [in] Int32 format,
+            [in] IAudioGainConfig* gain,
+            [out] IAudioDevicePortConfig** result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

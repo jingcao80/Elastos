@@ -1,0 +1,281 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * A class containing a GPS clock timestamp.
+     * It represents a measurement of the GPS receiver's clock.
+     *
+     * @hide
+     */
+    /**
+     * @Involve interface IParcelable
+     */
+    interface IGpsClock {
+        /**
+         * The type of the time stored is not available or it is unknown.
+         */
+        const Byte TYPE_UNKNOWN = 0;
+
+        /**
+         * The source of the time value reported by this class is the 'Local Hardware Clock'.
+         */
+        const Byte TYPE_LOCAL_HW_TIME = 1;
+
+        /**
+         * The source of the time value reported by this class is the 'GPS time' derived from
+         * satellites (epoch = Jan 6, 1980).
+         */
+        const Byte TYPE_GPS_TIME = 2;
+
+        /**
+         * Sets all contents to the values stored in the provided object.
+         */
+        Set(
+            [in] IGpsClock* clock);
+
+        /**
+         * Resets all the contents to its original state.
+         */
+        Reset();
+
+        /**
+         * Gets the type of time reported by {@link #getTimeInNs()}.
+         */
+        GetType(
+            [out] Byte* result);
+
+        /**
+         * Sets the type of time reported.
+         */
+        SetType(
+            [in] Byte value);
+
+        /**
+         * Returns true if {@link #getLeapSecond()} is available, false otherwise.
+         */
+        HasLeapSecond(
+            [out] Boolean* result);
+
+        /**
+         * Gets the leap second associated with the clock's time.
+         * The sign of the value is defined by the following equation:
+         *      utc_time_ns = time_ns + (full_bias_ns + bias_ns) - leap_second * 1,000,000,000
+         *
+         * The value is only available if {@link #hasLeapSecond()} is true.
+         */
+        GetLeapSecond(
+            [out] Int16* result);
+
+        /**
+         * Sets the leap second associated with the clock's time.
+         */
+        SetLeapSecond(
+            [in] Int16 leapSecond);
+
+        /**
+         * Resets the leap second associated with the clock's time.
+         */
+        ResetLeapSecond();
+
+        /**
+         * Gets the GPS receiver internal clock value in nanoseconds.
+         * This can be either the 'local hardware clock' value ({@link #TYPE_LOCAL_HW_TIME}), or the
+         * current GPS time derived inside GPS receiver ({@link #TYPE_GPS_TIME}).
+         * {@link #getType()} defines the time reported.
+         *
+         * For 'local hardware clock' this value is expected to be monotonically increasing during the
+         * reporting session. The real GPS time can be derived by compensating
+         * {@link #getFullBiasInNs()} (when it is available) from this value.
+         *
+         * For 'GPS time' this value is expected to be the best estimation of current GPS time that GPS
+         * receiver can achieve. {@link #getTimeUncertaintyInNs()} should be available when GPS time is
+         * specified.
+         *
+         * Sub-nanosecond accuracy can be provided by means of {@link #getBiasInNs()}.
+         * The reported time includes {@link #getTimeUncertaintyInNs()}.
+         */
+        GetTimeInNs(
+            [out] Int64* result);
+
+        /**
+         * Sets the GPS receiver internal clock in nanoseconds.
+         */
+        SetTimeInNs(
+            [in] Int64 timeInNs);
+
+        /**
+         * Returns true if {@link #getTimeUncertaintyInNs()} is available, false otherwise.
+         */
+        HasTimeUncertaintyInNs(
+            [out] Boolean* result);
+
+        /**
+         * Gets the clock's time Uncertainty (1-Sigma) in nanoseconds.
+         * The uncertainty is represented as an absolute (single sided) value.
+         *
+         * The value is only available if {@link #hasTimeUncertaintyInNs()} is true.
+         */
+        GetTimeUncertaintyInNs(
+            [out] Double* result);
+
+        /**
+         * Sets the clock's Time Uncertainty (1-Sigma) in nanoseconds.
+         */
+        SetTimeUncertaintyInNs(
+            [in] Double timeUncertaintyInNs);
+
+        /**
+         * Resets the clock's Time Uncertainty (1-Sigma) in nanoseconds.
+         */
+        ResetTimeUncertaintyInNs();
+
+        /**
+         * Returns true if {@link @getFullBiasInNs()} is available, false otherwise.
+         */
+        HasFullBiasInNs(
+            [out] Boolean* result);
+
+        /**
+         * Gets the difference between hardware clock ({@link #getTimeInNs()}) inside GPS receiver and
+         * the true GPS time since 0000Z, January 6, 1980, in nanoseconds.
+         *
+         * This value is available if {@link #TYPE_LOCAL_HW_TIME} is set, and GPS receiver has solved
+         * the clock for GPS time.
+         * {@link #getBiasUncertaintyInNs()} should be used for quality check.
+         *
+         * The sign of the value is defined by the following equation:
+         *      true time (GPS time) = time_ns + (full_bias_ns + bias_ns)
+         *
+         * The reported full bias includes {@link #getBiasUncertaintyInNs()}.
+         * The value is onl available if {@link #hasFullBiasInNs()} is true.
+         */
+        GetFullBiasInNs(
+            [out] Int64* result);
+
+        /**
+         * Sets the full bias in nanoseconds.
+         */
+        SetFullBiasInNs(
+            [in] Int64 value);
+
+        /**
+         * Resets the full bias in nanoseconds.
+         */
+        ResetFullBiasInNs();
+
+        /**
+         * Returns true if {@link #getBiasInNs()} is available, false otherwise.
+         */
+        HasBiasInNs(
+            [out] Boolean* result);
+
+        /**
+         * Gets the clock's sub-nanosecond bias.
+         * The reported bias includes {@link #getBiasUncertaintyInNs()}.
+         *
+         * The value is only available if {@link #hasBiasInNs()} is true.
+         */
+        GetBiasInNs(
+            [out] Double* result);
+
+        /**
+         * Sets the sub-nanosecond bias.
+         */
+        SetBiasInNs(
+            [in] Double biasInNs);
+
+        /**
+         * Resets the clock's Bias in nanoseconds.
+         */
+        ResetBiasInNs();
+
+        /**
+         * Returns true if {@link #getBiasUncertaintyInNs()} is available, false otherwise.
+         */
+        HasBiasUncertaintyInNs(
+            [out] Boolean* result);
+
+        /**
+         * Gets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
+         *
+         * The value is only available if {@link #hasBiasUncertaintyInNs()} is true.
+         */
+        GetBiasUncertaintyInNs(
+            [out] Double* result);
+
+        /**
+         * Sets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
+         */
+        SetBiasUncertaintyInNs(
+            [in] Double biasUncertaintyInNs);
+
+        /**
+         * Resets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
+         */
+        ResetBiasUncertaintyInNs();
+
+        /**
+         * Returns true if {@link #getDriftInNsPerSec()} is available, false otherwise.
+         */
+        HasDriftInNsPerSec(
+            [out] Boolean* result);
+
+        /**
+         * Gets the clock's Drift in nanoseconds per second.
+         * A positive value indicates that the frequency is higher than the nominal frequency.
+         * The reported drift includes {@link #getDriftUncertaintyInNsPerSec()}.
+         *
+         * The value is only available if {@link #hasDriftInNsPerSec()} is true.
+         */
+        GetDriftInNsPerSec(
+            [out] Double* result);
+
+        /**
+         * Sets the clock's Drift in nanoseconds per second.
+         */
+        SetDriftInNsPerSec(
+            [in] Double driftInNsPerSec);
+
+        /**
+         * Resets the clock's Drift in nanoseconds per second.
+         */
+        ResetDriftInNsPerSec();
+
+        /**
+         * Returns true if {@link #getDriftUncertaintyInNsPerSec()} is available, false otherwise.
+         */
+        HasDriftUncertaintyInNsPerSec(
+            [out] Boolean* result);
+
+        /**
+         * Gets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
+         *
+         * The value is only available if {@link #hasDriftUncertaintyInNsPerSec()} is true.
+         */
+        GetDriftUncertaintyInNsPerSec(
+            [out] Double* result);
+
+        /**
+         * Sets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
+         */
+        SetDriftUncertaintyInNsPerSec(
+            [in] Double driftUncertaintyInNsPerSec);
+
+        /**
+         * Resets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
+         */
+        ResetDriftUncertaintyInNsPerSec();
+
+        GetFlag(
+            [out] Int16* flag);
+    }
+
+    } // namespace Location
+    } // namespace Droid
+    } // namespace Elastos
+}
+

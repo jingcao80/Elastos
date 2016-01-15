@@ -1,0 +1,164 @@
+
+module
+{
+    interface Elastos.Security.IAlgorithmParameters;
+    interface Elastos.Security.IKey;
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.Spec.IPKCS8EncodedKeySpec;
+
+    namespace Elastosx {
+    namespace Crypto {
+
+    /**
+     * This class implements the {@code EncryptedPrivateKeyInfo} ASN.1 type as
+     * specified in <a href="http://www.ietf.org/rfc/rfc5208.txt">PKCS
+     * #8 - Private-Key Information Syntax Standard</a>.
+     * <p>
+     * The definition of ASN.1 is as follows:
+     * <dl>
+     * EncryptedPrivateKeyInfo ::= SEQUENCE {
+     * <dd>encryptionAlgorithm AlgorithmIdentifier,</dd>
+     * <dd>encryptedData OCTET STRING }</dd>
+     * </dl>
+     * <dl>
+     * AlgorithmIdentifier ::= SEQUENCE {
+     * <dd>algorithm OBJECT IDENTIFIER,</dd>
+     * <dd>parameters ANY DEFINED BY algorithm OPTIONAL }</dd>
+     * </dl>
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.IKey
+     */
+    interface IEncryptedPrivateKeyInfo {
+
+        /**
+         * Returns the name of the encryption algorithm.
+         *
+         * @return the name of the encryption algorithm.
+         */
+        GetAlgName(
+            [out] String * name);
+
+        /**
+         * Returns the parameters used by the encryption algorithm.
+         *
+         * @return the parameters used by the encryption algorithm.
+         */
+        GetAlgParameters(
+            [out] IAlgorithmParameters ** params);
+
+        /**
+         * Returns the encrypted data of this key.
+         *
+         * @return the encrypted data of this key, each time this method is called a
+         *         new array is returned.
+         */
+        GetEncryptedData(
+            [out, callee] ArrayOf<Byte> * data);
+
+        /**
+         * Returns the {@code PKCS8EncodedKeySpec} object extracted from the
+         * encrypted data.
+         * <p>
+         * The cipher must be initialize in either {@code Cipher.DECRYPT_MODE} or
+         * {@code Cipher.UNWRAP_MODE} with the same parameters and key used for
+         * encrypting this.
+         *
+         * @param cipher
+         *            the cipher initialized for decrypting the encrypted data.
+         * @return the extracted {@code PKCS8EncodedKeySpec}.
+         * @throws InvalidKeySpecException
+         *             if the specified cipher is not suited to decrypt the
+         *             encrypted data.
+         * @throws NullPointerException
+         *             if {@code cipher} is {@code null}.
+         */
+        GetKeySpec(
+            [in] ICipher * cipher,
+            [out] IPKCS8EncodedKeySpec ** spec);
+
+        /**
+         * Returns the {@code PKCS8EncodedKeySpec} object extracted from the
+         * encrypted data.
+         *
+         * @param decryptKey
+         *            the key to decrypt the encrypted data with.
+         * @return the extracted {@code PKCS8EncodedKeySpec}.
+         * @throws NoSuchAlgorithmException
+         *             if no usable cipher can be found to decrypt the encrypted
+         *             data.
+         * @throws InvalidKeyException
+         *             if {@code decryptKey} is not usable to decrypt the encrypted
+         *             data.
+         * @throws NullPointerException
+         *             if {@code decryptKey} is {@code null}.
+         */
+        GetKeySpec(
+            [in] IKey * decryptKey,
+            [out] IPKCS8EncodedKeySpec ** spec);
+
+        /**
+         * Returns the {@code PKCS8EncodedKeySpec} object extracted from the
+         * encrypted data.
+         *
+         * @param decryptKey
+         *            the key to decrypt the encrypted data with.
+         * @param providerName
+         *            the name of a provider whose cipher implementation should be
+         *            used.
+         * @return the extracted {@code PKCS8EncodedKeySpec}.
+         * @throws NoSuchProviderException
+         *             if no provider with {@code providerName} can be found.
+         * @throws NoSuchAlgorithmException
+         *             if no usable cipher can be found to decrypt the encrypted
+         *             data.
+         * @throws InvalidKeyException
+         *             if {@code decryptKey} is not usable to decrypt the encrypted
+         *             data.
+         * @throws NullPointerException
+         *             if {@code decryptKey} or {@code providerName} is {@code null}
+         *             .
+         */
+        GetKeySpec(
+            [in] IKey * decryptKey,
+            [in] String providerName,
+            [out] IPKCS8EncodedKeySpec ** spec);
+
+        /**
+         * Returns the {@code PKCS8EncodedKeySpec} object extracted from the
+         * encrypted data.
+         *
+         * @param decryptKey
+         *            the key to decrypt the encrypted data with.
+         * @param provider
+         *            the provider whose cipher implementation should be used.
+         * @return the extracted {@code PKCS8EncodedKeySpec}.
+         * @throws NoSuchAlgorithmException
+         *             if no usable cipher can be found to decrypt the encrypted
+         *             data.
+         * @throws InvalidKeyException
+         *             if {@code decryptKey} is not usable to decrypt the encrypted
+         *             data.
+         * @throws NullPointerException
+         *             if {@code decryptKey} or {@code provider} is {@code null}.
+         */
+        GetKeySpec(
+            [in] IKey * decryptKey,
+            [in] IProvider * provider,
+            [out] IPKCS8EncodedKeySpec ** spec);
+
+        /**
+         * Returns the ASN.1 encoded representation of this object.
+         *
+         * @return the ASN.1 encoded representation of this object.
+         * @throws IOException
+         *             if encoding this object fails.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte> * data);
+    }
+
+    } // namespace Crypto
+    } // namespace Elastosx
+}

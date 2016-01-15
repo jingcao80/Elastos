@@ -1,0 +1,41 @@
+TARGET_NAME= location
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc
+
+SOURCES = location.cpp
+SOURCES += Address.cpp
+SOURCES += Country.cpp
+SOURCES += CountryDetector.cpp
+SOURCES += Criteria.cpp
+SOURCES += FusedBatchOptions.cpp
+SOURCES += Geocoder.cpp
+SOURCES += CGeocoderHelper.cpp
+SOURCES += GeocoderParams.cpp
+SOURCES += Geofence.cpp
+SOURCES += CGeofenceHelper.cpp
+SOURCES += GpsClock.cpp
+SOURCES += GpsMeasurement.cpp
+SOURCES += GpsSatellite.cpp
+SOURCES += GpsStatus.cpp
+SOURCES += LocalListenerHelper.cpp
+
+SOURCES += Location.cpp
+SOURCES += CLocationHelper.cpp
+SOURCES += SettingInjectorService.cpp
+SOURCES += LocationProvider.cpp
+SOURCES += CLocationProviderHelper.cpp
+SOURCES += LocationRequest.cpp
+SOURCES += CLocationRequestHelper.cpp
+
+SOURCES += GpsMeasurementListenerTransport.cpp
+SOURCES += GpsMeasurementsEvent.cpp
+SOURCES += GpsNavigationMessageListenerTransport.cpp
+SOURCES += GpsNavigationMessage.cpp
+SOURCES += GpsNavigationMessageEvent.cpp
+SOURCES += LocationManager.cpp

@@ -1,0 +1,62 @@
+module
+{
+    interface Elastos.IO.IPrintWriter;
+
+    namespace Elastosx{
+    namespace Sql{
+    /**
+     * Interface that defines the methods which are common between DataSource,
+     * XADataSource and ConnectionPoolDataSource.
+     *
+     * @since 1.6
+     */
+    interface ICommonDataSource {
+        /**
+         * While attempting to connect to a database, this method get the maximum
+         * time in seconds that this data source can wait.
+         *
+         * @return An integer value to indicate the maximum time.
+         * @throws SQLException
+         *             An exception threw when a data base access error occurs.
+         */
+        GetLoginTimeout(
+            [out] Int32* loginTimeout);
+
+        /**
+         * Retrieves a log writer which is a character output stream to which all
+         * logging and tracing messages for this data source will be printed.
+         *
+         * @return The PrintWriter object for this DataSource.
+         * @throws SQLException
+         *             An exception threw when a data base access error occurs.
+         */
+         GetLogWriter(
+            [out] IPrintWriter** logWriter);
+
+        /**
+         * While attempting to connect to a database, this method set the maximum
+         * time in seconds that this data source can wait.
+         *
+         * @param seconds
+         *            An integer value to indicate the maximum time.
+         * @throws SQLException
+         *             An exception threw when a data base access error occurs.
+         */
+        SetLoginTimeout(
+            [in] Int32 seconds);
+
+        /**
+         * Set a log writer which is a character output stream to which all logging
+         * and tracing messages for this data source will be printed.
+         *
+         * @param out
+         *            The PrintWriter object for this DataSource.
+         * @throws SQLException
+         */
+        SetLogWriter(
+            [in] IPrintWriter* value);
+    }
+
+    } // namespace Sql
+    } // namespace Elastosx
+}

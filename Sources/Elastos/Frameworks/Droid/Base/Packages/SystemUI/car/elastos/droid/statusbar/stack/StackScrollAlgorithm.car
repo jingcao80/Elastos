@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.View.IViewGroup;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IExpandableView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Stack {
+
+    /**
+     * The Algorithm of the {@link com.android.systemui.statusbar.stack
+     * .NotificationStackScrollLayout} which can be queried for {@link com.android.systemui.statusbar
+     * .stack.StackScrollState}
+     */
+    [local]
+    interface IStackScrollAlgorithm {
+        const Float DIMMED_SCALE = 0.95;
+
+        GetBottomStackSlowDownLength(
+            [out] Int32* result);
+
+        ShouldScaleDimmed(
+            [out] Boolean* result);
+
+        GetStackScrollState(
+            [in] IAmbientState* ambientState,
+            [in] IStackScrollState* resultState);
+
+        SetLayoutHeight(
+            [in] Int32 layoutHeight);
+
+        SetTopPadding(
+            [in] Int32 topPadding);
+
+        /**
+         * Update whether the device is very small, i.e. Notifications can be in both the top and the
+         * bottom stack at the same time
+         *
+         * @param panelHeight The normal height of the panel when it's open
+         */
+        UpdateIsSmallScreen(
+            [in] Int32 panelHeight);
+
+        OnExpansionStarted(
+            [in] IStackScrollState* currentState);
+
+        OnExpansionStopped();
+
+        SetIsExpanded(
+            [in] Boolean isExpanded);
+
+        NotifyChildrenChanged(
+            [in] IViewGroup* hostView);
+
+        SetDimmed(
+            [in] Boolean dimmed);
+
+        OnReset(
+            [in] IExpandableView* view);
+    }
+
+    } // namespace Stack
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,139 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IFilterQueryProvider;
+
+    /**
+     * Adapter that exposes data from a {@link android.database.Cursor Cursor} to a
+     * {@link android.widget.ListView ListView} widget. The Cursor must include
+     * a column named "_id" or this class will not work.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IBaseAdapter
+     *
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     * interface Elastos.Droid.Widget.IFilterable
+     * interface Elastos.Droid.Widget.ICursorFilterClient
+     */
+
+    [local]
+    interface ICursorAdapter {
+        /**
+         * If set the adapter will call requery() on the cursor whenever a content change
+         * notification is delivered. Implies {@link #FLAG_REGISTER_CONTENT_OBSERVER}.
+         *
+         * @deprecated This option is discouraged, as it results in Cursor queries
+         * being performed on the application's UI thread and thus can cause poor
+         * responsiveness or even Application Not Responding errors.  As an alternative,
+         * use {@link android.app.LoaderManager} with a {@link android.content.CursorLoader}.
+         */
+        const Int32 FLAG_AUTO_REQUERY = 0x01;
+
+        /**
+         * If set the adapter will register a content observer on the cursor and will call
+         * {@link #onContentChanged()} when a notification comes in.  Be careful when
+         * using this flag: you will need to unset the current Cursor from the adapter
+         * to avoid leaks due to its registered observers.  This flag is not needed
+         * when using a CursorAdapter with a
+         * {@link android.content.CursorLoader}.
+         */
+        const Int32 FLAG_REGISTER_CONTENT_OBSERVER = 0x02;
+
+        /**
+         * Makes a new view to hold the data pointed to by cursor.
+         * @param context Interface to application's global information
+         * @param cursor The cursor from which to get the data. The cursor is already
+         * moved to the correct position.
+         * @param parent The parent to which the new view is attached to
+         * @return the newly created view.
+         */
+        NewView(
+            [in] IContext* ctx,
+            [in] ICursor* cursor,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        /**
+         * Makes a new drop down view to hold the data pointed to by cursor.
+         * @param context Interface to application's global information
+         * @param cursor The cursor from which to get the data. The cursor is already
+         * moved to the correct position.
+         * @param parent The parent to which the new view is attached to
+         * @return the newly created view.
+         */
+        NewDropDownView(
+            [in] IContext* ctx,
+            [in] ICursor* cursor,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        /**
+         * Bind an existing view to the data pointed to by cursor
+         * @param view Existing view, returned earlier by newView
+         * @param context Interface to application's global information
+         * @param cursor The cursor from which to get the data. The cursor is already
+         * moved to the correct position.
+         */
+        BindView(
+            [in] IView* view,
+            [in] IContext* ctx,
+            [in] ICursor* cursor);
+
+        /**
+         * Returns the query filter provider used for filtering. When the
+         * provider is NULL, no filtering occurs.
+         *
+         * @return the current filter query provider or NULL if it does not exist
+         *
+         * @see #setFilterQueryProvider(android.widget.FilterQueryProvider)
+         * @see #runQueryOnBackgroundThread(CharSequence)
+         */
+        GetFilterQueryProvider(
+            [out] IFilterQueryProvider** filterQueryProvider);
+
+        /**
+         * Sets the query filter provider used to filter the current Cursor.
+         * The provider's
+         * {@link android.widget.FilterQueryProvider#runQuery(CharSequence)}
+         * method is invoked when filtering is requested by a client of
+         * this adapter.
+         *
+         * @param filterQueryProvider the filter query provider or NULL to remove it
+         *
+         * @see #getFilterQueryProvider()
+         * @see #runQueryOnBackgroundThread(CharSequence)
+         */
+        SetFilterQueryProvider(
+            [in] IFilterQueryProvider* filterQueryProvider);
+
+        /**
+         * Swap in a new Cursor, returning the old Cursor.  Unlike
+         * {@link #changeCursor(Cursor)}, the returned old Cursor is <em>not</em>
+         * closed.
+         *
+         * @param newCursor The new cursor to be used.
+         * @return Returns the previously set Cursor, or null if there wasa not one.
+         * If the given new Cursor is the same instance is the previously set
+         * Cursor, null is also returned.
+         */
+        SwapCursor(
+            [in] ICursor* newCursor,
+            [out] ICursor** cursor);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

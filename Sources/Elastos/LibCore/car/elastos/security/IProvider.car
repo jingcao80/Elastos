@@ -1,0 +1,239 @@
+
+module
+{
+    interface Elastos.Utility.ISet;
+    interface Elastos.Utility.IList;
+    interface Elastos.Utility.IMap;
+    interface Elastos.Security.IProvider;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IProviderService {
+        /**
+         * Adds an alias.
+         *
+         * @param alias the alias to add
+         */
+        AddAlias(
+            [in] String alias);
+
+        /**
+         * Puts a new attribute mapping.
+         *
+         * @param name the attribute name.
+         * @param value the attribute value.
+         */
+        PutAttribute(
+            [in] String name,
+            [in] String value);
+
+        /**
+         * Returns the type of this {@code Service}. For example {@code
+         * KeyPairGenerator}.
+         *
+         * @return the type of this {@code Service}.
+         */
+        GetType(
+            [out] String* type);
+
+        /**
+         * Returns the name of the algorithm implemented by this {@code
+         * Service}.
+         *
+         * @return the name of the algorithm implemented by this {@code
+         *         Service}.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the {@code Provider} this {@code Service} belongs to.
+         *
+         * @return the {@code Provider} this {@code Service} belongs to.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Returns the name of the class implementing this {@code Service}.
+         *
+         * @return the name of the class implementing this {@code Service}.
+         */
+        GetClassName(
+            [out] String* className);
+
+        SetClassName(
+            [in] String className);
+
+        /**
+         * Returns the value of the attribute with the specified {@code name}.
+         *
+         * @param name
+         *            the name of the attribute.
+         * @return the value of the attribute, or {@code null} if no attribute
+         *         with the given name is set.
+         * @throws NullPointerException
+         *             if {@code name} is {@code null}.
+         */
+        GetAttribute(
+            [in] String name,
+            [out] String* attrib);
+
+        GetAliases(
+            [out] IList** aliases);
+
+        /**
+         * Creates and returns a new instance of the implementation described by
+         * this {@code Service}.
+         *
+         * @param constructorParameter
+         *            the parameter that is used by the constructor, or {@code
+         *            null} if the implementation does not declare a constructor
+         *            parameter.
+         * @return a new instance of the implementation described by this
+         *         {@code Service}.
+         * @throws NoSuchAlgorithmException
+         *             if the instance could not be constructed.
+         * @throws InvalidParameterException
+         *             if the implementation does not support the specified
+         *             {@code constructorParameter}.
+         */
+        NewInstance(
+            [in] IInterface* constructorParameter,
+            [out] IInterface** instance);
+
+        /**
+         * Indicates whether this {@code Service} supports the specified
+         * constructor parameter.
+         *
+         * @param parameter
+         *            the parameter to test.
+         * @return {@code true} if this {@code Service} supports the specified
+         *         constructor parameter, {@code false} otherwise.
+         */
+        SupportsParameter(
+            [in] IInterface* parameter,
+            [out] Boolean* isSupported);
+
+        GetAttributes(
+            [out] IMap** attributes);
+    }
+
+    /**
+      * @Involve
+      * interface Elastos.Utility.IProperties;
+      * interface IHashtable;
+      * interface IDictionary;
+      * interface IMap;
+      * interface ICloneable;
+      * interface ISerializable;
+      */
+    interface IProvider {
+        /**
+         * Returns the name of this provider.
+         *
+         * @return the name of this provider.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns the version number for the services being provided.
+         *
+         * @return the version number for the services being provided.
+         */
+        GetVersion(
+            [out] Double* versionNumber);
+
+        /**
+         * Returns a description of the services being provided.
+         *
+         * @return a description of the services being provided.
+         */
+        GetInfo(
+            [out] String* info);
+
+        /**
+         * Returns true if this provider implements the given algorithm. Caller
+         * must specify the cryptographic service and specify constraints via the
+         * attribute name and value.
+         *
+         * @param serv
+         *            Crypto service.
+         * @param alg
+         *            Algorithm or type.
+         * @param attribute
+         *            The attribute name or {@code null}.
+         * @param val
+         *            The attribute value.
+         * @return
+         */
+        ImplementsAlg(
+            [in] String serv,
+            [in] String alg,
+            [in] String attribute,
+            [in] String val,
+            [out] Boolean* result);
+
+        /**
+         *
+         * Set the provider preference order number.
+         *
+         * @param n
+         */
+        SetProviderNumber(
+            [in] Int32 n);
+
+        /**
+         *
+         * Get the provider preference order number.
+         *
+         * @return
+         */
+        GetProviderNumber(
+            [out] Int32* n);
+
+        /**
+         * Get the service of the specified type
+         *
+         */
+        GetService(
+            [in] String type,
+            [out] IProviderService** service);
+
+        /**
+         * Returns the service with the specified {@code type} implementing the
+         * specified {@code algorithm}, or {@code null} if no such implementation
+         * exists.
+         * <p>
+         * If two services match the requested type and algorithm, the one added
+         * with the {@link #putService(Service)} is returned (as opposed to the one
+         * added via {@link #put(Object, Object)}.
+         *
+         * @param type
+         *            the type of the service (for example {@code KeyPairGenerator})
+         * @param algorithm
+         *            the algorithm name (case insensitive)
+         * @return the requested service, or {@code null} if no such implementation
+         *         exists
+         */
+        GetService(
+            [in] String type,
+            [in] String algorithm,
+            [out] IProviderService** service);
+
+        /**
+         * Returns an unmodifiable {@code Set} of all services registered by this
+         * provider.
+         *
+         * @return an unmodifiable {@code Set} of all services registered by this
+         *         provider
+         */
+        GetServices(
+            [out] ISet** services);
+    }
+
+    } // Security
+    } // Elastos
+}

@@ -1,0 +1,107 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.View.InputMethod.IExtractedTextRequest;
+    interface Elastos.Droid.View.InputMethod.ICompletionInfo;
+    interface Elastos.Droid.View.InputMethod.ICorrectionInfo;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.Internal.View.IInputContextCallback;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+
+    /**
+     * Interface from an input method to the application, allowing it to perform
+     * edits on the current input field and other interactions with the application.
+     * {@hide}
+     */
+    interface IInputContext {
+        GetTextBeforeCursor(
+            [in] Int32 length,
+            [in] Int32 flags,
+            [in] Int32 seq,
+            [in] IInputContextCallback* icCallback);
+
+        GetTextAfterCursor(
+            [in] Int32 length,
+            [in] Int32 flags,
+            [in] Int32 seq,
+            [in] IInputContextCallback* icCallback);
+
+        GetCursorCapsMode(
+            [in] Int32 reqModes,
+            [in] Int32 seq,
+            [in] IInputContextCallback* icCallback);
+
+        GetExtractedText(
+            [in] IExtractedTextRequest* request,
+            [in] Int32 flags,
+            [in] Int32 seq,
+            [in] IInputContextCallback* icCallback);
+
+        DeleteSurroundingText(
+            [in] Int32 leftLength,
+            [in] Int32 rightLength);
+
+        SetComposingText(
+            [in] ICharSequence* text,
+            [in] Int32 newCursorPosition);
+
+        FinishComposingText();
+
+        CommitText(
+            [in] ICharSequence* text,
+            [in] Int32 newCursorPosition);
+
+        CommitCompletion(
+            [in] ICompletionInfo* completion);
+
+        CommitCorrection(
+            [in] ICorrectionInfo* correction);
+
+        SetSelection(
+            [in] Int32 start,
+            [in] Int32 end);
+
+        PerformEditorAction(
+            [in] Int32 actionCode);
+
+        PerformContextMenuAction(
+            [in] Int32 id);
+
+        BeginBatchEdit();
+
+        EndBatchEdit();
+
+        ReportFullscreenMode(
+            [in] Boolean enabled);
+
+        SendKeyEvent(
+            [in] IKeyEvent* event);
+
+        ClearMetaKeyStates(
+            [in] Int32 states);
+
+        PerformPrivateCommand(
+            [in] String action,
+            [in] IBundle* data);
+
+        SetComposingRegion(
+            [in] Int32 start,
+            [in] Int32 end);
+
+        GetSelectedText(
+            [in] Int32 flags,
+            [in] Int32 seq,
+            [in] IInputContextCallback* icCallback);
+    }
+
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

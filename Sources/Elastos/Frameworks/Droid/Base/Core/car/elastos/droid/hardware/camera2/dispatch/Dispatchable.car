@@ -1,0 +1,37 @@
+
+module
+{
+    using interface IMethodInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Dispatch {
+
+    /**
+     * Dynamically dispatch a method and its argument to some object.
+     *
+     * <p>This can be used to intercept method calls and do work around them, redirect work,
+     * or block calls entirely.</p>
+     */
+    [deprecated, local]
+    interface IDispatchable {
+        /**
+         * Dispatch the method and arguments to this object.
+         * @param method a method defined in class {@code T}
+         * @param args arguments corresponding to said {@code method}
+         * @return the object returned when invoking {@code method}
+         * @throws Throwable any exception that might have been raised while invoking the method
+         */
+        Dispatch(
+            [in] IMethodInfo* method,
+            [in] ArrayOf<IInterface*>* args);
+    }
+
+    } // namespace Dispatch
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

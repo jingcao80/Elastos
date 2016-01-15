@@ -1,0 +1,115 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Webkit.ICookieSyncManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    [local]
+    interface ICookieSyncManagerHelper {
+
+        /**
+         * Singleton access to a {@link CookieSyncManager}. An
+         * IllegalStateException will be thrown if
+         * {@link CookieSyncManager#createInstance(Context)} is not called before.
+         *
+         * @return CookieSyncManager
+         */
+        //synchronized
+        GetInstance(
+            [out] ICookieSyncManager** instance);
+
+        /**
+         * Create a singleton CookieSyncManager within a context
+         * @param context
+         * @return CookieSyncManager
+         */
+        //synchronized
+        CreateInstance(
+            [in] IContext* ctx,
+            [out] ICookieSyncManager** instance);
+    }
+
+    /**
+     * The CookieSyncManager is used to synchronize the browser cookie store
+     * between RAM and permanent storage. To get the best performance, browser cookies are
+     * saved in RAM. A separate thread saves the cookies between, driven by a timer.
+     * <p>
+     *
+     * To use the CookieSyncManager, the host application has to call the following
+     * when the application starts:
+     * <p>
+     *
+     * <pre class="prettyprint">CookieSyncManager.createInstance(context)</pre><p>
+     *
+     * To set up for sync, the host application has to call<p>
+     * <pre class="prettyprint">CookieSyncManager.getInstance().startSync()</pre><p>
+     *
+     * in Activity.onResume(), and call
+     * <p>
+     *
+     * <pre class="prettyprint">
+     * CookieSyncManager.getInstance().stopSync()
+     * </pre><p>
+     *
+     * in Activity.onPause().<p>
+     *
+     * To get instant sync instead of waiting for the timer to trigger, the host can
+     * call
+     * <p>
+     * <pre class="prettyprint">CookieSyncManager.getInstance().sync()</pre><p>
+     *
+     * The sync interval is 5 minutes, so you will want to force syncs
+     * manually anyway, for instance in {@link
+     * WebViewClient#onPageFinished}. Note that even sync() happens
+     * asynchronously, so don't do it just as your activity is shutting
+     * down.
+     *
+     * @deprecated The WebView now automatically syncs cookies as necessary.
+     *             You no longer need to create or use the CookieSyncManager.
+     *             To manually force a sync you can use the CookieManager
+     *             method {@link CookieManager#flush} which is a synchronous
+     *             replacement for {@link #sync}.
+     */
+    //@Deprecated
+    interface ICookieSyncManager {
+        /**
+         * sync() forces sync manager to sync now
+         * @deprecated Use {@link CookieManager#flush} instead.
+         */
+        //@Deprecated
+        Sync();
+
+        /**
+         * resetSync() resets sync manager's timer.
+         * @deprecated Calling resetSync is no longer necessary as the WebView automatically
+         *             syncs cookies.
+         */
+        //@Deprecated
+        ResetSync();
+
+        /**
+         * startSync() requests sync manager to start sync.
+         * @deprecated Calling startSync is no longer necessary as the WebView automatically
+         *             syncs cookies.
+         */
+        //@Deprecated
+        StartSync();
+
+        /**
+         * stopSync() requests sync manager to stop sync. remove any SYNC_MESSAGE in
+         * the queue to break the sync loop
+         * @deprecated Calling stopSync is no longer useful as the WebView
+         *             automatically syncs cookies.
+         */
+        //@Deprecated
+        StopSync();
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

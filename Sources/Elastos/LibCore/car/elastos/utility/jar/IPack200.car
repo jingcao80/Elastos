@@ -1,0 +1,276 @@
+
+module
+{
+    interface Elastos.Utility.IMap;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IFile;
+    interface Elastos.Utility.Jar.IJarFile;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Jar {
+
+    interface IPacker {
+        /**
+         * the format of a class attribute name.
+         */
+        const String CLASS_ATTRIBUTE_PFX = "pack.class.attribute.";
+
+        /**
+         * the format of a code attribute name.
+         */
+        const String CODE_ATTRIBUTE_PFX = "pack.code.attribute.";
+
+        /**
+         * the deflation hint to set in the output archive.
+         */
+        const String DEFLATE_HINT = "pack.deflate.hint";
+
+        /**
+         * the indicated amount of effort to use in compressing the archive.
+         */
+        const String EFFORT = "pack.effort";
+
+        /**
+         * a String representation for {@code error}.
+         */
+        const String ERROR = "error";
+
+        /**
+         * a String representation of {@code false}.
+         */
+        //cannot pass the elastos compiler if name FALSE,
+        //so here just replace with SFALSE, late to do...
+        const String SFALSE = "false";
+
+        /**
+         * the format of a field attribute name.
+         */
+        const String FIELD_ATTRIBUTE_PFX = "pack.field.attribute.";
+
+        /**
+         * a String representation for {@code keep}.
+         */
+        const String KEEP = "keep";
+
+        /**
+         * decide if all elements shall transmit in their original order.
+         */
+        const String KEEP_FILE_ORDER = "pack.keep.file.order";
+
+        /**
+         * a String representation for {@code latest}.
+         */
+        const String LATEST = "latest";
+
+        /**
+         * the format of a method attribute name.
+         */
+        const String METHOD_ATTRIBUTE_PFX = "pack.method.attribute.";
+
+        /**
+         * if it shall attempt to determine the latest modification time if this
+         * is set to {@code LATEST}.
+         */
+        const String MODIFICATION_TIME = "pack.modification.time";
+
+        /**
+         * a String representation of {@code pass}.
+         */
+        const String PASS = "pass";
+
+        /**
+         * the file that will not be compressed.
+         */
+        const String PASS_FILE_PFX = "pack.pass.file.";
+
+        /**
+         * packer progress as a percentage.
+         */
+        const String PROGRESS = "pack.progress";
+
+        /**
+         * The number of bytes of each archive segment.
+         */
+        const String SEGMENT_LIMIT = "pack.segment.limit";
+
+        /**
+         * a String representation of {@code strip}.
+         */
+        const String STRIP = "strip";
+
+        /**
+         * a String representation of {@code true}.
+         */
+        //cannot pass the elastos compiler if name TRUE,
+        //so here just replace with STRUE, late to do...
+        const String STRUE = "true";
+
+        /**
+         * the action to take if an unknown attribute is encountered.
+         */
+        const String UNKNOWN_ATTRIBUTE = "pack.unknown.attribute";
+
+         /**
+         * Returns a sorted map of the properties of this packer.
+         *
+         * @return the properties of the packer.
+         */
+        Properties(
+            [out] IMap** prop);
+
+        /**
+         * Pack the specified JAR file to the specified output stream.
+         *
+         * @param in
+         *            JAR file to be compressed.
+         * @param out
+         *            stream of compressed data.
+         * @throws IOException
+         *             if I/O exception occurs.
+         */
+        Pack(
+            [in] IJarFile* jarFile,
+            [in] IOutputStream* outputStream);
+
+        /**
+         * Pack the data from the specified jar input stream to the specified
+         * output stream.
+         *
+         * @param in
+         *            stream of uncompressed JAR data.
+         * @param out
+         *            stream of compressed data.
+         * @throws IOException
+         *             if I/O exception occurs.
+         */
+        Pack(
+            [in] IJarInputStream* jarInputStream,
+            [in] IOutputStream* outputStream);
+
+        /**
+         * add a listener for PropertyChange events
+         *
+         * @param listener
+         *            the listener to listen if PropertyChange events occurs
+        */
+        /*
+        AddPropertyChangeListener(
+            [in] IPropertyChangeListener* listener);
+        */
+        /**
+         * remove a listener
+         *
+         * @param listener
+         *            listener to remove
+        */
+        /*
+        RemovePropertyChangeListener(
+            [in] IPropertyChangeListener* listener);
+        */
+    }
+
+    interface IUnpacker {
+        /**
+         * The String indicating if the unpacker should ignore all transmitted
+         * values,can be replaced by either {@code true} or {@code false}.
+         */
+        const String DEFLATE_HINT = "unpack.deflate.hint";
+
+        /**
+         * a String representation of {@code false}.
+        */
+        //cannot pass the elastos compiler if name FALSE,
+        //so here just replace with SFALSE, late to do...
+        const String SFALSE = "false";
+
+        /**
+         * a String representation of {@code keep}.
+         */
+        const String KEEP = "keep";
+
+        /**
+         * the progress as a {@code percentage}.
+         */
+        const String PROGRESS = "unpack.progress";
+
+        /**
+         * a String representation of {@code true}.
+        */
+        //cannot pass the elastos compiler if name TRUE,
+        //so here just replace with STRUE, late to do...
+        const String STRUE = "true";
+
+        /**
+         * Returns a sorted map of the properties of this unpacker.
+         *
+         * @return the properties of unpacker.
+         */
+        Properties(
+            [out] IMap** prop);
+
+        /**
+         * Unpack the specified stream to the specified JAR output stream.
+         *
+         * @param in
+         *            stream to uncompressed.
+         * @param out
+         *            JAR output stream of uncompressed data.
+         * @throws IOException
+         *             if I/O exception occurs.
+         */
+        Unpack(
+            [in] IInputStream* inputStream,
+            [in] IJarOutputStream* outputStream);
+
+        /**
+         * Unpack the contents of the specified {@code File} to the specified
+         * JAR output stream.
+         *
+         * @param in
+         *            file to be uncompressed.
+         * @param out
+         *            JAR output stream of uncompressed data.
+         * @throws IOException
+         *             if I/O exception occurs.
+         */
+        Unpack(
+            [in] IFile* file,
+            [in] IJarOutputStream* jarOutputStream);
+
+        /**
+         * add a listener for {@code PropertyChange} events.
+         *
+         * @param listener
+         *            the listener to listen if {@code PropertyChange} events
+         *            occurs.
+        */
+        /*
+        AddPropertyChangeListener(
+            [in] IPropertyChangeListener* listener);
+        */
+        /**
+         * remove a listener.
+         *
+         * @param listener
+         *            listener to remove.
+        */
+        /*
+        RemovePropertyChangeListener(
+            [in] IPropertyChangeListener* listener);
+        */
+    }
+
+    interface IPack200 {
+        NewPacker(
+            [out] IPacker** packer);
+
+        NewUnpacker(
+            [out] IUnpacker** unpacker);
+    }
+
+    } //Jar
+    } //Utility
+    } //Elastos
+}

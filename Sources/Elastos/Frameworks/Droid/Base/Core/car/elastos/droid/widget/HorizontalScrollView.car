@@ -1,0 +1,169 @@
+
+module
+{
+    interface Elastos.Droid.View.IKeyEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Layout container for a view hierarchy that can be scrolled by the user,
+     * allowing it to be larger than the physical display.  A HorizontalScrollView
+     * is a {@link FrameLayout}, meaning you should place one child in it
+     * containing the entire contents to scroll; this child may itself be a layout
+     * manager with a complex hierarchy of objects.  A child that is often used
+     * is a {@link LinearLayout} in a horizontal orientation, presenting a horizontal
+     * array of top-level items that the user can scroll through.
+     *
+     * <p>The {@link TextView} class also
+     * takes care of its own scrolling, so does not require a HorizontalScrollView, but
+     * using the two together is possible to achieve the effect of a text view
+     * within a larger container.
+     *
+     * <p>HorizontalScrollView only supports horizontal scrolling. For vertical scrolling,
+     * use either {@link ScrollView} or {@link ListView}.
+     *
+     * @attr ref android.R.styleable#HorizontalScrollView_fillViewport
+     *
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IHorizontalScrollView {
+        /**
+         * Handle scrolling in response to an up or down arrow click.
+         *
+         * @param direction The direction corresponding to the arrow key that was
+         *                  pressed
+         * @return True if we consumed the event, false otherwise
+         */
+        ArrowScroll(
+            [in] Int32 direction,
+            [out] Boolean* consumed);
+
+        /**
+         * You can call this function yourself to have the scroll view perform
+         * scrolling from a key event, just as if the event had been dispatched to
+         * it by the view hierarchy.
+         *
+         * @param event The key event to execute.
+         * @return Return true if the event was handled, else false.
+         */
+        ExecuteKeyEvent(
+            [in] IKeyEvent* event,
+            [out] Boolean* handled);
+
+        /**
+         * Fling the scroll view
+         *
+         * @param velocityY The initial velocity in the Y direction. Positive
+         *                  numbers mean that the finger/cursor is moving down the screen,
+         *                  which means we want to scroll towards the top.
+         */
+        Fling(
+            [in] Int32 velocityY);
+
+        /**
+         * <p>Handles scrolling in response to a "home/end" shortcut press. This
+         * method will scroll the view to the left or right and give the focus
+         * to the leftmost/rightmost component in the new visible area. If no
+         * component is a good candidate for focus, this scrollview reclaims the
+         * focus.</p>
+         *
+         * @param direction the scroll direction: {@link android.view.View#FOCUS_LEFT}
+         *                  to go the left of the view or {@link android.view.View#FOCUS_RIGHT}
+         *                  to go the right
+         * @return true if the key event is consumed by this method, false otherwise
+         */
+        FullScroll(
+            [in] Int32 direction,
+            [out] Boolean* consumed);
+
+        /**
+         * @return The maximum amount this scroll view will scroll in response to
+         *   an arrow event.
+         */
+        GetMaxScrollAmount(
+            [out] Int32* maxScrollAmount);
+
+        /**
+         * Indicates whether this ScrollView's content is stretched to fill the viewport.
+         *
+         * @return True if the content fills the viewport, false otherwise.
+         */
+        IsFillViewport(
+            [out] Boolean* isFilled);
+
+        /**
+         * @return Whether arrow scrolling will animate its transition.
+         */
+        IsSmoothScrollingEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * <p>Handles scrolling in response to a "page up/down" shortcut press. This
+         * method will scroll the view by one page left or right and give the focus
+         * to the leftmost/rightmost component in the new visible area. If no
+         * component is a good candidate for focus, this scrollview reclaims the
+         * focus.</p>
+         *
+         * @param direction the scroll direction: {@link android.view.View#FOCUS_LEFT}
+         *                  to go one page left or {@link android.view.View#FOCUS_RIGHT}
+         *                  to go one page right
+         * @return true if the key event is consumed by this method, false otherwise
+         */
+        PageScroll(
+            [in] Int32 direction,
+            [out] Boolean* consumed);
+
+        /**
+         * Indicates this ScrollView whether it should stretch its content width to fill
+         * the viewport or not.
+         *
+         * @param fillViewport True to stretch the content's width to the viewport's
+         *        boundaries, false otherwise.
+         */
+        SetFillViewport(
+            [in] Boolean fillViewport);
+
+        /**
+         * Set whether arrow scrolling will animate its transition.
+         * @param smoothScrollingEnabled whether arrow scrolling will animate its transition
+         */
+        SetSmoothScrollingEnabled(
+            [in] Boolean smoothScrollingEnabled);
+
+        /**
+         * Like {@link View#scrollBy}, but scroll smoothly instead of immediately.
+         *
+         * @param dx the number of pixels to scroll by on the X axis
+         * @param dy the number of pixels to scroll by on the Y axis
+         */
+        SmoothScrollBy(
+            [in] Int32 dx,
+            [in] Int32 dy);
+
+        /**
+         * Like {@link #scrollTo}, but scroll smoothly instead of immediately.
+         *
+         * @param x the position where to scroll on the X axis
+         * @param y the position where to scroll on the Y axis
+         */
+        SmoothScrollTo(
+            [in] Int32 x,
+            [in] Int32 y);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

@@ -1,0 +1,251 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.Regex.IPattern;
+    using interface Elastos.Utility.Regex.IMatcher;
+
+    interface Elastos.Droid.Widget.ITextView;
+    interface Elastos.Droid.Text.ISpannable;
+    interface Elastos.Droid.Text.Utility.ILinkifyMatchFilter;
+    interface Elastos.Droid.Text.Utility.ILinkifyTransformFilter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Utility {
+
+    /**
+     *  Linkify take a piece of text and a regular expression and turns all of the
+     *  regex matches in the text into clickable links.  This is particularly
+     *  useful for matching things like email addresses, web urls, etc. and making
+     *  them actionable.
+     *
+     *  Alone with the pattern that is to be matched, a url scheme prefix is also
+     *  required.  Any pattern match that does not begin with the supplied scheme
+     *  will have the scheme prepended to the matched text when the clickable url
+     *  is created.  For instance, if you are matching web urls you would supply
+     *  the scheme <code>http://</code>.  If the pattern matches example.com, which
+     *  does not have a url scheme prefix, the supplied scheme will be prepended to
+     *  create <code>http://example.com</code> when the clickable url link is
+     *  created.
+     */
+    interface ILinkify{
+        /**
+         *  Bit field indicating that web URLs should be matched in methods that
+         *  take an options mask
+         */
+        const Int32 WEB_URLS = 0x01;
+
+        /**
+         *  Bit field indicating that email addresses should be matched in methods
+         *  that take an options mask
+         */
+        const Int32 EMAIL_ADDRESSES = 0x02;
+
+        /**
+         *  Bit field indicating that phone numbers should be matched in methods that
+         *  take an options mask
+         */
+        const Int32 PHONE_NUMBERS = 0x04;
+
+        /**
+         *  Bit field indicating that street addresses should be matched in methods that
+         *  take an options mask
+         */
+        const Int32 MAP_ADDRESSES = 0x08;
+
+        /**
+         *  Bit mask indicating that all available patterns should be matched in
+         *  methods that take an options mask
+         */
+        const Int32 ALL = 0x0F; //WEB_URLS | EMAIL_ADDRESSES | PHONE_NUMBERS | MAP_ADDRESSES;
+
+        /**
+         *  Filters out web URL matches that occur after an at-sign (@).  This is
+         *  to prevent turning the domain name in an email address into a web link.
+         */
+        GetStaticUrlMatchFilter(
+            [out] ILinkifyMatchFilter** ret);
+
+        /**
+         *  Filters out URL matches that don't have enough digits to be a
+         *  phone number.
+         */
+        GetStaticPhoneNumberMatchFilter(
+            [out] ILinkifyMatchFilter** ret);
+
+        /**
+         *  Transforms matched phone number text into something suitable
+         *  to be used in a tel: URL.  It does this by removing everything
+         *  but the digits and plus signs.  For instance:
+         *  &apos;+1 (919) 555-1212&apos;
+         *  becomes &apos;+19195551212&apos;
+         */
+        GetStaticPhoneNumberTransformFilter(
+            [out] ILinkifyTransformFilter** ret);
+
+        /**
+         *  Scans the text of the provided Spannable and turns all occurrences
+         *  of the link types indicated in the mask into clickable links.
+         *  If the mask is nonzero, it also removes any existing URLSpans
+         *  attached to the Spannable, to avoid problems if you call it
+         *  repeatedly on the same text.
+         */
+        AddLinks(
+             [in] ISpannable* text,
+             [in] Int32 mask,
+             [out] Boolean* ret);
+
+        /**
+         *  Scans the text of the provided TextView and turns all occurrences of
+         *  the link types indicated in the mask into clickable links.  If matches
+         *  are found the movement method for the TextView is set to
+         *  LinkMovementMethod.
+         */
+        AddLinks(
+            [in] ITextView* text,
+            [in] Int32 mask,
+            [out] Boolean* ret);
+
+        /**
+         *  Applies a regex to the text of a TextView turning the matches into
+         *  links.  If links are found then UrlSpans are applied to the link
+         *  text match areas, and the movement method for the text is changed
+         *  to LinkMovementMethod.
+         *
+         *  @param text         TextView whose text is to be marked-up with links
+         *  @param pattern      Regex pattern to be used for finding links
+         *  @param scheme       Url scheme string (eg <code>http://</code> to be
+         *                      prepended to the url of links that do not have
+         *                      a scheme specified in the link text
+         */
+        AddLinks(
+            [in] ITextView* text,
+            [in] IPattern* pattern,
+            [in] String scheme);
+
+        /**
+         *  Applies a regex to the text of a TextView turning the matches into
+         *  links.  If links are found then UrlSpans are applied to the link
+         *  text match areas, and the movement method for the text is changed
+         *  to LinkMovementMethod.
+         *
+         *  @param text         TextView whose text is to be marked-up with links
+         *  @param p            Regex pattern to be used for finding links
+         *  @param scheme       Url scheme string (eg <code>http://</code> to be
+         *                      prepended to the url of links that do not have
+         *                      a scheme specified in the link text
+         *  @param matchFilter  The filter that is used to allow the client code
+         *                      additional control over which pattern matches are
+         *                      to be converted into links.
+         */
+        AddLinks(
+            [in] ITextView* text,
+            [in] IPattern* p,
+            [in] String scheme,
+            [in] ILinkifyMatchFilter* matchFilter,
+            [in] ILinkifyTransformFilter* transformFilter);
+
+        /**
+         *  Applies a regex to a Spannable turning the matches into
+         *  links.
+         *
+         *  @param text         Spannable whose text is to be marked-up with
+         *                      links
+         *  @param pattern      Regex pattern to be used for finding links
+         *  @param scheme       Url scheme string (eg <code>http://</code> to be
+         *                      prepended to the url of links that do not have
+         *                      a scheme specified in the link text
+         */
+        AddLinks(
+            [in] ISpannable* text,
+            [in] IPattern* pattern,
+            [in] String scheme,
+            [out] Boolean* ret);
+
+        /**
+         *  Applies a regex to a Spannable turning the matches into
+         *  links.
+         *
+         *  @param s            Spannable whose text is to be marked-up with
+         *                      links
+         *  @param p            Regex pattern to be used for finding links
+         *  @param scheme       Url scheme string (eg <code>http://</code> to be
+         *                      prepended to the url of links that do not have
+         *                      a scheme specified in the link text
+         *  @param matchFilter  The filter that is used to allow the client code
+         *                      additional control over which pattern matches are
+         *                      to be converted into links.
+         */
+        AddLinks(
+            [in] ISpannable* s,
+            [in] IPattern* p,
+            [in] String scheme,
+            [in] ILinkifyMatchFilter* matchFilter,
+            [in] ILinkifyTransformFilter* transformFilter,
+            [out] Boolean* ret);
+    }
+
+    /**
+     *  MatchFilter enables client code to have more control over
+     *  what is allowed to match and become a link, and what is not.
+     *
+     *  For example:  when matching web urls you would like things like
+     *  http://www.example.com to match, as well as just example.com itelf.
+     *  However, you would not want to match against the domain in
+     *  support@example.com.  So, when matching against a web url pattern you
+     *  might also include a MatchFilter that disallows the match if it is
+     *  immediately preceded by an at-sign (@).
+     */
+    //public interface
+    interface ILinkifyMatchFilter {
+        /**
+         *  Examines the character span matched by the pattern and determines
+         *  if the match should be turned into an actionable link.
+         *
+         *  @param s        The body of text against which the pattern
+         *                  was matched
+         *  @param start    The index of the first character in s that was
+         *                  matched by the pattern - inclusive
+         *  @param end      The index of the last character in s that was
+         *                  matched - exclusive
+         *
+         *  @return         Whether this match should be turned into a link
+         */
+        AcceptMatch(
+            [in] ICharSequence* s,
+            [in] Int32 start,
+            [in] Int32 end,
+            [out] Boolean* ret);
+    }
+
+    /**
+     *  TransformFilter enables client code to have more control over
+     *  how matched patterns are represented as URLs.
+     *
+     *  For example:  when converting a phone number such as (919)  555-1212
+     *  into a tel: URL the parentheses, white space, and hyphen need to be
+     *  removed to produce tel:9195551212.
+     */
+    //public interface
+    interface ILinkifyTransformFilter {
+        /**
+         *  Examines the matched text and either passes it through or uses the
+         *  data in the Matcher state to produce a replacement.
+         *
+         *  @param match    The regex matcher state that found this URL text
+         *  @param url      The text that was matched
+         *
+         *  @return         The transformed form of the URL
+         */
+        TransformUrl(
+            [in] IMatcher* match,
+            [in] String url,
+            [out] String* ret);
+    }
+
+    }//namespace Utility
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

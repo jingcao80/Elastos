@@ -1,0 +1,113 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHeaderElement;
+    interface Org.Apache.Http.IProtocolVersion;
+    interface Org.Apache.Http.IRequestLine;
+    interface Org.Apache.Http.IStatusLine;
+    interface Org.Apache.Http.IHeader;
+    interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Message {
+
+    /**
+     * Interface for formatting elements of the HEAD section of an HTTP message.
+     * This is the complement to {@link LineParser}.
+     * There are individual methods for formatting a request line, a
+     * status line, or a header line. The formatting does <i>not</i> include the
+     * trailing line break sequence CR-LF.
+     * The formatted lines are returned in memory, the formatter does not depend
+     * on any specific IO mechanism.
+     * Instances of this interface are expected to be stateless and thread-safe.
+     *
+     * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
+     * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
+     * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     * @author and others
+     *
+     *
+     * <!-- empty lines above to avoid 'svn diff' context problems -->
+     * @version $Revision: 574185 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface ILineFormatter;
+     */
+    interface IBasicLineFormatter {
+
+        /**
+         * Obtains a buffer for formatting.
+         *
+         * @param buffer    a buffer already available, or <code>null</code>
+         *
+         * @return  the cleared argument buffer if there is one, or
+         *          a new empty buffer that can be used for formatting
+         */
+        InitBuffer(
+            [in] ICharArrayBuffer* buffer,
+            [out] ICharArrayBuffer** buf);
+
+        /**
+         * Guesses the length of a formatted protocol version.
+         * Needed to guess the length of a formatted request or status line.
+         *
+         * @param version   the protocol version to format, or <code>null</code>
+         *
+         * @return  the estimated length of the formatted protocol version,
+         *          in characters
+         */
+        EstimateProtocolVersionLen(
+            [in] IProtocolVersion* ver,
+            [out] Int32* len);
+
+        /**
+         * Actually formats a request line.
+         * Called from {@link #formatRequestLine}.
+         *
+         * @param buffer    the empty buffer into which to format,
+         *                  never <code>null</code>
+         * @param reqline   the request line to format, never <code>null</code>
+         */
+        DoFormatRequestLine(
+            [in] ICharArrayBuffer* buffer,
+            [in] IRequestLine* reqline);
+
+        /**
+         * Actually formats a status line.
+         * Called from {@link #formatStatusLine}.
+         *
+         * @param buffer    the empty buffer into which to format,
+         *                  never <code>null</code>
+         * @param statline  the status line to format, never <code>null</code>
+         */
+        DoFormatStatusLine(
+            [in] ICharArrayBuffer* buffer,
+            [in] IStatusLine* statline);
+
+        /**
+         * Actually formats a header.
+         * Called from {@link #formatHeader}.
+         *
+         * @param buffer    the empty buffer into which to format,
+         *                  never <code>null</code>
+         * @param header    the header to format, never <code>null</code>
+         */
+        DoFormatHeader(
+            [in] ICharArrayBuffer* buffer,
+            [in] IHeader* header);
+
+    }
+
+    } // namespace Message
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

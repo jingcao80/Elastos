@@ -1,0 +1,35 @@
+module
+{
+    interface Elastos.Droid.Sax.IElement;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Sax {
+
+    /**
+     * Contains element children. Using this class instead of HashMap results in
+     * measurably better performance.
+     */
+    interface IChildren {
+        /**
+         * Looks up a child by name and creates a new one if necessary.
+         */
+        GetOrCreate(
+            [in] IElement* parent,
+            [in] String uri,
+            [in] String localName,
+            [out] IElement** result);
+
+        /**
+         * Looks up a child by name.
+         */
+        Get(
+            [in] String uri,
+            [in] String localName,
+            [out] IElement** result);
+    }
+
+    } // namespace Sax
+    } // namespace Droid
+    } // namespace Elastos
+}

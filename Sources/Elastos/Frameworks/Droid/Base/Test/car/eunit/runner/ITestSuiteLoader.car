@@ -1,0 +1,19 @@
+
+module
+{
+    namespace Eunit {
+    namespace Runner {
+
+    [local]
+    interface ITestSuiteLoader {
+        Load(
+            [in] String suiteClassName,
+            [out] IClassInfo** clazz);
+        Reload(
+            [in] IClassInfo* aClass,
+            [out] IClassInfo** clazz);
+    }
+
+    } // namespace Runner
+    } // namespace Eunit
+}

@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InputMethodService {
+
+    interface ISoftInputWindowCallback {
+        OnBackPressed();
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.IDialog
+     */
+    interface ISoftInputWindow {
+        SetToken(
+            [in] IBinder* token);
+
+        /**
+         * Set which boundary of the screen the DockWindow sticks to.
+         *
+         * @param gravity The boundary of the screen to stick. See {#link
+         *        android.view.Gravity.LEFT}, {#link android.view.Gravity.TOP},
+         *        {#link android.view.Gravity.BOTTOM}, {#link
+         *        android.view.Gravity.RIGHT}.
+         */
+        SetGravity(
+            [in] Int32 gravity);
+    }
+
+    } // namespace InputMethodService
+    } // namespace Droid
+    } // namespace Elastos
+}

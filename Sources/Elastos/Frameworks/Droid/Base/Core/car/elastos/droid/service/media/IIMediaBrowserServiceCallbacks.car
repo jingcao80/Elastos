@@ -1,0 +1,43 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+    interface Elastos.Droid.Media.Session.IMediaSessionToken;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Media {
+
+    /**
+     * Media API allows clients to browse through hierarchy of a user’s media collection,
+     * playback a specific media entry and interact with the now playing queue.
+     * @hide
+     */
+    interface IIMediaBrowserServiceCallbacks {
+        /**
+         * Invoked when the connected has been established.
+         * @param root The root media id for browsing.
+         * @param session The {@link MediaSession.Token media session token} that can be used to control
+         *         the playback of the media app.
+         * @param extra Extras returned by the media service.
+         */
+        OnConnect(
+            [in] String root,
+            [in] IMediaSessionToken * session,
+            [in] IBundle * extras);
+
+        OnConnectFailed();
+
+        OnLoadChildren(
+            [in] String mediaId,
+            [in] IParceledListSlice * list);
+
+    }
+
+    } // namespace Media
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

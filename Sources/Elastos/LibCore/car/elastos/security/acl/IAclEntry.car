@@ -1,0 +1,123 @@
+
+module
+{
+    interface Elastos.Utility.IEnumeration;
+    interface Elastos.Security.IPrincipal;
+    interface Elastos.Security.Acl.IPermission;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Acl {
+
+    /**
+     * The <i>Access Control List Entry</i> interface definition.
+     * <p>
+     * An {@code AclEntry} is a list of the {@link Permission}s that are
+     *  granted (<i>positive</i>) or denied (<i>negative</i>) to a {@link Principal}.
+     */
+    interface IAclEntry {
+        /**
+         * Set the principal for this ACL entry.
+         * <p>
+         * The principal for an ACL entry can only be set once.
+         *
+         * @param user
+         *            the principal for this ACL entry.
+         * @return {@code true} on success, {@code false} if there is a principal already set for
+         *         this entry.
+         */
+        SetPrincipal(
+            [in] IPrincipal* user,
+            [out] Boolean* result);
+
+        /**
+         * Returns the principal of this ACL entry.
+         *
+         * @return the principal of this ACL entry, or null if none is set.
+         */
+        GetPrincipal(
+            [out] IPrincipal** principal);
+
+        /**
+         * Sets this ACL entry to be <i>negative</i>.
+         * <p>
+         * The permissions in this ACL entry will be denied to the principal
+         * associated with this entry.
+         * <p>
+         * Note: An ACL entry is <i>positive</i> by default and can only become
+         * <i>negative</i> by calling this method.
+         */
+        SetNegativePermissions();
+
+        /**
+         * Returns whether this ACL entry is <i>negative</i>.
+         *
+         * @return {@code true} if this ACL entry is negative, {@code false} if it's positive.
+         */
+        IsNegative(
+            [out] Boolean* result);
+
+        /**
+         * Adds the specified permission to this ACL entry.
+         *
+         * @param permission
+         *            the permission to be added.
+         * @return {@code true} if the specified permission is added, {@code false} if the
+         *         permission was already in this entry.
+         */
+        AddPermission(
+            [in] IPermission* permission,
+            [out] Boolean* result);
+
+        /**
+         * Removes the specified permission from this ACL entry.
+         *
+         * @param permission
+         *            the permission to be removed.
+         * @return {@code true} if the permission is removed, {@code false} if the permission was
+         *         not in this entry.
+         */
+        RemovePermission(
+            [in] IPermission* permission,
+            [out] Boolean* result);
+
+        /**
+         * Checks whether the specified permission is in this ACL entry.
+         *
+         * @param permission
+         *            the permission to check.
+         * @return {@code true} if the permission is in this entry, otherwise {@code false}.
+         */
+        CheckPermission(
+            [in] IPermission* permission,
+            [out] Boolean* result);
+
+        /**
+         * Returns the list of permissions of this ACL entry.
+         *
+         * @return the list of permissions of this ACL entry,
+         */
+        GetPermissions(
+            [out] IEnumeration** permissions);
+
+        /**
+         * Returns the string representation of this ACL entry.
+         *
+         * @return the string representation of this ACL entry.
+         */
+        ToString(
+            [out] String* str);
+
+        /**
+         * Clones this ACL entry instance.
+         *
+         * @return a copy of this entry.
+         */
+        Clone(
+            [out] IAclEntry** clone);
+    }
+
+    } // namespace Acl
+    } // namespace Security
+    } // namespace Elastos
+}

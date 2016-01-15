@@ -1,0 +1,32 @@
+
+module
+{
+
+    interface Org.Apache.Http.Cookie.ICookieSpec;
+    interface Org.Apache.Http.Params.IHttpParams;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Cookie {
+
+    /**
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 4.0
+     */
+    interface ICookieSpecFactory {
+
+        NewInstance(
+            [in] IHttpParams* params,
+            [out] ICookieSpec** spec);
+
+    }
+
+    } // namespace Cookie
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

@@ -1,0 +1,25 @@
+
+module
+{
+
+    namespace Libcore {
+    namespace Net {
+    namespace Url {
+
+    /**
+     * This subclass extends <code>URLConnection</code>.
+     * <p>
+     * This class is responsible for connecting, getting content and input stream of
+     * the file.
+     *
+     * @Involve
+     * interface Elastos.Net.IURLConnection;
+     */
+    interface IFtpURLConnection {
+    }
+
+    } // namespace Url
+    } // namespace Net
+    } // namespace Libcore
+
+}

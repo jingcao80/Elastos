@@ -1,0 +1,54 @@
+
+module
+{
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.Widget.IBaseAdapter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    /**
+     * Bridges between a ViewGroup and a BaseAdapter.
+     * <p>
+     * Usage: {@code ViewGroupAdapterBridge.link(viewGroup, adapter)}
+     * <br />
+     * After this call, the ViewGroup's children will be provided by the adapter.
+     *
+     * @Involve
+     * interface IDataSetObserver
+     */
+    interface IPseudoGridViewViewGroupAdapterBridge {}
+
+    [local]
+    interface IPseudoGridViewViewGroupAdapterBridgeHelper{
+        Link(
+            [in] IViewGroup* viewGroup,
+            [in] IBaseAdapter* adapter);
+    }
+
+    /**
+     * A view that arranges it's children in a grid with a fixed number of evenly spaced columns.
+     *
+     * {@see android.widget.GridView}
+     *
+     * @Involve
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface IView
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup
+     * interface IListenable
+     */
+    interface IPseudoGridView {}
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,368 @@
+
+module
+{
+    using interface Elastos.Security.Cert.IX509Certificate;
+    using interface Elastos.Security.IPrivateKey;
+    using interface Elastos.Utility.IHashMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Enterprise configuration details for Wi-Fi. Stores details about the EAP method
+     * and any associated credentials.
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiEnterpriseConfig {
+        /** @hide */
+        const String EMPTY_VALUE = "NULL";
+        /** @hide */
+        const String EAP_KEY = "eap";
+        /** @hide */
+        const String PHASE2_KEY = "phase2";
+        /** @hide */
+        const String IDENTITY_KEY = "identity";
+        /** @hide */
+        const String ANON_IDENTITY_KEY = "anonymous_identity";
+        /** @hide */
+        const String PASSWORD_KEY = "password";
+        /** @hide */
+        const String SUBJECT_MATCH_KEY = "subject_match";
+        /** @hide */
+        const String OPP_KEY_CACHING = "proactive_key_caching";
+        /**
+         * String representing the keystore OpenSSL ENGINE's ID.
+         * @hide
+         */
+        const String ENGINE_ID_KEYSTORE = "keystore";
+
+        /**
+         * String representing the keystore URI used for wpa_supplicant.
+         * @hide
+         */
+        const String KEYSTORE_URI = "keystore://";
+
+        /**
+         * String to set the engine value to when it should be enabled.
+         * @hide
+         */
+        const String ENGINE_ENABLE = "1";
+
+        /**
+         * String to set the engine value to when it should be disabled.
+         * @hide
+         */
+        const String ENGINE_DISABLE = "0";
+
+        /** @hide */
+        const String CA_CERT_PREFIX = "keystore://CACERT_";
+
+        /** @hide */
+        const String CLIENT_CERT_PREFIX = "keystore://USRCERT_";
+
+        /** @hide */
+        const String CLIENT_CERT_KEY = "client_cert";
+
+        /** @hide */
+        const String CA_CERT_KEY = "ca_cert";
+
+        /** @hide */
+        const String ENGINE_KEY = "engine";
+
+        /** @hide */
+        const String ENGINE_ID_KEY = "engine_id";
+
+        /** @hide */
+        const String PRIVATE_KEY_ID_KEY = "key_id";
+
+        /** Internal use only
+         * @hide
+         */
+        GetFields(
+            [out] IHashMap** result);
+
+        /**
+         * Set the EAP authentication method.
+         * @param  eapMethod is one {@link Eap#PEAP}, {@link Eap#TLS}, {@link Eap#TTLS} or
+         *                   {@link Eap#PWD}
+         * @throws IllegalArgumentException on an invalid eap method
+         */
+        SetEapMethod(
+            [in] Int32 eapMethod);
+
+        /**
+         * Get the eap method.
+         * @return eap method configured
+         */
+        GetEapMethod(
+            [out] Int32* result);
+
+        /**
+         * Set Phase 2 authentication method. Sets the inner authentication method to be used in
+         * phase 2 after setting up a secure channel
+         * @param phase2Method is the inner authentication method and can be one of {@link Phase2#NONE},
+         *                     {@link Phase2#PAP}, {@link Phase2#MSCHAP}, {@link Phase2#MSCHAPV2},
+         *                     {@link Phase2#GTC}
+         * @throws IllegalArgumentException on an invalid phase2 method
+         *
+         */
+        SetPhase2Method(
+            [in] Int32 phase2Method);
+
+        /**
+         * Get the phase 2 authentication method.
+         * @return a phase 2 method defined at {@link Phase2}
+         * */
+        GetPhase2Method(
+            [out] Int32* result);
+
+        /**
+         * Set the identity
+         * @param identity
+         */
+        SetIdentity(
+            [in] String identity);
+
+        /**
+         * Get the identity
+         * @return the identity
+         */
+        GetIdentity(
+            [out] String* result);
+
+        /**
+         * Set anonymous identity. This is used as the unencrypted identity with
+         * certain EAP types
+         * @param anonymousIdentity the anonymous identity
+         */
+        SetAnonymousIdentity(
+            [in] String anonymousIdentity);
+
+        /** Get the anonymous identity
+         * @return anonymous identity
+         */
+        GetAnonymousIdentity(
+            [out] String* result);
+
+        /**
+         * Set the password.
+         * @param password the password
+         */
+        SetPassword(
+            [in] String password);
+
+        /**
+         * Get the password.
+         *
+         * Returns locally set password value. For networks fetched from
+         * framework, returns "*".
+         */
+        GetPassword(
+            [out] String* result);
+
+        /**
+         * Set CA certificate alias.
+         *
+         * <p> See the {@link android.security.KeyChain} for details on installing or choosing
+         * a certificate
+         * </p>
+         * @param alias identifies the certificate
+         * @hide
+         */
+        SetCaCertificateAlias(
+            [in] String alias);
+
+        /**
+         * Get CA certificate alias
+         * @return alias to the CA certificate
+         * @hide
+         */
+        GetCaCertificateAlias(
+            [out] String* result);
+
+        /**
+         * Specify a X.509 certificate that identifies the server.
+         *
+         * <p>A default name is automatically assigned to the certificate and used
+         * with this configuration. The framework takes care of installing the
+         * certificate when the config is saved and removing the certificate when
+         * the config is removed.
+         *
+         * @param cert X.509 CA certificate
+         * @throws IllegalArgumentException if not a CA certificate
+         */
+        SetCaCertificate(
+            [in] IX509Certificate* cert);
+
+        /**
+         * Get CA certificate
+         * @return X.509 CA certificate
+         */
+        GetCaCertificate(
+            [out] IX509Certificate** result);
+
+        /**
+         * @hide
+         */
+        ResetCaCertificate();
+
+        /** Set Client certificate alias.
+         *
+         * <p> See the {@link android.security.KeyChain} for details on installing or choosing
+         * a certificate
+         * </p>
+         * @param alias identifies the certificate
+         * @hide
+         */
+        SetClientCertificateAlias(
+            [in] String alias);
+
+        /**
+         * Get client certificate alias
+         * @return alias to the client certificate
+         * @hide
+         */
+        GetClientCertificateAlias(
+            [out] String* result);
+
+        /**
+         * Specify a private key and client certificate for client authorization.
+         *
+         * <p>A default name is automatically assigned to the key entry and used
+         * with this configuration.  The framework takes care of installing the
+         * key entry when the config is saved and removing the key entry when
+         * the config is removed.
+         * @param privateKey
+         * @param clientCertificate
+         * @throws IllegalArgumentException for an invalid key or certificate.
+         */
+        SetClientKeyEntry(
+            [in] IPrivateKey* privateKey,
+            [in] IX509Certificate* clientCertificate);
+
+        /**
+         * Get client certificate
+         *
+         * @return X.509 client certificate
+         */
+        GetClientCertificate(
+            [out] IX509Certificate** result);
+
+        /**
+         * @hide
+         */
+        ResetClientKeyEntry();
+
+        /**
+         * @hide
+         */
+        GetClientPrivateKey(
+            [out] IPrivateKey** result);
+
+        /**
+         * Set subject match. This is the substring to be matched against the subject of the
+         * authentication server certificate.
+         * @param subjectMatch substring to be matched
+         */
+        SetSubjectMatch(
+            [in] String subjectMatch);
+
+        /**
+         * Get subject match
+         * @return the subject match string
+         */
+        GetSubjectMatch(
+            [out] String* result);
+
+        /** Returns the field value for the key.
+         * @param key into the hash
+         * @param prefix is the prefix that the value may have
+         * @return value
+         * @hide
+         */
+        GetFieldValue(
+            [in] String key,
+            [in] String prefix,
+            [out] String* result);
+
+        /** Set a value with an optional prefix at key
+         * @param key into the hash
+         * @param value to be set
+         * @param prefix an optional value to be prefixed to actual value
+         * @hide
+         */
+        SetFieldValue(
+            [in] String key,
+            [in] String value,
+            [in] String prefix);
+
+        /** Set a value with an optional prefix at key
+         * @param key into the hash
+         * @param value to be set
+         * @param prefix an optional value to be prefixed to actual value
+         * @hide
+         */
+        SetFieldValue(
+            [in] String key,
+            [in] String value);
+    }
+
+    /** The Extensible Authentication Protocol method used */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IWifiEnterpriseConfigEap {
+        /** No EAP method used. Represents an empty config */
+        const Int32 NONE = -1;
+        /** Protected EAP */
+        const Int32 PEAP = 0;
+        /** EAP-Transport Layer Security */
+        const Int32 TLS = 1;
+        /** EAP-Tunneled Transport Layer Security */
+        const Int32 TTLS = 2;
+        /** EAP-Password */
+        const Int32 PWD = 3;
+        /** EAP-Subscriber Identity Module */
+        const Int32 SIM = 4;
+        /** EAP-Authentication and Key Agreement */
+        const Int32 AKA = 5;
+
+        /** @hide */
+        GetStrings(
+            [out, callee] ArrayOf<String>* result);
+    }
+
+
+    /** The inner authentication method used */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IWifiEnterpriseConfigPhase2 {
+        const Int32 NONE = 0;
+
+        /** Password Authentication Protocol */
+        const Int32 PAP = 1;
+
+        /** Microsoft Challenge Handshake Authentication Protocol */
+        const Int32 MSCHAP = 2;
+
+        /** Microsoft Challenge Handshake Authentication Protocol v2 */
+        const Int32 MSCHAPV2 = 3;
+
+        /** Generic Token Card */
+        const Int32 GTC = 4;
+
+        GetStrings(
+            [out, callee] ArrayOf<String>* result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

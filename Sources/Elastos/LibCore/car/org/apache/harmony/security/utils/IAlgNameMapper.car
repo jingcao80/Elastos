@@ -1,0 +1,72 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Utils {
+
+    /**
+     * Provides Algorithm Name to OID and OID to Algorithm Name mappings. Some known
+     * mappings are hardcoded. Tries to obtain additional mappings from installed
+     * providers during initialization.
+     */
+    interface IAlgNameMapperHelper {
+        /**
+         * Returns OID for algName
+         *
+         * @param algName algorithm name to be mapped
+         * @return OID as String
+         */
+        Map2OID(
+            [in] String algName,
+            [out] String* oid);
+
+        /**
+         * Returns algName for OID
+         *
+         * @param oid OID to be mapped
+         * @return algorithm name
+         */
+        Map2AlgName(
+            [in] String oid,
+            [out] String* algName);
+
+        /**
+         * Returns Algorithm name for given algorithm alias
+         *
+         * @param algName - alias
+         * @return algorithm name
+         */
+        GetStandardName(
+            [in] String algName,
+            [out] String* standardName);
+
+        /**
+         * Checks if parameter represents OID
+         *
+         * @param alias alias to be checked
+         * @return 'true' if parameter represents OID
+         */
+        IsOID(
+            [in] String alias,
+            [out] Boolean* isOid);
+
+        /**
+         * Removes leading "OID." from oid String passed
+         *
+         * @param oid string that may contain leading "OID."
+         * @return string passed without leading "OID."
+         */
+        Normalize(
+            [in] String oid,
+            [out] String* normalString);
+    }
+
+    } // namespace Utils
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

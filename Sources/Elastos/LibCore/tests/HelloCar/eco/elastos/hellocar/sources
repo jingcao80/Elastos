@@ -1,0 +1,23 @@
+TARGET_NAME= Elastos.HelloCar
+TARGET_TYPE= eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)/../../inc
+
+SOURCES = Elastos.HelloCar.car
+SOURCES += Animal.cpp
+SOURCES += Cat.cpp
+SOURCES += Dog.cpp
+SOURCES += helloCar.cpp
+SOURCES += CAnimalHelper.cpp
+SOURCES += CMyThread.cpp
+#SOURCES += dllmain.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -llog -lcutils

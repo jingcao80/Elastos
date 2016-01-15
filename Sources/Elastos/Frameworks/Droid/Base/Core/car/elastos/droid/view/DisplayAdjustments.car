@@ -1,0 +1,36 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.ICompatibilityInfo;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+
+    interface IDisplayAdjustments {
+        const Boolean DEVELOPMENT_RESOURCES_DEPEND_ON_ACTIVITY_TOKEN = FALSE;
+
+        SetCompatibilityInfo(
+            [in] ICompatibilityInfo* compatInfo);
+
+        GetCompatibilityInfo(
+            [out] ICompatibilityInfo** compatInfo);
+
+        SetActivityToken(
+            [in] IBinder* token);
+
+        GetActivityToken(
+            [out] IBinder** token);
+    }
+
+    interface IDisplayAdjustmentsHelper {
+        GetDEFAULT_DISPLAY_ADJUSTMENTS(
+            [out] IDisplayAdjustments** da);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

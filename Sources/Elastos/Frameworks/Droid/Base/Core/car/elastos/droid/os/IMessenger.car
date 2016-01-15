@@ -1,0 +1,18 @@
+
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    interface IIMessenger {
+        Send(
+            [in] IMessage* message);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

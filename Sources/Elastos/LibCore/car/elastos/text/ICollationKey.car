@@ -1,0 +1,27 @@
+module
+{
+
+    namespace Elastos {
+    namespace Text {
+
+    /**
+      * @Involve
+      * interface Elastos.Core.IComparable;
+      */
+    interface ICollationKey {
+        /**
+         * Returns the string from which this collation key was created.
+         */
+        GetSourceString(
+            [out] String* sourceString);
+
+        /**
+         * Returns this collation key as a byte array.
+         */
+        ToByteArray(
+            [out, callee] ArrayOf<Byte>* array);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

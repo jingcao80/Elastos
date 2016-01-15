@@ -1,0 +1,67 @@
+
+module
+{
+    interface Elastos.Utility.IIterator;
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+      * @Involve
+      * interface ISerializable
+      */
+    interface ICertPath {
+        /**
+         * Returns the type of {@code Certificate} in this instance.
+         *
+         * @return the certificate type.
+         */
+        GetType(
+            [out] String* type);
+
+        /**
+         * Returns an immutable List of the {@code Certificate}s contained
+         * in the {@code CertPath}.
+         *
+         * @return a list of {@code Certificate}s in the {@code CertPath}.
+         */
+        GetCertificates(
+            [out] IList** certs);
+
+        /**
+         * Returns an encoding of the {@code CertPath} using the default encoding.
+         *
+         * @return default encoding of the {@code CertPath}.
+         * @throws CertificateEncodingException
+         *             if the encoding fails.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * Returns an encoding of this {@code CertPath} using the given
+         * {@code encoding} from {@link #getEncodings()}.
+         *
+         * @throws CertificateEncodingException
+         *             if the encoding fails.
+         */
+        GetEncoded(
+            [in] String encoding,
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /**
+         * Returns an {@code Iterator} over the supported encodings for a
+         * representation of the certificate path.
+         *
+         * @return {@code Iterator} over supported encodings (as {@code String}s).
+         */
+        GetEncodings(
+            [out] IIterator** encodings);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

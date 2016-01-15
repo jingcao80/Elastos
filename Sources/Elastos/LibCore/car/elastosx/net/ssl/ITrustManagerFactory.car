@@ -1,0 +1,147 @@
+
+module
+{
+    interface Elastos.Security.IKeyStore;
+    interface Elastos.Security.IProvider;
+    interface Elastosx.Net.Ssl.IManagerFactoryParameters;
+    interface Elastosx.Net.Ssl.ITrustManager;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The factory for {@code TrustManager}s based on {@code KeyStore} or provider
+     * specific implementation.
+     */
+    interface ITrustManagerFactory {
+        /**
+         * Returns the name of this {@code TrustManagerFactory} algorithm
+         * implementation.
+         *
+         * @return the name of this {@code TrustManagerFactory} algorithm
+         *         implementation.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns the provider for this {@code TrustManagerFactory} instance.
+         *
+         * @return the provider for this {@code TrustManagerFactory} instance.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Initializes this factory instance with the specified keystore as source
+         * of certificate authorities and trust material.
+         *
+         * @param ks
+         *            the keystore or {@code null}.
+         * @throws KeyStoreException
+         *             if the initialization fails.
+         */
+        Init(
+            [in] IKeyStore* ks);
+
+        /**
+         * Initializes this factory instance with the specified provider-specific
+         * parameters for a source of trust material.
+         *
+         * @param spec
+         *            the provider-specific parameters.
+         * @throws InvalidAlgorithmParameterException
+         *             if the initialization fails.
+         */
+        Init(
+            [in] IManagerFactoryParameters* spec);
+
+        /**
+         * Returns the list of {@code TrustManager}s with one entry for each type
+         * of trust material.
+         *
+         * @return the list of {@code TrustManager}s
+         */
+        GetTrustManagers(
+            [out, callee] ArrayOf<ITrustManager*>* managers);
+    }
+
+    interface ITrustManagerFactoryHelper {
+        /**
+         * Returns the default algorithm name for the {@code TrustManagerFactory}. The
+         * default algorithm name is specified by the security property
+         * {@code 'ssl.TrustManagerFactory.algorithm'}.
+         *
+         * @return the default algorithm name.
+         */
+        GetDefaultAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Creates a new {@code TrustManagerFactory} instance for the specified
+         * trust management algorithm.
+         *
+         * @param algorithm
+         *            the name of the requested trust management algorithm.
+         * @return a trust manager factory for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if no installed provider can provide the requested algorithm.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null} (instead of
+         *             NoSuchAlgorithmException as in 1.4 release)
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] ITrustManagerFactory** factory);
+
+        /**
+         * Creates a new {@code TrustManagerFactory} instance for the specified
+         * trust management algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the requested trust management algorithm name.
+         * @param provider
+         *            the name of the provider that provides the requested
+         *            algorithm.
+         * @return a trust manager factory for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified provider cannot provide the requested
+         *             algorithm.
+         * @throws NoSuchProviderException
+         *             if the specified provider does not exist.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null} (instead of
+         *             NoSuchAlgorithmException as in 1.4 release)
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] ITrustManagerFactory** factory);
+
+        /**
+         * Creates a new {@code TrustManagerFactory} instance for the specified
+         * trust management algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the requested key management algorithm name.
+         * @param provider
+         *            the provider that provides the requested algorithm.
+         * @return a key manager factory for the requested algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified provider cannot provide the requested
+         *             algorithm.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null} (instead of
+         *             NoSuchAlgorithmException as in 1.4 release)
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] ITrustManagerFactory** factory);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

@@ -1,0 +1,29 @@
+module{
+    namespace Elastosx{
+    namespace Sql{
+
+    /**
+     * Sent when specific events happen on a {@link PooledConnection} object. These
+     * events are a facility to report when an application closes the pooled
+     * connection or when an error occurs in the pooled connection.
+     */
+    /**
+     * @Involve
+     * interface IEventObject
+     * interface ISerializable
+     */
+    interface IConnectionEvent {
+        /**
+         * Gets the {@code SQLException} which holds information about the error
+         * which occurred in the {@code PooledConnection}.
+         *
+         * @return a {@code SQLException} containing information about the error.
+         *         May be {@code null} if no error has occurred.
+         */
+        GetSQLException(
+            [out] ECode* sqlException);
+    }
+
+    } // namespace Sql
+    } // namespace Elastosx
+}

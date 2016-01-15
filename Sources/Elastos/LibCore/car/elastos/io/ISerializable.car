@@ -1,0 +1,11 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    interface ISerializable {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

@@ -1,0 +1,545 @@
+
+module
+{
+    interface Elastos.Droid.Wifi.IWifiScannerBssidInfo;
+    interface Elastos.Droid.Wifi.IWifiScannerBssidListener;
+    interface Elastos.Droid.Wifi.IWifiScannerChannelSpec;
+    interface Elastos.Droid.Wifi.IWifiScannerScanListener;
+    interface Elastos.Droid.Wifi.IWifiScannerWifiChangeListener;
+    interface Elastos.Droid.Wifi.IWifiScannerWifiChangeSettings;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * This class provides a way to scan the Wifi universe around the device
+     * Get an instance of this class by calling
+     * {@link android.content.Context#getSystemService(String) Context.getSystemService(Context
+     * .WIFI_SCANNING_SERVICE)}.
+     * @hide
+     */
+    // @SystemApi
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IWifiScanner {
+        /** no band specified; use channel list instead */
+        const Int32 WIFI_BAND_UNSPECIFIED = 0;
+
+        /** 2.4 GHz band */
+        const Int32 WIFI_BAND_24_GHZ = 1;
+
+        /** 5 GHz band excluding DFS channels */
+        const Int32 WIFI_BAND_5_GHZ = 2;
+
+        /** DFS channels from 5 GHz band only */
+        const Int32 WIFI_BAND_5_GHZ_DFS_ONLY = 4;
+
+        /** 5 GHz band including DFS channels */
+        const Int32 WIFI_BAND_5_GHZ_WITH_DFS = 6;
+
+        /** Both 2.4 GHz band and 5 GHz band; no DFS channels */
+        const Int32 WIFI_BAND_BOTH = 3;
+
+        /** Both 2.4 GHz band and 5 GHz band; with DFS channels */
+        const Int32 WIFI_BAND_BOTH_WITH_DFS = 7;
+
+        /** Minimum supported scanning period */
+        const Int32 MIN_SCAN_PERIOD_MS = 1000;
+
+        /** Maximum supported scanning period */
+        const Int32 MAX_SCAN_PERIOD_MS = 1024000;
+
+        /** No Error */
+        const Int32 REASON_SUCCEEDED = 0;
+
+        /** Unknown error */
+        const Int32 REASON_UNSPECIFIED = -1;
+
+        /** Invalid listener */
+        const Int32 REASON_INVALID_LISTENER = -2;
+
+        /** Invalid request */
+        const Int32 REASON_INVALID_REQUEST = -3;
+
+        /** Invalid request */
+        const Int32 REASON_NOT_AUTHORIZED = -4;
+
+        /** @hide */
+        const String GET_AVAILABLE_CHANNELS_EXTRA = "Channels";
+
+        /** reports {@link ScanListener#onResults} when underlying buffers are full */
+        const Int32 REPORT_EVENT_AFTER_BUFFER_FULL = 0;
+
+        /** reports {@link ScanListener#onResults} after each scan */
+        const Int32 REPORT_EVENT_AFTER_EACH_SCAN = 1;
+
+        /** reports {@link ScanListener#onFullResult} whenever each beacon is discovered */
+        const Int32 REPORT_EVENT_FULL_SCAN_RESULT = 2;
+
+        /** @hide */
+        const Int32 CMD_SCAN = 0x00027000 + 0;
+
+        /** @hide */
+        const Int32 CMD_START_BACKGROUND_SCAN = 0x00027000 + 2;
+
+        /** @hide */
+        const Int32 CMD_STOP_BACKGROUND_SCAN = 0x00027000 + 3;
+
+        /** @hide */
+        const Int32 CMD_GET_SCAN_RESULTS = 0x00027000 + 4;
+
+        /** @hide */
+        const Int32 CMD_SCAN_RESULT = 0x00027000 + 5;
+
+        /** @hide */
+        const Int32 CMD_SET_HOTLIST = 0x00027000 + 6;
+
+        /** @hide */
+        const Int32 CMD_RESET_HOTLIST = 0x00027000 + 7;
+
+        /** @hide */
+        const Int32 CMD_AP_FOUND = 0x00027000 + 9;
+
+        /** @hide */
+        const Int32 CMD_AP_LOST = 0x00027000 + 10;
+
+        /** @hide */
+        const Int32 CMD_START_TRACKING_CHANGE = 0x00027000 + 11;
+
+        /** @hide */
+        const Int32 CMD_STOP_TRACKING_CHANGE = 0x00027000 + 12;
+
+        /** @hide */
+        const Int32 CMD_CONFIGURE_WIFI_CHANGE = 0x00027000 + 13;
+
+        /** @hide */
+        const Int32 CMD_WIFI_CHANGE_DETECTED = 0x00027000 + 15;
+
+        /** @hide */
+        const Int32 CMD_WIFI_CHANGES_STABILIZED = 0x00027000 + 16;
+
+        /** @hide */
+        const Int32 CMD_OP_SUCCEEDED = 0x00027000 + 17;
+
+        /** @hide */
+        const Int32 CMD_OP_FAILED = 0x00027000 + 18;
+
+        /** @hide */
+        const Int32 CMD_PERIOD_CHANGED = 0x00027000 + 19;
+
+        /** @hide */
+        const Int32 CMD_FULL_SCAN_RESULT = 0x00027000 + 20;
+
+        /**
+         * gives you all the possible channels; channel is specified as an
+         * integer with frequency in MHz i.e. channel 1 is 2412
+         * @hide
+         */
+        GetAvailableChannels(
+            [in] Int32 band,
+            [out] IList** result);
+
+        /** start wifi scan in background
+         * @param settings specifies various parameters for the scan; for more information look at
+         * {@link ScanSettings}
+         * @param listener specifies the object to report events to. This object is also treated as a
+         *                 key for this scan, and must also be specified to cancel the scan. Multiple
+         *                 scans should also not share this object.
+         */
+        StartBackgroundScan(
+            [in] IScanSettings* settings,
+            [in] IWifiScannerScanListener* listener);
+
+        /**
+         * stop an ongoing wifi scan
+         * @param listener specifies which scan to cancel; must be same object as passed in {@link
+         *  #startBackgroundScan}
+         */
+        StopBackgroundScan(
+            [in] IWifiScannerScanListener* listener);
+
+        /**
+         * retrieves currently available scan results
+         */
+        GetScanResults(
+            [out, callee] ArrayOf<IScanResult*>* result);
+
+        /** configure WifiChange detection
+         * @param rssiSampleSize number of samples used for RSSI averaging
+         * @param lostApSampleSize number of samples to confirm an access point's loss
+         * @param unchangedSampleSize number of samples to confirm there are no changes
+         * @param minApsBreachingThreshold minimum number of access points that need to be
+         *                                 out of range to detect WifiChange
+         * @param periodInMs indicates period of scan to find changes
+         * @param bssidInfos access points to watch
+         */
+        ConfigureWifiChange(
+            [in] Int32 rssiSampleSize,                          /* sample size for RSSI averaging */
+            [in] Int32 lostApSampleSize,                        /* samples to confirm AP's loss */
+            [in] Int32 unchangedSampleSize,                     /* samples to confirm no change */
+            [in] Int32 minApsBreachingThreshold,                /* change threshold to trigger event */
+            [in] Int32 periodInMs,                              /* period of scan */
+            [in] ArrayOf<IWifiScannerBssidInfo*>* bssidInfos    /* signal thresholds to crosss */
+        );
+
+        /**
+         * track changes in wifi environment
+         * @param listener object to report events on; this object must be unique and must also be
+         *                 provided on {@link #stopTrackingWifiChange}
+         */
+        StartTrackingWifiChange(
+            [in] IWifiScannerWifiChangeListener* listener);
+
+        /**
+         * stop tracking changes in wifi environment
+         * @param listener object that was provided to report events on {@link
+         * #stopTrackingWifiChange}
+         */
+        StopTrackingWifiChange(
+            [in] IWifiScannerWifiChangeListener* listener);
+
+        /** @hide */
+        // @SystemApi
+        ConfigureWifiChange(
+            [in] IWifiScannerWifiChangeSettings* settings);
+
+        /**
+         * set interesting access points to find
+         * @param bssidInfos access points of interest
+         * @param apLostThreshold number of scans needed to indicate that AP is lost
+         * @param listener object provided to report events on; this object must be unique and must
+         *                 also be provided on {@link #stopTrackingBssids}
+         */
+        StartTrackingBssids(
+            [in] ArrayOf<IWifiScannerBssidInfo*>* bssidInfos,
+            [in] Int32 apLostThreshold,
+            [in] IWifiScannerBssidListener* listener);
+
+        /**
+         * remove tracking of interesting access points
+         * @param listener same object provided in {@link #startTrackingBssids}
+         */
+        StopTrackingBssids(
+            [in] IWifiScannerBssidListener* listener);
+    }
+
+
+    /**
+     * Generic action callback invocation interface
+     *  @hide
+     */
+    // @SystemApi
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IWifiScannerActionListener {
+        OnSuccess();
+
+        OnFailure(
+            [in] Int32 reason,
+            [in] String description);
+    }
+
+
+    /**
+     * provides channel specification for scanning
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IWifiScannerChannelSpec {
+        /**
+         * channel frequency in MHz; for example channel 1 is specified as 2412
+         */
+        GetFrequency(
+            [out] Int32* result);
+
+        SetFrequency(
+            [in] Int32 frequency);
+
+        /**
+         * if true, scan this channel in passive fashion.
+         * This flag is ignored on DFS channel specification.
+         * @hide
+         */
+        GetPassive(
+            [out] Boolean* result);
+
+        SetPassive(
+            [in] Boolean passive);
+
+        /**
+         * how long to dwell on this channel
+         * @hide
+         */
+        GetDwellTimeMS(
+            [out] Int32* result);
+
+        SetDwellTimeMS(
+            [in] Int32 dwellTimeMS);
+    }
+
+    /**
+     * scan configuration parameters to be sent to {@link #startBackgroundScan}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IWifiScannerScanSettings {
+        /** one of the WIFI_BAND values */
+        GetBand(
+            [out] Int32* result);
+
+        SetBand(
+            [in] Int32 band);
+
+        /** list of channels; used when band is set to WIFI_BAND_UNSPECIFIED */
+        GetChannels(
+            [out, callee] ArrayOf<IWifiScannerChannelSpec*>* result);
+
+        SetChannels(
+            [in] ArrayOf<IWifiScannerChannelSpec*>* channels);
+
+        /** period of background scan; in millisecond, 0 => single shot scan */
+        GetPeriodInMs(
+            [out] Int32* result);
+
+        SetPeriodInMs(
+            [in] Int32 periodInMs);
+
+        /** must have a valid REPORT_EVENT value */
+        GetReportEvents(
+            [out] Int32* result);
+
+        SetReportEvents(
+            [in] Int32 reportEvents);
+
+        /** defines number of bssids to cache from each scan */
+        GetNumBssidsPerScan(
+            [out] Int32* result);
+
+        SetNumBssidsPerScan(
+            [in] Int32 numBssidsPerScan);
+    }
+
+    /** @hide */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IWifiScannerParcelableScanResults {
+        SetResults(
+            [in] ArrayOf<IScanResult*>* results);
+
+        GetResults(
+            [out, callee] ArrayOf<IScanResult*>* result);
+    }
+
+
+    /**
+     * interface to get scan events on; specify this on {@link #startBackgroundScan}
+     */
+    /**
+     * @Involved
+     * interface IWifiScannerActionListener;
+     */
+    [deprecated]
+    interface IWifiScannerScanListener {
+        /**
+         * Framework co-ordinates scans across multiple apps; so it may not give exactly the
+         * same period requested. If period of a scan is changed; it is reported by this event.
+         */
+        OnPeriodChanged(
+            [in] Int32 periodInMs);
+
+        /**
+         * reports results retrieved from background scan
+         */
+        OnResults(
+            [in] ArrayOf<IScanResult*>* results);
+
+        /**
+         * reports full scan result for each access point found in scan
+         */
+        OnFullResult(
+            [in] IScanResult* fullScanResult);
+    }
+
+
+    /** specifies information about an access point of interest */
+    /**
+     * @Involved
+     * no super interface ;
+     */
+    interface IWifiScannerBssidInfo {
+        /** bssid of the access point; in XX:XX:XX:XX:XX:XX format */
+        GetBssid(
+            [out] String* result);
+
+        SetBssid(
+            [in] String bssid);
+
+        /** low signal strength threshold; more information at {@link ScanResult#level} */
+        GetLow(
+            [out] Int32* result);
+
+        SetLow(
+            [in] Int32 low);
+
+        /** high signal threshold; more information at {@link ScanResult#level} */
+        GetHigh(
+            [out] Int32* result);
+
+        SetHigh(
+            [in] Int32 high);
+
+        /** channel frequency (in KHz) where you may find this BSSID */
+        GetFrequencyHint(
+            [out] Int32* result);
+
+        SetFrequencyHint(
+            [in] Int32 frequencyHint);
+    }
+
+    /** @hide */
+    // @SystemApi
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IWifiScannerWifiChangeSettings {
+        GetRssiSampleSize(
+            [out] Int32* result);
+
+        SetRssiSampleSize(
+            [in] Int32 rssiSampleSize);
+
+        /* sample size for RSSI averaging */
+        GetLostApSampleSize(
+            [out] Int32* result);
+
+        SetLostApSampleSize(
+            [in] Int32 lostApSampleSize);
+
+        /* samples to confirm AP's loss */
+        GetUnchangedSampleSize(
+            [out] Int32* result);
+
+        SetUnchangedSampleSize(
+            [in] Int32 unchangedSampleSize);
+
+        /* samples to confirm no change */
+        GetMinApsBreachingThreshold(
+            [out] Int32* result);
+
+        SetMinApsBreachingThreshold(
+            [in] Int32 minApsBreachingThreshold);
+
+        /* change threshold to trigger event */
+        GetPeriodInMs(
+            [out] Int32* result);
+
+        SetPeriodInMs(
+            [in] Int32 periodInMs);
+
+        /* scan period in millisecond */
+        GetBssidInfos(
+            [out, callee] ArrayOf<IWifiScannerBssidInfo*>* result);
+
+        SetBssidInfos(
+            [in] ArrayOf<IWifiScannerBssidInfo*>* bssidInfos);
+    }
+
+
+    /**
+     * interface to get wifi change events on; use this on {@link #startTrackingWifiChange}
+     */
+    /**
+     * @Involved
+     * interface IWifiScannerActionListener;
+     */
+    [deprecated]
+    interface IWifiScannerWifiChangeListener {
+        /** indicates that changes were detected in wifi environment
+         * @param results indicate the access points that exhibited change
+         */
+        OnChanging(
+            [in] ArrayOf<IScanResult*>* results);
+
+        /** indicates that no wifi changes are being detected for a while
+         * @param results indicate the access points that are bing monitored for change
+         */
+        OnQuiescence(
+            [in] ArrayOf<IScanResult*>* results);
+    }
+
+    /** interface to receive hotlist events on; use this on {@link #setHotlist} */
+    /**
+     * @Involved
+     * interface IWifiScannerActionListener;
+     */
+    [deprecated]
+    interface IWifiScannerBssidListener {
+        /** indicates that access points were found by on going scans
+         * @param results list of scan results, one for each access point visible currently
+         */
+        OnFound(
+            [in] ArrayOf<IScanResult*>* results);
+    }
+
+    /** @hide */
+    // @SystemApi
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IWifiScannerHotlistSettings {
+        GetBssidInfos(
+            [out, callee] ArrayOf<IWifiScannerBssidInfo*>* result);
+
+        SetBssidInfos(
+            [in] ArrayOf<IWifiScannerBssidInfo*>* bssidInfos);
+
+        GetApLostThreshold(
+            [out] Int32* result);
+
+        SetApLostThreshold(
+            [in] Int32 apLostThreshold);
+    }
+
+    /** @hide */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiScannerOperationResult {
+        GetReason(
+            [out] Int32* result);
+
+        SetReason(
+            [in] Int32 reason);
+
+        GetDescription(
+            [out] String* result);
+
+        SetDescription(
+            [in] String description);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

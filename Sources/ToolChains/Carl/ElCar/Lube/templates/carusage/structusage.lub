@@ -1,0 +1,16 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}_struct.txt"
+$
+$WITH all structs DO
+struct ${name} {
+$   WITH all members DO
+    ${type} ${name}${dimention};
+$   END DO
+}
+
+$END DO ;; all structs
+$END OUTPUT

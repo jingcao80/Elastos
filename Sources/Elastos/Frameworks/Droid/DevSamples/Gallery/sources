@@ -1,0 +1,45 @@
+TARGET_NAME = Gallery
+TARGET_TYPE = eco
+
+EXPORT_ALL_SYMBOLS = 1
+
+include $(MAKEDIR)/sources.inc
+
+IMPORTS = Elastos.Droid.Core.eco
+
+SOURCES  = Gallery.car
+SOURCES += R.cpp
+SOURCES += CAlbumActivity.cpp
+SOURCES += CBrowserActivity.cpp
+SOURCES += CPhotoActivity.cpp
+SOURCES += CAboutActivity.cpp
+SOURCES += CEditActivity.cpp
+SOURCES += CWallpaperActivity.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+##++++++++source code compiling environment
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Droid.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+##--------source code compiling environment
+
+##++++++++IDE compiling environment
+#LIBRARIES  = $(XDK_LIB_PATH)/Elastos.Runtime.lib
+#LIBRARIES += $(XDK_LIB_PATH)/Elastos.Core.lib
+#LIBRARIES += $(XDK_LIB_PATH)/Elastos.Droid.lib
+#LIBRARIES += $(XDK_LIB_PATH)/Elastos.Runtime.eco
+#LIBRARIES += $(XDK_LIB_PATH)/Elastos.CoreLibrary.eco
+#LIBRARIES += $(XDK_LIB_PATH)/crt0.lib
+##--------IDE compiling environment
+
+LIBRARIES += -lm -licuuc -llog -lutils -lcutils
+
+ELASTOS_LIBS += src/data/data.lib
+ELASTOS_LIBS += src/ui/ui.lib
+ELASTOS_LIBS += src/util/util.lib
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;

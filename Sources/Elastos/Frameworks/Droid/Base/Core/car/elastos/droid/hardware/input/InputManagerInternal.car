@@ -1,0 +1,45 @@
+
+module
+{
+    interface Elastos.Droid.View.IInputEvent;
+    interface Elastos.Droid.Hardware.Display.IDisplayViewport;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Input {
+
+    /**
+     * Input manager local system service interface.
+     *
+     * @hide Only for use within the system server.
+     */
+    interface IInputManagerInternal {
+
+        InjectInputEvent(
+            [in] IInputEvent* event,
+            [in] Int32 displayId,
+            [in] Int32 mode,
+            [out] Boolean* result);
+
+        /**
+         * Called by the display manager to set information about the displays as needed
+         * by the input system.  The input system must copy this information to retain it.
+         */
+        SetDisplayViewports(
+            [in] IDisplayViewport* defaultViewport,
+            [in] IDisplayViewport* externalTouchViewport);
+
+        /**
+         * Called by the power manager to tell the input manager whether it should start
+         * watching for wake events.
+         */
+        SetInteractive(
+            [in] Boolean interactive);
+    }
+
+    } // namespace Input
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

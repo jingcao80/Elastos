@@ -1,0 +1,29 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}.mk"
+$
+$   WITH all classes DO
+$      IF type is not "sink" and type is not "clsobj"
+SOURCES += _${fullname}.cpp
+$      END IF
+$      IF attrib is "hasctor" and lubeoption is not "UseCustomClassObject"
+SOURCES += ${fullname}ClassObject.cpp
+$      END IF
+$   END DO ;; all classes
+$   WITH all classes DO
+$      IF type is "sink"
+SOURCES += ${name}.cpp
+$      END IF
+$   END DO
+$IF module.type is not "library"
+SOURCES += _${name}pub.cpp
+SOURCES += _${name}abrg.cpp
+$IF module.attrib is "hasSinkObject"
+SOURCES += _CCallbackSink_.cpp
+$END IF
+$END IF
+$
+$END OUTPUT

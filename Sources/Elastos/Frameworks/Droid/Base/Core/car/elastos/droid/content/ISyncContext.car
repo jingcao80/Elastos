@@ -1,0 +1,33 @@
+
+module
+{
+    interface Elastos.Droid.Content.ISyncResult;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Interface used by the SyncAdapter to indicate its progress.
+     * @hide
+     */
+    interface IISyncContext {
+        /**
+         * Call to indicate that the SyncAdapter is making progress. E.g., if this SyncAdapter
+         * downloads or sends records to/from the server, this may be called after each record
+         * is downloaded or uploaded.
+         */
+        SendHeartbeat();
+
+        /**
+         * Signal that the corresponding sync session is completed.
+         * @param result information about this sync session
+         */
+        OnFinished(
+            [in] ISyncResult* result);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

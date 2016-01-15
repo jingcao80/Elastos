@@ -1,0 +1,80 @@
+
+module
+{
+    using interface Elastos.Security.IPrincipal;
+    using interface Elastos.Security.IPrivateKey;
+    using interface Elastos.Security.Cert.IX509Certificate;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    /**
+     * ClientCertRequest: The user receives an instance of this class as
+     * a parameter of {@link WebViewClient#onReceivedClientCertRequest}.
+     * The request includes the parameters to choose the client certificate,
+     * such as the host name and the port number requesting the cert, the acceptable
+     * key types and the principals.
+     *
+     * The user should call one of the class methods to indicate how to deal
+     * with the client certificate request. All methods should be called on
+     * UI thread.
+     *
+     * WebView caches the {@link #proceed} and {@link #cancel} responses in memory
+     * and uses them to handle future client certificate requests for the same
+     * host/port pair. The user can clear the cached data using
+     * {@link WebView#clearClientCertPreferences}.
+     *
+     */
+    [deprecated]
+    interface IClientCertRequest {
+
+        /**
+         * Returns the acceptable types of asymmetric keys (can be null).
+         */
+        GetKeyTypes(
+            [out, callee] ArrayOf<String>* types);
+
+        /**
+         * Returns the acceptable certificate issuers for the certificate
+         *            matching the private key (can be null).
+         */
+        GetPrincipals(
+            [out, callee] ArrayOf<IPrincipal*>* principals);
+
+        /**
+         * Returns the host name of the server requesting the certificate.
+         */
+        GetHost(
+            [out] String* host);
+
+        /**
+         * Returns the port number of the server requesting the certificate.
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /**
+         * Proceed with the specified private key and client certificate chain.
+         * Remember the user's positive choice and use it for future requests.
+         */
+        Proceed(
+            [in] IPrivateKey* privateKey,
+            [in] ArrayOf<IX509Certificate*>* chain);
+
+        /**
+         * Ignore the request for now. Do not remember user's choice.
+         */
+        Ignore();
+
+        /**
+         * Cancel this request. Remember the user's choice and use it for
+         * future requests.
+         */
+        Cancel();
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

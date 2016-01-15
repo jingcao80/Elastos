@@ -1,0 +1,35 @@
+
+module
+{
+    using interface Org.W3c.Dom.INode;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xml {
+    namespace Dom {
+
+    /**
+     * Provides a straightforward implementation of the corresponding W3C DOM
+     * interface. The class is used internally only, thus only notable members that
+     * are not in the original interface are documented (the W3C docs are quite
+     * extensive). Hope that's ok.
+     * <p>
+     * Some of the fields may have package visibility, so other classes belonging to
+     * the DOM implementation can easily access them while maintaining the DOM tree
+     * structure.
+     * <p>
+     * This class represents a Node that has a parent Node, but no children.
+     */
+    interface ILeafNodeImpl extends Org.W3c.Dom.INode {
+        IsParentOf(
+            [in] INode* node,
+            [out] Boolean* isParentOf);
+    }
+
+    } // namespace Dom
+    } // namespace Xml
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

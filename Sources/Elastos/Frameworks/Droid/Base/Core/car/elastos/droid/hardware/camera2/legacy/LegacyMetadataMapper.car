@@ -1,0 +1,96 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.IParameters;
+    interface Elastos.Droid.Hardware.ICameraInfo;
+    interface Elastos.Droid.Hardware.IHardwareCameraInfo;
+    interface Elastos.Droid.Hardware.Camera2.ICameraCharacteristics;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNative;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    interface ILegacyMetadataMapper {
+        // from graphics.h
+        const Int32 HAL_PIXEL_FORMAT_RGBA_8888 = 1; //IPixelFormat::RGBA_8888;
+        const Int32 HAL_PIXEL_FORMAT_BGRA_8888 = 0x5;
+        const Int32 HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
+        const Int32 HAL_PIXEL_FORMAT_BLOB = 0x21;
+
+        const Int32 UNKNOWN_MODE = -1;
+    }
+
+    /**
+     * Provide legacy-specific implementations of camera2 metadata for legacy devices, such as the
+     * camera characteristics.
+     */
+    interface ILegacyMetadataMapperHelper {
+        /**
+         * Create characteristics for a legacy device by mapping the {@code parameters}
+         * and {@code info}
+         *
+         * @param parameters A non-{@code null} parameters set
+         * @param info Camera info with camera facing direction and angle of orientation
+         *
+         * @return static camera characteristics for a camera device
+         *
+         * @throws NullPointerException if any of the args were {@code null}
+         */
+        CreateCharacteristics(
+            [in] IParameters* parameters,
+            [in] IHardwareCameraInfo* info,
+            [out] ICameraCharacteristics** outcc);
+
+        /**
+         * Create characteristics for a legacy device by mapping the {@code parameters}
+         * and {@code info}
+         *
+         * @param parameters A string parseable by {@link Camera.Parameters#unflatten}
+         * @param info Camera info with camera facing direction and angle of orientation
+         * @return static camera characteristics for a camera device
+         *
+         * @throws NullPointerException if any of the args were {@code null}
+         */
+        CreateCharacteristics(
+            [in] String parameters,
+            [in] ICameraInfo* info,
+            [out] ICameraCharacteristics** outcc);
+
+        /**
+         * Set the legacy parameters using the {@link LegacyRequest legacy request}.
+         *
+         * <p>The legacy request's parameters are changed as a side effect of calling this
+         * method.</p>
+         *
+         * @param request a non-{@code null} legacy request
+         */
+        ConvertRequestMetadata(
+            [in] ILegacyRequest* request);
+
+        /**
+         * Create a request template
+         *
+         * @param c a non-{@code null} camera characteristics for this camera
+         * @param templateId a non-negative template ID
+         *
+         * @return a non-{@code null} request template
+         *
+         * @throws IllegalArgumentException if {@code templateId} was invalid
+         *
+         * @see android.hardware.camera2.CameraDevice#TEMPLATE_MANUAL
+         */
+        CreateRequestTemplate(
+            [in] ICameraCharacteristics* c,
+            [in] Int32 templateId,
+            [out] ICameraMetadataNative** outcm);
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

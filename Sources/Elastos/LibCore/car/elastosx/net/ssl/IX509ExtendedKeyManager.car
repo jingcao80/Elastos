@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Security.IPrincipal;
+    interface Elastosx.Net.Ssl.ISSLEngine;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The abstract extension for the {@code X509KeyManager} interface.
+     *
+     * @Involve
+     * interface IX509KeyManager
+     * interface IKeyManager
+     */
+    [deprecated]
+    interface IX509ExtendedKeyManager {
+        /**
+         * Chooses an alias for the client side of an SSL connection to authenticate
+         * it with the specified public key type and certificate issuers.
+         *
+         * @param keyType
+         *            the list of public key algorithm names.
+         * @param issuers
+         *            the list of certificate issuers, or {@code null} if any issuer
+         *            will do.
+         * @param engine
+         *            the {@code SSLEngine} for the connection, or {@code null} if
+         *            no engine is predefined.
+         * @return the alias name of a matching key or {@code null} if there are no
+         *         matches.
+         */
+        ChooseEngineClientAlias(
+            [in] ArrayOf<String>* keyType,
+            [in] ArrayOf<IPrincipal*>* issuers,
+            [in] ISSLEngine* engine,
+            [out] String* alias);
+
+        /**
+         * Chooses an alias for the server side of an SSL connection to authenticate
+         * it with the specified public key type and certificate issuers.
+         *
+         * @param keyType
+         *            the list of public key algorithm names.
+         * @param issuers
+         *            the list of certificate issuers, or {@code null} if any issuer
+         *            will do.
+         * @param engine
+         *            the {@code SSLEngine} for the connection, or {@code null} if
+         *            no engine is predefined.
+         * @return the alias name of a matching key or {@code null} if there are no
+         *         matches.
+         */
+        ChooseEngineServerAlias(
+            [in] String keyType,
+            [in] ArrayOf<IPrincipal*>* issuers,
+            [in] ISSLEngine* engine,
+            [out] String* alias);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

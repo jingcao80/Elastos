@@ -1,0 +1,16 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}_enum.txt"
+$
+$WITH all enums DO
+$    IF attrib is not "callback"
+$        WITH all members DO
+enum ${enum.name}::${name} = ${value};
+$        END DO
+$    END IF
+$END DO ;; all enums
+
+$END OUTPUT

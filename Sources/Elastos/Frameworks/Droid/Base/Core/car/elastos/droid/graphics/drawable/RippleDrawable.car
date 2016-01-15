@@ -1,0 +1,103 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IColorStateList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+
+    /**
+     * Drawable that shows a ripple effect in response to state changes. The
+     * anchoring position of the ripple for a given state may be specified by
+     * calling {@link #setHotspot(float, float)} with the corresponding state
+     * attribute identifier.
+     * <p>
+     * A touch feedback drawable may contain multiple child layers, including a
+     * special mask layer that is not drawn to the screen. A single layer may be set
+     * as the mask by specifying its android:id value as {@link android.R.id#mask}.
+     * <pre>
+     * <code>&lt!-- A red ripple masked against an opaque rectangle. --/>
+     * &ltripple android:color="#ffff0000">
+     *   &ltitem android:id="@android:id/mask"
+     *         android:drawable="@android:color/white" />
+     * &ltripple /></code>
+     * </pre>
+     * <p>
+     * If a mask layer is set, the ripple effect will be masked against that layer
+     * before it is drawn over the composite of the remaining child layers.
+     * <p>
+     * If no mask layer is set, the ripple effect is masked against the composite
+     * of the child layers.
+     * <pre>
+     * <code>&lt!-- A blue ripple drawn atop a black rectangle. --/>
+     * &ltripple android:color="#ff00ff00">
+     *   &ltitem android:drawable="@android:color/black" />
+     * &ltripple />
+     *
+     * &lt!-- A red ripple drawn atop a drawable resource. --/>
+     * &ltripple android:color="#ff00ff00">
+     *   &ltitem android:drawable="@drawable/my_drawable" />
+     * &ltripple /></code>
+     * </pre>
+     * <p>
+     * If no child layers or mask is specified and the ripple is set as a View
+     * background, the ripple will be drawn atop the first available parent
+     * background within the View's hierarchy. In this case, the drawing region
+     * may extend outside of the Drawable bounds.
+     * <pre>
+     * <code>&lt!-- An unbounded green ripple. --/>
+     * &ltripple android:color="#ff0000ff" /></code>
+     * </pre>
+     *
+     * @attr ref android.R.styleable#RippleDrawable_color
+
+     * @Involve
+     * interface ILayerDrawable
+     */
+
+    interface IRippleDrawable {
+        /**
+         * Constant for automatically determining the maximum ripple radius.
+         *
+         * @see #setMaxRadius(int)
+         * @hide
+         */
+        const Int32 RADIUS_AUTO = -1;
+
+        SetColor(
+            [in] IColorStateList* color);
+
+        /**
+         * Sets the maximum ripple radius in pixels. The default value of
+         * {@link #RADIUS_AUTO} defines the radius as the distance from the center
+         * of the drawable bounds (or hotspot bounds, if specified) to a corner.
+         *
+         * @param maxRadius the maximum ripple radius in pixels or
+         *            {@link #RADIUS_AUTO} to automatically determine the maximum
+         *            radius based on the bounds
+         * @see #getMaxRadius()
+         * @see #setHotspotBounds(int, int, int, int)
+         * @hide
+         */
+        SetMaxRadius(
+            [in] Int32 maxRadius);
+
+        /**
+         * @return the maximum ripple radius in pixels, or {@link #RADIUS_AUTO} if
+         *         the radius is determined automatically
+         * @see #setMaxRadius(int)
+         * @hide
+         */
+        GetMaxRadius(
+            [out] Int32* maxRadius);
+    }
+
+    interface IRippleState {}
+
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

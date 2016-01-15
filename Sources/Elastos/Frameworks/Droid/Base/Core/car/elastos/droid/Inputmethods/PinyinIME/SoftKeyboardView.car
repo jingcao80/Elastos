@@ -1,0 +1,67 @@
+
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Inputmethods {
+    namespace PinyinIME {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IView
+     */
+    [deprecated, local]
+    interface ISoftKeyboardView {
+        SetSoftKeyboard(
+            [in] ISoftKeyboard* softSkb,
+            [out] Boolean* result);
+
+        GetSoftKeyboard(
+            [out] ISoftKeyboard** keyboard);
+
+        ResizeKeyboard(
+            [in] Int32 skbWidth,
+            [in] Int32 skbHeight);
+
+        SetBalloonHint(
+            [in] IBalloonHint* balloonOnKey,
+            [in] IBalloonHint* balloonPopup,
+            [in] Boolean movingNeverHidePopup);
+
+        SetOffsetToSkbContainer(
+            [in] ArrayOf<Int32>* offsetToSkbContainer);
+
+        ResetKeyPress(
+            [in] Int64 balloonDelay);
+
+        // If movePress is true, means that this function is called because user
+        // moves his finger to this button. If movePress is false, means that this
+        // function is called when user just presses this key.
+        OnKeyPress(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] /*SkbContainer.LongPressTimer*/ IHandler* longPressTimer,
+            [in] Boolean movePress,
+            [out] ISoftKey** key);
+
+        OnKeyRelease(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] ISoftKey** key);
+
+        OnKeyMove(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] ISoftKey** key);
+
+        DimSoftKeyboard(
+            [in] Boolean dimSkb);
+    }
+
+    } // namespace PinyinIME
+    } // namespace Inputmethods
+    } // namespace Droid
+    } // namespace Elastos
+}

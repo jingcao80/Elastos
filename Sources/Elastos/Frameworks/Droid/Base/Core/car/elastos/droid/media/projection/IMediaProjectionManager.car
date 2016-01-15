@@ -1,0 +1,44 @@
+module
+{
+    interface Elastos.Droid.Media.Projection.IMediaProjectionInfo;
+    interface Elastos.Droid.Media.Projection.IIMediaProjectionWatcherCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Projection {
+
+    interface IIMediaProjectionManager {
+        HasProjectionPermission(
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Boolean * result);
+
+        CreateProjection(
+            [in] Int32 uid,
+            [in] String packageName,
+            [in] Int32 type,
+            [in] Boolean permanentGrant,
+            [out] IIMediaProjection ** result);
+
+        IsValidMediaProjection(
+            [in] IIMediaProjection * projection,
+            [out] Boolean * result);
+
+        GetActiveProjectionInfo(
+            [out] IMediaProjectionInfo ** result);
+
+        StopActiveProjection();
+
+        AddCallback(
+            [in] IIMediaProjectionWatcherCallback * cb);
+
+        RemoveCallback(
+            [in] IIMediaProjectionWatcherCallback * cb);
+    }
+
+    } // namespace Projection
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,39 @@
+
+module
+{
+    namespace Elastos {
+    namespace Core {
+
+    interface IEnum {
+        /**
+         * Returns the name of this enum constant. The name is the field as it
+         * appears in the {@code enum} declaration.
+         *
+         * @return the name of this enum constant.
+         * @see #toString()
+         */
+        Name(
+            [out] String* str);
+
+        /**
+         * Returns the position of the enum constant in the declaration. The first
+         * constant has an ordinal value of zero.
+         *
+         * @return the ordinal value of this enum constant.
+         */
+        Ordinal(
+            [out] Int32* value);
+
+        /**
+         * Returns the enum constant's declaring class.
+         *
+         * @return the class object representing the constant's enum type.
+         */
+        // @SuppressWarnings("unchecked")
+        GetDeclaringClass(
+            [out] InterfaceID* riid);
+        }
+
+    } // namespace Core
+    } // namespace Elastos
+}

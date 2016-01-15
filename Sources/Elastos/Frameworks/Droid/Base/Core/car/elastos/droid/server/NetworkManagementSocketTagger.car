@@ -1,0 +1,64 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+
+    /**
+     * Assigns tags to sockets for traffic stats.
+     */
+    interface INetworkManagementSocketTagger {
+        /**
+         * {@link SystemProperties} key that indicates if {@code qtaguid} bandwidth
+         * controls have been enabled.
+         */
+        // TODO: remove when always enabled, or once socket tagging silently fails.
+        const String PROP_QTAGUID_ENABLED = "net.qtaguid_enabled";
+
+        Install();
+
+        SetThreadSocketStatsTag(
+            [in] Int32 tag);
+
+        GetThreadSocketStatsTag(
+            [out] Int32* tag);
+
+        SetThreadSocketStatsUid(
+            [in] Int32 uid);
+
+        SetKernelCounterSet(
+            [in] Int32 uid,
+            [in] Int32 counterSet);
+
+        ResetKernelUidStats(
+            [in] Int32 uid);
+
+        /**
+         * Convert {@code /proc/} tag format to {@link Integer}. Assumes incoming
+         * format like {@code 0x7fffffff00000000}.
+         */
+        KernelToTag(
+            [in] String string,
+            [out] Int32* tag);
+    }
+
+    interface ISocketTags
+    {
+        GetStatsTag(
+            [out] Int32* statsTag);
+
+        SetStatsTag(
+            [in] Int32 statsTag);
+
+        GetStatsUid(
+            [out] Int32* statsUid);
+
+        SetStatsUid(
+            [in] Int32 statsUid);
+    }
+
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,56 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * An AudioPortConfig contains a possible configuration of an audio port chosen
+     * among all possible attributes described by an AudioPort.
+     * An AudioPortConfig is created by AudioPort.buildConfiguration().
+     * AudioPorts are used to specify the sources and sinks of a patch created
+     * with AudioManager.connectAudioPatch().
+     * Several specialized versions of AudioPortConfig exist to handle different categories of
+     * audio ports and their specific attributes:
+     * - AudioDevicePortConfig for input (e.g micropohone) and output devices (e.g speaker)
+     * - AudioMixPortConfig for input or output streams of the audio framework.
+     * @hide
+     */
+    interface IAudioPortConfig {
+        /**
+         * Returns the audio port this AudioPortConfig is issued from.
+         */
+        Port(
+            [out] IAudioPort** result);
+
+        /**
+         * Sampling rate configured for this AudioPortConfig.
+         */
+        SamplingRate(
+            [out] Int32* result);
+
+        /**
+         * Channel mask configuration (e.g AudioFormat.CHANNEL_CONFIGURATION_STEREO).
+         */
+        ChannelMask(
+            [out] Int32* result);
+
+        /**
+         * Audio format configuration (e.g AudioFormat.ENCODING_PCM_16BIT).
+         */
+        Format(
+            [out] Int32* result);
+
+        /**
+         * The gain configuration if this port supports gain control, null otherwise
+         * @see AudioGainConfig.
+         */
+        Gain(
+            [out] IAudioGainConfig** result);
+
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

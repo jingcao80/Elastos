@@ -1,0 +1,101 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     *Wraps an existing InputStream and adds functionality to "push back" bytes that have been read, so
+     *that they can be read again. Parsers may find this useful. The number of bytes which may be pushed
+     *back can be specified during construction. If the buffer of pushed back bytes is empty, bytes are
+     *read from the underlying input stream.
+     *
+     *@implements Elastos.IO.IFilterInputStream
+     */
+
+     /**
+     * @Involve
+     * interface Elastos.IO.ICloseable;
+     * interface IInputStream;
+     * interface IFilterInputStream;
+     */
+    [deprecated]
+    interface IPushbackInputStream {
+        /**
+         * Pushes the specified byte oneByte back to this stream. Only the
+         * least significant byte of the integer oneByte is pushed back.
+         * This is done in such a way that the next byte read from this stream is
+         * {(byte) oneByte}.
+         * <p>
+         * If this stream's internal pushback buffer cannot store the byte, an
+         * IOException is thrown.
+         *
+         * @param oneByte
+         *            the byte to push back to this stream.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if this stream is closed or the internal pushback buffer is full.
+         */
+        Unread(
+            [in] Int32 oneByte);
+
+        /**
+         * Pushes all the bytes in buffer back to this stream. The bytes are
+         * pushed back in such a way that the next byte read from this stream is
+         * buffer[0], then buffer[1] and so on.
+         * <p>
+         * If this stream's internal pushback buffer cannot store the entire
+         * contents of buffer, an IOException is thrown. Parts of
+         * buffer may have already been copied to the pushback buffer when
+         * the exception is thrown.
+         *
+         * @param buffer
+         *            the buffer containing the bytes to push back to this stream.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if the free space in the internal pushback buffer is not sufficient to store the contents of buffer.
+         */
+        Unread(
+            [in] ArrayOf<Byte>* buffer);
+
+        /**
+         * Pushes a subset of the bytes in buffer back to this stream. The
+         * subset is defined by the start position offset within
+         * buffer and the number of bytes specified by length. The
+         * bytes are pushed back in such a way that the next byte read from this
+         * stream is buffer[offset], then buffer[1] and so on.
+         * <p>
+         * If this stream's internal pushback buffer cannot store the selected
+         * subset of buffer, an IOException is thrown. Parts of
+         * buffer may have already been copied to the pushback buffer when
+         * the exception is thrown.
+         *
+         * @param buffer
+         *            the buffer containing the bytes to push back to this stream.
+         * @param offset
+         *            the index of the first byte in buffer to push back.
+         * @param length
+         *            the number of bytes to push back.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IndexOutOfBoundsException | if {offset < 0} or {length < 0}, or if
+         *             {offset + length} is greater than the length of
+         *             {buffer}.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if the free space in the internal pushback buffer is not
+         *             sufficient to store the selected contents of {buffer}.
+         */
+        Unread(
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 length);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

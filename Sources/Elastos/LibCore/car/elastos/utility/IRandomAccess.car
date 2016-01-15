@@ -1,0 +1,17 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * RandomAccess is implemented by {@code List} implementations that support fast
+     * (usually constant time) random access.
+     */
+    interface IRandomAccess {
+        /* empty */
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,232 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Media.IMediaFormat;
+    interface Elastos.Droid.Media.IMediaTimeProvider;
+    interface Elastos.Droid.Media.ISubtitleTrackRenderingWidget;
+    using interface Elastos.Utility.IVector;
+    using interface Elastos.Utility.IIterable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * Callback used to send updates about changes to rendering data.
+     */
+    interface ISubtitleTrackRenderingWidgetOnChangedListener {
+        /**
+         * Called when the rendering data has changed.
+         *
+         * @param renderingWidget the widget whose data has changed
+         */
+        OnChanged(
+            [in] ISubtitleTrackRenderingWidget* renderingWidget);
+    }
+
+    /** @hide */
+    interface ISubtitleTrackRun
+    {
+        //TODO
+        //StoreByEndTimeMs(
+        //    [in] ILongSparseArray* runsByEndTime);
+
+        RemoveAtEndTimeMs();
+    }
+
+    /**
+     * Interface for rendering subtitles onto a Canvas.
+     */
+    interface ISubtitleTrackRenderingWidget {
+        /**
+         * Sets the widget's callback, which is used to send updates when the
+         * rendered data has changed.
+         *
+         * @param callback update callback
+         */
+        SetOnChangedListener(
+            [in] ISubtitleTrackRenderingWidgetOnChangedListener* cb);
+
+        /**
+         * Sets the widget's size.
+         *
+         * @param width width in pixels
+         * @param height height in pixels
+         */
+        SetSize(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * Sets whether the widget should draw subtitles.
+         *
+         * @param visible true if subtitles should be drawn, false otherwise
+         */
+        SetVisible(
+            [in] Boolean visible);
+
+        /**
+         * Renders subtitles onto a {@link Canvas}.
+         *
+         * @param c canvas on which to render subtitles
+         */
+        Draw(
+            [in] ICanvas* c);
+
+        /**
+         * Called when the widget is attached to a window.
+         */
+        OnAttachedToWindow();
+
+        /**
+         * Called when the widget is detached from a window.
+         */
+        OnDetachedFromWindow();
+    }
+
+    /** @hide */
+    [deprecated]
+    interface ISubtitleTrackCue {
+        OnTime(
+            [in] Int64 timeMs);
+
+        GetStartTimeMs(
+            [out] Int64* startTimeMs);
+
+        SetStartTimeMs(
+            [in] Int64 startTimeMs);
+
+        GetEndTimeMs(
+            [out] Int64* endTimeMs);
+
+        SetEndTimeMs(
+            [in] Int64 endTimeMs);
+
+        GetRunID(
+            [out] Int64* runID);
+
+        SetRunID(
+            [in] Int64 runID);
+
+        GetInnerTimesMs(
+            [out, callee] ArrayOf<Int64>* innerTimesMs);
+
+        SetInnerTimesMs(
+            [in] ArrayOf<Int64>* innerTimesMs);
+    }
+
+    /** @hide */
+    interface ISubtitleTrackCueList
+    {
+        Add(
+            [in] ISubtitleTrackCue* cue);
+
+        Remove(
+            [in] ISubtitleTrackCue* cue);
+
+        EntriesBetween(
+            [in] Int64 lastTimeMs,
+            [in] Int64 timeMs,
+            [out] IIterable** result);
+
+        NextTimeAfter(
+            [in] Int64 timeMs,
+            [out] Int64* result);
+
+        GetDEBUG(
+            [out] Boolean* result);
+
+        SetDEBUG(
+            [in] Boolean dg);
+    }
+
+    /**
+     * A subtitle track abstract base class that is responsible for parsing and displaying
+     * an instance of a particular type of subtitle.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Media.IMediaTimeProviderOnMediaTimeListener
+     */
+    [deprecated]
+    interface ISubtitleTrack {
+
+        /** @hide */
+        GetFormat(
+            [out] IMediaFormat** result);
+
+        /**
+         * Called when there is input data for the subtitle track.  The
+         * complete subtitle for a track can include multiple whole units
+         * (runs).  Each of these units can have multiple sections.  The
+         * contents of a run are submitted in sequential order, with eos
+         * indicating the last section of the run.  Calls from different
+         * runs must not be intermixed.
+         *
+         * @param data subtitle data byte buffer
+         * @param eos true if this is the last section of the run.
+         * @param runID mostly-unique ID for this run of data.  Subtitle cues
+         *              with runID of 0 are discarded immediately after
+         *              display.  Cues with runID of ~0 are discarded
+         *              only at the deletion of the track object.  Cues
+         *              with other runID-s are discarded at the end of the
+         *              run, which defaults to the latest timestamp of
+         *              any of its cues (with this runID).
+         */
+        OnData(
+            [in] ArrayOf<Byte>* data,
+            [in] Boolean eos,
+            [in] Int64 runID);
+
+        OnData(
+            [in] ISubtitleData* data);
+
+        /**
+         * Called when adding the subtitle rendering widget to the view hierarchy,
+         * as well as when showing or hiding the subtitle track, or when the video
+         * surface position has changed.
+         *
+         * @return the widget that renders this subtitle track. For most renderers
+         *         there should be a single shared instance that is used for all
+         *         tracks supported by that renderer, as at most one subtitle track
+         *         is visible at one time.
+         */
+        GetRenderingWidget(
+            [out] ISubtitleTrackRenderingWidget** result);
+
+        /**
+         * Called when the active cues have changed, and the contents of the subtitle
+         * view should be updated.
+         *
+         * @hide
+         */
+        UpdateView(
+            [in] IVector* activeCues);
+
+        /** @hide */
+        Show();
+
+        /** @hide */
+        Hide();
+
+        /** @hide */
+        SetTimeProvider(
+            [in] IMediaTimeProvider* timeProvider);
+
+        /** @hide update mRunsByEndTime with given end time */
+        SetRunDiscardTimeMs(
+            [in] Int64 runID,
+            [in] Int64 timeMs);
+
+        /** @hide whether this is a text track who fires events instead getting rendered */
+        IsTimedText(
+            [out] Boolean* result);
+
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,33 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Proxying implementation of Context that simply delegates all of its calls to
+     * another Context. Can be subclassed to modify behavior without changing the
+     * original Context.
+     *
+     * @implements Elastos.Droid.Content.Elastos.Droid.Content.IContext
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     */
+    [local]
+    interface IContextWrapper {
+        /**
+         * @return the base context as set by the constructor or setBaseContext
+         */
+        GetBaseContext(
+            [out] IContext** context);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

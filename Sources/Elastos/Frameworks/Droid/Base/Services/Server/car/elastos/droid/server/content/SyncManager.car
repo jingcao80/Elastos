@@ -1,0 +1,28 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Content {
+
+    /**
+     * @Invovle
+     * interface IISyncContext;
+     * interface IBinder;
+     * interface IServiceConnection;
+     * interface IProxyDeathRecipient;
+     *
+     * @hide
+     */
+    interface IActiveSyncContext {
+    }
+
+    interface ISyncManager {
+
+    }
+
+    } // namespace Content
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

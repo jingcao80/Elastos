@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Net.IInetAddress;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace System {
+
+    /**
+     * Corresponds to C's {@code struct group_req}.
+     */
+    interface IStructGroupReq {
+        GetGrInterface(
+            [out] Int32* grInterface);
+
+        GetGrGroup(
+            [out] IInetAddress** grGroup);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace System
+    } // namespace Droid
+    } // namespace Elastos
+}

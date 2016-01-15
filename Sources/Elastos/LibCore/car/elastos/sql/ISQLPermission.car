@@ -1,0 +1,24 @@
+module
+{
+    // import java.io.Serializable;
+    // import java.security.BasicPermission;
+    // import java.security.Guard;
+    // import java.security.Permission;
+
+    namespace Elastos {
+    namespace Sql {
+
+    interface ISQLPermission {
+        // @Override
+        GetActions(
+            [out] String * str);
+
+        // @Override
+        //Implies(
+        //    [in] IPermission permission,
+        //    [out] Boolean * value);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

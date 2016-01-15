@@ -1,0 +1,258 @@
+
+module
+{
+    interface Elastos.IO.IObjectOutput;
+
+    namespace Elastos {
+    namespace IO {
+
+    interface IObjectOutputStreamPutField;
+
+    /*
+     * A specialized OutputStream that is able to write (serialize) Java objects as well as primitive data
+     * types (int, byte, char etc.). The data can later be loaded using an ObjectInputStream.
+     *
+     * @implements Elastos.IO.IOutputStream
+     * @sa IObjectInputStream
+     * @sa IObjectOutput
+     * @sa ISerializable
+     * @sa IExternalizable
+     *
+     */
+     /**
+     * @Involve
+     * interface ICloseable;
+     * interface IOutputStream;
+     */
+    interface IObjectOutputStream {
+        /**
+         * Default method to write objects to this stream. Serializable fields
+         * defined in the object's class and superclasses are written to the output
+         * stream.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while writing to the target stream.
+         * NotActiveException | if this method is not called from {writeObject()}.
+         * @see ObjectInputStream#defaultReadObject
+         */
+        DefaultWriteObject();
+
+        /**
+         * Gets this stream's {PutField} object. This object provides access
+         * to the persistent fields that are eventually written to the output
+         * stream. It is used to transfer the values from the fields of the object
+         * that is currently being written to the persistent fields.
+         *
+         * @return the PutField object from which persistent fields can be accessed
+         *         by name.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs.
+         * NotActiveException | if this method is not called from {writeObject()}.
+         * @see ObjectInputStream#defaultReadObject
+         */
+        PutFields(
+            [out] IObjectOutputStreamPutField** fields);
+
+        /**
+         * Resets the state of this stream. A marker is written to the stream, so
+         * that the corresponding input stream will also perform a reset at the same
+         * point. Objects previously written are no longer remembered, so they will
+         * be written again (instead of a cyclical reference) if found in the object
+         * graph.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if {reset()} is called during the serialization of an object.
+         */
+        Reset();
+
+        /**
+         * Sets the specified protocol version to be used by this stream.
+         *
+         * @param version
+         *            the protocol version to be used. Use a {*            PROTOCOL_VERSION_x} constant from {
+         *            java.io.ObjectStreamConstants}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if an invalid {version} is specified.
+         * IOException  | if an I/O error occurs.
+         * @see ObjectStreamConstants#PROTOCOL_VERSION_1
+         * @see ObjectStreamConstants#PROTOCOL_VERSION_2
+         */
+        UseProtocolVersion(
+            [in] Int32 ver);
+
+        /**
+         * Writes the fields of the object currently being written to the target
+         * stream. The field values are buffered in the currently active {* PutField} object, which can be accessed by calling {putFields()}.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while writing to the target stream.
+         * NotActiveException | if there are no fields to write to the target stream.
+         * @see #putFields
+         */
+        WriteFields();
+
+        /**
+         * Writes an unshared object to the target stream. This method is identical
+         * to {writeObject}, except that it always writes a new object to the
+         * stream versus the use of back-referencing for identical objects by
+         * {writeObject}.
+         *
+         * @param object
+         *            the object to write to the target stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while writing to the target stream.
+         * @see ObjectInputStream#readUnshared()
+         */
+        WriteUnshared(
+            [in] IInterface* object);
+    }
+
+    interface IObjectOutputStreamPutField {
+        /**
+         * Puts the value of the boolean field identified by {name} to the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        Put(
+            [in] String name,
+            [in] Boolean value);
+
+        /**
+         * Puts the value of the character field identified by {name} to
+         * the persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        PutChar(
+            [in] String name,
+            [in] Char32 value);
+
+        /**
+         * Puts the value of the byte field identified by {name} to the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        PutByte(
+            [in] String name,
+            [in] Byte value);
+
+        /**
+         * Puts the value of the short field identified by {name} to the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        Put(
+            [in] String name,
+            [in] Int16 value);
+
+        /**
+         * Puts the value of the integer field identified by {name} to the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        Put(
+            [in] String name,
+            [in] Int32 value);
+
+        /**
+         * Puts the value of the long field identified by {name} to the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        Put(
+            [in] String name,
+            [in] Int64 value);
+
+        /**
+         * Puts the value of the float field identified by {name} to the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        Put(
+            [in] String name,
+            [in] Float value);
+
+        /**
+         * Puts the value of the double field identified by {name} to the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        Put(
+            [in] String name,
+            [in] Double value);
+
+        /**
+         * Puts the value of the Object field identified by {name} to the
+         * persistent field.
+         *
+         * @param name
+         *            the name of the field to serialize.
+         * @param value
+         *            the value that is put to the persistent field.
+         */
+        Put(
+            [in] String name,
+            [in] IInterface* value);
+
+        /**
+         * Writes the fields to the target stream {out}.
+         *
+         * @param out
+         *            the target stream
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while writing to the target stream.
+         * @deprecated This method is unsafe and may corrupt the target stream.
+         *             Use ObjectOutputStream#writeFields() instead.
+         */
+        Write(
+            [in] IObjectOutput* os);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

@@ -1,0 +1,31 @@
+
+module
+{
+    interface Elastosx.Net.Ssl.IHandshakeCompletedEvent;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * The listener to be implemented to receive event notifications on completion
+     * of SSL handshake on an SSL connection.
+     *
+     * @Involve
+     * interface Elastos.Utility.IEventListener;
+     */
+    interface IHandshakeCompletedListener {
+        /**
+         * The callback method that is invoked when a SSL handshake is completed.
+         *
+         * @param event
+         *            the information on the completed SSL handshake event.
+         */
+        HandshakeCompleted(
+            [in] IHandshakeCompletedEvent* event);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

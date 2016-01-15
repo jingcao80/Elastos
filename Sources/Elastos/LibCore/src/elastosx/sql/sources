@@ -1,0 +1,16 @@
+TARGET_NAME= elastosx.sql
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/elastosx/sql
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/sql
+INCLUDES += $(MAKEDIR)/../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+
+SOURCES =  CConnectionEvent.cpp
+SOURCES +=  CRowSetEvent.cpp
+SOURCES +=  CStatementEvent.cpp

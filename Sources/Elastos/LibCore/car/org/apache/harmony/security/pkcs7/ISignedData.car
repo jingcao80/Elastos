@@ -1,0 +1,51 @@
+
+module
+{
+    interface Elastos.Utility.IList;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Pkcs7 {
+
+    /**
+     * As defined in PKCS #7: Cryptographic Message Syntax Standard
+     * (http://www.ietf.org/rfc/rfc2315.txt)
+     *
+     * SignedData ::= SEQUENCE {
+     *   version Version,
+     *   digestAlgorithms DigestAlgorithmIdentifiers,
+     *   contentInfo ContentInfo,
+     *   certificates
+     *     [0] IMPLICIT ExtendedCertificatesAndCertificates OPTIONAL,
+     *   crls
+     *     [1] IMPLICIT CertificateRevocationLists OPTIONAL,
+     *   signerInfos SignerInfos }
+     */
+    interface ISignedData {
+        GetCertificates(
+            [out] IList** certificate);
+
+        GetCRLs(
+            [out] IList** crls);
+
+        GetSignerInfos(
+            [out] IList** signerInfo);
+
+        GetVersion(
+            [out] Int32* ver);
+    }
+
+    interface ISignedDataHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace Pkcs7
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

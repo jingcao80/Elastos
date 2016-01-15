@@ -1,0 +1,47 @@
+
+module
+{
+    interface Elastos.Droid.InputMethodService.IInputMethodService;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InputMethodService {
+
+
+    /***
+     * Specialization of {@link EditText} for showing and interacting with the
+     * extracted text in a full-screen input method.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IEditText
+     */
+    interface IExtractEditText {
+        SetIME(
+            [in] IInputMethodService* ime);
+
+        /**
+         * Start making changes that will not be reported to the client.  That
+         * is, {@link #onSelectionChanged(int, int)} will not result in sending
+         * the new selection to the client
+         */
+        StartInternalChanges();
+
+        /**
+         * Finish making changes that will not be reported to the client.  That
+         * is, {@link #onSelectionChanged(int, int)} will not result in sending
+         * the new selection to the client
+         */
+        FinishInternalChanges();
+
+        /**
+         * Return true if the edit text is currently showing a scroll bar.
+         */
+        HasVerticalScrollBar(
+            [out] Boolean* has);
+    }
+
+    } // namespace InputMethodService
+    } // namespace Droid
+    } // namespace Elastos
+}

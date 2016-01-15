@@ -1,0 +1,105 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IPathPermission;
+    interface Elastos.Droid.Os.IPatternMatcher;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Holds information about a specific content provider. This is returned by PackageManager.resolveContentProvider().
+     *
+     * @sa content provider
+     * @sa PackageManager.resolveContentProvider()
+     * @implements Elastos.Droid.Content.Pm.Elastos.Droid.Content.Pm.IComponentInfo
+     */
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.Pm.IComponentInfo
+     * interface Elastos.Droid.Content.Pm.IPackageItemInfo
+     */
+    [deprecated]
+    interface IProviderInfo {
+        /**
+         * Bit in #flags: If set, a single instance of the provider will
+         * run for all users on the device.  Set from the
+         * android.R.attr#singleUser attribute.
+         *
+         * @sa #flags
+         * @sa android.R.attr#singleUser
+         */
+        const Int32 FLAG_SINGLE_USER = 0x40000000;
+
+        ToString(
+            [out] String* str);
+
+        GetAuthority(
+            [out] String* authority);
+
+        SetAuthority(
+            [in] String authority);
+
+        GetReadPermission(
+            [out] String* readPermission);
+
+        SetReadPermission(
+            [in] String readPermission);
+
+        GetWritePermission(
+            [out] String* writePermission);
+
+        SetWritePermission(
+            [in] String writePermission);
+
+        GetGrantUriPermissions(
+            [out] Boolean* grantUriPermissions);
+
+        SetGrantUriPermissions(
+            [in] Boolean grantUriPermissions);
+
+        GetUriPermissionPatterns(
+            [out, callee] ArrayOf<IPatternMatcher*>* patterns);
+
+        SetUriPermissionPatterns(
+            [in] ArrayOf<IPatternMatcher*>* patterns);
+
+        GetPathPermissions(
+            [out, callee] ArrayOf<IPathPermission*>* pathPermissions);
+
+        SetPathPermissions(
+            [in] ArrayOf<IPathPermission*>* pathPermissions);
+
+        GetMultiprocess(
+            [out] Boolean* multiprocess);
+
+        SetMultiprocess(
+            [in] Boolean multiprocess);
+
+        GetInitOrder(
+            [out] Int32* initOrder);
+
+        SetInitOrder(
+            [in] Int32 initOrder);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        GetIsSyncable(
+            [out] Boolean* isSyncable);
+
+        SetIsSyncable(
+            [in] Boolean isSyncable);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,17 @@
+module
+{
+    interface Elastos.Droid.Commands.Monkey.IMonkeyEventSource;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Monkey {
+
+    interface IMonkeySourceRandomScript extends IMonkeyEventSource {
+    }
+
+    } //namespace Monkey
+    } //namespace Commands
+    } //namespace Droid
+    } //namespace Elastos
+}

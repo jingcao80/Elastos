@@ -1,0 +1,91 @@
+module
+{
+    interface Elastos.Droid.Text.IEditable;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IKeyEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    /**
+     * Interface for converting text key events into edit operations on an
+     * Editable class.  Note that for must cases this interface has been
+     * superceded by general soft input methods as defined by
+     * {@link android.view.inputmethod.InputMethod}; it should only be used
+     * for cases where an application has its own on-screen keypad and also wants
+     * to process hard keyboard events to match it.
+     */
+    [local]
+    interface IKeyListener {
+        /**
+         * Return the type of text that this key listener is manipulating,
+         * as per {@link android.text.InputType}.  This is used to
+         * determine the mode of the soft keyboard that is shown for the editor.
+         *
+         * <p>If you return
+         * {@link android.text.InputType#TYPE_NULL}
+         * then <em>no</em> soft keyboard will provided.  In other words, you
+         * must be providing your own key pad for on-screen input and the key
+         * listener will be used to handle input from a hard keyboard.
+         *
+         * <p>If you
+         * return any other value, a soft input method will be created when the
+         * user puts focus in the editor, which will provide a keypad and also
+         * consume hard key events.  This means that the key listener will generally
+         * not be used, instead the soft input method will take care of managing
+         * key input as per the content type returned here.
+         */
+        GetInputType(
+            [out] Int32* type);
+
+        /**
+         * If the key listener wants to handle this key, return true,
+         * otherwise return false and the caller (i.e.&nbsp;the widget host)
+         * will handle the key.
+         */
+        OnKeyDown(
+            [in] IView* view,
+            [in] IEditable* text,
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * If the key listener wants to handle this key release, return true,
+         * otherwise return false and the caller (i.e.&nbsp;the widget host)
+         * will handle the key.
+         */
+        OnKeyUp(
+            [in] IView* view,
+            [in] IEditable* text,
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * If the key listener wants to other kinds of key events, return true,
+         * otherwise return false and the caller (i.e.&nbsp;the widget host)
+         * will handle the key.
+         */
+        OnKeyOther(
+            [in] IView* view,
+            [in] IEditable* text,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * Remove the given shift states from the edited text.
+         */
+        ClearMetaKeyState(
+            [in] IView* view,
+            [in] IEditable* content,
+            [in] Int32 states);
+    }
+
+    }//namespace Method
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

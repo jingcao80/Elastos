@@ -1,0 +1,40 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+
+    /**
+     * Socket factory that implements a simple multi-home fail-over on connect failure,
+     * provided the same hostname resolves to multiple {@link InetAddress}es. Please note
+     * the {@link #connectSocket(Socket, String, int, InetAddress, int, HttpParams)}
+     * method cannot be reliably interrupted by closing the socket returned by the
+     * {@link #createSocket()} method.
+     */
+    /**
+     * @Involve
+     * interface SocketFactory;
+     */
+    interface IMultihomePlainSocketFactory {
+    }
+
+    interface IMultihomePlainSocketFactoryHelper {
+
+        /**
+         * Gets the singleton instance of this class.
+         * @return the one and only plain socket factory
+         */
+        GetSocketFactory(
+            [out] IMultihomePlainSocketFactory** factory);
+
+    }
+
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

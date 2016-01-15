@@ -1,0 +1,909 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Utility.ISparseBooleanArray;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IActionMode;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+    interface Elastos.Droid.Widget.IRemoteViewsOnClickHandler;
+    interface Elastos.Droid.Widget.IAbsListView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Interface definition for a callback to be invoked when the list or grid
+     * has been scrolled.
+     */
+    interface IAbsListViewOnScrollListener {
+
+        /**
+         * The view is not scrolling. Note navigating the list using the trackball counts as
+         * being in the idle state since these transitions are not animated.
+         */
+        const Int32 SCROLL_STATE_IDLE = 0;
+
+        /**
+         * The user is scrolling using touch, and their finger is still on the screen
+         */
+        const Int32 SCROLL_STATE_TOUCH_SCROLL = 1;
+
+        /**
+         * The user had previously been scrolling using touch and had performed a fling. The
+         * animation is now coasting to a stop
+         */
+        const Int32 SCROLL_STATE_FLING = 2;
+
+        /**
+         * Callback method to be invoked while the list view or grid view is being scrolled. If the
+         * view is being scrolled, this method will be called before the next frame of the scroll is
+         * rendered. In particular, it will be called before any calls to
+         * {@link Adapter#getView(Int32, View, ViewGroup)}.
+         *
+         * @param view The view whose scroll state is being reported
+         *
+         * @param scrollState The current scroll state. One of
+         * {@link #SCROLL_STATE_TOUCH_SCROLL} or {@link #SCROLL_STATE_IDLE}.
+         */
+        OnScrollStateChanged(
+            [in] IAbsListView* view,
+            [in] Int32 scrollState);
+
+        /**
+         * Callback method to be invoked when the list or grid has been scrolled. This will be
+         * called after the scroll has completed
+         * @param view The view whose scroll state is being reported
+         * @param firstVisibleItem the index of the first visible cell (ignore if
+         *        visibleItemCount == 0)
+         * @param visibleItemCount the number of visible cells
+         * @param totalItemCount the number of items in the list adaptor
+         */
+        OnScroll(
+            [in] IAbsListView* view,
+            [in] Int32 firstVisibleItem,
+            [in] Int32 visibleItemCount,
+            [in] Int32 totalItemCount);
+    }
+
+    /**
+     * The top-level view of a list item can implement this interface to allow
+     * itself to modify the bounds of the selection shown for that item.
+     */
+    interface ISelectionBoundsAdjuster {
+        /**
+         * Called to allow the list item to adjust the bounds shown for
+         * its selection.
+         *
+         * @param bounds On call, this contains the bounds the list has
+         * selected for the item (that is the bounds of the entire view).  The
+         * values can be modified as desired.
+         */
+        AdjustListItemSelectionBounds(
+            [in] IRect* bounds);
+    }
+
+    /**
+     * A MultiChoiceModeListener receives events for {@link AbsListView#CHOICE_MODE_MULTIPLE_MODAL}.
+     * It acts as the {@link ActionMode.Callback} for the selection mode and also receives
+     * {@link #onItemCheckedStateChanged(ActionMode, int, long, boolean)} events when the user
+     * selects and deselects list items.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IActionModeCallback
+     */
+    interface IMultiChoiceModeListener {
+        /**
+         * Called when an item is checked or unchecked during selection mode.
+         *
+         * @param mode The {@link ActionMode} providing the selection mode
+         * @param position Adapter position of the item that was checked or unchecked
+         * @param id Adapter ID of the item that was checked or unchecked
+         * @param checked <code>true</code> if the item is now checked, <code>false</code>
+         *                if the item is now unchecked.
+         */
+        OnItemCheckedStateChanged(
+            [in] IActionMode* mode,
+            [in] Int32 position,
+            [in] Int64 id,
+            [in] Boolean checked);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface IAbsListViewSavedState {
+
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupLayoutParams
+     */
+    interface IAbsListViewLayoutParams {
+        GetViewType(
+            [out] Int32* viewType);
+
+        SetViewType(
+            [in] Int32 viewType);
+
+        GetRecycledHeaderFooter(
+            [out] Boolean* footer);
+
+        SetRecycledHeaderFooter(
+            [in] Boolean footer);
+
+        GetForceAdd(
+            [out] Boolean* force);
+
+        SetForceAdd(
+            [in] Boolean force);
+
+        GetItemId(
+            [out] Int64* itemId);
+
+        SetItemId(
+            [in] Int64 itemId);
+
+        GetScrappedFromPosition(
+            [out] Int32* scrappedFromPosition);
+
+        SetScrappedFromPosition(
+            [in]  Int32 scrappedFromPosition);
+    }
+
+    /**
+     * A RecyclerListener is used to receive a notification whenever a View is placed
+     * inside the RecycleBin's scrap heap. This listener is used to free resources
+     * associated to Views placed in the RecycleBin.
+     *
+     * @see android.widget.AbsListView.RecycleBin
+     * @see android.widget.AbsListView#setRecyclerListener(android.widget.AbsListView.RecyclerListener)
+     */
+    [local]
+    interface IRecyclerListener {
+        /**
+         * Indicates that the specified View was moved into the recycler's scrap heap.
+         * The view is not displayed on screen any more and any expensive resource
+         * associated with the view should be discarded.
+         *
+         * @param view
+         */
+        OnMovedToScrapHeap(
+            [in] IView* view);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     *
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IOnGlobalLayoutListener
+     * interface Elastos.Droid.View.IOnTouchModeChangeListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface IAbsListView {
+
+        /**
+         * Disables the transcript mode.
+         *
+         * @see #setTranscriptMode(Int32)
+         */
+        const Int32 AbsListView_TRANSCRIPT_MODE_DISABLED = 0;
+        /**
+         * The list will automatically scroll to the bottom when a data set change
+         * notification is received and only if the last item is already visible
+         * on screen.
+         *
+         * @see #setTranscriptMode(Int32)
+         */
+        const Int32 AbsListView_TRANSCRIPT_MODE_NORMAL = 1;
+        /**
+         * The list will automatically scroll to the bottom, no matter what items
+         * are currently visible.
+         *
+         * @see #setTranscriptMode(Int32)
+         */
+        const Int32 AbsListView_TRANSCRIPT_MODE_ALWAYS_SCROLL = 2;
+
+        /**
+         * Normal list that does not indicate choices
+         */
+        const Int32 CHOICE_MODE_NONE = 0;
+
+        /**
+         * The list allows up to one choice
+         */
+        const Int32 CHOICE_MODE_SINGLE = 1;
+
+        /**
+         * The list allows multiple choices
+         */
+        const Int32 CHOICE_MODE_MULTIPLE = 2;
+
+        /**
+         * The list allows multiple choices in a modal selection mode
+         */
+        const Int32 CHOICE_MODE_MULTIPLE_MODAL = 3;
+
+        /**
+         * Returns the number of items currently selected. This will only be valid
+         * if the choice mode is not {@link #CHOICE_MODE_NONE} (default).
+         *
+         * <p>To determine the specific items that are currently selected, use one of
+         * the <code>getChecked*</code> methods.
+         *
+         * @return The number of items currently selected
+         *
+         * @see #getCheckedItemPosition()
+         * @see #getCheckedItemPositions()
+         * @see #getCheckedItemIds()
+         */
+        GetCheckedItemCount(
+            [out] Int32* count);
+
+        /**
+         * Returns the checked state of the specified position. The result is only
+         * valid if the choice mode has been set to {@link #CHOICE_MODE_SINGLE}
+         * or {@link #CHOICE_MODE_MULTIPLE}.
+         *
+         * @param position The item whose checked state to return
+         * @return The item's checked state or <code>false</code> if choice mode
+         *         is invalid
+         *
+         * @see #setChoiceMode(int)
+         */
+        IsItemChecked(
+            [in] Int32 position,
+            [out] Boolean* checked);
+
+        /**
+         * Returns the currently checked item. The result is only valid if the choice
+         * mode has been set to {@link #CHOICE_MODE_SINGLE}.
+         *
+         * @return The position of the currently checked item or
+         *         {@link #INVALID_POSITION} if nothing is selected
+         *
+         * @see #setChoiceMode(int)
+         */
+        GetCheckedItemPosition(
+            [out] Int32* pos);
+
+        /**
+         * Returns the set of checked items in the list. The result is only valid if
+         * the choice mode has not been set to {@link #CHOICE_MODE_NONE}.
+         *
+         * @return  A SparseBooleanArray which will return true for each call to
+         *          get(int position) where position is a checked position in the
+         *          list and false otherwise, or <code>null</code> if the choice
+         *          mode is set to {@link #CHOICE_MODE_NONE}.
+         */
+        GetCheckedItemPositions(
+            [out] ISparseBooleanArray** arr);
+
+        /**
+         * Returns the set of checked items ids. The result is only valid if the
+         * choice mode has not been set to {@link #CHOICE_MODE_NONE} and the adapter
+         * has stable IDs. ({@link ListAdapter#hasStableIds()} == {@code true})
+         *
+         * @return A new array which contains the id of each checked item in the
+         *         list.
+         */
+        GetCheckedItemIds(
+            [out, callee] ArrayOf<Int64>* arr);
+
+        /**
+         * Clear any choices previously set
+         */
+        ClearChoices();
+
+        /**
+         * Sets the checked state of the specified position. The is only valid if
+         * the choice mode has been set to {@link #CHOICE_MODE_SINGLE} or
+         * {@link #CHOICE_MODE_MULTIPLE}.
+         *
+         * @param position The item whose checked state is to be checked
+         * @param value The new checked state for the item
+         */
+        SetItemChecked(
+            [in] Int32 position,
+            [in] Boolean value);
+
+        /**
+         * @see #setChoiceMode(int)
+         *
+         * @return The current choice mode
+         */
+        GetChoiceMode(
+            [out] Int32* mode);
+
+        /**
+         * Defines the choice behavior for the List. By default, Lists do not have any choice behavior
+         * ({@link #CHOICE_MODE_NONE}). By setting the choiceMode to {@link #CHOICE_MODE_SINGLE}, the
+         * List allows up to one item to  be in a chosen state. By setting the choiceMode to
+         * {@link #CHOICE_MODE_MULTIPLE}, the list allows any number of items to be chosen.
+         *
+         * @param choiceMode One of {@link #CHOICE_MODE_NONE}, {@link #CHOICE_MODE_SINGLE}, or
+         * {@link #CHOICE_MODE_MULTIPLE}
+         */
+        SetChoiceMode(
+            [in] Int32 choiceMode);
+
+        /**
+         * Set a {@link MultiChoiceModeListener} that will manage the lifecycle of the
+         * selection {@link ActionMode}. Only used when the choice mode is set to
+         * {@link #CHOICE_MODE_MULTIPLE_MODAL}.
+         *
+         * @param listener Listener that will manage the selection mode
+         *
+         * @see #setChoiceMode(int)
+         */
+        SetMultiChoiceModeListener(
+            [in] IMultiChoiceModeListener* listener);
+
+        /**
+         * Specifies whether fast scrolling is enabled or disabled.
+         * <p>
+         * When fast scrolling is enabled, the user can quickly scroll through lists
+         * by dragging the fast scroll thumb.
+         * <p>
+         * If the adapter backing this list implements {@link SectionIndexer}, the
+         * fast scroller will display section header previews as the user scrolls.
+         * Additionally, the user will be able to quickly jump between sections by
+         * tapping along the length of the scroll bar.
+         *
+         * @see SectionIndexer
+         * @see #isFastScrollEnabled()
+         * @param enabled true to enable fast scrolling, false otherwise
+         */
+        SetFastScrollEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Specifies the style of the fast scroller decorations.
+         *
+         * @param styleResId style resource containing fast scroller properties
+         * @see android.R.styleable#FastScroll
+         */
+        SetFastScrollStyle(
+            [in] Int32 styleResId);
+
+        /**
+         * Set whether or not the fast scroller should always be shown in place of
+         * the standard scroll bars. This will enable fast scrolling if it is not
+         * already enabled.
+         * <p>
+         * Fast scrollers shown in this way will not fade out and will be a
+         * permanent fixture within the list. This is best combined with an inset
+         * scroll bar style to ensure the scroll bar does not overlap content.
+         *
+         * @param alwaysShow true if the fast scroller should always be displayed,
+         *            false otherwise
+         * @see #setScrollBarStyle(int)
+         * @see #setFastScrollEnabled(boolean)
+         */
+        SetFastScrollAlwaysVisible(
+            [in] Boolean alwaysShow);
+
+        /**
+         * Returns true if the fast scroller is set to always show on this view.
+         *
+         * @return true if the fast scroller will always show
+         * @see #setFastScrollAlwaysVisible(boolean)
+         */
+        IsFastScrollAlwaysVisible(
+            [out] Boolean* visible);
+
+        /**
+         * Returns true if the fast scroller is enabled.
+         *
+         * @see #setFastScrollEnabled(boolean)
+         * @return true if fast scroll is enabled, false otherwise
+         */
+        // @ViewDebug.ExportedProperty
+        IsFastScrollEnabled(
+            [out] Boolean* isEnabled);
+
+        /**
+         * When smooth scrollbar is enabled, the position and size of the scrollbar thumb
+         * is computed based on the number of visible pixels in the visible items. This
+         * however assumes that all list items have the same height. If you use a list in
+         * which items have different heights, the scrollbar will change appearance as the
+         * user scrolls through the list. To avoid this issue, you need to disable this
+         * property.
+         *
+         * When smooth scrollbar is disabled, the position and size of the scrollbar thumb
+         * is based solely on the number of items in the adapter and the position of the
+         * visible items inside the adapter. This provides a stable scrollbar as the user
+         * navigates through a list of items with varying heights.
+         *
+         * @param enabled Whether or not to enable smooth scrollbar.
+         *
+         * @see #setSmoothScrollbarEnabled(Boolean)
+         * @attr ref android.R.styleable#AbsListView_smoothScrollbar
+         */
+        SetSmoothScrollbarEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Returns the current state of the fast scroll feature.
+         *
+         * @return True if smooth scrollbar is enabled is enabled, FALSE otherwise.
+         *
+         * @see #setSmoothScrollbarEnabled(Boolean)
+         */
+        IsSmoothScrollbarEnabled(
+            [out] Boolean* isEnabled);
+
+        /**
+         * Set the listener that will receive notifications every time the list scrolls.
+         *
+         * @param l the scroll listener
+         */
+        SetOnScrollListener(
+            [in] IAbsListViewOnScrollListener* l);
+
+        /**
+         * Indicates whether the children's drawing cache is used during a scroll.
+         * By default, the drawing cache is enabled but this will consume more memory.
+         *
+         * @return TRUE if the scrolling cache is enabled, FALSE otherwise
+         *
+         * @see #setScrollingCacheEnabled(Boolean)
+         * @see View#setDrawingCacheEnabled(Boolean)
+         */
+        IsScrollingCacheEnabled(
+            [out] Boolean* isEnabled);
+
+        /**
+         * Enables or disables the children's drawing cache during a scroll.
+         * By default, the drawing cache is enabled but this will use more memory.
+         *
+         * When the scrolling cache is enabled, the caches are kept after the
+         * first scrolling. You can manually clear the cache by calling
+         * {@link android.view.ViewGroup#setChildrenDrawingCacheEnabled(Boolean)}.
+         *
+         * @param enabled TRUE to enable the scroll cache, FALSE otherwise
+         *
+         * @see #isScrollingCacheEnabled()
+         * @see View#setDrawingCacheEnabled(Boolean)
+         */
+        SetScrollingCacheEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Enables or disables the type filter window. If enabled, typing when
+         * this view has focus will filter the children to match the users input.
+         * Note that the {@link Adapter} used by this view must implement the
+         * {@link Filterable} interface.
+         *
+         * @param textFilterEnabled TRUE to enable type filtering, FALSE otherwise
+         *
+         * @see Filterable
+         */
+        SetTextFilterEnabled(
+            [in] Boolean textFilterEnabled);
+
+        /**
+         * Indicates whether type filtering is enabled for this view
+         *
+         * @return TRUE if type filtering is enabled, FALSE otherwise
+         *
+         * @see #setTextFilterEnabled(Boolean)
+         * @see Filterable
+         */
+        IsTextFilterEnabled(
+            [out] Boolean* isEnabled);
+
+        /**
+         * Indicates whether the content of this view is pinned to, or stacked from,
+         * the bottom edge.
+         *
+         * @return TRUE if the content is stacked from the bottom edge, FALSE otherwise
+         */
+        IsStackFromBottom(
+            [out] Boolean* isStackFromBottom);
+
+        /**
+         * When stack from bottom is set to TRUE, the list fills its content starting from
+         * the bottom of the view.
+         *
+         * @param stackFromBottom TRUE to pin the view's content to the bottom edge,
+         *        FALSE to pin the view's content to the top edge
+         */
+        SetStackFromBottom(
+            [in] Boolean stackFromBottom);
+
+        /**
+         * Sets the initial value for the text filter.
+         * @param filterText The text to use for the filter.
+         *
+         * @see #setTextFilterEnabled
+         */
+        SetFilterText(
+            [in] String filterText);
+
+        /**
+         * Returns the list's text filter, if available.
+         * @return the list's text filter or NULL if filtering isn't enabled
+         */
+        GetTextFilter(
+            [out] ICharSequence** textFilter);
+
+        /**
+         * List padding is the maximum of the normal view's padding and the padding of the selector.
+         *
+         * @see android.view.View#getPaddingTop()
+         * @see #getSelector()
+         *
+         * @return The top list padding.
+         */
+        GetListPaddingTop(
+            [out] Int32* top);
+
+        /**
+         * List padding is the maximum of the normal view's padding and the padding of the selector.
+         *
+         * @see android.view.View#getPaddingBottom()
+         * @see #getSelector()
+         *
+         * @return The bottom list padding.
+         */
+        GetListPaddingBottom(
+            [out] Int32* bottom);
+
+        /**
+         * List padding is the maximum of the normal view's padding and the padding of the selector.
+         *
+         * @see android.view.View#getPaddingLeft()
+         * @see #getSelector()
+         *
+         * @return The left list padding.
+         */
+        GetListPaddingLeft(
+            [out] Int32* left);
+
+        /**
+         * List padding is the maximum of the normal view's padding and the padding of the selector.
+         *
+         * @see android.view.View#getPaddingRight()
+         * @see #getSelector()
+         *
+         * @return The right list padding.
+         */
+        GetListPaddingRight(
+            [out] Int32* right);
+
+        /**
+         * Initializes an {@link AccessibilityNodeInfo} with information about a
+         * particular item in the list.
+         *
+         * @param view View representing the list item.
+         * @param position Position of the list item within the adapter.
+         * @param info Node info to populate.
+         */
+        OnInitializeAccessibilityNodeInfoForItem(
+            [in] IView* view,
+            [in] Int32 position,
+            [in] IAccessibilityNodeInfo* info);
+
+        /**
+         * Controls whether the selection highlight drawable should be drawn on top of the item or
+         * behind it.
+         *
+         * @param onTop If TRUE, the selector will be drawn on the item it is highlighting. The default
+         *        is FALSE.
+         *
+         * @attr ref android.R.styleable#AbsListView_drawSelectorOnTop
+         */
+        SetDrawSelectorOnTop(
+            [in] Boolean onTop);
+
+        /**
+         * Set a Drawable that should be used to highlight the currently selected item.
+         *
+         * @param resID A Drawable resource to use as the selection highlight.
+         *
+         * @attr ref android.R.styleable#AbsListView_listSelector
+         */
+        SetSelector(
+            [in] Int32 resID);
+
+        SetSelector(
+            [in] IDrawable* sel);
+
+        /**
+         * Returns the selector {@link android.graphics.drawable.Drawable} that is used to draw the
+         * selection in the list.
+         *
+         * @return the drawable used to display the selector
+         */
+        GetSelector(
+            [out] IDrawable** selector);
+
+        SetScrollIndicators(
+            [in] IView* up,
+            [in] IView* down);
+
+        /**
+         * Maps a point to a position in the list.
+         *
+         * @param x X in local coordinate
+         * @param y Y in local coordinate
+         * @return The position of the item which contains the specified point, or
+         *         {@link #AdapterView_INVALID_POSITION} if the point does not intersect an item.
+         */
+        PointToPosition(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Int32* position);
+
+        /**
+         * Maps a point to a the rowId of the item which intersects that point.
+         *
+         * @param x X in local coordinate
+         * @param y Y in local coordinate
+         * @return The rowId of the item which contains the specified point, or {@link #AdapterView_INVALID_ROW_ID}
+         *         if the point does not intersect an item.
+         */
+        PointToRowId(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Int64* rowId);
+
+        /**
+         * Initiate a fling with the given velocity.
+         *
+         * <p>Applications can use this method to manually initiate a fling as if the user
+         * initiated it via touch interaction.</p>
+         *
+         * @param velocityY Vertical velocity in pixels per second. Note that this is velocity of
+         *                  content, not velocity of a touch that initiated the fling.
+         */
+        Fling(
+            [in] Int32 velocityY);
+
+        /**
+         * @hide
+         */
+        SetOverScrollEffectPadding(
+            [in] Int32 leftPadding,
+            [in] Int32 rightPadding);
+
+        /**
+         * The amount of friction applied to flings. The default value
+         * is {@link ViewConfiguration#getScrollFriction}.
+         */
+        SetFriction(
+            [in] Float friction);
+
+        /**
+         * Sets a scale factor for the fling velocity. The initial scale
+         * factor is 1.0.
+         *
+         * @param scale The scale factor to multiply the velocity by.
+         */
+        SetVelocityScale(
+            [in] Float scale);
+
+        /**
+         * Smoothly scroll to the specified adapter position. The view will
+         * scroll such that the indicated position is displayed.
+         * @param position Scroll to this adapter position.
+         */
+        SmoothScrollToPosition(
+            [in] Int32 position);
+
+        /**
+         * Smoothly scroll to the specified adapter position. The view will
+         * scroll such that the indicated position is displayed, but it will
+         * stop early if scrolling further would scroll boundPosition out of
+         * view.
+         * @param position Scroll to this adapter position.
+         * @param boundPosition Do not scroll if it would move this adapter
+         *          position out of view.
+         */
+        SmoothScrollToPosition(
+            [in] Int32 position,
+            [in] Int32 boundPosition);
+
+        /**
+         * Smoothly scroll to the specified adapter position. The view will scroll
+         * such that the indicated position is displayed <code>offset</code> pixels below
+         * the top edge of the view. If this is impossible, (e.g. the offset would scroll
+         * the first or last item beyond the boundaries of the list) it will get as close
+         * as possible. The scroll will take <code>duration</code> milliseconds to complete.
+         *
+         * @param position Position to scroll to
+         * @param offset Desired distance in pixels of <code>position</code> from the top
+         *               of the view when scrolling is finished
+         * @param duration Number of milliseconds to use for the scroll
+         */
+        SmoothScrollToPositionFromTop(
+            [in] Int32 position,
+            [in] Int32 offset,
+            [in] Int32 duration);
+
+        /**
+         * Smoothly scroll to the specified adapter position. The view will scroll
+         * such that the indicated position is displayed <code>offset</code> pixels below
+         * the top edge of the view. If this is impossible, (e.g. the offset would scroll
+         * the first or last item beyond the boundaries of the list) it will get as close
+         * as possible.
+         *
+         * @param position Position to scroll to
+         * @param offset Desired distance in pixels of <code>position</code> from the top
+         *               of the view when scrolling is finished
+         */
+        SmoothScrollToPositionFromTop(
+            [in] Int32 position,
+            [in] Int32 offset);
+
+        /**
+         * Smoothly scroll by distance pixels over duration milliseconds.
+         * @param distance Distance to scroll in pixels.
+         * @param duration Duration of the scroll animation in milliseconds.
+         */
+        SmoothScrollBy(
+            [in] Int32 distance,
+            [in] Int32 duration);
+
+        /**
+         * Scrolls the list items within the view by a specified number of pixels.
+         *
+         * @param y the amount of pixels to scroll by vertically
+         * @see #canScrollList(int)
+         */
+        ScrollListBy(
+            [in] Int32 y);
+
+        /**
+         * Check if the items in the list can be scrolled in a certain direction.
+         *
+         * @param direction Negative to check scrolling up, positive to check
+         *            scrolling down.
+         * @return true if the list can be scrolled in the specified direction,
+         *         false otherwise.
+         * @see #scrollListBy(int)
+         */
+        CanScrollList(
+            [in] Int32 direction,
+            [out] Boolean* canScrollList);
+
+        /**
+         * Causes all the views to be rebuilt and redrawn.
+         */
+        InvalidateViews();
+
+        /**
+         * Clear the text filter.
+         */
+        ClearTextFilter();
+
+        /**
+         * Returns if the ListView currently has a text filter.
+         */
+        HasTextFilter(
+            [out] Boolean* hasTextFilter);
+
+        /**
+         * Puts the list or grid into transcript mode. In this mode the list or grid will always scroll
+         * to the bottom to show new items.
+         *
+         * @param mode the transcript mode to set
+         *
+         * @see #AbsListView_TRANSCRIPT_MODE_DISABLED
+         * @see #AbsListView_TRANSCRIPT_MODE_NORMAL
+         * @see #AbsListView_TRANSCRIPT_MODE_ALWAYS_SCROLL
+         */
+        SetTranscriptMode(
+            [in] Int32 mode);
+
+        /**
+         * Returns the current transcript mode.
+         *
+         * @return {@link #AbsListView_TRANSCRIPT_MODE_DISABLED}, {@link #AbsListView_TRANSCRIPT_MODE_NORMAL} or
+         *         {@link #AbsListView_TRANSCRIPT_MODE_ALWAYS_SCROLL}
+         */
+        GetTranscriptMode(
+            [out] Int32* mode);
+
+        /**
+         * When set to a non-zero value, the cache color hint indicates that this list is always drawn
+         * on top of a solid, single-color, opaque background
+         *
+         * @param color The background color
+         */
+        SetCacheColorHint(
+            [in] Int32 color);
+
+        /**
+         * When set to a non-zero value, the cache color hint indicates that this list is always drawn
+         * on top of a solid, single-color, opaque background
+         *
+         * @return The cache color hint
+         */
+        GetCacheColorHint(
+            [out] Int32* colorHint);
+
+        /**
+         * Move all views (excluding headers and footers) held by this AbsListView into the supplied
+         * List. This includes views displayed on the screen as well as views stored in AbsListView's
+         * internal view recycler.
+         *
+         * @param views A list into which to put the reclaimed views
+         */
+        ReclaimViews(
+            [in] IList* views);
+
+        /**
+         * Sets up this AbsListView to use a remote views adapter which connects to a RemoteViewsService
+         * through the specified intent.
+         * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
+         */
+        SetRemoteViewsAdapter(
+            [in] IIntent* intent);
+
+        /**
+         * Sets up the onClickHandler to be used by the RemoteViewsAdapter when inflating RemoteViews
+         *
+         * @param handler The OnClickHandler to use when inflating RemoteViews.
+         *
+         * @hide
+         */
+        SetRemoteViewsOnClickHandler(
+            [in] IRemoteViewsOnClickHandler* handler);
+
+        /**
+         * Sets the recycler listener to be notified whenever a View is set aside in
+         * the recycler for later reuse. This listener can be used to free resources
+         * associated to the View.
+         *
+         * @param listener The recycler listener to be notified of views set aside
+         *        in the recycler.
+         *
+         * @see android.widget.AbsListView.RecycleBin
+         * @see android.widget.AbsListView.RecyclerListener
+         */
+        SetRecyclerListener(
+            [in] IRecyclerListener* listener);
+
+        /**
+         * Sets the selected item and positions the selection y pixels from the top edge
+         * of the ListView. (If in touch mode, the item will not be selected but it will
+         * still be positioned appropriately.)
+         *
+         * @param position Index (starting at 0) of the data item to be selected.
+         * @param y The distance from the top edge of the ListView (plus padding) that the
+         *        item will be positioned.
+         */
+        SetSelectionFromTop(
+            [in] Int32 position,
+            [in] Int32 y);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

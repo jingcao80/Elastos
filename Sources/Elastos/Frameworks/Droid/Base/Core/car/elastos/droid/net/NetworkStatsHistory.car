@@ -1,0 +1,231 @@
+
+module
+{
+    interface Elastos.Droid.Internal.Utility.IIndentingPrintWriter;
+    interface Elastos.Droid.Net.INetworkStatsHistoryEntry;
+
+    using interface Elastos.IO.IDataOutputStream;
+    using interface Elastos.Utility.IRandom;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Collection of historical network statistics, recorded into equally-sized
+     * "buckets" in time. Internally it stores data in {@code long} series for more
+     * efficient persistence.
+     * <p>
+     * Each bucket is defined by a {@link #bucketStart} timestamp, and lasts for
+     * {@link #bucketDuration}. Internally assumes that {@link #bucketStart} is
+     * sorted at all times.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [local, parcelable]
+    interface INetworkStatsHistory {
+        const Int32 FIELD_ACTIVE_TIME = 0x01;
+
+        const Int32 FIELD_RX_BYTES = 0x02;
+
+        const Int32 FIELD_RX_PACKETS = 0x04;
+
+        const Int32 FIELD_TX_BYTES = 0x08;
+
+        const Int32 FIELD_TX_PACKETS = 0x10;
+
+        const Int32 FIELD_OPERATIONS = 0x20;
+
+        const Int32 FIELD_ALL = 0xFFFFFFFF;
+
+        WriteToStream(
+            [in] IDataOutputStream* dos);
+
+        GetSize(
+            [out] Int32* result);
+
+        GetBucketDuration(
+            [out] Int64* result);
+
+        GetStart(
+            [out] Int64* result);
+
+        GetEnd(
+            [out] Int64* result);
+
+        /**
+         * Return total bytes represented by this history.
+         */
+        GetTotalBytes(
+            [out] Int64* result);
+
+        /**
+         * Return index of bucket that contains or is immediately before the
+         * requested time.
+         */
+        GetIndexBefore(
+            [in] Int64 time,
+            [out] Int32* result);
+
+        /**
+         * Return index of bucket that contains or is immediately after the
+         * requested time.
+         */
+        GetIndexAfter(
+            [in] Int64 time,
+            [out] Int32* result);
+
+        /**
+         * Return specific stats entry.
+         */
+        GetValues(
+            [in] Int32 i,
+            [in] INetworkStatsHistoryEntry* recycle,
+            [out] INetworkStatsHistoryEntry** result);
+
+        /**
+         * Record that data traffic occurred in the given time range. Will
+         * distribute across internal buckets, creating new buckets as needed.
+         */
+        RecordData(
+            [in] Int64 start,
+            [in] Int64 end,
+            [in] INetworkStatsEntry* entry);
+
+        /**
+         * Record an entire {@link NetworkStatsHistory} into this history. Usually
+         * for combining together stats for external reporting.
+         */
+        RecordEntireHistory(
+            [in] INetworkStatsHistory* input);
+
+        /**
+         * Record given {@link NetworkStatsHistory} into this history, copying only
+         * buckets that atomically occur in the inclusive time range. Doesn't
+         * interpolate across partial buckets.
+         */
+        RecordHistory(
+            [in] INetworkStatsHistory* input,
+            [in] Int64 start,
+            [in] Int64 end);
+
+        /**
+         * Remove buckets older than requested cutoff.
+         */
+        // @Deprecated
+        RemoveBucketsBefore(
+            [in] Int64 cutoff);
+
+        /**
+         * Return interpolated data usage across the requested range. Interpolates
+         * across buckets, so values may be rounded slightly.
+         */
+        GetValues(
+            [in] Int64 start,
+            [in] Int64 end,
+            [in] INetworkStatsHistoryEntry* recycle,
+            [out] INetworkStatsHistoryEntry** result);
+
+        /**
+         * Return interpolated data usage across the requested range. Interpolates
+         * across buckets, so values may be rounded slightly.
+         */
+        GetValues(
+            [in] Int64 start,
+            [in] Int64 end,
+            [in] Int64 now,
+            [in] INetworkStatsHistoryEntry* recycle,
+            [out] INetworkStatsHistoryEntry** result);
+
+        /**
+         * @deprecated only for temporary testing
+         */
+        // @Deprecated
+        GenerateRandom(
+            [in] Int64 start,
+            [in] Int64 end,
+            [in] Int64 bytes);
+
+        /**
+         * @deprecated only for temporary testing
+         */
+        // @Deprecated
+        GenerateRandom(
+            [in] Int64 start,
+            [in] Int64 end,
+            [in] Int64 rxBytes,
+            [in] Int64 rxPackets,
+            [in] Int64 txBytes,
+            [in] Int64 txPackets,
+            [in] Int64 operations,
+            [in] IRandom* r);
+
+        Dump(
+            [in] IIndentingPrintWriter* pw,
+            [in] Boolean fullHistory);
+
+        EstimateResizeBuckets(
+            [in] Int64 newBucketDuration,
+            [out] Int32* result);
+    }
+
+    interface INetworkStatsHistoryEntry {
+        const Int64 UNKNOWN = -1;
+
+        GetBucketDuration(
+            [out] Int64* result);
+
+        SetBucketDuration(
+            [in] Int64 bucketDuration);
+
+        GetBucketStart(
+            [out] Int64* result);
+
+        SetBucketStart(
+            [in] Int64 bucketStart);
+
+        GetActiveTime(
+            [out] Int64* result);
+
+        SetActiveTime(
+            [in] Int64 activeTime);
+
+        GetRxBytes(
+            [out] Int64* result);
+
+        SetRxBytes(
+            [in] Int64 rxBytes);
+
+        GetRxPackets(
+            [out] Int64* result);
+
+        SetRxPackets(
+            [in] Int64 rxPackets);
+
+        GetTxBytes(
+            [out] Int64* result);
+
+        SetTxBytes(
+            [in] Int64 txBytes);
+
+        GetTxPackets(
+            [out] Int64* result);
+
+        SetTxPackets(
+            [in] Int64 txPackets);
+
+        GetOperations(
+            [out] Int64* result);
+
+        SetOperations(
+            [in] Int64 operations);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

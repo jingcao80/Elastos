@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.Qs.IQSTileHost;
+    interface Elastos.Droid.Packages.SystemUI.Qs.IQSTile;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+    namespace Tiles {
+
+    /*
+     * @Involve
+     * interface IListenable
+     * interface IQSTile
+     */
+    interface IIntentTile {
+        const String PREFIX = "intent(";
+    }
+
+    [local]
+    interface IIntentTileHelper {
+        Create(
+            [in] IQSTileHost* host,
+            [in] String spec,
+            [out] IQSTile** ret);
+    }
+
+    } // namespace Tiles
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,50 @@
+
+TARGET_NAME= animation
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+SOURCES = Animator.cpp
+SOURCES += TypeConverter.cpp
+SOURCES += ValueAnimator.cpp
+SOURCES += AnimatorSet.cpp
+SOURCES += CAnimatorSet.cpp
+SOURCES += CArgbEvaluator.cpp
+SOURCES += CFloatEvaluator.cpp
+SOURCES += CInt32Evaluator.cpp
+SOURCES += CLayoutTransition.cpp
+SOURCES += CObjectAnimator.cpp
+SOURCES += ObjectAnimator.cpp
+SOURCES += CObjectAnimatorHelper.cpp
+SOURCES += CTimeAnimator.cpp
+SOURCES += CValueAnimator.cpp
+SOURCES += CValueAnimatorHelper.cpp
+SOURCES += AnimatorInflater.cpp
+SOURCES += AnimatorListenerAdapter.cpp
+SOURCES += CKeyframeHelper.cpp
+SOURCES += CLayoutTransition.cpp
+SOURCES += CAnimatorSetBuilder.cpp
+SOURCES += PropertyValuesHolder.cpp
+SOURCES += CPropertyValuesHolderHelper.cpp
+SOURCES += Int32PropertyValuesHolder.cpp
+SOURCES += FloatPropertyValuesHolder.cpp
+SOURCES += FloatKeyframeSet.cpp
+SOURCES += Int32KeyframeSet.cpp
+SOURCES += Keyframe.cpp
+SOURCES += KeyframeSet.cpp
+SOURCES += TimeAnimator.cpp
+SOURCES += BidirectionalTypeConverter.cpp
+SOURCES += FloatArrayEvaluator.cpp
+SOURCES += Int32ArrayEvaluator.cpp
+SOURCES += MultiFloatValuesHolder.cpp
+SOURCES += MultiInt32ValuesHolder.cpp
+SOURCES += PathKeyframes.cpp
+SOURCES += PointFEvaluator.cpp
+SOURCES += RectEvaluator.cpp
+SOURCES += RevealAnimator.cpp
+SOURCES += StateListAnimator.cpp

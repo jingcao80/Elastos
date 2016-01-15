@@ -1,0 +1,116 @@
+
+module
+{
+    interface Elastos.Droid.Media.IVolumeProviderCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * Handles requests to adjust or set the volume on a session. This is also used
+     * to push volume updates back to the session. The provider must call
+     * {@link #setCurrentVolume(int)} each time the volume being provided changes.
+     * <p>
+     * You can set a volume provider on a session by calling
+     * {@link MediaSession#setPlaybackToRemote}.
+     */
+    interface IVolumeProvider {
+        /**
+         * The volume is fixed and can not be modified. Requests to change volume
+         * should be ignored.
+         */
+        const Int32 VOLUME_CONTROL_FIXED = 0;
+
+        /**
+         * The volume control uses relative adjustment via
+         * {@link #onAdjustVolume(int)}. Attempts to set the volume to a specific
+         * value should be ignored.
+         */
+        const Int32 VOLUME_CONTROL_RELATIVE = 1;
+
+        /**
+         * The volume control uses an absolute value. It may be adjusted using
+         * {@link #onAdjustVolume(int)} or set directly using
+         * {@link #onSetVolumeTo(int)}.
+         */
+        const Int32 VOLUME_CONTROL_ABSOLUTE = 2;
+
+        /**
+         * Get the volume control type that this volume provider uses.
+         *
+         * @return The volume control type for this volume provider
+         */
+        GetVolumeControl(
+            [out] Int32 * result);
+
+        /**
+         * Get the maximum volume this provider allows.
+         *
+         * @return The max allowed volume.
+         */
+        GetMaxVolume(
+            [out] Int32 * result);
+
+        /**
+         * Gets the current volume. This will be the last value set by
+         * {@link #setCurrentVolume(int)}.
+         *
+         * @return The current volume.
+         */
+        GetCurrentVolume(
+            [out] Int32 * result);
+
+        /**
+         * Notify the system that the current volume has been changed. This must be
+         * called every time the volume changes to ensure it is displayed properly.
+         *
+         * @param currentVolume The current volume on the output.
+         */
+        SetCurrentVolume(
+            [in] Int32 currentVolume);
+
+        /**
+         * Override to handle requests to set the volume of the current output.
+         * After the volume has been modified {@link #setCurrentVolume} must be
+         * called to notify the system.
+         *
+         * @param volume The volume to set the output to.
+         */
+        OnSetVolumeTo(
+            [in] Int32 volume);
+
+        /**
+         * Override to handle requests to adjust the volume of the current output.
+         * Direction will be one of {@link AudioManager#ADJUST_LOWER},
+         * {@link AudioManager#ADJUST_RAISE}, {@link AudioManager#ADJUST_SAME}.
+         * After the volume has been modified {@link #setCurrentVolume} must be
+         * called to notify the system.
+         *
+         * @param direction The direction to change the volume in.
+         */
+        OnAdjustVolume(
+            [in] Int32 direction);
+
+        /**
+         * Sets a callback to receive volume changes.
+         * @hide
+         */
+        SetCallback(
+            [in] IVolumeProviderCallback * cb);
+
+    }
+
+    /**
+     * Listens for changes to the volume.
+     * @hide
+     */
+    interface IVolumeProviderCallback {
+        OnVolumeChanged(
+            [in] IVolumeProvider * volumeProvider);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

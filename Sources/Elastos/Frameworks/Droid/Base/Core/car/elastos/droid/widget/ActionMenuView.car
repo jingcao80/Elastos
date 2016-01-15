@@ -1,0 +1,236 @@
+module
+{
+    interface Elastos.Droid.Widget.IActionMenuPresenter;
+    interface Elastos.Droid.Widget.IActionMenuViewOnMenuItemClickListener;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.Internal.View.Menu.IMenuBuilder;
+    interface Elastos.Droid.Internal.View.Menu.IMenuItemImpl;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
+    interface Elastos.Droid.Internal.View.Menu.IMenuBuilderCallback;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.IMenuItem;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.ILinearLayoutLayoutParams
+     */
+    interface IActionMenuViewLayoutParams {
+
+        SetIsOverflowButton(
+            [in] Boolean value);
+
+        SetCellsUsed(
+            [in] Int32 cellsUsed);
+
+        SetExtraPixels(
+            [in] Int32 extraPixels);
+
+        SetExpandable(
+            [in] Boolean value);
+
+        SetPreventEdgeOffset(
+            [in] Boolean value);
+
+        SetExpanded(
+            [in] Boolean value);
+
+        GetIsOverflowButton(
+            [out] Boolean* value);
+
+        GetCellsUsed(
+            [out] Int32* cellsUsed);
+
+        GetExtraPixels(
+            [out] Int32* extraPixels);
+
+        GetExpandable(
+            [out] Boolean* value);
+
+        GetPreventEdgeOffset(
+            [out] Boolean* value);
+
+        GetExpanded(
+            [out] Boolean* value);
+    }
+
+    /**
+     * ActionMenuView is a presentation of a series of menu options as a View. It provides
+     * several top level options as action buttons while spilling remaining options over as
+     * items in an overflow menu. This allows applications to present packs of actions inline with
+     * specific or repeating content.
+     *
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.ILinearLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Internal.View.Menu.IMenuBuilderItemInvoker
+     * interface Elastos.Droid.Internal.View.Menu.IMenuView
+     */
+
+    [local]
+    interface IActionMenuView {
+        /**
+         * Specifies the theme to use when inflating popup menus. By default, uses
+         * the same theme as the action menu view itself.
+         *
+         * @param resId theme used to inflate popup menus
+         * @see #getPopupTheme()
+         */
+        SetPopupTheme(
+            [in] Int32 resId);
+
+        /**
+         * @return resource identifier of the theme used to inflate popup menus, or
+         *         0 if menus are inflated against the action menu view theme
+         * @see #setPopupTheme(int)
+         */
+        GetPopupTheme(
+            [out] Int32* resId);
+
+        /**
+         * @param presenter Menu presenter used to display popup menu
+         * @hide
+         */
+        SetPresenter(
+            [in] IActionMenuPresenter* presenter);
+
+        SetOnMenuItemClickListener(
+            [in] IActionMenuViewOnMenuItemClickListener* listener);
+
+        /** @hide */
+        IsOverflowReserved(
+            [out] Boolean* isOverflowReserved);
+
+        /** @hide */
+        SetOverflowReserved(
+            [in] Boolean reserveOverflow);
+
+        /** @hide */
+        GenerateOverflowButtonLayoutParams(
+            [out] IActionMenuViewLayoutParams** params);
+
+        /** @hide */
+        InvokeItem(
+            [in] IMenuItemImpl* item,
+            [out] Boolean* rst);
+
+        /** @hide */
+        GetWindowAnimations(
+            [out] Int32* animations);
+
+        /** @hide */
+        Initialize(
+            [in] IMenuBuilder* menu);
+
+        /**
+         * Returns the Menu object that this ActionMenuView is currently presenting.
+         *
+         * <p>Applications should use this method to obtain the ActionMenuView's Menu object
+         * and inflate or add content to it as necessary.</p>
+         *
+         * @return the Menu presented by this view
+         */
+        GetMenu(
+            [out] IMenu** menu);
+
+        /**
+         * Must be called before the first call to getMenu()
+         * @hide
+         */
+        SetMenuCallbacks(
+            [in] IMenuPresenterCallback* pcb,
+            [in] IMenuBuilderCallback* mcb);
+
+        /**
+         * Returns the current menu or null if one has not yet been configured.
+         * @hide Internal use only for action bar integration
+         */
+        PeekMenu(
+            [out] IMenuBuilder** build);
+
+        /**
+         * Show the overflow items from the associated menu.
+         *
+         * @return true if the menu was able to be shown, false otherwise
+         */
+        ShowOverflowMenu(
+            [out] Boolean* showOverflowMenu);
+
+        /**
+         * Hide the overflow items from the associated menu.
+         *
+         * @return true if the menu was able to be hidden, false otherwise
+         */
+        HideOverflowMenu(
+            [out] Boolean* hideOverflowMenu);
+
+        /**
+         * Check whether the overflow menu is currently showing. This may not reflect
+         * a pending show operation in progress.
+         *
+         * @return true if the overflow menu is currently showing
+         */
+        IsOverflowMenuShowing(
+            [out] Boolean* isOverflowMenuShowing);
+
+        /** @hide */
+        IsOverflowMenuShowPending(
+            [out] Boolean* isOverflowMenuShowPending);
+
+
+        /**
+         * Dismiss any popups associated with this menu view.
+         */
+        DismissPopupMenus();
+
+        DispatchPopulateAccessibilityEvent(
+            [in] IAccessibilityEvent* event,
+            [out] Boolean* result);
+
+        /** @hide */
+        SetExpandedActionViewsExclusive(
+            [in] Boolean exclusive);
+
+    }
+
+    /**
+     * Interface responsible for receiving menu item click events if the items themselves
+     * do not have individual item click listeners.
+     */
+     [local]
+    interface IActionMenuViewOnMenuItemClickListener {
+        /**
+         * This method will be invoked when a menu item is clicked if the item itself did
+         * not already handle the event.
+         *
+         * @param item {@link MenuItem} that was clicked
+         * @return <code>true</code> if the event was handled, <code>false</code> otherwise.
+         */
+        OnMenuItemClick(
+            [in] IMenuItem* item,
+            [out] Boolean* rst);
+    }
+
+    /** @hide */
+    interface IActionMenuChildView {
+        NeedsDividerBefore(
+            [out] Boolean* rst);
+
+        NeedsDividerAfter(
+            [out] Boolean* rst);
+    }
+
+    }
+    }
+    }
+}

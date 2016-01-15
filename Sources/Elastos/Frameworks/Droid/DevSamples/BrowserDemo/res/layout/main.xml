@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+          <Button 
+            android:id="@+id/btn1"
+            android:layout_width="50px"
+            android:layout_height="wrap_content"
+            android:text="返回"
+            />
+         <Button 
+            android:id="@+id/btn2"
+            android:layout_width="50px"
+            android:layout_height="wrap_content"
+            android:text="前进"
+            />
+         <EditText 
+             android:id="@+id/et"
+             android:text="@string/edata"
+             android:layout_width="550px"
+             android:layout_height="wrap_content"
+             />
+        <Button 
+            android:id="@+id/btn3"
+            android:layout_width="70px"
+            android:layout_height="wrap_content"
+            android:text="GO"
+            />    
+        
+    </LinearLayout>
+    
+        <WebView
+            android:id="@+id/wv"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            />
+   
+
+</LinearLayout>

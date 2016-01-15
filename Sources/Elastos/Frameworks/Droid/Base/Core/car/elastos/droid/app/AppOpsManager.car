@@ -1,0 +1,666 @@
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Internal.App.IIAppOpsService;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * Callback for notification of changes to operation state.
+     */
+    interface IAppOpsManagerOnOpChangedListener {
+        OnOpChanged(
+            [in] String op,
+            [in] String packageName);
+    }
+
+    /**
+     * Callback for notification of changes to operation state.
+     * This allows you to see the raw op codes instead of strings.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IAppOpsManagerOnOpChangedListener
+     */
+    interface IAppOpsManagerOnOpChangedInternalListener {
+        OnOpChanged(
+            [in] String op,
+            [in] String packageName);
+
+        OnOpChanged(
+            [in] Int32 op,
+            [in] String packageName);
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IAppOpsManagerPackageOps {
+
+        GetPackageName(
+            [out] String* str);
+
+        GetUid(
+            [out] Int32* uid);
+
+        GetOps(
+            [out] IList** ops);
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IAppOpsManagerOpEntry {
+
+        GetOp(
+            [out] Int32* op);
+
+        GetMode(
+            [out] Int32* mode);
+
+        GetTime(
+            [out] Int64* time);
+
+        GetRejectTime(
+            [out] Int64* time);
+
+        IsRunning(
+            [out] Boolean* running);
+
+        GetDuration(
+            [out] Int32* duration);
+    }
+
+    /**
+     * API for interacting with "application operation" tracking.
+     *
+     * <p>This API is not generally intended for third party application developers; most
+     * features are only available to system applications.  Obtain an instance of it through
+     * {@link Context#getSystemService(String) Context.getSystemService} with
+     * {@link Context#APP_OPS_SERVICE Context.APP_OPS_SERVICE}.</p>
+     */
+    [deprecated]
+    interface IAppOpsManager {
+
+        /**
+         * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller is
+         * allowed to perform the given operation.
+         */
+        const Int32 MODE_ALLOWED = 0;
+
+        /**
+         * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller is
+         * not allowed to perform the given operation, and this attempt should
+         * <em>silently fail</em> (it should not cause the app to crash).
+         */
+        const Int32 MODE_IGNORED = 1;
+
+        /**
+         * Result from {@link #checkOpNoThrow}, {@link #noteOpNoThrow}, {@link #startOpNoThrow}: the
+         * given caller is not allowed to perform the given operation, and this attempt should
+         * cause it to have a fatal error, typically a {@link SecurityException}.
+         */
+        const Int32 MODE_ERRORED = 2;
+
+        /**
+         * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller should
+         * use its default security check.  This mode is not normally used; it should only be used
+         * with appop permissions, and callers must explicitly check for it and deal with it.
+         */
+        const Int32 MODE_DEFAULT = 3;
+
+        /** @hide No operation specified. */
+        const Int32 OP_NONE = -1;
+        /** @hide Access to coarse location information. */
+        const Int32 OP_COARSE_LOCATION = 0;
+        /** @hide Access to fine location information. */
+        const Int32 OP_FINE_LOCATION = 1;
+        /** @hide Causing GPS to run. */
+        const Int32 OP_GPS = 2;
+        /** @hide */
+        const Int32 OP_VIBRATE = 3;
+        /** @hide */
+        const Int32 OP_READ_CONTACTS = 4;
+        /** @hide */
+        const Int32 OP_WRITE_CONTACTS = 5;
+        /** @hide */
+        const Int32 OP_READ_CALL_LOG = 6;
+        /** @hide */
+        const Int32 OP_WRITE_CALL_LOG = 7;
+        /** @hide */
+        const Int32 OP_READ_CALENDAR = 8;
+        /** @hide */
+        const Int32 OP_WRITE_CALENDAR = 9;
+        /** @hide */
+        const Int32 OP_WIFI_SCAN = 10;
+        /** @hide */
+        const Int32 OP_POST_NOTIFICATION = 11;
+        /** @hide */
+        const Int32 OP_NEIGHBORING_CELLS = 12;
+        /** @hide */
+        const Int32 OP_CALL_PHONE = 13;
+        /** @hide */
+        const Int32 OP_READ_SMS = 14;
+        /** @hide */
+        const Int32 OP_WRITE_SMS = 15;
+        /** @hide */
+        const Int32 OP_RECEIVE_SMS = 16;
+        /** @hide */
+        const Int32 OP_RECEIVE_EMERGECY_SMS = 17;
+        /** @hide */
+        const Int32 OP_RECEIVE_MMS = 18;
+        /** @hide */
+        const Int32 OP_RECEIVE_WAP_PUSH = 19;
+        /** @hide */
+        const Int32 OP_SEND_SMS = 20;
+        /** @hide */
+        const Int32 OP_READ_ICC_SMS = 21;
+        /** @hide */
+        const Int32 OP_WRITE_ICC_SMS = 22;
+        /** @hide */
+        const Int32 OP_WRITE_SETTINGS = 23;
+        /** @hide */
+        const Int32 OP_SYSTEM_ALERT_WINDOW = 24;
+        /** @hide */
+        const Int32 OP_ACCESS_NOTIFICATIONS = 25;
+        /** @hide */
+        const Int32 OP_CAMERA = 26;
+        /** @hide */
+        const Int32 OP_RECORD_AUDIO = 27;
+        /** @hide */
+        const Int32 OP_PLAY_AUDIO = 28;
+        /** @hide */
+        const Int32 OP_READ_CLIPBOARD = 29;
+        /** @hide */
+        const Int32 OP_WRITE_CLIPBOARD = 30;
+        /** @hide */
+        const Int32 OP_TAKE_MEDIA_BUTTONS = 31;
+        /** @hide */
+        const Int32 OP_TAKE_AUDIO_FOCUS = 32;
+        /** @hide */
+        const Int32 OP_AUDIO_MASTER_VOLUME = 33;
+        /** @hide */
+        const Int32 OP_AUDIO_VOICE_VOLUME = 34;
+        /** @hide */
+        const Int32 OP_AUDIO_RING_VOLUME = 35;
+        /** @hide */
+        const Int32 OP_AUDIO_MEDIA_VOLUME = 36;
+        /** @hide */
+        const Int32 OP_AUDIO_ALARM_VOLUME = 37;
+        /** @hide */
+        const Int32 OP_AUDIO_NOTIFICATION_VOLUME = 38;
+        /** @hide */
+        const Int32 OP_AUDIO_BLUETOOTH_VOLUME = 39;
+        /** @hide */
+        const Int32 OP_WAKE_LOCK = 40;
+        /** @hide Continually monitoring location data. */
+        const Int32 OP_MONITOR_LOCATION = 41;
+        /** @hide Continually monitoring location data with a relatively high power request. */
+        const Int32 OP_MONITOR_HIGH_POWER_LOCATION = 42;
+        /** @hide Retrieve current usage stats via {@link UsageStatsManager}. */
+        const Int32 OP_GET_USAGE_STATS = 43;
+        /** @hide */
+        const Int32 OP_MUTE_MICROPHONE = 44;
+        /** @hide */
+        const Int32 OP_TOAST_WINDOW = 45;
+        /** @hide Capture the device's display contents and/or audio */
+        const Int32 OP_PROJECT_MEDIA = 46;
+        /** @hide Activate a VPN connection without user intervention. */
+        const Int32 OP_ACTIVATE_VPN = 47;
+        /** @hide */
+        const Int32 _NUM_OP = 48;
+
+        // when adding one of these:
+        //  - increment _NUM_OP
+        //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode
+        //  - add descriptive strings to Settings/res/values/arrays.xml
+        //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
+
+        /** Access to coarse location information. */
+        const String OPSTR_COARSE_LOCATION =
+                "android:coarse_location";
+        /** Access to fine location information. */
+        const String OPSTR_FINE_LOCATION =
+                "android:fine_location";
+        /** Continually monitoring location data. */
+        const String OPSTR_MONITOR_LOCATION
+                = "android:monitor_location";
+        /** Continually monitoring location data with a relatively high power request. */
+        const String OPSTR_MONITOR_HIGH_POWER_LOCATION
+                = "android:monitor_location_high_power";
+        /** Access to {@link android.app.usage.UsageStatsManager}. */
+        const String OPSTR_GET_USAGE_STATS
+                = "android:get_usage_stats";
+        /** Activate a VPN connection without user intervention. @hide */
+        //@SystemApi
+        const String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
+
+        /**
+         * Retrieve current operation state for all applications.
+         *
+         * @param ops The set of operations you are interested in, or null if you want all of them.
+         * @hide
+         */
+        GetPackagesForOps(
+            [in] ArrayOf<Int32>* opsArray,
+            [out] IList** result);
+
+        /**
+         * Retrieve current operation state for one application.
+         *
+         * @param uid The uid of the application of interest.
+         * @param packageName The name of the application of interest.
+         * @param ops The set of operations you are interested in, or null if you want all of them.
+         * @hide
+         */
+        GetPackagesForOps(
+            [in] Int32 uid,
+            [in] String packageName,
+            [in] ArrayOf<Int32>* ops,
+            [out] IList** result);
+
+        /** @hide */
+        SetMode(
+            [in] Int32 code,
+            [in] Int32 uid,
+            [in] String packageName,
+            [in] Int32 mode);
+
+        /**
+         * Set a non-persisted restriction on an audio operation at a stream-level.
+         * Restrictions are temporary additional constraints imposed on top of the persisted rules
+         * defined by {@link #setMode}.
+         *
+         * @param code The operation to restrict.
+         * @param usage The {@link android.media.AudioAttributes} usage value.
+         * @param mode The restriction mode (MODE_IGNORED,MODE_ERRORED) or MODE_ALLOWED to unrestrict.
+         * @param exceptionPackages Optional list of packages to exclude from the restriction.
+         * @hide
+         */
+        SetRestriction(
+            [in] Int32 code,
+            [in] Int32 usage,
+            [in] Int32 mode,
+            [in] ArrayOf<String>* exceptionPackages);
+
+        /** @hide */
+        ResetAllModes();
+
+        /**
+         * Monitor for changes to the operating mode for the given op in the given app package.
+         * @param op The operation to monitor, one of OPSTR_*.
+         * @param packageName The name of the application to monitor.
+         * @param callback Where to report changes.
+         */
+        StartWatchingMode(
+            [in] String op,
+            [in] String packageName,
+            [in] IAppOpsManagerOnOpChangedListener* cb);
+
+        /**
+         * Monitor for changes to the operating mode for the given op in the given app package.
+         * @param op The operation to monitor, one of OP_*.
+         * @param packageName The name of the application to monitor.
+         * @param callback Where to report changes.
+         * @hide
+         */
+        StartWatchingMode(
+            [in] Int32 op,
+            [in] String packageName,
+            [in] IAppOpsManagerOnOpChangedListener* cb);
+
+        /**
+         * Stop monitoring that was previously started with {@link #startWatchingMode}.  All
+         * monitoring associated with this callback will be removed.
+         */
+        StopWatchingMode(
+            [in] IAppOpsManagerOnOpChangedListener* cb);
+
+        /**
+         * Do a quick check for whether an application might be able to perform an operation.
+         * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String)}
+         * or {@link #startOp(String, int, String)} for your actual security checks, which also
+         * ensure that the given uid and package name are consistent.  This function can just be
+         * used for a quick check to see if an operation has been disabled for the application,
+         * as an early reject of some work.  This does not modify the time stamp or other data
+         * about the operation.
+         * @param op The operation to check.  One of the OPSTR_* constants.
+         * @param uid The user id of the application attempting to perform the operation.
+         * @param packageName The name of the application attempting to perform the operation.
+         * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+         * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+         * causing the app to crash).
+         * @throws SecurityException If the app has been configured to crash on this op.
+         */
+        CheckOp(
+            [in] String op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
+         * returns {@link #MODE_ERRORED}.
+         */
+        CheckOpNoThrow(
+            [in] String op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Make note of an application performing an operation.  Note that you must pass
+         * in both the uid and name of the application to be checked; this function will verify
+         * that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
+         * succeeds, the last execution time of the operation for this app will be updated to
+         * the current time.
+         * @param op The operation to note.  One of the OPSTR_* constants.
+         * @param uid The user id of the application attempting to perform the operation.
+         * @param packageName The name of the application attempting to perform the operation.
+         * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+         * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+         * causing the app to crash).
+         * @throws SecurityException If the app has been configured to crash on this op.
+         */
+        NoteOp(
+            [in] String op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
+         * returns {@link #MODE_ERRORED}.
+         */
+        NoteOpNoThrow(
+            [in] String op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Report that an application has started executing a long-running operation.  Note that you
+         * must pass in both the uid and name of the application to be checked; this function will
+         * verify that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
+         * succeeds, the last execution time of the operation for this app will be updated to
+         * the current time and the operation will be marked as "running".  In this case you must
+         * later call {@link #finishOp(String, int, String)} to report when the application is no
+         * longer performing the operation.
+         * @param op The operation to start.  One of the OPSTR_* constants.
+         * @param uid The user id of the application attempting to perform the operation.
+         * @param packageName The name of the application attempting to perform the operation.
+         * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+         * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+         * causing the app to crash).
+         * @throws SecurityException If the app has been configured to crash on this op.
+         */
+        StartOp(
+            [in] String op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Like {@link #startOp} but instead of throwing a {@link SecurityException} it
+         * returns {@link #MODE_ERRORED}.
+         */
+        StartOpNoThrow(
+            [in] String op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Report that an application is no longer performing an operation that had previously
+         * been started with {@link #startOp(String, int, String)}.  There is no validation of input
+         * or result; the parameters supplied here must be the exact same ones previously passed
+         * in when starting the operation.
+         */
+        FinishOp(
+            [in] String op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Do a quick check for whether an application might be able to perform an operation.
+         * This is <em>not</em> a security check; you must use {@link #noteOp(int, int, String)}
+         * or {@link #startOp(int, int, String)} for your actual security checks, which also
+         * ensure that the given uid and package name are consistent.  This function can just be
+         * used for a quick check to see if an operation has been disabled for the application,
+         * as an early reject of some work.  This does not modify the time stamp or other data
+         * about the operation.
+         * @param op The operation to check.  One of the OP_* constants.
+         * @param uid The user id of the application attempting to perform the operation.
+         * @param packageName The name of the application attempting to perform the operation.
+         * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+         * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+         * causing the app to crash).
+         * @throws SecurityException If the app has been configured to crash on this op.
+         * @hide
+         */
+        CheckOp(
+            [in] Int32 op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
+         * returns {@link #MODE_ERRORED}.
+         * @hide
+         */
+        CheckOpNoThrow(
+            [in] Int32 op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Do a quick check to validate if a package name belongs to a UID.
+         *
+         * @throws SecurityException if the package name doesn't belong to the given
+         *             UID, or if ownership cannot be verified.
+         */
+        CheckPackage(
+            [in] Int32 uid,
+            [in] String packageName);
+
+        /**
+         * Like {@link #checkOp} but at a stream-level for audio operations.
+         * @hide
+         */
+        CheckAudioOp(
+            [in] Int32 op,
+            [in] Int32 stream,
+            [in] Int32 uid,
+            [in] Int32 packageName,
+            [out] Int32* result);
+
+        /**
+         * Like {@link #checkAudioOp} but instead of throwing a {@link SecurityException} it
+         * returns {@link #MODE_ERRORED}.
+         * @hide
+         */
+        CheckAudioOpNoThrow(
+            [in] Int32 op,
+            [in] Int32 stream,
+            [in] Int32 uid,
+            [in] Int32 packageName,
+            [out] Int32* result);
+
+        /**
+         * Make note of an application performing an operation.  Note that you must pass
+         * in both the uid and name of the application to be checked; this function will verify
+         * that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
+         * succeeds, the last execution time of the operation for this app will be updated to
+         * the current time.
+         * @param op The operation to note.  One of the OP_* constants.
+         * @param uid The user id of the application attempting to perform the operation.
+         * @param packageName The name of the application attempting to perform the operation.
+         * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+         * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+         * causing the app to crash).
+         * @throws SecurityException If the app has been configured to crash on this op.
+         * @hide
+         */
+        NoteOp(
+            [in] Int32 op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
+         * returns {@link #MODE_ERRORED}.
+         * @hide
+         */
+        NoteOpNoThrow(
+            [in] Int32 op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /** @hide */
+        NoteOp(
+            [in] Int32 op,
+            [out] Int32* result);
+
+        /**
+         * Report that an application has started executing a long-running operation.  Note that you
+         * must pass in both the uid and name of the application to be checked; this function will
+         * verify that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
+         * succeeds, the last execution time of the operation for this app will be updated to
+         * the current time and the operation will be marked as "running".  In this case you must
+         * later call {@link #finishOp(int, int, String)} to report when the application is no
+         * longer performing the operation.
+         * @param op The operation to start.  One of the OP_* constants.
+         * @param uid The user id of the application attempting to perform the operation.
+         * @param packageName The name of the application attempting to perform the operation.
+         * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+         * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+         * causing the app to crash).
+         * @throws SecurityException If the app has been configured to crash on this op.
+         * @hide
+         */
+        StartOp(
+            [in] Int32 op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Like {@link #startOp} but instead of throwing a {@link SecurityException} it
+         * returns {@link #MODE_ERRORED}.
+         * @hide
+         */
+        StartOpNoThrow(
+            [in] Int32 op,
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /** @hide */
+        StartOp(
+            [in] Int32 op,
+            [out] Int32* result);
+
+        /**
+         * Report that an application is no longer performing an operation that had previously
+         * been started with {@link #startOp(int, int, String)}.  There is no validation of input
+         * or result; the parameters supplied here must be the exact same ones previously passed
+         * in when starting the operation.
+         * @hide
+         */
+        FinishOp(
+            [in] Int32 op,
+            [in] Int32 uid,
+            [in] String packageName);
+
+        /** @hide */
+        FinishOp(
+            [in] Int32 op);
+    }
+
+    interface IAppOpsManagerHelper {
+        /**
+         * {@hide}
+         */
+        StrOpToOp(
+            [in] String op,
+            [out] Int32* result);
+
+        /** @hide */
+        GetToken(
+            [in] IIAppOpsService* service,
+            [out] IBinder** binder);
+
+        /**
+         * Retrieve the op switch that controls the given operation.
+         * @hide
+         */
+        OpToSwitch(
+            [in] Int32 op,
+            [out] Int32* result);
+
+        /**
+         * Retrieve a non-localized name for the operation, for debugging output.
+         * @hide
+         */
+        OpToName(
+            [in] Int32 op,
+            [out] String* result);
+
+        /**
+         * Retrieve the permission associated with an operation, or null if there is not one.
+         * @hide
+         */
+        OpToPermission(
+            [in] Int32 op,
+            [out] String* result);
+
+        /**
+         * Retrieve the user restriction associated with an operation, or null if there is not one.
+         * @hide
+         */
+        OpToRestriction(
+            [in] Int32 op,
+            [out] String* result);
+
+        /**
+         * Retrieve whether the op allows the system (and system ui) to
+         * bypass the user restriction.
+         * @hide
+         */
+        OpAllowSystemBypassRestriction(
+            [in] Int32 op,
+            [out] Boolean* result);
+
+        /**
+         * Retrieve the default mode for the operation.
+         * @hide
+         */
+        OpToDefaultMode(
+            [in] Int32 op,
+            [out] Int32* result);
+
+        /**
+         * Retrieve whether the op allows itself to be reset.
+         * @hide
+         */
+        OpAllowsReset(
+            [in] Int32 op,
+            [out] Boolean* result);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

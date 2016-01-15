@@ -1,0 +1,224 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.View.Animation.IAnimation;
+    interface Elastos.Droid.View.Animation.IInterpolator;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Animation {
+
+    interface IAnimationParameters {
+        GetCount(
+            [out] Int32* count);
+
+        SetCount(
+            [in] Int32 count);
+
+        GetIndex(
+            [out] Int32* index);
+
+        SetIndex(
+            [in] Int32 index);
+    }
+
+    [local]
+    interface ILayoutAnimationController {
+        /**
+         * Distributes the animation delays in the order in which view were added
+         * to their view group.
+         */
+        const Int32 ORDER_NORMAL  = 0;
+
+        /**
+         * Distributes the animation delays in the reverse order in which view were
+         * added to their view group.
+         */
+        const Int32 ORDER_REVERSE = 1;
+
+        /**
+         * Randomly distributes the animation delays.
+         */
+        const Int32 ORDER_RANDOM  = 2;
+
+        /**
+         * Returns the order used to compute the delay of each child's animation.
+         *
+         * @return one of {@link #ORDER_NORMAL}, {@link #ORDER_REVERSE} or
+         *         {@link #ORDER_RANDOM)
+         *
+         * @attr ref android.R.styleable#LayoutAnimation_animationOrder
+         */
+        GetOrder(
+            [out] Int32* order);
+
+        /**
+         * Sets the order used to compute the delay of each child's animation.
+         *
+         * @param order one of {@link #ORDER_NORMAL}, {@link #ORDER_REVERSE} or
+         *        {@link #ORDER_RANDOM}
+         *
+         * @attr ref android.R.styleable#LayoutAnimation_animationOrder
+         */
+        SetOrder(
+            [in] Int32 order);
+
+        /**
+         * Sets the animation to be run on each child of the view group on which
+         * this layout animation controller is .
+         *
+         * @param context the context from which the animation must be inflated
+         * @param resourceID the resource identifier of the animation
+         *
+         * @see #setAnimation(Animation)
+         * @see #getAnimation()
+         *
+         * @attr ref android.R.styleable#LayoutAnimation_animation
+         */
+        SetAnimation(
+            [in] IContext* ctx,
+            [in] Int32 resourceID);
+
+        /**
+         * Sets the animation to be run on each child of the view group on which
+         * this layout animation controller is .
+         *
+         * @param animation the animation to run on each child of the view group
+
+         * @see #setAnimation(android.content.Context, int)
+         * @see #getAnimation()
+         *
+         * @attr ref android.R.styleable#LayoutAnimation_animation
+         */
+        SetAnimation(
+            [in] IAnimation* animation);
+
+        /**
+         * Returns the animation applied to each child of the view group on which
+         * this controller is set.
+         *
+         * @return an {@link android.view.animation.Animation} instance
+         *
+         * @see #setAnimation(android.content.Context, int)
+         * @see #setAnimation(Animation)
+         */
+        GetAnimation(
+            [out] IAnimation** animation);
+
+        /**
+         * Sets the interpolator used to interpolate the delays between the
+         * children.
+         *
+         * @param context the context from which the interpolator must be inflated
+         * @param resourceID the resource identifier of the interpolator
+         *
+         * @see #getInterpolator()
+         * @see #setInterpolator(Interpolator)
+         *
+         * @attr ref android.R.styleable#LayoutAnimation_interpolator
+         */
+        SetInterpolator(
+            [in] IContext* ctx,
+            [in] Int32 resourceID);
+
+        /**
+         * Sets the interpolator used to interpolate the delays between the
+         * children.
+         *
+         * @param interpolator the interpolator
+         *
+         * @see #getInterpolator()
+         * @see #setInterpolator(Interpolator)
+         *
+         * @attr ref android.R.styleable#LayoutAnimation_interpolator
+         */
+        SetInterpolator(
+            [in] IInterpolator* interpolator);
+
+        /**
+         * Returns the interpolator used to interpolate the delays between the
+         * children.
+         *
+         * @return an {@link android.view.animation.Interpolator}
+         */
+        GetInterpolator(
+            [out] IInterpolator** interpolator);
+
+        /**
+         * Returns the delay by which the children's animation are offset. The
+         * delay is expressed as a fraction of the animation duration.
+         *
+         * @return a fraction of the animation duration
+         *
+         * @see #setDelay(float)
+         */
+        GetDelay(
+            [out] Float* delay);
+
+        /**
+         * Sets the delay, as a fraction of the animation duration, by which the
+         * children's animations are offset. The general formula is:
+         *
+         * <pre>
+         * child animation delay = child index * delay * animation duration
+         * </pre>
+         *
+         * @param delay a fraction of the animation duration
+         *
+         * @see #getDelay()
+         */
+        SetDelay(
+            [in] Float delay);
+
+        /**
+         * Indicates whether two children's animations will overlap. Animations
+         * overlap when the delay is lower than 100% (or 1.0).
+         *
+         * @return true if animations will overlap, false otherwise
+         */
+        WillOverlap(
+            [out] Boolean* willOverlap);
+
+        /**
+         * Starts the animation.
+         */
+        Start();
+
+        /**
+         * Returns the animation to be applied to the specified view. The returned
+         * animation is delayed by an offset computed according to the information
+         * provided by
+         * {@link android.view.animation.LayoutAnimationController.AnimationParameters}.
+         * This method is called by view groups to obtain the animation to set on
+         * a specific child.
+         *
+         * @param view the view to animate
+         * @return an animation delayed by the number of milliseconds returned by
+         *         {@link #getDelayForView(android.view.View)}
+         *
+         * @see #getDelay()
+         * @see #setDelay(float)
+         * @see #getDelayForView(android.view.View)
+         */
+        GetAnimationForView(
+            [in] IView* view,
+            [out] IAnimation** animation);
+
+        /**
+         * Indicates whether the layout animation is over or not. A layout animation
+         * is considered done when the animation with the longest delay is done.
+         *
+         * @return true if all of the children's animations are over, false otherwise
+         */
+        IsDone(
+            [out] Boolean* isDone);
+    }
+
+    }   //namespace Animation
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

@@ -1,0 +1,144 @@
+module
+{
+    using interface Elastos.Droid.App.IPendingIntent;
+    using interface Elastos.Droid.Service.Notification.IStatusBarNotification;
+    using interface Elastos.Droid.Service.Notification.INotificationListenerServiceRankingMap;
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.View.IView;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.INotificationDataEntry;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewOnTouchListener
+     */
+    [local]
+    interface IBaseStatusBarTouchOutsideListener {
+        OnTouch(
+            [in] IView* v,
+            [in] IMotionEvent* ev);
+    }
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewOnClickListener
+     */
+    interface INotificationClicker {
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.SystemUI.ISystemUI
+     * ICommandQueueCallbacks
+     * IActivatableNotificationViewOnActivatedListener
+     * interface Elastos.Droid.RecentsComponentCallbacks
+     * inIExpandableNotificationRowExpansionLogger
+     * interface Elastos.Droid.INotificationDataEnvironment
+     */
+    interface IBaseStatusBar {
+
+        // Should match the value in PhoneWindowManager
+        const String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+
+        const Int32 EXPANDED_LEAVE_ALONE = -10000;
+        const Int32 EXPANDED_FULL_OPEN = -10001;
+
+        IsDeviceProvisioned(
+            [out] Boolean* isDeviceProvisioned);
+
+        Start();
+
+        UserSwitched(
+            [in] Int32 newUserId);
+
+        IsHeadsUp(
+            [in] String key,
+            [out] Boolean* result);
+
+        IsMediaNotification(
+            [in] INotificationDataEntry* entry,
+            [out] Boolean* result);
+
+        DismissPopups();
+
+        OnHeadsUpDismissed();
+
+        ResetHeadsUpDecayTimer();
+
+        ScheduleHeadsUpOpen();
+
+        ScheduleHeadsUpClose();
+
+        ScheduleHeadsUpEscalation();
+
+        /**
+         * Save the current "public" (locked and secure) state of the lockscreen.
+         */
+        SetLockscreenPublicMode(
+            [in] Boolean publicMode);
+
+        IsLockscreenPublicMode(
+            [out] Boolean* result);
+
+        /**
+         * Has the given user chosen to allow their private (full) notifications to be shown even
+         * when the lockscreen is in "public" (secure & locked) mode?
+         */
+        UserAllowsPrivateNotificationsInPublic(
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        OnNotificationClear(
+            [out] IStatusBarNotification** notification);
+
+        MakeClicker(
+            [in] IPendingIntent* intent,
+            [in] String notificationKey,
+            [in] Boolean forHun,
+            [out] INotificationClicker** clicker);
+
+        AnimateCollapsePanels(
+            [in] Int32 flags,
+            [in] Boolean force);
+
+        OverrideActivityPendingAppTransition(
+            [in] Boolean keyguardShowing);
+
+        AddNotification(
+            [in] IStatusBarNotification* notification,
+            [in] INotificationListenerServiceRankingMap* ranking);
+
+        UpdateNotificationRanking(
+            [in] INotificationListenerServiceRankingMap* ranking);
+
+        UpdateNotification(
+            [in] IStatusBarNotification* notification,
+            [in] INotificationListenerServiceRankingMap* ranking);
+
+        InKeyguardRestrictedInputMode(
+            [out] Boolean* result);
+
+        SetInteracting(
+            [in] Int32 barWindow,
+            [in] Boolean interacting);
+
+        SetBouncerShowing(
+            [in] Boolean bouncerShowing);
+
+        IsBouncerShowing(
+            [out] Boolean* showing);
+
+        Destroy();
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

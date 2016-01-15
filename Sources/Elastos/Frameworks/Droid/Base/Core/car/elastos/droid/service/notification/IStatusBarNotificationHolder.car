@@ -1,0 +1,22 @@
+
+module
+{
+    interface Elastos.Droid.Service.Notification.IStatusBarNotification;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Notification {
+
+    /** @hide */
+    interface IIStatusBarNotificationHolder {
+        /** Fetch the held StatusBarNotification. This method should only be called once per Holder */
+        Get(
+            [out] IStatusBarNotification** ret);
+    }
+
+    } //Notification
+    } //Service
+    } //Droid
+    } //Elastos
+}

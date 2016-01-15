@@ -1,0 +1,77 @@
+module
+{
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recent {
+
+    interface IRecentsPanelView;
+    interface ITaskDescription;
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewOnTouchListener
+     */
+    [local, deprecated]
+    interface IRecentTasksLoader {
+        SetRecentsPanel(
+            [in] IRecentsPanelView* newRecentsPanel,
+            [in] IRecentsPanelView* caller);
+
+        GetDefaultThumbnail(
+            [out] IBitmap** bitmap);
+
+        GetDefaultIcon(
+            [out] IBitmap** bitmap);
+
+        GetLoadedTasks(
+            [out] IArrayList** tasks);
+
+        Remove(
+            [in] ITaskDescription* td);
+
+        IsFirstScreenful(
+            [out] Boolean* result);
+
+        PreloadRecentTasksList();
+
+        CancelPreloadingRecentTasksList();
+
+        CancelLoadingThumbnailsAndIcons(
+            [in] IRecentsPanelView* caller);
+
+        PreloadFirstTask();
+
+        CancelPreloadingFirstTask();
+
+        GetFirstTask(
+            [out] ITaskDescription** des);
+
+        LoadFirstTask(
+            [out] ITaskDescription** des);
+
+        LoadTasksInBackground();
+
+        LoadTasksInBackground(
+            [in] Boolean zeroeth);
+    }
+
+    [local, deprecated]
+    interface IRecentTasksLoaderHelper {
+        GetInstance(
+            [in] IContext* ctx,
+            [out] IRecentTasksLoader** loader);
+    }
+
+    } // namespace Recent
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

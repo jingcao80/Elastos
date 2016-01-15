@@ -1,0 +1,286 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    /**
+     * Looks up caller information for the given phone number.
+     *
+     * {@hide}
+     */
+    [local]
+    interface ICallerInfo {
+        // Accessors
+
+        /**
+         * @return true if the caller info is an emergency number.
+         */
+        IsEmergencyNumber(
+            [out] Boolean* result);
+
+        /**
+         * @return true if the caller info is a voicemail number.
+         */
+        IsVoiceMailNumber(
+            [out] Boolean* result);
+
+        /**
+         * Updates this CallerInfo's geoDescription field, based on the raw
+         * phone number in the phoneNumber field.
+         *
+         * (Note that the various getCallerInfo() methods do *not* set the
+         * geoDescription automatically; you need to call this method
+         * explicitly to get it.)
+         *
+         * @param context the context used to look up the current locale / country
+         * @param fallbackNumber if this CallerInfo's phoneNumber field is empty,
+         *        this specifies a fallback number to use instead.
+         */
+        UpdateGeoDescription(
+            [in] IContext* ctx,
+            [in] String fallbackNumber);
+
+        SetName(
+            [in] String name);
+
+        GetName(
+            [out] String* name);
+
+        SetPhoneNumber(
+            [in] String phoneNumber);
+
+        GetPhoneNumber(
+            [out] String* phoneNumber);
+
+        SetNormalizedNumber(
+            [in] String normalizedNumber);
+
+        GetNormalizedNumber(
+            [out] String* normalizedNumber);
+
+        SetGeoDescription(
+            [in] String geoDescription);
+
+        GetGeoDescription(
+            [in] IContext* ctx,
+            [in] String number,
+            [out] String* geoDescription);
+
+        SetCnapName(
+            [in] String cnapName);
+
+        GetCnapName(
+            [out] String* cnapName);
+
+        SetNumberPresentation(
+            [in] Int32 numberPresentation);
+
+        GetNumberPresentation(
+            [out] Int32* numberPresentation);
+
+        SetNamePresentation(
+            [in] Int32 namePresentation);
+
+        GetNamePresentation(
+            [out] Int32* namePresentation);
+
+        GetContactExists(
+            [out] Boolean* contactExists);
+
+        SetContactExists(
+            [in] Boolean contactExists);
+
+        SetPhoneLabel(
+            [in] String phoneLabel);
+
+        GetPhoneLabel(
+            [out] String* phoneLabel);
+
+        /* Split up the phoneLabel into number type and label name */
+        SetNumberType(
+            [in] Int32 numberType);
+
+        GetNumberType(
+            [out] Int32* numberType);
+
+        SetNumberLabel(
+            [in] String numberLabel);
+
+        GetNumberLabel(
+            [out] String* numberLabel);
+
+        SetPhotoResource(
+            [in] Int32 photoResource);
+
+        GetPhotoResource(
+            [out] Int32* photoResource);
+
+        SetContactIdOrZero(
+            [in] Int64 contactIdOrZero);
+
+        GetContactIdOrZero(
+            [out] Int64* contactIdOrZero);
+
+        GetNeedUpdate(
+            [out] Boolean* needUpdate);
+
+        SetNeedUpdate(
+            [in] Boolean needUpdate);
+
+        SetContactRefUri(
+            [in] IUri* contactRefUri);
+
+        GetContactRefUri(
+            [out] IUri** contactRefUri);
+
+        SetLookupKey(
+            [in] String lookupKey);
+
+        GetLookupKey(
+            [out] String* lookupKey);
+
+        SetContactDisplayPhotoUri(
+            [in] IUri* contactDisplayPhotoUri);
+
+        GetContactDisplayPhotoUri(
+            [out] IUri** contactDisplayPhotoUri);
+
+        // fields to hold individual contact preference data,
+        // including the send to voicemail flag and the ringtone
+        // uri reference.
+        SetContactRingtoneUri(
+            [in] IUri* contactRingtoneUri);
+
+        GetContactRingtoneUri(
+            [out] IUri** contactRingtoneUri);
+
+        GetShouldSendToVoicemail(
+            [out] Boolean* shouldSendToVoicemail);
+
+        SetShouldSendToVoicemail(
+            [in] Boolean shouldSendToVoicemail);
+
+        /**
+         * Drawable representing the caller image.  This is essentially
+         * a cache for the image data tied into the connection /
+         * callerinfo object.
+         *
+         * This might be a high resolution picture which is more suitable
+         * for full-screen image view than for smaller icons used in some
+         * kinds of notifications.
+         *
+         * The {@link #isCachedPhotoCurrent} flag indicates if the image
+         * data needs to be reloaded.
+         */
+        SetCachedPhoto(
+            [in] IDrawable* cachedPhoto);
+
+        GetCachedPhoto(
+            [out] IDrawable** cachedPhoto);
+
+        /**
+         * Bitmap representing the caller image which has possibly lower
+         * resolution than {@link #cachedPhoto} and thus more suitable for
+         * icons (like notification icons).
+         *
+         * In usual cases this is just down-scaled image of {@link #cachedPhoto}.
+         * If the down-scaling fails, this will just become null.
+         *
+         * The {@link #isCachedPhotoCurrent} flag indicates if the image
+         * data needs to be reloaded.
+         */
+        SetCachedPhotoIcon(
+            [in] IBitmap* cachedPhotoIcon);
+
+        GetCachedPhotoIcon(
+            [out] IBitmap** cachedPhotoIcon);
+
+        /**
+         * Boolean which indicates if {@link #cachedPhoto} and
+         * {@link #cachedPhotoIcon} is fresh enough. If it is false,
+         * those images aren't pointing to valid objects.
+         */
+
+        GetIsCachedPhotoCurrent(
+            [out] Boolean* isCachedPhotoCurrent);
+
+        SetIsCachedPhotoCurrent(
+            [in] Boolean isCachedPhotoCurrent);
+    }
+
+    [local]
+    interface ICallerInfoHelper {
+        /**
+         * getCallerInfo given a Cursor.
+         * @param context the context used to retrieve string constants
+         * @param contactRef the URI to attach to this CallerInfo object
+         * @param cursor the first object in the cursor is used to build the CallerInfo object.
+         * @return the CallerInfo which contains the caller id for the given
+         * number. The returned CallerInfo is null if no number is supplied.
+         */
+        GetCallerInfo(
+            [in] IContext* ctx,
+            [in] IUri* contactRef,
+            [in] ICursor* cursor,
+            [out] ICallerInfo** callerInfo);
+
+        /**
+         * getCallerInfo given a URI, look up in the call-log database
+         * for the uri unique key.
+         * @param context the context used to get the ContentResolver
+         * @param contactRef the URI used to lookup caller id
+         * @return the CallerInfo which contains the caller id for the given
+         * number. The returned CallerInfo is null if no number is supplied.
+         */
+        GetCallerInfo(
+            [in] IContext* ctx,
+            [in] IUri* contactRef,
+            [out] ICallerInfo** callerInfo);
+
+        /**
+         * getCallerInfo given a phone number, look up in the call-log database
+         * for the matching caller id info.
+         * @param context the context used to get the ContentResolver
+         * @param number the phone number used to lookup caller id
+         * @return the CallerInfo which contains the caller id for the given
+         * number. The returned CallerInfo is null if no number is supplied. If
+         * a matching number is not found, then a generic caller info is returned,
+         * with all relevant fields empty or null.
+         */
+        GetCallerInfo(
+            [in] IContext* ctx,
+            [in] String number,
+            [out] ICallerInfo** callerInfo);
+
+        /**
+         * getCallerInfo given a phone number and subscription, look up in the call-log database
+         * for the matching caller id info.
+         * @param context the context used to get the ContentResolver
+         * @param number the phone number used to lookup caller id
+         * @param subId the subscription for checking for if voice mail number or not
+         * @return the CallerInfo which contains the caller id for the given
+         * number. The returned CallerInfo is null if no number is supplied. If
+         * a matching number is not found, then a generic caller info is returned,
+         * with all relevant fields empty or null.
+         */
+        GetCallerInfo(
+            [in] IContext* ctx,
+            [in] String number,
+            [in] Int64 subId,
+            [out] ICallerInfo** callerInfo);
+    }
+
+    } // namespace Telephony
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

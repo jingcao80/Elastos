@@ -1,0 +1,20 @@
+
+module
+{
+	interface Elastos.Droid.Mtp.IMtpPropertyList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Mtp {
+
+    interface IMtpPropertyGroup {
+    	GetPropertyList(
+	        [in] Int32 handle,
+	        [in] Int32 format,
+	        [in] Int32 depth,
+	        [out] IMtpPropertyList** list);
+    }
+    } // namespace mtp
+    } // namepsace Droid
+    } // namespace Elastos
+}

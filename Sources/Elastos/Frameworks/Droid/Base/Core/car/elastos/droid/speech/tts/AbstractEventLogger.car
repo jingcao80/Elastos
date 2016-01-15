@@ -1,0 +1,66 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+    namespace Tts {
+
+    /**
+     * Base class for storing data about a given speech synthesis request to the
+     * event logs. The data that is logged depends on actual implementation. Note
+     * that {@link AbstractEventLogger#onAudioDataWritten()} and
+     * {@link AbstractEventLogger#onEngineComplete()} must be called from a single
+     * thread (usually the audio playback thread).
+     */
+    interface IAbstractEventLogger {
+
+        /**
+         * Notifies the logger that this request has been selected from
+         * the processing queue for processing. Engine latency / total time
+         * is measured from this baseline.
+         */
+        OnRequestProcessingStart();
+
+        /**
+         * Notifies the logger that a chunk of data has been received from
+         * the engine. Might be called multiple times.
+         */
+         OnEngineDataReceived();
+
+        /**
+         * Notifies the logger that the engine has finished processing data.
+         * Will be called exactly once.
+         */
+        OnEngineComplete();
+
+        /**
+         * Notifies the logger that audio playback has started for some section
+         * of the synthesis. This is normally some amount of time after the engine
+         * has synthesized data and varies depending on utterances and
+         * other audio currently in the queue.
+         */
+        OnAudioDataWritten();
+
+        /**
+         * Notifies the logger that the current synthesis has completed.
+         * All available data is not logged.
+         */
+        OnCompleted(
+            [in] Int32 statusCode);
+
+        LogFailure(
+            [in] Int32 statusCode);
+
+        LogSuccess(
+            [in] Int64 audioLatency,
+            [in] Int64 engineLatency,
+            [in] Int64 engineTotal);
+    }
+
+    } // namespace Tts
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}
+

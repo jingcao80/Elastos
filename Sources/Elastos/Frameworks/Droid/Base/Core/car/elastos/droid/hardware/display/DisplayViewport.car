@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Display {
+
+    /**
+     * Describes how the pixels of physical display device reflects the content of
+     * a logical display.
+     * <p>
+     * This information is used by the input system to translate touch input from
+     * physical display coordinates into logical display coordinates.
+     * </p>
+     *
+     * @hide Only for use within the system server.
+     */
+    interface IDisplayViewport
+    {
+        IsValid(
+            [out] Boolean* valid);
+
+        SetValid(
+            [in] Boolean valid);
+
+        SetDisplayId(
+            [in] Int32 displayId);
+
+        GetDisplayId(
+            [out] Int32* displayId);
+
+        SetOrientation(
+            [in] Int32 orientation);
+
+        GetOrientation(
+            [out] Int32* orientation);
+
+        SetLogicalFrame(
+            [in] IRect* rect);
+
+        GetLogicalFrame(
+            [out] IRect** rect);
+
+        SetPhysicalFrame(
+            [in] IRect* rect);
+
+        GetPhysicalFrame(
+            [out] IRect** rect);
+
+        SetDeviceWidth(
+            [in] Int32 width);
+
+        GetDeviceWidth(
+            [out] Int32* width);
+
+        SetDeviceHeight(
+            [in] Int32 height);
+
+        GetDeviceHeight(
+            [out] Int32* height);
+
+        CopyFrom(
+            [in] IDisplayViewport* viewport);
+    }
+
+    } // namespace Display
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

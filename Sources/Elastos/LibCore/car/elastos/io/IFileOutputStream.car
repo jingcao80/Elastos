@@ -1,0 +1,44 @@
+
+module
+{
+//    interface Elastos.IO.Channels.IFileChannel;
+    interface Elastos.IO.IFileDescriptor;
+
+    namespace Elastos {
+    namespace IO {
+    /**
+    * An output stream that writes bytes to a file. If the output file exists, it can
+    * be replaced or appended to. If it does not exist, a new file will be created.
+    * This stream is not buffered. Most callers should wrap this stream with a
+    * BufferedOutputStream.
+    * <p>
+    * Use FileWriter to write characters, as opposed to bytes, to a file.
+    * @sa BufferedOutputStream
+    * @sa FileInputStream
+    * @implement Elastos.IO.IOutputStream
+    */
+     /**
+     * @Involve
+     * interface ICloseable;
+     * interface IOutputStream;
+     */
+    interface IFileOutputStream {
+        /**
+         * Returns a write-only FileChannel that shares its position with
+         * this stream.
+         *
+         * @sa FileChannel
+         */
+//        GetChannel(
+//            [out] IFileChannel** channel);
+
+        /**
+         * Returns the underlying file descriptor.
+         */
+        GetFD(
+            [out] IFileDescriptor** fd);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

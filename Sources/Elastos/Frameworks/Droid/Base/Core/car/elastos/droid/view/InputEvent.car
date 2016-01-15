@@ -1,0 +1,167 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Common base class for input events.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IInputEvent {
+        /**
+         * Gets the id for the device that this event came from.  An id of
+         * zero indicates that the event didn't come from a physical device
+         * and maps to the default keymap.  The other numbers are arbitrary and
+         * you shouldn't depend on the values.
+         *
+         * @return The device id.
+         * @see InputDevice#getDevice
+         */
+        GetDeviceId(
+            [out] Int32* deviceId);
+
+        /**
+         * Gets the device that this event came from.
+         *
+         * @return The device, or null if unknown.
+         */
+        GetDevice(
+            [out] IInputDevice** device);
+
+        /**
+         * Gets the source of the event.
+         *
+         * @return The event source or {@link InputDevice#SOURCE_UNKNOWN} if unknown.
+         * @see InputDevice#getSourceInfo
+         */
+        GetSource(
+            [out] Int32* source);
+
+        /**
+         * Modifies the source of the event.
+         * @param source The source.
+         *
+         * @hide
+         */
+        SetSource(
+            [in] Int32 source);
+
+        /**
+         * Determines whether the event is from the given source.
+         *
+         * @param source The input source to check against. This can be a specific device type, such as
+         * {@link InputDevice#SOURCE_TOUCH_NAVIGATION}, or a more generic device class, such as
+         * {@link InputDevice#SOURCE_CLASS_POINTER}.
+         * @return Whether the event is from the given source.
+         */
+        IsFromSource(
+            [in] Int32 source,
+            [out] Boolean* result);
+
+        /**
+         * Copies the event.
+         *
+         * @return A deep copy of the event.
+         * @hide
+         */
+        Copy(
+            [out] IInputEvent** event);
+
+        /**
+         * Recycles the event.
+         * This method should only be used by the system since applications do not
+         * expect {@link KeyEvent} objects to be recycled, although {@link MotionEvent}
+         * objects are fine.  See {@link KeyEvent#recycle()} for details.
+         * @hide
+         */
+        Recycle();
+
+        /**
+         * Conditionally recycled the event if it is appropriate to do so after
+         * dispatching the event to an application.
+         *
+         * If the event is a {@link MotionEvent} then it is recycled.
+         *
+         * If the event is a {@link KeyEvent} then it is NOT recycled, because applications
+         * expect key events to be immutable so once the event has been dispatched to
+         * the application we can no longer recycle it.
+         * @hide
+         */
+        RecycleIfNeededAfterDispatch();
+
+        /**
+         * Gets a private flag that indicates when the system has detected that this input event
+         * may be inconsistent with respect to the sequence of previously delivered input events,
+         * such as when a key up event is sent but the key was not down or when a pointer
+         * move event is sent but the pointer is not down.
+         *
+         * @return True if this event is tainted.
+         * @hide
+         */
+        IsTainted(
+            [out] Boolean* isTainted);
+
+        /**
+         * Sets a private flag that indicates when the system has detected that this input event
+         * may be inconsistent with respect to the sequence of previously delivered input events,
+         * such as when a key up event is sent but the key was not down or when a pointer
+         * move event is sent but the pointer is not down.
+         *
+         * @param tainted True if this event is tainted.
+         * @hide
+         */
+        SetTainted(
+            [in] Boolean tainted);
+
+        /**
+         * Retrieve the time this event occurred,
+         * in the {@link android.os.SystemClock#uptimeMillis} time base.
+         *
+         * @return Returns the time this event occurred,
+         * in the {@link android.os.SystemClock#uptimeMillis} time base.
+         */
+        GetEventTime(
+            [out] Int64* eventTime);
+
+        /**
+         * Retrieve the time this event occurred,
+         * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+         * nanosecond (instead of millisecond) precision.
+         * <p>
+         * The value is in nanosecond precision but it may not have nanosecond accuracy.
+         * </p>
+         *
+         * @return Returns the time this event occurred,
+         * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+         * nanosecond (instead of millisecond) precision.
+         *
+         * @hide
+         */
+        GetEventTimeNano(
+            [out] Int64* eventTimeNano);
+
+        /**
+         * Gets the unique sequence number of this event.
+         * Every input event that is created or received by a process has a
+         * unique sequence number.  Moreover, a new sequence number is obtained
+         * each time an event object is recycled.
+         *
+         * Sequence numbers are only guaranteed to be locally unique within a process.
+         * Sequence numbers are not preserved when events are parceled.
+         *
+         * @return The unique sequence number of this event.
+         * @hide
+         */
+        GetSequenceNumber(
+            [out] Int32* seq);
+    }
+
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

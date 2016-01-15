@@ -1,0 +1,65 @@
+module
+{
+    interface Elastos.Core.IArrayOf;
+    interface Elastos.Utility.ILocale;
+
+    namespace Libcore {
+    namespace ICU {
+
+    /**
+     * Provides access to ICU's time zone name data.
+     */
+    [deprecated]
+    interface ITimeZoneNames {
+        /*
+         * Offsets into the arrays returned by DateFormatSymbols.getZoneStrings.
+         */
+        const Int32 OLSON_NAME = 0;
+
+        const Int32 LONG_NAME = 1;
+
+        const Int32 SHORT_NAME = 2;
+
+        const Int32 LONG_NAME_DST = 3;
+
+        const Int32 SHORT_NAME_DST = 4;
+
+        const Int32 NAME_COUNT = 5;
+
+        /**
+         * Returns the appropriate string from 'zoneStrings'. Used with getZoneStrings.
+         */
+        GetDisplayName(
+            [in] ArrayOf<IArrayOf*>*  zoneStrings,
+            [in] String id,
+            [in] Boolean daylight,
+            [in] Int32 style ,
+            [out] String * str);
+
+        /**
+         * Returns an array of time zone strings, as used by DateFormatSymbols.getZoneStrings.
+         */
+        GetZoneStrings(
+            [in] ILocale * locale,
+            [out, callee] ArrayOf<IArrayOf*> * outarray);
+
+        /**
+         * Returns an array containing the time zone ids in use in the country corresponding to
+         * the given locale. This is not necessary for Java API, but is used by telephony as a
+         * fallback. We retrieve these strings from zone.tab rather than icu4c because the latter
+         * supplies them in alphabetical order where zone.tab has them in a kind of "importance"
+         * order (as defined in the zone.tab header).
+         */
+        ForLocale(
+            [in] ILocale * locale ,
+            [out, callee] ArrayOf<String> * outarray);
+
+        GetExemplarLocation(
+            [in] String locale,
+            [in] String tz,
+            [out] String* location);
+    }
+
+    } // IO
+    } // namespace LibCore
+}

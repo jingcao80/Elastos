@@ -1,0 +1,107 @@
+module
+{
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Text.ILayout;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * A paragraph style affecting the leading margin. There can be multiple leading
+     * margin spans on a single paragraph; they will be rendered in order, each
+     * adding its margin to the ones before it. The leading margin is on the right
+     * for lines in a right-to-left paragraph.
+     * <p>
+     * LeadingMarginSpans should be attached from the first character to the last
+     * character of a single paragraph.
+     *
+     * @Involve
+     * interface IParagraphStyle
+     */
+    interface ILeadingMarginSpan
+    {
+        /**
+         * Returns the amount by which to adjust the leading margin. Positive values
+         * move away from the leading edge of the paragraph, negative values move
+         * towards it.
+         *
+         * @param first true if the request is for the first line of a paragraph,
+         * false for subsequent lines
+         * @return the offset for the margin.
+         */
+        GetLeadingMargin(
+            [in] Boolean first,
+            [out] Int32* offset);
+
+        /**
+         * Renders the leading margin.  This is called before the margin has been
+         * adjusted by the value returned by {@link #getLeadingMargin(boolean)}.
+         *
+         * @param c the canvas
+         * @param p the paint. The this should be left unchanged on exit.
+         * @param x the current position of the margin
+         * @param dir the base direction of the paragraph; if negative, the margin
+         * is to the right of the text, otherwise it is to the left.
+         * @param top the top of the line
+         * @param baseline the baseline of the line
+         * @param bottom the bottom of the line
+         * @param text the text
+         * @param start the start of the line
+         * @param end the end of the line
+         * @param first true if this is the first line of its paragraph
+         * @param layout the layout containing this line
+         */
+        DrawLeadingMargin(
+            [in] ICanvas* c,
+            [in] IPaint* p,
+            [in] Int32 x,
+            [in] Int32 dir,
+            [in] Int32 top,
+            [in] Int32 baseline,
+            [in] Int32 bottom,
+            [in] ICharSequence* text,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Boolean first,
+            [in] ILayout* layout);
+    }
+
+    /*
+     * @Involve
+     * interface ILeadingMarginSpan
+     */
+    interface ILeadingMarginSpanStandard
+    {
+    }
+
+    /**
+     * An extended version of {@link LeadingMarginSpan}, which allows the
+     * implementor to specify the number of lines of the paragraph to which
+     * this object is attached that the "first line of paragraph" margin width
+     * will be applied to.
+     * <p>
+     * There should only be one LeadingMarginSpan2 per paragraph. The leading
+     * margin line count affects all LeadingMarginSpans in the paragraph,
+     * adjusting the number of lines to which the first line margin is applied.
+     * <p>
+     * As with LeadingMarginSpans, LeadingMarginSpan2s should be attached from
+     * the beginning to the end of a paragraph.
+     */
+    interface ILeadingMarginSpan2 {
+        /**
+         * Returns the number of lines of the paragraph to which this object is
+         * attached that the "first line" margin will apply to.
+         */
+        GetLeadingMarginLineCount(
+            [out] Int32* count);
+    }
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

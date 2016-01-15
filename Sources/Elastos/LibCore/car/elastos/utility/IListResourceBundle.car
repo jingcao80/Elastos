@@ -1,0 +1,27 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    /**
+     * {@code ListResourceBundle} is the abstract superclass of classes which provide
+     * resources by implementing the {@code getContents()} method to return
+     * the list of resources.
+     *
+     * @see ResourceBundle
+     * @since 1.1
+     */
+
+    /**
+     * @Involve
+     * interface IResourceBundle;
+     */
+    interface IListResourceBundle {
+        // @Override
+        HandleGetObject(
+            [in] String key,
+            [out] IInterface** outface);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

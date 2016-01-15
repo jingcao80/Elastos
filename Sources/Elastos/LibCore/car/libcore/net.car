@@ -1,0 +1,111 @@
+module
+{
+    merge("net/IMimeUtils.car");
+    merge("net/IUriCodec.car");
+
+    merge("net/http/IHttpDate.car");
+
+    merge("net/url/IFileHandler.car");
+    merge("net/url/IFileURLConnection.car");
+    merge("net/url/IFtpHandler.car");
+    merge("net/url/IFtpURLConnection.car");
+    merge("net/url/IFtpURLInputStream.car");
+    merge("net/url/IJarHandler.car");
+    merge("net/url/IJarURLConnectionImpl.car");
+    merge("net/url/IUrlUtils.car");
+    merge("net/event/NetworkEventListener.car");
+    merge("net/event/NetworkEventDispatcher.car");
+
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.Net.IURLConnection;
+    interface Elastos.Net.IURLStreamHandler;
+    interface Elastos.Net.IJarURLConnection;
+    interface Libcore.Net.Http.IHttpDate;
+    interface Libcore.Net.Url.IFileHandler;
+    interface Libcore.Net.Url.IFileURLConnection;
+    interface Libcore.Net.Url.IFtpHandler;
+    interface Libcore.Net.Url.IFtpURLInputStream;
+    interface Libcore.Net.Url.IUrlUtilsHelper;
+
+    namespace Libcore {
+    namespace Net {
+
+        singleton class CMimeUtils {
+            interface IMimeUtils;
+        }
+
+        singleton class CUriCodecHelper {
+            interface IUriCodecHelper;
+        }
+
+        namespace Http {
+            singleton class CHttpDate {
+                interface IHttpDate;
+            }
+        } //namespace Http
+
+        namespace Url {
+            class CFileHandler {
+                constructor();
+
+                interface IURLStreamHandler;
+                interface IFileHandler;
+            }
+
+            class CFileURLConnection {
+                constructor(
+                    [in] Elastos.Net.IURL* url);
+
+                interface IURLConnection;
+                interface IFileURLConnection;
+            }
+
+            class CFtpHandler {
+                constructor();
+
+                interface IURLStreamHandler;
+                interface IFtpHandler;
+            }
+
+            class CFtpURLInputStream {
+                constructor(
+                    [in] IInputStream* is,
+                    [in] Elastos.Net.ISocket* controlSocket);
+
+                interface ICloseable;
+                interface IInputStream;
+                interface IFtpURLInputStream;
+            }
+
+            singleton class CUrlUtilsHelper {
+                interface IUrlUtilsHelper;
+            }
+
+            class CJarHandler {
+                constructor();
+
+                interface IURLStreamHandler;
+                interface IJarHandler;
+            }
+
+            class CJarURLConnectionImpl {
+                constructor(
+                    [in] Elastos.Net.IURL* url);
+
+                interface IJarURLConnectionImpl;
+                interface IJarURLConnection;
+                interface IURLConnection;
+            }
+        } // namespace Url
+
+        namespace Event {
+            singleton class CNetworkEventDispatcherHelper {
+                interface INetworkEventDispatcherHelper;
+            }
+        } // namespace Event
+
+    } // namespace Net
+    } // namespace Libcore
+}

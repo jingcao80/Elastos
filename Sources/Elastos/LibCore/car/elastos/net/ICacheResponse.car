@@ -1,0 +1,43 @@
+
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Net {
+
+    interface ICacheResponse {
+        /**
+         * Returns an {@code InputStream} to access the response body.
+         *
+         * @return an {@code InputStream} which can be used to fetch the response
+         *         body.
+         * @throws IOException
+         *             if an I/O error is encountered while retrieving the response
+         *             body.
+         */
+        GetBody(
+            [out] IInputStream** is);
+
+        /**
+         * Returns an immutable {@code Map} which contains the response headers
+         * information. Note that {@code URLConnection} may need the original headers to be
+         * able to fully reconstruct the response. In particular, failure to provide
+         * a mapping from null to the original HTTP status line will prevent an
+         * {@code HttpURLConnection} from returning the correct response code.
+         * See {@link URLConnection#getHeaderFields}.
+         *
+         * @return an immutable {@code Map} which contains the response headers.
+         * @throws IOException
+         *             if an I/O error is encountered while retrieving the response
+         *             headers.
+         */
+        GetHeaders(
+            [out] IMap** headers);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

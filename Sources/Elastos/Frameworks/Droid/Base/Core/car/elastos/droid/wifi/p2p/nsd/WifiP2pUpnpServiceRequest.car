@@ -1,0 +1,60 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+    namespace Nsd {
+
+    /**
+     * A class for creating a Upnp service discovery request for use with
+     * {@link WifiP2pManager#addServiceRequest} and {@link WifiP2pManager#removeServiceRequest}
+     *
+     * {@see WifiP2pManager}
+     * {@see WifiP2pServiceRequest}
+     * {@see WifiP2pDnsSdServiceRequest}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     * interface IWifiP2pServiceRequest;
+     */
+    interface IWifiP2pUpnpServiceRequest {
+    }
+
+    interface IWifiP2pUpnpServiceRequestHelper {
+        /**
+         * Create a service discovery request to search all UPnP services.
+         *
+         * @return service request for UPnP.
+         */
+        NewInstance(
+            [out] IWifiP2pUpnpServiceRequest** result);
+
+        /**
+         * Create a service discovery request to search specified UPnP services.
+         *
+         * @param st ssdp search target.  Cannot be null.<br>
+         * e.g ) <br>
+         * <ul>
+         * <li>"ssdp:all"
+         * <li>"upnp:rootdevice"
+         * <li>"urn:schemas-upnp-org:device:MediaServer:2"
+         * <li>"urn:schemas-upnp-org:service:ContentDirectory:2"
+         * <li>"uuid:6859dede-8574-59ab-9332-123456789012"
+         * </ul>
+         * @return service request for UPnP.
+         */
+        NewInstance(
+            [in] String st,
+            [out] IWifiP2pUpnpServiceRequest** result);
+    }
+
+    } // namespace Nsd
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}
+

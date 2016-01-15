@@ -1,0 +1,18 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+     * Legacy security code; do not use.
+     * @implements Elastos.IO.IBasicPermission
+     */
+     /**
+     * @Involve
+     * interface IBasicPermission;  // no .car file, perhaps abandoned
+     */
+    interface ISerializablePermission {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

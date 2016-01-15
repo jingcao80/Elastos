@@ -1,0 +1,33 @@
+
+module
+{
+    interface Elastos.Droid.Content.ISyncResult;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    interface ISyncContext {
+        /**
+         * Call to update the status text for this sync. This internally invokes
+         * {@link #updateHeartbeat}, so it also takes the place of a call to that.
+         *
+         * @param message the current status message for this sync
+         *
+         * @hide
+         */
+        SetStatusText(
+            [in] String message);
+
+        OnFinished(
+            [in] ISyncResult* result);
+
+        GetSyncContextBinder(
+            [out] IBinder** binder);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,97 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+    interface Elastos.Droid.Graphics.ISurfaceTexture;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Legacy {
+
+    /**
+     * GLThreadManager handles the thread used for rendering into the configured output surfaces.
+     */
+    interface IGLThreadManager {
+
+        /**
+         * Start the thread.
+         *
+         * <p>
+         * This must be called before queueing new frames.
+         * </p>
+         */
+        Start();
+
+        /**
+         * Wait until the thread has started.
+         */
+        WaitUntilStarted();
+
+        /**
+         * Quit the thread.
+         *
+         * <p>
+         * No further methods can be called after this.
+         * </p>
+         */
+        Quit();
+
+        /**
+         * Queue a new call to draw into the surfaces specified in the next available preview
+         * request from the {@link CaptureCollector} passed to
+         * {@link #setConfigurationAndWait(java.util.Collection, CaptureCollector)};
+         */
+        QueueNewFrame();
+
+        /**
+         * Configure the GL renderer for the given set of output surfaces, and block until
+         * this configuration has been applied.
+         *
+         * @param surfaces a collection of {@link android.view.Surface}s to configure.
+         * @param collector a {@link CaptureCollector} to retrieve requests from.
+         */
+        SetConfigurationAndWait(
+            [in] ICollection* surfaces,
+            [in] ICaptureCollector* collector);
+
+        /**
+         * Get the underlying surface to produce frames from.
+         *
+         * <p>
+         * This returns the surface that is drawn into the set of surfaces passed in for each frame.
+         * This method should only be called after a call to
+         * {@link #setConfigurationAndWait(java.util.Collection)}.  Calling this before the first call
+         * to {@link #setConfigurationAndWait(java.util.Collection)}, after {@link #quit()}, or
+         * concurrently to one of these calls may result in an invalid
+         * {@link android.graphics.SurfaceTexture} being returned.
+         * </p>
+         *
+         * @return an {@link android.graphics.SurfaceTexture} to draw to.
+         */
+        GetCurrentSurfaceTexture(
+            [out] ISurfaceTexture** outsur);
+
+        /**
+         * Ignore any subsequent calls to {@link #queueNewFrame(java.util.Collection)}.
+         */
+        IgnoreNewFrames();
+
+        /**
+         * Wait until no messages are queued.
+         */
+        WaitUntilIdle();
+
+        /**
+         * Re-enable drawing new frames after a call to {@link #ignoreNewFrames()}.
+         */
+        AllowNewFrames();
+    }
+
+    } // namespace Legacy
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

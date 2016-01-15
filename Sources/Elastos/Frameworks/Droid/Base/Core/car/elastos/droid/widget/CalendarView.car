@@ -1,0 +1,546 @@
+
+module
+{
+
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface ICalendarView;
+
+    /**
+     * The callback used to indicate the user changes the date.
+     */
+    interface IOnDateChangeListener {
+
+        /**
+         * Called upon change of the selected day.
+         *
+         * @param view The view associated with this listener.
+         * @param year The year that was set.
+         * @param month The month that was set [0-11].
+         * @param dayOfMonth The day of the month that was set.
+         */
+        OnSelectedDayChange(
+            [in] ICalendarView* view,
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 dayOfMonth);
+    }
+
+    /**
+     * A delegate interface that defined the public API of the CalendarView. Allows different
+     * CalendarView implementations. This would need to be implemented by the CalendarView delegates
+     * for the real behavior.
+     */
+    interface ICalendarViewDelegate {
+
+        SetShownWeekCount(
+            [in] Int32 count);
+
+        GetShownWeekCount(
+            [out] Int32* result);
+
+        SetSelectedWeekBackgroundColor(
+            [in] Int32 color);
+
+        GetSelectedWeekBackgroundColor(
+            [out] Int32* result);
+
+        SetFocusedMonthDateColor(
+            [in] Int32 color);
+
+        GetFocusedMonthDateColor(
+            [out] Int32* result);
+
+        SetUnfocusedMonthDateColor(
+            [in] Int32 color);
+
+        GetUnfocusedMonthDateColor(
+            [out] Int32* result);
+
+        SetWeekNumberColor(
+            [in] Int32 color);
+
+        GetWeekNumberColor(
+            [out] Int32* result);
+
+        SetWeekSeparatorLineColor(
+            [in] Int32 color);
+
+        GetWeekSeparatorLineColor(
+            [out] Int32* result);
+
+        SetSelectedDateVerticalBar(
+            [in] Int32 resourceId);
+
+        SetSelectedDateVerticalBar(
+            [in] IDrawable* drawable);
+
+        GetSelectedDateVerticalBar(
+            [out] IDrawable** result);
+
+        SetWeekDayTextAppearance(
+            [in] Int32 resourceId);
+
+        GetWeekDayTextAppearance(
+            [out] Int32* result);
+
+        SetDateTextAppearance(
+            [in] Int32 resourceId);
+
+        GetDateTextAppearance(
+            [out] Int32* result);
+
+        SetEnabled(
+            [in] Boolean enabled);
+
+        IsEnabled(
+            [out] Boolean* result);
+
+        SetMinDate(
+            [in] Int64 minDate);
+
+        GetMinDate(
+            [out] Int64* result);
+
+        SetMaxDate(
+            [in] Int64 maxDate);
+
+        GetMaxDate(
+            [out] Int64* result);
+
+        SetShowWeekNumber(
+            [in] Boolean showWeekNumber);
+
+        GetShowWeekNumber(
+            [out] Boolean* result);
+
+        SetFirstDayOfWeek(
+            [in] Int32 firstDayOfWeek);
+
+        GetFirstDayOfWeek(
+            [out] Int32* result);
+
+        SetDate(
+            [in] Int64 date);
+
+        SetDate(
+            [in] Int64 date,
+            [in] Boolean animate,
+            [in] Boolean center);
+
+        GetDate(
+            [out] Int64* result);
+
+        SetOnDateChangeListener(
+            [in] IOnDateChangeListener* listener);
+
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        OnInitializeAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        OnInitializeAccessibilityNodeInfo(
+            [in] IAccessibilityNodeInfo* info);
+    }
+
+    /**
+     * This class is a calendar widget for displaying and selecting dates. The range
+     * of dates supported by this calendar is configurable. A user can select a date
+     * by taping on it and can scroll and fling the calendar to a desired date.
+     *
+     * @attr ref android.R.styleable#CalendarView_showWeekNumber
+     * @attr ref android.R.styleable#CalendarView_firstDayOfWeek
+     * @attr ref android.R.styleable#CalendarView_minDate
+     * @attr ref android.R.styleable#CalendarView_maxDate
+     * @attr ref android.R.styleable#CalendarView_shownWeekCount
+     * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
+     * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
+     * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
+     * @attr ref android.R.styleable#CalendarView_weekNumberColor
+     * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
+     * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
+     * @attr ref android.R.styleable#CalendarView_weekDayTextAppearance
+     * @attr ref android.R.styleable#CalendarView_dateTextAppearance
+     */
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface ICalendarView {
+
+        /**
+         * Sets the number of weeks to be shown.
+         *
+         * @param count The shown week count.
+         *
+         * @attr ref android.R.styleable#CalendarView_shownWeekCount
+         */
+        SetShownWeekCount(
+            [in] Int32 count);
+
+        /**
+         * Gets the number of weeks to be shown.
+         *
+         * @return The shown week count.
+         *
+         * @attr ref android.R.styleable#CalendarView_shownWeekCount
+         */
+        GetShownWeekCount(
+            [out] Int32* count);
+
+        /**
+         * Sets the background color for the selected week.
+         *
+         * @param color The week background color.
+         *
+         * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
+         */
+        SetSelectedWeekBackgroundColor(
+            [in] Int32 color);
+
+        /**
+         * Gets the background color for the selected week.
+         *
+         * @return The week background color.
+         *
+         * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
+         */
+        GetSelectedWeekBackgroundColor(
+            [out] Int32* color);
+
+        /**
+         * Sets the color for the dates of the focused month.
+         *
+         * @param color The focused month date color.
+         *
+         * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
+         */
+        SetFocusedMonthDateColor(
+            [in] Int32 color);
+
+        /**
+         * Gets the color for the dates in the focused month.
+         *
+         * @return The focused month date color.
+         *
+         * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
+         */
+        GetFocusedMonthDateColor(
+            [out] Int32* color);
+
+        /**
+         * Sets the color for the dates of a not focused month.
+         *
+         * @param color A not focused month date color.
+         *
+         * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
+         */
+        SetUnfocusedMonthDateColor(
+            [in] Int32 color);
+
+        /**
+         * Gets the color for the dates in a not focused month.
+         *
+         * @return A not focused month date color.
+         *
+         * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
+         */
+        GetUnfocusedMonthDateColor(
+            [out] Int32* color);
+
+        /**
+         * Sets the color for the week numbers.
+         *
+         * @param color The week number color.
+         *
+         * @attr ref android.R.styleable#CalendarView_weekNumberColor
+         */
+        SetWeekNumberColor(
+            [in] Int32 color);
+
+        /**
+         * Gets the color for the week numbers.
+         *
+         * @return The week number color.
+         *
+         * @attr ref android.R.styleable#CalendarView_weekNumberColor
+         */
+        GetWeekNumberColor(
+            [out] Int32* color);
+
+        /**
+         * Sets the color for the separator line between weeks.
+         *
+         * @param color The week separator color.
+         *
+         * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
+         */
+        SetWeekSeparatorLineColor(
+            [in] Int32 color);
+
+        /**
+         * Gets the color for the separator line between weeks.
+         *
+         * @return The week separator color.
+         *
+         * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
+         */
+        GetWeekSeparatorLineColor(
+            [out] Int32* color);
+
+        /**
+         * Sets the drawable for the vertical bar shown at the beginning and at
+         * the end of the selected date.
+         *
+         * @param resourceId The vertical bar drawable resource id.
+         *
+         * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
+         */
+        SetSelectedDateVerticalBar(
+            [in] Int32 resourceId);
+
+        /**
+         * Sets the drawable for the vertical bar shown at the beginning and at
+         * the end of the selected date.
+         *
+         * @param drawable The vertical bar drawable.
+         *
+         * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
+         */
+        SetSelectedDateVerticalBar(
+            [in] IDrawable* drawable);
+
+        /**
+         * Gets the drawable for the vertical bar shown at the beginning and at
+         * the end of the selected date.
+         *
+         * @return The vertical bar drawable.
+         */
+        GetSelectedDateVerticalBar(
+            [out] IDrawable** drawable);
+
+        /**
+         * Sets the text appearance for the week day abbreviation of the calendar header.
+         *
+         * @param resourceId The text appearance resource id.
+         *
+         * @attr ref android.R.styleable#CalendarView_weekDayTextAppearance
+         */
+        SetWeekDayTextAppearance(
+            [in] Int32 resourceId);
+
+        /**
+         * Gets the text appearance for the week day abbreviation of the calendar header.
+         *
+         * @return The text appearance resource id.
+         *
+         * @attr ref android.R.styleable#CalendarView_weekDayTextAppearance
+         */
+        GetWeekDayTextAppearance(
+            [out] Int32* resourceId);
+
+        /**
+         * Sets the text appearance for the calendar dates.
+         *
+         * @param resourceId The text appearance resource id.
+         *
+         * @attr ref android.R.styleable#CalendarView_dateTextAppearance
+         */
+        SetDateTextAppearance(
+            [in] Int32 resourceId);
+
+        /**
+         * Gets the text appearance for the calendar dates.
+         *
+         * @return The text appearance resource id.
+         *
+         * @attr ref android.R.styleable#CalendarView_dateTextAppearance
+         */
+        GetDateTextAppearance(
+            [out] Int32* resourceId);
+
+        /**
+         * Gets the minimal date supported by this {@link CalendarView} in milliseconds
+         * since January 1, 1970 00:00:00 in {@link TimeZone#getDefault()} time
+         * zone.
+         * <p>
+         * Note: The default minimal date is 01/01/1900.
+         * <p>
+         *
+         * @return The minimal supported date.
+         *
+         * @attr ref android.R.styleable#CalendarView_minDate
+         */
+        GetMinDate(
+            [out] Int64* minDate);
+
+        /**
+         * Sets the minimal date supported by this {@link CalendarView} in milliseconds
+         * since January 1, 1970 00:00:00 in {@link TimeZone#getDefault()} time
+         * zone.
+         *
+         * @param minDate The minimal supported date.
+         *
+         * @attr ref android.R.styleable#CalendarView_minDate
+         */
+        SetMinDate(
+            [in] Int64 minDate);
+
+        /**
+         * Gets the maximal date supported by this {@link CalendarView} in milliseconds
+         * since January 1, 1970 00:00:00 in {@link TimeZone#getDefault()} time
+         * zone.module
+         * <p>
+         * Note: The default maximal date is 01/01/2100.
+         * <p>
+         *
+         * @return The maximal supported date.
+         *
+         * @attr ref android.R.styleable#CalendarView_maxDate
+         */
+        GetMaxDate(
+            [out] Int64* maxDate);
+
+        /**
+         * Sets the maximal date supported by this {@link CalendarView} in milliseconds
+         * since January 1, 1970 00:00:00 in {@link TimeZone#getDefault()} time
+         * zone.
+         *
+         * @param maxDate The maximal supported date.
+         *
+         * @attr ref android.R.styleable#CalendarView_maxDate
+         */
+        SetMaxDate(
+            [in] Int64 maxDate);
+
+        /**
+         * Sets whether to show the week number.
+         *
+         * @param showWeekNumber True to show the week number.
+         *
+         * @attr ref android.R.styleable#CalendarView_showWeekNumber
+         */
+        SetShowWeekNumber(
+            [in] Boolean showWeekNumber);
+
+        /**
+         * Gets whether to show the week number.
+         *
+         * @return True if showing the week number.
+         *
+         * @attr ref android.R.styleable#CalendarView_showWeekNumber
+         */
+        GetShowWeekNumber(
+            [out] Boolean* showWeekNumber);
+
+        /**
+         * Gets the first day of week.
+         *
+         * @return The first day of the week conforming to the {@link CalendarView}
+         *         APIs.
+         * @see Calendar#MONDAY
+         * @see Calendar#TUESDAY
+         * @see Calendar#WEDNESDAY
+         * @see Calendar#THURSDAY
+         * @see Calendar#FRIDAY
+         * @see Calendar#SATURDAY
+         * @see Calendar#SUNDAY
+         *
+         * @attr ref android.R.styleable#CalendarView_firstDayOfWeek
+         */
+        GetFirstDayOfWeek(
+            [out] Int32* firstDayOfWeek);
+
+        /**
+         * Sets the first day of week.
+         *
+         * @param firstDayOfWeek The first day of the week conforming to the
+         *            {@link CalendarView} APIs.
+         * @see Calendar#MONDAY
+         * @see Calendar#TUESDAY
+         * @see Calendar#WEDNESDAY
+         * @see Calendar#THURSDAY
+         * @see Calendar#FRIDAY
+         * @see Calendar#SATURDAY
+         * @see Calendar#SUNDAY
+         *
+         * @attr ref android.R.styleable#CalendarView_firstDayOfWeek
+         */
+        SetFirstDayOfWeek(
+            [in] Int32 firstDayOfWeek);
+
+        /**
+         * Sets the listener to be notified upon selected date change.
+         *
+         * @param listener The listener to be notified.
+         */
+        SetOnDateChangeListener(
+            [in] IOnDateChangeListener* listener);
+
+        /**
+         * Gets the selected date in milliseconds since January 1, 1970 00:00:00 in
+         * {@link TimeZone#getDefault()} time zone.
+         *
+         * @return The selected date.
+         */
+        GetDate(
+            [out] Int64* data);
+
+        /**
+         * Sets the selected date in milliseconds since January 1, 1970 00:00:00 in
+         * {@link TimeZone#getDefault()} time zone.
+         *
+         * @param date The selected date.
+         *
+         * @throws IllegalArgumentException of the provided date is before the
+         *        minimal or after the maximal date.
+         *
+         * @see #setDate(Int64, Boolean, Boolean)
+         * @see #setMinDate(Int64)
+         * @see #setMaxDate(Int64)
+         */
+        SetDate(
+            [in] Int64 date);
+
+        /**
+         * Sets the selected date in milliseconds since January 1, 1970 00:00:00 in
+         * {@link TimeZone#getDefault()} time zone.
+         *
+         * @param date The date.
+         * @param animate Whether to animate the scroll to the current date.
+         * @param center Whether to center the current date even if it is already visible.
+         *
+         * @throws IllegalArgumentException of the provided date is before the
+         *        minimal or after the maximal date.
+         *
+         * @see #setMinDate(Int64)
+         * @see #setMaxDate(Int64)
+         */
+        SetDate(
+            [in] Int64 date,
+            [in] Boolean animate,
+            [in] Boolean center);
+
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

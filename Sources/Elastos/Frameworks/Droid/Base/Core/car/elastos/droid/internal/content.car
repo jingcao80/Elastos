@@ -1,0 +1,41 @@
+module
+{
+    merge("content/NativeLibraryHelper.car");
+    merge("content/PackageHelper.car");
+    merge("content/PackageMonitor.car");
+    merge("content/SelectionBuilder.car");
+
+    using interface Elastos.IO.ICloseable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Content {
+
+    [deprecated]
+    class CNativeLibraryHelperHandle {
+        constructor(
+            [in] ArrayOf<Int64>* apkHandles,
+            [in] Boolean multiArch);
+
+        interface INativeLibraryHelperHandle;
+        interface ICloseable;
+    }
+
+    singleton class CNativeLibraryHelperHandleHelper {
+        interface INativeLibraryHelperHandleHelper;
+    }
+
+    singleton class CNativeLibraryHelper {
+        interface INativeLibraryHelper;
+    }
+
+    singleton class CPackageHelper {
+        interface IPackageHelper;
+    }
+
+    } // namespace Content
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

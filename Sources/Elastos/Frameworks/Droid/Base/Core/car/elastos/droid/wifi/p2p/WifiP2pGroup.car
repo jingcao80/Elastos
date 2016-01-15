@@ -1,0 +1,124 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+
+    /**
+     * A class representing a Wi-Fi P2p group. A p2p group consists of a single group
+     * owner and one or more clients. In the case of a group with only two devices, one
+     * will be the group owner and the other will be a group client.
+     *
+     * {@see WifiP2pManager}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiP2pGroup {
+        /** The temporary network id.
+         * {@hide} */
+        const Int32 TEMPORARY_NET_ID = -1;
+
+        /** The persistent network id.
+         * If a matching persistent profile is found, use it.
+         * Otherwise, create a new persistent profile.
+         * {@hide} */
+        const Int32 PERSISTENT_NET_ID = -2;
+
+        /** @hide */
+        SetNetworkName(
+            [in] String networkName);
+
+        /**
+         * Get the network name (SSID) of the group. Legacy Wi-Fi clients will discover
+         * the p2p group using the network name.
+         */
+        GetNetworkName(
+            [out] String* result);
+
+        /** @hide */
+        SetIsGroupOwner(
+            [in] Boolean isGo);
+
+        /** Check whether this device is the group owner of the created p2p group */
+        IsGroupOwner(
+            [out] Boolean* result);
+
+        /** @hide */
+        SetOwner(
+            [in] IWifiP2pDevice* device);
+
+        /** Get the details of the group owner as a {@link WifiP2pDevice} object */
+        GetOwner(
+            [out] IWifiP2pDevice** result);
+
+        /** @hide */
+        AddClient(
+            [in] String address);
+
+        /** @hide */
+        AddClient(
+            [in] IWifiP2pDevice* device);
+
+        /** @hide */
+        RemoveClient(
+            [in] String address,
+            [out] Boolean* result);
+
+        /** @hide */
+        RemoveClient(
+            [in] IWifiP2pDevice* device,
+            [out] Boolean* result);
+
+        /** @hide */
+        IsClientListEmpty(
+            [out] Boolean* result);
+
+        /** @hide Returns {@code true} if the device is part of the group */
+        Contains(
+            [in] IWifiP2pDevice* device,
+            [out] Boolean* result);
+
+        /** Get the list of clients currently part of the p2p group */
+        GetClientList(
+            [out] ICollection** result);
+
+        /** @hide */
+        SetPassphrase(
+            [in] String passphrase);
+
+        /**
+         * Get the passphrase of the group. This function will return a valid passphrase only
+         * at the group owner. Legacy Wi-Fi clients will need this passphrase alongside
+         * network name obtained from {@link #getNetworkName()} to join the group
+         */
+        GetPassphrase(
+            [out] String* result);
+
+        /** @hide */
+        SetInterface(
+            [in] String intf);
+
+        /** Get the interface name on which the group is created */
+        GetInterface(
+            [out] String* result);
+
+        /** @hide */
+        GetNetworkId(
+            [out] Int32* result);
+
+        /** @hide */
+        SetNetworkId(
+            [in] Int32 netId);
+    }
+
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

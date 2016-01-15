@@ -1,0 +1,108 @@
+module
+{
+    interface Elastos.Droid.Sax.IStartElementListener;
+    interface Elastos.Droid.Sax.IEndElementListener;
+    interface Elastos.Droid.Sax.IEndTextElementListener;
+
+    using interface Org.Xml.Sax.ILocator;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Sax {
+
+    /**
+     * An XML element. Provides access to child elements and hooks to listen
+     * for events related to this element.
+     *
+     * @see RootElement
+     */
+    interface IElement {
+        /**
+         * Gets the child element with the given name. Uses an empty string as the
+         * namespace.
+         */
+        GetChild(
+            [in] String localName,
+            [out] IElement** result);
+
+        /**
+         * Gets the child element with the given name.
+         */
+        GetChild(
+            [in] String uri,
+            [in] String localName,
+            [out] IElement** result);
+
+        /**
+         * Gets the child element with the given name. Uses an empty string as the
+         * namespace. We will throw a {@link org.xml.sax.SAXException} at parsing
+         * time if the specified child is missing. This helps you ensure that your
+         * listeners are called.
+         */
+        RequireChild(
+            [in] String localName,
+            [out] IElement** result);
+
+        /**
+         * Gets the child element with the given name. We will throw a
+         * {@link org.xml.sax.SAXException} at parsing time if the specified child
+         * is missing. This helps you ensure that your listeners are called.
+         */
+        RequireChild(
+            [in] String uri,
+            [in] String localName,
+            [out] IElement** result);
+
+        /**
+         * Sets start and end element listeners at the same time.
+         */
+        SetElementListener(
+            [in] IElementListener* elementListener);
+
+        /**
+         * Sets start and end text element listeners at the same time.
+         */
+        SetTextElementListener(
+            [in] ITextElementListener* elementListener);
+
+        /**
+         * Sets a listener for the start of this element.
+         */
+        SetStartElementListener(
+            [in] IStartElementListener* startElementListener);
+
+        /**
+         * Sets a listener for the end of this element.
+         */
+        SetEndElementListener(
+            [in] IEndElementListener* endElementListener);
+
+        /**
+         * Sets a listener for the end of this text element.
+         */
+        SetEndTextElementListener(
+            [in] IEndTextElementListener* endTextElementListener);
+
+        /**
+         * Clears flags on required children.
+         */
+        ResetRequiredChildren();
+
+        /**
+         * Throws an exception if a required child was not present.
+         */
+        CheckRequiredChildren(
+            [in] ILocator* locator);
+    }
+
+    interface IElementHelper {
+        ToString(
+            [in] String uri,
+            [in] String localName,
+            [out] String* str);
+    }
+
+    } // namespace Sax
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,325 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+
+    interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
+    interface Elastos.Droid.Content.Res.IXmlResourceParser;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+    /**
+     * @Involve
+     * interface Elastos.IO.IInputStream
+     */
+    interface IAssetInputStream {
+        GetAssetInt32(
+            [out] Int32* value);
+    }
+
+    /**
+     * Provides access to an application's raw asset files; see {@sa Resources}
+     * for the way most applications will want to retrieve their resource data.
+     * This class presents a lower-level API that allows you to open and read raw
+     * files that have been bundled with the application as a simple stream of
+     * bytes.
+     */
+    /**
+     * @Involve
+     * interface ICloseable;
+     */
+    [deprecated]
+    interface IAssetManager {
+        /**
+         * Mode for {@sa #open(String, int)}: no specific information about how
+         * data will be accessed.
+         */
+        const Int32 ACCESS_UNKNOWN = 0;
+
+        /**
+         * Mode for {@sa #open(String, int)}: Read chunks, and seek forward and
+         * backward.
+         */
+        const Int32 ACCESS_RANDOM = 1;
+        /**
+         * Mode for {@sa #open(String, int)}: Read sequentially, with an
+         * occasional forward seek.
+         */
+        const Int32 ACCESS_STREAMING = 2;
+        /**
+         * Mode for {@sa #open(String, int)}: Attempt to load contents into
+         * memory, for fast small reads.
+         */
+        const Int32 ACCESS_BUFFER = 3;
+
+        /**
+         * Close this asset manager.
+         */
+        Close();
+
+        /**
+         * Open an asset using ACCESS_STREAMING mode.  This provides access to
+         * files that have been bundled with an application as assets -- that is,
+         * files placed in to the "assets" directory.
+         *
+         * @param fileName The name of the asset to open.  This name can be
+         *                 hierarchical.
+         *
+         * @see #open(String, int)
+         * @see #list
+         */
+        Open(
+            [in] String fileName,
+            [out] IInputStream** stream);
+
+        /**
+         * Open an asset using an explicit access mode, returning an InputStream to
+         * read its contents.  This provides access to files that have been bundled
+         * with an application as assets -- that is, files placed in to the
+         * "assets" directory.
+         *
+         * @param fileName The name of the asset to open.  This name can be
+         *                 hierarchical.
+         * @param accessMode Desired access mode for retrieving the data.
+         *
+         * @see #ACCESS_UNKNOWN
+         * @see #ACCESS_STREAMING
+         * @see #ACCESS_RANDOM
+         * @see #ACCESS_BUFFER
+         * @see #open(String)
+         * @see #list
+         */
+        Open(
+            [in] String fileName,
+            [in] Int32 accessMode,
+            [out] IInputStream** stream);
+
+        OpenFd(
+            [in] String fileName,
+            [out] IAssetFileDescriptor** fd);
+
+        /**
+         * Return a String array of all the assets at the given path.
+         *
+         * @param path A relative path within the assets, i.e., "docs/home.html".
+         *
+         * @return String[] Array of strings, one for each asset.  These file
+         *         names are relative to 'path'.  You can open the file by
+         *         concatenating 'path' and a name in the returned string (via
+         *         File) and passing that to open().
+         *
+         * @see #open
+         */
+        List(
+            [in] String path,
+            [out, callee] ArrayOf<String>* names);
+
+        /**
+         * {@hide}
+         * Open a non-asset file as an asset using ACCESS_STREAMING mode.  This
+         * provides direct access to all of the files included in an application
+         * package (not only its assets).  Applications should not normally use
+         * this.
+         *
+         * @see #open(String)
+         */
+        OpenNonAsset(
+            [in] String fileName,
+            [out] IInputStream** stream);
+
+        /**
+         * {@hide}
+         * Open a non-asset file as an asset using a specific access mode.  This
+         * provides direct access to all of the files included in an application
+         * package (not only its assets).  Applications should not normally use
+         * this.
+         *
+         * @see #open(String, int)
+         */
+        OpenNonAsset(
+            [in] String fileName,
+            [in] Int32 accessMode,
+            [out] IInputStream** stream);
+
+        /**
+         * {@hide}
+         * Open a non-asset in a specified package.  Not for use by applications.
+         *
+         * @param cookie Identifier of the package to be opened.
+         * @param fileName Name of the asset to retrieve.
+         */
+        OpenNonAsset(
+            [in] Int32 cookie,
+            [in] String fileName,
+            [out] IInputStream** stream);
+
+        /**
+         * {@hide}
+         * Open a non-asset in a specified package.  Not for use by applications.
+         *
+         * @param cookie Identifier of the package to be opened.
+         * @param fileName Name of the asset to retrieve.
+         * @param accessMode Desired access mode for retrieving the data.
+         */
+        OpenNonAsset(
+            [in] Int32 cookie,
+            [in] String fileName,
+            [in] Int32 accessMode,
+            [out] IInputStream** stream);
+
+        OpenNonAssetFd(
+            [in] String fileName,
+            [out] IAssetFileDescriptor** fd);
+
+        OpenNonAssetFd(
+            [in] Int32 cookie,
+            [in] String fileName,
+            [out] IAssetFileDescriptor** fd);
+
+        /**
+         * Retrieve a parser for a compiled XML file.
+         *
+         * @param fileName The name of the file to retrieve.
+         */
+        OpenXmlResourceParser(
+            [in] String fileName,
+            [out] IXmlResourceParser** parser);
+
+        /**
+         * Retrieve a parser for a compiled XML file.
+         *
+         * @param cookie Identifier of the package to be opened.
+         * @param fileName The name of the file to retrieve.
+         */
+        OpenXmlResourceParser(
+            [in] Int32 cookie,
+            [in] String fileName,
+            [out] IXmlResourceParser** parser);
+
+        /**
+         * Add an additional set of assets to the asset manager.  This can be
+         * either a directory or ZIP file.  Not for use by applications.  Returns
+         * the cookie of the added asset, or 0 on failure.
+         * {@hide}
+         */
+        AddAssetPath(
+            [in] String path,
+            [out] Int32* cookie);
+
+        /**
+         * Add multiple sets of assets to the asset manager at once.  See
+         * {@sa #addAssetPath(String)} for more information.  Returns array of
+         * cookies for each added asset with 0 indicating failure, or null if
+         * the input array of paths is null.
+         * {@hide}
+         */
+        AddAssetPaths(
+            [in] ArrayOf<String>* paths,
+            [out, callee] ArrayOf<Int32>* cookies);
+
+         /**
+         * Add a set of assets to overlay an already added set of assets.
+         *
+         * This is only intended for application resources. System wide resources
+         * are handled before any Java code is executed.
+         *
+         * {@hide}
+         */
+        AddOverlayPath(
+            [in] String idmapPath,
+            [out] Int32* cookie);
+
+        /**
+         * Determine whether the state in this asset manager is up-to-date with
+         * the files on the filesystem.  If false is returned, you need to
+         * instantiate a new AssetManager class to see the new data.
+         * {@hide}
+         */
+        IsUpToDate(
+            [out] Boolean* isUp);
+
+        /**
+         * Change the locale being used by this asset manager.  Not for use by
+         * applications.
+         * {@hide}
+         */
+        SetLocale(
+            [in] String locale);
+
+        /**
+         * Get the locales that this asset manager contains data for.
+         */
+        GetLocales(
+            [out, callee] ArrayOf<String>* locales);
+
+        /**
+         * Change the configuation used when retrieving resources.  Not for use by
+         * applications.
+         * {@hide}
+         */
+        SetConfiguration(
+            [in] Int32 mcc,
+            [in] Int32 mnc,
+            [in] String locale,
+            [in] Int32 orientation,
+            [in] Int32 touchscreen,
+            [in] Int32 density,
+            [in] Int32 keyboard,
+            [in] Int32 keyboardHidden,
+            [in] Int32 navigation,
+            [in] Int32 screenWidth,
+            [in] Int32 screenHeight,
+            [in] Int32 smallestScreenWidthDp,
+            [in] Int32 screenWidthDp,
+            [in] Int32 screenHeightDp,
+            [in] Int32 screenLayout,
+            [in] Int32 uiMode,
+            [in] Int32 majorVersion);
+
+        /**
+         * {@hide}
+         */
+        GetCookieName(
+            [in] Int32 cookie,
+            [out] String* name);
+
+        GetNativeAssetManager(
+            [out] Int64* assetMgr);
+    }
+
+    interface IAssetManagerHelper {
+        /**
+         * Return a global shared asset manager that provides access to only
+         * system assets (no application assets).
+         * {@hide}
+         */
+        GetSystem(
+            [out] IAssetManager** am);
+
+        /**
+         * {@hide}
+         */
+        GetGlobalAssetCount(
+            [out] Int32* count);
+
+        /**
+         * {@hide}
+         */
+        GetAssetAllocations(
+            [out] String* allocations);
+
+        /**
+         * {@hide}
+         */
+        GetGlobalAssetManagerCount(
+            [out] Int32* count);
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

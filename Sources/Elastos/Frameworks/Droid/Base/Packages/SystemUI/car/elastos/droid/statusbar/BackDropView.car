@@ -1,0 +1,27 @@
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    /**
+     * A view who contains media artwork.
+     *
+     * @Involve
+     * interface Elastos.Droid.Widget.IFrameLayout
+     */
+    interface IBackDropView {
+        SetOnVisibilityChangedRunnable(
+            [in] IRunnable* runnable);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

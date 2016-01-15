@@ -1,0 +1,6 @@
+
+LIBRARY AudioTrack.eco
+
+EXPORTS
+	GetMinBufferSize
+

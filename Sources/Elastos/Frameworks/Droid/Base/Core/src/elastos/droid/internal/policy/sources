@@ -1,0 +1,13 @@
+TARGET_NAME= policy
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES += CPolicyManager.cpp
+
+ELASTOS_LIBS += impl/impl.lib

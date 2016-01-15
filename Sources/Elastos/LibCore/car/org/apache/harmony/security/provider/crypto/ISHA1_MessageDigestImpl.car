@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Crypto {
+
+    /**
+     * This class extends the MessageDigestSpi class implementing all its abstract methods;
+     * it overrides the "Object clone()" and "int engineGetDigestLength()" methods. <BR>
+     * The class implements the Cloneable interface.
+     */
+    interface ISHA1_MessageDigestImpl extends Elastos.Security.IMessageDigestSpi {
+    }
+
+    } // namespace Crypto
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

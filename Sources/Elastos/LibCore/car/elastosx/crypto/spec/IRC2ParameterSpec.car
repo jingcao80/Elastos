@@ -1,0 +1,39 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The algorithm parameter specification for the <a
+     * href="http://www.ietf.org/rfc/rfc2268.txt">RC2</a> algorithm.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+     */
+    interface IRC2ParameterSpec {
+
+        /**
+         * Returns the effective key length (in bits).
+         *
+         * @return the effective key length (in bits).
+         */
+        GetEffectiveKeyBits(
+            [out] Int32 * bits);
+
+        /**
+         * Returns a copy of the initialization vector.
+         *
+         * @return a copy of the initialization vector, or null if none specified.
+         */
+        GetIV(
+            [out, callee] ArrayOf<Byte> * iv);
+    }
+
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

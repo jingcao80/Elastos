@@ -1,0 +1,33 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpMessage;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace IO {
+
+    /**
+     * Generic message writer interface.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 567370 $
+     *
+     * @since 4.0
+     */
+    interface IHttpMessageWriter {
+
+        Write(
+            [in] IHttpMessage* message);
+
+    }
+
+    } // namespace IO
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

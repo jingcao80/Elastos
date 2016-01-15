@@ -1,0 +1,773 @@
+module
+{
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.IO.IPrintStream;
+
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Database.Sqlite.ISQLiteDatabase;
+    interface Elastos.Droid.Database.Sqlite.ISQLiteStatement;
+    interface Elastos.Droid.Database.Sqlite.ISQLiteProgram;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    [deprecated]
+    interface IDatabaseInsertHelper {
+        /**
+         * Returns the index of the specified column. This is index is suitagble for use
+         * in calls to bind().
+         * @param key the column name
+         * @return the index of the column
+        */
+        GetColumnIndex(
+            [in] String key,
+            [out] Int32* index);
+
+        /**
+         * Bind the value to an index. A prepareForInsert() or prepareForReplace()
+         * without a matching execute() must have already have been called.
+         * @param index the index of the slot to which to bind
+         * @param value the value to bind
+         */
+        BindDouble(
+            [in] Int32 index,
+            [in] Double value);
+
+        /**
+         * Bind the value to an index. A prepareForInsert() or prepareForReplace()
+         * without a matching execute() must have already have been called.
+         * @param index the index of the slot to which to bind
+         * @param value the value to bind
+         */
+        BindFloat(
+            [in] Int32 index,
+            [in] Float value);
+
+        /**
+         * Bind the value to an index. A prepareForInsert() or prepareForReplace()
+         * without a matching execute() must have already have been called.
+         * @param index the index of the slot to which to bind
+         * @param value the value to bind
+         */
+        BindInt64(
+            [in] Int32 index,
+            [in] Int64 value);
+
+        /**
+         * Bind the value to an index. A prepareForInsert() or prepareForReplace()
+         * without a matching execute() must have already have been called.
+         * @param index the index of the slot to which to bind
+         * @param value the value to bind
+         */
+        BindInt32(
+            [in] Int32 index,
+            [in] Int32 value);
+
+        /**
+         * Bind the value to an index. A prepareForInsert() or prepareForReplace()
+         * without a matching execute() must have already have been called.
+         * @param index the index of the slot to which to bind
+         * @param value the value to bind
+         */
+        BindBoolean(
+            [in] Int32 index,
+            [in] Boolean value);
+
+        /**
+         * Bind null to an index. A prepareForInsert() or prepareForReplace()
+         * without a matching execute() must have already have been called.
+         * @param index the index of the slot to which to bind
+         */
+        BindNull(
+            [in] Int32 index);
+
+        /**
+         * Bind the value to an index. A prepareForInsert() or prepareForReplace()
+         * without a matching execute() must have already have been called.
+         * @param index the index of the slot to which to bind
+         * @param value the value to bind
+         */
+        BindBytes(
+            [in] Int32 index,
+            [in] ArrayOf<Byte>* value);
+
+        /**
+         * Bind the value to an index. A prepareForInsert() or prepareForReplace()
+         * without a matching execute() must have already have been called.
+         * @param index the index of the slot to which to bind
+         * @param value the value to bind
+         */
+        BindString(
+            [in] Int32 index,
+            [in] String value);
+
+        /**
+         * Performs an insert, adding a new row with the given values.
+         * If the table contains conflicting rows, an error is
+         * returned.
+         *
+         * @param values the set of values with which to populate the
+         * new row
+         *
+         * @return the row ID of the newly inserted row, or -1 if an
+         * error occurred
+         */
+        Insert(
+            [in] IContentValues* values,
+            [out] Int64* result);
+
+        /**
+         * Execute the previously prepared insert or replace using the bound values
+         * since the last call to prepareForInsert or prepareForReplace.
+         *
+         * <p>Note that calling bind() and then execute() is not thread-safe. The only thread-safe
+         * way to use this class is to call insert() or replace().
+         *
+         * @return the row ID of the newly inserted row, or -1 if an
+         * error occurred
+         */
+        Execute(
+            [out] Int64* result);
+
+        /**
+         * Prepare the InsertHelper for an insert. The pattern for this is:
+         * <ul>
+         * <li>prepareForInsert()
+         * <li>bind(index, value);
+         * <li>bind(index, value);
+         * <li>...
+         * <li>bind(index, value);
+         * <li>execute();
+         * </ul>
+         */
+        PrepareForInsert();
+
+        /**
+         * Prepare the InsertHelper for a replace. The pattern for this is:
+         * <ul>
+         * <li>prepareForReplace()
+         * <li>bind(index, value);
+         * <li>bind(index, value);
+         * <li>...
+         * <li>bind(index, value);
+         * <li>execute();
+         * </ul>
+         */
+        PrepareForReplace();
+
+        /**
+         * Performs an insert, adding a new row with the given values.
+         * If the table contains conflicting rows, they are deleted
+         * and replaced with the new row.
+         *
+         * @param values the set of values with which to populate the
+         * new row
+         *
+         * @return the row ID of the newly inserted row, or -1 if an
+         * error occurred
+         */
+        Replace(
+            [in] IContentValues* values,
+            [out] Int64* result);
+
+        /**
+         * Close this object and release any resources associated with
+         * it.  The behavior of calling <code>insert()</code> after
+         * calling this method is undefined.
+         */
+        Close();
+
+    }
+
+
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_SELECT = 1;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_UPDATE = 2;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_ATTACH = 3;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_BEGIN = 4;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_COMMIT = 5;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_ABORT = 6;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_PRAGMA = 7;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_DDL = 8;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_UNPREPARED = 9;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    const DatabaseUtils_STATEMENT_OTHER = 99;
+
+    /**
+     * Static utility methods for dealing with databases and {@link Cursor}s.
+     */
+    [local, deprecated]
+    interface IDatabaseUtils {
+        /**
+         * Special function for writing an exception result at the header of
+         * a parcel, to be used when returning an exception from a transaction.
+         * exception will be re-thrown by the function in another process
+         * @param reply Parcel to write to
+         * @param e The Exception to be written.
+         * @see Parcel#writeNoException
+         * @see Parcel#writeException
+         */
+        WriteExceptionToParcel(
+            [in] IParcel* reply,
+            [in] ECode e);
+
+        /**
+         * Special function for reading an exception result from the header of
+         * a parcel, to be used after receiving the result of a transaction.  This
+         * will throw the exception for you if it had been written to the Parcel,
+         * otherwise return and let you read the normal result data from the Parcel.
+         * @param reply Parcel to read from
+         * @see Parcel#writeNoException
+         * @see Parcel#readException
+         */
+        ReadExceptionFromParcel(
+            [in] IParcel* reply);
+
+        ReadExceptionWithFileNotFoundExceptionFromParcel(
+            [in] IParcel* reply);
+
+        ReadExceptionWithOperationApplicationExceptionFromParcel(
+            [in] IParcel* reply);
+
+        /**
+         * Binds the given Object to the given SQLiteProgram using the proper
+         * typing. For example, bind numbers as longs/doubles, and everything else
+         * as a string by call toString() on it.
+         *
+         * @param prog the program to bind the object to
+         * @param index the 1-based index to bind at
+         * @param value the value to bind
+         */
+        BindObjectToProgram(
+            [in] ISQLiteProgram* prog,
+            [in] Int32 index,
+            [in] IInterface* value);
+
+        /**
+         * Appends an SQL string to the given StringBuilder, including the opening
+         * and closing single quotes. Any single quotes internal to sqlString will
+         * be escaped.
+         *
+         * This method is deprecated because we want to encourage everyone
+         * to use the "?" binding form.  However, when implementing a
+         * ContentProvider, one may want to add WHERE clauses that were
+         * not provided by the caller.  Since "?" is a positional form,
+         * using it in this case could break the caller because the
+         * indexes would be shifted to accomodate the ContentProvider's
+         * internal bindings.  In that case, it may be necessary to
+         * construct a WHERE clause manually.  This method is useful for
+         * those cases.
+         *
+         * @param sb the StringBuilder that the SQL string will be appended to
+         * @param sqlString the raw string to be appended, which may contain single
+         *                  quotes
+         */
+        AppendEscapedSQLString(
+            [in] IStringBuilder* sb,
+            [in] String sqlString);
+
+        /**
+         * SQL-escape a string.
+         */
+        SqlEscapeString(
+            [in] String value,
+            [out] String* str);
+
+        /**
+         * Appends an Object to an SQL string with the proper escaping, etc.
+         */
+        AppendValueToSql(
+            [in] IStringBuilder* sql,
+            [in] IInterface* value);
+
+        /**
+         * Concatenates two SQL WHERE clauses, handling empty or null values.
+         */
+        ConcatenateWhere(
+            [in] String a,
+            [in] String b,
+            [out] String* str);
+
+        /**
+         * return the collation key
+         * @param name
+         * @return the collation key
+         */
+        GetCollationKey(
+            [in] String name,
+            [out] String* str);
+
+        /**
+         * return the collation key in hex format
+         * @param name
+         * @return the collation key in hex format
+         */
+        GetHexCollationKey(
+            [in] String name,
+            [out] String* str);
+
+        /**
+         * Prints the contents of a Cursor to System.out. The position is restored
+         * after printing.
+         *
+         * @param cursor the cursor to print
+         */
+        DumpCursor(
+            [in] ICursor* cursor);
+
+        /**
+         * Prints the contents of a Cursor to a PrintSteam. The position is restored
+         * after printing.
+         *
+         * @param cursor the cursor to print
+         * @param stream the stream to print to
+         */
+        DumpCursor(
+            [in] ICursor* cursor,
+            [in] IPrintStream* stream);
+
+        /**
+         * Prints the contents of a Cursor to a StringBuilder. The position
+         * is restored after printing.
+         *
+         * @param cursor the cursor to print
+         * @param sb the StringBuilder to print to
+         */
+        DumpCursor(
+            [in] ICursor* cursor,
+            [in] IStringBuilder* sb);
+
+        /**
+         * Prints the contents of a Cursor to a String. The position is restored
+         * after printing.
+         *
+         * @param cursor the cursor to print
+         * @return a String that contains the dumped cursor
+         */
+        DumpCursorToString(
+            [in] ICursor* cursor,
+            [out] String* str);
+
+        /**
+         * Prints the contents of a Cursor's current row to System.out.
+         *
+         * @param cursor the cursor to print from
+         */
+        DumpCurrentRow(
+            [in] ICursor* cursor);
+
+        /**
+         * Prints the contents of a Cursor's current row to a PrintSteam.
+         *
+         * @param cursor the cursor to print
+         * @param stream the stream to print to
+         */
+        DumpCurrentRow(
+            [in] ICursor* cursor,
+            [in] IPrintStream* stream);
+
+        /**
+         * Prints the contents of a Cursor's current row to a StringBuilder.
+         *
+         * @param cursor the cursor to print
+         * @param sb the StringBuilder to print to
+         */
+        DumpCurrentRow(
+            [in] ICursor* cursor,
+            [in] IStringBuilder* sb);
+
+        /**
+         * Dump the contents of a Cursor's current row to a String.
+         *
+         * @param cursor the cursor to print
+         * @return a String that contains the dumped cursor row
+         */
+        DumpCurrentRowToString(
+            [in] ICursor* cursor,
+            [out] String* str);
+
+        /**
+         * Reads a String out of a field in a Cursor and writes it to a Map.
+         *
+         * @param cursor The cursor to read from
+         * @param field The TEXT field to read
+         * @param values The {@link ContentValues} to put the value into, with the field as the key
+         */
+        CursorStringToContentValues(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IContentValues* values);
+
+        /**
+         * Reads a String out of a field in a Cursor and writes it to an InsertHelper.
+         *
+         * @param cursor The cursor to read from
+         * @param field The TEXT field to read
+         * @param inserter The InsertHelper to bind into
+         * @param index the index of the bind entry in the InsertHelper
+         */
+        CursorStringToInsertHelper(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IDatabaseInsertHelper* inserter,
+            [in] Int32 index);
+
+        /**
+         * Reads a String out of a field in a Cursor and writes it to a Map.
+         *
+         * @param cursor The cursor to read from
+         * @param field The TEXT field to read
+         * @param values The {@link ContentValues} to put the value into, with the field as the key
+         * @param key The key to store the value with in the map
+         */
+        CursorStringToContentValues(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IContentValues* values,
+            [in] String key);
+
+        /**
+         * Reads an Integer out of a field in a Cursor and writes it to a Map.
+         *
+         * @param cursor The cursor to read from
+         * @param field The INTEGER field to read
+         * @param values The {@link ContentValues} to put the value into, with the field as the key
+         */
+        CursorInt32ToContentValues(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IContentValues* values);
+
+        /**
+         * Reads a Integer out of a field in a Cursor and writes it to a Map.
+         *
+         * @param cursor The cursor to read from
+         * @param field The INTEGER field to read
+         * @param values The {@link ContentValues} to put the value into, with the field as the key
+         * @param key The key to store the value with in the map
+         */
+        CursorInt32ToContentValues(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IContentValues* values,
+            [in] String key);
+
+        /**
+         * Reads a Long out of a field in a Cursor and writes it to a Map.
+         *
+         * @param cursor The cursor to read from
+         * @param field The INTEGER field to read
+         * @param values The {@link ContentValues} to put the value into, with the field as the key
+         */
+        CursorInt64ToContentValues(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IContentValues* values);
+
+        /**
+         * Reads a Long out of a field in a Cursor and writes it to a Map.
+         *
+         * @param cursor The cursor to read from
+         * @param field The INTEGER field to read
+         * @param values The {@link ContentValues} to put the value into
+         * @param key The key to store the value with in the map
+         */
+        CursorInt64ToContentValues(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IContentValues* values,
+            [in] String key);
+
+        /**
+         * Reads a Double out of a field in a Cursor and writes it to a Map.
+         *
+         * @param cursor The cursor to read from
+         * @param field The REAL field to read
+         * @param values The {@link ContentValues} to put the value into
+         */
+        CursorDoubleToCursorValues(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IContentValues* values);
+
+        /**
+         * Reads a Double out of a field in a Cursor and writes it to a Map.
+         *
+         * @param cursor The cursor to read from
+         * @param field The REAL field to read
+         * @param values The {@link ContentValues} to put the value into
+         * @param key The key to store the value with in the map
+         */
+        CursorDoubleToContentValues(
+            [in] ICursor* cursor,
+            [in] String field,
+            [in] IContentValues* values,
+            [in] String key);
+
+        /**
+         * Read the entire contents of a cursor row and store them in a ContentValues.
+         *
+         * @param cursor the cursor to read from.
+         * @param values the {@link ContentValues} to put the row into.
+         */
+        CursorRowToContentValues(
+            [in] ICursor* cursor,
+            [in] IContentValues* values);
+
+        /**
+         * Query the table for the number of rows in the table.
+         * @param db the database the table is in
+         * @param table the name of the table to query
+         * @return the number of rows in the table
+         */
+        QueryNumEntries(
+            [in] ISQLiteDatabase* db,
+            [in] String table,
+            [out] Int64* result);
+
+        /**
+         * Query the table for the number of rows in the table.
+         * @param db the database the table is in
+         * @param table the name of the table to query
+         * @param selection A filter declaring which rows to return,
+         *              formatted as an SQL WHERE clause (excluding the WHERE itself).
+         *              Passing null will count all rows for the given table
+         * @return the number of rows in the table filtered by the selection
+         */
+        QueryNumEntries(
+            [in] ISQLiteDatabase* db,
+            [in] String table,
+            [in] String selection,
+            [out] Int64* result);
+
+        /**
+         * Query the table for the number of rows in the table.
+         * @param db the database the table is in
+         * @param table the name of the table to query
+         * @param selection A filter declaring which rows to return,
+         *              formatted as an SQL WHERE clause (excluding the WHERE itself).
+         *              Passing null will count all rows for the given table
+         * @param selectionArgs You may include ?s in selection,
+         *              which will be replaced by the values from selectionArgs,
+         *              in order that they appear in the selection.
+         *              The values will be bound as Strings.
+         * @return the number of rows in the table filtered by the selection
+         */
+        QueryNumEntries(
+            [in] ISQLiteDatabase* db,
+            [in] String table,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] Int64* result);
+
+        /**
+         * Query the table to check whether a table is empty or not
+         * @param db the database the table is in
+         * @param table the name of the table to query
+         * @return True if the table is empty
+         * @hide
+         */
+        QueryIsEmpty(
+            [in] ISQLiteDatabase* db,
+            [in] String table,
+            [out] Boolean* result);
+
+        /**
+         * Utility method to run the query on the db and return the value in the
+         * first column of the first row.
+         */
+        Int64ForQuery(
+            [in] ISQLiteDatabase* db,
+            [in] String query,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] Int64* result);
+
+        /**
+         * Utility method to run the pre-compiled query and return the value in the
+         * first column of the first row.
+         */
+        Int64ForQuery(
+            [in] ISQLiteStatement* prog,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] Int64* result);
+
+        /**
+         * Utility method to run the query on the db and return the value in the
+         * first column of the first row.
+         */
+        StringForQuery(
+            [in] ISQLiteDatabase* db,
+            [in] String query,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] String* result);
+
+        /**
+         * Utility method to run the pre-compiled query and return the value in the
+         * first column of the first row.
+         */
+        StringForQuery(
+            [in] ISQLiteStatement* prog,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] String* result);
+
+        /**
+         * Utility method to run the query on the db and return the blob value in the
+         * first column of the first row.
+         *
+         * @return A read-only file descriptor for a copy of the blob value.
+         */
+        BlobFileDescriptorForQuery(
+            [in] ISQLiteDatabase* db,
+            [in] String query,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] IParcelFileDescriptor** result);
+
+        /**
+         * Utility method to run the pre-compiled query and return the blob value in the
+         * first column of the first row.
+         *
+         * @return A read-only file descriptor for a copy of the blob value.
+         */
+        BlobFileDescriptorForQuery(
+            [in] ISQLiteStatement* prog,
+            [in] ArrayOf<String>* selectionArgs,
+            [out] IParcelFileDescriptor** result);
+
+        /**
+         * Reads a String out of a column in a Cursor and writes it to a ContentValues.
+         * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+         *
+         * @param cursor The cursor to read from
+         * @param column The column to read
+         * @param values The {@link ContentValues} to put the value into
+         */
+        CursorStringToContentValuesIfPresent(
+            [in] ICursor* cursor,
+            [in] IContentValues* values,
+            [in] String column);
+
+        /**
+         * Reads a Long out of a column in a Cursor and writes it to a ContentValues.
+         * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+         *
+         * @param cursor The cursor to read from
+         * @param column The column to read
+         * @param values The {@link ContentValues} to put the value into
+         */
+        CursorInt64ToContentValuesIfPresent(
+            [in] ICursor* cursor,
+            [in] IContentValues* values,
+            [in] String column);
+
+        /**
+         * Reads a Short out of a column in a Cursor and writes it to a ContentValues.
+         * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+         *
+         * @param cursor The cursor to read from
+         * @param column The column to read
+         * @param values The {@link ContentValues} to put the value into
+         */
+        CursorInt16ToContentValuesIfPresent(
+            [in] ICursor* cursor,
+            [in] IContentValues* values,
+            [in] String column);
+
+        /**
+         * Reads a Integer out of a column in a Cursor and writes it to a ContentValues.
+         * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+         *
+         * @param cursor The cursor to read from
+         * @param column The column to read
+         * @param values The {@link ContentValues} to put the value into
+         */
+        CursorInt32ToContentValuesIfPresent(
+            [in] ICursor* cursor,
+            [in] IContentValues* values,
+            [in] String column);
+
+        /**
+         * Reads a Float out of a column in a Cursor and writes it to a ContentValues.
+         * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+         *
+         * @param cursor The cursor to read from
+         * @param column The column to read
+         * @param values The {@link ContentValues} to put the value into
+         */
+        CursorFloatToContentValuesIfPresent(
+            [in] ICursor* cursor,
+            [in] IContentValues* values,
+            [in] String column);
+
+        /**
+         * Reads a Double out of a column in a Cursor and writes it to a ContentValues.
+         * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+         *
+         * @param cursor The cursor to read from
+         * @param column The column to read
+         * @param values The {@link ContentValues} to put the value into
+         */
+        CursorDoubleToContentValuesIfPresent(
+            [in] ICursor* cursor,
+            [in] IContentValues* values,
+            [in] String column);
+
+        /**
+         * Creates a db and populates it with the sql statements in sqlStatements.
+         *
+         * @param context the context to use to create the db
+         * @param dbName the name of the db to create
+         * @param dbVersion the version to set on the db
+         * @param sqlStatements the statements to use to populate the db. This should be a single string
+         *   of the form returned by sqlite3's <tt>.dump</tt> command (statements separated by
+         *   semicolons)
+         */
+        CreateDbFromSqlStatements(
+            [in] IContext* ctx,
+            [in] String dbName,
+            [in] Int32 dbVersion,
+            [in] String sqlStatements);
+
+        /**
+         * Returns one of the following which represent the type of the given SQL statement.
+         * <ol>
+         *   <li>{@link #STATEMENT_SELECT}</li>
+         *   <li>{@link #STATEMENT_UPDATE}</li>
+         *   <li>{@link #STATEMENT_ATTACH}</li>
+         *   <li>{@link #STATEMENT_BEGIN}</li>
+         *   <li>{@link #STATEMENT_COMMIT}</li>
+         *   <li>{@link #STATEMENT_ABORT}</li>
+         *   <li>{@link #STATEMENT_OTHER}</li>
+         * </ol>
+         * @param sql the SQL statement whose type is returned by this method
+         * @return one of the values listed above
+         */
+        GetSqlStatementType(
+            [in] String sql,
+            [out] Int32* type);
+
+        /**
+         * Appends one set of selection args to another. This is useful when adding a selection
+         * argument to a user provided set.
+         */
+        AppendSelectionArgs(
+            [in] ArrayOf<String>* originalValues,
+            [in] ArrayOf<String>* newValues,
+            [out,callee] ArrayOf<String>* args);
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

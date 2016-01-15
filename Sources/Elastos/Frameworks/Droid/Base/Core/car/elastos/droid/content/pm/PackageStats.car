@@ -1,0 +1,82 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * implementation of PackageStats associated with a application package.
+     */
+
+    interface IPackageStats {
+        ToString(
+            [out] String* str);
+
+        GetPackageName(
+            [out] String* packageName);
+
+        SetPackageName(
+            [in] String packageName);
+
+        GetUserHandle(
+            [out] Int32* userHandle);
+
+        SetUserHandle(
+            [in] Int32 userHandle);
+
+        GetCodeSize(
+            [out] Int64* codeSize);
+
+        SetCodeSize(
+            [in] Int64 codeSize);
+
+        GetDataSize(
+            [out] Int64* dataSize);
+
+        SetDataSize(
+            [in] Int64 dataSize);
+
+        GetCacheSize(
+            [out] Int64* cacheSize);
+
+        SetCacheSize(
+            [in] Int64 cacheSize);
+
+        GetExternalCodeSize(
+            [out] Int64* externalCodeSize);
+
+        SetExternalCodeSize(
+            [in] Int64 externalCodeSize);
+
+        GetExternalDataSize(
+            [out] Int64* externalDataSize);
+
+        SetExternalDataSize(
+            [in] Int64 externalDataSize);
+
+        GetExternalCacheSize(
+            [out] Int64* externalCacheSize);
+
+        SetExternalCacheSize(
+            [in] Int64 externalCacheSize);
+
+        GetExternalMediaSize(
+            [out] Int64* externalMediaSize);
+
+        SetExternalMediaSize(
+            [in] Int64 externalMediaSize);
+
+        GetExternalObbSize(
+            [out] Int64* externalObbSize);
+
+        SetExternalObbSize(
+            [in] Int64 externalObbSize);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

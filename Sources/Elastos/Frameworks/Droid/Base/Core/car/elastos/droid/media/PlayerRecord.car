@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+        /**
+         * @hide
+         * Class to handle all the information about a media player, encapsulating information
+         * about its use RemoteControlClient, playback type and volume... The lifecycle of each
+         * instance is managed by android.media.MediaFocusControl, from its addition to the player stack
+         * stack to its release.
+         */
+        interface IPlayerRecord
+        {
+            Dump(
+                [in] IPrintWriter* pw,
+                [in] Boolean registrationInfo);
+
+            ResetPlaybackInfo();
+
+            UnlinkToRcClientDeath();
+
+            // FIXME rename to "release"? (as in FocusRequester class)
+            Destroy();
+        }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

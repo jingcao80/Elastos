@@ -1,0 +1,189 @@
+module
+{
+    interface Elastos.Utility.Logging.ILogRecord;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Logging {
+    /**
+     * A {@code Handler} object accepts a logging request and exports the desired
+     * messages to a target, for example, a file, the console, etc. It can be
+     * disabled by setting its logging level to {@code Level.OFF}.
+     */
+    interface ILogHandler {
+        // print error message in some format
+        PrintInvalidPropMessage(
+            [in] String key,
+            [in] String value,
+            [in] ECode e);
+
+        /**
+         * init the common properties, including filter, level, formatter, and
+         * encoding
+         */
+        InitProperties(
+            [in] String defaultLevel,
+            [in] String defaultFilter,
+            [in] String defaultFormatter,
+            [in] String defaultEncoding);
+
+        /**
+         * Closes this handler. A flush operation will be performed and all the
+         * associated resources will be freed. Client applications should not use
+         * this handler after closing it.
+         */
+        Close();
+
+        /**
+         * Flushes any buffered output.
+         */
+        Flush();
+
+        /**
+         * Accepts a logging request and sends it to the the target.
+         *
+         * @param record
+         *            the log record to be logged; {@code null} records are ignored.
+         */
+        Publish(
+            [in] ILogRecord* record);
+
+        /**
+         * Gets the character encoding used by this handler, {@code null} for
+         * default encoding.
+         *
+         * @return the character encoding used by this handler.
+         */
+        GetEncoding(
+            [out] String* str);
+
+        /**
+         * Gets the error manager used by this handler to report errors during
+         * logging.
+         *
+         * @return the error manager used by this handler.
+         */
+        GetErrorManager(
+            [out] IErrorManager** errman);
+
+        /**
+         * Gets the filter used by this handler.
+         *
+         * @return the filter used by this handler (possibly {@code null}).
+         */
+        GetFilter(
+            [out] IFilter** outfilter);
+
+        /**
+         * Gets the formatter used by this handler to format the logging messages.
+         *
+         * @return the formatter used by this handler (possibly {@code null}).
+         */
+        GetFormatter(
+            [out] ILogFormatter** outformat);
+
+        /**
+         * Gets the logging level of this handler, records with levels lower than
+         * this value will be dropped.
+         *
+         * @return the logging level of this handler.
+         */
+        GetLevel(
+            [out] ILevel** outlevel);
+
+        /**
+         * Determines whether the supplied log record needs to be logged. The
+         * logging levels will be checked as well as the filter.
+         *
+         * @param record
+         *            the log record to be checked.
+         * @return {@code true} if the supplied log record needs to be logged,
+         *         otherwise {@code false}.
+         */
+        IsLoggable(
+            [in] ILogRecord* record,
+            [out] Boolean* value);
+
+        /**
+         * Sets the character encoding used by this handler. A {@code null} value
+         * indicates the use of the default encoding. This internal method does
+         * not check security.
+         *
+         * @param newEncoding
+         *            the character encoding to set.
+         * @throws UnsupportedEncodingException
+         *             if the specified encoding is not supported by the runtime.
+         */
+        InternalSetEncoding(
+            [in] String newEncoding);
+
+        /**
+         * Sets the character encoding used by this handler, {@code null} indicates
+         * a default encoding.
+         *
+         * @param encoding
+         *            the character encoding to set.
+         * @throws UnsupportedEncodingException
+         *             if the specified encoding is not supported by the runtime.
+         */
+        SetEncoding(
+            [in] String encoding);
+
+        /**
+         * Sets the error manager for this handler.
+         *
+         * @param newErrorManager
+         *            the error manager to set.
+         * @throws NullPointerException
+         *             if {@code em} is {@code null}.
+         */
+        SetErrorManager(
+            [in] IErrorManager* newErrorManager);
+
+        /**
+         * Sets the filter to be used by this handler.
+         *
+         * @param newFilter
+         *            the filter to set, may be {@code null}.
+         */
+        SetFilter(
+            [in] IFilter* newFilter);
+
+        /**
+         * Sets the formatter to be used by this handler. This internal method does
+         * not check security.
+         *
+         * @param newFormatter
+         *            the formatter to set.
+         */
+        InternalSetFormatter(
+            [in] ILogFormatter* newFormatter);
+
+        /**
+         * Sets the formatter to be used by this handler.
+         *
+         * @param newFormatter
+         *            the formatter to set.
+         * @throws NullPointerException
+         *             if {@code newFormatter} is {@code null}.
+         */
+        SetFormatter(
+            [in] ILogFormatter* newFormatter);
+
+        /**
+         * Sets the logging level of the messages logged by this handler, levels
+         * lower than this value will be dropped.
+         *
+         * @param newLevel
+         *            the logging level to set.
+         * @throws NullPointerException
+         *             if {@code newLevel} is {@code null}.
+         */
+        SetLevel(
+            [in] ILevel* newLevel);
+    }
+
+    } // namespace Logging
+    } // namespace Utility
+    } // namespace Elastos
+}

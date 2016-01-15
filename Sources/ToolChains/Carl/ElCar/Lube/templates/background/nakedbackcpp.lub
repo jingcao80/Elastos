@@ -1,0 +1,333 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$OUTPUT "_${fullname}.cpp"
+$
+#include <new>
+#include "${ClassFullPath(class)}.h"
+
+${ClassNamespaceBegin(class)}
+$IF attrib is "singleton"
+static ${name} *_s_p${name}_ObjPtr_ = NULL;
+static SpinLock _s_${name}_spinlockObj_;
+static _SingletonObjState_ _s_${name}_ObjState_ = _SingletonObjState_Uninitialize;
+
+void _${class.name}::OnLastStrongRef(
+    /* [in] */ const void* id)
+{
+    _s_${name}_ObjState_ = _SingletonObjState_Uninitialize;
+    _s_p${name}_ObjPtr_ = NULL;
+    _s_${name}_spinlockObj_.Unlock();
+}
+
+SpinLock& _${class.name}::GetSelfSpinLock()
+{
+    return _s_${name}_spinlockObj_;
+}
+$END IF
+
+$IF class.attrib is not "hasctor"
+CARAPI _${class.name}CreateObject(
+    /* [out] */ ${class.name} **ppObj)
+{
+$
+$IF class.attrib is not "singleton"
+    ${class.name} *pObj = NULL;
+
+    void* pLocation = calloc(sizeof(${class.name}), 1);
+    if (!pLocation) {
+        return E_OUT_OF_MEMORY;
+    }
+    pObj = (${class.name} *)new(pLocation) ${class.name};
+
+    *ppObj = pObj;
+    (*ppObj)->AddRef();
+
+    return NOERROR;
+$ELSE ;; singleton
+    ECode ec;
+    ${class.name} *pNewObj;
+    void* pLocation;
+BEGIN:
+    ec = NOERROR;
+    *ppObj = NULL;
+
+    _s_${class.name}_spinlockObj_.Lock();
+
+    switch (_s_${class.name}_ObjState_) {
+        case _SingletonObjState_Uninitialize:
+            _s_${class.name}_ObjState_ = _SingletonObjState_Initializing;
+            _s_${class.name}_spinlockObj_.Unlock();
+
+            pLocation = calloc(sizeof(${class.name}), 1);
+            if (!pLocation) {
+                _s_${class.name}_ObjState_ = _SingletonObjState_Uninitialize;
+                ec = E_OUT_OF_MEMORY;
+                goto Exit;
+            }
+            pNewObj = (${class.name} *)new(pLocation) ${class.name};
+
+            _s_p${class.name}_ObjPtr_ = pNewObj;
+            *ppObj = pNewObj;
+            (*ppObj)->AddRef();
+            _s_${class.name}_ObjState_ = _SingletonObjState_Initialized;
+            break;
+        case _SingletonObjState_Initializing:
+            do {
+                _s_${class.name}_spinlockObj_.Unlock();
+                usleep(1);
+
+                _s_${class.name}_spinlockObj_.Lock();
+                if (_SingletonObjState_Uninitialize
+                        == _s_${class.name}_ObjState_) {
+                    _s_${class.name}_spinlockObj_.Unlock();
+                    goto BEGIN;
+                }
+            } while(_SingletonObjState_Initialized
+                        != _s_${class.name}_ObjState_);
+            /* Don't break here */
+        case _SingletonObjState_Initialized:
+            *ppObj = _s_p${class.name}_ObjPtr_;
+            (*ppObj)->AddRef();
+            _s_${class.name}_spinlockObj_.Unlock();
+            break;
+    }
+
+Exit:
+    return ec;
+$END IF  ;; singleton
+}
+
+$IF type is not "aspect"
+$    IF class.attrib is not "singleton"
+ECode _${class.name}::NewByFriend(
+$    ELSE
+ECode _${class.name}::AcquireSingletonByFriend(
+$    END IF ;; "singleton"
+    /* [out] */ ${class.name} **newObj)
+{
+    return _${class.name}CreateObject(newObj);
+}
+$END IF
+
+$IF type is not "aspect"
+$    IF class.attrib is not "singleton"
+ECode _${class.name}::NewByFriend(
+$    ELSE
+ECode _${class.name}::AcquireSingletonByFriend(
+$    END IF ;; "singleton"
+    /* [in] */ REIID iid,
+    /* [out] */ PInterface* itfObj)
+{
+    ${class.name}* newObj;
+    ECode ec = _${class.name}CreateObject(&newObj);
+    if (FAILED(ec)) {
+        *itfObj = NULL;
+        return ec;
+    }
+    *itfObj = newObj->Probe(iid);
+    if (*itfObj) return NOERROR;
+    else {
+        newObj->Release();
+        return E_NO_INTERFACE;
+    }
+}
+$END IF
+
+$ELSE  ;; not "hasctor"
+$WITH all constructors DO
+CARAPI _${class.name}CreateObject(
+$    WITH all parameters DO
+$       IF parameter is not last
+    /* [${attrib}] */ ${type} ${prefixingname(parameter)},
+$       END IF
+$    END DO ;; all parameters
+    /* [out] */ ${class.name} **ppObj)
+{
+$
+$IF class.attrib is not "singleton"
+    ECode ec = NOERROR;
+    ${class.name} *pObj = NULL;
+
+    void* pLocation = calloc(sizeof(${class.name}), 1);
+    if (!pLocation) {
+        return E_OUT_OF_MEMORY;
+    }
+    pObj = (${class.name} *)new(pLocation) ${class.name};
+
+$   IF method.attrib is not "TrivialCtor"
+    ec = pObj->constructor($^
+$   WITH all parameters DO
+$       IF parameter is first and parameter is last
+,$^
+$       END IF
+$       IF parameter is not last
+${prefixingname(parameter)},$^
+$       END IF
+$   END DO ;; all parameters
+$   Rewrite(")")
+;
+    if (FAILED(ec)) goto Exit;
+$   END IF;
+
+    *ppObj = pObj;
+    (*ppObj)->AddRef();
+
+$   IF method.attrib is not "TrivialCtor"
+Exit:
+$   END IF;
+    if (FAILED(ec) && pObj) {
+        pObj->~${class.name}();
+        free(pObj);
+        *ppObj = NULL;
+    }
+    return ec;
+$ELSE ;; singleton
+    ECode ec;
+    ${class.name} *pNewObj;
+    void* pLocation;
+BEGIN:
+    ec = NOERROR;
+    *ppObj = NULL;
+
+    _s_${class.name}_spinlockObj_.Lock();
+
+    switch (_s_${class.name}_ObjState_) {
+        case _SingletonObjState_Uninitialize:
+            _s_${class.name}_ObjState_ = _SingletonObjState_Initializing;
+            _s_${class.name}_spinlockObj_.Unlock();
+
+            pLocation = calloc(sizeof(${class.name}), 1);
+            if (!pLocation) {
+                _s_${class.name}_ObjState_ = _SingletonObjState_Uninitialize;
+                ec = E_OUT_OF_MEMORY;
+                goto Exit;
+            }
+            pNewObj = (${class.name} *)new(pLocation) ${class.name};
+
+$   IF method.attrib is not "TrivialCtor"
+            ec = pNewObj->constructor($^
+$   WITH all parameters DO
+$       IF parameter is first and parameter is last
+,$^
+$       END IF
+$       IF parameter is not last
+${prefixingname(parameter)},$^
+$       END IF
+$   END DO ;; all parameters
+$   Rewrite(")")
+;
+            if (FAILED(ec)) {
+                _s_${class.name}_ObjState_ = _SingletonObjState_Uninitialize;
+                delete pNewObj;
+                goto Exit;
+            }
+$   END IF;
+            _s_p${class.name}_ObjPtr_ = pNewObj;
+            *ppObj = pNewObj;
+            (*ppObj)->AddRef();
+            _s_${class.name}_ObjState_ = _SingletonObjState_Initialized;
+            break;
+        case _SingletonObjState_Initializing:
+            do {
+                _s_${class.name}_spinlockObj_.Unlock();
+                usleep(1);
+
+                _s_${class.name}_spinlockObj_.Lock();
+                if (_SingletonObjState_Uninitialize
+                        == _s_${class.name}_ObjState_) {
+                    _s_${class.name}_spinlockObj_.Unlock();
+                    goto BEGIN;
+                }
+            } while(_SingletonObjState_Initialized
+                        != _s_${class.name}_ObjState_);
+            /* Don't break here */
+        case _SingletonObjState_Initialized:
+            *ppObj = _s_p${class.name}_ObjPtr_;
+            (*ppObj)->AddRef();
+            _s_${class.name}_spinlockObj_.Unlock();
+            break;
+    }
+
+Exit:
+    return ec;
+$END IF
+}
+
+$END DO ;;
+
+$IF type is not "aspect"
+$   WITH all interfaces DO
+$       IF attrib is "clsobj"
+$           WITH all methods DO
+$               IF class.attrib is not "singleton"
+ECode _${class.name}::NewByFriend(
+$               ELSE
+ECode _${class.name}::AcquireSingletonByFriend(
+$               END IF ;; "singleton"
+$               WITH all parameters DO
+$                   IF parameter is not last
+    /* [${attrib}] */ ${type} ${prefixingname(parameter)},
+$                   ELSE
+    /* [out] */ ${class.name} **${prefixingname(parameter)})
+$                   END IF
+$               END DO ;; all parameters
+{
+    return _${class.name}CreateObject(
+$   WITH all parameters DO
+$       IF parameter is not last
+            ${prefixingname(parameter)},
+$       ELSE
+            ${prefixingname(parameter)});
+$       END IF
+$   END DO ;; all parameters
+}
+
+$           END DO ;; all methods
+$
+$           WITH all methods DO
+$               IF class.attrib is not "singleton"
+ECode _${class.name}::NewByFriend(
+$               ELSE
+ECode _${class.name}::AcquireSingletonByFriend(
+$               END IF ;; "singleton"
+$               WITH all parameters DO
+$                   IF parameter is not last
+    /* [${attrib}] */ ${type} ${prefixingname(parameter)},
+$                   ELSE
+    /* [in] */ REIID iid,
+    /* [out] */ PInterface* itfObj)
+$                   END IF
+$               END DO ;; all parameters
+{
+    ${class.name}* newObj;
+    ECode ec = _${class.name}CreateObject(
+$   WITH all parameters DO
+$       IF parameter is not last
+            ${prefixingname(parameter)},
+$       ELSE
+            &newObj);
+$       END IF
+$   END DO ;; all parameters
+    if (FAILED(ec)) {
+        *itfObj = NULL;
+        return ec;
+    }
+    *itfObj = newObj->Probe(iid);
+    if (*itfObj) return NOERROR;
+    else {
+        newObj->Release();
+        return E_NO_INTERFACE;
+    }
+}
+
+$           END DO ;; all methods
+$       END IF ;; attrib is "clsobj"
+$   END DO ;; all interfaces
+$END IF ;; not "aspect"
+$END IF ;; not "hasctor"
+${ClassNamespaceEnd(class)}
+$
+$END OUTPUT

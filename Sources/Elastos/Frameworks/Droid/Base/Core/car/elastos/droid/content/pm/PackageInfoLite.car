@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IVerifierInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Basic information about a package as specified in its manifest.
+     * Utility class used in PackageManager methods
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IPackageInfoLite {
+        ToString(
+            [out] String* str);
+
+        GetPackageName(
+            [out] String* name);
+
+        SetPackageName(
+            [in] String name);
+
+        GetVersionCode(
+            [out] Int32* versionCode);
+
+        SetVersionCode(
+            [in] Int32 versionCode);
+
+        GetMultiArch(
+            [out] Boolean* versionCode);
+
+        SetMultiArch(
+            [in] Boolean versionCode);
+
+        GetRecommendedInstallLocation(
+            [out] Int32* location);
+
+        SetRecommendedInstallLocation(
+            [in] Int32 location);
+
+        GetInstallLocation(
+            [out] Int32* location);
+
+        SetInstallLocation(
+            [in] Int32 location);
+
+        GetVerifiers(
+            [out, callee] ArrayOf<IVerifierInfo*>* verifiers);
+
+        SetVerifiers(
+            [in] ArrayOf<IVerifierInfo*>* verifiers);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

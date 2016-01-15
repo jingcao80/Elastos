@@ -1,0 +1,774 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Pm.IUserInfo;
+    interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * Manages users and user details on a multi-user system.
+     */
+    interface IUserManager {
+        /**
+         * Specifies if a user is disallowed from adding and removing accounts.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
+
+        /**
+         * Specifies if a user is disallowed from changing Wi-Fi
+         * access points. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CONFIG_WIFI = "no_config_wifi";
+
+        /**
+         * Specifies if a user is disallowed from installing applications.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_INSTALL_APPS = "no_install_apps";
+
+        /**
+         * Specifies if a user is disallowed from uninstalling applications.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
+
+        /**
+         * Specifies if a user is disallowed from toggling location sharing.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_SHARE_LOCATION = "no_share_location";
+
+        /**
+         * Specifies if a user is disallowed from enabling the
+         * "Unknown Sources" setting, that allows installation of apps from unknown sources.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
+
+        /**
+         * Specifies if a user is disallowed from configuring bluetooth.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
+
+        /**
+         * Specifies if a user is disallowed from transferring files over
+         * USB. This can only be set by device owners and profile owners on the primary user.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
+
+        /**
+         * Specifies if a user is disallowed from configuring user
+         * credentials. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
+
+        /**
+         * Specifies if a user is disallowed from removing itself and other
+         * users. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_REMOVE_USER = "no_remove_user";
+
+        /**
+         * Specifies if a user is disallowed from enabling or
+         * accessing debugging features. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
+
+        /**
+         * Specifies if a user is disallowed from configuring VPN.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CONFIG_VPN = "no_config_vpn";
+
+        /**
+         * Specifies if a user is disallowed from configuring Tethering
+         * & portable hotspots. This can only be set by device owners and profile owners on the
+         * primary user. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CONFIG_TETHERING = "no_config_tethering";
+
+        /**
+         * Specifies if a user is disallowed from factory resetting
+         * from Settings. This can only be set by device owners and profile owners on the primary user.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_FACTORY_RESET = "no_factory_reset";
+
+        /**
+         * Specifies if a user is disallowed from adding new users and
+         * profiles. This can only be set by device owners and profile owners on the primary user.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_ADD_USER = "no_add_user";
+
+        /**
+         * Specifies if a user is disallowed from disabling application
+         * verification. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String ENSURE_VERIFY_APPS = "ensure_verify_apps";
+
+        /**
+         * Specifies if a user is disallowed from configuring cell
+         * broadcasts. This can only be set by device owners and profile owners on the primary user.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
+
+        /**
+         * Specifies if a user is disallowed from configuring mobile
+         * networks. This can only be set by device owners and profile owners on the primary user.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CONFIG_MOBILE_NETWORKS = "no_config_mobile_networks";
+
+        /**
+         * Specifies if a user is disallowed from modifying
+         * applications in Settings or launchers. The following actions will not be allowed when this
+         * restriction is enabled:
+         * <li>uninstalling apps</li>
+         * <li>disabling apps</li>
+         * <li>clearing app caches</li>
+         * <li>clearing app data</li>
+         * <li>force stopping apps</li>
+         * <li>clearing app defaults</li>
+         * <p>
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_APPS_CONTROL = "no_control_apps";
+
+        /**
+         * Specifies if a user is disallowed from mounting
+         * physical external media. This can only be set by device owners and profile owners on the
+         * primary user. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
+
+        /**
+         * Specifies if a user is disallowed from adjusting microphone
+         * volume. If set, the microphone will be muted. This can only be set by device owners
+         * and profile owners on the primary user. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
+
+        /**
+         * Specifies if a user is disallowed from adjusting the master
+         * volume. If set, the master volume will be muted. This can only be set by device owners
+         * and profile owners on the primary user. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
+
+        /**
+         * Specifies that the user is not allowed to make outgoing
+         * phone calls. Emergency calls are still permitted.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_OUTGOING_CALLS = "no_outgoing_calls";
+
+        /**
+         * Specifies that the user is not allowed to send or receive
+         * SMS messages. The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_SMS = "no_sms";
+
+        /**
+         * Specifies that windows besides app windows should not be
+         * created. This will block the creation of the following types of windows.
+         * <li>{@link LayoutParams#TYPE_TOAST}</li>
+         * <li>{@link LayoutParams#TYPE_PHONE}</li>
+         * <li>{@link LayoutParams#TYPE_PRIORITY_PHONE}</li>
+         * <li>{@link LayoutParams#TYPE_SYSTEM_ALERT}</li>
+         * <li>{@link LayoutParams#TYPE_SYSTEM_ERROR}</li>
+         * <li>{@link LayoutParams#TYPE_SYSTEM_OVERLAY}</li>
+         *
+         * <p>This can only be set by device owners and profile owners on the primary user.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CREATE_WINDOWS = "no_create_windows";
+
+        /**
+         * Specifies if what is copied in the clipboard of this profile can
+         * be pasted in related profiles. Does not restrict if the clipboard of related profiles can be
+         * pasted in this profile.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         */
+        const String DISALLOW_CROSS_PROFILE_COPY_PASTE = "no_cross_profile_copy_paste";
+
+        /**
+         * Specifies if the user is not allowed to use NFC to beam out data from apps.
+         * The default value is <code>false</code>.
+         *
+         * <p/>Key for user restrictions.
+         * <p/>Type: Boolean
+         * @see #setUserRestrictions(Bundle)
+         * @see #getUserRestrictions()
+         * @hide
+         */
+        const String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
+
+        /** @hide */
+        const Int32 PIN_VERIFICATION_FAILED_INCORRECT = -3;
+        /** @hide */
+        const Int32 PIN_VERIFICATION_FAILED_NOT_SET = -2;
+        /** @hide */
+        const Int32 PIN_VERIFICATION_SUCCESS = -1;
+
+        /**
+         * Returns the user handle for the user that this application is running for.
+         * @return the user handle of the user making this call.
+         * @hide
+         * */
+        GetUserHandle(
+            [out] Int32* userHandle);
+
+        /**
+         * Returns the user name of the user making this call.  This call is only
+         * available to applications on the system image; it requires the
+         * MANAGE_USERS permission.
+         * @return the user name
+         */
+        GetUserName(
+            [out] String* userName);
+
+        /**
+         * Used to determine whether the user making this call is subject to
+         * teleportations.
+         * @return whether the user making this call is a goat
+         */
+        IsUserAGoat(
+            [out] Boolean* result);
+
+        /**
+         * Return whether the given user is actively running.  This means that
+         * the user is in the "started" state, not "stopped" -- it is currently
+         * allowed to run code through scheduled alarms, receiving broadcasts,
+         * etc.  A started user may be either the current foreground user or a
+         * background user; the result here does not distinguish between the two.
+         * @param user The user to retrieve the running state for.
+         */
+        IsUserRunning(
+            [in] IUserHandle* user,
+            [out] Boolean* result);
+
+        /**
+         * Return whether the given user is actively running <em>or</em> stopping.
+         * This is like {@link #isUserRunning(UserHandle)}, but will also return
+         * true if the user had been running but is in the process of being stopped
+         * (but is not yet fully stopped, and still running some code).
+         * @param user The user to retrieve the running state for.
+         */
+        IsUserRunningOrStopping(
+            [in] IUserHandle* user,
+            [out] Boolean* result);
+
+        /**
+         * Returns the UserInfo object describing a specific user.
+         * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+         * @param userHandle the user handle of the user whose information is being requested.
+         * @return the UserInfo object for a specific user.
+         * @hide
+         */
+        GetUserInfo(
+            [in] Int32 userHandle,
+            [out] IUserInfo** userInfo);
+
+        /**
+         * Returns the user-wide restrictions imposed on this user.
+         * @return a Bundle containing all the restrictions.
+         */
+        GetUserRestrictions(
+            [out] IBundle** bundle);
+
+        /**
+         * Returns the user-wide restrictions imposed on the user specified by <code>userHandle</code>.
+         * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+         * @return a Bundle containing all the restrictions.
+         */
+        GetUserRestrictions(
+            [in] IUserHandle* user,
+            [out] IBundle** bundle);
+
+        /**
+         * Sets all the user-wide restrictions for this user.
+         * Requires the MANAGE_USERS permission.
+         * @param restrictions the Bundle containing all the restrictions.
+         * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
+         * android.content.ComponentName, String)} or
+         * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
+         * android.content.ComponentName, String)} instead.
+         */
+        //@Deprecated
+        SetUserRestrictions(
+            [in] IBundle* bundle);
+
+        /**
+         * Sets all the user-wide restrictions for the specified user.
+         * Requires the MANAGE_USERS permission.
+         * @param restrictions the Bundle containing all the restrictions.
+         * @param userHandle the UserHandle of the user for whom to set the restrictions.
+         * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
+         * android.content.ComponentName, String)} or
+         * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
+         * android.content.ComponentName, String)} instead.
+         */
+        //@Deprecated
+        SetUserRestrictions(
+            [in] IBundle* bundle,
+            [in] IUserHandle* userHandle);
+
+        /**
+         * Sets the value of a specific restriction.
+         * Requires the MANAGE_USERS permission.
+         * @param key the key of the restriction
+         * @param value the value for the restriction
+         * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
+         * android.content.ComponentName, String)} or
+         * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
+         * android.content.ComponentName, String)} instead.
+         */
+        //@Deprecated
+        SetUserRestriction(
+            [in] String key,
+            [in] Boolean value);
+
+        /**
+         * @hide
+         * Sets the value of a specific restriction on a specific user.
+         * Requires the MANAGE_USERS permission.
+         * @param key the key of the restriction
+         * @param value the value for the restriction
+         * @param userHandle the user whose restriction is to be changed.
+         * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
+         * android.content.ComponentName, String)} or
+         * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
+         * android.content.ComponentName, String)} instead.
+         */
+        //@Deprecated
+        SetUserRestriction(
+            [in] String key,
+            [in] Boolean value,
+            [in] IUserHandle* userHandle);
+
+        /**
+         * Returns whether the current user has been disallowed from performing certain actions
+         * or setting certain settings.
+         *
+         * @param restrictionKey The string key representing the restriction.
+         * @return {@code true} if the current user has the given restriction, {@code false} otherwise.
+         */
+        HasUserRestriction(
+            [in] String restrictionKey,
+            [out] Boolean* result);
+
+        /**
+         * Return the serial number for a user.  This is a device-unique
+         * number assigned to that user; if the user is deleted and then a new
+         * user created, the new users will not be given the same serial number.
+         * @param user The user whose serial number is to be retrieved.
+         * @return The serial number of the given user; returns -1 if the
+         * given UserHandle does not exist.
+         * @see #getUserForSerialNumber(long)
+         */
+        GetSerialNumberForUser(
+            [in] IUserHandle* user,
+            [out] Int64* number);
+
+        /**
+         * Return the user associated with a serial number previously
+         * returned by {@link #getSerialNumberForUser(UserHandle)}.
+         * @param serialNumber The serial number of the user that is being
+         * retrieved.
+         * @return Return the user associated with the serial number, or null
+         * if there is not one.
+         * @see #getSerialNumberForUser(UserHandle)
+         */
+        GetUserForSerialNumber(
+            [in] Int64 serialNumber,
+            [out] IUserHandle** user);
+
+        /**
+         * Creates a user with the specified name and options.
+         * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+         *
+         * @param name the user's name
+         * @param flags flags that identify the type of user and other properties.
+         * @see UserInfo
+         *
+         * @return the UserInfo object for the created user, or null if the user could not be created.
+         * @hide
+         */
+        CreateUser(
+            [in] String name,
+            [in] Int32 flags,
+            [out] IUserInfo** userInfo);
+
+        /**
+         * Creates a guest user and configures it.
+         * @param context an application context
+         * @param name the name to set for the user
+         * @hide
+         */
+        CreateGuest(
+            [in] IContext* context,
+            [in] String name,
+            [out] IUserInfo** userInfo);
+
+        /**
+         * @hide
+         * Marks the guest user for deletion to allow a new guest to be created before deleting
+         * the current user who is a guest.
+         * @param userHandle
+         * @return
+         */
+        MarkGuestForDeletion(
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        /**
+         * Return the number of users currently created on the device.
+         */
+        GetUserCount(
+            [out] Int32* count);
+
+        /**
+         * Returns information for all users on this device.
+         * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+         * @return the list of users that were created.
+         * @hide
+         */
+        GetUsers(
+            [out] IList** users);
+
+        /**
+         * Returns information for all users on this device.
+         * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+         * @param excludeDying specify if the list should exclude users being removed.
+         * @return the list of users that were created.
+         * @hide
+         */
+        GetUsers(
+            [in] Boolean excludeDying,
+            [out] IList** users);
+
+        /**
+         * Returns list of the profiles of userHandle including
+         * userHandle itself.
+         * Note that this returns both enabled and not enabled profiles. See
+         * {@link #getUserProfiles()} if you need only the enabled ones.
+         *
+         * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+         * @param userHandle profiles of this user will be returned.
+         * @return the list of profiles.
+         * @hide
+         */
+        GetProfiles(
+            [in] Int32 userHandle,
+            [out] IList** users);
+
+        /**
+         * Returns a list of UserHandles for profiles associated with the user that the calling process
+         * is running on, including the user itself.
+         *
+         * @return A non-empty list of UserHandles associated with the calling user.
+         */
+        GetUserProfiles(
+            [out] IList** users);
+
+        /**
+         * Removes a user and all associated data.
+         * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+         * @param userHandle the integer handle of the user, where 0 is the primary user.
+         * @hide
+         */
+        RemoveUser(
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        /**
+         * Updates the user's name.
+         * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+         *
+         * @param userHandle the user's integer handle
+         * @param name the new name for the user
+         * @hide
+         */
+        SetUserName(
+            [in] Int32 userHandle,
+            [in] String name);
+
+        /**
+         * Sets the user's photo.
+         * @param userHandle the user for whom to change the photo.
+         * @param icon the bitmap to set as the photo.
+         * @hide
+         */
+        SetUserIcon(
+            [in] Int32 userHandle,
+            [in] IBitmap* icon);
+
+        /**
+         * Returns a file descriptor for the user's photo. PNG data can be read from this file.
+         * @param userHandle the user whose photo we want to read.
+         * @return a {@link Bitmap} of the user's photo, or null if there's no photo.
+         * @hide
+         */
+        GetUserIcon(
+            [in] Int32 userHandle,
+            [out] IBitmap** icon);
+
+        /**
+         * Returns a serial number on this device for a given userHandle. User handles can be recycled
+         * when deleting and creating users, but serial numbers are not reused until the device is wiped.
+         * @param userHandle
+         * @return a serial number associated with that user, or -1 if the userHandle is not valid.
+         * @hide
+         */
+        GetUserSerialNumber(
+            [in] Int32 userHandle,
+            [out] Int32* numer);
+
+        /**
+         * Returns a userHandle on this device for a given user serial number. User handles can be
+         * recycled when deleting and creating users, but serial numbers are not reused until the device
+         * is wiped.
+         * @param userSerialNumber
+         * @return the userHandle associated with that user serial number, or -1 if the serial number
+         * is not valid.
+         * @hide
+         */
+        GetUserHandle(
+            [in] Int32 userSerialNumber,
+            [out] Int32* userHandle);
+
+        /**
+         * Returns a Bundle containing any saved application restrictions for this user, for the
+         * given package name. Only an application with this package name can call this method.
+         * @param packageName the package name of the calling application
+         * @return a Bundle with the restrictions as key/value pairs, or null if there are no
+         * saved restrictions. The values can be of type Boolean, String or String[], depending
+         * on the restriction type, as defined by the application.
+         */
+        GetApplicationRestrictions(
+            [in] String packageName,
+            [out] IBundle** bundle);
+
+        /**
+         * Sets a new challenge PIN for restrictions. This is only for use by pre-installed
+         * apps and requires the MANAGE_USERS permission.
+         * @param newPin the PIN to use for challenge dialogs.
+         * @return Returns true if the challenge PIN was set successfully.
+         */
+        SetRestrictionsChallenge(
+            [in] String newPin,
+            [out] Boolean* challenge);
+
+        /**
+         * @hide
+         * @param pin The PIN to verify, or null to get the number of milliseconds to wait for before
+         * allowing the user to enter the PIN.
+         * @return Returns a positive number (including zero) for how many milliseconds before
+         * you can accept another PIN, when the input is null or the input doesn't match the saved PIN.
+         * Returns {@link #PIN_VERIFICATION_SUCCESS} if the input matches the saved PIN. Returns
+         * {@link #PIN_VERIFICATION_FAILED_NOT_SET} if there is no PIN set.
+         */
+        CheckRestrictionsChallenge(
+            [in] String pin,
+            [out] Int32* result);
+
+        /**
+         * @hide
+         * Checks whether the user has restrictions that are PIN-protected. An application that
+         * participates in restrictions can check if the owner has requested a PIN challenge for
+         * any restricted operations. If there is a PIN in effect, the application should launch
+         * the PIN challenge activity {@link android.content.Intent#ACTION_RESTRICTIONS_CHALLENGE}.
+         * @see android.content.Intent#ACTION_RESTRICTIONS_CHALLENGE
+         * @return whether a restrictions PIN is in effect.
+         */
+        HasRestrictionsChallenge(
+            [out] Boolean* result);
+
+        /** @hide */
+        RemoveRestrictions();
+
+        /**
+         * @hide
+         * Set restrictions that should apply to any future guest user that's created.
+         */
+        SetDefaultGuestRestrictions(
+            [in] IBundle* restrictions);
+
+        /**
+         * @hide
+         * Gets the default guest restrictions.
+         */
+        GetDefaultGuestRestrictions(
+            [out] IBundle** bundle);
+    }
+
+    interface IUserManagerHelper {
+        Get(
+            [in] IContext* ctx,
+            [out] IUserManager** userManager);
+
+        /**
+         * Returns whether the system supports multiple users.
+         * @return true if multiple users can be created, false if it is a single user device.
+         * @hide
+         */
+        SupportsMultipleUsers(
+            [out] Boolean* result);
+
+        /**
+         * Returns the maximum number of users that can be created on this device. A return value
+         * of 1 means that it is a single user device.
+         * @hide
+         * @return a value greater than or equal to 1
+         */
+        GetMaxSupportedUsers(
+            [out] Int32* number);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

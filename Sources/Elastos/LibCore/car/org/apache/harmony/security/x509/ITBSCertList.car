@@ -1,0 +1,154 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.X509.IExtensions;
+    interface Org.Apache.Harmony.Security.X509.IAlgorithmIdentifier;
+    using interface Elastos.Math.IBigInteger;
+    using interface Elastos.Utility.IDate;
+    using interface Elastos.Utility.IList;
+    using interface Elastosx.Security.Auth.X500.IX500Principal;
+    using interface Elastos.Core.IStringBuilder;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+    interface Org.Apache.Harmony.Security.X501.IName;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    interface IRevokedCertificate {
+        GetCrlEntryExtensions(
+            [out] IExtensions** extensions);
+
+        GetUserCertificate(
+            [out] IBigInteger** certificate);
+
+        GetRevocationDate(
+            [out] IDate** date);
+
+        /**
+         * Returns the value of Certificate Issuer Extension, if it is
+         * presented.
+         */
+        GetIssuer(
+            [out] IX500Principal** issuer);
+
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        Equals(
+            [in] IInterface* rc,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        DumpValue(
+            [in] IStringBuilder* sb,
+            [in] String prefix);
+    }
+
+    interface IRevokedCertificateHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with TBSCertList structure which is the part of X.509 CRL
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *   TBSCertList  ::=  SEQUENCE  {
+     *        version                 Version OPTIONAL,
+     *                                     -- if present, MUST be v2
+     *        signature               AlgorithmIdentifier,
+     *        issuer                  Name,
+     *        thisUpdate              Time,
+     *        nextUpdate              Time OPTIONAL,
+     *        revokedCertificates     SEQUENCE OF SEQUENCE  {
+     *             userCertificate         CertificateSerialNumber,
+     *             revocationDate          Time,
+     *             crlEntryExtensions      Extensions OPTIONAL
+     *                                           -- if present, MUST be v2
+     *                                  }  OPTIONAL,
+     *        crlExtensions           [0]  EXPLICIT Extensions OPTIONAL
+     *                                           -- if present, MUST be v2
+     *   }
+     * </pre>
+     */
+    interface ITBSCertList {
+        /**
+         * Returns the value of version field of the structure.
+         */
+        GetVersion(
+            [out] Int32* ver);
+
+        /**
+         * Returns the value of signature field of the structure.
+         */
+        GetSignature(
+            [out] IAlgorithmIdentifier** signature);
+
+        /**
+         * Returns the value of issuer field of the structure.
+         */
+        GetIssuerEx(
+            [out] IName** issuer);
+
+        /**
+         * Returns the value of thisUpdate field of the structure.
+         */
+        GetThisUpdate(
+            [out] IDate** date);
+
+        /**
+         * Returns the value of nextUpdate field of the structure.
+         */
+        GetNextUpdate(
+            [out] IDate** date);
+
+        /**
+         * Returns the value of revokedCertificates field of the structure.
+         */
+        GetRevokedCertificates(
+            [out] IList** certificates);
+
+        /**
+         * Returns the value of crlExtensions field of the structure.
+         */
+        GetCrlExtensions(
+            [out] IExtensions** extensions);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 TBSCertList value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        Equals(
+            [in] IInterface* rc,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        DumpValue(
+            [in] IStringBuilder* sb);
+    }
+
+    interface ITBSCertListHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,63 @@
+
+module
+{
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    /**
+     * Listener invoked when the remote display connection changes state.
+     */
+    interface IRemoteDisplayListener {
+        OnDisplayConnected(
+            [in] ISurface* surface,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 flags,
+            [in] Int32 session);
+
+        OnDisplayDisconnected();
+
+        OnDisplayError(
+            [in] Int32 error);
+    }
+
+    interface IRemoteDisplay {
+        /* these constants must be kept in sync with IRemoteDisplayClient.h */
+        const Int32 DISPLAY_FLAG_SECURE = 1 << 0;
+
+        const Int32 DISPLAY_ERROR_UNKOWN = 1;
+
+        const Int32 DISPLAY_ERROR_CONNECTION_DROPPED = 2;
+
+        /**
+         * Disconnects the remote display and stops listening for new connections.
+         */
+        Dispose();
+
+        Pause();
+
+        Resume();
+    }
+
+    interface IRemoteDisplayHelper {
+        /**
+         * Starts listening for displays to be connected on the specified interface.
+         *
+         * @param iface The interface address and port in the form "x.x.x.x:y".
+         * @param listener The listener to invoke when displays are connected or disconnected.
+         * @param handler The handler on which to invoke the listener.
+         */
+        Listen(
+            [in] String iface,
+            [in] IRemoteDisplayListener* listener,
+            [in] IHandler* handler,
+            [out] IRemoteDisplay** result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

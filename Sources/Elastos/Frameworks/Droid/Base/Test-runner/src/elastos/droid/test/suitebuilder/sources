@@ -1,0 +1,11 @@
+
+TARGET_NAME= suitebuilder
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../../../
+
+SOURCES += CFailedToCreateTests.cpp
+SOURCES += CTestMethod.cpp
+SOURCES += CTestSuiteBuilder.cpp
+SOURCES += TestGrouping.cpp

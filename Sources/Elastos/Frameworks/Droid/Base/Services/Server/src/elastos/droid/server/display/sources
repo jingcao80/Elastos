@@ -1,0 +1,28 @@
+TARGET_NAME= display
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
+
+C_DEFINES += -DDROID_SERVER
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+SOURCES = display.cpp
+SOURCES += AutomaticBrightnessController.cpp
+SOURCES += CDisplayManagerService.cpp
+SOURCES += ColorFade.cpp
+SOURCES += DisplayAdapter.cpp
+SOURCES += DisplayDevice.cpp
+SOURCES += DisplayDeviceInfo.cpp
+SOURCES += DisplayPowerController.cpp
+SOURCES += DisplayPowerState.cpp
+SOURCES += LocalDisplayAdapter.cpp
+SOURCES += LogicalDisplay.cpp
+SOURCES += OverlayDisplayAdapter.cpp
+SOURCES += OverlayDisplayWindow.cpp
+SOURCES += PersistentDataStore.cpp
+SOURCES += RampAnimator.cpp
+SOURCES += VirtualDisplayAdapter.cpp
+SOURCES += WifiDisplayAdapter.cpp
+SOURCES += WifiDisplayController.cpp

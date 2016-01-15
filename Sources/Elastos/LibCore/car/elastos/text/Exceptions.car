@@ -1,0 +1,13 @@
+
+module
+{
+
+//    const FAMILY_SYSTEM = 0x2D     // namespace Text exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Text exception codes (Family: 0x2D)
+    const E_PARSE_EXCEPTION                                = 0xAD010000;
+}

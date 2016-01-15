@@ -1,0 +1,66 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * {@hide}
+     *
+     * Simple SNTP client class for retrieving network time.
+     *
+     * Sample usage:
+     * <pre>SntpClient client = new SntpClient();
+     * if (client.requestTime("time.foo.com")) {
+     *     long now = client.getNtpTime() + SystemClock.elapsedRealtime() - client.getNtpTimeReference();
+     * }
+     * </pre>
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ISntpClient {
+        /**
+         * Sends an SNTP request to the given host and processes the response.
+         *
+         * @param host host name of the server.
+         * @param timeout network timeout in milliseconds.
+         * @return true if the transaction was successful.
+         */
+        RequestTime(
+            [in] String host,
+            [in] Int32 timeout,
+            [out] Boolean* result);
+
+        /**
+         * Returns the time computed from the NTP transaction.
+         *
+         * @return time value computed from NTP server response.
+         */
+        GetNtpTime(
+            [out] Int64* result);
+
+        /**
+         * Returns the reference clock value (value of SystemClock.elapsedRealtime())
+         * corresponding to the NTP time.
+         *
+         * @return reference clock corresponding to the NTP time.
+         */
+        GetNtpTimeReference(
+            [out] Int64* result);
+
+        /**
+         * Returns the round trip time of the NTP transaction
+         *
+         * @return round trip time in milliseconds.
+         */
+        GetRoundTripTime(
+            [out] Int64* result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

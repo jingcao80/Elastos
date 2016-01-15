@@ -1,0 +1,334 @@
+
+module
+{
+    merge("utility/ArrayMap.car");
+    merge("utility/ArraySet.car");
+    merge("utility/AtomicFile.car");
+    merge("utility/AttributeSet.car");
+    merge("utility/XmlPullAttributes.car");
+    merge("utility/Xml.car");
+    merge("utility/DisplayMetrics.car");
+    merge("utility/TypedValue.car");
+    merge("utility/EventLogTags.car");
+    merge("utility/TrustedTime.car");
+    merge("utility/NtpTrustedTime.car");
+    merge("utility/Property.car");
+    merge("utility/Pair.car");
+    merge("utility/Base64.car");
+    merge("utility/Base64InputStream.car");
+    merge("utility/Base64OutputStream.car");
+    merge("utility/Config.car");
+    merge("utility/DayOfMonthCursor.car");
+    merge("utility/DebugUtils.car");
+    merge("utility/FastImmutableArraySet.car");
+    merge("utility/JsonReader.car");
+    merge("utility/JsonWriter.car");
+    merge("utility/LayoutDirection.car");
+    merge("utility/LocalLog.car");
+    merge("utility/Log.car");
+    merge("utility/LogPrinter.car");
+    merge("utility/Int64Array.car");
+    merge("utility/Int64SparseArray.car");
+    merge("utility/MonthDisplayHelper.car");
+    merge("utility/Printer.car");
+    merge("utility/Range.car");
+    merge("utility/Rational.car");
+    merge("utility/Size.car");
+    merge("utility/SizeF.car");
+    merge("utility/SparseArray.car");
+    merge("utility/SparseBooleanArray.car");
+    merge("utility/SparseInt32Array.car");
+    merge("utility/SparseInt64Array.car");
+    merge("utility/Spline.car");
+    merge("utility/StateSet.car");
+    merge("utility/TimingLogger.car");
+
+    using interface Elastos.Core.INumber;
+    using interface Elastos.Core.IComparable;
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.IO.IFile;
+    using interface Elastos.IO.IWriter;
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.IO.IFlushable;
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IFilterInputStream;
+    using interface Elastos.IO.IOutputStream;
+    using interface Elastos.IO.IFilterOutputStream;
+    using interface Elastos.Utility.IMap;
+    using interface Elastos.Utility.ISet;
+    using interface Elastos.Utility.ICollection;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    class CAtomicFile {
+        constructor(
+            [in] IFile* baseName);
+
+        interface IAtomicFile;
+    }
+
+    class CArrayMap {
+        constructor();
+
+        constructor(
+            [in] Int32 capacity);
+
+        constructor(
+            [in] IArrayMap* map);
+
+        interface IArrayMap;
+        interface IMap;
+    }
+
+    class CArraySet {
+        constructor();
+
+        constructor(
+            [in] Int32 capacity);
+
+        constructor(
+            [in] IArraySet* map);
+
+        interface IArraySet;
+        interface ISet;
+        interface ICollection;
+    }
+
+    singleton class CBase64 {
+        interface IBase64;
+    }
+
+    class CBase64InputStream {
+
+        constructor(
+            [in] IInputStream* inputStream,
+            [in] Int32 flags);
+
+        constructor(
+            [in] IInputStream* inputStream,
+            [in] Int32 flags,
+            [in] Boolean encode);
+
+        interface IBase64InputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class CBase64OutputStream {
+
+        constructor(
+            [in] IOutputStream* outputStream,
+            [in] Int32 flags);
+
+        constructor(
+            [in] IOutputStream* outputStream,
+            [in] Int32 flags,
+            [in] Boolean encode);
+
+        interface IBase64OutputStream;
+        interface IFilterOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CInt64SparseArray {
+        constructor();
+
+        constructor(
+            [in] Int32 initialCapacity);
+
+        interface IInt64SparseArray;
+        interface ICloneable;
+    }
+
+    class CMonthDisplayHelper {
+
+        constructor(
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 weekStartDay);
+
+        constructor(
+            [in] Int32 year,
+            [in] Int32 month);
+
+        interface IMonthDisplayHelper;
+    }
+
+    class CDisplayMetrics {
+        interface IDisplayMetrics;
+    }
+
+    singleton class CNtpTrustedTimeHelper {
+        interface INtpTrustedTimeHelper;
+    }
+
+    class CPair {
+        constructor(
+            [in] IInterface *first,
+            [in] IInterface *second);
+
+        interface IPair;
+    }
+
+    singleton class CPairHelper {
+        interface IPairHelper;
+    }
+
+    class CRational {
+        constructor(
+            [in] Int32 numerator,
+            [in] Int32 denominator);
+
+        interface IRational;
+        interface INumber;
+        interface IComparable;
+    }
+
+    singleton class CRationalHelper {
+        interface IRationalHelper;
+    }
+
+    class CSize {
+        constructor(
+            [in] Int32 w,
+            [in] Int32 h);
+
+        interface ISize;
+    }
+
+    singleton class CSizeHelper {
+        interface ISizeHelper;
+    }
+
+    class CSizeF {
+        constructor(
+            [in] Float w,
+            [in] Float h);
+
+        interface ISizeF;
+    }
+
+    singleton class CSizeFHelper {
+        interface ISizeFHelper;
+    }
+
+    class CSparseArray {
+        constructor();
+
+        constructor(
+            [in] Int32 initialCapacity);
+
+        interface ISparseArray;
+        interface ICloneable;
+    }
+
+    class CSparseBooleanArray {
+        constructor();
+
+        constructor(
+            [in] Int32 initialCapacity);
+
+        interface ISparseBooleanArray;
+        interface ICloneable;
+    }
+
+    class CSparseInt32Array {
+        constructor();
+
+        constructor(
+            [in] Int32 initialCapacity);
+
+        interface ISparseInt32Array;
+        interface ICloneable;
+    }
+
+    singleton class CSplineHelper {
+        interface ISplineHelper;
+    }
+
+    [deprecated]
+    class CMonotoneCubicSpline {
+        constructor(
+            [in] ArrayOf<Float>* x,
+            [in] ArrayOf<Float>* y);
+
+        interface IMonotoneCubicSpline;
+        interface ISpline;
+    }
+
+    [deprecated]
+    class CLinearSpline {
+        constructor(
+            [in] ArrayOf<Float>* x,
+            [in] ArrayOf<Float>* y);
+
+        interface ILinearSpline;
+        interface ISpline;
+    }
+
+    class CTypedValue {
+        interface ITypedValue;
+    }
+
+    singleton class CTypedValueHelper {
+        interface ITypedValueHelper;
+    }
+
+    class CXmlPullAttributes {
+        constructor(
+            [in] IXmlPullParser* ps);
+
+        interface IXmlPullAttributes;
+        interface IAttributeSet;
+    }
+
+/*
+    class CParcelableObjectContainer {
+        constructor();
+
+        interface IObjectContainer;
+        interface IParcelable;
+    }
+
+
+    class CFastXmlSerializer {
+        interface IFastXmlSerializer;
+    }
+
+    [deprecated]
+    class CEventLogTags {
+        // constructor();
+
+        // constructor(
+        //     [in] IBufferedReader** input);
+
+        interface IEventLogTags;
+    }
+
+    singleton class CPropertyHelper {
+        constructor();
+        interface IPropertyHelper;
+    }
+
+*/
+
+    class CInt64Array {
+        constructor();
+
+        constructor(
+            [in] Int32 initialCapacity);
+
+        interface IInt64Array;
+        interface ICloneable;
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+}

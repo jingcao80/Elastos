@@ -1,0 +1,15 @@
+TARGET_NAME= zigbee
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../inc
+INCLUDES += $(MAKEDIR)/../../../../Core/inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = ZigbeeDevice.cpp
+SOURCES += ZigbeeDoorSensor.cpp
+SOURCES += ZigbeeGroup.cpp
+SOURCES += ZigbeeHumiditySensor.cpp
+SOURCES += ZigbeeTHSensor.cpp
+SOURCES += ZigbeeTemperatureSensor.cpp

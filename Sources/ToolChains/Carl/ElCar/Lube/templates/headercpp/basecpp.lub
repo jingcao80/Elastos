@@ -1,0 +1,28 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}.cpp"
+
+${GenerateDependHeaderForModule(module)}
+
+using namespace Elastos;
+
+$TEMPLATE "header/decluuid.lub"
+$
+$WITH all interfaces DO
+$  IF interface.attrib is not "sink"
+${InterfaceNamespaceBegin(interface)}$^
+$   WITH all interfaceconsts DO
+$     IF type is "Byte" or type is "Int16" or type is "Int32" or type is "Char32"
+const ${type} ${interface.name}::${name};
+$     ELSE
+const ${type} ${interface.name}::${name} = ${value};
+$     END IF
+$   END DO ;; all interfaceconsts
+${InterfaceNamespaceEnd(interface)}$^
+$  END IF;; not sink
+$END DO ;; all interfaces
+$
+$END OUTPUT

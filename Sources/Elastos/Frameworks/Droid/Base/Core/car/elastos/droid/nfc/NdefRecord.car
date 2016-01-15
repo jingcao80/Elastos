@@ -1,0 +1,94 @@
+
+module
+{
+
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.IO.IByteBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+    /**
+     * @Involve
+     * interace IParcelable
+     */
+    interface INdefRecord {
+        GetTnf(
+            [out] Int16* tnf);
+
+        GetType(
+            [out, callee] ArrayOf<Byte>* type);
+
+        GetId(
+            [out, callee] ArrayOf<Byte>* Id);
+
+        GetPayload(
+            [out, callee] ArrayOf<Byte>* payload);
+
+        ToByteArray(
+            [out, callee] ArrayOf<Byte>* res);
+
+        ToMimeType(
+            [out] String* type);
+
+        ToUri(
+            [out] IUri** uri);
+
+        WriteToByteBuffer(
+            [in] IByteBuffer* buffer,
+            [in] Boolean mb,
+            [in] Boolean me);
+
+        GetByteLength(
+            [out] Int32* len);
+
+    }
+
+    [deprecated]
+    interface INdefRecordHelper {
+        CreateApplicationRecord(
+            [in] String packageName,
+            [out] INdefRecord** record);
+
+        CreateUri(
+            [in] IUri* uri,
+            [out] INdefRecord** record);
+
+        CreateUri(
+            [in] String uriString,
+            [out] INdefRecord** record);
+
+        CreateMime(
+            [in] String mimeType,
+            [in] ArrayOf<Byte>* mimeData,
+            [out] INdefRecord** record);
+
+        CreateExternal(
+            [in] String str,
+            [in] String type,
+            [in] ArrayOf<Byte>* data,
+            [out] INdefRecord** record);
+
+        CreateTextRecord(
+            [in] String languageCode,
+            [in] String text,
+            [out] INdefRecord** record);
+
+        Parse(
+            [in] IByteBuffer* buffer,
+            [in] Boolean ignoreMbMe,
+            [out, callee] ArrayOf<INdefRecord*>* record);
+
+        ValidateTnf(
+            [in] Int16 tnf,
+            [in] ArrayOf<Byte>* type,
+            [in] ArrayOf<Byte>* id,
+            [in] ArrayOf<Byte>* payload,
+            [out] String* str);
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

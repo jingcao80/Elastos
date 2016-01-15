@@ -1,0 +1,184 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Content.Res.IColorStateList;
+    enum Elastos.Droid.Graphics.PorterDuffMode;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupMarginLayoutParams
+     * interface Elastos.Droid.View.IViewGroupLayoutParams
+     */
+    interface IFrameLayoutLayoutParams {
+        /**
+         * The gravity to apply with the View to which these layout parameters
+         * are associated.
+         *
+         * @see android.view.Gravity
+         *
+         * @attr ref android.R.styleable#FrameLayout_Layout_layout_gravity
+         */
+        SetGravity(
+            [in] Int32 gravity);
+
+        GetGravity(
+            [out] Int32* gravity);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IFrameLayout {
+        /**
+         * Describes how the foreground is positioned.
+         *
+         * @return foreground gravity.
+         *
+         * @see #setForegroundGravity(int)
+         *
+         * @attr ref android.R.styleable#FrameLayout_foregroundGravity
+         */
+        GetForegroundGravity(
+            [out] Int32* foregroundGravity);
+
+        /**
+         * Describes how the foreground is positioned. Defaults to START and TOP.
+         *
+         * @param foregroundGravity See {@link android.view.Gravity}
+         *
+         * @see #getForegroundGravity()
+         *
+         * @attr ref android.R.styleable#FrameLayout_foregroundGravity
+         */
+        //@android.view.RemotableViewMethod
+        SetForegroundGravity(
+            [in] Int32 foregroundGravity);
+
+        /**
+         * Supply a Drawable that is to be rendered on top of all of the child
+         * views in the frame layout.  Any padding in the Drawable will be taken
+         * into account by ensuring that the children are inset to be placed
+         * inside of the padding area.
+         *
+         * @param drawable The Drawable to be drawn on top of the children.
+         *
+         * @attr ref android.R.styleable#FrameLayout_foreground
+         */
+        SetForeground(
+            [in] IDrawable* drawable);
+
+        /**
+         * Returns the drawable used as the foreground of this FrameLayout. The
+         * foreground drawable, if non-null, is always drawn on top of the children.
+         *
+         * @return A Drawable or null if no foreground was set.
+         */
+        GetForeground(
+            [out] IDrawable** foreground);
+
+        /**
+         * Determines whether all children, or just those in the VISIBLE or
+         * INVISIBLE state, are considered when measuring.
+         *
+         * @return Whether all children are considered when measuring.
+         */
+        GetMeasureAllChildren(
+            [out] Boolean* measureAll);
+
+        /**
+         * Sets whether to consider all children, or just those in
+         * the VISIBLE or INVISIBLE state, when measuring. Defaults to false.
+         *
+         * @param measureAll true to consider children marked GONE, false otherwise.
+         * Default value is false.
+         *
+         * @attr ref android.R.styleable#FrameLayout_measureAllChildren
+         */
+        //@android.view.RemotableViewMethod
+        SetMeasureAllChildren(
+            [in] Boolean measureAll);
+
+        /**
+         * Determines whether all children, or just those in the VISIBLE or
+         * INVISIBLE state, are considered when measuring.
+         *
+         * @return Whether all children are considered when measuring.
+         *
+         * @deprecated This method is deprecated in favor of
+         * {@link #getMeasureAllChildren() getMeasureAllChildren()}, which was
+         * renamed for consistency with
+         * {@link #setMeasureAllChildren(boolean) setMeasureAllChildren()}.
+         */
+        //@Deprecated
+        GetConsiderGoneChildrenWhenMeasuring(
+            [out] Boolean* measureAll);
+
+        /**
+         * Applies a tint to the foreground drawable. Does not modify the current
+         * tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+         * <p>
+         * Subsequent calls to {@link #setForeground(Drawable)} will automatically
+         * mutate the drawable and apply the specified tint and tint mode using
+         * {@link Drawable#setTintList(ColorStateList)}.
+         *
+         * @param tint the tint to apply, may be {@code null} to clear tint
+         *
+         * @attr ref android.R.styleable#FrameLayout_foregroundTint
+         * @see #getForegroundTintList()
+         * @see Drawable#setTintList(ColorStateList)
+         */
+        SetForegroundTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * @return the tint applied to the foreground drawable
+         * @attr ref android.R.styleable#FrameLayout_foregroundTint
+         * @see #setForegroundTintList(ColorStateList)
+         * @Nullable
+         */
+        GetForegroundTintList(
+            [out] IColorStateList** tint);
+
+        /**
+         * Specifies the blending mode used to apply the tint specified by
+         * {@link #setForegroundTintList(ColorStateList)}} to the foreground drawable.
+         * The default mode is {@link PorterDuff.Mode#SRC_IN}.
+         *
+         * @param tintMode the blending mode used to apply the tint, may be
+         *                 {@code null} to clear tint
+         * @attr ref android.R.styleable#FrameLayout_foregroundTintMode
+         * @see #getForegroundTintMode()
+         * @see Drawable#setTintMode(PorterDuff.Mode)
+         */
+        SetForegroundTintMode(
+            [in] PorterDuffMode tintMode);
+
+        /**
+         * @return the blending mode used to apply the tint to the foreground
+         *         drawable
+         * @attr ref android.R.styleable#FrameLayout_foregroundTintMode
+         * @see #setForegroundTintMode(PorterDuff.Mode)
+         * @Nullable
+         */
+        GetForegroundTintMode(
+            [out] PorterDuffMode* tintMode);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

@@ -1,0 +1,30 @@
+TARGET_NAME= validation
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/math
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml/datatype
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml/namespace
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml/parsers
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml/transform
+INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/xml/validation
+INCLUDES += $(MAKEDIR)/../../../../inc/org/xml/sax
+
+SOURCES = Schema.cpp
+SOURCES += SchemaFactory.cpp
+SOURCES += SchemaFactoryFinder.cpp
+SOURCES += SchemaFactoryLoader.cpp
+SOURCES += TypeInfoProvider.cpp
+SOURCES += Validator.cpp
+SOURCES += ValidatorHandler.cpp
+SOURCES += CSchemaFactoryHelper.cpp

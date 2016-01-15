@@ -1,0 +1,287 @@
+
+module
+{
+    interface Elastos.Droid.Wifi.IScanResultInformationElement;
+    interface Elastos.Droid.Wifi.IWifiSsid;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Describes information about a detected access point. In addition
+     * to the attributes described here, the supplicant keeps track of
+     * {@code quality}, {@code noise}, and {@code maxbitrate} attributes,
+     * but does not currently report them to external clients.
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IScanResult {
+        /**
+         * The network name.
+         */
+        GetSSID(
+            [out] String* result);
+
+        SetSSID(
+            [in] String SSID);
+
+        /**
+         * Ascii encoded SSID. This will replace SSID when we deprecate it. @hide
+         */
+        GetWifiSsid(
+            [out] IWifiSsid** result);
+
+        SetWifiSsid(
+            [in] IWifiSsid* wifiSsid);
+
+        /**
+         * The address of the access point.
+         */
+        GetBSSID(
+            [out] String* result);
+
+        SetBSSID(
+            [in] String BSSID);
+
+        /**
+         * Describes the authentication, key management, and encryption schemes
+         * supported by the access point.
+         */
+        GetCapabilities(
+            [out] String* result);
+
+        SetCapabilities(
+            [in] String capabilities);
+
+        /**
+         * The detected signal level in dBm, also known as the RSSI.
+         *
+         * <p>Use {@link android.net.wifi.WifiManager#calculateSignalLevel} to convert this number into
+         * an absolute signal level which can be displayed to a user.
+         */
+        GetLevel(
+            [out] Int32* result);
+
+        SetLevel(
+            [in] Int32 level);
+
+        /**
+         * The frequency in MHz of the channel over which the client is communicating
+         * with the access point.
+         */
+        GetFrequency(
+            [out] Int32* result);
+
+        SetFrequency(
+            [in] Int32 frequency);
+
+        /**
+         * timestamp in microseconds (since boot) when
+         * this result was last seen.
+         */
+        GetTimestamp(
+            [out] Int64* result);
+
+        SetTimestamp(
+            [in] Int64 timestamp);
+
+        /**
+         * Timestamp representing date when this result was last seen, in milliseconds from 1970
+         * {@hide}
+         */
+        GetSeen(
+            [out] Int64* result);
+
+        SetSeen(
+            [in] Int64 seen);
+
+        /**
+         * If the scan result is a valid autojoin candidate
+         * {@hide}
+         */
+        GetIsAutoJoinCandidate(
+            [out] Int32* result);
+
+        SetIsAutoJoinCandidate(
+            [in] Int32 isAutoJoinCandidate);
+
+        /** @hide */
+        const Int32 ENABLED = 0;
+        /** @hide */
+        const Int32 AUTO_ROAM_DISABLED = 16;
+        /** @hide */
+        const Int32 AUTO_JOIN_DISABLED = 32;
+        /** @hide */
+        const Int32 AUTHENTICATION_ERROR = 128;
+
+        /**
+         * Status: indicating join status
+         * @hide
+         */
+        GetAutoJoinStatus(
+            [out] Int32* result);
+
+        /**
+         * num IP configuration failures
+         * @hide
+         */
+        GetNumIpConfigFailures(
+            [out] Int32* result);
+
+        SetNumIpConfigFailures(
+            [in] Int32 numIpConfigFailures);
+
+        /**
+         * @hide
+         * Last time we blacklisted the ScanResult
+         */
+        GetBlackListTimestamp(
+            [out] Int64* result);
+
+        SetBlackListTimestamp(
+            [in] Int64 blackListTimestamp);
+
+        /**
+         * Status: indicating the scan result is not a result
+         * that is part of user's saved configurations
+         * @hide
+         */
+        GetUntrusted(
+            [out] Boolean* result);
+
+        SetUntrusted(
+            [in] Boolean untrusted);
+
+        /**
+         * Number of time we connected to it
+         * @hide
+         */
+        GetNumConnection(
+            [out] Int32* result);
+
+        SetNumConnection(
+            [in] Int32 numConnection);
+
+        /**
+         * Number of time autojoin used it
+         * @hide
+         */
+        GetNumUsage(
+            [out] Int32* result);
+
+        SetNumUsage(
+            [in] Int32 numUsage);
+
+        /**
+         * The approximate distance to the AP in centimeter, if available.  Else
+         * {@link UNSPECIFIED}.
+         * {@hide}
+         */
+        GetDistanceCm(
+            [out] Int32* result);
+
+        SetDistanceCm(
+            [in] Int32 distanceCm);
+
+        /**
+         * The standard deviation of the distance to the AP, if available.
+         * Else {@link UNSPECIFIED}.
+         * {@hide}
+         */
+        GetDistanceSdCm(
+            [out] Int32* result);
+
+        SetDistanceSdCm(
+            [in] Int32 distanceSdCm);
+
+        /**
+         * {@hide}
+         */
+        const Int32 UNSPECIFIED = -1;
+
+        /** information elements found in the beacon
+         * @hide
+         */
+        GetInformationElements(
+            [out, callee] ArrayOf<IScanResultInformationElement*>* result);
+
+        SetInformationElements(
+            [in] ArrayOf<IScanResultInformationElement*>* informationElements);
+
+        /**
+         * @hide
+         * Update RSSI of the scan result
+         * @param previousRSSI
+         * @param previousSeen
+         * @param maxAge
+         */
+        AverageRssi(
+            [in] Int32 previousRssi,
+            [in] Int64 previousSeen,
+            [in] Int32 maxAge);
+
+        /** @hide **/
+        SetAutoJoinStatus(
+            [in] Int32 status);
+
+        /**
+         * @hide
+         */
+        Is24GHz(
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        Is5GHz(
+            [out] Boolean* result);
+    }
+
+    interface IScanResultHelper {
+        /**
+         * @hide
+         * TODO: makes real freq boundaries
+         */
+        Is24GHz(
+            [in] Int32 freq,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         * TODO: makes real freq boundaries
+         */
+        Is5GHz(
+            [in] Int32 freq,
+            [out] Boolean* result);
+    }
+
+    /** information element from beacon
+     * @hide
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IScanResultInformationElement {
+        GetId(
+            [out] Int32* result);
+
+        SetId(
+            [in] Int32 id);
+
+        GetBytes(
+            [out, callee] ArrayOf<Byte>* result);
+
+        SetBytes(
+            [in] ArrayOf<Byte>* bytes);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

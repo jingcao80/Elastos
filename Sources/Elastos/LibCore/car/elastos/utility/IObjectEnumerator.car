@@ -1,0 +1,49 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * The IObjectEnumerator interface used to manage every object in the objects enumerator.
+     * To retrives the object by the IObjectEnumerator interface, you must move the object cursor
+     * and get the current object by means of the cursor.
+     */
+    interface IObjectEnumerator {
+        /**
+         * Retrives the current object interface from the object enumerator.
+         *
+         * @param[out] object The pointer to a IInterface variable that receives the object interface.
+         * @return If the function succeeds, the return value is ::NOERROR.
+         * @return If the function fails and the return value is ::E_INVALID_ARGUMENT,
+         * it indicats that the object pointer is NULL.
+         * @return If the function fails and the return value is ::E_INVALID_OPERATION,
+         * it indicats that the object emulator is NULL or the cursor of the enumerator does not point to an object.
+         */
+        Current(
+            [out] IInterface** object);
+
+        /**
+         * Moves the object cursor to the next object in the object enumerator.
+         *
+         * @param[out] succeeded The pointer to a Boolean variable that Indicates whether the move operation succeed.
+         * @return If the function succeeds, the return value is ::NOERROR.
+         * @return If the function fails and the return value is ::E_INVALID_ARGUMENT,
+         * it indicats that the succeeded pointer is NULL.
+         * @return If the function fails and the return value is ::E_INVALID_OPERATION,
+         * it indicats that the object emulator is NULL or the cursor of the enumerator does not point to an object.
+         */
+        MoveNext(
+            [out] Boolean* succeeded);
+
+        /**
+         * Resets the object cursor to the initial state in the object enumerator.
+         *
+         * @return The function always return ::NOERROR.
+         */
+        Reset();
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,50 @@
+
+
+#
+# 请保持字母顺序
+#
+
+
+DIRS += accessibilityservice
+DIRS += app
+DIRS += appwidget
+DIRS += animation
+DIRS += content
+DIRS += database
+DIRS += emoji
+DIRS += gesture
+DIRS += graphics
+DIRS += hardware
+DIRS += inputmethodservice
+DIRS += internal
+DIRS += location
+DIRS += media
+DIRS += mtp
+DIRS += net
+DIRS += os
+DIRS += preference
+DIRS += provider
+DIRS += view
+DIRS += sax
+DIRS += server
+DIRS += service
+DIRS += speech
+#DIRS += systemui
+DIRS += text
+DIRS += transition
+DIRS += utility
+DIRS += webkit
+DIRS += widget
+DIRS += wifi
+
+#DIRS += impl
+#DIRS += bluetooth
+#DIRS += opengl
+#DIRS += privacy
+#DIRS += accounts
+#DIRS += telephony
+#DIRS += statusbar
+#DIRS += googleremote
+#DIRS += wifidisplay
+#DIRS += inputmethods
+#DIRS += swextend

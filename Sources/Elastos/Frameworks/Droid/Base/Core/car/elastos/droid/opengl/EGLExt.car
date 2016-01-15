@@ -1,0 +1,30 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    /**
+     * EGL Extensions
+     */
+    interface IEGLExt {
+        // EGL_KHR_create_context
+        const Int32 EGL_CONTEXT_MAJOR_VERSION_KHR   = 0x3098;
+        const Int32 EGL_CONTEXT_MINOR_VERSION_KHR   = 0x30FB;
+        const Int32 EGL_CONTEXT_FLAGS_KHR           = 0x30FC;
+        const Int32 EGL_OPENGL_ES3_BIT_KHR          = 0x0040;
+
+        // C function EGLBoolean eglPresentationTimeANDROID ( EGLDisplay dpy, EGLSurface sur, EGLnsecsANDROID time )
+
+        EglPresentationTimeANDROID(
+            [in] IEGLDisplay* dpy,
+            [in] IEGLSurface* sur,
+            [in] Int64 time,
+            [out] Boolean* result);
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}

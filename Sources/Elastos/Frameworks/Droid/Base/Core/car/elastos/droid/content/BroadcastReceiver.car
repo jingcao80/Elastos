@@ -1,0 +1,664 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+
+    /**
+     * vState for a result that is pending for a broadcast receiver. Returned by
+     * goAsync() while in BroadcastReceiver.onReceive(). This allows you to return
+     * from onReceive() without having the broadcast terminate; you must call finish()
+     * once you are done with the broadcast. This allows you to process the broadcast
+     * off of the main thread of your app.
+     *
+     * @sa goAsync()
+     * @sa BroadcastReceiver
+     * @sa finish()
+     * <p>
+     * Note on threading: the state inside of this class is not itself thread-safe,
+     * however you can use it from any thread if you properly sure that you do not
+     * have races. Typically this means you will hand the entire object to another
+     * thread, which will be solely responsible for setting any results and finally
+     * calling finish().
+     */
+    interface IPendingResult {
+        /**
+         * Version of BroadcastReceiver#setResultCode(int) BroadcastReceiver.setResultCode(int) for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#setResultCode(int) BroadcastReceiver.setResultCode(int)
+         */
+        SetResultCode(
+            [in] Int32 code);
+
+        /**
+         * Version of BroadcastReceiver#getResultCode() BroadcastReceiver.getResultCode() for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#getResultCode() BroadcastReceiver.getResultCode()
+         */
+        GetResultCode(
+            [out] Int32* resultCode);
+
+        /**
+         * Version of BroadcastReceiver#setResultData(String) BroadcastReceiver.setResultData(String) for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#setResultData(String) BroadcastReceiver.setResultData(String)
+         */
+        SetResultData(
+            [in] String data);
+
+        /**
+         * Version of BroadcastReceiver#getResultData() BroadcastReceiver.getResultData() for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#getResultData()
+         * BroadcastReceiver.getResultData()
+         */
+        GetResultData(
+            [out] String* resultData);
+
+        /**
+         * Version of BroadcastReceiver#setResultExtras(Bundle)
+         * BroadcastReceiver.setResultExtras(Bundle) for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#setResultExtras(Bundle) BroadcastReceiver.setResultExtras(Bundle)
+         */
+        SetResultExtras(
+            [in] IBundle* extras);
+
+        /**
+         * Version of BroadcastReceiver#getResultExtras(boolean)
+         * BroadcastReceiver.getResultExtras(boolean) for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#getResultExtras(boolean) BroadcastReceiver.getResultExtras(boolean)
+         */
+        GetResultExtras(
+            [in] Boolean makeMap,
+            [out] IBundle** resultExtras);
+
+        /**
+         * Version of BroadcastReceiver#setResult(int, String, Bundle)
+         * BroadcastReceiver.setResult(int, String, Bundle) for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#setResult(int, String, Bundle) BroadcastReceiver.setResult(int, String, Bundle)
+         */
+        SetResult(
+            [in] Int32 code,
+            [in] String data,
+            [in] IBundle* extras);
+
+        /**
+         * Version of BroadcastReceiver#getAbortBroadcast()
+         * BroadcastReceiver.getAbortBroadcast() for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#getAbortBroadcast() BroadcastReceiver.getAbortBroadcast()
+         */
+        GetAbortBroadcast(
+            [out] Boolean* isAborted);
+
+        /**
+         * Version of BroadcastReceiver#abortBroadcast() BroadcastReceiver.abortBroadcast() for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#abortBroadcast() BroadcastReceiver.abortBroadcast()
+         */
+        AbortBroadcast();
+
+        /**
+         * Version of BroadcastReceiver#clearAbortBroadcast() BroadcastReceiver.clearAbortBroadcast() for
+         * asynchronous broadcast handling.
+         *
+         * @sa BroadcastReceiver#clearAbortBroadcast() BroadcastReceiver.clearAbortBroadcast()
+         */
+        ClearAbortBroadcast();
+
+        /**
+         * Finish the broadcast.  The current result will be sent and the
+         * next broadcast will proceed.
+         */
+        Finish();
+
+        GetOrderedHint(
+            [out] Boolean* orderedHint);
+
+        GetInitialStickyHint(
+            [out] Boolean* initialStickyHint);
+
+        GetSendingUserId(
+            [out] Int32* userId);
+    }
+
+
+    /**
+     * Base class for code that will receive intents sent by sendBroadcast().
+     * <p>
+     * If you don't need to send broadcasts across applications, consider using this
+     * class with LocalBroadcastManager instead of the more general facilities
+     * described below. This will give you a much more efficient implementation (no
+     * cross-process communication needed) and allow you to avoid thinking about any
+     * security issues related to other applications being able to receive or send
+     * your broadcasts.
+     *
+     * @sa LocalBroadcastManager
+     * <p>
+     * You can either dynamically register an instance of this class with
+     * Context.registerReceiver() or statically publish an implementation through the
+     * <receiver> tag in your AndroidManifest.xml.
+     *
+     * @sa Context.registerReceiver()
+     * @sa <receiver>
+     * <p>
+     * <strong>Note</strong>:    If registering a receiver in your Activity.onResume()
+     * implementation, you should unregister it in Activity.onPause(). (You won't
+     * receive intents when paused, and this will cut down on unnecessary system
+     * overhead). Do not unregister in Activity.onSaveInstanceState(), because this
+     * won't be called if the user moves back in the history stack.
+     *
+     * @sa Activity.onResume()
+     * @sa Activity.onSaveInstanceState()
+     * @sa Activity.onPause()
+     * <p>
+     * There are two major classes of broadcasts that can be received:
+     * <p>
+     * </li><strong>Normal broadcasts</strong> (sent with Context.sendBroadcast) are completely asynchronous
+     *. All receivers of the broadcast are run in an undefined order, often at the
+     * same time. This is more efficient, but means that receivers cannot use the
+     * result or abort APIs included here.</li>
+     *
+     * @sa Context.sendBroadcast
+     * <p>
+     * <li><strong>Ordered broadcasts</strong> (sent with Context.sendOrderedBroadcast) are delivered to
+     * one receiver at a time. As each receiver executes in turn, it can propagate a
+     * result to the next receiver, or it can completely abort the broadcast so that
+     * it won't be passed to other receivers. The order receivers run in can be
+     * controlled with the android:priority attribute of the matching intent-filter;
+     * receivers with the same priority will be run in an arbitrary order.</li>
+     *
+     * @sa Context.sendOrderedBroadcast
+     * <p>
+     * Even in the case of normal broadcasts, the system may in some situations
+     * revert to delivering the broadcast one receiver at a time. In particular, for
+     * receivers that may require the creation of a process, only one will be run at
+     * a time to avoid overloading the system with new processes. In this situation,
+     * however, the non-ordered semantics hold: these receivers still cannot return
+     * results or abort their broadcast.
+     * <p>
+     * Note that, although the Intent class is used for sending and receiving these
+     * broadcasts, the Intent broadcast mechanism here is completely separate from
+     * Intents that are used to start Activities with Context.startActivity(). There
+     * is no way for a BroadcastReceiver to see or capture Intents used with
+     * startActivity(); likewise, when you broadcast an Intent, you will never find
+     * or start an Activity. These two operations are semantically very different:
+     * starting an Activity with an Intent is a foreground operation that modifies
+     * what the user is currently interacting with; broadcasting an Intent is a
+     * background operation that the user is not normally aware of.
+     *
+     * @sa Context.startActivity()
+     * <p>
+     * The BroadcastReceiver class (when launched as a component through a manifest's
+     * <receiver> tag) is an important part of an application's overall lifecycle.
+     *
+     * @sa <receiver>
+     * @sa application's overall lifecycle
+     * <p>
+     * <h3>Topics covered here:<h3>
+     * <p>1.Security
+     * <p>2.Receiver Lifecycle
+     * <p>3.Process Lifecycle
+     *
+     * @sa Security
+     * @sa Receiver Lifecycle
+     * @sa Process Lifecycle
+     * <p>
+     * <h3>Developer Guides</h3>
+     * <p>
+     * For information about how to use this class to receive and resolve intents, read the Intents and Intent Filters developer guide.
+     *
+     * @sa Intents and Intent Filters
+     * <p>
+     * <h3>Security</h3>
+     * <p>
+     * Receivers used with the Context APIs are by their nature a cross-application
+     * facility, so you must consider how other applications may be able to abuse
+     * your use of them. Some things to consider are:
+     *
+     * @sa Context
+     * <p>
+     * <li>The Intent namespace is global. Make sure that Intent action names and other
+     * strings are written in a namespace you own, or else you may inadvertently
+     * conflict with other applications.</li>
+     * <p>
+     * <li>When you use registerReceiver(BroadcastReceiver, IntentFilter), any
+     * application may send broadcasts to that registered receiver. You can control
+     * who can send broadcasts to it through permissions described below.</li>
+     *
+     * @sa registerReceiver(BroadcastReceiver, IntentFilter)
+     * <p>
+     * <li>When you publish a receiver in your application's manifest and specify
+     * intent-filters for it, any other application can send broadcasts to it
+     * regardless of the filters you specify. To prevent others from sending to it,
+     * make it unavailable to them with android:exported="false".</li>
+     * <p>
+     * <li>When you use sendBroadcast(Intent) or related methods, normally any other
+     * application can receive these broadcasts. You can control who can receive such
+     * broadcasts through permissions described below. Alternatively, starting with
+     * ICE_CREAM_SANDWICH, you can also safely restrict the broadcast to a single
+     * application with Intent.setPackage</li>
+     *
+     * @sa sendBroadcast(Intent)
+     * @sa ICE_CREAM_SANDWICH
+     * @sa Intent.setPackage
+     * <p>
+     * None of these issues exist when using LocalBroadcastManager, since intents
+     * broadcast it never go outside of the current process.
+     *
+     * @sa LocalBroadcastManager
+     * <p>
+     * Access permissions can be enforced by either the sender or receiver of a broadcast.
+     * <p>
+     * To enforce a permission when sending, you supply a non-null permission
+     * argument to sendBroadcast(Intent, String) or sendOrderedBroadcast(Intent,
+     * String, BroadcastReceiver, android.os.Handler, int, String, Bundle). Only
+     * receivers who have been granted this permission (by requesting it with the
+     * <uses-permission> tag in their AndroidManifest.xml) will be able to receive
+     * the broadcast.
+     *
+     * @sa sendBroadcast(Intent, String)
+     * @sa sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler, int, String, Bundle)
+     * @sa <uses-permission>
+     * <p>
+     * To enforce a permission when receiving, you supply a non-null permission when
+     * registering your receiver -- either when calling registerReceiver
+     *(BroadcastReceiver, IntentFilter, String, android.os.Handler) or in the static
+     * <receiver> tag in your AndroidManifest.xml. Only broadcasters who have been
+     * granted this permission (by requesting it with the <uses-permission> tag in
+     * their AndroidManifest.xml) will be able to send an Intent to the receiver.
+     *
+     * @sa registerReceiver(BroadcastReceiver, IntentFilter, String, android.os.Handler)
+     * @sa <receiver>
+     * @sa <uses-permission>
+     * <p>
+     * See the Security and Permissions document for more information on permissions and security in general.
+     *
+     * @sa Security and Permissions
+     * <p>
+     * <h3>Receiver Lifecycle</h3>
+     * <p>
+     * A BroadcastReceiver object is only valid for the duration of the call to
+     * onReceive(Context, Intent). Once your code returns from this function, the
+     * system considers the object to be finished and no longer active.
+     *
+     * @sa onReceive(Context, Intent)
+     * <p>
+     * This has important repercussions to what you can do in an onReceive(Context,
+     * Intent) implementation: anything that requires asynchronous operation is not
+     * available, because you will need to return from the function to handle the
+     * asynchronous operation, but at that point the BroadcastReceiver is no longer
+     * active and thus the system is free to kill its process before the asynchronous
+     * operation completes.
+     *
+     * @sa onReceive(Context, Intent)
+     * <p>
+     * In particular, you may not show a dialog or bind to a service from within a
+     * BroadcastReceiver. For the former, you should instead use the
+     * NotificationManager API. For the latter, you can use Context.startService() to
+     * send a command to the service.
+     *
+     * @sa NotificationManager
+     * @sa Context.startService()
+     * <p>
+     * <strong>Process Lifecycle</strong>
+     * <p>
+     * A process that is currently executing a BroadcastReceiver (that is, currently
+     * running the code in its onReceive(Context, Intent) method) is considered to be
+     * a foreground process and will be kept running by the system except under cases
+     * of extreme memory pressure.
+     *
+     * @sa onReceive(Context, Intent)
+     * <p>
+     * Once you return from onReceive(), the BroadcastReceiver is no longer active,
+     * and its hosting process is only as important as any other application
+     * components that are running in it. This is especially important because if
+     * that process was only hosting the BroadcastReceiver (a common case for
+     * applications that the user has never or not recently interacted with), then
+     * upon returning from onReceive() the system will consider its process to be
+     * empty and aggressively kill it so that resources are available for other more
+     * important processes.
+     * <p>
+     * This means that for longer-running operations you will often use a Service in
+     * conjunction with a BroadcastReceiver to keep the containing process active for
+     * the entire time of your operation.
+     *
+     * @sa Service
+     */
+    interface IBroadcastReceiver {
+        /**
+         * This method is called when the BroadcastReceiver is receiving an Intent
+         * broadcast.  During this time you can use the other methods on
+         * BroadcastReceiver to view/modify the current result values.  This method
+         * is always called within the main thread of its process, unless you
+         * explicitly asked for it to be scheduled on a different thread using
+         * android.content.Context#registerReceiver(BroadcastReceiver,
+         * IntentFilter, String, android.os.Handler). When it runs on the main
+         * thread you should
+         * never perform long-running operations in it (there is a timeout of
+         * 10 seconds that the system allows before considering the receiver to
+         * be blocked and a candidate to be killed). You cannot launch a popup dialog
+         * in your implementation of onReceive().
+         *
+         * @sa android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String, android.os.Handler)
+         *
+         * <p><b>If this BroadcastReceiver was launched through a &lt;receiver&gt; tag,
+         * then the object is no longer alive after returning from this
+         * function.</b>  This means you should not perform any operations that
+         * return a result to you asynchronously -- in particular, for interacting
+         * with services, you should use
+         * Context#startService(Intent) instead of
+         * Context#bindService(Intent, ServiceConnection, int).  If you wish
+         * to interact with a service that is already running, you can use
+         * #peekService.
+         *
+         * @sa Context#startService(Intent)} instead of
+         * @sa Context#bindService(Intent, ServiceConnection, int)
+         * @sa #peekService
+         *
+         * <p>The Intent filters used in android.content.Context#registerReceiver
+         * and in application manifests are <em>not</em> guaranteed to be exclusive. They
+         * are hints to the operating system about how to find suitable recipients. It is
+         * possible for senders to force delivery to specific recipients, bypassing filter
+         * resolution.  For this reason, #onReceive(Context, Intent) onReceive()
+         * implementations should respond only to known actions, ignoring any unexpected
+         * Intents that they may receive.
+         *
+         * @sa android.content.Context#registerReceiver
+         * @sa #onReceive(Context, Intent) onReceive()
+         *
+         * @param context The Context in which the receiver is running.
+         * @param intent The Intent being received.
+         */
+        OnReceive(
+            [in] IContext* ctx,
+            [in] IIntent* intent);
+
+        /**
+         * This can be called by an application in #onReceive to allow
+         * it to keep the broadcast active after returning from that function.
+         * This does <em>not</em> change the expectation of being relatively
+         * responsive to the broadcast (finishing it within 10s), but does allow
+         * the implementation to move work related to it over to another thread
+         * to avoid glitching the main UI thread due to disk IO.
+         *
+         * @sa #onReceive
+         *
+         * @return Returns a PendingResult representing the result of
+         * the active broadcast.  The BroadcastRecord itself is no longer active;
+         * all data and other interaction must go through PendingResult
+         * APIs.  The PendingResult#finish PendingResult.finish() method
+         * must be called once processing of the broadcast is done.
+         *
+         * @sa PendingResult
+         * @sa PendingResult#finish PendingResult.finish()
+         */
+        GoAsync(
+            [out] IPendingResult** pendingResult);
+
+        /**
+         * Provide a binder to an already-running service.  This method is synchronous
+         * and will not start the target service if it is not present, so it is safe
+         * to call from #onReceive.
+         *
+         * @param myContext The Context that had been passed to #onReceive(Context, Intent)
+         * @param service The Intent indicating the service you wish to use.  See
+         * Context#startService(Intent) for more information.
+         *
+         * @sa #onReceive
+         * @sa Context#startService(Intent)
+         */
+        PeekService(
+            [in] IContext* myContext,
+            [in] IIntent* service,
+            [out] IBinder** binder);
+
+        /**
+         * Change the current result code of this broadcast; only works with
+         * broadcasts sent through
+         * Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast.  Often uses the
+         * Activity android.app.Activity#RESULT_CANCELED and
+         * android.app.Activity#RESULT_OK constants, though the
+         * actual meaning of this value is ultimately up to the broadcaster.
+         *
+         * <p class="note">This method does not work with non-ordered broadcasts such
+         * as those sent with Context#sendBroadcast(Intent)
+         * Context.sendBroadcast</p>
+         *
+         * @sa Context#sendOrderedBroadcast(Intent, String)
+         * @sa android.app.Activity#RESULT_CANCELED
+         * @sa android.app.Activity#RESULT_OK
+         * @sa Context#sendBroadcast(Intent) Context.sendBroadcast
+         *
+         * @param code The new result code.
+         *
+         * @see #setResult(int, String, Bundle)
+         */
+        SetResultCode(
+            [in] Int32 code);
+
+        /**
+         * Retrieve the current result code, as set by the previous receiver.
+         *
+         * @return int The current result code.
+         */
+        GetResultCode(
+            [out] Int32* code);
+
+        /**
+         * Change the current result data of this broadcast; only works with
+         * broadcasts sent through
+         * Context#sendOrderedBroadcast(Intent, String)
+         * Context.sendOrderedBroadcast.  This is an arbitrary
+         * string whose interpretation is up to the broadcaster.
+         *
+         * @sa Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast
+         *
+         * <p><strong>This method does not work with non-ordered broadcasts such
+         * as those sent with Context#sendBroadcast(Intent) Context.sendBroadcast</strong></p>
+         *
+         * @sa Context#sendBroadcast(Intent) Context.sendBroadcast}
+         * @param data The new result data; may be null.
+         *
+         * @see #setResult(int, String, Bundle)
+         */
+        SetResultData(
+            [in] String data);
+
+        /**
+         * Retrieve the current result data, as set by the previous receiver.
+         * Often this is null.
+         *
+         * @return String The current result data; may be null.
+         */
+        GetResultData(
+            [out] String* data);
+
+        /**
+         * Change the current result extras of this broadcast; only works with
+         * broadcasts sent through
+         * Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast.  This is a Bundle
+         * holding arbitrary data, whose interpretation is up to the
+         * broadcaster.  Can be set to null.  Calling this method completely
+         * replaces the current map (if any).
+         *
+         * @sa Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast
+         *
+         * <p><strong>This method does not work with non-ordered broadcasts such
+         * as those sent with Context#sendBroadcast(Intent) Context.sendBroadcast</strong></p>
+         *
+         * @sa Context#sendBroadcast(Intent) Context.sendBroadcast
+         *
+         * @param extras The new extra data map; may be null.
+         *
+         * @see #setResult(int, String, Bundle)
+         */
+        SetResultExtras(
+            [in] IBundle* extras);
+
+        /**
+         * Retrieve the current result extra data, as set by the previous receiver.
+         * Any changes you make to the returned Map will be propagated to the next
+         * receiver.
+         *
+         * @param makeMap If true then a new empty Map will be made for you if the
+         *                current Map is null; if false you should be prepared to
+         *                receive a null Map.
+         *
+         * @return Map The current extras map.
+         */
+        GetResultExtras(
+            [in] Boolean makeMap,
+            [out] IBundle** extras);
+
+        /**
+         * Change all of the result data returned from this broadcasts; only works
+         * with broadcasts sent through
+         * Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast.  All current result data is replaced
+         * by the value given to this method.
+         *
+         * <p><strong>This method does not work with non-ordered broadcasts such
+         * as those sent with Context#sendBroadcast(Intent) Context.sendBroadcast</strong></p>
+         *
+         * @param code The new result code.  Often uses the
+         * Activity android.app.Activity#RESULT_CANCELED and
+         * android.app.Activity#RESULT_OK constants, though the
+         * actual meaning of this value is ultimately up to the broadcaster.
+         * @param data The new result data.  This is an arbitrary
+         * string whose interpretation is up to the broadcaster; may be null.
+         * @param extras The new extra data map.  This is a Bundle
+         * holding arbitrary data, whose interpretation is up to the
+         * broadcaster.  Can be set to null.  This completely
+         * replaces the current map (if any).
+         *
+         * @sa Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast
+         * @sa Context#sendBroadcast(Intent) Context.sendBroadcast
+         * @sa android.app.Activity#RESULT_CANCELED
+         * @sa android.app.Activity#RESULT_OK
+         */
+        SetResult(
+            [in] Int32 code,
+            [in] String data,
+            [in] IBundle* extras);
+
+        /**
+         * Returns the flag indicating whether or not this receiver should
+         * abort the current broadcast.
+         *
+         * @return True if the broadcast should be aborted.
+         */
+        GetAbortBroadcast(
+            [out] Boolean* isAborted);
+
+        /**
+         * Sets the flag indicating that this receiver should abort the
+         * current broadcast; only works with broadcasts sent through
+         * Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast.  This will prevent
+         * any other broadcast receivers from receiving the broadcast. It will still
+         * call #onReceive of the BroadcastReceiver that the caller of
+         * Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast passed in.
+         *
+         * <p><strong>This method does not work with non-ordered broadcasts such
+         * as those sent with Context#sendBroadcast(Intent)
+         * Context.sendBroadcast</strong></p>
+         *
+         * @sa Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast
+         * @sa #onReceive
+         * @sa Context#sendOrderedBroadcast(Intent, String) Context.sendOrderedBroadcast
+         * @sa Context#sendBroadcast(Intent) Context.sendBroadcast
+         */
+        AbortBroadcast();
+
+        /**
+         * Clears the flag indicating that this receiver should abort the current
+         * broadcast.
+         */
+        ClearAbortBroadcast();
+
+        /**
+         * Returns true if the receiver is currently processing an ordered
+         * broadcast.
+         */
+        IsOrderedBroadcast(
+            [out] Boolean* isOrdered);
+
+        /**
+         * Returns true if the receiver is currently processing the initial
+         * value of a sticky broadcast -- that is, the value that was last
+         * broadcast and is currently held in the sticky cache, so this is
+         * not directly the result of a broadcast right now.
+         */
+        IsInitialStickyBroadcast(
+            [out] Boolean* isInitial);
+
+        /**
+         * For internal use, sets the hint about whether this BroadcastReceiver is
+         * running in ordered mode.
+         */
+        SetOrderedHint(
+            [in] Boolean isOrdered);
+
+        /**
+         * For internal use to set the result data that is active. @hide
+         */
+        SetPendingResult(
+            [in] IPendingResult* result);
+
+        /**
+         * For internal use to set the result data that is active. @hide
+         */
+        GetPendingResult(
+            [out] IPendingResult** pendingResult);
+
+        /** @hide */
+        GetSendingUserId(
+            [out] Int32* userId);
+
+        /**
+         * Control inclusion of debugging help for mismatched
+         * calls to Context#registerReceiver(BroadcastReceiver, IntentFilter) Context.registerReceiver().
+         * If called with true, before given to registerReceiver(), then the
+         * callstack of the following Context#unregisterReceiver(BroadcastReceiver) Context.unregisterReceiver() call is retained, to be printed if a later
+         * incorrect unregister call is made.  Note that doing this requires retaining
+         * information about the BroadcastReceiver for the lifetime of the app,
+         * resulting in a leak -- this should only be used for debugging.
+         *
+         * @sa Context#registerReceiver(BroadcastReceiver, IntentFilter)
+         * Context.registerReceiver()
+         * @sa Context#unregisterReceiver(BroadcastReceiver) Context.unregisterReceiver()
+         */
+        SetDebugUnregister(
+            [in] Boolean debug);
+
+        /**
+         * Return the last value given to #setDebugUnregister.
+         *
+         * @sa #setDebugUnregister
+         */
+        GetDebugUnregister(
+            [out] Boolean* debugUnregister);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

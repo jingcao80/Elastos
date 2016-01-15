@@ -1,0 +1,52 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.X501.IName;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Pkcs10 {
+
+    /**
+     * CertificationRequestInfo ::= SEQUENCE {
+     *   version Version,
+     *   subject Name,
+     *   subjectPublicKeyInfo SubjectPublicKeyInfo,
+     *   attributes [0] IMPLICIT Attributes }
+     *
+     * Version ::= INTEGER
+     *
+     * Attributes ::= SET OF Attribute
+     */
+    interface ICertificationRequestInfo {
+        GetSubject(
+            [out] IName** name);
+
+        GetVersion(
+            [out] Int32* ver);
+
+        /**
+         * Returns ASN.1 encoded form of this CertificationRequestInfo.
+         * @return a byte array containing ASN.1 encode form.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        ToString(
+            [out] String* str);
+    }
+
+    interface ICertificationRequestInfoHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace Pkcs10
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

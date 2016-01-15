@@ -1,0 +1,55 @@
+
+module
+{
+    interface Elastos.Droid.Internal.View.Menu.IMenuBuilderItemInvoker;
+    interface Elastos.Droid.Widget.IListPopupWindow;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+
+    [local]
+    interface IPopupCallback {
+         GetPopup(
+            [out] IListPopupWindow** listPopup);
+    }
+
+    /**
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IOnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.Widget.ITextView
+     * interface IMenuItemView;
+     * interface IViewOnClickListener;
+     * interface IViewOnLongClickListener;
+     * interface IActionMenuChildView;
+     */
+    [local]
+    interface IActionMenuItemView {
+        SetItemInvoker(
+            [in] IMenuBuilderItemInvoker* itemInvoker);
+
+        SetPopupCallback(
+            [in] IPopupCallback* popupCallback);
+
+        SetExpandedFormat(
+            [in] Boolean expandedFormat);
+
+        HasText(
+            [out] Boolean* rst);
+    }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

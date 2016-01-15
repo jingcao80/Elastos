@@ -1,0 +1,75 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    /**
+     * Breaks a string into tokens; new code should probably use {@link String#split}.
+     *
+     * <blockquote>
+     * <pre>
+     * // Legacy code:
+     * StringTokenizer st = new StringTokenizer("a:b:c", ":");
+     * while (st.hasMoreTokens()) {
+     *     System.err.println(st.nextToken());
+     * }
+     *
+     * // New code:
+     * for (String token : "a:b:c".split(":")) {
+     *     System.err.println(token);
+     * }
+     * </pre>
+     * </blockquote>
+     *
+     * @since 1.0
+     */
+
+    /**
+     * @Involve
+     * interface IEnumeration;
+     */
+    interface IStringTokenizer {
+        /**
+         * Returns the number of unprocessed tokens remaining in the string.
+         *
+         * @return number of tokens that can be retreived before an {@code
+         *         Exception} will result from a call to {@code nextToken()}.
+         */
+        CountTokens(
+            [out] Int32* value);
+
+        /**
+         * Returns {@code true} if unprocessed tokens remain.
+         *
+         * @return {@code true} if unprocessed tokens remain.
+         */
+        HasMoreTokens(
+            [out] Boolean* value);
+
+        /**
+         * Returns the next token in the string as a {@code String}.
+         *
+         * @return next token in the string as a {@code String}.
+         * @throws NoSuchElementException
+         *                if no tokens remain.
+         */
+        GetNextToken(
+            [out] String* str);
+
+        /**
+         * Returns the next token in the string as a {@code String}. The delimiters
+         * used are changed to the specified delimiters.
+         *
+         * @param delims
+         *            the new delimiters to use.
+         * @return next token in the string as a {@code String}.
+         * @throws NoSuchElementException
+         *                if no tokens remain.
+         */
+        GetNextToken(
+            [in] String delims,
+            [out] String* str);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

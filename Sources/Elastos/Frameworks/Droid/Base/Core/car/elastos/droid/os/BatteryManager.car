@@ -1,0 +1,178 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * The BatteryManager class contains strings and constants used for values
+     * in the {@link android.content.Intent#ACTION_BATTERY_CHANGED} Intent.
+     */
+    interface IBatteryManager {
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int32eger containing the current status constant.
+         */
+        const String EXTRA_STATUS = "status";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int32eger containing the current health constant.
+         */
+        const String EXTRA_HEALTH = "health";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * boolean indicating whether a battery is present.
+         */
+        const String EXTRA_PRESENT = "present";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int32eger field containing the current battery level, from 0 to
+         * {@link #EXTRA_SCALE}.
+         */
+        const String EXTRA_LEVEL = "level";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int32eger containing the maximum battery level.
+         */
+        const String EXTRA_SCALE = "scale";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int32eger containing the resource ID of a small status bar icon
+         * indicating the current battery state.
+         */
+        const String EXTRA_ICON_SMALL = "icon-small";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int32eger indicating whether the device is plugged in to a power
+         * source; 0 means it is on battery, other constants are different
+         * types of power sources.
+         */
+        const String EXTRA_PLUGGED = "plugged";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int32eger containing the current battery voltage level.
+         */
+        const String EXTRA_VOLTAGE = "voltage";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int32eger containing the current battery temperature.
+         */
+        const String EXTRA_TEMPERATURE = "temperature";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * String describing the technology of the current battery.
+         */
+        const String EXTRA_TECHNOLOGY = "technology";
+
+        /**
+         * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+         * Int value set to nonzero if an unsupported charger is attached
+         * to the device.
+         * {@hide}
+         */
+        const String EXTRA_INVALID_CHARGER = "invalid_charger";
+
+        // values for "status" field in the ACTION_BATTERY_CHANGED Intent
+        const Int32 BATTERY_STATUS_UNKNOWN = 1;
+        const Int32 BATTERY_STATUS_CHARGING = 2;
+        const Int32 BATTERY_STATUS_DISCHARGING = 3;
+        const Int32 BATTERY_STATUS_NOT_CHARGING = 4;
+        const Int32 BATTERY_STATUS_FULL = 5;
+
+        // values for "health" field in the ACTION_BATTERY_CHANGED Intent
+        const Int32 BATTERY_HEALTH_UNKNOWN = 1;
+        const Int32 BATTERY_HEALTH_GOOD = 2;
+        const Int32 BATTERY_HEALTH_OVERHEAT = 3;
+        const Int32 BATTERY_HEALTH_DEAD = 4;
+        const Int32 BATTERY_HEALTH_OVER_VOLTAGE = 5;
+        const Int32 BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
+        const Int32 BATTERY_HEALTH_COLD = 7;
+
+        // values of the "plugged" field in the ACTION_BATTERY_CHANGED Int32ent.
+        // These must be powers of 2.
+        /** Power source is an AC charger. */
+        const Int32 BATTERY_PLUGGED_AC = 1;
+        /** Power source is a USB port. */
+        const Int32 BATTERY_PLUGGED_USB = 2;
+        /** Power source is wireless. */
+        const Int32 BATTERY_PLUGGED_WIRELESS = 4;
+
+        /** @hide */
+        const Int32 BATTERY_PLUGGED_ANY =
+                BATTERY_PLUGGED_AC | BATTERY_PLUGGED_USB | BATTERY_PLUGGED_WIRELESS;
+
+        /*
+         * Battery property identifiers.  These must match the values in
+         * frameworks/native/include/batteryservice/BatteryService.h
+         */
+        /** Battery capacity in microampere-hours, as an integer. */
+        const Int32 BATTERY_PROPERTY_CHARGE_COUNTER = 1;
+
+        /**
+         * Instantaneous battery current in microamperes, as an integer.  Positive
+         * values indicate net current entering the battery from a charge source,
+         * negative values indicate net current discharging from the battery.
+         */
+        const Int32 BATTERY_PROPERTY_CURRENT_NOW = 2;
+
+        /**
+         * Average battery current in microamperes, as an integer.  Positive
+         * values indicate net current entering the battery from a charge source,
+         * negative values indicate net current discharging from the battery.
+         * The time period over which the average is computed may depend on the
+         * fuel gauge hardware and its configuration.
+         */
+        const Int32 BATTERY_PROPERTY_CURRENT_AVERAGE = 3;
+
+        /**
+         * Remaining battery capacity as an integer percentage of total capacity
+         * (with no fractional part).
+         */
+        const Int32 BATTERY_PROPERTY_CAPACITY = 4;
+
+        /**
+         * Battery remaining energy in nanowatt-hours, as a long integer.
+         */
+        const Int32 BATTERY_PROPERTY_ENERGY_COUNTER = 5;
+
+        /**
+         * Return the value of a battery property of integer type.  If the
+         * platform does not provide the property queried, this value will
+         * be Integer.MIN_VALUE.
+         *
+         * @param id identifier of the requested property
+         *
+         * @return the property value, or Integer.MIN_VALUE if not supported.
+         */
+        GetInt32Property(
+            [in] Int32 id,
+            [out] Int32* property);
+
+        /**
+         * Return the value of a battery property of long type If the
+         * platform does not provide the property queried, this value will
+         * be Long.MIN_VALUE.
+         *
+         * @param id identifier of the requested property
+         *
+         * @return the property value, or Long.MIN_VALUE if not supported.
+         */
+        GetInt64Property(
+            [in] Int32 id,
+            [out] Int64* property);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

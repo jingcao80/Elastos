@@ -1,0 +1,143 @@
+module
+{
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Logging {
+
+    /**
+     * {Level} objects are used to indicate the level of logging. There are a
+     * set of predefined logging levels, each associated with an integer value.
+     * Enabling a certain logging level also enables all logging levels with larger
+     * values.
+     * <p>
+     * The predefined levels in ascending order are FINEST, FINER, FINE, CONFIG,
+     * INFO, WARNING, SEVERE. There are two additional predefined levels, which are
+     * ALL and OFF. ALL indicates logging all messages, and OFF indicates logging no
+     * messages.
+     */
+    interface ILevel {
+        /**
+         * Gets the name of this level.
+         *
+         * @return this level's name.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Gets the name of the resource bundle associated with this level.
+         *
+         * @return the name of this level's resource bundle.
+         */
+        GetResourceBundleName(
+            [out] String* name);
+
+        /**
+         * Gets the integer value indicating this level.
+         *
+         * @return this level's integer value.
+         */
+        Int32Value(
+            [out] Int32* value);
+
+        /**
+         * Gets the localized name of this level. The default locale is used. If no
+         * resource bundle is associated with this level then the original level
+         * name is returned.
+         *
+         * @return the localized name of this level.
+         */
+        GetLocalizedName(
+            [out] String* name);
+
+        /**
+         * Compares two {Level} objects for equality. They are considered to
+         * be equal if they have the same level value.
+         *
+         * @param o
+         *            the other object to compare this level to.
+         * @return {true} if this object equals to the supplied object,
+         *         {false} otherwise.
+         */
+        Equals(
+            [in] IInterface* o,
+            [out] Boolean* result);
+
+        /**
+         * Returns the string representation of this {Level} object. In
+         * this case, it is the level's name.
+         *
+         * @return the string representation of this level.
+         */
+        ToString(
+            [out] String* name);
+    }
+
+    interface ILevelHelper {
+        Parse(
+            [in] String name,
+            [out] ILevel** level);
+
+        GetMinusOne(
+            [out] ILevel** result);
+
+        /**
+         * The OFF level provides no logging messages.
+         */
+        GetOff(
+            [out] ILevel** result);
+
+        /**
+         * The SEVERE level provides severe failure messages.
+         */
+        GetServer(
+            [out] ILevel** result);
+
+        /**
+         * The WARNING level provides warnings.
+         */
+        GetWarning(
+            [out] ILevel** result);
+
+        /**
+         * The INFO level provides informative messages.
+         */
+        GetInfo(
+            [out] ILevel** result);
+
+        /**
+         * The CONFIG level provides static configuration messages.
+         */
+        GetConfig(
+            [out] ILevel** result);
+
+        /**
+         * The FINE level provides tracing messages.
+         */
+        GetFine(
+            [out] ILevel** result);
+
+        /**
+         * The FINER level provides more detailed tracing messages.
+         */
+        GetFiner(
+            [out] ILevel** result);
+
+        /**
+         * The FINEST level provides highly detailed tracing messages.
+         */
+        GetFinest(
+            [out] ILevel** result);
+
+        /**
+         * The ALL level provides all logging messages.
+         */
+        GetAll(
+            [out] ILevel** result);
+    }
+
+    } // namespace Logging
+    } // namespace Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,178 @@
+module
+{
+    enum Elastos.Math.RoundingMode;
+
+    interface Elastos.Math.IBigDecimal;
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Core.INumber;
+    interface Elastos.Text.IDecimalFormatSymbols;
+    interface Elastos.Text.IFieldPosition;
+    interface Elastos.Text.IParsePosition;
+    interface Elastos.Text.IAttributedCharacterIterator;
+    interface Libcore.ICU.ILocaleData;
+
+    namespace Libcore {
+    namespace ICU {
+
+    /**
+     * @Involve
+     * interface ICloneable;
+     */
+    [deprecated]
+    interface INativeDecimalFormat {
+        Close();
+
+        /**
+         * Copies the DecimalFormatSymbols settings into our native peer in bulk.
+         */
+        SetDecimalFormatSymbols(
+            [in] IDecimalFormatSymbols* dfs);
+
+        SetDecimalFormatSymbols(
+            [in] ILocaleData* ld);
+
+        FormatBigDecimal(
+            [in] IBigDecimal* value,
+            [in] IFieldPosition* field,
+            [out, callee] ArrayOf<Char32>* result);
+
+        FormatBigInteger(
+            [in] IBigInteger* value,
+            [in] IFieldPosition* field,
+            [out, callee] ArrayOf<Char32>* result);
+
+        FormatInt64(
+            [in] Int64 value,
+            [in] IFieldPosition* field,
+            [out, callee] ArrayOf<Char32>* result);
+
+        FormatDouble(
+            [in] Double value,
+            [in] IFieldPosition* field,
+            [out, callee] ArrayOf<Char32>* result);
+
+        ApplyLocalizedPattern(
+            [in] String pattern);
+
+        ApplyPattern(
+            [in] String pattern);
+
+        FormatToCharacterIterator(
+            [in] IInterface* object,
+            [out] IAttributedCharacterIterator** result);
+
+        ToLocalizedPattern(
+            [out] String* pattern);
+
+        ToPattern(
+            [out] String* pattern);
+
+        Parse(
+            [in] String string,
+            [in] IParsePosition* position,
+            [out] INumber** result);
+
+        // start getter and setter
+
+        GetMaximumFractionDigits(
+            [out] Int32* maxFractionDigits);
+
+        GetMaximumIntegerDigits(
+            [out] Int32* maxIntegerDigits);
+
+        GetMinimumFractionDigits(
+            [out] Int32* minFractionDigits);
+
+        GetMinimumIntegerDigits(
+            [out] Int32* minIntegerDigits);
+
+        GetGroupingSize(
+            [out] Int32* size);
+
+        GetMultiplier(
+            [out] Int32* multiplier);
+
+        GetNegativePrefix(
+            [out] String* prefix);
+
+        GetNegativeSuffix(
+            [out] String* suffix);
+
+        GetPositivePrefix(
+            [out] String* prefix);
+
+        GetPositiveSuffix(
+            [out] String* suffix);
+
+        IsDecimalSeparatorAlwaysShown(
+            [out] Boolean* isAlwaysShown);
+
+        IsParseBigDecimal(
+            [out] Boolean* isParseBigDecimal);
+
+        IsParseIntegerOnly(
+            [out] Boolean* isParseIntegerOnly);
+
+        IsGroupingUsed(
+            [out] Boolean* isGroupingUsed);
+
+        SetDecimalSeparatorAlwaysShown(
+            [in] Boolean value);
+
+        SetCurrency(
+            [in] String currencySymbol,
+            [in] String currencyCode);
+
+        SetGroupingSize(
+            [in] Int32 value);
+
+        SetGroupingUsed(
+            [in] Boolean value);
+
+        SetMaximumFractionDigits(
+            [in] Int32 value);
+
+        SetMaximumIntegerDigits(
+            [in] Int32 value);
+
+        SetMinimumFractionDigits(
+            [in] Int32 value);
+
+        SetMinimumIntegerDigits(
+            [in] Int32 value);
+
+        SetMultiplier(
+            [in] Int32 value);
+
+        SetNegativePrefix(
+            [in] String value);
+
+        SetNegativeSuffix(
+            [in] String value);
+
+        SetPositivePrefix(
+            [in] String value);
+
+        SetPositiveSuffix(
+            [in] String value);
+
+        SetParseBigDecimal(
+            [in] Boolean value);
+
+        SetParseIntegerOnly(
+            [in] Boolean value);
+
+        SetRoundingMode(
+            [in] RoundingMode mode,
+            [in] Double roundingIncrement);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetAddr(
+            [out] Int32* value);
+    }
+    } // namespace ICU
+    } // namespace Libcore
+}

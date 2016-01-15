@@ -1,0 +1,29 @@
+module
+{
+//    const FAMILY_CORE = 0x27    // Platform exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Platform exception codes (Family: 0x27)
+    const E_CONCURRENT_MODIFICATION_EXCEPTION               = 0xA7000000;
+    const E_FORMATTER_CLOSED_EXCEPTION                      = 0xA7000001;
+    const E_MISSING_FORMAT_ARGUMENT_EXCEPTION               = 0xA7000002;
+    const E_ILLEGAL_FORMAT_CONVERSION_EXCEPTION             = 0xA7000003;
+    const E_ILLEGAL_FORMAT_FLAGS_EXCEPTION                  = 0xA7000004;
+    const E_UNKNOWN_FORMAT_CONVERSION_EXCEPTION             = 0xA7000005;
+    const E_FORMAT_FLAGS_CONVERSION_MISMATCH_EXCEPTION      = 0xA7000006;
+    const E_MISSING_FORMAT_WIDTH_EXCEPTION                  = 0xA7000007;
+    const E_ILLEGAL_FORMAT_PRECISION_EXCEPTION              = 0xA7000008;
+    const E_ILLEGAL_FORMAT_WIDTH_EXCEPTION                  = 0xA7000009;
+    const E_EMPTY_STACK_EXCEPTION                           = 0xA700000A;
+    const E_INPUT_MISMATCH_EXCEPTION                        = 0xA700000B;
+    const E_MISSING_RESOURCE_EXCEPTION                      = 0xA700000C;
+    const E_BROKEN_BARRIER_EXCEPTION                        = 0xA700000D;
+    const E_ILLFORMED_LOCALE_EXCEPTION                      = 0xA700000E;
+    const E_BACKING_STORE_EXCEPTION                         = 0xA700000F;
+    const E_CHECKED_ARITHMETIC_EXCEPTION                    = 0xA7000010;
+    const E_INVALID_PREFERENCES_FORMAT_EXCEPTION            = 0xA7000011;
+    const E_JAR_EXCEPTION                                   = 0xA7000012;
+}

@@ -1,0 +1,2264 @@
+
+module
+{
+    merge("view/AbsSavedState.car");
+    merge("view/AccessibilityInteractionController.car");
+    merge("view/AccessibilityIterators.car");
+    merge("view/ActionMode.car");
+    merge("view/ActionProvider.car");
+    merge("view/Choreographer.car");
+    merge("view/CollapsibleActionView.car");
+    merge("view/ContextMenu.car");
+    merge("view/ContextThemeWrapper.car");
+    merge("view/SurfaceControl.car");
+    merge("view/Display.car");
+    merge("view/DisplayAdjustments.car");
+    merge("view/DisplayEventReceiver.car");
+    merge("view/DisplayInfo.car");
+    merge("view/DragEvent.car");
+    merge("view/FallbackEventHandler.car");
+    merge("view/FocusFinder.car");
+    merge("view/FrameStats.car");
+    merge("view/GestureDetector.car");
+
+    merge("view/Gravity.car");
+    merge("view/HapticFeedbackConstants.car");
+    merge("view/HardwareCanvas.car");
+    merge("view/HardwareLayer.car");
+    merge("view/IApplicationToken.car");
+    merge("view/IInputFilter.car");
+    merge("view/IInputFilterHost.car");
+    merge("view/IOnKeyguardExitResult.car");
+    merge("view/IRotationWatcher.car");
+    merge("view/IWindow.car");
+    merge("view/IWindowFocusObserver.car");
+    merge("view/IWindowId.car");
+    merge("view/IWindowManager.car");
+    merge("view/IWindowSession.car");
+    merge("view/InputChannel.car");
+    merge("view/InputDevice.car");
+    merge("view/InputEvent.car");
+    merge("view/InputEventConsistencyVerifier.car");
+    merge("view/InputEventReceiver.car");
+    merge("view/InputEventSender.car");
+    merge("view/InputQueue.car");
+    merge("view/KeyCharacterMap.car");
+    merge("view/KeyEvent.car");
+    merge("view/LayoutInflater.car");
+    merge("view/MagnificationSpec.car");
+    merge("view/Menu.car");
+    merge("view/MenuInflater.car");
+    merge("view/MenuItem.car");
+    merge("view/MotionEvent.car");
+    merge("view/OrientationListener.car");
+    merge("view/OrientationEventListener.car");
+    merge("view/PointerIcon.car");
+    merge("view/RenderNode.car");
+    merge("view/RenderNodeAnimator.car");
+    merge("view/ScaleGestureDetector.car");
+    merge("view/SubMenu.car");
+    merge("view/Surface.car");
+    merge("view/SurfaceHolder.car");
+    merge("view/SurfaceSession.car");
+    merge("view/SurfaceView.car");
+    merge("view/TextureView.car");
+    merge("view/TouchDelegate.car");
+    merge("view/VelocityTracker.car");
+    merge("view/ViewRootImpl.car");
+    merge("view/View.car");
+    merge("view/ViewConfiguration.car");
+    merge("view/ViewGroup.car");
+    merge("view/ViewGroupOverlay.car");
+    merge("view/ViewManager.car");
+    merge("view/ViewOutlineProvider.car");
+    merge("view/ViewOverlay.car");
+    merge("view/ViewParent.car");
+    merge("view/ViewPropertyAnimator.car");
+    merge("view/ViewStub.car");
+    merge("view/ViewTreeObserver.car");
+    merge("view/Window.car");
+    merge("view/WindowAnimationFrameStats.car");
+    merge("view/WindowContentFrameStats.car");
+    merge("view/WindowId.car");
+    merge("view/WindowInfo.car");
+    merge("view/WindowInsets.car");
+    merge("view/WindowManager.car");
+    merge("view/WindowManagerGlobal.car");
+    merge("view/WindowManagerInternal.car");
+    merge("view/WindowManagerPolicy.car");
+    merge("view/GraphicBuffer.car");
+    merge("view/SoundEffectConstants.car");
+    merge("view/ViewAnimationUtils.car");
+
+    // merge("view/CompatibilityInfoHolder.car");
+    merge("view/DisplayList.car");
+    merge("view/HardwareRenderer.car");
+    merge("view/GhostView.car");
+    // merge("view/IDisplayContentChangeListener.car");
+    // merge("view/RootViewSurfaceTaker.car");
+    merge("view/IInputMethodCallback.car");
+    // merge("view/WindowManagerPolicyThread.car");
+    // merge("view/IInputContextCallback.car");
+    // merge("view/DisplayManagerAw.car");
+    // merge("view/IDisplayManagerAw.car");
+    // merge("view/DispList.car");
+
+    merge("view/accessibility/AccessibilityCache.car");
+    merge("view/accessibility/AccessibilityEvent.car");
+    merge("view/accessibility/AccessibilityEventSource.car");
+    merge("view/accessibility/AccessibilityInteractionClient.car");
+    merge("view/accessibility/AccessibilityManager.car");
+    merge("view/accessibility/AccessibilityNodeInfo.car");
+    merge("view/accessibility/AccessibilityNodeProvider.car");
+    merge("view/accessibility/AccessibilityRecord.car");
+    merge("view/accessibility/AccessibilityWindowInfo.car");
+    merge("view/accessibility/CaptioningManager.car");
+    merge("view/accessibility/IAccessibilityInteractionCallback.car");
+    merge("view/accessibility/IAccessibilityInteractionConnection.car");
+    merge("view/accessibility/IAccessibilityInteractionConnectionCallback.car");
+    merge("view/accessibility/IAccessibilityManager.car");
+    merge("view/accessibility/IAccessibilityManagerClient.car");
+
+    merge("view/animation/AccelerateDecelerateInterpolator.car");
+    merge("view/animation/AccelerateInterpolator.car");
+    merge("view/animation/AlphaAnimation.car");
+    merge("view/animation/Animation.car");
+    merge("view/animation/AnimationSet.car");
+    merge("view/animation/AnimationUtils.car");
+    merge("view/animation/AnticipateInterpolator.car");
+    merge("view/animation/AnticipateOvershootInterpolator.car");
+    merge("view/animation/BounceInterpolator.car");
+    merge("view/animation/CycleInterpolator.car");
+    merge("view/animation/DecelerateInterpolator.car");
+    merge("view/animation/GridLayoutAnimationController.car");
+    merge("view/animation/Interpolator.car");
+    merge("view/animation/LayoutAnimationController.car");
+    merge("view/animation/LinearInterpolator.car");
+    merge("view/animation/OvershootInterpolator.car");
+    merge("view/animation/PathInterpolator.car");
+    merge("view/animation/RotateAnimation.car");
+    merge("view/animation/ScaleAnimation.car");
+    merge("view/animation/Transformation.car");
+    merge("view/animation/TranslateAnimation.car");
+
+    merge("view/inputmethod/BaseInputConnection.car");
+    merge("view/inputmethod/CompletionInfo.car");
+    merge("view/inputmethod/CorrectionInfo.car");
+    merge("view/inputmethod/CursorAnchorInfo.car");
+    merge("view/inputmethod/EditorInfo.car");
+    merge("view/inputmethod/ExtractedText.car");
+    merge("view/inputmethod/ExtractedTextRequest.car");
+    merge("view/inputmethod/IInputMethodSubtypeArray.car");
+    merge("view/inputmethod/InputBinding.car");
+    merge("view/inputmethod/InputConnection.car");
+    merge("view/inputmethod/InputMethod.car");
+    merge("view/inputmethod/InputMethodInfo.car");
+    merge("view/inputmethod/InputMethodSession.car");
+    merge("view/inputmethod/InputMethodManager.car");
+    merge("view/inputmethod/InputMethodSubtype.car");
+    merge("view/inputmethod/SparseRectFArray.car");
+
+    merge("view/textservice/SentenceSuggestionsInfo.car");
+    merge("view/textservice/SpellCheckerInfo.car");
+    merge("view/textservice/SpellCheckerSession.car");
+    merge("view/textservice/SpellCheckerSubtype.car");
+    merge("view/textservice/SuggestionsInfo.car");
+    merge("view/textservice/TextInfo.car");
+    merge("view/textservice/TextServicesManager.car");
+    merge("view/textservice/SpellCheckerSessionListenerImpl.car");
+    merge("view/textservice/InternalListener.car");
+
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.Utility.IMap;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Animation.ITimeInterpolator;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContextWrapper;
+    interface Elastos.Droid.Content.Pm.IResolveInfo;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Content.Res.IResourcesTheme;
+    interface Elastos.Droid.Graphics.IPath;
+    // interface Elastos.Droid.Graphics.ISurfaceTexture;
+    interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    interface Elastos.Droid.Internal.View.Animation.INativeInterpolatorFactory;
+    interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    // interface Elastos.Droid.Internal.View.IInputBindResult;
+    interface Elastos.Droid.Internal.View.IIInputMethodManager;
+    interface Elastos.Droid.Internal.View.IInputContext;
+    // interface Elastos.Droid.Internal.View.IInputContextCallback;
+    interface Elastos.Droid.Internal.View.IInputMethodClient;
+    // interface Elastos.Droid.Internal.View.IIInputMethodSession;
+    interface Elastos.Droid.Internal.View.IBaseIWindow;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Os.IHandler;
+    // interface Elastos.Droid.View.IKeyEventCallback;
+    interface Elastos.Droid.View.IKeyEventCallback;
+    // interface Elastos.Droid.View.IInputMethodCallback;
+    // interface Elastos.Droid.View.IWindowManagerPolicyThread;
+    // interface Elastos.Droid.View.IAccessibilityInteractionController;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityCache;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEventHelper;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityInteractionClient;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityInteractionClientHelper;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoHelper;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoAccessibilityAction;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoAccessibilityActionHelper;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoCollectionInfo;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoCollectionInfoHelper;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoCollectionItemInfo;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoCollectionItemInfoHelper;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoRangeInfo;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfoRangeInfoHelper;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityRecord;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityRecordHelper;
+    interface Elastos.Droid.View.Accessibility.ICaptioningManagerCaptionStyle;
+    interface Elastos.Droid.View.Accessibility.ICaptioningManagerCaptionStyleHelper;
+    interface Elastos.Droid.View.Accessibility.IIAccessibilityInteractionConnectionCallback;
+    interface Elastos.Droid.View.IGestureDetector;
+    interface Elastos.Droid.View.IGestureDetectorOnGestureListener;
+    interface Elastos.Droid.View.IGestureDetectorOnDoubleTapListener;
+    interface Elastos.Droid.View.IScaleGestureDetector;
+    interface Elastos.Droid.View.IScaleGestureDetectorOnScaleGestureListener;
+    interface Elastos.Droid.Hardware.Display.IDisplayManagerGlobal;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.ISurfaceTexture;
+    interface Elastos.Droid.Graphics.ICanvasProperty;
+    interface Elastos.Droid.Animation.IAnimator;
+    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerSessionListener;
+    interface Elastos.Droid.View.Internal.TextService.IITextServicesSessionListener;
+    interface Elastos.Droid.View.Internal.TextService.IITextServicesManager;
+    interface Elastos.Droid.Content.IContextWrapper;
+
+    // interface Elastos.Droid.View.Accessibility.IIAccessibilityInteractionConnection;
+    // interface Elastos.Droid.View.Accessibility.IAccessibilityManager;
+    // interface Elastos.Droid.View.InputMethod.ICorrectionInfo;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.Text.IInputType;
+
+    // namespace Elastos {
+    // namespace Droid {
+    // namespace Internal {
+    // namespace View {
+
+    // class CInputContextCallback {
+    //     interface IInputContextCallback;
+    // }
+
+    // } // namespace View
+    // } // namespace Internal
+    // } // namespace Droid
+    // } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    class CView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    class CMenuInflater
+    {
+        constructor (
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IInterface* realOwner);
+
+        interface IMenuInflater;
+    }
+
+    class CContextThemeWrapper
+    {
+        constructor ();
+
+        constructor(
+            [in] IContext* base,
+            [in] Int32 themeres);
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+    }
+
+    class CAbsSavedState
+    {
+        constructor();
+
+        constructor(
+            [in] IParcelable* superState);
+
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
+    class CViewBaseSavedState
+    {
+        constructor();
+
+        constructor(
+            [in] IParcelable* state);
+
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
+    class CWindowManagerGlobalSessionCallback {
+        constructor();
+
+        interface IIWindowSessionCallback;
+        interface IBinder;
+    }
+
+    singleton class CChoreographerHelper {
+        interface IChoreographerHelper;
+    }
+    /**
+    * Describes the characteristics of a particular logical display.
+    * @hide
+    */
+
+    class CDisplay {
+        constructor(
+            [in] IDisplayManagerGlobal* global,
+            [in] Int32 displayId,
+            [in] IDisplayInfo* displayInfo,
+            [in] IDisplayAdjustments* daj);
+
+        interface IDisplay;
+    }
+
+    class CDisplayInfo {
+        constructor();
+
+        constructor(
+            [in] IDisplayInfo* other);
+
+        interface IDisplayInfo;
+        interface IParcelable;
+    }
+
+    //     class CDisplayManagerAw {
+    //         constructor();
+
+    //         interface IDisplayManagerAw;
+    //     }
+
+    //     [local]
+    //     class CDispList {
+    //         constructor(
+    //             [in] IContext* ctx);
+
+    //         interface IDispList;
+    //     }
+
+    //     singleton class CDispListHelper {
+    //         constructor();
+
+    //         interface IDispListHelper;
+    //     }
+
+    //     class CDispListDispFormat {
+
+    //         constructor(
+    //             [in] Int32 type,
+    //             [in] Int32 format);
+
+    //         interface IDispListDispFormat;
+    //     }
+
+    /**
+     * Use with {@link KeyEvent#dispatch(Callback, DispatcherState, Object)}
+     * for more advanced key dispatching, such as long presses.
+     */
+    class CDispatcherState {
+        constructor();
+
+        interface IDispatcherState;
+    }
+
+    //     [local]
+    //     class CDragShadowBuilder {
+    //         constructor();
+
+    //         constructor(
+    //             [in] IView* view);
+
+    //         interface IDragShadowBuilder;
+    //     }
+
+    singleton class CGravity {
+        interface IGravity;
+    }
+
+    class CGraphicBuffer {
+        constructor();
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 format,
+            [in] Int32 usage,
+            [in] Int64 nativeObject);
+
+        interface IGraphicBuffer;
+    }
+
+     /**
+      * An input channel specifies the file descriptors used to send input events to
+      * a window in another process.  It is Parcelable so that it can be sent
+      * to the process that is to receive events.  Only one thread should be reading
+      * from an InputChannel at a time.
+      * @hide
+      */
+    class CInputChannel {
+        constructor();
+
+        interface IInputChannel;
+        interface IParcelable;
+     }
+
+    singleton class CInputChannelHelper {
+        interface IInputChannelHelper;
+    }
+
+    class CInputQueue {
+        interface IInputQueue;
+    }
+
+    //     /**
+    //      * Describes the capabilities of a particular input device.
+    //      * <p>
+    //      * Each input device may support multiple classes of input.  For example, a multi-function
+    //      * keyboard may compose the capabilities of a standard keyboard together with a track pad mouse
+    //      * or other pointing device.
+    //      * </p><p>
+    //      * Some input devices present multiple distinguishable sources of input.
+    //      * Applications can query the framework about the characteristics of each distinct source.
+    //      * </p><p>
+    //      * As a further wrinkle, different kinds of input sources uses different coordinate systems
+    //      * to describe motion events.  Refer to the comments on the input source constants for
+    //      * the appropriate interpretation.
+    //      * </p>
+    //      */
+    class CInputDevice {
+        constructor();
+
+        constructor(
+            [in] Int32 id,
+            [in] Int32 generation,
+            [in] Int32 controllerNumber,
+            [in] String name,
+            [in] Int32 vendorId,
+            [in] Int32 productId,
+            [in] String descriptor,
+            [in] Boolean isExternal,
+            [in] Int32 sources,
+            [in] Int32 keyboardType,
+            [in] IKeyCharacterMap* keyCharacterMap,
+            [in] Boolean hasVibrator,
+            [in] Boolean hasButtonUnderPad);
+
+        interface IInputDevice;
+        interface IParcelable;
+     }
+
+    [local]
+    class CTouchDelegate {
+        constructor();
+
+        constructor(
+            [in] IRect* bounds,
+            [in] IView* delegateView);
+
+        interface ITouchDelegate;
+    }
+
+    //     singleton class CInputDeviceHelper {
+    //         interface IInputDeviceHelper;
+    //     }
+
+    /**
+     * Describes the keys provided by a keyboard device and their associated labels.
+     */
+    class CKeyCharacterMap {
+        constructor(
+            [in] Int32 ptr);
+
+        constructor();
+
+        interface IParcelable;
+        interface IKeyCharacterMap;
+    }
+
+    singleton class CKeyCharacterMapHelper {
+        interface IKeyCharacterMapHelper;
+    }
+
+    class CKeyData {
+        constructor();
+
+        interface IKeyData;
+    }
+
+    singleton class CFallbackActionHelper {
+        interface IFallbackActionHelper;
+    }
+
+    class CKeyEvent {
+        /**
+         * Create a new key event.
+         *
+         * @param action Action code: either {@link #ACTION_DOWN},
+         * {@link #ACTION_UP}, or {@link #ACTION_MULTIPLE}.
+         * @param code The key code.
+         */
+        constructor(
+            [in] Int32 action,
+            [in] Int32 code);
+
+        /**
+         * Create a new key event.
+         *
+         * @param downTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this key code originally went down.
+         * @param eventTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this event happened.
+         * @param action Action code: either {@link #ACTION_DOWN},
+         * {@link #ACTION_UP}, or {@link #ACTION_MULTIPLE}.
+         * @param code The key code.
+         * @param repeat A repeat count for down events (> 0 if this is after the
+         * initial down) or event count for multiple events.
+         */
+        constructor(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 code,
+            [in] Int32 repeat);
+
+        /**
+         * Create a new key event.
+         *
+         * @param downTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this key code originally went down.
+         * @param eventTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this event happened.
+         * @param action Action code: either {@link #ACTION_DOWN},
+         * {@link #ACTION_UP}, or {@link #ACTION_MULTIPLE}.
+         * @param code The key code.
+         * @param repeat A repeat count for down events (> 0 if this is after the
+         * initial down) or event count for multiple events.
+         * @param metaState Flags indicating which meta keys are currently pressed.
+         */
+        constructor(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 code,
+            [in] Int32 repeat,
+            [in] Int32 metaState);
+
+        /**
+         * Create a new key event.
+         *
+         * @param downTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this key code originally went down.
+         * @param eventTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this event happened.
+         * @param action Action code: either {@link #ACTION_DOWN},
+         * {@link #ACTION_UP}, or {@link #ACTION_MULTIPLE}.
+         * @param code The key code.
+         * @param repeat A repeat count for down events (> 0 if this is after the
+         * initial down) or event count for multiple events.
+         * @param metaState Flags indicating which meta keys are currently pressed.
+         * @param deviceId The device ID that generated the key event.
+         * @param scancode Raw device scan code of the event.
+         */
+        constructor(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 code,
+            [in] Int32 repeat,
+            [in] Int32 metaState,
+            [in] Int32 deviceId,
+            [in] Int32 scancode);
+
+        /**
+         * Create a new key event.
+         *
+         * @param downTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this key code originally went down.
+         * @param eventTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this event happened.
+         * @param action Action code: either {@link #ACTION_DOWN},
+         * {@link #ACTION_UP}, or {@link #ACTION_MULTIPLE}.
+         * @param code The key code.
+         * @param repeat A repeat count for down events (> 0 if this is after the
+         * initial down) or event count for multiple events.
+         * @param metaState Flags indicating which meta keys are currently pressed.
+         * @param deviceId The device ID that generated the key event.
+         * @param scancode Raw device scan code of the event.
+         * @param flags The flags for this key event
+         */
+        constructor(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 code,
+            [in] Int32 repeat,
+            [in] Int32 metaState,
+            [in] Int32 deviceId,
+            [in] Int32 scancode,
+            [in] Int32 flags);
+
+        /**
+         * Create a new key event.
+         *
+         * @param downTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this key code originally went down.
+         * @param eventTime The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this event happened.
+         * @param action Action code: either {@link #ACTION_DOWN},
+         * {@link #ACTION_UP}, or {@link #ACTION_MULTIPLE}.
+         * @param code The key code.
+         * @param repeat A repeat count for down events (> 0 if this is after the
+         * initial down) or event count for multiple events.
+         * @param metaState Flags indicating which meta keys are currently pressed.
+         * @param deviceId The device ID that generated the key event.
+         * @param scancode Raw device scan code of the event.
+         * @param flags The flags for this key event
+         * @param source The input source such as {@link InputDevice#SOURCE_KEYBOARD}.
+         */
+        constructor(
+            [in] Int64 downTime,
+            [in] Int64 eventTime,
+            [in] Int32 action,
+            [in] Int32 code,
+            [in] Int32 repeat,
+            [in] Int32 metaState,
+            [in] Int32 deviceId,
+            [in] Int32 scancode,
+            [in] Int32 flags,
+            [in] Int32 source);
+
+        /**
+         * Create a new key event for a string of characters.  The key code,
+         * action, repeat count and source will automatically be set to
+         * {@link #KEYCODE_UNKNOWN}, {@link #ACTION_MULTIPLE}, 0, and
+         * {@link InputDevice#SOURCE_KEYBOARD} for you.
+         *
+         * @param time The time (in {@link android.os.SystemClock#uptimeMillis})
+         * at which this event occured.
+         * @param characters The string of characters.
+         * @param deviceId The device ID that generated the key event.
+         * @param flags The flags for this key event
+         */
+        constructor(
+            [in] Int64 time,
+            [in] String characters,
+            [in] Int32 deviceId,
+            [in] Int32 flags);
+
+        /**
+         * Make an exact copy of an existing key event.
+         */
+        constructor(
+            [in] IKeyEvent* origEvent);
+
+        /**
+         * Copy an existing key event, modifying its time and repeat count.
+         *
+         * @deprecated Use {@link #changeTimeRepeat(KeyEvent, Int64, Int32)}
+         * instead.
+         *
+         * @param origEvent The existing event to be copied.
+         * @param eventTime The new event time
+         * (in {@link android.os.SystemClock#uptimeMillis}) of the event.
+         * @param newRepeat The new repeat count of the event.
+         */
+        //@Deprecated
+        constructor(
+            [in] IKeyEvent* origEvent,
+            [in] Int64 eventTime,
+            [in] Int32 newRepeat);
+
+        // private
+        constructor(
+            [in] IKeyEvent* origEvent,
+            [in] Int32 action);
+
+        constructor();
+
+        interface IKeyEvent;
+        interface IInputEvent;
+        interface IParcelable;
+    }
+
+    singleton class CKeyEventHelper {
+        interface IKeyEventHelper;
+    }
+
+    class CMotionEvent {
+        constructor();
+
+        interface IMotionEvent;
+        interface IInputEvent;
+        interface IParcelable;
+    }
+
+    singleton class CMotionEventHelper {
+        interface IMotionEventHelper;
+    }
+
+    class CPointerCoords {
+        constructor();
+
+        constructor(
+            [in] IPointerCoords* other);
+
+        interface IPointerCoords;
+    }
+
+    singleton class CPointerCoordsHelper {
+        interface IPointerCoordsHelper;
+    }
+
+    class CPointerProperties {
+        constructor();
+
+        constructor(
+            [in] IPointerProperties* other);
+
+        interface IPointerProperties;
+    }
+
+    singleton class CPointerPropertiesHelper {
+        interface IPointerPropertiesHelper;
+    }
+
+    class CPointerIcon {
+       constructor();
+
+       constructor(
+           [in] Int32 style);
+
+       interface IPointerIcon;
+       interface IParcelable;
+    }
+
+    singleton class CPointerIconHelper {
+       interface IPointerIconHelper;
+    }
+
+
+    class CDragEvent {
+        constructor();
+
+        interface IDragEvent;
+        interface IParcelable;
+    }
+
+    singleton class CFocusFinderHelper {
+        constructor();
+
+        interface IFocusFinderHelper;
+    }
+
+    //     singleton class CDragEventHelper {
+    //         interface IDragEventHelper;
+    //     }
+
+    [local]
+    class CViewConfiguration {
+        /**
+         * @deprecated Use {@link android.view.ViewConfiguration#get(android.content.Context)} instead.
+         */
+        constructor();
+
+        /**
+         * Creates a new configuration for the specified context. The configuration depends on
+         * various parameters of the context, like the dimension of the display or the density
+         * of the display.
+         *
+         * @param context The application context used to initialize this view configuration.
+         *
+         * @see #get(android.content.Context)
+         * @see android.util.DisplayMetrics
+         */
+        constructor(
+            [in] IContext* ctx);
+
+        interface IViewConfiguration;
+    }
+
+    [local]
+    singleton class CViewConfigurationHelper {
+        interface IViewConfigurationHelper;
+    }
+
+    [local]
+    class CViewGroupLayoutParams {
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        constructor(
+            [in] IViewGroupLayoutParams* source);
+
+        interface IViewGroupLayoutParams;
+    }
+
+        [local]
+        class CViewGroupMarginLayoutParams {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] Int32 width,
+                [in] Int32 height);
+
+            constructor(
+                [in] IViewGroupMarginLayoutParams* source);
+
+            constructor(
+                [in] IViewGroupLayoutParams* vglp);
+
+            interface IViewGroupMarginLayoutParams;
+            interface IViewGroupLayoutParams;
+        }
+
+    //     class CViewGroupMarginLayoutParams {
+    //         constructor();
+
+    //         constructor(
+    //             [in] IContext* ctx,
+    //             [in] IAttributeSet* attrs);
+
+    //         constructor(
+    //             [in] Int32 width,
+    //             [in] Int32 height);
+
+    //         constructor(
+    //             [in] IViewGroupMarginLayoutParams* source);
+
+    //         interface IViewGroupMarginLayoutParams;
+    //     }
+
+    [local]
+    class CViewPropertyAnimator {
+        constructor(
+            [in] IView* view);
+
+        interface IViewPropertyAnimator;
+    }
+
+    //     class CAccessibilityInteractionConnection {
+    //         constructor(
+    //             [in] Handle32 viewRootImpl);
+
+    //         interface IIAccessibilityInteractionConnection;
+    //     }
+
+    [local]
+    class CAccessibilityInteractionController {
+        constructor(
+            [in] IViewRootImpl* viewRootImpl);
+
+        interface IAccessibilityInteractionController;
+    }
+
+    singleton class CRenderNodeHelper {
+        constructor();
+
+        interface IRenderNodeHelper;
+    }
+
+    class CRenderNodeAnimator {
+        constructor(
+            [in] Int32 property,
+            [in] Float finalValue);
+
+        constructor(
+            [in] ICanvasProperty* canvasProperty,
+            [in] Float finalValue);
+
+        /**
+         * Creates a new render node animator for a field on a Paint property.
+         *
+         * @param property The paint property to target
+         * @param paintField Paint field to animate, one of {@link #PAINT_ALPHA} or
+         *            {@link #PAINT_STROKE_WIDTH}
+         * @param finalValue The target value for the property
+         */
+        constructor(
+            [in] ICanvasProperty* property,
+            [in] Int32 paintField,
+            [in] Float finalValue);
+
+        constructor(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Float startRadius,
+            [in] Float endRadius);
+
+        interface IAnimator;
+        interface ICloneable;
+        interface IRenderNodeAnimator;
+    }
+
+    class CSurface {
+        /**
+        * Create an empty surface, which will later be filled in by readFromParcel().
+        * @hide
+        */
+        constructor();
+
+        /**
+        * Create a surface with a name.
+        *
+        * The surface creation flags specify what kind of surface to create and
+        * certain options such as whether the surface can be assumed to be opaque
+        * and whether it should be initially hidden.  Surfaces should always be
+        * created with the {@link #HIDDEN} flag set to ensure that they are not
+        * made visible prematurely before all of the surface's properties have been
+        * configured.
+        *
+        * Good practice is to first create the surface with the {@link #HIDDEN} flag
+        * specified, open a transaction, set the surface layer, layer stack, alpha,
+        * and position, call {@link #show} if appropriate, and close the transaction.
+        *
+        * @param session The surface session, must not be null.
+        * @param name The surface name, must not be null.
+        * @param w The surface initial width.
+        * @param h The surface initial height.
+        * @param flags The surface creation flags.  Should always include {@link #HIDDEN}
+        * in the creation flags.
+        * @hide
+        */
+        constructor(
+         [in] Int64 nativeObject);
+
+        /**
+        * Create Surface from a {@link SurfaceTexture}.
+        *
+        * Images drawn to the Surface will be made available to the {@link
+        * SurfaceTexture}, which can attach them to an OpenGL ES texture via {@link
+        * SurfaceTexture#updateTexImage}.
+        *
+        * @param surfaceTexture The {@link SurfaceTexture} that is updated by this
+        * Surface.
+        */
+        constructor(
+         [in] ISurfaceTexture* surfaceTexture);
+
+        interface ISurface;
+        interface IParcelable;
+    }
+
+    singleton class CSurfaceControlHelper {
+        interface ISurfaceControlHelper;
+    }
+
+    class CSurfaceSession {
+        constructor();
+
+        interface ISurfaceSession;
+    }
+
+    class CSurfaceControl {
+        constructor(
+            [in] ISurfaceSession* session,
+            [in] String name,
+            [in] Int32 w,
+            [in] Int32 h,
+            [in] Int32 format,
+            [in] Int32 flags);
+
+        interface ISurfaceControl;
+    }
+
+    class CPhysicalDisplayInfo {
+        constructor();
+
+        constructor(
+            [in] IPhysicalDisplayInfo* other);
+
+        interface IPhysicalDisplayInfo;
+    }
+
+    [local]
+    class CSurfaceView {
+        constructor(
+             [in] IContext* ctx);
+
+        constructor(
+             [in] IContext* ctx,
+             [in] IAttributeSet* attrs);
+
+        constructor(
+             [in] IContext* ctx,
+             [in] IAttributeSet* attrs,
+             [in] Int32 defStyle);
+
+        interface IView;
+        interface ISurfaceView;
+        interface IKeyEventCallback;
+        interface IDrawableCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    class CSurfaceViewWindow {
+        constructor(
+            [in] ISurfaceView* surfaceView);
+
+        interface IBaseIWindow;
+        interface IIWindow;
+        interface IBinder;
+    }
+
+        [local]
+        class CViewRootImplW {
+            constructor(
+                [in] Handle32 viewRoot);
+
+            interface IIWindow;
+            interface IBinder;
+        }
+
+    class CWindowManagerLayoutParams {
+        constructor();
+
+        constructor(
+            [in] Int32 type);
+
+        constructor(
+            [in] Int32 type,
+            [in] Int32 flags);
+
+        constructor(
+            [in] Int32 type,
+            [in] Int32 flags,
+            [in] Int32 format);
+
+        constructor(
+            [in] Int32 w,
+            [in] Int32 h,
+            [in] Int32 type,
+            [in] Int32 flags,
+            [in] Int32 format);
+
+        constructor(
+            [in] Int32 w,
+            [in] Int32 h,
+            [in] Int32 xpos,
+            [in] Int32 ypos,
+            [in] Int32 type,
+            [in] Int32 flags,
+            [in] Int32 format);
+
+        interface IWindowManagerLayoutParams;
+        interface IViewGroupLayoutParams;
+        interface IParcelable;
+    }
+
+    //     class CEmptyAbsSavedState {
+
+    //         constructor();
+
+    //         interface IAbsSavedState;
+    //         interface IParcelable;
+    //     }
+
+    singleton class CAbsSavedStateHelper {
+        interface IAbsSavedStateHelper;
+    }
+
+    singleton class CWindowManagerLayoutParamsHelper {
+        interface IWindowManagerLayoutParamsHelper;
+    }
+
+    class CWindowAnimationFrameStats {
+        constructor();
+
+        interface IWindowAnimationFrameStats;
+        interface IFrameStats;
+        interface IParcelable;
+    }
+
+    class CWindowContentFrameStats {
+        constructor();
+
+        interface IWindowContentFrameStats;
+        interface IFrameStats;
+        interface IParcelable;
+    }
+
+    class CWindowId {
+        constructor();
+
+        constructor(
+            [in] IIWindowId* target);
+
+        constructor(
+            [in] IBinder* obj);
+
+        interface IWindowId;
+        interface IParcelable;
+    }
+
+    class CWindowIdFocusObserver {
+        constructor(
+            [in] IWindowIdFocusObserver* observer);
+
+        interface IIWindowFocusObserver;
+        interface IBinder;
+    }
+
+    singleton class CWindowManagerGlobalHelper {
+        interface IWindowManagerGlobalHelper;
+    }
+
+    class CWindowManagerGlobal {
+        /**@hide*/
+        constructor();
+
+        interface IWindowManagerGlobal;
+    }
+
+    //     //Menu
+    //     [local]
+    //     class CMenuInflater {
+    //         /**
+    //          * Constructs a menu inflater.
+    //          *
+    //          * @see Activity#getMenuInflater()
+    //          */
+    //         constructor (
+    //             [in] IContext* ctx);
+
+    //         /**
+    //          * Constructs a menu inflater.
+    //          *
+    //          * @see Activity#getMenuInflater()
+    //          * @hide
+    //          */
+    //         constructor(
+    //              [in] IContext* ctx,
+    //              [in] IInterface* realOwner);
+
+    //         interface IMenuInflater;
+    //      }
+
+    [local]
+    class CViewStub {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 layoutResource);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IViewStub;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CGestureDetector {
+        constructor(
+            [in] IGestureDetectorOnGestureListener* listener,
+            [in] IHandler* handler);
+
+        constructor(
+            [in] IGestureDetectorOnGestureListener* listener);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IGestureDetectorOnGestureListener* listener);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IGestureDetectorOnGestureListener* listener,
+            [in] IHandler* handler);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IGestureDetectorOnGestureListener* listener,
+            [in] IHandler* handler,
+            [in] Boolean unused);
+
+        interface IGestureDetector;
+    }
+
+    class CGestureDetectorSimpleOnGestureListener {
+        constructor();
+
+        interface IGestureDetectorOnGestureListener;
+        interface IGestureDetectorOnDoubleTapListener;
+    }
+
+    [local]
+    class CScaleGestureDetector {
+        constructor(
+            [in] IContext* ctx,
+            [in] IScaleGestureDetectorOnScaleGestureListener* listener);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IScaleGestureDetectorOnScaleGestureListener* listener,
+            [in] IHandler* handler);
+
+        interface IScaleGestureDetector;
+    }
+
+    class CScaleGestureDetectorSimpleOnScaleGestureListener {
+        constructor();
+
+        interface IScaleGestureDetectorOnScaleGestureListener;
+    }
+
+    // singleton class CVelocityTrackerHelper {
+    //     interface IVelocityTrackerHelper;
+    // }
+
+    // singleton class CWindowManagerPolicyThread {
+    //     interface IWindowManagerPolicyThread;
+    // }
+
+    class CWindowInfo {
+        constructor();
+
+        interface IWindowInfo;
+        interface IParcelable;
+    }
+
+    class CWindowInsets {
+        constructor(
+            [in] IRect* systemWindowInsets,
+            [in] IRect* windowDecorInsets,
+            [in] IRect* stableInsets,
+            [in] Boolean isRound);
+
+        /**
+         * Construct a new WindowInsets, copying all values from a source WindowInsets.
+         *
+         * @param src Source to copy insets from
+         */
+        constructor(
+            [in] IWindowInsets* src);
+
+        /** @hide */
+        constructor(
+            [in] IRect* systemWindowInsets);
+
+        interface IWindowInsets;
+    }
+
+    singleton class CWindowInfoHelper {
+        interface IWindowInfoHelper;
+    }
+
+    [local]
+    class CViewOverlay {
+        constructor(
+            [in] IContext* ctx,
+            [in] IView* hostView);
+
+        interface IViewOverlay;
+    }
+
+    [local]
+    class CViewGroupOverlay {
+        constructor(
+            [in] IContext* ctx,
+            [in] IView* hostView);
+
+        interface IViewGroupOverlay;
+        interface IViewOverlay;
+    }
+
+    [local]
+    class COverlayViewGroup {
+        constructor(
+            [in] IContext* ctx,
+            [in] IView* hostView);
+
+        interface IOverlayViewGroup;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    singleton class CViewOutlineProviderHelper {
+        interface IViewOutlineProviderHelper;
+    }
+
+    class CMagnificationSpec {
+        constructor();
+
+        interface IMagnificationSpec;
+        interface IParcelable;
+    }
+
+    class CViewTreeObserver {
+        constructor();
+
+        interface IViewTreeObserver;
+    }
+
+    singleton class CSoundEffectConstantsHelper {
+        interface ISoundEffectConstantsHelper;
+    }
+
+    singleton class CViewAnimationUtilsHelper {
+        interface IViewAnimationUtilsHelper;
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Animation {
+
+    [local]
+    class CLinearInterpolator {
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface ILinearInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class CAccelerateDecelerateInterpolator {
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IAccelerateDecelerateInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class CAnticipateInterpolator {
+        constructor();
+
+        constructor(
+            [in] Float tension);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [in] IAttributeSet* attrs);
+
+        interface IAnticipateInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class CAnticipateOvershootInterpolator {
+        constructor();
+
+        constructor(
+            [in] Float tension);
+
+        constructor(
+            [in] Float tension,
+            [in] Float extraTension);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [in] IAttributeSet* attrs);
+
+        interface IAnticipateOvershootInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class CBounceInterpolator {
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IBounceInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class CCycleInterpolator {
+        constructor(
+            [in] Float cycles);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [in] IAttributeSet* attrs);
+
+        interface ICycleInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class CDecelerateInterpolator {
+        constructor();
+
+        constructor(
+            [in] Float factor);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [in] IAttributeSet* attrs);
+
+        interface IDecelerateInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class CAccelerateInterpolator {
+        constructor();
+
+        constructor(
+            [in] Float factor);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [in] IAttributeSet* attrs);
+
+        interface IAccelerateInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class COvershootInterpolator {
+        constructor();
+
+        constructor(
+            [in] Float tension);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [in] IAttributeSet* attrs);
+
+        interface IOvershootInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+        interface INativeInterpolatorFactory;
+    }
+
+    [local]
+    class CPathInterpolator {
+        constructor(
+            [in] IPath* path);
+
+        constructor(
+            [in] Float controlX,
+            [in] Float controlY);
+
+        constructor(
+            [in] Float controlX1,
+            [in] Float controlY1,
+            [in] Float controlX2,
+            [in] Float controlY2);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [in] IAttributeSet* attrs);
+
+        interface IPathInterpolator;
+        interface IInterpolator;
+        interface ITimeInterpolator;
+    }
+
+    [local]
+    class CRotateAnimation {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Float fromDegrees,
+            [in] Float toDegrees);
+
+        constructor(
+            [in] Float fromDegrees,
+            [in] Float toDegrees,
+            [in] Float pivotX,
+            [in] Float pivotY);
+
+        constructor(
+            [in] Float fromDegrees,
+            [in] Float toDegrees,
+            [in] Int32 pivotXType,
+            [in] Float pivotXValue,
+            [in] Int32 pivotYType,
+            [in] Float pivotYValue);
+
+        interface IRotateAnimation;
+        interface IAnimation;
+        interface ICloneable;
+    }
+
+    [local]
+    class CTranslateAnimation {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Float fromXDelta,
+            [in] Float toXDelta,
+            [in] Float fromYDelta,
+            [in] Float toYDelta);
+
+        constructor(
+            [in] Float fromXType,
+            [in] Float fromXValue,
+            [in] Float toXType,
+            [in] Float toXValue,
+            [in] Float fromYType,
+            [in] Float fromYValue,
+            [in] Float toYType,
+            [in] Float toYValue);
+
+        interface ITranslateAnimation;
+        interface IAnimation;
+        interface ICloneable;
+    }
+
+    [local]
+    class CAlphaAnimation {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Float fromAlpha,
+            [in] Float toAlpha);
+
+        interface IAlphaAnimation;
+        interface IAnimation;
+        interface ICloneable;
+    }
+
+    [local]
+    class CClipRectAnimation {
+        constructor(
+            [in] IRect* fromClip,
+            [in] IRect* toClip);
+
+        interface IAnimation;
+        interface ICloneable;
+    }
+
+    [local]
+    class CLayoutAnimationController {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IAnimation* animation);
+
+        constructor(
+            [in] IAnimation* animation,
+            [in] Float delay);
+
+        interface ILayoutAnimationController;
+    }
+
+    [local]
+    class CGridLayoutAnimationController {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IAnimation* animation);
+
+        constructor(
+            [in] IAnimation* animation,
+            [in] Float columnDelay,
+            [in] Float rowDelay);
+
+        interface IGridLayoutAnimationController;
+        interface ILayoutAnimationController;
+    }
+
+    [local]
+    class CScaleAnimation {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] Float fromX,
+            [in] Float toX,
+            [in] Float fromY,
+            [in] Float toY);
+
+        constructor(
+            [in] Float fromX,
+            [in] Float toX,
+            [in] Float fromY,
+            [in] Float toY,
+            [in] Float pivotX,
+            [in] Float pivotY);
+
+        constructor(
+            [in] Float fromX,
+            [in] Float toX,
+            [in] Float fromY,
+            [in] Float toY,
+            [in] Float pivotXType,
+            [in] Float pivotXValue,
+            [in] Float pivotYType,
+            [in] Float pivotYValue);
+
+        interface IScaleAnimation;
+        interface IAnimation;
+        interface ICloneable;
+    }
+
+    [local]
+    class CAnimationSet {
+        constructor(
+            [in] Boolean shareInterpolator);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IAnimationSet;
+        interface IAnimation;
+        interface ICloneable;
+    }
+
+    class CTransformation {
+        constructor();
+
+        interface ITransformation;
+    }
+
+    singleton class CAnimationUtils {
+        interface IAnimationUtils;
+    }
+
+    } // namespace Animation
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    /**
+     * This class represents a node of the window content as well as actions that
+     * can be requested from its source. From the point of view of an
+     * {@link android.accessibilityservice.AccessibilityService} a window content is
+     * presented as tree of accessibility node info which may or may not map one-to-one
+     * to the view hierarchy. In other words, a custom view is free to report itself as
+     * a tree of accessibility node info.
+     * </p>
+     * <p>
+     * Once an accessibility node info is delivered to an accessibility service it is
+     * made immutable and calling a state mutation method generates an error.
+     * </p>
+     * <p>
+     * Please refer to {@link android.accessibilityservice.AccessibilityService} for
+     * details about how to obtain a handle to window content as a tree of accessibility
+     * node info as well as familiarizing with the security model.
+     * </p>
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about making applications accessible, read the
+     * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+     * developer guide.</p>
+     * </div>
+     *
+     * @see android.accessibilityservice.AccessibilityService
+     * @see AccessibilityEvent
+     * @see AccessibilityManager
+     */
+    class CAccessibilityNodeInfo {
+        constructor();
+
+        interface IAccessibilityNodeInfo;
+        interface IParcelable;
+    }
+
+    singleton class CAccessibilityNodeInfoHelper {
+        interface IAccessibilityNodeInfoHelper;
+    }
+
+    class CAccessibilityNodeInfoAccessibilityAction {
+        constructor(
+            [in] Int32 actionId,
+            [in] ICharSequence* label);
+
+        interface IAccessibilityNodeInfoAccessibilityAction;
+    }
+
+    singleton class CAccessibilityNodeInfoAccessibilityActionHelper {
+        interface IAccessibilityNodeInfoAccessibilityActionHelper;
+    }
+
+    singleton class CAccessibilityNodeInfoCollectionInfoHelper {
+        interface IAccessibilityNodeInfoCollectionInfoHelper;
+    }
+
+    singleton class CAccessibilityNodeInfoCollectionItemInfoHelper {
+        interface IAccessibilityNodeInfoCollectionItemInfoHelper;
+    }
+
+    singleton class CAccessibilityNodeInfoRangeInfoHelper {
+        interface IAccessibilityNodeInfoRangeInfoHelper;
+    }
+
+    class CAccessibilityRecord {
+        constructor();
+
+        interface IAccessibilityRecord;
+    }
+
+    singleton class CAccessibilityRecordHelper {
+        interface IAccessibilityRecordHelper;
+    }
+
+    class CAccessibilityCache {
+        constructor();
+
+        interface IAccessibilityCache;
+    }
+
+    class CAccessibilityEvent {
+        constructor();
+
+        interface IAccessibilityEvent;
+        interface IAccessibilityRecord;
+        interface IParcelable;
+    }
+
+    singleton class CAccessibilityEventHelper {
+        interface IAccessibilityEventHelper;
+    }
+
+    [local]
+    class CAccessibilityManager {
+        constructor(
+            [in] IContext* base,
+            [in] IIAccessibilityManager* service,
+            [in] Int32 userId);
+
+        interface IAccessibilityManager;
+    }
+
+    singleton class CAccessibilityManagerHelper {
+        interface IAccessibilityManagerHelper;
+    }
+
+    class CAccessibilityManagerClient {
+        constructor(
+            [in] IAccessibilityManager* host);
+
+        interface IIAccessibilityManagerClient;
+        interface IBinder;
+    }
+
+    class CAccessibilityInteractionClient {
+        constructor();
+
+        interface IAccessibilityInteractionClient;
+        interface IIAccessibilityInteractionConnectionCallback;
+        interface IBinder;
+    }
+
+    singleton class CAccessibilityInteractionClientHelper {
+        interface IAccessibilityInteractionClientHelper;
+    }
+
+    class CAccessibilityWindowInfo {
+        constructor();
+
+        interface IAccessibilityWindowInfo;
+        interface IParcelable;
+    }
+
+    singleton class CAccessibilityWindowInfoHelper {
+        interface IAccessibilityWindowInfoHelper;
+    }
+
+    class CCaptioningManagerCaptionStyle {
+        constructor(
+            [in] Int32 foregroundColor,
+            [in] Int32 backgroundColor,
+            [in] Int32 edgeType,
+            [in] Int32 edgeColor,
+            [in] Int32 windowColor,
+            [in] String rawTypeface);
+
+        interface ICaptioningManagerCaptionStyle;
+    }
+
+    singleton class CCaptioningManagerCaptionStyleHelper {
+        interface ICaptioningManagerCaptionStyleHelper;
+    }
+
+    } // Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    class CExtractedText {
+        constructor();
+
+        interface IExtractedText;
+        interface IParcelable;
+    }
+
+    class CExtractedTextRequest {
+        constructor();
+
+        interface IExtractedTextRequest;
+        interface IParcelable;
+    }
+
+    class CCompletionInfo {
+        constructor();
+
+        constructor(
+            [in] Int64 id,
+            [in] Int32 index,
+            [in] ICharSequence* text);
+
+        constructor(
+            [in] Int64 id,
+            [in] Int32 index,
+            [in] ICharSequence* text,
+            [in] ICharSequence* label);
+
+        interface ICompletionInfo;
+        interface IParcelable;
+    }
+
+    class CCursorAnchorInfo {
+        constructor();
+
+        constructor(
+            [in] ICursorAnchorInfoBuilder* builder);
+
+        interface ICursorAnchorInfo;
+        interface IParcelable;
+    }
+
+    class CEditorInfo {
+        constructor();
+
+        interface IEditorInfo;
+        interface IInputType;
+        interface IParcelable;
+    }
+
+    class CInputMethodManager {
+        constructor(
+            [in] IIInputMethodManager* service,
+            [in] ILooper* looper);
+
+        interface IInputMethodManager;
+    }
+
+    [local]
+    class CControlledInputConnectionWrapper {
+        constructor(
+            [in] ILooper* mainLooper,
+            [in] IInputConnection* conn,
+            [in] IInputMethodManager* inputMethodManager);
+
+        interface IInputContext;
+        interface IBinder;
+    }
+
+    [local]
+    class CIInputMethodClient {
+        constructor(
+            [in] IInputMethodManager* agmer);
+
+        interface IInputMethodClient;
+        interface IBinder;
+    }
+
+    [local]
+    class CBaseInputConnection {
+        constructor(
+            [in] IInputMethodManager* mgr,
+            [in] Boolean fullEditor);
+
+        constructor(
+            [in] Elastos.Droid.View.IView* targetView,
+            [in] Boolean fullEditor);
+
+        interface IBaseInputConnection;
+        interface IInputConnection;
+    }
+
+    class CInputBinding {
+        constructor(
+            [in] IInputConnection* conn,
+            [in] IBinder* connToken,
+            [in] Int32 uid,
+            [in] Int32 pid);
+
+        constructor(
+            [in] IInputConnection* conn,
+            [in] IInputBinding* binding);
+
+        constructor();
+
+        interface IInputBinding;
+        interface IParcelable;
+    }
+
+    class CInputConnectionWrapper {
+        constructor(
+            [in] IInputConnection* target,
+            [in] Boolean mutble);
+
+        interface IInputConnection;
+    }
+
+    // [local]
+    class CInputMethodInfo {
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IResolveInfo* service);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IResolveInfo* service,
+            [in] IMap* additionalSubtypesMap);
+
+        constructor(
+            [in] String capsuelName,
+            [in] String className,
+            [in] ICharSequence* label,
+            [in] String settingsActivity);
+
+        interface IInputMethodInfo;
+        interface IParcelable;
+    }
+
+    class CCorrectionInfo {
+        constructor();
+
+        constructor(
+            [in] Int32 offset,
+            [in] ICharSequence* oldText,
+            [in] ICharSequence* newText);
+
+        interface ICorrectionInfo;
+        interface IParcelable;
+    }
+
+    // [local]
+    singleton class CInputMethodSubtypeHelper {
+        interface IInputMethodSubtypeHelper;
+    }
+
+    class CInputMethodSubtype {
+        constructor();
+
+        constructor(
+            [in] Int32 nameId,
+            [in] Int32 iconId,
+            [in] String locale,
+            [in] String mode,
+            [in] String extraValue,
+            [in] Boolean isAuxiliary,
+            [in] Boolean overridesImplicitlyEnabledSubtype);
+
+        constructor(
+            [in] Int32 nameId,
+            [in] Int32 iconId,
+            [in] String locale,
+            [in] String mode,
+            [in] String extraValue,
+            [in] Boolean isAuxiliary,
+            [in] Boolean overridesImplicitlyEnabledSubtype,
+            [in] Int32 id);
+
+        constructor(
+            [in] IInputMethodSubtypeBuilder* builder);
+
+        interface IInputMethodSubtype;
+        interface IParcelable;
+    }
+
+    class CInputMethodSubtypeArray {
+        constructor();
+
+        constructor(
+            [in] IList* subtypes);
+
+        interface IInputMethodSubtypeArray;
+        interface IParcelable;
+    }
+
+    class CSparseRectFArray {
+        constructor();
+
+        interface ISparseRectFArray;
+        interface IParcelable;
+    }
+
+    } // InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace TextService {
+
+    [deprecated]
+    class CSentenceSuggestionsInfo {
+        constructor();
+
+        constructor(
+            [in] ArrayOf<ISuggestionsInfo*>* suggestionsInfos,
+            [in] ArrayOf<Int32>* offsets,
+            [in] ArrayOf<Int32>* lengths);
+
+        interface ISentenceSuggestionsInfo;
+        interface IParcelable;
+    }
+
+    class CSpellCheckerInfo {
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IResolveInfo* service);
+
+        interface ISpellCheckerInfo;
+        interface IParcelable;
+    }
+
+    class CSpellCheckerSubtype {
+        constructor();
+
+        constructor(
+            [in] Int32 nameId,
+            [in] String locale,
+            [in] String extraValue);
+
+        interface ISpellCheckerSubtype;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSuggestionsInfo {
+        constructor();
+
+        constructor(
+            [in] Int32 suggestionsAttributes,
+            [in] ArrayOf<String>* suggestions);
+
+        constructor(
+            [in] Int32 suggestionsAttributes,
+            [in] ArrayOf<String>* suggestions,
+            [in] Int32 cookie,
+            [in] Int32 sequence);
+
+        interface ISuggestionsInfo;
+        interface IParcelable;
+    }
+
+    class CTextInfo {
+        constructor();
+
+        constructor(
+            [in] String text);
+
+        constructor(
+            [in] String text,
+            [in] Int32 cookie,
+            [in] Int32 sequence);
+
+        constructor(
+            [in] ICharSequence* charSequence,
+            [in] Int32 start,
+            [in] Int32 end,
+            [in] Int32 cookie,
+            [in] Int32 sequenceNumber);
+
+        interface ITextInfo;
+        interface IParcelable;
+    }
+
+    class CTextServicesManager {
+        constructor();
+
+        interface ITextServicesManager;
+    }
+
+    class CSpellCheckerSessionListenerImpl {
+
+        constructor(
+            [in] IHandler* handler);
+
+        interface ISpellCheckerSessionListenerImpl;
+        interface IISpellCheckerSessionListener;
+    }
+
+    class CInternalListener {
+
+        constructor(
+            [in] ISpellCheckerSessionListenerImpl* spellCheckerSessionListenerImpl);
+
+        interface IInternalListener;
+        interface IITextServicesSessionListener;
+    }
+
+    class CSpellCheckerSession {
+
+        constructor(
+            [in] ISpellCheckerInfo* info,
+            [in] IITextServicesManager* tsm,
+            [in] ISpellCheckerSessionListener* listener,
+            [in] ISpellCheckerSubtype* subtype);
+
+        interface ISpellCheckerSession;
+    }
+
+    } // namespace TextService
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

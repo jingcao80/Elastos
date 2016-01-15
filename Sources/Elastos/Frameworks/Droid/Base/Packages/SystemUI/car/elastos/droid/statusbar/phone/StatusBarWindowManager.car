@@ -1,0 +1,68 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * Encapsulates all logic for the status bar window state management.
+     */
+    [local]
+    interface IStatusBarWindowManager {
+        /**
+         * Adds the status bar view to the window manager.
+         *
+         * @param statusBarView The view to add.
+         * @param barHeight The height of the status bar in collapsed state.
+         */
+        Add(
+            [in] IView* statusBarView,
+            [in] Int32 barHeight);
+
+        SetKeyguardShowing(
+            [in] Boolean showing);
+
+        SetKeyguardOccluded(
+            [in] Boolean occluded);
+
+        SetKeyguardNeedsInput(
+            [in] Boolean needsInput);
+
+        SetStatusBarExpanded(
+            [in] Boolean expanded);
+
+        SetStatusBarFocusable(
+            [in] Boolean focusable);
+
+        SetKeyguardUserActivityTimeout(
+            [in] Int64 timeout);
+
+        SetBouncerShowing(
+            [in] Boolean showing);
+
+        SetKeyguardFadingAway(
+            [in] Boolean keyguardFadingAway);
+
+        SetQsExpanded(
+            [in] Boolean expanded);
+
+        /**
+         * @param state The {@link StatusBarState} of the status bar.
+         */
+        SetStatusBarState(
+            [in] Int32 state);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

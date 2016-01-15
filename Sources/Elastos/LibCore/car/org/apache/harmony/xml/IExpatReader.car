@@ -1,0 +1,69 @@
+
+module
+{
+    using interface Org.Xml.Sax.Ext.ILexicalHandler;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xml {
+
+    /**
+     * SAX wrapper around Expat. Interns strings. Does not support validation.
+     * Does not support {@link DTDHandler}.
+     */
+    interface IExpatReader extends Org.Xml.Sax.IXMLReader {
+        /**
+         * Returns the current lexical handler.
+         *
+         * @return the current lexical handler, or null if none has been registered
+         * @see #setLexicalHandler
+         */
+        GetLexicalHandler(
+            [out] ILexicalHandler** handler);
+
+        /**
+         * Registers a lexical event handler. Supports neither
+         * {@link LexicalHandler#startEntity(String)} nor
+         * {@link LexicalHandler#endEntity(String)}.
+         *
+         * <p>If the application does not register a lexical handler, all
+         * lexical events reported by the SAX parser will be silently
+         * ignored.</p>
+         *
+         * <p>Applications may register a new or different handler in the
+         * middle of a parse, and the SAX parser must begin using the new
+         * handler immediately.</p>
+         *
+         * @param lexicalHandler listens for lexical events
+         * @see #getLexicalHandler()
+         */
+        SetLexicalHandler(
+            [in] ILexicalHandler* lexicalHandler);
+
+        /**
+         * Returns true if this SAX parser processes namespaces.
+         *
+         * @see #setNamespaceProcessingEnabled(boolean)
+         */
+        IsNamespaceProcessingEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Enables or disables namespace processing. Set to true by default. If you
+         * enable namespace processing, the parser will invoke
+         * {@link ContentHandler#startPrefixMapping(String, String)} and
+         * {@link ContentHandler#endPrefixMapping(String)}, and it will filter
+         * out namespace declarations from element attributes.
+         *
+         * @see #isNamespaceProcessingEnabled()
+         */
+        SetNamespaceProcessingEnabled(
+            [in] Boolean processNamespaces);
+    }
+
+    } // namespace Xml
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

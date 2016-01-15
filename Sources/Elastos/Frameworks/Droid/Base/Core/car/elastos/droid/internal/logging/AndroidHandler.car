@@ -1,0 +1,74 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Logging {
+
+    /**
+     * Implements a {@link java.util.logging.Logger} handler that writes to the Android log. The
+     * implementation is rather straightforward. The name of the logger serves as
+     * the log tag. Only the log levels need to be converted appropriately. For
+     * this purpose, the following mapping is being used:
+     *
+     * <table>
+     *   <tr>
+     *     <th>logger level</th>
+     *     <th>Android level</th>
+     *   </tr>
+     *   <tr>
+     *     <td>
+     *       SEVERE
+     *     </td>
+     *     <td>
+     *       ERROR
+     *     </td>
+     *   </tr>
+     *   <tr>
+     *     <td>
+     *       WARNING
+     *     </td>
+     *     <td>
+     *       WARN
+     *     </td>
+     *   </tr>
+     *   <tr>
+     *     <td>
+     *       INFO
+     *     </td>
+     *     <td>
+     *       INFO
+     *     </td>
+     *   </tr>
+     *   <tr>
+     *     <td>
+     *       CONFIG
+     *     </td>
+     *     <td>
+     *       DEBUG
+     *     </td>
+     *   </tr>
+     *   <tr>
+     *     <td>
+     *       FINE, FINER, FINEST
+     *     </td>
+     *     <td>
+     *       VERBOSE
+     *     </td>
+     *   </tr>
+     * </table>
+     */
+    [local]
+     /**
+     * @Involve
+     * interface IHandler
+     * interface dalvik.system.DalvikLogHandler
+     */
+    interface IAndroidHandler {
+    }
+
+    }//namespace Logging
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

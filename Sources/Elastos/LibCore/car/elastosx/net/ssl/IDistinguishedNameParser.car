@@ -1,0 +1,42 @@
+
+module
+{
+
+    interface Elastos.Utility.IList;
+
+    namespace Elastosx {
+    namespace Net {
+    namespace Ssl {
+
+    /**
+     * A distinguished name (DN) parser. This parser only supports extracting a
+     * string value from a DN. It doesn't support values in the hex-string style.
+     *
+     * @hide
+     */
+    interface IDistinguishedNameParser {
+        /**
+         * Parses the DN and returns the most significant attribute value
+         * for an attribute type, or null if none found.
+         *
+         * @param attributeType attribute type to look for (e.g. "ca")
+         */
+        FindMostSpecific(
+            [in] String attributeType,
+            [out] String* specific);
+
+        /**
+         * Parses the DN and returns all values for an attribute type, in
+         * the order of decreasing significance (most significant first).
+         *
+         * @param attributeType attribute type to look for (e.g. "ca")
+         */
+        GetAllMostSpecificFirst(
+            [in] String attributeType,
+            [out] IList** frist);
+    }
+
+    } // namespace Ssl
+    } // namespace Net
+    } // namespace Elastosx
+}

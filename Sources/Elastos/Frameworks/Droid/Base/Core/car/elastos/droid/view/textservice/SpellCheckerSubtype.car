@@ -1,0 +1,82 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Pm.IApplicationInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace TextService {
+
+    /**
+     * This class is used to specify meta information of a subtype contained in a spell checker.
+     * Subtype can describe locale (e.g. en_US, fr_FR...) used for settings.
+     */
+    /**
+     * @Invovle
+     * interface IParcelable
+     */
+    [local, parcelable]
+    interface ISpellCheckerSubtype {
+        /**
+         * @return the name of the subtype
+         */
+        GetNameResId(
+            [out] Int32* id);
+
+        /**
+         * @return the locale of the subtype
+         */
+        GetLocale(
+            [out] String* str);
+
+        /**
+         * @return the extra value of the subtype
+         */
+        GetExtraValue(
+            [out] String* str);
+
+        /**
+         * The string of ExtraValue in subtype should be defined as follows:
+         * example: key0,key1=value1,key2,key3,key4=value4
+         * @param key the key of extra value
+         * @return the subtype contains specified the extra value
+         */
+        ContainsExtraValueKey(
+            [in] String key,
+            [out] Boolean* bFlag);
+
+        /**
+         * The string of ExtraValue in subtype should be defined as follows:
+         * example: key0,key1=value1,key2,key3,key4=value4
+         * @param key the key of extra value
+         * @return the value of the specified key
+         */
+        GetExtraValueOf(
+            [in] String key,
+            [out] String* str);
+
+        /**
+         * @param context Context will be used for getting Locale and PackageManager.
+         * @param packageName The package name of the spell checker
+         * @param appInfo The application info of the spell checker
+         * @return a display name for this subtype. The string resource of the label (mSubtypeNameResId)
+         * can have only one %s in it. If there is, the %s part will be replaced with the locale's
+         * display name by the formatter. If there is not, this method simply returns the string
+         * specified by mSubtypeNameResId. If mSubtypeNameResId is not specified (== 0), it's up to the
+         * framework to generate an appropriate display name.
+         */
+        GetDisplayName(
+            [in] IContext* ctx,
+            [in] String packageName,
+            [in] IApplicationInfo* appInfo,
+            [out] ICharSequence** cs);
+    }
+
+    }   //namespace TextService
+    }   //namespace View
+    }   //namespace Droid
+    }   //namespace Elastos
+}

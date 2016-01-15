@@ -1,0 +1,118 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    /**
+     * A report of failed capture for a single image capture from the image sensor.
+     *
+     * <p>CaptureFailures are produced by a {@link CameraDevice} if processing a
+     * {@link CaptureRequest} fails, either partially or fully. Use {@link #getReason}
+     * to determine the specific nature of the failed capture.</p>
+     *
+     * <p>Receiving a CaptureFailure means that the metadata associated with that frame number
+     * has been dropped -- no {@link CaptureResult} with the same frame number will be
+     * produced.</p>
+     */
+    interface ICaptureFailure {
+        /**
+         * The {@link CaptureResult} has been dropped this frame only due to an error
+         * in the framework.
+         *
+         * @see #getReason()
+         */
+        const Int32 REASON_ERROR = 0;
+
+        /**
+         * The capture has failed due to a {@link CameraCaptureSession#abortCaptures} call from the
+         * application.
+         *
+         * @see #getReason()
+         */
+        const Int32 REASON_FLUSHED = 1;
+
+
+        /**
+         * Get the request associated with this failed capture.
+         *
+         * <p>Whenever a request is unsuccessfully captured, with
+         * {@link CameraCaptureSession.CaptureCallback#onCaptureFailed},
+         * the {@code failed capture}'s {@code getRequest()} will return that {@code request}.
+         * </p>
+         *
+         * <p>In particular,
+         * <code><pre>cameraDevice.capture(someRequest, new CaptureCallback() {
+         *     {@literal @}Override
+         *     void onCaptureFailed(CaptureRequest myRequest, CaptureFailure myFailure) {
+         *         assert(myFailure.getRequest.equals(myRequest) == true);
+         *     }
+         * };
+         * </code></pre>
+         * </p>
+         *
+         * @return The request associated with this failed capture. Never {@code null}.
+         */
+        GetRequest(
+            [out] ICaptureRequest** outcr);
+
+        /**
+         * Get the frame number associated with this failed capture.
+         *
+         * <p>Whenever a request has been processed, regardless of failed capture or success,
+         * it gets a unique frame number assigned to its future result/failed capture.</p>
+         *
+         * <p>This value monotonically increments, starting with 0,
+         * for every new result or failure; and the scope is the lifetime of the
+         * {@link CameraDevice}.</p>
+         *
+         * @return long frame number
+         */
+        GetFrameNumber(
+            [out] Int64* value);
+
+        /**
+         * Determine why the request was dropped, whether due to an error or to a user
+         * action.
+         *
+         * @return int One of {@code REASON_*} integer constants.
+         *
+         * @see #REASON_ERROR
+         * @see #REASON_FLUSHED
+         */
+        GetReason(
+            [out] Int32* value);
+
+        /**
+         * Determine if the image was captured from the camera.
+         *
+         * <p>If the image was not captured, no image buffers will be available.
+         * If the image was captured, then image buffers may be available.</p>
+         *
+         * @return boolean True if the image was captured, false otherwise.
+         */
+        WasImageCaptured(
+            [out] Boolean* value);
+
+        /**
+         * The sequence ID for this failed capture that was returned by the
+         * {@link CameraCaptureSession#capture} family of functions.
+         *
+         * <p>The sequence ID is a unique monotonically increasing value starting from 0,
+         * incremented every time a new group of requests is submitted to the CameraDevice.</p>
+         *
+         * @return int The ID for the sequence of requests that this capture failure is the result of
+         *
+         * @see CameraDevice.CaptureCallback#onCaptureSequenceCompleted
+         */
+        GetSequenceId(
+            [out] Int32* value);
+    }
+
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

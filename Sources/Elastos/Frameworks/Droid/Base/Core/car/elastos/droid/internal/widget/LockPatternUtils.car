@@ -1,0 +1,668 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.ICollection;
+
+    interface Elastos.Droid.Widget.IButton;
+    interface Elastos.Droid.App.Admin.IDevicePolicyManager;
+    interface Elastos.Droid.App.IAlarmClockInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * Utilities for the lock pattern and its settings.
+     */
+
+    [local]
+    interface ILockPatternUtils {
+        /**
+         * The maximum number of incorrect attempts before the user is prevented
+         * from trying again for {@link #FAILED_ATTEMPT_TIMEOUT_MS}.
+         */
+        const Int32 FAILED_ATTEMPTS_BEFORE_TIMEOUT = 5;
+
+        /**
+         * The number of incorrect attempts before which we fall back on an alternative
+         * method of verifying the user, and resetting their lock pattern.
+         */
+        const Int32 FAILED_ATTEMPTS_BEFORE_RESET = 20;
+
+        /**
+         * How long the user is prevented from trying again after entering the
+         * wrong pattern too many times.
+         */
+        const Int64 FAILED_ATTEMPT_TIMEOUT_MS = 30000;
+
+        /**
+         * The interval of the countdown for showing progress of the lockout.
+         */
+        const Int64 FAILED_ATTEMPT_COUNTDOWN_INTERVAL_MS = 1000;
+
+
+        /**
+         * This dictates when we start telling the user that continued failed attempts will wipe
+         * their device.
+         */
+        const Int32 FAILED_ATTEMPTS_BEFORE_WIPE_GRACE = 5;
+
+        /**
+         * The minimum number of dots in a valid pattern.
+         */
+        const Int32 MIN_LOCK_PATTERN_SIZE = 4;
+
+        /**
+         * The minimum number of dots the user must include in a wrong pattern
+         * attempt for it to be counted against the counts that affect
+         * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
+         */
+        const Int32 MIN_PATTERN_REGISTER_FAIL = MIN_LOCK_PATTERN_SIZE;
+
+        /**
+         * Tells the keyguard to show the user switcher when the keyguard is created.
+         */
+        const String KEYGUARD_SHOW_USER_SWITCHER = "showuserswitcher";
+
+        /**
+         * Tells the keyguard to show the security challenge when the keyguard is created.
+         */
+        const String KEYGUARD_SHOW_SECURITY_CHALLENGE = "showsecuritychallenge";
+
+        /**
+         * Tells the keyguard to show the widget with the specified id when the keyguard is created.
+         */
+        const String KEYGUARD_SHOW_APPWIDGET = "showappwidget";
+
+        /**
+         * The bit in LOCK_BIOMETRIC_WEAK_FLAGS to be used to indicate whether liveliness should
+         * be used
+         */
+        const Int32 FLAG_BIOMETRIC_WEAK_LIVELINESS = 0x1;
+
+        /**
+         * Pseudo-appwidget id we use to represent the default clock status widget
+         */
+        const Int32 ID_DEFAULT_STATUS_WIDGET = -2;
+
+        const String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
+
+        const String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
+
+        const String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
+
+        const String PASSWORD_TYPE_KEY = "lockscreen.password_type";
+
+        const String PASSWORD_TYPE_ALTERNATE_KEY = "lockscreen.password_type_alternate";
+
+        const String LOCK_PASSWORD_SALT_KEY = "lockscreen.password_salt";
+
+        const String DISABLE_LOCKSCREEN_KEY = "lockscreen.disabled";
+
+        const String LOCKSCREEN_OPTIONS = "lockscreen.options";
+
+        const String LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK
+                = "lockscreen.biometric_weak_fallback";
+
+        const String BIOMETRIC_WEAK_EVER_CHOSEN_KEY
+                = "lockscreen.biometricweakeverchosen";
+
+        const String LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS
+                = "lockscreen.power_button_instantly_locks";
+
+        const String LOCKSCREEN_WIDGETS_ENABLED = "lockscreen.widgets_enabled";
+
+        const String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
+
+        // Maximum allowed number of repeated or ordered characters in a sequence before we'll
+        // consider it a complex PIN/password.
+        const Int32 MAX_ALLOWED_SEQUENCE = 3;
+
+        GetDevicePolicyManager(
+            [out] IDevicePolicyManager** manager);
+
+        GetRequestedMinimumPasswordLength(
+            [out] Int32* length);
+
+        /**
+         * Gets the device policy password mode. If the mode is non-specific, returns
+         * MODE_PATTERN which allows the user to choose anything.
+         */
+        GetRequestedPasswordQuality(
+            [out] Int32* quality);
+
+        GetRequestedPasswordHistoryLength(
+            [out] Int32* length);
+
+        GetRequestedPasswordMinimumLetters(
+            [out] Int32* letters);
+
+        GetRequestedPasswordMinimumUpperCase(
+            [out] Int32* upperCase);
+
+        GetRequestedPasswordMinimumLowerCase(
+            [out] Int32* lowerCase);
+
+        GetRequestedPasswordMinimumNumeric(
+            [out] Int32* numeric);
+
+        GetRequestedPasswordMinimumSymbols(
+            [out] Int32* symbols);
+
+        GetRequestedPasswordMinimumNonLetter(
+            [out] Int32* letter);
+
+        /**
+         * Returns the actual password mode, as set by keyguard after updating the password.
+         *
+         * @return
+         */
+        ReportFailedPasswordAttempt();
+
+        ReportSuccessfulPasswordAttempt();
+
+        SetCurrentUser(
+            [in] Int32 userId);
+
+        GetCurrentUser(
+            [out] Int32* user);
+
+        RemoveUser(
+            [in] Int32 userId);
+
+        /**
+         * Check to see if a pattern matches the saved pattern.  If no pattern exists,
+         * always returns true.
+         * @param pattern The pattern to check.
+         * @return Whether the pattern matches the stored one.
+         */
+        CheckPattern(
+            [in] IList* pattern,
+            [out] Boolean* result);
+
+        /**
+         * Check to see if a password matches the saved password.  If no password exists,
+         * always returns true.
+         * @param password The password to check.
+         * @return Whether the password matches the stored one.
+         */
+        CheckPassword(
+            [in] String password,
+            [out] Boolean* res);
+
+        /**
+         * Check to see if vold already has the password.
+         * Note that this also clears vold's copy of the password.
+         * @return Whether the vold password matches or not.
+         */
+        CheckVoldPassword(
+            [out] Boolean* result);
+
+        /**
+         * Check to see if a password matches any of the passwords stored in the
+         * password history.
+         *
+         * @param password The password to check.
+         * @return Whether the password matches any in the history.
+         */
+        CheckPasswordHistory(
+            [in] String password,
+            [out] Boolean* history);
+
+        /**
+         * Check to see if the user has stored a lock pattern.
+         * @return Whether a saved pattern exists.
+         */
+        SavedPatternExists(
+            [out] Boolean* exists);
+
+        /**
+         * Check to see if the user has stored a lock pattern.
+         * @return Whether a saved pattern exists.
+         */
+        SavedPasswordExists(
+            [out] Boolean* exists);
+
+        /**
+         * Return true if the user has ever chosen a pattern.  This is true even if the pattern is
+         * currently cleared.
+         *
+         * @return True if the user has ever chosen a pattern.
+         */
+        IsPatternEverChosen(
+            [out] Boolean* chosen);
+
+        /**
+         * Return true if the user has ever chosen biometric weak.  This is true even if biometric
+         * weak is not current set.
+         *
+         * @return True if the user has ever chosen biometric weak.
+         */
+        IsBiometricWeakEverChosen(
+            [out] Boolean* chosen);
+
+        /**
+         * Used by device policy manager to validate the current password
+         * information it has.
+         */
+        GetActivePasswordQuality(
+            [out] Int32* quality);
+
+        /**
+         * Clear any lock pattern or password.
+         */
+        ClearLock(
+            [in] Boolean isFallback);
+
+        /**
+         * Disable showing lock screen at all when the DevicePolicyManager allows it.
+         * This is only meaningful if pattern, pin or password are not set.
+         *
+         * @param disable Disables lock screen when true
+         */
+        SetLockScreenDisabled(
+            [in] Boolean isDisable);
+
+        /**
+         * Determine if LockScreen can be disabled. This is used, for example, to tell if we should
+         * show LockScreen or go straight to the home screen.
+         *
+         * @return true if lock screen is can be disabled
+         */
+        IsLockScreenDisabled(
+            [out] Boolean* disabled);
+
+        /**
+         * Calls back SetupFaceLock to delete the temporary gallery file
+         */
+        DeleteTempGallery();
+
+        /**
+         * Save a lock pattern.
+         * @param pattern The new pattern to save.
+         */
+        SaveLockPattern(
+            [in] IList* pattern);
+
+        /**
+         * Save a lock pattern.
+         * @param pattern The new pattern to save.
+         * @param isFallback Specifies if this is a fallback to biometric weak
+         */
+        SaveLockPattern(
+            [in] IList* pattern,
+            [in] Boolean isFallback);
+
+        SetOwnerInfo(
+            [in] String info,
+            [in] Int32 userId);
+
+        SetOwnerInfoEnabled(
+            [in] Boolean enabled);
+
+        GetOwnerInfo(
+            [in] Int32 userId,
+            [out] String* info);
+
+        IsOwnerInfoEnabled(
+            [out] Boolean* disabled);
+
+        /**
+         * Save a lock password.  Does not ensure that the password is as good
+         * as the requested mode, but will adjust the mode to be as good as the
+         * pattern.
+         * @param password The password to save
+         * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+         */
+        SaveLockPassword(
+            [in] String password,
+            [in] Int32 quality);
+
+        /**
+         * Save a lock password.  Does not ensure that the password is as good
+         * as the requested mode, but will adjust the mode to be as good as the
+         * pattern.
+         * @param password The password to save
+         * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+         * @param isFallback Specifies if this is a fallback to biometric weak
+         */
+        SaveLockPassword(
+            [in] String password,
+            [in] Int32 quality,
+            [in] Boolean isFallback);
+
+        /**
+         * Save a lock password.  Does not ensure that the password is as good
+         * as the requested mode, but will adjust the mode to be as good as the
+         * pattern.
+         * @param password The password to save
+         * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+         * @param isFallback Specifies if this is a fallback to biometric weak
+         * @param userHandle The userId of the user to change the password for
+         */
+        SaveLockPassword(
+            [in] String password,
+            [in] Int32 quality,
+            [in] Boolean isFallback,
+            [in] Int32 userHandle);
+
+        /**
+         * Retrieves the quality mode we're in.
+         * {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+         *
+         * @return stored password quality
+         */
+        GetKeyguardStoredPasswordQuality(
+            [out] Int32* quality);
+
+        /**
+         * @return true if the lockscreen method is set to biometric weak
+         */
+        UsingBiometricWeak(
+            [out] Boolean* weak);
+
+        /**
+         * @return Whether the lock password is enabled, or if it is set as a backup for biometric weak
+         */
+        IsLockPasswordEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * @return Whether the lock pattern is enabled, or if it is set as a backup for biometric weak
+         */
+        IsLockPatternEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * @return Whether biometric weak lock is installed and that the front facing camera exists
+         */
+        IsBiometricWeakInstalled(
+            [out] Boolean* installed);
+
+        /**
+         * Set whether biometric weak liveliness is enabled.
+         */
+        SetBiometricWeakLivelinessEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * @return Whether the biometric weak liveliness is enabled.
+         */
+        IsBiometricWeakLivelinessEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Set whether the lock pattern is enabled.
+         */
+        SetLockPatternEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * @return Whether the visible pattern is enabled.
+         */
+        IsVisiblePatternEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Set whether the visible pattern is enabled.
+         */
+        SetVisiblePatternEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * @return Whether tactile feedback for the pattern is enabled.
+         */
+        IsTactileFeedbackEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Set and store the lockout deadline, meaning the user can't attempt his/her unlock
+         * pattern until the deadline has passed.
+         * @return the chosen deadline.
+         */
+        SetLockoutAttemptDeadline(
+            [out] Int64* deadline);
+
+        /**
+         * @return The elapsed time in millis in the future when the user is allowed to
+         *   attempt to enter his/her lock pattern, or 0 if the user is welcome to
+         *   enter a pattern.
+         */
+        GetLockoutAttemptDeadline(
+            [out] Int64* deadline);
+
+        /**
+         * @return Whether the user is permanently locked out until they verify their
+         *   credentials.  Occurs after {@link #FAILED_ATTEMPTS_BEFORE_RESET} failed
+         *   attempts.
+         */
+        IsPermanentlyLocked(
+            [out] Boolean* locked);
+
+        /**
+         * Set the state of whether the device is permanently locked, meaning the user
+         * must authenticate via other means.
+         *
+         * @param locked Whether the user is permanently locked out until they verify their
+         *   credentials.  Occurs after {@link #FAILED_ATTEMPTS_BEFORE_RESET} failed
+         *   attempts.
+         */
+        SetPermanentlyLocked(
+            [in] Boolean locked);
+
+        IsEmergencyCallCapable(
+            [out] Boolean* capable);
+
+        IsPukUnlockScreenEnable(
+            [out] Boolean* isEnable);
+
+        IsEmergencyCallEnabledWhileSimLocked(
+            [out] Boolean* locked);
+
+        /**
+         * @return A formatted string of the next alarm (for showing on the lock screen),
+         *   or null if there is no next alarm.
+         */
+        GetNextAlarm(
+            [out] IAlarmClockInfo** alarm);
+
+        GetAppWidgets(
+            [out, callee] ArrayOf<Int32>* widgets);
+
+        // appwidget used when appwidgets are disabled (we make an exception for
+        // default clock widget)
+        WriteFallbackAppWidgetId(
+            [in] Int32 appWidgetId);
+
+        // appwidget used when appwidgets are disabled (we make an exception for
+        // default clock widget)
+        GetFallbackAppWidgetId(
+            [out] Int32* id);
+
+        // TODO: log an error if this returns false
+        AddAppWidget(
+            [in] Int32 widgetId,
+            [in] Int32 index,
+            [out] Boolean* res);
+
+        RemoveAppWidget(
+            [in] Int32 widgetId,
+            [out] Boolean* res);
+
+        IsSecure(
+            [out] Boolean* secure);
+
+        /**
+         * Sets the emergency button visibility based on isEmergencyCallCapable().
+         *
+         * If the emergency button is visible, sets the text on the emergency button
+         * to indicate what action will be taken.
+         *
+         * If there's currently a call in progress, the button will take them to the call
+         * @param button The button to update
+         * @param shown Indicates whether the given screen wants the emergency button to show at all
+         * @param showIcon Indicates whether to show a phone icon for the button.
+         */
+        UpdateEmergencyCallButtonState(
+            [in] IButton* button,
+            [in] Boolean shown,
+            [in] Boolean showIcon);
+
+        /**
+         * Resumes a call in progress. Typically launched from the EmergencyCall button
+         * on various lockscreens.
+         */
+        ResumeCall();
+
+        /**
+         * @return {@code true} if there is a call currently in progress, {@code false} otherwise.
+         */
+        IsInCall(
+            [out] Boolean* res);
+
+        SetPowerButtonInstantlyLocks(
+            [in] Boolean enabled);
+
+        GetPowerButtonInstantlyLocks(
+            [out] Boolean* locks);
+
+        /**
+         * Clears the encryption password.
+         */
+        ClearEncryptionPassword();
+
+        /**
+         * Retrieves the quality mode for {@param userHandle}.
+         * {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+         *
+         * @return stored password quality
+         */
+        GetKeyguardStoredPasswordQuality(
+            [in] Int32 userHandle,
+            [out] Int32* quality);
+
+        /*
+         * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
+         * Not the most secure, but it is at least a second level of protection. First level is that
+         * the file is in a location only readable by the system process.
+         * @param password the gesture pattern.
+         * @return the hash of the pattern in a byte array.
+         */
+        PasswordToHash(
+            [in] String password,
+            [in] Int32 userId,
+            [out, callee] ArrayOf<Byte>* arr);
+
+        /**
+         * Determine whether the user has selected any non-system widgets in keyguard
+         *
+         * @return true if widgets have been selected
+         */
+        HasWidgetsEnabledInKeyguard(
+            [in] Int32 userid,
+            [out] Boolean* selected);
+
+        GetWidgetsEnabled(
+            [out] Boolean* enabled);
+
+        GetWidgetsEnabled(
+            [in] Int32 userId,
+            [out] Boolean* enabled);
+
+        SetWidgetsEnabled(
+            [in] Boolean enabled);
+
+        SetWidgetsEnabled(
+            [in] Boolean enabled,
+            [in] Int32 userId);
+
+        SetEnabledTrustAgents(
+            [in] ICollection* activeTrustAgents);
+
+        GetEnabledTrustAgents(
+            [out] IList** agents);
+
+        SetEnabledTrustAgents(
+            [in] ICollection* activeTrustAgents,
+            [in] Int32 userId);
+
+        GetEnabledTrustAgents(
+            [in] Int32 userId,
+            [out] IList** list);
+
+        /**
+         * @see android.app.trust.TrustManager#reportRequireCredentialEntry(int)
+         */
+        RequireCredentialEntry(
+            [in] Int32 userId);
+
+        IsCredentialRequiredToDecrypt(
+            [in] Boolean defaultValue,
+            [out] Boolean* res);
+
+        SetCredentialRequiredToDecrypt(
+            [in] Boolean required);
+    }
+
+    interface ILockPatternUtilsHelper {
+
+        /*
+         * Returns the maximum length of a sequential characters.  A sequence is defined as
+         * monotonically increasing characters with a constant interval or the same character repeated.
+         *
+         * For example:
+         * maxLengthSequence("1234") == 4
+         * maxLengthSequence("1234abc") == 4
+         * maxLengthSequence("aabc") == 3
+         * maxLengthSequence("qwertyuio") == 1
+         * maxLengthSequence("@ABC") == 3
+         * maxLengthSequence(";;;;") == 4 (anything that repeats)
+         * maxLengthSequence(":;<=>") == 1  (ordered, but not composed of alphas or digits)
+         *
+         * @param string the pass
+         * @return the number of sequential letters or digits
+         */
+        MaxLengthSequence(
+            [in] String string,
+            [out] Int32* len);
+
+        /**
+         * Gets whether the device is encrypted.
+         *
+         * @return Whether the device is encrypted.
+         */
+        IsDeviceEncrypted(
+            [out] Boolean* isDeviceEncrypted);
+
+        /**
+         * Determine if the device supports encryption, even if it's set to default. This
+         * differs from isDeviceEncrypted() in that it returns true even if the device is
+         * encrypted with the default password.
+         * @return true if device encryption is enabled
+         */
+        IsDeviceEncryptionEnabled(
+            [out] Boolean* isDeviceEncryptionEnabled);
+
+        /*
+         * Generate an SHA-1 hash for the pattern. Not the most secure, but it is
+         * at least a second level of protection. First level is that the file
+         * is in a location only readable by the system process.
+         * @param pattern the gesture pattern.
+         * @return the hash of the pattern in a byte array.
+         */
+        PatternToHash(
+            [in] IList* pattern,
+            [out, callee] ArrayOf<Byte>* arr);
+
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+
+}
+

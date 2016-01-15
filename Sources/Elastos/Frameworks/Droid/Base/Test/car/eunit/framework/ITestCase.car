@@ -1,0 +1,42 @@
+
+module
+{
+    namespace Eunit {
+    namespace Framework {
+
+    interface ITestResult;
+
+    interface ITestCase {
+        /**
+         * A convenience method to run this test, collecting the results with a
+         * default TestResult object.
+         *
+         * @see TestResult
+         */
+        Run(
+            [out] ITestResult** result);
+
+        /**
+         * Runs the bare test sequence.
+         * @throws Throwable if any exception is thrown
+         */
+        RunBare();
+
+        /**
+         * Gets the name of a TestCase
+         * @return the name of the TestCase
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Sets the name of a TestCase
+         * @param name the name to set
+         */
+        SetName(
+            [in] String name);
+    }
+
+    } // namespace Framework
+    } // namespace Eunit
+}

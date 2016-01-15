@@ -1,0 +1,56 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Widget.IListPopupWindow;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+
+    /**
+     * Presents a menu as a small, simple popup anchored to another view.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IAdapterViewOnItemClickListener;
+     * interface IViewOnKeyListener;
+     * interface IOnGlobalLayoutListener;
+     * interface IPopupWindowOnDismissListener;
+     * interface IViewOnAttachStateChangeListener;
+     * interface IMenuPresenter;
+     */
+    [local]
+    interface IMenuPopupHelper {
+        SetAnchorView(
+            [in] IView* anchor);
+
+        SetForceShowIcon(
+            [in] Boolean forceShow);
+
+        SetGravity(
+            [in] Int32 gravity);
+
+        Show();
+
+        GetPopup(
+            [out] IListPopupWindow** listPopup);
+
+        TryShow(
+            [out] Boolean* rst);
+
+        Dismiss();
+
+        IsShowing(
+            [out] Boolean* rst);
+    }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

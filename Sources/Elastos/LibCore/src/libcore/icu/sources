@@ -1,0 +1,53 @@
+
+TARGET_NAME= libcore.icu
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../inc/;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/icu;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/io;
+INCLUDES += $(MAKEDIR)/../../../inc/libcore/utility;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/text;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/math;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/io/charset;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility/etl;
+
+SOURCES = icu.cpp
+SOURCES += AlphabeticIndex.cpp
+SOURCES += ImmutableIndex.cpp
+SOURCES += CollationElementIteratorICU.cpp
+SOURCES += CCollationElementIteratorICUHelper.cpp
+SOURCES += CollationKeyICU.cpp
+SOURCES += DateIntervalFormat.cpp
+SOURCES += CDateIntervalFormat.cpp
+SOURCES += ICUUtil.cpp
+SOURCES += CICUUtil.cpp
+SOURCES += LocaleData.cpp
+SOURCES += CLocaleDataHelper.cpp
+SOURCES += NativeBreakIterator.cpp
+SOURCES += CNativeBreakIteratorHelper.cpp
+SOURCES += NativeCollation.cpp
+SOURCES += CNativeCollationHelper.cpp
+SOURCES += NativeConverter.cpp
+SOURCES += CNativeConverterHelper.cpp
+SOURCES += CNativeDecimalFormat.cpp
+SOURCES += NativeIDN.cpp
+SOURCES += CNativeIDNHelper.cpp
+SOURCES += NativeNormalizer.cpp
+SOURCES += CNativeNormalizerHelper.cpp
+SOURCES += CNativePluralRules.cpp
+SOURCES += CNativePluralRulesHelper.cpp
+SOURCES += CRuleBasedCollatorICU.cpp
+SOURCES += TimeZoneNames.cpp
+SOURCES += CTimeZoneNames.cpp
+SOURCES += Transliterator.cpp

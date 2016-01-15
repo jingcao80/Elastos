@@ -1,0 +1,114 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.App.IActivity;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    [local]
+    interface IVoiceInteractorRequest {
+        Cancel();
+
+        GetContext(
+            [out] IContext** context);
+
+        GetActivity(
+            [out] IActivity** activity);
+
+        OnCancel();
+
+        OnAttached(
+            [in] IActivity* activity);
+
+        OnDetached();
+
+        Clear();
+    }
+
+    /**
+     * @Involve
+     * interface IVoiceInteractorRequest
+     */
+    interface IVoiceInteractorConfirmationRequest {
+        OnConfirmationResult(
+            [in] Boolean confirmed,
+            [in] IBundle* result);
+    }
+
+    /**
+     * @Involve
+     * interface IVoiceInteractorRequest
+     */
+    interface IVoiceInteractorCompleteVoiceRequest {
+        OnCompleteResult(
+            [in] IBundle* result);
+    }
+
+    /**
+     * @Involve
+     * interface IVoiceInteractorRequest
+     */
+    interface IVoiceInteractorAbortVoiceRequest {
+        OnAbortResult(
+            [in] IBundle* result);
+    }
+
+    /**
+     * @Involve
+     * interface IVoiceInteractorRequest
+     */
+    interface IVoiceInteractorCommandRequest {
+        OnCommandResult(
+            [in] IBundle* result);
+    }
+
+    /**
+     * @hide
+     * Interface for an {@link Activity} to interact with the user through voice.  Use
+     * {@link android.app.Activity#getVoiceInteractor() Activity.getVoiceInteractor}
+     * to retrieve the interface, if the activity is currently involved in a voice interaction.
+     *
+     * <p>The voice interactor revolves around submitting voice interaction requests to the
+     * back-end voice interaction service that is working with the user.  These requests are
+     * submitted with {@link #submitRequest}, providing a new instance of a
+     * {@link Request} subclass describing the type of operation to perform -- currently the
+     * possible requests are {@link ConfirmationRequest} and {@link CommandRequest}.
+     *
+     * <p>Once a request is submitted, the voice system will process it and eventually deliver
+     * the result to the request object.  The application can cancel a pending request at any
+     * time.
+     *
+     * <p>The VoiceInteractor is integrated with Activity's state saving mechanism, so that
+     * if an activity is being restarted with retained state, it will retain the current
+     * VoiceInteractor and any outstanding requests.  Because of this, you should always use
+     * {@link Request#getActivity() Request.getActivity} to get back to the activity of a
+     * request, rather than holding on to the activity instance yourself, either explicitly
+     * or implicitly through a non-static inner class.
+     */
+     [deprecated, local]
+    interface IVoiceInteractor {
+        SubmitRequest(
+            [in] IVoiceInteractorRequest* request,
+            [out] Boolean* result);
+
+        /**
+         * Queries the supported commands available from the VoiceinteractionService.
+         * The command is a string that describes the generic operation to be performed.
+         * An example might be "com.google.voice.commands.REQUEST_NUMBER_BAGS" to request the number
+         * of bags as part of airline check-in.  (This is not an actual working example.)
+         *
+         * @param commands
+         */
+        SupportsCommands(
+            [in] ArrayOf<String>* commands,
+            [out, callee] ArrayOf<Boolean>* result);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

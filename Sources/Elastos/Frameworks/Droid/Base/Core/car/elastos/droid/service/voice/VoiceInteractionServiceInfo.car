@@ -1,0 +1,35 @@
+module
+{
+    interface Elastos.Droid.Content.Pm.IServiceInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Voice {
+
+    /**
+     * @hide
+     */
+    interface IVoiceInteractionServiceInfo {
+        GetParseError(
+            [out] String* parseError);
+
+        GetServiceInfo(
+            [out] IServiceInfo** serviceInfo);
+
+        GetSessionService(
+            [out] String* sessionService);
+
+        GetRecognitionService(
+            [out] String* recognitionService);
+
+        GetSettingsActivity(
+            [out] String* settingsActivity);
+    }
+
+
+    } // namespace Voice
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

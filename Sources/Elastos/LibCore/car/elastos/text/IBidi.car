@@ -1,0 +1,169 @@
+module
+{
+    namespace Elastos {
+    namespace Text {
+
+    [deprecated]
+    interface IBidi {
+        /**
+         * Constant that indicates the default base level. If there is no strong
+         * character, then set the paragraph level to 0 (left-to-right).
+         */
+        const Int32 DIRECTION_DEFAULT_LEFT_TO_RIGHT = -2;
+
+        /**
+         * Constant that indicates the default base level. If there is no strong
+         * character, then set the paragraph level to 1 (right-to-left).
+         */
+        const Int32 DIRECTION_DEFAULT_RIGHT_TO_LEFT = -1;
+
+        /**
+         * Constant that specifies the default base level as 0 (left-to-right).
+         */
+        const Int32 DIRECTION_LEFT_TO_RIGHT = 0;
+
+        /**
+         * Constant that specifies the default base level as 1 (right-to-left).
+         */
+        const Int32 DIRECTION_RIGHT_TO_LEFT = 1;
+
+        /**
+         * Returns whether the base level is from left to right.
+         */
+        BaseIsLeftToRight(
+            [out] Boolean* baseLevel);
+
+        /**
+         * Creates a new {Bidi} object containing the information of one line
+         * from this object.
+         */
+        CreateLineBidi(
+            [in] Int32 lineStart,
+            [in] Int32 lineLimit,
+            [out] IBidi** object);
+
+        /**
+         * Returns the base level.
+         */
+        GetBaseLevel(
+            [out] Int32* baseLevel);
+
+        /**
+         * Returns the length of the text in the {Bidi} object.
+         */
+        GetLength(
+            [out] Int32* length);
+
+        /**
+         * Returns the level of a specified character.
+         */
+        GetLevelAt(
+            [in] Int32 offset,
+            [out] Int32* level);
+
+        /**
+         * Returns the number of runs in the bidirectional text.
+         */
+        GetRunCount(
+            [out] Int32* runCount);
+
+        /**
+         * Returns the level of the specified run.
+         */
+        GetRunLevel(
+            [in] Int32 run,
+            [out] Int32* runLevel);
+
+        /**
+         * Returns the limit offset of the specified run.
+         */
+        GetRunLimit(
+            [in] Int32 run,
+            [out] Int32* limitOffset);
+
+        /**
+         * Returns the start offset of the specified run.
+         */
+        GetRunStart(
+            [in] Int32 run,
+            [out] Int32* startOffset);
+
+        /**
+         * Indicates whether the text is from left to right, that is, both the base
+         * direction and the text direction is from left to right.
+         */
+        IsLeftToRight(
+            [out] Boolean* isLefttoRight);
+
+        /**
+         * Indicates whether the text direction is mixed.
+         */
+        IsMixed(
+            [out] Boolean* isMixed);
+
+        /**
+         * Indicates whether the text is from right to left, that is, both the base
+         * direction and the text direction is from right to left.
+         */
+        IsRightToLeft(
+            [out] Boolean* isRightToLeft);
+    }
+
+    [deprecated]
+    interface IBidiHelper {
+        /**
+         * Reorders a range of objects according to their specified levels. This is
+         * a convenience function that does not use a {Bidi} object. The range
+         * of objects at {index} from {objectStart} to {
+         * objectStart + count} will be reordered according to the range of levels
+         * at {index} from {levelStart} to {levelStart + count}.
+         *
+         * @param levels
+         *            the level array, which is already determined.
+         * @param levelStart
+         *            the start offset of the range of the levels.
+         * @param objects
+         *            the object array to reorder.
+         * @param objectStart
+         *            the start offset of the range of objects.
+         * @param count
+         *            the count of the range of objects to reorder.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {count}, {levelStart} or {objectStart} is negative; if {count > levels.length - levelStart} or if {count > objects.length - objectStart}.
+         */
+        ReorderVisually(
+            [in] ArrayOf<Byte>* levels,
+            [in] Int32 levelStart,
+            [in] ArrayOf<IInterface*>* objects,
+            [in] Int32 objectStart,
+            [in] Int32 count);
+
+        /**
+         * Indicates whether a range of characters of a text requires a {Bidi}
+         * object to display properly.
+         *
+         * @param text
+         *            the char array of the text.
+         * @param start
+         *            the start offset of the range of characters.
+         * @param limit
+         *            the limit offset of the range of characters.
+         * @return {true} if the range of characters requires a {Bidi}
+         *         object; {false} otherwise.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if {start} or {limit} is negative; {start > limit} or {limit} is greater than the length of this object's paragraph text.
+         */
+        RequiresBidi(
+            [in] ArrayOf<Char32>* text,
+            [in] Int32 start,
+            [in] Int32 limit,
+            [out] Boolean * result);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

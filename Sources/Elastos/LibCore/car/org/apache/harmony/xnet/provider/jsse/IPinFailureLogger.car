@@ -1,0 +1,28 @@
+
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    interface IPinFailureLoggerHelper {
+        Log(
+            [in] String cn,
+            [in] Boolean chainContainsUserCert,
+            [in] Boolean pinIsEnforcing,
+            [in] IList* chain);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,92 @@
+
+module
+{
+    interface Elastos.Droid.App.IActionBarTab;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * This widget implements the dynamic action bar tab behavior that can change
+     * across different configurations or circumstances.
+     */
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.Widget.IHorizontalScrollView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener
+     */
+    [local]
+    interface IScrollingTabContainerView {
+        SetAllowCollapse(
+            [in] Boolean allowCollapse);
+
+        SetTabSelected(
+            [in] Int32 position);
+
+        SetContentHeight(
+            [in] Int32 contentHeight);
+
+        AnimateToVisibility(
+            [in] Int32 visibility);
+
+        AnimateToTab(
+            [in] Int32 position);
+
+        AddTab(
+            [in] IActionBarTab* tab,
+            [in] Boolean setSelected);
+
+        AddTab(
+            [in] IActionBarTab* tab,
+            [in] Int32 position,
+            [in] Boolean setSelected);
+
+        UpdateTab(
+            [in] Int32 position);
+
+        RemoveTabAt(
+            [in] Int32 position);
+
+        RemoveAllTabs();
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.ILinearLayout
+     * extends Elastos.Droid.View.IViewOnLongClickListener
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface ITabView {
+        BindTab(
+            [in] IActionBarTab* tab);
+
+        Update();
+
+        GetTab(
+            [out] IActionBarTab** tab);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+}
+

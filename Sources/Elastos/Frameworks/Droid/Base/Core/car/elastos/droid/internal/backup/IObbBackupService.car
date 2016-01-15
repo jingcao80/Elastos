@@ -1,0 +1,51 @@
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+    interface Elastos.Droid.App.Backup.IIBackupManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Backup {
+
+    /**
+     * Interface for the Backup Manager Service to communicate with a helper service that
+     * handles local (whole-file) backup & restore of OBB content on behalf of applications.
+     * This can't be done within the Backup Manager Service itself because of the restrictions
+     * on system-user access to external storage, and can't be left to the apps because even
+     * apps that do not have permission to access external storage in the usual way can still
+     * use OBBs.
+     *
+     * {@hide}
+     */
+    [oneway]
+    interface IIObbBackupService {
+        /*
+         * Back up a package's OBB directory tree
+         */
+        BackupObbs(
+            [in] String packageName,
+            [in] IParcelFileDescriptor* data,
+            [in] Int32 token,
+            [in] IIBackupManager* callbackBinder);
+
+        /*
+         * Restore an OBB file for the given package from the incoming stream
+         */
+        RestoreObbFile(
+            [in] String pkgName,
+            [in] IParcelFileDescriptor* data,
+            [in] Int32 fileSize,
+            [in] Int32 type,
+            [in] String path,
+            [in] Int64 mode,
+            [in] Int64 mtime,
+            [in] Int32 token,
+            [in] IIBackupManager* callbackBinder);
+    }
+
+    }//namespace Backup
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

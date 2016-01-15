@@ -1,0 +1,284 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Os.ILooper;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.Utility.ICollection;
+
+    interface Elastos.Droid.Packages.SystemUI.Qs.IQSTileView;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBluetoothController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.ICastController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IFlashlightController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IHotspotController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IKeyguardMonitor;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.ILocationController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IRotationLockController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IZenModeController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    [local]
+    interface IQSTileDetailAdapter {
+        getTitle(
+            [out] Int32* title);
+
+        GetToggleState(
+            [out] Boolean* state);
+
+        CreateDetailView(
+            [in] IContext* context,
+            [in] IView* convertView,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        GetSettingsIntent(
+            [out] IIntent** intent);
+
+        SetToggleState(
+            [in] Boolean state);
+    }
+
+    /*
+     * @Involve
+     * interface IHandler
+     */
+    interface IQSTileH {}
+
+    interface IQSTileState {
+        CopyTo(
+            [in] IQSTileState* other,
+            [out] Boolean* ret);
+
+        ToStringBuilder(
+            [out] IStringBuilder** builder);
+    }
+
+    interface IQSTileCallback {
+        OnStateChanged(
+            [in] IQSTileState* state);
+
+        OnShowDetail(
+            [in] Boolean show);
+
+        OnToggleStateChanged(
+            [in] Boolean state);
+
+        OnScanStateChanged(
+            [in] Boolean state);
+
+        OnAnnouncementRequested(
+            [in] ICharSequence* announcement);
+    }
+
+    interface IQSTileHostCallback {
+        OnTilesChanged();
+    }
+
+    interface IQSTileHost {
+        StartSettingsActivity(
+            [in] IIntent* intent);
+
+        Warn(
+            [in] String message/*,
+            [in] IThrowable* t*/);
+
+        CollapsePanels();
+
+        GetLooper(
+            [out] ILooper** looper);
+
+        GetContext(
+            [out] IContext** context);
+
+        GetTiles(
+            [out] ICollection** tiles);
+
+        SetCallback(
+            [in] IQSTileHostCallback* _callback);
+
+        GetBluetoothController(
+            [out] IBluetoothController** controller);
+
+        GetLocationController(
+            [out] ILocationController** controller);
+
+        GetRotationLockController(
+            [out] IRotationLockController** controller);
+
+        GetNetworkController(
+            [out] INetworkController** controller);
+
+        GetZenModeController(
+            [out] IZenModeController** controller);
+
+        GetHotspotController(
+            [out] IHotspotController** controller);
+
+        GetCastController(
+            [out] ICastController** controller);
+
+        GetFlashlightController(
+            [out] IFlashlightController** controller);
+
+        GetKeyguardMonitor(
+            [out] IKeyguardMonitor** monitor);
+    }
+
+    /*
+     * @Involve
+     * interface IQSTileState
+     */
+    interface IQSTileBooleanState {
+        GetValue(
+            [out] Boolean* value);
+
+        SetValue(
+           [in] Boolean value);
+    }
+
+    /*
+     * @Involve
+     * interface IQSTileState
+     */
+    interface IQSTileSignalState  {
+        GetEnabled(
+            [out] Boolean* ret);
+
+        GetConnected(
+            [out] Boolean* ret);
+
+        GetActivityIn(
+            [out] Boolean* ret);
+
+        GetActivityOut(
+            [out] Boolean* ret);
+
+        GetOverlayIconId(
+            [out] Int32* ret);
+
+        GetFilter(
+            [out] Boolean* ret);
+
+        GetIsOverlayIconWide(
+            [out] Boolean* ret);
+
+        SetEnabled(
+            [in] Boolean ret);
+
+        SetConnected(
+            [in] Boolean ret);
+
+        SetActivityIn(
+            [in] Boolean ret);
+
+        SetActivityOut(
+            [in] Boolean ret);
+
+        SetOverlayIconId(
+            [in] Int32 ret);
+
+        SetFilter(
+            [in] Boolean ret);
+
+        SetIsOverlayIconWide(
+            [in] Boolean ret);
+    }
+
+    /**
+     * Base quick-settings tile, extend this to create a new tile.
+     *
+     * State management done on a looper provided by the host.  Tiles should update state in
+     * handleUpdateState.  Callbacks affecting state should use refreshState to trigger another
+     * state update pass on tile looper.
+     *
+     * @Involve
+     * interface IListenable
+     */
+    [local]
+    interface IQSTile {
+        NewTileState(
+            [out] IInterface** state);
+
+        HandleClick();
+
+        HandleUpdateState(
+            [in] IInterface* state,
+            [in] IInterface* arg);
+
+        SupportsDualTargets(
+            [out] Boolean* ret);
+
+        GetHost(
+            [out] IQSTileHost** host);
+
+        CreateTileView(
+            [in] IContext* context,
+            [out] IQSTileView** view);
+
+        GetDetailAdapter(
+            [out] IQSTileDetailAdapter** adapter);
+
+        // safe to call from any thread
+
+        SetCallback(
+            [in] IQSTileCallback* _callback);
+
+        Click();
+
+        SecondaryClick();
+
+        ShowDetail(
+            [in] Boolean show);
+
+        RefreshState();
+
+        RefreshState(
+            [in] IInterface* arg);
+
+        UserSwitch(
+            [in] Int32 newUserId);
+
+        FireToggleStateChanged(
+            [in] Boolean state);
+
+        FireScanStateChanged(
+            [in] Boolean state);
+
+        Destroy();
+
+        GetState(
+            [out] IInterface** state);
+
+        HandleSecondaryClick();
+
+        HandleRefreshState(
+            [in] IInterface* arg);
+
+        ShouldAnnouncementBeDelayed(
+            [out] Boolean* ret);
+
+        ComposeChangeAnnouncement(
+            [out] String* ret);
+
+        HandleUserSwitch(
+            [in] Int32 newUserId);
+
+        HandleDestroy();
+    }
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

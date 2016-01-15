@@ -1,0 +1,119 @@
+
+module {
+
+    interface Elastos.Droid.Widget.IExpandableListPosition;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * Metadata about an expanded group to help convert from a flat list
+     * position to either a) group position for groups, or b) child position for
+     * children
+     */
+    interface IGroupMetadata {
+        CompareTo(
+            [in] IGroupMetadata* another,
+            [out] Int32* pos);
+    }
+
+    interface IGroupMetadataHelper {
+        Obtain(
+            [in] Int32 flPos,
+            [in] Int32 lastChildFlPos,
+            [in] Int32 gPos,
+            [in] Int64 gId,
+            [out] IGroupMetadata** groupMetadata);
+    }
+
+    interface IPositionMetadata {
+        Recycle();
+
+        /**
+         * Checks whether the group referred to in this object is expanded,
+         * or not (at the time this object was created)
+         *
+         * @return whether the group at groupPos is expanded or not
+         */
+        IsExpanded(
+            [out] Boolean* expanded);
+    }
+
+    interface IPositionMetadataHelper {
+        Obtain(
+            [in] Int32 flatListPos,
+            [in] Int32 type,
+            [in] Int32 groupPos,
+            [in] Int32 childPos,
+            [in] IGroupMetadata* groupMetadata,
+            [in] Int32 groupInsertIndex,
+            [out] IPositionMetadata** positionMetadata);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.IBaseAdapter
+     *
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     * interface Elastos.Droid.Widget.IFilterable
+     */
+    [local]
+    interface IExpandableListConnector {
+        /**
+         * Point to the {@link ExpandableListAdapter} that will give us data/Views
+         *
+         * @param expandableListAdapter the adapter that supplies us with data/Views
+         */
+        SetExpandableListAdapter(
+            [in] IExpandableListAdapter* expandableListAdapter);
+
+        GetUnflattenedPos(
+            [in] Int32 flPos,
+            [out] IPositionMetadata** positionMetadata);
+
+        /**
+         * Whether the given group is currently expanded.
+         * @param groupPosition The group to check.
+         * @return Whether the group is currently expanded.
+         */
+        IsGroupExpanded(
+            [in] Int32 groupPosition,
+            [out] Boolean* expanded);
+
+        /**
+         * Set the maximum number of groups that can be expanded at any given time
+         */
+        SetMaxExpGroupCount(
+            [in] Int32 maxExpGroupCount);
+
+        GetAdapter(
+            [out] IExpandableListAdapter** adapter);
+
+        GetFlattenedPos(
+            [in] IExpandableListPosition* pos,
+            [out] IPositionMetadata** data);
+
+        ExpandGroup(
+            [in] Int32 groupPos,
+            [out] Boolean* res);
+
+        ExpandGroup(
+            [in] IPositionMetadata* posMetadata,
+            [out] Boolean* res);
+
+        CollapseGroup(
+            [in] Int32 groupPos,
+            [out] Boolean* res);
+
+        CollapseGroup(
+            [in] IPositionMetadata* posMetadata,
+            [out] Boolean* res);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+}

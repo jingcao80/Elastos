@@ -1,0 +1,43 @@
+module
+{
+    interface Elastos.Droid.Database.Sqlite.ISQLiteDatabase;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+    namespace Sqlite {
+
+    /**
+     * A Cursor implementation that exposes results from a query on a
+     * {@link SQLiteDatabase}.
+     *
+     * SQLiteCursor is not internally synchronized so code using a SQLiteCursor from multiple
+     * threads should perform its own synchronization when using the SQLiteCursor.
+     *
+     * @Involve
+     * interface ICloseable;
+     * interface ICursor;
+     * interface ICrossProcessCursor;
+     * interface IAbstractCursor;
+     * interface IAbstractWindowedCursor;
+     */
+    [deprecated]
+    interface ISQLiteCursor {
+        /**
+         * @return the SQLiteDatabase that this cursor is associated with.
+         */
+        GetDatabase(
+            [out] ISQLiteDatabase** database);
+
+        /**
+         * Changes the selection arguments. The new values take effect after a call to requery().
+         */
+        SetSelectionArguments(
+            [in] ArrayOf<String>* selectionArgs);
+    }
+
+    } // namespace Sqlite
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

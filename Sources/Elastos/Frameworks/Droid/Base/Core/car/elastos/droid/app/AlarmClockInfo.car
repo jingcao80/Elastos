@@ -1,0 +1,54 @@
+
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /**
+     * An immutable description of an alarm clock.
+     *
+     * @see AlarmManager#setAlarmClock
+     * @see AlarmManager#getNextAlarmClock
+    */
+    /**
+     * @Involve
+     * interface IParcelable
+    */
+    interface IAlarmClockInfo {
+        /**
+         * Returns the time at which the alarm is going to trigger.
+         *
+         * This value is UTC wall clock time in milliseconds, as returned by
+         * {@link System#currentTimeMillis()} for example.
+         */
+        GetTriggerTime(
+            [out] Int64* result);
+
+        SetTriggerTime(
+            [in] Int64 value);
+
+        /**
+         * Returns an intent intent that can be used to show or edit details of the alarm clock in
+         * the application that scheduled it.
+         *
+         * <p class="note">Beware that any application can retrieve and send this intent,
+         * potentially with additional fields filled in. See
+         * {@link PendingIntent#send(android.content.Context, int, android.content.Intent)
+         * PendingIntent.send()} and {@link android.content.Intent#fillIn Intent.fillIn()}
+         * for details.
+         */
+        GetShowIntent(
+            [out] IPendingIntent** intent);
+
+        SetShowIntent(
+            [in] IPendingIntent* intent);
+    }
+
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,73 @@
+$INPUT module
+$OUTPUT "_CCallbackSink_.h"
+
+#ifndef _CCallbackSink_H_
+#define _CCallbackSink_H_
+
+#include <elastos.h>
+#include <callback.h>
+#include <elastos/core/Mutex.h>
+
+using namespace Elastos;
+using Elastos::Core::Mutex;
+
+class _CCallbackSink_
+{
+public:
+
+    CARAPI _AddCallback(Int32 event, EventHandler & handler);
+
+    CARAPI _RemoveCallback(Int32 event, EventHandler & handler);
+
+    CARAPI _AcquireCallbackRendezvous(
+            Int32 event,
+            ICallbackRendezvous** ppRendezvous);
+
+    CARAPI _RemoveAllCallbacks();
+
+    CARAPI _CancelPendingCallback(Int32 event);
+
+    CARAPI _CancelAllPendingCallbacks();
+
+    CARAPI _PostCallbackEvent(
+            PInterface _pServer_,
+            Int32 _EventId_,
+            CallbackContextContainer *_pEvent_,
+            Int32 _cFlags_,
+            PVoid pCoalesceFunc,
+            IParcel **_ppParams_);
+
+    _CCallbackSink_(
+            PInterface* ppServer,
+            ICallbackConnector** ppConnector,
+            Int32 nMaxEvents,
+            CallbackContextContainer* pEvent) :
+                    _m_ppServer(ppServer), _m_ppConnector(ppConnector),
+                    _m_nMaxEvents(nMaxEvents), _m_events(pEvent)
+    {
+    }
+
+private:
+
+    ECode _AddCallback(
+                PInterface pCallbackContext,
+                Int32 dwEvent,
+                EventHandler & handler);
+    ECode _RemoveCallback(
+                PInterface pCallbackContext,
+                Int32 dwEvent,
+                EventHandler & handler);
+
+protected:
+
+    Mutex                       _m_lock;
+    PInterface*                 _m_ppServer;
+    ICallbackConnector**        _m_ppConnector;
+    Int32                       _m_nMaxEvents;
+    CallbackContextContainer*   _m_events;
+    ICallbackSink*              _m_pSink;
+};
+
+#endif // _CCallbackSink_H_
+$END OUTPUT
+

@@ -1,0 +1,172 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IComponentCallbacks;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    [local]
+    interface IActivityLifecycleCallbacks {
+        OnActivityCreated(
+            [in] IActivity* activity,
+            [in] IBundle* savedInstanceState);
+
+        OnActivityStarted(
+            [in] IActivity* activity);
+
+        OnActivityResumed(
+            [in] IActivity* activity);
+
+        OnActivityPaused(
+            [in] IActivity* activity);
+
+        OnActivityStopped(
+            [in] IActivity* activity);
+
+        OnActivitySaveInstanceState(
+            [in] IActivity* activity,
+            [in] IBundle* outState);
+
+        OnActivityDestroyed(
+            [in] IActivity* activity);
+    }
+
+    /**
+     * Callback interface for use with {@link Application#registerOnProvideAssistDataListener}
+     * and {@link Application#unregisterOnProvideAssistDataListener}.
+     */
+    [local]
+    interface IOnProvideAssistDataListener {
+        /**
+         * This is called when the user is requesting an assist, to build a full
+         * {@link Intent#ACTION_ASSIST} Intent with all of the context of the current
+         * application.  You can override this method to place into the bundle anything
+         * you would like to appear in the {@link Intent#EXTRA_ASSIST_CONTEXT} part
+         * of the assist Intent.
+         */
+        OnProvideAssistData(
+            [in] IActivity* activity,
+            [in] IBundle* savedInstanceState);
+    }
+
+    /**
+     * Base class for those who need to maintain global application state. You can
+     * provide your own implementation by specifying its name in your
+     * AndroidManifest.xml's &lt;application&gt; tag, which will cause that class
+     * to be instantiated for you when the process for your application/package is
+     * created.
+     *
+     * <p class="note">There is normally no need to subclass Application.  In
+     * most situation, static singletons can provide the same functionality in a
+     * more modular way.  If your singleton needs a global context (for example
+     * to register broadcast receivers), the function to retrieve it can be
+     * given a {@sa android.content.Context} which internally uses
+     * {@sa android.content.Context#getApplicationContext() Context.getApplicationContext()}
+     * when first constructing the singleton.</p>
+     *
+     * @implements Elastos.Droid.Content.IContextWrapper
+     *
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface IComponentCallbacks2
+     */
+    [local]
+    interface IApplication {
+        /**
+         * Called when the application is starting, before any other application
+         * objects have been created.  Implementations should be as quick as
+         * possible (for example using lazy initialization of state) since the time
+         * spent in this function directly impacts the performance of starting the
+         * first activity, service, or receiver in a process.
+         * If you override this method, be sure to call super.onCreate().
+         */
+        OnCreate();
+
+        /**
+         * This method is for use in emulated process environments.  It will
+         * never be called on a production Android device, where processes are
+         * removed by simply killing them; no user code (including this callback)
+         * is executed when doing so.
+         */
+        OnTerminate();
+
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        OnLowMemory();
+
+        OnTrimMemory(
+            [in] Int32 level);
+
+        RegisterComponentCallbacks(
+            [in] IComponentCallbacks* cb);
+
+        UnregisterComponentCallbacks(
+            [in] IComponentCallbacks* cb);
+
+        RegisterActivityLifecycleCallbacks(
+            [in] IActivityLifecycleCallbacks* cb);
+
+        UnregisterActivityLifecycleCallbacks(
+            [in] IActivityLifecycleCallbacks* cb);
+
+        RegisterOnProvideAssistDataListener(
+            [in] IOnProvideAssistDataListener* cb);
+
+        UnregisterOnProvideAssistDataListener(
+            [in] IOnProvideAssistDataListener* cb);
+
+        /**
+         * @hide
+         */
+        /* package */
+        Attach(
+            [in] IContext* ctx);
+
+        /* package */
+        DispatchActivityCreated(
+            [in] IActivity* activity,
+            [in] IBundle* b);
+
+        /* package */
+        DispatchActivityStarted(
+            [in] IActivity* activity);
+
+        /* package */
+        DispatchActivityResumed(
+            [in] IActivity* activity);
+
+        /* package */
+        DispatchActivityPaused(
+            [in] IActivity* activity);
+
+        /* package */
+        DispatchActivityStopped(
+            [in] IActivity* activity);
+
+        /* package */
+        DispatchActivitySaveInstanceState(
+            [in] IActivity* activity,
+            [in] IBundle* b);
+
+        /* package */
+        DispatchActivityDestroyed(
+            [in] IActivity* activity);
+
+        /* package */
+        DispatchOnProvideAssistData(
+            [in] IActivity* activity,
+            [in] IBundle* data);
+
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,446 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Media.AudioPolicy.IAudioPolicyConfig;
+    interface Elastos.Droid.Media.IIAudioFocusDispatcher;
+    interface Elastos.Droid.Media.IIRemoteControlDisplay;
+    interface Elastos.Droid.Media.IIVolumeController;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IAudioServiceVolumeController {
+        SetController(
+            [in] IIVolumeController* controller);
+
+        LoadSettings(
+            [in] IContentResolver* cr);
+
+        SuppressAdjustment(
+            [in] Int32 resolvedStream,
+            [in] Int32 flags,
+            [out] Boolean* result);
+
+        SetVisible(
+            [in] Boolean visible);
+
+        IsSameBinder(
+            [in] IIVolumeController* controller,
+            [out] Boolean* result);
+
+        AsBinder(
+            [out] IBinder** result);
+
+        PostDisplaySafeVolumeWarning(
+            [in] Int32 flags);
+
+        PostVolumeChanged(
+            [in] Int32 streamType,
+            [in] Int32 flags);
+
+        PostMasterVolumeChanged(
+            [in] Int32 flags);
+
+        PostMasterMuteChanged(
+            [in] Int32 flags);
+
+        SetLayoutDirection(
+            [in] Int32 layoutDirection);
+
+        PostDismiss();
+    }
+
+    interface IAudioServiceVolumeStreamState {
+        GetSettingNameForDevice(
+            [in] Int32 device,
+            [out] String* result);
+
+        ReadSettings();
+
+        ApplyDeviceVolume(
+            [in] Int32 device);
+
+        ApplyAllVolumes();
+
+        AdjustIndex(
+            [in] Int32 deltaIndex,
+            [in] Int32 device,
+            [out] Boolean* result);
+
+        SetIndex(
+            [in] Int32 index,
+            [in] Int32 device,
+            [out] Boolean* result);
+
+        GetIndex(
+            [in] Int32 device,
+            [out] Int32* result);
+
+        GetMaxIndex(
+            [out] Int32* result);
+
+        SetAllIndexes(
+            [in] IAudioServiceVolumeStreamState* srcStream);
+
+        SetAllIndexesToMax();
+
+        Mute(
+            [in] IBinder* cb,
+            [in] Boolean state);
+
+        GetStreamType(
+            [out] Int32* result);
+
+        CheckFixedVolumeDevices();
+    }
+
+    /**
+     * The implementation of the volume manager service.
+     * <p>
+     * This implementation focuses on delivering a responsive UI. Most methods are
+     * asynchronous to external calls. For example, the task of setting a volume
+     * will update our internal state, but in a separate thread will set the system
+     * volume and later persist to the database. Similarly, setting the ringer mode
+     * will update the state and broadcast a change and in a separate thread later
+     * persist the ringer mode.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Media.IIAudioService
+     */
+    interface IAudioService {
+        /**
+         * The delay before playing a sound. This small period exists so the user
+         * can press another key (non-volume keys, too) to have it NOT be audible.
+         * <p>
+         * PhoneWindow will implement this part.
+         */
+        const Int32 PLAY_SOUND_DELAY = 300;
+
+        SystemReady();
+
+        OnSystemReady();
+
+        ///////////////////////////////////////////////////////////////////////////
+        // IPC methods
+        ///////////////////////////////////////////////////////////////////////////
+        /** @see AudioManager#adjustVolume(int, int) */
+        AdjustSuggestedStreamVolume(
+            [in] Int32 direction,
+            [in] Int32 suggestedStreamType,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        /** @see AudioManager#adjustStreamVolume(int, int, int) */
+        AdjustStreamVolume(
+            [in] Int32 streamType,
+            [in] Int32 direction,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        /** @see AudioManager#adjustMasterVolume(int, int) */
+        AdjustMasterVolume(
+            [in] Int32 steps,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        /** @see AudioManager#setStreamVolume(int, int, int) */
+        SetStreamVolume(
+            [in] Int32 streamType,
+            [in] Int32 index,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        /** @see AudioManager#forceVolumeControlStream(int) */
+        ForceVolumeControlStream(
+            [in] Int32 streamType,
+            [in] IBinder* cb);
+
+        /** @see AudioManager#setStreamSolo(int, Boolean) */
+        SetStreamSolo(
+            [in] Int32 streamType,
+            [in] Boolean state,
+            [in] IBinder* cb);
+
+        /** @see AudioManager#setStreamMute(int, Boolean) */
+        SetStreamMute(
+            [in] Int32 streamType,
+            [in] Boolean state,
+            [in] IBinder* cb);
+
+        /** get stream mute state. */
+        IsStreamMute(
+            [in] Int32 streamType,
+            [out] Boolean* result);
+
+        ForceRemoteSubmixFullVolume(
+            [in] Boolean startForcing,
+            [in] IBinder* cb);
+
+        /** @see AudioManager#setMasterMute(Boolean, int) */
+        SetMasterMute(
+            [in] Boolean state,
+            [in] Int32 flags,
+            [in] String callingPackage,
+            [in] IBinder* cb);
+
+        /** get master mute state. */
+        IsMasterMute(
+            [out] Boolean* result);
+
+        /** @see AudioManager#getStreamVolume(int) */
+        GetStreamVolume(
+            [in] Int32 streamType,
+            [out] Int32* result);
+
+        GetMasterVolume(
+            [out] Int32* result);
+
+        SetMasterVolume(
+            [in] Int32 volume,
+            [in] Int32 flags,
+            [in] String callingPackage);
+
+        /** @see AudioManager#getStreamMaxVolume(int) */
+        GetStreamMaxVolume(
+            [in] Int32 streamType,
+            [out] Int32* result);
+
+        GetMasterMaxVolume(
+            [out] Int32* result);
+
+        /** Get last audible volume before stream was muted. */
+        GetLastAudibleStreamVolume(
+            [in] Int32 streamType,
+            [out] Int32* result);
+
+        /** Get last audible master volume before it was muted. */
+        GetLastAudibleMasterVolume(
+            [out] Int32* result);
+
+        /** @see AudioManager#getMasterStreamType()  */
+        GetMasterStreamType(
+            [out] Int32* result);
+
+        /** @see AudioManager#setMicrophoneMute(Boolean) */
+        SetMicrophoneMute(
+            [in] Boolean on,
+            [in] String callingPackage);
+
+        /** @see AudioManager#getRingerMode() */
+        GetRingerMode(
+            [out] Int32* result);
+
+        /** @see AudioManager#setRingerMode(int) */
+        SetRingerMode(
+            [in] Int32 ringerMode,
+            [in] Boolean checkZen);
+
+        /** @see AudioManager#shouldVibrate(int) */
+        ShouldVibrate(
+            [in] Int32 vibrateType,
+            [out] Boolean* result);
+
+        /** @see AudioManager#getVibrateSetting(int) */
+        GetVibrateSetting(
+            [in] Int32 vibrateType,
+            [out] Int32* result);
+
+        /** @see AudioManager#setVibrateSetting(int, int) */
+        SetVibrateSetting(
+            [in] Int32 vibrateType,
+            [in] Int32 vibrateSetting);
+
+        /** @see AudioManager#setMode(int) */
+        SetMode(
+            [in] Int32 mode,
+            [in] IBinder* cb);
+
+        /** @see AudioManager#getMode() */
+        GetMode(
+            [out] Int32* result);
+
+        /** @see AudioManager#playSoundEffect(int) */
+        PlaySoundEffect(
+            [in] Int32 effectType);
+
+        /** @see AudioManager#playSoundEffect(int, float) */
+        PlaySoundEffectVolume(
+            [in] Int32 effectType,
+            [in] Float volume);
+
+        /**
+         * Loads samples into the soundpool.
+         * This method must be called at first when sound effects are enabled
+         */
+        LoadSoundEffects(
+            [out] Boolean* result);
+
+        /**
+         *  Unloads samples from the sound pool.
+         *  This method can be called to free some memory when
+         *  sound effects are disabled.
+         */
+        UnloadSoundEffects();
+
+        /** @see AudioManager#reloadAudioSettings() */
+        ReloadAudioSettings();
+
+        /** @see AudioManager#setSpeakerphoneOn(Boolean) */
+        SetSpeakerphoneOn(
+            [in] Boolean on);
+
+        /** @see AudioManager#isSpeakerphoneOn() */
+        IsSpeakerphoneOn(
+            [out] Boolean* result);
+
+        /** @see AudioManager#setBluetoothScoOn(Boolean) */
+        SetBluetoothScoOn(
+            [in] Boolean on);
+
+        /** @see AudioManager#isBluetoothScoOn() */
+        IsBluetoothScoOn(
+            [out] Boolean* result);
+
+        /** @see AudioManager#setBluetoothA2dpOn(Boolean) */
+        SetBluetoothA2dpOn(
+            [in] Boolean on);
+
+        /** @see AudioManager#isBluetoothA2dpOn() */
+        IsBluetoothA2dpOn(
+            [out] Boolean* result);
+
+        /** @see AudioManager#startBluetoothSco() */
+        StartBluetoothSco(
+            [in] IBinder* cb,
+            [in] Int32 targetSdkVersion);
+
+        /** @see AudioManager#startBluetoothScoVirtualCall() */
+        StartBluetoothScoVirtualCall(
+            [in] IBinder* cb);
+
+        /** @see AudioManager#stopBluetoothSco() */
+        StopBluetoothSco(
+            [in] IBinder* cb);
+
+        ClearAllScoClients(
+            [in] Int32 exceptPid,
+            [in] Boolean stopSco);
+
+        IsStreamAffectedByMute(
+            [in] Int32 streamType,
+            [out] Boolean* result);
+
+        SetWiredDeviceConnectionState(
+            [in] Int32 device,
+            [in] Int32 state,
+            [in] String name);
+
+        SetBluetoothA2dpDeviceConnectionState(
+            [in] IBluetoothDevice* device,
+            [in] Int32 state,
+            [in] Int32 profile,
+            [out] Int32* result);
+
+        AvrcpSupportsAbsoluteVolume(
+            [in] String address,
+            [in] Boolean support);
+
+        //==========================================================================================
+        // RemoteControlDisplay / RemoteControlClient / Remote info
+        //==========================================================================================
+        RegisterRemoteController(
+            [in] IIRemoteControlDisplay* rcd,
+            [in] Int32 w,
+            [in] Int32 h,
+            [in] IComponentName* listenerComp,
+            [out] Boolean* result);
+
+        RegisterRemoteControlDisplay(
+            [in] IIRemoteControlDisplay* rcd,
+            [in] Int32 w,
+            [in] Int32 h,
+            [out] Boolean* result);
+
+        UnregisterRemoteControlDisplay(
+            [in] IIRemoteControlDisplay* rcd);
+
+        RemoteControlDisplayUsesBitmapSize(
+            [in] IIRemoteControlDisplay* rcd,
+            [in] Int32 w,
+            [in] Int32 h);
+
+        RemoteControlDisplayWantsPlaybackPositionSync(
+            [in] IIRemoteControlDisplay* rcd,
+            [in] Boolean wantsSync);
+
+        //==========================================================================================
+        // Audio Focus
+        //==========================================================================================
+        RequestAudioFocus(
+            [in] Int32 mainStreamType,
+            [in] Int32 durationHint,
+            [in] IBinder* cb,
+            [in] IIAudioFocusDispatcher* fd,
+            [in] String clientId,
+            [in] String callingPackageName,
+            [out] Int32* result);
+
+        AbandonAudioFocus(
+            [in] IIAudioFocusDispatcher* fd,
+            [in] String clientId,
+            [out] Int32* result);
+
+        UnregisterAudioFocusClient(
+            [in] String clientId);
+
+        GetCurrentAudioFocus(
+            [out] Int32* result);
+
+        // Handles request to override default use of A2DP for media.
+        SetBluetoothA2dpOnInt(
+            [in] Boolean on);
+
+        // called by android.hardware.Camera to populate CameraInfo.canDisableShutterSound
+        IsCameraSoundForced(
+            [out] Boolean* result);
+
+        //==========================================================================================
+        // Audio policy management
+        //==========================================================================================
+        RegisterAudioPolicy(
+            [in] IAudioPolicyConfig* policyConfig,
+            [in] IBinder* cb,
+            [out] Boolean* result);
+
+        UnregisterAudioPolicyAsync(
+            [in] IBinder* cb);
+    }
+
+    interface IAudioServiceHelper {
+        /** @hide */
+        StreamToString(
+            [in] Int32 stream,
+            [out] String* result);
+
+        /**
+         * @see #setVibrateSetting(int, int)
+         */
+        GetValueForVibrateSetting(
+            [in] Int32 existingValue,
+            [in] Int32 vibrateType,
+            [in] Int32 vibrateSetting,
+            [out] Int32* result);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

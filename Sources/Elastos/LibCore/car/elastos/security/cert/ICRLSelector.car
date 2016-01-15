@@ -1,0 +1,41 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+     * The interface specification for determining whether a CRL meets some criteria
+     * to select CRL objects among a set of {@code CRL}s.
+     * <p>
+     * The implementations of this interface are typically used to define the
+     * criteria for selecting {@code CRL}s from a {@code CertStore}.
+     *
+     * @see CertStore
+     * @see CRL
+     */
+    /**
+      * @Involve
+      * interface Elastos.Core.ICloneable;
+      */
+    interface ICRLSelector {
+        /**
+         * Checks whether the defined criteria of this instance match the specified
+         * CRL.
+         *
+         * @param crl
+         *            the CRL to be evaluated.
+         * @return {@code true} if the CRL matches the criteria, {@code false}
+         *         otherwise.
+         */
+        Match(
+            [in] ICRL* crl,
+            [out] Boolean* result);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

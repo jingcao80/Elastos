@@ -1,0 +1,62 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.View.TextService.ISpellCheckerInfo;
+    interface Elastos.Droid.View.TextService.ISpellCheckerSubtype;
+    interface Elastos.Droid.View.Internal.TextService.IITextServicesSessionListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Internal {
+    namespace TextService {
+
+    /**
+     * Interface to the text service manager.
+     * @hide
+     */
+    [local, parcelable]
+    interface IITextServicesManager {
+        GetCurrentSpellChecker(
+            [in] String locale,
+            [out] ISpellCheckerInfo** info);
+
+        GetCurrentSpellCheckerSubtype(
+            [in] String locale,
+            [in] Boolean allowImplicitlySelectedSubtype,
+            [out] ISpellCheckerSubtype** subtype);
+
+        [oneway] GetSpellCheckerService(
+            [in] String sciId,
+            [in] String locale,
+            [in] IITextServicesSessionListener* tsListener,
+            [in] IISpellCheckerSessionListener* scListener,
+            [in] IBundle* bundle);
+
+        [oneway] FinishSpellCheckerService(
+            [in] IISpellCheckerSessionListener* listener);
+
+        [oneway] SetCurrentSpellChecker(
+            [in] String locale,
+            [in] String sciId);
+
+        [oneway] SetCurrentSpellCheckerSubtype(
+            [in] String locale,
+            [in] Int32 hashCode);
+
+        [oneway] SetSpellCheckerEnabled(
+            [in] Boolean enabled);
+
+        IsSpellCheckerEnabled(
+            [out] Boolean* ebl);
+
+        GetEnabledSpellCheckers(
+            [out, callee] ArrayOf<ISpellCheckerInfo*>* infoArray);
+    }
+
+    } // namespace TextService
+    } // namespace Internal
+    } // namespace View
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IIRingtonePlayer {
+        /** Used for Ringtone.java playback */
+        Play(
+            [in] IBinder* token,
+            [in] IUri* uri,
+            [in] IAudioAttributes * aa);
+
+        Stop(
+            [in] IBinder* token);
+
+        IsPlaying(
+            [in] IBinder* token,
+            [out] Boolean* result);
+
+        /** Used for Notification sound playback. */
+        PlayAsync(
+            [in] IUri* uri,
+            [in] IUserHandle* user,
+            [in] Boolean looping,
+            [in] IAudioAttributes * aa);
+
+        StopAsync();
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

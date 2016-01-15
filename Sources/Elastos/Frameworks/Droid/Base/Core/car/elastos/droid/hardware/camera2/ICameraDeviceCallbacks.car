@@ -1,0 +1,35 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICaptureResultExtras;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNative;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+
+    interface IICameraDeviceCallbacks {
+        /**
+         * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
+         */
+        OnDeviceError(
+            [in] Int32 errorCode,
+            [in] ICaptureResultExtras* resultExtras);
+
+        OnDeviceIdle();
+
+        OnCaptureStarted(
+            [in] ICaptureResultExtras* resultExtras,
+            [in] Int64 timestamp);
+
+        OnResultReceived(
+            [in] ICameraMetadataNative* result,
+            [in] ICaptureResultExtras* resultExtras);
+    }
+
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

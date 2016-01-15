@@ -1,0 +1,24 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Xml {
+    namespace Transform {
+    namespace Stream {
+
+    interface IFilePathToURI {
+
+    // To escape a file path to a URI, by using %HH to represent
+    // special ASCII characters: 0x00~0x1F, 0x7F, ' ', '<', '>', '#', '%'
+    // and '"' and non-ASCII characters (whose value >= 128).
+        Filepath2URI(
+            [in] String path,
+            [out] String* uri);
+    }
+
+    } // namespace Stream
+    } // namespace Transform
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

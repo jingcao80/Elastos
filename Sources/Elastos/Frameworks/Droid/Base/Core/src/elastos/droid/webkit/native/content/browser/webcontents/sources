@@ -1,0 +1,12 @@
+
+TARGET_NAME= webcontents
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../../../sources.inc
+
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = WebContentsImpl.cpp

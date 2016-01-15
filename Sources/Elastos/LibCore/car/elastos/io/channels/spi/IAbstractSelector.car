@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.IO.Channels.ISelectionKey;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+    namespace Spi {
+
+   /**
+   * {@code AbstractSelector} is the base implementation class for selectors.
+   * It realizes the interruption of selection by {@code begin} and
+   * {@code end}. It also holds the cancellation and the deletion of the key
+   * set.
+   */
+   /**
+   * @Involve
+   * interface Elastos.IO.Channels.ISelector;
+   */
+   interface IAbstractSelector {
+      Cancel(
+          [in] ISelectionKey* key);
+    }
+
+    } // namespace Spi
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

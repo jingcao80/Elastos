@@ -1,0 +1,130 @@
+
+module
+{
+    using interface Elastos.Droid.Internal.Policy.IIKeyguardShowCallback;
+    using interface Elastos.Droid.Keyguard.KeyguardHostView.IOnDismissAction;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
+     * via {@link ViewMediatorCallback} to poke the wake lock and report that the keyguard is done,
+     * which is in turn, reported to this class by the current
+     * {@link com.android.keyguard.KeyguardViewBase}.
+     */
+    [local]
+    interface IStatusBarKeyguardViewManager {
+        RegisterStatusBar(
+            [in] IPhoneStatusBar* phoneStatusBar,
+            [in] IViewGroup* container,
+            [in] IStatusBarWindowManager* statusBarWindowManager,
+            [in] IScrimController* scrimController);
+
+        /**
+         * Show the keyguard.  Will handle creating and attaching to the view manager
+         * lazily.
+         */
+        Show(
+            [in] IBundle* options);
+
+        DismissWithAction(
+            [in] IOnDismissAction* r,
+            [in] Boolean afterKeyguardGone);
+
+        /**
+         * Reset the state of the view.
+         */
+        Reset();
+
+        OnScreenTurnedOff();
+
+        OnScreenTurnedOn(
+            [in] IIKeyguardShowCallback* _callback);
+
+        VerifyUnlock();
+
+        SetNeedsInput(
+            [in] Boolean needsInput);
+
+        UpdateUserActivityTimeout();
+
+        SetOccluded(
+            [in] Boolean occluded);
+
+        IsOccluded(
+            [out] Boolean* ret);
+
+        /**
+         * Starts the animation before we dismiss Keyguard, i.e. an disappearing animation on the
+         * security view of the bouncer.
+         *
+         * @param finishRunnable the runnable to be run after the animation finished, or {@code null} if
+         *                       no action should be run
+         */
+        StartPreHideAnimation(
+            [in] IRunnable* finishRunnable);
+
+        /**
+         * Hides the keyguard view
+         */
+        Hide(
+            [in] Int64 startTime,
+            [in] Int64 fadeoutDuration);
+
+        /**
+         * Dismisses the keyguard by going to the next screen or making it gone.
+         */
+        Dismiss();
+
+        IsSecure(
+            [out] Boolean* ret);
+
+        /**
+         * @return Whether the keyguard is showing
+         */
+        IsShowing(
+            [out] Boolean* ret);
+
+        /**
+         * Notifies this manager that the back button has been pressed.
+         *
+         * @return whether the back press has been handled
+         */
+        OnBackPressed(
+            [out] Boolean* ret);
+
+        IsBouncerShowing(
+            [out] Boolean* ret);
+
+        OnMenuPressed(
+            [out] Boolean* ret);
+
+        InterceptMediaKey(
+            [in] IKeyEvent* event,
+            [out] Boolean* ret);
+
+        onActivityDrawn();
+
+        ShouldDisableWindowAnimationsForUnlock(
+            [out] Boolean* ret);
+
+        IsGoingToNotificationShade(
+            [out] Boolean* ret);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

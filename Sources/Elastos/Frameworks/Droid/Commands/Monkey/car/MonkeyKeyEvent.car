@@ -1,0 +1,52 @@
+module
+{
+    using interface Elastos.Droid.Commands.Monkey.IMonkeyEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Monkey {
+
+    interface IMonkeyKeyEvent extends IMonkeyEvent {
+        /**
+         * @return key code
+         */
+        GetKeyCode(
+            [out] Int32* keyCode);
+
+          /**
+         * @get action
+         */
+        GetAction(
+            [out] Int32* action);
+
+        /**
+        * @ get down time
+        */
+        GetDownTime(
+            [out] Int64 *downTime);
+
+        /**
+        * @ get event time
+        */
+        GetEventTime(
+            [out] Int64 *eventTime);
+
+        /**
+        * @ set down time
+        */
+        SetDownTime(
+            [in] Int64 downTime);
+
+        /**
+        * @ set event time
+        */
+        SetEventTime(
+            [in] Int64 eventTime);
+    }
+
+    } // namespace Monkey
+    } // namespace Commands
+    } // namespace Droid
+    } // namespace Elastos
+}

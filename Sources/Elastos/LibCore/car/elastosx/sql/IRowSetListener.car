@@ -1,0 +1,59 @@
+module{
+    namespace Elastosx{
+    namespace Sql{
+    /**
+     * An interface used to send notification of events occurring in the context of
+     * a {@link RowSet}. To receive the notification events, an object must
+     * implement the {@code RowSetListener} interface and then register itself with
+     * the {@code RowSet} of interest using the
+     * {@link RowSet#addRowSetListener(RowSetListener)} method.
+     */
+    /**
+     * @Involve
+     * interface IEventObject
+     */
+    interface IRowSetListener {
+        /**
+         * Notifies the listener that the {@code RowSet}'s cursor in {@code
+         * theEvent.getSource} has moved.
+         *
+         * @param theEvent
+         *            a {@code RowSetEvent} that contains information about the
+         *            {@code RowSet} involved. This information can be used to
+         *            retrieve information about the change, such as the updated
+         *            data values.
+         */
+        CursorMoved(
+            [in] IRowSetEvent* theEvent);
+
+        /**
+         * Notifies the listener that one of the {@code RowSet}'s rows in {@code
+         * theEvent.getSource} has changed.
+         *
+         * @param theEvent
+         *            a {@code RowSetEvent} that contains information about the
+         *            {@code RowSet} involved. This information can be used to
+         *            retrieve information about the change, such as the new cursor
+         *            position.
+         */
+        RowChanged(
+            [in] IRowSetEvent* theEvent);
+
+        /**
+         * Notifies the listener that the {@code RowSet}'s entire contents in
+         * {@code theEvent.getSource} have been updated (an example is the execution
+         * of a command which retrieves new data from the database).
+         *
+         * @param theEvent
+         *            a {@code RowSetEvent} that contains information about the
+         *            {@code RowSet} involved. This information can be used to
+         *            retrieve information about the change, such as the updated
+         *            rows of data.
+         */
+        RowSetChanged(
+            [in] IRowSetEvent* theEvent);
+    }
+
+    } // namespace Sql
+    } // namespace Elastosx
+}

@@ -1,0 +1,31 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+    * Wraps an existing OutputStream and buffers the output. Expensive interaction with
+    * the underlying input stream is minimized, since most (smaller) requests can be
+    * satisfied by accessing the buffer alone. The drawback is that some extra space is
+    * required to hold the buffer and that copying takes place when flushing that
+    * buffer, but this is usually outweighed by the performance benefits.
+    * <p>
+    * A typical application pattern for the class looks like this:
+    * <p>
+    * BufferedOutputStream buf = new BufferedOutputStream(new FileOutputStream("file.java"));
+    * @sa BufferedInputStream
+    *@implement Elastos.IO.IFilterOutputStream
+    */
+    /**
+    * @Involve
+    * interface ICloseable;
+    * interface IOutputStream;
+    * interface IFilterOutputStream;
+    */
+    interface IBufferedOutputStream {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

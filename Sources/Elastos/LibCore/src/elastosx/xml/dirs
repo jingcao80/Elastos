@@ -1,0 +1,7 @@
+DIRS += namespace
+DIRS += datatype
+DIRS += transform
+DIRS += parsers
+DIRS += xpath
+DIRS += validation
+

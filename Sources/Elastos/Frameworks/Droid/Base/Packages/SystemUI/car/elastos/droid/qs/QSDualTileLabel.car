@@ -1,0 +1,60 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Graphics.ITypeface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Qs {
+
+    /**
+     * Text displayed over one or two lines, centered horizontally.  A caret is always drawn at the end
+     * of the first line, and considered part of the content for centering purposes.
+     *
+     * Text overflow rules:
+     *   First line: break on a word, unless a single word takes up the entire line - in which case
+     *               truncate.
+     *   Second line: ellipsis if necessary
+     *
+     * @Involve
+     * interface IAccessibilityEventSource
+     * interface IKeyEventCallback
+     * interface IDrawableCallback
+     * interface IView
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup
+     * interface ILinearLayout
+     */
+    interface IQSDualTileLabel {
+        SetFirstLineCaret(
+            [in] IDrawable* d);
+
+        SetText(
+            [in] ICharSequence* text);
+
+        GetText(
+            [out] String* text);
+
+        SetTextSize(
+            [in] Int32 unit,
+            [in] Float size);
+
+        SetTextColor(
+            [in] Int32 color);
+
+        SetTypeface(
+            [in] ITypeface* tf);
+    }
+
+    } // namespace Qs
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

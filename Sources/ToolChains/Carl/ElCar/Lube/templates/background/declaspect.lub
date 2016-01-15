@@ -1,0 +1,15 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+
+public:
+    CARAPI_(PInterface) _AspectProbe(_ELASTOS REIID);
+
+protected:
+    CARAPI _Aggregate(PInterface pOuter);
+    CARAPI _Unaggregate(ClassID* pTargetClsId);
+
+    Boolean _m_bAggregated;

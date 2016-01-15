@@ -1,0 +1,92 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Auth {
+
+    /**
+     * The class represents an authentication scope consisting of a host name,
+     * a port number, a realm name and an authentication scheme name which
+     * {@link Credentials Credentials} apply to.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     * @author <a href="mailto:adrian@intencha.com">Adrian Sutton</a>
+     *
+     * @since 4.0
+     */
+    interface IAuthScope {
+        /**
+         * The <tt>null</tt> value represents any host. In the future versions of
+         * HttpClient the use of this parameter will be discontinued.
+         */
+        // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //const String ANY_HOST = NULL;
+
+        /**
+         * The <tt>-1</tt> value represents any port.
+         */
+        const Int32 ANY_PORT = -1;
+
+        /**
+         * The <tt>null</tt> value represents any realm.
+         */
+        //const String ANY_REALM = NULL;
+
+        /**
+         * The <tt>null</tt> value represents any authentication scheme.
+         */
+        //const String ANY_SCHEME = NULL;
+
+        /**
+         * @return the host
+         */
+        GetHost(
+            [out] String* host);
+
+        /**
+         * @return the port
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /**
+         * @return the realm name
+         */
+        GetRealm(
+            [out] String* realmName);
+
+        /**
+         * @return the scheme type
+         */
+        GetScheme(
+            [out] String* scheme);
+
+        /**
+         * Tests if the authentication scopes match.
+         *
+         * @return the match factor. Negative value signifies no match.
+         *    Non-negative signifies a match. The greater the returned value
+         *    the closer the match.
+         */
+        Match(
+            [in] IAuthScope* that,
+            [out] Int32* value);
+
+    }
+
+    interface IAuthScopeHelper {
+
+        GetDefaultScope(
+            [out] IAuthScope** scope);
+
+    }
+
+    } // namespace Auth
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

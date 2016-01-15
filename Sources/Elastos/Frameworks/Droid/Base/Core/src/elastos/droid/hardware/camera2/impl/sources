@@ -1,0 +1,16 @@
+
+TARGET_NAME= impl
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES  = CallbackProxies.cpp
+SOURCES += CameraCaptureSessionImpl.cpp
+SOURCES += CameraDeviceImpl.cpp
+SOURCES += CameraMetadataNative.cpp
+SOURCES += CaptureResultExtras.cpp
+
+SOURCES += impl.cpp

@@ -1,0 +1,73 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IResultReceiver;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Media.IRating;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    interface IISessionCallback {
+        OnCommand(
+            [in] String command,
+            [in] IBundle * args,
+            [in] IResultReceiver * cb);
+
+        OnMediaButton(
+            [in] IIntent * mediaButtonIntent,
+            [in] Int32 sequenceNumber,
+            [in] IResultReceiver * cb);
+
+        // These callbacks are for the TransportPerformer
+        OnPlay();
+
+        OnPlayFromMediaId(
+            [in] String uri,
+            [in] IBundle * extras);
+
+        OnPlayFromSearch(
+            [in] String query,
+            [in] IBundle * extras);
+
+        OnSkipToTrack(
+            [in] Int64 id);
+
+        OnPause();
+
+        OnStop();
+
+        OnNext();
+
+        OnPrevious();
+
+        OnFastForward();
+
+        OnRewind();
+
+        OnSeekTo(
+            [in] Int64 pos);
+
+        OnRate(
+            [in] IRating * rating);
+
+        OnCustomAction(
+            [in] String action,
+            [in] IBundle * args);
+
+        // These callbacks are for volume handling
+        OnAdjustVolume(
+            [in] Int32 direction);
+
+        OnSetVolumeTo(
+            [in] Int32 value);
+
+    }
+
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,26 @@
+module
+{
+    namespace Libcore{
+    namespace Net{
+
+    interface IMimeUtils{
+        HasMineType(
+            [in] String mimeType,
+            [out] Boolean *result);
+
+        GuessMimeTypeFromExtension(
+            [in] String extension,
+            [out] String* result);
+
+        HasExtension(
+            [in] String extension,
+            [out] Boolean* result);
+
+        GuessExtensionFromMimeType(
+            [in] String mimeType,
+            [out] String* result);
+    }
+
+    } // namespace Net
+    } // namespace Libcore
+}

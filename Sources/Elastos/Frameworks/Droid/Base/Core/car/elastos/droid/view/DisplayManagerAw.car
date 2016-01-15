@@ -1,0 +1,266 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+
+    interface IDisplayManagerAw {
+
+    /**
+     * Use this method to get the default Display object.
+     *
+     * @return default Display object
+     */
+    const String EXTRA_HDMISTATUS = "hdmistatus";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_TVDACSTATUS_CHANGED}:
+     * integer containing the current health constant.
+     */
+    const String EXTRA_TVSTATUS = "tvdacstatus";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_DISPLAY_OUTPUT_CHANGED}:
+     * integer containing the current health constant.
+     */
+    const String EXTRA_DISPLAY_TYPE = "display_type";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_DISPLAY_OUTPUT_CHANGED}:
+     * integer containing the current health constant.
+     */
+    const String EXTRA_DISPLAY_MODE = "display_mode";
+
+    const Int32 DISPLAY_DEVICE_ON                       = 0;
+    const Int32 DISPLAY_DEVICE_OFF                      = 1;
+
+    const Int32 DISPLAY_DEVICE_PLUGIN                   = 0;
+    const Int32 DISPLAY_DEVICE_PLUGOUT                  = 1;
+
+    const Int32 DISPLAY_OUTPUT_TYPE_NONE                = 0;
+    const Int32 DISPLAY_OUTPUT_TYPE_LCD                 = 1;
+    const Int32 DISPLAY_OUTPUT_TYPE_TV                  = 2;
+    const Int32 DISPLAY_OUTPUT_TYPE_HDMI                = 3;
+    const Int32 DISPLAY_OUTPUT_TYPE_VGA                 = 4;
+
+    const Int32 DISPLAY_MODE_SINGLE                     = 0;
+    const Int32 DISPLAY_MODE_DUALLCD                    = 1;
+    const Int32 DISPLAY_MODE_DUALDIFF                   = 2;
+    const Int32 DISPLAY_MODE_DUALSAME                   = 3;
+    const Int32 DISPLAY_MODE_DUALSAME_TWO_VIDEO         = 4;
+    const Int32 DISPLAY_MODE_SINGLE_VAR                 = 5;
+    const Int32 DISPLAY_MODE_SINGLE_VAR_BE              = 6;
+    const Int32 DISPLAY_MODE_SINGLE_FB_VAR              = 7;
+    const Int32 DISPLAY_MODE_SINGLE_FB_GPU              = 8;
+
+    const Int32 DISPLAY_TVDAC_NONE                      = 0;
+    const Int32 DISPLAY_TVDAC_YPBPR                     = 1;
+    const Int32 DISPLAY_TVDAC_CVBS                      = 2;
+    const Int32 DISPLAY_TVDAC_SVIDEO                    = 3;
+    const Int32 DISPLAY_TVDAC_ALL                       = 4;
+
+    const Int32 DISPLAY_TVFORMAT_480I                = 0;
+    const Int32 DISPLAY_TVFORMAT_576I                = 1;
+    const Int32 DISPLAY_TVFORMAT_480P                = 2;
+    const Int32 DISPLAY_TVFORMAT_576P                = 3;
+    const Int32 DISPLAY_TVFORMAT_720P_50HZ           = 4;
+    const Int32 DISPLAY_TVFORMAT_720P_60HZ           = 5;
+    const Int32 DISPLAY_TVFORMAT_1080I_50HZ          = 6;
+    const Int32 DISPLAY_TVFORMAT_1080I_60HZ          = 7;
+    const Int32 DISPLAY_TVFORMAT_1080P_24HZ          = 8;
+    const Int32 DISPLAY_TVFORMAT_1080P_50HZ          = 9;
+    const Int32 DISPLAY_TVFORMAT_1080P_60HZ          = 0xa;
+    const Int32 DISPLAY_TVFORMAT_PAL                 = 0xb;
+    const Int32 DISPLAY_TVFORMAT_PAL_SVIDEO          = 0xc;
+    const Int32 DISPLAY_TVFORMAT_PAL_CVBS_SVIDEO     = 0xd;
+    const Int32 DISPLAY_TVFORMAT_NTSC                = 0xe;
+    const Int32 DISPLAY_TVFORMAT_NTSC_SVIDEO         = 0xf;
+    const Int32 DISPLAY_TVFORMAT_NTSC_CVBS_SVIDEO    = 0x10;
+    const Int32 DISPLAY_TVFORMAT_PAL_M               = 0x11;
+    const Int32 DISPLAY_TVFORMAT_PAL_M_SVIDEO        = 0x12;
+    const Int32 DISPLAY_TVFORMAT_PAL_M_CVBS_SVIDEO   = 0x13;
+    const Int32 DISPLAY_TVFORMAT_PAL_NC              = 0x14;
+    const Int32 DISPLAY_TVFORMAT_PAL_NC_SVIDEO       = 0x15;
+    const Int32 DISPLAY_TVFORMAT_PAL_NC_CVBS_SVIDEO  = 0x16;
+
+
+    const Int32 DISPLAY_VGA_H1680_V1050                 = 0x17;
+    const Int32 DISPLAY_VGA_H1440_V900                  = 0x18;
+    const Int32 DISPLAY_VGA_H1360_V768                  = 0x19;
+    const Int32 DISPLAY_VGA_H1280_V1024                 = 0x1a;
+    const Int32 DISPLAY_VGA_H1024_V768                  = 0x1b;
+    const Int32 DISPLAY_VGA_H800_V600                   = 0x1c;
+    const Int32 DISPLAY_VGA_H640_V480                   = 0x1d;
+    const Int32 DISPLAY_VGA_H1440_V900_RB               = 0x1e;
+    const Int32 DISPLAY_VGA_H1680_V1050_RB              = 0x1f;
+    const Int32 DISPLAY_VGA_H1920_V1080_RB              = 0x20;
+    const Int32 DISPLAY_VGA_H1920_V1080                 = 0x21;
+    const Int32 DISPLAY_VGA_H1280_V720                  = 0x22;
+
+    const Int32 DISPLAY_TVFORMAT_1080P_25HZ          = 0x23;
+    const Int32 DISPLAY_TVFORMAT_1080P_30HZ          = 0x24;
+    const Int32 DISPLAY_TVFORMAT_1080P_24HZ_3D_FP    = 0x25;
+    const Int32 DISPLAY_TVFORMAT_720P_50HZ_3D_FP     = 0x26;
+    const Int32 DISPLAY_TVFORMAT_720P_60HZ_3D_FP     = 0x27;
+
+    const Int32 MINIMUX_BRIGHTNESS = 20;
+    const Int32 MAXIMUX_BRIGHTNESS = 100;
+    const Int32 MINIMUX_SATURATION = 20;
+    const Int32 MAXIMUX_SATURATION = 100;
+    const Int32 MINIMUX_CONTRAST = 20;
+    const Int32 MAXIMUX_CONTRAST = 100;
+    const Int32 MINIMUX_DISP_AREA = 90;
+    const Int32 MAXIMUX_DISP_AREA = 100;
+    const Int32 DEF_BRIGHTNESS = 50;
+    const Int32 DEF_SATURATION = 50;
+    const Int32 DEF_CONTRAST = 50;
+    const Int32 DEF_DISP_AREA = 95;
+
+    GetDisplayCount(
+        [out] Int32* result);
+
+    GetDisplayOpenStatus(
+        [in] Int32 mDisplay,
+        [out] Boolean* result);
+
+    GetDisplayHotPlugStatus(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    GetDisplayOutputType(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    GetDisplayOutputFormat(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    GetDisplayWidth(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    GetDisplayHeight(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    GetDisplayPixelFormat(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    SetDisplayParameter(
+        [in] Int32 mDisplay,
+        [in] Int32 param0,
+        [in] Int32 param1,
+        [out] Int32* result);
+
+    SetDisplayMode(
+        [in] Int32 mode,
+        [out] Int32* result);
+
+    GetDisplayMode(
+        [out] Int32* result);
+
+    SetDisplayOutputType(
+        [in] Int32 mDisplay,
+        [in] Int32 type,
+        [in] Int32 format,
+        [out] Int32* result);
+
+    OpenDisplay(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    CloseDisplay(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    SetDisplayBacklightMode(
+        [in] Int32 mode,
+        [out] Int32* result);
+
+    SetDisplayMaster(
+        [in] Int32 mDisplay,
+        [out] Int32* result);
+
+    GetDisplayMaster(
+        [out] Int32* result);
+
+    GetMaxWidthDisplay(
+        [out] Int32* result);
+
+    GetMaxHdmiMode(
+        [out] Int32* result);
+
+    GetDisplayBacklightMode(
+        [out] Int32* result);
+
+    IsSupportHdmiMode(
+        [in] Int32 mode,
+        [out] Int32* result);
+
+    IsSupport3DMode(
+        [out] Int32* result);
+
+    GetHdmiHotPlugStatus(
+        [out] Int32* result);
+
+    GetTvHotPlugStatus(
+        [out] Int32* result);
+
+    SetDisplayAreaPercent(
+        [in] Int32 displayno,
+        [in] Int32 percent,
+        [out] Int32* result);
+
+    GetDisplayAreaPercent(
+        [in] Int32 displayno,
+        [out] Int32* result);
+
+    SetDisplayBright(
+        [in] Int32 displayno,
+        [in] Int32 bright,
+        [out] Int32* result);
+
+    GetDisplayBright(
+        [in] Int32 displayno,
+        [out] Int32* result);
+
+    SetDisplayContrast(
+        [in] Int32 displayno,
+        [in] Int32 contrast,
+        [out] Int32* result);
+
+    GetDisplayContrast(
+        [in] Int32 displayno,
+        [out] Int32* result);
+
+    SetDisplaySaturation(
+        [in] Int32 displayno,
+        [in] Int32 saturation,
+        [out] Int32* result);
+
+    GetDisplaySaturation(
+        [in] Int32 displayno,
+        [out] Int32* result);
+
+    SetDisplayHue(
+        [in] Int32 displayno,
+        [in] Int32 hue,
+        [out] Int32* result);
+
+    GetDisplayHue(
+        [in] Int32 displayno,
+        [out] Int32* result);
+
+    Set3DLayerOffset(
+        [in] Int32 displayno,
+        [in] Int32 left,
+        [in] Int32 right,
+        [out] Int32* result);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,129 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.X509.IExtensions;
+    interface Org.Apache.Harmony.Security.X509.IGeneralName;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+    using interface Elastos.Utility.IDate;
+    using interface Elastos.Math.IBigInteger;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+    namespace Tsp {
+
+    /**
+     * As defined in Time-Stamp Protocol (TSP)
+     * (http://www.ietf.org/rfc/rfc3161.txt)
+     *
+     * TSTInfo ::= SEQUENCE  {
+     *    version                      INTEGER  { v1(1) },
+     *    policy                       TSAPolicyId,
+     *    messageImprint               MessageImprint,
+     *      -- MUST have the same value as the similar field in
+     *      -- TimeStampReq
+     *    serialNumber                 INTEGER,
+     *     -- Time-Stamping users MUST be ready to accommodate integers
+     *     -- up to 160 bits.
+     *    genTime                      GeneralizedTime,
+     *    accuracy                     Accuracy                 OPTIONAL,
+     *    ordering                     BOOLEAN             DEFAULT FALSE,
+     *    nonce                        INTEGER                  OPTIONAL,
+     *      -- MUST be present if the similar field was present
+     *      -- in TimeStampReq.  In that case it MUST have the same value.
+     *    tsa                          [0] GeneralName          OPTIONAL,
+     *    extensions                   [1] IMPLICIT Extensions   OPTIONAL
+     * }
+     *
+     * TSAPolicyId ::= OBJECT IDENTIFIER
+     *
+     * "tsa [0] GeneralName OPTIONAL" is EXPLICIT and the word EXPLICIT is omitted.
+     */
+    interface ITSTInfo {
+        ToString(
+            [out] String* str);
+
+        /**
+         * @return Returns the accuracy.
+         */
+        GetAccuracy(
+            [out, callee] ArrayOf<Int32>* accuracy);
+
+        /**
+         * @return Returns the extensions.
+         */
+        GetExtensions(
+            [out] IExtensions** extensions);
+
+        /**
+         * @return Returns the genTime.
+         */
+        GetGenTime(
+            [out] IDate** date);
+
+        /**
+         * @return Returns the messageImprint.
+         */
+        GetMessageImprint(
+            [out] IMessageImprint** messageImprint);
+
+        /**
+         * @return Returns the nonce.
+         */
+        GetNonce(
+            [out] IBigInteger** nonce);
+
+        /**
+         * @return Returns the ordering.
+         */
+        GetOrdering(
+            [out] Boolean* ordering);
+
+        /**
+         * @return Returns the policy.
+         */
+        GetPolicy(
+            [out] String* policy);
+
+        /**
+         * @return Returns the serialNumber.
+         */
+        GetSerialNumber(
+            [out] IBigInteger** serialNumber);
+
+        /**
+         * @return Returns the tsa.
+         */
+        GetTsa(
+            [out] IGeneralName** tsa);
+
+        /**
+         * @return Returns the version.
+         */
+        GetVersion(
+            [out] Int32* ver);
+    }
+
+    interface ITSTInfoHelper {
+        GetACCURACY(
+            [out] IASN1Sequence** accuracy);
+
+        SetACCURACY(
+            [in] IASN1Sequence* accuracy);
+
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
+    }
+
+    } // namespace Tsp
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

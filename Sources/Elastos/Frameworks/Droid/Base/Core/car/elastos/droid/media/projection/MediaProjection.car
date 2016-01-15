@@ -1,0 +1,127 @@
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Media.IAudioRecord;
+// TODO: Need IIVirtualDisplayCallback
+    // interface Elastos.Droid.Hardware.Display.IIVirtualDisplayCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Projection {
+
+    interface IMediaProjectionCallback {
+        /**
+         * Called when the MediaProjection session is no longer valid.
+         * <p>
+         * Once a MediaProjection has been stopped, it's up to the application to release any
+         * resources it may be holding (e.g. {@link android.hardware.display.VirtualDisplay}s).
+         * </p>
+         */
+        OnStop();
+    }
+
+    interface IMediaProjection {
+        /** Register a listener to receive notifications about when the {@link
+         * MediaProjection} changes state.
+         *
+         * @param callback The callback to call.
+         * @param handler The handler on which the callback should be invoked, or
+         * null if the callback should be invoked on the calling thread's looper.
+         *
+         * @see #unregisterCallback
+         */
+        RegisterCallback(
+            [in] IMediaProjectionCallback * cb,
+            [in] IHandler * handler);
+
+        /** Unregister a MediaProjection listener.
+         *
+         * @param callback The callback to unregister.
+         *
+         * @see #registerCallback
+         */
+        UnregisterCallback(
+            [in] IMediaProjectionCallback * cb);
+
+        /**
+         * @hide
+         */
+// TODO: Need IIVirtualDisplayCallback
+        // CreateVirtualDisplay(
+        //     [in] String name,
+        //     [in] Int32 width,
+        //     [in] Int32 height,
+        //     [in] Int32 dpi,
+        //     [in] Boolean isSecure,
+        //     [in] ISurface * surface,
+        //     [in] IIVirtualDisplayCallback * cb,
+        //     [in] IHandler * handler,
+        //     [out] IVirtualDisplay ** result);
+
+        /**
+         * Creates a {@link android.hardware.display.VirtualDisplay} to capture the
+         * contents of the screen.
+         *
+         * @param name The name of the virtual display, must be non-empty.
+         * @param width The width of the virtual display in pixels. Must be
+         * greater than 0.
+         * @param height The height of the virtual display in pixels. Must be
+         * greater than 0.
+         * @param dpi The density of the virtual display in dpi. Must be greater
+         * than 0.
+         * @param surface The surface to which the content of the virtual display
+         * should be rendered, or null if there is none initially.
+         * @param flags A combination of virtual display flags. See {@link DisplayManager} for the full
+         * list of flags.
+         * @param callback Callback to call when the virtual display's state
+         * changes, or null if none.
+         * @param handler The {@link android.os.Handler} on which the callback should be
+         * invoked, or null if the callback should be invoked on the calling
+         * thread's main {@link android.os.Looper}.
+         *
+         * @see android.hardware.display.DisplayManager#createVirtualDisplay(
+         * String, int, int, int, int, Surface, VirtualDisplay.Callback, Handler)
+         */
+// TODO: Need IIVirtualDisplayCallback
+        // CreateVirtualDisplay(
+        //     [in] String name,
+        //     [in] Int32 width,
+        //     [in] Int32 height,
+        //     [in] Int32 dpi,
+        //     [in] Int32 flags,
+        //     [in] ISurface * surface,
+        //     [in] IIVirtualDisplayCallback * cb,
+        //     [in] IHandler * handler,
+        //     [out] IVirtualDisplay ** result);
+
+        /**
+         * Creates an AudioRecord to capture audio played back by the system.
+         * @hide
+         */
+        CreateAudioRecord(
+            [in] Int32 sampleRateInHz,
+            [in] Int32 channelConfig,
+            [in] Int32 audioFormat,
+            [in] Int32 bufferSizeInBytes,
+            [out] IAudioRecord ** result);
+
+        /**
+         * Stops projection.
+         */
+        Stop();
+
+        /**
+         * Get the underlying IMediaProjection.
+         * @hide
+         */
+        GetProjection(
+            [out] IIMediaProjection ** result);
+
+    }
+
+    } // namespace Projection
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,38 @@
+
+module
+{
+
+    interface Org.Apache.Http.IProtocolVersion;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * The first line of an {@link HttpRequest HttpRequest}.
+     * It contains the method, URI, and HTTP version of the request.
+     * For details, see RFC 2616.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 573864 $
+     *
+     * @since 4.0
+     */
+    interface IRequestLine {
+
+        GetMethod(
+            [out] String* method);
+
+        GetProtocolVersion(
+            [out] IProtocolVersion** protocolVersion);
+
+        GetUri(
+            [out] String* uri);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

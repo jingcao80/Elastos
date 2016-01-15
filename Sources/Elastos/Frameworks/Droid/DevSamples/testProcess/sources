@@ -1,0 +1,18 @@
+
+TARGET_NAME = fwOSProcess
+TARGET_TYPE = ecx
+
+IMPORTS = Elastos.Droid.Core.eco
+
+SOURCES  = test.cpp
+SOURCES += main.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Droid.lib
+LIBRARIES += $(XDK_USER_LIB)/tstcom.lib
+
+LIBRARIES += -lgcc -lc -lstdc++ -lm -ldl -llog -lz -lutils -lbinder -lmedia
+
+LIBRARIES += -licuuc -licui18n -lcutils -lskia -lgui -lui -lhwui -landroidfw -lharfbuzz -ljpeg -lhardware_legacy -lstagefright -lstagefright_foundation -lsqlite -lcamera_client -lnetutils -lusbhost -lselinux

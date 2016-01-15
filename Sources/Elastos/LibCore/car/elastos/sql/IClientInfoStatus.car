@@ -1,0 +1,15 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    enum ClientInfoStatus {
+        ClientInfoStatus_UNKNOWN,
+        ClientInfoStatus_UNKNOWN_PROPERTY,
+        ClientInfoStatus_VALUE_INVALID,
+        ClientInfoStatus_VALUE_TRUNCATED,
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

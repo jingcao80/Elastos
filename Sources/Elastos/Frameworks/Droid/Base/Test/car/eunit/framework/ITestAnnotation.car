@@ -1,0 +1,28 @@
+
+module
+{
+    namespace Eunit {
+    namespace Framework {
+
+    interface ITestAnnotation {
+        IsAnnotationPresent(
+            [in] String method,
+            [in] String annotation,
+            [out] Boolean* result);
+
+        GetNumIterations(
+            [in] String method,
+            [out] Int32* numIterations);
+
+        IsTimedTest(
+            [in] String method,
+            [out] Boolean* result);
+
+        IsIncludeDetailedStats(
+            [in] String method,
+            [out] Boolean* result);
+    }
+
+    } // namespace Framework
+    } // namespace Eunit
+}

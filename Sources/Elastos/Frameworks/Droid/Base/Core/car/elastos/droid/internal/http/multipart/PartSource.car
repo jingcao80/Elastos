@@ -1,0 +1,55 @@
+module
+{
+    using interface Elastos.IO.IInputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Http {
+    namespace Multipart {
+
+    /**
+     * An interface for providing access to data when posting MultiPart messages.
+     *
+     * @see FilePart
+     *
+     * @author <a href="mailto:becke@u.washington.edu">Michael Becke</a>
+     *
+     * @since 2.0
+     */
+    interface IPartSource {
+        /**
+         * Gets the number of bytes contained in this source.
+         *
+         * @return a value >= 0
+         */
+        GetLength(
+            [out] Int64* length);
+
+        /**
+         * Gets the name of the file this source represents.
+         *
+         * @return the fileName used for posting a MultiPart file part
+         */
+        GetFileName(
+            [out] String* fileName);
+
+        /**
+         * Gets a new InputStream for reading this source.  This method can be
+         * called more than once and should therefore return a new stream every
+         * time.
+         *
+         * @return a new InputStream
+         *
+         * @throws IOException if an error occurs when creating the InputStream
+         */
+        CreateInputStream(
+            [out] IInputStream** stream);
+    }
+
+    } // namespace Multipart
+    } // namespace Http
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

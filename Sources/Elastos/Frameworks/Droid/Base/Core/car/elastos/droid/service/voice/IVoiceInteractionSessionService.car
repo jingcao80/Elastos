@@ -1,0 +1,25 @@
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Voice {
+
+    /**
+     * @hide
+     */
+     [oneway]
+    interface IIVoiceInteractionSessionService {
+        NewSession(
+            [in] IBinder* token,
+            [in] IBundle* args);
+    }
+
+    } // namespace Voice
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,36 @@
+
+module
+{
+
+    using interface Elastos.IO.IOutputStream;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Entity {
+
+    /**
+     * An abstract entity content producer.
+     *
+     *<p>Content producers are expected to be able to produce their
+     * content multiple times</p>
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 496070 $
+     *
+     * @since 4.0
+     */
+    interface IContentProducer {
+
+        WriteTo(
+            [in] IOutputStream* outstream);
+
+    }
+
+    } // namespace Entity
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

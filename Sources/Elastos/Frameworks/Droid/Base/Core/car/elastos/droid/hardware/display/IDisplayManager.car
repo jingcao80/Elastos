@@ -1,0 +1,94 @@
+
+module
+{
+    interface Elastos.Droid.View.IDisplayInfo;
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.Media.Projection.IIMediaProjection;
+    interface Elastos.Droid.Hardware.Display.IIVirtualDisplayCallback;
+    interface Elastos.Droid.Hardware.Display.IIDisplayManagerCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Display {
+
+    interface IIDisplayManager {
+        GetDisplayInfo(
+            [in] Int32 displayId,
+            [out] IDisplayInfo** displayInfo);
+
+        GetDisplayIds(
+            [out, callee] ArrayOf<Int32>* displayIds);
+
+        RegisterCallback(
+            [in] IIDisplayManagerCallback* cb);
+
+        // Requires CONFIGURE_WIFI_DISPLAY permission.
+        // The process must have previously registered a callback.
+        StartWifiDisplayScan();
+
+        // Requires CONFIGURE_WIFI_DISPLAY permission.
+        StopWifiDisplayScan();
+
+        // Requires CONFIGURE_WIFI_DISPLAY permission.
+        ConnectWifiDisplay(
+            [in] String address);
+
+        // No permissions required.
+        DisconnectWifiDisplay();
+
+        // Requires CONFIGURE_WIFI_DISPLAY permission.
+        RenameWifiDisplay(
+            [in] String address,
+            [in] String alias);
+
+        // Requires CONFIGURE_WIFI_DISPLAY permission.
+        ForgetWifiDisplay(
+            [in] String address);
+
+        // Requires CONFIGURE_WIFI_DISPLAY permission.
+        PauseWifiDisplay();
+
+        // Requires CONFIGURE_WIFI_DISPLAY permission.
+        ResumeWifiDisplay();
+
+        // No permissions required.
+        // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
+        // MediaProjection token for certain combinations of flags.
+        CreateVirtualDisplay(
+            [in] IIVirtualDisplayCallback* clbk,
+            [in] IIMediaProjection* projectionToken,
+            [in] String packageName,
+            [in] String name,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 densityDpi,
+            [in] ISurface* surface,
+            [in] Int32 flags,
+            [out] Int32* result);
+
+        // No permissions required, but must be same Uid as the creator.
+        ResizeVirtualDisplay(
+            [in] IIVirtualDisplayCallback* token,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 densityDpi);
+
+        // No permissions required but must be same Uid as the creator.
+        SetVirtualDisplaySurface(
+            [in] IIVirtualDisplayCallback* token,
+            [in] ISurface* surface);
+
+        // No permissions required but must be same Uid as the creator.
+        ReleaseVirtualDisplay(
+            [in] IIVirtualDisplayCallback* token);
+
+        GetWifiDisplayStatus(
+             [out] IWifiDisplayStatus** wds);
+    }
+
+    } // namespace Display
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,221 @@
+
+module
+{
+    interface Elastos.Droid.Net.IDhcpInfo;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IMessenger;
+    interface Elastos.Droid.Os.IWorkSource;
+    interface Elastos.Droid.Wifi.IScanSettings;
+    interface Elastos.Droid.Wifi.IWifiActivityEnergyInfo;
+    interface Elastos.Droid.Wifi.IWifiConfiguration;
+    interface Elastos.Droid.Wifi.IWifiConnectionStatistics;
+    interface Elastos.Droid.Wifi.IWifiInfo;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+
+    /**
+     * Interface that allows controlling and querying Wi-Fi connectivity.
+     *
+     * {@hide}
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IIWifiManager {
+        GetSupportedFeatures(
+            [out] Int32* result);
+
+        ReportActivityInfo(
+            [out] IWifiActivityEnergyInfo** result);
+
+        GetConfiguredNetworks(
+            [out] IList** result);
+
+        GetPrivilegedConfiguredNetworks(
+            [out] IList** result);
+
+        AddOrUpdateNetwork(
+            [in] IWifiConfiguration* config,
+            [out] Int32* result);
+
+        RemoveNetwork(
+            [in] Int32 netId,
+            [out] Boolean* result);
+
+        EnableNetwork(
+            [in] Int32 netId,
+            [in] Boolean disableOthers,
+            [out] Boolean* result);
+
+        DisableNetwork(
+            [in] Int32 netId,
+            [out] Boolean* result);
+
+        PingSupplicant(
+            [out] Boolean* result);
+
+        GetChannelList(
+            [out] IList** result);
+
+        StartScan(
+            [in] IScanSettings* requested,
+            [in] IWorkSource* ws);
+
+        GetScanResults(
+            [in] String callingPackage,
+            [out] IList** result);
+
+        Disconnect();
+
+        Reconnect();
+
+        Reassociate();
+
+        GetConnectionInfo(
+            [out] IWifiInfo** result);
+
+        SetWifiEnabled(
+            [in] Boolean wifiEnable,
+            [out] Boolean* result);
+
+        GetWifiEnabledState(
+            [out] Int32* result);
+
+        SetCountryCode(
+            [in] String country,
+            [in] Boolean persist);
+
+        SetFrequencyBand(
+            [in] Int32 band,
+            [in] Boolean persist);
+
+        GetFrequencyBand(
+            [out] Int32* result);
+
+        IsDualBandSupported(
+            [out] Boolean* result);
+
+        SaveConfiguration(
+            [out] Boolean* result);
+
+        GetDhcpInfo(
+            [out] IDhcpInfo** result);
+
+        IsScanAlwaysAvailable(
+            [out] Boolean* result);
+
+        AcquireWifiLock(
+            [in] IBinder* lock,
+            [in] Int32 lockType,
+            [in] String tag,
+            [in] IWorkSource* ws,
+            [out] Boolean* result);
+
+        UpdateWifiLockWorkSource(
+            [in] IBinder* lock,
+            [in] IWorkSource* ws);
+
+        ReleaseWifiLock(
+            [in] IBinder* lock,
+            [out] Boolean* result);
+
+        InitializeMulticastFiltering();
+
+        IsMulticastEnabled(
+            [out] Boolean* result);
+
+        AcquireMulticastLock(
+            [in] IBinder* binder,
+            [in] String tag);
+
+        ReleaseMulticastLock();
+
+        SetWifiApEnabled(
+            [in] IWifiConfiguration* wifiConfig,
+            [in] Boolean wifiApEnable);
+
+        GetWifiApEnabledState(
+            [out] Int32* result);
+
+        GetWifiApConfiguration(
+            [out] IWifiConfiguration** result);
+
+        SetWifiApConfiguration(
+            [in] IWifiConfiguration* wifiConfig);
+
+        StartWifi();
+
+        StopWifi();
+
+        AddToBlacklist(
+            [in] String bssid);
+
+        ClearBlacklist();
+
+        GetWifiServiceMessenger(
+            [out] IMessenger** result);
+
+        GetConfigFile(
+            [out] String* result);
+
+        EnableTdls(
+            [in] String remoteIPAddress,
+            [in] Boolean enableTdls);
+
+        EnableTdlsWithMacAddress(
+            [in] String remoteMacAddress,
+            [in] Boolean enableTdsWithMacAddress);
+
+        RequestBatchedScan(
+            [in] IBatchedScanSettings* requested,
+            [in] IBinder* binder,
+            [in] IWorkSource* ws,
+            [out] Boolean* result);
+
+        StopBatchedScan(
+            [in] IBatchedScanSettings* requested);
+
+        GetBatchedScanResults(
+            [in] String callingPackage,
+            [out] IList** result);
+
+        IsBatchedScanSupported(
+            [out] Boolean* result);
+
+        PollBatchedScan();
+
+        GetWpsNfcConfigurationToken(
+            [in] Int32 netId,
+            [out] String* result);
+
+        EnableVerboseLogging(
+            [in] Int32 verbose);
+
+        GetVerboseLoggingLevel(
+            [out] Int32* result);
+
+        GetAggressiveHandover(
+            [out] Int32* result);
+
+        EnableAggressiveHandover(
+            [in] Int32 enabled);
+
+        GetAllowScansWithTraffic(
+            [out] Int32* result);
+
+        SetAllowScansWithTraffic(
+            [in] Int32 enabledScansWithTraffic);
+
+        GetConnectionStatistics(
+            [out] IWifiConnectionStatistics** result);
+    }
+
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}

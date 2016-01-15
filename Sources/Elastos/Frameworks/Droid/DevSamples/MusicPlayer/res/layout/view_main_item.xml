@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:gravity="center_horizontal"
+    android:layout_height="fill_parent" >
+
+    <ImageView
+        android:id="@+item/main_imgview_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:contentDescription="@null"
+        android:src="@drawable/music_logo" />
+
+    <TextView
+        android:id="@+item/main_tv_song"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+item/main_imgview_left"
+        android:text="@string/song" />
+
+    <TextView
+        android:id="@+item/main_tv_singer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+item/main_imgview_left"
+        android:text="@string/singer" />
+
+    <TextView
+        android:id="@+item/main_tv_byte"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="9.3M字节" />
+
+    <Button
+        android:id="@+item/main_btn_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/music_logo" />
+
+    <TextView
+        android:id="@+item/main_tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+item/main_btn_more"
+        android:text="时长 04:24" />
+
+</RelativeLayout>

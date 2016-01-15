@@ -1,0 +1,107 @@
+
+module
+{
+    interface Elastos.Droid.Server.Net.INetworkStatsSettingsConfig;
+
+    using interface Elastos.Droid.Net.IIConnectivityManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Net {
+
+    /**
+     * Collect and persist detailed network statistics, and provide this data to
+     * other system services.
+     */
+    /**
+     * @Involved
+     * interface IINetworkStatsService;
+     * interface IBinder;
+     */
+    [local]
+    interface INetworkStatsService {
+        // @VisibleForTesting
+        const String ACTION_NETWORK_STATS_POLL = "com.android.server.action.NETWORK_STATS_POLL";
+        const String ACTION_NETWORK_STATS_UPDATED = "com.android.server.action.NETWORK_STATS_UPDATED";
+
+        BindConnectivityManager(
+            [in] IIConnectivityManager* connManager);
+
+        SystemReady();
+    }
+
+    /**
+     * Settings that can be changed externally.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    [local]
+    interface INetworkStatsSettings {
+        GetPollInterval(
+            [out] Int64* result);
+
+        GetTimeCacheMaxAge(
+            [out] Int64* result);
+
+        GetSampleEnabled(
+            [out] Boolean* result);
+
+        GetReportXtOverDev(
+            [out] Boolean* result);
+
+        GetDevConfig(
+            [out] INetworkStatsSettingsConfig** result);
+
+        GetXtConfig(
+            [out] INetworkStatsSettingsConfig** result);
+
+        GetUidConfig(
+            [out] INetworkStatsSettingsConfig** result);
+
+        GetUidTagConfig(
+            [out] INetworkStatsSettingsConfig** result);
+
+        GetGlobalAlertBytes(
+            [in] Int64 def,
+            [out] Int64* result);
+
+        GetDevPersistBytes(
+            [in] Int64 def,
+            [out] Int64* result);
+
+        GetXtPersistBytes(
+            [in] Int64 def,
+            [out] Int64* result);
+
+        GetUidPersistBytes(
+            [in] Int64 def,
+            [out] Int64* result);
+
+        GetUidTagPersistBytes(
+            [in] Int64 def,
+            [out] Int64* result);
+    }
+
+    /**
+     * @Involved
+     * no super interface ;
+     */
+    interface INetworkStatsSettingsConfig {
+        GetBucketDuration(
+            [out] Int64* result);
+
+        GetRotateAgeMillis(
+            [out] Int64* result);
+
+        GetDeleteAgeMillis(
+            [out] Int64* result);
+    }
+
+    } // namespace Net
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

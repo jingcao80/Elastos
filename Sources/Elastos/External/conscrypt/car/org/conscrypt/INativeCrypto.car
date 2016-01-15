@@ -1,0 +1,1618 @@
+
+module
+{
+    using interface Elastos.Core.IArrayOf;
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IOutputStream;
+    using interface Elastos.Utility.ICalendar;
+    using interface Elastos.Utility.IMap;
+    using interface Elastos.Security.Interfaces.IDSAPrivateKey;
+    using interface Elastos.Security.Interfaces.IECPrivateKey;
+    using interface Elastos.Security.Interfaces.IRSAPrivateKey;
+    using interface Elastosx.Security.Auth.X500.IX500Principal;
+    interface Org.Conscrypt.IOpenSSLBIOInputStream;
+    interface Org.Conscrypt.IOpenSSLDigestContext;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /**
+     * A collection of callbacks from the native OpenSSL code that are
+     * related to the SSL handshake initiated by SSL_do_handshake.
+     */
+    [deprecated]
+    interface ISSLHandshakeCallbacks {
+        /**
+         * Verify that we trust the certificate chain is trusted.
+         *
+         * @param sslSessionNativePtr pointer to a reference of the SSL_SESSION
+         * @param certificateChainRefs chain of X.509 certificate references
+         * @param authMethod auth algorithm name
+         *
+         * @throws CertificateException if the certificate is untrusted
+         */
+        VerifyCertificateChain(
+            [in] Int64 sslSessionNativePtr,
+            [in] ArrayOf<Int64>* certificateChainRefs,
+            [in] String authMethod);
+
+        /**
+         * Called on an SSL client when the server requests (or
+         * requires a certificate). The client can respond by using
+         * SSL_use_certificate and SSL_use_PrivateKey to set a
+         * certificate if has an appropriate one available, similar to
+         * how the server provides its certificate.
+         *
+         * @param keyTypes key types supported by the server,
+         * convertible to strings with #keyType
+         * @param asn1DerEncodedX500Principals CAs known to the server
+         */
+        ClientCertificateRequested(
+            [in] ArrayOf<Byte>* keyTypes,
+            [in] ArrayOf<Handle32>* asn1DerEncodedX500Principals);
+
+        /**
+         * Gets the key to be used in client mode for this connection in Pre-Shared Key (PSK) key
+         * exchange.
+         *
+         * @param identityHint PSK identity hint provided by the server or {@code null} if no hint
+         *        provided.
+         * @param identity buffer to be populated with PSK identity (NULL-terminated modified UTF-8)
+         *        by this method. This identity will be provided to the server.
+         * @param key buffer to be populated with key material by this method.
+         *
+         * @return number of bytes this method stored in the {@code key} buffer or {@code 0} if an
+         *         error occurred in which case the handshake will be aborted.
+         */
+        ClientPSKKeyRequested(
+            [in] String identityHint,
+            [in] ArrayOf<Byte>* identity,
+            [in] ArrayOf<Byte>* key,
+            [out] Int32* result);
+
+        /**
+         * Gets the key to be used in server mode for this connection in Pre-Shared Key (PSK) key
+         * exchange.
+         *
+         * @param identityHint PSK identity hint provided by this server to the client or
+         *        {@code null} if no hint was provided.
+         * @param identity PSK identity provided by the client.
+         * @param key buffer to be populated with key material by this method.
+         *
+         * @return number of bytes this method stored in the {@code key} buffer or {@code 0} if an
+         *         error occurred in which case the handshake will be aborted.
+         */
+        ServerPSKKeyRequested(
+            [in] String identityHint,
+            [in] String identity,
+            [in] ArrayOf<Byte>* key,
+            [out] Int32* result);
+
+        /**
+         * Called when SSL state changes. This could be handshake completion.
+         */
+        OnSSLStateChange(
+            [in] Int64 sslSessionNativePtr,
+            [in] Int32 type,
+            [in] Int32 val);
+    }
+
+    [deprecated]
+    interface INativeCrypto {
+        // --- ENGINE functions ----------------------------------------------------
+        ENGINE_load_dynamic();
+
+        ENGINE_by_id(
+            [in] String id,
+            [out] Int64* result);
+
+        ENGINE_add(
+            [in] Int64 e,
+            [out] Int32* result);
+
+        ENGINE_init(
+            [in] Int64 e,
+            [out] Int32* result);
+
+        ENGINE_finish(
+            [in] Int64 e,
+            [out] Int32* result);
+
+        ENGINE_free(
+            [in] Int64 e,
+            [out] Int32* result);
+
+        ENGINE_load_private_key(
+            [in] Int64 e,
+            [in] String key_id,
+            [out] Int64* result);
+
+        ENGINE_get_id(
+            [in] Int64 engineRef,
+            [out] String* result);
+
+        ENGINE_ctrl_cmd_string(
+            [in] Int64 engineRef,
+            [in] String cmd,
+            [in] String arg,
+            [in] Int32 cmd_optional,
+            [out] Int32* result);
+
+        // --- DSA/RSA public/private key handling functions -----------------------
+
+        EVP_PKEY_new_DSA(
+            [in] ArrayOf<Byte>* p,
+            [in] ArrayOf<Byte>* q,
+            [in] ArrayOf<Byte>* g,
+            [in] ArrayOf<Byte>* pub_key,
+            [in] ArrayOf<Byte>* priv_key,
+            [out] Int64* result);
+
+        EVP_PKEY_new_RSA(
+            [in] ArrayOf<Byte>* n,
+            [in] ArrayOf<Byte>* e,
+            [in] ArrayOf<Byte>* d,
+            [in] ArrayOf<Byte>* p,
+            [in] ArrayOf<Byte>* q,
+            [in] ArrayOf<Byte>* dmp1,
+            [in] ArrayOf<Byte>* dmq1,
+            [in] ArrayOf<Byte>* iqmp,
+            [out] Int64* result);
+
+        EVP_PKEY_new_mac_key(
+            [in] Int32 type,
+            [in] ArrayOf<Byte>* key,
+            [out] Int64* result);
+
+        EVP_PKEY_size(
+            [in] Int64 pkey,
+            [out] Int32* result);
+
+        EVP_PKEY_type(
+            [in] Int64 pkey,
+            [out] Int32* result);
+
+        EVP_PKEY_print_public(
+            [in] Int64 pkeyRef,
+            [out] String* result);
+
+        EVP_PKEY_print_private(
+            [in] Int64 pkeyRef,
+            [out] String* result);
+
+        EVP_PKEY_free(
+            [in] Int64 pkey);
+
+        EVP_PKEY_cmp(
+            [in] Int64 pkey1,
+            [in] Int64 pkey2,
+            [out] Int32* result);
+
+        I2d_PKCS8_PRIV_KEY_INFO(
+            [in] Int64 pkey,
+            [out, callee] ArrayOf<Byte>* result);
+
+        D2i_PKCS8_PRIV_KEY_INFO(
+            [in] ArrayOf<Byte>* data,
+            [out] Int64* result);
+
+        I2d_PUBKEY(
+            [in] Int64 pkey,
+            [out, callee] ArrayOf<Byte>* result);
+
+        D2i_PUBKEY(
+            [in] ArrayOf<Byte>* data,
+            [out] Int64* result);
+
+        GetRSAPrivateKeyWrapper(
+            [in] IRSAPrivateKey* key,
+            [in] ArrayOf<Byte>* modulus,
+            [out] Int64* result);
+
+        GetDSAPrivateKeyWrapper(
+            [in] IDSAPrivateKey* key,
+            [out] Int64* result);
+
+        GetECPrivateKeyWrapper(
+            [in] IECPrivateKey* key,
+            [in] Int64 ecGroupRef,
+            [out] Int64* result);
+
+        RSA_generate_key_ex(
+            [in] Int32 modulusBits,
+            [in] ArrayOf<Byte>* publicExponent,
+            [out] Int64* result);
+
+        RSA_size(
+            [in] Int64 pkey,
+            [out] Int32* result);
+
+        RSA_private_encrypt(
+            [in] Int32 flen,
+            [in] ArrayOf<Byte>* from,
+            [in] ArrayOf<Byte>* to,
+            [in] Int64 pkey,
+            [in] Int32 padding,
+            [out] Int32* result);
+
+        RSA_public_decrypt(
+            [in] Int32 flen,
+            [in] ArrayOf<Byte>* from,
+            [in] ArrayOf<Byte>* to,
+            [in] Int64 pkey,
+            [in] Int32 padding,
+            [out] Int32* result);
+
+        RSA_public_encrypt(
+            [in] Int32 flen,
+            [in] ArrayOf<Byte>* from,
+            [in] ArrayOf<Byte>* to,
+            [in] Int64 pkey,
+            [in] Int32 padding,
+            [out] Int32* result);
+
+        RSA_private_decrypt(
+            [in] Int32 flen,
+            [in] ArrayOf<Byte>* from,
+            [in] ArrayOf<Byte>* to,
+            [in] Int64 pkey,
+            [in] Int32 padding,
+            [out] Int32* result);
+
+        /**
+         * @return array of {n, e}
+         */
+        Get_RSA_public_params(
+            [in] Int64 rsa,
+            [out, callee] ArrayOf<Byte>* n,
+            [out, callee] ArrayOf<Byte>* e);
+
+        /**
+         * @return array of {n, e, d, p, q, dmp1, dmq1, iqmp}
+         */
+        Get_RSA_private_params(
+            [in] Int64 rsa,
+            [out, callee] ArrayOf<Byte>* n,
+            [out, callee] ArrayOf<Byte>* e,
+            [out, callee] ArrayOf<Byte>* d,
+            [out, callee] ArrayOf<Byte>* p,
+            [out, callee] ArrayOf<Byte>* q,
+            [out, callee] ArrayOf<Byte>* dmp1,
+            [out, callee] ArrayOf<Byte>* dmq1,
+            [out, callee] ArrayOf<Byte>* iqmp);
+
+        DSA_generate_key(
+            [in] Int32 primeBits,
+            [in] ArrayOf<Byte>* seed,
+            [in] ArrayOf<Byte>* g,
+            [in] ArrayOf<Byte>* p,
+            [in] ArrayOf<Byte>* q,
+            [out] Int64* result);
+
+        /**
+         * @return array of {g, p, q, y(pub), x(priv)}
+         */
+        Get_DSA_params(
+            [in] Int64 dsa,
+            [out, callee] ArrayOf<Byte>* g,
+            [out, callee] ArrayOf<Byte>* p,
+            [out, callee] ArrayOf<Byte>* q,
+            [out, callee] ArrayOf<Byte>* ypub,
+            [out, callee] ArrayOf<Byte>* xpriv);
+
+        Set_DSA_flag_nonce_from_hash(
+            [in] Int64 dsa);
+
+        I2d_RSAPublicKey(
+            [in] Int64 rsa,
+            [out, callee] ArrayOf<Byte>* result);
+
+        I2d_RSAPrivateKey(
+            [in] Int64 rsa,
+            [out, callee] ArrayOf<Byte>* result);
+
+        I2d_DSAPublicKey(
+            [in] Int64 dsa,
+            [out, callee] ArrayOf<Byte>* result);
+
+        I2d_DSAPrivateKey(
+            [in] Int64 dsa,
+            [out, callee] ArrayOf<Byte>* result);
+
+        // --- DH public/private key handling functions ----------------------------
+
+        EVP_PKEY_new_DH(
+            [in] ArrayOf<Byte>* p,
+            [in] ArrayOf<Byte>* g,
+            [in] ArrayOf<Byte>* pub_key,
+            [in] ArrayOf<Byte>* priv_key,
+            [out] Int64* result);
+
+        DH_generate_parameters_ex(
+            [in] Int32 primeBits,
+            [in] Int64 generator,
+            [out] Int64* result);
+
+        DH_generate_key(
+            [in] Int64 pkeyRef);
+
+        /**
+         * @return array of {p, g, y(pub), x(priv)}
+         */
+        Get_DH_params(
+            [in] Int64 dh,
+            [out, callee] ArrayOf<Byte>* p,
+            [out, callee] ArrayOf<Byte>* g,
+            [out, callee] ArrayOf<Byte>* ypub,
+            [out, callee] ArrayOf<Byte>* xpriv);
+
+        // --- EC functions --------------------------
+
+        /**
+         * Used to request EC_GROUP_new_curve_GFp to EC_GROUP_new_curve
+         */
+        const Int32 EC_CURVE_GFP = 1;
+
+        /**
+         * Used to request EC_GROUP_new_curve_GF2m to EC_GROUP_new_curve
+         */
+        const Int32 EC_CURVE_GF2M = 2;
+
+        /**
+         * EC_GROUP_set_asn1_flag: indicates an EC_GROUP is a NamedCurve.
+         */
+        const Int32 OPENSSL_EC_NAMED_CURVE = 0x001;
+
+        /**
+         * EC_GROUP_set_point_conversion_form: indicates compressed ASN.1 format
+         */
+        const Int32 POINT_CONVERSION_COMPRESSED = 2;
+
+        /**
+         * EC_GROUP_set_point_conversion_form: indicates uncompressed ASN.1 format
+         */
+        const Int32 POINT_CONVERSION_UNCOMPRESSED = 4;
+
+        /**
+         * EC_GROUP_set_point_conversion_form: indicates hybrid ASN.1 format
+         */
+        const Int32 POINT_CONVERSION_HYBRID = 4;
+
+        EVP_PKEY_new_EC_KEY(
+            [in] Int64 groupRef,
+            [in] Int64 pubkeyRef,
+            [in] ArrayOf<Byte>* privkey,
+            [out] Int64* result);
+
+        EC_GROUP_new_by_curve_name(
+            [in] String curveName,
+            [out] Int64* result);
+
+        EC_GROUP_new_curve(
+            [in] Int32 type,
+            [in] ArrayOf<Byte>* p,
+            [in] ArrayOf<Byte>* a,
+            [in] ArrayOf<Byte>* b,
+            [out] Int64* result);
+
+        EC_GROUP_dup(
+            [in] Int64 groupRef,
+            [out] Int64* result);
+
+        EC_GROUP_set_asn1_flag(
+            [in] Int64 groupRef,
+            [in] Int32 flag);
+
+        EC_GROUP_set_point_conversion_form(
+            [in] Int64 groupRef,
+            [in] Int32 form);
+
+        EC_GROUP_get_curve_name(
+            [in] Int64 groupRef,
+            [out] String* result);
+
+        EC_GROUP_get_curve(
+            [in] Int64 groupRef,
+            [out, callee] ArrayOf<Byte>* p,
+            [out, callee] ArrayOf<Byte>* a,
+            [out, callee] ArrayOf<Byte>* b);
+
+        EC_GROUP_clear_free(
+            [in] Int64 ctx);
+
+        EC_GROUP_cmp(
+            [in] Int64 ctx1,
+            [in] Int64 ctx2,
+            [out] Boolean* result);
+
+        EC_GROUP_set_generator(
+            [in] Int64 groupCtx,
+            [in] Int64 pointCtx,
+            [in] ArrayOf<Byte>* n,
+            [in] ArrayOf<Byte>* h);
+
+        EC_GROUP_get_generator(
+            [in] Int64 groupCtx,
+            [out] Int64* result);
+
+        Get_EC_GROUP_type(
+            [in] Int64 groupCtx,
+            [out] Int32* result);
+
+        EC_GROUP_get_order(
+            [in] Int64 groupCtx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        EC_GROUP_get_degree(
+            [in] Int64 groupCtx,
+            [out] Int32* result);
+
+        EC_GROUP_get_cofactor(
+            [in] Int64 groupCtx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        EC_POINT_new(
+            [in] Int64 groupRef,
+            [out] Int64* result);
+
+        EC_POINT_clear_free(
+            [in] Int64 pointRef);
+
+        EC_POINT_cmp(
+            [in] Int64 groupRef,
+            [in] Int64 pointRef1,
+            [in] Int64 pointRef2,
+            [out] Boolean* result);
+
+        EC_POINT_get_affine_coordinates(
+            [in] Int64 groupCtx,
+            [in] Int64 pointCtx,
+            [out, callee] ArrayOf<Byte>* x,
+            [out, callee] ArrayOf<Byte>* y);
+
+        EC_POINT_set_affine_coordinates(
+            [in] Int64 groupCtx,
+            [in] Int64 pointCtx,
+            [in] ArrayOf<Byte>* x,
+            [in] ArrayOf<Byte>* y);
+
+        EC_KEY_generate_key(
+            [in] Int64 groupRef,
+            [out] Int64* result);
+
+        EC_KEY_get0_group(
+            [in] Int64 pkeyRef,
+            [out] Int64* result);
+
+        EC_KEY_get_private_key(
+            [in] Int64 keyRef,
+            [out, callee] ArrayOf<Byte>* result);
+
+        EC_KEY_get_public_key(
+            [in] Int64 keyRef,
+            [out] Int64* result);
+
+        EC_KEY_set_nonce_from_hash(
+            [in] Int64 keyRef,
+            [in] Boolean enabled);
+
+        ECDH_compute_key(
+            [in] ArrayOf<Byte>* outArray,
+            [in] Int32 outOffset,
+            [in] Int64 publicKeyRef,
+            [in] Int64 privateKeyRef,
+            [out] Int32* result);
+
+        // --- Message digest functions --------------
+
+        EVP_get_digestbyname(
+            [in] String name,
+            [out] Int64* result);
+
+        EVP_MD_size(
+            [in] Int64 evp_md,
+            [out] Int32* result);
+
+        EVP_MD_block_size(
+            [in] Int64 evp_md,
+            [out] Int32* result);
+
+        // --- Message digest context functions --------------
+
+        EVP_MD_CTX_create(
+            [out] Int64* result);
+
+        EVP_MD_CTX_init(
+            [in] IOpenSSLDigestContext* ctx);
+
+        EVP_MD_CTX_destroy(
+            [in] Int64 ctx);
+
+        EVP_MD_CTX_copy(
+            [in] IOpenSSLDigestContext* dst_ctx,
+            [in] IOpenSSLDigestContext* src_ctx,
+            [out] Int32* result);
+
+        // --- Digest handling functions -------------------------------------------
+
+        EVP_DigestInit(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] Int64 evp_md,
+            [out] Int32* result);
+
+        EVP_DigestUpdate(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        EVP_DigestFinal(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] ArrayOf<Byte>* hash,
+            [in] Int32 offset,
+            [out] Int32* result);
+
+        // --- MAC handling functions ----------------------------------------------
+
+        EVP_DigestSignInit(
+            [in] IOpenSSLDigestContext* evp_md_ctx,
+            [in] Int64 evp_md,
+            [in] Int64 evp_pkey);
+
+        EVP_DigestSignUpdate(
+            [in] IOpenSSLDigestContext* evp_md_ctx,
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        EVP_DigestSignFinal(
+            [in] IOpenSSLDigestContext* evp_md_ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        // --- Signature handling functions ----------------------------------------
+
+        EVP_SignInit(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] Int64 evpRef,
+            [out] Int32* result);
+
+        EVP_SignUpdate(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        EVP_SignFinal(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] ArrayOf<Byte>* signature,
+            [in] Int32 offset,
+            [in] Int64 key,
+            [out] Int32* result);
+
+        EVP_VerifyInit(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] Int64 evpRef,
+            [out] Int32* result);
+
+        EVP_VerifyUpdate(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        EVP_VerifyFinal(
+            [in] IOpenSSLDigestContext* ctx,
+            [in] ArrayOf<Byte>* signature,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] Int64 key,
+            [out] Int32* result);
+
+        // --- Block ciphers -------------------------------------------------------
+
+        EVP_get_cipherbyname(
+            [in] String string,
+            [out] Int64* result);
+
+        EVP_CipherInit_ex(
+            [in] Int64 ctx,
+            [in] Int64 evpCipher,
+            [in] ArrayOf<Byte>* key,
+            [in] ArrayOf<Byte>* iv,
+            [in] Boolean encrypting);
+
+        EVP_CipherUpdate(
+            [in] Int64 ctx,
+            [in] ArrayOf<Byte>* outArray,
+            [in] Int32 outOffset,
+            [in] ArrayOf<Byte>* inArray,
+            [in] Int32 inOffset,
+            [in] Int32 inLength,
+            [out] Int32* result);
+
+        EVP_CipherFinal_ex(
+            [in] Int64 ctx,
+            [in] ArrayOf<Byte>* outArray,
+            [in] Int32 outOffset,
+            [out] Int32* result);
+
+        EVP_CIPHER_iv_length(
+            [in] Int64 evpCipher,
+            [out] Int32* result);
+
+        EVP_CIPHER_CTX_new(
+            [out] Int64* result);
+
+        EVP_CIPHER_CTX_block_size(
+            [in] Int64 ctx,
+            [out] Int32* result);
+
+        Get_EVP_CIPHER_CTX_buf_len(
+            [in] Int64 ctx,
+            [out] Int32* result);
+
+        EVP_CIPHER_CTX_set_padding(
+            [in] Int64 ctx,
+            [in] Boolean enablePadding);
+
+        EVP_CIPHER_CTX_set_key_length(
+            [in] Int64 ctx,
+            [in] Int32 keyBitSize);
+
+        EVP_CIPHER_CTX_cleanup(
+            [in] Int64 ctx);
+
+        // --- RAND seeding --------------------------------------------------------
+
+        const Int32 RAND_SEED_LENGTH_IN_BYTES = 1024;
+
+        RAND_seed(
+            [in] ArrayOf<Byte>* seed);
+
+        RAND_load_file(
+            [in] String filename,
+            [in] Int64 max_bytes,
+            [out] Int32* result);
+
+        RAND_bytes(
+            [in] ArrayOf<Byte>* output);
+
+        // --- ASN.1 objects -------------------------------------------------------
+
+        OBJ_txt2nid(
+            [in] String oid,
+            [out] Int32* result);
+
+        OBJ_txt2nid_longName(
+            [in] String oid,
+            [out] String* result);
+
+        OBJ_txt2nid_oid(
+            [in] String oid,
+            [out] String* result);
+
+        // --- X509_NAME -----------------------------------------------------------
+
+        X509_NAME_hash(
+            [in] IX500Principal* principal,
+            [out] Int32* result);
+
+        X509_NAME_hash_old(
+            [in] IX500Principal* principal,
+            [out] Int32* result);
+
+        X509_NAME_print_ex(
+            [in] Int64 x509nameCtx,
+            [in] Int64 flags,
+            [out] String* result);
+
+        // --- X509 ----------------------------------------------------------------
+
+        /** Used to request get_X509_GENERAL_NAME_stack get the "altname" field. */
+        const Int32 GN_STACK_SUBJECT_ALT_NAME = 1;
+
+        /**
+         * Used to request get_X509_GENERAL_NAME_stack get the issuerAlternativeName
+         * extension.
+         */
+        const Int32 GN_STACK_ISSUER_ALT_NAME = 2;
+
+        /**
+         * Used to request only non-critical types in get_X509*_ext_oids.
+         */
+        const Int32 EXTENSION_TYPE_NON_CRITICAL = 0;
+
+        /**
+         * Used to request only critical types in get_X509*_ext_oids.
+         */
+        const Int32 EXTENSION_TYPE_CRITICAL = 1;
+
+        D2i_X509_bio(
+            [in] Int64 bioCtx,
+            [out] Int64* result);
+
+        D2i_X509(
+            [in] ArrayOf<Byte>* encoded,
+            [out] Int64* result);
+
+        PEM_read_bio_X509(
+            [in] Int64 bioCtx,
+            [out] Int64* result);
+
+        I2d_X509(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /** Takes an X509 context not an X509_PUBKEY context. */
+        I2d_X509_PUBKEY(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        ASN1_seq_pack_X509(
+            [in] ArrayOf<Int64>* x509CertRefs,
+            [out, callee] ArrayOf<Byte>* result);
+
+        ASN1_seq_unpack_X509_bio(
+            [in] Int64 bioRef,
+            [out, callee] ArrayOf<Int64>* result);
+
+        X509_free(
+            [in] Int64 x509ctx);
+
+        X509_cmp(
+            [in] Int64 x509ctx1,
+            [in] Int64 x509ctx2,
+            [out] Int32* result);
+
+        Get_X509_hashCode(
+            [in] Int64 x509ctx,
+            [out] Int32* result);
+
+        X509_print_ex(
+            [in] Int64 bioCtx,
+            [in] Int64 x509ctx,
+            [in] Int64 nmflag,
+            [in] Int64 certflag);
+
+        X509_get_issuer_name(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_get_subject_name(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        Get_X509_sig_alg_oid(
+            [in] Int64 x509ctx,
+            [out] String* result);
+
+        Get_X509_sig_alg_parameter(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        Get_X509_issuerUID(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Boolean>* result);
+
+        Get_X509_subjectUID(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Boolean>* result);
+
+        X509_get_pubkey(
+            [in] Int64 x509ctx,
+            [out] Int64* result);
+
+        Get_X509_pubkey_oid(
+            [in] Int64 x509ctx,
+            [out] String* result);
+
+        X509_get_ext_oid(
+            [in] Int64 x509ctx,
+            [in] String oid,
+            [out, callee] ArrayOf<Byte>* result);
+
+        Get_X509_ext_oids(
+            [in] Int64 x509ctx,
+            [in] Int32 critical,
+            [out, callee] ArrayOf<String>* result);
+
+        Get_X509_GENERAL_NAME_stack(
+            [in] Int64 x509ctx,
+            [in] Int32 type,
+            [out, callee] ArrayOf<IArrayOf*>* result);
+
+        Get_X509_ex_kusage(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Boolean>* result);
+
+        Get_X509_ex_xkusage(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<String>* result);
+
+        Get_X509_ex_pathlen(
+            [in] Int64 x509ctx,
+            [out] Int32* result);
+
+        X509_get_notBefore(
+            [in] Int64 x509ctx,
+            [out] Int64* result);
+
+        X509_get_notAfter(
+            [in] Int64 x509ctx,
+            [out] Int64* result);
+
+        X509_get_version(
+            [in] Int64 x509ctx,
+            [out] Int64* result);
+
+        X509_get_serialNumber(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_verify(
+            [in] Int64 x509ctx,
+            [in] Int64 pkeyCtx);
+
+        Get_X509_cert_info_enc(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        Get_X509_signature(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        Get_X509_ex_flags(
+            [in] Int64 x509ctx,
+            [out] Int32* result);
+
+        X509_check_issued(
+            [in] Int64 ctx,
+            [in] Int64 ctx2,
+            [out] Int32* result);
+
+        // --- X509 EXFLAG ---------------------------------------------------------
+
+        const Int32 EXFLAG_CA = 0x10;
+
+        const Int32 EXFLAG_CRITICAL = 0x200;
+
+        // --- PKCS7 ---------------------------------------------------------------
+
+        /** Used as the "which" field in d2i_PKCS7_bio and PEM_read_bio_PKCS7. */
+        const Int32 PKCS7_CERTS = 1;
+
+        /** Used as the "which" field in d2i_PKCS7_bio and PEM_read_bio_PKCS7. */
+        const Int32 PKCS7_CRLS = 2;
+
+        /** Returns an array of X509 or X509_CRL pointers. */
+        D2i_PKCS7_bio(
+            [in] Int64 bioCtx,
+            [in] Int32 which,
+            [out, callee] ArrayOf<Int64>* result);
+
+        /** Returns an array of X509 or X509_CRL pointers. */
+        I2d_PKCS7(
+            [in] ArrayOf<Int64>* certs,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /** Returns an array of X509 or X509_CRL pointers. */
+        PEM_read_bio_PKCS7(
+            [in] Int64 bioCtx,
+            [in] Int32 which,
+            [out, callee] ArrayOf<Int64>* result);
+
+        // --- X509_CRL ------------------------------------------------------------
+
+        D2i_X509_CRL_bio(
+            [in] Int64 bioCtx,
+            [out] Int64* result);
+
+        PEM_read_bio_X509_CRL(
+            [in] Int64 bioCtx,
+            [out] Int64* result);
+
+        I2d_X509_CRL(
+            [in] Int64 x509CrlCtx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_CRL_free(
+            [in] Int64 x509CrlCtx);
+
+        X509_CRL_print(
+            [in] Int64 bioCtx,
+            [in] Int64 x509CrlCtx);
+
+        Get_X509_CRL_sig_alg_oid(
+            [in] Int64 x509CrlCtx,
+            [out] String* result);
+
+        Get_X509_CRL_sig_alg_parameter(
+            [in] Int64 x509CrlCtx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_CRL_get_issuer_name(
+            [in] Int64 x509CrlCtx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /** Returns X509_REVOKED reference that is not duplicated! */
+        X509_CRL_get0_by_cert(
+            [in] Int64 x509CrlCtx,
+            [in] Int64 x509Ctx,
+            [out] Int64* result);
+
+        /** Returns X509_REVOKED reference that is not duplicated! */
+        X509_CRL_get0_by_serial(
+            [in] Int64 x509CrlCtx,
+            [in] ArrayOf<Byte>* serial,
+            [out] Int64* result);
+
+        /** Returns an array of X509_REVOKED that are owned by the caller. */
+        X509_CRL_get_REVOKED(
+            [in] Int64 x509CrlCtx,
+            [out, callee] ArrayOf<Int64>* result);
+
+        Get_X509_CRL_ext_oids(
+            [in] Int64 x509ctx,
+            [in] Int32 critical,
+            [out, callee] ArrayOf<String>* result);
+
+        X509_CRL_get_ext_oid(
+            [in] Int64 x509CrlCtx,
+            [in] String oid,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_CRL_get_version(
+            [in] Int64 x509CrlCtx,
+            [out] Int64* result);
+
+        X509_CRL_get_ext(
+            [in] Int64 x509CrlCtx,
+            [in] String oid,
+            [out] Int64* result);
+
+        Get_X509_CRL_signature(
+            [in] Int64 x509ctx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_CRL_verify(
+            [in] Int64 x509CrlCtx,
+            [in] Int64 pkeyCtx);
+
+        Get_X509_CRL_crl_enc(
+            [in] Int64 x509CrlCtx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_CRL_get_lastUpdate(
+            [in] Int64 x509CrlCtx,
+            [out] Int64* result);
+
+        X509_CRL_get_nextUpdate(
+            [in] Int64 x509CrlCtx,
+            [out] Int64* result);
+
+        // --- X509_REVOKED --------------------------------------------------------
+
+        X509_REVOKED_dup(
+            [in] Int64 x509RevokedCtx,
+            [out] Int64* result);
+
+        I2d_X509_REVOKED(
+            [in] Int64 x509RevokedCtx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        Get_X509_REVOKED_ext_oids(
+            [in] Int64 x509ctx,
+            [in] Int32 critical,
+            [out, callee] ArrayOf<String>* result);
+
+        X509_REVOKED_get_ext_oid(
+            [in] Int64 x509RevokedCtx,
+            [in] String oid,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_REVOKED_get_serialNumber(
+            [in] Int64 x509RevokedCtx,
+            [out, callee] ArrayOf<Byte>* result);
+
+        X509_REVOKED_get_ext(
+            [in] Int64 x509RevokedCtx,
+            [in] String oid,
+            [out] Int64* result);
+
+        /** Returns ASN1_TIME reference. */
+        Get_X509_REVOKED_revocationDate(
+            [in] Int64 x509RevokedCtx,
+            [out] Int64* result);
+
+        X509_REVOKED_print(
+            [in] Int64 bioRef,
+            [in] Int64 x509RevokedCtx);
+
+        // --- X509_EXTENSION ------------------------------------------------------
+
+        X509_supported_extension(
+            [in] Int64 x509ExtensionRef,
+            [out] Int32* result);
+
+        // --- ASN1_TIME -----------------------------------------------------------
+
+        ASN1_TIME_to_Calendar(
+            [in] Int64 asn1TimeCtx,
+            [in] ICalendar* cal);
+
+        // --- BIO stream creation -------------------------------------------------
+
+        Create_BIO_InputStream(
+            [in] IOpenSSLBIOInputStream* is,
+            [out] Int64* result);
+
+        Create_BIO_OutputStream(
+            [in] IOutputStream* os,
+            [out] Int64* result);
+
+        BIO_read(
+            [in] Int64 bioRef,
+            [in] ArrayOf<Byte>* buffer,
+            [out] Int32* result);
+
+        BIO_write(
+            [in] Int64 bioRef,
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        BIO_free_all(
+            [in] Int64 bioRef);
+
+        // --- SSL handling --------------------------------------------------------
+
+        const String SUPPORTED_PROTOCOL_SSLV3 = "SSLv3";
+        const String SUPPORTED_PROTOCOL_TLSV1 = "TLSv1";
+        const String SUPPORTED_PROTOCOL_TLSV1_1 = "TLSv1.1";
+        const String SUPPORTED_PROTOCOL_TLSV1_2 = "TLSv1.2";
+
+        Get_OPENSSL_TO_STANDARD_CIPHER_SUITES(
+            [out] IMap** result);
+
+        Get_STANDARD_TO_OPENSSL_CIPHER_SUITES(
+            [out] IMap** result);
+
+        /**
+         * TLS_EMPTY_RENEGOTIATION_INFO_SCSV is RFC 5746's renegotiation
+         * indication signaling cipher suite value. It is not a real
+         * cipher suite. It is just an indication in the default and
+         * supported cipher suite lists indicates that the implementation
+         * supports secure renegotiation.
+         *
+         * In the RI, its presence means that the SCSV is sent in the
+         * cipher suite list to indicate secure renegotiation support and
+         * its absense means to send an empty TLS renegotiation info
+         * extension instead.
+         *
+         * However, OpenSSL doesn't provide an API to give this level of
+         * control, instead always sending the SCSV and always including
+         * the empty renegotiation info if TLS is used (as opposed to
+         * SSL). So we simply allow TLS_EMPTY_RENEGOTIATION_INFO_SCSV to
+         * be passed for compatibility as to provide the hint that we
+         * support secure renegotiation.
+         */
+        const String TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+                = "TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
+
+        /**
+         * TLS_FALLBACK_SCSV is from
+         * https://tools.ietf.org/html/draft-ietf-tls-downgrade-scsv-00
+         * to indicate to the server that this is a fallback protocol
+         * request.
+         */
+        const String TLS_FALLBACK_SCSV = "TLS_FALLBACK_SCSV";
+
+        // EVP_PKEY types from evp.h and objects.h
+        const Int32 EVP_PKEY_RSA  = 6;   // NID_rsaEcnryption
+        const Int32 EVP_PKEY_DSA  = 116; // NID_dsa
+        const Int32 EVP_PKEY_DH   = 28;  // NID_dhKeyAgreement
+        const Int32 EVP_PKEY_EC   = 408; // NID_X9_62_id_ecPublicKey
+        const Int32 EVP_PKEY_HMAC = 855; // NID_hmac
+        const Int32 EVP_PKEY_CMAC = 894; // NID_cmac
+
+        // RSA padding modes from rsa.h
+        const Int32 RSA_PKCS1_PADDING = 1;
+        const Int32 RSA_NO_PADDING    = 3;
+
+        // SSL mode from ssl.h
+        const Int64 SSL_MODE_HANDSHAKE_CUTTHROUGH = 0x00000080;
+        const Int64 SSL_MODE_CBC_RECORD_SPLITTING = 0x00000100;
+        const Int64 SSL_MODE_SEND_FALLBACK_SCSV   = 0x00000200;
+
+        // SSL options from ssl.h
+        const Int64 SSL_OP_TLSEXT_PADDING                         = 0x00000010;
+        const Int64 SSL_OP_NO_TICKET                              = 0x00004000;
+        const Int64 SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION = 0x00010000;
+        const Int64 SSL_OP_NO_SSLv3                               = 0x02000000;
+        const Int64 SSL_OP_NO_TLSv1                               = 0x04000000;
+        const Int64 SSL_OP_NO_TLSv1_1                             = 0x10000000;
+        const Int64 SSL_OP_NO_TLSv1_2                             = 0x08000000;
+
+        /*
+         * Client certificate types as defined in
+         * TLS 1.0 spec., 7.4.4. Certificate request.
+         * EC constants from RFC 4492.
+         * OpenSSL constants from ssl/tls1.h.
+         */
+        const Byte TLS_CT_RSA_SIGN = 1;
+        const Byte TLS_CT_DSS_SIGN = 2;
+        const Byte TLS_CT_RSA_FIXED_DH = 3;
+        const Byte TLS_CT_DSS_FIXED_DH = 4;
+        const Byte TLS_CT_ECDSA_SIGN = 64;
+        const Byte TLS_CT_RSA_FIXED_ECDH = 65;
+        const Byte TLS_CT_ECDSA_FIXED_ECDH = 66;
+
+        /*
+         * Used in the SSL_get_shutdown and SSL_set_shutdown functions.
+         */
+        const Int32 SSL_SENT_SHUTDOWN = 1;
+        const Int32 SSL_RECEIVED_SHUTDOWN = 2;
+
+        SSL_CTX_new(
+            [out] Int64* result);
+
+        GetSupportedCipherSuites(
+            [out, callee] ArrayOf<String>* result);
+
+        SSL_CTX_free(
+            [in] Int64 ssl_ctx);
+
+        SSL_CTX_set_session_id_context(
+            [in] Int64 ssl_ctx,
+            [in] ArrayOf<Byte>* sid_ctx);
+
+        SSL_new(
+            [in] Int64 ssl_ctx,
+            [out] Int64* result);
+
+        SSL_enable_tls_channel_id(
+            [in] Int64 ssl);
+
+        SSL_get_tls_channel_id(
+            [in] Int64 ssl,
+            [out, callee] ArrayOf<Byte>* result);
+
+        SSL_set1_tls_channel_id(
+            [in] Int64 ssl,
+            [in] Int64 pkey);
+
+        SSL_use_certificate(
+            [in] Int64 ssl,
+            [in] ArrayOf<Int64>* x509refs);
+
+        SSL_use_PrivateKey(
+            [in] Int64 ssl,
+            [in] Int64 pkey);
+
+        SSL_check_private_key(
+            [in] Int64 ssl);
+
+        SSL_set_client_CA_list(
+            [in] Int64 ssl,
+            [in] ArrayOf<Handle32>* asn1DerEncodedX500Principals);
+
+        SSL_get_mode(
+            [in] Int64 ssl,
+            [out] Int64* result);
+
+        SSL_set_mode(
+            [in] Int64 ssl,
+            [in] Int64 mode,
+            [out] Int64* result);
+
+        SSL_clear_mode(
+            [in] Int64 ssl,
+            [in] Int64 mode,
+            [out] Int64* result);
+
+        SSL_get_options(
+            [in] Int64 ssl,
+            [out] Int64* result);
+
+        SSL_set_options(
+            [in] Int64 ssl,
+            [in] Int64 options,
+            [out] Int64* result);
+
+        SSL_clear_options(
+            [in] Int64 ssl,
+            [in] Int64 options,
+            [out] Int64* result);
+
+        SSL_use_psk_identity_hint(
+            [in] Int64 ssl,
+            [in] String identityHint);
+
+        Set_SSL_psk_client_callback_enabled(
+            [in] Int64 ssl,
+            [in] Boolean enabled);
+
+        Set_SSL_psk_server_callback_enabled(
+            [in] Int64 ssl,
+            [in] Boolean enabled);
+
+        Get_DEFAULT_PROTOCOLS(
+            [out, callee] ArrayOf<String>* result);
+
+        GetSupportedProtocols(
+            [out, callee] ArrayOf<String>* result);
+
+        SetEnabledProtocols(
+            [in] Int64 ssl,
+            [in] ArrayOf<String>* protocols);
+
+        CheckEnabledProtocols(
+            [in] ArrayOf<String>* protocols,
+            [out, callee] ArrayOf<String>* result);
+
+        SSL_set_cipher_lists(
+            [in] Int64 ssl,
+            [in] ArrayOf<String>* ciphers);
+
+        /**
+         * Gets the list of cipher suites enabled for the provided {@code SSL} instance.
+         *
+         * @return array of {@code SSL_CIPHER} references.
+         */
+        SSL_get_ciphers(
+            [in] Int64 ssl,
+            [out, callee] ArrayOf<Int64>* result);
+
+        /*
+         * Constants for SSL_CIPHER algorithm_mkey (key exchange algorithm).
+         * OpenSSL constants from ssl/ssl_locl.h.
+         */
+        /** RSA key exchange */
+        const Int32 SSL_kRSA = 0x00000001;
+
+        /** DH cert, RSA CA cert -- no such ciphersuite supported! */
+        const Int32 SSL_kDHr = 0x00000002;
+
+        /** DH cert, DSA CA cert -- no such ciphersuite supported! */
+        const Int32 SSL_kDHd = 0x00000004;
+
+        /** tmp DH key no DH cert */
+        const Int32 SSL_kEDH = 0x00000008;
+
+        /** Kerberos5 key exchange */
+        const Int32 SSL_kKRB5 = 0x00000010;
+
+        /** ECDH cert, RSA CA cert */
+        const Int32 SSL_kECDHr = 0x00000020;
+
+        /** ECDH cert, ECDSA CA cert */
+        const Int32 SSL_kECDHe = 0x00000040;
+
+        /** ephemeral ECDH */
+        const Int32 SSL_kEECDH = 0x00000080;
+
+        /** PSK */
+        const Int32 SSL_kPSK = 0x00000100;
+
+        /** GOST key exchange */
+        const Int32 SSL_kGOST = 0x00000200;
+
+        /** SRP */
+        const Int32 SSL_kSRP = 0x00000400;
+
+        /*
+         * Constants for SSL_CIPHER algorithm_auth (server authentication).
+         * OpenSSL constants from ssl/ssl_locl.h.
+         */
+        /** RSA auth */
+        const Int32 SSL_aRSA = 0x00000001;
+
+        /** DSS auth */
+        const Int32 SSL_aDSS = 0x00000002;
+
+        /** no auth (i.e. use ADH or AECDH) */
+        const Int32 SSL_aNULL = 0x00000004;
+
+        /** Fixed DH auth (kDHd or kDHr) -- no such ciphersuites supported! */
+        const Int32 SSL_aDH = 0x00000008;
+
+        /** Fixed ECDH auth (kECDHe or kECDHr) */
+        const Int32 SSL_aECDH = 0x00000010;
+
+        /** KRB5 auth */
+        const Int32 SSL_aKRB5 = 0x00000020;
+
+        /** ECDSA auth*/
+        const Int32 SSL_aECDSA = 0x00000040;
+
+        /** PSK auth */
+        const Int32 SSL_aPSK = 0x00000080;
+
+        /** GOST R 34.10-94 signature auth */
+        const Int32 SSL_aGOST94 = 0x00000100;
+
+        /** GOST R 34.10-2001 signature auth */
+        const Int32 SSL_aGOST01 = 0x00000200;
+
+        Get_SSL_CIPHER_algorithm_mkey(
+            [in] Int64 sslCipher,
+            [out] Int32* result);
+
+        Get_SSL_CIPHER_algorithm_auth(
+            [in] Int64 sslCipher,
+            [out] Int32* result);
+
+        SetEnabledCipherSuites(
+            [in] Int64 ssl,
+            [in] ArrayOf<String>* cipherSuites);
+
+        CheckEnabledCipherSuites(
+            [in] ArrayOf<String>* cipherSuites,
+            [out, callee] ArrayOf<String>* result);
+
+        /*
+         * See the OpenSSL ssl.h header file for more information.
+         */
+        const Int32 SSL_VERIFY_NONE = 0x00;
+        const Int32 SSL_VERIFY_PEER = 0x01;
+        const Int32 SSL_VERIFY_FAIL_IF_NO_PEER_CERT = 0x02;
+
+        SSL_set_accept_state(
+            [in] Int64 sslNativePointer);
+
+        SSL_set_connect_state(
+            [in] Int64 sslNativePointer);
+
+        SSL_set_verify(
+            [in] Int64 sslNativePointer,
+            [in] Int32 mode);
+
+        SSL_set_session(
+            [in] Int64 sslNativePointer,
+            [in] Int64 sslSessionNativePointer);
+
+        SSL_set_session_creation_enabled(
+            [in] Int64 sslNativePointer,
+            [in] Boolean creationEnabled);
+
+        SSL_set_tlsext_host_name(
+            [in] Int64 sslNativePointer,
+            [in] String hostname);
+
+        SSL_get_servername(
+            [in] Int64 sslNativePointer,
+            [out] String* result);
+
+        /**
+         * Enables NPN for all SSL connections in the context.
+         *
+         * <p>For clients this causes the NPN extension to be included in the
+         * ClientHello message.
+         *
+         * <p>For servers this causes the NPN extension to be included in the
+         * ServerHello message. The NPN extension will not be included in the
+         * ServerHello response if the client didn't include it in the ClientHello
+         * request.
+         *
+         * <p>In either case the caller should pass a non-null byte array of NPN
+         * protocols to {@link #SSL_do_handshake}.
+         */
+        SSL_CTX_enable_npn(
+            [in] Int64 sslCtxNativePointer);
+
+        /**
+         * Disables NPN for all SSL connections in the context.
+         */
+        SSL_CTX_disable_npn(
+            [in] Int64 sslCtxNativePointer);
+
+        /**
+         * For clients, sets the list of supported ALPN protocols in wire-format
+         * (length-prefixed 8-bit strings).
+         */
+        SSL_set_alpn_protos(
+            [in] Int64 sslPointer,
+            [in] ArrayOf<Byte>* protos,
+            [out] Int32* result);
+
+        /**
+         * Returns the selected ALPN protocol. If the server did not select a
+         * protocol, {@code null} will be returned.
+         */
+        SSL_get0_alpn_selected(
+            [in] Int64 sslPointer,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Returns the sslSessionNativePointer of the negotiated session. If this is
+         * a server negotiation, supplying the {@code alpnProtocols} will enable
+         * ALPN negotiation.
+         */
+        SSL_do_handshake(
+            [in] Int64 sslNativePointer,
+            [in] IFileDescriptor* fd,
+            [in] ISSLHandshakeCallbacks* shc,
+            [in] Int32 timeoutMillis,
+            [in] Boolean client_mode,
+            [in] ArrayOf<Byte>* npnProtocols,
+            [in] ArrayOf<Byte>* alpnProtocols,
+            [out] Int64* result);
+
+        /**
+         * Returns the sslSessionNativePointer of the negotiated session. If this is
+         * a server negotiation, supplying the {@code alpnProtocols} will enable
+         * ALPN negotiation.
+         */
+        SSL_do_handshake_bio(
+            [in] Int64 sslNativePointer,
+            [in] Int64 sourceBioRef,
+            [in] Int64 sinkBioRef,
+            [in] ISSLHandshakeCallbacks* shc,
+            [in] Boolean client_mode,
+            [in] ArrayOf<Byte>* npnProtocols,
+            [in] ArrayOf<Byte>* alpnProtocols,
+            [out] Int64* result);
+
+        SSL_get_npn_negotiated_protocol(
+            [in] Int64 sslNativePointer,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Currently only intended for forcing renegotiation for testing.
+         * Not used within OpenSSLSocketImpl.
+         */
+        SSL_renegotiate(
+            [in] Int64 sslNativePointer);
+
+        /**
+         * Returns the local X509 certificate references. Must X509_free when done.
+         */
+        SSL_get_certificate(
+            [in] Int64 sslNativePointer,
+            [out, callee] ArrayOf<Int64>* result);
+
+        /**
+         * Returns the peer X509 certificate references. Must X509_free when done.
+         */
+        SSL_get_peer_cert_chain(
+            [in] Int64 sslNativePointer,
+            [out, callee] ArrayOf<Int64>* result);
+
+        /**
+         * Reads with the native SSL_read function from the encrypted data stream
+         * @return -1 if error or the end of the stream is reached.
+         */
+        SSL_read(
+            [in] Int64 sslNativePointer,
+            [in] IFileDescriptor* fd,
+            [in] ISSLHandshakeCallbacks* shc,
+            [in] ArrayOf<Byte>* b,
+            [in] Int32 off,
+            [in] Int32 len,
+            [in] Int32 readTimeoutMillis,
+            [out] Int32* result);
+
+        SSL_read_BIO(
+            [in] Int64 sslNativePointer,
+            [in] ArrayOf<Byte>* dest,
+            [in] Int32 destOffset,
+            [in] Int32 destLength,
+            [in] Int64 sourceBioRef,
+            [in] Int64 sinkBioRef,
+            [in] ISSLHandshakeCallbacks* shc,
+            [out] Int32* result);
+
+        /**
+         * Writes with the native SSL_write function to the encrypted data stream.
+         */
+        SSL_write(
+            [in] Int64 sslNativePointer,
+            [in] IFileDescriptor* fd,
+            [in] ISSLHandshakeCallbacks* shc,
+            [in] ArrayOf<Byte>* b,
+            [in] Int32 off,
+            [in] Int32 len,
+            [in] Int32 writeTimeoutMillis);
+
+        SSL_write_BIO(
+            [in] Int64 sslNativePointer,
+            [in] ArrayOf<Byte>* source,
+            [in] Int32 length,
+            [in] Int64 sinkBioRef,
+            [in] ISSLHandshakeCallbacks* shc,
+            [out] Int32* result);
+
+        SSL_interrupt(
+            [in] Int64 sslNativePointer);
+
+        SSL_shutdown(
+            [in] Int64 sslNativePointer,
+            [in] IFileDescriptor* fd,
+            [in] ISSLHandshakeCallbacks* shc);
+
+        SSL_shutdown_BIO(
+            [in] Int64 sslNativePointer,
+            [in] Int64 sourceBioRef,
+            [in] Int64 sinkBioRef,
+            [in] ISSLHandshakeCallbacks* shc);
+
+        SSL_get_shutdown(
+            [in] Int64 sslNativePointer,
+            [out] Int32* result);
+
+        SSL_free(
+            [in] Int64 sslNativePointer);
+
+        SSL_SESSION_session_id(
+            [in] Int64 sslSessionNativePointer,
+            [out, callee] ArrayOf<Byte>* result);
+
+        SSL_SESSION_get_time(
+            [in] Int64 sslSessionNativePointer,
+            [out] Int64* result);
+
+        SSL_SESSION_get_version(
+            [in] Int64 sslSessionNativePointer,
+            [out] String* result);
+
+        SSL_SESSION_cipher(
+            [in] Int64 sslSessionNativePointer,
+            [out] String* result);
+
+        SSL_SESSION_free(
+            [in] Int64 sslSessionNativePointer);
+
+        I2d_SSL_SESSION(
+            [in] Int64 sslSessionNativePointer,
+            [out, callee] ArrayOf<Byte>* result);
+
+        D2i_SSL_SESSION(
+            [in] ArrayOf<Byte>* data,
+            [out] Int64* result);
+
+        // Values used in the SSLHandshakeCallbacks#onSSLStateChange as the {@code type}.
+        const Int32 SSL_ST_CONNECT = 0x1000;
+        const Int32 SSL_ST_ACCEPT = 0x2000;
+        const Int32 SSL_ST_MASK = 0x0FFF;
+        const Int32 SSL_ST_INIT = SSL_ST_CONNECT | SSL_ST_ACCEPT;
+        const Int32 SSL_ST_BEFORE = 0x4000;
+        const Int32 SSL_ST_OK = 0x03;
+        const Int32 SSL_ST_RENEGOTIATE = 0x04 | SSL_ST_INIT;
+
+        const Int32 SSL_CB_LOOP = 0x01;
+        const Int32 SSL_CB_EXIT = 0x02;
+        const Int32 SSL_CB_READ = 0x04;
+        const Int32 SSL_CB_WRITE = 0x08;
+        const Int32 SSL_CB_ALERT = 0x4000;
+        const Int32 SSL_CB_READ_ALERT = SSL_CB_ALERT | SSL_CB_READ;
+        const Int32 SSL_CB_WRITE_ALERT = SSL_CB_ALERT | SSL_CB_WRITE;
+        const Int32 SSL_CB_ACCEPT_LOOP = SSL_ST_ACCEPT | SSL_CB_LOOP;
+        const Int32 SSL_CB_ACCEPT_EXIT = SSL_ST_ACCEPT | SSL_CB_EXIT;
+        const Int32 SSL_CB_CONNECT_LOOP = SSL_ST_CONNECT | SSL_CB_LOOP;
+        const Int32 SSL_CB_CONNECT_EXIT = SSL_ST_CONNECT | SSL_CB_EXIT;
+        const Int32 SSL_CB_HANDSHAKE_START = 0x10;
+        const Int32 SSL_CB_HANDSHAKE_DONE = 0x20;
+
+        /*
+         * From ssl/ssl3.h
+         */
+        const Int32 SSL3_RT_HEADER_LENGTH = 5;
+        const Int32 SSL_RT_MAX_CIPHER_BLOCK_SIZE = 16;
+        const Int32 SSL3_RT_MAX_MD_SIZE = 64;
+        const Int32 SSL3_RT_MAX_PLAIN_LENGTH = 16384;
+        const Int32 SSL3_RT_MAX_ENCRYPTED_OVERHEAD = 256 + SSL3_RT_MAX_MD_SIZE;
+        const Int32 SSL3_RT_SEND_MAX_ENCRYPTED_OVERHEAD = SSL_RT_MAX_CIPHER_BLOCK_SIZE
+                + SSL3_RT_MAX_MD_SIZE;
+        const Int32 SSL3_RT_MAX_COMPRESSED_LENGTH = SSL3_RT_MAX_PLAIN_LENGTH;
+        const Int32 SSL3_RT_MAX_ENCRYPTED_LENGTH = SSL3_RT_MAX_ENCRYPTED_OVERHEAD
+                + SSL3_RT_MAX_COMPRESSED_LENGTH;
+        const Int32 SSL3_RT_MAX_PACKET_SIZE = SSL3_RT_MAX_ENCRYPTED_LENGTH
+                + SSL3_RT_HEADER_LENGTH;
+
+        ERR_peek_last_error(
+            [out] Int64* error);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

@@ -1,0 +1,144 @@
+
+module
+{
+    interface Elastos.Net.IInetAddress;
+    interface Elastos.Net.ISocketAddress;
+
+    namespace Elastos{
+    namespace Net{
+
+    [deprecated]
+    interface IDatagramPacket {
+        /**
+         * Gets the sender or destination IP address of this datagram packet.
+         *
+         * @return the address from where the datagram was received or to which it
+         *         is sent.
+         */
+        GetAddress(
+            [out] IInetAddress** address);
+
+        /**
+         * Gets the data of this datagram packet.
+         *
+         * @return the received data or the data to be sent.
+         */
+        GetData(
+            [out, callee] ArrayOf<Byte>* data);
+
+        /**
+         * Gets the length of the data stored in this datagram packet.
+         *
+         * @return the length of the received data or the data to be sent.
+         */
+        GetLength(
+            [out] Int32* length);
+
+        /**
+         * Gets the offset of the data stored in this datagram packet.
+         *
+         * @return the position of the received data or the data to be sent.
+         */
+        GetOffset(
+            [out] Int32* offset);
+
+        /**
+         * Gets the port number of the target or sender host of this datagram
+         * packet.
+         *
+         * @return the port number of the origin or target host.
+         */
+        GetPort(
+            [out] Int32* port);
+
+        /**
+         * Sets the IP address of the target host.
+         *
+         * @param addr
+         *            the target host address.
+         */
+        SetAddress(
+            [in] IInetAddress* addr);
+
+        /**
+         * Sets the data buffer for this datagram packet. The length of the datagram
+         * packet is set to the buffer length.
+         *
+         * @param buf
+         *            the buffer to store the data.
+         */
+        SetData(
+            [in] ArrayOf<Byte>* buf);
+
+        /**
+         * Sets the data buffer for this datagram packet.
+         *
+         * @param buf
+         *            the buffer to store the data.
+         * @param anOffset
+         *            the buffer offset where the data is stored.
+         * @param aLength
+         *            the length of the data to be sent or the length of buffer to
+         *            store the received data.
+         */
+        SetData(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 anOffset,
+            [in] Int32 aLength);
+
+        /**
+         * Sets the length of the datagram packet. This length plus the offset must
+         * be lesser than or equal to the buffer size.
+         *
+         * @param len
+         *            the length of this datagram packet.
+         */
+        SetLength(
+            [in] Int32 len);
+
+        /**
+         * Resets 'length' to the last user-supplied length, ready to receive another packet.
+         * @hide for PlainDatagramSocketImpl
+         */
+        ResetLengthForReceive() ;
+
+        /**
+         * Sets the port number of the target host of this datagram packet.
+         *
+         * @param aPort
+         *            the target host port number.
+         */
+        SetPort(
+            [in] Int32 aPort);
+
+        /**
+         * Sets 'length' without changing 'userSuppliedLength', after receiving a packet.
+         * @hide for IoBridge
+         */
+        SetReceivedLength(
+            [in] Int32 length);
+        /**
+         * Gets the host address and the port to which this datagram packet is sent
+         * as a {@code SocketAddress} object.
+         *
+         * @return the SocketAddress of the target host.
+         */
+        GetSocketAddress(
+            [out] ISocketAddress** sockAddr);
+
+        /**
+         * Sets the {@code SocketAddress} for this datagram packet.
+         *
+         * @param sockAddr
+         *            the SocketAddress of the target host.
+         */
+        SetSocketAddress(
+            [in] ISocketAddress* sockAddr);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}
+
+

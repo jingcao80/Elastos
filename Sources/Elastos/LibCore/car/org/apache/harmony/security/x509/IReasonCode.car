@@ -1,0 +1,60 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * CRL Entry's Reason Code Extension (OID = 2.5.29.21).
+     * <pre>
+     *  id-ce-cRLReason OBJECT IDENTIFIER ::= { id-ce 21 }
+     *
+     *  -- reasonCode ::= { CRLReason }
+     *  CRLReason ::= ENUMERATED {
+     *       unspecified             (0),
+     *       keyCompromise           (1),
+     *       cACompromise            (2),
+     *       affiliationChanged      (3),
+     *       superseded              (4),
+     *       cessationOfOperation    (5),
+     *       certificateHold         (6),
+     *       removeFromCRL           (8),
+     *       privilegeWithdrawn      (9),
+     *       aACompromise           (10)
+     *  }
+     * </pre>
+     * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     */
+    interface IReasonCode extends IExtensionValue {
+        // predefined reason code values
+        const Byte UNSPECIFIED = 0;
+        const Byte KEY_COMPROMISE = 1;
+        const Byte CA_COMPROMISE = 2;
+        const Byte AFFILIATION_CHANGED = 3;
+        const Byte SUPERSEDED = 4;
+        const Byte CESSATION_OF_OPERATION = 5;
+        const Byte CERTIFICATE_HOLD = 6;
+        const Byte REMOVE_FROM_CRL = 8;
+        const Byte PRIVILEGE_WITHDRAWN = 9;
+        const Byte AA_COMPROMISE = 10;
+    }
+
+    interface IReasonCodeHelper {
+        /**
+         * ASN.1 Encoder/Decoder.
+         */
+        GetASN1(
+            [out] IASN1Type** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

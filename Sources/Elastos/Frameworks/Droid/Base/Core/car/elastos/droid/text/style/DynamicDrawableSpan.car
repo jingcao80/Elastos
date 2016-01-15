@@ -1,0 +1,53 @@
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Text.Style.ICharacterStyle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Style {
+
+    /**
+     * @Involve
+     * interface IUpdateAppearance
+     * interface IUpdateLayout
+     * interface ICharacterStyle
+     * interface IMetricAffectingSpan
+     * interface IReplacementSpan
+     */
+    interface IDynamicDrawableSpan {
+        /**
+         * A constant indicating that the bottom of this span should be aligned
+         * with the bottom of the surrounding text, i.e., at the same level as the
+         * lowest descender in the text.
+         */
+        const Int32 ALIGN_BOTTOM = 0;
+
+        /**
+         * A constant indicating that the bottom of this span should be aligned
+         * with the baseline of the surrounding text.
+         */
+        const Int32 ALIGN_BASELINE = 1;
+
+        /**
+         * Returns the vertical alignment of this span, one of {@link #ALIGN_BOTTOM} or
+         * {@link #ALIGN_BASELINE}.
+         */
+        GetVerticalAlignment(
+            [out] Int32* ret);
+
+        /**
+         * Your subclass must implement this method to provide the bitmap
+         * to be drawn.  The dimensions of the bitmap must be the same
+         * from each call to the next.
+         */
+        GetDrawable(
+            [out] IDrawable** ret);
+    }
+
+    }//namespace Style
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

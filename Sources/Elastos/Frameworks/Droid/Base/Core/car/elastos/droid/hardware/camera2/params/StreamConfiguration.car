@@ -1,0 +1,93 @@
+
+module
+{
+    interface Elastos.Droid.Utility.ISize;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Params {
+
+    /**
+     * Immutable class to store the available stream
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS configurations} to set up
+     * {@link android.view.Surface Surfaces} for creating a {@link CameraCaptureSession capture session}
+     * with {@link CameraDevice#createCaptureSession}.
+     * <!-- TODO: link to input stream configuration -->
+     *
+     * <p>This is the authoritative list for all input/output formats (and sizes respectively
+     * for that format) that are supported by a camera device.</p>
+     *
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_CONFIGURATIONS
+     *
+     * @hide
+     */
+    interface IStreamConfiguration {
+        /**
+         * Get the internal image {@code format} in this stream configuration.
+         *
+         * @return an integer format
+         *
+         * @see ImageFormat
+         * @see PixelFormat
+         */
+        GetFormat(
+            [out] Int32* format);
+
+
+        /**
+         * Return the width of the stream configuration.
+         *
+         * @return width > 0
+         */
+        GetWidth(
+            [out] Int32* width);
+
+        /**
+         * Return the height of the stream configuration.
+         *
+         * @return height > 0
+         */
+        GetHeight(
+            [out] Int32* height);
+
+        /**
+         * Convenience method to return the size of this stream configuration.
+         *
+         * @return a Size with positive width and height
+         */
+        GetSize(
+            [out] ISize** size);
+
+        /**
+         * Determines if this configuration is usable for input streams.
+         *
+         * <p>Input and output stream configurations are not interchangeable;
+         * input stream configurations must be used when configuring inputs.</p>
+         *
+         * @return {@code true} if input configuration, {@code false} otherwise
+         */
+        IsInput(
+            [out] Boolean* result);
+
+        /**
+         * Determines if this configuration is usable for output streams.
+         *
+         * <p>Input and output stream configurations are not interchangeable;
+         * out stream configurations must be used when configuring outputs.</p>
+         *
+         * @return {@code true} if output configuration, {@code false} otherwise
+         *
+         * @see CameraDevice#createCaptureSession
+         */
+        IsOutput(
+            [out] Boolean* result);
+    }
+
+    } // namespace Params
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

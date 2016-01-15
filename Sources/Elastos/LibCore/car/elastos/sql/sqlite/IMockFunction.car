@@ -1,0 +1,22 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    /**
+      * @Involve
+      * interface Elastos.Sql.SQLite.IFunction;
+      */
+    interface IMockFunction {
+
+        GetAggValue(
+            [out] String * str);
+
+        PrintCalled();
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

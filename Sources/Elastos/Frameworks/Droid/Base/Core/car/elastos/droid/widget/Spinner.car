@@ -1,0 +1,238 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IAbsSpinner;
+
+    [local]
+    interface ISpinnerPopup {
+        SetAdapter(
+            [in] IListAdapter* adapter);
+
+        /**
+         * Show the popup
+         */
+        Show(
+            [in] Int32 textDirection,
+            [in] Int32 textAlignment);
+
+        Dismiss();
+
+        IsShowing(
+            [out] Boolean* res);
+
+        SetPromptText(
+            [in] ICharSequence* hintText);
+
+        GetHintText(
+            [out] ICharSequence** csq);
+
+        SetBackgroundDrawable(
+            [in] IDrawable* bg);
+
+        SetVerticalOffset(
+            [in] Int32 px);
+
+        SetHorizontalOffset(
+            [in] Int32 px);
+
+        GetBackground(
+            [out] IDrawable** bg);
+
+        GetVerticalOffset(
+            [out] Int32* offset);
+
+        GetHorizontalOffset(
+            [out] Int32* offset);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsSpinner
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface ISpinner {
+        /**
+         * Set the background drawable for the spinner's popup window of choices.
+         * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
+         *
+         * @param background Background drawable
+         *
+         * @attr ref android.R.styleable#Spinner_popupBackground
+         */
+        SetPopupBackgroundDrawable(
+            [in] IDrawable* background);
+
+        /**
+         * Set the background drawable for the spinner's popup window of choices.
+         * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
+         *
+         * @param resId Resource ID of a background drawable
+         *
+         * @attr ref android.R.styleable#Spinner_popupBackground
+         */
+        SetPopupBackgroundResource(
+            [in] Int32 resId);
+
+        /**
+         * Get the background drawable for the spinner's popup window of choices.
+         * Only valid in {@link #MODE_DROPDOWN}; other modes will return null.
+         *
+         * @return background Background drawable
+         *
+         * @attr ref android.R.styleable#Spinner_popupBackground
+         */
+        GetPopupBackground(
+            [out] IDrawable** d);
+
+        /**
+         * Set a vertical offset in pixels for the spinner's popup window of choices.
+         * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
+         *
+         * @param pixels Vertical offset in pixels
+         *
+         * @attr ref android.R.styleable#Spinner_dropDownVerticalOffset
+         */
+        SetDropDownVerticalOffset(
+            [in] Int32 pixels);
+
+        /**
+         * Get the configured vertical offset in pixels for the spinner's popup window of choices.
+         * Only valid in {@link #MODE_DROPDOWN}; other modes will return 0.
+         *
+         * @return Vertical offset in pixels
+         *
+         * @attr ref android.R.styleable#Spinner_dropDownVerticalOffset
+         */
+        GetDropDownVerticalOffset(
+            [out] Int32* pixels);
+
+        /**
+         * Set a horizontal offset in pixels for the spinner's popup window of choices.
+         * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
+         *
+         * @param pixels Horizontal offset in pixels
+         *
+         * @attr ref android.R.styleable#Spinner_dropDownHorizontalOffset
+         */
+        SetDropDownHorizontalOffset(
+            [in] Int32 pixels);
+
+        /**
+         * Get the configured horizontal offset in pixels for the spinner's popup window of choices.
+         * Only valid in {@link #MODE_DROPDOWN}; other modes will return 0.
+         *
+         * @return Horizontal offset in pixels
+         *
+         * @attr ref android.R.styleable#Spinner_dropDownHorizontalOffset
+         */
+        GetDropDownHorizontalOffset(
+            [out] Int32* pixels);
+
+        /**
+         * Set the width of the spinner's popup window of choices in pixels. This value
+         * may also be set to {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+         * to match the width of the Spinner itself, or
+         * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} to wrap to the measured size
+         * of contained dropdown list items.
+         *
+         * <p>Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.</p>
+         *
+         * @param pixels Width in pixels, WRAP_CONTENT, or MATCH_PARENT
+         *
+         * @attr ref android.R.styleable#Spinner_dropDownWidth
+         */
+        SetDropDownWidth(
+            [in] Int32 pixels);
+
+        /**
+         * Get the configured width of the spinner's popup window of choices in pixels.
+         * The returned value may also be {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+         * meaning the popup window will match the width of the Spinner itself, or
+         * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} to wrap to the measured size
+         * of contained dropdown list items.
+         *
+         * @return Width in pixels, WRAP_CONTENT, or MATCH_PARENT
+         *
+         * @attr ref android.R.styleable#Spinner_dropDownWidth
+         */
+        GetDropDownWidth(
+            [out] Int32* width);
+
+        /**
+         * Describes how the selected item view is positioned. Currently only the horizontal component
+         * is used. The default is determined by the current theme.
+         *
+         * @param gravity See {@link android.view.Gravity}
+         *
+         * @attr ref android.R.styleable#Spinner_gravity
+         */
+        SetGravity(
+            [in] Int32 gravity);
+
+        /**
+         * Describes how the selected item view is positioned. The default is determined by the
+         * current theme.
+         *
+         * @return A {@link android.view.Gravity Gravity} value
+         */
+        GetGravity(
+            [out] Int32* gravity);
+
+
+        /**
+         * Sets the prompt to display when the dialog is shown.
+         * @param prompt the prompt to set
+         */
+        SetPrompt(
+            [in] ICharSequence* prompt);
+
+        /**
+         * Sets the prompt to display when the dialog is shown.
+         * @param promptId the resource ID of the prompt to display when the dialog is shown
+         */
+        SetPromptId(
+            [in] Int32 promptId);
+
+        /**
+         * @return The prompt to display when the dialog is shown
+         */
+        GetPrompt(
+            [out] ICharSequence** prompt);
+    }
+
+    /**
+     * @Involve
+     * extends IListPopupWindow
+     * implements ISpinnerPopup
+     */
+    interface IDropdownPopup {}
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface Elastos.Droid.Os.IParcelable
+     * interface Elastos.Droid.Widget.IAbsSpinnerSavedState
+     */
+    interface ISpinnerSavedState {}
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,124 @@
+
+module
+{
+    merge("privacy/PrivacySettings.car");
+    merge("privacy/PrivacySettingsManager.car");
+    merge("privacy/IPrivacySettingsManager.car");
+    merge("privacy/PrivacyPersistenceAdapter.car");
+    merge("privacy/surrogate/PrivacyLocationManager.car");
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Location.IILocationManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Privacy {
+
+    class CPrivacySettings {
+        constructor();
+
+        constructor(
+            [in] Int32 id,
+            [in] String packageName,
+            [in] Int32 uid);
+
+        constructor(
+            [in] Int32 id,
+            [in] String packageName,
+            [in] Int32 uid,
+            [in] Boolean allEmpty);
+
+        //constructor(
+        //    [in] Int32 id,
+        //    [in] String packageName,
+        //    [in] Int32 uid,
+        //    [in] Byte locationGpsSetting,
+        //    [in] String locationGpsLat,
+        //    [in] String locationGpsLon);
+
+        //constructor(
+        //    [in] Int32 id,
+        //    [in] String packageName,
+        //    [in] Int32 uid,
+        //    [in] Byte deviceIdSetting,
+        //    [in] String deviceId,
+        //    [in] Byte line1NumberSetting,
+        //    [in] String line1Number,
+        //    [in] Byte locationGpsSetting,
+        //    [in] String locationGpsLat,
+        //    [in] String locationGpsLon,
+        //    [in] Byte locationNetworkSetting,
+        //    [in] String locationNetworkLat,
+        //    [in] String locationNetworkLon,
+        //    [in] Byte networkInfoSetting,
+        //    [in] Byte simInfoSetting,
+        //    [in] Byte simSerialNumberSetting,
+        //    [in] String simSerialNumber,
+        //    [in] Byte subscriberIdSetting,
+        //    [in] String subscriberId,
+        //    [in] Byte accountsSetting,
+        //    [in] Byte accountsAuthTokensSetting,
+        //    [in] Byte outgoingCallsSetting,
+        //    [in] Byte incomingCallsSetting,
+        //    [in] Byte contactsSetting,
+        //    [in] Byte calendarSetting,
+        //    [in] Byte mmsSetting,
+        //    [in] Byte smsSetting,
+        //    [in] Byte callLogSetting,
+        //    [in] Byte bookmarksSetting,
+        //    [in] Byte systemLogsSetting,
+        //    [in] Byte externalStorageSetting,
+        //    [in] Byte cameraSetting,
+        //    [in] Byte recordAudioSetting,
+        //    [in] Byte notificationSetting,
+        //    [in] Byte intentBootCompletedSetting,
+        //    [in] ArrayOf<Int32>* allowedContacts,
+        //    [in] Byte smsSendSetting,
+        //    [in] Byte phoneCallSetting,
+        //    [in] Byte ipTableProtectSetting,
+        //    [in] Byte iccAccessSetting,
+        //    [in] Byte addOnManagementSetting,
+        //    [in] Byte androidIdSetting,
+        //    [in] String androidID,
+        //    [in] Byte wifiInfoSetting,
+        //    [in] Byte switchConnectivitySetting,
+        //    [in] Byte sendMmsSetting,
+        //    [in] Byte forceOnlineState,
+        //    [in] Byte switchWifiStateSetting);
+
+        interface IPrivacySettings;
+        interface IParcelable;
+    }
+
+    [local]
+    class CPrivacyPersistenceAdapter {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IPrivacyPersistenceAdapter;
+    }
+
+    [local]
+    class CPrivacySettingsManager {
+        constructor(
+            [in] IContext* ctx,
+            [in] IIPrivacySettingsManager* service);
+
+        interface IPrivacySettingsManager;
+    }
+
+    namespace Surrogate {
+        [local]
+        class CPrivacyLocationManager {
+            constructor(
+                [in] IILocationManager* service,
+                [in] IContext* ctx);
+
+            interface IPrivacyLocationManager;
+        }
+    } // namespace Surrogate
+
+    } // namespace Privacy
+    } // namespace Droid
+    } // namespace Elastos
+}

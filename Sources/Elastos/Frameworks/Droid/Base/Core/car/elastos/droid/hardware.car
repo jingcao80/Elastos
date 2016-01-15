@@ -1,0 +1,1660 @@
+
+module
+{
+    merge("hardware/Camera.car");
+    merge("hardware/CameraInfo.car");
+    merge("hardware/ISerialManager.car");
+    merge("hardware/Sensor.car");
+    merge("hardware/SensorEvent.car");
+    merge("hardware/SensorEventListener.car");
+    merge("hardware/SensorListener.car");
+    merge("hardware/SensorManager.car");
+    merge("hardware/SerialManager.car");
+    merge("hardware/SerialPort.car");
+    merge("hardware/SystemSensorManager.car");
+    merge("hardware/ConsumerIrManager.car");
+    merge("hardware/GeomagneticField.car");
+    merge("hardware/SensorEventListener2.car");
+    merge("hardware/TriggerEvent.car");
+    merge("hardware/TriggerEventListener.car");
+    merge("hardware/LegacySensorManager.car");
+    merge("hardware/IConsumerIrService.car");
+    merge("hardware/ICameraServiceListener.car");
+    merge("hardware/ICameraClient.car");
+    merge("hardware/ICameraService.car");
+    merge("hardware/IProCameraCallbacks.car");
+
+    merge("hardware/display/DisplayManager.car");
+    merge("hardware/display/DisplayManagerGlobal.car");
+    merge("hardware/display/DisplayManagerInternal.car");
+    merge("hardware/display/DisplayViewport.car");
+    merge("hardware/display/IDisplayManager.car");
+    merge("hardware/display/IDisplayManagerCallback.car");
+    merge("hardware/display/IVirtualDisplayCallback.car");
+    merge("hardware/display/VirtualDisplay.car");
+    merge("hardware/display/WifiDisplay.car");
+    merge("hardware/display/WifiDisplaySessionInfo.car");
+    merge("hardware/display/WifiDisplayStatus.car");
+
+    merge("hardware/hdmi/HdmiClient.car");
+    merge("hardware/hdmi/HdmiControlManager.car");
+    merge("hardware/hdmi/HdmiDeviceInfo.car");
+    merge("hardware/hdmi/HdmiHotplugEvent.car");
+    merge("hardware/hdmi/HdmiPlaybackClient.car");
+    merge("hardware/hdmi/HdmiPortInfo.car");
+    merge("hardware/hdmi/HdmiRecordListener.car");
+    merge("hardware/hdmi/HdmiRecordSources.car");
+    merge("hardware/hdmi/HdmiTimerRecordSources.car");
+    merge("hardware/hdmi/HdmiTvClient.car");
+    merge("hardware/hdmi/IHdmiControlCallback.car");
+    merge("hardware/hdmi/IHdmiControlService.car");
+    merge("hardware/hdmi/IHdmiDeviceEventListener.car");
+    merge("hardware/hdmi/IHdmiHotplugEventListener.car");
+    merge("hardware/hdmi/IHdmiInputChangeListener.car");
+    merge("hardware/hdmi/IHdmiMhlVendorCommandListener.car");
+    merge("hardware/hdmi/IHdmiRecordListener.car");
+    merge("hardware/hdmi/IHdmiSystemAudioModeChangeListener.car");
+    merge("hardware/hdmi/IHdmiVendorCommandListener.car");
+
+    merge("hardware/input/IInputManager.car");
+    merge("hardware/input/IInputDevicesChangedListener.car");
+    merge("hardware/input/InputDeviceIdentifier.car");
+    merge("hardware/input/InputManager.car");
+    merge("hardware/input/InputManagerInternal.car");
+    merge("hardware/input/KeyboardLayout.car");
+    merge("hardware/input/TouchCalibration.car");
+
+    merge("hardware/location/ActivityChangedEvent.car");
+    merge("hardware/location/ActivityRecognitionEvent.car");
+    merge("hardware/location/ActivityRecognitionHardware.car");
+    merge("hardware/location/GeofenceHardware.car");
+    merge("hardware/location/GeofenceHardwareCallback.car");
+    merge("hardware/location/GeofenceHardwareImpl.car");
+    merge("hardware/location/GeofenceHardwareMonitorCallback.car");
+    merge("hardware/location/GeofenceHardwareMonitorEvent.car");
+    merge("hardware/location/GeofenceHardwareRequest.car");
+    merge("hardware/location/GeofenceHardwareRequestParcelable.car");
+    merge("hardware/location/GeofenceHardwareService.car");
+    merge("hardware/location/IActivityRecognitionHardware.car");
+    merge("hardware/location/IActivityRecognitionHardwareSink.car");
+    merge("hardware/location/IActivityRecognitionHardwareWatcher.car");
+    merge("hardware/location/IFusedLocationHardware.car");
+    merge("hardware/location/IFusedLocationHardwareSink.car");
+    merge("hardware/location/IGeofenceHardware.car");
+    merge("hardware/location/IGeofenceHardwareCallback.car");
+    merge("hardware/location/IGeofenceHardwareMonitorCallback.car");
+
+    merge("hardware/soundtrigger/IRecognitionStatusCallback.car");
+    merge("hardware/soundtrigger/KeyphraseEnrollmentInfo.car");
+    merge("hardware/soundtrigger/KeyphraseMetadata.car");
+    merge("hardware/soundtrigger/SoundTrigger.car");
+    merge("hardware/soundtrigger/SoundTriggerModule.car");
+
+    merge("hardware/usb/IUsbManager.car");
+    merge("hardware/usb/UsbAccessory.car");
+    merge("hardware/usb/UsbConstants.car");
+    merge("hardware/usb/UsbDevice.car");
+    merge("hardware/usb/UsbDeviceConnection.car");
+    merge("hardware/usb/UsbEndpoint.car");
+    merge("hardware/usb/UsbInterface.car");
+    merge("hardware/usb/UsbManager.car");
+    merge("hardware/usb/UsbRequest.car");
+    merge("hardware/usb/UsbCameraManager.car");
+    merge("hardware/usb/UsbConfiguration.car");
+
+    merge("hardware/camera2/CameraAccessException.car");
+    merge("hardware/camera2/CaptureRequest.car");
+    merge("hardware/camera2/CameraDevice.car");
+    merge("hardware/camera2/CameraCaptureSession.car");
+    merge("hardware/camera2/CameraCharacteristics.car");
+    merge("hardware/camera2/CameraManager.car");
+    merge("hardware/camera2/CameraMetadata.car");
+    merge("hardware/camera2/CaptureFailure.car");
+    merge("hardware/camera2/CaptureResult.car");
+    merge("hardware/camera2/DngCreator.car");
+    merge("hardware/camera2/TotalCaptureResult.car");
+    merge("hardware/camera2/ICameraDeviceCallbacks.car");
+    merge("hardware/camera2/ICameraDeviceUser.car");
+
+    merge("hardware/camera2/dispatch/Dispatchable.car");
+    merge("hardware/camera2/dispatch/MethodNameInvoker.car");
+    merge("hardware/camera2/dispatch/ArgumentReplacingDispatcher.car");
+    merge("hardware/camera2/dispatch/BroadcastDispatcher.car");
+    merge("hardware/camera2/dispatch/DuckTypingDispatcher.car");
+    merge("hardware/camera2/dispatch/HandlerDispatcher.car");
+    merge("hardware/camera2/dispatch/InvokeDispatcher.car");
+    merge("hardware/camera2/dispatch/NullDispatcher.car");
+
+    merge("hardware/camera2/impl/CallbackProxies.car");
+    merge("hardware/camera2/impl/CameraMetadataNative.car");
+    merge("hardware/camera2/impl/CameraCaptureSessionImpl.car");
+    merge("hardware/camera2/impl/CameraDeviceImpl.car");
+    merge("hardware/camera2/impl/GetCommand.car");
+    merge("hardware/camera2/impl/SetCommand.car");
+    merge("hardware/camera2/impl/CaptureResultExtras.car");
+
+    merge("hardware/camera2/legacy/BurstHolder.car");
+    merge("hardware/camera2/legacy/CameraDeviceState.car");
+    merge("hardware/camera2/legacy/CameraDeviceUserShim.car");
+    merge("hardware/camera2/legacy/CaptureCollector.car");
+    merge("hardware/camera2/legacy/GLThreadManager.car");
+    merge("hardware/camera2/legacy/LegacyExceptionUtils.car");
+    merge("hardware/camera2/legacy/LegacyCameraDevice.car");
+    merge("hardware/camera2/legacy/LegacyFaceDetectMapper.car");
+    merge("hardware/camera2/legacy/LegacyFocusStateMapper.car");
+    merge("hardware/camera2/legacy/LegacyMetadataMapper.car");
+    merge("hardware/camera2/legacy/LegacyRequest.car");
+    merge("hardware/camera2/legacy/LegacyRequestMapper.car");
+    merge("hardware/camera2/legacy/LegacyResultMapper.car");
+    merge("hardware/camera2/legacy/ParameterUtils.car");
+    merge("hardware/camera2/legacy/PerfMeasurement.car");
+    merge("hardware/camera2/legacy/RequestHandlerThread.car");
+    merge("hardware/camera2/legacy/RequestHolder.car");
+    merge("hardware/camera2/legacy/RequestQueue.car");
+    merge("hardware/camera2/legacy/RequestThreadManager.car");
+    merge("hardware/camera2/legacy/LegacySizeAreaComparator.car");
+    merge("hardware/camera2/legacy/SurfaceTextureRenderer.car");
+
+    merge("hardware/camera2/marshal/Marshaler.car");
+    merge("hardware/camera2/marshal/MarshalHelpers.car");
+    merge("hardware/camera2/marshal/MarshalQueryable.car");
+    merge("hardware/camera2/marshal/MarshalRegistry.car");
+
+    merge("hardware/camera2/params/BlackLevelPattern.car");
+    merge("hardware/camera2/params/ColorSpaceTransform.car");
+    merge("hardware/camera2/params/Face.car");
+    merge("hardware/camera2/params/RggbChannelVector.car");
+    merge("hardware/camera2/params/LensShadingMap.car");
+    merge("hardware/camera2/params/MeteringRectangle.car");
+    merge("hardware/camera2/params/StreamConfigurationMap.car");
+    merge("hardware/camera2/params/TonemapCurve.car");
+    merge("hardware/camera2/params/HighSpeedVideoConfiguration.car");
+    merge("hardware/camera2/params/ReprocessFormatsMap.car");
+    merge("hardware/camera2/params/StreamConfiguration.car");
+    merge("hardware/camera2/params/StreamConfigurationDuration.car");
+
+    merge("hardware/camera2/utils/ArrayUtils.car");
+    merge("hardware/camera2/utils/BinderHolder.car");
+    merge("hardware/camera2/utils/CloseableLock.car");
+    merge("hardware/camera2/utils/HashCodeHelpers.car");
+    merge("hardware/camera2/utils/ListUtils.car");
+    merge("hardware/camera2/utils/LongParcelable.car");
+    merge("hardware/camera2/utils/ParamsUtils.car");
+    merge("hardware/camera2/utils/UtilsSizeAreaComparator.car");
+    merge("hardware/camera2/utils/TaskDrainer.car");
+    merge("hardware/camera2/utils/TaskSingleDrainer.car");
+    merge("hardware/camera2/utils/TypeReference.car");
+    merge("hardware/camera2/utils/CameraBinderDecorator.car");
+    merge("hardware/camera2/utils/CameraServiceBinderDecorator.car");
+    merge("hardware/camera2/utils/Decorator.car");
+
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IPoint;
+    interface Elastos.Droid.View.IDisplay;
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.View.IRotationWatcher;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Media.IAudioFormat;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IHandlerCallback;
+    interface Elastos.Droid.Utility.IRational;
+    interface Elastos.Droid.Utility.ISize;
+    interface Elastos.Droid.Hardware.Camera2.ICameraDevice;
+    interface Elastos.Droid.Hardware.Camera2.ICameraDeviceStateCallback;
+    interface Elastos.Droid.Hardware.Camera2.ICameraCaptureSessionStateCallback;
+    interface Elastos.Droid.Hardware.Camera2.ICaptureRequest;
+    interface Elastos.Droid.Hardware.Camera2.ICameraCaptureSession;
+    interface Elastos.Droid.Hardware.Camera2.ICameraCharacteristics;
+    interface Elastos.Droid.Hardware.Camera2.IICameraDeviceUser;
+    interface Elastos.Droid.Hardware.Camera2.IICameraDeviceCallbacks;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNative;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICaptureResultExtras;
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNativeKey;
+    interface Elastos.Droid.Hardware.Camera2.Utils.ITypeReference;
+    interface Elastos.Droid.Hardware.Camera2.Dispatch.IDispatchable;
+    interface Elastos.Droid.Hardware.IParameters;
+    interface Elastos.Droid.Hardware.ICameraArea;
+    interface Elastos.Droid.Hardware.IHardwareCamera;
+
+    using interface Elastos.Core.IComparator;
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.Utility.IUUID;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+        class CConsumerIrManager {
+            constructor(
+                [in] IContext* context);
+
+            interface IConsumerIrManager;
+        }
+
+        class CCarrierFrequencyRange {
+            constructor(
+                [in] Int32 min,
+                [in] Int32 max);
+
+            interface ICarrierFrequencyRange;
+        }
+
+        class CGeomagneticField {
+            constructor(
+                [in] Float gdLatitudeDeg,
+                [in] Float gdLongitudeDeg,
+                [in] Float altitudeMeters,
+                [in] Int64 timeMillis);
+
+            interface IGeomagneticField;
+        }
+
+        class CSensorEvent {
+            constructor(
+                [in] Int32 size);
+
+            interface ISensorEvent;
+        }
+
+        class CSensor {
+            constructor();
+
+            interface ISensor;
+        }
+
+        singleton class CSensorManagerHelper {
+            interface ISensorManagerHelper;
+        }
+
+        class CHardwareCamera {
+            constructor();
+
+            /** used by Camera#open, Camera#open(int) */
+            constructor(
+                [in] Int32 cameraId);
+
+            /**
+             * Create a legacy camera object.
+             *
+             * @param cameraId The hardware camera to access, between 0 and
+             * {@link #getNumberOfCameras()}-1.
+             * @param halVersion The HAL API version this camera device to be opened as.
+             */
+            constructor(
+                [in] Int32 cameraId,
+                [in] Int32 halVersion);
+
+            interface IHardwareCamera;
+        }
+
+        singleton class CHardwareCameraHelper {
+            interface IHardwareCameraHelper;
+        }
+
+        class CTriggerEvent {
+            constructor(
+                [in] Int32 size);
+
+            interface ITriggerEvent;
+        }
+
+        class CLegacySensorManagerRotationWatcher{
+            constructor();
+
+            interface IRotationWatcher;
+        }
+
+    namespace Camera2 {
+        class CCameraCharacteristics {
+            constructor();
+
+            /**
+             * Takes ownership of the passed-in properties object
+             * @hide
+             */
+            constructor(
+                [in] ICameraMetadataNative* properties);
+
+            interface ICameraCharacteristics;
+            interface ICameraMetadata;
+        }
+
+        class CCaptureRequestBuilder {
+            constructor();
+
+            /**
+             * Initialize the builder using the template; the request takes
+             * ownership of the template.
+             *
+             * @hide
+             */
+            constructor(
+                [in] ICameraMetadataNative* _template);
+
+            interface ICaptureRequestBuilder;
+        }
+
+        class CCaptureResult {
+            /**
+             * Takes ownership of the passed-in properties object
+             *
+             * <p>For internal use only</p>
+             * @hide
+             */
+            constructor(
+                [in] ICameraMetadataNative* results,
+                [in] ICaptureRequest* parent,
+                [in] ICaptureResultExtras* extras);
+
+            /**
+             * Creates a request-less result.
+             *
+             * <p><strong>For testing only.</strong></p>
+             * @hide
+             */
+            constructor(
+                [in] ICameraMetadataNative* results,
+                [in] Int32 sequenceId);
+
+            interface ICaptureResult;
+            interface ICameraMetadata;
+        }
+
+        class CCaptureFailure {
+            constructor();
+
+            constructor(
+                [in] ICaptureRequest* request,
+                [in] Int32 reason,
+                [in] Boolean dropped,
+                [in] Int32 sequenceId,
+                [in] Int64 frameNumber);
+
+            interface ICaptureFailure;
+        }
+
+        class CTotalCaptureResult {
+            constructor();
+
+            constructor(
+                [in] ICameraMetadataNative* results,
+                [in] ICaptureRequest* parent,
+                [in] ICaptureResultExtras* extras,
+                [in] IList* partials);
+
+            constructor(
+                [in] ICameraMetadataNative* results,
+                [in] Int32 sequenceId);
+
+            interface ITotalCaptureResult;
+            interface ICaptureResult;
+            interface ICameraMetadata;
+        }
+
+        [local]
+        class CCameraCharacteristicsKey {
+
+            constructor();
+
+            /**
+             * Visible for testing and vendor extensions only.
+             *
+             * @hide
+             */
+            constructor(
+                [in] String name,
+                [in] ClassID type);
+
+            /**
+             * Visible for testing and vendor extensions only.
+             *
+             * @hide
+             */
+            constructor(
+                [in] String name,
+                [in] ITypeReference* typeReference);
+
+            /**
+             * Visible for CameraMetadataNative implementation only; do not use.
+             *
+             * TODO: Make this private or remove it altogether.
+             *
+             * @hide
+             */
+            constructor(
+                [in] ICameraMetadataNativeKey* nativeKey);
+
+            interface ICameraCharacteristicsKey;
+        }
+
+        [local]
+        class CCaptureResultKey {
+
+            constructor();
+
+            /**
+             * Visible for testing and vendor extensions only.
+             *
+             * @hide
+             */
+            constructor(
+                [in] String name,
+                [in] ClassID type);
+
+            /**
+             * Visible for testing and vendor extensions only.
+             *
+             * @hide
+             */
+            constructor(
+                [in] String name,
+                [in] ITypeReference* typeReference);
+
+            //@SuppressWarnings({ "unchecked" })
+            constructor(
+                [in] ICameraMetadataNativeKey* nativeKey);
+
+            interface ICaptureResultKey;
+        }
+
+        [local]
+        class CCaptureRequestKey {
+
+            constructor();
+
+            /**
+             * Visible for testing and vendor extensions only.
+             *
+             * @hide
+             */
+            constructor(
+                [in] String name,
+                [in] ClassID type);
+
+            /**
+             * Visible for testing and vendor extensions only.
+             *
+             * @hide
+             */
+            constructor(
+                [in] String name,
+                [in] ITypeReference* typeReference);
+
+            //@SuppressWarnings({ "unchecked" })
+            constructor(
+                [in] ICameraMetadataNativeKey* nativeKey);
+
+
+            interface ICaptureRequestKey;
+        }
+
+        class CCameraManager {
+            constructor();
+
+            constructor(
+                [in] IContext* context);
+
+            interface ICameraManager;
+        }
+
+        class CDngCreator {
+            constructor();
+
+            constructor(
+                [in] ICameraCharacteristics* characteristics,
+                [in] ICaptureResult* metadata);
+
+            interface IDngCreator;
+            interface ICloseable;
+        }
+
+    namespace Dispatch {
+        class CNullDispatcher {
+            constructor();
+
+            interface INullDispatcher;
+            interface IDispatchable;
+        }
+
+        class CInvokeDispatcher {
+            constructor();
+
+            constructor(
+                [in] IInterface* target);
+
+            interface IInvokeDispatcher;
+            interface IDispatchable;
+        }
+
+        [local]
+        class CHandlerDispatcher {
+            constructor();
+
+            /**
+             * Create a dispatcher that forwards it's dispatch calls by posting
+             * them onto the {@code handler} as a {@code Runnable}.
+             *
+             * @param dispatchTarget the destination whose method calls will be redirected into the handler
+             * @param handler all calls into {@code dispatchTarget} will be posted onto this handler
+             * @param <T> the type of the element you want to wrap.
+             * @return a dispatcher that will forward it's dispatch calls to a handler
+             */
+            constructor(
+                [in] IDispatchable* dispatchTarget,
+                [in] IHandler* handler);
+
+            interface IHandlerDispatcher;
+            interface IDispatchable;
+        }
+
+        [local]
+        class CArgumentReplacingDispatcher {
+            constructor();
+
+            /**
+             * Create a new argument replacing dispatcher; dispatches are forwarded to {@code target}
+             * after the argument is replaced.
+             *
+             * <p>For example, if a method {@code onAction(T1 a, Integer b, T2 c)} is invoked, and we wanted
+             * to replace all occurrences of {@code b} with {@code 0xDEADBEEF}, we would set
+             * {@code argumentIndex = 1} and {@code replaceWith = 0xDEADBEEF}.</p>
+             *
+             * <p>If a method dispatched has less arguments than {@code argumentIndex}, it is
+             * passed through with the arguments unchanged.</p>
+             *
+             * @param target destination dispatch type, methods will be redirected to this dispatcher
+             * @param argumentIndex the numeric index of the argument {@code >= 0}
+             * @param replaceWith arguments matching {@code argumentIndex} will be replaced with this object
+             */
+            constructor(
+                [in] IDispatchable* target,
+                [in] Int32 argumentIndex,
+                [in] IInterface* replaceWith);
+
+            interface IArgumentReplacingDispatcher;
+            interface IDispatchable;
+        }
+
+        [local]
+        class CDuckTypingDispatcher {
+            constructor();
+
+            /**
+             * Create a new duck typing dispatcher.
+             *
+             * @param target destination dispatch type, methods will be redirected to this dispatcher
+             * @param targetClass destination dispatch class, methods will be converted to this class's
+             */
+            constructor(
+                [in] IDispatchable* target,
+                [in] IClassInfo* targetClass);
+
+            interface IDuckTypingDispatcher;
+            interface IDispatchable;
+        }
+
+        [deprecated, local]
+        class CBroadcastDispatcher {
+            constructor();
+
+            /**
+             * Create a broadcast dispatcher from the supplied dispatch targets.
+             *
+             * @param dispatchTargets one or more targets to dispatch to
+             */
+            //@SafeVarargs
+            constructor(
+                [in] ArrayOf<IDispatchable*>* dispatchTargets);
+
+            interface IBroadcastDispatcher;
+            interface IDispatchable;
+        }
+
+        [local]
+        class CMethodNameInvoker {
+            constructor();
+
+            /**
+             * Create a new method name invoker.
+             *
+             * @param target destination dispatch type, invokes will be redirected to this dispatcher
+             * @param targetClass destination dispatch class, the invoked methods will be from this class
+             */
+            constructor(
+                [in] IDispatchable* target,
+                [in] IClassInfo* targetClass);
+
+            interface IMethodNameInvoker;
+        }
+
+    } //namespace Dispatch
+
+    namespace Impl {
+        class CCameraMetadataNative {
+            constructor();
+
+            /**
+             * Copy constructor - clone metadata
+             */
+            constructor(
+                [in] ICameraMetadataNative* requestId);
+
+            interface ICameraMetadataNative;
+            interface IParcelable;
+        }
+
+        [local]
+        class CCallbackProxiesDeviceStateCallbackProxy {
+            constructor();
+
+            constructor(
+                [in] IDispatchable* dispatchTarget);
+
+            interface ICameraDeviceStateCallback;
+            interface ICameraDeviceImplStateCallbackKK;
+            interface ICallbackProxiesDeviceStateCallbackProxy;
+        }
+
+        [local]
+        class CCallbackProxiesDeviceCaptureCallbackProxy {
+            constructor();
+
+            constructor(
+                [in] IDispatchable* dispatchTarget);
+
+            interface ICallbackProxiesDeviceCaptureCallbackProxy;
+        }
+
+        [local]
+        class CCallbackProxiesSessionStateCallbackProxy {
+            constructor();
+
+            constructor(
+                [in] IDispatchable* dispatchTarget);
+
+            interface ICallbackProxiesSessionStateCallbackProxy;
+        }
+
+        class CCameraCaptureSessionImpl {
+            constructor();
+
+            /**
+             * Create a new CameraCaptureSession.
+             *
+             * <p>The camera device must already be in the {@code IDLE} state when this is invoked.
+             * There must be no pending actions
+             * (e.g. no pending captures, no repeating requests, no flush).</p>
+             */
+            constructor(
+                [in] Int32 id,
+                [in] IList* outputs,
+                [in] ICameraCaptureSessionStateCallback* _callback,
+                [in] IHandler* stateHandler,
+                [in] ICameraDeviceImpl* deviceImpl,
+                [in] IHandler* deviceStateHandler,
+                [in] Boolean configureSuccess);
+
+            interface ICameraCaptureSessionImpl;
+            interface ICameraCaptureSession;
+            interface ICloseable;
+        }
+
+        class CCameraDeviceImplCaptureCallbackHolder {
+            constructor();
+
+            constructor(
+                [in] ICameraDeviceImplCaptureCallback* _callback,
+                [in] IList* requestList,
+                [in] IHandler* handler,
+                [in] Boolean repeating);
+
+            interface ICameraDeviceImplCaptureCallbackHolder;
+        }
+
+        class CCameraDeviceImplFrameNumberTracker {
+            constructor();
+
+            constructor(
+                [in] ICameraDeviceImpl* host);
+
+            interface ICameraDeviceImplFrameNumberTracker;
+        }
+
+        class CCameraDeviceImplCameraDeviceCallbacks {
+            constructor();
+
+            constructor(
+                [in] ICameraDeviceImpl* host);
+
+            interface ICameraDeviceImplCameraDeviceCallbacks;
+            interface IICameraDeviceCallbacks;
+            interface IBinder;
+        }
+
+        class CCameraDeviceImpl {
+            constructor();
+
+            constructor(
+                [in] String cameraId,
+                [in] ICameraDeviceStateCallback* _callback,
+                [in] IHandler* handler,
+                [in] ICameraCharacteristics* characteristics);
+
+            interface ICameraDeviceImpl;
+            interface ICameraDevice;
+            interface ICloseable;
+        }
+
+    } //namespace Impl
+
+    namespace Legacy {
+        class CBurstHolder {
+            constructor();
+
+            constructor(
+                [in] Int32 requestId,
+                [in] Boolean repeating,
+                [in] IList* requests,
+                [in] ICollection* jpegSurfaceIds);
+
+            interface IBurstHolder;
+        }
+
+        class CCameraDeviceState {
+            interface ICameraDeviceState;
+        }
+
+        class CCameraDeviceUserShim {
+            constructor();
+
+            constructor(
+                [in] Int32 cameraId,
+                [in] ILegacyCameraDevice* legacyCamera,
+                [in] ICameraCharacteristics* characteristics,
+                [in] ICameraDeviceUserShimCameraLooper* cameraInit,
+                [in] ICameraDeviceUserShimCameraCallbackThread* cameraCallbacks);
+
+            interface ICameraDeviceUserShim;
+            interface IICameraDeviceUser;
+        }
+
+        singleton class CCameraDeviceUserShimHelper {
+            interface ICameraDeviceUserShimHelper;
+        }
+
+        class CCaptureCollector {
+            constructor();
+
+            constructor(
+                [in] Int32 maxInFlight,
+                [in] ICameraDeviceState* deviceState);
+
+            interface ICaptureCollector;
+        }
+
+        class CGLThreadManager {
+            constructor();
+
+            constructor(
+                [in] Int32 cameraId,
+                [in] Int32 facing,
+                [in] ICameraDeviceState* state);
+
+            interface IGLThreadManager;
+        }
+
+        singleton class CLegacyExceptionUtilsHelper {
+            interface ILegacyExceptionUtilsHelper;
+        }
+
+        class CLegacyCameraDevice {
+            constructor();
+
+            constructor(
+                [in] Int32 cameraId,
+                [in] IHardwareCamera* camera,
+                [in] ICameraCharacteristics* characteristics,
+                [in] IICameraDeviceCallbacks* _callbacks);
+
+            interface ILegacyCameraDevice;
+            interface ICloseable;
+        }
+
+        class CLegacyFaceDetectMapper {
+            constructor();
+
+            constructor(
+                [in] IHardwareCamera* camera,
+                [in] ICameraCharacteristics* characteristics);
+
+            interface ILegacyFaceDetectMapper;
+        }
+
+        class CLegacyFocusStateMapper {
+            constructor();
+
+            constructor(
+                [in] IHardwareCamera* camera);
+
+            interface ILegacyFocusStateMapper;
+        }
+
+        singleton class CLegacyMetadataMapper {
+            interface ILegacyMetadataMapper;
+        }
+
+        class CLegacyRequest {
+            constructor();
+
+            constructor(
+                [in] ICameraCharacteristics* characteristics,
+                [in] ICaptureRequest* captureRequest,
+                [in] ISize* previewSize,
+                [in] IParameters* parameters);
+
+            interface ILegacyRequest;
+        }
+
+        singleton class CLegacyRequestMapper {
+            interface ILegacyRequestMapper;
+        }
+
+        class CLegacyResultMapper {
+            interface ILegacyResultMapper;
+        }
+
+        singleton class CParameterUtils {
+            interface IParameterUtils;
+        }
+
+        class CZoomData {
+            constructor();
+
+            constructor(
+                [in] Int32 zoomIndex,
+                [in] IRect* previewCrop,
+                [in] IRect* reportedCrop);
+
+            interface IParameterUtilsZoomData;
+        }
+
+        class CMeteringData {
+            constructor();
+
+            constructor(
+                [in] ICameraArea* meteringArea,
+                [in] IRect* previewMetering,
+                [in] IRect* reportedMetering);
+
+            interface IParameterUtilsMeteringData;
+        }
+
+        class CWeightedRectangle {
+            constructor();
+
+            constructor(
+                [in] IRect* rect,
+                [in] Int32 weight);
+
+            interface IParameterUtilsWeightedRectangle;
+        }
+
+        class CPerfMeasurement {
+            constructor();
+
+            constructor(
+                [in] Int32 maxQueries);
+
+            interface IPerfMeasurement;
+        }
+
+        singleton class CPerfMeasurementHelper {
+            interface IPerfMeasurementHelper;
+        }
+
+        class CRequestHandlerThread {
+            constructor();
+
+            constructor(
+                [in] String name,
+                [in] IHandlerCallback* _callback);
+
+            interface IRequestHandlerThread;
+        }
+
+        class CRequestHolderBuilder {
+            constructor();
+
+            constructor(
+                [in] Int32 requestId,
+                [in] Int32 subsequenceId,
+                [in] ICaptureRequest* request,
+                [in] Boolean repeating,
+                [in] ICollection* jpegSurfaceIds);
+
+            interface IRequestHolderBuilder;
+        }
+
+        class CRequestQueue {
+            constructor();
+
+            constructor(
+                [in] IList* jpegSurfaceIds);
+
+            interface IRequestQueue;
+        }
+
+        class CRequestThreadManager {
+            constructor();
+
+            constructor(
+                [in] Int32 cameraId,
+                [in] IHardwareCamera* camera,
+                [in] ICameraCharacteristics* characteristics,
+                [in] ICameraDeviceState* deviceState);
+
+            interface IRequestThreadManager;
+        }
+
+        class CRequestThreadManagerFpsCounter {
+            constructor();
+
+            constructor(
+                [in] String streamType);
+
+            interface IRequestThreadManagerFpsCounter;
+        }
+
+        class CLegacySizeAreaComparator {
+            interface ILegacySizeAreaComparator;
+            interface IComparator;
+        }
+
+        singleton class CLegacySizeAreaComparatorHelper {
+            interface ILegacySizeAreaComparatorHelper;
+        }
+
+        class CSurfaceTextureRenderer {
+            constructor();
+
+            constructor(
+                [in] Int32 facing);
+
+            interface ISurfaceTextureRenderer;
+        }
+    } //namespace Legacy
+
+    namespace Params {
+        [deprecated]
+        class CBlackLevelPattern {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Int32>* offsets);
+
+            interface IBlackLevelPattern;
+        }
+
+        [deprecated]
+        class CColorSpaceTransform {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<IRational*>* elements);
+
+            constructor(
+                [in] ArrayOf<Int32>* _elements);
+
+            interface IColorSpaceTransform;
+        }
+
+        class CFace {
+            constructor();
+
+            constructor(
+                [in] IRect* bounds,
+                [in] Int32 score,
+                [in] Int32 id,
+                [in] IPoint* leftEyePosition,
+                [in] IPoint* rightEyePosition,
+                [in] IPoint* mouthPosition);
+
+            constructor(
+                [in] IRect* bounds,
+                [in] Int32 score);
+
+            interface IFace;
+        }
+
+        class CHighSpeedVideoConfiguration {
+            constructor();
+
+            constructor(
+                [in] Int32 width,
+                [in] Int32 height,
+                [in] Int32 fpsMin,
+                [in] Int32 fpsMax);
+
+            interface IHighSpeedVideoConfiguration;
+        }
+
+        [deprecated]
+        class CLensShadingMap {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Float>* elements,
+                [in] Int32 rows,
+                [in] Int32 columns);
+
+            interface ILensShadingMap;
+        }
+
+        class CMeteringRectangle {
+            constructor();
+
+            constructor(
+                [in] Int32 x,
+                [in] Int32 y,
+                [in] Int32 width,
+                [in] Int32 height,
+                [in] Int32 meteringWeight);
+
+            constructor(
+                [in] IPoint* xy,
+                [in] ISize* dimensions,
+                [in] Int32 meteringWeight);
+
+            constructor(
+                [in] IRect* rect,
+                [in] Int32 meteringWeight);
+
+            interface IMeteringRectangle;
+        }
+
+        [deprecated]
+        class CReprocessFormatsMap {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Int32>* entry);
+
+            interface IReprocessFormatsMap;
+        }
+
+        class CRggbChannelVector {
+            constructor();
+
+            constructor(
+                [in] Float red,
+                [in] Float greenEven,
+                [in] Float greenOdd,
+                [in] Float blue);
+
+            interface IRggbChannelVector;
+        }
+
+        class CStreamConfiguration {
+            constructor();
+
+            constructor(
+                [in] Int32 format,
+                [in] Int32 width,
+                [in] Int32 height,
+                [in] Boolean input);
+
+            interface IStreamConfiguration;
+        }
+
+        class CStreamConfigurationDuration {
+            constructor();
+
+            constructor(
+                [in] Int32 format,
+                [in] Int32 width,
+                [in] Int32 height,
+                [in] Int64 durationNs);
+
+            interface IStreamConfigurationDuration;
+        }
+
+        [deprecated]
+        class CTonemapCurve {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Float>* red,
+                [in] ArrayOf<Float>* green,
+                [in] ArrayOf<Float>* blue);
+
+            interface ITonemapCurve;
+        }
+
+        [deprecated]
+        class CStreamConfigurationMap {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<IStreamConfiguration*>* configurations,
+                [in] ArrayOf<IStreamConfigurationDuration*>* minFrameDurations,
+                [in] ArrayOf<IStreamConfigurationDuration*>* stallDurations,
+                [in] ArrayOf<IHighSpeedVideoConfiguration*>* highSpeedVideoConfigurations);
+
+            interface IStreamConfigurationMap;
+        }
+
+    } // namespace Params
+
+    namespace Utils {
+        singleton class CArrayUtils {
+            interface IArrayUtils;
+        }
+
+        class CCloseableLock {
+            constructor();
+
+            constructor(
+                [in] String name);
+
+            interface ICloseableLock;
+            interface ICloseable;
+        }
+
+        singleton class CHashCodeHelpers {
+            interface IHashCodeHelpers;
+        }
+
+        singleton class CListUtils {
+            interface IListUtils;
+        }
+
+        singleton class CParamsUtils {
+            interface IParamsUtils;
+        }
+
+        class CUtilsSizeAreaComparator {
+            interface IUtilsSizeAreaComparator;
+            interface IComparator;
+        }
+
+        singleton class CUtilsSizeAreaComparatorHelper {
+            interface IUtilsSizeAreaComparatorHelper;
+        }
+
+        class CTaskDrainer {
+            constructor();
+
+            constructor(
+                [in] IHandler* handler,
+                [in] ITaskDrainerDrainListener* listener);
+
+            constructor(
+                [in] IHandler* handler,
+                [in] ITaskDrainerDrainListener* listener,
+                [in] String name);
+
+            interface ITaskDrainer;
+        }
+
+        class CTaskSingleDrainer {
+            constructor();
+
+            constructor(
+                [in] IHandler* handler,
+                [in] ITaskDrainerDrainListener* listener);
+
+            constructor(
+                [in] IHandler* handler,
+                [in] ITaskDrainerDrainListener* listener,
+                [in] String name);
+
+            interface ITaskSingleDrainer;
+        }
+    } //namespace Utils
+
+    } // namespace Camera2
+
+    namespace Location {
+        class CActivityRecognitionHardware {
+            interface IActivityRecognitionHardware;
+            interface IIActivityRecognitionHardware;
+            interface IBinder;
+        }
+    } // namespace Location
+
+    namespace Display {
+        /**
+         * Manages the properties of attached displays.
+         * <p>
+         * Get an instance of this class by calling
+         * {@link android.content.Context#getSystemService(java.lang.String)
+         * Context.getSystemService()} with the argument
+         * {@link android.content.Context#DISPLAY_SERVICE}.
+         * </p>
+         */
+        [local]
+        class CDisplayManager {
+            constructor(
+                [in] IContext* ctx);
+
+            interface IDisplayManager;
+        }
+
+        class CDisplayManagerCallback {
+            constructor(
+                [in] Handle32 owner);
+
+            interface IIDisplayManagerCallback;
+        }
+
+        class CDisplayPowerRequest {
+            constructor();
+
+            constructor(
+                [in] IDisplayPowerRequest* other);
+
+            interface IDisplayPowerRequest;
+        }
+
+        class CVirtualDisplay {
+            constructor(
+                [in] IDisplayManagerGlobal* global,
+                [in] IDisplay* display,
+                [in] IIVirtualDisplayCallback* token,
+                [in] ISurface* surface);
+
+            interface IVirtualDisplay;
+        }
+
+        class CVirtualDisplayCallback {
+            interface IVirtualDisplayCallback;
+        }
+
+        class CWifiDisplay {
+            constructor();
+
+            constructor(
+                [in] String deviceAddress,
+                [in] String deviceName,
+                [in] String deviceAlias,
+                [in] Boolean available,
+                [in] Boolean canConnect,
+                [in] Boolean remembered);
+
+            interface IWifiDisplay;
+            interface IParcelable;
+        }
+
+        class CWifiDisplaySessionInfo {
+            constructor();
+
+            constructor(
+                [in] Boolean client,
+                [in] Int32 session,
+                [in] String group,
+                [in] String pp,
+                [in] String ip);
+
+            interface IWifiDisplaySessionInfo;
+            interface IParcelable;
+        }
+
+        [deprecated]
+        class CWifiDisplayStatus {
+            constructor();
+
+            constructor(
+                [in] Int32 featureState,
+                [in] Int32 scanState,
+                [in] Int32 activeDisplayState,
+                [in] IWifiDisplay* activeDisplay,
+                [in] ArrayOf<IWifiDisplay*>* displays,
+                [in] IWifiDisplaySessionInfo* sessionInfo);
+
+            interface IWifiDisplayStatus;
+            interface IParcelable;
+        }
+
+        class CDisplayViewport {
+            constructor();
+
+            interface IDisplayViewport;
+        }
+
+        singleton class CDisplayManagerGlobalHelper {
+            interface IDisplayManagerGlobalHelper;
+        }
+    } // namespace Display
+
+    namespace Input {
+
+        class CInputManagerInputDevicesChangedListener {
+            constructor(
+                [in] Handle32 inputManager);
+
+            interface IInputDevicesChangedListener;
+        }
+
+        class CInputManager {
+            interface IInputManager;
+        }
+
+        singleton class CInputManagerHelper {
+            interface IInputManagerHelper;
+        }
+
+    } // namespace Input
+
+    namespace Soundtrigger {
+
+    class CSoundTriggerModuleProperties {
+        constructor();
+
+        /**
+         * Create a segment of a carrier frequency range.
+         *
+         * @param min The minimum transmittable frequency in this range segment.
+         * @param max The maximum transmittable frequency in this range segment.
+         */
+        constructor(
+            [in] Int32 id,
+            [in] String implementor,
+            [in] String description,
+            [in] String uuid,
+            [in] Int32 _version,
+            [in] Int32 maxSoundModels,
+            [in] Int32 maxKeyphrases,
+            [in] Int32 maxUsers,
+            [in] Int32 recognitionModes,
+            [in] Boolean supportsCaptureTransition,
+            [in] Int32 maxBufferMs,
+            [in] Boolean supportsConcurrentCapture,
+            [in] Int32 powerConsumptionMw,
+            [in] Boolean returnsTriggerInEvent);
+
+        interface ISoundTriggerModuleProperties;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSoundTriggerSoundModel {
+        constructor();
+
+        constructor(
+            [in] IUUID* uuid,
+            [in] IUUID* vendorUuid,
+            [in] Int32 type,
+            [in] ArrayOf<Byte>* data);
+
+        interface ISoundTriggerSoundModel;
+    }
+
+    [deprecated]
+    class CSoundTriggerKeyphrase {
+        constructor();
+
+        constructor(
+            [in] Int32 id,
+            [in] Int32 recognitionModes,
+            [in] String locale,
+            [in] String text,
+            [in] ArrayOf<Int32>* users);
+
+        interface ISoundTriggerKeyphrase;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSoundTriggerKeyphraseSoundModel {
+        constructor();
+
+        constructor(
+            [in] IUUID* uuid,
+            [in] IUUID* vendorUuid,
+            [in] ArrayOf<Byte>* data,
+            [in] ArrayOf<ISoundTriggerKeyphrase*>* keyphrases);
+
+        interface ISoundTriggerKeyphraseSoundModel;
+        interface ISoundTriggerSoundModel;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSoundTriggerRecognitionEvent {
+        constructor();
+
+        constructor(
+            [in] Int32 status,
+            [in] Int32 soundModelHandle,
+            [in] Boolean captureAvailable,
+            [in] Int32 captureSession,
+            [in] Int32 captureDelayMs,
+            [in] Int32 capturePreambleMs,
+            [in] Boolean triggerInData,
+            [in] IAudioFormat* captureFormat,
+            [in] ArrayOf<Byte>* data);
+
+        interface ISoundTriggerRecognitionEvent;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSoundTriggerRecognitionConfig {
+        constructor();
+
+        constructor(
+            [in] Boolean captureRequested,
+            [in] Boolean allowMultipleTriggers,
+            [in] ArrayOf<ISoundTriggerKeyphraseRecognitionExtra*>* keyphrases,
+            [in] ArrayOf<Byte>* data);
+
+        interface ISoundTriggerRecognitionConfig;
+        interface IParcelable;
+    }
+
+    class CSoundTriggerConfidenceLevel {
+        constructor();
+
+        constructor(
+            [in] Int32 userId,
+            [in] Int32 confidenceLevel);
+
+        interface ISoundTriggerConfidenceLevel;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSoundTriggerKeyphraseRecognitionExtra {
+        constructor();
+
+        constructor(
+            [in] Int32 id,
+            [in] Int32 recognitionModes,
+            [in] Int32 coarseConfidenceLevel,
+            [in] ArrayOf<ISoundTriggerConfidenceLevel*>* confidenceLevels);
+
+        interface ISoundTriggerKeyphraseRecognitionExtra;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSoundTriggerKeyphraseRecognitionEvent {
+        constructor();
+
+        constructor(
+            [in] Int32 status,
+            [in] Int32 soundModelHandle,
+            [in] Boolean captureAvailable,
+            [in] Int32 captureSession,
+            [in] Int32 captureDelayMs,
+            [in] Int32 capturePreambleMs,
+            [in] Boolean triggerInData,
+            [in] IAudioFormat* captureFormat,
+            [in] ArrayOf<Byte>* data,
+            [in] ArrayOf<ISoundTriggerKeyphraseRecognitionExtra*>* keyphraseExtras);
+
+        interface ISoundTriggerKeyphraseRecognitionEvent;
+        interface ISoundTriggerRecognitionEvent;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CSoundTriggerSoundModelEvent {
+        constructor();
+
+        constructor(
+            [in] Int32 status,
+            [in] Int32 soundModelHandle,
+            [in] ArrayOf<Byte>* data);
+
+        interface ISoundTriggerSoundModelEvent;
+        interface IParcelable;
+    }
+
+    } // namespace Soundtrigger
+
+    namespace Usb {
+
+    class CUsbAccessory {
+        constructor();
+
+        /**
+         * UsbAccessory should only be instantiated by UsbService implementation
+         * @hide
+         */
+        constructor(
+            [in] String manufacturer,
+            [in] String model,
+            [in] String description,
+            [in] String ver,
+            [in] String uri,
+            [in] String serial);
+
+        /**
+         * UsbAccessory should only be instantiated by UsbService implementation
+         * @hide
+         */
+        constructor(
+            [in] ArrayOf<String> strings);
+
+        interface IUsbAccessory;
+        interface IParcelable;
+    }
+
+    class CUsbConfiguration {
+        constructor();
+
+        /**
+         * UsbConfiguration should only be instantiated by UsbService implementation
+         * @hide
+         */
+        constructor(
+            [in] Int32 id,
+            [in] String name,
+            [in] Int32 attributes,
+            [in] Int32 maxPower);
+
+        interface IUsbConfiguration;
+        interface IParcelable;
+    }
+
+    [deprecated]
+    class CUsbDevice {
+        constructor();
+
+        /**
+         * UsbDevice should only be instantiated by UsbService implementation
+         * @hide
+         */
+        constructor(
+            [in] String name,
+            [in] Int32 vendorId,
+            [in] Int32 productId,
+            [in] Int32 cls,
+            [in] Int32 subCls,
+            [in] Int32 protocol,
+            [in] String manufacturerName,
+            [in] String productName,
+            [in] String serialNumber);
+
+        interface IUsbDevice;
+        interface IParcelable;
+    }
+
+    class CUsbDeviceConnection {
+        /**
+         * UsbDevice should only be instantiated by UsbService implementation
+         * @hide
+         */
+        constructor(
+            [in] IUsbDevice* device);
+
+        interface IUsbDeviceConnection;
+    }
+
+    class CUsbEndpoint {
+        constructor();
+
+        /**
+         * UsbEndpoint should only be instantiated by UsbService implementation
+         * @hide
+         */
+        constructor(
+            [in] Int32 address,
+            [in] Int32 attributes,
+            [in] Int32 size,
+            [in] Int32 interval);
+
+        interface IUsbEndpoint;
+        interface IParcelable;
+    }
+
+    class CUsbInterface {
+        constructor();
+
+        /**
+         * UsbInterface should only be instantiated by UsbService implementation
+         * @hide
+         */
+        constructor(
+            [in] Int32 id,
+            [in] Int32 alternateSetting,
+            [in] String name,
+            [in] Int32 Class,
+            [in] Int32 subClass,
+            [in] Int32 protocol);
+
+        interface IUsbInterface;
+        interface IParcelable;
+    }
+
+    [local]
+    class CUsbManager {
+        /**
+         * {@hide}
+         */
+        constructor(
+            [in] IContext* ctx,
+            [in] IIUsbManager* service);
+
+        interface IUsbManager;
+    }
+
+    class CUsbRequest {
+        constructor();
+
+        interface IUsbRequest;
+    }
+
+    singleton class CUsbDeviceHelper {
+        interface IUsbDeviceHelper;
+    }
+
+    } // namespace Usb
+    } // namespace Hardware
+    } // namepsace Droid
+    } // namespace Elastos
+}

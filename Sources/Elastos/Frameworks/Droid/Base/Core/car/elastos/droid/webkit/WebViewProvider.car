@@ -1,0 +1,577 @@
+
+module
+{
+    using interface Elastos.IO.IFile;
+    using interface Elastos.IO.IBufferedWriter;
+    using interface Elastos.Utility.IMap;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.IPicture;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Net.Http.ISslCertificate;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroupLayoutParams;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeProvider;
+    interface Elastos.Droid.View.InputMethod.IEditorInfo;
+    interface Elastos.Droid.View.InputMethod.IInputConnection;
+    interface Elastos.Droid.Webkit.IValueCallback;
+    interface Elastos.Droid.Webkit.IWebBackForwardList;
+    interface Elastos.Droid.Webkit.IWebViewPictureListener;
+    interface Elastos.Droid.Webkit.IWebViewHitTestResult;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+
+    //-------------------------------------------------------------------------
+    // View / ViewGroup delegation methods
+    //-------------------------------------------------------------------------
+
+    /**
+     * Provides mechanism for the name-sake methods declared in View and ViewGroup to be delegated
+     * into the WebViewProvider instance.
+     * NOTE For many of these methods, the WebView will provide a super.Foo() call before or after
+     * making the call into the provider instance. This is done for convenience in the common case
+     * of maintaining backward compatibility. For remaining super class calls (e.g. where the
+     * provider may need to only conditionally make the call based on some internal state) see the
+     * {@link WebView.PrivateAccess} callback class.
+     */
+    // TODO: See if the pattern of the super-class calls can be rationalized at all, and document
+    // the remainder on the methods below.
+    [local]
+    interface IWebViewProviderViewDelegate {
+        ShouldDelayChildPressedState(
+            [out] Boolean* result);
+
+        GetAccessibilityNodeProvider(
+            [out] IAccessibilityNodeProvider** provider);
+
+        OnInitializeAccessibilityNodeInfo(
+            [in] IAccessibilityNodeInfo* info);
+
+        OnInitializeAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        PerformAccessibilityAction(
+            [in] Int32 action,
+            [in] IBundle* arguments,
+            [out] Boolean* result);
+
+        SetOverScrollMode(
+            [in] Int32 mode);
+
+        SetScrollBarStyle(
+            [in] Int32 style);
+
+        OnDrawVerticalScrollBar(
+            [in] ICanvas* canvas,
+            [in] IDrawable* scrollBar,
+            [in] Int32 l,
+            [in] Int32 t,
+            [in] Int32 r,
+            [in] Int32 b);
+
+        OnOverScrolled(
+            [in] Int32 scrollX,
+            [in] Int32 scrollY,
+            [in] Boolean clampedX,
+            [in] Boolean clampedY);
+
+        OnWindowVisibilityChanged(
+            [in] Int32 visibility);
+
+        OnDraw(
+            [in] ICanvas* canvas);
+
+        SetLayoutParams(
+            [in] IViewGroupLayoutParams* layoutParams);
+
+        PerformLongClick(
+            [out] Boolean* result);
+
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        OnCreateInputConnection(
+            [in] IEditorInfo* outAttrs,
+            [out] IInputConnection** inputConnection);
+
+        OnKeyMultiple(
+            [in] Int32 keyCode,
+            [in] Int32 repeatCount,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OnKeyDown(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OnKeyUp(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OnAttachedToWindow();
+
+        OnDetachedFromWindow();
+
+        OnVisibilityChanged(
+            [in] IView* changedView,
+            [in] Int32 visibility);
+
+        OnWindowFocusChanged(
+            [in] Boolean hasWindowFocus);
+
+        OnFocusChanged(
+            [in] Boolean focused,
+            [in] Int32 direction,
+            [in] IRect* previouslyFocusedRect);
+
+        SetFrame(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom,
+            [out] Boolean* result);
+
+        OnSizeChanged(
+            [in] Int32 w,
+            [in] Int32 h,
+            [in] Int32 ow,
+            [in] Int32 oh);
+
+        OnScrollChanged(
+            [in] Int32 l,
+            [in] Int32 t,
+            [in] Int32 oldl,
+            [in] Int32 oldt);
+
+        DispatchKeyEvent(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OnTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        OnHoverEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        OnGenericMotionEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        OnTrackballEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        RequestFocus(
+            [in] Int32 direction,
+            [in] IRect* previouslyFocusedRect,
+            [out] Boolean* result);
+
+        OnMeasure(
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
+
+        RequestChildRectangleOnScreen(
+            [in] IView* child,
+            [in] IRect* rect,
+            [in] Boolean immediate,
+            [out] Boolean* result);
+
+        SetBackgroundColor(
+            [in] Int32 color);
+
+        SetLayerType(
+            [in] Int32 layerType,
+            [in] IPaint* paint);
+
+        PreDispatchDraw(
+            [in] ICanvas* canvas);
+
+        OnStartTemporaryDetach();
+
+        OnFinishTemporaryDetach();
+    }
+
+    interface IWebViewProviderScrollDelegate {
+        // These methods are declared protected in the ViewGroup base class. This interface
+        // exists to promote them to public so they may be called by the WebView proxy class.
+        // TODO: Combine into ViewDelegate?
+        /**
+         * See {@link android.webkit.WebView#computeHorizontalScrollRange}
+         */
+        ComputeHorizontalScrollRange(
+            [out] Int32* range);
+
+        /**
+         * See {@link android.webkit.WebView#computeHorizontalScrollOffset}
+         */
+        ComputeHorizontalScrollOffset(
+            [out] Int32* offset);
+
+        /**
+         * See {@link android.webkit.WebView#computeVerticalScrollRange}
+         */
+        ComputeVerticalScrollRange(
+            [out] Int32* range);
+
+        /**
+         * See {@link android.webkit.WebView#computeVerticalScrollOffset}
+         */
+        ComputeVerticalScrollOffset(
+            [out] Int32* offset);
+
+        /**
+         * See {@link android.webkit.WebView#computeVerticalScrollExtent}
+         */
+        ComputeVerticalScrollExtent(
+            [out] Int32* extent);
+
+        /**
+         * See {@link android.webkit.WebView#computeScroll}
+         */
+        ComputeScroll();
+    }
+
+    /**
+     * WebView backend provider interface: this interface is the abstract backend to a WebView
+     * instance; each WebView object is bound to exactly one WebViewProvider object which implements
+     * the runtime behavior of that WebView.
+     *
+     * All methods must behave as per their namesake in {@link WebView}, unless otherwise noted.
+     *
+     * @hide Not part of the public API; only required by system implementors.
+     */
+    [deprecated, local]
+    interface IWebViewProvider {
+        //-------------------------------------------------------------------------
+        // Main interface for backend provider of the WebView class.
+        //-------------------------------------------------------------------------
+        /**
+         * Initialize this WebViewProvider instance. Called after the WebView has fully constructed.
+         * @param javaScriptInterfaces is a Map of interface names, as keys, and
+         * object implementing those interfaces, as values.
+         * @param privateBrowsing If true the web view will be initialized in private / incognito mode.
+         */
+        Init(
+            [in] IMap* javaScriptInterfaces,
+            [in] Boolean privateBrowsing);
+
+        SetHorizontalScrollbarOverlay(
+            [in] Boolean overlay);
+
+        SetVerticalScrollbarOverlay(
+            [in] Boolean overlay);
+
+        OverlayHorizontalScrollbar(
+            [out] Boolean* scrollbar);
+
+        OverlayVerticalScrollbar(
+            [out] Boolean* scrollbar);
+
+        GetVisibleTitleHeight(
+            [out] Int32* height);
+
+        GetCertificate(
+            [out] ISslCertificate** cer);
+
+        SetCertificate(
+            [in] ISslCertificate* certificate);
+
+        SavePassword(
+            [in] String host,
+            [in] String username,
+            [in] String password);
+
+        SetHttpAuthUsernamePassword(
+            [in] String host,
+            [in] String realm,
+            [in] String username,
+            [in] String password);
+
+        GetHttpAuthUsernamePassword(
+            [in] String host,
+            [in] String realm,
+            [out, callee] ArrayOf<String>* up);
+
+        /**
+         * See {@link WebView#destroy()}.
+         * As well as releasing the internal state and resources held by the implementation,
+         * the provider should null all references it holds on the WebView proxy class, and ensure
+         * no further method calls are made to it.
+         */
+        Destroy();
+
+        SetNetworkAvailable(
+            [in] Boolean networkUp);
+
+        SaveState(
+            [in] IBundle* outState,
+            [out] IWebBackForwardList** wbfl);
+
+        SavePicture(
+            [in] IBundle* b,
+            [in] IFile* dest,
+            [out] Boolean* result);
+
+        RestorePicture(
+            [in] IBundle* b,
+            [in] IFile* src,
+            [out] Boolean* result);
+
+        RestoreState(
+            [in] IBundle* inState,
+            [out] IWebBackForwardList** wbfl);
+
+        LoadUrl(
+            [in] String url,
+            [in] IMap* additionalHttpHeaders);
+
+        LoadUrl(
+            [in] String url);
+
+        PostUrl(
+            [in] String url,
+            [in] ArrayOf<Byte>* postData);
+
+        LoadData(
+            [in] String data,
+            [in] String mimeType,
+            [in] String encoding);
+
+        LoadDataWithBaseURL(
+            [in] String baseUrl,
+            [in] String data,
+            [in] String mimeType,
+            [in] String encoding,
+            [in] String historyUrl);
+
+        EvaluateJavaScript(
+            [in] String script,
+            [in] IValueCallback* resultCallback);
+
+        SaveWebArchive(
+            [in] String filename);
+
+        SaveWebArchive(
+            [in] String basename,
+            [in] Boolean autoname,
+            [in] IValueCallback* callBack);
+
+        StopLoading();
+
+        Reload();
+
+        CanGoBack(
+            [out] Boolean* result);
+
+        GoBack();
+
+        CanGoForward(
+            [out] Boolean* result);
+
+        GoForward();
+
+        CanGoBackOrForward(
+            [in] Int32 steps,
+            [out] Boolean* result);
+
+        GoBackOrForward(
+            [in] Int32 steps);
+
+        IsPrivateBrowsingEnabled(
+            [out] Boolean* result);
+
+        PageUp(
+            [in] Boolean top,
+            [out] Boolean* result);
+
+        PageDown(
+            [in] Boolean bottom,
+            [out] Boolean* result);
+
+        ClearView();
+
+        CapturePicture(
+            [out] IPicture** pic);
+
+//        CreatePrintDocumentAdapter(
+//            [in] String documentName,
+//            [out] IPrintDocumentAdapter** adapter);
+
+        GetScale(
+            [out] Float* scale);
+
+        SetInitialScale(
+            [in] Int32 scaleInPercent);
+
+        InvokeZoomPicker();
+
+        GetHitTestResult(
+            [out] IWebViewHitTestResult** result);
+
+        RequestFocusNodeHref(
+            [in] IMessage* hrefMsg);
+
+        RequestImageRef(
+            [in] IMessage* msg);
+
+        GetUrl(
+            [out] String* url);
+
+        GetOriginalUrl(
+            [out] String* url);
+
+        GetTitle(
+            [out] String* title);
+
+        GetFavicon(
+            [out] IBitmap** favicon);
+
+        GetTouchIconUrl(
+            [out] String* url);
+
+        GetProgress(
+            [out] Int32* progress);
+
+        GetContentHeight(
+            [out] Int32* height);
+
+        GetContentWidth(
+            [out] Int32* width);
+
+        PauseTimers();
+
+        ResumeTimers();
+
+        OnPause();
+
+        OnResume();
+
+        IsPaused(
+            [out] Boolean* result);
+
+        FreeMemory();
+
+        ClearCache(
+            [in] Boolean includeDiskFiles);
+
+        ClearFormData();
+
+        ClearHistory();
+
+        ClearSslPreferences();
+
+        CopyBackForwardList(
+            [out] IWebBackForwardList** wbfl);
+
+        SetFindListener(
+            [in] IWebViewFindListener* listener);
+
+        FindNext(
+            [in] Boolean forward);
+
+        FindAll(
+            [in] String find,
+            [out] Int32* all);
+
+        FindAllAsync(
+            [in] String find);
+
+        ShowFindDialog(
+            [in] String text,
+            [in] Boolean showIme,
+            [out] Boolean* result);
+
+        ClearMatches();
+
+        DocumentHasImages(
+            [in] IMessage* response);
+
+        SetWebViewClient(
+            [in] IWebViewClient* client);
+
+        SetDownloadListener(
+            [in] IDownloadListener* listener);
+
+        SetWebChromeClient(
+            [in] IWebChromeClient* client);
+
+        SetPictureListener(
+            [in] IWebViewPictureListener* listener);
+
+        AddJavascriptInterface(
+            [in] IInterface* obj,
+            [in] String interfaceName);
+
+        RemoveJavascriptInterface(
+            [in] String interfaceName);
+
+        GetSettings(
+            [out] IWebSettings** settings);
+
+        SetMapTrackballToArrowKeys(
+            [in] Boolean setMap);
+
+        FlingScroll(
+            [in] Int32 vx,
+            [in] Int32 vy);
+
+        GetZoomControls(
+            [out] IView** view);
+
+        CanZoomIn(
+            [out] Boolean* result);
+
+        CanZoomOut(
+            [out] Boolean* result);
+
+        ZoomBy(
+            [in] Float zoomFactor,
+            [out] Boolean* result);
+
+        ZoomIn(
+            [out] Boolean* result);
+
+        ZoomOut(
+            [out] Boolean* result);
+
+        DumpViewHierarchyWithProperties(
+            [in] IBufferedWriter* writer,
+            [in] Int32 level);
+
+        FindHierarchyView(
+            [in] String className,
+            [in] Int32 hashCode,
+            [out] IView** view);
+
+        /**
+         * Only used by FindActionModeCallback to inform providers that the find dialog has
+         * been dismissed.
+         */
+        NotifyFindDialogDismissed();
+
+        GetViewDelegate(
+            [out] IWebViewProviderViewDelegate** viewDelegate);
+
+        GetScrollDelegate(
+            [out] IWebViewProviderScrollDelegate** scrollDelegate);
+    }
+
+    } // namespace Webkit
+    } // namepsace Droid
+    } // namespace Elastos
+}

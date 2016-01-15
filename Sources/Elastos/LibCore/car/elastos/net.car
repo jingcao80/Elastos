@@ -1,0 +1,818 @@
+
+module
+{
+    merge("net/Exceptions.car");
+    merge("net/IAuthenticator.car");
+    merge("net/ICacheRequest.car");
+    merge("net/ICacheResponse.car");
+    merge("net/IContentHandler.car");
+    merge("net/IContentHandlerFactory.car");
+    merge("net/ICookieHandler.car");
+    merge("net/IURLStreamHandler.car");
+    merge("net/IURLStreamHandlerFactory.car");
+    merge("net/IURI.car");
+    merge("net/IURL.car");
+    merge("net/ICookieManager.car");
+    merge("net/ICookiePolicy.car");
+    merge("net/ICookieStore.car");
+    merge("net/IDatagramPacket.car");
+    merge("net/IDatagramSocket.car");
+    merge("net/ISocketOptions.car");
+    merge("net/IDatagramSocketImpl.car");
+    merge("net/IDatagramSocketImplFactory.car");
+    merge("net/IResponseCache.car");
+    merge("net/IURLConnection.car");
+    merge("net/IHttpURLConnection.car");
+    merge("net/IFileNameMap.car");
+    merge("net/IHttpCookie.car");
+    merge("net/IIDN.car");
+    merge("net/IInetAddress.car");
+    merge("net/ISocketAddress.car");
+    merge("net/IInetSocketAddress.car");
+    merge("net/IInterfaceAddress.car");
+    merge("net/IMulticastSocket.car");
+    merge("net/INetworkInterface.car");
+    merge("net/IPasswordAuthentication.car");
+    merge("net/IPlainDatagramSocketImpl.car");
+    merge("net/ISocketImpl.car");
+    merge("net/IPlainSocketImpl.car");
+    merge("net/IPlainServerSocketImpl.car");
+    merge("net/IProxy.car");
+    merge("net/IProxySelector.car");
+    merge("net/ISecureCacheResponse.car");
+    merge("net/IServerSocket.car");
+    merge("net/ISocket.car");
+    merge("net/ISocketImplFactory.car");
+    merge("net/ISocks4Message.car");
+    merge("net/IURLEncoder.car");
+    merge("net/IURLDecoder.car");
+    merge("net/IJarURLConnection.car");
+    merge("net/INetPermission.car");
+    merge("net/ISocketPermission.car");
+
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Core.IComparable;
+    interface Elastos.IO.ISerializable;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.IFlushable;
+    interface Elastos.IO.IFileDescriptor;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.Security.IGuard;
+    interface Elastos.Security.IPermission;
+
+    namespace Elastos {
+    namespace Net {
+
+    class CCookieManager {
+        /**
+         * Constructs a new cookie manager.
+         *
+         * The invocation of this constructor is the same as the invocation of
+         * CookieManager(null, null).
+         *
+         */
+        constructor();
+
+        /**
+         * Constructs a new cookie manager using a specified cookie store and a
+         * cookie policy.
+         *
+         * @param store
+         *            a CookieStore to be used by cookie manager. The manager will
+         *            use a default one if the arg is null.
+         * @param cookiePolicy
+         *            a CookiePolicy to be used by cookie manager
+         *            ACCEPT_ORIGINAL_SERVER will be used if the arg is null.
+         */
+        constructor(
+            [in] ICookieStore* store,
+            [in] ICookiePolicy* cookiePolicy);
+
+        interface ICookieManager;
+        interface ICookieHandler;
+    }
+
+    [deprecated]
+    class CDatagramPacket {
+        /**
+         * Constructs a new {@code DatagramPacket} object to receive data up to
+         * {@code length} bytes.
+         *
+         * @param data
+         *            a byte array to store the read characters.
+         * @param length
+         *            the length of the data buffer.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 length);
+
+        /**
+         * Constructs a new {@code DatagramPacket} object to receive data up to
+         * {@code length} bytes with a specified buffer offset.
+         *
+         * @param data
+         *            a byte array to store the read characters.
+         * @param offset
+         *            the offset of the byte array where the bytes is written.
+         * @param length
+         *            the length of the data.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        /**
+         * Constructs a new {@code DatagramPacket} object to send data to the port
+         * {@code aPort} of the address {@code host}. The {@code length} must be
+         * lesser than or equal to the size of {@code data}. The first {@code
+         * length} bytes from the byte array position {@code offset} are sent.
+         *
+         * @param data
+         *            a byte array which stores the characters to be sent.
+         * @param offset
+         *            the offset of {@code data} where to read from.
+         * @param length
+         *            the length of data.
+         * @param host
+         *            the address of the target host.
+         * @param aPort
+         *            the port of the target host.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] IInetAddress* host,
+            [in] Int32 aPort);
+
+        /**
+         * Constructs a new {@code DatagramPacket} object to send data to the port
+         * {@code aPort} of the address {@code host}. The {@code length} must be
+         * lesser than or equal to the size of {@code data}. The first {@code
+         * length} bytes are sent.
+         *
+         * @param data
+         *            a byte array which stores the characters to be sent.
+         * @param length
+         *            the length of data.
+         * @param host
+         *            the address of the target host.
+         * @param port
+         *            the port of the target host.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 length,
+            [in] IInetAddress* host,
+            [in] Int32 port);
+
+        /**
+         * Constructs a new {@code DatagramPacket} object to send data to the
+         * address {@code sockAddr}. The {@code length} must be lesser than or equal
+         * to the size of {@code data}. The first {@code length} bytes of the data
+         * are sent.
+         *
+         * @param data
+         *            the byte array to store the data.
+         * @param length
+         *            the length of the data.
+         * @param sockAddr
+         *            the target host address and port.
+         * @throws SocketException
+         *             if an error in the underlying protocol occurs.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 length,
+            [in] ISocketAddress* sockAddr);
+
+        /**
+         * Constructs a new {@code DatagramPacket} object to send data to the
+         * address {@code sockAddr}. The {@code length} must be lesser than or equal
+         * to the size of {@code data}. The first {@code length} bytes of the data
+         * are sent.
+         *
+         * @param data
+         *            the byte array to store the data.
+         * @param offset
+         *            the offset of the data.
+         * @param length
+         *            the length of the data.
+         * @param sockAddr
+         *            the target host address and port.
+         * @throws SocketException
+         *             if an error in the underlying protocol occurs.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] ISocketAddress* sockAddr);
+
+        interface IDatagramPacket;
+    }
+
+    class CDatagramSocket {
+        /**
+         * Constructs a UDP datagram socket which is bound to any available port on
+         * the localhost.
+         *
+         * @throws SocketException
+         *             if an error occurs while creating or binding the socket.
+         */
+        constructor();
+
+        /**
+         * Constructs a UDP datagram socket which is bound to the specific port
+         * {@code aPort} on the localhost. Valid values for {@code aPort} are
+         * between 0 and 65535 inclusive.
+         *
+         * @param aPort
+         *            the port to bind on the localhost.
+         * @throws SocketException
+         *             if an error occurs while creating or binding the socket.
+         */
+        constructor(
+            [in] Int32 aPort);
+
+        /**
+         * Constructs a UDP datagram socket which is bound to the specific local
+         * address {@code addr} on port {@code aPort}. Valid values for {@code
+         * aPort} are between 0 and 65535 inclusive.
+         *
+         * @param aPort
+         *            the port to bind on the localhost.
+         * @param addr
+         *            the address to bind on the localhost.
+         * @throws SocketException
+         *             if an error occurs while creating or binding the socket.
+         */
+        constructor(
+            [in] Int32 aport,
+            [in] IInetAddress* addr);
+
+        /**
+         * Constructs a new {@code DatagramSocket} bound to the host/port specified
+         * by the {@code SocketAddress} {@code localAddr} or an unbound {@code
+         * DatagramSocket} if the {@code SocketAddress} is {@code null}.
+         *
+         * @param localAddr
+         *            the local machine address and port to bind to.
+         * @throws IllegalArgumentException
+         *             if the SocketAddress is not supported
+         * @throws SocketException
+         *             if a problem occurs creating or binding the socket.
+         */
+        constructor(
+            [in] ISocketAddress* localAddr);
+
+        interface IDatagramSocket;
+        interface ICloseable;
+    }
+
+    class CHttpCookie {
+        /**
+         * Creates a new cookie.
+         *
+         * @param name a non-empty string that contains only printable ASCII, no
+         *     commas or semicolons, and is not prefixed with  {@code $}. May not be
+         *     an HTTP attribute name.
+         * @param value an opaque value from the HTTP server.
+         * @throws IllegalArgumentException if {@code name} is invalid.
+         */
+        constructor(
+            [in] String name,
+            [in] String value);
+
+        interface IHttpCookie;
+        interface ICloneable;
+    }
+
+    singleton class CHttpCookieHelper {
+        interface IHttpCookieHelper;
+    }
+
+    [deprecated]
+    class CInet4Address {
+        constructor(
+            [in] ArrayOf<Byte>* address,
+            [in] String hostName);
+
+        interface IInet4Address;
+        interface IInetAddress;
+        interface ISerializable;
+    }
+
+    singleton class CInet4AddressHelper {
+        interface IInet4AddressHelper;
+    }
+
+    [deprecated]
+    class CInet6Address {
+        constructor(
+            [in] ArrayOf<Byte>* address,
+            [in] String hostName,
+            [in] Int32 scope_id);
+
+        interface IInet6Address;
+        interface IInetAddress;
+        interface ISerializable;
+    }
+
+    singleton class CInet6AddressHelper {
+        interface IInet6AddressHelper;
+    }
+
+    class CInetSocketAddress {
+        /**
+        * @hide internal use only
+        */
+        constructor();
+
+        /**
+        * Creates a socket endpoint with the given port number {@code port} and
+        * no specified address. The range for valid port numbers is between 0 and
+        * 65535 inclusive.
+        *
+        * @param port
+        *            the specified port number to which this socket is bound.
+        */
+        constructor(
+            [in] Int32 port);
+
+        /**
+        * Creates a socket endpoint with the given port number {@code port} and
+        * {@code address}. The range for valid port numbers is between 0 and 65535
+        * inclusive. If {@code address} is {@code null} this socket is bound to the
+        * IPv4 wildcard address.
+        *
+        * @param port
+        *            the specified port number to which this socket is bound.
+        * @param address
+        *            the specified address to which this socket is bound.
+        */
+        constructor(
+            [in] IInetAddress* address,
+            [in] Int32 port);
+
+        /**
+        * Creates a socket endpoint with the given port number {@code port} and the
+        * hostname {@code host}. The hostname is tried to be resolved and cannot be
+        * {@code null}. The range for valid port numbers is between 0 and 65535
+        * inclusive.
+        *
+        * @param port
+        *            the specified port number to which this socket is bound.
+        * @param host
+        *            the specified hostname to which this socket is bound.
+        * @throws SecurityException
+        *             if a {@link SecurityManager} is installed and its {@code
+        *             checkConnect()} method does not allow the resolving of the
+        *             host name.
+        */
+        constructor(
+            [in] String host,
+            [in] Int32 port);
+
+        /*
+        * Internal constructor for InetSocketAddress(String, int) and
+        * createUnresolved(String, int);
+        */
+        constructor(
+            [in] String hostname,
+            [in] Int32 port,
+            [in] Boolean needResolved);
+
+        interface IInetSocketAddress;
+        interface ISocketAddress;
+        interface ISerializable;
+    }
+
+    singleton class CInetSocketAddressHelper
+    {
+        interface IInetSocketAddressHelper;
+    }
+
+    class CMulticastSocket {
+        constructor();
+
+        constructor(
+            [in] Int32 aPort);
+
+        constructor(
+            [in] ISocketAddress* localAddr);
+
+        interface IMulticastSocket;
+        interface IDatagramSocket;
+        interface ICloseable;
+    }
+
+    class CNetPermission {
+        constructor(
+            [in] String name);
+
+        constructor(
+            [in] String name,
+            [in] String actions);
+
+        interface INetPermission;
+        //interface IBasicPermission;
+        interface IPermission;
+        interface IGuard;
+        interface ISerializable;
+    }
+
+    [deprecated]
+    class CPasswordAuthentication {
+        /**
+         * Creates an instance of a password authentication with a specified
+         * username and password.
+         *
+         * @param userName
+         *            the username to store.
+         * @param password
+         *            the associated password to store.
+         */
+        constructor(
+            [in] String userName,
+            [in] ArrayOf<Char32> * password);
+
+        interface IPasswordAuthentication;
+    }
+
+    class CPlainDatagramSocketImpl {
+        constructor(
+            [in] IFileDescriptor* fd,
+            [in] Int32 localPort);
+
+        constructor();
+
+        interface IPlainDatagramSocketImpl;
+        interface IDatagramSocketImpl;
+        interface ISocketOptions;
+    }
+
+    class CPlainServerSocketImpl {
+        constructor();
+
+        constructor(
+            [in] IFileDescriptor * pFd);
+
+        interface ISocketOptions;
+        interface ISocketImpl;
+        interface IPlainSocketImpl;
+        interface IPlainServerSocketImpl;
+    }
+
+    class CPlainSocketImpl {
+        constructor();
+
+        constructor(
+            [in] IFileDescriptor * pFd);
+
+        constructor(
+            [in] IProxy * pProxy);
+
+        constructor(
+            [in] IFileDescriptor * pFd,
+            [in] Int32 localport,
+            [in] IInetAddress * pAddr,
+            [in] Int32 port);
+
+        interface ISocketOptions;
+        interface ISocketImpl;
+        interface IPlainSocketImpl;
+    }
+
+    class CPlainSocketInputStream {
+        constructor(
+            [in] ISocketImpl * socketImpl);
+
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class CPlainSocketOutputStream {
+        constructor(
+            [in] ISocketImpl * socketImpl);
+
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CProxy {
+        /**
+         * Creates a new {@code Proxy} instance. {@code SocketAddress} must NOT be
+         * {@code null} when {@code type} is either {@code Proxy.Type.HTTP} or
+         * {@code Proxy.Type.SOCKS}. To create a {@code Proxy} instance representing
+         * the proxy type {@code Proxy.Type.DIRECT}, use {@code Proxy.NO_PROXY}
+         * instead of this constructor.
+         *
+         * @param type
+         *            the proxy type of this instance.
+         * @param sa
+         *            the proxy address of this instance.
+         * @throws IllegalArgumentException
+         *             if the parameter {@code type} is set to {@code
+         *             Proxy.Type.DIRECT} or the value for {@code SocketAddress} is
+         *             {@code null}.
+         */
+        constructor(
+            [in] ProxyType type,
+            [in] ISocketAddress* sa);
+
+        /*
+         * Constructs a Proxy instance, which is Proxy.DIRECT type with null
+         * SocketAddress. This constructor is used for NO_PROXY.
+         */
+        constructor();
+
+        interface IProxy;
+    }
+
+    singleton class CProxyHelper
+    {
+        interface IProxyHelper;
+    }
+
+    singleton class CResponseCacheHelper
+    {
+        interface IResponseCacheHelper;
+    }
+
+    class CServerSocket {
+        constructor();
+
+        constructor(
+            [in] Int32 port);
+
+        constructor(
+            [in] Int32 port,
+            [in] Int32 backlog);
+
+        constructor(
+            [in] Int32 port,
+            [in] Int32 backlog,
+            [in] IInetAddress* localAddress);
+
+        interface IServerSocket;
+        interface ICloseable;
+    }
+
+    singleton class CServerSocketHelper {
+        interface IServerSocketHelper;
+    }
+
+    class CSocket {
+        constructor();
+
+        constructor(
+            [in] IProxy* proxy);
+
+        constructor(
+            [in] String dstName,
+            [in] Int32 dstPort);
+
+        constructor(
+            [in] String dstName,
+            [in] Int32 dstPort,
+            [in] IInetAddress* localAddress,
+            [in] Int32 localPort);
+
+        constructor(
+            [in] String hostName,
+            [in] Int32 port,
+            [in] Boolean streaming);
+
+        constructor(
+            [in] IInetAddress* dstAddress,
+            [in] Int32 dstPort);
+
+        constructor(
+            [in] IInetAddress* dstAddress,
+            [in] Int32 dstPort,
+            [in] IInetAddress* localAddress,
+            [in] Int32 localPort);
+
+        constructor(
+            [in] IInetAddress* addr,
+            [in] Int32 port,
+            [in] Boolean streaming);
+
+        interface ISocket;
+        interface ICloseable;
+    }
+
+    singleton class CSocketHelper {
+        interface ISocketHelper;
+    }
+
+    class CSocketPermission {
+        constructor(
+            [in] String host,
+            [in] String action);
+
+        interface ISocketPermission;
+        interface IPermission;
+        interface IGuard;
+        interface ISerializable;
+    }
+
+    class CSocks4Message {
+        constructor();
+
+        interface ISocks4Message;
+    }
+
+    class CURI {
+        /* private */
+        constructor();
+
+        /**
+         * Creates a new URI instance by parsing {@code spec}.
+         *
+         * @param spec a URI whose illegal characters have all been encoded.
+         */
+        constructor(
+            [in] String spec);
+
+        /**
+         * Creates a new URI instance of the given unencoded component parts.
+         *
+         * @param scheme the URI scheme, or null for a non-absolute URI.
+         */
+        constructor(
+            [in] String scheme,
+            [in] String schemeSpecificPart,
+            [in] String fragment);
+
+        /**
+         * Creates a new URI instance of the given unencoded component parts.
+         *
+         * @param scheme the URI scheme, or null for a non-absolute URI.
+         */
+        constructor(
+            [in] String scheme,
+            [in] String userInfo,
+            [in] String host,
+            [in] Int32 port,
+            [in] String path,
+            [in] String query,
+            [in] String fragment);
+
+        /**
+         * Creates a new URI instance of the given unencoded component parts.
+         *
+         * @param scheme the URI scheme, or null for a non-absolute URI.
+         */
+        constructor(
+            [in] String scheme,
+            [in] String host,
+            [in] String path,
+            [in] String fragment);
+
+        /**
+         * Creates a new URI instance of the given unencoded component parts.
+         *
+         * @param scheme the URI scheme, or null for a non-absolute URI.
+         */
+        constructor(
+            [in] String scheme,
+            [in] String authority,
+            [in] String path,
+            [in] String query,
+            [in] String fragment);
+
+        interface IURI;
+        interface IComparable;
+        interface ISerializable;
+    }
+
+    singleton class CURIHelper {
+        interface IURIHelper;
+    }
+
+    class CURL {
+        /**
+         * Creates a new URL instance by parsing {@code spec}.
+         *
+         * @throws MalformedURLException if {@code spec} could not be parsed as a
+         *     URL.
+         */
+        constructor(
+            [in] String spec);
+
+        /**
+         * Creates a new URL by resolving {@code spec} relative to {@code context}.
+         *
+         * @param context the URL to which {@code spec} is relative, or null for
+         *     no context in which case {@code spec} must be an absolute URL.
+         * @throws MalformedURLException if {@code spec} could not be parsed as a
+         *     URL or has an unsupported protocol.
+         */
+        constructor(
+            [in] IURL* context,
+            [in] String spec);
+
+        /**
+         * Creates a new URL by resolving {@code spec} relative to {@code context}.
+         *
+         * @param context the URL to which {@code spec} is relative, or null for
+         *     no context in which case {@code spec} must be an absolute URL.
+         * @param handler the stream handler for this URL, or null for the
+         *     protocol's default stream handler.
+         * @throws MalformedURLException if the given string {@code spec} could not
+         *     be parsed as a URL or an invalid protocol has been found.
+         */
+        constructor(
+            [in] IURL* context,
+            [in] String spec,
+            [in] IURLStreamHandler* handler);
+
+        /**
+         * Creates a new URL of the given component parts. The URL uses the
+         * protocol's default port.
+         *
+         * @throws MalformedURLException if the combination of all arguments do not
+         *     represent a valid URL or if the protocol is invalid.
+         */
+        constructor(
+            [in] String protocol,
+            [in] String host,
+            [in] String file);
+
+        /**
+         * Creates a new URL of the given component parts. The URL uses the
+         * protocol's default port.
+         *
+         * @param host the host name or IP address of the new URL.
+         * @param port the port, or {@code -1} for the protocol's default port.
+         * @param file the name of the resource.
+         * @throws MalformedURLException if the combination of all arguments do not
+         *     represent a valid URL or if the protocol is invalid.
+         */
+        constructor(
+            [in] String protocol,
+            [in] String host,
+            [in] Int32 port,
+            [in] String file);
+
+        /**
+         * Creates a new URL of the given component parts. The URL uses the
+         * protocol's default port.
+         *
+         * @param host the host name or IP address of the new URL.
+         * @param port the port, or {@code -1} for the protocol's default port.
+         * @param file the name of the resource.
+         * @param handler the stream handler for this URL, or null for the
+         *     protocol's default stream handler.
+         * @throws MalformedURLException if the combination of all arguments do not
+         *     represent a valid URL or if the protocol is invalid.
+         */
+        constructor(
+            [in] String protocol,
+            [in] String host,
+            [in] Int32 port,
+            [in] String file,
+            [in] IURLStreamHandler* handler);
+
+        interface IURL;
+        interface ISerializable;
+    }
+
+    singleton class CCookieHandlerHelper {
+        interface ICookieHandlerHelper;
+    }
+
+    singleton class CCookiePolicyHelper {
+        interface ICookiePolicyHelper;
+    }
+
+    singleton class CIDN {
+        interface IIDN;
+    }
+
+    singleton class CInetAddressHelper {
+        interface IInetAddressHelper;
+    }
+
+    singleton class CNetworkInterfaceHelper {
+        interface INetworkInterfaceHelper;
+    }
+
+    singleton class CURLEncoder {
+        interface IURLEncoder;
+    }
+
+    singleton class CURLDecoder {
+        interface IURLDecoder;
+    }
+
+
+    } // Net
+    } // Elastos
+}

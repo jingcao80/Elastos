@@ -1,0 +1,111 @@
+
+module
+{
+
+    using interface Elastos.Utility.IList;
+
+    interface Org.Apache.Http.IHeader;
+    interface Org.Apache.Http.Cookie.ICookieOrigin;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Cookie {
+
+    /**
+     * Defines the cookie management specification.
+     * <p>Cookie management specification must define
+     * <ul>
+     *   <li> rules of parsing "Set-Cookie" header
+     *   <li> rules of validation of parsed cookies
+     *   <li>  formatting of "Cookie" header
+     * </ul>
+     * for a given host, port and path of origin
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
+     *
+     * @since 4.0
+     */
+    interface ICookieSpec {
+
+        /**
+         * Returns version of the state management this cookie specification
+         * conforms to.
+         *
+         * @return version of the state management specification
+         */
+        GetVersion(
+            [out] Int32* ver);
+
+        /**
+          * Parse the <tt>"Set-Cookie"</tt> Header into an array of Cookies.
+          *
+          * <p>This method will not perform the validation of the resultant
+          * {@link Cookie}s</p>
+          *
+          * @see #validate
+          *
+          * @param header the <tt>Set-Cookie</tt> received from the server
+          * @param origin details of the cookie origin
+          * @return an array of <tt>Cookie</tt>s parsed from the header
+          * @throws MalformedCookieException if an exception occurs during parsing
+          */
+        Parse(
+            [in] IHeader* header,
+            [in] ICookieOrigin* origin,
+            [out] IList** cookies);
+
+        /**
+          * Validate the cookie according to validation rules defined by the
+          *  cookie specification.
+          *
+          * @param cookie the Cookie to validate
+          * @param origin details of the cookie origin
+          * @throws MalformedCookieException if the cookie is invalid
+          */
+        Validate(
+            [in] ICookie* cookie,
+            [in] ICookieOrigin* origin);
+
+        /**
+         * Determines if a Cookie matches the target location.
+         *
+         * @param cookie the Cookie to be matched
+         * @param origin the target to test against
+         *
+         * @return <tt>true</tt> if the cookie should be submitted with a request
+         *  with given attributes, <tt>false</tt> otherwise.
+         */
+        Match(
+            [in] ICookie* cookie,
+            [in] ICookieOrigin* origin,
+            [out] Boolean* result);
+
+        /**
+         * Create <tt>"Cookie"</tt> headers for an array of Cookies.
+         *
+         * @param cookies the Cookies format into a Cookie header
+         * @return a Header for the given Cookies.
+         * @throws IllegalArgumentException if an input parameter is illegal
+         */
+        FormatCookies(
+            [in] IList* cookies,
+            [out] IList** headers);
+
+        /**
+         * Returns a request header identifying what version of the state management
+         * specification is understood. May be <code>null</code> if the cookie
+         * specification does not support <tt>Cookie2</tt> header.
+         */
+        GetVersionHeader(
+            [out] IHeader** header);
+
+    }
+
+    } // namespace Cookie
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

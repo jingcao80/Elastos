@@ -1,0 +1,105 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Wifi {
+    namespace P2p {
+    namespace Nsd {
+
+    /**
+     * A class for creating a service discovery request for use with
+     * {@link WifiP2pManager#addServiceRequest} and {@link WifiP2pManager#removeServiceRequest}
+     *
+     * <p>This class is used to create service discovery request for custom
+     * vendor specific service discovery protocol {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}
+     * or to search all service protocols {@link WifiP2pServiceInfo#SERVICE_TYPE_ALL}.
+     *
+     * <p>For the purpose of creating a UPnP or Bonjour service request, use
+     * {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pDnsSdServiceRequest} respectively.
+     *
+     * {@see WifiP2pManager}
+     * {@see WifiP2pUpnpServiceRequest}
+     * {@see WifiP2pDnsSdServiceRequest}
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IWifiP2pServiceRequest {
+        /**
+         * Return transaction id.
+         *
+         * @return transaction id
+         * @hide
+         */
+        GetTransactionId(
+            [out] Int32* result);
+
+        /**
+         * Set transaction id.
+         *
+         * @param id
+         * @hide
+         */
+        SetTransactionId(
+            [in] Int32 id);
+
+        /**
+         * Return wpa_supplicant request string.
+         *
+         * The format is the hex dump of the following frame.
+         * <pre>
+         * _______________________________________________________________
+         * |        Length (2)        |   Type (1)   | Transaction ID (1) |
+         * |                  Query Data (variable)                       |
+         * </pre>
+         *
+         * @return wpa_supplicant request string.
+         * @hide
+         */
+        GetSupplicantQuery(
+            [out] String* result);
+    }
+
+    interface IWifiP2pServiceRequestHelper {
+        /**
+         * Create a service discovery request.
+         *
+         * @param protocolType can be {@link WifiP2pServiceInfo#SERVICE_TYPE_ALL}
+         * or {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}.
+         * In order to create a UPnP or Bonjour service request, use
+         * {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pDnsSdServiceRequest}
+         * respectively
+         *
+         * @param queryData hex string that is vendor specific.  Can be null.
+         * @return service discovery request.
+         */
+        NewInstance(
+            [in] Int32 protocolType,
+            [in] String queryData,
+            [out] IWifiP2pServiceRequest** result);
+
+        /**
+         * Create a service discovery request.
+         *
+         * @param protocolType can be {@link WifiP2pServiceInfo#SERVICE_TYPE_ALL}
+         * or {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}.
+         * In order to create a UPnP or Bonjour service request, use
+         * {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pDnsSdServiceRequest}
+         * respectively
+         *
+         * @return service discovery request.
+         */
+        NewInstance(
+            [in] Int32 protocolType,
+            [out] IWifiP2pServiceRequest** result);
+    }
+
+    } // namespace Nsd
+    } // namespace P2p
+    } // namespace Wifi
+    } // namespace Droid
+    } // namespace Elastos
+}
+

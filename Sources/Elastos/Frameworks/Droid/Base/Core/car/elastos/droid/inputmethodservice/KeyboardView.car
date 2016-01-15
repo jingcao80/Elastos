@@ -1,0 +1,134 @@
+
+module {
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InputMethodService {
+
+    /**
+     * Listener for virtual keyboard events.
+     */
+    [deprecated, local]
+    interface IOnKeyboardActionListener {
+
+        /**
+         * Called when the user presses a key. This is sent before the {@link #onKey} is called.
+         * For keys that repeat, this is only called once.
+         * @param primaryCode the unicode of the key being pressed. If the touch is not on a valid
+         * key, the value will be zero.
+         */
+        OnPress(
+            [in] Int32 primaryCode);
+
+        /**
+         * Called when the user releases a key. This is sent after the {@link #onKey} is called.
+         * For keys that repeat, this is only called once.
+         * @param primaryCode the code of the key that was released
+         */
+        OnRelease(
+            [in] Int32 primaryCode);
+
+        /**
+         * Send a key press to the listener.
+         * @param primaryCode this is the key that was pressed
+         * @param keyCodes the codes for all the possible alternative keys
+         * with the primary code being the first. If the primary key code is
+         * a single character such as an alphabet or number or symbol, the alternatives
+         * will include other characters that may be on the same key or adjacent keys.
+         * These codes are useful to correct for accidental presses of a key adjacent to
+         * the intended key.
+         */
+        OnKey(
+            [in] Int32 primaryCode,
+            [in] ArrayOf<Int32>* keyCodes);
+
+        /**
+         * Sends a sequence of characters to the listener.
+         * @param text the sequence of characters to be displayed.
+         */
+        OnText(
+            [in] ICharSequence* text);
+
+        /**
+         * Called when the user quickly moves the finger from right to left.
+         */
+        SwipeLeft();
+
+        /**
+         * Called when the user quickly moves the finger from left to right.
+         */
+        SwipeRight();
+
+        /**
+         * Called when the user quickly moves the finger from up to down.
+         */
+        SwipeDown();
+
+        /**
+         * Called when the user quickly moves the finger from down to up.
+         */
+        SwipeUp();
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IView
+     */
+    [local]
+    interface IKeyboardView {
+        SetOnKeyboardActionListener(
+            [in] IOnKeyboardActionListener* listener);
+
+        SetKeyboard(
+            [in] IKeyboard* keyboard);
+
+        GetKeyboard(
+            [out] IKeyboard** keyboard);
+
+        SetShifted(
+            [in] Boolean shifted,
+            [out] Boolean* res);
+
+        IsShifted(
+            [out] Boolean* shifted);
+
+        SetPreviewEnabled(
+            [in] Boolean previewEnabled);
+
+        IsPreviewEnabled(
+            [out] Boolean* res);
+
+        SetVerticalCorrection(
+            [in] Int32 verticalOffset);
+
+        SetPopupParent(
+            [in] IView* v);
+
+        SetPopupOffset(
+            [in] Int32 x,
+            [in] Int32 y);
+
+        SetProximityCorrectionEnabled(
+            [in] Boolean enabled);
+
+        IsProximityCorrectionEnabled(
+            [out] Boolean* res);
+
+        InvalidateAllKeys();
+
+        InvalidateKey(
+            [in] Int32 keyIndex);
+
+        Closing();
+
+        HandleBack(
+            [out] Boolean* res);
+    }
+
+
+    } // namespace InputMethodService
+    } // namespace Droid
+    } // namespace Elastos
+}

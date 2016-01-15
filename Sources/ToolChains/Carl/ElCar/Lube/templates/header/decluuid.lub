@@ -1,0 +1,56 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$
+$IF type is "library"
+#ifdef _UNDEFDLLEXP
+#define DLLEXP
+#else
+#define DLLEXP __declspec(dllimport)
+#endif
+
+$   WITH all classes DO
+$       IF attrib is not "private"
+EXTERN_C DLLEXP const _ELASTOS ClassID ECLSID_${name};
+$       END IF ;; not private
+$   END DO
+
+$   WITH all interfaces DO
+EXTERN_C DLLEXP const _ELASTOS InterfaceID EIID_${name};
+$   END DO
+$
+$ELSE ;; !(type is "library")
+
+#ifndef __UUNM_${MacroRewrite(name)}_DEFINED__
+#define __UUNM_${MacroRewrite(name)}_DEFINED__
+#define c_p${MacroRewrite(name)}Uunm ${uunm}
+#endif // __UUNM_${MacroRewrite(name)}_DEFINED__
+$   WITH all classes DO
+$       IF attrib is not "private"
+
+#ifndef __ECLSID_${fullname}_DEFINED__
+#define __ECLSID_${fullname}_DEFINED__
+${ClassNamespaceBegin(class)}$^
+const _ELASTOS ClassID ECLSID_${name} = {
+    ${uuid},
+    (char *)c_p${MacroRewrite(module.name)}Uunm,
+    0x${module.carcode} };
+${ClassNamespaceEnd(class)}$^
+#endif // __CLSID_${fullname}_DEFINED__
+$       END IF ;; not private
+$   END DO ;; all classes
+$
+$   WITH all interfaces DO
+
+#ifndef __EIID_${fullname}_DEFINED__
+#define __EIID_${fullname}_DEFINED__
+${InterfaceNamespaceBegin(interface)}$^
+const _ELASTOS InterfaceID EIID_${name} = \
+    ${iid};
+${InterfaceNamespaceEnd(interface)}$^
+#endif // __IID_${fullname}_DEFINED__
+$   END DO ;; all interfaces
+$
+$END IF ;; type is "library"

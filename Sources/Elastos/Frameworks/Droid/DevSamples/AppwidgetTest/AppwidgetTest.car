@@ -1,0 +1,21 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+    using interface Elastos.Droid.App.IActivity;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace AppwidgetTest {
+
+        class CActivityOne {
+            interface IActivity;
+        }
+
+    } // namespace AppwidgetTest
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+
+}

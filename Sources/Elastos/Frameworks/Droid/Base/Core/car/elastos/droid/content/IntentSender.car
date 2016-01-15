@@ -1,0 +1,205 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntentSender;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IUserHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * Callback interface for discovering when a send operation has
+     * completed.  Primarily for use with a IntentSender that is
+     * performing a broadcast, this provides the same information as
+     * calling {@link Context#sendOrderedBroadcast(Intent, String,
+     * android.content.BroadcastReceiver, Handler, int, String, Bundle)
+     * Context.sendBroadcast()} with a final BroadcastReceiver.
+     */
+    [local]
+    interface IIntentSenderOnFinished {
+        /**
+         * Called when a send operation as completed.
+         *
+         * @param IntentSender The IntentSender this operation was sent through.
+         * @param intent The original Intent that was sent.
+         * @param resultCode The final result code determined by the send.
+         * @param resultData The final data collected by a broadcast.
+         * @param resultExtras The final extras collected by a broadcast.
+         */
+        OnSendFinished(
+            [in] IIntentSender* IntentSender,
+            [in] IIntent* intent,
+            [in] Int32 resultCode,
+            [in] String resultData,
+            [in] IBundle* resultExtras);
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    [local, parcelable]
+    interface IIntentSender {
+        /**
+         * Perform the operation associated with this IntentSender, allowing the
+         * caller to specify information about the Intent to use and be notified
+         * when the send has completed.
+         *
+         * @param context The Context of the caller.  This may be null if
+         * <var>intent</var> is also null.
+         * @param code Result code to supply back to the IntentSender's target.
+         * @param intent Additional Intent data.  See {@link Intent#fillIn
+         * Intent.fillIn()} for information on how this is applied to the
+         * original Intent.  Use null to not modify the original Intent.
+         * @param onFinished The object to call back on when the send has
+         * completed, or null for no callback.
+         * @param handler Handler identifying the thread on which the callback
+         * should happen.  If null, the callback will happen from the thread
+         * pool of the process.
+         *
+         *
+         * @throws SendIntentException Throws CanceledIntentException if the IntentSender
+         * is no longer allowing more intents to be sent through it.
+         */
+        SendIntent(
+            [in] IContext* ctx,
+            [in] Int32 code,
+            [in] IIntent* intent,
+            [in] IIntentSenderOnFinished* onFinished,
+            [in] IHandler* handler);
+
+        /**
+         * Perform the operation associated with this IntentSender, allowing the
+         * caller to specify information about the Intent to use and be notified
+         * when the send has completed.
+         *
+         * @param context The Context of the caller.  This may be null if
+         * <var>intent</var> is also null.
+         * @param code Result code to supply back to the IntentSender's target.
+         * @param intent Additional Intent data.  See {@link Intent#fillIn
+         * Intent.fillIn()} for information on how this is applied to the
+         * original Intent.  Use null to not modify the original Intent.
+         * @param onFinished The object to call back on when the send has
+         * completed, or null for no callback.
+         * @param handler Handler identifying the thread on which the callback
+         * should happen.  If null, the callback will happen from the thread
+         * pool of the process.
+         * @param requiredPermission Name of permission that a recipient of the PendingIntent
+         * is required to hold.  This is only valid for broadcast intents, and
+         * corresponds to the permission argument in
+         * {@link Context#sendBroadcast(Intent, String) Context.sendOrderedBroadcast(Intent, String)}.
+         * If null, no permission is required.
+         *
+         *
+         * @throws SendIntentException Throws CanceledIntentException if the IntentSender
+         * is no longer allowing more intents to be sent through it.
+         */
+        SendIntent(
+            [in] IContext* ctx,
+            [in] Int32 code,
+            [in] IIntent* intent,
+            [in] IIntentSenderOnFinished* onFinished,
+            [in] IHandler* handler,
+            [in] String requiredPermission);
+
+        /**
+         * @deprecated Renamed to {@link #getCreatorPackage()}.
+         */
+        GetTargetPackage(
+            [out] String* str);
+
+        /**
+         * Return the package name of the application that created this
+         * IntentSender, that is the identity under which you will actually be
+         * sending the Intent.  The returned string is supplied by the system, so
+         * that an application can not spoof its package.
+         *
+         * @return The package name of the PendingIntent, or null if there is
+         * none associated with it.
+         */
+        GetCreatorPackage(
+            [out] String* str);
+
+        /**
+         * Return the uid of the application that created this
+         * PendingIntent, that is the identity under which you will actually be
+         * sending the Intent.  The returned integer is supplied by the system, so
+         * that an application can not spoof its uid.
+         *
+         * @return The uid of the PendingIntent, or -1 if there is
+         * none associated with it.
+         */
+        GetCreatorUid(
+            [out] Int32* uid);
+
+        /**
+         * Return the user handle of the application that created this
+         * PendingIntent, that is the user under which you will actually be
+         * sending the Intent.  The returned UserHandle is supplied by the system, so
+         * that an application can not spoof its user.  See
+         * {@link android.os.Process#myUserHandle() Process.myUserHandle()} for
+         * more explanation of user handles.
+         *
+         * @return The user handle of the PendingIntent, or null if there is
+         * none associated with it.
+         */
+        GetCreatorUserHandle(
+            [out] IUserHandle** userHandle);
+
+        /**
+         * Comparison operator on two IntentSender objects, such that true
+         * is returned then they both represent the same operation from the
+         * same package.
+         */
+        Equals(
+            [in] IInterface* otherObj,
+            [out] Boolean* isEqual);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        ToString(
+            [out] String* str);
+
+        /** @hide */
+        GetTarget(
+            [out] IIIntentSender** intentSender);
+    }
+
+    [local]
+    interface IIntentSenderHelper {
+        /**
+         * Convenience function for writing either a IntentSender or null pointer to
+         * a Parcel.  You must use this with {@link #readIntentSenderOrNullFromParcel}
+         * for later reading it.
+         *
+         * @param sender The IntentSender to write, or null.
+         * @param out Where to write the IntentSender.
+         */
+        WriteIntentSenderOrNullToParcel(
+            [in] IIntentSender* sender,
+            [in] IParcel* parcel);
+
+        /**
+         * Convenience function for reading either a Messenger or null pointer from
+         * a Parcel.  You must have previously written the Messenger with
+         * {@link #writeIntentSenderOrNullToParcel}.
+         *
+         * @param in The Parcel containing the written Messenger.
+         *
+         * @return Returns the Messenger read from the Parcel, or null if null had
+         * been written.
+         */
+        ReadIntentSenderOrNullFromParcel(
+            [in] IParcel* parcel,
+            [out] IIntentSender** intentSender);
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,54 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+    namespace Gsm {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Telephony.ICellLocation
+     */
+    interface IGsmCellLocation {
+
+        GetLac(
+            [out] Int32* lac);
+
+        GetCid(
+            [out] Int32* cid);
+
+        GetPsc(
+            [out] Int32* psc);
+
+        SetLac(
+            [in] Int32 lac);
+
+        SetCid(
+            [in] Int32 cid);
+
+        SetPsc(
+            [in] Int32 psc);
+
+        SetStateInvalid();
+
+        SetLacAndCid(
+            [in] Int32 lac,
+            [in] Int32 cid);
+
+        /**
+         * Set intent notifier Bundle based on service state
+         *
+         * @param m intent notifier Bundle
+         */
+        FillInNotifierBundle(
+            [in] IBundle* m);
+    }
+
+    } // namespace Gsm
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

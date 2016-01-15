@@ -1,0 +1,135 @@
+
+module
+{
+    interface Elastos.Utility.Zip.IZipEntry;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * Used to write (compress) data into zip files.
+     * <p>
+     * ZipOutputStream is used to write ZipEntrys to the underlying stream.
+     * Output from ZipOutputStream can be read using ZipFile or ZipInputStream.
+     *
+     * @sa ZipEntrys
+     * @sa ZipOutputStream
+     * <p>
+     * While DeflaterOutputStream can write compressed zip file entries, this
+     * extension can write uncompressed entries as well. Use setMethod(int) or
+     * setMethod(int) with the STORED flag.
+     *
+     * @sa setMethod(int)
+     * @sa setMethod(int)
+     * @sa STORED
+     *
+     * <p><strong>Example</strong>
+     * <p>
+     * Using ZipOutputStream is a little more complicated than GZIPOutputStream
+     * because zip files are containers that can contain multiple files. This code
+     * creates a zip file containing several files, similar to the zip(1) utility.
+     *
+     * @sa GZIPOutputStream
+     * <pre>
+     * OutputStream os = ...
+     * ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os));
+     * try {
+     *  for (int i = 0; i < fileCount; ++i) {
+     *    String filename = ...
+     *    byte[] bytes = ...
+     *    ZipEntry entry = new ZipEntry(filename);
+     *    zos.putNextEntry(entry);
+     *    zos.write(bytes);
+     *    zos.closeEntry();
+     *  }
+     * } finally {
+     *  zos.close();
+     * }
+     * </pre>
+     *
+     * @implements Elastos.Utility.Zip.IDeflaterOutputStream
+     */
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IOutputStream;
+     * interface IFilterOutputStream;
+     * interface IDeflaterOutputStream;
+     */
+    interface IZipOutputStream {
+        /**
+         * Indicates deflated entries.
+         */
+        const Int32 DEFLATED = 8;
+
+        /**
+         * Indicates uncompressed entries.
+         */
+        const Int32 STORED = 0;
+
+        /**
+         * Closes the current {ZipEntry}. Any entry terminal data is written
+         * to the underlying stream.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException  If an error occurs closing the entry.
+         */
+        CloseEntry();
+
+        /**
+         * Writes entry information to the underlying stream. Data associated with
+         * the entry can then be written using {write()}. After data is
+         * written {closeEntry()} must be called to complete the writing of
+         * the entry to the underlying stream.
+         *
+         * @param ze
+         *            the {ZipEntry} to store.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | If an error occurs storing the entry.
+         * @see #write
+         */
+        PutNextEntry(
+            [in] IZipEntry* ze);
+
+        /**
+         * Sets the {ZipFile} comment associated with the file being written.
+         *
+         * @param comment
+         *            the comment associated with the file.
+         */
+        SetComment(
+            [in] String comment);
+
+        /**
+         * Sets the compression level to be used for writing entry data. This level
+         * may be set on a per entry basis. The level must have a value between -1
+         * and 8 according to the {Deflater} compression level bounds.
+         *
+         * @param level
+         *            the compression level (ranging from -1 to 8).
+         * @see Deflater
+         */
+        SetLevel(
+            [in] Int32 level);
+
+        /**
+         * Sets the compression method to be used when compressing entry data.
+         * method must be one of {STORED} (for no compression) or {DEFLATED}.
+         *
+         * @param method
+         *            the compression method to use.
+         */
+        SetMethod(
+            [in] Int32 method);
+    }
+
+    } // namespace Zip
+    } // namesapce Utility
+    } // namespace Elastos
+}

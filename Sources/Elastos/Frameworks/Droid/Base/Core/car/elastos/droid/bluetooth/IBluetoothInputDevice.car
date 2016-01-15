@@ -1,0 +1,99 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * API for Bluetooth HID service
+         *
+         * {@hide}
+         */
+        [deprecated]
+        interface IIBluetoothInputDevice {
+            // Public API
+            Connect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            Disconnect(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            // Mike TODO: wait for List car interface
+            GetConnectedDevices(
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetDevicesMatchingConnectionStates(
+                [in] ArrayOf<Int32>* states,
+                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+
+            GetConnectionState(
+                [in] IBluetoothDevice* device,
+                [out] Int32* state);
+
+            SetPriority(
+                [in] IBluetoothDevice* device,
+                [in] Int32 priority,
+                [out] Boolean* result);
+
+            GetPriority(
+                [in] IBluetoothDevice* device,
+                [out] Int32* priority);
+
+            /**
+            * @hide
+            */
+            GetProtocolMode(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
+            /**
+            * @hide
+            */
+            VirtualUnplug(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+            /**
+            * @hide
+            */
+            SetProtocolMode(
+                [in] IBluetoothDevice* device,
+                [in] Int32 protocolMode,
+                [out] Boolean* result);
+
+            /**
+            * @hide
+            */
+            GetReport(
+                [in] IBluetoothDevice* device,
+                [in] Byte reportType,
+                [in] Byte reportId,
+                [in] Int32 bufferSize,
+                [out] Boolean* result);
+
+            /**
+            * @hide
+            */
+            SetReport(
+                [in] IBluetoothDevice* device,
+                [in] Byte reportType,
+                [in] String report,
+                [out] Boolean* result);
+
+            /**
+            * @hide
+            */
+            SendData(
+                [in] IBluetoothDevice* device,
+                [in] String report,
+                [out] Boolean* result);
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

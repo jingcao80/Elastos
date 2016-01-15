@@ -1,0 +1,222 @@
+
+module
+{
+    interface Elastos.Droid.Os.IUserHandle;
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Pm.IActivityInfo;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace AppWidget {
+
+    /**
+     * Describes the meta data for an installed AppWidget provider. The fields in this class correspond to the fields in the <appwidget-provider> xml tag.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [local, parcelable]
+    interface IAppWidgetProviderInfo {
+        /**
+         * Widget is not resizable.
+         */
+        const Int32 RESIZE_NONE             = 0;
+        /**
+         * Widget is resizable in the horizontal axis only.
+         */
+        const Int32 RESIZE_HORIZONTAL       = 1;
+        /**
+         * Widget is resizable in the vertical axis only.
+         */
+        const Int32 RESIZE_VERTICAL         = 2;
+        /**
+         * Widget is resizable in both the horizontal and vertical axes.
+         */
+        const Int32 RESIZE_BOTH = RESIZE_HORIZONTAL | RESIZE_VERTICAL;
+
+        /**
+         * Indicates that the widget can be displayed on the home screen. This is the default value.
+         */
+        const Int32 WIDGET_CATEGORY_HOME_SCREEN = 1;
+
+        /**
+         * Indicates that the widget can be displayed on the keyguard.
+         */
+        const Int32 WIDGET_CATEGORY_KEYGUARD = 2;
+
+        /**
+         * Indicates that the widget can be displayed within a space reserved for the search box.
+         */
+        const Int32 WIDGET_CATEGORY_SEARCHBOX = 4;
+
+        /**
+         * Loads the localized label to display to the user in the AppWidget picker.
+         *
+         * @param packageManager Package manager instance for loading resources.
+         * @return The label for the current locale.
+         */
+        LoadLabel(
+            [in] IPackageManager* packageManager,
+            [out] String* result);
+
+        /**
+         * Loads the icon to display for this AppWidget in the AppWidget picker. If not
+         * supplied in the xml, the application icon will be used. A client can optionally
+         * provide a desired density such as {@link android.util.DisplayMetrics#DENSITY_LOW}
+         * {@link android.util.DisplayMetrics#DENSITY_MEDIUM}, etc. If no density is
+         * provided, the density of the current display will be used.
+         * <p>
+         * The loaded icon corresponds to the <code>android:icon</code> attribute in
+         * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+         * </p>
+         *
+         * @param context Context for accessing resources.
+         * @param density The optional desired density as per
+         *         {@link android.util.DisplayMetrics#densityDpi}.
+         * @return The provider icon.
+         */
+        LoadIcon(
+            [in] IContext* context,
+            [in] Int32 density,
+            [out] IDrawable** result);
+
+        /**
+         * Loads a preview of what the AppWidget will look like after it's configured.
+         * A client can optionally provide a desired density such as
+         * {@link android.util.DisplayMetrics#DENSITY_LOW}
+         * {@link android.util.DisplayMetrics#DENSITY_MEDIUM}, etc. If no density is
+         * provided, the density of the current display will be used.
+         * <p>
+         * The loaded image corresponds to the <code>android:previewImage</code> attribute
+         * in the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+         * </p>
+         *
+         * @param context Context for accessing resources.
+         * @param density The optional desired density as per
+         *         {@link android.util.DisplayMetrics#densityDpi}.
+         * @return The widget preview image or null if preview image is not available.
+         */
+        LoadPreviewImage(
+            [in] IContext* context,
+            [in] Int32 density,
+            [out] IDrawable** result);
+
+        /**
+         * Gets the user profile in which the provider resides.
+         *
+         * @return The hosting user profile.
+         */
+        GetProfile(
+            [out] IUserHandle** result);
+
+        ToString(
+            [out] String* result);
+
+        SetProvider(
+            [in] IComponentName* name);
+
+        GetProvider(
+            [out] IComponentName** name);
+
+        SetMinWidth(
+            [in] Int32 width);
+
+        GetMinWidth(
+            [out] Int32* width);
+
+        SetMinHeight(
+            [in] Int32 height);
+
+        GetMinHeight(
+            [out] Int32* height);
+
+        SetMinResizeWidth(
+            [in] Int32 width);
+
+        GetMinResizeWidth(
+            [out] Int32* width);
+
+        SetMinResizeHeight(
+            [in] Int32 height);
+
+        GetMinResizeHeight(
+            [out] Int32* height);
+
+        SetUpdatePeriodMillis(
+            [in] Int32 period);
+
+        GetUpdatePeriodMillis(
+            [out] Int32* period);
+
+        SetInitialLayout(
+            [in] Int32 layout);
+
+        GetInitialLayout(
+            [out] Int32* layout);
+
+        SetInitialKeyguardLayout(
+            [in] Int32 layout);
+
+        GetInitialKeyguardLayout(
+            [out] Int32* layout);
+
+        SetConfigure(
+            [in] IComponentName* name);
+
+        GetConfigure(
+            [out] IComponentName** name);
+
+        SetLabel(
+            [in] String label);
+
+        GetLabel(
+            [out] String* label);
+
+        SetIcon(
+            [in] Int32 icon);
+
+        GetIcon(
+            [out] Int32* icon);
+
+        SetAutoAdvanceViewId(
+            [in] Int32 id);
+
+        GetAutoAdvanceViewId(
+            [out] Int32* id);
+
+        SetPreviewImage(
+            [in] Int32 image);
+
+        GetPreviewImage(
+            [out] Int32* image);
+
+        SetResizeMode(
+            [in] Int32 mode);
+
+        GetResizeMode(
+            [out] Int32* mode);
+
+        SetWidgetCategory(
+            [in] Int32 category);
+
+        GetWidgetCategory(
+            [out] Int32* category);
+
+        SetProviderInfo(
+            [in] IActivityInfo* providerInfo);
+
+        GetProviderInfo(
+            [out] IActivityInfo** providerInfo);
+
+        Clone(
+            [out] IAppWidgetProviderInfo** info);
+    }
+
+    }//namespace AppWidget
+    }//namespace Droid
+    }//namespace Elastos
+}

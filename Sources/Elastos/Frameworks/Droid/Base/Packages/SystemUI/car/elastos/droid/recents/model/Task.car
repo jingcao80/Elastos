@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    interface Elastos.Droid.Packages.SystemUI.Recents.Model.ITaskGrouping;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Model {
+
+    /* Task callbacks */
+    interface ITaskCallbacks {
+
+        /* Notifies when a task has been bound */
+        OnTaskDataLoaded();
+
+        /* Notifies when a task has been unbound */
+        OnTaskDataUnloaded();
+    }
+
+    /** The ComponentNameKey represents the unique primary key for a component
+     * belonging to a specified user. */
+    interface IComponentNameKey {
+    }
+
+    /* The Task Key represents the unique primary key for the task */
+    interface ITaskKey {
+
+        /** Returns the component name key for this task. */
+        GetComponentNameKey(
+            [out] IComponentNameKey** result);
+    }
+
+    /**
+     * A task represents the top most task in the system's task stack.
+     */
+    interface ITask {
+
+        /** Copies the other task. */
+        CopyFrom(
+            [in] ITask* o);
+
+        /** Set the callbacks */
+        SetCallbacks(
+            [in] ITaskCallbacks* cb);
+
+        /** Set the grouping */
+        SetGroup(
+            [in] ITaskGrouping* group);
+
+        /** Notifies the callback listeners that this task has been loaded */
+        NotifyTaskDataLoaded(
+            [in] IBitmap* thumbnail,
+            [in] IDrawable* applicationIcon);
+
+        /** Notifies the callback listeners that this task has been unloaded */
+        NotifyTaskDataUnloaded(
+            [in] IBitmap* defaultThumbnail,
+            [in] IDrawable* defaultApplicationIcon);
+    }
+
+    } // namespace Model
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

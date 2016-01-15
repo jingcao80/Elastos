@@ -1,0 +1,480 @@
+
+module
+{
+    using interface Elastos.IO.IBuffer;
+    using interface Elastos.IO.IFloatBuffer;
+    using interface Elastos.IO.IInt32Buffer;
+
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Opengles {
+
+    /**
+     * @Involve
+     * interface Elastosx.Microedition.Khronos.Opengles.IGL10
+     */
+    [deprecated]
+    interface IGL11 {
+        const Int32 _GL_ACTIVE_TEXTURE                          = 0x84E0;
+        const Int32 _GL_ADD_SIGNED                              = 0x8574;
+        const Int32 _GL_ALPHA_SCALE                             = 0x0D1C;
+        const Int32 _GL_ALPHA_TEST_FUNC                         = 0x0BC1;
+        const Int32 _GL_ALPHA_TEST_REF                          = 0x0BC2;
+        const Int32 _GL_ARRAY_BUFFER                            = 0x8892;
+        const Int32 _GL_ARRAY_BUFFER_BINDING                    = 0x8894;
+        const Int32 _GL_BLEND_DST                               = 0x0BE0;
+        const Int32 _GL_BLEND_SRC                               = 0x0BE1;
+        const Int32 _GL_BUFFER_ACCESS                           = 0x88BB;
+        const Int32 _GL_BUFFER_SIZE                             = 0x8764;
+        const Int32 _GL_BUFFER_USAGE                            = 0x8765;
+        const Int32 _GL_CLIENT_ACTIVE_TEXTURE                   = 0x84E1;
+        const Int32 _GL_CLIP_PLANE0                             = 0x3000;
+        const Int32 _GL_CLIP_PLANE1                             = 0x3001;
+        const Int32 _GL_CLIP_PLANE2                             = 0x3002;
+        const Int32 _GL_CLIP_PLANE3                             = 0x3003;
+        const Int32 _GL_CLIP_PLANE4                             = 0x3004;
+        const Int32 _GL_CLIP_PLANE5                             = 0x3005;
+        const Int32 _GL_COLOR_ARRAY_BUFFER_BINDING              = 0x8898;
+        const Int32 _GL_COLOR_ARRAY_POINTER                     = 0x8090;
+        const Int32 _GL_COLOR_ARRAY_SIZE                        = 0x8081;
+        const Int32 _GL_COLOR_ARRAY_STRIDE                      = 0x8083;
+        const Int32 _GL_COLOR_ARRAY_TYPE                        = 0x8082;
+        const Int32 _GL_COLOR_CLEAR_VALUE                       = 0x0C22;
+        const Int32 _GL_COLOR_WRITEMASK                         = 0x0C23;
+        const Int32 _GL_COMBINE                                 = 0x8570;
+        const Int32 _GL_COMBINE_ALPHA                           = 0x8572;
+        const Int32 _GL_COMBINE_RGB                             = 0x8571;
+        const Int32 _GL_CONSTANT                                = 0x8576;
+        const Int32 _GL_COORD_REPLACE_OES                       = 0x8862;
+        const Int32 _GL_CULL_FACE_MODE                          = 0x0B45;
+        const Int32 _GL_CURRENT_COLOR                           = 0x0B00;
+        const Int32 _GL_CURRENT_NORMAL                          = 0x0B02;
+        const Int32 _GL_CURRENT_TEXTURE_COORDS                  = 0x0B03;
+        const Int32 _GL_DEPTH_CLEAR_VALUE                       = 0x0B73;
+        const Int32 _GL_DEPTH_FUNC                              = 0x0B74;
+        const Int32 _GL_DEPTH_RANGE                             = 0x0B70;
+        const Int32 _GL_DEPTH_WRITEMASK                         = 0x0B72;
+        const Int32 _GL_DOT3_RGB                                = 0x86AE;
+        const Int32 _GL_DOT3_RGBA                               = 0x86AF;
+        const Int32 _GL_DYNAMIC_DRAW                            = 0x88E8;
+        const Int32 _GL_ELEMENT_ARRAY_BUFFER                    = 0x8893;
+        const Int32 _GL_ELEMENT_ARRAY_BUFFER_BINDING            = 0x8895;
+        const Int32 _GL_FRONT_FACE                              = 0x0B46;
+        const Int32 _GL_GENERATE_MIPMAP                         = 0x8191;
+        const Int32 _GL_GENERATE_MIPMAP_HINT                    = 0x8192;
+        const Int32 _GL_INTERPOLATE                             = 0x8575;
+        const Int32 _GL_LINE_WIDTH                              = 0x0B21;
+        const Int32 _GL_LOGIC_OP_MODE                           = 0x0BF0;
+        const Int32 _GL_MATRIX_MODE                             = 0x0BA0;
+        const Int32 _GL_MAX_CLIP_PLANES                         = 0x0D32;
+        const Int32 _GL_MODELVIEW_MATRIX                        = 0x0BA6;
+        const Int32 _GL_MODELVIEW_MATRIX_FLOAT_AS_INT_BITS_OES  = 0x898D;
+        const Int32 _GL_MODELVIEW_STACK_DEPTH                   = 0x0BA3;
+        const Int32 _GL_NORMAL_ARRAY_BUFFER_BINDING             = 0x8897;
+        const Int32 _GL_NORMAL_ARRAY_POINTER                    = 0x808F;
+        const Int32 _GL_NORMAL_ARRAY_STRIDE                     = 0x807F;
+        const Int32 _GL_NORMAL_ARRAY_TYPE                       = 0x807E;
+        const Int32 _GL_OPERAND0_ALPHA                          = 0x8598;
+        const Int32 _GL_OPERAND0_RGB                            = 0x8590;
+        const Int32 _GL_OPERAND1_ALPHA                          = 0x8599;
+        const Int32 _GL_OPERAND1_RGB                            = 0x8591;
+        const Int32 _GL_OPERAND2_ALPHA                          = 0x859A;
+        const Int32 _GL_OPERAND2_RGB                            = 0x8592;
+        const Int32 _GL_POINT_DISTANCE_ATTENUATION              = 0x8129;
+        const Int32 _GL_POINT_FADE_THRESHOLD_SIZE               = 0x8128;
+        const Int32 _GL_POINT_SIZE                              = 0x0B11;
+        const Int32 _GL_POINT_SIZE_ARRAY_BUFFER_BINDING_OES     = 0x8B9F;
+        const Int32 _GL_POINT_SIZE_ARRAY_OES                    = 0x8B9C;
+        const Int32 _GL_POINT_SIZE_ARRAY_POINTER_OES            = 0x898C;
+        const Int32 _GL_POINT_SIZE_ARRAY_STRIDE_OES             = 0x898B;
+        const Int32 _GL_POINT_SIZE_ARRAY_TYPE_OES               = 0x898A;
+        const Int32 _GL_POINT_SIZE_MAX                          = 0x8127;
+        const Int32 _GL_POINT_SIZE_MIN                          = 0x8126;
+        const Int32 _GL_POINT_SPRITE_OES                        = 0x8861;
+        const Int32 _GL_POLYGON_OFFSET_FACTOR                   = 0x8038;
+        const Int32 _GL_POLYGON_OFFSET_UNITS                    = 0x2A00;
+        const Int32 _GL_PREVIOUS                                = 0x8578;
+        const Int32 _GL_PRIMARY_COLOR                           = 0x8577;
+        const Int32 _GL_PROJECTION_MATRIX                       = 0x0BA7;
+        const Int32 _GL_PROJECTION_MATRIX_FLOAT_AS_INT_BITS_OES = 0x898E;
+        const Int32 _GL_PROJECTION_STACK_DEPTH                  = 0x0BA4;
+        const Int32 _GL_RGB_SCALE                               = 0x8573;
+        const Int32 _GL_SAMPLE_BUFFERS                          = 0x80A8;
+        const Int32 _GL_SAMPLE_COVERAGE_INVERT                  = 0x80AB;
+        const Int32 _GL_SAMPLE_COVERAGE_VALUE                   = 0x80AA;
+        const Int32 _GL_SAMPLES                                 = 0x80A9;
+        const Int32 _GL_SCISSOR_BOX                             = 0x0C10;
+        const Int32 _GL_SHADE_MODEL                             = 0x0B54;
+        const Int32 _GL_SRC0_ALPHA                              = 0x8588;
+        const Int32 _GL_SRC0_RGB                                = 0x8580;
+        const Int32 _GL_SRC1_ALPHA                              = 0x8589;
+        const Int32 _GL_SRC1_RGB                                = 0x8581;
+        const Int32 _GL_SRC2_ALPHA                              = 0x858A;
+        const Int32 _GL_SRC2_RGB                                = 0x8582;
+        const Int32 _GL_STATIC_DRAW                             = 0x88E4;
+        const Int32 _GL_STENCIL_CLEAR_VALUE                     = 0x0B91;
+        const Int32 _GL_STENCIL_FAIL                            = 0x0B94;
+        const Int32 _GL_STENCIL_FUNC                            = 0x0B92;
+        const Int32 _GL_STENCIL_PASS_DEPTH_FAIL                 = 0x0B95;
+        const Int32 _GL_STENCIL_PASS_DEPTH_PASS                 = 0x0B96;
+        const Int32 _GL_STENCIL_REF                             = 0x0B97;
+        const Int32 _GL_STENCIL_VALUE_MASK                      = 0x0B93;
+        const Int32 _GL_STENCIL_WRITEMASK                       = 0x0B98;
+        const Int32 _GL_SUBTRACT                                = 0x84E7;
+        const Int32 _GL_TEXTURE_BINDING_2D                      = 0x8069;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING      = 0x889A;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_POINTER             = 0x8092;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_SIZE                = 0x8088;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_STRIDE              = 0x808A;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_TYPE                = 0x8089;
+        const Int32 _GL_TEXTURE_MATRIX                          = 0x0BA8;
+        const Int32 _GL_TEXTURE_MATRIX_FLOAT_AS_INT_BITS_OES    = 0x898F;
+        const Int32 _GL_TEXTURE_STACK_DEPTH                     = 0x0BA5;
+        const Int32 _GL_VERTEX_ARRAY_BUFFER_BINDING             = 0x8896;
+        const Int32 _GL_VERTEX_ARRAY_POINTER                    = 0x808E;
+        const Int32 _GL_VERTEX_ARRAY_SIZE                       = 0x807A;
+        const Int32 _GL_VERTEX_ARRAY_STRIDE                     = 0x807C;
+        const Int32 _GL_VERTEX_ARRAY_TYPE                       = 0x807B;
+        const Int32 _GL_VIEWPORT                                = 0x0BA2;
+        const Int32 _GL_WRITE_ONLY                              = 0x88B9;
+
+        glGetPointerv(
+            [in] Int32 pname,
+            [in] ArrayOf<IBuffer*>* params);
+
+        glBindBuffer(
+            [in] Int32 target,
+            [in] Int32 buffer);
+
+        glBufferData(
+            [in] Int32 target,
+            [in] Int32 size,
+            [in] IBuffer* data,
+            [in] Int32 usage);
+
+        glBufferSubData(
+            [in] Int32 target,
+            [in] Int32 offset,
+            [in] Int32 size,
+            [in] IBuffer* data);
+
+        glClipPlanef(
+            [in] Int32 plane,
+            [in] ArrayOf<Float>* equation,
+            [in] Int32 offset);
+
+        glClipPlanef(
+            [in] Int32 plane,
+            [in] IFloatBuffer* equation);
+
+        glClipPlanex(
+            [in] Int32 plane,
+            [in] ArrayOf<Int32>* equation,
+            [in] Int32 offset);
+
+        glClipPlanex(
+            [in] Int32 plane,
+            [in] IInt32Buffer* equation);
+
+        glColor4ub(
+            [in] Byte red,
+            [in] Byte green,
+            [in] Byte blue,
+            [in] Byte alpha);
+
+        glColorPointer(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+
+        glDeleteBuffers(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* buffers,
+            [in] Int32 offset);
+
+        glDeleteBuffers(
+            [in] Int32 n,
+            [in] IInt32Buffer* buffers
+        );
+
+        glDrawElements(
+            [in] Int32 mode,
+            [in] Int32 count,
+            [in] Int32 type,
+            [in] Int32 offset);
+
+        glGenBuffers(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* buffers,
+            [in] Int32 offset);
+
+        glGenBuffers(
+            [in] Int32 n,
+            [in] IInt32Buffer* buffers);
+
+        glGetBooleanv(
+            [in] Int32 pname,
+            [in] ArrayOf<Boolean>* params,
+            [in] Int32 offset);
+
+        glGetBooleanv(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetBufferParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetBufferParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetClipPlanef(
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* eqn,
+            [in] Int32 offset);
+
+        glGetClipPlanef(
+            [in] Int32 pname,
+            [in] IFloatBuffer* eqn);
+
+        glGetClipPlanex(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* eqn,
+            [in] Int32 offset);
+
+        glGetClipPlanex(
+            [in] Int32 pname,
+            [in] IInt32Buffer* eqn);
+
+        glGetFixedv(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetFixedv(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetFloatv(
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glGetFloatv(
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glGetLightfv(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glGetLightfv(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glGetLightxv(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetLightxv(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetMaterialfv(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glGetMaterialfv(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glGetMaterialxv(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetMaterialxv(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetTexEnviv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetTexEnviv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetTexEnvxv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetTexEnvxv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetTexParameterfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glGetTexParameterfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glGetTexParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetTexParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glGetTexParameterxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetTexParameterxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glIsBuffer(
+            [in] Int32 buffer,
+            [out] Boolean* result);
+
+        glIsEnabled(
+            [in] Int32 cap,
+            [out] Boolean* result);
+
+        glIsTexture(
+            [in] Int32 texture,
+            [out] Boolean* result);
+
+        glNormalPointer(
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+
+        glPointParameterf(
+            [in] Int32 pname,
+            [in] Float param);
+
+        glPointParameterfv(
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glPointParameterfv(
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glPointParameterx(
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        glPointParameterxv(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glPointParameterxv(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glPointSizePointerOES(
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] IBuffer* pointer);
+
+        glTexCoordPointer(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+
+        glTexEnvi(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        glTexEnviv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glTexEnviv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glTexParameteri(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        glTexParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glTexParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glTexParameterxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glTexParameterxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glVertexPointer(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+    }
+
+    } // namepsace Opengles
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

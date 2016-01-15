@@ -1,0 +1,61 @@
+
+module
+{
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.IO.IFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Power {
+
+    interface IPowerUIWarningsUI {
+        Update(
+            [in] Int32 batteryLevel,
+            [in] Int32 bucket,
+            [in] Int64 screenOffTime);
+
+        ShowSaverMode(
+            [in] Boolean mode);
+
+        DismissLowBatteryWarning();
+
+        ShowLowBatteryWarning(
+            [in] Boolean playSound);
+
+        DismissInvalidChargerWarning();
+
+        ShowInvalidChargerWarning();
+
+        UpdateLowBatteryWarning();
+
+        IsInvalidChargerWarningShowing(
+            [out] Boolean* ret);
+
+        Dump(
+            [in] IPrintWriter* pw);
+    }
+
+    /**
+     * @Involve
+     * interface ISystemUI
+     */
+    [deprecated]
+    interface IPowerUI {
+        Start();
+
+        UpdateBatteryWarningLevels();
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
+    }
+
+    } // namespace Power
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

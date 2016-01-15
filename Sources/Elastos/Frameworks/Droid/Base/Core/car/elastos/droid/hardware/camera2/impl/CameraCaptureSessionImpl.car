@@ -1,0 +1,70 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Camera2.Impl.ICameraDeviceImplStateCallbackKK;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Impl {
+
+    /**
+     * Proxy out invocations to the camera2 API callbacks into a {@link Dispatchable}.
+     *
+     * <p>Since abstract classes do not support Java's dynamic {@code Proxy}, we have to
+     * to use our own proxy mechanism.</p>
+     *
+     * @invoke ICameraCaptureSession
+     */
+    interface ICameraCaptureSessionImpl {
+        /**
+         * Replace this session with another session.
+         *
+         * <p>This is an optimization to avoid unconfiguring and then immediately having to
+         * reconfigure again.</p>
+         *
+         * <p>The semantics are identical to {@link #close}, except that unconfiguring will be skipped.
+         * <p>
+         *
+         * <p>After this call completes, the session will not call any further methods on the camera
+         * device.</p>
+         *
+         * @see CameraCaptureSession#close
+         */
+        ReplaceSessionClose();
+
+        /**
+         * Whether currently in mid-abort.
+         *
+         * <p>This is used by the implementation to set the capture failure
+         * reason, in lieu of more accurate error codes from the camera service.
+         * Unsynchronized to avoid deadlocks between simultaneous session->device,
+         * device->session calls.</p>
+         *
+         * <p>Package-private.</p>
+         */
+        IsAborting(
+            [out] Boolean* result);
+
+        /**
+         *
+         * Create an internal state callback, to be invoked on the mDeviceHandler
+         *
+         * <p>It has a few behaviors:
+         * <ul>
+         * <li>Convert device state changes into session state changes.
+         * <li>Keep track of async tasks that the session began (idle, abort).
+         * </ul>
+         * </p>
+         * */
+        GetDeviceStateCallback(
+            [out] ICameraDeviceImplStateCallbackKK** back);
+    }
+
+    } // namespace Impl
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

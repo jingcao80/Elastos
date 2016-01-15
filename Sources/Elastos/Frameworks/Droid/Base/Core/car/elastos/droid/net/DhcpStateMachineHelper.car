@@ -1,0 +1,24 @@
+
+module
+{
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Utility.IStateMachine;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    [local]
+    interface IDhcpStateMachineHelper {
+        MakeDhcpStateMachine(
+            [in] IContext* context,
+            [in] IStateMachine* controller,
+            [in] String intf,
+            [out] IDhcpStateMachine** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

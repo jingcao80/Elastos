@@ -1,0 +1,34 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+    namespace Storage {
+
+    interface IStorageEventListener {
+       /**
+          * Called when the detection state of a USB Mass Storage host has changed.
+          * @param connected true if the USB mass storage is connected.
+         */
+        OnUsbMassStorageConnectionChanged(
+            [in] Boolean connected);
+
+       /**
+          * Called when storage has changed state
+          * @param path the filesystem path for the storage
+          * @param oldState the old state as returned by {@link android.os.Environment#getExternalStorageState()}.
+          * @param newState the old state as returned by {@link android.os.Environment#getExternalStorageState()}.
+         */
+        OnStorageStateChanged(
+            [in] String path,
+            [in] String oldState,
+            [in] String newState);
+    }
+
+    }//namespace Storage
+    }//namespace Os
+    }//namespace Droid
+    }//namespace Elastos
+}
+

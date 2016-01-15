@@ -1,0 +1,26 @@
+
+TARGET_NAME= accounts
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+SOURCES += CAccount.cpp
+SOURCES += CAuthenticatorDescription.cpp
+SOURCES += CAuthenticatorDescriptionHelper.cpp
+SOURCES += CAccountAuthenticatorResponse.cpp
+SOURCES += CAccountManager.cpp
+SOURCES += CAccountManagerHelper.cpp
+SOURCES += ChooseTypeAndAccountActivity.cpp
+SOURCES += CAccountManagerAmsResponse.cpp
+SOURCES += CAccountManagerFutureResponse.cpp
+SOURCES += CChooseResponse.cpp
+SOURCES += AccountManagerResponse.cpp
+SOURCES += AbstractAccountAuthenticator.cpp
+SOURCES += CAccountAuthenticatorTransport.cpp
+SOURCES += AccountAuthenticatorActivity.cpp
+SOURCES += ChooseAccountActivity.cpp
+SOURCES += ChooseAccountTypeActivity.cpp
+SOURCES += CAccountAndUser.cpp

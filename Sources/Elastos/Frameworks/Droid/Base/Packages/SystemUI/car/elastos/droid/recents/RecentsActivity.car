@@ -1,0 +1,65 @@
+
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+
+    /**
+     * The main Recents activity that is started from AlternateRecentsComponent.
+     */
+    /**
+     * @Involve
+     * interface IActivity
+     * interface IRecentsViewRecentsViewCallbacks
+     * interface IRecentsAppWidgetHostRecentsAppWidgetHostCallbacks
+     * interface IDebugOverlayViewDebugOverlayViewCallbacks
+     */
+    interface IRecentsActivity {
+
+        /** Updates the set of recent tasks */
+        UpdateRecentsTasks(
+            [in] IIntent* launchIntent);
+
+        /** Attempts to allocate and bind the search bar app widget */
+        BindSearchBarAppWidget();
+
+        /** Creates the search bar app widget view */
+        AddSearchBarAppWidgetView();
+
+        /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
+        DismissRecentsToFocusedTaskOrHome(
+            [in] Boolean checkFilteredStackState,
+            [out] Boolean* result);
+
+        /** Dismisses Recents directly to Home. */
+        DismissRecentsToHomeRaw(
+            [in] Boolean animated);
+
+        /** Dismisses Recents directly to Home if we currently aren't transitioning. */
+        DismissRecentsToHome(
+            [in] Boolean animated,
+            [out] Boolean* result);
+
+        /** Inflates the debug overlay if debug mode is enabled. */
+        InflateDebugOverlay();
+
+        OnConfigurationChange();
+
+        /** Called when debug mode is triggered */
+        OnDebugModeTriggered();
+
+        /** Called when the enter recents animation is triggered. */
+        OnEnterAnimationTriggered();
+    }
+
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

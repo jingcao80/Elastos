@@ -1,0 +1,27 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IIRemoteCallback {
+        SendResult(
+            [in] IBundle* data);
+    }
+
+    interface IRemoteCallback {
+        SendResult(
+            [in] IBundle* data);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

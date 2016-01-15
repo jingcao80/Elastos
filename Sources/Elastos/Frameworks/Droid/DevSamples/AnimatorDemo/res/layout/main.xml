@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <Button
+            android:id="@+id/bt_inter"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Interface Animation" />
+
+    <Button
+            android:id="@+id/bt_color"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Color Animation" />
+
+    <Button
+            android:id="@+id/bt_alpha"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Alpha Animation" />
+
+    <Button
+            android:id="@+id/bt_property"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Property Animation" />
+
+    <Button
+            android:id="@+id/bt_valueHolder"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="PropertyValueHolder Animation" />
+</LinearLayout>

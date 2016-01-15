@@ -1,0 +1,389 @@
+
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.Core.IRunnable;
+
+    using interface Elastos.Droid.Animation.IAnimator;
+    using interface Elastos.Droid.Animation.ITimeInterpolator;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Internal.StatusBar.IStatusBarIcon;
+    using interface Elastos.Droid.Os.IUserHandle;
+    using interface Elastos.Droid.Service.Notification.IStatusBarNotification;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewPropertyAnimator;
+    using interface Elastos.Droid.Widget.ILinearLayout;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.IGestureRecorder;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IStatusBarWindowView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * @Involve
+     * interface IBaseStatusBar
+     * interface IDemoMode
+     * interface IDragDownHelperDragDownCallback
+     * interface IActivityStarter
+     */
+    [local, deprecated]
+    interface IPhoneStatusBar {
+
+        const Boolean DEBUG = FALSE; // = IBaseStatusBar::DEBUG;
+        const Boolean SPEW = FALSE;
+        const Boolean DUMPTRUCK = TRUE; // extra dumpsys info
+        const Boolean DEBUG_GESTURES = FALSE;
+        const Boolean DEBUG_MEDIA = FALSE;
+        const Boolean DEBUG_MEDIA_FAKE_ARTWORK = FALSE;
+
+        const Boolean DEBUG_WINDOW_STATE = FALSE;
+
+        // additional instrumentation for testing purposes; intended to be left on during development
+        const Boolean CHATTY = DEBUG;
+
+        const String ACTION_STATUSBAR_START
+                = "com.android.internal.policy.statusbar.START";
+
+        const Boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = TRUE;
+
+        const Int32 FADE_KEYGUARD_START_DELAY = 100;
+        const Int32 FADE_KEYGUARD_DURATION = 300;
+
+        GetStatusBarWindow(
+            [out] IStatusBarWindowView** result);
+
+        GetStatusBarHeight(
+            [out] Int32* result);
+
+        RefreshAllStatusBarIcons();
+
+        AddIcon(
+            [in] String slot,
+            [in] Int32 index,
+            [in] Int32 viewIndex,
+            [in] IStatusBarIcon* icon);
+
+        UpdateIcon(
+            [in] String slot,
+            [in] Int32 index,
+            [in] Int32 viewIndex,
+            [in] IStatusBarIcon* old,
+            [in] IStatusBarIcon* icon);
+
+        RemoveIcon(
+            [in] String slot,
+            [in] Int32 index,
+            [in] Int32 viewIndex);
+
+        GetCurrentUserHandle(
+            [out] IUserHandle** result);
+
+        DisplayNotificationFromHeadsUp(
+            [in] IStatusBarNotification* notification);
+
+        FindAndUpdateMediaNotifications();
+
+        /**
+         * Refresh or remove lockscreen artwork from media metadata.
+         */
+        UpdateMediaMetaData(
+            [in] Boolean metaDataChanged);
+
+        ShowClock(
+            [in] Boolean show);
+
+        /**
+         * State is one or more of the DISABLE constants from StatusBarManager.
+         */
+        Disable(
+            [in] Int32 state,
+            [in] Boolean animate);
+
+        GetScrimController(
+            [out] IScrimController** result);
+
+        SetQsExpanded(
+            [in] Boolean expanded);
+
+        IsGoingToNotificationShade(
+            [out] Boolean* result);
+
+        IsQsExpanded(
+            [out] Boolean* result);
+
+        IsScreenOnComingFromTouch(
+            [out] Boolean* result);
+
+        IsFalsingThresholdNeeded(
+            [out] Boolean* result);
+
+        IsDozing(
+            [out] Boolean* result);
+
+        IsScrimSrcModeEnabled(
+            [out] Boolean* result);
+
+        PanelsEnabled(
+            [out] Boolean* result);
+
+        MakeExpandedVisible(
+            [in] Boolean force);
+
+        AnimateCollapsePanels();
+
+        PostAnimateCollapsePanels();
+
+        AnimateCollapsePanels(
+            [in] Int32 flags);
+
+        AnimateCollapsePanels(
+            [in] Int32 flags,
+            [in] Boolean force);
+
+        SetVisibilityWhenDone(
+            [in] IViewPropertyAnimator* a,
+            [in] IView* v,
+            [in] Int32 vis,
+            [out] IViewPropertyAnimator** result);
+
+        SetVisibilityWhenDone(
+            [in] IAnimator* a,
+            [in] IView* v,
+            [in] Int32 vis,
+            [out] IAnimator** result);
+
+        Interpolator(
+            [in] ITimeInterpolator* ti,
+            [in] IAnimator* a,
+            [out] IAnimator** result);
+
+        StartDelay(
+            [in] Int32 d,
+            [in] IAnimator* a,
+            [out] IAnimator** result);
+
+        Start(
+            [in] IAnimator* a,
+            [out] IAnimator** result);
+
+        AnimateCollapseQuickSettings();
+
+        MakeExpandedInvisible();
+
+        InterceptTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        GetGestureRecorder(
+            [out] IGestureRecorder** result);
+
+        SetLightsOn(
+            [in] Boolean on);
+
+        TopAppWindowChanged(
+            [in] Boolean showMenu);
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
+
+        // called by makeStatusbar and also by PhoneStatusBarView
+        UpdateDisplaySize();
+
+        StartActivityDismissingKeyguard(
+            [in] IIntent* intent,
+            [in] Boolean onlyProvisioned,
+            [in] Boolean dismissShade);
+
+        OnHeadsUpDismissed();
+
+        /**
+         * Reload some of our resources when the configuration changes.
+         *
+         * We don't reload everything when the configuration changes -- we probably
+         * should, but getting that smooth is tough.  Someday we'll fix that.  In the
+         * meantime, just update the things that we know change.
+         */
+        UpdateResources();
+
+        //
+        // tracing
+        //
+
+        PostStartTracing();
+
+        Vibrate();
+
+        PostStartSettingsActivity(
+            [in] IIntent* intent,
+            [in] Int32 delay);
+
+        /**
+         * @return The {@link StatusBarState} the status bar is in.
+         */
+        GetBarState(
+            [out] Int32* result);
+
+        ShowKeyguard();
+
+        IsCollapsing(
+            [out] Boolean* result);
+
+        AddPostCollapseAction(
+            [in] IRunnable* r);
+
+        IsInLaunchTransition(
+            [out] Boolean* result);
+
+        /**
+         * Fades the content of the keyguard away after the launch transition is done.
+         *
+         * @param beforeFading the runnable to be run when the circle is fully expanded and the fading
+         *                     starts
+         * @param endRunnable the runnable to be run when the transition is done
+         */
+        FadeKeyguardAfterLaunchTransition(
+            [in] IRunnable* beforeFading,
+            [in] IRunnable* endRunnable);
+
+        /**
+         * @return true if we would like to stay in the shade, false if it should go away entirely
+         */
+        HideKeyguard(
+            [out] Boolean* result);
+
+        CalculateGoingToFullShadeDelay(
+            [out] Int64* result);
+
+        /**
+         * Notifies the status bar the Keyguard is fading away with the specified timings.
+         *
+         * @param delay the animation delay in miliseconds
+         * @param fadeoutDuration the duration of the exit animation, in milliseconds
+         */
+        SetKeyguardFadingAway(
+            [in] Int64 delay,
+            [in] Int64 fadeoutDuration);
+
+        IsKeyguardFadingAway(
+            [out] Boolean* result);
+
+        /**
+         * Notifies that the Keyguard fading away animation is done.
+         */
+        FinishKeyguardFadingAway();
+
+        UpdateStackScrollerState(
+            [in] Boolean goingToFullShade);
+
+        UserActivity();
+
+        InterceptMediaKey(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OnMenuPressed(
+            [out] Boolean* result);
+
+        OnBackPressed(
+            [out] Boolean* result);
+
+        OnSpacePressed(
+            [out] Boolean* result);
+
+        /**
+         * @param state The {@link StatusBarState} to set.
+         */
+        SetBarState(
+            [in] Int32 state);
+
+        OnTrackingStarted();
+
+        OnUnlockHintStarted();
+
+        OnHintFinished();
+
+        OnCameraHintStarted();
+
+        OnPhoneHintStarted();
+
+        OnTrackingStopped(
+            [in] Boolean expand);
+
+        GetNavigationBarView(
+            [out] INavigationBarView** result);
+
+        /**
+         * If secure with redaction: Show bouncer, go to unlocked shade.
+         *
+         * <p>If secure without redaction or no security: Go to {@link StatusBarState#SHADE_LOCKED}.</p>
+         *
+         * @param expandView The view to expand after going to the shade.
+         */
+        GoToLockedShade(
+            [in] IView* expandView);
+
+        /**
+         * Goes back to the keyguard after hanging around in {@link StatusBarState#SHADE_LOCKED}.
+         */
+        GoToKeyguard();
+
+        /**
+         * @return a ViewGroup that spans the entire panel which contains the quick settings
+         */
+        GetQuickSettingsOverlayParent(
+            [out] IViewGroup** result);
+
+        GetKeyguardFadingAwayDelay(
+            [out] Int64* result);
+
+        GetKeyguardFadingAwayDuration(
+            [out] Int64* result);
+
+        GetSystemIcons(
+            [out] ILinearLayout** result);
+
+        GetSystemIconArea(
+            [out] ILinearLayout** result);
+
+        OnScreenTurnedOff();
+
+        OnScreenTurnedOn();
+
+        HasActiveNotifications(
+            [out] Boolean* result);
+
+        WakeUpIfDozing(
+            [in] Int64 time,
+            [in] Boolean fromTouch);
+    }
+
+    [local]
+    interface IPhoneStatusBarHelper {
+
+        ViewInfo(
+            [in] IView* v,
+            [out] String* result);
+
+        Saturate(
+            [in] Float a,
+            [out] Float* result);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

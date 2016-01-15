@@ -1,0 +1,256 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+
+    /**
+     * A Drawable that manages an array of other Drawables. These are drawn in array
+     * order, so the element with the largest index will be drawn on top.
+     * <p>
+     * It can be defined in an XML file with the <code>&lt;layer-list></code> element.
+     * Each Drawable in the layer is defined in a nested <code>&lt;item></code>. For more
+     * information, see the guide to <a
+     * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
+     *
+     * @attr ref android.R.styleable#LayerDrawableItem_left
+     * @attr ref android.R.styleable#LayerDrawableItem_top
+     * @attr ref android.R.styleable#LayerDrawableItem_right
+     * @attr ref android.R.styleable#LayerDrawableItem_bottom
+     * @attr ref android.R.styleable#LayerDrawableItem_drawable
+     * @attr ref android.R.styleable#LayerDrawableItem_id
+     */
+
+
+     /**
+    * A Drawable is a general abstraction for "something that can be drawn." Most often
+    * you will deal with Drawable as the type of resource retrieved for drawing things
+    * to the screen; the Drawable class provides a generic API for dealing with an
+    * underlying visual resource that may take a variety of forms. Unlike a View, a
+    * Drawable does not have any facility to receive events or otherwise interact with
+    * the user.
+    *
+    * @sa  View
+    * <p>
+    * In addition to simple drawing, Drawable provides a number of generic mechanisms
+    * for its client to interact with what is being drawn:
+    * <p>
+    * The setBounds(Rect) method must be called to tell the Drawable where it is drawn
+    * and how large it should be. All Drawables should respect the requested size,
+    * often simply by scaling their imagery. A client can find the preferred size for
+    * some Drawables with the getIntrinsicHeight() and getIntrinsicWidth() methods.
+    *
+    * @sa setBounds(Rect)
+    * @sa getIntrinsicHeight()
+    * @sa getIntrinsicWidth()
+    * <p>
+    * The getPadding(Rect) method can return from some Drawables information about how
+    * to frame content that is placed inside of them. For example, a Drawable that is
+    * intended to be the frame for a button widget would need to return padding that
+    * correctly places the label inside of itself.
+    *
+    * @sa getPadding(Rect)
+    * <p>
+    * The setState(int[]) method allows the client to tell the Drawable in which state
+    * it is to be drawn, such as "focused", "selected", etc. Some drawables may modify
+    * their imagery based on the selected state.
+    *
+    * @sa setState(int[])
+    * <p>
+    * The setLevel(int) method allows the client to supply a single continuous
+    * controller that can modify the Drawable is displayed, such as a battery level or
+    * progress level. Some drawables may modify their imagery based on the current
+    * level.
+    *
+    * @sa setLevel(int)
+    * <p>
+    * A Drawable can perform animations by calling back to its client through the
+    * Drawable.Callback interface. All clients should support this interface
+    * (via setCallback(Drawable.Callback)) so that animations will work. A simple way
+    * to do this is through the system facilities such as
+    * (setBackgroundDrawable(Drawable) and ImageView.
+    *
+    * @sa Drawable.Callback
+    * @sa setCallback(Drawable.Callback
+    * @sa setBackgroundDrawable(Drawable)
+    * @sa ImageView
+    * <p>
+    * Though usually not visible to the application, Drawables may take a variety of
+    * forms:
+    * Bitmap: the simplest Drawable, a PNG or JPEG image.
+    * Nine Patch: an extension to the PNG format allows it to specify information about
+    * how to stretch it and place things inside of it.
+    * Shape: contains simple drawing commands instead of a raw bitmap, allowing it to
+    * resize better in some cases.
+    * Layers: a compound drawable, which draws multiple underlying drawables on top of
+    * each other.
+    * States: a compound drawable that selects one of a set of drawables based on its
+    * state.
+    * Levels: a compound drawable that selects one of a set of drawables based on its
+    * level.
+    * Scale: a compound drawable with a single child drawable, whose overall size is
+    * modified based on the current level.
+    *
+    * @implements Elastos.Droid.Graphics.Drawable.IDrawable
+    */
+    /**
+     * @Involve
+     * interface IDrawable
+     */
+    interface ILayerDrawable {
+        /**
+         * Padding mode used to nest each layer inside the padding of the previous
+         * layer.
+         *
+         * @see #setPaddingMode(int)
+         */
+        const Int32 PADDING_MODE_NEST = 0;
+
+        /**
+         * Padding mode used to stack each layer directly atop the previous layer.
+         *
+         * @see #setPaddingMode(int)
+         */
+        const Int32 PADDING_MODE_STACK = 1;
+
+        /**
+         * Look for a layer with the given id, and returns its Drawable.
+         *
+         * @sa Drawable
+         *
+         * @param id The layer ID to search for->
+         * @return The Drawable of the layer that has the given id in the hierarchy or NULL.
+         *
+         * @sa Drawable
+         */
+        FindDrawableByLayerId(
+            [in] Int32 id,
+            [out] IDrawable** drawable);
+
+        /**
+         * Returns the drawable at the specified layer index.
+         *
+         * @param index The layer index of the drawable to retrieve.
+         *
+         * @return The Drawable at the specified layer index.
+         *
+         * @sa android.graphics.drawable.Drawable
+         */
+        GetDrawable(
+            [in] Int32 index,
+            [out] IDrawable** drawable);
+
+        /**
+         * Returns the id of the specified layer.
+         *
+         * @param index The index of the layer.
+         *
+         * @return The id of the layer or android.view.View#NO_ID if the layer has no id.
+         *
+         * @sa android.view.View#NO_ID
+         */
+        GetId(
+            [in] Int32 index,
+            [out] Int32* id);
+
+        /**
+         * Returns the number of layers contained within this.
+         * @return The number of layers.
+         */
+        GetNumberOfLayers(
+            [out] Int32* number);
+
+        /**
+         * Sets (or replaces) the Drawable for the layer with the given id.
+         *
+         * @sa Drawable
+         *
+         * @param id The layer ID to search for->
+         * @param drawable The replacement  Drawable.
+         *
+         * @sa Drawable
+         * @return Whether the  Drawable was replaced (could return FALSE if
+         *         the id was not found).
+         *
+         * @sa Drawable
+         */
+        SetDrawableByLayerId(
+            [in] Int32 id,
+            [in] IDrawable* drawable,
+            [out] Boolean* res);
+
+        /**
+         * Sets the ID of a layer->
+         *
+         * @param index The index of the layer which will received the ID.
+         * @param id The ID to assign to the layer->
+         */
+        SetId(
+            [in] Int32 index,
+            [in] Int32 id);
+
+        /** Specify modifiers to the bounds for the drawable[index]->
+            left += l
+            top += t;
+            right -= r;
+            bottom -= b;
+        */
+        SetLayerInset(
+            [in] Int32 index,
+            [in] Int32 l,
+            [in] Int32 t,
+            [in] Int32 r,
+            [in] Int32 b);
+
+        /**
+         * Specifies how layer padding should affect the bounds of subsequent
+         * layers. The default value is {@link #PADDING_MODE_NEST}.
+         *
+         * @param mode padding mode, one of:
+         *            <ul>
+         *            <li>{@link #PADDING_MODE_NEST} to nest each layer inside the
+         *            padding of the previous layer
+         *            <li>{@link #PADDING_MODE_STACK} to stack each layer directly
+         *            atop the previous layer
+         *            </ul>
+         *
+         * @see #getPaddingMode()
+         * @attr ref android.R.styleable#LayerDrawable_paddingMode
+         */
+        SetPaddingMode(
+            [in] Int32 mode);
+
+        /**
+         * @return the current padding mode
+         *
+         * @see #setPaddingMode(int)
+         * @attr ref android.R.styleable#LayerDrawable_paddingMode
+         */
+        GetPaddingMode(
+            [out] Int32* mode);
+
+        /**
+         * Sets the opacity of this drawable directly, instead of collecting the states from
+         * the layers
+         *
+         * @param opacity The opacity to use, or PixelFormat
+         * for the default behavior
+         *
+         * @sa PixelFormat#UNKNOWN PixelFormat.UNKNOWN
+         *
+         * @see PixelFormat#UNKNOWN
+         * @see PixelFormat#TRANSLUCENT
+         * @see PixelFormat#TRANSPARENT
+         * @see PixelFormat#OPAQUE
+         */
+        SetOpacity(
+            [in] Int32 opacity);
+    }
+
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

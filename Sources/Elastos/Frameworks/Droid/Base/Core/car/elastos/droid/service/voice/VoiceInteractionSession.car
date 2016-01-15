@@ -1,0 +1,400 @@
+module
+{
+    interface Elastos.Droid.App.IDialog;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractionManagerService;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.View.IInternalInsetsInfo;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.View.ILayoutInflater;
+    interface Elastos.Droid.View.IView;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Voice {
+
+    interface IVoiceInteractionSessionRequest {
+        SendConfirmResult(
+            [in] Boolean confirmed,
+            [in] IBundle* result);
+
+        SendCompleteVoiceResult(
+            [in] IBundle* result);
+
+        SendAbortVoiceResult(
+            [in] IBundle* result);
+
+        SendCommandResult(
+            [in] Boolean complete,
+            [in] IBundle* result);
+
+        SendCancelResult();
+
+        FinishRequest();
+    }
+
+    interface IVoiceInteractionSessionCaller {
+
+    }
+
+    /**
+     * @hide
+     * Information about where interesting parts of the input method UI appear.
+     */
+    interface IVoiceInteractionSessionInsets {
+        /**
+         * Option for {@link #touchableInsets}: the entire window frame
+         * can be touched.
+         */
+        const Int32 TOUCHABLE_INSETS_FRAME = 0;
+
+        /**
+         * Option for {@link #touchableInsets}: the area inside of
+         * the content insets can be touched.
+         */
+        const Int32 TOUCHABLE_INSETS_CONTENT = 1;
+
+        /**
+         * Option for {@link #touchableInsets}: the region specified by
+         * {@link #touchableRegion} can be touched.
+         */
+        const Int32 TOUCHABLE_INSETS_REGION = 3;
+    }
+
+    /**
+     * An active interaction session, started by a {@link VoiceInteractionService}.
+     *
+     * @Involve
+     * interface Elastos.Droid.View.IKeyEventCallback
+     */
+     [local, deprecated]
+    interface IVoiceInteractionSession {
+
+        NewRequest(
+            [in] IIVoiceInteractorCallback* cb,
+            [out] IVoiceInteractionSessionRequest** request);
+
+        RemoveRequest(
+            [in] IBinder* reqInterface,
+            [out] IVoiceInteractionSessionRequest** request);
+
+        DoCreate(
+            [in] IIVoiceInteractionManagerService* service,
+            [in] IBinder* token,
+            [in] IBundle* args);
+
+        DoDestroy();
+
+        InitViews();
+
+        /**
+         * @hide
+         * @SystemApi
+         */
+        ShowWindow();
+
+        /**
+         * @hide
+         * @SystemApi
+         */
+        HideWindow();
+
+        /**
+         * @hide
+         * You can call this to customize the theme used by your IME's window.
+         * This must be set before {@link #onCreate}, so you
+         * will typically call it in your constructor with the resource ID
+         * of your custom theme.
+         * @SystemApi
+         */
+        SetTheme(
+            [in] Int32 theme);
+
+        /**
+         * @hide
+         * Ask that a new activity be started for voice interaction.  This will create a
+         * new dedicated task in the activity manager for this voice interaction session;
+         * this means that {@link Intent#FLAG_ACTIVITY_NEW_TASK Intent.FLAG_ACTIVITY_NEW_TASK}
+         * will be set for you to make it a new task.
+         *
+         * <p>The newly started activity will be displayed to the user in a special way, as
+         * a layer under the voice interaction UI.</p>
+         *
+         * <p>As the voice activity runs, it can retrieve a {@link android.app.VoiceInteractor}
+         * through which it can perform voice interactions through your session.  These requests
+         * for voice interactions will appear as callbacks on {@link #onGetSupportedCommands},
+         * {@link #onConfirm}, {@link #onCommand}, and {@link #onCancel}.
+         *
+         * <p>You will receive a call to {@link #onTaskStarted} when the task starts up
+         * and {@link #onTaskFinished} when the last activity has finished.
+         *
+         * @param intent The Intent to start this voice interaction.  The given Intent will
+         * always have {@link Intent#CATEGORY_VOICE Intent.CATEGORY_VOICE} added to it, since
+         * this is part of a voice interaction.
+         * @SystemApi
+         */
+        StartVoiceActivity(
+            [in] IIntent* intent);
+
+        /**
+         * @hide
+         * Convenience for inflating views.
+         * @SystemApi
+         */
+        GetLayoutInflater(
+            [out] ILayoutInflater** inflater);
+
+        /**
+         * @hide
+         * Retrieve the window being used to show the session's UI.
+         * @SystemApi
+         */
+        GetWindow(
+            [out] IDialog** dialog);
+
+        /**
+         * Finish the session.
+         */
+        Finish();
+
+        /**
+         * Initiatize a new session.
+         *
+         * @param args The arguments that were supplied to
+         * {@link VoiceInteractionService#startSession VoiceInteractionService.startSession}.
+         */
+        OnCreate(
+            [in] IBundle* args);
+
+        /**
+         * Last callback to the session as it is being finished.
+         */
+        OnDestroy();
+
+        /**
+         * @hide
+         * Hook in which to create the session's UI.
+         * @SystemApi
+         */
+        OnCreateContentView();
+
+        SetContentView(
+            [in] IView* view);
+
+        /**
+         * @hide
+         */
+        // @SystemApi
+        OnKeyDown(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        // @SystemApi
+        OnKeyLongPress(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        // @SystemApi
+        OnKeyUp(
+            [in] Int32 keyCode,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        // @SystemApi
+        OnKeyMultiple(
+            [in] Int32 keyCode,
+            [in] Int32 count,
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         * @SystemApi
+         */
+        OnBackPressed();
+
+        /**
+         * Sessions automatically watch for requests that all system UI be closed (such as when
+         * the user presses HOME), which will appear here.  The default implementation always
+         * calls {@link #finish}.
+         */
+        OnCloseSystemDialogs();
+
+        /**
+         * @hide
+         * Compute the interesting insets into your UI.  The default implementation
+         * uses the entire window frame as the insets.  The default touchable
+         * insets are {@link Insets#TOUCHABLE_INSETS_FRAME}.
+         *
+         * @param outInsets Fill in with the current UI insets.
+         * @SystemApi
+         */
+        OnComputeInsets(
+            [in] IVoiceInteractionSessionInsets* outInsets);
+
+        /**
+         * @hide
+         * @SystemApi
+         * Called when a task initiated by {@link #startVoiceActivity(android.content.Intent)}
+         * has actually started.
+         *
+         * @param intent The original {@link Intent} supplied to
+         * {@link #startVoiceActivity(android.content.Intent)}.
+         * @param taskId Unique ID of the now running task.
+         */
+        OnTaskStarted(
+            [in] IIntent* intent,
+            [in] Int32 taskId);
+
+        /**
+         * @hide
+         * @SystemApi
+         * Called when the last activity of a task initiated by
+         * {@link #startVoiceActivity(android.content.Intent)} has finished.  The default
+         * implementation calls {@link #finish()} on the assumption that this represents
+         * the completion of a voice action.  You can override the implementation if you would
+         * like a different behavior.
+         *
+         * @param intent The original {@link Intent} supplied to
+         * {@link #startVoiceActivity(android.content.Intent)}.
+         * @param taskId Unique ID of the finished task.
+         */
+        OnTaskFinished(
+            [in] IIntent* intent,
+            [in] Int32 taskId);
+
+        /**
+         * @hide
+         * @SystemApi
+         * Request to query for what extended commands the session supports.
+         *
+         * @param caller Who is making the request.
+         * @param commands An array of commands that are being queried.
+         * @return Return an array of booleans indicating which of each entry in the
+         * command array is supported.  A true entry in the array indicates the command
+         * is supported; false indicates it is not.  The default implementation returns
+         * an array of all false entries.
+         */
+        OnGetSupportedCommands(
+            [in] IVoiceInteractionSessionCaller* caller,
+            [in] ArrayOf<String>* commands,
+            [out, callee] ArrayOf<Boolean>* rst);
+
+        /**
+         * @hide
+         * @SystemApi
+         * Request to confirm with the user before proceeding with an unrecoverable operation,
+         * corresponding to a {@link android.app.VoiceInteractor.ConfirmationRequest
+         * VoiceInteractor.ConfirmationRequest}.
+         *
+         * @param caller Who is making the request.
+         * @param request The active request.
+         * @param prompt The prompt informing the user of what will happen, as per
+         * {@link android.app.VoiceInteractor.ConfirmationRequest VoiceInteractor.ConfirmationRequest}.
+         * @param extras Any additional information, as per
+         * {@link android.app.VoiceInteractor.ConfirmationRequest VoiceInteractor.ConfirmationRequest}.
+         */
+        OnConfirm(
+            [in] IVoiceInteractionSessionCaller* caller,
+            [in] IVoiceInteractionSessionRequest* request,
+            [in] ICharSequence* prompt,
+            [in] IBundle* extras);
+
+        /**
+         * @hide
+         * @SystemApi
+         * Request to complete the voice interaction session because the voice activity successfully
+         * completed its interaction using voice.  Corresponds to
+         * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+         * VoiceInteractor.CompleteVoiceRequest}.  The default implementation just sends an empty
+         * confirmation back to allow the activity to exit.
+         *
+         * @param caller Who is making the request.
+         * @param request The active request.
+         * @param message The message informing the user of the problem, as per
+         * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+         * VoiceInteractor.CompleteVoiceRequest}.
+         * @param extras Any additional information, as per
+         * {@link android.app.VoiceInteractor.CompleteVoiceRequest
+         * VoiceInteractor.CompleteVoiceRequest}.
+         */
+        OnCompleteVoice(
+            [in] IVoiceInteractionSessionCaller* caller,
+            [in] IVoiceInteractionSessionRequest* request,
+            [in] ICharSequence* message,
+            [in] IBundle* extras);
+
+        /**
+         * @hide
+         * @SystemApi
+         * Request to abort the voice interaction session because the voice activity can not
+         * complete its interaction using voice.  Corresponds to
+         * {@link android.app.VoiceInteractor.AbortVoiceRequest
+         * VoiceInteractor.AbortVoiceRequest}.  The default implementation just sends an empty
+         * confirmation back to allow the activity to exit.
+         *
+         * @param caller Who is making the request.
+         * @param request The active request.
+         * @param message The message informing the user of the problem, as per
+         * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
+         * @param extras Any additional information, as per
+         * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
+         */
+        OnAbortVoice(
+            [in] IVoiceInteractionSessionCaller* caller,
+            [in] IVoiceInteractionSessionRequest* request,
+            [in] ICharSequence* message,
+            [in] IBundle* extras);
+
+        /**
+         * @hide
+         * @SystemApi
+         * Process an arbitrary extended command from the caller,
+         * corresponding to a {@link android.app.VoiceInteractor.CommandRequest
+         * VoiceInteractor.CommandRequest}.
+         *
+         * @param caller Who is making the request.
+         * @param request The active request.
+         * @param command The command that is being executed, as per
+         * {@link android.app.VoiceInteractor.CommandRequest VoiceInteractor.CommandRequest}.
+         * @param extras Any additional information, as per
+         * {@link android.app.VoiceInteractor.CommandRequest VoiceInteractor.CommandRequest}.
+         */
+        OnCommand(
+            [in] IVoiceInteractionSessionCaller* caller,
+            [in] IVoiceInteractionSessionRequest* request,
+            [in] String command,
+            [in] IBundle* extras);
+
+        /**
+         * @hide
+         * @SystemApi
+         * Called when the {@link android.app.VoiceInteractor} has asked to cancel a {@link Request}
+         * that was previously delivered to {@link #onConfirm} or {@link #onCommand}.
+         *
+         * @param request The request that is being canceled.
+         */
+        OnCancel(
+            [in] IVoiceInteractionSessionRequest* request);
+    }
+
+    } // namespace Voice
+    } // namespace Service
+    } // namespace Droid
+    } // namespace Elastos
+}

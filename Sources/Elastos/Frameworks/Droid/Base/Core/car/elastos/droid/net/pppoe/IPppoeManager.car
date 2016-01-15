@@ -1,0 +1,48 @@
+
+module
+{
+    interface Elastos.Droid.Net.IDhcpInfo;
+    interface Elastos.Droid.Net.Pppoe.IPppoeDevInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Pppoe {
+
+    interface IIPppoeManager {
+        GetDeviceNameList(
+            [out, callee] ArrayOf<String>* list);
+
+        SetPppoeState(
+            [in] Int32 state);
+
+        GetPppoeState(
+            [out] Int32* val);
+
+        UpdatePppoeDevInfo(
+            [in] IPppoeDevInfo* info);
+
+        IsPppoeConfigured(
+            [out] Boolean* result);
+
+        GetSavedPppoeConfig(
+            [out] IPppoeDevInfo** info);
+
+        GetTotalInterface(
+            [out] Int32* val);
+
+        SetPppoeMode(
+            [in] String mode);
+
+        IsPppoeDeviceUp(
+            [out] Boolean* result);
+
+        GetDhcpInfo(
+            [out] IDhcpInfo** info);
+    }
+
+    } // namespace Pppoe
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

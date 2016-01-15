@@ -1,0 +1,42 @@
+
+module
+{
+    interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * A class implementing a container for data associated with a measurement event.
+     * Events are delivered to registered instances of {@link Listener}.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface interface IParcelable
+     */
+    interface IGpsMeasurementsEvent {
+        // @NonNull
+        GetClock(
+            [out] IGpsClock** result);
+
+        /**
+         * Gets a read-only collection of measurements associated with the current event.
+         */
+        // @NonNull
+        GetMeasurements(
+            [out] ICollection** result);
+    }
+
+    interface IGpsMeasurementsEventListener {
+        OnGpsMeasurementsReceived(
+            [in] IGpsMeasurementsEvent* eventArgs);
+    }
+
+    } // namespace Location
+    } // namespace Droid
+    } // namespace Elastos
+}
+

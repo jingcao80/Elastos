@@ -1,0 +1,129 @@
+module
+{
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.Pm.IUserInfo;
+    interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     *  {@hide}
+     */
+    interface IIUserManager {
+        CreateUser(
+            [in] String name,
+            [in] Int32 flags,
+            [out] IUserInfo** userInfo);
+
+        CreateProfileForUser(
+            [in] String name,
+            [in] Int32 flags,
+            [in] Int32 userHandle,
+            [out] IUserInfo** userInfo);
+
+        SetUserEnabled(
+            [in] Int32 userHandle);
+
+        RemoveUser(
+            [in] Int32 userHandle,
+            [out] Boolean* succeeded);
+
+        SetUserName(
+            [in] Int32 userHandle,
+            [in] String name);
+
+        SetUserIcon(
+            [in] Int32 userHandle,
+            [in] IBitmap* icon);
+
+        GetUserIcon(
+            [in] Int32 userHandle,
+            [out] IBitmap** icon);
+
+        GetUsers(
+            [in] Boolean excludeDying,
+            [out] IList** users);
+
+        GetProfiles(
+            [in] Int32 userHandle,
+            [in] Boolean enabledOnly,
+            [out] IList** result);
+
+        GetProfileParent(
+            [in] Int32 userHandle,
+            [out] IUserInfo** info);
+
+        GetUserInfo(
+            [in] Int32 userHandle,
+            [out] IUserInfo** userInfo);
+
+        IsRestricted(
+            [out] Boolean* result);
+
+        GetUserSerialNumber(
+            [in] Int32 userHandle,
+            [out] Int32* result);
+
+        GetUserHandle(
+            [in] Int32 userSerialNumber,
+            [out] Int32* result);
+
+        GetUserRestrictions(
+            [in] Int32 userHandle,
+            [out] IBundle** bundle);
+
+        HasUserRestriction(
+            [in] String restrictionKey,
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+
+        SetUserRestrictions(
+            [in] IBundle* restrictions,
+            [in] Int32 userHandle);
+
+        SetApplicationRestrictions(
+            [in] String packageName,
+            [in] IBundle* restrictions,
+            [in] Int32 userHandle);
+
+        GetApplicationRestrictions(
+            [in] String packageName,
+            [out] IBundle** bundle);
+
+        GetApplicationRestrictionsForUser(
+            [in] String packageName,
+            [in] Int32 userHandle,
+            [out] IBundle** bundle);
+
+        SetRestrictionsChallenge(
+            [in] String newPin,
+            [out] Boolean* result);
+
+        CheckRestrictionsChallenge(
+            [in] String pin,
+            [out] Int32* result);
+
+        HasRestrictionsChallenge(
+            [out] Boolean* result);
+
+        RemoveRestrictions();
+
+        SetDefaultGuestRestrictions(
+            [in] IBundle* restrictions);
+
+        GetDefaultGuestRestrictions(
+            [out] IBundle** result);
+
+        MarkGuestForDeletion(
+            [in] Int32 userHandle,
+            [out] Boolean* result);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

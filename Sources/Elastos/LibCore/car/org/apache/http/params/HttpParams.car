@@ -1,0 +1,205 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Params {
+
+    /**
+     * Represents a collection of HTTP protocol and framework parameters.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 610763 $
+     *
+     * @since 4.0
+     */
+    interface IHttpParams {
+
+        /**
+         * Obtains the value of the given parameter.
+         *
+         * @param name the parent name.
+         *
+         * @return  an object that represents the value of the parameter,
+         *          <code>null</code> if the parameter is not set or if it
+         *          is explicitly set to <code>null</code>
+         *
+         * @see #setParameter(String, Object)
+         */
+        GetParameter(
+            [in] String name,
+            [out] IInterface** parameter);
+
+        /**
+         * Assigns the value to the parameter with the given name.
+         *
+         * @param name parameter name
+         * @param value parameter value
+         */
+        SetParameter(
+            [in] String name,
+            [in] IInterface* value,
+            [out] IHttpParams** httpParams);
+
+        /**
+         * Creates a copy of these parameters.
+         *
+         * @return  a new set of parameters holding the same values as this one
+         */
+        Copy(
+            [out] IHttpParams** httpParams);
+
+        /**
+         * Removes the parameter with the specified name.
+         *
+         * @param name parameter name
+         *
+         * @return true if the parameter existed and has been removed, false else.
+         */
+        RemoveParameter(
+            [in] String name,
+            [out] Boolean* remove);
+
+        /**
+         * Returns a {@link Long} parameter value with the given name.
+         * If the parameter is not explicitly set, the default value is returned.
+         *
+         * @param name the parent name.
+         * @param defaultValue the default value.
+         *
+         * @return a {@link Long} that represents the value of the parameter.
+         *
+         * @see #setLongParameter(String, long)
+         */
+        GetInt64Parameter(
+            [in] String name,
+            [in] Int64 defaultValue,
+            [out] Int64* int64Parameter);
+
+        /**
+         * Assigns a {@link Long} to the parameter with the given name
+         *
+         * @param name parameter name
+         * @param value parameter value
+         */
+        SetInt64Parameter(
+            [in] String name,
+            [in] Int64 value,
+            [out] IHttpParams** httpParams);
+
+        /**
+         * Returns an {@link Integer} parameter value with the given name.
+         * If the parameter is not explicitly set, the default value is returned.
+         *
+         * @param name the parent name.
+         * @param defaultValue the default value.
+         *
+         * @return a {@link Integer} that represents the value of the parameter.
+         *
+         * @see #setIntParameter(String, int)
+         */
+        GetInt32Parameter(
+            [in] String name,
+            [in] Int32 defaultValue,
+            [out] Int32* int32Parameter);
+
+        /**
+         * Assigns an {@link Integer} to the parameter with the given name
+         *
+         * @param name parameter name
+         * @param value parameter value
+         */
+        SetInt32Parameter(
+            [in] String name,
+            [in] Int32 value,
+            [out] IHttpParams** httpParams);
+
+        /**
+         * Returns a {@link Double} parameter value with the given name.
+         * If the parameter is not explicitly set, the default value is returned.
+         *
+         * @param name the parent name.
+         * @param defaultValue the default value.
+         *
+         * @return a {@link Double} that represents the value of the parameter.
+         *
+         * @see #setDoubleParameter(String, double)
+         */
+        GetDoubleParameter(
+            [in] String name,
+            [in] Double defaultValue,
+            [out] Double* doubleParameter);
+
+        /**
+         * Assigns a {@link Double} to the parameter with the given name
+         *
+         * @param name parameter name
+         * @param value parameter value
+         */
+        SetDoubleParameter(
+            [in] String name,
+            [in] Double value,
+            [out] IHttpParams** httpParams);
+
+        /**
+         * Returns a {@link Boolean} parameter value with the given name.
+         * If the parameter is not explicitly set, the default value is returned.
+         *
+         * @param name the parent name.
+         * @param defaultValue the default value.
+         *
+         * @return a {@link Boolean} that represents the value of the parameter.
+         *
+         * @see #setBooleanParameter(String, boolean)
+         */
+        GetBooleanParameter(
+            [in] String name,
+            [in] Boolean defaultValue,
+            [out] Boolean* booleanParameter);
+
+        /**
+         * Assigns a {@link Boolean} to the parameter with the given name
+         *
+         * @param name parameter name
+         * @param value parameter value
+         */
+        SetBooleanParameter(
+            [in] String name,
+            [in] Boolean value,
+            [out] IHttpParams** httpParams);
+
+        /**
+         * Checks if a boolean parameter is set to <code>true</code>.
+         *
+         * @param name parameter name
+         *
+         * @return <tt>true</tt> if the parameter is set to value <tt>true</tt>,
+         *         <tt>false</tt> if it is not set or set to <code>false</code>
+         */
+        IsParameterTrue(
+            [in] String name,
+            [out] Boolean* isParameterTrue);
+
+        /**
+         * Checks if a boolean parameter is not set or <code>false</code>.
+         *
+         * @param name parameter name
+         *
+         * @return <tt>true</tt> if the parameter is either not set or
+         *         set to value <tt>false</tt>,
+         *         <tt>false</tt> if it is set to <code>true</code>
+         */
+        IsParameterFalse(
+            [in] String name,
+            [out] Boolean* isParameterFalse);
+    }
+
+    } // namespace Params
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

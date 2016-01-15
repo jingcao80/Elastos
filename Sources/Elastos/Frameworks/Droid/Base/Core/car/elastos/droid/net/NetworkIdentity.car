@@ -1,0 +1,64 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Network definition that includes strong identity. Analogous to combining
+     * {@link NetworkInfo} and an IMSI.
+     *
+     * @hide
+     */
+    interface INetworkIdentity {
+
+        /**
+         * When enabled, combine all {@link #mSubType} together under
+         * {@link #SUBTYPE_COMBINED}.
+         */
+        const Boolean COMBINE_SUBTYPE_ENABLED = TRUE;
+
+        const Int32 SUBTYPE_COMBINED = -1;
+
+        GetType(
+            [out] Int32* result);
+
+        GetSubType(
+            [out] Int32* result);
+
+        GetSubscriberId(
+            [out] String* result);
+
+        GetNetworkId(
+            [out] String* result);
+
+        GetRoaming(
+            [out] Boolean* result);
+    }
+
+    [local]
+    interface INetworkIdentityHelper {
+        /**
+         * Scrub given IMSI on production builds.
+         */
+        ScrubSubscriberId(
+            [in] String subscriberId,
+            [out] String* result);
+
+        /**
+         * Build a {@link NetworkIdentity} from the given {@link NetworkState},
+         * assuming that any mobile networks are using the current IMSI.
+         */
+        BuildNetworkIdentity(
+            [in] IContext* ctx,
+            [in] INetworkState* state,
+            [out] INetworkIdentity** result);
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

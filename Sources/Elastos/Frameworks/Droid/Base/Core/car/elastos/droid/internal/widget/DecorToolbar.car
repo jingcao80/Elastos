@@ -1,0 +1,202 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Droid.Utility.ISparseArray;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IViewGroup;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
+    interface Elastos.Droid.Widget.ISpinnerAdapter;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * Common interface for a toolbar that sits as part of the window decor.
+     * Layouts that control window decor use this as a point of interaction with different
+     * bar implementations.
+     *
+     * @hide
+     */
+     [local]
+    interface IDecorToolbar {
+        GetViewGroup(
+            [out] IViewGroup** view);
+
+        GetContext(
+            [out] IContext** context);
+
+        IsSplit(
+            [out] Boolean* isSplit);
+
+        HasExpandedActionView(
+            [out] Boolean* hasExpandedActionView);
+
+        CollapseActionView();
+
+        SetWindowCallback(
+            [in] IWindowCallback* cb);
+
+        SetWindowTitle(
+            [in] ICharSequence* title);
+
+        GetTitle(
+            [out] ICharSequence** title);
+
+        SetTitle(
+            [in] ICharSequence* title);
+
+        GetSubtitle(
+            [out] ICharSequence** title);
+
+        SetSubtitle(
+            [in] ICharSequence* subtitle);
+
+        InitProgress();
+
+        InitIndeterminateProgress();
+
+        CanSplit(
+            [out] Boolean* canSplit);
+
+        SetSplitView(
+            [in] IViewGroup* splitView);
+
+        SetSplitToolbar(
+            [in] Boolean split);
+
+        SetSplitWhenNarrow(
+            [in] Boolean splitWhenNarrow);
+
+        HasIcon(
+            [out] Boolean* hasIcon);
+
+        HasLogo(
+            [out] Boolean* hasLogo);
+
+        SetIcon(
+            [in] Int32 resId);
+
+        SetIcon(
+            [in] IDrawable* d);
+
+        SetLogo(
+            [in] Int32 resId);
+
+        SetLogo(
+            [in] IDrawable* d);
+
+        CanShowOverflowMenu(
+            [out] Boolean* canShowOverflowMenu);
+
+        IsOverflowMenuShowing(
+            [out] Boolean* isOverflowMenuShowing);
+
+        IsOverflowMenuShowPending(
+            [out] Boolean* isOverflowMenuShowPending);
+
+        ShowOverflowMenu(
+            [out] Boolean* showOverflowMenu);
+
+        HideOverflowMenu(
+            [out] Boolean* hideOverflowMenu);
+
+        SetMenuPrepared();
+
+        SetMenu(
+            [in] IMenu* menu,
+            [in] IMenuPresenterCallback* cb);
+
+        DismissPopupMenus();
+
+
+        GetDisplayOptions(
+            [out] Int32* options);
+
+        SetDisplayOptions(
+            [in] Int32 opts);
+
+        SetEmbeddedTabView(
+            [in] IScrollingTabContainerView* tabView);
+
+        HasEmbeddedTabs(
+            [out] Boolean* hasEmbeddedTabs);
+
+        IsTitleTruncated(
+            [out] Boolean* isTitleTruncated);
+
+        SetCollapsible(
+            [in] Boolean collapsible);
+
+        SetHomeButtonEnabled(
+            [in] Boolean enabled);
+
+        GetNavigationMode(
+            [out] Int32* mode);
+
+        SetNavigationMode(
+            [in] Int32 mode);
+
+        SetDropdownParams(
+            [in] ISpinnerAdapter* adapter,
+            [in] IAdapterViewOnItemSelectedListener* listener);
+
+        SetDropdownSelectedPosition(
+            [in] Int32 position);
+
+        GetDropdownSelectedPosition(
+            [out] Int32* position);
+
+        GetDropdownItemCount(
+            [out] Int32* count);
+
+        SetCustomView(
+            [in] IView* view);
+
+        GetCustomView(
+            [out] IView** view);
+
+        AnimateToVisibility(
+            [in] Int32 visibility);
+
+        SetNavigationIcon(
+            [in] IDrawable* icon);
+
+        SetNavigationIcon(
+            [in] Int32 resId);
+
+        SetNavigationContentDescription(
+            [in] ICharSequence* description);
+
+        SetNavigationContentDescription(
+            [in] Int32 resId);
+
+        SetDefaultNavigationContentDescription(
+            [in] Int32 defaultNavigationContentDescription);
+
+        SetDefaultNavigationIcon(
+            [in] IDrawable* icon);
+
+        SaveHierarchyState(
+            [in] ISparseArray* toolbarStates);
+
+        RestoreHierarchyState(
+            [in] ISparseArray* toolbarStates);
+
+    }
+
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}

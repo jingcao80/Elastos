@@ -1,0 +1,44 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IIccOpenLogicalChannelResponse {
+        /**
+         * Indicates an invalid channel.
+         */
+        const Int32 INVALID_CHANNEL = -1;
+
+        /**
+         * Possible status values returned by open channel command.
+         *
+         * STATUS_NO_ERROR: Open channel command returned successfully.
+         * STATUS_MISSING_RESOURCE: No logical channels available.
+         * STATUS_NO_SUCH_ELEMENT: AID not found on UICC.
+         * STATUS_UNKNOWN_ERROR: Unknown error in open channel command.
+         */
+        const Int32 STATUS_NO_ERROR = 1;
+        const Int32 STATUS_MISSING_RESOURCE = 2;
+        const Int32 STATUS_NO_SUCH_ELEMENT = 3;
+        const Int32 STATUS_UNKNOWN_ERROR = 4;
+
+        GetChannel(
+            [out] Int32* result);
+
+        GetStatus(
+            [out] Int32* result);
+
+        GetSelectResponse(
+            [out, callee] ArrayOf<Byte>* result);
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+
+    /**
+     * PublicKeyImpl
+     */
+    [deprecated]
+    interface IPublicKeyImpl extends Elastos.Security.IPublicKey {
+        SetAlgorithm(
+            [in] String algorithm);
+
+        SetEncoding(
+            [in] ArrayOf<Byte>* encoding);
+    }
+
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

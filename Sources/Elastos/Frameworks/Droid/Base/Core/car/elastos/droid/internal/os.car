@@ -1,0 +1,135 @@
+module
+{
+    merge("os/AtomicFile.car");
+    merge("os/BackgroundThread.car");
+    merge("os/BaseCommand.car");
+    merge("os/BatterySipper.car");
+    merge("os/BatteryStatsHelper.car");
+    merge("os/BatteryStatsImpl.car");
+    merge("os/BinderInternal.car");
+    merge("os/HandlerCaller.car");
+    merge("os/IDropBoxManagerService.car");
+    merge("os/InstallerConnection.car");
+    merge("os/IParcelFileDescriptorFactory.car");
+    merge("os/IResultReceiver.car");
+    merge("os/PowerProfile.car");
+    merge("os/ProcessCpuTracker.car");
+    merge("os/RuntimeInit.car");
+    merge("os/SamplingProfilerIntegration.car");
+    merge("os/SomeArgs.car");
+    merge("os/TransferPipe.car");
+    merge("os/Zygote.car");
+    merge("os/ZygoteInit.car");
+
+    using interface Elastos.IO.IFile;
+    using interface Elastos.Core.IComparable;
+    using interface Elastos.Core.IRunnable;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IBatteryStatsUid;
+    interface Elastos.Droid.Os.ILooper;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    class CAtomicFile {
+        constructor(
+            [in] IFile* baseName);
+
+        interface IAtomicFile;
+    }
+
+    singleton class CBackgroundThreadHelper {
+        interface IBackgroundThreadHelper;
+    }
+
+    [local, deprecated]
+    class CBatterySipper {
+        constructor(
+            [in] BatterySipperDrainType drainType,
+            [in] IBatteryStatsUid* uid,
+            [in] ArrayOf<Double>* values);
+
+        interface IBatterySipper;
+        interface IComparable;
+    }
+
+    [local]
+    class CBatteryStatsHelper {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] Boolean collectBatteryBroadcast);
+
+        constructor(
+            [in] IContext* context,
+            [in] Boolean collectBatteryBroadcast,
+            [in] Boolean wifiOnly);
+
+        interface IBatteryStatsHelper;
+    }
+
+    singleton class CBatteryStatsHelperHelper {
+        interface IBatteryStatsHelperHelper;
+    }
+
+    [local]
+    class CHandlerCaller {
+        constructor(
+            [in] IContext* ctx,
+            [in] ILooper* looper,
+            [in] IHandlerCallerCallback* cbk,
+            [in] Boolean asyncHandler,
+            [in] Boolean isStrong);
+
+        interface IHandlerCaller;
+    }
+
+    singleton class CRuntimeInit {
+        interface IRuntimeInit;
+    }
+
+    singleton class CSomeArgsHelper {
+        interface ISomeArgsHelper;
+    }
+
+    singleton class CZygoteInit {
+        interface IZygoteInit;
+    }
+
+    [local]
+    class CPowerProfile {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IPowerProfile;
+    }
+
+    class CProcessCpuTracker {
+        constructor(
+            [in] Boolean includeThreads);
+
+        interface IProcessCpuTracker;
+    }
+
+    class CTransferPipe {
+        constructor();
+
+        interface ITransferPipe;
+        interface IRunnable;
+    }
+
+    class CInstallerConnection {
+        constructor();
+
+        interface IInstallerConnection;
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

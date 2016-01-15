@@ -1,0 +1,5 @@
+
+EXPORT_HEADERS += elastos/droid/test/ActivityInstrumentationTestCase2.h
+EXPORT_HEADERS += elastos/droid/test/ActivityTestCase.h
+EXPORT_HEADERS += elastos/droid/test/ElastosTestCase.h
+EXPORT_HEADERS += elastos/droid/test/InstrumentationTestCase.h

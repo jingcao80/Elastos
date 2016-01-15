@@ -1,0 +1,83 @@
+module{
+    interface Elastos.Sql.IConnection;
+    namespace Elastosx{
+    namespace Sql{
+
+    interface IPooledConnection {
+        /**
+         * Registers the supplied {@code ConnectionEventListener} with this {@code
+         * PooledConnection}. Once registered, the {@code ConnectionEventListener}
+         * will receive {@link ConnectionEvent} events when they occur in the
+         * {@code PooledConnection}.
+         *
+         * @param theListener
+         *            an object which implements the {@code ConnectionEventListener}
+         *            interface.
+         */
+        AddConnectionEventListener(
+            [in] IConnectionEventListener* theListener);
+
+        /**
+         * Closes the connection to the database held by this {@code
+         * PooledConnection}. This method should not be called directly by
+         * application code - it is intended only for the connection pool manager
+         * component.
+         *
+         * @throws SQLException
+         *             if there is a problem accessing the database.
+         */
+        Close();
+
+        /**
+         * Creates a connection to the database. This method is typically called by
+         * the connection pool manager when an application invokes the method
+         * {@code DataSource.getConnection()} and there are no {@code
+         * PooledConnection} objects available in the connection pool.
+         *
+         * @return a {@code Connection} object.
+         * @throws SQLException
+         *             if there is a problem accessing the database.
+         */
+        GetConnection(
+            [out] IConnection** connection);
+
+        /**
+         * Unregisters the supplied {@code ConnectionEventListener} from this {@code
+         * PooledConnection}. Once unregistered, the {@code ConnectionEventListener}
+         * will no longer receive events occurring in the {@code PooledConnection}.
+         *
+         * @param theListener
+         *            an object which implements the {@code ConnectionEventListener}
+         *            interface. This object should have previously been registered
+         *            with the {@code PooledConnection} using the {@code
+         *            addConnectionEventListener} method.
+         */
+        RemoveConnectionEventListener(
+            [in] IConnectionEventListener* theListener);
+
+        /**
+         * Add a StatementEventListener to this PooledConnection object.
+         *
+         * @param listener
+         *            A StatementEventListener object which is to be added with this
+         *            PooledConnection object
+         * @since 1.6
+         */
+        AddStatementEventListener(
+            [in] IStatementEventListener* listener1);
+
+        /**
+         * Remove a StatementEventListener from this PooledConnection object.
+         *
+         * @param listener
+         *            A StatementEventListener object which is to be removed form
+         *            this PooledConnection object
+         * @since 1.6
+         */
+        RemoveStatementEventListener(
+            [in] IStatementEventListener* listener2);
+    }
+
+    } // namespace Sql
+    } // namespace Elastosx
+}

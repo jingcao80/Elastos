@@ -1,0 +1,296 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace Accessibility {
+
+    /**
+     * This class represents a state snapshot of a window for accessibility
+     * purposes. The screen content contains one or more windows where some
+     * windows can be descendants of other windows, which is the windows are
+     * hierarchically ordered. Note that there is no root window. Hence, the
+     * screen content can be seen as a collection of window trees.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [local, parcelable]
+    interface IAccessibilityWindowInfo {
+        /**
+         * Window type: This is an application window. Such a window shows UI for
+         * interacting with an application.
+         */
+        const Int32 TYPE_APPLICATION = 1;
+
+        /**
+         * Window type: This is an input method window. Such a window shows UI for
+         * inputting text such as keyboard, suggestions, etc.
+         */
+        const Int32 TYPE_INPUT_METHOD = 2;
+
+        /**
+         * Window type: This is an system window. Such a window shows UI for
+         * interacting with the system.
+         */
+        const Int32 TYPE_SYSTEM = 3;
+
+        /**
+         * Gets the type of the window.
+         *
+         * @return The type.
+         *
+         * @see #TYPE_APPLICATION
+         * @see #TYPE_INPUT_METHOD
+         * @see #TYPE_SYSTEM
+         */
+        GetType(
+            [out] Int32* type);
+
+        /**
+         * Sets the type of the window.
+         *
+         * @param The type
+         *
+         * @hide
+         */
+        SetType(
+            [in] Int32 type);
+
+        /**
+         * Gets the layer which determines the Z-order of the window. Windows
+         * with greater layer appear on top of windows with lesser layer.
+         *
+         * @return The window layer.
+         */
+        GetLayer(
+            [out] Int32* layer);
+
+        /**
+         * Sets the layer which determines the Z-order of the window. Windows
+         * with greater layer appear on top of windows with lesser layer.
+         *
+         * @param The window layer.
+         *
+         * @hide
+         */
+        SetLayer(
+            [in] Int32 layer);
+
+        /**
+         * Gets the root node in the window's hierarchy.
+         *
+         * @return The root node.
+         */
+        GetRoot(
+            [out] IAccessibilityNodeInfo** info);
+
+        /**
+         * Gets the parent window if such.
+         *
+         * @return The parent window.
+         */
+        GetParent(
+            [out] IAccessibilityWindowInfo** info);
+
+        /**
+         * Sets the parent window id.
+         *
+         * @param parentId The parent id.
+         *
+         * @hide
+         */
+        SetParentId(
+            [in] Int32 parentId);
+
+        /**
+         * Gets the unique window id.
+         *
+         * @return windowId The window id.
+         */
+        GetId(
+            [out] Int32* id);
+
+        /**
+         * Sets the unique window id.
+         *
+         * @param windowId The window id.
+         *
+         * @hide
+         */
+        SetId(
+            [in] Int32 id);
+
+        /**
+         * Sets the unique id of the IAccessibilityServiceConnection over which
+         * this instance can send requests to the system.
+         *
+         * @param connectionId The connection id.
+         *
+         * @hide
+         */
+        SetConnectionId(
+            [in] Int32 connectionId);
+
+        /**
+         * Gets the bounds of this window in the screen.
+         *
+         * @param outBounds The out window bounds.
+         */
+        GetBoundsInScreen(
+            [in] IRect* outBounds);
+
+        /**
+         * Sets the bounds of this window in the screen.
+         *
+         * @param bounds The out window bounds.
+         *
+         * @hide
+         */
+        SetBoundsInScreen(
+            [in] IRect* bounds);
+
+        /**
+         * Gets if this window is active. An active window is the one
+         * the user is currently touching or the window has input focus
+         * and the user is not touching any window.
+         *
+         * @return Whether this is the active window.
+         */
+        IsActive(
+            [out] Boolean* active);
+
+        /**
+         * Sets if this window is active, which is this is the window
+         * the user is currently touching or the window has input focus
+         * and the user is not touching any window.
+         *
+         * @param Whether this is the active window.
+         *
+         * @hide
+         */
+        SetActive(
+            [in] Boolean active);
+
+        /**
+         * Gets if this window has input focus.
+         *
+         * @return Whether has input focus.
+         */
+        IsFocused(
+            [out] Boolean* focused);
+
+        /**
+         * Sets if this window has input focus.
+         *
+         * @param Whether has input focus.
+         *
+         * @hide
+         */
+        SetFocused(
+            [in] Boolean focused);
+
+        /**
+         * Gets if this window has accessibility focus.
+         *
+         * @return Whether has accessibility focus.
+         */
+        IsAccessibilityFocused(
+            [out] Boolean* focused);
+
+        /**
+         * Sets if this window has accessibility focus.
+         *
+         * @param Whether has accessibility focus.
+         *
+         * @hide
+         */
+        SetAccessibilityFocused(
+            [in] Boolean focused);
+
+        /**
+         * Gets the number of child windows.
+         *
+         * @return The child count.
+         */
+        GetChildCount(
+            [out] Int32* count);
+
+        /**
+         * Gets the child window at a given index.
+         *
+         * @param index The index.
+         * @return The child.
+         */
+        GetChild(
+            [in] Int32 index,
+            [out] IAccessibilityWindowInfo** info);
+
+        /**
+         * Adds a child window.
+         *
+         * @param childId The child window id.
+         *
+         * @hide
+         */
+        AddChild(
+            [in] Int32 childId);
+
+        /**
+         * Return an instance back to be reused.
+         * <p>
+         * <strong>Note:</strong> You must not touch the object after calling this function.
+         * </p>
+         *
+         * @throws IllegalStateException If the info is already recycled.
+         */
+        Recycle();
+
+        /**
+         * Checks whether this window changed. The argument should be
+         * another state of the same window, which is have the same id
+         * and type as they never change.
+         *
+         * @param other The new state.
+         * @return Whether something changed.
+         *
+         * @hide
+         */
+        Changed(
+            [in] IAccessibilityWindowInfo* other,
+            [out] Boolean* result);
+    }
+
+    [local]
+    interface IAccessibilityWindowInfoHelper {
+        /**
+         * Returns a cached instance if such is available or a new one is
+         * created.
+         *
+         * @return An instance.
+         */
+        Obtain(
+            [out] IAccessibilityWindowInfo** info);
+
+        /**
+         * Returns a cached instance if such is available or a new one is
+         * created. The returned instance is initialized from the given
+         * <code>info</code>.
+         *
+         * @param info The other info.
+         * @return An instance.
+         */
+        Obtain(
+            [in] IAccessibilityWindowInfo* info,
+            [out] IAccessibilityWindowInfo** cloneInfo);
+    }
+
+    } // namespace Accessibility
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,5 @@
+module
+{
+    merge("appwidget/IAppWidgetHost.car");
+    merge("appwidget/IAppWidgetService.car");
+}

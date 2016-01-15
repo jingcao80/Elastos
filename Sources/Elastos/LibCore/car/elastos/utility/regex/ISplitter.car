@@ -1,0 +1,28 @@
+module
+{
+    interface Elastos.Utility.Regex.IPattern;
+
+    namespace Elastos{
+    namespace Utility{
+    namespace Regex{
+
+    interface ISplitter{
+
+        FastSplit(
+           [in] String regularExpression,
+           [in] String input,
+           [in] Int32 limit,
+           [out, callee] ArrayOf<String>* array);
+
+        Split(
+           [in] IPattern* pattern,
+           [in] String regularExpression,
+           [in] String input,
+           [in] Int32 limit,
+           [out, callee] ArrayOf<String>* array);
+    }
+
+    } // namespace Regex
+    } // namespace Utility
+    } // namespace Elastos
+}

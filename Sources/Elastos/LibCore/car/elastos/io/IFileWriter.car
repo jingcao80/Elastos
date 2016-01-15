@@ -1,0 +1,28 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+    * A specialized Writer that writes to a file in the file system. All write requests
+    * made by calling methods in this class are directly forwarded to the equivalent
+    * function of the underlying operating system. Since this may induce some
+    * performance penalty, in particular if many small write requests are made, a
+    * FileWriter is often wrapped by a BufferedWriter.
+    * @sa BufferedWriter
+    * @sa FileReader
+    * @implement Elastos.IO.IOutputStreamReader
+    */
+
+     /**
+     * @Involve
+     * interface Elastos.Core.IAppendable;
+     * interface IWriter;
+     * interface IOutputStreamWriter;
+     */
+    interface IFileWriter {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

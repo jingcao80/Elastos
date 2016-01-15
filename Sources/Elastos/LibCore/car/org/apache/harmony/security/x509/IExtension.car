@@ -1,0 +1,80 @@
+
+module
+{
+    interface Elastos.Core.IStringBuilder;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+    interface Org.Apache.Harmony.Security.X509.IBasicConstraints;
+    interface Org.Apache.Harmony.Security.X509.IExtensionValue;
+    interface Org.Apache.Harmony.Security.X509.IKeyUsage;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the Extension part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  Extension  ::=  SEQUENCE  {
+     *       extnID      OBJECT IDENTIFIER,
+     *       critical    BOOLEAN DEFAULT FALSE,
+     *       extnValue   OCTET STRING
+     *  }
+     * </pre>
+     *
+     * @ Involve
+     * interface Elastos.Security.Cert.IExtension
+     */
+    interface IExtension {
+        // critical constants
+        const Boolean CRITICAL = TRUE;
+        const Boolean NON_CRITICAL = FALSE;
+
+        /**
+         * Returns the raw (undecoded octet string) value of extnValue
+         * field of the structure.
+         */
+        GetRawExtnValue(
+            [out, callee] ArrayOf<Byte>* rawExtnValue);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 Extension value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encode);
+
+        GetDecodedExtensionValue(
+            [out] IExtensionValue** extensionValue);
+
+        GetKeyUsageValue(
+            [out] IKeyUsage** usageValue);
+
+        GetBasicConstraintsValue(
+            [out] IBasicConstraints** basicConstrainsValue);
+
+        DumpValue(
+            [in] IStringBuilder* sb,
+            [in] String prefix);
+    }
+
+    interface IExtensionHelper {
+        /**
+         * X.509 Extension encoder/decoder.
+         */
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

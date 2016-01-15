@@ -1,0 +1,169 @@
+module
+{
+    interface Elastos.Core.IClassLoader;
+    interface Elastos.Utility.IGregorianCalendar;
+    interface Elastos.Math.IBigDecimal;
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Datatype {
+
+    interface IDatatypeFactory {
+
+        const String DATATYPEFACTORY_PROPERTY = "javax.xml.datatype.DatatypeFactory";
+        const String DATATYPEFACTORY_IMPLEMENTATION_CLASS = "org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl";
+
+        NewDuration(
+            [in] String lexicalRepresentation,
+            [out] IDuration** duration);
+
+        NewDuration(
+            [in] Int64 durationInMilliSeconds,
+            [out] IDuration** duration);
+
+        NewDuration(
+            [in] Boolean isPositive,
+            [in] IBigInteger* years,
+            [in] IBigInteger* months,
+            [in] IBigInteger* days,
+            [in] IBigInteger* hours,
+            [in] IBigInteger* minutes,
+            [in] IBigDecimal* seconds,
+            [out] IDuration** duration);
+
+        NewDuration(
+            [in] Boolean isPositive,
+            [in] Int32 years,
+            [in] Int32 months,
+            [in] Int32 days,
+            [in] Int32 hours,
+            [in] Int32 minutes,
+            [in] Int32 seconds,
+            [out] IDuration** duration);
+
+        NewDurationDayTime(
+            [in] String lexicalRepresentation,
+            [out] IDuration** duration);
+
+        NewDurationDayTime(
+            [in] Int64 durationInMilliseconds,
+            [out] IDuration** duration);
+
+        NewDurationDayTime(
+            [in] Boolean isPositive,
+            [in] IBigInteger* day,
+            [in] IBigInteger* hour,
+            [in] IBigInteger* minute,
+            [in] IBigInteger* second,
+            [out] IDuration** duration);
+
+        NewDurationDayTime(
+            [in] Boolean isPositive,
+            [in] Int32 day,
+            [in] Int32 hour,
+            [in] Int32 minute,
+            [in] Int32 second,
+            [out] IDuration** duration);
+
+        NewDurationYearMonth(
+            [in] String lexicalRepresentation,
+            [out] IDuration** duration);
+
+        NewDurationYearMonth(
+            [in] Int64 durationInMilliseconds,
+            [out] IDuration** duration);
+
+        NewDurationYearMonth(
+            [in] Boolean isPositive,
+            [in] IBigInteger* year,
+            [in] IBigInteger* month,
+            [out] IDuration** duration);
+
+        NewDurationYearMonth(
+            [in] Boolean isPositive,
+            [in] Int32 year,
+            [in] Int32 month,
+            [out] IDuration** duration);
+
+        NewXMLGregorianCalendar(
+            [out] IXMLGregorianCalendar** rst);
+
+        NewXMLGregorianCalendar(
+            [in] String lexicalRepresentation,
+            [out] IXMLGregorianCalendar** rst);
+
+        NewXMLGregorianCalendar(
+            [in] IGregorianCalendar* cal,
+            [out] IXMLGregorianCalendar** rst);
+
+        NewXMLGregorianCalendar(
+            [in] IBigInteger* year,
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int32 hour,
+            [in] Int32 minute,
+            [in] Int32 second,
+            [in] IBigDecimal* fractionalSecond,
+            [in] Int32 timezone,
+            [out] IXMLGregorianCalendar** rst);
+
+        NewXMLGregorianCalendar(
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int32 hour,
+            [in] Int32 minute,
+            [in] Int32 second,
+            [in] Int32 millisecond,
+            [in] Int32 timezone,
+            [out] IXMLGregorianCalendar** rst);
+
+        NewXMLGregorianCalendarDate(
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 day,
+            [in] Int32 timezone,
+            [out] IXMLGregorianCalendar** rst);
+
+        NewXMLGregorianCalendarTime(
+            [in] Int32 hours,
+            [in] Int32 minutes,
+            [in] Int32 seconds,
+            [in] Int32 timezone,
+            [out] IXMLGregorianCalendar** rst);
+
+        NewXMLGregorianCalendarTime(
+            [in] Int32 hours,
+            [in] Int32 minutes,
+            [in] Int32 seconds,
+            [in] IBigDecimal* fractionalSecond,
+            [in] Int32 timezone,
+            [out] IXMLGregorianCalendar** rst);
+
+        NewXMLGregorianCalendarTime(
+            [in] Int32 hours,
+            [in] Int32 minutes,
+            [in] Int32 seconds,
+            [in] Int32 milliseconds,
+            [in] Int32 timezone,
+            [out] IXMLGregorianCalendar** rst);
+    }
+
+    [local]
+    interface IDatatypeFactoryHelper {
+
+        NewInstance(
+            [out] IDatatypeFactory** instance);
+
+        NewInstance(
+            [in] String factoryClassName,
+            [in] IClassLoader* classLoader,
+            [out] IDatatypeFactory** instance);
+    }
+
+    } // namespace Datatype
+    } // namespace Xml
+    } // namespace Elastosx
+}
+

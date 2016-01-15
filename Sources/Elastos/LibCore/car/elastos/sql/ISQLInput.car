@@ -1,0 +1,353 @@
+module
+{
+    interface Elastos.Math.IBigDecimal;
+    interface Elastos.IO.IReader;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.Net.IURL;
+
+    namespace Elastos {
+    namespace Sql {
+
+    interface ISQLInput {
+        /**
+         * Returns the next attribute in the stream in the form of a {@code String}.
+         *
+         * @return the next attribute. {@code null} if the value is SQL {@code NULL}.
+         *
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadString(
+            [out] String* str);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code boolean}
+         * .
+         *
+         * @return the next attribute as a {@code boolean}. {@code false} if the
+         *         value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadBoolean(
+            [out] Boolean* value);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code byte}.
+         *
+         * @return the next attribute as a {@code byte}. 0 if the value is SQL
+         *         {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadByte(
+            [out] Byte* value);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code short}.
+         *
+         * @return the next attribute as a {@code short}. 0 if the value is SQL
+         *         {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadShort(
+            [out] Int16* value);
+
+        /**
+         * Returns the next attribute in the stream in the form of an {@code int}.
+         *
+         * @return the next attribute as an {@code int}. 0 if the value is SQL
+         *         {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadInt(
+            [out] Int32* value);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code long}.
+         *
+         * @return the next attribute as a {@code long}. 0 if the value is SQL
+         *         {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadLong(
+            [out] Int64* value);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code float}.
+         *
+         * @return the next attribute as a {@code float}. 0 if the value is SQL
+         *         {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadFloat(
+            [out] Float* value);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code double}.
+         *
+         * @return the next attribute as a {@code double}. 0 if the value is SQL
+         *         {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadDouble(
+            [out] Double* value);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.math.BigDecimal}.
+         *
+         * @return the attribute as a {@code java.math.BigDecimal}. {@code null} if
+         *         the read returns SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see java.math.BigDecimal
+         */
+        ReadBigDecimal(
+            [out] IBigDecimal** bigDecimal);
+
+        /**
+         * Returns the next attribute in the stream in the form of a byte array.
+         *
+         * @return the attribute as a byte array. {@code null} if the read returns
+         *         SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadBytes(
+            [out, callee] ArrayOf<Byte>* array);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.Date}.
+         *
+         * @return the next attribute as a {@code java.sql.Date}. {@code null} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see Date
+         */
+        ReadDate(
+            [out] ISQLDate** date);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.Time}.
+         *
+         * @return the attribute as a {@code java.sql.Time}. {@code null} if the
+         *         read returns SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see Time
+         */
+        ReadTime(
+            [out] ITime** ti);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.Timestamp}.
+         *
+         * @return the attribute as a {@code java.sql.Timestamp}. {@code null} if
+         *         the read returns SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see Timestamp
+         */
+        ReadTimestamp(
+            [out] ITimestamp** timestamp);
+
+        /**
+         * Returns the next attribute in the stream in the form of a Unicode
+         * character stream embodied as a {@code java.io.Reader}.
+         *
+         * @return the next attribute as a {@code java.io.Reader}. {@code null} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see java.io.Reader
+         */
+        ReadCharacterStream(
+            [out] IReader** reader);
+
+        /**
+         * Returns the next attribute in the stream in the form of an ASCII
+         * character stream embodied as a {@code java.io.InputStream}.
+         *
+         * @return the next attribute as a {@code java.io.InputStream}. {@code null}
+         *         if the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see java.io.InputStream
+         */
+        ReadAsciiStream(
+            [out] IInputStream** is);
+
+        /**
+         * Returns the next attribute in the stream in the form of a stream of bytes
+         * embodied as a {@code java.io.InputStream}.
+         *
+         * @return the next attribute as a {@code java.io.InputStream}. {@code null}
+         *         if the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see java.io.InputStream
+         */
+        ReadBinaryStream(
+            [out] IInputStream** is);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.lang.Object}.
+         * <p>
+         * The type of the {@code Object} returned is determined by the type mapping
+         * for this JDBC driver, including any customized mappings, if present. A
+         * type map is given to the {@code SQLInput} by the JDBC driver before the
+         * {@code SQLInput} is given to the application.
+         * <p>
+         * If the attribute is an SQL structured or distinct type, its SQL type is
+         * determined. If the stream's type map contains an element for that SQL
+         * type, the driver creates an object for the relevant type and invokes the
+         * method {@code SQLData.readSQL} on it, which reads supplementary data from
+         * the stream using whichever protocol is defined for that method.
+         *
+         * @return the next attribute as an Object. {@code null} if the value is SQL
+         *         {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadObject(
+            [out] IInterface** obj);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.Ref}.
+         *
+         * @return the next attribute as a {@code java.sql.Ref}. {@code null} if the
+         *         value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see Ref
+         */
+        ReadRef(
+            [out] IRef** ref);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.Blob}.
+         *
+         * @return the next attribute as a {@code java.sql.Blob}. {@code null} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadBlob(
+            [out] IBlob** blob);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.Clob}.
+         *
+         * @return the next attribute as a {@code java.sql.Clob}. {@code null} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see Clob
+         */
+        ReadClob(
+            [out] IClob** clob);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.Array}.
+         *
+         * @return the next attribute as an {@code Array}. {@code null} if the value
+         *         is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see Array
+         */
+        ReadArray(
+            [out] IArray** array);
+
+        /**
+         * Reports whether the last value read was SQL {@code NULL}.
+         *
+         * @return {@code true} if the last value read was SQL {@code NULL}, {@code
+         *         false} otherwise.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        WasNull(
+            [out] Boolean* wasNull);
+
+        /**
+         * Reads the next attribute in the stream (SQL DATALINK value) and returns
+         * it as a {@code java.net.URL} object.
+         *
+         * @return the next attribute as a {@code java.net.URL}. {@code null} if the
+         *         value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         * @see java.net.URL
+         */
+        ReadURL(
+            [out] IURL** url);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.NClob}.
+         *
+         * @return the next attribute as a {@code java.sql.NClob}. {@code null} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadNClob(
+            [out] INClob** nclob);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.lang.String}. Used for the NCHAR, NVARCHAR and LONGNVARCHAR types.
+         * See {@link #readString} otherwise.
+         *
+         * @return the next attribute as a {@code java.lang.String}. {@code null} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadNString(
+            [out] String* str);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.SQLXML}.
+         *
+         * @return the next attribute as a {@code java.sql.SQLXML}. {@code null} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadSQLXML(
+            [out] ISQLXML** sqlxml);
+
+        /**
+         * Returns the next attribute in the stream in the form of a {@code
+         * java.sql.RowId}. Used for the ROWID type.
+         *
+         * @return the next attribute as a {@code java.sql.RowId}. {@code null} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        ReadRowId(
+            [out] IRowId** rowid);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

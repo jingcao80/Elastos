@@ -1,0 +1,123 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+     *The base class for all writers. A writer is a means of writing data to a target in a character-wise
+     *manner. Most output streams expect the flush() method to be called before closing the stream, to
+     *ensure all data is actually written out.
+     *<p>
+     *This abstract class does not provide a fully working implementation, so it needs to be subclassed,
+     *and at least the write(char[], int, int), close() and flush() methods needs to be overridden.
+     *Overriding some of the non-abstract methods is also often advised, since it might result in higher
+     *efficiency.
+
+     *Many specialized readers for purposes like reading from a file already exist in this package.
+     *
+     *@sa Reader
+     *@implements Elastos.IO.Elastos.Core.IAppendable
+     */
+     /**
+     * @Involve
+     * interface Elastos.Core.IAppendable;
+     * interface ICloseable;
+     * interface IFlushable;
+     */
+    [deprecated]
+    interface IWriter {
+        /**
+         * Writes one character to the target. Only the two least significant bytes
+         * of the integer oneChar are written.
+         *
+         * @param oneChar
+         *            the character to write to the target.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if this writer is closed or another I/O error occurs.
+         */
+        Write(
+            [in] Int32 oneChar32);
+
+        /**
+         * Writes the entire character buffer {buf} to the target.
+         *
+         * @param buf
+         *            the non-null array containing characters to write.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if this writer is closed or another I/O error occurs.
+         */
+        Write(
+            [in] ArrayOf<Char32>* buffer);
+
+        /**
+         * Writes {count} characters starting at {offset} in {buf}
+         * to the target.
+         *
+         * @param buf
+         *            the non-null character array to write.
+         * @param offset
+         *            the index of the first character in {buf} to write.
+         * @param count
+         *            the maximum number of characters to write.
+         *
+         *  @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IndexOutOfBoundsException | if {offset < 0} or {count < 0}, or if {offset + count} is greater than the size of buf.
+         * IOException | if this writer is closed or another I/O error occurs.
+         */
+
+        Write(
+            [in] ArrayOf<Char32>* buffer,
+            [in] Int32 offset,
+            [in] Int32 count);
+
+        /**
+         * Writes the characters from the specified string to the target.
+         *
+         * @param str
+         *            the non-null string containing the characters to write.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if this writer is closed or another I/O error occurs.
+         */
+        Write(
+            [in] String str);
+
+        /**
+         * Writes {count} characters from {str} starting at {offset} to the target.
+         *
+         * @param str
+         *            the non-null string containing the characters to write.
+         * @param offset
+         *            the index of the first character in {str} to write.
+         * @param count
+         *            the number of characters from {str} to write.
+         * @return ECode = NOERROR(0) if success, elas as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException |  if this writer is closed or another I/O error occurs.
+         * IndexOutOfBoundsException | if {offset < 0} or {count < 0}, or if {offset + count} is greater than the length of {str}.
+         */
+        Write(
+            [in] String str,
+            [in] Int32 offset,
+            [in] Int32 count);
+
+        /**
+         * Returns true if this writer has encountered and suppressed an error. Used
+         * by PrintWriters as an alternative to checked exceptions.
+         */
+        CheckError(
+            [out] Boolean* hasError);
+
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

@@ -1,0 +1,20 @@
+
+TARGET_NAME= params
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+SOURCES = CConnConnectionParamBean.cpp
+SOURCES += CConnManagerParamBean.cpp
+SOURCES += ConnManagerParams.cpp
+SOURCES += CConnManagerParams.cpp
+SOURCES += CConnPerRouteBean.cpp
+SOURCES += CConnRouteParamBean.cpp
+SOURCES += ConnRouteParams.cpp
+SOURCES += CConnRouteParams.cpp

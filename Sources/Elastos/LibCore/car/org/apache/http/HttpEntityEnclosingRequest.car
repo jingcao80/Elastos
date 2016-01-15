@@ -1,0 +1,54 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpEntity;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+
+    /**
+     * A request with an entity.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 618017 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IHttpRequest;
+     */
+    interface IHttpEntityEnclosingRequest {
+
+        /**
+         * Tells if this request should use the expect-continue handshake.
+         * The expect continue handshake gives the server a chance to decide
+         * whether to accept the entity enclosing request before the possibly
+         * lengthy entity is sent across the wire.
+         * @return true if the expect continue handshake should be used, false if
+         * not.
+         */
+        ExpectContinue(
+            [out] Boolean* result);
+
+        /**
+         * Hands the entity to the request.
+         * @param entity the entity to send.
+         */
+        SetEntity(
+            [in] IHttpEntity* entity);
+
+        GetEntity(
+            [out] IHttpEntity** entity);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

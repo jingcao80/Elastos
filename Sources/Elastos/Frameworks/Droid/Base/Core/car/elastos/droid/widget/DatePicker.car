@@ -1,0 +1,330 @@
+
+module
+{
+    using interface Elastos.Utility.ICalendar;
+    interface Elastos.Droid.Widget.IDatePicker;
+    interface Elastos.Droid.Widget.ICalendarView;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityNodeInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * A callback interface for updating input validity when the date picker
+     * when included into a dialog.
+     *
+     * @hide
+     */
+    interface IDatePickerValidationCallback {
+        OnValidationChanged(
+            [in] Boolean valid);
+    }
+
+    /**
+     * The callback used to indicate the user changes\d the date.
+     */
+    interface IDatePickerOnDateChangedListener {
+        /**
+         * Called upon a date change.
+         *
+         * @param view The view associated with this listener.
+         * @param year The year that was set.
+         * @param monthOfYear The month that was set (0-11) for compatibility
+         *            with {@link java.util.Calendar}.
+         * @param dayOfMonth The day of the month that was set.
+         */
+        OnDateChanged(
+            [in] IDatePicker* view,
+            [in] Int32 year,
+            [in] Int32 monthOfYear,
+            [in] Int32 dayOfMonth);
+    }
+
+    /**
+     * A delegate interface that defined the public API of the DatePicker. Allows different
+     * DatePicker implementations. This would need to be implemented by the DatePicker delegates
+     * for the real behavior.
+     *
+     * @hide
+     */
+     [local]
+    interface IDatePickerDelegate {
+        Init(
+            [in] Int32 year,
+            [in] Int32 monthOfYear,
+            [in] Int32 dayOfMonth,
+            [in] IDatePickerOnDateChangedListener* onDateChangedListener);
+
+        UpdateDate(
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 dayOfMonth);
+
+        GetYear(
+            [out] Int32* year);
+
+        GetMonth(
+            [out] Int32* month);
+
+        GetDayOfMonth(
+            [out] Int32* dayOfMonth);
+
+        SetFirstDayOfWeek(
+            [in] Int32 firstDayOfWeek);
+
+        GetFirstDayOfWeek(
+            [out] Int32* firstDayOfWeek);
+
+        SetMinDate(
+            [in] Int64 minDate);
+
+        GetMinDate(
+            [out] ICalendar** calendar);
+
+        SetMaxDate(
+            [in] Int64 maxDate);
+
+        GetMaxDate(
+            [out] ICalendar** calendar);
+
+        SetEnabled(
+            [in] Boolean enabled);
+
+        IsEnabled(
+            [out] Boolean* enabled);
+
+        GetCalendarView(
+            [out] ICalendarView** calendarView);
+
+        SetCalendarViewShown(
+            [in] Boolean shown);
+
+        GetCalendarViewShown(
+            [out] Boolean* shown);
+
+        SetSpinnersShown(
+            [in] Boolean shown);
+
+        GetSpinnersShown(
+            [out] Boolean* shown);
+
+        SetValidationCallback(
+            [in] IDatePickerValidationCallback* cb);
+
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        OnSaveInstanceState(
+            [in] IParcelable* superState,
+            [out] IParcelable** state);
+
+        OnRestoreInstanceState(
+            [in] IParcelable* state);
+
+        DispatchPopulateAccessibilityEvent(
+            [in] IAccessibilityEvent* event,
+            [out] Boolean* rst);
+
+        OnPopulateAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        OnInitializeAccessibilityEvent(
+            [in] IAccessibilityEvent* event);
+
+        OnInitializeAccessibilityNodeInfo(
+            [in] IAccessibilityNodeInfo* info);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IFrameLayout
+     */
+    interface IDatePicker {
+        /**
+         * Gets the minimal date supported by this {@link DatePicker} in
+         * milliseconds since January 1, 1970 00:00:00 in
+         * {@link TimeZone#getDefault()} time zone.
+         * <p>
+         * Note: The default minimal date is 01/01/1900.
+         * <p>
+         *
+         * @return The minimal supported date.
+         */
+        GetMinDate(
+            [out] Int64* minDate);
+
+        /**
+         * Sets the minimal date supported by this {@link NumberPicker} in
+         * milliseconds since January 1, 1970 00:00:00 in
+         * {@link TimeZone#getDefault()} time zone.
+         *
+         * @param minDate The minimal supported date.
+         */
+        SetMinDate(
+            [in] Int64 minDate);
+
+        /**
+         * Gets the maximal date supported by this {@link DatePicker} in
+         * milliseconds since January 1, 1970 00:00:00 in
+         * {@link TimeZone#getDefault()} time zone.
+         * <p>
+         * Note: The default maximal date is 12/31/2100.
+         * <p>
+         *
+         * @return The maximal supported date.
+         */
+        GetMaxDate(
+            [out] Int64* maxDate);
+
+        /**
+         * Sets the maximal date supported by this {@link DatePicker} in
+         * milliseconds since January 1, 1970 00:00:00 in
+         * {@link TimeZone#getDefault()} time zone.
+         *
+         * @param maxDate The maximal supported date.
+         */
+        SetMaxDate(
+            [in] Int64 maxDate);
+
+        /**
+         * Sets the callback that indicates the current date is valid.
+         *
+         * @param callback the callback, may be null
+         * @hide
+         */
+        SetValidationCallback(
+            [in] IDatePickerValidationCallback* cb);
+
+        /**
+         * Gets whether the {@link CalendarView} is shown.
+         *
+         * @return True if the calendar view is shown.
+         * @see #getCalendarView()
+         */
+        GetCalendarViewShown(
+            [out] Boolean* shown);
+
+        /**
+         * Gets the {@link CalendarView}.
+         *
+         * @return The calendar view.
+         * @see #getCalendarViewShown()
+         */
+        GetCalendarView (
+            [out] ICalendarView** view);
+
+        /**
+         * Sets whether the {@link CalendarView} is shown.
+         *
+         * @param shown True if the calendar view is to be shown.
+         */
+        SetCalendarViewShown(
+            [in] Boolean shown);
+
+        /**
+         * Gets whether the spinners are shown.
+         *
+         * @return True if the spinners are shown.
+         */
+        GetSpinnersShown(
+            [out] Boolean* shown);
+
+        /**
+         * Sets whether the spinners are shown.
+         *
+         * @param shown True if the spinners are to be shown.
+         */
+        SetSpinnersShown(
+            [in] Boolean shown);
+
+        /**
+         * Updates the current date.
+         *
+         * @param year The year.
+         * @param month The month which is <strong>starting from zero</strong>.
+         * @param dayOfMonth The day of the month.
+         */
+        UpdateDate(
+            [in] Int32 year,
+            [in] Int32 month,
+            [in] Int32 dayOfMonth);
+
+        /**
+         * Initialize the state. If the provided values designate an inconsistent
+         * date the values are normalized before updating the spinners.
+         *
+         * @param year The initial year.
+         * @param monthOfYear The initial month <strong>starting from zero</strong>.
+         * @param dayOfMonth The initial day of the month.
+         * @param onDateChangedListener How user is notified date is changed by
+         *            user, can be null.
+         */
+        Init(
+            [in] Int32 year,
+            [in] Int32 monthOfYear,
+            [in] Int32 dayOfMonth,
+            [in] IDatePickerOnDateChangedListener* onDateChangedListener);
+
+        /**
+         * @return The selected year.
+         */
+        GetYear(
+            [out] Int32* year);
+
+        /**
+         * @return The selected month.
+         */
+        GetMonth(
+            [out] Int32* month);
+
+        /**
+         * @return The selected day of month.
+         */
+        GetDayOfMonth(
+            [out] Int32* day);
+
+        /**
+         * Sets the first day of week.
+         *
+         * @param firstDayOfWeek The first day of the week conforming to the
+         *            {@link CalendarView} APIs.
+         * @see Calendar#SUNDAY
+         * @see Calendar#MONDAY
+         * @see Calendar#TUESDAY
+         * @see Calendar#WEDNESDAY
+         * @see Calendar#THURSDAY
+         * @see Calendar#FRIDAY
+         * @see Calendar#SATURDAY
+         *
+         * @attr ref android.R.styleable#DatePicker_firstDayOfWeek
+         */
+        SetFirstDayOfWeek(
+            [in] Int32 firstDayOfWeek);
+
+        /**
+         * Gets the first day of week.
+         *
+         * @return The first day of the week conforming to the {@link CalendarView}
+         *         APIs.
+         * @see Calendar#SUNDAY
+         * @see Calendar#MONDAY
+         * @see Calendar#TUESDAY
+         * @see Calendar#WEDNESDAY
+         * @see Calendar#THURSDAY
+         * @see Calendar#FRIDAY
+         * @see Calendar#SATURDAY
+         *
+         * @attr ref android.R.styleable#DatePicker_firstDayOfWeek
+         */
+        GetFirstDayOfWeek(
+            [out] Int32* firstDayOfWeek);
+    }
+
+    }// namespace Widget
+    }// namespace Droid
+    }// namespace Elastos
+
+}

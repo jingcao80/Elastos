@@ -1,0 +1,335 @@
+module
+{
+    interface Elastos.Math.IBigDecimal;
+    interface Elastos.IO.IReader;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.Net.IURL;
+    interface Elastos.Sql.ISQLData;
+
+    namespace Elastos {
+    namespace Sql {
+
+    interface ISQLOutput {
+        /**
+         * Write a {@code String} value into the output stream.
+         *
+         * @param theString
+         *            the {@code String} to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteString(
+            [in] String theString);
+
+        /**
+         * Write a {@code boolean} value into the output stream.
+         *
+         * @param theFlag
+         *            the {@code boolean} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteBoolean(
+            [in] Boolean theFlag);
+
+        /**
+         * Write a {@code byte} value into the output stream.
+         *
+         * @param theByte
+         *            the {@code byte} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteByte(
+            [in] Byte theByte);
+
+        /**
+         * Write a {@code short} value into the output stream.
+         *
+         * @param theShort
+         *            the {@code short} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteShort(
+            [in] Int16 theShort);
+
+        /**
+         * Write an {@code int} value into the output stream.
+         *
+         * @param theInt
+         *            the {@code int} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteInt(
+           [in] Int32 theInt);
+
+        /**
+         * Write a {@code long} value into the output stream.
+         *
+         * @param theLong
+         *            the {@code long} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteLong(
+            [in] Int64 theLong);
+
+        /**
+         * Write a {@code float} value into the output stream.
+         *
+         * @param theFloat
+         *            the {@code float} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteFloat(
+            [in] Float theFloat);
+
+        /**
+         * Write a {@code double} value into the output stream.
+         *
+         * @param theDouble
+         *            the {@code double} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteDouble(
+            [in] Double theDouble);
+
+        /**
+         * Write a {@code java.math.BigDecimal} value into the output stream.
+         *
+         * @param theBigDecimal
+         *            the {@code BigDecimal} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteBigDecimal(
+            [in] IBigDecimal* theBigDecimal);
+
+        /**
+         * Write an array of bytes into the output stream.
+         *
+         * @param theBytes
+         *            the array of bytes to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteBytes(
+            [in] ArrayOf<Byte> theBytes);
+
+        /**
+         * Write a {@code java.sql.Date} value into the output stream.
+         *
+         * @param theDate
+         *            the {@code Date} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see Date
+         */
+        WriteDate(
+            [in] ISQLDate* theDate);
+
+        /**
+         * Write a {@code java.sql.Time} value into the output stream.
+         *
+         * @param theTime
+         *            the {@code Time} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see Time
+         */
+        WriteTime(
+            [in] ITime* theTime);
+
+        /**
+         * Write a {@code java.sql.Timestamp} value into the output stream.
+         *
+         * @param theTimestamp
+         *            the {@code Timestamp} value to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see Timestamp
+         */
+        WriteTimestamp(
+            [in] ITimestamp* theTimestamp);
+
+        /**
+         * Write a stream of unicode characters into the output stream.
+         *
+         * @param theStream
+         *            the stream of unicode characters to write, as a {@code
+         *            java.io.Reader} object.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteCharacterStream(
+            [in] IReader* theStream);
+
+        /**
+         * Write a stream of ASCII characters into the output stream.
+         *
+         * @param theStream
+         *            the stream of ASCII characters to write, as a {@code
+         *            java.io.InputStream} object
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteAsciiStream(
+            [in] IInputStream* theStream);
+
+        /**
+         * Write a stream of uninterpreted bytes into the output stream.
+         *
+         * @param theStream
+         *            the stream of bytes to write, as a {@code java.io.InputStream}
+         *            object
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteBinaryStream(
+            [in] IInputStream* theStream);
+
+        /**
+         * Write an {@code SQLData} object into the output stream.
+         * <p>
+         * If the {@code SQLData} object is null, writes {@code NULL} to the stream.
+         * <p>
+         * Otherwise, calls the {@code SQLData.writeSQL} method of the object, which
+         * writes the object's attributes to the stream by calling the appropriate
+         * SQLOutput writer methods for each attribute, in order. The order of the
+         * attributes is the order they are listed in the SQL definition of the User
+         * Defined Type.
+         *
+         * @param theObject
+         *            the {@code SQLData} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see SQLData
+         */
+        WriteObject(
+            [in] ISQLData* theObject);
+
+        /**
+         * Write an SQL {@code Ref} value into the output stream.
+         *
+         * @param theRef
+         *            the {@code java.sql.Ref} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see Ref
+         */
+        WriteRef(
+            [in] IRef* theRef);
+
+        /**
+         * Write an SQL {@code Blob} value into the output stream.
+         *
+         * @param theBlob
+         *            the {@code java.sql.Blob} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see Blob
+         */
+        WriteBlob(
+            [in] IBlob* theBlob);
+
+        /**
+         * Write an SQL {@code Clob} value into the output stream.
+         *
+         * @param theClob
+         *            the {@code java.sql.Clob} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see Clob
+         */
+        WriteClob(
+            [in] IClob* theClob);
+
+        /**
+         * Write an SQL {@code Struct} value into the output stream.
+         *
+         * @param theStruct
+         *            the {@code java.sql.Struct} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see Struct
+         */
+        WriteStruct(
+            [in] ISQLStruct* theStruct);
+
+        /**
+         * Write an SQL {@code Array} value into the output stream.
+         *
+         * @param theArray
+         *            the {@code java.sql.Array} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see Array
+         */
+        WriteArray(
+            [in] IArray* theArray);
+
+        /**
+         * Write a {@code URL} into the output stream as an SQL DATALINK.
+         *
+         * @param theURL
+         *            the datalink value as a {@code java.net.URL} to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         * @see java.net.URL
+         */
+        WriteURL(
+            [in] IURL* theURL);
+
+        /**
+         * Write a {@code String} into the output stream as an SQL NCHAR, NVARCHAR,
+         * or LONGNVARCHAR.
+         *
+         * @param theString
+         *            the {@code String} to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteNString(
+            [in] String theString);
+
+        /**
+         * Write a {@code Clob} into the output stream as an SQL NCLOB.
+         *
+         * @param theNClob
+         *            the {@code java.sql.Clob} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteNClob(
+            [in] INClob* theNClob);
+
+        /**
+         * Write a {@code RowId} into the output stream as an SQL ROWID.
+         *
+         * @param theRowId
+         *            the {@code java.sql.RowId} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WriteRowId(
+            [in] IRowId* theRowId);
+
+        /**
+         * Write a {@code SQLXML} into the output stream as an SQL XML.
+         *
+         * @param theXml
+         *            the {@code java.sql.SQLXML} object to write.
+         * @throws SQLException
+         *             if a database error occurs.
+         */
+        WwriteSQLXML(
+            [in] ISQLXML* theXml);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

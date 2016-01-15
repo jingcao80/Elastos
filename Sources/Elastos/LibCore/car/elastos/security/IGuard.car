@@ -1,0 +1,27 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * {@code Guard} implementors protect access to other objects.
+     */
+    interface IGuard {
+        /**
+         * Checks whether access to the specified {@code Object} should be granted.
+         * This method returns silently if access is granted, otherwise a {@code
+         * SecurityException} is thrown.
+         *
+         * @param object
+         *            the object to be protected by this {@code Guard}.
+         * @throws SecurityException
+         *             if access is not granted.
+         */
+        CheckGuard(
+            [in] IInterface* object);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

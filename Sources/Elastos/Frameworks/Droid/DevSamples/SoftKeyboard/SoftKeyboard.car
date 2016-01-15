@@ -1,0 +1,32 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    //using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.InputMethodService.IOnKeyboardActionListener;
+    using interface Elastos.Droid.InputMethodService.IInputMethodService;
+    using interface Elastos.Droid.InputMethodService.ISoftKeyboard;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace SoftKeyboard {
+
+    class CSoftKeyboard {
+        constructor();
+
+        interface IInputMethodService;
+        interface IOnKeyboardActionListener;
+        interface IComponentCallbacks2;
+        interface IKeyEventCallback;
+        interface ISoftKeyboard;
+    }
+
+    } // namespace SoftKeyboard
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}

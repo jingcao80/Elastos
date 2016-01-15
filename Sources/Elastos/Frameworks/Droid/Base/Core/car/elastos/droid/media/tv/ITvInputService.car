@@ -1,0 +1,48 @@
+module
+{
+    interface Elastos.Droid.View.IInputChannel;
+    interface Elastos.Droid.Hardware.Hdmi.IHdmiDeviceInfo;
+    interface Elastos.Droid.Media.Tv.IITvInputServiceCallback;
+    interface Elastos.Droid.Media.Tv.IITvInputSessionCallback;
+    interface Elastos.Droid.Media.Tv.ITvInputHardwareInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Top-level interface to a TV input component (implemented in a Service).
+     * @hide
+     */
+    interface IITvInputService {
+        RegisterCallback(
+            [in] IITvInputServiceCallback * cb);
+
+        UnregisterCallback(
+            [in] IITvInputServiceCallback * cb);
+
+        CreateSession(
+            [in] IInputChannel * channel,
+            [in] IITvInputSessionCallback * cb,
+            [in] String inputId);
+
+        // For hardware TvInputService
+        NotifyHardwareAdded(
+            [in] ITvInputHardwareInfo * hardwareInfo);
+
+        NotifyHardwareRemoved(
+            [in] ITvInputHardwareInfo * hardwareInfo);
+
+        NotifyHdmiDeviceAdded(
+            [in] IHdmiDeviceInfo * deviceInfo);
+
+        NotifyHdmiDeviceRemoved(
+            [in] IHdmiDeviceInfo * deviceInfo);
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

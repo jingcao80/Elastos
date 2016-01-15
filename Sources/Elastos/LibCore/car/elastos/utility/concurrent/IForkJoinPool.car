@@ -1,0 +1,667 @@
+
+module
+{
+    interface Elastos.Core.IThreadUncaughtExceptionHandler;
+    interface Elastos.Utility.Concurrent.IForkJoinWorkerThread;
+    interface Elastos.Utility.Concurrent.IForkJoinTask;
+    interface Elastos.Utility.Concurrent.IForkJoinPoolForkJoinWorkerThreadFactory;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+
+    /**
+     * Interface for extending managed parallelism for tasks running
+     * in {@link ForkJoinPool}s.
+     *
+     * <p>A {@code ManagedBlocker} provides two methods.  Method
+     * {@code isReleasable} must return {@code true} if blocking is
+     * not necessary. Method {@code block} blocks the current thread
+     * if necessary (perhaps internally invoking {@code isReleasable}
+     * before actually blocking). These actions are performed by any
+     * thread invoking {@link ForkJoinPool#managedBlock}.  The
+     * unusual methods in this API accommodate synchronizers that may,
+     * but don't usually, block for long periods. Similarly, they
+     * allow more efficient internal handling of cases in which
+     * additional workers may be, but usually are not, needed to
+     * ensure sufficient parallelism.  Toward this end,
+     * implementations of method {@code isReleasable} must be amenable
+     * to repeated invocation.
+     *
+     * <p>For example, here is a ManagedBlocker based on a
+     * ReentrantLock:
+     *  <pre> {@code
+     * class ManagedLocker implements ManagedBlocker {
+     *   final ReentrantLock lock;
+     *   boolean hasLock = false;
+     *   ManagedLocker(ReentrantLock lock) { this.lock = lock; }
+     *   public boolean block() {
+     *     if (!hasLock)
+     *       lock.lock();
+     *     return true;
+     *   }
+     *   public boolean isReleasable() {
+     *     return hasLock || (hasLock = lock.tryLock());
+     *   }
+     * }}</pre>
+     *
+     * <p>Here is a class that possibly blocks waiting for an
+     * item on a given queue:
+     *  <pre> {@code
+     * class QueueTaker<E> implements ManagedBlocker {
+     *   final BlockingQueue<E> queue;
+     *   volatile E item = null;
+     *   QueueTaker(BlockingQueue<E> q) { this.queue = q; }
+     *   public boolean block() throws InterruptedException {
+     *     if (item == null)
+     *       item = queue.take();
+     *     return true;
+     *   }
+     *   public boolean isReleasable() {
+     *     return item != null || (item = queue.poll()) != null;
+     *   }
+     *   public E getItem() { // call after pool.managedBlock completes
+     *     return item;
+     *   }
+     * }}</pre>
+     */
+    interface IForkJoinPoolManagedBlocker {
+        /**
+         * Possibly blocks the current thread, for example waiting for
+         * a lock or condition.
+         *
+         * @return {@code true} if no additional blocking is necessary
+         * (i.e., if isReleasable would return true)
+         * @throws InterruptedException if interrupted while waiting
+         * (the method is not required to do so, but is allowed to)
+         */
+        Block(
+            [out] Boolean* res);
+
+        /**
+         * Returns {@code true} if blocking is unnecessary.
+         */
+        IsReleasable(
+            [out] Boolean* res);
+    }
+
+    /**
+     * An {@link ExecutorService} for running {@link ForkJoinTask}s.
+     * A {@code ForkJoinPool} provides the entry point for submissions
+     * from non-{@code ForkJoinTask} clients, as well as management and
+     * monitoring operations.
+     *
+     * <p>A {@code ForkJoinPool} differs from other kinds of {@link
+     * ExecutorService} mainly by virtue of employing
+     * <em>work-stealing</em>: all threads in the pool attempt to find and
+     * execute subtasks created by other active tasks (eventually blocking
+     * waiting for work if none exist). This enables efficient processing
+     * when most tasks spawn other subtasks (as do most {@code
+     * ForkJoinTask}s). When setting <em>asyncMode</em> to true in
+     * constructors, {@code ForkJoinPool}s may also be appropriate for use
+     * with event-style tasks that are never joined.
+     *
+     * <p>A {@code ForkJoinPool} is constructed with a given target
+     * parallelism level; by default, equal to the number of available
+     * processors. The pool attempts to maintain enough active (or
+     * available) threads by dynamically adding, suspending, or resuming
+     * internal worker threads, even if some tasks are stalled waiting to
+     * join others. However, no such adjustments are guaranteed in the
+     * face of blocked IO or other unmanaged synchronization. The nested
+     * {@link ManagedBlocker} interface enables extension of the kinds of
+     * synchronization accommodated.
+     *
+     * <p>In addition to execution and lifecycle control methods, this
+     * class provides status check methods (for example
+     * {@link #getStealCount}) that are intended to aid in developing,
+     * tuning, and monitoring fork/join applications. Also, method
+     * {@link #toString} returns indications of pool state in a
+     * convenient form for informal monitoring.
+     *
+     * <p> As is the case with other ExecutorServices, there are three
+     * main task execution methods summarized in the following
+     * table. These are designed to be used by clients not already engaged
+     * in fork/join computations in the current pool.  The main forms of
+     * these methods accept instances of {@code ForkJoinTask}, but
+     * overloaded forms also allow mixed execution of plain {@code
+     * Runnable}- or {@code Callable}- based activities as well.  However,
+     * tasks that are already executing in a pool should normally
+     * <em>NOT</em> use these pool execution methods, but instead use the
+     * within-computation forms listed in the table.
+     *
+     * <table BORDER CELLPADDING=3 CELLSPACING=1>
+     *  <tr>
+     *    <td></td>
+     *    <td ALIGN=CENTER> <b>Call from non-fork/join clients</b></td>
+     *    <td ALIGN=CENTER> <b>Call from within fork/join computations</b></td>
+     *  </tr>
+     *  <tr>
+     *    <td> <b>Arrange async execution</td>
+     *    <td> {@link #execute(ForkJoinTask)}</td>
+     *    <td> {@link ForkJoinTask#fork}</td>
+     *  </tr>
+     *  <tr>
+     *    <td> <b>Await and obtain result</td>
+     *    <td> {@link #invoke(ForkJoinTask)}</td>
+     *    <td> {@link ForkJoinTask#invoke}</td>
+     *  </tr>
+     *  <tr>
+     *    <td> <b>Arrange exec and obtain Future</td>
+     *    <td> {@link #submit(ForkJoinTask)}</td>
+     *    <td> {@link ForkJoinTask#fork} (ForkJoinTasks <em>are</em> Futures)</td>
+     *  </tr>
+     * </table>
+     *
+     * <p><b>Sample Usage.</b> Normally a single {@code ForkJoinPool} is
+     * used for all parallel task execution in a program or subsystem.
+     * Otherwise, use would not usually outweigh the construction and
+     * bookkeeping overhead of creating a large set of threads. For
+     * example, a common pool could be used for the {@code SortTasks}
+     * illustrated in {@link RecursiveAction}. Because {@code
+     * ForkJoinPool} uses threads in {@linkplain java.lang.Thread#isDaemon
+     * daemon} mode, there is typically no need to explicitly {@link
+     * #shutdown} such a pool upon program exit.
+     *
+     *  <pre> {@code
+     * static final ForkJoinPool mainPool = new ForkJoinPool();
+     * ...
+     * public void sort(long[] array) {
+     *   mainPool.invoke(new SortTask(array, 0, array.length));
+     * }}</pre>
+     *
+     * <p><b>Implementation notes</b>: This implementation restricts the
+     * maximum number of running threads to 32767. Attempts to create
+     * pools with greater than the maximum number result in
+     * {@code IllegalArgumentException}.
+     *
+     * <p>This implementation rejects submitted tasks (that is, by throwing
+     * {@link RejectedExecutionException}) only when the pool is shut down
+     * or internal resources have been exhausted.
+     *
+     * @since 1.7
+     * @hide
+     * @author Doug Lea
+     */
+
+    /**
+     * @Involve
+     * interface IExecutor;
+     * interface IExecutorService;
+     * interface IAbstractExecutorService;
+     */
+    interface IForkJoinPool {
+        /*
+         * Implementation Overview
+         *
+         * This class provides the central bookkeeping and control for a
+         * set of worker threads: Submissions from non-FJ threads enter
+         * into a submission queue. Workers take these tasks and typically
+         * split them into subtasks that may be stolen by other workers.
+         * Preference rules give first priority to processing tasks from
+         * their own queues (LIFO or FIFO, depending on mode), then to
+         * randomized FIFO steals of tasks in other worker queues, and
+         * lastly to new submissions.
+         *
+         * The main throughput advantages of work-stealing stem from
+         * decentralized control -- workers mostly take tasks from
+         * themselves or each other. We cannot negate this in the
+         * implementation of other management responsibilities. The main
+         * tactic for avoiding bottlenecks is packing nearly all
+         * essentially atomic control state into a single 64bit volatile
+         * variable ("ctl"). This variable is read on the order of 10-100
+         * times as often as it is modified (always via CAS). (There is
+         * some additional control state, for example variable "shutdown"
+         * for which we can cope with uncoordinated updates.)  This
+         * streamlines synchronization and control at the expense of messy
+         * constructions needed to repack status bits upon updates.
+         * Updates tend not to contend with each other except during
+         * bursts while submitted tasks begin or end.  In some cases when
+         * they do contend, threads can instead do something else
+         * (usually, scan for tasks) until contention subsides.
+         *
+         * To enable packing, we restrict maximum parallelism to (1<<15)-1
+         * (which is far in excess of normal operating range) to allow
+         * ids, counts, and their negations (used for thresholding) to fit
+         * into 16bit fields.
+         *
+         * Recording Workers.  Workers are recorded in the "workers" array
+         * that is created upon pool construction and expanded if (rarely)
+         * necessary.  This is an array as opposed to some other data
+         * structure to support index-based random steals by workers.
+         * Updates to the array recording new workers and unrecording
+         * terminated ones are protected from each other by a seqLock
+         * (scanGuard) but the array is otherwise concurrently readable,
+         * and accessed directly by workers. To simplify index-based
+         * operations, the array size is always a power of two, and all
+         * readers must tolerate null slots. To avoid flailing during
+         * start-up, the array is presized to hold twice #parallelism
+         * workers (which is unlikely to need further resizing during
+         * execution). But to avoid dealing with so many null slots,
+         * variable scanGuard includes a mask for the nearest power of two
+         * that contains all current workers.  All worker thread creation
+         * is on-demand, triggered by task submissions, replacement of
+         * terminated workers, and/or compensation for blocked
+         * workers. However, all other support code is set up to work with
+         * other policies.  To ensure that we do not hold on to worker
+         * references that would prevent GC, ALL accesses to workers are
+         * via indices into the workers array (which is one source of some
+         * of the messy code constructions here). In essence, the workers
+         * array serves as a weak reference mechanism. Thus for example
+         * the wait queue field of ctl stores worker indices, not worker
+         * references.  Access to the workers in associated methods (for
+         * example signalWork) must both index-check and null-check the
+         * IDs. All such accesses ignore bad IDs by returning out early
+         * from what they are doing, since this can only be associated
+         * with termination, in which case it is OK to give up.
+         *
+         * All uses of the workers array, as well as queue arrays, check
+         * that the array is non-null (even if previously non-null). This
+         * allows nulling during termination, which is currently not
+         * necessary, but remains an option for resource-revocation-based
+         * shutdown schemes.
+         *
+         * Wait Queuing. Unlike HPC work-stealing frameworks, we cannot
+         * let workers spin indefinitely scanning for tasks when none can
+         * be found immediately, and we cannot start/resume workers unless
+         * there appear to be tasks available.  On the other hand, we must
+         * quickly prod them into action when new tasks are submitted or
+         * generated.  We park/unpark workers after placing in an event
+         * wait queue when they cannot find work. This "queue" is actually
+         * a simple Treiber stack, headed by the "id" field of ctl, plus a
+         * 15bit counter value to both wake up waiters (by advancing their
+         * count) and avoid ABA effects. Successors are held in worker
+         * field "nextWait".  Queuing deals with several intrinsic races,
+         * mainly that a task-producing thread can miss seeing (and
+         * signalling) another thread that gave up looking for work but
+         * has not yet entered the wait queue. We solve this by requiring
+         * a full sweep of all workers both before (in scan()) and after
+         * (in tryAwaitWork()) a newly waiting worker is added to the wait
+         * queue. During a rescan, the worker might release some other
+         * queued worker rather than itself, which has the same net
+         * effect. Because enqueued workers may actually be rescanning
+         * rather than waiting, we set and clear the "parked" field of
+         * ForkJoinWorkerThread to reduce unnecessary calls to unpark.
+         * (Use of the parked field requires a secondary recheck to avoid
+         * missed signals.)
+         *
+         * Signalling.  We create or wake up workers only when there
+         * appears to be at least one task they might be able to find and
+         * execute.  When a submission is added or another worker adds a
+         * task to a queue that previously had two or fewer tasks, they
+         * signal waiting workers (or trigger creation of new ones if
+         * fewer than the given parallelism level -- see signalWork).
+         * These primary signals are buttressed by signals during rescans
+         * as well as those performed when a worker steals a task and
+         * notices that there are more tasks too; together these cover the
+         * signals needed in cases when more than two tasks are pushed
+         * but untaken.
+         *
+         * Trimming workers. To release resources after periods of lack of
+         * use, a worker starting to wait when the pool is quiescent will
+         * time out and terminate if the pool has remained quiescent for
+         * SHRINK_RATE nanosecs. This will slowly propagate, eventually
+         * terminating all workers after long periods of non-use.
+         *
+         * Submissions. External submissions are maintained in an
+         * array-based queue that is structured identically to
+         * ForkJoinWorkerThread queues except for the use of
+         * submissionLock in method addSubmission. Unlike the case for
+         * worker queues, multiple external threads can add new
+         * submissions, so adding requires a lock.
+         *
+         * Compensation. Beyond work-stealing support and lifecycle
+         * control, the main responsibility of this framework is to take
+         * actions when one worker is waiting to join a task stolen (or
+         * always held by) another.  Because we are multiplexing many
+         * tasks on to a pool of workers, we can't just let them block (as
+         * in Thread.join).  We also cannot just reassign the joiner's
+         * run-time stack with another and replace it later, which would
+         * be a form of "continuation", that even if possible is not
+         * necessarily a good idea since we sometimes need both an
+         * unblocked task and its continuation to progress. Instead we
+         * combine two tactics:
+         *
+         *   Helping: Arranging for the joiner to execute some task that it
+         *      would be running if the steal had not occurred.  Method
+         *      ForkJoinWorkerThread.joinTask tracks joining->stealing
+         *      links to try to find such a task.
+         *
+         *   Compensating: Unless there are already enough live threads,
+         *      method tryPreBlock() may create or re-activate a spare
+         *      thread to compensate for blocked joiners until they
+         *      unblock.
+         *
+         * The ManagedBlocker extension API can't use helping so relies
+         * only on compensation in method awaitBlocker.
+         *
+         * It is impossible to keep exactly the target parallelism number
+         * of threads running at any given time.  Determining the
+         * existence of conservatively safe helping targets, the
+         * availability of already-created spares, and the apparent need
+         * to create new spares are all racy and require heuristic
+         * guidance, so we rely on multiple retries of each.  Currently,
+         * in keeping with on-demand signalling policy, we compensate only
+         * if blocking would leave less than one active (non-waiting,
+         * non-blocked) worker. Additionally, to avoid some false alarms
+         * due to GC, lagging counters, system activity, etc, compensated
+         * blocking for joins is only attempted after rechecks stabilize
+         * (retries are interspersed with Thread.yield, for good
+         * citizenship).  The variable blockedCount, incremented before
+         * blocking and decremented after, is sometimes needed to
+         * distinguish cases of waiting for work vs blocking on joins or
+         * other managed sync. Both cases are equivalent for most pool
+         * control, so we can update non-atomically. (Additionally,
+         * contention on blockedCount alleviates some contention on ctl).
+         *
+         * Shutdown and Termination. A call to shutdownNow atomically sets
+         * the ctl stop bit and then (non-atomically) sets each workers
+         * "terminate" status, cancels all unprocessed tasks, and wakes up
+         * all waiting workers.  Detecting whether termination should
+         * commence after a non-abrupt shutdown() call requires more work
+         * and bookkeeping. We need consensus about quiescence (i.e., that
+         * there is no more work) which is reflected in active counts so
+         * long as there are no current blockers, as well as possible
+         * re-evaluations during independent changes in blocking or
+         * quiescing workers.
+         *
+         * Style notes: There is a lot of representation-level coupling
+         * among classes ForkJoinPool, ForkJoinWorkerThread, and
+         * ForkJoinTask.  Most fields of ForkJoinWorkerThread maintain
+         * data structures managed by ForkJoinPool, so are directly
+         * accessed.  Conversely we allow access to "workers" array by
+         * workers, and direct access to ForkJoinTask.status by both
+         * ForkJoinPool and ForkJoinWorkerThread.  There is little point
+         * trying to reduce this, since any associated future changes in
+         * representations will need to be accompanied by algorithmic
+         * changes anyway. All together, these low-level implementation
+         * choices produce as much as a factor of 4 performance
+         * improvement compared to naive implementations, and enable the
+         * processing of billions of tasks per second, at the expense of
+         * some ugliness.
+         *
+         * Methods signalWork() and scan() are the main bottlenecks so are
+         * especially heavily micro-optimized/mangled.  There are lots of
+         * inline assignments (of form "while ((local = field) != 0)")
+         * which are usually the simplest way to ensure the required read
+         * orderings (which are sometimes critical). This leads to a
+         * "C"-like style of listing declarations of these locals at the
+         * heads of methods or blocks.  There are several occurrences of
+         * the unusual "do {} while (!cas...)"  which is the simplest way
+         * to force an update of a CAS'ed variable. There are also other
+         * coding oddities that help some methods perform reasonably even
+         * when interpreted (not compiled).
+         *
+         * The order of declarations in this file is: (1) declarations of
+         * statics (2) fields (along with constants used when unpacking
+         * some of them), listed in an order that tends to reduce
+         * contention among them a bit under most JVMs.  (3) internal
+         * control methods (4) callbacks and other support for
+         * ForkJoinTask and ForkJoinWorkerThread classes, (5) exported
+         * methods (plus a few little helpers). (6) static block
+         * initializing all statics in a minimally dependent order.
+         */
+
+        // Execution methods
+
+        /**
+         * Performs the given task, returning its result upon completion.
+         * If the computation encounters an unchecked Exception or Error,
+         * it is rethrown as the outcome of this invocation.  Rethrown
+         * exceptions behave in the same way as regular exceptions, but,
+         * when possible, contain stack traces (as displayed for example
+         * using {@code ex.printStackTrace()}) of both the current thread
+         * as well as the thread actually encountering the exception;
+         * minimally only the latter.
+         *
+         * @param task the task
+         * @return the task's result
+         * @throws NullPointerException if the task is null
+         * @throws RejectedExecutionException if the task cannot be
+         *         scheduled for execution
+         */
+        Invoke(
+            [in] IForkJoinTask* task,
+            [out] IInterface** outface);
+
+        /**
+         * Arranges for (asynchronous) execution of the given task.
+         *
+         * @param task the task
+         * @throws NullPointerException if the task is null
+         * @throws RejectedExecutionException if the task cannot be
+         *         scheduled for execution
+         */
+        Execute(
+            [in] IForkJoinTask* task);
+
+        /**
+         * Submits a ForkJoinTask for execution.
+         *
+         * @param task the task to submit
+         * @return the task
+         * @throws NullPointerException if the task is null
+         * @throws RejectedExecutionException if the task cannot be
+         *         scheduled for execution
+         */
+        Submit(
+            [in] IForkJoinTask* task,
+            [out] IForkJoinTask** outfork);
+
+        /**
+         * Returns the factory used for constructing new workers.
+         *
+         * @return the factory used for constructing new workers
+         */
+        GetFactory(
+            [out] IForkJoinPoolForkJoinWorkerThreadFactory** res);
+
+        /**
+         * Returns the handler for internal worker threads that terminate
+         * due to unrecoverable errors encountered while executing tasks.
+         *
+         * @return the handler, or {@code null} if none
+         */
+        GetUncaughtExceptionHandler(
+            [out] IThreadUncaughtExceptionHandler** res);
+
+        /**
+         * Returns the targeted parallelism level of this pool.
+         *
+         * @return the targeted parallelism level of this pool
+         */
+        GetParallelism(
+            [out] Int32* value);
+
+        /**
+         * Returns the number of worker threads that have started but not
+         * yet terminated.  The result returned by this method may differ
+         * from {@link #getParallelism} when threads are created to
+         * maintain parallelism when others are cooperatively blocked.
+         *
+         * @return the number of worker threads
+         */
+        GetPoolSize(
+            [out] Int32* value);
+
+        /**
+         * Returns {@code true} if this pool uses local first-in-first-out
+         * scheduling mode for forked tasks that are never joined.
+         *
+         * @return {@code true} if this pool uses async mode
+         */
+        GetAsyncMode(
+            [out] Boolean* value);
+
+        /**
+         * Returns an estimate of the number of worker threads that are
+         * not blocked waiting to join tasks or for other managed
+         * synchronization. This method may overestimate the
+         * number of running threads.
+         *
+         * @return the number of worker threads
+         */
+        GetRunningThreadCount(
+            [out] Int32* value);
+
+        /**
+         * Returns an estimate of the number of threads that are currently
+         * stealing or executing tasks. This method may overestimate the
+         * number of active threads.
+         *
+         * @return the number of active threads
+         */
+        GetActiveThreadCount(
+            [out] Int32* value);
+
+        /**
+         * Returns {@code true} if all worker threads are currently idle.
+         * An idle worker is one that cannot obtain a task to execute
+         * because none are available to steal from other threads, and
+         * there are no pending submissions to the pool. This method is
+         * conservative; it might not return {@code true} immediately upon
+         * idleness of all threads, but will eventually become true if
+         * threads remain inactive.
+         *
+         * @return {@code true} if all threads are currently idle
+         */
+        IsQuiescent(
+            [out] Boolean* value);
+
+        /**
+         * Returns an estimate of the total number of tasks stolen from
+         * one thread's work queue by another. The reported value
+         * underestimates the actual total number of steals when the pool
+         * is not quiescent. This value may be useful for monitoring and
+         * tuning fork/join programs: in general, steal counts should be
+         * high enough to keep threads busy, but low enough to avoid
+         * overhead and contention across threads.
+         *
+         * @return the number of steals
+         */
+        GetStealCount(
+            [out] Int64* value);
+
+        /**
+         * Returns an estimate of the total number of tasks currently held
+         * in queues by worker threads (but not including tasks submitted
+         * to the pool that have not begun executing). This value is only
+         * an approximation, obtained by iterating across all threads in
+         * the pool. This method may be useful for tuning task
+         * granularities.
+         *
+         * @return the number of queued tasks
+         */
+        GetQueuedTaskCount(
+            [out] Int64* value);
+
+        /**
+         * Returns an estimate of the number of tasks submitted to this
+         * pool that have not yet begun executing.  This method may take
+         * time proportional to the number of submissions.
+         *
+         * @return the number of queued submissions
+         */
+        GetQueuedSubmissionCount(
+            [out] Int32* value);
+
+        /**
+         * Returns {@code true} if there are any tasks submitted to this
+         * pool that have not yet begun executing.
+         *
+         * @return {@code true} if there are any queued submissions
+         */
+        HasQueuedSubmissions(
+            [out] Boolean* value);
+
+        /**
+         * Returns a string identifying this pool, as well as its state,
+         * including indications of run state, parallelism level, and
+         * worker and task counts.
+         *
+         * @return a string identifying this pool, as well as its state
+         */
+        ToString(
+            [out] String* str);
+
+        /**
+         * Returns {@code true} if the process of termination has
+         * commenced but not yet completed.  This method may be useful for
+         * debugging. A return of {@code true} reported a sufficient
+         * period after shutdown may indicate that submitted tasks have
+         * ignored or suppressed interruption, or are waiting for IO,
+         * causing this executor not to properly terminate. (See the
+         * advisory notes for class {@link ForkJoinTask} stating that
+         * tasks should not normally entail blocking operations.  But if
+         * they do, they must abort them on interrupt.)
+         *
+         * @return {@code true} if terminating but not yet terminated
+         */
+        IsTerminating(
+            [out] Boolean* value);
+
+        /**
+         * If called by a ForkJoinTask operating in this pool, equivalent
+         * in effect to {@link ForkJoinTask#helpQuiesce}. Otherwise,
+         * waits and/or attempts to assist performing tasks until this
+         * pool {@link #isQuiescent} or the indicated timeout elapses.
+         *
+         * @param timeout the maximum time to wait
+         * @param unit the time unit of the timeout argument
+         * @return {@code true} if quiescent; {@code false} if the
+         * timeout elapsed.
+         */
+        AwaitQuiescence(
+            [in] Int64 timeout,
+            [in] ITimeUnit* unit,
+            [out] Boolean* result);
+    }
+
+    /**
+     * Factory for creating new {@link ForkJoinWorkerThread}s.
+     * A {@code ForkJoinWorkerThreadFactory} must be defined and used
+     * for {@code ForkJoinWorkerThread} subclasses that extend base
+     * functionality or initialize threads with different contexts.
+     */
+    interface IForkJoinPoolForkJoinWorkerThreadFactory {
+        /**
+         * Returns a new worker thread operating in the given pool.
+         *
+         * @param pool the pool this thread works in
+         * @throws NullPointerException if the pool is null
+         */
+        NewThread(
+            [in] IForkJoinPool* pool,
+            [out] IForkJoinWorkerThread** td);
+    }
+
+    interface IForkJoinPoolHelper {
+
+
+        /**
+         * Blocks in accord with the given blocker.  If the current thread
+         * is a {@link ForkJoinWorkerThread}, this method possibly
+         * arranges for a spare thread to be activated if necessary to
+         * ensure sufficient parallelism while the current thread is blocked.
+         *
+         * <p>If the caller is not a {@link ForkJoinTask}, this method is
+         * behaviorally equivalent to
+         *  <pre> {@code
+         * while (!blocker.isReleasable())
+         *   if (blocker.block())
+         *     return;
+         * }</pre>
+         *
+         * If the caller is a {@code ForkJoinTask}, then the pool may
+         * first be expanded to ensure parallelism, and later adjusted.
+         *
+         * @param blocker the blocker
+         * @throws InterruptedException if blocker.block did so
+         */
+        // ManagedBlock(
+        //    [in] IManagedBlocker* blocker);
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

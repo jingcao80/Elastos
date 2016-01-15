@@ -1,0 +1,18 @@
+
+module
+{
+    interface Elastos.Droid.Media.IRemoteDisplayState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IIRemoteDisplayCallback {
+        OnStateChanged(
+            [in] IRemoteDisplayState * state);
+
+    }
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,103 @@
+module {
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    interface IDrmStore {
+        const String AUTHORITY = "drm";
+
+        /**
+         * Utility function for inserting a file into the DRM content provider.
+         *
+         * @param cr The content resolver to use
+         * @param file The file to insert
+         * @param title The title for the content (or null)
+         * @return uri to the DRM record or null
+         */
+        AddDrmFile(
+            [in] IContentResolver* cr,
+            [in] IFile* file,
+            [in] String title,
+            [out] IIntent** record);
+
+        /**
+         * Utility function for inserting a file stream into the DRM content provider.
+         *
+         * @param cr The content resolver to use
+         * @param fis The FileInputStream to insert
+         * @param title The title for the content (or null)
+         * @return uri to the DRM record or null
+         */
+        AddDrmFile(
+            [in] IContentResolver* cr,
+            [in] IFileInputStream* fis,
+            [in] String title,
+            [out] IIntent** record);
+
+        /**
+         * Utility function to enforce any permissions required to access DRM
+         * content.
+         *
+         * @param context A context used for checking calling permission.
+         */
+        EnforceAccessDrmPermission(
+            [in] IContext* ctx);
+    }
+
+    /**
+     * @Involve
+     * interface IBaseColumns
+     */
+    interface IDrmStoreColumns {
+        /**
+         * The data stream for the file
+         * <P>Type: DATA STREAM</P>
+         */
+        const String DATA = "_data";
+
+        /**
+         * The size of the file in bytes
+         * <P>Type: INTEGER (long)</P>
+         */
+        const String SIZE = "_size";
+
+        /**
+         * The title of the file content
+         * <P>Type: TEXT</P>
+         */
+        const String TITLE = "title";
+
+        /**
+         * The MIME type of the file
+         * <P>Type: TEXT</P>
+         */
+        const String MIME_TYPE = "mime_type";
+    }
+
+    /**
+     * @Involve
+     * interface IDrmStoreColumns
+     */
+    interface IDrmStoreImages {
+        GetCONTENT_URI(
+            [out] IUri** uri);
+    }
+
+    /**
+     * @Involve
+     * interface IDrmStoreColumns
+     */
+    interface IDrmStoreAudio {
+        GetCONTENT_URI(
+            [out] IUri** uri);
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+
+}

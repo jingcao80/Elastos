@@ -1,0 +1,8 @@
+module
+{
+    merge("textservice/ISpellCheckerService.car");
+    merge("textservice/ISpellCheckerSession.car");
+    merge("textservice/ISpellCheckerSessionListener.car");
+    merge("textservice/ITextServicesManager.car");
+    merge("textservice/ITextServicesSessionListener.car");
+}

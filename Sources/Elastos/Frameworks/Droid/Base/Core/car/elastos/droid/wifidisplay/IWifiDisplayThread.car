@@ -1,0 +1,30 @@
+module
+{
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace WifiDisplay {
+
+    /**
+     * System private API for communicating with the application.  This is given to
+     * the activity manager by an application  when it starts up, for the activity
+     * manager to tell the application about things it needs to do.
+     *
+     * {@hide}
+     */
+    interface IWifiDisplayThread {
+        ExitWifiDisplayReceive();
+
+        ExitWifiDisplaySend();
+
+        StartWifiDisplaySend();
+
+        DispatchMotionEvent(
+            [in] IMotionEvent* event);
+    }
+
+    } // namespace WifiDisplay
+    } // namespace Droid
+    } // namespace Elastos
+}

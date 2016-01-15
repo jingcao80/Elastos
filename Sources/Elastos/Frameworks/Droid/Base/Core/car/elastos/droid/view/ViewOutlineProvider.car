@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IOutline;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Interface by which a View builds its {@link Outline}, used for shadow casting and clipping.
+     */
+    [local]
+    interface IViewOutlineProvider {
+        /**
+         * Called to get the provider to populate the Outline.
+         *
+         * This method will be called by a View when its owned Drawables are invalidated, when the
+         * View's size changes, or if {@link View#invalidateOutline()} is called
+         * explicitly.
+         *
+         * The input outline is empty and has an alpha of <code>1.0f</code>.
+         *
+         * @param view The view building the outline.
+         * @param outline The empty outline to be populated.
+         */
+        GetOutline(
+            [in] IView* view,
+            [in] IOutline* outline);
+    }
+
+    [local]
+    interface IViewOutlineProviderHelper {
+        /**
+         * Default outline provider for Views, which queries the Outline from the View's background,
+         * or generates a 0 alpha, rectangular Outline the size of the View if a background
+         * isn't present.
+         *
+         * @see Drawable#getOutline(Outline)
+         */
+        GetBACKGROUND(
+            [out] IViewOutlineProvider** background);
+
+        /**
+         * Maintains the outline of the View to match its rectangular bounds,
+         * at <code>1.0f</code> alpha.
+         *
+         * This can be used to enable Views that are opaque but lacking a background cast a shadow.
+         */
+        GetBOUNDS(
+            [out] IViewOutlineProvider** bounds);
+
+        /**
+         * Maintains the outline of the View to match its rectangular padded bounds,
+         * at <code>1.0f</code> alpha.
+         *
+         * This can be used to enable Views that are opaque but lacking a background cast a shadow.
+         */
+        GetPADDEDBOUNDS(
+            [out] IViewOutlineProvider** bounds);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,47 @@
+
+TARGET_NAME= style
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = style.cpp
+SOURCES += AbsoluteSizeSpan.cpp
+SOURCES += AlignmentSpanStandard.cpp
+SOURCES += BackgroundColorSpan.cpp
+SOURCES += BulletSpan.cpp
+SOURCES += CharacterStyle.cpp
+SOURCES += CCharacterStyleHelper.cpp
+SOURCES += ClickableSpan.cpp
+SOURCES += DrawableMarginSpan.cpp
+SOURCES += DynamicDrawableSpan.cpp
+SOURCES += EasyEditSpan.cpp
+SOURCES += ForegroundColorSpan.cpp
+SOURCES += IconMarginSpan.cpp
+SOURCES += ImageSpan.cpp
+SOURCES += LeadingMarginSpanStandard.cpp
+SOURCES += LocaleSpan.cpp
+SOURCES += MaskFilterSpan.cpp
+SOURCES += MetricAffectingSpan.cpp
+SOURCES += QuoteSpan.cpp
+SOURCES += RasterizerSpan.cpp
+SOURCES += RelativeSizeSpan.cpp
+SOURCES += ReplacementSpan.cpp
+SOURCES += ScaleXSpan.cpp
+SOURCES += SpellCheckSpan.cpp
+SOURCES += StrikethroughSpan.cpp
+SOURCES += StyleSpan.cpp
+SOURCES += SubscriptSpan.cpp
+SOURCES += SuggestionRangeSpan.cpp
+SOURCES += SuggestionSpan.cpp
+SOURCES += SuperscriptSpan.cpp
+SOURCES += TabStopSpan.cpp
+SOURCES += TextAppearanceSpan.cpp
+SOURCES += TtsSpan.cpp
+SOURCES += TypefaceSpan.cpp
+SOURCES += URLSpan.cpp
+SOURCES += UnderlineSpan.cpp

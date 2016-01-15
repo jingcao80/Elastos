@@ -1,0 +1,26 @@
+
+module
+{
+//    const FAMILY_CORE = 0x2B    // Net exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Net exception codes (Family: 0x2B)
+    const E_BIND_EXCEPTION                                  = 0xAB010000;
+    const E_CONNECT_EXCEPTION                               = 0xAB020000;
+    const E_HTTP_RETRY_EXCEPTION                            = 0xAB030000;
+    const E_MALFORMED_URL_EXCEPTION                         = 0xAB040000;
+    const E_NO_ROUTE_TO_HOST_EXCEPTION                      = 0xAB050000;
+    const E_PORT_UNREACHABLE_EXCEPTION                      = 0xAB060000;
+    const E_PROTOCOL_EXCEPTION                              = 0xAB070000;
+    const E_SOCKET_EXCEPTION                                = 0xAB080000;
+    const E_SOCKET_TIMEOUT_EXCEPTION                        = 0xAB090000;
+    const E_UNKNOWN_SERVICE_EXCEPTION                       = 0xAB0B0000;
+    const E_URI_SYNTAX_EXCEPTION                            = 0xAB0C0000;
+    const E_SOCKET_CLOSE_EXCEPTION                          = 0xAB0D0000;
+    const E_MALFORMED_REPLY_EXCEPTION                       = 0xAB0E0000;
+    const E_INVALID_SOCKET_EXCEPTION                        = 0xAB0F0000;
+    const E_UNKNOWN_HOST_EXCEPTION                          = 0xAB100000;
+}

@@ -1,0 +1,440 @@
+module
+{
+    interface Elastos.Core.IStringBuffer;
+    interface Elastos.Utility.IDate;
+    interface Elastos.Utility.ICalendar;
+    interface Elastos.Utility.ITimeZone;
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Text.INumberFormat;
+    interface Elastos.Text.IFieldPosition;
+    interface Elastos.Text.IParsePosition;
+
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * The instances of this inner class are used as attribute keys and
+     * values in AttributedCharacterIterator that the
+     * formatToCharacterIterator(Object) method returns.
+     * <p>
+     * There is no public constructor in this class, the only instances are the constants defined here.
+     *
+     * @implements ELastos.Text.IFormatField
+     */
+    /**
+     * @Involve
+     * interface IFormatField
+     */
+    interface IDateFormatField {
+        /**
+         * Returns the Calendar field that this field represents.
+         */
+        GetCalendarField(
+            [out] Int32* field);
+    }
+
+    interface IDateFormatFieldHelper {
+        GetDateFormatFieldByName(
+            [in] String name,
+            [out] IDateFormatField** field);
+
+        /**
+         * Returns the {DateFormat.Field} instance for the given calendar
+         * field.
+         *
+         * @param calendarField
+         *            a calendar field constant.
+         * @return the {DateFormat.Field} corresponding to
+         *         {calendarField}.
+         */
+        OfCalendarField(
+            [in] Int32 calendarField,
+            [out] IDateFormatField** field);
+    }
+
+    /**
+     * Formats or parses dates and times.
+     *
+     * This class provides factories for obtaining instances configured for a specific locale. The most common subclass is SimpleDateFormat.
+     *
+     * Sample Code
+     * {
+     * DateFormat[] formats = new DateFormat[] {
+     * DateFormat.getDateInstance(),
+     * DateFormat.getDateTimeInstance(),
+     * DateFormat.getTimeInstance(),
+     * };
+     * for (DateFormat df : formats) {
+     * System.out.println(df.format(new Date(0)));
+     * df.setTimeZone(TimeZone.getTimeZone("UTC"));
+     * System.out.println(df.format(new Date(0)));
+     *    }
+     * }
+     *
+     * Produces this output when run on an en_US device in the America/Los_Angeles time zone:
+     *  Dec 31, 1969
+     *  Jan 1, 1970
+     *  Dec 31, 1969 4:00:00 PM
+     *  Jan 1, 1970 12:00:00 AM
+     *  4:00:00 PM
+     *  12:00:00 AM
+     *
+     * And will produce similarly appropriate localized human-readable output
+     * on any user's system. Notice how the same point in time when formatted
+     * can appear to be a different time when rendered for a different time
+     * zone. This is one reason why formatting should be left until the data
+     * will only be presented to a human. Machines should interchange "Unix
+     * time" integers.
+     *
+     * @implements Elastos.Text.IFormat
+     */
+    /**
+     * @Involve
+     * interface IFormat
+     */
+    [deprecated]
+    interface IDateFormat {
+        /**
+         * The format style constant defining the default format style. The default
+         * is MEDIUM.
+         */
+        const Int32 DEFAULT = 2;
+
+        /**
+         * The format style constant defining the full style.
+         */
+        const Int32 FULL = 0;
+
+        /**
+         * The format style constant defining the long style.
+         */
+        const Int32 LONG = 1;
+
+        /**
+         * The format style constant defining the medium style.
+         */
+        const Int32 MEDIUM = 2;
+
+        /**
+         * The format style constant defining the short style.
+         */
+        const Int32 SHORT = 3;
+
+        /**
+         * The {FieldPosition} selector for 'G' field alignment, corresponds
+         * to the Calendar#ERA field.
+         *
+         * @sa Calendar#ERA
+         */
+        const Int32 ERA_FIELD = 0;
+
+        /**
+         * The {FieldPosition} selector for 'y' field alignment, corresponds
+         * to the Calendar#YEAR field.
+         *
+         * @sa Calendar#YEAR
+         */
+        const Int32 YEAR_FIELD = 1;
+
+        /**
+         * The {FieldPosition} selector for 'M' field alignment, corresponds
+         * to the Calendar#MONTH field.
+         *
+         * @sa Calendar#MONTH
+         */
+        const Int32 MONTH_FIELD = 2;
+
+        /**
+         * The {FieldPosition} selector for 'd' field alignment, corresponds
+         * to the Calendar#DATE field.
+         *
+         * @sa Calendar#DATE
+         */
+        const Int32 DATE_FIELD = 3;
+
+        /**
+         * The {FieldPosition} selector for 'k' field alignment, corresponds
+         * to the Calendar#HOUR_OF_DAY field. {HOUR_OF_DAY1_FIELD} is
+         * used for the one-based 24-hour clock. For example, 23:59 + 01:00 results
+         * in 24:59.
+         *
+         * @sa Calendar#HOUR_OF_DAY
+         */
+        const Int32 HOUR_OF_DAY1_FIELD = 4;
+
+        /**
+         * The {FieldPosition} selector for 'H' field alignment, corresponds
+         * to the Calendar#HOUR_OF_DAY field. {HOUR_OF_DAY0_FIELD} is
+         * used for the zero-based 24-hour clock. For example, 23:59 + 01:00 results
+         * in 00:59.
+         *
+         * @sa Calendar#HOUR_OF_DAY
+         */
+        const Int32 HOUR_OF_DAY0_FIELD = 5;
+
+        /**
+         * FieldPosition selector for 'm' field alignment, corresponds to the
+         * Calendar#MINUTE field.
+         *
+         * @sa Calendar#MINUTE
+         */
+        const Int32 MINUTE_FIELD = 6;
+
+        /**
+         * FieldPosition selector for 's' field alignment, corresponds to the
+         * Calendar#SECOND field.
+         *
+         * @sa Calendar#SECOND
+         */
+        const Int32 SECOND_FIELD = 7;
+
+        /**
+         * FieldPosition selector for 'S' field alignment, corresponds to the
+         * Calendar#MILLISECOND field.
+         *
+         * @sa Calendar#MILLISECOND
+         */
+        const Int32 MILLISECOND_FIELD = 8;
+
+        /**
+         * FieldPosition selector for 'E' field alignment, corresponds to the
+         * Calendar#DAY_OF_WEEK field.
+         *
+         * @sa Calendar#DAY_OF_WEEK
+         */
+        const Int32 DAY_OF_WEEK_FIELD = 9;
+
+        /**
+         * FieldPosition selector for 'D' field alignment, corresponds to the
+         * Calendar#DAY_OF_YEAR field.
+         *
+         * @sa Calendar#DAY_OF_YEAR
+         */
+        const Int32 DAY_OF_YEAR_FIELD = 10;
+
+        /**
+         * FieldPosition selector for 'F' field alignment, corresponds to the
+         * Calendar#DAY_OF_WEEK_IN_MONTH field.
+         *
+         * @sa Calendar#DAY_OF_WEEK_IN_MONTH
+         */
+        const Int32 DAY_OF_WEEK_IN_MONTH_FIELD = 11;
+
+        /**
+         * FieldPosition selector for 'w' field alignment, corresponds to the
+         * Calendar#WEEK_OF_YEAR field.
+         *
+         * @sa Calendar#WEEK_OF_YEAR
+         */
+        const Int32 WEEK_OF_YEAR_FIELD = 12;
+
+        /**
+         * FieldPosition selector for 'W' field alignment, corresponds to the
+         * Calendar#WEEK_OF_MONTH field.
+         *
+         * @sa Calendar#WEEK_OF_MONTH
+         */
+        const Int32 WEEK_OF_MONTH_FIELD = 13;
+
+        /**
+         * FieldPosition selector for 'a' field alignment, corresponds to the
+         * Calendar#AM_PM field.
+         *
+         * @sa Calendar#AM_PM
+         */
+        const Int32 AM_PM_FIELD = 14;
+
+        /**
+         * FieldPosition selector for 'h' field alignment, corresponding to the
+         * Calendar#HOUR field.
+         *
+         * @sa Calendar#HOUR
+         */
+        const Int32 HOUR1_FIELD = 15;
+
+        /**
+         * The {FieldPosition} selector for 'K' field alignment, corresponding to the
+         * Calendar#HOUR field.
+         *
+         * @sa Calendar#HOUR
+         */
+        const Int32 HOUR0_FIELD = 16;
+
+        /**
+         * The {FieldPosition} selector for 'z' field alignment, corresponds
+         * to the Calendar#ZONE_OFFSET and Calendar#DST_OFFSET
+         * fields.
+         *
+         * @sa Calendar#ZONE_OFFSET
+         * @sa Calendar#DST_OFFSET
+         */
+        const Int32 TIMEZONE_FIELD = 17;
+
+        /**
+         * Formats the specified date using the rules of this date format.
+         *
+         * @param date
+         *            the date to format.
+         * @return the formatted string.
+         */
+        Format(
+            [in] IDate* date,
+            [out] String* result);
+
+        /**
+         * Formats the specified date as a string using the pattern of this date
+         * format and appends the string to the specified string buffer.
+         * <p>
+         * If the {@code field} member of {@code field} contains a value specifying
+         * a format field, then its {@code beginIndex} and {@code endIndex} members
+         * will be updated with the position of the first occurrence of this field
+         * in the formatted text.
+         *
+         * @param date
+         *            the date to format.
+         * @param buffer
+         *            the target string buffer to append the formatted date/time to.
+         * @param field
+         *            on input: an optional alignment field; on output: the offsets
+         *            of the alignment field in the formatted text.
+         * @return the string buffer.
+         */
+        Format(
+            [in] IDate* date,
+            [in] IStringBuffer * buffer,
+            [in] IFieldPosition* field);
+
+        /**
+         * Returns the calendar used by this {DateFormat}.
+         *
+         * @return the calendar used by this date format.
+         */
+        GetCalendar(
+            [out] ICalendar** calendar);
+
+        /**
+         * Returns the {NumberFormat} used by this {DateFormat}.
+         *
+         * @return the {NumberFormat} used by this date format.
+         */
+        GetNumberFormat(
+            [out] INumberFormat** format);
+
+        /**
+         * Returns the time zone of this date format's calendar.
+         */
+        GetTimeZone(
+            [out] ITimeZone** timezone);
+
+        /**
+         * Indicates whether the calendar used by this date format is lenient.
+         */
+        IsLenient(
+            [out] Boolean* isLenient);
+
+        /**
+         * Parses a date from the specified string using the rules of this date
+         * format.
+         */
+        Parse(
+            [in] String string,
+            [out] IDate** date);
+
+        /**
+         * Parses a date from the specified string starting at the index specified
+         * by {position}. If the string is successfully parsed then the index
+         * of the {ParsePosition} is updated to the index following the parsed
+         * text. On error, the index is unchanged and the error index of
+         * {ParsePosition} is set to the index where the error occurred.
+         * <p>
+         * By default, parsing is lenient: If the input is not in the form used by
+         * this object's format method but can still be parsed as a date, then the
+         * parse succeeds. Clients may insist on strict adherence to the format by
+         * calling {setLenient(false)}.
+         */
+        Parse(
+            [in] String string,
+            [in] IParsePosition* position,
+            [out] IDate** date);
+
+        /**
+         * Sets the calendar used by this date format.
+         */
+        SetCalendar(
+            [in] ICalendar* cal);
+
+        /**
+         * Specifies whether or not date/time parsing shall be lenient. With lenient
+         * parsing, the parser may use heuristics to interpret inputs that do not
+         * precisely match this object's format. With strict parsing, inputs must
+         * match this object's format.
+         */
+        SetLenient(
+            [in] Boolean value);
+
+        /**
+         * Sets the {NumberFormat} used by this date format.
+         */
+        SetNumberFormat(
+            [in] INumberFormat* format);
+
+        /**
+         * Sets the time zone of the calendar used by this date format.
+         */
+        SetTimeZone(
+            [in] ITimeZone* timezone);
+    }
+
+    interface IDateFormatHelper
+    {
+        GetAvailableLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        GetDateInstance(
+            [out] IDateFormat** instance);
+
+        GetDateInstance(
+            [in] Int32 style,
+            [out] IDateFormat** instance);
+
+        GetDateInstance(
+            [in] Int32 style,
+            [in] ILocale* locale,
+            [out] IDateFormat** instance);
+
+        GetDateTimeInstance(
+            [out] IDateFormat** instance);
+
+        GetDateTimeInstance(
+            [in] Int32 dateStyle,
+            [in] Int32 timeStyle,
+            [out] IDateFormat** instance);
+
+        GetDateTimeInstance(
+            [in] Int32 dateStyle,
+            [in] Int32 timeStyle,
+            [in] ILocale* locale,
+            [out] IDateFormat** instance);
+
+        Set24HourTimePref(
+            [in] Boolean is24Hour);
+
+        GetInstance(
+            [out] IDateFormat** instance);
+
+        GetTimeInstance(
+            [out] IDateFormat** instance);
+
+        GetTimeInstance(
+            [in] Int32 style,
+            [out] IDateFormat** instance);
+
+        GetTimeInstance(
+            [in] Int32 style,
+            [in] ILocale* locale,
+            [out] IDateFormat** instance);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

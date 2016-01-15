@@ -1,0 +1,59 @@
+
+module
+{
+
+    interface Org.Apache.Http.IProtocolVersion;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * An HTTP connection over the Internet Protocol (IP).
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 613298 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IProtocolVersion;
+     * interface ICloneable
+     */
+    interface IHttpVersion {
+
+        /**
+         * Obtains a specific HTTP version.
+         *
+         * @param major     the major version
+         * @param minor     the minor version
+         *
+         * @return  an instance of {@link HttpVersion} with the argument version
+         */
+        ForVersion(
+            [in] Int32 major,
+            [in] Int32 minor,
+            [out] IProtocolVersion** ver);
+
+    }
+
+    interface IHttpVersionHelper {
+
+        GerHttpVersion09(
+            [out] IHttpVersion** ver);
+
+        GerHttpVersion10(
+            [out] IHttpVersion** ver);
+
+        GerHttpVersion11(
+            [out] IHttpVersion** ver);
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

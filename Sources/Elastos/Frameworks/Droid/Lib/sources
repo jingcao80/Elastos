@@ -1,0 +1,60 @@
+TARGET_NAME= Elastos.Droid
+TARGET_TYPE= lib
+
+#VPATH := $(MAKEDIR)/../eco/src/core/app:$(MAKEDIR)/../eco/src/core/content:$(MAKEDIR)/../eco/src/core/inputmethodservice:$(MAKEDIR)/../eco/src/core/utils
+
+VPATH := $(MAKEDIR)/../Base/Core/src/:$(MAKEDIR)/../Base/Core/src/content:$(MAKEDIR)/../Base/Core/src/app:$(MAKEDIR)/../Base/Core/src/app/backup:$(MAKEDIR)/../Base/Core/src/os:$(MAKEDIR)/../Base/Core/src/util:$(MAKEDIR)/../Base/Core/src/provider:$(MAKEDIR)/../Base/Core/src/inputmethodservice:$(MAKEDIR)/../Base/Core/src/text:$(MAKEDIR)/../Base/Core/src/database/sqlite:$(MAKEDIR)/../Base/Core/src/appwidget:$(MAKEDIR)/../Base/Core/src/webkit:$(MAKEDIR)/../Base/Core/src/preference:$(MAKEDIR)/../Base/Core/src/text/method
+
+EXPORT_LIBRARY= 1
+
+include $(MAKEDIR)/../sources.inc
+
+IMPORTS = Elastos.Droid.Core.eco
+
+SOURCES = Activity.cpp
+SOURCES += ListActivity.cpp
+SOURCES += PreferenceActivity.cpp
+SOURCES += Fragment.cpp
+SOURCES += ListFragment.cpp
+SOURCES += ActivityManagerNative.cpp
+SOURCES += BroadcastReceiver.cpp
+SOURCES += BackupAgent.cpp
+SOURCES += BackupAgentHelper.cpp
+SOURCES += Build.cpp
+SOURCES += NativeMessageQueue.cpp
+SOURCES += ServiceManager.cpp
+SOURCES += R.cpp
+SOURCES += Xml.cpp
+SOURCES += XmlUtils.cpp
+SOURCES += Config.cpp
+SOURCES += SomeArgs.cpp
+SOURCES += Handler.cpp
+SOURCES += HandlerBase.cpp
+SOURCES += HandlerRunnableBase.cpp
+SOURCES += Runnable.cpp
+SOURCES += Service.cpp
+SOURCES += ArrayUtils.cpp
+SOURCES += TextUtils.cpp
+SOURCES += MeasuredText.cpp
+SOURCES += AndroidBidi.cpp
+SOURCES += TextDirectionHeuristics.cpp
+SOURCES += SystemClock.cpp
+SOURCES += AbstractInputMethodImpl.cpp
+SOURCES += AbstractInputMethodSessionImpl.cpp
+SOURCES += AbstractInputMethodService.cpp
+SOURCES += InputMethodService.cpp
+SOURCES += Keyboard.cpp
+SOURCES += ContentProvider.cpp
+SOURCES += Process.cpp
+SOURCES += SQLiteOpenHelper.cpp
+SOURCES += AppWidgetProvider.cpp
+SOURCES += WebViewClient.cpp
+SOURCES += WebChromeClient.cpp
+SOURCES += AsyncTask.cpp
+SOURCES += FileObserver.cpp
+SOURCES += Manifest.cpp
+SOURCES += Instrumentation.cpp
+SOURCES += Application.cpp
+SOURCES += MetaKeyKeyListener.cpp
+SOURCES += BaseKeyListener.cpp
+SOURCES += TimeKeyListener.cpp

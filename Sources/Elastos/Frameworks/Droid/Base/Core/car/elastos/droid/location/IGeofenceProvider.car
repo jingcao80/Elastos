@@ -1,0 +1,25 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Location.IIGeofenceHardware;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * An interface for location providers implementing the Geofencing service
+     *
+     * {@hide}
+     */
+    [deprecated]
+    interface IIGeofenceProvider {
+        SetGeofenceHardware(
+            [in] IIGeofenceHardware* proxy);
+    }
+
+    } // namespace Location
+    } // namespace Droid
+    } // namespace Elastos
+}
+

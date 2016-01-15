@@ -1,0 +1,44 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Xml {
+    namespace Validation {
+
+    interface ISchemaFactoryFinder {
+
+    /**
+     * <p>Creates a new {@link SchemaFactory} object for the specified
+     * schema language.</p>
+     *
+     * @param schemaLanguage
+     *      See {@link SchemaFactory Schema Language} table in <code>SchemaFactory</code>
+     *      for the list of available schema languages.
+     *
+     * @return <code>null</code> if the callee fails to create one.
+     *
+     * @throws NullPointerException
+     *      If the <tt>schemaLanguage</tt> parameter is null.
+     */
+        NewFactory(
+            [in] String schemaLanguage,
+            [out] ISchemaFactory** factory);
+
+    /**
+     * <p>Creates an instance of the specified and returns it.</p>
+     *
+     * @param className
+     *      fully qualified class name to be instantiated.
+     *
+     * @return null
+     *      if it fails. Error messages will be printed by this method.
+     */
+        CreateInstance(
+            [in] String className,
+            [out] ISchemaFactory** factory);
+    }
+
+    } // namespace Validation
+    } // namespace Xml
+    } // namespace Elastosx
+}

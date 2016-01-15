@@ -1,0 +1,93 @@
+module
+{
+    interface Elastos.Droid.Text.ILayout;
+    interface Elastos.Droid.Text.ISpannable;
+    interface Elastos.Droid.View.IMotionEvent;
+    interface Elastos.Droid.Widget.ITextView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    interface ITouch{
+
+        /**
+         * Scrolls the specified widget to the specified coordinates, except
+         * constrains the X scrolling position to the horizontal regions of
+         * the text that will be visible after scrolling to the specified
+         * Y position.
+         */
+        ScrollTo(
+            [in] ITextView* widget,
+            [in] ILayout* layout,
+            [in] Int32 x,
+            [in] Int32 y);
+
+        /**
+         * Handles touch events for dragging.  You may want to do other actions
+         * like moving the cursor on touch as well.
+         */
+        OnTouchEvent(
+            [in] ITextView* widget,
+            [in] ISpannable* buffer,
+            [in] IMotionEvent* event,
+            [out] Boolean* ret);
+
+        /**
+         * @param widget The text view.
+         * @param buffer The text buffer.
+         */
+        GetInitialScrollX(
+            [in] ITextView* widget,
+            [in] ISpannable* buffer,
+            [out] Int32* ret);
+
+        /**
+         * @param widget The text view.
+         * @param buffer The text buffer.
+         */
+        GetInitialScrollY(
+            [in] ITextView* widget,
+            [in] ISpannable* buffer,
+            [out] Int32* ret);
+
+        /**
+         * Checks if selection is still active.
+         * This is useful for extending Selection span on buffer.
+         * @param buffer The text buffer.
+         * @return true if buffer has been marked for selection.
+         *
+         * @hide
+         */
+        IsActivelySelecting(
+            [in] ISpannable* buffer,
+            [out] Boolean* ret);
+
+        /**
+         * Checks if selection has begun (are we out of slop?).
+         * Note: DragState.mIsSelectionStarted goes back to false with the very next event.
+         * This is useful for starting Selection span on buffer.
+         * @param buffer The text buffer.
+         * @return true if selection has started on the buffer.
+         *
+         * @hide
+         */
+        IsSelectionStarted(
+            [in] ISpannable* buffer,
+            [out] Boolean* ret);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Text.INoCopySpan
+     */
+    interface ITouchDragState {
+
+    }
+
+    }//namespace Method
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

@@ -1,0 +1,43 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * A view to show hints on Keyguard ("Swipe up to unlock", "Tap again to open").
+     */
+    /**
+     * @Involve
+     * interface ITextView
+     */
+    interface IKeyguardIndicationTextView {
+
+        /**
+         * Changes the text with an animation and makes sure a single indication is shown long enough.
+         *
+         * @param text The text to show.
+         */
+        SwitchIndication(
+            [in] ICharSequence* text);
+
+        /**
+         * See {@link #switchIndication}.
+         */
+        SwitchIndication(
+            [in] Int32 textResId);
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

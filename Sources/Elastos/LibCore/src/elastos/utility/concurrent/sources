@@ -1,0 +1,60 @@
+
+TARGET_NAME = concurrent
+TARGET_TYPE = lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/concurrent;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/concurrent/atomic;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/concurrent/locks;
+
+SOURCES += AbstractExecutorService.cpp
+SOURCES += CArrayBlockingQueue.cpp
+SOURCES += CConcurrentHashMap.cpp
+SOURCES += CConcurrentLinkedDeque.cpp
+SOURCES += CConcurrentLinkedQueue.cpp
+SOURCES += CConcurrentSkipListMap.cpp
+SOURCES += CConcurrentSkipListSet.cpp
+SOURCES += CCopyOnWriteArrayList.cpp
+SOURCES += CCopyOnWriteArrayListHelper.cpp
+SOURCES += CCopyOnWriteArraySet.cpp
+SOURCES += CCountDownLatch.cpp
+SOURCES += CCyclicBarrier.cpp
+SOURCES += CDelayQueue.cpp
+SOURCES += CExchanger.cpp
+SOURCES += CExecutorCompletionService.cpp
+SOURCES += CExecutors.cpp
+SOURCES += CForkJoinPool.cpp
+SOURCES += CForkJoinTaskHelper.cpp
+SOURCES += ForkJoinWorkerThread.cpp
+SOURCES += CLinkedBlockingDeque.cpp
+SOURCES += CLinkedBlockingQueue.cpp
+SOURCES += CLinkedTransferQueue.cpp
+SOURCES += CPhaser.cpp
+SOURCES += CPriorityBlockingQueue.cpp
+SOURCES += CSemaphore.cpp
+SOURCES += CTimeUnitHelper.cpp
+SOURCES += CThreadLocalRandom.cpp
+SOURCES += CThreadLocalRandomHelper.cpp
+SOURCES += CSynchronousQueue.cpp
+SOURCES += CScheduledThreadPoolExecutor.cpp
+SOURCES += CopyOnWriteArrayList.cpp
+SOURCES += CountedCompleter.cpp
+SOURCES += Executors.cpp
+SOURCES += ForkJoinTask.cpp
+SOURCES += FutureTask.cpp
+SOURCES += TimeUnit.cpp
+SOURCES += ThreadPoolExecutor.cpp
+SOURCES += RecursiveAction.cpp
+SOURCES += RecursiveTask.cpp
+SOURCES += concurrent.cpp
+
+ELASTOS_LIBS += atomic/atomic.lib
+ELASTOS_LIBS += locks/locks.lib

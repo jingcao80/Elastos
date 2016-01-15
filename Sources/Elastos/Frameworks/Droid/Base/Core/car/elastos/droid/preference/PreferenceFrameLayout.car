@@ -1,0 +1,39 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Preference {
+
+    /**
+     * @hide
+     *
+     * @Involve
+     * interface IFrameLayout
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IPreferenceFrameLayout {
+    }
+
+    /**
+     * @hide
+     *
+     * @Involve
+     * interface IFrameLayoutLayoutParams;
+     * interface IViewGroupMarginLayoutParams;
+     * interface IViewGroupLayoutParams;
+     */
+    interface IPreferenceFrameLayoutParams {
+    }
+
+    } // namespace Preference
+    } // namespace Droid
+    } // namespace Elastos
+}
+

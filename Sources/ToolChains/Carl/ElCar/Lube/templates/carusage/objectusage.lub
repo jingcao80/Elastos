@@ -1,0 +1,49 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+${class.name} {$^
+$   WITH all interfaces DO
+$       IF attrib is not "generic" and attrib is not "clsobj" and attrib is not "callback"
+$           IF interface is first
+ ${name}$^
+$           ELSE
+, ${name}$^
+$           END IF
+$       END IF
+$   END DO ;; all interfaces
+ }$^
+
+$IF attrib is not "private"
+$   IF attrib is not "hasctor"
+$       WITH all interfaces DO
+$          IF attrib is not "callback" and attrib is not "clsobj"
+$ ;; static ECode
+${class.name}::$^
+$              IF class.attrib is "singleton"
+AcquireSingleton(
+$              ELSE
+New(
+$              END IF ;; singleton
+        /*[out]*/ ${name} **p${name});
+$ ;; static ECode
+${class.name}::$^
+$              IF class.attrib is "singleton"
+AcquireSingletonInDomain(
+$              ELSE
+NewInRegime(
+$              END IF ;; singleton
+        /*[in]*/  PRegime pRegime,
+        /*[out]*/ ${name} **p${name});
+$           END IF
+$       END DO ;; all interfaces
+$    ELSE ;; hasctor
+${UsageNewOfCtor(class)}
+$    END IF ;; hasctor
+$END IF ;; private
+$IF attrib is "hascallback"
+$    TEMPLATE "callbackusage.lub"
+$END IF
+

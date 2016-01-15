@@ -1,0 +1,116 @@
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IOutputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+
+    /**
+     * External class that reads data from a given {@link InputStream}. May be
+     * called multiple times when reading rotated data.
+     */
+    [local]
+    interface IFileRotatorReader {
+        Read(
+            [in] IInputStream* inStream);
+    }
+
+    /**
+     * External class that writes data to a given {@link OutputStream}.
+     */
+    [local]
+    interface IFileRotatorWriter {
+        Write(
+            [in] IOutputStream* outStream);
+    }
+
+    /**
+     * External class that reads existing data from given {@link InputStream},
+     * then writes any modified data to {@link OutputStream}.
+     */
+    /**
+     * @Involve
+     * interface IFileRotatorReader
+     * interface IFileRotatorWriter
+     */
+    [local]
+    interface IFileRotatorRewriter {
+        Reset();
+
+        ShouldWrite(
+            [out] Boolean* result);
+    }
+
+    /**
+     * Utility that rotates files over time, similar to {@code logrotate}. There is
+     * a single "active" file, which is periodically rotated into historical files,
+     * and eventually deleted entirely. Files are stored under a specific directory
+     * with a well-known prefix.
+     * <p>
+     * Instead of manipulating files directly, users implement interfaces that
+     * perform operations on {@link InputStream} and {@link OutputStream}. This
+     * enables atomic rewriting of file contents in
+     * {@link #rewriteActive(Rewriter, long)}.
+     * <p>
+     * Users must periodically call {@link #maybeRotate(long)} to perform actual
+     * rotation. Not inherently thread safe.
+     */
+    [local]
+    interface IFileRotator {
+        /**
+         * Delete all files managed by this rotator.
+         */
+        DeleteAll();
+
+        /**
+         * Dump all files managed by this rotator for debugging purposes.
+         */
+        DumpAll(
+            [in] IOutputStream* os);
+
+        /**
+         * Process currently active file, first reading any existing data, then
+         * writing modified data. Maintains a backup during write, which is restored
+         * if the write fails.
+         */
+        RewriteActive(
+            [in] IFileRotatorRewriter* rewriter,
+            [in] Int64 currentTimeMillis);
+
+        CombineActive(
+            [in] IFileRotatorReader* reader,
+            [in] IFileRotatorWriter* writer,
+            [in] Int64 currentTimeMillis);
+
+        /**
+         * Process all files managed by this rotator, usually to rewrite historical
+         * data. Each file is processed atomically.
+         */
+        RewriteAll(
+            [in] IFileRotatorRewriter* rewriter);
+
+        /**
+         * Read any rotated data that overlap the requested time range.
+         */
+        ReadMatching(
+            [in] IFileRotatorReader* reader,
+            [in] Int64 matchStartMillis,
+            [in] Int64 matchEndMillis);
+
+
+        /**
+         * Examine all files managed by this rotator, renaming or deleting if their
+         * age matches the configured thresholds.
+         */
+        MaybeRotate(
+            [in] Int64 currentTimeMillis);
+    }
+
+    } // namespace Utility
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

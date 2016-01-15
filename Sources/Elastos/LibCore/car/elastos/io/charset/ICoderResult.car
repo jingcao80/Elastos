@@ -1,0 +1,143 @@
+module
+{
+    namespace Elastos {
+    namespace IO {
+    namespace Charset {
+
+    /**
+     * Used to indicate the result of encoding/decoding. There are four types of
+     * results:
+     * <ol>
+     * <li>UNDERFLOW indicates that all input has been processed but more input is
+     * required. It is represented by the unique object
+     * <code>CoderResult.UNDERFLOW</code>.
+     * <li>OVERFLOW indicates an insufficient output buffer size. It is represented
+     * by the unique object <code>CoderResult.OVERFLOW</code>.
+     * <li>A malformed-input error indicates that an unrecognizable sequence of
+     * input units has been encountered. Get an instance of this type of result by
+     * calling <code>CoderResult.malformedForLength(int)</code> with the length of
+     * the malformed-input.
+     * <li>An unmappable-character error indicates that a sequence of input units
+     * can not be mapped to the output charset. Get an instance of this type of
+     * result by calling <code>CoderResult.unmappableForLength(int)</code> with
+     * the input sequence size indicating the identity of the unmappable character.
+     * </ol>
+     */
+    interface ICoderResult {
+        /**
+         * Returns true if this result is an underflow condition.
+         *
+         * @return true if an underflow, otherwise false.
+         */
+        IsUnderflow(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if this result represents a malformed-input error or an
+         * unmappable-character error.
+         *
+         * @return true if this is a malformed-input error or an
+         *         unmappable-character error, otherwise false.
+         */
+        IsError(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if this result represents a malformed-input error.
+         *
+         * @return true if this is a malformed-input error, otherwise false.
+         */
+        IsMalformed(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if this result is an overflow condition.
+         *
+         * @return true if this is an overflow, otherwise false.
+         */
+        IsOverflow(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if this result represents an unmappable-character error.
+         *
+         * @return true if this is an unmappable-character error, otherwise false.
+         */
+        IsUnmappable(
+            [out] Boolean* result);
+
+        /**
+         * Gets the length of the erroneous input. The length is only meaningful to
+         * a malformed-input error or an unmappable character error.
+         *
+         * @return the length, as an integer, of this object's erroneous input.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * UnsupportedOperationException | if this result is an overflow or underflow.
+         */
+        GetLength(
+            [out] Int32* length);
+
+        /**
+         * Throws an exception corresponding to this coder result.
+         *
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * BufferUnderflowException | in case this is an underflow.
+         * BufferOverflowException | in case this is an overflow.
+         * UnmappableCharacterException | in case this is an unmappable-character error.
+         * MalformedInputException | in case this is a malformed-input error.
+         * CharacterCodingException | the default exception.
+         */
+        ThrowException();
+    }
+
+    interface ICoderResultHelper {
+        GetUNDERFLOW(
+            [out] ICoderResult** result);
+
+        GetOVERFLOW(
+            [out] ICoderResult** result);
+
+        /**
+         * Gets a <code>CoderResult</code> object indicating a malformed-input
+         * error.
+         *
+         * @param length
+         *            the length of the malformed-input.
+         * @return a <code>CoderResult</code> object indicating a malformed-input
+         *         error.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if <code>length</code> is non-positive.
+         */
+        MalformedForLength(
+            [in] Int32 length,
+            [out] ICoderResult** result);
+
+        /**
+         * Gets a <code>CoderResult</code> object indicating an unmappable
+         * character error.
+         *
+         * @param length
+         *            the length of the input unit sequence denoting the unmappable
+         *            character.
+         * @return a <code>CoderResult</code> object indicating an unmappable
+         *         character error.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if <code>length</code> is non-positive.
+         */
+        UnmappableForLength(
+            [in] Int32 length,
+            [out] ICoderResult** result);
+    }
+
+    } // namespace Charset
+    } // namespace IO
+    } // namespace Elastos
+}

@@ -1,0 +1,36 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+    /**
+     * Callback interface definition for HDMI client to get informed of
+     * the CEC logical device status change event.
+     *
+     * @hide
+    */
+    [oneway]
+    interface IIHdmiDeviceEventListener {
+        /**
+         * @param deviceInfo {@link HdmiDeviceInfo} of the logical device whose
+         *                   status has changed
+         * @param status device status. It should be one of the following values
+         *        <ul>
+         *        <li>{@link HdmiControlManager#DEVICE_EVENT_ADD_DEVICE}
+         *        <li>{@link HdmiControlManager#DEVICE_EVENT_REMOVE_DEVICE}
+         *        <li>{@link HdmiControlManager#DEVICE_EVENT_UPDATE_DEVICE}
+         *        </ul>
+         */
+        OnStatusChanged(
+            [in] IHdmiDeviceInfo* deviceInfo,
+            [in] Int32 status);
+    }
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

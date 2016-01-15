@@ -1,0 +1,55 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * {@code SecureRandomSpi} is the <i>Service Provider Interface</i> (<b>SPI</b>) definition
+     * for {@link SecureRandom}.
+     *
+     * @see SecureRandom
+     */
+    /**
+     * @Involve
+     * interface Elastos.IO.ISerializable;
+     */
+    [deprecated]
+    interface ISecureRandomSpi {
+        /**
+         * Reseeds this {@code SecureRandomSpi} instance with the specified {@code
+         * seed}. The seed of this {@code SecureRandomSpi} instance is supplemented,
+         * not replaced.
+         *
+         * @param seed
+         *            the new seed.
+         */
+        EngineSetSeed(
+            [in] ArrayOf<Byte>* seed);
+
+        /**
+         * Generates and stores random bytes in the given {@code byte[]} for each
+         * array element.
+         *
+         * @param bytes
+         *            the {@code byte[]} to be filled with random bytes.
+         */
+        EngineNextBytes(
+            [in] ArrayOf<Byte>* bytes);
+
+        /**
+         * Generates and returns the specified number of seed bytes, computed using
+         * the seed generation algorithm used by this {@code SecureRandomSpi}.
+         *
+         * @param numBytes
+         *            the number of seed bytes.
+         * @return the seed bytes
+         */
+        EngineGenerateSeed(
+            [in] Int32 numBytes,
+            [out, callee] ArrayOf<Byte>* seed);
+    }
+
+    } // end namespace Security
+    } // end namespace Elastos
+}

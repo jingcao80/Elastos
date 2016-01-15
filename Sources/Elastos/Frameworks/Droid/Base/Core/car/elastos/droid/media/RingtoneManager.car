@@ -1,0 +1,362 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Media.IRingtone;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    [local]
+    interface IRingtoneManager {
+        /**
+         * Type that refers to sounds that are used for the phone ringer.
+         */
+        const Int32 TYPE_RINGTONE = 1;
+
+        /**
+         * Type that refers to sounds that are used for notifications.
+         */
+        const Int32 TYPE_NOTIFICATION = 2;
+
+        /**
+         * Type that refers to sounds that are used for the alarm.
+         */
+        const Int32 TYPE_ALARM = 4;
+
+        /**
+         * All types of sounds.
+         */
+        const Int32 TYPE_ALL = 0x7; // TYPE_RINGTONE | TYPE_NOTIFICATION | TYPE_ALARM;
+
+        /**
+         * Activity Action: Shows a ringtone picker.
+         * <p>
+         * Input: {@link #EXTRA_RINGTONE_EXISTING_URI},
+         * {@link #EXTRA_RINGTONE_SHOW_DEFAULT},
+         * {@link #EXTRA_RINGTONE_SHOW_SILENT}, {@link #EXTRA_RINGTONE_TYPE},
+         * {@link #EXTRA_RINGTONE_DEFAULT_URI}, {@link #EXTRA_RINGTONE_TITLE},
+         * {@link #EXTRA_RINGTONE_INCLUDE_DRM}.
+         * <p>
+         * Output: {@link #EXTRA_RINGTONE_PICKED_URI}.
+         */
+        //@SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        const String ACTION_RINGTONE_PICKER = "android.intent.action.RINGTONE_PICKER";
+
+        /**
+         * Given to the ringtone picker as a boolean. Whether to show an item for
+         * "Default".
+         *
+         * @see #ACTION_RINGTONE_PICKER
+         */
+        const String EXTRA_RINGTONE_SHOW_DEFAULT =
+                "android.intent.extra.ringtone.SHOW_DEFAULT";
+
+        /**
+         * Given to the ringtone picker as a boolean. Whether to show an item for
+         * "Silent". If the "Silent" item is picked,
+         * {@link #EXTRA_RINGTONE_PICKED_URI} will be null.
+         *
+         * @see #ACTION_RINGTONE_PICKER
+         */
+        const String EXTRA_RINGTONE_SHOW_SILENT =
+                "android.intent.extra.ringtone.SHOW_SILENT";
+
+        /**
+         * Given to the ringtone picker as a boolean. Whether to include DRM ringtones.
+         */
+        const String EXTRA_RINGTONE_INCLUDE_DRM =
+                "android.intent.extra.ringtone.INCLUDE_DRM";
+
+        /**
+         * Given to the ringtone picker as a {@link Uri}. The {@link Uri} of the
+         * current ringtone, which will be used to show a checkmark next to the item
+         * for this {@link Uri}. If showing an item for "Default" (@see
+         * {@link #EXTRA_RINGTONE_SHOW_DEFAULT}), this can also be one of
+         * {@link System#DEFAULT_RINGTONE_URI},
+         * {@link System#DEFAULT_NOTIFICATION_URI}, or
+         * {@link System#DEFAULT_ALARM_ALERT_URI} to have the "Default" item
+         * checked.
+         *
+         * @see #ACTION_RINGTONE_PICKER
+         */
+        const String EXTRA_RINGTONE_EXISTING_URI =
+                "android.intent.extra.ringtone.EXISTING_URI";
+
+        /**
+         * Given to the ringtone picker as a {@link Uri}. The {@link Uri} of the
+         * ringtone to play when the user attempts to preview the "Default"
+         * ringtone. This can be one of {@link System#DEFAULT_RINGTONE_URI},
+         * {@link System#DEFAULT_NOTIFICATION_URI}, or
+         * {@link System#DEFAULT_ALARM_ALERT_URI} to have the "Default" point to
+         * the current sound for the given default sound type. If you are showing a
+         * ringtone picker for some other type of sound, you are free to provide any
+         * {@link Uri} here.
+         */
+        const String EXTRA_RINGTONE_DEFAULT_URI =
+                "android.intent.extra.ringtone.DEFAULT_URI";
+
+        /**
+         * Given to the ringtone picker as an int. Specifies which ringtone type(s) should be
+         * shown in the picker. One or more of {@link #TYPE_RINGTONE},
+         * {@link #TYPE_NOTIFICATION}, {@link #TYPE_ALARM}, or {@link #TYPE_ALL}
+         * (bitwise-ored together).
+         */
+        const String EXTRA_RINGTONE_TYPE = "android.intent.extra.ringtone.TYPE";
+
+        /**
+         * Given to the ringtone picker as a {@link CharSequence}. The title to
+         * show for the ringtone picker. This has a default value that is suitable
+         * in most cases.
+         */
+        const String EXTRA_RINGTONE_TITLE = "android.intent.extra.ringtone.TITLE";
+
+        /**
+         * Returned from the ringtone picker as a {@link Uri}.
+         * <p>
+         * It will be one of:
+         * <li> the picked ringtone,
+         * <li> a {@link Uri} that equals {@link System#DEFAULT_RINGTONE_URI},
+         * {@link System#DEFAULT_NOTIFICATION_URI}, or
+         * {@link System#DEFAULT_ALARM_ALERT_URI} if the default was chosen,
+         * <li> null if the "Silent" item was picked.
+         *
+         * @see #ACTION_RINGTONE_PICKER
+         */
+        const String EXTRA_RINGTONE_PICKED_URI =
+                "android.intent.extra.ringtone.PICKED_URI";
+
+        /**
+         * The column index (in the cursor returned by {@link #getCursor()} for the
+         * row ID.
+         */
+        const Int32 ID_COLUMN_INDEX = 0;
+
+        /**
+         * The column index (in the cursor returned by {@link #getCursor()} for the
+         * title.
+         */
+        const Int32 TITLE_COLUMN_INDEX = 1;
+
+        /**
+         * The column index (in the cursor returned by {@link #getCursor()} for the
+         * media provider's URI.
+         */
+        const Int32 URI_COLUMN_INDEX = 2;
+
+        /**
+         * Sets which type(s) of ringtones will be listed by this.
+         *
+         * @param type The type(s), one or more of {@link #TYPE_RINGTONE},
+         *            {@link #TYPE_NOTIFICATION}, {@link #TYPE_ALARM},
+         *            {@link #TYPE_ALL}.
+         * @see #EXTRA_RINGTONE_TYPE
+         */
+        SetType(
+            [in] Int32 type);
+
+        /**
+         * Infers the playback stream type based on what type of ringtones this
+         * manager is returning.
+         *
+         * @return The stream type.
+         */
+        InferStreamType(
+            [out] Int32* result);
+
+        /**
+         * Whether retrieving another {@link Ringtone} will stop playing the
+         * previously retrieved {@link Ringtone}.
+         * <p>
+         * If this is false, make sure to {@link Ringtone#stop()} any previous
+         * ringtones to free resources.
+         *
+         * @param stopPreviousRingtone If TRUE, the previously retrieved
+         *            {@link Ringtone} will be stopped.
+         */
+        SetStopPreviousRingtone(
+            [in] Boolean stopPreviousRingtone);
+
+        /**
+         * @see #setStopPreviousRingtone(boolean)
+         */
+        GetStopPreviousRingtone(
+            [out] Boolean* result);
+
+        /**
+         * Stops playing the last {@link Ringtone} retrieved from this.
+         */
+        StopPreviousRingtone();
+
+        /**
+         * Returns whether DRM ringtones will be included.
+         *
+         * @return Whether DRM ringtones will be included.
+         * @see #setIncludeDrm(boolean)
+         */
+        GetIncludeDrm(
+            [out] Boolean* result);
+
+        /**
+         * Sets whether to include DRM ringtones.
+         *
+         * @param includeDrm Whether to include DRM ringtones.
+         */
+        SetIncludeDrm(
+            [in] Boolean includeDrm);
+
+        /**
+         * Returns a {@link Cursor} of all the ringtones available. The returned
+         * cursor will be the same cursor returned each time this method is called,
+         * so do not {@link Cursor#close()} the cursor. The cursor can be
+         * {@link Cursor#deactivate()} safely.
+         * <p>
+         * If {@link RingtoneManager#RingtoneManager(Activity)} was not used, the
+         * caller should manage the returned cursor through its activity's life
+         * cycle to prevent leaking the cursor.
+         *
+         * @return A {@link Cursor} of all the ringtones available.
+         * @see #ID_COLUMN_INDEX
+         * @see #TITLE_COLUMN_INDEX
+         * @see #URI_COLUMN_INDEX
+         */
+        GetCursor(
+            [out] ICursor** result);
+
+        /**
+         * Gets a {@link Ringtone} for the ringtone at the given position in the
+         * {@link Cursor}.
+         *
+         * @param position The position (in the {@link Cursor}) of the ringtone.
+         * @return A {@link Ringtone} pointing to the ringtone.
+         */
+        GetRingtone(
+            [in] Int32 position,
+            [out] IRingtone** result);
+
+        /**
+         * Gets a {@link Uri} for the ringtone at the given position in the {@link Cursor}.
+         *
+         * @param position The position (in the {@link Cursor}) of the ringtone.
+         * @return A {@link Uri} pointing to the ringtone.
+         */
+        GetRingtoneUri(
+            [in] Int32 position,
+            [out] IUri** result);
+
+        /**
+         * Gets the position of a {@link Uri} within this {@link RingtoneManager}.
+         *
+         * @param ringtoneUri The {@link Uri} to retreive the position of.
+         * @return The position of the {@link Uri}, or -1 if it cannot be found.
+         */
+        GetRingtonePosition(
+            [in] IUri* ringtoneUri,
+            [out] Int32* result);
+    }
+
+    [local]
+    interface IRingtoneManagerHelper {
+        /**
+         * Returns a valid ringtone URI. No guarantees on which it returns. If it
+         * cannot find one, returns null.
+         *
+         * @param context The context to use for querying.
+         * @return A ringtone URI, or null if one cannot be found.
+         */
+        GetValidRingtoneUri(
+            [in] IContext* ctx,
+            [out] IUri** result);
+
+        /**
+         * Returns a {@link Ringtone} for a given sound URI.
+         * <p>
+         * If the given URI cannot be opened for any reason, this method will
+         * attempt to fallback on another sound. If it cannot find any, it will
+         * return null.
+         *
+         * @param context A context used to query.
+         * @param ringtoneUri The {@link Uri} of a sound or ringtone.
+         * @return A {@link Ringtone} for the given URI, or null.
+         */
+        GetRingtone(
+            [in] IContext* ctx,
+            [in] IUri* ringtoneUri,
+            [out] IRingtone** result);
+
+        /**
+         * Gets the current default sound's {@link Uri}. This will give the actual
+         * sound {@link Uri}, instead of using this, most clients can use
+         * {@link System#DEFAULT_RINGTONE_URI}.
+         *
+         * @param context A context used for querying.
+         * @param type The type whose default sound should be returned. One of
+         *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
+         *            {@link #TYPE_ALARM}.
+         * @return A {@link Uri} pointing to the default sound for the sound type.
+         * @see #setActualDefaultRingtoneUri(Context, int, Uri)
+         */
+        GetActualDefaultRingtoneUri(
+            [in] IContext* ctx,
+            [in] Int32 type,
+            [out] IUri** result);
+
+        /**
+         * Sets the {@link Uri} of the default sound for a given sound type.
+         *
+         * @param context A context used for querying.
+         * @param type The type whose default sound should be set. One of
+         *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
+         *            {@link #TYPE_ALARM}.
+         * @param ringtoneUri A {@link Uri} pointing to the default sound to set.
+         * @see #getActualDefaultRingtoneUri(Context, int)
+         */
+        SetActualDefaultRingtoneUri(
+            [in] IContext* ctx,
+            [in] Int32 type,
+            [in] IUri* ringtoneUri);
+
+        /**
+         * Returns whether the given {@link Uri} is one of the default ringtones.
+         *
+         * @param ringtoneUri The ringtone {@link Uri} to be checked.
+         * @return Whether the {@link Uri} is a default.
+         */
+        IsDefault(
+            [in] IUri* ringtoneUri,
+            [out] Boolean* result);
+
+        /**
+         * Returns the type of a default {@link Uri}.
+         *
+         * @param defaultRingtoneUri The default {@link Uri}. For example,
+         *            {@link System#DEFAULT_RINGTONE_URI},
+         *            {@link System#DEFAULT_NOTIFICATION_URI}, or
+         *            {@link System#DEFAULT_ALARM_ALERT_URI}.
+         * @return The type of the defaultRingtoneUri, or -1.
+         */
+        GetDefaultType(
+            [in] IUri* defaultRingtoneUri,
+            [out] Int32* result);
+
+        /**
+         * Returns the {@link Uri} for the default ringtone of a particular type.
+         * Rather than returning the actual ringtone's sound {@link Uri}, this will
+         * return the symbolic {@link Uri} which will resolved to the actual sound
+         * when played.
+         *
+         * @param type The ringtone type whose default should be returned.
+         * @return The {@link Uri} of the default ringtone for the given type.
+         */
+        GetDefaultUri(
+            [in] Int32 type,
+            [out] IUri** result);
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

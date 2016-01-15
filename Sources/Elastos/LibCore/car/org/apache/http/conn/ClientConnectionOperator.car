@@ -1,0 +1,93 @@
+
+module
+{
+
+    using interface Elastos.Net.IInetAddress;
+
+    interface Org.Apache.Http.IHttpHost;
+    interface Org.Apache.Http.Conn.IOperatedClientConnection;
+    interface Org.Apache.Http.Params.IHttpParams;
+    interface Org.Apache.Http.Protocol.IHttpContext;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+
+    /**
+     * Interface for opening {@link OperatedClientConnection connections}.
+     * This interface encapsulates the logic to create sockets and to
+     * open or update the connection with the new socket.
+     * Implementations will most likely make use of
+     * {@link SocketFactory socket factories}.
+     * <br/>
+     * The methods in this interface allow the creation of plain and layered
+     * sockets. Creating a tunnelled connection through a proxy, however,
+     * is not within the scope of the operator.
+     *
+     * @author <a href="mailto:rolandw at apache.org">Roland Weber</a>
+     *
+     *
+     * <!-- empty lines to avoid svn diff problems -->
+     * @version   $Revision: 645850 $ $Date: 2008-04-08 04:08:52 -0700 (Tue, 08 Apr 2008) $
+     *
+     * @since 4.0
+     */
+    interface IClientConnectionOperator {
+
+        /**
+         * Creates a new connection that can be operated.
+         *
+         * @return  a new, unopened connection for use with this operator
+         */
+        CreateConnection(
+            [out] IOperatedClientConnection** connection);
+
+        /**
+         * Opens a connection to the given target host.
+         *
+         * @param conn      the connection to open
+         * @param target    the target host to connect to
+         * @param local     the local address to route from, or
+         *                  <code>null</code> for the default
+         * @param context   the context for the connection
+         * @param params    the parameters for the connection
+         *
+         * @throws IOException      in case of a problem
+         */
+        OpenConnection(
+            [in] IOperatedClientConnection* conn,
+            [in] IHttpHost* target,
+            [in] IInetAddress* loc,
+            [in] IHttpContext* context,
+            [in] IHttpParams* params);
+
+        /**
+         * Updates a connection with a layered secure connection.
+         * The typical use of this method is to update a tunnelled plain
+         * connection (HTTP) to a secure TLS/SSL connection (HTTPS).
+         *
+         * @param conn      the open connection to update
+         * @param target    the target host for the updated connection.
+         *                  The connection must already be open or tunnelled
+         *                  to the host and port, but the scheme of the target
+         *                  will be used to create a layered connection.
+         * @param context   the context for the connection
+         * @param params    the parameters for the updated connection
+         *
+         * @throws IOException      in case of a problem
+         */
+        UpdateSecureConnection(
+            [in] IOperatedClientConnection* conn,
+            [in] IHttpHost* target,
+            [in] IHttpContext* context,
+            [in] IHttpParams* params);
+
+    }
+
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

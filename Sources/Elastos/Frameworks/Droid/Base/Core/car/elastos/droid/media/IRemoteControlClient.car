@@ -1,0 +1,85 @@
+
+module
+{
+    interface Elastos.Droid.Media.IIRemoteControlDisplay;
+    interface Elastos.Droid.Media.IRating;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+/**
+ * @hide
+ * Interface registered by AudioManager to notify a source of remote control information
+ * that information is requested to be displayed on the remote control (through
+ * IRemoteControlDisplay).
+ * {@see AudioManager#registerRemoteControlClient(RemoteControlClient)}.
+ */
+    [oneway]
+    interface IIRemoteControlClient {
+        /**
+         * Notifies a remote control client that information for the given generation ID is
+         * requested. If the flags contains
+         * {@link RemoteControlClient#FLAG_INFORMATION_REQUESTED_ALBUM_ART} then the width and height
+         *   parameters are valid.
+         * @param generationId
+         * @param infoFlags
+         * FIXME: is infoFlags required? since the RCC pushes info, this might always be called
+         *        with RC_INFO_ALL
+         */
+        OnInformationRequested(
+            [in] Int32 generationId,
+            [in] Int32 infoFlags);
+
+        /**
+         * Notifies a remote control client that information for the given generation ID is
+         * requested for the given RemoteControlDisplay alone.
+         * @param rcd the display to which current info should be sent
+         */
+        InformationRequestForDisplay(
+            [in] IIRemoteControlDisplay * rcd,
+            [in] Int32 w,
+            [in] Int32 h);
+
+        /**
+         * Sets the generation counter of the current client that is displayed on the remote control.
+         */
+        SetCurrentClientGenerationId(
+            [in] Int32 clientGeneration);
+
+        PlugRemoteControlDisplay(
+            [in] IIRemoteControlDisplay * rcd,
+            [in] Int32 w,
+            [in] Int32 h);
+
+        UnplugRemoteControlDisplay(
+            [in] IIRemoteControlDisplay * rcd);
+
+        SetBitmapSizeForDisplay(
+            [in] IIRemoteControlDisplay * rcd,
+            [in] Int32 w,
+            [in] Int32 h);
+
+        SetWantsSyncForDisplay(
+            [in] IIRemoteControlDisplay * rcd,
+            [in] Boolean wantsSync);
+
+        EnableRemoteControlDisplay(
+            [in] IIRemoteControlDisplay * rcd,
+            [in] Boolean enabled);
+
+        SeekTo(
+            [in] Int32 clientGeneration,
+            [in] Int64 timeMs);
+
+        UpdateMetadata(
+            [in] Int32 clientGeneration,
+            [in] Int32 key,
+            [in] IRating * value);
+
+    }
+
+    } // namespace Media
+    } // namepsace Droid
+    } // namespace Elastos
+}

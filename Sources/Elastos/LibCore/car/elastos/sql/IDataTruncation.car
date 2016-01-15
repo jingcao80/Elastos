@@ -1,0 +1,59 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    /**
+      * @Involve
+      * interface Elastos.Sql.ISQLWarning;
+      */
+    interface IDataTruncation {
+        /**
+         * Gets the number of bytes of data that should have been read/written.
+         *
+         * @return the number of bytes that should have been read or written. The
+         *         value is set to {@code -1} if the size is unknown.
+         */
+        GetDataSize(
+            [out] Int32* size);
+
+        /**
+         * Gets the index of the column or of the parameter that was truncated.
+         *
+         * @return the index number of the column or of the parameter.
+         */
+        GetIndex(
+            [out] Int32* index);
+
+        /**
+         * Gets whether the value truncated was a parameter value or a column value.
+         *
+         * @return {@code true} if the value truncated was a parameter value,
+         *         {@code false} if it was a column value.
+         */
+        GetParameter(
+            [out] Boolean* isPara);
+
+        /**
+         * Gets whether the value was truncated on a read operation or a write
+         * operation
+         *
+         * @return {@code true} if the value was truncated on a read operation,
+         *         {@code false} otherwise.
+         */
+        GetRead(
+            [out] Boolean* isRead);
+
+        /**
+         * Gets the number of bytes of data that was actually read or written.
+         *
+         * @return the number of bytes actually read/written. The value may be set
+         *         to {@code -1} if the size is unknown.
+         */
+        GetTransferSize(
+            [out] Int32* size);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

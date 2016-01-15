@@ -1,0 +1,298 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
+    interface Elastos.Droid.Os.IHandler;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IJetPlayer;
+
+    /**
+     * Handles the notification when the JET engine generates an event.
+     */
+    interface IOnJetEventListener {
+        /**
+         * Callback for when the JET engine generates a new event.
+         *
+         * @param player the JET player the event is coming from
+         * @param segment 8 bit unsigned value
+         * @param track 6 bit unsigned value
+         * @param channel 4 bit unsigned value
+         * @param controller 7 bit unsigned value
+         * @param value 7 bit unsigned value
+         */
+        OnJetEvent(
+            [in] IJetPlayer* player,
+            [in] Int16 segment,
+            [in] Byte track,
+            [in] Byte channel,
+            [in] Byte controller,
+            [in] Byte value);
+
+        /**
+         * Callback for when JET's currently playing segment's userID is updated.
+         *
+         * @param player the JET player the status update is coming from
+         * @param userId the ID of the currently playing segment
+         * @param repeatCount the repetition count for the segment (0 means it plays once)
+         */
+        OnJetUserIdUpdate(
+            [in] IJetPlayer* player,
+            [in] Int32 userId,
+            [in] Int32 repeatCount);
+
+        /**
+         * Callback for when JET's number of queued segments is updated.
+         *
+         * @param player the JET player the status update is coming from
+         * @param nbSegments the number of segments in the JET queue
+         */
+        OnJetNumQueuedSegmentUpdate(
+            [in] IJetPlayer* player,
+            [in] Int32 nbSegments);
+
+        /**
+         * Callback for when JET pause state is updated.
+         *
+         * @param player the JET player the status update is coming from
+         * @param paused indicates whether JET is paused (1) or not (0)
+         */
+        OnJetPauseUpdate(
+            [in] IJetPlayer* player,
+            [in] Int32 paused);
+    }
+
+    [deprecated]
+    interface IJetPlayer {
+        /**
+         * Cloning a JetPlayer instance is not supported. Calling clone() will generate an exception.
+         */
+        Clone(
+            [out] IJetPlayer** jetPlayer);
+
+        /**
+         * Stops the current JET playback, and releases all associated native resources.
+         * The object can no longer be used and the reference should be set to NULL
+         * after a call to release().
+         */
+        ReleaseResources();
+
+        //--------------------------------------------
+        // Jet functionality
+        //------------------------
+        /**
+         * Loads a .jet file from a given path.
+         * @param path the path to the .jet file, for instance "/sdcard/mygame/music.jet".
+         * @return true if loading the .jet file was successful, false if loading failed.
+         */
+        LoadJetFile(
+            [in] String path,
+            [out] Boolean* result);
+
+        /**
+         * Loads a .jet file from an asset file descriptor.
+         * @param afd the asset file descriptor.
+         * @return true if loading the .jet file was successful, false if loading failed.
+         */
+        LoadJetFile(
+            [in] IAssetFileDescriptor* afd,
+            [out] Boolean* result);
+
+        /**
+         * Closes the resource containing the JET content.
+         * @return true if successfully closed, false otherwise.
+         */
+        CloseJetFile(
+            [out] Boolean* result);
+
+        /**
+         * Starts playing the JET segment queue.
+         * @return true if rendering and playback is successfully started, false otherwise.
+         */
+        Play(
+            [out] Boolean* result);
+
+        /**
+         * Pauses the playback of the JET segment queue.
+         * @return true if rendering and playback is successfully paused, false otherwise.
+         */
+        Pause(
+            [out] Boolean* result);
+
+        /**
+         * Queues the specified segment in the JET queue.
+         * @param segmentNum the identifier of the segment.
+         * @param libNum the index of the sound bank associated with the segment. Use -1 to indicate
+         *    that no sound bank (DLS file) is associated with this segment, in which case JET will use
+         *    the General MIDI library.
+         * @param repeatCount the number of times the segment will be repeated. 0 means the segment will
+         *    only play once. -1 means the segment will repeat indefinitely.
+         * @param transpose the amount of pitch transposition. Set to 0 for normal playback.
+         *    Range is -12 to +12.
+         * @param muteFlags a bitmask to specify which MIDI tracks will be muted during playback. Bit 0
+         *    affects track 0, bit 1 affects track 1 etc.
+         * @param userID a value specified by the application that uniquely identifies the segment.
+         *    this value is received in the
+         *    {@link OnJetEventListener#onJetUserIdUpdate(JetPlayer, Int32, Int32)} event listener method.
+         *    Normally, the application will keep a Byte value that is incremented each time a new
+         *    segment is queued up. This can be used to look up any special characteristics of that
+         *    track including trigger clips and mute flags.
+         * @return true if the segment was successfully queued, false if the queue is full or if the
+         *    parameters are invalid.
+         */
+        QueueJetSegment(
+            [in] Int32 segmentNum,
+            [in] Int32 libNum,
+            [in] Int32 repeatCount,
+            [in] Int32 transpose,
+            [in] Int32 muteFlags,
+            [in] Byte userID,
+            [out] Boolean* queued);
+
+        /**
+         * Queues the specified segment in the JET queue.
+         * @param segmentNum the identifier of the segment.
+         * @param libNum the index of the soundbank associated with the segment. Use -1 to indicate that
+         *    no sound bank (DLS file) is associated with this segment, in which case JET will use
+         *    the General MIDI library.
+         * @param repeatCount the number of times the segment will be repeated. 0 means the segment will
+         *    only play once. -1 means the segment will repeat indefinitely.
+         * @param transpose the amount of pitch transposition. Set to 0 for normal playback.
+         *    Range is -12 to +12.
+         * @param muteArray an array of booleans to specify which MIDI tracks will be muted during
+         *    playback. The value at index 0 affects track 0, value at index 1 affects track 1 etc.
+         *    The length of the array must be {@link #getMaxTracks()} for the call to succeed.
+         * @param userID a value specified by the application that uniquely identifies the segment.
+         *    this value is received in the
+         *    {@link OnJetEventListener#onJetUserIdUpdate(JetPlayer, Int32, Int32)} event listener method.
+         *    Normally, the application will keep a Byte value that is incremented each time a new
+         *    segment is queued up. This can be used to look up any special characteristics of that
+         *    track including trigger clips and mute flags.
+         * @return true if the segment was successfully queued, false if the queue is full or if the
+         *    parameters are invalid.
+         */
+        QueueJetSegmentMuteArray(
+            [in] Int32 segmentNum,
+            [in] Int32 libNum,
+            [in] Int32 repeatCount,
+            [in] Int32 transpose,
+            [in] ArrayOf<Boolean>* muteArray,
+            [in] Byte userID,
+            [out] Boolean* queued);
+
+        /**
+         * Modifies the mute flags.
+         * @param muteFlags a bitmask to specify which MIDI tracks are muted. Bit 0 affects track 0,
+         *    bit 1 affects track 1 etc.
+         * @param sync if false, the new mute flags will be applied as soon as possible by the JET
+         *    render and playback engine. If true, the mute flags will be updated at the start of the
+         *    next segment. If the segment is repeated, the flags will take effect the next time
+         *    segment is repeated.
+         * @return true if the mute flags were successfully updated, false otherwise.
+         */
+        SetMuteFlags(
+            [in] Int32 muteFlags,
+            [in] Boolean sync,
+            [out] Boolean* result);
+
+        /**
+         * Modifies the mute flags for the current active segment.
+         * @param muteArray an array of booleans to specify which MIDI tracks are muted. The value at
+         *    index 0 affects track 0, value at index 1 affects track 1 etc.
+         *    The length of the array must be {@link #getMaxTracks()} for the call to succeed.
+         * @param sync if false, the new mute flags will be applied as soon as possible by the JET
+         *    render and playback engine. If true, the mute flags will be updated at the start of the
+         *    next segment. If the segment is repeated, the flags will take effect the next time
+         *    segment is repeated.
+         * @return true if the mute flags were successfully updated, false otherwise.
+         */
+        SetMuteArray(
+            [in] ArrayOf<Boolean>* muteArray,
+            [in] Boolean sync,
+            [out] Boolean* result);
+
+        /**
+         * Mutes or unmutes a single track.
+         * @param trackId the index of the track to mute.
+         * @param muteFlag set to true to mute, false to unmute.
+         * @param sync if false, the new mute flags will be applied as soon as possible by the JET
+         *    render and playback engine. If true, the mute flag will be updated at the start of the
+         *    next segment. If the segment is repeated, the flag will take effect the next time
+         *    segment is repeated.
+         * @return true if the mute flag was successfully updated, false otherwise.
+         */
+        SetMuteFlag(
+            [in] Int32 trackId,
+            [in] Boolean muteFlag,
+            [in] Boolean sync,
+            [out] Boolean* result);
+
+        /**
+         * Schedules the playback of a clip.
+         * This will automatically update the mute flags in sync with the JET Clip Marker (controller
+         * 103). The parameter clipID must be in the range of 0-63. After the call to triggerClip, when
+         * JET next encounters a controller event 103 with bits 0-5 of the value equal to clipID and
+         * bit 6 set to 1, it will automatically unmute the track containing the controller event.
+         * When JET encounters the complementary controller event 103 with bits 0-5 of the value equal
+         * to clipID and bit 6 set to 0, it will mute the track again.
+         * @param clipId the identifier of the clip to trigger.
+         * @return true if the clip was successfully triggered, false otherwise.
+         */
+        TriggerClip(
+            [in] Int32 clipId,
+            [out] Boolean* result);
+
+        /**
+         * Empties the segment queue, and clears all clips that are scheduled for playback.
+         * @return true if the queue was successfully cleared, false otherwise.
+         */
+        ClearQueue(
+            [out] Boolean* result);
+
+        //--------------------------------------------
+        // Jet event listener
+        //------------------------
+        /**
+         * Sets the listener JetPlayer notifies when a JET event is generated by the rendering and
+         * playback engine.
+         * Notifications will be received in the same thread as the one in which the JetPlayer
+         * instance was created.
+         * @param listener
+         */
+        SetEventListener(
+            [in] IOnJetEventListener* listener);
+
+        /**
+         * Sets the listener JetPlayer notifies when a JET event is generated by the rendering and
+         * playback engine.
+         * Use this method to receive JET events in the Handler associated with another
+         * thread than the one in which you created the JetPlayer instance.
+         * @param listener
+         * @param handler the Handler that will receive the event notification messages.
+         */
+        SetEventListener(
+            [in] IOnJetEventListener* listener,
+            [in] IHandler* handler);
+    }
+
+    interface IJetPlayerHelper {
+        GetJetPlayer(
+            [out] IJetPlayer** player);
+
+        //--------------------------------------------
+        // Getters
+        //------------------------
+        /**
+         * Returns the maximum number of simultaneous MIDI tracks supported by JetPlayer
+         */
+        GetMaxTracks(
+            [out] Int32* tracks);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

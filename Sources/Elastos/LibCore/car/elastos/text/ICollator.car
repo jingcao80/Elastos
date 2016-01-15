@@ -1,0 +1,227 @@
+
+module
+{
+    interface Elastos.Utility.ILocale;
+    interface Elastos.Text.ICollationKey;
+
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * Performs locale-sensitive string comparison. A concrete subclass,
+     * RuleBasedCollator, allows customization of the collation ordering by the use of rule sets.
+     *
+     * @sa RuleBasedCollator
+     * <p>
+     * Following the Unicode Consortium's specifications for the Unicode Collation
+     * Algorithm (UCA), there are 4 different levels of strength used in comparisons:
+     *
+     * @sa Unicode Consortium
+     * @sa Unicode Collation Algorithm (UCA)
+     * <p>
+     * <li>PRIMARY strength: Typically, this is used to denote differences between base
+     * characters (for example, "a" < "b"). It is the strongest difference. For
+     * example, dictionaries are divided into different sections by base character.</li>
+     * <p>
+     * <li>SECONDARY strength: Accents in the characters are considered secondary
+     * differences (for example, "as" < "às" < "at"). Other differences between
+     * letters can also be considered secondary differences, depending on the language.
+     * A secondary difference is ignored when there is a primary difference anywhere
+     * in the strings.</li>
+     * <p>
+     * <li>TERTIARY strength: Upper and lower case differences in characters are
+     * distinguished at tertiary strength (for example, "ao" < "Ao" < "aò").
+     * In addition, a variant of a letter differs from the base form on the tertiary
+     * strength (such as "A" and "Ⓐ"). Another example is the difference between
+     * large and small Kana. A tertiary difference is ignored when there is a primary
+     * or secondary difference anywhere in the strings.</li>
+     * <p>
+     * <li>IDENTICAL strength: When all other strengths are equal, the IDENTICAL strength
+     * is used as a tiebreaker. The Unicode code point values of the NFD form of each
+     * string are compared, just in case there is no difference. For example, Hebrew
+     * cantellation marks are only distinguished at this strength. This strength
+     * should be used sparingly, as only code point value differences between two
+     * strings are an extremely rare occurrence. Using this strength substantially
+     * decreases the performance for both comparison and collation key generation APIs.
+     * This strength also increases the size of the collation key.</li>
+     * <p>
+     * This Collator deals only with two decomposition modes, the canonical
+     * decomposition mode and one that does not use any decomposition. The
+     * compatibility decomposition mode java.text.Collator.FULL_DECOMPOSITION is not
+     * supported here. If the canonical decomposition mode is set, Collator handles
+     * un-normalized text properly, producing the same results as if the text were
+     * normalized in NFD. If canonical decomposition is turned off, it is the user's
+     * responsibility to ensure that all text is already in the appropriate form
+     * before performing a comparison or before getting a CollationKey.
+     *
+     * @sa CollationKey
+     *
+     * <em>Examples:</em>
+     * <pre>
+     * // Get the Collator for US English and set its strength to PRIMARY
+     * Collator usCollator = Collator.getInstance(Locale.US);
+     * usCollator.setStrength(Collator.PRIMARY);
+     * if (usCollator.compare("abc", "ABC") == 0) {
+     * System.out.println("Strings are equivalent");
+     * }
+     * </pre>
+     * The following example shows how to compare two strings using the collator for the default locale.
+     * <pre>
+     * // Compare two strings in the default locale
+     * Collator myCollator = Collator.getInstance();
+     * myCollator.setDecomposition(Collator.NO_DECOMPOSITION);
+     * if (myCollator.compare("ḁ̀", "ḁ̀") != 0) {
+     * System.out.println("ḁ̀ is not equal to ḁ̀ without decomposition");
+     * myCollator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
+     * if (myCollator.compare("ḁ̀", "ḁ̀") != 0) {
+     *    System.out.println("Error: ḁ̀ should be equal to ḁ̀ with decomposition");
+     * } else {
+     *    System.out.println("ḁ̀ is equal to ḁ̀ with decomposition");
+     * }
+     * } else {
+     * System.out.println("Error: ḁ̀ should be not equal to ḁ̀ without decomposition");
+     * }
+     * </pre>
+     *
+     * @sa RuleBasedCollator
+     * @sa CollationKey
+     */
+    /**
+      * @Involve
+      * interface IComparator;
+      * interface ICloneable;
+      */
+    interface ICollator {
+        /**
+         * Constant used to specify the decomposition rule.
+         */
+        const Int32 NO_DECOMPOSITION = 0;
+
+        /**
+         * Constant used to specify the decomposition rule.
+         */
+        const Int32 CANONICAL_DECOMPOSITION = 1;
+
+        /**
+         * Constant used to specify the decomposition rule. This value for
+         * decomposition is not supported.
+         */
+        const Int32 FULL_DECOMPOSITION = 2;
+
+        /**
+         * Constant used to specify the collation strength.
+         */
+        const Int32 PRIMARY = 0;
+
+        /**
+         * Constant used to specify the collation strength.
+         */
+        const Int32 SECONDARY = 1;
+
+        /**
+         * Constant used to specify the collation strength.
+         */
+        const Int32 TERTIARY = 2;
+
+        /**
+         * Constant used to specify the collation strength.
+         */
+        const Int32 IDENTICAL = 3;
+
+        /**
+         * Compares two objects to determine their relative order. The objects must
+         * be strings.
+         */
+        Compare(
+            [in] IInterface* object1,
+            [in] IInterface* object2,
+            [out] Int32* result);
+
+        /**
+         * Compares two strings to determine their relative order.
+         */
+        Compare(
+            [in] String string1,
+            [in] String string2,
+            [out] Int32* result);
+
+         /**
+         * Compares this collator with the specified object and indicates if they
+         * are equal.
+         */
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        /**
+         * Compares two strings using the collation rules to determine if they are
+         * equal.
+         */
+        Equals(
+            [in] String string1,
+            [in] String string2,
+            [out] Boolean* result);
+
+        /**
+         * Returns a CollationKey for the specified string for this collator
+         * with the current decomposition rule and strength value.
+         *
+         * @sa CollationKey
+         */
+        GetCollationKey(
+            [in] String string,
+            [out] ICollationKey** collationKey);
+
+        /**
+         * Returns the decomposition rule for this collator.
+         */
+        GetDecomposition(
+            [out] Int32* decomposition);
+
+        /**
+         * Returns the strength value for this collator.
+         */
+        GetStrength(
+            [out] Int32* strength);
+
+        /**
+         * Sets the decomposition rule for this collator.
+         */
+        SetDecomposition(
+            [in] Int32 value);
+
+        /**
+         * Sets the strength value for this collator.
+         */
+        SetStrength(
+            [in] Int32 value);
+    }
+
+    interface ICollatorHelper {
+        /**
+         * Returns an array of locales for which custom {Collator} instances
+         * are available.
+         * <p>Note that Android does not support user-supplied locale service providers.
+         */
+        GetAvailableLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+
+        /**
+         * Returns a {Collator} instance which is appropriate for the user's default
+         * {Locale}.
+         * See "<a href="../util/Locale.html#default_locale">Be wary of the default locale</a>".
+         */
+        GetInstance(
+            [out] ICollator** instance);
+
+        /**
+         * Returns a {Collator} instance which is appropriate for {locale}.
+         */
+        GetInstance(
+            [in] ILocale* locale,
+            [out] ICollator** instance);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

@@ -1,0 +1,156 @@
+
+module
+{
+    interface Elastos.Net.IInetAddress;
+    interface Elastos.Net.IDatagramPacket;
+    interface Elastos.IO.IByteBuffer;
+    interface Elastos.IO.IFileDescriptor;
+
+    namespace Libcore {
+    namespace IO {
+
+    [deprecated]
+    interface IIoBridge {
+        // Socket options used by java.net but not exposed in SocketOptions.
+        const Int32 JAVA_MCAST_JOIN_GROUP = 19;
+        const Int32 JAVA_MCAST_LEAVE_GROUP = 20;
+        const Int32 JAVA_MCAST_JOIN_SOURCE_GROUP = 21;
+        const Int32 JAVA_MCAST_LEAVE_SOURCE_GROUP = 22;
+        const Int32 JAVA_MCAST_BLOCK_SOURCE = 23;
+        const Int32 JAVA_MCAST_UNBLOCK_SOURCE = 24;
+        const Int32 JAVA_IP_MULTICAST_TTL = 17;
+
+        Available(
+            [in] IFileDescriptor* fd,
+            [out] Int32* avail);
+
+        Bind(
+            [in] IFileDescriptor* fd,
+            [in] IInetAddress* inetAddress,
+            [in] Int32 port);
+
+        Connect(
+            [in] IFileDescriptor* fd,
+            [in] IInetAddress* inetAddress,
+            [in] Int32 port);
+
+        Connect(
+            [in] IFileDescriptor* fd,
+            [in] IInetAddress* inetAddress,
+            [in] Int32 port,
+            [in] Int32 timeoutMs);
+
+        /**
+         * Closes the supplied file descriptor and sends a signal to any threads are currently blocking.
+         * In order for the signal to be sent the blocked threads must have registered with
+         * the AsynchronousCloseMonitor before they entered the blocking operation.
+         *
+         * <p>This method is a no-op if passed a {@code null} or already-closed file descriptor.
+         */
+        CloseAndSignalBlockedThreads(
+            [in] IFileDescriptor* fd);
+
+        IsConnected(
+            [in] IFileDescriptor* fd,
+            [in] IInetAddress* inetAddress,
+            [in] Int32 port,
+            [in] Int32 timeoutMs,
+            [in] Int32 remainingTimeoutMs,
+            [out] Boolean* isConnected);
+
+        GetSocketOption(
+            [in] IFileDescriptor* fd,
+            [in] Int32 option,
+            [out] IInterface** value);
+
+        SetSocketOption(
+            [in] IFileDescriptor* fd,
+            [in] Int32 option,
+            [in] IInterface* value);
+
+        /**
+         * java.io only throws FileNotFoundException when opening files, regardless of what actually
+         * went wrong. Additionally, java.io is more restrictive than POSIX when it comes to opening
+         * directories: POSIX says read-only is okay, but java.io doesn't even allow that. We also
+         * have an Android-specific hack to alter the default permissions.
+         */
+        Open(
+            [in] String path,
+            [in] Int32 flags,
+            [out] IFileDescriptor** fd);
+
+        /**FileDescriptor*
+         * java.io thinks that a read at EOF is an error and should return -1, contrary to traditional
+         * Unix practice where you'd read until you got 0 bytes (and any future read would return -1).
+         */
+        Read(
+            [in] IFileDescriptor* fd,
+            [in] ArrayOf<Byte>* bytes,
+            [in] Int32 byteOffset,
+            [in] Int32 byteCount,
+            [out] Int32* count);
+
+        /**
+         * java.io always writes every byte it's asked to, or fails with an error. (That is, unlike
+         * Unix it never just writes as many bytes as happens to be convenient.)
+         */
+        Write(
+            [in] IFileDescriptor* fd,
+            [in] ArrayOf<Byte>* bytes,
+            [in] Int32 byteOffset,
+            [in] Int32 byteCount);
+
+        Sendto(
+            [in] IFileDescriptor* fd,
+            [in] ArrayOf<Byte>* bytes,
+            [in] Int32 byteOffset,
+            [in] Int32 byteCount,
+            [in] Int32 flags,
+            [in] IInetAddress* inetAddress,
+            [in] Int32 port,
+            [out] Int32* result);
+
+        Sendto(
+            [in] IFileDescriptor* fd,
+            [in] IByteBuffer* buffer,
+            [in] Int32 flags,
+            [in] IInetAddress* inetAddress,
+            [in] Int32 port,
+            [out] Int32* result);
+
+        Recvfrom(
+            [in] Boolean isRead,
+            [in] IFileDescriptor* fd,
+            [in] ArrayOf<Byte>* bytes,
+            [in] Int32 byteOffset,
+            [in] Int32 byteCount,
+            [in] Int32 flags,
+            [in] IDatagramPacket* packet,
+            [in] Boolean isConnected,
+            [out] Int32* result);
+
+        Recvfrom(
+            [in] Boolean isRead,
+            [in] IFileDescriptor* fd,
+            [in] IByteBuffer* buffer,
+            [in] Int32 flags,
+            [in] IDatagramPacket* packet,
+            [in] Boolean isConnected,
+            [out] Int32* result);
+
+        Socket(
+            [in] Boolean stream,
+            [out] IFileDescriptor** fd);
+
+        GetSocketLocalAddress(
+            [in] IFileDescriptor* fd,
+            [out] IInetAddress** address);
+
+        GetSocketLocalPort(
+            [in] IFileDescriptor* fd,
+            [out] Int32* port);
+    }
+
+    } // namespace IO
+    } // namespace Libcore
+}

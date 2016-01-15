@@ -1,0 +1,165 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Net.IInetAddress;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Net {
+
+    /**
+     * A simple container used to carry information in VpnBuilder, VpnDialogs,
+     * and com.android.server.connectivity.Vpn. Internal use only.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IVpnConfig {
+        const String SERVICE_INTERFACE = "android.net.VpnService";
+
+        const String DIALOGS_PACKAGE = "com.android.vpndialogs";
+
+        const String LEGACY_VPN = "[Legacy VPN]";
+
+        GetUser(
+            [out] String* user);
+
+        SetUser(
+            [in] String user);
+
+        GetInterfaze(
+            [out] String* interfaze);
+
+        SetInterfaze(
+            [in] String interfaze);
+
+        GetSession(
+            [out] String* session);
+
+        SetSession(
+            [in] String session);
+
+        GetMtu(
+            [out] Int32* mtu);
+
+        SetMtu(
+            [in] Int32 mtu);
+
+        GetAddresses(
+            [out] IList** addresses);
+
+        SetAddresses(
+            [in] IList* addresses);
+
+        GetRoutes(
+            [out] IList** routes);
+
+        SetRoutes(
+            [in] IList* routes);
+
+        GetDnsServers(
+            [out] IList** dnsServers);
+
+        SetDnsServers(
+            [in] IList* dnsServers);
+
+        GetSearchDomains(
+            [out] IList** searchDomains);
+
+        SetSearchDomains(
+            [in] IList* searchDomains);
+
+        GetAllowedApplications(
+            [out] IList** allowedApplications);
+
+        SetAllowedApplications(
+            [in] IList* allowedApplications);
+
+        GetDisallowedApplications(
+            [out] IList** disallowedApplications);
+
+        SetDisallowedApplications(
+            [in] IList* disallowedApplications);
+
+        GetConfigureIntent(
+            [out] IPendingIntent** configureIntent);
+
+        SetConfigureIntent(
+            [in] IPendingIntent* configureIntent);
+
+        GetStartTime(
+            [out] Int64* startTime);
+
+        SetStartTime(
+            [in] Int64 startTime);
+
+        GetLegacy(
+            [out] Boolean* legacy);
+
+        SetLegacy(
+            [in] Boolean legacy);
+
+        SetBlocking(
+            [in] Boolean blocking);
+
+        GetBlocking(
+            [out] Boolean* blocking);
+
+        GetAllowBypass(
+            [out] Boolean* allowBypass);
+
+        SetAllowBypass(
+            [in] Boolean allowBypass);
+
+        GetAllowIPv4(
+            [out] Boolean* allowIPv4);
+
+        SetAllowIPv4(
+            [in] Boolean allowIPv4);
+
+        GetAllowIPv6(
+            [out] Boolean* allowIPv6);
+
+        SetAllowIPv6(
+            [in] Boolean allowIPv6);
+
+        UpdateAllowedFamilies(
+            [in] IInetAddress* address);
+
+        AddLegacyRoutes(
+            [in] String routesStr);
+
+        AddLegacyAddresses(
+            [in] String addressesStr);
+    }
+
+    [local]
+    interface IVpnConfigHelper {
+        GetIntentForConfirmation(
+            [out] IIntent** intent);
+
+        GetIntentForStatusPanel(
+            [in] IContext* ctx,
+            [out] IPendingIntent** intent);
+
+        GetVpnLabel(
+            [in] IContext* context,
+            [in] String packageName,
+            [out] ICharSequence** label);
+    }
+
+    } // namespace Net
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

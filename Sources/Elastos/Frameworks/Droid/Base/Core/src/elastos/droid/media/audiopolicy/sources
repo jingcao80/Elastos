@@ -1,0 +1,19 @@
+
+TARGET_NAME= audiopolicy
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = CAudioMix.cpp
+SOURCES += CAudioMixBuilder.cpp
+SOURCES += CAudioMixingRule.cpp
+SOURCES += CAudioMixingRuleBuilder.cpp
+SOURCES += CAudioPolicy.cpp
+SOURCES += CAudioPolicyBuilder.cpp
+SOURCES += CAudioPolicyConfig.cpp
+

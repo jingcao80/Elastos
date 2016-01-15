@@ -1,0 +1,55 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The key specification for a DES key.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IKeySpec;
+     */
+    interface IDESedeKeySpec {
+        /**
+         * The length of a DES key in bytes.
+         */
+        const Int32 DES_EDE_KEY_LEN = 24;
+
+        /**
+         * Returns a copy of the key.
+         *
+         * @return a copy of the key.
+         */
+        GetKey(
+            [out, callee] ArrayOf<Byte> * key);
+    }
+
+    [deprecated]
+    interface IDESedeKeySpecHelper {
+        /**
+         * Returns whether the specified key data starting at <code>offset</code> is
+         * <i>parity-adjusted</i>.
+         *
+         * @param key
+         *            the key data.
+         * @param offset
+         *            the offset to start checking at.
+         * @return {@code true} if the specified key data is parity-adjusted,
+         *            {@code false} otherwise.
+         * @throws InvalidKeyException
+         *             if the length of the key data starting at offset is less than
+         *             24.
+         */
+        IsParityAdjusted(
+            [in] ArrayOf<Byte> * key,
+            [in] Int32 offset,
+            [out] Boolean * result);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

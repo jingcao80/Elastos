@@ -1,0 +1,119 @@
+
+module
+{
+    interface Elastos.Droid.Net.INetworkIdentity;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Template definition used to generically match {@link NetworkIdentity},
+     * usually when collecting statistics.
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface INetworkTemplate {
+        const Int32 MATCH_MOBILE_ALL = 1;
+
+        const Int32 MATCH_MOBILE_3G_LOWER = 2;
+
+        const Int32 MATCH_MOBILE_4G = 3;
+
+        const Int32 MATCH_WIFI = 4;
+
+        const Int32 MATCH_ETHERNET = 5;
+
+        const Int32 MATCH_MOBILE_WILDCARD = 6;
+
+        const Int32 MATCH_WIFI_WILDCARD = 7;
+
+        GetMatchRule(
+            [out] Int32* result);
+
+        GetSubscriberId(
+            [out] String* result);
+
+        GetNetworkId(
+            [out] String* result);
+
+        /**
+         * Test if given {@link NetworkIdentity} matches this template.
+         */
+        Matches(
+            [in] INetworkIdentity* ident,
+            [out] Boolean* result);
+    }
+
+    interface INetworkTemplateHelper {
+        // @VisibleForTesting
+        ForceAllNetworkTypes();
+
+        /**
+         * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
+         * the given IMSI.
+         */
+        BuildTemplateMobileAll(
+            [in] String subscriberId,
+            [out] INetworkTemplate** result);
+
+        /**
+         * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
+         * the given IMSI that roughly meet a "3G" definition, or lower.
+         */
+        // @Deprecated
+        BuildTemplateMobile3gLower(
+            [in] String subscriberId,
+            [out] INetworkTemplate** result);
+
+        /**
+         * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
+         * the given IMSI that roughly meet a "4G" definition.
+         */
+        // @Deprecated
+        BuildTemplateMobile4g(
+            [in] String subscriberId,
+            [out] INetworkTemplate** result);
+
+        /**
+         * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks,
+         * regardless of IMSI.
+         */
+        BuildTemplateMobileWildcard(
+            [out] INetworkTemplate** result);
+
+        /**
+         * Template to match all {@link ConnectivityManager#TYPE_WIFI} networks,
+         * regardless of SSID.
+         */
+        BuildTemplateWifiWildcard(
+            [out] INetworkTemplate** result);
+
+        // @Deprecated
+        BuildTemplateWifi(
+            [out] INetworkTemplate** result);
+
+        /**
+         * Template to match {@link ConnectivityManager#TYPE_WIFI} networks with the
+         * given SSID.
+         */
+        BuildTemplateWifi(
+            [in] String networkId,
+            [out] INetworkTemplate** result);
+
+        /**
+         * Template to combine all {@link ConnectivityManager#TYPE_ETHERNET} style
+         * networks together.
+         */
+        BuildTemplateEthernet(
+            [out] INetworkTemplate** result);
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

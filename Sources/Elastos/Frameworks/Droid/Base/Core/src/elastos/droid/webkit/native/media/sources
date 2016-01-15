@@ -1,0 +1,24 @@
+TARGET_NAME = media
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AudioManagerElastos.cpp
+SOURCES += VideoCapture.cpp
+SOURCES += VideoCaptureFactory.cpp
+SOURCES += VideoCaptureTango.cpp
+SOURCES += VideoCaptureElastos.cpp
+SOURCES += AudioRecordInput.cpp
+SOURCES += MediaCodecBridge.cpp
+SOURCES += WebAudioMediaCodecBridge.cpp
+SOURCES += MediaDrmBridge.cpp
+SOURCES += MediaPlayerListener.cpp
+SOURCES += MediaPlayerBridge.cpp
+SOURCES += UsbMidiDeviceElastos.cpp
+SOURCES += UsbMidiDeviceFactoryElastos.cpp
+SOURCES += ImageFormat.cpp

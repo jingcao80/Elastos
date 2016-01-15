@@ -1,0 +1,54 @@
+
+module
+{
+
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Cookie {
+    namespace Params {
+
+    /**
+     * Parameter names for cookie specifications in HttpCookie.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 578403 $
+     *
+     * @since 4.0
+     */
+    interface ICookieSpecPNames {
+
+        /**
+         * Parameter for the date patterns used for parsing.
+         * <p>
+         * This parameter expects a value of type {@link java.util.Collection}.
+         * The collection elements are of type {@link String}
+         * and must be compatible with the syntax of
+         * {@link java.text.SimpleDateFormat}.
+         * </p>
+         */
+        const String DATE_PATTERNS = "http.protocol.cookie-datepatterns";
+
+        /**
+         * Parameter for Cookie header formatting.
+         * Defines whether {@link org.apache.http.cookie.Cookie cookies}
+         * should be put on
+         * a single {@link org.apache.http.Header request header}.
+         * If not, each cookie is formatted in a seperate Cookie header.
+         * <p>
+         * This parameter expects a value of type {@link Boolean}.
+         * </p>
+         */
+        const String SINGLE_COOKIE_HEADER = "http.protocol.single-cookie-header";
+
+    }
+
+    } // namespace Params
+    } // namespace Cookie
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

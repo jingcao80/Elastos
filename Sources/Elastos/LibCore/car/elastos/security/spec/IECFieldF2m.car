@@ -1,0 +1,74 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The parameters specifying a <i>characteristic 2 finite field</i> of an
+     * elliptic curve.
+     */
+    /**
+     * @Involve
+     * interface IECField
+     */
+    interface IECFieldF2m {
+        /**
+         * Returns the prime value {@code p} for this finite field.
+         *
+         * @return the prime value {@code p} for this finite field.
+         */
+        GetM(
+            [out] IBigInteger** m);
+
+        /**
+         * Returns whether the specified object is equal to this finite field.
+         *
+         * @param obj
+         *            the object to compare to this finite field.
+         * @return {@code true} if the specified object is equal to this finite field,
+         *         otherwise {@code false}.
+         */
+        Equals(
+            [in] IInterface* obj,
+            [out] Boolean* result);
+
+        /**
+         * Returns the hashcode value for this finite field.
+         *
+         * @return the hashcode value for this finite field.
+         */
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        /**
+         * Returns a copy of the integer array containing the order of the middle
+         * term(s) of the reduction polynomial for a polynomial basis.
+         *
+         * @return a copy of the integer array containing the order of the middle
+         *         term(s) of the reduction polynomial for a polynomial basis or
+         *         {@code null} for a normal basis.
+         */
+        GetMidTermsOfReductionPolynomial(
+            [out, callee] ArrayOf<Int32> *terms);
+
+        /**
+         * Returns the base of the reduction polynomial with the n-th bit
+         * corresponding to the n-th coefficient of the reduction polynomial for a
+         * polynomial basis.
+         *
+         * @return the base of the reduction polynomial with the n-th bit
+         *         corresponding to the n-th coefficient of the reduction polynomial
+         *         for a polynomial basis or {@code null} for a normal basis.
+         */
+        GetReductionPolynomial(
+            [out] IBigInteger **rp);
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

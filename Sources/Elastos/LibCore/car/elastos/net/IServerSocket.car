@@ -1,0 +1,247 @@
+
+module
+{
+    interface Elastos.IO.Channels.IServerSocketChannel;
+    interface Elastos.Net.ISocket;
+    interface Elastos.Net.IInetAddress;
+    interface Elastos.Net.ISocketAddress;
+    interface Elastos.Net.ISocketImplFactory;
+
+    namespace Elastos {
+    namespace Net {
+
+    /**
+     * This class represents a server-side socket that waits for incoming client
+     * connections. A ServerSocket handles the requests and sends back an appropriate
+     * reply. The actual tasks that a server socket must accomplish are implemented by
+     * an internal SocketImpl instance.
+     *
+     * @Involve
+     * interface Elastos.IO.ICloseable;
+     */
+
+    interface IServerSocket {
+        /**
+         * @hide internal use only
+         */
+        GetImpl(
+            [out] ISocketImpl** impl);
+
+        /**
+         * Waits for an incoming request and blocks until the connection is opened.
+         * This method returns a socket object representing the just opened
+         * connection.
+         *
+         * @return the connection representing socket.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an error occurs while accepting a new connection.
+         */
+        Accept(
+            [out] ISocket** socket);
+
+        /**
+         * Closes this server socket and its implementation. Any attempt to connect
+         * to this socket thereafter will fail.
+         *
+         * IOException | if an error occurs while closing this socket.
+         */
+        Close();
+
+        /**
+         * Gets the local IP address of this server socket or {null} if the
+         * socket is unbound. This is useful for multihomed hosts.
+         *
+         * @return the local address of this server socket.
+         */
+        GetInetAddress(
+            [out] IInetAddress** address);
+
+        /**
+         * Gets the local port of this server socket or {-1} if the socket is
+         * unbound.
+         *
+         * @return the local port this server is listening on.
+         */
+        GetLocalPort(
+            [out] Int32* port);
+
+        /**
+         * Gets the socket SocketOptions#SO_TIMEOUT accept timeout.
+         *
+         * @sa SocketOptions#SO_TIMEOUT accept timeout
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if the option cannot be retrieved.
+         */
+        GetSoTimeout(
+            [out] Int32* timeout);
+
+        /**
+         * Sets the SocketOptions#SO_TIMEOUT accept timeout in milliseconds for this socket.
+         *
+         * @sa SocketOptions#SO_TIMEOUT accept timeout
+         * This accept timeout defines the period the socket will block waiting to
+         * accept a connection before throwing an {InterruptedIOException}. The value
+         * {0} (default) is used to set an infinite timeout. To have effect
+         * this option must be set before the blocking method was called.
+         *
+         * @param timeout the timeout in milliseconds or 0 for no timeout.
+         * SocketException | if an error occurs while setting the option.
+         */
+        SetSoTimeout(
+            [in] Int32 timeout);
+
+        /**
+         * Binds this server socket to the given local socket address with a maximum
+         * backlog of 50 unaccepted connections. If the {localAddr} is set to
+         * {null} the socket will be bound to an available local address on
+         * any free port of the system.
+         *
+         * @param localAddr
+         *            the local address and port to bind on.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the {SocketAddress} is not supported.
+         * IOException | if the socket is already bound or a problem occurs during binding.
+         */
+        Bind(
+            [in] ISocketAddress* localAddr);
+
+        /**
+         * Binds this server socket to the given local socket address. If the
+         * {localAddr} is set to {null} the socket will be bound to an
+         * available local address on any free port of the system.
+         *
+         * @param localAddr the local machine address and port to bind on.
+         * @param backlog the maximum number of unaccepted connections. Passing 0 or
+         *     a negative value yields the default backlog of 50.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if the {SocketAddress} is not supported.
+         * IOException | if the socket is already bound or a problem occurs during binding.
+         */
+        Bind(
+            [in] ISocketAddress* localAddr,
+            [in] Int32 backlog);
+
+        /**
+         * Gets the local socket address of this server socket or {null} if
+         * the socket is unbound. This is useful on multihomed hosts.
+         *
+         * @return the local socket address and port this socket is bound to.
+         */
+        GetLocalSocketAddress(
+            [out] ISocketAddress** address);
+
+        /**
+         * Returns whether this server socket is bound to a local address and port
+         * or not.
+         *
+         * @return {true} if this socket is bound, {false} otherwise.
+         */
+        IsBound(
+            [out] Boolean* isBound);
+
+        /**
+         * Returns whether this server socket is closed or not.
+         *
+         * @return {true} if this socket is closed, {false} otherwise.
+         */
+        IsClosed(
+            [out] Boolean* isClosed);
+
+        /**
+         * Sets the value for the socket option {SocketOptions.SO_REUSEADDR}.
+         *
+         * @param reuse
+         *            the socket option setting.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * SocketException | if an error occurs while setting the option value.
+         */
+        SetReuseAddress(
+            [in] Boolean reuse);
+
+        /**
+         * Gets the value of the socket option {SocketOptions.SO_REUSEADDR}.
+         *
+         * @return {true} if the option is enabled, {false} otherwise.
+         * SocketException | if an error occurs while reading the option value.
+         */
+        GetReuseAddress(
+            [out] Boolean* reuse);
+
+        /**
+         * Sets this socket's SocketOptions#SO_SNDBUF receive buffer size.
+         *
+         * @sa SocketOptions#SO_SNDBUF receive buffer size
+         */
+        SetReceiveBufferSize(
+            [in] Int32 size);
+
+        /**
+         * Returns this socket's SocketOptions#SO_RCVBUF receive buffer size.
+         *
+         * @sa SocketOptions#SO_RCVBUF receive buffer size
+         */
+        GetReceiveBufferSize(
+            [out] Int32* size);
+
+        /**
+         * Returns this socket's {ServerSocketChannel}, if one exists. A channel is
+         * available only if this socket wraps a channel. (That is, you can go from a
+         * channel to a socket and back again, but you can't go from an arbitrary socket to a channel.)
+         * In practice, this means that the socket must have been created by
+         * java.nio.channels.ServerSocketChannel#open.
+         *
+         * @sa java.nio.channels.ServerSocketChannel#open
+         */
+        GetChannel(
+            [out] IServerSocketChannel** channel);
+
+        /**
+         * Sets performance preferences for connection time, latency and bandwidth.
+         * <p>
+         * This method does currently nothing.
+         *
+         * @param connectionTime
+         *            the value representing the importance of a short connecting
+         *            time.
+         * @param latency
+         *            the value representing the importance of low latency.
+         * @param bandwidth
+         *            the value representing the importance of high bandwidth.
+         */
+        SetPerformancePreferences(
+            [in] Int32 connectionTime,
+            [in] Int32 latency,
+            [in] Int32 bandwidth);
+    }
+
+    interface IServerSocketHelper {
+        /**
+         * Sets the server socket implementation factory of this instance. This
+         * method may only be invoked with sufficient security privilege and only
+         * once during the application lifetime.
+         *
+         * @param aFactory
+         *            the streaming socket factory to be used for further socket
+         *            instantiations.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if the factory could not be set or is already set.
+         */
+        SetSocketFactory(
+            [in] ISocketImplFactory* aFactory);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+}

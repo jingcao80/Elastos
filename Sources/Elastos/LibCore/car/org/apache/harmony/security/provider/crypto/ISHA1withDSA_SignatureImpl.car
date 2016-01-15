@@ -1,0 +1,19 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Provider {
+    namespace Crypto {
+
+    interface ISHA1withDSA_SignatureImpl extends Elastos.Security.ISignature {}
+
+    } // namespace Crypto
+    } // namespace Provider
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

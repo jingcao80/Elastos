@@ -1,0 +1,31 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    /**
+     * @Involve
+     * interface ITrustedTime
+     */
+    interface INtpTrustedTime{
+        GetCachedNtpTime(
+            [out] Int64* cacheNtpTime);
+
+        GetCachedNtpTimeReference(
+            [out] Int64* cachedNtpTimeReference);
+    }
+
+    interface INtpTrustedTimeHelper {
+        GetInstance(
+            [in] IContext* ctx,
+            [out] INtpTrustedTime** ntpTT);
+    }
+
+    } // namespace Utility
+    } // namepsace Droid
+    } // namespace Elastos
+}

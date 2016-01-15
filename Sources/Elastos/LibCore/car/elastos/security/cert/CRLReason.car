@@ -1,0 +1,33 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+        /**
+         * The reason a CRL entry was revoked. See <a
+         * href="http://www.ietf.org/rfc/rfc3280.txt">RFC 3280</a> for more information.
+         *
+         * @since 1.7
+         * @hide
+         */
+        enum CRLReason /* implements Comparable<CRLReason>, Serializable */{
+            CRLReason_NULL,
+            CRLReason_UNSPECIFIED,
+            CRLReason_KEY_COMPROMISE,
+            CRLReason_CA_COMPROMISE,
+            CRLReason_AFFILIATION_CHANGED,
+            CRLReason_SUPERSEDED,
+            CRLReason_CESSATION_OF_OPERATION,
+            CRLReason_CERTIFICATE_HOLD,
+            CRLReason_UNUSED,
+            CRLReason_REMOVE_FROM_CRL,
+            CRLReason_PRIVILEGE_WITHDRAWN,
+            CRLReason_AA_COMPROMISE
+        }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

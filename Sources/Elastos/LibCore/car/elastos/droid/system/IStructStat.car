@@ -1,0 +1,79 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace System {
+
+    /**
+     * File information returned by fstat(2), lstat(2), and stat(2). Corresponds to C's
+     * {@code struct stat} from
+     * <a href="http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/stat.h.html">&lt;stat.h&gt;</a>
+     */
+    interface IStructStat {
+        /** Device ID of device containing file. */
+        GetDev(
+            [out] Int64* dev);
+
+        /** File serial number (inode). */
+        GetIno(
+            [out] Int64* ino);
+
+        /** Mode (permissions) of file. */
+        GetMode(
+            [out] Int32* mode);
+
+        /** Number of hard links to the file. */
+        GetNlink(
+            [out] Int64* nlink);
+
+        /** User ID of file. */
+        GetUid(
+            [out] Int32* uid);
+
+        /** Group ID of file. */
+        GetGid(
+            [out] Int32* gid);
+
+        /** Device ID (if file is character or block special). */
+        GetRdev(
+            [out] Int64* rdev);
+
+        /**
+         * For regular files, the file size in bytes.
+         * For symbolic links, the length in bytes of the pathname contained in the symbolic link.
+         * For a shared memory object, the length in bytes.
+         * For a typed memory object, the length in bytes.
+         * For other file types, the use of this field is unspecified.
+         */
+        GetSize(
+            [out] Int64* size);
+
+        /** Time of last access. */
+        GetAtime(
+            [out] Int64* atime);
+
+        /** Time of last data modification. */
+        GetMtime(
+            [out] Int64* mtime);
+
+        /** Time of last status change. */
+        GetCtime(
+            [out] Int64* ctime);
+
+        /**
+         * A file system-specific preferred I/O block size for this object.
+         * For some file system types, this may vary from file to file.
+         */
+        GetBlksize(
+            [out] Int64* blksize);
+
+        /** Number of blocks allocated for this object. */
+        GetBlocks(
+            [out] Int64* blocks);
+    }
+
+    } // namespace System
+    } // namespace Droid
+    } // namespace Elastos
+}

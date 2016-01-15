@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * A network identifier along with a score for the quality of that network.
+     *
+     * @hide
+     */
+    // @SystemApi
+    /**
+     * @Involved
+     * interface IParcelable;
+     */
+    interface IScoredNetwork {
+        /** A {@link NetworkKey} uniquely identifying this network. */
+        GetNetworkKey(
+            [out] INetworkKey** result);
+
+        /**
+         * The {@link RssiCurve} representing the scores for this network based on the RSSI.
+         *
+         * <p>This field is optional and may be set to null to indicate that no score is available for
+         * this network at this time. Such networks, along with networks for which the scorer has not
+         * responded, are always prioritized below scored networks, regardless of the score.
+         */
+        GetRssiCurve(
+            [out] IRssiCurve** result);
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

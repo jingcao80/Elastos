@@ -1,0 +1,55 @@
+$ INPUT class
+$ IF type is not "aspect"
+$   IF attrib is "hasctor"
+$     WITH all interfaces DO
+$       IF attrib is "clsobj"
+$         WITH all methods DO
+$           IF attrib is not "defaultctor"
+
+$             IF class.attrib is "singleton"
+    static _ELASTOS ECode _AcquireSingletonInRegime(
+$             ELSE
+    static _ELASTOS ECode _NewInRegime(
+$             END IF ;; is singleton
+        /* [in] */ IRegime* __regime$^
+$             WITH all parameters DO
+,
+$               IF parameter is not last
+        /* [${attrib}] */ ${ParamNamespaceType(type)} ${name}$^
+$               ELSE
+        /* [out] */ IInterface** __object)
+$               END IF ;; parameter is not last
+$             END DO ;; all parameters
+    {
+        _ELASTOS ECode ec;
+        I${class.name}ClassObject* pClassObject;
+        PInterface pObject = NULL;
+
+        ec = _CObject_AcquireClassFactory(ECLSID_${class.name}, RGM_SAME_DOMAIN,
+                EIID_I${class.name}ClassObject, (IInterface**)&pClassObject);
+        if (FAILED(ec)) return ec;
+
+        ec = pClassObject->${method.name}($^
+$           WITH all parameters DO
+$             IF parameter is not last
+${name}, $^
+$             ELSE
+&pObject);
+$             END IF ;; parameter is not last
+$           END DO ;; all parameters
+
+        if (!IS_RGM_NUMBER(__regime) && NULL != pObject)
+            ec = _CObject_EnterRegime(pObject, __regime);
+
+        *__object = pObject;
+
+        pClassObject->Release();
+
+        return ec;
+    }
+$           END IF ;; is not defaultctor
+$         END DO ;; all methods
+$       END IF ;; is clsobj
+$     END DO ;; all interfaces
+$   END IF ;; attrib is hasctor
+$ END IF ;; is not aspect

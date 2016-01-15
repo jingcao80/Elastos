@@ -1,0 +1,22 @@
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** @hide */
+    interface IActivityContainerCallback {
+        [oneway] SetVisible(
+            [in] IBinder* container,
+            [in] Boolean visible);
+
+        [oneway] OnAllActivitiesComplete(
+            [in] IBinder* container);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,147 @@
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Emoji {
+
+    interface IEmojiFactory {
+        /**
+         * Returns Bitmap object corresponding to the AndroidPua.
+         *
+         * Note that each Bitmap is cached by this class, which means that, if you modify a
+         * Bitmap object (using setPos() method), all same emoji Bitmap will be modified.
+         * If it is unacceptable, please copy the object before modifying it.
+         *
+         * @param pua A unicode codepoint.
+         * @return Bitmap object when this factory knows the Bitmap relevant to the codepoint.
+         * Otherwise null is returned.
+         */
+        GetBitmapFromAndroidPua(
+            [in] Int32 pua,
+            [out] IBitmap** RetBitmap);
+
+       /**
+        * Returns Bitmap object corresponding to the vendor specified sjis.
+        *
+        * See comments in getBitmapFromAndroidPua().
+        *
+        * @param sjis sjis code specific to each career(vendor)
+        * @return Bitmap object when this factory knows the Bitmap relevant to the code. Otherwise
+        * null is returned.
+        */
+        GetBitmapFromVendorSpecificSjis(
+            [in] Char32 sjis,
+            [out] IBitmap** RetBitmap);
+
+       /**
+        * Returns Bitmap object corresponding to the vendor specific Unicode.
+        *
+        * See comments in getBitmapFromAndroidPua().
+        *
+        * @param vsp vendor specific PUA.
+        * @return Bitmap object when this factory knows the Bitmap relevant to the code. Otherwise
+        * null is returned.
+        */
+       GetBitmapFromVendorSpecificPua(
+           [in] Int32 vsp,
+           [out] IBitmap** RetBitmap);
+
+       /**
+        * Returns Unicode PUA for Android corresponding to the vendor specific sjis.
+        *
+        * @param sjis vendor specific sjis
+        * @return Unicode PUA for Android, or -1 if there's no map for the sjis.
+        */
+        GetAndroidPuaFromVendorSpecificSjis(
+            [in] Char32 sjis,
+            [out] Int32* RetValue);
+
+       /**
+        * Returns vendor specific sjis corresponding to the Unicode AndroidPua.
+        *
+        * @param pua Unicode PUA for Android,
+        * @return vendor specific sjis, or -1 if there's no map for the AndroidPua.
+        */
+        GetVendorSpecificSjisFromAndroidPua(
+            [in] Int32 pua,
+            [out] Int32* RetValue);
+
+       /**
+        * Returns Unicode PUA for Android corresponding to the vendor specific Unicode.
+        *
+        * @param vsp vendor specific PUA.
+        * @return Unicode PUA for Android, or -1 if there's no map for the
+        * Unicode.
+        */
+        GetAndroidPuaFromVendorSpecificPua(
+            [in] Int32 vsp,
+            [out] Int32* RetValue);
+
+
+        GetAndroidPuaFromVendorSpecificPua(
+            [in] String vspString,
+            [out] String* RetValue);
+
+       /**
+        * Returns vendor specific Unicode corresponding to the Unicode AndroidPua.
+        *
+        * @param pua Unicode PUA for Android,
+        * @return vendor specific sjis, or -1 if there's no map for the AndroidPua.
+        */
+        GetVendorSpecificPuaFromAndroidPua(
+            [in] Int32 pua,
+            [out] Int32* RetValue);
+
+        GetVendorSpecificPuaFromAndroidPua(
+            [in] String puaString,
+            [out] String* RetValue);
+
+        /**
+         * Returns the lowest code point corresponding to an Android
+         * emoji character.
+         */
+        GetMinimumAndroidPua(
+            [out] Int32* RetValue);
+
+        /**
+         * Returns the highest code point corresponding to an Android
+         * emoji character.
+         */
+        GetMaximumAndroidPua(
+            [out] Int32* RetValue);
+
+        GetName(
+            [out] String* RetValue);
+
+
+    }
+    interface IEmojiFactoryHelper {
+        /**
+         * Constructs an instance of EmojiFactory corresponding to the name.
+         *
+         * @param class_name Name of the factory. This must include complete package name.
+         * @return A concrete EmojiFactory instance corresponding to factory_name.
+         * If factory_name is invalid, null is returned.
+         */
+        NewInstance(
+            [in] String class_name,
+            [out] IEmojiFactory** EmojiFactory);
+
+        /**
+         * Constructs an instance of available EmojiFactory.
+         *
+         * @return A concrete EmojiFactory instance. If there are several available
+         * EmojiFactory class, preferred one is chosen by the system. If there isn't, null
+         * is returned.
+         */
+         NewAvailableInstance(
+             [out] IEmojiFactory** EmojiFactory);
+    }
+
+    } // namespace Emoji
+    } // namepsace Droid
+    } // namespace Elastos
+
+}

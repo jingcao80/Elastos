@@ -1,0 +1,21 @@
+module
+{
+    namespace Libcore {
+    namespace ICU {
+
+    interface INativeIDNHelper {
+
+        ToASCII(
+            [in] String s,
+            [in] Int32 flags,
+            [out] String * str);
+
+        ToUnicode(
+            [in] String s,
+            [in] Int32 flags,
+            [out] String * str);
+
+    }
+    } // namespace ICU
+    } // namespace Libcore
+}

@@ -1,0 +1,67 @@
+
+module
+{
+
+    interface Org.Apache.Http.IConnectionReuseStrategy;
+    interface Org.Apache.Http.IHttpResponseFactory;
+    interface Org.Apache.Http.IHttpRequest;
+    interface Org.Apache.Http.IHttpResponse;
+    interface Org.Apache.Http.IHttpServerConnection;
+    interface Org.Apache.Http.Params.IHttpParams;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Protocol {
+
+    /**
+     * Minimalistic server-side implementation of an HTTP processor.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 610763 $
+     */
+    interface IHttpService {
+
+        SetHttpProcessor(
+            [in] IHttpProcessor* processor);
+
+        SetConnReuseStrategy(
+            [in] IConnectionReuseStrategy* connStrategy);
+
+        SetResponseFactory(
+            [in] IHttpResponseFactory* responseFactory);
+
+        SetHandlerResolver(
+            [in] IHttpRequestHandlerResolver* handlerResolver);
+
+        SetExpectationVerifier(
+            [in] IHttpExpectationVerifier* expectationVerifier);
+
+        GetParams(
+            [out] IHttpParams** params);
+
+        SetParams(
+            [in] IHttpParams* params);
+
+        HandleRequest(
+            [in] IHttpServerConnection* conn,
+            [in] IHttpContext* context);
+
+        HandleException(
+            [in] ECode ex,
+            [in] IHttpResponse* response);
+
+        DoService(
+            [in] IHttpRequest* request,
+            [in] IHttpResponse* response,
+            [in] IHttpContext* context);
+
+    }
+
+    } // namespace Protocol
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

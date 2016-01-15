@@ -1,0 +1,812 @@
+module
+{
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface Elastos.Droid.View.IInputEvent;
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Media.Tv.ITvInputManagerSession;
+    interface Elastos.Droid.Media.Tv.ITvContentRating;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+    * Interface used to receive the created session.
+    * @hide
+     */
+    // @SystemApi
+    interface ITvInputManagerSessionCallback {
+        /**
+        * This is called after {@link TvInputManager#createSession} has been processed.
+        *
+        * @param session A {@link TvInputManager.Session} instance created. This can be
+        *            {@code null} if the creation request failed.
+        */
+        OnSessionCreated(
+            [in] ITvInputManagerSession* session);
+
+        /**
+        * This is called when {@link TvInputManager.Session} is released.
+        * This typically happens when the process hosting the session has crashed or been killed.
+        *
+        * @param session A {@link TvInputManager.Session} instance released.
+        */
+        OnSessionReleased(
+            [in] ITvInputManagerSession* session);
+
+        /**
+        * This is called when the channel of this session is changed by the underlying TV input
+        * with out any {@link TvInputManager.Session#tune(Uri)} request.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback.
+        * @param channelUri The URI of a channel.
+        */
+        OnChannelRetuned(
+            [in] ITvInputManagerSession* session,
+            [in] IUri* channelUri);
+
+        /**
+        * This is called when the track information of the session has been changed.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback.
+        * @param tracks A list which includes track information.
+        */
+        OnTracksChanged(
+            [in] ITvInputManagerSession* session,
+            [in] IList* tracks);
+
+        /**
+        * This is called when a track for a given type is selected.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback
+        * @param type The type of the selected track. The type can be
+        *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
+        *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+        * @param trackId The ID of the selected track. When {@code null} the currently selected
+        *            track for a given type should be unselected.
+        */
+        OnTrackSelected(
+            [in] ITvInputManagerSession* session,
+            [in] Int32 type,
+            [in] String trackId);
+
+        /**
+        * This is called when the video is available, so the TV input starts the playback.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback.
+        */
+        OnVideoAvailable(
+            [in] ITvInputManagerSession* session);
+
+        /**
+        * This is called when the video is not available, so the TV input stops the playback.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback
+        * @param reason The reason why the TV input stopped the playback:
+        * <ul>
+        * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
+        * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
+        * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
+        * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+        * </ul>
+        */
+        OnVideoUnavailable(
+            [in] ITvInputManagerSession* session,
+            [in] Int32 reason);
+
+        /**
+        * This is called when the current program content turns out to be allowed to watch since
+        * its content rating is not blocked by parental controls.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback
+        */
+        OnContentAllowed(
+            [in] ITvInputManagerSession* session);
+
+        /**
+        * This is called when the current program content turns out to be not allowed to watch
+        * since its content rating is blocked by parental controls.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback
+        * @param rating The content ration of the blocked program.
+        */
+        OnContentBlocked(
+            [in] ITvInputManagerSession* session,
+            [in] ITvContentRating* rating);
+
+        /**
+        * This is called when {@link TvInputService.Session#layoutSurface} is called to change the
+        * layout of surface.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback
+        * @param left Left position.
+        * @param top Top position.
+        * @param right Right position.
+        * @param bottom Bottom position.
+        * @hide
+        */
+        // @SystemApi
+        OnLayoutSurface(
+            [in] ITvInputManagerSession* session,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /**
+        * This is called when a custom event has been sent from this session.
+        *
+        * @param session A {@link TvInputManager.Session} associated with this callback
+        * @param eventType The type of the event.
+        * @param eventArgs Optional arguments of the event.
+        * @hide
+        */
+        // @SystemApi
+        OnSessionEvent(
+            [in] ITvInputManagerSession* session,
+            [in] String eventType,
+            [in] IBundle* eventArgs);
+    }
+
+    /**
+    * Callback used to monitor status of the TV input.
+     */
+    interface ITvInputManagerTvInputCallback {
+        /**
+        * This is called when the state of a given TV input is changed.
+        *
+        * @param inputId The id of the TV input.
+        * @param state State of the TV input. The value is one of the following:
+        * <ul>
+        * <li>{@link TvInputManager#INPUT_STATE_CONNECTED}
+        * <li>{@link TvInputManager#INPUT_STATE_CONNECTED_STANDBY}
+        * <li>{@link TvInputManager#INPUT_STATE_DISCONNECTED}
+        * </ul>
+        */
+        OnInputStateChanged(
+            [in] String inputId,
+            [in] Int32 state);
+
+        /**
+        * This is called when a TV input is added.
+        *
+        * @param inputId The id of the TV input.
+        */
+        OnInputAdded(
+            [in] String inputId);
+
+        /**
+        * This is called when a TV input is removed.
+        *
+        * @param inputId The id of the TV input.
+        */
+        OnInputRemoved(
+            [in] String inputId);
+
+        /**
+        * This is called when a TV input is updated. The update of TV input happens when it is
+        * reinstalled or the media on which the newer version of TV input exists is
+        * available/unavailable.
+        *
+        * @param inputId The id of the TV input.
+        * @hide
+        */
+        // @SystemApi
+        OnInputUpdated(
+            [in] String inputId);
+    }
+
+    /**
+    * Interface used to receive events from Hardware objects.
+    * @hide
+     */
+    // @SystemApi
+    [deprecated]
+    interface ITvInputManagerHardwareCallback {
+        OnReleased();
+
+        OnStreamConfigChanged(
+            [in] ArrayOf<ITvStreamConfig*>* configs);
+    }
+
+    /**
+    * Callback that is invoked when an input event that was dispatched to this session has been
+    * finished.
+     *
+    * @hide
+     */
+    [deprecated]
+    interface ITvInputManagerSessionFinishedInputEventCallback {
+        /**
+        * Called when the dispatched input event is finished.
+        *
+        * @param token A token passed to {@link #dispatchInputEvent}.
+        * @param handled {@code true} if the dispatched input event was handled properly.
+        *            {@code false} otherwise.
+        */
+        OnFinishedInputEvent(
+            [in] IInterface* token,
+            [in] Boolean handled);
+    }
+
+    /**
+    * The Session provides the per-session functionality of TV inputs.
+    * @hide
+     */
+    // @SystemApi
+    [local]
+    interface ITvInputManagerSession {
+
+        const Int32 DISPATCH_IN_PROGRESS = -1;
+
+        const Int32 DISPATCH_NOT_HANDLED = 0;
+
+        const Int32 DISPATCH_HANDLED = 1;
+
+        /**
+        * Releases this session.
+        */
+        ReleaseResources();
+
+        /**
+        * Sets the {@link android.view.Surface} for this session.
+        *
+        * @param surface A {@link android.view.Surface} used to render video.
+        */
+        SetSurface(
+            [in] ISurface* surface);
+
+        /**
+        * Notifies of any structural changes (format or size) of the {@link Surface}
+        * passed by {@link #setSurface}.
+        *
+        * @param format The new PixelFormat of the {@link Surface}.
+        * @param width The new width of the {@link Surface}.
+        * @param height The new height of the {@link Surface}.
+        * @hide
+        */
+        // @SystemApi
+        DispatchSurfaceChanged(
+            [in] Int32 format,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+        * Sets the relative stream volume of this session to handle a change of audio focus.
+        *
+        * @param volume A volume value between 0.0f to 1.0f.
+        * @throws IllegalArgumentException if the volume value is out of range.
+        */
+        SetStreamVolume(
+            [in] Float volume);
+
+        /**
+        * Tunes to a given channel.
+        *
+        * @param channelUri The URI of a channel.
+        * @throws IllegalArgumentException if the argument is {@code null}.
+        */
+        Tune(
+            [in] IUri* channelUri);
+
+        /**
+        * Tunes to a given channel.
+        *
+        * @param channelUri The URI of a channel.
+        * @param params A set of extra parameters which might be handled with this tune event.
+        * @throws IllegalArgumentException if {@code channelUri} is {@code null}.
+        * @hide
+        */
+        // @SystemApi
+        Tune(
+            [in] IUri* channelUri,
+            [in] IBundle* params);
+
+        /**
+        * Enables or disables the caption for this session.
+        *
+        * @param enabled {@code true} to enable, {@code false} to disable.
+        */
+        SetCaptionEnabled(
+            [in] Boolean enabled);
+
+        /**
+        * Selects a track.
+        *
+        * @param type The type of the track to select. The type can be
+        *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
+        *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+        * @param trackId The ID of the track to select. When {@code null}, the currently selected
+        *            track of the given type will be unselected.
+        * @see #getTracks
+        */
+        SelectTrack(
+            [in] Int32 type,
+            [in] String trackId);
+
+        /**
+        * Returns the list of tracks for a given type. Returns {@code null} if the information is
+        * not available.
+        *
+        * @param type The type of the tracks. The type can be {@link TvTrackInfo#TYPE_AUDIO},
+        *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
+        * @return the list of tracks for the given type.
+        */
+        GetTracks(
+            [in] Int32 type,
+            [out] IList ** result);
+
+        /**
+        * Returns the selected track for a given type. Returns {@code null} if the information is
+        * not available or any of the tracks for the given type is not selected.
+        *
+        * @return the ID of the selected track.
+        * @see #selectTrack
+        */
+        GetSelectedTrack(
+            [in] Int32 type,
+            [out] String* result);
+
+        /**
+        * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
+        * TvInputService.Session.appPrivateCommand()} on the current TvView.
+        *
+        * @param action Name of the command to be performed. This <em>must</em> be a scoped name,
+        *            i.e. prefixed with a package name you own, so that different developers will
+        *            not create conflicting commands.
+        * @param data Any data to include with the command.
+        * @hide
+        */
+        // @SystemApi
+        SendAppPrivateCommand(
+            [in] String action,
+            [in] IBundle* data);
+
+        /**
+        * Dispatches an input event to this session.
+        *
+        * @param event An {@link InputEvent} to dispatch.
+        * @param token A token used to identify the input event later in the callback.
+        * @param callback A callback used to receive the dispatch result.
+        * @param handler A {@link Handler} that the dispatch result will be delivered to.
+        * @return Returns {@link #DISPATCH_HANDLED} if the event was handled. Returns
+        *         {@link #DISPATCH_NOT_HANDLED} if the event was not handled. Returns
+        *         {@link #DISPATCH_IN_PROGRESS} if the event is in progress and the callback will
+        *         be invoked later.
+        * @throws IllegalArgumentException if any of the necessary arguments is {@code null}.
+        * @hide
+        */
+        DispatchInputEvent(
+            [in] IInputEvent* event,
+            [in] IInterface* token,
+            [in] ITvInputManagerSessionFinishedInputEventCallback* cb,
+            [in] IHandler* handler,
+            [out] Int32* result);
+
+        /**
+        * Sets this as the main session. The main session is a session whose corresponding TV
+        * input determines the HDMI-CEC active source device.
+        *
+        * @see TvView#setMain
+        */
+        SetMain();
+
+        /**
+        * Creates an overlay view. Once the overlay view is created, {@link #relayoutOverlayView}
+        * should be called whenever the layout of its containing view is changed.
+        * {@link #removeOverlayView()} should be called to remove the overlay view.
+        * Since a session can have only one overlay view, this method should be called only once
+        * or it can be called again after calling {@link #removeOverlayView()}.
+        *
+        * @param view A view playing TV.
+        * @param frame A position of the overlay view.
+        * @throws IllegalArgumentException if any of the arguments is {@code null}.
+        * @throws IllegalStateException if {@code view} is not attached to a window.
+        */
+        CreateOverlayView(
+            [in] IView* view,
+            [in] IRect* frame);
+
+        /**
+        * Relayouts the current overlay view.
+        *
+        * @param frame A new position of the overlay view.
+        * @throws IllegalArgumentException if the arguments is {@code null}.
+        */
+        RelayoutOverlayView(
+            [in] IRect* frame);
+
+        /**
+        * Removes the current overlay view.
+        */
+        RemoveOverlayView();
+
+        /**
+        * Requests to unblock content blocked by parental controls.
+        */
+        RequestUnblockContent(
+            [in] ITvContentRating* unblockedRating);
+
+        FinishedInputEvent(
+            [in] Int32 seq,
+            [in] Boolean handled,
+            [in] Boolean timeout);
+
+        GetToken(
+            [out] IBinder** result);
+    }
+
+    /**
+    * The Hardware provides the per-hardware functionality of TV hardware.
+     *
+    * TV hardware is physical hardware attached to the Android device; for example, HDMI ports,
+    * Component/Composite ports, etc. Specifically, logical devices such as HDMI CEC logical
+    * devices don't fall into this category.
+     *
+    * @hide
+     */
+    // @SystemApi
+    interface ITvInputManagerHardware {
+        SetSurface(
+            [in] ISurface* surface,
+            [in] ITvStreamConfig* config,
+            [out] Boolean* result);
+
+        SetStreamVolume(
+            [in] Float volume);
+
+        DispatchKeyEventToHdmi(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        OverrideAudioSink(
+            [in] Int32 audioType,
+            [in] String audioAddress,
+            [in] Int32 samplingRate,
+            [in] Int32 channelMask,
+            [in] Int32 format);
+    }
+
+    /**
+    * Central system API to the overall TV input framework (TIF) architecture, which arbitrates
+    * interaction between applications and the selected TV inputs.
+     */
+    interface ITvInputManager {
+        const Int32 VIDEO_UNAVAILABLE_REASON_START = 0;
+        const Int32 VIDEO_UNAVAILABLE_REASON_END = 3;
+
+        /**
+        * A generic reason. Video is not available due to an unspecified error.
+        */
+        const Int32 VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0; //VIDEO_UNAVAILABLE_REASON_START;
+        /**
+        * Video is not available because the TV input is in the middle of tuning to a new channel.
+        */
+        const Int32 VIDEO_UNAVAILABLE_REASON_TUNING = 1;
+        /**
+        * Video is not available due to the weak TV signal.
+        */
+        const Int32 VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL = 2;
+        /**
+        * Video is not available because the TV input stopped the playback temporarily to buffer more
+        * data.
+        */
+        const Int32 VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; //VIDEO_UNAVAILABLE_REASON_END;
+
+        /**
+        * The TV input is connected.
+        * <p>
+        * State for {@link #getInputState} and {@link
+        * TvInputManager.TvInputCallback#onInputStateChanged}.
+        * </p>
+        */
+        const Int32 INPUT_STATE_CONNECTED = 0;
+        /**
+        * The TV input is connected but in standby mode. It would take a while until it becomes
+        * fully ready.
+        * <p>
+        * State for {@link #getInputState} and {@link
+        * TvInputManager.TvInputCallback#onInputStateChanged}.
+        * </p>
+        */
+        const Int32 INPUT_STATE_CONNECTED_STANDBY = 1;
+        /**
+        * The TV input is disconnected.
+        * <p>
+        * State for {@link #getInputState} and {@link
+        * TvInputManager.TvInputCallback#onInputStateChanged}.
+        * </p>
+        */
+        const Int32 INPUT_STATE_DISCONNECTED = 2;
+
+        /**
+        * Broadcast intent action when the user blocked content ratings change. For use with the
+        * {@link #isRatingBlocked}.
+        */
+        const String ACTION_BLOCKED_RATINGS_CHANGED =
+                "android.media.tv.action.BLOCKED_RATINGS_CHANGED";
+
+        /**
+        * Broadcast intent action when the parental controls enabled state changes. For use with the
+        * {@link #isParentalControlsEnabled}.
+        */
+        const String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED =
+                "android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED";
+
+        /**
+        * Broadcast intent action used to query available content rating systems.
+        * <p>
+        * The TV input manager service locates available content rating systems by querying broadcast
+        * receivers that are registered for this action. An application can offer additional content
+        * rating systems to the user by declaring a suitable broadcast receiver in its manifest.
+        * </p><p>
+        * Here is an example broadcast receiver declaration that an application might include in its
+        * AndroidManifest.xml to advertise custom content rating systems. The meta-data specifies a
+        * resource that contains a description of each content rating system that is provided by the
+        * application.
+        * <p><pre class="prettyprint">
+        * {@literal
+        * <receiver android:name=".TvInputReceiver">
+        *     <intent-filter>
+        *         <action android:name=
+        *                 "android.media.tv.TvInputManager.ACTION_QUERY_CONTENT_RATING_SYSTEMS" />
+        *     </intent-filter>
+        *     <meta-data
+        *             android:name="android.media.tv.TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS"
+        *             android:resource="@xml/tv_content_rating_systems" />
+        * </receiver>}</pre></p>
+        * In the above example, the <code>@xml/tv_content_rating_systems</code> resource refers to an
+        * XML resource whose root element is <code>&lt;rating-system-definitions&gt;</code> that
+        * contains zero or more <code>&lt;rating-system-definition&gt;</code> elements. Each <code>
+        * &lt;rating-system-definition&gt;</code> element specifies the ratings, sub-ratings and rating
+        * orders of a particular content rating system.
+        * </p>
+        *
+        * @see TvContentRating
+        */
+        const String ACTION_QUERY_CONTENT_RATING_SYSTEMS =
+                "android.media.tv.action.QUERY_CONTENT_RATING_SYSTEMS";
+
+        /**
+        * Content rating systems metadata associated with {@link #ACTION_QUERY_CONTENT_RATING_SYSTEMS}.
+        * <p>
+        * Specifies the resource ID of an XML resource that describes the content rating systems that
+        * are provided by the application.
+        * </p>
+        */
+        const String META_DATA_CONTENT_RATING_SYSTEMS =
+                "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
+
+        /**
+        * Returns the complete list of TV inputs on the system.
+        *
+        * @return List of {@link TvInputInfo} for each TV input that describes its meta information.
+        */
+        GetTvInputList(
+            [out] IList ** result);
+
+        /**
+        * Returns the {@link TvInputInfo} for a given TV input.
+        *
+        * @param inputId The ID of the TV input.
+        * @return the {@link TvInputInfo} for a given TV input. {@code null} if not found.
+        */
+        GetTvInputInfo(
+            [in] String inputId,
+            [out] ITvInputInfo ** result);
+
+        /**
+        * Returns the state of a given TV input. It retuns one of the following:
+        * <ul>
+        * <li>{@link #INPUT_STATE_CONNECTED}
+        * <li>{@link #INPUT_STATE_CONNECTED_STANDBY}
+        * <li>{@link #INPUT_STATE_DISCONNECTED}
+        * </ul>
+        *
+        * @param inputId The id of the TV input.
+        * @throws IllegalArgumentException if the argument is {@code null} or if there is no
+        *        {@link TvInputInfo} corresponding to {@code inputId}.
+        */
+        GetInputState(
+            [in] String inputId,
+            [out] Int32* result);
+
+        /**
+        * Registers a {@link TvInputCallback}.
+        *
+        * @param callback A callback used to monitor status of the TV inputs.
+        * @param handler A {@link Handler} that the status change will be delivered to.
+        * @throws IllegalArgumentException if any of the arguments is {@code null}.
+        */
+        RegisterCallback(
+            [in] ITvInputManagerTvInputCallback* cb,
+            [in] IHandler* handler);
+
+        /**
+        * Unregisters the existing {@link TvInputCallback}.
+        *
+        * @param callback The existing callback to remove.
+        * @throws IllegalArgumentException if any of the arguments is {@code null}.
+        */
+        UnregisterCallback(
+            [in] ITvInputManagerTvInputCallback* cb);
+
+        /**
+        * Returns the user's parental controls enabled state.
+        *
+        * @return {@code true} if the user enabled the parental controls, {@code false} otherwise.
+        */
+        IsParentalControlsEnabled(
+            [out] Boolean* result);
+
+        /**
+        * Sets the user's parental controls enabled state.
+        *
+        * @param enabled The user's parental controls enabled state. {@code true} if the user enabled
+        *            the parental controls, {@code false} otherwise.
+        * @see #isParentalControlsEnabled
+        * @hide
+        */
+        // @SystemApi
+        SetParentalControlsEnabled(
+            [in] Boolean enabled);
+
+        /**
+        * Checks whether a given TV content rating is blocked by the user.
+        *
+        * @param rating The TV content rating to check.
+        * @return {@code true} if the given TV content rating is blocked, {@code false} otherwise.
+        */
+        IsRatingBlocked(
+            [in] ITvContentRating* rating,
+            [out] Boolean* result);
+
+        /**
+        * Returns the list of blocked content ratings.
+        *
+        * @return the list of content ratings blocked by the user.
+        * @hide
+        */
+        // @SystemApi
+        GetBlockedRatings(
+            [out] IList ** result);
+
+        /**
+        * Adds a user blocked content rating.
+        *
+        * @param rating The content rating to block.
+        * @see #isRatingBlocked
+        * @see #removeBlockedRating
+        * @hide
+        */
+        // @SystemApi
+        AddBlockedRating(
+            [in] ITvContentRating* rating);
+
+        /**
+        * Removes a user blocked content rating.
+        *
+        * @param rating The content rating to unblock.
+        * @see #isRatingBlocked
+        * @see #addBlockedRating
+        * @hide
+        */
+        // @SystemApi
+        RemoveBlockedRating(
+            [in] ITvContentRating* rating);
+
+        /**
+        * Returns the list of all TV content rating systems defined.
+        * @hide
+        */
+        // @SystemApi
+        GetTvContentRatingSystemList(
+            [out] IList ** result);
+
+        /**
+        * Creates a {@link Session} for a given TV input.
+        * <p>
+        * The number of sessions that can be created at the same time is limited by the capability of
+        * the given TV input.
+        * </p>
+        *
+        * @param inputId The id of the TV input.
+        * @param callback A callback used to receive the created session.
+        * @param handler A {@link Handler} that the session creation will be delivered to.
+        * @throws IllegalArgumentException if any of the arguments is {@code null}.
+        * @hide
+        */
+        // @SystemApi
+        CreateSession(
+            [in] String inputId,
+            [in] ITvInputManagerSessionCallback* cb,
+            [in] IHandler* handler);
+
+        /**
+        * Returns the TvStreamConfig list of the given TV input.
+        *
+        * @param inputId the id of the TV input.
+        * @return List of {@link TvStreamConfig} which is available for capturing
+        *   of the given TV input.
+        * @hide
+        */
+        // @SystemApi
+        GetAvailableTvStreamConfigList(
+            [in] String inputId,
+            [out] IList ** result);
+
+        /**
+        * Take a snapshot of the given TV input into the provided Surface.
+        *
+        * @param inputId the id of the TV input.
+        * @param surface the {@link Surface} to which the snapshot is captured.
+        * @param config the {@link TvStreamConfig} which is used for capturing.
+        * @return true when the {@link Surface} is ready to be captured.
+        * @hide
+        */
+        // @SystemApi
+        CaptureFrame(
+            [in] String inputId,
+            [in] ISurface* surface,
+            [in] ITvStreamConfig* config,
+            [out] Boolean* result);
+
+        /**
+        * Returns true if there is only a single TV input session.
+        *
+        * @hide
+        */
+        // @SystemApi
+        IsSingleSessionActive(
+            [out] Boolean* result);
+
+        /**
+        * Returns a list of TvInputHardwareInfo objects representing available hardware.
+        *
+        * @hide
+        */
+        // @SystemApi
+        GetHardwareList(
+            [out] IList ** result);
+
+        /**
+        * Returns acquired TvInputManager.Hardware object for given deviceId.
+        *
+        * If there are other Hardware object acquired for the same deviceId, calling this method will
+        * preempt the previously acquired object and report {@link HardwareCallback#onReleased} to the
+        * old object.
+        *
+        * @hide
+        */
+        // @SystemApi
+        AcquireTvInputHardware(
+            [in] Int32 deviceId,
+            [in] ITvInputManagerHardwareCallback* cb,
+            [in] ITvInputInfo* info,
+            [out] ITvInputManagerHardware ** result);
+
+        /**
+        * Releases previously acquired hardware object.
+        *
+        * @hide
+        */
+        // @SystemApi
+        ReleaseTvInputHardware(
+            [in] Int32 deviceId,
+            [in] ITvInputManagerHardware* hardware);
+    }
+
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

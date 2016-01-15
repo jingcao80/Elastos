@@ -1,0 +1,18 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2005,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT class
+$
+
+protected:
+    CARAPI _ChildConstruct(PInterface pChild);
+    CARAPI _ChildDestruct(PInterface pChild);
+
+$ WITH all interfaces DO
+$   IF attrib is "virtual"
+$     WITH all parents_and_me DO
+    ${name} *_m_p${name};
+$     END DO ;; all parents
+$   END IF
+$ END DO ;; all interfaces

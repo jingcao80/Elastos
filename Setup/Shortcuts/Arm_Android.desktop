@@ -1,0 +1,14 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Name=Arm Android
+Comment=Elastos RDK Development Env
+TryExec=gnome-terminal
+Exec=gnome-terminal -e 'bash --init-file ~/ElastosRDK5_0/Setup/Arm_Android_Init'
+Icon=~/ElastosRDK5_0/Setup/Shortcuts/Arm_Android.ico
+#Icon=utilities-terminal
+Type=Application
+Categories=TerminalEmulator
+StartupNotify=true
+#OnlyShowIn=GNOME;
+X-Ubuntu-Gettext-Domain=gnome-terminal

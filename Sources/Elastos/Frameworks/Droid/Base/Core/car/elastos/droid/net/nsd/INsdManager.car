@@ -1,0 +1,23 @@
+module
+{
+    interface Elastos.Droid.Os.IMessenger;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+    namespace Nsd {
+
+    interface IINsdManager
+    {
+        GetMessenger(
+            [out] IMessenger** msg);
+
+        SetEnabled(
+            [in] Boolean val);
+    }
+
+    } // namespace Nsd
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

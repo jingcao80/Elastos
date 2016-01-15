@@ -1,0 +1,6 @@
+module
+{
+    merge("wifidisplay/IWifiDisplayThread.car");
+    merge("wifidisplay/IWifiDisplayManager.car");
+
+}

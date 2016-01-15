@@ -1,0 +1,77 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * Describes the buildtime configuration of a network.
+     * Holds settings read from resources.
+     * @hide
+     */
+    interface INetworkConfig {
+        IsDefault(
+            [out] Boolean* result);
+
+        /**
+         * Human readable string
+         */
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        /**
+         * Type from ConnectivityManager
+         */
+        GetType(
+            [out] Int32* type);
+
+        SetType(
+            [in] Int32 type);
+
+        /**
+         * the radio number from radio attributes config
+         */
+        GetRadio(
+            [out] Int32* radio);
+
+        SetRadio(
+            [in] Int32 radio);
+
+        /**
+         * higher number == higher priority when turning off connections
+         */
+        GetPriority(
+            [out] Int32* priority);
+
+        SetPriority(
+            [in] Int32 priority);
+
+        /**
+         * indicates the boot time dependencyMet setting
+         */
+        GetDependencyMet(
+            [out] Boolean* dependencyMet);
+
+        SetDependencyMet(
+            [in] Boolean dependencyMet);
+
+        /**
+         * indicates the default restoral timer in seconds
+         * if the network is used as a special network feature
+         * -1 indicates no restoration of default
+         */
+        GetRestoreTime(
+            [out] Int32* restoretime);
+
+        SetRestoreTime(
+            [in] Int32 restoretime);
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

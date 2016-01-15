@@ -1,0 +1,163 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IWindowCallback;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
+    interface Elastos.Droid.Internal.Widget.IScrollingTabContainerView;
+    interface Elastos.Droid.Internal.Widget.IActionBarContextView;
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Widget.ISpinnerAdapter;
+    interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Internal.Widget.IAbsActionBarView
+     */
+    [local]
+    interface IActionBarView {
+        /**
+         * Set the window callback used to invoke menu items; used for dispatching home button presses.
+         * @param cb Window callback to dispatch to
+         */
+        SetWindowCallback(
+            [in] IWindowCallback* cb);
+
+        InitProgress();
+
+        InitIndeterminateProgress();
+
+        IsSplit(
+            [out] Boolean* res);
+
+        CanSplit(
+            [out] Boolean* split);
+
+        HasEmbeddedTabs(
+            [out] Boolean* res);
+
+        SetEmbeddedTabView(
+            [in] IScrollingTabContainerView* tabs);
+
+        SetMenuPrepared();
+
+        SetMenu(
+            [in] IMenu* menu,
+            [in] IMenuPresenterCallback* cb);
+
+        HasExpandedActionView(
+            [out] Boolean* res);
+
+        CollapseActionView();
+
+        SetCustomView(
+            [in] IView* view);
+
+        GetTitle(
+            [out] ICharSequence** title);
+
+        /**
+         * Set the action bar title. This will always replace or override window titles.
+         * @param title Title to set
+         *
+         * @see #setWindowTitle(CharSequence)
+         */
+        SetTitle(
+            [in] ICharSequence* title);
+
+        /**
+         * Set the window title. A window title will always be replaced or overridden by a user title.
+         * @param title Title to set
+         *
+         * @see #setTitle(CharSequence)
+         */
+        SetWindowTitle(
+            [in] ICharSequence* title);
+
+        GetSubtitle(
+            [out] ICharSequence** subTitle);
+
+        SetSubtitle(
+            [in] ICharSequence* subtitle);
+
+        SetHomeButtonEnabled(
+            [in] Boolean able);
+
+        SetDisplayOptions(
+            [in] Int32 options);
+
+        SetIcon(
+            [in] IDrawable* icon);
+
+        SetIcon(
+            [in] Int32 resId);
+
+        SetLogo(
+            [in] IDrawable* logo);
+
+        SetLogo(
+            [in] Int32 resId);
+
+        HasLogo(
+            [out] Boolean* result);
+
+        SetNavigationMode(
+            [in] Int32 mode);
+
+        SetDropdownParams(
+            [in] ISpinnerAdapter* adapter,
+            [in] IAdapterViewOnItemSelectedListener* listener);
+
+        GetDropdownItemCount(
+            [out] Int32* adapter);
+
+        SetDropdownSelectedPosition(
+            [in] Int32 position);
+
+        GetDropdownSelectedPosition(
+            [out] Int32* pos);
+
+        GetCustomView(
+            [out] IView** view);
+
+        GetNavigationMode(
+            [out] Int32* mode);
+
+        GetDisplayOptions(
+            [out] Int32* options);
+
+        SetContextView(
+            [in] IActionBarContextView* view);
+
+        SetCollapsible(
+            [in] Boolean collapsible);
+
+        IsTitleTruncated(
+            [out] Boolean* isTruncated);
+
+        SetNavigationIcon(
+            [in] IDrawable* indicator);
+
+        SetNavigationIcon(
+            [in] Int32 resId);
+
+        SetNavigationContentDescription(
+            [in] ICharSequence* description);
+
+        SetNavigationContentDescription(
+            [in] Int32 resId);
+    }
+
+    } // namespace Widget
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}
+

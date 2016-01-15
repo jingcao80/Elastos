@@ -1,0 +1,31 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- MainActivity -->
+    <dimen name="title_bar_height">40dip</dimen>
+    <dimen name="logo_width">60dip</dimen>
+    <dimen name="logo_height">40dip</dimen>
+    <dimen name="search_edittext_width">180dip</dimen>
+    <dimen name="tab_width">400dip</dimen>
+    <dimen name="play_mode_view_width">120dip</dimen>
+    <dimen name="foot_height">50dip</dimen>
+    <dimen name="tab_btn_textsize">16sp</dimen>
+    <dimen name="tab_btn_textsize_focus">18dp</dimen>
+
+    <!-- About MusicPlayer -->
+    <dimen name="arrow_width">40dip</dimen>
+    <dimen name="big_logo_margin_top">100dip</dimen>
+    <dimen name="big_logo_width">360dip</dimen>
+    <dimen name="big_logo_height">200dip</dimen>
+
+    <!-- Play Activity -->
+    <dimen name="play_foot_height">180dip</dimen>
+    <dimen name="play_volume_bar_width">100dip</dimen>
+    <dimen name="title_icon_margin_left">20dip</dimen>
+    <dimen name="albumart_width">300dip</dimen>
+    <dimen name="albumart_height">300dip</dimen>
+
+</resources>

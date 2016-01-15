@@ -1,0 +1,110 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+    namespace Atomic {
+
+    interface IAtomicReferenceArray {
+        /**
+         * Returns the length of the array.
+         *
+         * @return the length of the array
+         */
+        GetLength(
+            [out] Int32* value);
+
+        /**
+         * Gets the current value at position {@code i}.
+         *
+         * @param i the index
+         * @return the current value
+         */
+        Get(
+            [in] Int32 i,
+            [out] IInterface** outface);
+
+        /**
+         * Sets the element at position {@code i} to the given value.
+         *
+         * @param i the index
+         * @param newValue the new value
+         */
+        Set(
+            [in] Int32 i,
+            [in] IInterface* newValue);
+
+        /**
+         * Eventually sets the element at position {@code i} to the given value.
+         *
+         * @param i the index
+         * @param newValue the new value
+         * @since 1.6
+         */
+        LazySet(
+            [in] Int32 i,
+            [in] IInterface* newValue);
+
+
+        /**
+         * Atomically sets the element at position {@code i} to the given
+         * value and returns the old value.
+         *
+         * @param i the index
+         * @param newValue the new value
+         * @return the previous value
+         */
+        GetAndSet(
+            [in] Int32 i,
+            [in] IInterface* newValue,
+            [out] IInterface** outface);
+
+        /**
+         * Atomically sets the element at position {@code i} to the given
+         * updated value if the current value {@code ==} the expected value.
+         *
+         * @param i the index
+         * @param expect the expected value
+         * @param update the new value
+         * @return true if successful. False return indicates that
+         * the actual value was not equal to the expected value.
+         */
+        CompareAndSet(
+            [in] Int32 i,
+            [in] IInterface* expect,
+            [in] IInterface* update,
+            [out] Boolean* value);
+
+        /**
+         * Atomically sets the element at position {@code i} to the given
+         * updated value if the current value {@code ==} the expected value.
+         *
+         * <p>May <a href="package-summary.html#Spurious">fail spuriously</a>
+         * and does not provide ordering guarantees, so is only rarely an
+         * appropriate alternative to {@code compareAndSet}.
+         *
+         * @param i the index
+         * @param expect the expected value
+         * @param update the new value
+         * @return true if successful.
+         */
+        WeakCompareAndSet(
+            [in] Int32 i,
+            [in] IInterface* expect,
+            [in] IInterface* update,
+            [out] Boolean* value);
+
+        /**
+         * Returns the String representation of the current values of array.
+         * @return the String representation of the current values of array
+         */
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Atomic
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

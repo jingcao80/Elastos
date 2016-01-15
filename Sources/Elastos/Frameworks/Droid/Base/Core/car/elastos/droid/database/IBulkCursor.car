@@ -1,0 +1,66 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Database.ICursorWindow;
+    interface Elastos.Droid.Database.IIContentObserver;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+     * This interface provides a low-level way to pass bulk cursor data across
+     * both process and language boundaries. Application code should use the Cursor
+     * interface directly.
+     *
+     * {@hide}
+     */
+    interface IBulkCursor {
+        /* IPC constants */
+        const String DESCRIPTOR = "android.content.IBulkCursor";
+
+        const Int32 GET_CURSOR_WINDOW_TRANSACTION = 0x00000001; //IBinder.FIRST_CALL_TRANSACTION;
+        const Int32 DEACTIVATE_TRANSACTION        = 0x00000002; //IBinder.FIRST_CALL_TRANSACTION + 1;
+        const Int32 REQUERY_TRANSACTION           = 0x00000003; //IBinder.FIRST_CALL_TRANSACTION + 2;
+        const Int32 ON_MOVE_TRANSACTION           = 0x00000004; //IBinder.FIRST_CALL_TRANSACTION + 3;
+        const Int32 GET_EXTRAS_TRANSACTION        = 0x00000005; //IBinder.FIRST_CALL_TRANSACTION + 4;
+        const Int32 RESPOND_TRANSACTION           = 0x00000006; //IBinder.FIRST_CALL_TRANSACTION + 5;
+        const Int32 CLOSE_TRANSACTION             = 0x00000007; //IBinder.FIRST_CALL_TRANSACTION + 6;
+
+        /**
+         * Gets a cursor window that contains the specified position.
+         * The window will contain a range of rows around the specified position.
+         */
+        GetWindow(
+            [in] Int32 position,
+            [out] ICursorWindow** result);
+
+        /**
+         * Notifies the cursor that the position has changed.
+         * Only called when {@link #getWantsAllOnMoveCalls()} returns true.
+         *
+         * @param position The new position
+         */
+        OnMove(
+            [in] Int32 position);
+
+        Deactivate();
+
+        Close();
+
+        Requery(
+            [in] IIContentObserver* observer,
+            [out] Int32* result);
+
+        GetExtras(
+            [out] IBundle** extras);
+
+        Respond(
+            [in] IBundle* extras,
+            [out] IBundle** result);
+    }
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Dispatch {
+
+    /**
+     * Broadcast a single dispatch into multiple other dispatchables.
+     *
+     * <p>Every time {@link #dispatch} is invoked, all the broadcast targets will
+     * see the same dispatch as well. The first target's return value is returned.</p>
+     *
+     * <p>This enables a single listener to be converted into a multi-listener.</p>
+     *
+     * @ invoke
+     * interface IDispatchable;
+     */
+    interface IBroadcastDispatcher {
+    }
+
+    } // namespace Dispatch
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,62 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IPaint;
+
+    interface Elastos.IO.IInputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    interface IMovie {
+        Draw(
+            [in] ICanvas* canvas,
+            [in] Float x,
+            [in] Float y,
+            [in] IPaint* paint);
+
+        Draw(
+            [in] ICanvas* canvas,
+            [in] Float x,
+            [in] Float y);
+
+        GetDuration(
+            [out] Int32* duration);
+
+        GetHeight(
+            [out] Int32* height);
+
+        GetWidth(
+            [out] Int32* width);
+
+        IsOpaque(
+            [out] Boolean* isOpaque);
+
+        SetTime(
+            [in] Int32 relativeMilliseconds,
+            [out] Boolean* result);
+    }
+
+    [deprecated]
+    interface IMovieHelper {
+        DecodeByteArray(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out] IMovie** movie);
+
+        DecodeFile(
+            [in] String pathName,
+            [out] IMovie** movie);
+
+        DecodeStream(
+            [in] IInputStream* is,
+            [out] IMovie** movie);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,66 @@
+
+module
+{
+
+    using interface Elastos.Net.IURI;
+
+    interface Org.Apache.Http.IHttpResponse;
+    interface Org.Apache.Http.Protocol.IHttpContext;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+
+    /**
+     * A handler for determining if an HTTP request should be redirected to
+     * a new location in response to an HTTP response received from the target
+     * server.
+     *
+     * <p>
+     * Classes implementing this interface must synchronize access to shared
+     * data as methods of this interfrace may be executed from multiple threads
+     * </p>
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     */
+    interface IRedirectHandler {
+
+        /**
+         * Determines if a request should be redirected to a new location
+         * given the response from the target server.
+         *
+         * @param response the response received from the target server
+         * @param context the context for the request execution
+         *
+         * @return <code>true</code> if the request should be redirected, <code>false</code>
+         * otherwise
+         */
+        IsRedirectRequested(
+            [in] IHttpResponse* response,
+            [in] IHttpContext* context,
+            [out] Boolean* redirected);
+
+        /**
+         * Determines the location request is expected to be redirected to
+         * given the response from the target server and the current request
+         * execution context.
+         *
+         * @param response the response received from the target server
+         * @param context the context for the request execution
+         *
+         * @return redirect URI
+         */
+        GetLocationURI(
+            [in] IHttpResponse* response,
+            [in] IHttpContext* context,
+            [out] IURI** uri);
+
+    }
+
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

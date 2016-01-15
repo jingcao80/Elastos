@@ -1,0 +1,17 @@
+TARGET_NAME= server
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = server.cpp
+SOURCES += BootReceiver.cpp
+SOURCES += LocalServices.cpp
+SOURCES += CAppWidgetBackupBridge.cpp
+SOURCES += ResettableTimeout.cpp
+SOURCES += NetworkManagementSocketTagger.cpp
+SOURCES += CNetworkManagementSocketTaggerHelper.cpp

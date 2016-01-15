@@ -1,0 +1,17 @@
+TARGET_NAME= DCARSampleServer
+TARGET_TYPE= ecx
+
+C_DEFINES+=-DHAVE_SYS_UIO_H
+
+INCLUDES += $(MAKEDIR)/../../../DCARServiceManager
+
+IMPORTS = Elastos.CoreLibrary.eco
+
+SOURCES = main.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_USER_LIB)/DCARServiceManager.lib
+LIBRARIES += -lm -llog -licuuc

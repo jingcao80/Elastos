@@ -1,0 +1,306 @@
+
+module
+{
+    using interface Elastos.Utility.ILocale;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+       * @Involve interface IParcelable
+       */
+
+    interface IAddress {
+        /**
+         * Returns the Locale associated with this address.
+         */
+        GetLocale(
+            [out] ILocale** locale);
+
+        /**
+         * Returns the largest index currently in use to specify an address line.
+         * If no address lines are specified, -1 is returned.
+         */
+        GetMaxAddressLineIndex(
+            [out] Int32* index);
+
+        /**
+         * Returns a line of the address numbered by the given index
+         * (starting at 0), or null if no such line is present.
+         *
+         * @throws IllegalArgumentException if index < 0
+         */
+        GetAddressLine(
+            [in] Int32 index,
+            [out] String* line);
+
+        /**
+         * Sets the line of the address numbered by index (starting at 0) to the
+         * given String, which may be null.
+         *
+         * @throws IllegalArgumentException if index < 0
+         */
+        SetAddressLine(
+            [in] Int32 index,
+            [in] String line);
+
+        /**
+         * Returns the feature name of the address, for example, "Golden Gate Bridge", or null
+         * if it is unknown
+         */
+        GetFeatureName(
+            [out] String* featureName);
+
+        /**
+         * Sets the feature name of the address to the given String, which may be null
+         */
+        SetFeatureName(
+            [in] String featureName);
+
+        /**
+         * Returns the administrative area name of the address, for example, "CA", or null if
+         * it is unknown
+         */
+        GetAdminArea(
+            [out] String* adminArea);
+
+        /**
+         * Sets the administrative area name of the address to the given String, which may be null
+         */
+        SetAdminArea(
+            [in] String adminArea);
+
+        /**
+         * Returns the sub-administrative area name of the address, for example, "Santa Clara County",
+         * or null if it is unknown
+         */
+        GetSubAdminArea(
+            [out] String* subAdminArea);
+
+        /**
+         * Sets the sub-administrative area name of the address to the given String, which may be null
+         */
+        SetSubAdminArea(
+            [in] String subAdminArea);
+
+        /**
+         * Returns the locality of the address, for example "Mountain View", or null if it is unknown.
+         */
+        GetLocality(
+            [out] String* locality);
+
+        /**
+         * Sets the locality of the address to the given String, which may be null.
+         */
+        SetLocality(
+            [in] String locality);
+
+        /**
+         * Returns the sub-locality of the address, or null if it is unknown.
+         * For example, this may correspond to the neighborhood of the locality.
+         */
+        GetSubLocality(
+            [out] String* sublocality);
+
+        /**
+         * Sets the sub-locality of the address to the given String, which may be null.
+         */
+        SetSubLocality(
+            [in] String sublocality);
+
+        /**
+         * Returns the thoroughfare name of the address, for example, "1600 Ampitheater Parkway",
+         * which may be null
+         */
+        GetThoroughfare(
+            [out] String* thoroughfare);
+
+        /**
+         * Sets the thoroughfare name of the address, which may be null.
+         */
+        SetThoroughfare(
+            [in] String thoroughfare);
+
+        /**
+         * Returns the sub-thoroughfare name of the address, which may be null.
+         * This may correspond to the street number of the address.
+         */
+        GetSubThoroughfare(
+            [out] String* subthoroughfare);
+
+        /**
+         * Sets the sub-thoroughfare name of the address, which may be null.
+         */
+        SetSubThoroughfare(
+            [in] String subthoroughfare);
+
+        /**
+         * Returns the premises of the address, or null if it is unknown.
+         */
+        GetPremises(
+            [out] String* premises);
+
+        /**
+         * Sets the premises of the address to the given String, which may be null.
+         */
+        SetPremises(
+            [in] String premises);
+
+        /**
+         * Returns the postal code of the address, for example "94110",
+         * or null if it is unknown.
+         */
+        GetPostalCode(
+            [out] String* postalCode);
+
+        /**
+         * Sets the postal code of the address to the given String, which may
+         * be null.
+         */
+        SetPostalCode(
+            [in] String postalCode);
+
+        /**
+         * Returns the country code of the address, for example "US",
+         * or null if it is unknown.
+         */
+        GetCountryCode(
+            [out] String* countryCode);
+
+        /**
+         * Sets the country code of the address to the given String, which may
+         * be null.
+         */
+        SetCountryCode(
+            [in] String countryCode);
+
+        /**
+         * Returns the localized country name of the address, for example "Iceland",
+         * or null if it is unknown.
+         */
+        GetCountryName(
+            [out] String* countryName);
+
+        /**
+         * Sets the country name of the address to the given String, which may
+         * be null.
+         */
+        SetCountryName(
+            [in] String countryName);
+
+        /**
+         * Returns true if a latitude has been assigned to this Address,
+         * false otherwise.
+         */
+        HasLatitude(
+            [out] Boolean* hasLatitude);
+
+        /**
+         * Returns the latitude of the address if known.
+         *
+         * @throws IllegalStateException if this Address has not been assigned
+         * a latitude.
+         */
+        GetLatitude(
+            [out] Double* latitude);
+
+        /**
+         * Sets the latitude associated with this address.
+         */
+        SetLatitude(
+            [in] Double latitude);
+
+        /**
+         * Removes any latitude associated with this address.
+         */
+        ClearLatitude();
+
+        /**
+         * Returns true if a longitude has been assigned to this Address,
+         * false otherwise.
+         */
+        HasLongitude(
+            [out] Boolean* hasLongitude);
+
+        /**
+         * Returns the longitude of the address if known.
+         *
+         * @throws IllegalStateException if this Address has not been assigned
+         * a longitude.
+         */
+        GetLongitude(
+            [out] Double* longitude);
+
+        /**
+         * Sets the longitude associated with this address.
+         */
+        SetLongitude(
+            [in] Double longitude);
+
+        /**
+         * Removes any longitude associated with this address.
+         */
+        ClearLongitude();
+
+        /**
+         * Returns the phone number of the address if known,
+         * or null if it is unknown.
+         *
+         * @throws IllegalStateException if this Address has not been assigned
+         * a latitude.
+         */
+        GetPhone(
+            [out] String* phone);
+
+        /**
+         * Sets the phone number associated with this address.
+         */
+        SetPhone(
+            [in] String phone);
+
+        /**
+         * Returns the public URL for the address if known,
+         * or null if it is unknown.
+         */
+        GetUrl(
+            [out] String* url);
+
+        /**
+         * Sets the public URL associated with this address.
+         */
+        SetUrl(
+            [in] String Url);
+
+        /**
+         * Returns additional provider-specific information about the
+         * address as a Bundle.  The keys and values are determined
+         * by the provider.  If no additional information is available,
+         * null is returned.
+         *
+         * <!--
+         * <p> A number of common key/value pairs are listed
+         * below. Providers that use any of the keys on this list must
+         * provide the corresponding value as described below.
+         *
+         * <ul>
+         * </ul>
+         * -->
+         */
+        GetExtras(
+            [out] IBundle** extras);
+
+        /**
+         * Sets the extra information associated with this fix to the
+         * given Bundle.
+         */
+        SetExtras(
+            [in] IBundle* extras);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+
+}

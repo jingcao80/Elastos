@@ -1,0 +1,223 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    [deprecated]
+    interface IDataOutput {
+        /**
+         * Writes the specified 8-bit byte.
+         *
+         * @param oneByte
+         *            the byte to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readByte()
+         */
+        Write(
+            [in] Int32 oneByte);
+
+        /**
+         * Writes the entire contents of the byte array {buffer} to this
+         * stream.
+         *
+         * @param buffer
+         *            the buffer to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         */
+        Write(
+            [in] ArrayOf<Byte>* buffer);
+
+        /**
+         * Writes {count} bytes from the byte array {buffer} starting at
+         * offset {index}.
+         *
+         * @param buffer
+         *            the buffer to write.
+         * @param offset
+         *            the index of the first byte in {buffer} to write.
+         * @param count
+         *            the number of bytes from the {buffer} to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         */
+        Write(
+            [in] ArrayOf<Byte>* buffer,
+            [in] Int32 offset,
+            [in] Int32 count);
+
+        /**
+         * Writes the specified boolean.
+         *
+         * @param val
+         *            the boolean value to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readBoolean()
+         */
+        WriteBoolean(
+            [in] Boolean val);
+
+        /**
+         * Writes the specified 8-bit byte.
+         *
+         * @param val
+         *            the byte value to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readByte()
+         * @see DataInput#readUnsignedByte()
+         */
+        WriteByte(
+            [in] Int32 val);
+
+        /**
+         * Writes the low order 8-bit bytes from the specified string.
+         *
+         * @param str
+         *            the string containing the bytes to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         */
+        WriteBytes(
+            [in] String str);
+
+        /**
+         * Writes the specified 16-bit character in big-endian order. Only the two
+         * bytes of the integer {oneByte} are written.
+         *
+         * @param val
+         *            the character to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readChar()
+         */
+        WriteChar(
+            [in] Int32 val);
+
+        /**
+         * Writes the 16-bit characters contained in {str} in big-endian order.
+         *
+         * @param str
+         *            the string that contains the characters to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readChar()
+         */
+        WriteChars(
+            [in] String str);
+
+        /**
+         * Writes the specified 64-bit double in big-endian order. The resulting output is the eight
+         * bytes returned by doubleToLongBits(double).
+         *
+         * @sa Double#doubleToLongBits(double)
+         *
+         * @param val
+         *            the double to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readDouble()
+         */
+        WriteDouble(
+            [in] Double val);
+
+        /**
+         * Writes the specified 32-bit float in big-endian order. The resulting output is the four bytes
+         * returned by floatToIntBits(float).
+         *
+         * @sa Float#floatToIntBits(float)
+         *
+         * @param val
+         *            the float to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readFloat()
+         */
+        WriteFloat(
+            [in] Float val);
+
+        /**
+         * Writes the specified 32-bit int in big-endian order.
+         *
+         * @param val
+         *            the int to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readInt()
+         */
+        WriteInt32(
+            [in] Int32 val);
+
+        /**
+         * Writes the specified 64-bit long in big-endian order.
+         *
+         * @param val
+         *            the long to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readLong()
+         */
+        WriteInt64(
+            [in] Int64 val);
+
+        /**
+         * Writes the specified 16-bit short in big-endian order. Only the lower two bytes of {
+         * val} are written with the higher one written first.
+         *
+         * @param val
+         *            the short to write.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readShort()
+         * @see DataInput#readUnsignedShort()
+         */
+        WriteInt16(
+            [in] Int32 val);
+
+        /**
+         * Writes the specified string encoded in {@link DataInput modified UTF-8}.
+         *
+         * @param str
+         *            the string to write encoded in {@link DataInput modified UTF-8}.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException | if an I/O error occurs while writing.
+         * @see DataInput#readUTF()
+         */
+        WriteUTF(
+            [in] String str);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

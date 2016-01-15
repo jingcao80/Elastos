@@ -1,0 +1,27 @@
+
+module
+{
+    using interface Org.W3c.Dom.INode;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xml {
+    namespace Dom {
+
+    /**
+     * A minimal implementation of DOMConfiguration. This implementation uses inner
+     * parameter instances to centralize each parameter's behavior.
+     */
+
+    interface IDOMConfigurationImpl extends Org.W3c.Dom.IDOMConfiguration {
+        Normalize(
+            [in] INode* node);
+    }
+
+    } // namespace Dom
+    } // namespace Xml
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

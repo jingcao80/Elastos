@@ -1,0 +1,58 @@
+
+module
+{
+
+    interface Org.Apache.Http.IO.IHttpTransportMetrics;
+    interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace IO {
+
+    /**
+     * Session input buffer for blocking connections.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 560528 $
+     *
+     * @since 4.0
+     */
+    [deprecated]
+    interface ISessionInputBuffer {
+
+        Read(
+            [in] ArrayOf<Byte>* b,
+            [in] Int32 off,
+            [in] Int32 len,
+            [out] Int32* count);
+
+        Read(
+            [in] ArrayOf<Byte>* b,
+            [out] Int32* count);
+
+        Read(
+            [out] Int32* count);
+
+        ReadLine(
+            [in] ICharArrayBuffer* buffer,
+            [out] Int32* count);
+
+        ReadLine(
+            [out] String* line);
+
+        IsDataAvailable(
+            [in] Int32 timeout,
+            [out] Boolean* isAvailable);
+
+        GetMetrics(
+            [out] IHttpTransportMetrics** metrics);
+    }
+
+    } // namespace IO
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

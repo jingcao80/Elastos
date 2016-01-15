@@ -1,0 +1,123 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Droid.Os.IBinder;
+
+    interface Elastos.Droid.Internal.StatusBar.IStatusBarIconList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace StatusBar {
+
+    [deprecated]
+    interface IIStatusBarService
+    {
+        ExpandNotificationsPanel();
+
+        CollapsePanels();
+
+        Disable(
+            [in] Int32 what,
+            [in] IBinder* token,
+            [in] String pkg);
+
+        SetIcon(
+            [in] String slot,
+            [in] String iconPackage,
+            [in] Int32 iconId,
+            [in] Int32 iconLevel,
+            [in] String contentDescription);
+
+        SetIconVisibility(
+            [in] String slot,
+            [in] Boolean visible);
+
+        RemoveIcon(
+            [in] String slot);
+
+        TopAppWindowChanged(
+            [in] Boolean menuVisible);
+
+        SetImeWindowStatus(
+            [in] IBinder* token,
+            [in] Int32 vis,
+            [in] Int32 backDisposition,
+            [in] Boolean showImeSwitcher);
+
+        ExpandSettingsPanel();
+
+        SetCurrentUser(
+            [in] Int32 newUserId);
+
+        // ---- Methods below are for use by the status bar policy services ----
+        // You need the STATUS_BAR_SERVICE permission
+
+        RegisterStatusBar(
+            [in] IIStatusBar* cb,
+            [out] IStatusBarIconList** iconList,
+            [out, callee] ArrayOf<Int32>* switches,
+            [out] IList** binders);
+
+        OnPanelRevealed();
+
+        OnPanelHidden();
+
+        OnNotificationClick(
+            [in] String key);
+
+        OnNotificationError(
+            [in] String pkg,
+            [in] String tag,
+            [in] Int32 id,
+            [in] Int32 uid,
+            [in] Int32 initialPid,
+            [in] String message,
+            [in] Int32 userId);
+
+        OnClearAllNotifications(
+            [in] Int32 userId);
+
+        OnNotificationClear(
+            [in] String pkg,
+            [in] String tag,
+            [in] Int32 id,
+            [in] Int32 userId);
+
+        OnNotificationVisibilityChanged(
+            [in] ArrayOf<String>* newlyVisibleKeys,
+            [in] ArrayOf<String>* noLongerVisibleKeys);
+
+        OnNotificationExpansionChanged(
+            [in] String key,
+            [in] Boolean userAction,
+            [in] Boolean expanded);
+
+        SetSystemUiVisibility(
+            [in] Int32 vis,
+            [in] Int32 mask);
+
+        SetWindowState(
+            [in] Int32 window,
+            [in] Int32 state);
+
+        ShowRecentApps(
+            [in] Boolean triggeredFromAltTab);
+
+        HideRecentApps(
+            [in] Boolean triggeredFromAltTab,
+            [in] Boolean triggeredFromHomeKey);
+
+        ToggleRecentApps();
+
+        PreloadRecentApps();
+
+        CancelPreloadRecentApps();
+    }
+
+    } // namespace StatusBar
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

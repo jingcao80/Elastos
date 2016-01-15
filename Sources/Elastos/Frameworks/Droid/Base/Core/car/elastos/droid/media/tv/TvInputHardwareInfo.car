@@ -1,0 +1,68 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Simple container for information about TV input hardware.
+     * Not for third-party developers.
+     *
+     * @hide
+     */
+    // @SystemApi
+    interface ITvInputHardwareInfo {
+        // Match hardware/libhardware/include/hardware/tv_input.h
+        const Int32 TV_INPUT_TYPE_OTHER_HARDWARE = 1;
+        const Int32 TV_INPUT_TYPE_TUNER          = 2;
+        const Int32 TV_INPUT_TYPE_COMPOSITE      = 3;
+        const Int32 TV_INPUT_TYPE_SVIDEO         = 4;
+        const Int32 TV_INPUT_TYPE_SCART          = 5;
+        const Int32 TV_INPUT_TYPE_COMPONENT      = 6;
+        const Int32 TV_INPUT_TYPE_VGA            = 7;
+        const Int32 TV_INPUT_TYPE_DVI            = 8;
+        const Int32 TV_INPUT_TYPE_HDMI           = 9;
+        const Int32 TV_INPUT_TYPE_DISPLAY_PORT   = 10;
+
+        GetDeviceId(
+            [out] Int32 * result);
+
+        GetType(
+            [out] Int32 * result);
+
+        GetAudioType(
+            [out] Int32 * result);
+
+        GetAudioAddress(
+            [out] String * result);
+
+        GetHdmiPortId(
+            [out] Int32 * result);
+    }
+
+    interface ITvInputHardwareInfoBuilder {
+        DeviceId(
+            [in] Int32 deviceId);
+
+        Type(
+            [in] Int32 type);
+
+        AudioType(
+            [in] Int32 audioType);
+
+        AudioAddress(
+            [in] String audioAddress);
+
+        HdmiPortId(
+            [in] Int32 hdmiPortId);
+
+        Build(
+            [out] ITvInputHardwareInfo ** result);
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

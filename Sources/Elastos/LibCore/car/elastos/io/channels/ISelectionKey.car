@@ -1,0 +1,204 @@
+
+module
+{
+    interface Elastos.IO.Channels.ISelectableChannel;
+    interface Elastos.IO.Channels.ISelector;
+
+    namespace Elastos {
+    namespace IO {
+    namespace Channels {
+
+     /**
+     * A channel that can be used with a {@link Selector}. The channel must be
+     * registered with a selector by calling one of the {@code register} methods,
+     * which return a {@link SelectionKey} object. In order to deregister a channel
+     * from a selector, its selection key must be canceled. This can be done
+     * explicitly by calling the {@link SelectionKey#cancel()} method but it is also
+     * done implicitly when the channel or the selector is closed.
+     * <p>
+     * A channel may be registered with several selectors at the same time but only
+     * once for any given selector.
+     */
+     interface ISelectionKey {
+
+          /**
+           * Interest set mask bit for socket-accept operations.
+           */
+          const Int32 OP_ACCEPT = 16;
+
+          /**
+           * Interest set mask bit for socket-connect operations.
+           */
+          const Int32 OP_CONNECT = 8;
+
+          /**
+           * Interesting operation mask bit for read operations.
+           */
+          const Int32 OP_READ = 1;
+
+          /**
+           * Interest set mask bit for write operations.
+           */
+          const Int32 OP_WRITE = 4;
+
+          /**
+           * Attaches an object to this key. It is acceptable to attach {@code null},
+           * this discards the old attachment.
+           *
+           * @param anObject
+           *            the object to attach, or {@code null} to discard the current
+           *            attachment.
+           * @return the last attached object or {@code null} if no object has been
+           *         attached.
+           */
+          Attach(
+              [in]  IObject*  newObj,
+              [out] IObject** oldObj);
+
+          /**
+           * Gets the attached object.
+           *
+           * @return the attached object or {@code null} if no object has been
+           *         attached.
+           */
+          Attachment(
+              [out] IObject** obj);
+
+          /**
+           * Cancels this key.
+           * <p>
+           * A key that has been canceled is no longer valid. Calling this method on
+           * an already canceled key does nothing.
+           * <p>
+           * Calling this method is safe at any time. The call might block until
+           * another ongoing call to a method of this selector has finished. The
+           * reason is that it is synchronizing on the key set of the selector. After
+           * this call finishes, the key will have been added to the selectors
+           * canceled-keys set and will not be included in any future selects of this
+           * selector.
+           */
+          Cancel();
+
+          /**
+           * Gets the channel of this key.
+           *
+           * @return the channel of this key.
+           */
+          GetChannel(
+              [out] ISelectableChannel** channel);
+
+          /**
+           * Gets this key's {@link SelectionKey interest set}. The returned set has
+           * only those bits set that are valid for this key's channel.
+           *
+           * @return the interest set of this key.
+           * @throws CancelledKeyException
+           *             if the key has already been canceled.
+           */
+          GetInterestOps(
+               [out]  Int32* ops);
+
+          /**
+           * Sets the {@link SelectionKey interest set} for this key.
+           *
+           * @param operations
+           *            the new interest set.
+           * @return this key.
+           * @throws IllegalArgumentException
+           *             if a bit in {@code operations} is not in the set of
+           *             {@link SelectableChannel#validOps() valid operations} of this
+           *             key's channel.
+           * @throws CancelledKeyException
+           *             if the key has already been canceled.
+           */
+          GetInterestOps(
+               [in]  Int32 ops,
+               [out] ISelectionKey** key);
+
+          /**
+           * Indicates whether this key's channel is interested in the accept
+           * operation and is ready to accept new connections. A call to this method
+           * is equal to executing {@code (readyOps() & OP_ACCEPT) == OP_ACCEPT}.
+           *
+           * @return {@code true} if the channel is interested in the accept operation
+           *         and is ready to accept new connections, {@code false} otherwise.
+           * @throws CancelledKeyException
+           *             if the key has already been canceled.
+           */
+          IsAcceptable(
+               [out] Boolean* acceptable);
+
+          /**
+           * Indicates whether this key's channel is interested in the connect
+           * operation and is ready to connect. A call to this method is equal to
+           * executing {@code (readyOps() & OP_CONNECT) == OP_CONNECT}.
+           *
+           * @return {@code true} if the channel is interested in the connect
+           *         operation and is ready to connect, {@code false} otherwise.
+           * @throws CancelledKeyException
+           *             if the key has already been canceled.
+           */
+          IsConnectable(
+               [out] Boolean* connectable);
+
+          /**
+           * Indicates whether this key's channel is interested in the read operation
+           * and is ready to read. A call to this method is equal to executing
+           * {@code (readyOps() & OP_READ) == OP_READ}.
+           *
+           * @return {@code true} if the channel is interested in the read operation
+           *         and is ready to read, {@code false} otherwise.
+           * @throws CancelledKeyException
+           *             if the key has already been canceled.
+           */
+          IsReadable(
+               [out] Boolean* readable);
+
+          /**
+           * Indicates whether this key is valid. A key is valid as long as it has not
+           * been canceled.
+           *
+           * @return {@code true} if this key has not been canceled, {@code false}
+           *         otherwise.
+           */
+          IsValid(
+               [out] Boolean* valid);
+
+          /**
+           * Indicates whether this key's channel is interested in the write operation
+           * and is ready to write. A call to this method is equal to executing
+           * {@code (readyOps() & OP_WRITE) == OP_WRITE}.
+           *
+           * @return {@code true} if the channel is interested in the write operation
+           *         and is ready to write, {@code false} otherwise.
+           * @throws CancelledKeyException
+           *             if the key has already been canceled.
+           */
+          IsWritable(
+               [out] Boolean* writable);
+
+          /**
+           * Gets the set of operations that are ready. The returned set has only
+           * those bits set that are valid for this key's channel.
+           *
+           * @return the operations for which this key's channel is ready.
+           * @throws CancelledKeyException
+           *             if the key has already been canceled.
+           */
+          GetReadyOps(
+               [out] Int32* ops);
+
+          /**
+           * Gets the selector for which this key's channel is registered.
+           *
+           * @return the related selector.
+           */
+          GetSelector(
+               [out] ISelector** selector);
+
+    } // interface end
+
+    } // namespace Channels
+    } // namespace IO
+    } // namespace Elastos
+}

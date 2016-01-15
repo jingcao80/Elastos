@@ -1,0 +1,12 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    interface ISignatureSpi {
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

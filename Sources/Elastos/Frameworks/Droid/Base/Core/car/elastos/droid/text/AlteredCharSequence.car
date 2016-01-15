@@ -1,0 +1,41 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    // XXX should this really be in the public API at all?
+    /**
+     * An AlteredCharSequence is a CharSequence that is largely mirrored from
+     * another CharSequence, except that a specified range of characters are
+     * mirrored from a different char array instead.
+     *
+     * @Involve
+     * interface IGetChars
+     * interface ICharSequence
+     */
+    interface IAlteredCharSequence {}
+
+    [deprecated]
+    interface IAlteredCharSequenceHelper{
+        /**
+         * Create an AlteredCharSequence whose text (and possibly spans)
+         * are mirrored from <code>source</code>, except that the range of
+         * offsets <code>substart</code> inclusive to <code>subend</code> exclusive
+         * are mirrored instead from <code>sub</code>, beginning at offset 0.
+         */
+        Make(
+            [in] ICharSequence* source,
+            [in] ArrayOf<Char32>* sub,
+            [in] Int32 substart,
+            [in] Int32 subend,
+            [out] IAlteredCharSequence** ret);
+    }
+
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

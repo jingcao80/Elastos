@@ -1,0 +1,196 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Hdmi {
+
+    /**
+     * A class to encapsulate device information for HDMI devices including CEC and MHL. In terms of
+     * CEC, this container includes basic information such as logical address, physical address and
+     * device type, and additional information like vendor id and osd name. In terms of MHL device, this
+     * container includes adopter id and device type. Otherwise, it keeps the information of other type
+     * devices for which only port ID, physical address are meaningful.
+     *
+     * @hide
+     *
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+     //@SystemApi
+    interface IHdmiDeviceInfo {
+        /** TV device type. */
+        const Int32 DEVICE_TV = 0;
+
+        /** Recording device type. */
+        const Int32 DEVICE_RECORDER = 1;
+
+        /** Device type reserved for future usage. */
+        const Int32 DEVICE_RESERVED = 2;
+
+        /** Tuner device type. */
+        const Int32 DEVICE_TUNER = 3;
+
+        /** Playback device type. */
+        const Int32 DEVICE_PLAYBACK = 4;
+
+        /** Audio system device type. */
+        const Int32 DEVICE_AUDIO_SYSTEM = 5;
+
+        /** @hide Pure CEC switch device type. */
+        const Int32 DEVICE_PURE_CEC_SWITCH = 6;
+
+        /** @hide Video processor device type. */
+        const Int32 DEVICE_VIDEO_PROCESSOR = 7;
+
+        // Value indicating the device is not an active source.
+        const Int32 DEVICE_INACTIVE = -1;
+
+        /**
+         * Logical address used to indicate the source comes from internal device. The logical address
+         * of TV(0) is used.
+         */
+        const Int32 ADDR_INTERNAL = 0;
+
+        /**
+         * Physical address used to indicate the source comes from internal device. The physical address
+         * of TV(0) is used.
+         */
+        const Int32 PATH_INTERNAL = 0x0000;
+
+        /** Invalid physical address (routing path) */
+        const Int32 PATH_INVALID = 0xFFFF;
+
+        /** Invalid port ID */
+        const Int32 PORT_INVALID = -1;
+
+
+        /**
+         * Return the id of the device.
+         */
+        GetId(
+            [out] Int32* id);
+
+        /**
+         * Return the CEC logical address of the device.
+         */
+        GetLogicalAddress(
+            [out] Int32* address);
+
+        /**
+         * Return the physical address of the device.
+         */
+        GetPhysicalAddress(
+            [out] Int32* address);
+
+        /**
+         * Return the port ID.
+         */
+        GetPortId(
+            [out] Int32* id);
+
+        /**
+         * Return CEC type of the device. For more details, refer constants between {@link #DEVICE_TV}
+         * and {@link #DEVICE_INACTIVE}.
+         */
+        GetDeviceType(
+            [out] Int32* type);
+
+        /**
+         * Return device's power status. It should be one of the following values.
+         * <ul>
+         * <li>{@link HdmiControlManager#POWER_STATUS_ON}
+         * <li>{@link HdmiControlManager#POWER_STATUS_STANDBY}
+         * <li>{@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_ON}
+         * <li>{@link HdmiControlManager#POWER_STATUS_TRANSIENT_TO_STANDBY}
+         * <li>{@link HdmiControlManager#POWER_STATUS_UNKNOWN}
+         * </ul>
+         */
+        GetDevicePowerStatus(
+            [out] Int32* status);
+
+        /**
+         * Return MHL device id. Return -1 for non-MHL device.
+         */
+        GetDeviceId(
+            [out] Int32* id);
+
+        /**
+         * Return MHL adopter id. Return -1 for non-MHL device.
+         */
+        GetAdopterId(
+            [out] Int32* id);
+
+        /**
+         * Return {@code true} if the device is of a type that can be an input source.
+         */
+        IsSourceType(
+            [out] Boolean* result);
+
+        /**
+         * Return {@code true} if the device represents an HDMI-CEC device. {@code false} if the device
+         * is either MHL or other device.
+         */
+        IsCecDevice(
+            [out] Boolean* result);
+
+        /**
+         * Return {@code true} if the device represents an MHL device. {@code false} if the device is
+         * either CEC or other device.
+         */
+        IsMhlDevice(
+            [out] Boolean* result);
+
+        /**
+         * Return display (OSD) name of the device.
+         */
+        GetDisplayName(
+            [out] String* name);
+
+        /**
+         * Return vendor id of the device. Vendor id is used to distinguish devices built by other
+         * manufactures. This is required for vendor-specific command on CEC standard.
+         */
+        GetVendorId(
+            [out] Int32* id);
+    }
+
+    interface IHdmiDeviceInfoHelper {
+        /**
+         * Return the id to be used for CEC device.
+         *
+         * @param address logical address of CEC device
+         * @return id for CEC device
+         */
+        IdForCecDevice(
+            [in] Int32 address,
+            [out] Int32* device);
+
+        /**
+         * Return the id to be used for MHL device.
+         *
+         * @param portId port which the MHL device is connected to
+         * @return id for MHL device
+         */
+        IdForMhlDevice(
+            [in] Int32 portId,
+            [out] Int32* device);
+
+        /**
+         * Return the id to be used for hardware port.
+         *
+         * @param portId port id
+         * @return id for hardware port
+         */
+        IdForHardware(
+            [in] Int32 portId,
+            [out] Int32* hardware);
+    }
+
+    } // namespace Hdmi
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

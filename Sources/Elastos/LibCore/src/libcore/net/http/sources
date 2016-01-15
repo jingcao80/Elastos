@@ -1,0 +1,24 @@
+TARGET_NAME= http
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/net;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/net/http;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/net;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/text;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/zip;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/jar;
+
+SOURCES = CHttpDate.cpp

@@ -1,0 +1,104 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Choice;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Explicit;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1SequenceOf;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Set;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1SetOf;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    [deprecated]
+    interface IBerOutputStream {
+        EncodeTag(
+            [in] Int32 tag);
+
+        EncodeANY();
+
+        EncodeBitString();
+
+        EncodeBoolean();
+
+        EncodeChoice(
+            [in] IASN1Choice* choice);
+
+        EncodeExplicit(
+            [in] IASN1Explicit* xplicit);
+
+        EncodeGeneralizedTime();
+
+        EncodeUTCTime();
+
+        EncodeInteger();
+
+        EncodeOctetString();
+
+        EncodeOID();
+
+        EncodeSequence(
+            [in] IASN1Sequence* sequence);
+
+        EncodeSequenceOf(
+            [in] IASN1SequenceOf* sequenceOf);
+
+        EncodeSet(
+            [in] IASN1Set* set);
+
+        EncodeSetOf(
+            [in] IASN1SetOf* setOf);
+
+        EncodeString();
+
+        GetChoiceLength(
+            [in] IASN1Choice* choice);
+
+        GetExplicitLength(
+            [in] IASN1Explicit* sequence);
+
+        GetSequenceLength(
+            [in] IASN1Sequence* sequence);
+
+        GetSequenceOfLength(
+            [in] IASN1SequenceOf* sequence);
+
+        GetSetLength(
+            [in] IASN1Set* set);
+
+        GetSetOfLength(
+            [in] IASN1SetOf* setOf);
+
+//        /** Encoded byte array */
+//        SetEncoded(
+//            [in] ArrayOf<Byte>* encoded);
+//
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        /** Current encoded length */
+        SetLength(
+            [in] Int32 length);
+
+        GetLength(
+            [out] Int32* length);
+
+        /** Current decoded content */
+        SetContent(
+            [in] IInterface* content);
+
+        GetContent(
+            [out] IInterface** content);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

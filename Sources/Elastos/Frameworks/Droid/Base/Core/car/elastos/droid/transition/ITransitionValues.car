@@ -1,0 +1,35 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Transition {
+
+    /**
+     * Data structure which holds cached values for the transition.
+     * The view field is the target which all of the values pertain to.
+     * The values field is a map which holds information for fields
+     * according to names selected by the transitions. These names should
+     * be unique to avoid clobbering values stored by other transitions,
+     * such as the convention project:transition_name:property_name. For
+     * example, the platform might store a property "alpha" in a transition
+     * "Fader" as "android:fader:alpha".
+     *
+     * <p>These values are cached during the
+     * {@link Transition#captureStartValues(TransitionValues)}
+     * capture} phases of a scene change, once when the start values are captured
+     * and again when the end values are captured. These start/end values are then
+     * passed into the transitions via the
+     * for {@link Transition#createAnimator(ViewGroup, TransitionValues, TransitionValues)}
+     * method.</p>
+     */
+    interface ITransitionValues {
+
+        ToString(
+            [out] String* result);
+    }
+
+    } // Transition
+    } // Droid
+    } // Elastos
+}

@@ -1,0 +1,44 @@
+module {
+    using interface Elastos.Droid.View.InputMethod.IInputMethodManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace Launcher {
+
+    [local]
+    interface IGeckoInputConnection extends Elastos.Droid.View.InputMethod.IInputConnection
+    {
+        OnKeyDel(
+            [out] Boolean* flag);
+
+        NotifyTextChange(
+           [in] IInputMethodManager* imm,
+           [in] String text,
+           [in] Int32 start,
+           [in] Int32 oldEnd,
+           [in] Int32 newEnd);
+
+        NotifySelectionChange(
+           [in] IInputMethodManager* imm,
+           [in] Int32 start,
+           [in] Int32 end);
+
+        Reset();
+
+        SetSelectionStart(
+            [in] Int32 selectionStart);
+
+        SetSelectionLength(
+            [in] Int32 selectionLength);
+
+        PutResult(
+            [in] String result);
+    }
+
+    } // namespace Launcher
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+
+}

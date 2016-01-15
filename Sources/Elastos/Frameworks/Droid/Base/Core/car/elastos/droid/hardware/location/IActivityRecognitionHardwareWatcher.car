@@ -1,0 +1,29 @@
+
+module
+{
+    interface Elastos.Droid.Hardware.Location.IIActivityRecognitionHardware;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Location {
+
+    /**
+     * Activity Recognition Hardware watcher. This interface can be used to receive interfaces to
+     * implementations of {@link IActivityRecognitionHardware}.
+     *
+     * @hide
+     */
+    interface IIActivityRecognitionHardwareWatcher {
+        /**
+         * Hardware Activity-Recognition availability event.
+         */
+        OnInstanceChanged(
+           [in] IIActivityRecognitionHardware* instance);
+    }
+
+    } // namespace Location
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,22 @@
+
+module
+{
+    namespace Elastos {
+    namespace Core {
+
+    /**
+     * Represents a command that can be executed. Often used to run code in a
+     * different {@link Thread}.
+     */
+    interface IRunnable {
+        /**
+         * Starts executing the active part of the class' code. This method is
+         * called when a thread is started that has been created with a class which
+         * implements {@code Runnable}.
+         */
+        Run();
+    }
+
+    } // namespace Core
+    } // namespace Elastos
+}

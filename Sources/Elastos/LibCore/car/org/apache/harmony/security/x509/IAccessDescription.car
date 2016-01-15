@@ -1,0 +1,51 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the AccessDescription which is a part of X.509 framework
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     *  AccessDescription  ::=  SEQUENCE {
+     *      accessMethod          OBJECT IDENTIFIER,
+     *      accessLocation        GeneralName  }
+     */
+    interface IAccessDescription {
+        /**
+         * Returns ASN.1 encoded form of this X.509 AccessDescription.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        ToString(
+            [out] String* str);
+    }
+
+    interface IAccessDescriptionHelper {
+        /**
+         * Custom AccessDescription DER encoder/decoder
+         */
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

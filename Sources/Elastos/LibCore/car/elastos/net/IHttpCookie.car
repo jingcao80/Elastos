@@ -1,0 +1,196 @@
+
+module
+{
+    interface Elastos.Utility.IList;
+
+    namespace Elastos{
+    namespace Net{
+
+    /*
+     * @Involve
+     * interface Elastos.Core.ICloneable;
+     */
+    interface IHttpCookie {
+        /**
+         * Returns the {@code Comment} attribute.
+         */
+        GetComment(
+            [out] String* comment);
+
+        /**
+         * Returns the value of {@code CommentURL} attribute.
+         */
+        GetCommentURL(
+            [out] String* url);
+
+        /**
+         * Returns the {@code Discard} attribute.
+         */
+        GetDiscard(
+            [out] Boolean* discard);
+
+        /**
+         * Returns the {@code Domain} attribute.
+         */
+        // the original name is GetDomain, but it's conflict with the method of IObject
+        GetDomainAttr(
+            [out] String* theDomain);
+
+        /**
+         * Returns the {@code Max-Age} attribute, in delta-seconds.
+         */
+        GetMaxAge(
+            [out] Int64* maxAge);
+
+        /**
+         * Returns the name of this cookie.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns the {@code Path} attribute. This cookie is visible to all
+         * subpaths.
+         */
+        GetPath(
+            [out] String* path);
+
+        /**
+         * Returns the {@code Port} attribute, usually containing comma-separated
+         * port numbers. A null port indicates that the cookie may be sent to any
+         * port. The empty string indicates that the cookie should only be sent to
+         * the port of the originating request.
+         */
+        GetPortList(
+            [out] String* portList);
+
+        /**
+         * Returns the {@code Secure} attribute.
+         */
+        GetSecure(
+            [out] Boolean* secure);
+
+        /**
+         * Returns the value of this cookie.
+         */
+        GetValue(
+            [out] String* value);
+
+        /**
+         * Returns the version of this cookie.
+         */
+        GetVersion(
+            [out] Int32* theVersion);
+
+        /**
+         * Returns true if this cookie's Max-Age is 0.
+         */
+        HasExpired(
+            [out] Boolean* expired);
+
+        /**
+         * Set the {@code Comment} attribute of this cookie.
+         */
+        SetComment(
+            [in] String comment);
+
+        /**
+         * Set the {@code CommentURL} attribute of this cookie.
+         */
+        SetCommentURL(
+            [in] String commentURL);
+
+        /**
+         * Set the {@code Discard} attribute of this cookie.
+         */
+        SetDiscard(
+            [in] Boolean discard);
+
+        /**
+         * Set the {@code Domain} attribute of this cookie. HTTP clients send
+         * cookies only to matching domains.
+         */
+        SetDomain(
+            [in] String pattern);
+
+        /**
+         * Sets the {@code Max-Age} attribute of this cookie.
+         */
+        SetMaxAge(
+            [in] Int64 deltaSeconds);
+
+        /**
+         * Set the {@code Path} attribute of this cookie. HTTP clients send cookies
+         * to this path and its subpaths.
+         */
+        SetPath(
+            [in] String path);
+
+        /**
+         * Set the {@code Port} attribute of this cookie.
+         */
+        SetPortList(
+            [in] String portList);
+
+        /**
+         * Sets the {@code Secure} attribute of this cookie.
+         */
+        SetSecure(
+            [in] Boolean secure);
+
+        /**
+         * Sets the opaque value of this cookie.
+         */
+        SetValue(
+            [in] String value);
+
+        /**
+         * Sets the {@code Version} attribute of the cookie.
+         *
+         * @throws IllegalArgumentException if v is neither 0 nor 1
+         */
+        SetVersion(
+            [in] Int32 v);
+    }
+
+    interface IHttpCookieHelper {
+        /**
+         * Returns true if {@code host} matches the domain pattern {@code domain}.
+         *
+         * @param domainPattern a host name (like {@code android.com} or {@code
+         *     localhost}), or a pattern to match subdomains of a domain name (like
+         *     {@code .android.com}). A special case pattern is {@code .local},
+         *     which matches all hosts without a TLD (like {@code localhost}).
+         * @param host the host name or IP address from an HTTP request.
+         */
+        IsDomainMatches(
+            [in] String domainPattern,
+            [in] String host,
+            [out] Boolean* match);
+
+        /**
+         * Constructs a cookie from a string. The string should comply with
+         * set-cookie or set-cookie2 header format as specified in
+         * <a href="http://www.ietf.org/rfc/rfc2965.txt">RFC 2965</a>. Since
+         * set-cookies2 syntax allows more than one cookie definitions in one
+         * header, the returned object is a list.
+         *
+         * @param header
+         *            a set-cookie or set-cookie2 header.
+         * @return a list of constructed cookies
+         * @throws IllegalArgumentException
+         *             if the string does not comply with cookie specification, or
+         *             the cookie name contains illegal characters, or reserved
+         *             tokens of cookie specification appears
+         * @throws NullPointerException
+         *             if header is null
+         */
+        Parse(
+            [in] String header,
+            [out] IList** cookies);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

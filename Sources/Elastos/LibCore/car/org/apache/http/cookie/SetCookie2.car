@@ -1,0 +1,56 @@
+
+module
+{
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Cookie {
+
+    /**
+     * This interface represents a <code>SetCookie2</code> response header sent by the
+     * origin server to the HTTP agent in order to maintain a conversational state.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface ISetCookie;
+     */
+    [deprecated]
+    interface ISetCookie2 {
+
+        /**
+         * If a user agent (web browser) presents this cookie to a user, the
+         * cookie's purpose will be described by the information at this URL.
+         */
+        SetCommentURL(
+            [in] String commentURL);
+
+        /**
+         * Sets the Port attribute. It restricts the ports to which a cookie
+         * may be returned in a Cookie request header.
+         */
+        SetPorts(
+            [in] ArrayOf<Int32>* ports);
+
+        /**
+         * Set the Discard attribute.
+         *
+         * Note: <tt>Discard</tt> attribute overrides <tt>Max-age</tt>.
+         *
+         * @see #isPersistent()
+         */
+        SetDiscard(
+            [in] Boolean discard);
+
+    }
+
+    } // namespace Cookie
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

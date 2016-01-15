@@ -1,0 +1,71 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface ILinearLayoutLayoutParams
+     */
+    interface ITableRowLayoutParams {
+        SetColumn(
+            [in] Int32 column);
+
+        GetColumn(
+            [out] Int32* column);
+
+        SetSpan(
+            [in] Int32 span);
+
+        GetSpan(
+            [out] Int32* span);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.View.ILinearLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+     [local]
+    interface ITableRow {
+        /**
+         * <p>Returns the view at the specified index. This method can be overriden
+         * to take into account virtual children. Refer to
+         * {@link android.widget.TableLayout} and {@link android.widget.TableRow}
+         * for an example.</p>
+         *
+         * @param index the child's index
+         * @return the child at the specified index
+         */
+        GetVirtualChildAt(
+            [in] Int32 index,
+            [out] IView** childView);
+
+        /**
+         * <p>Returns the virtual number of children. This number might be different
+         * than the actual number of children if the layout can hold virtual
+         * children. Refer to
+         * {@link android.widget.TableLayout} and {@link android.widget.TableRow}
+         * for an example.</p>
+         *
+         * @return the virtual number of children
+         */
+        GetVirtualChildCount(
+            [out] Int32* count);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

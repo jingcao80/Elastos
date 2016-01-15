@@ -1,0 +1,19 @@
+TARGET_NAME= notification
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+
+SOURCES = notification.cpp
+SOURCES += NotificationListenerService.cpp
+SOURCES += Condition.cpp
+SOURCES += CConditionHelper.cpp
+SOURCES += ConditionProviderService.cpp
+SOURCES += NotificationRankingUpdate.cpp
+SOURCES += StatusBarNotification.cpp
+SOURCES += ZenModeConfig.cpp
+SOURCES += CZenModeConfigHelper.cpp

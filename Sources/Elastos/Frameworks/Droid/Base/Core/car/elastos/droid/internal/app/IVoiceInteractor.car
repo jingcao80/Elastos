@@ -1,0 +1,58 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractorRequest;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    /**
+     * IPC interface for an application to perform calls through a VoiceInteractor.
+     */
+    [deprecated]
+    interface IIVoiceInteractor {
+
+        StartConfirmation(
+            [in] String callingPackage,
+            [in] IIVoiceInteractorCallback* clb,
+            [in] ICharSequence* prompt,
+            [in] IBundle* extras,
+            [out] IIVoiceInteractorRequest** result);
+
+        StartCompleteVoice(
+            [in] String callingPackage,
+            [in] IIVoiceInteractorCallback* clb,
+            [in] ICharSequence* message,
+            [in] IBundle* extras,
+            [out] IIVoiceInteractorRequest** result);
+
+        StartAbortVoice(
+            [in] String callingPackage,
+            [in] IIVoiceInteractorCallback* clb,
+            [in] ICharSequence* message,
+            [in] IBundle* extras,
+            [out] IIVoiceInteractorRequest** result);
+
+        StartCommand(
+            [in] String callingPackage,
+            [in] IIVoiceInteractorCallback* clb,
+            [in] String command,
+            [in] IBundle* extras,
+            [out] IIVoiceInteractorRequest** result);
+
+        SupportsCommands(
+            [in] String callingPackage,
+            [in] ArrayOf<String>* commands,
+            [out, callee] ArrayOf<Boolean>* result);
+    }
+
+    }//namespace App
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

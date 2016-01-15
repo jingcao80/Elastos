@@ -1,0 +1,118 @@
+
+module
+{
+    interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+    /**
+     * A thread-safe random-access list.
+     *
+     * <p>Read operations (including {@link #get}) do not block and may overlap with
+     * update operations. Reads reflect the results of the most recently completed
+     * operations. Aggregate operations like {@link #addAll} and {@link #clear} are
+     * atomic; they never expose an intermediate state.
+     *
+     * <p>Iterators of this list never throw {@link
+     * ConcurrentModificationException}. When an iterator is created, it keeps a
+     * copy of the list's contents. It is always safe to iterate this list, but
+     * iterations may not reflect the latest state of the list.
+     *
+     * <p>Iterators returned by this list and its sub lists cannot modify the
+     * underlying list. In particular, {@link Iterator#remove}, {@link
+     * ListIterator#add} and {@link ListIterator#set} all throw {@link
+     * UnsupportedOperationException}.
+     *
+     * <p>This class offers extended API beyond the {@link List} interface. It
+     * includes additional overloads for indexed search ({@link #indexOf} and {@link
+     * #lastIndexOf}) and methods for conditional adds ({@link #addIfAbsent} and
+     * {@link #addAllAbsent}).
+     */
+
+    /**
+     * @Involve
+     * interface IList;
+     * interface ICollection;
+     * interface IIterable;
+     * interface IRandomAccess;
+     * interface ICloneable;
+     * interface ISerializable;
+     */
+    interface ICopyOnWriteArrayList {
+        /**
+         * Searches this list for {@code object} and returns the index of the first
+         * occurrence that is at or after {@code from}.
+         *
+         * @return the index or -1 if the object was not found.
+         */
+        IndexOf(
+            [in] IInterface* object,
+            [in] Int32 from,
+            [out] Int32* value);
+
+        /**
+         * Searches this list for {@code object} and returns the index of the last
+         * occurrence that is before {@code to}.
+         *
+         * @return the index or -1 if the object was not found.
+         */
+        LastIndexOf(
+            [in] IInterface* object,
+            [in] Int32 to,
+            [out] Int32* value);
+
+        /**
+         * Adds the elements of {@code collection} that are not already present in
+         * this list. If {@code collection} includes a repeated value, at most one
+         * occurrence of that value will be added to this list. Elements are added
+         * at the end of this list.
+         *
+         * <p>Callers of this method may prefer {@link CopyOnWriteArraySet}, whose
+         * API is more appropriate for set operations.
+         */
+        AddAllAbsent(
+            [in] ICollection* collection,
+            [out] Int32* value);
+
+        /**
+         * Adds {@code object} to the end of this list if it is not already present.
+         *
+         * <p>Callers of this method may prefer {@link CopyOnWriteArraySet}, whose
+         * API is more appropriate for set operations.
+         */
+        AddIfAbsent(
+            [in] IInterface* object,
+            [out] Boolean* value);
+
+        GetArray(
+            [out, callee] ArrayOf<IInterface*>* outarr);
+    }
+
+    interface ICopyOnWriteArrayListHelper {
+        ContainsAll(
+            [in] ICollection* collection,
+            [in] ArrayOf<IInterface*> snapshot,
+            [in] Int32 from,
+            [in] Int32 to,
+            [out] Boolean* value);
+
+        LastIndexOf(
+            [in] IInterface* o,
+            [in] ArrayOf<IInterface*> data,
+            [in] Int32 from,
+            [in] Int32 to,
+            [out] Int32* value);
+
+        IndexOf(
+            [in] IInterface* o,
+            [in] ArrayOf<IInterface*> data,
+            [in] Int32 from,
+            [in] Int32 to,
+            [out] Int32* value);
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

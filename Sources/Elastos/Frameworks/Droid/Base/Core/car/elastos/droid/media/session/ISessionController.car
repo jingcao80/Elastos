@@ -1,0 +1,123 @@
+module
+{
+    interface Elastos.Core.ICharSequence;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IResultReceiver;
+    interface Elastos.Droid.Content.Pm.IParceledListSlice;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Media.IRating;
+    interface Elastos.Droid.Media.IMediaMetadata;
+    interface Elastos.Droid.View.IKeyEvent;
+    interface IISessionControllerCallback;
+    interface IParcelableVolumeInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    interface IISessionController {
+        SendCommand(
+            [in] String command,
+            [in] IBundle * args,
+            [in] IResultReceiver * cb);
+
+        SendMediaButton(
+            [in] IKeyEvent * mediaButton,
+            [out] Boolean * result);
+
+        RegisterCallbackListener(
+            [in] IISessionControllerCallback * cb);
+
+        UnregisterCallbackListener(
+            [in] IISessionControllerCallback * cb);
+
+        IsTransportControlEnabled(
+            [out] Boolean * result);
+
+        GetPackageName(
+            [out] String * result);
+
+        GetTag(
+            [out] String * result);
+
+        GetLaunchPendingIntent(
+            [out] IPendingIntent ** result);
+
+        GetFlags(
+            [out] Int64 * result);
+
+        GetVolumeAttributes(
+            [out] IParcelableVolumeInfo ** result);
+
+        AdjustVolume(
+            [in] Int32 direction,
+            [in] Int32 flags,
+            [in] String packageName);
+
+        SetVolumeTo(
+            [in] Int32 value,
+            [in] Int32 flags,
+            [in] String packageName);
+
+        // These commands are for the TransportControls
+        Play();
+
+        PlayFromMediaId(
+            [in] String uri,
+            [in] IBundle * extras);
+
+        PlayFromSearch(
+            [in] String string,
+            [in] IBundle * extras);
+
+        SkipToQueueItem(
+            [in] Int64 id);
+
+        Pause();
+
+        Stop();
+
+        Next();
+
+        Previous();
+
+        FastForward();
+
+        Rewind();
+
+        SeekTo(
+            [in] Int64 pos);
+
+        Rate(
+            [in] IRating * rating);
+
+        SendCustomAction(
+            [in] String action,
+            [in] IBundle * args);
+
+        GetMetadata(
+            [out] IMediaMetadata ** result);
+
+        GetPlaybackState(
+            [out] IPlaybackState ** result);
+
+        GetQueue(
+            [out] IParceledListSlice ** result);
+
+        GetQueueTitle(
+            [out] ICharSequence ** result);
+
+        GetExtras(
+            [out] IBundle ** result);
+
+        GetRatingType(
+            [out] Int32 * result);
+
+    }
+
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

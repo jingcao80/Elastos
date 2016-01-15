@@ -1,0 +1,652 @@
+
+module
+{
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Utility.IDate;
+    interface Elastos.Utility.ISet;
+    interface Elastos.Utility.ICollection;
+    interface Elastos.Security.IPublicKey;
+    interface Elastosx.Security.Auth.X500.IX500Principal;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Cert {
+
+    /**
+      * @Involve
+      * interface ICertSelector
+      * interface Elastos.Core.ICloneable;
+      */
+    [deprecated]
+    interface IX509CertSelector {
+        /**
+         * Sets the certificate that a matching certificate must be equal to.
+         *
+         * @param certificate
+         *            the certificate to match, or null to not check this criteria.
+         */
+        SetCertificate(
+            [in] IX509Certificate* certificate);
+
+        /**
+         * Returns the certificate that a matching certificate must be equal to.
+         *
+         * @return the certificate to match, or null if this criteria is not
+         *         checked.
+         */
+        GetCertificate(
+            [out] IX509Certificate** certificate);
+
+        /**
+         * Sets the serial number that a certificate must match.
+         *
+         * @param serialNumber
+         *            the serial number to match, or {@code null} to not check the
+         *            serial number.
+         */
+        SetSerialNumber(
+            [in] IBigInteger* serialNumber);
+
+        /**
+         * Returns the serial number that a certificate must match.
+         *
+         * @return the serial number to match, or {@code null} if the serial number
+         *         is not to be checked.
+         */
+        GetSerialNumber(
+            [out] IBigInteger** serialNumber);
+
+        /**
+         * Sets the issuer that a certificate must match.
+         *
+         * @param issuer
+         *            the issuer to match, or {@code null} if the issuer is not to
+         *            be checked.
+         */
+        SetIssuer(
+            [in] IX500Principal* issuer);
+
+        /**
+         * Returns the issuer that a certificate must match.
+         *
+         * @return the issuer that a certificate must match, or {@code null} if the
+         *         issuer is not to be checked.
+         */
+        GetIssuer(
+            [out] IX500Principal** issuer);
+
+        /**
+         * <b>Do not use</b>, use {@link #getIssuer()} or
+         * {@link #getIssuerAsBytes()} instead. Sets the issuer that a certificate
+         * must match.
+         *
+         * @param issuerName
+         *            the issuer in a RFC 2253 format string, or {@code null} to not
+         *            check the issuer.
+         * @throws IOException
+         *             if parsing the issuer fails.
+         */
+        SetIssuerUsingString(
+            [in] String issuerName);
+
+        /**
+         * <b>Do not use</b>, use {@link #getIssuer()} or
+         * {@link #getIssuerAsBytes()} instead. Returns the issuer that a
+         * certificate must match in a RFC 2253 format string.
+         *
+         * @return the issuer in a RFC 2253 format string, or {@code null} if the
+         *         issuer is not to be checked.
+         */
+        GetIssuerAsString(
+            [out] String* issuer);
+
+        /**
+         * Sets the issuer that a certificate must match.
+         *
+         * @param issuerDN
+         *            the distinguished issuer name in ASN.1 DER encoded format, or
+         *            {@code null} to not check the issuer.
+         * @throws IOException
+         *             if decoding the issuer fail.
+         */
+        SetIssuerUsingBytes(
+            [in] ArrayOf<Byte>* issuerDN);
+
+        /**
+         * Returns the issuer that a certificate must match.
+         *
+         * @return the distinguished issuer name in ASN.1 DER encoded format, or
+         *         {@code null} if the issuer is not to be checked.
+         * @throws IOException
+         *             if encoding the issuer fails.
+         */
+        GetIssuerAsBytes(
+            [out, callee] ArrayOf<Byte>* issuerDN);
+
+        /**
+         * Set the subject that a certificate must match.
+         *
+         * @param subject
+         *            the subject distinguished name or {@code null} to not check
+         *            the subject.
+         */
+        SetSubject(
+            [in] IX500Principal* subject);
+
+        /**
+         * Returns the subject that a certificate must match.
+         *
+         * @return the subject distinguished name, or null if the subject is not to
+         *         be checked.
+         */
+        GetSubject(
+            [out] IX500Principal** subject);
+
+        /**
+         * <b>Do not use</b>, use {@link #setSubject(byte[])} or
+         * {@link #setSubject(X500Principal)} instead. Returns the subject that a
+         * certificate must match.
+         *
+         * @param subjectDN
+         *            the subject distinguished name in RFC 2253 format or {@code
+         *            null} to not check the subject.
+         * @throws IOException
+         *             if decoding the subject fails.
+         */
+        SetSubjectUsingString(
+            [in] String subjectDN);
+
+        /**
+         * <b>Do not use</b>, use {@link #getSubject()} or
+         * {@link #getSubjectAsBytes()} instead. Returns the subject that a
+         * certificate must match.
+         *
+         * @return the subject distinguished name in RFC 2253 format, or {@code
+         *         null} if the subject is not to be checked.
+         */
+        GetSubjectAsString(
+            [out] String* subjectDN);
+
+        /**
+         * Sets the subject that a certificate must match.
+         *
+         * @param subjectDN
+         *            the subject distinguished name in ASN.1 DER format, or {@code
+         *            null} to not check the subject.
+         * @throws IOException
+         *             if decoding the subject fails.
+         */
+        SetSubjectUsingBytes(
+            [in] ArrayOf<Byte>* subjectDN);
+
+        /**
+         * Returns the subject that a certificate must match.
+         *
+         * @return the subject distinguished name in ASN.1 DER format, or {@code
+         *         null} if the subject is not to be checked.
+         * @throws IOException
+         *             if encoding the subject fails.
+         */
+        GetSubjectAsBytes(
+            [out, callee] ArrayOf<Byte>* subjectDN);
+
+        /**
+         * Sets the criterion for the {@literal SubjectKeyIdentifier} extension.
+         * <p>
+         * The {@code subjectKeyIdentifier} should be a single DER encoded value.
+         *
+         * @param subjectKeyIdentifier
+         *            the subject key identifier or {@code null} to disable this
+         *            check.
+         */
+        SetSubjectKeyIdentifier(
+            [in] ArrayOf<Byte>* subjectKeyIdentifier);
+
+        /**
+         * Returns the criterion for the {@literal SubjectKeyIdentifier} extension.
+         *
+         * @return the subject key identifier or {@code null} if it is not to be
+         *         checked.
+         */
+        GetSubjectKeyIdentifier(
+            [out, callee] ArrayOf<Byte>* subjectKeyIdentifier);
+
+        /**
+         * Sets the criterion for the {@literal AuthorityKeyIdentifier} extension.
+         *
+         * @param authorityKeyIdentifier
+         *            the authority key identifier, or {@code null} to disable this
+         *            check.
+         */
+        SetAuthorityKeyIdentifier(
+            [in] ArrayOf<Byte>* authorityKeyIdentifier);
+
+        /**
+         * Returns the criterion for the {@literal AuthorityKeyIdentifier}
+         * extension.
+         *
+         * @return the authority key identifier, or {@code null} if it is not to be
+         *         checked.
+         */
+        GetAuthorityKeyIdentifier(
+            [out, callee] ArrayOf<Byte>* authorityKeyIdentifier);
+
+        /**
+         * Sets the criterion for the validity date of the certificate.
+         * <p>
+         * The certificate must be valid at the specified date.
+         * @param certificateValid
+         *            the validity date or {@code null} to not check the date.
+         */
+        SetCertificateValid(
+            [in] IDate* certificateValid);
+
+        /**
+         * Returns the criterion for the validity date of the certificate.
+         *
+         * @return the validity date or {@code null} if the date is not to be
+         *         checked.
+         */
+        GetCertificateValid(
+            [out] IDate** certificateValid);
+
+        /**
+         * Sets the criterion for the validity date of the private key.
+         * <p>
+         * The private key must be valid at the specified date.
+         *
+         * @param privateKeyValid
+         *            the validity date or {@code null} to not check the date.
+         */
+        SetPrivateKeyValid(
+            [in] IDate* privateKeyValid);
+
+        /**
+         * Returns the criterion for the validity date of the private key.
+         * <p>
+         * The private key must be valid at the specified date.
+         *
+         * @return the validity date or {@code null} if the date is not to be
+         *         checked.
+         */
+        GetPrivateKeyValid(
+            [out] IDate** privateKeyValid);
+
+        /**
+         * Sets the criterion for the subject public key signature algorithm.
+         * <p>
+         * The certificate must contain a subject public key with the algorithm
+         * specified.
+         *
+         * @param oid
+         *            the OID (object identifier) of the signature algorithm or
+         *            {@code null} to not check the OID.
+         * @throws IOException
+         *             if the specified object identifier is invalid.
+         */
+        SetSubjectPublicKeyAlgID(
+            [in] String oid);
+
+        /**
+         * Returns the criterion for the subject public key signature algorithm.
+         *
+         * @return the OID (object identifier) or the signature algorithm or {@code
+         *         null} if it's not to be checked.
+         */
+        GetSubjectPublicKeyAlgID(
+            [out] String* oid);
+
+        /**
+         * Sets the criterion for the subject public key.
+         *
+         * @param key
+         *            the subject public key or {@code null} to not check the key.
+         */
+        SetSubjectPublicKey(
+            [in] IPublicKey* key);
+
+        /**
+         * Sets the criterion for the subject public key.
+         *
+         * @param key
+         *            the subject public key in ASN.1 DER encoded format or {@code null} to
+         *            not check the key.
+         * @throws IOException
+         *             if decoding the the public key fails.
+         */
+        SetSubjectPublicKeyEx(
+            [in] ArrayOf<Byte>* key);
+
+        /**
+         * Returns the criterion for the subject public key.
+         *
+         * @return the subject public key or {@code null} if the key is not to be
+         *         checked.
+         */
+        GetSubjectPublicKey(
+            [out] IPublicKey** key);
+
+        /**
+         * Sets the criterion for the {@literal KeyUsage} extension.
+         *
+         * @param keyUsage
+         *            the boolean array in the format as returned by
+         *            {@link X509Certificate#getKeyUsage()}, or {@code null} to not
+         *            check the key usage.
+         */
+        SetKeyUsage(
+            [in] ArrayOf<Boolean>* keyUsage);
+
+        /**
+         * Returns the criterion for the {@literal KeyUsage} extension.
+         *
+         * @return the boolean array in the format as returned by
+         *         {@link X509Certificate#getKeyUsage()}, or {@code null} if the key
+         *         usage is not to be checked.
+         */
+        GetKeyUsage(
+            [out, callee] ArrayOf<Boolean>* keyUsage);
+
+        /**
+         * Sets the criterion for the {@literal ExtendedKeyUsage} extension.
+         *
+         * @param keyUsage
+         *            the set of key usage OIDs, or {@code null} to not check it.
+         * @throws IOException
+         *             if one of the OIDs is invalid.
+         */
+        SetExtendedKeyUsage(
+            [in] ISet* keyUsage);
+
+        /**
+         * Returns the criterion for the {@literal ExtendedKeyUsage} extension.
+         *
+         * @return the set of key usage OIDs, or {@code null} if it's not to be
+         *         checked.
+         */
+        GetExtendedKeyUsage(
+            [out] ISet** keyUsage);
+
+        /**
+         * Sets the flag for the matching behavior for subject alternative names.
+         * <p>
+         * The flag indicates whether a certificate must contain all or at least one
+         * of the subject alternative names specified by {@link
+         * #setSubjectAlternativeNames} or {@link #addSubjectAlternativeName}.
+         *
+         * @param matchAllNames
+         *            {@code true} if a certificate must contain all of the
+         *            specified subject alternative names, otherwise {@code false}.
+         */
+        SetMatchAllSubjectAltNames(
+            [in] Boolean matchAllNames);
+
+        /**
+         * Returns the flag for the matching behavior for subject alternative names.
+         * <p>
+         * The flag indicates whether a certificate must contain all or at least one
+         * of the subject alternative names specified by {@link
+         * #setSubjectAlternativeNames} or {@link #addSubjectAlternativeName}.
+         *
+         * @return {@code true} if a certificate must contain all of the specified
+         *         subject alternative names, otherwise {@code false}.
+         */
+        GetMatchAllSubjectAltNames(
+            [out] Boolean* matchAllNames);
+
+        /**
+         * Sets the criterion for subject alternative names.
+         * <p>
+         * the certificate must contain all or at least one of the specified subject
+         * alternative names. The behavior is specified by
+         * {@link #getMatchAllSubjectAltNames}.
+         * <p>
+         * The specified parameter {@code names} is a collection with an entry for
+         * each name to be included in the criterion. The name is specified as a
+         * {@code List}, the first entry must be an {@code Integer} specifying the
+         * name type (0-8), the second entry must be a {@code String} or a byte
+         * array specifying the name (in string or ASN.1 DER encoded form)
+         *
+         * @param names
+         *            the names collection or {@code null} to not perform this check.
+         * @throws IOException
+         *             if the decoding of a name fails.
+         */
+        SetSubjectAlternativeNames(
+            [in] ICollection* names);
+
+        /**
+         * Adds a subject alternative name to the respective criterion.
+         *
+         * @param tag
+         *            the type of the name
+         * @param name
+         *            the name in string format.
+         * @throws IOException
+         *             if parsing the name fails.
+         */
+        AddSubjectAlternativeName(
+            [in] Int32 tag,
+            [in] String name);
+
+        /**
+         * Adds a subject alternative name to the respective criterion.
+         *
+         * @param tag
+         *            the type of the name.
+         * @param name
+         *            the name in ASN.1 DER encoded form.
+         * @throws IOException
+         *             if the decoding of the name fails.
+         */
+        AddSubjectAlternativeNameEx(
+            [in] Int32 tag,
+            [in] ArrayOf<Byte>* name);
+
+        /**
+         * Returns the criterion for subject alternative names.
+         * <p>
+         * the certificate must contain all or at least one of the specified subject
+         * alternative names. The behavior is specified by
+         * {@link #getMatchAllSubjectAltNames}.
+         * <p>
+         * The subject alternative names is a collection with an entry for each name
+         * included in the criterion. The name is specified as a {@code List}, the
+         * first entry is an {@code Integer} specifying the name type (0-8), the
+         * second entry is byte array specifying the name in ASN.1 DER encoded form)
+         *
+         * @return the names collection or {@code null} if none specified.
+         */
+        GetSubjectAlternativeNames(
+            [out] ICollection** names);
+
+        /**
+         * Sets the criterion for the name constraints.
+         * <p>
+         * The certificate must constraint subject and subject alternative names
+         * that match the specified name constraints.
+         * <p>
+         * The name constraints in ASN.1:
+         *
+         * <pre>
+         * NameConstraints ::= SEQUENCE {
+         *        permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
+         *        excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
+         *
+         * GeneralSubtrees ::= SEQUENCE SIZE (1..MAX) OF GeneralSubtree
+         *
+         * GeneralSubtree ::= SEQUENCE {
+         *        base                    GeneralName,
+         *        minimum         [0]     BaseDistance DEFAULT 0,
+         *        maximum         [1]     BaseDistance OPTIONAL }
+         *
+         * BaseDistance ::= INTEGER (0..MAX)
+         *
+         * GeneralName ::= CHOICE {
+         *        otherName                       [0]     OtherName,
+         *        rfc822Name                      [1]     IA5String,
+         *        dNSName                         [2]     IA5String,
+         *        x400Address                     [3]     ORAddress,
+         *        directoryName                   [4]     Name,
+         *        ediPartyName                    [5]     EDIPartyName,
+         *        uniformResourceIdentifier       [6]     IA5String,
+         *        iPAddress                       [7]     OCTET STRING,
+         *        registeredID                    [8]     OBJECT IDENTIFIER}
+         *
+         * </pre>
+         *
+         * @param bytes
+         *            the name constraints in ASN.1 DER encoded format, or null to
+         *            not check any constraints.
+         * @throws IOException
+         *             if decoding the name constraints fail.
+         */
+        SetNameConstraints(
+            [in] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns the criterion for the name constraints.
+         *
+         * @return the name constraints or {@code null} if none specified.
+         * @see #setNameConstraints
+         */
+        GetNameConstraints(
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Sets the criterion for the basic constraints extension.
+         * <p>
+         * A value greater than or equal to zero indicates that a certificate must
+         * include a basic constraints extension with a path length of a least that
+         * value. A value of {@code -2} indicates that only end-entity certificates
+         * are accepted. A value of {@code -1} indicates that no check is done.
+         *
+         * @param pathLen
+         *            the value specifying the criterion.
+         * @throws IllegalArgumentException
+         *             if {@code pathLen} is less than {@code -2}.
+         */
+        SetBasicConstraints(
+            [in] Int32 pathLen);
+
+        /**
+         * Returns the criterion for the basic constraints extension.
+         * <p>
+         * A value greater than or equal to zero indicates that a certificate must
+         * include a basic constraints extension with a path length of a least that
+         * value. A value of {@code -2} indicates that only end-entity certificates
+         * are accepted. A value of {@code -1} indicates that no check is done.
+         *
+         * @return the value of the criterion.
+         */
+        GetBasicConstraints(
+            [out] Int32* pathLen);
+
+        /**
+         * Sets the criterion for the policy constraint.
+         * <p>
+         * The certificate must have at least one of the specified certificate
+         * policy extensions. For an empty set the certificate must have at least
+         * some policies in its policy extension.
+         *
+         * @param policies
+         *            the certificate policy OIDs, an empty set, or {@code null} to
+         *            not perform this check.
+         * @throws IOException
+         *             if parsing the specified OIDs fails.
+         */
+        SetPolicy(
+            [in] ISet* policies);
+
+        /**
+         * Returns the criterion for the policy constraint.
+         * <p>
+         * The certificate must have at least one of the certificate policy
+         * extensions. For an empty set the certificate must have at least some
+         * policies in its policy extension.
+         *
+         * @return the certificate policy OIDs, an empty set, or {@code null} if not
+         *         to be checked.
+         */
+        GetPolicy(
+            [out] ISet** policies);
+
+        /**
+         * Adds a {@literal "pathToName"} to the respective criterion.
+         *
+         * @param type
+         *            the type of the name.
+         * @param name
+         *            the name in string format.
+         * @throws IOException
+         *             if parsing fails.
+         * @see #setPathToNames
+         */
+        AddPathToName(
+            [in] Int32 type,
+            [in] String name);
+
+        /**
+         * Sets the criterion for the pathToNames constraint.
+         * <p>
+         * This allows to specify the complete set of names, a certificate's name
+         * constraints must permit.
+         * <p>
+         * The specified parameter {@code names} is a collection with an entry for
+         * each name to be included in the criterion. The name is specified as a
+         * {@code List}, the first entry must be an {@code Integer} specifying the
+         * name type (0-8), the second entry must be a {@code String} or a byte
+         * array specifying the name (in string or ASN.1 DER encoded form)
+         *
+         * @param names
+         *            the names collection or {@code null} to not perform this
+         *            check.
+         * @throws IOException
+         *             if decoding fails.
+         */
+        SetPathToNames(
+            [in] ICollection* names);
+
+        /**
+         * Adds a {@literal "pathToName"} to the respective criterion.
+         *
+         * @param type
+         *            the type of the name
+         * @param name
+         *            the name in ASN.1 DER encoded form.
+         * @throws IOException
+         *             if decoding fails.
+         * @see #setPathToNames
+         */
+        AddPathToNameEx(
+            [in] Int32 type,
+            [in] ArrayOf<Byte>* name);
+
+        /**
+         * Returns the criterion for the pathToNames constraint.
+         * <p>
+         * The constraint is a collection with an entry for each name to be included
+         * in the criterion. The name is specified as a {@code List}, the first
+         * entry is an {@code Integer} specifying the name type (0-8), the second
+         * entry is a byte array specifying the name in ASN.1 DER encoded form.
+         *
+         * @return the pathToNames constraint or {@code null} if none specified.
+         */
+        GetPathToNames(
+            [out] ICollection** name);
+
+        /**
+         * Returns a string representation of this {@code X509CertSelector}
+         * instance.
+         *
+         * @return a string representation of this {@code X509CertSelector}
+         *         instance.
+         */
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Cert
+    } // namespace Security
+    } // namespace Elastos
+}

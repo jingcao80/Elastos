@@ -1,0 +1,143 @@
+
+module
+{
+    interface Elastos.Droid.Internal.Location.IProviderProperties;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * An abstract superclass for location providers.  A location provider
+     * provides periodic reports on the geographical location of the
+     * device.
+     *
+     * <p> Each provider has a set of criteria under which it may be used;
+     * for example, some providers require GPS hardware and visibility to
+     * a number of satellites; others require the use of the cellular
+     * radio, or access to a specific carrier's network, or to the
+     * internet.  They may also have different battery consumption
+     * characteristics or monetary costs to the user.  The {@link
+     * Criteria} class allows providers to be selected based on
+     * user-specified criteria.
+     */
+    interface ILocationProvider {
+
+        const Int32 OUT_OF_SERVICE = 0;
+
+        const Int32 TEMPORARILY_UNAVAILABLE = 1;
+
+        const Int32 AVAILABLE = 2;
+
+        /**
+         * A regular expression matching characters that may not appear
+         * in the name of a LocationProvider
+         * @hide
+         */
+        const String BAD_CHARS_REGEX = "[^a-zA-Z0-9]";
+
+        /**
+         * Returns the name of this provider.
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns true if this provider meets the given criteria,
+         * false otherwise.
+         */
+        MeetsCriteria(
+            [in] ICriteria* criteria,
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the provider requires access to a
+         * data network (e.g., the Internet), false otherwise.
+         */
+        RequiresNetwork(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the provider requires access to a
+         * satellite-based positioning system (e.g., GPS), false
+         * otherwise.
+         */
+        RequiresSatellite(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the provider requires access to an appropriate
+         * cellular network (e.g., to make use of cell tower IDs), false
+         * otherwise.
+         */
+        RequiresCell(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the use of this provider may result in a
+         * monetary charge to the user, false if use is free.  It is up to
+         * each provider to give accurate information.
+         */
+        HasMonetaryCost(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the provider is able to provide altitude
+         * information, false otherwise.  A provider that reports altitude
+         * under most circumstances but may occassionally not report it
+         * should return true.
+         */
+        SupportsAltitude(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the provider is able to provide speed
+         * information, false otherwise.  A provider that reports speed
+         * under most circumstances but may occassionally not report it
+         * should return true.
+         */
+        SupportsSpeed(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the provider is able to provide bearing
+         * information, false otherwise.  A provider that reports bearing
+         * under most circumstances but may occassionally not report it
+         * should return true.
+         */
+        SupportsBearing(
+            [out] Boolean* result);
+
+        /**
+         * Returns the power requirement for this provider.
+         *
+         * @return the power requirement for this provider, as one of the
+         * constants Criteria.POWER_REQUIREMENT_*.
+         */
+        GetPowerRequirement(
+            [out] Int32* pr);
+
+        /**
+         * Returns a constant describing horizontal accuracy of this provider.
+         * If the provider returns finer grain or exact location,
+         * {@link Criteria#ACCURACY_FINE} is returned, otherwise if the
+         * location is only approximate then {@link Criteria#ACCURACY_COARSE}
+         * is returned.
+         */
+        GetAccuracy(
+            [out] Int32* accuracy);
+    }
+
+    interface ILocationProviderHelper {
+
+        PropertiesMeetCriteria(
+            [in] String name,
+            [in] IProviderProperties* properties,
+            [in] ICriteria* criteria,
+            [out] Boolean* rst);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}

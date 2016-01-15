@@ -1,0 +1,30 @@
+
+module
+{
+
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Service {
+    namespace Dreams {
+
+    /**
+     * @hide
+     */
+    [oneway]
+    interface IIDreamService {
+        Attach(
+            [in] IBinder* windowToken,
+            [in] Boolean canDoze);
+
+        Detach();
+
+        WakeUp();
+    }
+
+    } // namespace Dreams
+    } // namespace Service
+    } // namepsace Droid
+    } // namespace Elastos
+}

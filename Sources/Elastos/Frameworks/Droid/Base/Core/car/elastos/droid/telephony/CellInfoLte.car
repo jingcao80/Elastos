@@ -1,0 +1,35 @@
+
+module
+{
+
+    interface Elastos.Droid.Telephony.ICellSignalStrengthLte;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Telephony.ICellInfo
+     * interface IParcelable
+     */
+    interface ICellInfoLte {
+
+        GetCellIdentity(
+            [out] ICellIdentityLte** res);
+
+        SetCellIdentity(
+            [in] ICellIdentityLte* cid);
+
+        GetCellSignalStrength(
+            [out] ICellSignalStrengthLte** res);
+
+        SetCellSignalStrength(
+            [in] ICellSignalStrengthLte* css);
+
+    }
+
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

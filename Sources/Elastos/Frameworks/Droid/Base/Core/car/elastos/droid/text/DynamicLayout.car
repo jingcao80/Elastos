@@ -1,0 +1,57 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * DynamicLayout is a text layout that updates itself as the text is edited.
+     * <p>This is used by widgets to control text layout. You should not need
+     * to use this class directly unless you are implementing your own widget
+     * or custom display object, or need to call
+     * {@link android.graphics.Canvas#drawText(java.lang.CharSequence, int, int, float, float, android.graphics.Paint)
+     *  Canvas.drawText()} directly.</p>
+     *
+     * @Involve
+     * interface ILayout
+     */
+    interface IDynamicLayout {
+        /**
+         * @hide
+         */
+        GetBlockEndLines(
+            [out, callee] ArrayOf<Int32>* ret);
+
+        /**
+         * @hide
+         */
+        GetBlockIndices(
+            [out, callee] ArrayOf<Int32>* ret);
+
+        /**
+         * @hide
+         */
+        GetNumberOfBlocks(
+            [out] Int32* ret);
+
+        /**
+        * @hide
+        */
+        GetIndexFirstChangedBlock(
+            [out] Int32* index);
+
+        /**
+         * @hide
+         */
+        SetIndexFirstChangedBlock(
+            [in] Int32 i);
+    }
+
+
+    } // namespace Text
+    } // namepsace Droid
+    } // namespace Elastos
+}

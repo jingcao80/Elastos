@@ -1,0 +1,105 @@
+
+module
+{
+    namespace Elastos {
+    namespace Utility {
+    namespace Concurrent {
+
+    /**
+     * @Involve
+     * interface IFuture;
+     * interface IRunnableFuture;
+     * interface IRunnableScheduledFuture;
+     */
+    interface IScheduledFutureTask {
+    }
+
+    /**
+     * A {@link ThreadPoolExecutor} that can additionally schedule
+     * commands to run after a given delay, or to execute
+     * periodically. This class is preferable to {@link java.util.Timer}
+     * when multiple worker threads are needed, or when the additional
+     * flexibility or capabilities of {@link ThreadPoolExecutor} (which
+     * this class extends) are required.
+     *
+     * <p>Delayed tasks execute no sooner than they are enabled, but
+     * without any real-time guarantees about when, after they are
+     * enabled, they will commence. Tasks scheduled for exactly the same
+     * execution time are enabled in first-in-first-out (FIFO) order of
+     * submission.
+     *
+     * <p>When a submitted task is cancelled before it is run, execution
+     * is suppressed. By default, such a cancelled task is not
+     * automatically removed from the work queue until its delay
+     * elapses. While this enables further inspection and monitoring, it
+     * may also cause unbounded retention of cancelled tasks.
+     *
+     * <p>Successive executions of a task scheduled via
+     * {@code scheduleAtFixedRate} or
+     * {@code scheduleWithFixedDelay} do not overlap. While different
+     * executions may be performed by different threads, the effects of
+     * prior executions <a
+     * href="package-summary.html#MemoryVisibility"><i>happen-before</i></a>
+     * those of subsequent ones.
+     *
+     * <p>While this class inherits from {@link ThreadPoolExecutor}, a few
+     * of the inherited tuning methods are not useful for it. In
+     * particular, because it acts as a fixed-sized pool using
+     * {@code corePoolSize} threads and an unbounded queue, adjustments
+     * to {@code maximumPoolSize} have no useful effect. Additionally, it
+     * is almost never a good idea to set {@code corePoolSize} to zero or
+     * use {@code allowCoreThreadTimeOut} because this may leave the pool
+     * without threads to handle tasks once they become eligible to run.
+     *
+     * <p><b>Extension notes:</b> This class overrides the
+     * {@link ThreadPoolExecutor#execute(Runnable) execute} and
+     * {@link AbstractExecutorService#submit(Runnable) submit}
+     * methods to generate internal {@link ScheduledFuture} objects to
+     * control per-task delays and scheduling.  To preserve
+     * functionality, any further overrides of these methods in
+     * subclasses must invoke superclass versions, which effectively
+     * disables additional task customization.  However, this class
+     * provides alternative protected extension method
+     * {@code decorateTask} (one version each for {@code Runnable} and
+     * {@code Callable}) that can be used to customize the concrete task
+     * types used to execute commands entered via {@code execute},
+     * {@code submit}, {@code schedule}, {@code scheduleAtFixedRate},
+     * and {@code scheduleWithFixedDelay}.  By default, a
+     * {@code ScheduledThreadPoolExecutor} uses a task type extending
+     * {@link FutureTask}. However, this may be modified or replaced using
+     * subclasses of the form:
+     *
+     *  <pre> {@code
+     * public class CustomScheduledExecutor extends ScheduledThreadPoolExecutor {
+     *
+     *   static class CustomTask<V> implements RunnableScheduledFuture<V> { ... }
+     *
+     *   protected <V> RunnableScheduledFuture<V> decorateTask(
+     *                Runnable r, RunnableScheduledFuture<V> task) {
+     *       return new CustomTask<V>(r, task);
+     *   }
+     *
+     *   protected <V> RunnableScheduledFuture<V> decorateTask(
+     *                Callable<V> c, RunnableScheduledFuture<V> task) {
+     *       return new CustomTask<V>(c, task);
+     *   }
+     *   // ... add constructors, etc.
+     * }}</pre>
+     *
+     * @since 1.5
+     * @author Doug Lea
+     */
+
+    /**
+     * @Involve
+     * interface IFuture;
+     * interface IRunnableFuture;
+     * interface IScheduledExecutorService;
+     */
+    interface IScheduledThreadPoolExecutor {
+    }
+
+    } // namespace Concurrent
+    } // namespace Utility
+    } // namespace Elastos
+}

@@ -1,0 +1,18 @@
+
+TARGET_NAME= ssl
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc;
+
+SOURCES = AbstractVerifier.cpp
+SOURCES += CAllowAllHostnameVerifier.cpp
+SOURCES += CBrowserCompatHostnameVerifier.cpp
+SOURCES += CStrictHostnameVerifier.cpp
+SOURCES += CSSLSocketFactory.cpp
+SOURCES += CSSLSocketFactoryHelper.cpp

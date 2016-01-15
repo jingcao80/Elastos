@@ -1,0 +1,21 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Cardemulation{
+
+    /**
+     * @Involve
+     * interace IService
+     */
+    interface IOffHostApduService {
+    }
+
+    }// namespace Cardemulation
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

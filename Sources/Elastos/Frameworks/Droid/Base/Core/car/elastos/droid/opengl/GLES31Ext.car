@@ -1,0 +1,685 @@
+
+module
+{
+    using interface Elastos.IO.IInt32Buffer;
+    using interface Elastos.IO.IByteBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    interface IDebugProcKHR {
+        OnMessage(
+            [in] Int32 source,
+            [in] Int32 type,
+            [in] Int32 id,
+            [in] Int32 severity,
+            [in] String message);
+    }
+
+    [deprecated]
+    interface IGLES31Ext {
+
+        // GL_KHR_blend_equation_advanced
+        const Int32 _GL__BLEND_ADVANCED_COHERENT_KHR                          = 0x9285;
+        const Int32 _GL__MULTIPLY_KHR                                         = 0x9294;
+        const Int32 _GL__SCREEN_KHR                                           = 0x9295;
+        const Int32 _GL__OVERLAY_KHR                                          = 0x9296;
+        const Int32 _GL__DARKEN_KHR                                           = 0x9297;
+        const Int32 _GL__LIGHTEN_KHR                                          = 0x9298;
+        const Int32 _GL__COLORDODGE_KHR                                       = 0x9299;
+        const Int32 _GL__COLORBURN_KHR                                        = 0x929A;
+        const Int32 _GL__HARDLIGHT_KHR                                        = 0x929B;
+        const Int32 _GL__SOFTLIGHT_KHR                                        = 0x929C;
+        const Int32 _GL__DIFFERENCE_KHR                                       = 0x929E;
+        const Int32 _GL__EXCLUSION_KHR                                        = 0x92A0;
+        const Int32 _GL__HSL_HUE_KHR                                          = 0x92AD;
+        const Int32 _GL__HSL_SATURATION_KHR                                   = 0x92AE;
+        const Int32 _GL__HSL_COLOR_KHR                                        = 0x92AF;
+        const Int32 _GL__HSL_LUMINOSITY_KHR                                   = 0x92B0;
+
+        // GL_KHR_debug
+        const Int32 _GL__DEBUG_OUTPUT_SYNCHRONOUS_KHR                         = 0x8242;
+        const Int32 _GL__DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_KHR                 = 0x8243;
+        const Int32 _GL__DEBUG_CALLBACK_FUNCTION_KHR                          = 0x8244;
+        const Int32 _GL__DEBUG_CALLBACK_USER_PARAM_KHR                        = 0x8245;
+        const Int32 _GL__DEBUG_SOURCE_API_KHR                                 = 0x8246;
+        const Int32 _GL__DEBUG_SOURCE_WINDOW_SYSTEM_KHR                       = 0x8247;
+        const Int32 _GL__DEBUG_SOURCE_SHADER_COMPILER_KHR                     = 0x8248;
+        const Int32 _GL__DEBUG_SOURCE_THIRD_PARTY_KHR                         = 0x8249;
+        const Int32 _GL__DEBUG_SOURCE_APPLICATION_KHR                         = 0x824A;
+        const Int32 _GL__DEBUG_SOURCE_OTHER_KHR                               = 0x824B;
+        const Int32 _GL__DEBUG_TYPE_ERROR_KHR                                 = 0x824C;
+        const Int32 _GL__DEBUG_TYPE_DEPRECATED_BEHAVIOR_KHR                   = 0x824D;
+        const Int32 _GL__DEBUG_TYPE_UNDEFINED_BEHAVIOR_KHR                    = 0x824E;
+        const Int32 _GL__DEBUG_TYPE_PORTABILITY_KHR                           = 0x824F;
+        const Int32 _GL__DEBUG_TYPE_PERFORMANCE_KHR                           = 0x8250;
+        const Int32 _GL__DEBUG_TYPE_OTHER_KHR                                 = 0x8251;
+        const Int32 _GL__DEBUG_TYPE_MARKER_KHR                                = 0x8268;
+        const Int32 _GL__DEBUG_TYPE_PUSH_GROUP_KHR                            = 0x8269;
+        const Int32 _GL__DEBUG_TYPE_POP_GROUP_KHR                             = 0x826A;
+        const Int32 _GL__DEBUG_SEVERITY_NOTIFICATION_KHR                      = 0x826B;
+        const Int32 _GL__MAX_DEBUG_GROUP_STACK_DEPTH_KHR                      = 0x826C;
+        const Int32 _GL__DEBUG_GROUP_STACK_DEPTH_KHR                          = 0x826D;
+        const Int32 _GL__BUFFER_KHR                                           = 0x82E0;
+        const Int32 _GL__SHADER_KHR                                           = 0x82E1;
+        const Int32 _GL__PROGRAM_KHR                                          = 0x82E2;
+        const Int32 _GL__VERTEX_ARRAY_KHR                                     = 0x8074;
+        const Int32 _GL__QUERY_KHR                                            = 0x82E3;
+        const Int32 _GL__SAMPLER_KHR                                          = 0x82E6;
+        const Int32 _GL__MAX_LABEL_LENGTH_KHR                                 = 0x82E8;
+        const Int32 _GL__MAX_DEBUG_MESSAGE_LENGTH_KHR                         = 0x9143;
+        const Int32 _GL__MAX_DEBUG_LOGGED_MESSAGES_KHR                        = 0x9144;
+        const Int32 _GL__DEBUG_LOGGED_MESSAGES_KHR                            = 0x9145;
+        const Int32 _GL__DEBUG_SEVERITY_HIGH_KHR                              = 0x9146;
+        const Int32 _GL__DEBUG_SEVERITY_MEDIUM_KHR                            = 0x9147;
+        const Int32 _GL__DEBUG_SEVERITY_LOW_KHR                               = 0x9148;
+        const Int32 _GL__DEBUG_OUTPUT_KHR                                     = 0x92E0;
+        const Int32 _GL__CONTEXT_FLAG_DEBUG_BIT_KHR                           = 0x00000002;
+        const Int32 _GL__STACK_OVERFLOW_KHR                                   = 0x0503;
+        const Int32 _GL__STACK_UNDERFLOW_KHR                                  = 0x0504;
+
+        // GL_KHR_texture_compression_astc_ldr
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_4x4_KHR                         = 0x93B0;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_5x4_KHR                         = 0x93B1;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_5x5_KHR                         = 0x93B2;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_6x5_KHR                         = 0x93B3;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_6x6_KHR                         = 0x93B4;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_8x5_KHR                         = 0x93B5;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_8x6_KHR                         = 0x93B6;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_8x8_KHR                         = 0x93B7;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_10x5_KHR                        = 0x93B8;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_10x6_KHR                        = 0x93B9;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_10x8_KHR                        = 0x93BA;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_10x10_KHR                       = 0x93BB;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_12x10_KHR                       = 0x93BC;
+        const Int32 _GL__COMPRESSED_RGBA_ASTC_12x12_KHR                       = 0x93BD;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR                 = 0x93D0;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR                 = 0x93D1;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR                 = 0x93D2;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR                 = 0x93D3;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR                 = 0x93D4;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR                 = 0x93D5;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR                 = 0x93D6;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR                 = 0x93D7;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR                = 0x93D8;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR                = 0x93D9;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR                = 0x93DA;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR               = 0x93DB;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR               = 0x93DC;
+        const Int32 _GL__COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR               = 0x93DD;
+
+        // GL_OES_sample_shading
+        const Int32 _GL__SAMPLE_SHADING_OES                                   = 0x8C36;
+        const Int32 _GL__MIN_SAMPLE_SHADING_VALUE_OES                         = 0x8C37;
+
+        // GL_OES_shader_multisample_interpolation
+        const Int32 _GL__MIN_FRAGMENT_INTERPOLATION_OFFSET_OES                = 0x8E5B;
+        const Int32 _GL__MAX_FRAGMENT_INTERPOLATION_OFFSET_OES                = 0x8E5C;
+        const Int32 _GL__FRAGMENT_INTERPOLATION_OFFSET_BITS_OES               = 0x8E5D;
+
+        // GL_OES_texture_stencil8
+        const Int32 _GL__STENCIL_INDEX_OES                                    = 0x1901;
+        const Int32 _GL__STENCIL_INDEX8_OES                                   = 0x8D48;
+
+        // GL_OES_texture_storage_multisample_2d_array
+        const Int32 _GL__TEXTURE_2D_MULTISAMPLE_ARRAY_OES                     = 0x9102;
+        const Int32 _GL__TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY_OES             = 0x9105;
+        const Int32 _GL__SAMPLER_2D_MULTISAMPLE_ARRAY_OES                     = 0x910B;
+        const Int32 _GL__INT_SAMPLER_2D_MULTISAMPLE_ARRAY_OES                 = 0x910C;
+        const Int32 _GL__UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY_OES        = 0x910D;
+
+        // GL_EXT_geometry_shader
+        const Int32 _GL__GEOMETRY_SHADER_EXT                                  = 0x8DD9;
+        const Int32 _GL__GEOMETRY_SHADER_BIT_EXT                              = 0x00000004;
+        const Int32 _GL__GEOMETRY_LINKED_VERTICES_OUT_EXT                     = 0x8916;
+        const Int32 _GL__GEOMETRY_LINKED_INPUT_TYPE_EXT                       = 0x8917;
+        const Int32 _GL__GEOMETRY_LINKED_OUTPUT_TYPE_EXT                      = 0x8918;
+        const Int32 _GL__GEOMETRY_SHADER_INVOCATIONS_EXT                      = 0x887F;
+        const Int32 _GL__LAYER_PROVOKING_VERTEX_EXT                           = 0x825E;
+        const Int32 _GL__LINES_ADJACENCY_EXT                                  = 0x000A;
+        const Int32 _GL__LINE_STRIP_ADJACENCY_EXT                             = 0x000B;
+        const Int32 _GL__TRIANGLES_ADJACENCY_EXT                              = 0x000C;
+        const Int32 _GL__TRIANGLE_STRIP_ADJACENCY_EXT                         = 0x000D;
+        const Int32 _GL__MAX_GEOMETRY_UNIFORM_COMPONENTS_EXT                  = 0x8DDF;
+        const Int32 _GL__MAX_GEOMETRY_UNIFORM_BLOCKS_EXT                      = 0x8A2C;
+        const Int32 _GL__MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS_EXT         = 0x8A32;
+        const Int32 _GL__MAX_GEOMETRY_INPUT_COMPONENTS_EXT                    = 0x9123;
+        const Int32 _GL__MAX_GEOMETRY_OUTPUT_COMPONENTS_EXT                   = 0x9124;
+        const Int32 _GL__MAX_GEOMETRY_OUTPUT_VERTICES_EXT                     = 0x8DE0;
+        const Int32 _GL__MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS_EXT             = 0x8DE1;
+        const Int32 _GL__MAX_GEOMETRY_SHADER_INVOCATIONS_EXT                  = 0x8E5A;
+        const Int32 _GL__MAX_GEOMETRY_TEXTURE_IMAGE_UNITS_EXT                 = 0x8C29;
+        const Int32 _GL__MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS_EXT              = 0x92CF;
+        const Int32 _GL__MAX_GEOMETRY_ATOMIC_COUNTERS_EXT                     = 0x92D5;
+        const Int32 _GL__MAX_GEOMETRY_IMAGE_UNIFORMS_EXT                      = 0x90CD;
+        const Int32 _GL__MAX_GEOMETRY_SHADER_STORAGE_BLOCKS_EXT               = 0x90D7;
+        const Int32 _GL__FIRST_VERTEX_CONVENTION_EXT                          = 0x8E4D;
+        const Int32 _GL__LAST_VERTEX_CONVENTION_EXT                           = 0x8E4E;
+        const Int32 _GL__UNDEFINED_VERTEX_EXT                                 = 0x8260;
+        const Int32 _GL__PRIMITIVES_GENERATED_EXT                             = 0x8C87;
+        const Int32 _GL__FRAMEBUFFER_DEFAULT_LAYERS_EXT                       = 0x9312;
+        const Int32 _GL__MAX_FRAMEBUFFER_LAYERS_EXT                           = 0x9317;
+        const Int32 _GL__FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT             = 0x8DA8;
+        const Int32 _GL__FRAMEBUFFER_ATTACHMENT_LAYERED_EXT                   = 0x8DA7;
+        const Int32 _GL__REFERENCED_BY_GEOMETRY_SHADER_EXT                    = 0x9309;
+
+        // GL_EXT_primitive_bounding_box
+        const Int32 _GL__PRIMITIVE_BOUNDING_BOX_EXT                           = 0x92BE;
+
+        // GL_EXT_tessellation_shader
+        const Int32 _GL__PATCHES_EXT                                          = 0x000E;
+        const Int32 _GL__PATCH_VERTICES_EXT                                   = 0x8E72;
+        const Int32 _GL__TESS_CONTROL_OUTPUT_VERTICES_EXT                     = 0x8E75;
+        const Int32 _GL__TESS_GEN_MODE_EXT                                    = 0x8E76;
+        const Int32 _GL__TESS_GEN_SPACING_EXT                                 = 0x8E77;
+        const Int32 _GL__TESS_GEN_VERTEX_ORDER_EXT                            = 0x8E78;
+        const Int32 _GL__TESS_GEN_POINT_MODE_EXT                              = 0x8E79;
+        const Int32 _GL__ISOLINES_EXT                                         = 0x8E7A;
+        const Int32 _GL__QUADS_EXT                                            = 0x0007;
+        const Int32 _GL__FRACTIONAL_ODD_EXT                                   = 0x8E7B;
+        const Int32 _GL__FRACTIONAL_EVEN_EXT                                  = 0x8E7C;
+        const Int32 _GL__MAX_PATCH_VERTICES_EXT                               = 0x8E7D;
+        const Int32 _GL__MAX_TESS_GEN_LEVEL_EXT                               = 0x8E7E;
+        const Int32 _GL__MAX_TESS_CONTROL_UNIFORM_COMPONENTS_EXT              = 0x8E7F;
+        const Int32 _GL__MAX_TESS_EVALUATION_UNIFORM_COMPONENTS_EXT           = 0x8E80;
+        const Int32 _GL__MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS_EXT             = 0x8E81;
+        const Int32 _GL__MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS_EXT          = 0x8E82;
+        const Int32 _GL__MAX_TESS_CONTROL_OUTPUT_COMPONENTS_EXT               = 0x8E83;
+        const Int32 _GL__MAX_TESS_PATCH_COMPONENTS_EXT                        = 0x8E84;
+        const Int32 _GL__MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS_EXT         = 0x8E85;
+        const Int32 _GL__MAX_TESS_EVALUATION_OUTPUT_COMPONENTS_EXT            = 0x8E86;
+        const Int32 _GL__MAX_TESS_CONTROL_UNIFORM_BLOCKS_EXT                  = 0x8E89;
+        const Int32 _GL__MAX_TESS_EVALUATION_UNIFORM_BLOCKS_EXT               = 0x8E8A;
+        const Int32 _GL__MAX_TESS_CONTROL_INPUT_COMPONENTS_EXT                = 0x886C;
+        const Int32 _GL__MAX_TESS_EVALUATION_INPUT_COMPONENTS_EXT             = 0x886D;
+        const Int32 _GL__MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS_EXT     = 0x8E1E;
+        const Int32 _GL__MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS_EXT  = 0x8E1F;
+        const Int32 _GL__MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS_EXT          = 0x92CD;
+        const Int32 _GL__MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS_EXT       = 0x92CE;
+        const Int32 _GL__MAX_TESS_CONTROL_ATOMIC_COUNTERS_EXT                 = 0x92D3;
+        const Int32 _GL__MAX_TESS_EVALUATION_ATOMIC_COUNTERS_EXT              = 0x92D4;
+        const Int32 _GL__MAX_TESS_CONTROL_IMAGE_UNIFORMS_EXT                  = 0x90CB;
+        const Int32 _GL__MAX_TESS_EVALUATION_IMAGE_UNIFORMS_EXT               = 0x90CC;
+        const Int32 _GL__MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS_EXT           = 0x90D8;
+        const Int32 _GL__MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS_EXT        = 0x90D9;
+        const Int32 _GL__PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED              = 0x8221;
+        const Int32 _GL__IS_PER_PATCH_EXT                                     = 0x92E7;
+        const Int32 _GL__REFERENCED_BY_TESS_CONTROL_SHADER_EXT                = 0x9307;
+        const Int32 _GL__REFERENCED_BY_TESS_EVALUATION_SHADER_EXT             = 0x9308;
+        const Int32 _GL__TESS_CONTROL_SHADER_EXT                              = 0x8E88;
+        const Int32 _GL__TESS_EVALUATION_SHADER_EXT                           = 0x8E87;
+        const Int32 _GL__TESS_CONTROL_SHADER_BIT_EXT                          = 0x00000008;
+        const Int32 _GL__TESS_EVALUATION_SHADER_BIT_EXT                       = 0x00000010;
+
+        // GL_EXT_texture_border_clamp
+        const Int32 _GL__TEXTURE_BORDER_COLOR_EXT                             = 0x1004;
+        const Int32 _GL__CLAMP_TO_BORDER_EXT                                  = 0x812D;
+
+        // GL_EXT_texture_buffer
+        const Int32 _GL__TEXTURE_BUFFER_EXT                                   = 0x8C2A;
+        const Int32 _GL__TEXTURE_BUFFER_BINDING_EXT                           = 0x8C2A;
+        const Int32 _GL__MAX_TEXTURE_BUFFER_SIZE_EXT                          = 0x8C2B;
+        const Int32 _GL__TEXTURE_BINDING_BUFFER_EXT                           = 0x8C2C;
+        const Int32 _GL__TEXTURE_BUFFER_DATA_STORE_BINDING_EXT                = 0x8C2D;
+        const Int32 _GL__TEXTURE_BUFFER_OFFSET_ALIGNMENT_EXT                  = 0x919F;
+        const Int32 _GL__SAMPLER_BUFFER_EXT                                   = 0x8DC2;
+        const Int32 _GL__INT_SAMPLER_BUFFER_EXT                               = 0x8DD0;
+        const Int32 _GL__UNSIGNED_INT_SAMPLER_BUFFER_EXT                      = 0x8DD8;
+        const Int32 _GL__IMAGE_BUFFER_EXT                                     = 0x9051;
+        const Int32 _GL__INT_IMAGE_BUFFER_EXT                                 = 0x905C;
+        const Int32 _GL__UNSIGNED_INT_IMAGE_BUFFER_EXT                        = 0x9067;
+        const Int32 _GL__TEXTURE_BUFFER_OFFSET_EXT                            = 0x919D;
+        const Int32 _GL__TEXTURE_BUFFER_SIZE_EXT                              = 0x919E;
+
+        // GL_EXT_texture_cube_map_array
+        const Int32 _GL__TEXTURE_CUBE_MAP_ARRAY_EXT                           = 0x9009;
+        const Int32 _GL__TEXTURE_BINDING_CUBE_MAP_ARRAY_EXT                   = 0x900A;
+        const Int32 _GL__SAMPLER_CUBE_MAP_ARRAY_EXT                           = 0x900C;
+        const Int32 _GL__SAMPLER_CUBE_MAP_ARRAY_SHADOW_EXT                    = 0x900D;
+        const Int32 _GL__INT_SAMPLER_CUBE_MAP_ARRAY_EXT                       = 0x900E;
+        const Int32 _GL__UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY_EXT              = 0x900F;
+        const Int32 _GL__IMAGE_CUBE_MAP_ARRAY_EXT                             = 0x9054;
+        const Int32 _GL__INT_IMAGE_CUBE_MAP_ARRAY_EXT                         = 0x905F;
+        const Int32 _GL__UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY_EXT                = 0x906A;
+
+        // GL_EXT_texture_sRGB_decode
+        const Int32 _GL__TEXTURE_SRGB_DECODE_EXT                              = 0x8A48;
+        const Int32 _GL__DECODE_EXT                                           = 0x8A49;
+        const Int32 _GL__SKIP_DECODE_EXT                                      = 0x8A4A;
+
+        glBlendBarrierKHR(
+        );
+
+        // C function void glDebugMessageControlKHR ( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled )
+
+        glDebugMessageControlKHR(
+            [in] Int32 source,
+            [in] Int32 type,
+            [in] Int32 severity,
+            [in] Int32 count,
+            [in] ArrayOf<Int32>* ids,
+            [in] Int32 offset,
+            [in] Boolean enabled
+        );
+
+        // C function void glDebugMessageControlKHR ( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled )
+
+        glDebugMessageControlKHR(
+            [in] Int32 source,
+            [in] Int32 type,
+            [in] Int32 severity,
+            [in] Int32 count,
+            [in] IInt32Buffer* ids,
+            [in] Boolean enabled
+        );
+
+        // C function void glDebugMessageInsertKHR ( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *buf )
+
+        glDebugMessageInsertKHR(
+            [in] Int32 source,
+            [in] Int32 type,
+            [in] Int32 id,
+            [in] Int32 severity,
+            [in] String buf
+        );
+
+        // C function void glDebugMessageCallbackKHR ( GLDEBUGPROCKHR callback, const void *userParam )
+
+        glDebugMessageCallbackKHR(
+            [in] IDebugProcKHR* cb);
+
+        // C function GLuint glGetDebugMessageLogKHR ( GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog )
+
+        glGetDebugMessageLogKHR(
+            [in] Int32 count,
+            [in] Int32 bufSize,
+            [in] ArrayOf<Int32>* sources,
+            [in] Int32 sourcesOffset,
+            [in] ArrayOf<Int32>* types,
+            [in] Int32 typesOffset,
+            [in] ArrayOf<Int32>* ids,
+            [in] Int32 idsOffset,
+            [in] ArrayOf<Int32>* severities,
+            [in] Int32 severitiesOffset,
+            [in] ArrayOf<Int32>* lengths,
+            [in] Int32 lengthsOffset,
+            [in] ArrayOf<Byte>* messageLog,
+            [in] Int32 messageLogOffset,
+            [out] Int32* result);
+
+        // C function GLuint glGetDebugMessageLogKHR ( GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog )
+
+        glGetDebugMessageLogKHR(
+            [in] Int32 count,
+            [in] IInt32Buffer* sources,
+            [in] IInt32Buffer* types,
+            [in] IInt32Buffer* ids,
+            [in] IInt32Buffer* severities,
+            [in] IInt32Buffer* lengths,
+            [in] IByteBuffer* messageLog,
+            [out] Int32* result);
+
+        // C function GLuint glGetDebugMessageLogKHR ( GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog )
+
+        glGetDebugMessageLogKHR(
+            [in] Int32 count,
+            [in] ArrayOf<Int32>* sources,
+            [in] Int32 sourcesOffset,
+            [in] ArrayOf<Int32>* types,
+            [in] Int32 typesOffset,
+            [in] ArrayOf<Int32>* ids,
+            [in] Int32 idsOffset,
+            [in] ArrayOf<Int32>* severities,
+            [in] Int32 severitiesOffset,
+            [out, callee] ArrayOf<String>* result);
+
+        // C function GLuint glGetDebugMessageLogKHR ( GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog )
+
+        glGetDebugMessageLogKHR(
+            [in] Int32 count,
+            [in] IInt32Buffer* sources,
+            [in] IInt32Buffer* types,
+            [in] IInt32Buffer* ids,
+            [in] IInt32Buffer* severities,
+            [out, callee] ArrayOf<String>* result);
+
+        // C function void glPushDebugGroupKHR ( GLenum source, GLuint id, GLsizei length, const GLchar *message )
+
+        glPushDebugGroupKHR(
+            [in] Int32 source,
+            [in] Int32 id,
+            [in] Int32 length,
+            [in] String message
+        );
+
+        // C function void glPopDebugGroupKHR ( void )
+
+        glPopDebugGroupKHR(
+        );
+
+        // C function void glObjectLabelKHR ( GLenum identifier, GLuint name, GLsizei length, const GLchar *label )
+
+        glObjectLabelKHR(
+            [in] Int32 identifier,
+            [in] Int32 name,
+            [in] Int32 length,
+            [in] String label
+        );
+
+        // C function void glGetObjectLabelKHR ( GLenum identifier, GLuint name, GLsizei bufSize, GLsizei *length, GLchar *label )
+
+        glGetObjectLabelKHR(
+            [in] Int32 identifier,
+            [in] Int32 name,
+            [out] String* result);
+
+        // C function void glObjectPtrLabelKHR ( const void *ptr, GLsizei length, const GLchar *label )
+
+        glObjectPtrLabelKHR(
+            [in] Int64 ptr,
+            [in] String label);
+
+        // C function void glGetObjectPtrLabelKHR ( const void *ptr, GLsizei bufSize, GLsizei *length, GLchar *label )
+
+        glGetObjectPtrLabelKHR(
+            [in] Int64 ptr,
+            [out] String* label);
+
+        // C function void glGetPointervKHR ( GLenum pname, void **params )
+
+        glGetDebugMessageCallbackKHR(
+            [out] IDebugProcKHR** khr);
+
+        // C function void glMinSampleShadingOES ( GLfloat value )
+
+        glMinSampleShadingOES(
+            [in] Float value
+        );
+
+        // C function void glTexStorage3DMultisampleOES ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations )
+
+        glTexStorage3DMultisampleOES(
+            [in] Int32 target,
+            [in] Int32 samples,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 depth,
+            [in] Boolean fixedsamplelocations
+        );
+
+        // C function void glCopyImageSubDataEXT ( GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth, GLsizei srcHeight, GLsizei srcDepth )
+
+        glCopyImageSubDataEXT(
+            [in] Int32 srcName,
+            [in] Int32 srcTarget,
+            [in] Int32 srcLevel,
+            [in] Int32 srcX,
+            [in] Int32 srcY,
+            [in] Int32 srcZ,
+            [in] Int32 dstName,
+            [in] Int32 dstTarget,
+            [in] Int32 dstLevel,
+            [in] Int32 dstX,
+            [in] Int32 dstY,
+            [in] Int32 dstZ,
+            [in] Int32 srcWidth,
+            [in] Int32 srcHeight,
+            [in] Int32 srcDepth
+        );
+
+        // C function void glEnableiEXT ( GLenum target, GLuint index )
+
+        glEnableiEXT(
+            [in] Int32 target,
+            [in] Int32 index
+        );
+
+        // C function void glDisableiEXT ( GLenum target, GLuint index )
+
+        glDisableiEXT(
+            [in] Int32 target,
+            [in] Int32 index
+        );
+
+        // C function void glBlendEquationiEXT ( GLuint buf, GLenum mode )
+
+        glBlendEquationiEXT(
+            [in] Int32 buf,
+            [in] Int32 mode
+        );
+
+        // C function void glBlendEquationSeparateiEXT ( GLuint buf, GLenum modeRGB, GLenum modeAlpha )
+
+        glBlendEquationSeparateiEXT(
+            [in] Int32 buf,
+            [in] Int32 modeRGB,
+            [in] Int32 modeAlpha
+        );
+
+        // C function void glBlendFunciEXT ( GLuint buf, GLenum src, GLenum dst )
+
+        glBlendFunciEXT(
+            [in] Int32 buf,
+            [in] Int32 src,
+            [in] Int32 dst
+        );
+
+        // C function void glBlendFuncSeparateiEXT ( GLuint buf, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha )
+
+        glBlendFuncSeparateiEXT(
+            [in] Int32 buf,
+            [in] Int32 srcRGB,
+            [in] Int32 dstRGB,
+            [in] Int32 srcAlpha,
+            [in] Int32 dstAlpha
+        );
+
+        // C function void glColorMaskiEXT ( GLuint index, GLboolean r, GLboolean g, GLboolean b, GLboolean a )
+
+        glColorMaskiEXT(
+            [in] Int32 index,
+            [in] Boolean r,
+            [in] Boolean g,
+            [in] Boolean b,
+            [in] Boolean a
+        );
+
+        // C function GLboolean glIsEnablediEXT ( GLenum target, GLuint index )
+
+        glIsEnablediEXT(
+            [in] Int32 target,
+            [in] Int32 index,
+            [out] Boolean* result
+        );
+
+        // C function void glFramebufferTextureEXT ( GLenum target, GLenum attachment, GLuint texture, GLint level )
+
+        glFramebufferTextureEXT(
+            [in] Int32 target,
+            [in] Int32 attachment,
+            [in] Int32 texture,
+            [in] Int32 level
+        );
+
+        // C function void glPrimitiveBoundingBoxEXT ( GLfloat minX, GLfloat minY, GLfloat minZ, GLfloat minW, GLfloat maxX, GLfloat maxY, GLfloat maxZ, GLfloat maxW )
+
+        glPrimitiveBoundingBoxEXT(
+            [in] Float minX,
+            [in] Float minY,
+            [in] Float minZ,
+            [in] Float minW,
+            [in] Float maxX,
+            [in] Float maxY,
+            [in] Float maxZ,
+            [in] Float maxW
+        );
+
+        // C function void glPatchParameteriEXT ( GLenum pname, GLint value )
+
+        glPatchParameteriEXT(
+            [in] Int32 pname,
+            [in] Int32 value
+        );
+
+        // C function void glTexParameterIivEXT ( GLenum target, GLenum pname, const GLint *params )
+
+        glTexParameterIivEXT(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glTexParameterIivEXT ( GLenum target, GLenum pname, const GLint *params )
+
+        glTexParameterIivEXT(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glTexParameterIuivEXT ( GLenum target, GLenum pname, const GLuint *params )
+
+        glTexParameterIuivEXT(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glTexParameterIuivEXT ( GLenum target, GLenum pname, const GLuint *params )
+
+        glTexParameterIuivEXT(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glGetTexParameterIivEXT ( GLenum target, GLenum pname, GLint *params )
+
+        glGetTexParameterIivEXT(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetTexParameterIivEXT ( GLenum target, GLenum pname, GLint *params )
+
+        glGetTexParameterIivEXT(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glGetTexParameterIuivEXT ( GLenum target, GLenum pname, GLuint *params )
+
+        glGetTexParameterIuivEXT(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetTexParameterIuivEXT ( GLenum target, GLenum pname, GLuint *params )
+
+        glGetTexParameterIuivEXT(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glSamplerParameterIivEXT ( GLuint sampler, GLenum pname, const GLint *param )
+
+        glSamplerParameterIivEXT(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* param,
+            [in] Int32 offset
+        );
+
+        // C function void glSamplerParameterIivEXT ( GLuint sampler, GLenum pname, const GLint *param )
+
+        glSamplerParameterIivEXT(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] IInt32Buffer* param
+        );
+
+        // C function void glSamplerParameterIuivEXT ( GLuint sampler, GLenum pname, const GLuint *param )
+
+        glSamplerParameterIuivEXT(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* param,
+            [in] Int32 offset
+        );
+
+        // C function void glSamplerParameterIuivEXT ( GLuint sampler, GLenum pname, const GLuint *param )
+
+        glSamplerParameterIuivEXT(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] IInt32Buffer* param
+        );
+
+        // C function void glGetSamplerParameterIivEXT ( GLuint sampler, GLenum pname, GLint *params )
+
+        glGetSamplerParameterIivEXT(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetSamplerParameterIivEXT ( GLuint sampler, GLenum pname, GLint *params )
+
+        glGetSamplerParameterIivEXT(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glGetSamplerParameterIuivEXT ( GLuint sampler, GLenum pname, GLuint *params )
+
+        glGetSamplerParameterIuivEXT(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset
+        );
+
+        // C function void glGetSamplerParameterIuivEXT ( GLuint sampler, GLenum pname, GLuint *params )
+
+        glGetSamplerParameterIuivEXT(
+            [in] Int32 sampler,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params
+        );
+
+        // C function void glTexBufferEXT ( GLenum target, GLenum internalformat, GLuint buffer )
+
+        glTexBufferEXT(
+            [in] Int32 target,
+            [in] Int32 internalformat,
+            [in] Int32 buffer
+        );
+
+        // C function void glTexBufferRangeEXT ( GLenum target, GLenum internalformat, GLuint buffer, GLintptr offset, GLsizeiptr size )
+
+        glTexBufferRangeEXT(
+            [in] Int32 target,
+            [in] Int32 internalformat,
+            [in] Int32 buffer,
+            [in] Int32 offset,
+            [in] Int32 size
+        );
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}
+

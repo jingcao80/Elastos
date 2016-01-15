@@ -1,0 +1,72 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    /**
+     * StateMachine that interacts with the native DHCP client and can talk to
+     * a controller that also needs to be a StateMachine
+     *
+     * The Dhcp state machine provides the following features:
+     * - Wakeup and renewal using the native DHCP client  (which will not renew
+     *   on its own when the device is in suspend state and this can lead to device
+     *   holding IP address beyond expiry)
+     * - A notification right before DHCP request or renewal is started. This
+     *   can be used for any additional setup before DHCP. For example, wifi sets
+     *   BT-Wifi coex settings right before DHCP is initiated
+     *
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface IStateMachine;
+     */
+    interface IDhcpStateMachine {
+        /* Commands from controller to start/stop DHCP */
+        const Int32 CMD_START_DHCP                  =  0x00030001;
+        const Int32 CMD_STOP_DHCP                   =  0x00030002;
+        const Int32 CMD_RENEW_DHCP                  =  0x00030003;
+
+        /* Notification from DHCP state machine prior to DHCP discovery/renewal */
+        const Int32 CMD_PRE_DHCP_ACTION             =  0x00030004;
+
+        /* Notification from DHCP state machine post DHCP discovery/renewal. Indicates
+         * success/failure */
+        const Int32 CMD_POST_DHCP_ACTION            =  0x00030005;
+
+        /* Notification from DHCP state machine before quitting */
+        const Int32 CMD_ON_QUIT                     =  0x00030006;
+
+        /* Command from controller to indicate DHCP discovery/renewal can continue
+         * after pre DHCP action is complete */
+        const Int32 CMD_PRE_DHCP_ACTION_COMPLETE    =  0x00030007;
+
+        /* Message.arg1 arguments to CMD_POST_DHCP notification */
+        const Int32 DHCP_SUCCESS =  1;
+        const Int32 DHCP_FAILURE =  2;
+
+        /**
+         * This sends a notification right before DHCP request/renewal so that the
+         * controller can do certain actions before DHCP packets are sent out.
+         * When the controller is ready, it sends a CMD_PRE_DHCP_ACTION_COMPLETE message
+         * to indicate DHCP can continue
+         *
+         * This is used by Wifi at this time for the purpose of doing BT-Wifi coex
+         * handling during Dhcp
+         */
+        RegisterForPreDhcpNotification();
+
+        /**
+         * Quit the DhcpStateMachine.
+         *
+         * @hide
+         */
+        DoQuit();
+    }
+
+    } // namespace Net
+    } // namespace Droid
+    } // namespace Elastos
+}

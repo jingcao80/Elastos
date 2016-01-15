@@ -1,0 +1,82 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpRequest;
+    interface Org.Apache.Http.IHttpEntityEnclosingRequest;
+    interface Org.Apache.Http.IHttpResponse;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    /**
+     * An HTTP connection for use on the server side.
+     * Requests are received, responses are sent.
+     *
+     * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
+     *
+     * @version $Revision: 542199 $
+     *
+     * @since 4.0
+     */
+    /**
+     * @Involve
+     * interface IHttpConnection;
+     */
+    interface IHttpServerConnection {
+
+        /**
+         * Receives the request line and all headers available from this connection.
+         * The caller should examine the returned request and decide if to receive a
+         * request entity as well.
+         *
+         * @return a new HttpRequest object whose request line and headers are
+         *         initialized.
+         * @throws HttpException
+         * @throws IOException
+         */
+        ReceiveRequestHeader(
+            [out] IHttpRequest** request);
+
+        /**
+         * Receives the next request entity available from this connection and attaches it to
+         * an existing request.
+         * @param request the request to attach the entity to.
+         * @throws HttpException
+         * @throws IOException
+         */
+        ReceiveRequestEntity(
+            [in] IHttpEntityEnclosingRequest* request);
+
+        /**
+         * Sends the response line and headers of a response over this connection.
+         * @param response the response whose headers to send.
+         * @throws HttpException
+         * @throws IOException
+         */
+        SendResponseHeader(
+            [in] IHttpResponse* response);
+
+        /**
+         * Sends the response entity of a response over this connection.
+         * @param response the response whose entity to send.
+         * @throws HttpException
+         * @throws IOException
+         */
+        SendResponseEntity(
+            [in] IHttpResponse* response);
+
+        /**
+         * Sends all pending buffered data over this connection.
+         * @throws IOException
+         */
+        Flush();
+
+    }
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

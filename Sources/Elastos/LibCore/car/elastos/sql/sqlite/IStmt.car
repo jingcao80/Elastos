@@ -1,0 +1,276 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+    namespace SQLite {
+
+    interface IStmt {
+        /**
+         * Prepare the next SQL statement for the Stmt instance.
+         * @return true when the next piece of the SQL statement sequence
+         * has been prepared, false on end of statement sequence.
+         */
+        Prepare(
+            [out] Boolean* value);
+
+        /**
+         * Perform one step of compiled SQLite3 statement.
+         *
+         * Example:<BR>
+         * <PRE>
+         *   ...
+         *   try {
+         *     Stmt s = db.prepare("select * from x; select * from y;");
+         *     s.bind(...);
+         *     ...
+         *     s.bind(...);
+         *     while (s.step(cb)) {
+         *       Object o = s.value(...);
+         *       ...
+         *     }
+         *     // s.reset() for re-execution or
+         *     // s.prepare() for the next piece of SQL
+         *     while (s.prepare()) {
+         *       s.bind(...);
+         *       ...
+         *       s.bind(...);
+         *       while (s.step(cb)) {
+         *         Object o = s.value(...);
+         *         ...
+         *       }
+         *     }
+         *   } catch (SQLite.Exception e) {
+         *     s.close();
+         *   }
+         * </PRE>
+         *
+         * @return true when row data is available, false on end
+         * of result set.
+         */
+        Step(
+            [out] Boolean* value);
+
+        /**
+         * Close the compiled SQLite3 statement.
+         */
+        Close();
+
+        /**
+         * Reset the compiled SQLite3 statement without
+         * clearing parameter bindings.
+         */
+        Reset();
+
+        /**
+         * Clear all bound parameters of the compiled SQLite3 statement.
+         */
+        ClearBindings();
+
+        /**
+         * Bind positional integer value to compiled SQLite3 statement.
+         * @param pos parameter index, 1-based
+         * @param value value of parameter
+         */
+        Bind(
+            [in] Int32 pos,
+            [in] Int32 value);
+
+        /**
+         * Bind positional long value to compiled SQLite3 statement.
+         * @param pos parameter index, 1-based
+         * @param value value of parameter
+         */
+        Bind(
+            [in] Int32 pos,
+            [in] Int64 value);
+
+        /**
+         * Bind positional double value to compiled SQLite3 statement.
+         * @param pos parameter index, 1-based
+         * @param value value of parameter
+         */
+        Bind(
+            [in] Int32 pos,
+            [in] Double value);
+
+        /**
+         * Bind positional byte array to compiled SQLite3 statement.
+         * @param pos parameter index, 1-based
+         * @param value value of parameter, may be null
+         */
+        Bind(
+            [in] Int32 pos,
+            [in] ArrayOf<Byte> value);
+
+        /**
+         * Bind positional String to compiled SQLite3 statement.
+         * @param pos parameter index, 1-based
+         * @param value value of parameter, may be null
+         */
+        Bind(
+            [in] Int32 pos,
+            [in] String value);
+
+        /**
+         * Bind positional SQL null to compiled SQLite3 statement.
+         * @param pos parameter index, 1-based
+         */
+        Bind(
+            [in] Int32 pos);
+
+        /**
+         * Bind positional zero'ed blob to compiled SQLite3 statement.
+         * @param pos parameter index, 1-based
+         * @param length byte size of zero blob
+         */
+        BindZeroblob(
+            [in] Int32 pos,
+            [in] Int32 length);
+
+        /**
+         * Return number of parameters in compiled SQLite3 statement.
+         * @return int number of parameters
+         */
+        BindParameterCount(
+            [out] Int32* count);
+
+        /**
+         * Return name of parameter in compiled SQLite3 statement.
+         * @param pos parameter index, 1-based
+         * @return String parameter name
+         */
+        BindParameterName(
+            [in] Int32 pos,
+            [out] String* str);
+
+        /**
+         * Return index of named parameter in compiled SQLite3 statement.
+         * @param name of parameter
+         * @return int index of parameter, 1-based
+         */
+        BindParameterIndex(
+            [in] String name,
+            [out] Int32* index);
+
+        /**
+         * Retrieve integer column from exec'ed SQLite3 statement.
+         * @param col column number, 0-based
+         * @return int column value
+         */
+        ColumnInt(
+            [in] Int32 col,
+            [out] Int32* value);
+
+        /**
+         * Retrieve long column from exec'ed SQLite3 statement.
+         * @param col column number, 0-based
+         * @return long column value
+         */
+        ColumnLong(
+            [in] Int32 col,
+            [out] Int64* value);
+
+        /**
+         * Retrieve double column from exec'ed SQLite3 statement.
+         * @param col column number, 0-based
+         * @return double column value
+         */
+        ColumnDouble(
+            [in] Int32 col,
+            [out] Double* value);
+
+        /**
+         * Retrieve blob column from exec'ed SQLite3 statement.
+         * @param col column number, 0-based
+         * @return byte[] column value
+         */
+        ColumnBytes(
+            [in] Int32 col,
+            [out, callee] ArrayOf<Byte>* array);
+
+        /**
+         * Retrieve string column from exec'ed SQLite3 statement.
+         * @param col column number, 0-based
+         * @return String column value
+         */
+        ColumnString(
+            [in] Int32 col,
+            [out] String* str);
+
+        /**
+         * Retrieve column type from exec'ed SQLite3 statement.
+         * @param col column number, 0-based
+         * @return column type code, e.g. SQLite.Constants.SQLITE_INTEGER
+         */
+        ColumnType(
+            [in] Int32 col,
+            [out] Int32* type);
+
+        /**
+         * Retrieve number of columns of exec'ed SQLite3 statement.
+         * @return int number of columns
+         */
+        ColumnCount(
+            [out] Int32* count);
+
+        /**
+         * Retrieve column data as object from exec'ed SQLite3 statement.
+         * @param col column number, 0-based
+         * @return Object or null
+         */
+        Column(
+            [in] Int32 col,
+            [out] IInterface** obj);
+
+        /**
+         * Return table name of column of SQLite3 statement.
+         * @param col column number, 0-based
+         * @return String or null
+         */
+        ColumnTableName(
+            [in] Int32 col,
+            [out] String* str);
+
+        /**
+         * Return database name of column of SQLite3 statement.
+         * @param col column number, 0-based
+         * @return String or null
+         */
+        ColumnDatabaseName(
+            [in] Int32 col,
+            [out] String* str);
+
+        /**
+         * Return declared column type of SQLite3 statement.
+         * @param col column number, 0-based
+         * @return String or null
+         */
+        ColumnDecltype(
+            [in] Int32 col,
+            [out] String* str);
+
+        /**
+         * Return origin column name of column of SQLite3 statement.
+         * @param col column number, 0-based
+         * @return String or null
+         */
+        ColumnOriginName(
+            [in] Int32 col,
+            [out] String* str);
+
+        /**
+         * Return statement status information.
+         * @param op which counter to report
+         * @param flg reset flag
+         * @return counter
+         */
+        Status(
+            [in] Int32 op,
+            [in] Boolean flg,
+            [out] Int32* value);
+    }
+
+    } // namespace SQLite
+    } // namespace Sql
+    } // namespace Elastos
+}

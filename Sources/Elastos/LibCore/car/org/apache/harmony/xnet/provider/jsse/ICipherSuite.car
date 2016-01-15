@@ -1,0 +1,163 @@
+
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * Represents Cipher Suite as defined in TLS 1.0 spec.,
+     * A.5. The CipherSuite;
+     * C. CipherSuite definitions.
+     * @see <a href="http://www.ietf.org/rfc/rfc2246.txt">TLS 1.0 spec.</a>
+     *
+     */
+    interface ICipherSuite {
+        /**
+         * Returns true if cipher suite is anonymous
+         * @return
+         */
+        IsAnonymous(
+            [out] Boolean* annoymous);
+
+        /**
+         * Returns cipher suite name
+         * @return
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Returns cipher suite code as byte array
+         * @return
+         */
+        ToBytes(
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        /**
+         * Returns cipher suite description
+         */
+        ToString(
+            [out] String* str);
+
+        /**
+         * Returns cipher algorithm name
+         * @return
+        */
+        GetBulkEncryptionAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Returns cipher block size
+         * @return
+         */
+        GetBlockSize(
+            [out] Int32* size);
+
+        /**
+         * Returns MAC algorithm name
+         * @return
+         */
+        GetHmacName(
+            [out] String* name);
+
+        /**
+         * Returns hash algorithm name
+         * @return
+         */
+        GetHashName(
+            [out] String* name);
+
+        /**
+         * Returns hash size
+         * @return
+         */
+        GetMACLength(
+            [out] Int32* length);
+
+        /**
+         * Indicates whether this cipher suite is exportable
+         * @return
+         */
+        IsExportable(
+            [out] Boolean* isExportable);
+
+        /**
+         * Returns key type constant suitable for calling
+         * X509KeyManager.chooseServerAlias or
+         * X509ExtendedKeyManager.chooseEngineServerAlias.
+         */
+        GetServerKeyType(
+            [out] String* type);
+
+        /**
+         * Returns auth type constant suitable for calling X509TrustManager.checkServerTrusted.
+         */
+        GetAuthType(
+            [in] Boolean emphemeral,
+            [out] String* type);
+    }
+
+    interface ICipherSuiteHelper {
+        /**
+         * Returns CipherSuite by name
+         */
+        GetByName(
+            [in] String name,
+            [out] ICipherSuite** suite);
+
+        /**
+         * Returns CipherSuite based on TLS CipherSuite code
+         * @see <a href="http://www.ietf.org/rfc/rfc2246.txt">TLS 1.0 spec., A.5. The CipherSuite</a>
+         */
+        GetByCode(
+            [in] Byte b1,
+            [in] Byte b2,
+            [out] ICipherSuite** suite);
+
+        /**
+         * Returns CipherSuite based on V2CipherSpec code
+         * as described in TLS 1.0 spec., E. Backward Compatibility With SSL
+         */
+        GetByCodeEx(
+            [in] Byte b1,
+            [in] Byte b2,
+            [in] Byte b3,
+            [out] ICipherSuite** suite);
+
+        /**
+         * Returns array of supported CipherSuites
+         * @return
+         */
+        GetSupported(
+            [out, callee] ArrayOf<ICipherSuite*>* supported);
+
+        /**
+         * Returns array of supported cipher suites names
+         * @return
+         */
+        GetSupportedCipherSuiteNames(
+            [out, callee] ArrayOf<String>* names);
+
+        /**
+         * Similar to getServerKeyType, but returns value given TLS
+         * ClientCertificateType byte values from a CertificateRequest
+         * message for use with X509KeyManager.chooseClientAlias or
+         * X509ExtendedKeyManager.chooseEngineClientAlias.
+         */
+        GetClientKeyType(
+            [in] Byte keyType,
+            [out] String* type);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

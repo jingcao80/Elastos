@@ -1,0 +1,27 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Luni {
+    namespace Lang {
+    namespace Reflect {
+
+    interface ITypes {
+        GetClonedTypeArray(
+            [in] IListOfTypes* types,
+            [out, callee] ArrayOf<IType*>** clonedTypeArray);
+
+        GetType(
+            [in] IType* type,
+            [out] IType** returndType);
+    }
+
+    } // namespace Reflect
+    } // namespace Lang
+    } // namespace Luni
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

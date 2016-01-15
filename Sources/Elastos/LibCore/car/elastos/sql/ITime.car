@@ -1,0 +1,15 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    /**
+      * @Involve
+      * interface Elastos.Utility.IDate;
+      */
+    interface ITime {
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

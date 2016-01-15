@@ -1,0 +1,22 @@
+
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    interface IOpenSSLProvider extends Elastos.Security.IProvider {
+        const String PROVIDER_NAME = "AndroidOpenSSL";
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

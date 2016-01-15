@@ -1,0 +1,103 @@
+
+module
+{
+    interface Elastos.Security.ICertificate;
+    interface Elastos.Security.IIdentityScope;
+    interface Elastos.Security.IPublicKey;
+
+    namespace Elastos {
+    namespace Security {
+
+    interface IIdentity {
+        /**
+         * Adds a {@code Certificate} to this {@code Identity}.
+         *
+         * @param certificate
+         *            the {@code Certificate} to be added to this {@code Identity}.
+         * @throws KeyManagementException
+         *             if the certificate is not valid.
+         */
+        AddCertificate(
+            [in] ICertificate* certificate);
+
+        /**
+         * Removes the specified {@code Certificate} from this {@code Identity}.
+         *
+         * @param certificate
+         *            the {@code Certificate} to be removed.
+         * @throws KeyManagementException
+         *             if the certificate is not found.
+         */
+        RemoveCertificate(
+            [in] ICertificate* certificate);
+
+        /**
+         * Returns the certificates for this {@code Identity}. External
+         * modifications of the returned array has no impact on this {@code
+         * Identity}.
+         *
+         * @return the {@code Certificates} for this {@code Identity}
+         */
+        Certificates(
+            [out, callee] ArrayOf<ICertificate*>* certs);
+
+        /**
+         * Returns a string containing a concise, human-readable description of the
+         * this {@code Identity}.
+         *
+         * @param detailed
+         *            whether or not this method should return detailed information.
+         * @return a printable representation for this {@code Permission}.
+         */
+        ToStringEx(
+            [in] Boolean detailed,
+            [out] String* str);
+
+        /**
+         * Returns the {@code IdentityScope} of this {@code Identity}.
+         *
+         * @return the {@code IdentityScope} of this {@code Identity}.
+         */
+        GetScope(
+            [out] IIdentityScope** scope);
+
+        /**
+         * Sets the specified {@code PublicKey} to this {@code Identity}.
+         *
+         * @param key
+         *            the {@code PublicKey} to be set.
+         * @throws KeyManagementException
+         *             if another {@code Identity} in the same scope as this {@code
+         *             Identity} already has the same {@code PublicKey}.
+         */
+        SetPublicKey(
+            [in] IPublicKey* key);
+
+        /**
+         * Returns the {@code PublicKey} associated with this {@code Identity}.
+         *
+         * @return the {@code PublicKey} associated with this {@code Identity}.
+         */
+        GetPublicKey(
+            [out] IPublicKey** pubKey);
+
+        /**
+         * Sets an information string for this {@code Identity}.
+         * @param info
+         *            the information to be set.
+         */
+        SetInfo(
+            [in] String info);
+
+        /**
+         * Returns the information string of this {@code Identity}.
+         *
+         * @return the information string of this {@code Identity}.
+         */
+        GetInfo(
+            [out] String* str);
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

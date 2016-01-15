@@ -1,0 +1,78 @@
+
+module
+{
+    interface Elastos.Utility.IList;
+    interface Elastos.Security.IPrincipal;
+
+    namespace Elastos{
+    namespace Net{
+
+    /*
+     * @Involve
+     * interface ICacheResponse;
+     */
+    interface ISecureCacheResponse {
+        /**
+         * Gets the cipher suite string on the connection which is originally used
+         * to retrieve the network resource.
+         *
+         * @return the cipher suite string.
+         */
+        GetCipherSuite(
+            [out] String* clipherSuite);
+
+        /**
+         * Gets the local certificate chain. When the original connection retrieved
+         * the resource data, this certificate chain was sent to the server during
+         * handshaking process. This method only takes effect when certificate-based
+         * cipher suite is enabled.
+         *
+         * @return the certificate chain that was sent to the server. If no
+         *         certificate chain was sent, the method returns {@code null}.
+         */
+        GetLocalCertificateChain(
+            [out] IList** certificateChain);
+
+        /**
+         * Gets the cached server's certificate chain. As part of defining the
+         * session, the certificate chain was established when the original
+         * connection retrieved network resource. This method can only be invoked
+         * when certificated-based cipher suite is enabled. Otherwise, it throws an
+         * {@code SSLPeerUnverifiedException}.
+         *
+         * @return the server's certificate chain.
+         * @throws SSLPeerUnverifiedException
+         *             if the peer is unverified.
+         */
+        GetServerCertificateChain(
+            [out] IList** certificateChain);
+
+        /**
+         * Gets the server's principle. When the original connection retrieved
+         * network resource, the principle was established when defining the
+         * session.
+         *
+         * @return a principal object representing the server's principal.
+         * @throws SSLPeerUnverifiedException
+         *             if the peer is unverified.
+         */
+        GetPeerPrincipal(
+            [out] IPrincipal** principal);
+
+        /**
+         * Gets the local principle that the original connection sent to the server.
+         * When the original connection fetched the network resource, the principle
+         * was sent to the server during handshaking process.
+         *
+         * @return the local principal object being sent to the server. Returns an
+         *         {@code X500Principal} object for X509-based cipher suites. If no
+         *         principal was sent, it returns {@code null}.
+         */
+        GetLocalPrincipal(
+            [out] IPrincipal** principal);
+    }
+
+    } // namespace Net
+    } // namespace Elastos
+
+}

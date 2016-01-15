@@ -1,0 +1,148 @@
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IFile;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * @Involve
+     * interface ICloseable
+     */
+    interface IDropBoxManagerEntry {
+        Close();
+
+        /** @return the tag originally attached to the entry. */
+        GetTag(
+            [out] String* tag);
+
+        /** @return time when the entry was originally created. */
+        GetTimeMillis(
+            [out] Int64* timeMillis);
+
+        /** @return flags describing the content returned by {@link #getInputStream()}. */
+        GetFlags(
+            [out] Int32* flags);
+
+        /**
+         * @param maxBytes of string to return (will truncate at this length).
+         * @return the uncompressed text contents of the entry, null if the entry is not text.
+         */
+        GetText(
+            [in] Int32 maxBytes,
+            [out] String* text);
+
+        /** @return the uncompressed contents of the entry, or null if the contents were lost */
+        GetInputStream(
+            [out] IInputStream** stream);
+    }
+
+    [deprecated]
+    interface IDropBoxManager {
+        /** Flag value: Entry's content was deleted to save space. */
+        const Int32 IS_EMPTY = 1;
+
+        /** Flag value: Content is human-readable UTF-8 text (can be combined with IS_GZIPPED). */
+        const Int32 IS_TEXT = 2;
+
+        /** Flag value: Content can be decompressed with {@link java.util.zip.GZIPOutputStream}. */
+        const Int32 IS_GZIPPED = 4;
+
+        /** Flag value for serialization only: Value is a byte array, not a file descriptor */
+        const Int32 HAS_BYTE_ARRAY = 8;
+
+        /**
+         * Broadcast Action: This is broadcast when a new entry is added in the dropbox.
+         * You must hold the {@link android.Manifest.permission#READ_LOGS} permission
+         * in order to receive this broadcast.
+         *
+         * <p class="note">This is a protected intent that can only be sent
+         * by the system.
+         */
+        const String ACTION_DROPBOX_ENTRY_ADDED =
+            "android.intent.action.DROPBOX_ENTRY_ADDED";
+
+        /**
+         * Extra for {@link android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED}:
+         * string containing the dropbox tag.
+         */
+        const String EXTRA_TAG = "tag";
+
+        /**
+         * Extra for {@link android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED}:
+         * long integer value containing time (in milliseconds since January 1, 1970 00:00:00 UTC)
+         * when the entry was created.
+         */
+        const String EXTRA_TIME = "time";
+
+        /**
+         * Stores human-readable text.  The data may be discarded eventually (or even
+         * immediately) if space is limited, or ignored entirely if the tag has been
+         * blocked (see {@link #isTagEnabled}).
+         *
+         * @param tag describing the type of entry being stored
+         * @param data value to store
+         */
+        AddText(
+            [in] String tag,
+            [in] String data);
+
+        /**
+         * Stores binary data, which may be ignored or discarded as with {@link #addText}.
+         *
+         * @param tag describing the type of entry being stored
+         * @param data value to store
+         * @param flags describing the data
+         */
+        AddData(
+            [in] String tag,
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 flags);
+
+        /**
+         * Stores the contents of a file, which may be ignored or discarded as with
+         * {@link #addText}.
+         *
+         * @param tag describing the type of entry being stored
+         * @param file to read from
+         * @param flags describing the data
+         * @throws IOException if the file can't be opened
+         */
+        AddFile(
+            [in] String tag,
+            [in] IFile* file,
+            [in] Int32 flags);
+
+        /**
+         * Checks any blacklists (set in system settings) to see whether a certain
+         * tag is allowed.  Entries with disabled tags will be dropped immediately,
+         * so you can save the work of actually constructing and sending the data.
+         *
+         * @param tag that would be used in {@link #addText} or {@link #addFile}
+         * @return whether events with that tag would be accepted
+         */
+        IsTagEnabled(
+            [in] String tag,
+            [out] Boolean* isTagEnabled);
+
+        /**
+         * Gets the next entry from the drop box <em>after</em> the specified time.
+         * Requires <code>android.permission.READ_LOGS</code>.  You must always call
+         * {@link Entry#close()} on the return value!
+         *
+         * @param tag of entry to look for, null for all tags
+         * @param msec time of the last entry seen
+         * @return the next entry, or null if there are no more entries
+         */
+        GetNextEntry(
+            [in] String tag,
+            [in] Int64 msec,
+            [out] IDropBoxManagerEntry** nextEntry);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

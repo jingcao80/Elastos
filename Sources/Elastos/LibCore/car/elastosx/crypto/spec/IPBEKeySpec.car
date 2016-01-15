@@ -1,0 +1,63 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+    namespace Spec {
+
+    /**
+     * The key specification for a <i>password based encryption</i> key.
+     * <p>
+     * Password based encryption is described in <a
+     * href="http://www.ietf.org/rfc/rfc2898.txt">PKCS #5</a>.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Security.Spec.IKeySpec;
+     */
+    interface IPBEKeySpec {
+        /**
+         * Clears the password by overwriting it.
+         */
+        ClearPassword();
+
+        /**
+         * Returns a copy of the password of this key specification.
+         *
+         * @return a copy of the password of this key specification.
+         * @throws IllegalStateException
+         *             if the password has been cleared before.
+         */
+        GetPassword(
+            [out, callee] ArrayOf<Char32> * pwd);
+
+        /**
+         * Returns a copy of the salt of this key specification.
+         *
+         * @return a copy of the salt of this key specification or null if none is
+         *         specified.
+         */
+        GetSalt(
+            [out, callee] ArrayOf<Byte> * salt);
+
+        /**
+         * Returns the iteration count of this key specification.
+         *
+         * @return the iteration count of this key specification.
+         */
+        GetIterationCount(
+            [out] Int32 * count);
+
+        /**
+         * Returns the desired key length of the derived key.
+         *
+         * @return the desired key length of the derived key.
+         */
+        GetKeyLength(
+            [out] Int32 * length);
+    }
+
+    } // namespace Spec
+    } // namespace Crypto
+    } // namespace Elastosx
+}

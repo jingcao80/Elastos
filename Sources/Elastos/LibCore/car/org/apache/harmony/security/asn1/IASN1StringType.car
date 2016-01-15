@@ -1,0 +1,49 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Asn1 {
+
+    /**
+     * @Involve
+     * interface IASN1Type;
+     * interface IASN1Constants;
+     */
+    interface IASN1StringType {
+        GetDecodedObject(
+            [in] IBerInputStream* bis,
+            [out] IInterface** object);
+    }
+
+    interface IASN1StringTypeHelper {
+        GetBMPSTRING(
+            [out] IASN1Type** type);
+
+        GetIA5STRING(
+            [out] IASN1Type** type);
+
+        GetGENERALSTRING(
+            [out] IASN1Type** type);
+
+        GetPRINTABLESTRING(
+            [out] IASN1Type** type);
+
+        GetTELETEXSTRING(
+            [out] IASN1Type** type);
+
+        GetUNIVERSALSTRING(
+            [out] IASN1Type** type);
+
+        GetUTF8STRING(
+            [out] IASN1Type** type);
+    }
+
+    } // namespace Asn1
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

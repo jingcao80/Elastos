@@ -1,0 +1,46 @@
+
+module
+{
+
+    using interface Elastos.Utility.IList;
+
+    interface Org.Apache.Http.Auth.IAuthSchemeRegistry;
+    interface Org.Apache.Http.Client.ICredentialsProvider;
+    interface Org.Apache.Http.Client.ICookieStore;
+    interface Org.Apache.Http.Cookie.ICookieSpecRegistry;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Client {
+    namespace Protocol {
+
+    /**
+     * @Involve
+     * interface IClientContext;
+     */
+    interface IClientContextConfigurer {
+
+        SetCookieSpecRegistry(
+            [in] ICookieSpecRegistry* registry);
+
+        SetAuthSchemeRegistry(
+            [in] IAuthSchemeRegistry* registry);
+
+        SetCookieStore(
+            [in] ICookieStore* store);
+
+        SetCredentialsProvider(
+            [in] ICredentialsProvider* provider);
+
+        SetAuthSchemePref(
+            [in] IList* list);
+
+    }
+
+    } // namespace Protocol
+    } // namespace Client
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+}

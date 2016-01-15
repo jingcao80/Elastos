@@ -1,0 +1,58 @@
+
+module
+{
+    interface Elastos.Utility.IDate;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with Validity structure which is the part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  Validity ::= SEQUENCE {
+     *       notBefore      Time,
+     *       notAfter       Time
+     *  }
+     * </pre>
+     */
+    interface IValidity {
+        /**
+         * Returns the value of notBefore field of the structure.
+         */
+        GetNotBefore(
+            [out] IDate** date);
+
+        /**
+         * Returns the value of notAfter field of the structure.
+         */
+        GetNotAfter(
+            [out] IDate** date);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 Validity value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface IValidityHelper {
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

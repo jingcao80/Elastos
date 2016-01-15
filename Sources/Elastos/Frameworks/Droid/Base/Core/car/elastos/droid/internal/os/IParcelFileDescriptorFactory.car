@@ -1,0 +1,26 @@
+module
+{
+
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /** @hide */
+    interface IIParcelFileDescriptorFactory {
+        // NOTE: implementors should carefully sanitize the incoming name
+        // using something like FileUtils.isValidExtFilename()
+        Open(
+            [in] String name,
+            [in] Int32 mode,
+            [out] IParcelFileDescriptor** pfd);
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

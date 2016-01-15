@@ -1,0 +1,361 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    [deprecated]
+    interface IMatrix {
+    /**
+     * Multiply two 4x4 matrices together and store the result in a third 4x4
+     * matrix. In matrix notation: result = lhs x rhs. Due to the way
+     * matrix multiplication works, the result matrix will have the same
+     * effect as first multiplying by the rhs matrix, then multiplying by
+     * the lhs matrix. This is the opposite of what you might expect.
+     *
+     * The same Float array may be passed for result, lhs, and/or rhs. However,
+     * the result element values are undefined if the result elements overlap
+     * either the lhs or rhs elements.
+     *
+     * @param result The Float array that holds the result.
+     * @param resultOffset The offset into the result array where the result is
+     *        stored.
+     * @param lhs The Float array that holds the left-hand-side matrix.
+     * @param lhsOffset The offset into the lhs array where the lhs is stored
+     * @param rhs The Float array that holds the right-hand-side matrix.
+     * @param rhsOffset The offset into the rhs array where the rhs is stored.
+     *
+     * @throws IllegalArgumentException if result, lhs, or rhs are null, or if
+     * resultOffset + 16 > result.length or lhsOffset + 16 > lhs.length or
+     * rhsOffset + 16 > rhs.length.
+     */
+        MultiplyMM(
+            [in] ArrayOf<Float>* result,
+            [in] Int32 resultOffset,
+            [in] ArrayOf<Float>* lhs,
+            [in] Int32 lhsOffset,
+            [in] ArrayOf<Float>* rhs,
+            [in] Int32 rhsOffset);
+
+    /**
+     * Multiply a 4 element vector by a 4x4 matrix and store the result in a 4
+     * element column vector. In matrix notation: result = lhs x rhs
+     *
+     * The same Float array may be passed for resultVec, lhsMat, and/or rhsVec.
+     * However, the resultVec element values are undefined if the resultVec
+     * elements overlap either the lhsMat or rhsVec elements.
+     *
+     * @param resultVec The Float array that holds the result vector.
+     * @param resultVecOffset The offset into the result array where the result
+     *        vector is stored.
+     * @param lhsMat The Float array that holds the left-hand-side matrix.
+     * @param lhsMatOffset The offset into the lhs array where the lhs is stored
+     * @param rhsVec The Float array that holds the right-hand-side vector.
+     * @param rhsVecOffset The offset into the rhs vector where the rhs vector
+     *        is stored.
+     *
+     * @throws IllegalArgumentException if resultVec, lhsMat,
+     * or rhsVec are null, or if resultVecOffset + 4 > resultVec.length
+     * or lhsMatOffset + 16 > lhsMat.length or
+     * rhsVecOffset + 4 > rhsVec.length.
+     */
+        MultiplyMV(
+            [in] ArrayOf<Float>* resultVec,
+            [in] Int32 resultVecOffset,
+            [in] ArrayOf<Float>* lhsMat,
+            [in] Int32 lhsMatOffset,
+            [in] ArrayOf<Float>* rhsVec,
+            [in] Int32 rhsVecOffset);
+
+    /**
+     * Transposes a 4 x 4 matrix.
+     *
+     * @param mTrans the array that holds the output inverted matrix
+     * @param mTransOffset an offset into mInv where the inverted matrix is
+     *        stored.
+     * @param m the input array
+     * @param mOffset an offset into m where the matrix is stored.
+     */
+        TransposeM(
+            [in] ArrayOf<Float>* mTrans,
+            [in] Int32 mTransOffset,
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset);
+
+    /**
+     * Inverts a 4 x 4 matrix.
+     *
+     * @param mInv the array that holds the output inverted matrix
+     * @param mInvOffset an offset into mInv where the inverted matrix is
+     *        stored.
+     * @param m the input array
+     * @param mOffset an offset into m where the matrix is stored.
+     * @return true if the matrix could be inverted, false if it could not.
+     */
+        InvertM(
+            [in] ArrayOf<Float>* mInv,
+            [in] Int32 mInvOffset,
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset,
+            [out] Boolean* rst);
+
+    /**
+     * Computes an orthographic projection matrix.
+     *
+     * @param m returns the result
+     * @param mOffset
+     * @param left
+     * @param right
+     * @param bottom
+     * @param top
+     * @param near
+     * @param far
+     */
+        OrthoM(
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset,
+            [in] Float left,
+            [in] Float right,
+            [in] Float bottom,
+            [in] Float top,
+            [in] Float near,
+            [in] Float far);
+
+    /**
+     * Define a projection matrix in terms of six clip planes
+     * @param m the float array that holds the perspective matrix
+     * @param offset the offset into float array m where the perspective
+     * matrix data is written
+     * @param left
+     * @param right
+     * @param bottom
+     * @param top
+     * @param near
+     * @param far
+     */
+        FrustumM(
+            [in] ArrayOf<Float>* m,
+            [in] Int32 offset,
+            [in] Float left,
+            [in] Float right,
+            [in] Float bottom,
+            [in] Float top,
+            [in] Float near,
+            [in] Float far);
+
+    /**
+     * Define a projection matrix in terms of a field of view angle, an
+     * aspect ratio, and z clip planes
+     * @param m the float array that holds the perspective matrix
+     * @param offset the offset into float array m where the perspective
+     * matrix data is written
+     * @param fovy field of view in y direction, in degrees
+     * @param aspect width to height aspect ratio of the viewport
+     * @param zNear
+     * @param zFar
+     */
+        PerspectiveM(
+            [in] ArrayOf<Float>* m,
+            [in] Int32 offset,
+            [in] Float fovy,
+            [in] Float aspectp,
+            [in] Float zNear,
+            [in] Float zFar);
+
+    /**
+     * Computes the length of a vector
+     *
+     * @param x x coordinate of a vector
+     * @param y y coordinate of a vector
+     * @param z z coordinate of a vector
+     * @return the length of a vector
+     */
+        Length(
+            [in] Float x,
+            [in] Float y,
+            [in] Float z,
+            [out] Float* len);
+
+    /**
+     * Sets matrix m to the identity matrix.
+     * @param sm returns the result
+     * @param smOffset index into sm where the result matrix starts
+     */
+        SetIdentityM(
+            [in] ArrayOf<Float>* sm,
+            [in] Int32 smOffset);
+
+    /**
+     * Scales matrix  m by x, y, and z, putting the result in sm
+     * @param sm returns the result
+     * @param smOffset index into sm where the result matrix starts
+     * @param m source matrix
+     * @param mOffset index into m where the source matrix starts
+     * @param x scale factor x
+     * @param y scale factor y
+     * @param z scale factor z
+     */
+        ScaleM(
+            [in] ArrayOf<Float>* sm,
+            [in] Int32 smOffset,
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset,
+            [in] Float x,
+            [in] Float y,
+            [in] Float z);
+
+    /**
+     * Scales matrix m in place by sx, sy, and sz
+     * @param m matrix to scale
+     * @param mOffset index into m where the matrix starts
+     * @param x scale factor x
+     * @param y scale factor y
+     * @param z scale factor z
+     */
+        ScaleM(
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset,
+            [in] Float x,
+            [in] Float y,
+            [in] Float z);
+
+    /**
+     * Translates matrix m by x, y, and z, putting the result in tm
+     * @param tm returns the result
+     * @param tmOffset index into sm where the result matrix starts
+     * @param m source matrix
+     * @param mOffset index into m where the source matrix starts
+     * @param x translation factor x
+     * @param y translation factor y
+     * @param z translation factor z
+     */
+        TranslateM(
+            [in] ArrayOf<Float>* tm,
+            [in] Int32 tmOffset,
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset,
+            [in] Float x,
+            [in] Float y,
+            [in] Float z);
+
+    /**
+     * Translates matrix m by x, y, and z in place.
+     * @param m matrix
+     * @param mOffset index into m where the matrix starts
+     * @param x translation factor x
+     * @param y translation factor y
+     * @param z translation factor z
+     */
+        TranslateM(
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset,
+            [in] Float x,
+            [in] Float y,
+            [in] Float z);
+
+    /**
+     * Rotates matrix m by angle a (in degrees) around the axis (x, y, z)
+     * @param rm returns the result
+     * @param rmOffset index into rm where the result matrix starts
+     * @param m source matrix
+     * @param mOffset index into m where the source matrix starts
+     * @param a angle to rotate in degrees
+     * @param x scale factor x
+     * @param y scale factor y
+     * @param z scale factor z
+     */
+        RotateM(
+            [in] ArrayOf<Float>* rm,
+            [in] Int32 rmOffset,
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset,
+            [in] Float a,
+            [in] Float x,
+            [in] Float y,
+            [in] Float z);
+
+    /**
+     * Rotates matrix m in place by angle a (in degrees)
+     * around the axis (x, y, z)
+     * @param m source matrix
+     * @param mOffset index into m where the matrix starts
+     * @param a angle to rotate in degrees
+     * @param x scale factor x
+     * @param y scale factor y
+     * @param z scale factor z
+     */
+        RotateM(
+            [in] ArrayOf<Float>* m,
+            [in] Int32 mOffset,
+            [in] Float a,
+            [in] Float x,
+            [in] Float y,
+            [in] Float z);
+
+    /**
+     * Rotates matrix m by angle a (in degrees) around the axis (x, y, z)
+     * @param rm returns the result
+     * @param rmOffset index into rm where the result matrix starts
+     * @param a angle to rotate in degrees
+     * @param x scale factor x
+     * @param y scale factor y
+     * @param z scale factor z
+     */
+        SetRotateM(
+            [in] ArrayOf<Float>* rm,
+            [in] Int32 rmOffset,
+            [in] Float a,
+            [in] Float x,
+            [in] Float y,
+            [in] Float z);
+
+    /**
+     * Converts Euler angles to a rotation matrix
+     * @param rm returns the result
+     * @param rmOffset index into rm where the result matrix starts
+     * @param x angle of rotation, in degrees
+     * @param y angle of rotation, in degrees
+     * @param z angle of rotation, in degrees
+     */
+        SetRotateEulerM(
+            [in] ArrayOf<Float>* rm,
+            [in] Int32 rmOffset,
+            [in] Float x,
+            [in] Float y,
+            [in] Float z);
+
+    /**
+     * Define a viewing transformation in terms of an eye point, a center of
+     * view, and an up vector.
+     *
+     * @param rm returns the result
+     * @param rmOffset index into rm where the result matrix starts
+     * @param eyeX eye point X
+     * @param eyeY eye point Y
+     * @param eyeZ eye point Z
+     * @param centerX center of view X
+     * @param centerY center of view Y
+     * @param centerZ center of view Z
+     * @param upX up vector X
+     * @param upY up vector Y
+     * @param upZ up vector Z
+     */
+        SetLookAtM(
+            [in] ArrayOf<Float>* rm,
+            [in] Int32 rmOffset,
+            [in] Float  eyeX,
+            [in] Float eyeY,
+            [in] Float eyeZ,
+            [in] Float centerX,
+            [in] Float centerY,
+            [in] Float centerZ,
+            [in] Float upX,
+            [in] Float upY,
+            [in] Float upZ);
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}

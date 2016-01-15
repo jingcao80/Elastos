@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.IO.IPipedWriter;
+
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * @Involved
+     * interface IReadable;
+     * interface IReader;
+     */
+    interface IPipedReader {
+        /**
+         * Connects this {@code PipedReader} to a {@link PipedWriter}. Any data
+         * written to the writer becomes readable in this reader.
+         *
+         * @param src
+         *            the writer to connect to.
+         * @throws IOException
+         *             if this reader is closed or already connected, or if {@code
+         *             src} is already connected.
+         */
+        Connect(
+            [in] IPipedWriter* src);
+
+        /**
+         * Establishes the connection to the PipedWriter.
+         *
+         * @throws IOException
+         *             If this Reader is already connected.
+         */
+        EstablishConnection();
+
+        }
+
+    } // namespace IO
+    } // namespace Elastos
+}

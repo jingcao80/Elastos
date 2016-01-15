@@ -1,0 +1,336 @@
+
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IInputStream;
+
+    interface Elastos.Droid.Utility.ITypedValue;
+    interface Elastos.Droid.Utility.IDisplayMetrics;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IMatrix;
+    interface Elastos.Droid.Content.Res.IResources;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    /**
+     * Creates Bitmap objects from various sources, including files, streams,
+     * and byte-arrays.
+     */
+    [deprecated]
+    interface IBitmapFactoryOptions {
+        /**
+         *  This can be called from another thread while this options object is
+         *  inside a decode... call. Calling this will notify the decoder that
+         *  it should cancel its operation. This is not guaranteed to cancel
+         *  the decode, but if it does, the decoder... operation will return
+         *  null, or if inJustDecodeBounds is true, will set outWidth/outHeight
+         *  to -1
+         */
+        RequestCancelDecode();
+
+        GetInBitmap(
+            [out] IBitmap** bm);
+
+        SetInBitmap(
+            [in] IBitmap* bm);
+
+        GetInMutable(
+            [out] Boolean* isMutable);
+
+        SetInMutable(
+            [in] Boolean m);
+
+        GetInJustDecodeBounds(
+            [out] Boolean* justDecodeBounds);
+
+        SetInJustDecodeBounds(
+            [in] Boolean justDecodeBounds);
+
+        GetInSampleSize(
+            [out] Int32* sampleSize);
+
+        SetInSampleSize(
+            [in] Int32 sampleSize);
+
+        GetInPreferredConfig(
+            [out] BitmapConfig* config);
+
+        SetInPreferredConfig(
+            [in] BitmapConfig config);
+
+        GetInPremultiplied(
+            [out] Boolean* inPremultiplied);
+
+        SetInPremultiplied(
+            [in] Boolean inPremultiplied);
+
+        GetInDither(
+            [out] Boolean* dither);
+
+        SetInDither(
+            [in] Boolean dither);
+
+        GetInDensity(
+            [out] Int32* density);
+
+        SetInDensity(
+            [in] Int32 density);
+
+        GetInTargetDensity(
+            [out] Int32* density);
+
+        SetInTargetDensity(
+            [in] Int32 density);
+
+        GetInScreenDensity(
+            [out] Int32* density);
+
+        SetInScreenDensity(
+            [in] Int32 density);
+
+        GetInScaled(
+            [out] Boolean* scaled);
+
+        SetInScaled(
+            [in] Boolean scaled);
+
+        GetInPurgeable(
+            [out] Boolean* purgeable);
+
+        SetInPurgeable(
+            [in] Boolean purgeable);
+
+        GetInInputShareable(
+            [out] Boolean* shareable);
+
+        SetInInputShareable(
+            [in] Boolean shareable);
+
+        GetInPreferQualityOverSpeed(
+            [out] Boolean* preferQualityOverSpeed);
+
+        SetInPreferQualityOverSpeed(
+            [in] Boolean preferQualityOverSpeed);
+
+        GetOutWidth(
+            [out] Int32* width);
+
+        SetOutWidth(
+            [in] Int32 width);
+
+        GetOutHeight(
+            [out] Int32* height);
+
+        SetOutHeight(
+            [in] Int32 height);
+
+        GetOutMimeType(
+            [out] String* mimeType);
+
+        SetOutMimeType(
+            [in] String mimeType);
+
+        SetInTempStorage(
+            [in] ArrayOf<Byte>* storage);
+
+        GetInTempStorage(
+            [out, callee] ArrayOf<Byte>* storage);
+
+        SetCancel(
+            [in] Boolean cancel);
+
+        GetCancel(
+            [out] Boolean* cancel);
+    }
+
+    /**
+    * Creates Bitmap objects from various sources, including files, streams,
+    * and byte-arrays.
+    */
+    [deprecated]
+    interface IBitmapFactory {
+        /**
+         * Decode an immutable bitmap from the specified byte array.
+         *
+         * @param data byte array of compressed image data
+         * @param offset offset into imageData for where the decoder should begin
+         *               parsing.
+         * @param length the number of bytes, beginning at offset, to parse
+         * @param opts null-ok; Options that control downsampling and whether the
+         *             image should be completely decoded, or just is size returned.
+         * @return The decoded bitmap, or null if the image data could not be
+         *         decoded, or, if opts is non-null, if opts requested only the
+         *         size be returned (in opts.outWidth and opts.outHeight)
+         */
+        DecodeByteArray(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] IBitmapFactoryOptions* opts,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Decode an immutable bitmap from the specified byte array.
+         *
+         * @param data byte array of compressed image data
+         * @param offset offset into imageData for where the decoder should begin
+         *               parsing.
+         * @param length the number of bytes, beginning at offset, to parse
+         * @return The decoded bitmap, or null if the image could not be decode.
+         */
+        DecodeByteArray(
+            [in] ArrayOf<Byte>* data,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Decode a file path into a bitmap. If the specified file name is null,
+         * or cannot be decoded into a bitmap, the function returns null.
+         *
+         * @param pathName complete path name for the file to be decoded.
+         * @param opts null-ok; Options that control downsampling and whether the
+         *             image should be completely decoded, or just is size returned.
+         * @return The decoded bitmap, or null if the image data could not be
+         *         decoded, or, if opts is non-null, if opts requested only the
+         *         size be returned (in opts.outWidth and opts.outHeight)
+         */
+        DecodeFile(
+            [in] String pathName,
+            [in] IBitmapFactoryOptions* opts,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Decode a file path into a bitmap. If the specified file name is null,
+         * or cannot be decoded into a bitmap, the function returns null.
+         *
+         * @param pathName complete path name for the file to be decoded.
+         * @return the resulting decoded bitmap, or null if it could not be decoded.
+         */
+        DecodeFile(
+            [in] String pathName,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Decode a bitmap from the file descriptor. If the bitmap cannot be decoded
+         * return null. The position within the descriptor will not be changed when
+         * this returns, so the descriptor can be used again as-is.
+         *
+         * @param fd The file descriptor containing the bitmap data to decode
+         * @param outPadding If not null, return the padding rect for the bitmap if
+         *                   it exists, otherwise set padding to [-1,-1,-1,-1]. If
+         *                   no bitmap is returned (null) then padding is
+         *                   unchanged.
+         * @param opts null-ok; Options that control downsampling and whether the
+         *             image should be completely decoded, or just is size returned.
+         * @return the decoded bitmap, or null
+         */
+        DecodeFileDescriptor(
+            [in] IFileDescriptor* fd,
+            [in] IRect* outPadding,
+            [in] IBitmapFactoryOptions* opts,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Decode a bitmap from the file descriptor. If the bitmap cannot be decoded
+         * return null. The position within the descriptor will not be changed when
+         * this returns, so the descriptor can be used again as is.
+         *
+         * @param fd The file descriptor containing the bitmap data to decode
+         * @return the decoded bitmap, or null
+         */
+        DecodeFileDescriptor(
+            [in] IFileDescriptor* fd,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Synonym for opening the given resource and calling decodeResourceStream.
+         *
+         * @sa #decodeResourceStream
+         *
+         * @param res   The resources object containing the image data
+         * @param id The resource id of the image data
+         * @param opts null-ok; Options that control downsampling and whether the
+         *             image should be completely decoded, or just is size returned.
+         * @return The decoded bitmap, or null if the image data could not be
+         *         decoded, or, if opts is non-null, if opts requested only the
+         *         size be returned (in opts.outWidth and opts.outHeight)
+         */
+        DecodeResource(
+            [in] IResources* res,
+            [in] Int32 id,
+            [in] IBitmapFactoryOptions* opts,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Synonym for decodeResource(Resources, int, android.graphics.BitmapFactory.Options) will null Options.
+         *
+         * @sa #decodeResource(Resources, int, android.graphics.BitmapFactory.Options)
+         *
+         * @param res The resources object containing the image data
+         * @param id The resource id of the image data
+         * @return The decoded bitmap, or null if the image could not be decode.
+         */
+        DecodeResource(
+            [in] IResources* res,
+            [in] Int32 id,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Decode a new Bitmap from an InputStream. This InputStream was obtained from
+         * resources, which we pass to be able to scale the bitmap accordingly.
+         */
+        DecodeResourceStream(
+            [in] IResources* res,
+            [in] ITypedValue* value,
+            [in] IInputStream* is,
+            [in] IRect* pad,
+            [in] IBitmapFactoryOptions* opts,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Decode an input stream into a bitmap. If the input stream is null, or
+         * cannot be used to decode a bitmap, the function returns null.
+         * The stream's position will be where ever it was after the encoded data
+         * was read.
+         *
+         * @param is The input stream that holds the raw data to be decoded into a
+         *           bitmap.
+         * @param outPadding If not null, return the padding rect for the bitmap if
+         *                   it exists, otherwise set padding to [-1,-1,-1,-1]. If
+         *                   no bitmap is returned (null) then padding is
+         *                   unchanged.
+         * @param opts null-ok; Options that control downsampling and whether the
+         *             image should be completely decoded, or just is size returned.
+         * @return The decoded bitmap, or null if the image data could not be
+         *         decoded, or, if opts is non-null, if opts requested only the
+         *         size be returned (in opts.outWidth and opts.outHeight)
+         */
+        DecodeStream(
+            [in] IInputStream* is,
+            [in] IRect* outPadding,
+            [in] IBitmapFactoryOptions* opts,
+            [out] IBitmap** bitmap);
+
+        /**
+         * Decode an input stream into a bitmap. If the input stream is null, or
+         * cannot be used to decode a bitmap, the function returns null.
+         * The stream's position will be where ever it was after the encoded data
+         * was read.
+         *
+         * @param is The input stream that holds the raw data to be decoded into a
+         *           bitmap.
+         * @return The decoded bitmap, or null if the image data could not be decoded.
+         */
+        DecodeStream(
+            [in] IInputStream* is,
+            [out] IBitmap** bitmap);
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

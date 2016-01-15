@@ -1,0 +1,215 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Os.IParcel;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Represents an icon that can be used as a mouse pointer.
+     * <p>
+     * Pointer icons can be provided either by the system using system styles,
+     * or by applications using bitmaps or application resources.
+     * </p>
+     *
+     * @hide
+     */
+    [local, parcelable]
+    interface IPointerIcon {
+        /** Style constant: Custom icon with a user-supplied bitmap. */
+        const Int32 STYLE_CUSTOM = -1;
+
+        /** Style constant: Null icon.  It has no bitmap. */
+        const Int32 STYLE_NULL = 0;
+
+        /** Style constant: Arrow icon.  (Default mouse pointer) */
+        const Int32 STYLE_ARROW = 1000;
+
+        /** {@hide} Style constant: Spot hover icon for touchpads. */
+        const Int32 STYLE_SPOT_HOVER = 2000;
+
+        /** {@hide} Style constant: Spot touch icon for touchpads. */
+        const Int32 STYLE_SPOT_TOUCH = 2001;
+
+        /** {@hide} Style constant: Spot anchor icon for touchpads. */
+        const Int32 STYLE_SPOT_ANCHOR = 2002;
+
+        /**
+         * Loads the bitmap and hotspot information for a pointer icon, if it is not already loaded.
+         * Returns a pointer icon (not necessarily the same instance) with the information filled in.
+         *
+         * @param context The context.
+         * @return The loaded pointer icon.
+         *
+         * @throws IllegalArgumentException if context is NULL.
+         * @see #isLoaded()
+         * @hide
+         */
+        Load(
+            [in] IContext* ctx,
+            [out] IPointerIcon** result);
+
+        /**
+         * Returns true if the pointer icon style is {@link #STYLE_NULL}.
+         *
+         * @return True if the pointer icon style is {@link #STYLE_NULL}.
+         */
+        IsNullIcon(
+            [out] Boolean* isNullIcon);
+
+        /**
+         * Returns true if the pointer icon has been loaded and its bitmap and hotspot
+         * information are available.
+         *
+         * @return True if the pointer icon is loaded.
+         * @see #load(Context)
+         */
+        IsLoaded(
+            [out] Boolean* isLoaded);
+
+        /**
+         * Gets the style of the pointer icon.
+         *
+         * @return The pointer icon style.
+         */
+        GetStyle(
+            [out] Int32* style);
+
+        /**
+         * Gets the bitmap of the pointer icon.
+         *
+         * @return The pointer icon bitmap, or NULL if the style is {@link #STYLE_NULL}.
+         *
+         * @throws IllegalStateException if the bitmap is not loaded.
+         * @see #isLoaded()
+         * @see #load(Context)
+         */
+        GetBitmap(
+            [out] IBitmap** bitmap);
+
+        /**
+         * Gets the X offset of the pointer icon hotspot.
+         *
+         * @return The hotspot X offset.
+         *
+         * @throws IllegalStateException if the bitmap is not loaded.
+         * @see #isLoaded()
+         * @see #load(Context)
+         */
+        GetHotSpotX(
+            [out] Float* hotSpotX);
+
+        /**
+         * Gets the Y offset of the pointer icon hotspot.
+         *
+         * @return The hotspot Y offset.
+         *
+         * @throws IllegalStateException if the bitmap is not loaded.
+         * @see #isLoaded()
+         * @see #load(Context)
+         */
+        GetHotSpotY(
+            [out] Float* hotSpotY);
+
+		DescribeContents(
+            [out] Int32* result);
+
+        WriteToParcel(
+            [in] IParcel* parcel,
+            [in] Int32 flags);
+    }
+
+    [local]
+    interface IPointerIconHelper {
+        /**
+         * Gets a special pointer icon that has no bitmap.
+         *
+         * @return The NULL pointer icon.
+         *
+         * @see #STYLE_NULL
+         */
+        GetNullIcon(
+            [out] IPointerIcon** pointerIcon);
+
+        /**
+         * Gets the default pointer icon.
+         *
+         * @param context The context.
+         * @return The default pointer icon.
+         *
+         * @throws IllegalArgumentException if context is NULL.
+         */
+        GetDefaultIcon(
+            [in] IContext* ctx,
+            [out] IPointerIcon** pointerIcon);
+
+        /**
+         * Gets a system pointer icon for the given style.
+         * If style is not recognized, returns the default pointer icon.
+         *
+         * @param context The context.
+         * @param style The pointer icon style.
+         * @return The pointer icon.
+         *
+         * @throws IllegalArgumentException if context is NULL.
+         */
+        GetSystemIcon(
+            [in] IContext* ctx,
+            [in] Int32 style,
+            [out] IPointerIcon** pointerIcon);
+
+        /**
+         * Creates a custom pointer from the given bitmap and hotspot information.
+         *
+         * @param bitmap The bitmap for the icon.
+         * @param hotspotX The X offset of the pointer icon hotspot in the bitmap.
+         *        Must be within the [0, bitmap.getWidth()) range.
+         * @param hotspotY The Y offset of the pointer icon hotspot in the bitmap.
+         *        Must be within the [0, bitmap.getHeight()) range.
+         * @return A pointer icon for this bitmap.
+         *
+         * @throws IllegalArgumentException if bitmap is NULL, or if the x/y hotspot
+         *         parameters are invalid.
+         */
+        CreateCustomIcon(
+            [in] IBitmap* bitmap,
+            [in] Float hotSpotX,
+            [in] Float hotSpotY,
+            [out] IPointerIcon** pointerIcon);
+
+        /**
+         * Loads a custom pointer icon from an XML resource.
+         * <p>
+         * The XML resource should have the following form:
+         * <code>
+         * &lt;?xml version="1.0" encoding="utf-8"?&gt;
+         * &lt;pointer-icon xmlns:android="http://schemas.android.com/apk/res/android"
+         *   android:bitmap="@drawable/my_pointer_bitmap"
+         *   android:hotSpotX="24"
+         *   android:hotSpotY="24" /&gt;
+         * </code>
+         * </p>
+         *
+         * @param resources The resources object.
+         * @param resourceId The resource id.
+         * @return The pointer icon.
+         *
+         * @throws IllegalArgumentException if resources is NULL.
+         * @throws Resources.NotFoundException if the resource was not found or the drawable
+         * linked in the resource was not found.
+         */
+        LoadCustomIcon(
+            [in] IResources* resources,
+            [in] Int32 resourceId,
+            [out] IPointerIcon** pointerIcon);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

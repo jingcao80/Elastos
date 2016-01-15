@@ -1,0 +1,52 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");       // import 依赖库
+
+    merge("IAnimal.car");                       // 合并 CAR　文件
+    merge("IDog.car");                          // 合并 CAR　文件
+
+    using interface Elastos.Core.IThread;       // using 声明
+    using interface Elastos.Core.IRunnable;     // using 声明
+    using interface Elastos.Core.IComparable;   // using 声明
+
+    namespace Elastos {                         // 命名空间
+    namespace HelloCar {
+
+    class CDog {                        // 声明 CAR 类
+        constructor();                  // 显式声明无参构造函数
+
+        constructor(                    // 显式声明有参构造函数
+            [in] Int32 age,
+            [in] String name);
+
+        interface IDog;                 // 接口声明
+        interface IAnimal;              // 接口声明
+        interface IComparable;          // 接口声明
+    }
+
+    class CCat {                        // 声明 CAR 类
+        constructor();                  // 显式声明无参构造函数
+
+        constructor(                    // 显式声明有参构造函数
+            [in] Int32 age,
+            [in] String name);
+
+        interface IAnimal;              // 接口声明
+        interface IComparable;          // 接口声明
+    }
+
+    singleton class CAnimalHelper {     // 声明单例 CAR 类
+        interface IAnimalHelper;        // 接口声明
+    }
+
+    class CMyThread {
+        constructor();                  // 实现 IThread 的 CAR 类必须显式声明 constructor()
+
+        interface IThread;
+        interface IRunnable;            // 实现 IThread 的 CAR 类必须同时实现 IRunnable
+    }
+
+    } // HelloCar
+    } // Elastos
+}

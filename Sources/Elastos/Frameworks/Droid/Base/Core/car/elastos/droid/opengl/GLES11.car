@@ -1,0 +1,567 @@
+
+module
+{
+    using interface Elastos.IO.IBuffer;
+    using interface Elastos.IO.IInt32Buffer;
+    using interface Elastos.IO.IFloatBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Opengl {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Opengl.IGLES10
+     */
+    [deprecated]
+    interface IGLES11 {
+        const Int32 _GL_ACTIVE_TEXTURE                          = 0x84E0;
+        const Int32 _GL_ADD_SIGNED                              = 0x8574;
+        const Int32 _GL_ALPHA_SCALE                             = 0x0D1C;
+        const Int32 _GL_ALPHA_TEST_FUNC                         = 0x0BC1;
+        const Int32 _GL_ALPHA_TEST_REF                          = 0x0BC2;
+        const Int32 _GL_ARRAY_BUFFER                            = 0x8892;
+        const Int32 _GL_ARRAY_BUFFER_BINDING                    = 0x8894;
+        const Int32 _GL_BLEND_DST                               = 0x0BE0;
+        const Int32 _GL_BLEND_SRC                               = 0x0BE1;
+        const Int32 _GL_BUFFER_ACCESS                           = 0x88BB;
+        const Int32 _GL_BUFFER_SIZE                             = 0x8764;
+        const Int32 _GL_BUFFER_USAGE                            = 0x8765;
+        const Int32 _GL_CLIENT_ACTIVE_TEXTURE                   = 0x84E1;
+        const Int32 _GL_CLIP_PLANE0                             = 0x3000;
+        const Int32 _GL_CLIP_PLANE1                             = 0x3001;
+        const Int32 _GL_CLIP_PLANE2                             = 0x3002;
+        const Int32 _GL_CLIP_PLANE3                             = 0x3003;
+        const Int32 _GL_CLIP_PLANE4                             = 0x3004;
+        const Int32 _GL_CLIP_PLANE5                             = 0x3005;
+        const Int32 _GL_COLOR_ARRAY_BUFFER_BINDING              = 0x8898;
+        const Int32 _GL_COLOR_ARRAY_POINTER                     = 0x8090;
+        const Int32 _GL_COLOR_ARRAY_SIZE                        = 0x8081;
+        const Int32 _GL_COLOR_ARRAY_STRIDE                      = 0x8083;
+        const Int32 _GL_COLOR_ARRAY_TYPE                        = 0x8082;
+        const Int32 _GL_COLOR_CLEAR_VALUE                       = 0x0C22;
+        const Int32 _GL_COLOR_WRITEMASK                         = 0x0C23;
+        const Int32 _GL_COMBINE                                 = 0x8570;
+        const Int32 _GL_COMBINE_ALPHA                           = 0x8572;
+        const Int32 _GL_COMBINE_RGB                             = 0x8571;
+        const Int32 _GL_CONSTANT                                = 0x8576;
+        const Int32 _GL_COORD_REPLACE_OES                       = 0x8862;
+        const Int32 _GL_CULL_FACE_MODE                          = 0x0B45;
+        const Int32 _GL_CURRENT_COLOR                           = 0x0B00;
+        const Int32 _GL_CURRENT_NORMAL                          = 0x0B02;
+        const Int32 _GL_CURRENT_TEXTURE_COORDS                  = 0x0B03;
+        const Int32 _GL_DEPTH_CLEAR_VALUE                       = 0x0B73;
+        const Int32 _GL_DEPTH_FUNC                              = 0x0B74;
+        const Int32 _GL_DEPTH_RANGE                             = 0x0B70;
+        const Int32 _GL_DEPTH_WRITEMASK                         = 0x0B72;
+        const Int32 _GL_DOT3_RGB                                = 0x86AE;
+        const Int32 _GL_DOT3_RGBA                               = 0x86AF;
+        const Int32 _GL_DYNAMIC_DRAW                            = 0x88E8;
+        const Int32 _GL_ELEMENT_ARRAY_BUFFER                    = 0x8893;
+        const Int32 _GL_ELEMENT_ARRAY_BUFFER_BINDING            = 0x8895;
+        const Int32 _GL_FRONT_FACE                              = 0x0B46;
+        const Int32 _GL_GENERATE_MIPMAP                         = 0x8191;
+        const Int32 _GL_GENERATE_MIPMAP_HINT                    = 0x8192;
+        const Int32 _GL_INTERPOLATE                             = 0x8575;
+        const Int32 _GL_LINE_WIDTH                              = 0x0B21;
+        const Int32 _GL_LOGIC_OP_MODE                           = 0x0BF0;
+        const Int32 _GL_MATRIX_MODE                             = 0x0BA0;
+        const Int32 _GL_MAX_CLIP_PLANES                         = 0x0D32;
+        const Int32 _GL_MODELVIEW_MATRIX                        = 0x0BA6;
+        const Int32 _GL_MODELVIEW_MATRIX_FLOAT_AS_INT_BITS_OES  = 0x898D;
+        const Int32 _GL_MODELVIEW_STACK_DEPTH                   = 0x0BA3;
+        const Int32 _GL_NORMAL_ARRAY_BUFFER_BINDING             = 0x8897;
+        const Int32 _GL_NORMAL_ARRAY_POINTER                    = 0x808F;
+        const Int32 _GL_NORMAL_ARRAY_STRIDE                     = 0x807F;
+        const Int32 _GL_NORMAL_ARRAY_TYPE                       = 0x807E;
+        const Int32 _GL_OPERAND0_ALPHA                          = 0x8598;
+        const Int32 _GL_OPERAND0_RGB                            = 0x8590;
+        const Int32 _GL_OPERAND1_ALPHA                          = 0x8599;
+        const Int32 _GL_OPERAND1_RGB                            = 0x8591;
+        const Int32 _GL_OPERAND2_ALPHA                          = 0x859A;
+        const Int32 _GL_OPERAND2_RGB                            = 0x8592;
+        const Int32 _GL_POINT_DISTANCE_ATTENUATION              = 0x8129;
+        const Int32 _GL_POINT_FADE_THRESHOLD_SIZE               = 0x8128;
+        const Int32 _GL_POINT_SIZE                              = 0x0B11;
+        const Int32 _GL_POINT_SIZE_ARRAY_BUFFER_BINDING_OES     = 0x8B9F;
+        const Int32 _GL_POINT_SIZE_ARRAY_OES                    = 0x8B9C;
+        const Int32 _GL_POINT_SIZE_ARRAY_POINTER_OES            = 0x898C;
+        const Int32 _GL_POINT_SIZE_ARRAY_STRIDE_OES             = 0x898B;
+        const Int32 _GL_POINT_SIZE_ARRAY_TYPE_OES               = 0x898A;
+        const Int32 _GL_POINT_SIZE_MAX                          = 0x8127;
+        const Int32 _GL_POINT_SIZE_MIN                          = 0x8126;
+        const Int32 _GL_POINT_SPRITE_OES                        = 0x8861;
+        const Int32 _GL_POLYGON_OFFSET_FACTOR                   = 0x8038;
+        const Int32 _GL_POLYGON_OFFSET_UNITS                    = 0x2A00;
+        const Int32 _GL_PREVIOUS                                = 0x8578;
+        const Int32 _GL_PRIMARY_COLOR                           = 0x8577;
+        const Int32 _GL_PROJECTION_MATRIX                       = 0x0BA7;
+        const Int32 _GL_PROJECTION_MATRIX_FLOAT_AS_INT_BITS_OES = 0x898E;
+        const Int32 _GL_PROJECTION_STACK_DEPTH                  = 0x0BA4;
+        const Int32 _GL_RGB_SCALE                               = 0x8573;
+        const Int32 _GL_SAMPLE_BUFFERS                          = 0x80A8;
+        const Int32 _GL_SAMPLE_COVERAGE_INVERT                  = 0x80AB;
+        const Int32 _GL_SAMPLE_COVERAGE_VALUE                   = 0x80AA;
+        const Int32 _GL_SAMPLES                                 = 0x80A9;
+        const Int32 _GL_SCISSOR_BOX                             = 0x0C10;
+        const Int32 _GL_SHADE_MODEL                             = 0x0B54;
+        const Int32 _GL_SRC0_ALPHA                              = 0x8588;
+        const Int32 _GL_SRC0_RGB                                = 0x8580;
+        const Int32 _GL_SRC1_ALPHA                              = 0x8589;
+        const Int32 _GL_SRC1_RGB                                = 0x8581;
+        const Int32 _GL_SRC2_ALPHA                              = 0x858A;
+        const Int32 _GL_SRC2_RGB                                = 0x8582;
+        const Int32 _GL_STATIC_DRAW                             = 0x88E4;
+        const Int32 _GL_STENCIL_CLEAR_VALUE                     = 0x0B91;
+        const Int32 _GL_STENCIL_FAIL                            = 0x0B94;
+        const Int32 _GL_STENCIL_FUNC                            = 0x0B92;
+        const Int32 _GL_STENCIL_PASS_DEPTH_FAIL                 = 0x0B95;
+        const Int32 _GL_STENCIL_PASS_DEPTH_PASS                 = 0x0B96;
+        const Int32 _GL_STENCIL_REF                             = 0x0B97;
+        const Int32 _GL_STENCIL_VALUE_MASK                      = 0x0B93;
+        const Int32 _GL_STENCIL_WRITEMASK                       = 0x0B98;
+        const Int32 _GL_SUBTRACT                                = 0x84E7;
+        const Int32 _GL_TEXTURE_BINDING_2D                      = 0x8069;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING      = 0x889A;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_POINTER             = 0x8092;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_SIZE                = 0x8088;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_STRIDE              = 0x808A;
+        const Int32 _GL_TEXTURE_COORD_ARRAY_TYPE                = 0x8089;
+        const Int32 _GL_TEXTURE_MATRIX                          = 0x0BA8;
+        const Int32 _GL_TEXTURE_MATRIX_FLOAT_AS_INT_BITS_OES    = 0x898F;
+        const Int32 _GL_TEXTURE_STACK_DEPTH                     = 0x0BA5;
+        const Int32 _GL_VERTEX_ARRAY_BUFFER_BINDING             = 0x8896;
+        const Int32 _GL_VERTEX_ARRAY_POINTER                    = 0x808E;
+        const Int32 _GL_VERTEX_ARRAY_SIZE                       = 0x807A;
+        const Int32 _GL_VERTEX_ARRAY_STRIDE                     = 0x807C;
+        const Int32 _GL_VERTEX_ARRAY_TYPE                       = 0x807B;
+        const Int32 _GL_VIEWPORT                                = 0x0BA2;
+        const Int32 _GL_WRITE_ONLY                              = 0x88B9;
+
+        // C function void glBindBuffer ( GLenum target, GLuint buffer )
+        glBindBuffer(
+            [in] Int32 target,
+            [in] Int32 buffer);
+
+        // C function void glBufferData ( GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage )
+        glBufferData(
+            [in] Int32 target,
+            [in] Int32 size,
+            [in] IBuffer* data,
+            [in] Int32 usage);
+
+        // C function void glBufferSubData ( GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data )
+        glBufferSubData(
+            [in] Int32 target,
+            [in] Int32 offset,
+            [in] Int32 size,
+            [in] IBuffer* data);
+
+        // C function void glClipPlanef ( GLenum plane, const GLfloat *equation )
+        glClipPlanef(
+            [in] Int32 plane,
+            [in] ArrayOf<Float>* equation,
+            [in] Int32 offset);
+
+        // C function void glClipPlanef ( GLenum plane, const GLfloat *equation )
+        glClipPlanef(
+            [in] Int32 plane,
+            [in] IFloatBuffer* equation);
+
+        // C function void glClipPlanex ( GLenum plane, const GLfixed *equation )
+        glClipPlanex(
+            [in] Int32 plane,
+            [in] ArrayOf<Int32>* equation,
+            [in] Int32 offset);
+
+        // C function void glClipPlanex ( GLenum plane, const GLfixed *equation )
+        glClipPlanex(
+            [in] Int32 plane,
+            [in] IInt32Buffer* equation);
+
+        // C function void glColor4ub ( GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha )
+        glColor4ub(
+            [in] Byte red,
+            [in] Byte green,
+            [in] Byte blue,
+            [in] Byte alpha);
+
+        // C function void glColorPointer ( GLint size, GLenum type, GLsizei stride, GLint offset )
+        glColorPointer(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+
+        // C function void glDeleteBuffers ( GLsizei n, const GLuint *buffers )
+        glDeleteBuffers(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* buffers,
+            [in] Int32 offset);
+
+        // C function void glDeleteBuffers ( GLsizei n, const GLuint *buffers )
+        glDeleteBuffers(
+            [in] Int32 n,
+            [in] IInt32Buffer* buffers);
+
+        // C function void glDrawElements ( GLenum mode, GLsizei count, GLenum type, GLint offset )
+        glDrawElements(
+            [in] Int32 mode,
+            [in] Int32 count,
+            [in] Int32 type,
+            [in] Int32 offset);
+
+        // C function void glGenBuffers ( GLsizei n, GLuint *buffers )
+        glGenBuffers(
+            [in] Int32 n,
+            [in] ArrayOf<Int32>* buffers,
+            [in] Int32 offset);
+
+        // C function void glGenBuffers ( GLsizei n, GLuint *buffers )
+        glGenBuffers(
+            [in] Int32 n,
+            [in] IInt32Buffer* buffers);
+
+        // C function void glGetBooleanv ( GLenum pname, GLboolean *params )
+        glGetBooleanv(
+            [in] Int32 pname,
+            [in] ArrayOf<Boolean>* params,
+            [in] Int32 offset);
+
+        // C function void glGetBooleanv ( GLenum pname, GLboolean *params )
+        glGetBooleanv(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetBufferParameteriv ( GLenum target, GLenum pname, GLint *params )
+        glGetBufferParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetBufferParameteriv ( GLenum target, GLenum pname, GLint *params )
+        glGetBufferParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetClipPlanef ( GLenum pname, GLfloat *eqn )
+        glGetClipPlanef(
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* eqn,
+            [in] Int32 offset);
+
+        // C function void glGetClipPlanef ( GLenum pname, GLfloat *eqn )
+        glGetClipPlanef(
+            [in] Int32 pname,
+            [in] IFloatBuffer* eqn);
+
+        // C function void glGetClipPlanex ( GLenum pname, GLfixed *eqn )
+        glGetClipPlanex(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* eqn,
+            [in] Int32 offset);
+
+        // C function void glGetClipPlanex ( GLenum pname, GLfixed *eqn )
+        glGetClipPlanex(
+            [in] Int32 pname,
+            [in] IInt32Buffer* eqn);
+
+        // C function void glGetFixedv ( GLenum pname, GLfixed *params )
+        glGetFixedv(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetFixedv ( GLenum pname, GLfixed *params )
+        glGetFixedv(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetFloatv ( GLenum pname, GLfloat *params )
+        glGetFloatv(
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glGetFloatv ( GLenum pname, GLfloat *params )
+        glGetFloatv(
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glGetLightfv ( GLenum light, GLenum pname, GLfloat *params )
+        glGetLightfv(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glGetLightfv ( GLenum light, GLenum pname, GLfloat *params )
+        glGetLightfv(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glGetLightxv ( GLenum light, GLenum pname, GLfixed *params )
+        glGetLightxv(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetLightxv ( GLenum light, GLenum pname, GLfixed *params )
+        glGetLightxv(
+            [in] Int32 light,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetMaterialfv ( GLenum face, GLenum pname, GLfloat *params )
+        glGetMaterialfv(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glGetMaterialfv ( GLenum face, GLenum pname, GLfloat *params )
+        glGetMaterialfv(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glGetMaterialxv ( GLenum face, GLenum pname, GLfixed *params )
+        glGetMaterialxv(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetMaterialxv ( GLenum face, GLenum pname, GLfixed *params )
+        glGetMaterialxv(
+            [in] Int32 face,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetTexEnvfv ( GLenum env, GLenum pname, GLfloat *params )
+        glGetTexEnvfv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexEnvfv ( GLenum env, GLenum pname, GLfloat *params )
+        glGetTexEnvfv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glGetTexEnviv ( GLenum env, GLenum pname, GLint *params )
+        glGetTexEnviv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexEnviv ( GLenum env, GLenum pname, GLint *params )
+        glGetTexEnviv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetTexEnvxv ( GLenum env, GLenum pname, GLfixed *params )
+        glGetTexEnvxv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexEnvxv ( GLenum env, GLenum pname, GLfixed *params )
+        glGetTexEnvxv(
+            [in] Int32 env,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetTexParameterfv ( GLenum target, GLenum pname, GLfloat *params )
+        glGetTexParameterfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexParameterfv ( GLenum target, GLenum pname, GLfloat *params )
+        glGetTexParameterfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glGetTexParameteriv ( GLenum target, GLenum pname, GLint *params )
+        glGetTexParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexParameteriv ( GLenum target, GLenum pname, GLint *params )
+        glGetTexParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glGetTexParameterxv ( GLenum target, GLenum pname, GLfixed *params )
+        glGetTexParameterxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glGetTexParameterxv ( GLenum target, GLenum pname, GLfixed *params )
+        glGetTexParameterxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function GLboolean glIsBuffer ( GLuint buffer )
+
+        glIsBuffer(
+            [in] Int32 buffer,
+            [out] Boolean* isBuffer);
+
+        // C function GLboolean glIsEnabled ( GLenum cap )
+        glIsEnabled(
+            [in] Int32 cap,
+            [out] Boolean* isEnabled);
+
+        // C function GLboolean glIsTexture ( GLuint texture )
+        glIsTexture(
+            [in] Int32 texture,
+            [out] Boolean* isTexture);
+
+        // C function void glNormalPointer ( GLenum type, GLsizei stride, GLint offset )
+        glNormalPointer(
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+
+        // C function void glPointParameterf ( GLenum pname, GLfloat param )
+        glPointParameterf(
+            [in] Int32 pname,
+            [in] Float param);
+
+        // C function void glPointParameterfv ( GLenum pname, const GLfloat *params )
+        glPointParameterfv(
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glPointParameterfv ( GLenum pname, const GLfloat *params )
+
+        glPointParameterfv(
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glPointParameterx ( GLenum pname, GLfixed param )
+        glPointParameterx(
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glPointParameterxv ( GLenum pname, const GLfixed *params )
+        glPointParameterxv(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glPointParameterxv ( GLenum pname, const GLfixed *params )
+
+        glPointParameterxv(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glPointSizePointerOES(
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] IBuffer* pointer
+        );
+
+        // C function void glTexCoordPointer ( GLint size, GLenum type, GLsizei stride, GLint offset )
+        glTexCoordPointer(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+
+        // C function void glTexEnvi ( GLenum target, GLenum pname, GLint param )
+        glTexEnvi(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glTexEnviv ( GLenum target, GLenum pname, const GLint *params )
+        glTexEnviv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glTexEnviv ( GLenum target, GLenum pname, const GLint *params )
+        glTexEnviv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glTexParameterfv ( GLenum target, GLenum pname, const GLfloat *params )
+        glTexParameterfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        // C function void glTexParameterfv ( GLenum target, GLenum pname, const GLfloat *params )
+        glTexParameterfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        // C function void glTexParameteri ( GLenum target, GLenum pname, GLint param )
+        glTexParameteri(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        // C function void glTexParameteriv ( GLenum target, GLenum pname, const GLint *params )
+        glTexParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glTexParameteriv ( GLenum target, GLenum pname, const GLint *params )
+        glTexParameteriv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glTexParameterxv ( GLenum target, GLenum pname, const GLfixed *params )
+        glTexParameterxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        // C function void glTexParameterxv ( GLenum target, GLenum pname, const GLfixed *params )
+        glTexParameterxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        // C function void glVertexPointer ( GLint size, GLenum type, GLsizei stride, GLint offset )
+        glVertexPointer(
+            [in] Int32 size,
+            [in] Int32 type,
+            [in] Int32 stride,
+            [in] Int32 offset);
+    }
+
+    } // namespace Opengl
+    } // namespace Droid
+    } // namespace Elastos
+}

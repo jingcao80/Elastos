@@ -1,0 +1,66 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Pdf {
+
+    /**
+     * Creates a new instance.
+     * <p>
+     * <strong>Note:</strong> The provided file descriptor must be <strong>seekable</strong>,
+     * i.e. its data being randomly accessed, e.g. pointing to a file. After finishing
+     * with this class you must call {@link #close()}.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> This class takes ownership of the passed in file descriptor
+     * and is responsible for closing it when the editor is closed.
+     * </p>
+     *
+     * @param input Seekable file descriptor to read from.
+     *
+     * @see #close()
+     */
+    interface IPdfEditor {
+        /**
+         * Gets the number of pages in the document.
+         *
+         * @return The page count.
+         */
+        GetPageCount(
+            [out] Int32* count);
+
+        /**
+         * Removes the page with a given index.
+         *
+         * @param pageIndex The page to remove.
+         */
+        RemovePage(
+            [in] Int32 pageIndex);
+
+        /**
+         * Writes the PDF file to the provided destination.
+         * <p>
+         * <strong>Note:</strong> This method takes ownership of the passed in file
+         * descriptor and is responsible for closing it when writing completes.
+         * </p>
+         * @param output The destination.
+         */
+        Write(
+            [in] IParcelFileDescriptor* output);
+
+        /**
+         * Closes this editor. You should not use this instance
+         * after this method is called.
+         */
+        Close();
+    }
+
+    } // namespace Pdf
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

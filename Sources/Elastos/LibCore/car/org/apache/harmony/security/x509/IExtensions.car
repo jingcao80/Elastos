@@ -1,0 +1,201 @@
+
+module
+{
+    interface Elastos.Utility.ISet;
+    interface Elastos.Utility.IList;
+    interface Elastos.Utility.ICollection;
+    interface Elastos.Core.IStringBuilder;
+    interface Elastosx.Security.Auth.X500.IX500Principal;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+    interface Org.Apache.Harmony.Security.X509.IExtension;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the Extensions part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
+     * </pre>
+     */
+    interface IExtensions {
+        GetSize(
+            [out] Int32* size);
+
+        /**
+         * Returns the list of critical extensions.
+         */
+        GetCriticalExtensions(
+            [out] ISet** extensions);
+
+        /**
+         * Returns the list of critical extensions.
+         */
+        GetNonCriticalExtensions(
+            [out] ISet** extensions);
+
+        HasUnsupportedCritical(
+            [out] Boolean* hasUnsupportedCritical);
+
+        /**
+         * Returns the values of extensions.
+         */
+        GetExtensionByOID(
+            [in] String oid,
+            [out] IExtension** extensionByOID);
+
+        /**
+         * Returns the value of Key Usage extension (OID == 2.5.29.15).
+         * The ASN.1 definition of Key Usage Extension is:
+         *
+         * <pre>
+         * id-ce-keyUsage OBJECT IDENTIFIER ::=  { id-ce 15 }
+         *
+         * KeyUsage ::= BIT STRING {
+         *     digitalSignature        (0),
+         *     nonRepudiation          (1),
+         *     keyEncipherment         (2),
+         *     dataEncipherment        (3),
+         *     keyAgreement            (4),
+         *     keyCertSign             (5),
+         *     cRLSign                 (6),
+         *     encipherOnly            (7),
+         *     decipherOnly            (8)
+         * }
+         * </pre>
+         * (as specified in RFC 3280)
+         *
+         * @return the value of Key Usage Extension if it is in the list,
+         * and null if there is no such extension or its value can not be decoded
+         * otherwise. Note, that the length of returned array can be greater
+         * than 9.
+         */
+        ValueOfKeyUsage(
+            [out, callee] ArrayOf<Boolean>* valueOfKeyUsage);
+
+        /**
+         * Returns the value of Extended Key Usage extension (OID == 2.5.29.37).
+         * The ASN.1 definition of Extended Key Usage Extension is:
+         *
+         * <pre>
+         *  id-ce-extKeyUsage OBJECT IDENTIFIER ::= { id-ce 37 }
+         *
+         *  ExtKeyUsageSyntax ::= SEQUENCE SIZE (1..MAX) OF KeyPurposeId
+         *
+         *  KeyPurposeId ::= OBJECT IDENTIFIER
+         * </pre>
+         * (as specified in RFC 3280)
+         *
+         * @return the list with string representations of KeyPurposeId's OIDs
+         * and null
+         * @throws IOException if extension was incorrectly encoded.
+         */
+        ValueOfExtendedKeyUsage(
+            [out] IList** valueOfExtendedKeyUsage);
+
+        /**
+         * Returns the value of Basic Constraints Extension (OID = 2.5.29.19).
+         * The ASN.1 definition of Basic Constraints Extension is:
+         *
+         * <pre>
+         *   id-ce-basicConstraints OBJECT IDENTIFIER ::=  { id-ce 19 }
+         *
+         *   BasicConstraints ::= SEQUENCE {
+         *        cA                      BOOLEAN DEFAULT FALSE,
+         *        pathLenConstraint       INTEGER (0..MAX) OPTIONAL
+         *   }
+         * </pre>
+         * (as specified in RFC 3280)
+         *
+         * @return the value of pathLenConstraint field if extension presents,
+         * and Integer.MAX_VALUE if does not.
+        */
+        ValueOfBasicConstrains(
+            [out] Int32* valueOfBasicConstrains);
+
+        /**
+         * Returns the value of Subject Alternative Name (OID = 2.5.29.17).
+         * The ASN.1 definition for Subject Alternative Name is:
+         *
+         * <pre>
+         *  id-ce-subjectAltName OBJECT IDENTIFIER ::=  { id-ce 17 }
+         *
+         *  SubjectAltName ::= GeneralNames
+         * </pre>
+         * (as specified in RFC 3280)
+         *
+         * @return Returns the collection of pairs:
+         * (Integer (tag), Object (name value)) if extension presents, and
+         * null if does not.
+         */
+        ValueOfSubjectAlternativeName(
+            [out] ICollection** valueOfSubjectAlternativeName);
+
+        /**
+         * Returns the value of Issuer Alternative Name Extension (OID = 2.5.29.18).
+         * The ASN.1 definition for Issuer Alternative Name is:
+         *
+         * <pre>
+         *   id-ce-issuerAltName OBJECT IDENTIFIER ::=  { id-ce 18 }
+         *
+         *   IssuerAltName ::= GeneralNames
+         * </pre>
+         * (as specified in RFC 3280)
+         *
+         * @return Returns the collection of pairs:
+         * (Integer (tag), Object (name value)) if extension presents, and
+         * null if does not.
+         */
+        ValueOfIssuerAlternativeName(
+            [out] ICollection** valueOfIssuerAlternativeName);
+
+        /**
+         * Returns the value of Certificate Issuer Extension (OID = 2.5.29.29).
+         * It is a CRL entry extension and contains the GeneralNames describing
+         * the issuer of revoked certificate. Its ASN.1 notation is as follows:
+         * <pre>
+         *   id-ce-certificateIssuer   OBJECT IDENTIFIER ::= { id-ce 29 }
+         *
+         *   certificateIssuer ::=     GeneralNames
+         * </pre>
+         * (as specified in RFC 3280)
+         *
+         * @return the value of Certificate Issuer Extension
+         */
+        ValueOfCertificateIssuerExtension(
+            [out] IX500Principal** valueOfCertificateIssuerExtension);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 Extensions value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        DumpValue(
+            [in] IStringBuilder* sb,
+            [in] String prefix);
+    }
+
+    interface IExtensionsHelper {
+        /**
+         * Custom X.509 Extensions decoder.
+         */
+        GetASN1(
+            [out] IASN1Type** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

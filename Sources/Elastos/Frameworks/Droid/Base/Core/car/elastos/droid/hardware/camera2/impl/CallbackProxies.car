@@ -1,0 +1,49 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Impl {
+
+    // TODO: replace with codegen
+    /*
+     * @invoke
+     * interface ICameraDeviceStateCallback
+     * interface ICameraDeviceImplStateCallbackKK
+     */
+    interface ICallbackProxiesDeviceStateCallbackProxy {
+    }
+
+    //@SuppressWarnings("deprecation")
+    /*
+     * @invoke
+     * interface ICameraDeviceImplCaptureCallback
+     */
+    interface ICallbackProxiesDeviceCaptureCallbackProxy {
+    }
+
+    /*
+     * @invoke
+     * interface ICameraCaptureSessionStateCallback
+     */
+    interface ICallbackProxiesSessionStateCallbackProxy {
+
+    }
+
+    /**
+     * Proxy out invocations to the camera2 API callbacks into a {@link Dispatchable}.
+     *
+     * <p>Since abstract classes do not support Java's dynamic {@code Proxy}, we have to
+     * to use our own proxy mechanism.</p>
+     */
+    interface ICallbackProxies {
+    }
+
+    } // namespace Impl
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

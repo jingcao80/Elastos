@@ -1,0 +1,87 @@
+
+module
+{
+    interface Elastos.Droid.Utility.IRational;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Params {
+
+    /**
+     * Immutable class for describing a 3x3 matrix of {@link Rational} values in row-major order.
+     *
+     * <p>This matrix maps a transform from one color space to another. For the particular color space
+     * source and target, see the appropriate camera metadata documentation for the key that provides
+     * this value.</p>
+     *
+     * @see CameraMetadata
+     */
+    [deprecated]
+    interface IColorSpaceTransform {
+
+        /**
+         * Get an element of this matrix by its row and column.
+         *
+         * <p>The rows must be within the range [0, 3),
+         * and the column must be within the range [0, 3).</p>
+         *
+         * @return element (non-{@code null})
+         *
+         * @throws IllegalArgumentException if column or row was out of range
+         */
+        GetElement(
+            [in] Int32 column,
+            [in] Int32 row,
+            [out] IRational** outrat);
+
+        /**
+         * Copy the {@link Rational} elements in row-major order from this matrix into the destination.
+         *
+         * @param destination
+         *          an array big enough to hold at least {@code 9} elements after the
+         *          {@code offset}
+         * @param offset
+         *          a non-negative offset into the array
+         * @throws NullPointerException
+         *          If {@code destination} was {@code null}
+         * @throws ArrayIndexOutOfBoundsException
+         *          If there's not enough room to write the elements at the specified destination and
+         *          offset.
+         */
+        CopyElements(
+            [in] ArrayOf<IRational*>* destination,
+            [in] Int32 offset);
+
+        /**
+         * Copy the {@link Rational} elements in row-major order from this matrix into the destination.
+         *
+         * <p>Each element is stored as a contiguous rational packed as a
+         * {@code (numerator, denominator)} pair of ints, identical to the
+         * {@link ColorSpaceTransform#ColorSpaceTransform(int[]) constructor}.</p>
+         *
+         * @param destination
+         *          an array big enough to hold at least {@code 18} elements after the
+         *          {@code offset}
+         * @param offset
+         *          a non-negative offset into the array
+         * @throws NullPointerException
+         *          If {@code destination} was {@code null}
+         * @throws ArrayIndexOutOfBoundsException
+         *          If there's not enough room to write the elements at the specified destination and
+         *          offset.
+         *
+         * @see ColorSpaceTransform#ColorSpaceTransform(int[])
+         */
+        CopyElements(
+            [in] ArrayOf<Int32>* destination,
+            [in] Int32 offset);
+    }
+
+    } // namespace Params
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

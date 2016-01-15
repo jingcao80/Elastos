@@ -1,0 +1,33 @@
+module
+{
+    interface Elastos.Droid.Gesture.IGesture;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Gesture {
+
+    /**
+     * An instance represents a sample if the label is available or a query if the
+     * label is null.
+     */
+    [local]
+    interface IInstance {
+        /**
+         * create a learning instance for a single stroke gesture
+         *
+         * @param gesture
+         * @param label
+         * @return the instance
+         */
+        CreateInstance(
+            [in] Int32 sequenceType,
+            [in] Int32 orientationType,
+            [in] IGesture* gesture,
+            [in] String label,
+            [out] IInstance** obj);
+    }
+
+    } // namespace Gesture
+    } // namespace Droid
+    } // namespace Elastos
+}

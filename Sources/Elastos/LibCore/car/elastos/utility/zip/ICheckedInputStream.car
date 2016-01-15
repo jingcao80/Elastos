@@ -1,0 +1,38 @@
+
+module
+{
+    interface Elastos.Utility.Zip.IChecksum;
+
+    namespace Elastos{
+    namespace Utility {
+    namespace Zip {
+
+    /**
+     * The CheckedInputStream class is used to maintain a checksum at the same
+     * time as the data, on which the checksum is computed, is read from a
+     * stream. The purpose of this checksum is to establish data integrity,
+     * comparing the computed checksum against a published checksum value.
+     *
+     * @implements Elastos.Utility.Zip.Elastos.IO.IFilterInputStream
+     */
+
+    /**
+     * @Involve
+     * interface ICloseable;
+     * interface IInputStream;
+     * interface IFilterInputStream;
+     */
+    interface ICheckedInputStream {
+        /**
+         * Returns the checksum calculated on the stream read so far.
+         *
+         * @return the updated checksum.
+         */
+        GetChecksum(
+            [out] IChecksum** checksum);
+    }
+
+    } // namespace Zip
+    } // namespace Utility
+    } // namespace Elastos
+}

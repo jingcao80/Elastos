@@ -1,0 +1,255 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupMarginLayoutParams
+     */
+    interface IRelativeLayoutLayoutParams {
+        /**
+         * Adds a layout rule to be interpreted by the RelativeLayout. This
+         * method should only be used for constraints that don't refer to another sibling
+         * (e.g., CENTER_IN_PARENT) or take a boolean value ({@link RelativeLayout#TRUE}
+         * for true or - for false). To specify a verb that takes a subject, use
+         * {@link #addRule(int, int)} instead.
+         *
+         * @param verb One of the verbs defined by
+         *        {@link android.widget.RelativeLayout RelativeLayout}, such as
+         *        ALIGN_WITH_PARENT_LEFT.
+         * @see #addRule(int, int)
+         */
+        AddRule(
+            [in] Int32 verb);
+
+        /**
+         * Adds a layout rule to be interpreted by the RelativeLayout. Use this for
+         * verbs that take a target, such as a sibling (ALIGN_RIGHT) or a boolean
+         * value (VISIBLE).
+         *
+         * @param verb One of the verbs defined by
+         *        {@link android.widget.RelativeLayout RelativeLayout}, such as
+         *         ALIGN_WITH_PARENT_LEFT.
+         * @param anchor The id of another view to use as an anchor,
+         *        or a boolean value(represented as {@link RelativeLayout#TRUE})
+         *        for true or 0 for false).  For verbs that don't refer to another sibling
+         *        (for example, ALIGN_WITH_PARENT_BOTTOM) just use -1.
+         * @see #addRule(int)
+         */
+        AddRule(
+            [in] Int32 verb,
+            [in] Int32 anchor);
+
+         /**
+          * Removes a layout rule to be interpreted by the RelativeLayout.
+          *
+          * @param verb One of the verbs defined by
+          *        {@link android.widget.RelativeLayout RelativeLayout}, such as
+          *         ALIGN_WITH_PARENT_LEFT.
+          * @see #addRule(int)
+          * @see #addRule(int, int)
+          */
+        RemoveRule(
+             [in] Int32 verb);
+
+        /**
+         * Retrieves a complete list of all supported rules, where the index is the rule
+         * verb, and the element value is the value specified, or "false" if it was never
+         * set.
+         *
+         * @return the supported rules
+         * @see #addRule(int, int)
+         */
+        GetRules(
+            [out, callee] ArrayOf<Int32>* rules);
+
+        /**
+         * Retrieves a complete list of all supported rules, where the index is the rule
+         * verb, and the element value is the value specified, or "false" if it was never
+         * set. If there are relative rules defined (*_START / *_END), they will be resolved
+         * depending on the layout direction.
+         *
+         * @param layoutDirection the direction of the layout.
+         *                        Should be either {@link View#LAYOUT_DIRECTION_LTR}
+         *                        or {@link View#LAYOUT_DIRECTION_RTL}
+         * @return the supported rules
+         * @see #addRule(int, int)
+         *
+         * @hide
+         */
+        GetRules(
+            [in] Int32 layoutDirection,
+            [out, callee] ArrayOf<Int32>* rules);
+
+        SetAlignWithParent(
+            [in] Boolean align);
+
+        GetAlignWithParent(
+            [out] Boolean* align);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IRelativeLayout {
+
+        const Int32 RelativeLayout_TRUE = -1;
+
+        /**
+         * Rule that aligns a child's right edge with another child's left edge.
+         */
+        const Int32 LEFT_OF = 0;
+        /**
+         * Rule that aligns a child's left edge with another child's right edge.
+         */
+        const Int32 RIGHT_OF = 1;
+        /**
+         * Rule that aligns a child's bottom edge with another child's top edge.
+         */
+        const Int32 ABOVE = 2;
+        /**
+         * Rule that aligns a child's top edge with another child's bottom edge.
+         */
+        const Int32 BELOW = 3;
+
+        /**
+         * Rule that aligns a child's baseline with another child's baseline.
+         */
+        const Int32 ALIGN_BASELINE = 4;
+        /**
+         * Rule that aligns a child's left edge with another child's left edge.
+         */
+        const Int32 ALIGN_LEFT = 5;
+        /**
+         * Rule that aligns a child's top edge with another child's top edge.
+         */
+        const Int32 ALIGN_TOP = 6;
+        /**
+         * Rule that aligns a child's right edge with another child's right edge.
+         */
+        const Int32 ALIGN_RIGHT = 7;
+        /**
+         * Rule that aligns a child's bottom edge with another child's bottom edge.
+         */
+        const Int32 ALIGN_BOTTOM = 8;
+
+        /**
+         * Rule that aligns the child's left edge with its RelativeLayout
+         * parent's left edge.
+         */
+        const Int32 ALIGN_PARENT_LEFT = 9;
+        /**
+         * Rule that aligns the child's top edge with its RelativeLayout
+         * parent's top edge.
+         */
+        const Int32 ALIGN_PARENT_TOP = 10;
+        /**
+         * Rule that aligns the child's right edge with its RelativeLayout
+         * parent's right edge.
+         */
+        const Int32 ALIGN_PARENT_RIGHT = 11;
+        /**
+         * Rule that aligns the child's bottom edge with its RelativeLayout
+         * parent's bottom edge.
+         */
+        const Int32 ALIGN_PARENT_BOTTOM = 12;
+
+        /**
+         * Rule that centers the child with respect to the bounds of its
+         * RelativeLayout parent.
+         */
+        const Int32 CENTER_IN_PARENT = 13;
+        /**
+         * Rule that centers the child horizontally with respect to the
+         * bounds of its RelativeLayout parent.
+         */
+        const Int32 CENTER_HORIZONTAL = 14;
+        /**
+         * Rule that centers the child vertically with respect to the
+         * bounds of its RelativeLayout parent.
+         */
+        const Int32 CENTER_VERTICAL = 15;
+
+        /**
+         * Rule that aligns a child's end edge with another child's start edge.
+         */
+        const Int32 START_OF                 = 16;
+        /**
+         * Rule that aligns a child's start edge with another child's end edge.
+         */
+        const Int32 END_OF                   = 17;
+        /**
+         * Rule that aligns a child's start edge with another child's start edge.
+         */
+        const Int32 ALIGN_START              = 18;
+        /**
+         * Rule that aligns a child's end edge with another child's end edge.
+         */
+        const Int32 ALIGN_END                = 19;
+        /**
+         * Rule that aligns the child's start edge with its RelativeLayout
+         * parent's start edge.
+         */
+        const Int32 ALIGN_PARENT_START       = 20;
+        /**
+         * Rule that aligns the child's end edge with its RelativeLayout
+         * parent's end edge.
+         */
+        const Int32 ALIGN_PARENT_END         = 21;
+
+        const Int32 VERB_COUNT              = 22;
+
+        /**
+         * Defines which View is ignored when the gravity is applied. This setting has no
+         * effect if the gravity is <code>Gravity.LEFT | Gravity.TOP</code>.
+         *
+         * @param viewId The id of the View to be ignored by gravity, or 0 if no View
+         *        should be ignored.
+         *
+         * @see #setGravity(int)
+         *
+         * @attr ref android.R.styleable#RelativeLayout_ignoreGravity
+         */
+        SetIgnoreGravity(
+            [in] Int32 viewId);
+
+        GetGravity(
+            [out] Int32* gravity);
+
+        /**
+         * Describes how the child views are positioned. Defaults to
+         * <code>Gravity.LEFT | Gravity.TOP</code>.
+         *
+         * @param gravity See {@link android.view.Gravity}
+         *
+         * @see #setHorizontalGravity(int)
+         * @see #setVerticalGravity(int)
+         *
+         * @attr ref android.R.styleable#RelativeLayout_gravity
+         */
+        SetGravity(
+            [in] Int32 gravity);
+
+        SetHorizontalGravity(
+            [in] Int32 horizontalGravity);
+
+        SetVerticalGravity(
+            [in] Int32 verticalGravity);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

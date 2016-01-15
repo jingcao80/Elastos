@@ -1,0 +1,223 @@
+module
+{
+    interface Elastos.Utility.ICurrency;
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace Text {
+
+    /**
+     * Encapsulates the set of symbols (such as the decimal separator, the grouping
+     * separator, and so on) needed by DecimalFormat to format numbers. DecimalFormat
+     * internally creates an instance of DecimalFormatSymbols from its locale data.
+     * If you need to change any of these symbols, you can get the
+     * DecimalFormatSymbols object from your DecimalFormat and modify it.
+     *
+     * @sa Locale
+     * @sa DecimalFormat
+     */
+    /**
+     * @Involve
+     * interface ISerializable;
+     * interface ICloneable;
+     */
+    interface IDecimalFormatSymbols {
+        /**
+         * Returns the currency.
+         */
+        GetCurrency(
+            [out] ICurrency** currency);
+
+        /**
+         * Returns the international currency symbol.
+         */
+        GetInternationalCurrencySymbol(
+            [out] String* symbol);
+
+        /**
+         * Returns the currency symbol.
+         */
+        GetCurrencySymbol(
+            [out] String* symbol);
+
+        /**
+         * Returns the character which represents the decimal point in a number.
+         */
+        GetDecimalSeparator(
+            [out] Char32* separator);
+
+        /**
+         * Returns the character which represents a single digit in a format
+         * pattern.
+         */
+        GetDigit(
+            [out] Char32* digit);
+
+        /**
+         * Returns the character used as the thousands separator in a number.
+         */
+        GetGroupingSeparator(
+            [out] Char32* separator);
+
+        /**
+         * Returns the string which represents infinity.
+         */
+        GetInfinity(
+            [out] String* infinity);
+
+        /**
+         * Returns the minus sign character.
+         */
+        GetMinusSign(
+            [out] Char32* sign);
+
+        /**
+         * Returns the character which represents the decimal point in a monetary
+         * value.
+         */
+        GetMonetaryDecimalSeparator(
+            [out] Char32* separator);
+
+        /**
+         * Returns the string which represents NaN.
+         */
+        GetNaN(
+            [out] String* NaN);
+
+        /**
+         * Returns the character which separates the positive and negative patterns
+         * in a format pattern.
+         */
+        GetPatternSeparator(
+            [out] Char32* separator);
+
+        /**
+         * Returns the percent character.
+         */
+        GetPercent(
+            [out] Char32* percent);
+
+        /**
+         * Returns the per mill sign character.
+         */
+        GetPerMill(
+            [out] Char32* perMill);
+
+        /**
+         * Returns the character which represents zero.
+         */
+        GetZeroDigit(
+            [out] Char32* zeroDigit);
+
+        /*
+         * Returns the string used to separate mantissa and exponent. Typically "E", as in "1.2E3".
+         */
+        GetExponentSeparator(
+            [out] String* separator);
+
+        SetCurrency(
+            [in] ICurrency* currency);
+
+        /**
+         * Sets the international currency symbol.
+         */
+        SetInternationalCurrencySymbol(
+            [in] String value);
+
+        /**
+         * Sets the currency symbol.
+         */
+        SetCurrencySymbol(
+            [in] String value);
+
+        /**
+         * Sets the character which represents the decimal point in a number.
+         */
+        SetDecimalSeparator(
+            [in] Char32 value);
+
+        /**
+         * Sets the character which represents a single digit in a format pattern.
+         */
+        SetDigit(
+            [in] Char32 value);
+
+        /**
+         * Sets the character used as the thousands separator in a number.
+         */
+        SetGroupingSeparator(
+            [in] Char32 value);
+
+        /**
+         * Sets the string which represents infinity.
+         */
+        SetInfinity(
+            [in] String value);
+
+        /**
+         * Sets the minus sign character.
+         */
+        SetMinusSign(
+            [in] Char32 value);
+
+        /**
+         * Sets the character which represents the decimal point in a monetary
+         * value.
+         */
+        SetMonetaryDecimalSeparator(
+            [in] Char32 value);
+
+        /**
+         * Sets the string which represents NaN.
+         */
+        SetNaN(
+            [in] String value);
+
+        /**
+         * Sets the character which separates the positive and negative patterns in
+         * a format pattern.
+         */
+        SetPatternSeparator(
+            [in] Char32 value);
+
+        /**
+         * Sets the percent character.
+         */
+        SetPercent(
+            [in] Char32 value);
+
+        /**
+         * Sets the per mill sign character.
+         */
+        SetPerMill(
+            [in] Char32 value);
+
+        /**
+         * Sets the character which represents zero.
+         */
+        SetZeroDigit(
+            [in] Char32 value);
+
+        /**
+         * Sets the string used to separate mantissa and exponent. Typically "E", as in "1.2E3".
+         * @since 1.6
+         */
+        SetExponentSeparator(
+            [in] String value);
+    }
+
+    interface IDecimalFormatSymbolsHelper {
+        GetInstance(
+            [out] IDecimalFormatSymbols** instance);
+
+        GetInstance(
+            [in] ILocale* locale,
+            [out] IDecimalFormatSymbols** instance);
+
+        GetAvailableLocales(
+            [out, callee] ArrayOf<ILocale*>* locales);
+    }
+
+    } // namespace Text
+    } // namespace Elastos
+}

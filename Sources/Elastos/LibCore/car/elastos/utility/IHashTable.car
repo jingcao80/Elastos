@@ -1,0 +1,87 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * @Involve
+     * interface IDictionary;
+     * interface IMap;
+     * interface ICloneable;
+     * interface ISerializable;
+     */
+    [deprecated]
+    interface IHashTable {
+
+        /**
+         * interfaces from IDictionary
+         */
+        GetElements(
+            [out] IEnumeration** enm);
+
+        Get(
+            [in] IInterface* key,
+            [out] IInterface** outface);
+
+        GetKeys(
+            [out] IEnumeration** enm);
+
+        Put(
+            [in] IInterface* key,
+            [in] IInterface* value,
+            [out] IInterface** outface);
+
+        Put(
+            [in] IInterface* key,
+            [in] IInterface* value);
+
+        Remove(
+            [in] IInterface* key,
+            [out] IInterface** outface);
+
+        Remove(
+            [in] IInterface* key);
+
+
+        /**
+         * interfaces from IMap
+         */
+        Clear();
+
+        ContainsKey(
+            [in] IInterface* key,
+            [out] Boolean* result);
+
+        ContainsValue(
+            [in] IInterface* value,
+            [out] Boolean* result);
+
+        GetEntrySet(
+            [out] ISet** entries);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        GetKeySet(
+            [out] ISet** keySet);
+
+        PutAll(
+            [in] IMap* map);
+
+        GetSize(
+            [out] Int32* size);
+
+        GetValues(
+            [out] ICollection** value);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

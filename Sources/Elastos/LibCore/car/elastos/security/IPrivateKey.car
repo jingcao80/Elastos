@@ -1,0 +1,21 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * {@code PrivateKey} is the common interface for private keys.
+     *
+     * @see PublicKey
+     */
+    /**
+     * @Involve
+     * interface IKey
+     */
+    interface IPrivateKey {
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

@@ -1,0 +1,298 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IClassLoader;
+    using interface Elastos.IO.ISerializable;
+    using interface Elastos.Utility.ISet;
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Os.IPersistableBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    [deprecated, local]
+    interface IBaseBundle {
+        SetClassLoader(
+            [in] IClassLoader* loader);
+
+        GetClassLoader(
+            [out] IClassLoader** loader);
+
+        IsParcelled(
+            [out] Boolean* result);
+
+        GetSize(
+            [out] Int32 * size);
+
+        IsEmpty(
+            [out] Boolean* empty);
+
+        Clear();
+
+        ContainsKey(
+            [in] String key,
+            [out] Boolean* result);
+
+        Get(
+            [in] String key,
+            [out] IInterface** obj);
+
+        Remove(
+            [in] String key);
+
+        PutAll(
+            [in] IPersistableBundle* bundle);
+
+        GetKeySet(
+            [out] ISet** set);
+
+        PutBoolean(
+            [in] String key,
+            [in] Boolean value);
+
+        PutByte(
+            [in] String key,
+            [in] Byte value);
+
+        PutChar(
+            [in] String key,
+            [in] Char32 value);
+
+        PutInt16(
+            [in] String key,
+            [in] Int16 value);
+
+        PutInt32(
+            [in] String key,
+            [in] Int32 value);
+
+        PutInt64(
+            [in] String key,
+            [in] Int64 value);
+
+        PutFloat(
+            [in] String key,
+            [in] Float value);
+
+        PutDouble(
+            [in] String key,
+            [in] Double value);
+
+        PutString(
+            [in] String key,
+            [in] String value);
+
+        PutCharSequence(
+            [in] String key,
+            [in] ICharSequence* value);
+
+        PutIntegerArrayList(
+            [in] String key,
+            [in] IArrayList* value);
+
+        PutStringArrayList(
+            [in] String key,
+            [in] IArrayList* value);
+
+        PutCharSequenceArrayList(
+            [in] String key,
+            [in] IArrayList* value);
+
+        PutSerializable(
+            [in] String key,
+            [in] ISerializable* value);
+
+        PutBooleanArray(
+            [in] String key,
+            [in] ArrayOf<Boolean>* value);
+
+        PutByteArray(
+            [in] String key,
+            [in] ArrayOf<Byte>* value);
+
+        PutCharArray(
+            [in] String key,
+            [in] ArrayOf<Char32>* value);
+
+        PutInt16Array(
+            [in] String key,
+            [in] ArrayOf<Int16>* value);
+
+        PutInt32Array(
+            [in] String key,
+            [in] ArrayOf<Int32>* value);
+
+        PutInt64Array(
+            [in] String key,
+            [in] ArrayOf<Int64>* value);
+
+        PutFloatArray(
+            [in] String key,
+            [in] ArrayOf<Float>* value);
+
+        PutDoubleArray(
+            [in] String key,
+            [in] ArrayOf<Double>* value);
+
+        PutStringArray(
+            [in] String key,
+            [in] ArrayOf<String>* value);
+
+        PutCharSequenceArray(
+            [in] String key,
+            [in] ArrayOf<ICharSequence*>* value);
+
+        GetBoolean(
+            [in] String key,
+            [out] Boolean* value);
+
+        GetBoolean(
+            [in] String key,
+            [in] Boolean defaultValue,
+            [out] Boolean* value);
+
+        GetByte(
+            [in] String key,
+            [out] Byte* value);
+
+        GetByte(
+            [in] String key,
+            [in] Byte defaultValue,
+            [out] Byte* value);
+
+        GetChar(
+            [in] String key,
+            [out] Char32* value);
+
+        GetChar(
+            [in] String key,
+            [in] Char32 defaultValue,
+            [out] Char32* value);
+
+        GetInt16(
+            [in] String key,
+            [out] Int16* value);
+
+        GetInt16(
+            [in] String key,
+            [in] Int16 defaultValue,
+            [out] Int16* value);
+
+        GetInt32(
+            [in] String key,
+            [out] Int32* value);
+
+        GetInt32(
+            [in] String key,
+            [in] Int32 defaultValue,
+            [out] Int32* value);
+
+        GetInt64(
+            [in] String key,
+            [out] Int64* value);
+
+        GetInt64(
+            [in] String key,
+            [in] Int64 defaultValue,
+            [out] Int64* value);
+
+        GetFloat(
+            [in] String key,
+            [out] Float* value);
+
+        GetFloat(
+            [in] String key,
+            [in] Float defaultValue,
+            [out] Float* value);
+
+        GetDouble(
+            [in] String key,
+            [out] Double* value);
+
+        GetDouble(
+            [in] String key,
+            [in] Double defaultValue,
+            [out] Double* value);
+
+        GetString(
+            [in] String key,
+            [out] String* value);
+
+        GetString(
+            [in] String key,
+            [in] String defaultValue,
+            [out] String* value);
+
+        GetCharSequence(
+            [in] String key,
+            [out] ICharSequence** value);
+
+        GetCharSequence(
+            [in] String key,
+            [in] ICharSequence* defaultValue,
+            [out] ICharSequence** value);
+
+        GetSerializable(
+            [in] String key,
+            [out] ISerializable** value);
+
+        GetIntegerArrayList(
+            [in] String key,
+            [out] IArrayList** value);
+
+        GetStringArrayList(
+            [in] String key,
+            [out] IArrayList** value);
+
+        GetCharSequenceArrayList(
+            [in] String key,
+            [out] IArrayList** value);
+
+        GetBooleanArray(
+            [in] String key,
+            [out, callee] ArrayOf<Boolean>* value);
+
+        GetByteArray(
+            [in] String key,
+            [out, callee] ArrayOf<Byte>* value);
+
+        GetInt16Array(
+            [in] String key,
+            [out, callee] ArrayOf<Int16>* value);
+
+        GetCharArray(
+            [in] String key,
+            [out, callee] ArrayOf<Char32>* value);
+
+        GetInt32Array(
+            [in] String key,
+            [out, callee] ArrayOf<Int32>* value);
+
+        GetInt64Array(
+            [in] String key,
+            [out, callee] ArrayOf<Int64>* value);
+
+        GetFloatArray(
+            [in] String key,
+            [out, callee] ArrayOf<Float>* value);
+
+        GetDoubleArray(
+            [in] String key,
+            [out, callee] ArrayOf<Double>* value);
+
+        GetStringArray(
+            [in] String key,
+            [out, callee] ArrayOf<String>* value);
+
+        GetCharSequenceArray(
+            [in] String key,
+            [out, callee] ArrayOf<ICharSequence*>* value);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+} // module

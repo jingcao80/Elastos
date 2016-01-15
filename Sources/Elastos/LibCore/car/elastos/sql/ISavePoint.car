@@ -1,0 +1,23 @@
+module
+{
+    namespace Elastos {
+    namespace Sql {
+
+    interface ISavePoint {
+        GetSavepointId(
+            [out] Int32* id);
+
+        /**
+         * Returns the name for this savepoint.
+         *
+         * @return the name of this savepoint.
+         * @throws SQLException
+         *             if an error occurrs accessing the database.
+         */
+        GetSavepointName(
+            [out] String* name);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

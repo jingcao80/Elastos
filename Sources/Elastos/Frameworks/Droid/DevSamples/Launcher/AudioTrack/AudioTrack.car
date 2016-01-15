@@ -1,0 +1,130 @@
+
+module
+{
+    /** indicates AudioTrack state is stopped */
+    const AudioTrack_PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
+    /** indicates AudioTrack state is paused */
+    const AudioTrack_PLAYSTATE_PAUSED  = 2;  // matches SL_PLAYSTATE_PAUSED
+    /** indicates AudioTrack state is playing */
+    const AudioTrack_PLAYSTATE_PLAYING = 3;  // matches SL_PLAYSTATE_PLAYING
+
+    /**
+     * Creation mode where audio data is transferred from Java to the native layer
+     * only once before the audio starts playing.
+     */
+    const AudioTrack_MODE_STATIC = 0;
+    /**
+     * Creation mode where audio data is streamed from Java to the native layer
+     * as the audio is playing.
+     */
+    const AudioTrack_MODE_STREAM = 1;
+
+    /**
+     * State of an AudioTrack that was not successfully initialized upon creation.
+     */
+    const AudioTrack_STATE_UNINITIALIZED = 0;
+    /**
+     * State of an AudioTrack that is ready to be used.
+     */
+    const AudioTrack_STATE_INITIALIZED   = 1;
+    /**
+     * State of a successfully initialized AudioTrack that uses static data,
+     * but that hasn't received that data yet.
+     */
+    const AudioTrack_STATE_NO_STATIC_DATA = 2;
+
+    // Error codes:
+    // to keep in sync with frameworks/base/core/jni/android_media_AudioTrack.cpp
+    /**
+     * Denotes a successful operation.
+     */
+    const AudioTrack_SUCCESS                               = 0;
+    /**
+     * Denotes a generic operation failure.
+     */
+    const AudioTrack_ERROR                                 = -1;
+    /**
+     * Denotes a failure due to the use of an invalid value.
+     */
+    const AudioTrack_ERROR_BAD_VALUE                       = -2;
+    /**
+     * Denotes a failure due to the improper use of a method.
+     */
+    const AudioTrack_ERROR_INVALID_OPERATION               = -3;
+
+    interface IAudioTrack {
+        Init(
+            [in] Int32 streamType,
+            [in] Int32 sampleRateInHz,
+            [in] Int32 channelConfig,
+            [in] Int32 audioFormat,
+            [in] Int32 bufferSizeInBytes,
+            [in] Int32 mode,
+            [in] Int32 sessionId);
+
+        Destroy();
+
+        /**
+         * Returns the playback state of the AudioTrack instance.
+         * @see #PLAYSTATE_STOPPED
+         * @see #PLAYSTATE_PAUSED
+         * @see #PLAYSTATE_PLAYING
+         */
+        GetPlayState(
+            [out] Int32* state);
+
+        /**
+         * Returns the playback head position expressed in frames
+         */
+        GetPlaybackHeadPosition(
+            [out] Int32* position);
+
+        /**
+         * Sets the specified left/right output volume values on the AudioTrack. Values are clamped
+         * to the ({@link #VOLUME_MIN}, {@link #VOLUME_MAX}) interval if outside this range.
+         * @param leftVolume output attenuation for the left channel. A value of 0.0f is silence,
+         *      a value of 1.0f is no attenuation.
+         * @param rightVolume output attenuation for the right channel
+         * @return error code or success, see {@link #SUCCESS},
+         *    {@link #ERROR_INVALID_OPERATION}
+         */
+        SetStereoVolume(
+            [in] Float leftVolume,
+            [in] Float rightVolume,
+            [out] Int32* result);
+
+        /**
+         * Starts playing an AudioTrack.
+         *
+         * @throws IllegalStateException
+         */
+        Play();
+
+        /**
+         * Pauses the playback of the audio data.
+         * @throws IllegalStateException
+         */
+        Pause();
+
+        /**
+         * Stops playing the audio data.
+         *
+         * @throws IllegalStateException
+         */
+        Stop();
+
+        /**
+         * Flushes the audio data currently queued for playback. Any data that has
+         * not been played back will be discarded.
+         */
+        Flush();
+
+        Write(
+            [in] MemoryBuf<> audioData,
+            [out] Int32* written);
+    }
+
+    class CAudioTrack {
+        interface IAudioTrack;
+    }
+}

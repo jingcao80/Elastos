@@ -1,0 +1,37 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+    importlib("Elastos.Droid.Test.eco");
+    importlib("Eunit.eco");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Test.IInstrumentationTestCase;
+    using interface Eunit.Framework.ITest;
+    using interface Eunit.Framework.ITestCase;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DevSamples {
+    namespace InstrumentationDemo {
+
+    class CActivityOne {
+        interface IActivity;
+    }
+
+    interface IMyTestCase {
+        TestAddToGroup();
+    }
+
+    class CTestCaseOne {
+        interface ITest;
+        interface ITestCase;
+        interface IInstrumentationTestCase;
+        interface IMyTestCase;
+    }
+
+    } // namespace InstrumentationDemo
+    } // namespace DevSamples
+    } // namespace Droid
+    } // namespace Elastos
+}

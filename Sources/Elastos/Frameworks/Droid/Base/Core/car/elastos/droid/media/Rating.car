@@ -1,0 +1,174 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * A class to encapsulate rating information used as content metadata.
+     * A rating is defined by its rating style (see {@link #RATING_HEART},
+     * {@link #RATING_THUMB_UP_DOWN}, {@link #RATING_3_STARS}, {@link #RATING_4_STARS},
+     * {@link #RATING_5_STARS} or {@link #RATING_PERCENTAGE}) and the actual rating value (which may
+     * be defined as "unrated"), both of which are defined when the rating instance is constructed
+     * through one of the factory methods.
+     */
+    interface IRating {
+        /**
+         * Indicates a rating style is not supported. A Rating will never have this
+         * type, but can be used by other classes to indicate they do not support
+         * Rating.
+         */
+        const Int32 RATING_NONE = 0;
+
+        /**
+         * A rating style with a single degree of rating, "heart" vs "no heart". Can be used to
+         * indicate the content referred to is a favorite (or not).
+         */
+        const Int32 RATING_HEART = 1;
+
+        /**
+         * A rating style for "thumb up" vs "thumb down".
+         */
+        const Int32 RATING_THUMB_UP_DOWN = 2;
+
+        /**
+         * A rating style with 0 to 3 stars.
+         */
+        const Int32 RATING_3_STARS = 3;
+
+        /**
+         * A rating style with 0 to 4 stars.
+         */
+        const Int32 RATING_4_STARS = 4;
+
+        /**
+         * A rating style with 0 to 5 stars.
+         */
+        const Int32 RATING_5_STARS = 5;
+
+        /**
+         * A rating style expressed as a percentage.
+         */
+        const Int32 RATING_PERCENTAGE = 6;
+
+        /**
+         * Return whether there is a rating value available.
+         * @return true if the instance was not created with {@link #newUnratedRating(int)}.
+         */
+        IsRated(
+            [out] Boolean * result);
+
+        /**
+         * Return the rating style.
+         * @return one of {@link #RATING_HEART}, {@link #RATING_THUMB_UP_DOWN},
+         *    {@link #RATING_3_STARS}, {@link #RATING_4_STARS}, {@link #RATING_5_STARS},
+         *    or {@link #RATING_PERCENTAGE}.
+         */
+        GetRatingStyle(
+            [out] Int32 * result);
+
+        /**
+         * Return whether the rating is "heart selected".
+         * @return true if the rating is "heart selected", false if the rating is "heart unselected",
+         *    if the rating style is not {@link #RATING_HEART} or if it is unrated.
+         */
+        HasHeart(
+            [out] Boolean * result);
+
+        /**
+         * Return whether the rating is "thumb up".
+         * @return true if the rating is "thumb up", false if the rating is "thumb down",
+         *    if the rating style is not {@link #RATING_THUMB_UP_DOWN} or if it is unrated.
+         */
+        IsThumbUp(
+            [out] Boolean * result);
+
+        /**
+         * Return the star-based rating value.
+         * @return a rating value greater or equal to 0.0f, or a negative value if the rating style is
+         *    not star-based, or if it is unrated.
+         */
+        GetStarRating(
+            [out] Float * result);
+
+        /**
+         * Return the percentage-based rating value.
+         * @return a rating value greater or equal to 0.0f, or a negative value if the rating style is
+         *    not percentage-based, or if it is unrated.
+         */
+        GetPercentRating(
+            [out] Float * result);
+    }
+
+    interface IRatingHelper {
+    /**
+     * Return a Rating instance with no rating.
+     * Create and return a new Rating instance with no rating known for the given
+     * rating style.
+     * @param ratingStyle one of {@link #RATING_HEART}, {@link #RATING_THUMB_UP_DOWN},
+     *    {@link #RATING_3_STARS}, {@link #RATING_4_STARS}, {@link #RATING_5_STARS},
+     *    or {@link #RATING_PERCENTAGE}.
+     * @return null if an invalid rating style is passed, a new Rating instance otherwise.
+     */
+    NewUnratedRating(
+        [in] Int32 ratingStyle,
+        [out] IRating ** result);
+
+    /**
+     * Return a Rating instance with a heart-based rating.
+     * Create and return a new Rating instance with a rating style of {@link #RATING_HEART},
+     * and a heart-based rating.
+     * @param hasHeart true for a "heart selected" rating, false for "heart unselected".
+     * @return a new Rating instance.
+     */
+    NewHeartRating(
+        [in] Boolean hasHeart,
+        [out] IRating ** result);
+
+    /**
+     * Return a Rating instance with a thumb-based rating.
+     * Create and return a new Rating instance with a {@link #RATING_THUMB_UP_DOWN}
+     * rating style, and a "thumb up" or "thumb down" rating.
+     * @param thumbIsUp true for a "thumb up" rating, false for "thumb down".
+     * @return a new Rating instance.
+     */
+    NewThumbRating(
+        [in] Boolean thumbIsUp,
+        [out] IRating ** result);
+
+    /**
+     * Return a Rating instance with a star-based rating.
+     * Create and return a new Rating instance with one of the star-base rating styles
+     * and the given integer or fractional number of stars. Non integer values can for instance
+     * be used to represent an average rating value, which might not be an integer number of stars.
+     * @param starRatingStyle one of {@link #RATING_3_STARS}, {@link #RATING_4_STARS},
+     *     {@link #RATING_5_STARS}.
+     * @param starRating a number ranging from 0.0f to 3.0f, 4.0f or 5.0f according to
+     *     the rating style.
+     * @return null if the rating style is invalid, or the rating is out of range,
+     *     a new Rating instance otherwise.
+     */
+    NewStarRating(
+        [in] Int32 starRatingStyle,
+        [in] Float starRating,
+        [out] IRating ** result);
+
+    /**
+     * Return a Rating instance with a percentage-based rating.
+     * Create and return a new Rating instance with a {@link #RATING_PERCENTAGE}
+     * rating style, and a rating of the given percentage.
+     * @param percent the value of the rating
+     * @return null if the rating is out of range, a new Rating instance otherwise.
+     */
+    NewPercentageRating(
+        [in] Float percent,
+        [out] IRating ** result);
+
+    }
+
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,41 @@
+
+module
+{
+    namespace Eunit {
+    namespace Framework {
+
+    interface ITestAnnotation;
+    interface ITestResult;
+    interface ITestFailure;
+
+    interface ITest {
+        /**
+         * Counts the number of test cases that will be run by this test.
+         */
+        CountTestCases(
+            [out] Int32* number);
+
+        /**
+         * Runs a test and collects its result in a TestResult instance.
+         */
+        Run(
+            [in] ITestResult* result);
+
+        GetTestAnnotation(
+            [out] ITestAnnotation** annotation);
+
+        IsFailed(
+            [out] Boolean* result);
+
+        AddFailure(
+            [in] ECode ec,
+            [in] String message,
+            [in] String backtrace);
+
+        GetFailures(
+            [out, callee] ArrayOf<ITestFailure*>* failures);
+    }
+
+    } // namespace Framework
+    } // namespace Eunit
+}

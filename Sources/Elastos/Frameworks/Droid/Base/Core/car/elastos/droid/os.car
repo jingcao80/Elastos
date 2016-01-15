@@ -1,0 +1,643 @@
+module
+{
+    merge("os/BaseBundle.car");
+    merge("os/BatteryProperties.car");
+    merge("os/BatteryManager.car");
+    merge("os/BatteryManagerInternal.car");
+    merge("os/BatteryStats.car");
+    merge("os/Binder.car");
+    merge("os/Bundle.car");
+    merge("os/CancellationSignal.car");
+    merge("os/CommonClock.car");
+    merge("os/CommonTimeUtils.car");
+    merge("os/ConditionVariable.car");
+    merge("os/CountDownTimer.car");
+    merge("os/Debug.car");
+    merge("os/DebugMemoryInfo.car");
+    merge("os/DropBoxManager.car");
+    merge("os/Environment.car");
+    merge("os/FileBridge.car");
+    merge("os/FileObserver.car");
+    merge("os/Handler.car");
+    merge("os/HandlerThread.car");
+    merge("os/IBatteryPropertiesListener.car");
+    merge("os/IBatteryPropertiesRegistrar.car");
+    merge("os/IHardwareService.car");
+    merge("os/IMessenger.car");
+    merge("os/INetworkActivityListener.car");
+    merge("os/INetworkManagementService.car");
+    merge("os/IPermissionController.car");
+    merge("os/IPowerManager.car");
+    merge("os/ISchedulingPolicyService.car");
+    merge("os/IServiceManager.car");
+    merge("os/IUpdateLock.car");
+    merge("os/IUserManager.car");
+    merge("os/IVibratorService.car");
+    merge("os/Looper.car");
+    merge("os/MemoryFile.car");
+    merge("os/Message.car");
+    merge("os/MessageQueue.car");
+    merge("os/Messenger.car");
+    merge("os/ParcelFileDescriptor.car");
+    merge("os/ParcelUuid.car");
+    merge("os/PatternMatcher.car");
+    merge("os/PersistableBundle.car");
+    merge("os/PowerManager.car");
+    merge("os/PowerManagerInternal.car");
+    merge("os/Process.car");
+    merge("os/RecoverySystem.car");
+    merge("os/RemoteCallback.car");
+    merge("os/RemoteCallbackList.car");
+    merge("os/ResultReceiver.car");
+    merge("os/ServiceManager.car");
+    merge("os/StatFs.car");
+    merge("os/StrictMode.car");
+    merge("os/SystemProperties.car");
+    merge("os/SystemService.car");
+    merge("os/Trace.car");
+    merge("os/UserHandle.car");
+    merge("os/UserManager.car");
+    merge("os/Vibrator.car");
+    merge("os/WorkSource.car");
+
+    merge("os/IdleHandler.car");
+
+    // merge("os/PkgUsageStats.car");
+    // merge("os/IZigbeeService.car");
+    // merge("os/ZigbeeManager.car");
+    // merge("os/IKortideRemoteService.car");
+    // merge("os/ParcelStringList.car");
+    // merge("os/ProcessStats.car");
+
+    merge("os/storage/IMountService.car");
+    merge("os/storage/IMountServiceListener.car");
+    merge("os/storage/IMountShutdownObserver.car");
+    merge("os/storage/IObbActionListener.car");
+    merge("os/storage/MountServiceListener.car");
+    merge("os/storage/OnObbStateChangeListener.car");
+    merge("os/storage/StorageEventListener.car");
+    merge("os/storage/StorageManager.car");
+    merge("os/storage/StorageVolume.car");
+
+    using interface Elastos.Core.IClassLoader;
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.Core.IThread;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.IO.IFlushable;
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IOutputStream;
+    using interface Elastos.IO.IFileInputStream;
+    using interface Elastos.IO.IFileOutputStream;
+    using interface Elastos.Utility.IUUID;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Utility.IXmlUtilsWriteMapCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    // namespace Storage {
+    //     class CStorageManager {
+    //         constructor(
+    //             [in] ILooper* tgtLooper);
+
+    //         interface IStorageManager;
+    //     }
+
+    //     singleton class CStorageManagerHelper {
+    //         interface IStorageManagerHelper;
+    //     }
+
+    //     class CMountServiceBinderListener {
+    //         constructor(
+    //             [in] IStorageManager* host);
+
+    //         interface IMountServiceListener;
+    //     }
+
+    //     class CObbActionListener {
+    //         constructor(
+    //             [in] IStorageManager* host);
+
+    //         interface IObbActionListener;
+    //     }
+
+    //     class CStorageVolume {
+    //         constructor();
+
+    //         constructor(
+    //             [in] IFile* path,
+    //             [in] Int32 descriptionId,
+    //             [in] Boolean primary,
+    //             [in] Boolean removable,
+    //             [in] Boolean emulated,
+    //             [in] Int32 mtpReserveSpace,
+    //             [in] Boolean allowMassStorage,
+    //             [in] Int64 maxFileSize,
+    //             [in] IUserHandle* owner);
+
+    //         interface IStorageVolume;
+    //         interface IParcelable;
+    //     }
+
+    //     singleton class CStorageVolumeHelper {
+    //         interface IStorageVolumeHelper;
+    //     }
+    // }
+
+    // class CBinderDeathRecipient {
+    //     interface IProxyDeathRecipient;
+    // }
+
+    class CBinder {
+        constructor();
+
+        interface IBinder;
+    }
+
+    singleton class CBinderHelper {
+        interface IBinderHelper;
+    }
+
+    singleton class CLooperHelper {
+        interface ILooperHelper;
+    }
+
+    [local]
+    class CBundle {
+        /**
+         * Constructs a new, empty Bundle.
+         */
+        constructor();
+
+        constructor(
+            [in] IClassLoader* loader);
+
+        constructor(
+            [in] Int32 capacity);
+
+        constructor(
+            [in] IBundle* b);
+
+        constructor(
+            [in] IPersistableBundle* bunble);
+
+        interface IBundle;
+        interface IBaseBundle;
+        interface ICloneable;
+        interface IParcelable;
+    }
+
+    singleton class CBundleHelper {
+        interface IBundleHelper;
+    }
+
+    singleton class CEnvironment {
+        interface IEnvironment;
+    }
+
+    class CHandler {
+        constructor();
+
+        constructor(
+            [in] Boolean async);
+
+        constructor(
+            [in] ILooper* looper);
+
+        constructor(
+            [in] IHandlerCallback* cb,
+            [in] Boolean takeStrongRefOfCallback);
+
+        constructor(
+            [in] ILooper* looper,
+            [in] IHandlerCallback* cb,
+            [in] Boolean takeStrongRefOfCallback);
+
+        constructor(
+            [in] IHandlerCallback* cb,
+            [in] Boolean takeStrongRefOfCallback,
+            [in] Boolean async);
+
+        constructor(
+            [in] ILooper* looper,
+            [in] IHandlerCallback* cb,
+            [in] Boolean takeStrongRefOfCallback,
+            [in] Boolean async);
+
+        interface IHandler;
+    }
+
+    class CHandlerThread {
+        constructor(
+            [in] String name);
+
+        /**
+         * Constructs a HandlerThread.
+         * @param name
+         * @param priority The priority to run the thread at. The value supplied must be from
+         * {@link android.os.Process} and not from java.lang.Thread.
+         */
+        constructor(
+            [in] String name,
+            [in] Int32 priority);
+
+        interface IHandlerThread;
+        interface IThread;
+        interface IRunnable;
+    }
+
+    class CMessageQueue {
+         constructor(
+             [in] Boolean quitAllowed);
+
+         interface IMessageQueue;
+    }
+
+    class CMessage {
+        constructor();
+
+        interface IMessage;
+        interface IParcelable;
+    }
+
+    class CMessenger {
+        constructor();
+
+        constructor(
+            [in] IHandler* handler);
+
+        constructor(
+            [in] IIMessenger* target);
+
+        interface IMessenger;
+        interface IParcelable;
+    }
+
+    class CMessengerImpl {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IIMessenger;
+    }
+
+    singleton class CMessageHelper {
+        interface IMessageHelper;
+    }
+
+    singleton class CServiceManager {
+        interface IServiceManager;
+     }
+
+    class CUserHandle {
+        constructor();
+
+        constructor(
+            [in] Int32 h);
+
+        interface IUserHandle;
+        interface IParcelable;
+    }
+
+    singleton class CUserHandleHelper {
+        interface IUserHandleHelper;
+    }
+
+    singleton class CSystemProperties {
+        interface ISystemProperties;
+    }
+
+    class CCancellationSignal {
+        constructor();
+
+        interface ICancellationSignal;
+    }
+
+    singleton class CCancellationSignalHelper {
+        interface ICancellationSignalHelper;
+    }
+
+    class CMemoryFile {
+        constructor(
+            [in] String name,
+            [in] Int32 length);
+
+        interface IMemoryFile;
+    }
+
+    class CUserEnvironment {
+        constructor(
+            [in] Int32 userId);
+
+        interface IUserEnvironment;
+    }
+
+    class CParcel {
+        constructor();
+
+        interface IParcel;
+    }
+
+    class CParcelFileDescriptor {
+        constructor();
+
+        constructor(
+            [in] IParcelFileDescriptor* pfd);
+
+        interface IParcelFileDescriptor;
+        interface IParcelable;
+        interface ICloseable;
+    }
+
+    singleton class CParcelFileDescriptorHelper {
+        interface IParcelFileDescriptorHelper;
+    }
+
+    class CParcelFileDescriptorAutoCloseInputStream {
+        constructor(
+            [in] IParcelFileDescriptor* pfd);
+
+        interface IParcelFileDescriptorAutoCloseInputStream;
+        interface IFileInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class CParcelFileDescriptorAutoCloseOutputStream {
+        constructor(
+           [in] IParcelFileDescriptor* pfd);
+
+        interface IParcelFileDescriptorAutoCloseOutputStream;
+        interface IFileOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+    }
+
+    class CParcelUuid {
+        constructor();
+
+        constructor(
+            [in] IUUID* pfd);
+
+        interface IParcelUuid;
+        interface IParcelable;
+    }
+
+    singleton class CParcelUuidHelper {
+        interface IParcelUuidHelper;
+    }
+
+    class CPatternMatcher {
+        constructor();
+
+        constructor(
+            [in] String pattern,
+            [in] Int32 type);
+
+        interface IPatternMatcher;
+        interface IParcelable;
+    }
+
+    class CPersistableBundle {
+        constructor();
+
+        constructor(
+           [in] Int32 capacity);
+
+        constructor(
+           [in] IPersistableBundle* b);
+
+        interface IPersistableBundle;
+        interface ICloneable;
+        interface IParcelable;
+        interface IXmlUtilsWriteMapCallback;
+    }
+
+    singleton class CPersistableBundleHelper {
+        interface IPersistableBundleHelper;
+    }
+
+    class CProcessStartResult {
+        interface IProcessStartResult;
+    }
+
+    class CRemoteCallbackList {
+        interface IRemoteCallbackList;
+    }
+
+    class CStatFs {
+        constructor(
+            [in] String path);
+
+        interface IStatFs;
+    }
+
+    singleton class CSystemService {
+        interface ISystemService;
+    }
+
+    [local]
+    class CSystemVibrator {
+        constructor();
+
+        constructor(
+            [in] IContext* ctx);
+
+        interface IVibrator;
+    }
+
+    [local]
+    class CUpdateLock {
+        constructor(
+            [in] String tag);
+
+        interface IUpdateLock;
+    }
+
+    class CUserManager {
+        constructor(
+            [in] IContext* ctx,
+            [in] IIUserManager* service);
+
+        interface IUserManager;
+    }
+
+    singleton class CUserManagerHelper {
+        interface IUserManagerHelper;
+    }
+
+    class CWorkSource {
+        constructor();
+
+        constructor(
+            [in] IWorkSource* orig);
+
+        constructor(
+            [in] Int32 uid);
+
+        interface IWorkSource;
+        interface IParcelable;
+    }
+
+    [local]
+    class CPowerManager {
+        constructor(
+            [in] IContext* ctx,
+            [in] IIPowerManager* service,
+            [in] IHandler* handler);
+
+        interface IPowerManager;
+    }
+
+    singleton class CPowerManagerHelper {
+        interface IPowerManagerHelper;
+    }
+
+    class CPowerManagerWakeLock {
+        constructor(
+            [in] Int32 flags,
+            [in] String tag,
+            [in] String packageName,
+            [in] IPowerManager* host);
+
+        interface IPowerManagerWakeLock;
+    }
+
+    // [deprecated]
+    // class CDropBoxManagerEntry {
+    //     constructor();
+
+    //     constructor(
+    //         [in] String tag,
+    //         [in] Int64 millis);
+
+    //     constructor(
+    //         [in] String tag,
+    //         [in] Int64 millis,
+    //         [in] String text);
+
+    //     constructor(
+    //         [in] String tag,
+    //         [in] Int64 millis,
+    //         [in] ArrayOf<Byte>* arrayData,
+    //         [in] Int32 flags);
+
+    //     constructor(
+    //         [in] String pfdtag,
+    //         [in] Int64 pfdmillis,
+    //         [in] IParcelFileDescriptor* pfdData,
+    //         [in] Int32 pfdflags);
+
+    //     constructor(
+    //         [in] String filetag,
+    //         [in] Int64 filemillis,
+    //         [in] IFile* fileData,
+    //         [in] Int32 fileflags);
+
+    //     interface IParcelable;
+    //     interface ICloseable;
+    //     interface IDropBoxManagerEntry;
+    // }
+
+
+    // [local]
+    // class CDropBoxManager {
+    //     constructor(
+    //         [in] IDropBoxManagerService* service);
+
+    //     constructor();
+
+    //     interface IDropBoxManager;
+    // }
+
+    // singleton class CDebug {
+    //     interface IDebug;
+    // }
+
+    // class CDebugMemoryInfo {
+    //     constructor();
+
+    //     interface IDebugMemoryInfo;
+    //     interface IParcelable;
+    // }
+
+    // singleton class CDebugMemoryInfoHelper {
+    //     interface IDebugMemoryInfoHelper;
+    // }
+
+    // class CStrictModeThreadPolicyBuilder {
+    //     constructor();
+
+    //     constructor(
+    //         [in] IStrictModeThreadPolicy* policy);
+
+    //     interface IStrictModeThreadPolicyBuilder;
+    // }
+
+    // class CStrictModeVmPolicyBuilder {
+    //     constructor();
+
+    //     constructor(
+    //         [in] IStrictModeVmPolicy* policy);
+
+    //     interface IStrictModeVmPolicyBuilder;
+    // }
+
+    // singleton class CStrictMode {
+    //     interface IStrictMode;
+    // }
+
+    // class CStrictModeSpan {
+    //     constructor();
+
+    //     constructor(
+    //         [in] Handle32 threadState);
+
+    //     interface IStrictModeSpan;
+    // }
+
+
+    // class CStrictModeViolationInfo {
+    //     constructor();
+
+    //     constructor(
+    //         //[in] IThrowable* tr,
+    //         [in] Int32 policy);
+
+    //     constructor(
+    //         [in] IParcel* pin);
+
+    //     constructor(
+    //         [in] IParcel* pin,
+    //         [in] Boolean unsetGatheringBit);
+
+    //     interface IStrictModeViolationInfo;
+    // }
+
+    // [deprecated]
+    // class CParcelStringList {
+    //     constructor(
+    //         [in] ArrayOf<String>* list);
+
+    //     interface IParcelStringList;
+    //     interface IParcelable;
+    // }
+
+    // singleton class CZigbeeManager {
+    //     interface IZigbeeManager;
+    // }
+
+    class CFileBridge {
+        constructor();
+
+        interface IFileBridge;
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+}

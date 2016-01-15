@@ -1,0 +1,21 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Security {
+    namespace Auth {
+
+    /**
+     * @Involved
+     * interface IBasicPermission;
+     * interface IPermission;
+     * interface IGuard;
+     */
+    interface IAuthPermission {
+    }
+
+    } // namespace Auth
+    } // namespace Security
+    } // namespace Elastosx
+
+}

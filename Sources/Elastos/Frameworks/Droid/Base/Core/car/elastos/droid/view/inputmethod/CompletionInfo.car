@@ -1,0 +1,78 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * Information about a single text completion that an editor has reported to
+     * an input method.
+     *
+     * <p>This class encapsulates a completion offered by an application
+     * that wants it to be presented to the user by the IME. Usually, apps
+     * present their completions directly in a scrolling list for example
+     * (UI developers will usually use or extend
+     * {@see android.widget.AutoCompleteTextView} to implement this).
+     * However, in some cases, the editor may not be visible, as in the
+     * case in extract mode where the IME has taken over the full
+     * screen. In this case, the editor can choose to send their
+     * completions to the IME for display.
+     *
+     * <p>Most applications who want to send completions to an IME should use
+     * {@link android.widget.AutoCompleteTextView} as this class makes this
+     * process easy. In this case, the application would not have to deal directly
+     * with this class.
+     *
+     * <p>An application who implements its own editor and wants direct control
+     * over this would create an array of CompletionInfo objects, and send it to the IME using
+     * {@link InputMethodManager#displayCompletions(View, CompletionInfo[])}.
+     * The IME would present the completions however they see fit, and
+     * call back to the editor through
+     * {@link InputConnection#commitCompletion(CompletionInfo)}.
+     * The application can then pick up the commit event by overriding
+     * {@link android.widget.TextView#onCommitCompletion(CompletionInfo)}.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ICompletionInfo {
+        /**
+         * Return the abstract identifier for this completion, typically
+         * corresponding to the id associated with it in the original adapter.
+         */
+        GetId(
+            [out] Int64* id);
+
+        /**
+         * Return the original position of this completion, typically
+         * corresponding to its position in the original adapter.
+         */
+        GetPosition(
+            [out] Int32* pos);
+
+        /**
+         * Return the actual text associated with this completion.  This is the
+         * real text that will be inserted into the editor if the user selects it.
+         */
+        GetText(
+            [out] ICharSequence** text);
+
+        /**
+         * Return the user-visible label for the completion, or null if the plain
+         * text should be shown.  If non-null, this will be what the user sees as
+         * the completion option instead of the actual text.
+         */
+        GetLabel(
+            [out] ICharSequence** text);
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,69 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    enum Elastos.Droid.Text.LayoutAlignment;
+    interface Elastos.Droid.Graphics.ITypeface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Widget {
+
+    /**
+     * A basic, embed-able keyboard designed for password entry. Allows entry of all Latin-1 characters.
+     *
+     * It has two modes: alpha and numeric. In alpha mode, it allows all Latin-1 characters and enables
+     * an additional keyboard with symbols.  In numeric mode, it shows a 12-key DTMF dialer-like
+     * keypad with alpha characters hints.
+     *
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface ISubtitleView {
+        SetText(
+            [in] Int32 resId);
+
+        SetText(
+            [in] ICharSequence* text);
+
+        SetForegroundColor(
+            [in] Int32 color);
+
+        SetEdgeType(
+            [in] Int32 edgeType);
+
+        SetEdgeColor(
+            [in] Int32 color);
+
+        /**
+         * Sets the text size in pixels.
+         *
+         * @param size the text size in pixels
+         */
+        SetTextSize(
+            [in] Float size);
+
+        SetTypeface(
+            [in] ITypeface* typeface);
+
+        SetAlignment(
+            [in] LayoutAlignment textAlignment);
+
+        SetStyle(
+            [in] Int32 styleId);
+    }
+
+    }// namespace Widget
+    }// namespace Internal
+    }// namespace Droid
+    }// namespace Elastos
+
+}
+

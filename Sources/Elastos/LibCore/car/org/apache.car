@@ -1,0 +1,1604 @@
+
+module
+{
+    merge("apache/harmony/security/asn1/Exceptions.car");
+    merge("apache/harmony/security/asn1/IASN1Constants.car");
+    merge("apache/harmony/security/asn1/IASN1OctetString.car");
+    merge("apache/harmony/security/asn1/IASN1Type.car");
+    merge("apache/harmony/security/asn1/IASN1StringType.car");
+    merge("apache/harmony/security/asn1/IASN1Time.car");
+    merge("apache/harmony/security/asn1/IASN1UTCTime.car");
+    merge("apache/harmony/security/asn1/IASN1Choice.car");
+    merge("apache/harmony/security/asn1/IASN1Explicit.car");
+    merge("apache/harmony/security/asn1/IASN1TypeCollection.car");
+    merge("apache/harmony/security/asn1/IASN1ValueCollection.car");
+    merge("apache/harmony/security/asn1/IASN1Sequence.car");
+    merge("apache/harmony/security/asn1/IASN1SequenceOf.car");
+    merge("apache/harmony/security/asn1/IASN1Set.car");
+    merge("apache/harmony/security/asn1/IASN1SetOf.car");
+    merge("apache/harmony/security/asn1/IBitString.car");
+    merge("apache/harmony/security/asn1/IBerInputStream.car");
+    merge("apache/harmony/security/asn1/IBerOutputStream.car");
+    merge("apache/harmony/security/asn1/IDerInputStream.car");
+    merge("apache/harmony/security/asn1/IDerOutputStream.car");
+
+    merge("apache/harmony/security/fortress/IEngine.car");
+    merge("apache/harmony/security/fortress/ISecurityAccess.car");
+    merge("apache/harmony/security/fortress/IServices.car");
+
+    merge("apache/harmony/security/pkcs7/IContentInfo.car");
+    merge("apache/harmony/security/pkcs7/ISignedData.car");
+    merge("apache/harmony/security/pkcs7/ISignerInfo.car");
+
+    merge("apache/harmony/security/utils/IObjectIdentifier.car");
+    merge("apache/harmony/security/utils/IJarUtils.car");
+
+    merge("apache/harmony/security/x501/IAttributeValue.car");
+    merge("apache/harmony/security/x501/IAttributeTypeAndValue.car");
+    merge("apache/harmony/security/x501/IName.car");
+
+    merge("apache/harmony/security/x509/IAlgorithmIdentifier.car");
+    merge("apache/harmony/security/x509/IBasicConstraints.car");
+    merge("apache/harmony/security/x509/ICertificate.car");
+    merge("apache/harmony/security/x509/IExtension.car");
+    merge("apache/harmony/security/x509/IExtensions.car");
+    merge("apache/harmony/security/x509/IExtensionValue.car");
+    merge("apache/harmony/security/x509/IKeyUsage.car");
+
+    merge("apache/harmony/security/x509/ISubjectPublicKeyInfo.car");
+
+    merge("apache/harmony/security/x509/ITBSCertificate.car");
+    merge("apache/harmony/security/x509/IValidity.car");
+
+    merge("apache/http/ConnectionReuseStrategy.car");
+    merge("apache/http/FormattedHeader.car");
+    merge("apache/http/Header.car");
+    merge("apache/http/HeaderElement.car");
+    merge("apache/http/HeaderElementIterator.car");
+    merge("apache/http/HeaderIterator.car");
+    merge("apache/http/HttpClientConnection.car");
+    merge("apache/http/HttpConnection.car");
+    merge("apache/http/HttpConnectionMetrics.car");
+    merge("apache/http/HttpEntity.car");
+    merge("apache/http/HttpEntityEnclosingRequest.car");
+    merge("apache/http/HttpHost.car");
+    merge("apache/http/HttpInetConnection.car");
+    merge("apache/http/HttpMessage.car");
+    merge("apache/http/HttpRequest.car");
+    merge("apache/http/HttpRequestFactory.car");
+    merge("apache/http/HttpRequestInterceptor.car");
+    merge("apache/http/HttpResponse.car");
+    merge("apache/http/HttpResponseFactory.car");
+    merge("apache/http/HttpResponseInterceptor.car");
+    merge("apache/http/HttpServerConnection.car");
+    merge("apache/http/HttpStatus.car");
+    merge("apache/http/HttpVersion.car");
+    merge("apache/http/NameValuePair.car");
+    merge("apache/http/ProtocolVersion.car");
+    merge("apache/http/ReasonPhraseCatalog.car");
+    merge("apache/http/RequestLine.car");
+    merge("apache/http/StatusLine.car");
+    merge("apache/http/TokenIterator.car");
+    merge("apache/http/Exceptions.car");
+
+    merge("apache/http/auth/AUTH.car");
+    merge("apache/http/auth/AuthScheme.car");
+    merge("apache/http/auth/AuthSchemeFactory.car");
+    merge("apache/http/auth/AuthSchemeRegistry.car");
+    merge("apache/http/auth/AuthScope.car");
+    merge("apache/http/auth/AuthState.car");
+    merge("apache/http/auth/BasicUserPrincipal.car");
+    merge("apache/http/auth/Credentials.car");
+    merge("apache/http/auth/NTCredentials.car");
+    merge("apache/http/auth/NTUserPrincipal.car");
+    merge("apache/http/auth/UsernamePasswordCredentials.car");
+
+    merge("apache/http/auth/params/AuthParamBean.car");
+    merge("apache/http/auth/params/AuthParams.car");
+    merge("apache/http/auth/params/AuthPNames.car");
+
+    merge("apache/http/client/AuthenticationHandler.car");
+    merge("apache/http/client/CookieStore.car");
+    merge("apache/http/client/CredentialsProvider.car");
+    merge("apache/http/client/HttpClient.car");
+    merge("apache/http/client/HttpRequestRetryHandler.car");
+    merge("apache/http/client/RedirectHandler.car");
+    merge("apache/http/client/RequestDirector.car");
+    merge("apache/http/client/ResponseHandler.car");
+    merge("apache/http/client/UserTokenHandler.car");
+
+    merge("apache/http/client/methods/AbortableHttpRequest.car");
+    merge("apache/http/client/methods/HttpDelete.car");
+    merge("apache/http/client/methods/HttpGet.car");
+    merge("apache/http/client/methods/HttpHead.car");
+    merge("apache/http/client/methods/HttpOptions.car");
+    merge("apache/http/client/methods/HttpPost.car");
+    merge("apache/http/client/methods/HttpPut.car");
+    merge("apache/http/client/methods/HttpTrace.car");
+    merge("apache/http/client/methods/HttpUriRequest.car");
+
+    merge("apache/http/client/params/AllClientPNames.car");
+    merge("apache/http/client/params/AuthPolicy.car");
+    merge("apache/http/client/params/ClientParamBean.car");
+    merge("apache/http/client/params/ClientPNames.car");
+    merge("apache/http/client/params/CookiePolicy.car");
+    merge("apache/http/client/params/HttpClientParams.car");
+
+    merge("apache/http/client/protocol/ClientContext.car");
+    merge("apache/http/client/protocol/ClientContextConfigurer.car");
+
+    merge("apache/http/conn/ClientConnectionManager.car");
+    merge("apache/http/conn/ClientConnectionManagerFactory.car");
+    merge("apache/http/conn/ClientConnectionOperator.car");
+    merge("apache/http/conn/ClientConnectionRequest.car");
+    merge("apache/http/conn/ConnectionKeepAliveStrategy.car");
+    merge("apache/http/conn/ConnectionReleaseTrigger.car");
+    merge("apache/http/conn/EofSensorInputStream.car");
+    merge("apache/http/conn/EofSensorWatcher.car");
+    merge("apache/http/conn/ManagedClientConnection.car");
+    merge("apache/http/conn/MultihomePlainSocketFactory.car");
+    merge("apache/http/conn/OperatedClientConnection.car");
+
+    merge("apache/http/conn/params/ConnConnectionParamBean.car");
+    merge("apache/http/conn/params/ConnConnectionPNames.car");
+    merge("apache/http/conn/params/ConnManagerParamBean.car");
+    merge("apache/http/conn/params/ConnManagerParams.car");
+    merge("apache/http/conn/params/ConnManagerPNames.car");
+    merge("apache/http/conn/params/ConnPerRoute.car");
+    merge("apache/http/conn/params/ConnPerRouteBean.car");
+    merge("apache/http/conn/params/ConnRouteParamBean.car");
+    merge("apache/http/conn/params/ConnRouteParams.car");
+    merge("apache/http/conn/params/ConnRoutePNames.car");
+
+    merge("apache/http/conn/routing/BasicRouteDirector.car");
+    merge("apache/http/conn/routing/HttpRoute.car");
+    merge("apache/http/conn/routing/HttpRouteDirector.car");
+    merge("apache/http/conn/routing/HttpRoutePlanner.car");
+    merge("apache/http/conn/routing/RouteInfo.car");
+    merge("apache/http/conn/routing/RouteTracker.car");
+
+    merge("apache/http/conn/scheme/HostNameResolver.car");
+    merge("apache/http/conn/scheme/LayeredSocketFactory.car");
+    merge("apache/http/conn/scheme/PlainSocketFactory.car");
+    merge("apache/http/conn/scheme/Scheme.car");
+    merge("apache/http/conn/scheme/SchemeRegistry.car");
+    merge("apache/http/conn/scheme/SocketFactory.car");
+
+    merge("apache/http/conn/ssl/AbstractVerifier.car");
+    merge("apache/http/conn/ssl/SSLSocketFactory.car");
+    merge("apache/http/conn/ssl/X509HostnameVerifier.car");
+
+    merge("apache/http/cookie/ClientCookie.car");
+    merge("apache/http/cookie/Cookie.car");
+    merge("apache/http/cookie/CookieAttributeHandler.car");
+    merge("apache/http/cookie/CookieOrigin.car");
+    merge("apache/http/cookie/CookieSpec.car");
+    merge("apache/http/cookie/CookieSpecFactory.car");
+    merge("apache/http/cookie/CookieSpecRegistry.car");
+    merge("apache/http/cookie/SetCookie.car");
+    merge("apache/http/cookie/SetCookie2.car");
+    merge("apache/http/cookie/SM.car");
+
+    merge("apache/http/cookie/params/CookieSpecParamBean.car");
+    merge("apache/http/cookie/params/CookieSpecPNames.car");
+
+    merge("apache/http/entity/AbstractHttpEntity.car");
+    merge("apache/http/entity/BasicHttpEntity.car");
+    merge("apache/http/entity/ContentLengthStrategy.car");
+    merge("apache/http/entity/ContentProducer.car");
+
+    merge("apache/http/impl/auth/NTLMEngine.car");
+    merge("apache/http/impl/conn/tsccm/RefQueueHandler.car");
+    merge("apache/http/impl/conn/tsccm/PoolEntryRequest.car");
+
+    merge("apache/http/io/HttpMessageParser.car");
+    merge("apache/http/io/HttpMessageWriter.car");
+    merge("apache/http/io/HttpTransportMetrics.car");
+    merge("apache/http/io/SessionInputBuffer.car");
+    merge("apache/http/io/SessionOutputBuffer.car");
+
+    merge("apache/http/message/BasicHeaderIterator.car");
+    merge("apache/http/message/BasicHeaderValueFormatter.car");
+    merge("apache/http/message/BasicHeaderValueParser.car");
+    merge("apache/http/message/BasicHttpResponse.car");
+    merge("apache/http/message/BasicLineFormatter.car");
+    merge("apache/http/message/BasicLineParser.car");
+    merge("apache/http/message/BasicListHeaderIterator.car");
+    merge("apache/http/message/BasicNameValuePair.car");
+    merge("apache/http/message/BasicTokenIterator.car");
+    merge("apache/http/message/HeaderGroup.car");
+    merge("apache/http/message/HeaderValueFormatter.car");
+    merge("apache/http/message/HeaderValueParser.car");
+    merge("apache/http/message/LineFormatter.car");
+    merge("apache/http/message/LineParser.car");
+    merge("apache/http/message/ParserCursor.car");
+
+    merge("apache/http/params/BasicHttpParams.car");
+    merge("apache/http/params/CoreConnectionPNames.car");
+    merge("apache/http/params/CoreProtocolPNames.car");
+    merge("apache/http/params/DefaultedHttpParams.car");
+    merge("apache/http/params/HttpConnectionParamBean.car");
+    merge("apache/http/params/HttpConnectionParams.car");
+    merge("apache/http/params/HttpParams.car");
+    merge("apache/http/params/HttpProtocolParamBean.car");
+    merge("apache/http/params/HttpProtocolParams.car");
+
+    merge("apache/http/protocol/BasicHttpProcessor.car");
+    merge("apache/http/protocol/DefaultedHttpContext.car");
+    merge("apache/http/protocol/ExecutionContext.car");
+    merge("apache/http/protocol/HTTP.car");
+    merge("apache/http/protocol/HttpContext.car");
+    merge("apache/http/protocol/HttpDateGenerator.car");
+    merge("apache/http/protocol/HttpExpectationVerifier.car");
+    merge("apache/http/protocol/HttpProcessor.car");
+    merge("apache/http/protocol/HttpRequestExecutor.car");
+    merge("apache/http/protocol/HttpRequestHandler.car");
+    merge("apache/http/protocol/HttpRequestHandlerRegistry.car");
+    merge("apache/http/protocol/HttpRequestHandlerResolver.car");
+    merge("apache/http/protocol/HttpRequestInterceptorList.car");
+    merge("apache/http/protocol/HttpResponseInterceptorList.car");
+    merge("apache/http/protocol/HttpService.car");
+    merge("apache/http/protocol/UriPatternMatcher.car");
+
+    merge("apache/http/utility/ByteArrayBuffer.car");
+    merge("apache/http/utility/CharArrayBuffer.car");
+    merge("apache/http/utility/VersionInfo.car");
+
+
+    interface Elastos.Core.IArrayOf;
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Core.IComparator;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.ISerializable;
+    interface Elastos.IO.IFile;
+    interface Elastos.Net.IURI;
+    interface Elastos.Net.IInetAddress;
+    interface Elastos.Security.IPrincipal;
+    interface Elastos.Security.IKeyStore;
+    interface Elastos.Security.ISecureRandom;
+    interface Elastos.Utility.IList;
+    interface Elastos.Utility.IIterator;
+    interface Elastos.Utility.ILocale;
+    interface Elastosx.Net.Ssl.IHostnameVerifier;
+    interface Org.Apache.Http.IHttpEntity;
+    interface Org.Apache.Http.IHttpMessage;
+    interface Org.Apache.Http.IHttpEntityEnclosingRequest;
+    interface Org.Apache.Http.IProtocolVersion;
+    interface Org.Apache.Http.IRequestLine;
+    interface Org.Apache.Http.IHttpHost;
+    interface Org.Apache.Http.IHttpRequestInterceptor;
+    interface Org.Apache.Http.IHttpResponseInterceptor;
+    interface Org.Apache.Http.INameValuePair;
+    interface Org.Apache.Http.IHeader;
+    interface Org.Apache.Http.IHttpRequest;
+    interface Org.Apache.Http.IStatusLine;
+    interface Org.Apache.Http.IHeaderIterator;
+    interface Org.Apache.Http.ITokenIterator;
+    interface Org.Apache.Http.IHeaderElement;
+    interface Org.Apache.Http.IReasonPhraseCatalog;
+    interface Org.Apache.Http.IHeaderElementIterator;
+    interface Org.Apache.Http.IHttpResponse;
+    interface Org.Apache.Http.IFormattedHeader;
+    interface Org.Apache.Http.IConnectionReuseStrategy;
+    interface Org.Apache.Http.IHttpResponseFactory;
+    interface Org.Apache.Http.Conn.Scheme.IHostNameResolver;
+    interface Org.Apache.Http.Conn.Scheme.ILayeredSocketFactory;
+    interface Org.Apache.Http.Conn.Scheme.IHostNameResolver;
+    interface Org.Apache.Http.Conn.Scheme.ISocketFactory;
+    interface Org.Apache.Http.Entity.IAbstractHttpEntity;
+    interface Org.Apache.Http.Params.IHttpParams;
+    interface Org.Apache.Http.Protocol.IHttpContext;
+    interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+
+    namespace Asn1 {
+
+    class CASN1OctetString {
+        constructor();
+
+        interface IASN1OctetString;
+        interface IASN1StringType;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    singleton class CASN1OctetStringHelper {
+        interface IASN1OctetStringHelper;
+    }
+
+    [deprecated]
+    class CBerInputStream {
+        constructor(
+            [in] ArrayOf<Byte>* encoded);
+
+        constructor(
+            [in] ArrayOf<Byte>* encoded,
+            [in] Int32 offset,
+            [in] Int32 expectedLength);
+
+        constructor(
+            [in] IInputStream* is);
+
+        constructor(
+            [in] IInputStream* is,
+            [in] Int32 initialSize);
+
+        interface IBerInputStream;
+    }
+
+    class CBerOutputStream {
+        interface IBerOutputStream;
+    }
+
+    [deprecated]
+    class CDerInputStream {
+        constructor(
+            [in] ArrayOf<Byte>* encoded);
+
+        constructor(
+            [in] ArrayOf<Byte>* encoded,
+            [in] Int32 offset,
+            [in] Int32 expectedLength);
+
+        constructor(
+            [in] IInputStream* is);
+
+        interface IDerInputStream;
+        interface IBerInputStream;
+    }
+
+    class CDerOutputStream {
+        constructor(
+            [in] IASN1Type* asn1,
+            [in] IInterface* object);
+
+        interface IDerOutputStream;
+        interface IBerOutputStream;
+    }
+
+    }
+
+    namespace Fortress {
+
+    class CEngine {
+        /**
+         * Creates a Engine object
+         *
+         * @param serviceName
+         */
+        constructor(
+            [in] String serviceName);
+
+        interface IEngine;
+    }
+
+    singleton class CServices {
+        interface IServices;
+    }
+
+    } // namespace Fortress
+
+    namespace Pkcs7 {
+
+    singleton class CContentInfoHelper {
+        interface IContentInfoHelper;
+    }
+
+    } // namespace Pkcs7
+
+    namespace Utils {
+
+    singleton class CJarUtils {
+        interface IJarUtils;
+    }
+
+    } // namespace Utils
+    }
+    }
+    }
+    }
+
+
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+
+    class CHttpHost {
+        constructor(
+           [in] String hostName,
+           [in] Int32 port,
+           [in] String scheme);
+
+        constructor(
+           [in] String hostName,
+           [in] Int32 port);
+
+        constructor(
+           [in] String hostName);
+
+        constructor(
+           [in] IHttpHost* httpHost);
+
+        interface IHttpHost;
+        interface ICloneable;
+    }
+
+    class CProtocolVersion {
+        constructor();
+
+        constructor(
+            [in] String protocol,
+            [in] Int32 major,
+            [in] Int32 minor);
+
+        interface IProtocolVersion;
+        interface ICloneable;
+    }
+
+    class CHttpVersion {
+        constructor();
+
+        constructor(
+            [in] Int32 major,
+            [in] Int32 minor);
+
+        interface IProtocolVersion;
+        interface IHttpVersion;
+        interface ICloneable;
+    }
+
+    singleton class CHttpVersionHelper {
+        interface IHttpVersionHelper;
+    }
+
+
+    namespace Auth {
+
+    class CAuthSchemeRegistry {
+        constructor();
+
+        interface IAuthSchemeRegistry;
+    }
+
+    class CAuthScope {
+        /** Creates a new credentials scope for the given
+         * <tt>host</tt>, <tt>port</tt>, <tt>realm</tt>, and
+         * <tt>authentication scheme</tt>.
+         *
+         * @param host the host the credentials apply to. May be set
+         *   to <tt>null</tt> if credenticals are applicable to
+         *   any host.
+         * @param port the port the credentials apply to. May be set
+         *   to negative value if credenticals are applicable to
+         *   any port.
+         * @param realm the realm the credentials apply to. May be set
+         *   to <tt>null</tt> if credenticals are applicable to
+         *   any realm.
+         * @param scheme the authentication scheme the credentials apply to.
+         *   May be set to <tt>null</tt> if credenticals are applicable to
+         *   any authentication scheme.
+         */
+        constructor(
+            [in] String host,
+            [in] Int32 port,
+            [in] String realm,
+            [in] String scheme);
+
+        /** Creates a new credentials scope for the given
+         * <tt>host</tt>, <tt>port</tt>, <tt>realm</tt>, and any
+         * authentication scheme.
+         *
+         * @param host the host the credentials apply to. May be set
+         *   to <tt>null</tt> if credenticals are applicable to
+         *   any host.
+         * @param port the port the credentials apply to. May be set
+         *   to negative value if credenticals are applicable to
+         *   any port.
+         * @param realm the realm the credentials apply to. May be set
+         *   to <tt>null</tt> if credenticals are applicable to
+         *   any realm.
+         */
+        constructor(
+            [in] String host,
+            [in] Int32 port,
+            [in] String realm);
+
+        /** Creates a new credentials scope for the given
+         * <tt>host</tt>, <tt>port</tt>, any realm name, and any
+         * authentication scheme.
+         *
+         * @param host the host the credentials apply to. May be set
+         *   to <tt>null</tt> if credenticals are applicable to
+         *   any host.
+         * @param port the port the credentials apply to. May be set
+         *   to negative value if credenticals are applicable to
+         *   any port.
+         */
+        constructor(
+            [in] String host,
+            [in] Int32 port);
+
+        /**
+         * Creates a copy of the given credentials scope.
+         */
+        constructor(
+            [in] IAuthScope* authscope);
+
+        interface IAuthScope;
+    }
+
+    singleton class CAuthScopeHelper {
+        interface IAuthScopeHelper;
+    }
+
+    class CAuthState {
+        constructor();
+
+        interface IAuthState;
+    }
+
+    class CBasicUserPrincipal {
+        constructor(
+            [in] String username);
+
+        interface IBasicUserPrincipal;
+        interface IPrincipal;
+    }
+
+    class CNTCredentials {
+        constructor(
+            [in] String usernamePassword);
+
+        constructor(
+            [in] String userName,
+            [in] String password,
+            [in] String workstation,
+            [in] String dom);
+
+        interface INTCredentials;
+        interface ICredentials;
+    }
+
+    class CNTUserPrincipal {
+        constructor(
+            [in] String dom,
+            [in] String username);
+
+        interface INTUserPrincipal;
+        interface IPrincipal;
+    }
+
+    class CUsernamePasswordCredentials {
+        constructor(
+            [in] String usernamePassword);
+
+        constructor(
+            [in] String userName,
+            [in] String password);
+
+        interface IUsernamePasswordCredentials;
+        interface ICredentials;
+    }
+
+
+    namespace Params {
+
+    [deprecated]
+    class CAuthParamBean {
+        constructor(
+            [in] IHttpParams* params);
+
+        interface IAuthParamBean;
+    }
+
+    singleton class CAuthParams {
+        interface IAuthParams;
+    }
+
+    } // namespace Params
+    } // namespace Auth
+
+
+    namespace Client {
+
+    namespace Entity {
+
+    class CUrlEncodedFormEntity {
+        constructor(
+            [in] IList* parameters,
+            [in] String encoding);
+
+        constructor(
+            [in] IList* parameters);
+
+        constructor();
+
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+        interface ICloneable;
+    }
+
+    } // namespace Entity
+
+    namespace Methods {
+
+    class CHttpDelete {
+        constructor();
+
+        constructor(
+            [in] IURI* _uri);
+
+        constructor(
+            [in] String uri);
+
+        interface IHttpDelete;
+        interface IHttpMessage;
+        interface IHttpRequest;
+        interface IHttpUriRequest;
+        interface IAbortableHttpRequest;
+        interface ICloneable;
+    }
+
+    class CHttpGet {
+        constructor();
+
+        constructor(
+            [in] IURI* _uri);
+
+        constructor(
+            [in] String uri);
+
+        interface IHttpGet;
+        interface IHttpMessage;
+        interface IHttpRequest;
+        interface IHttpUriRequest;
+        interface IAbortableHttpRequest;
+        interface ICloneable;
+    }
+
+    class CHttpHead {
+        constructor();
+
+        constructor(
+            [in] IURI* _uri);
+
+        constructor(
+            [in] String uri);
+
+        interface IHttpHead;
+        interface IHttpMessage;
+        interface IHttpRequest;
+        interface IHttpUriRequest;
+        interface IAbortableHttpRequest;
+        interface ICloneable;
+    }
+
+    class CHttpOptions {
+        constructor();
+
+        constructor(
+            [in] IURI* _uri);
+
+        constructor(
+            [in] String uri);
+
+        interface IHttpOptions;
+        interface IHttpMessage;
+        interface IHttpRequest;
+        interface IHttpUriRequest;
+        interface IAbortableHttpRequest;
+        interface ICloneable;
+    }
+
+    class CHttpPost {
+        constructor();
+
+        constructor(
+            [in] IURI* _uri);
+
+        constructor(
+            [in] String uri);
+
+        interface IHttpPost;
+        interface IHttpEntityEnclosingRequest;
+        interface IHttpMessage;
+        interface IHttpRequest;
+        interface IHttpUriRequest;
+        interface IAbortableHttpRequest;
+        interface ICloneable;
+    }
+
+    class CHttpPut {
+        constructor();
+
+        constructor(
+            [in] IURI* _uri);
+
+        constructor(
+            [in] String uri);
+
+        interface IHttpPut;
+        interface IHttpEntityEnclosingRequest;
+        interface IHttpMessage;
+        interface IHttpRequest;
+        interface IHttpUriRequest;
+        interface IAbortableHttpRequest;
+        interface ICloneable;
+    }
+
+    class CHttpTrace {
+        constructor();
+
+        constructor(
+            [in] IURI* _uri);
+
+        constructor(
+            [in] String uri);
+
+        interface IHttpTrace;
+        interface IHttpMessage;
+        interface IHttpRequest;
+        interface IHttpUriRequest;
+        interface IAbortableHttpRequest;
+        interface ICloneable;
+    }
+
+    } // namespace Methods
+
+
+    namespace Params {
+
+    class CClientParamBean {
+        constructor(
+            [in] IHttpParams* params);
+
+        interface IClientParamBean;
+    }
+
+    singleton class CHttpClientParams {
+        interface IHttpClientParams;
+    }
+
+    } // namespace Params
+
+
+    namespace Protocol {
+
+    class CClientContextConfigurer {
+        constructor(
+            [in] IHttpContext* context);
+
+        interface IClientContextConfigurer;
+        interface IClientContext;
+    }
+
+    class CRequestAddCookies {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CRequestDefaultHeaders {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CRequestProxyAuthentication {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CRequestTargetAuthentication {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CResponseProcessCookies {
+        constructor();
+
+        interface IHttpResponseInterceptor;
+    }
+
+    } // namespace Protocol
+
+    } // namespace Client
+
+
+    namespace Conn {
+
+    class CBasicEofSensorWatcher {
+        constructor(
+            [in] IManagedClientConnection* conn,
+            [in] Boolean reuse);
+
+        interface IEofSensorWatcher;
+    }
+
+    class CBasicManagedEntity {
+        constructor(
+            [in] IHttpEntity* entity,
+            [in] IManagedClientConnection* conn,
+            [in] Boolean reuse);
+
+        interface IHttpEntity;
+        interface IConnectionReleaseTrigger;
+        interface IEofSensorWatcher;
+    }
+
+    class CEofSensorInputStream {
+        constructor(
+            [in] IInputStream* is,
+            [in] IEofSensorWatcher* watcher);
+
+        interface IEofSensorInputStream;
+        interface IInputStream;
+        interface ICloseable;
+        interface IConnectionReleaseTrigger;
+    }
+
+    singleton class CMultihomePlainSocketFactoryHelper {
+        interface IMultihomePlainSocketFactoryHelper;
+    }
+
+
+    namespace Params {
+
+    class CConnConnectionParamBean {
+        constructor(
+            [in] IHttpParams* params);
+
+        interface IConnConnectionParamBean;
+    }
+
+    class CConnManagerParamBean {
+        constructor(
+            [in] IHttpParams* params);
+
+        interface IConnManagerParamBean;
+    }
+
+    singleton class CConnManagerParams {
+        interface IConnManagerParams;
+        interface IConnManagerPNames;
+    }
+
+    class CConnPerRouteBean {
+        constructor(
+            [in] Int32 defaultMax);
+
+        constructor();
+
+        interface IConnPerRouteBean;
+        interface IConnPerRoute;
+    }
+
+    class CConnRouteParamBean {
+        constructor(
+            [in] IHttpParams* params);
+
+        interface IConnRouteParamBean;
+    }
+
+    singleton class CConnRouteParams {
+        interface IConnRouteParams;
+        interface IConnRoutePNames;
+    }
+
+    } // namespace Params
+
+
+    namespace Routing {
+
+    class CBasicRouteDirector {
+        interface IBasicRouteDirector;
+        interface IHttpRouteDirector;
+    }
+
+    [deprecated]
+    class CHttpRoute {
+        constructor(
+            [in] IHttpHost* target,
+            [in] IInetAddress* l,
+            [in] ArrayOf<IHttpHost*>* proxies,
+            [in] Boolean secure,
+            [in] TunnelType tunnelled,
+            [in] LayerType layered);
+
+        constructor(
+            [in] IHttpHost* target,
+            [in] IInetAddress* l,
+            [in] IHttpHost* proxy,
+            [in] Boolean secure,
+            [in] TunnelType tunnelled,
+            [in] LayerType layered);
+
+        constructor(
+            [in] IHttpHost* target,
+            [in] IInetAddress* l,
+            [in] Boolean secure);
+
+        constructor(
+            [in] IHttpHost* target);
+
+        constructor(
+            [in] IHttpHost* target,
+            [in] IInetAddress* l,
+            [in] IHttpHost* proxy,
+            [in] Boolean secure);
+
+        interface IHttpRoute;
+        interface IRouteInfo;
+        interface ICloneable;
+    }
+
+    class CRouteTracker {
+        constructor(
+            [in] IHttpHost* target,
+            [in] IInetAddress* l);
+
+        constructor(
+            [in] IHttpRoute* route);
+
+        interface IRouteTracker;
+        interface IRouteInfo;
+        interface ICloneable;
+    }
+
+    } // namespace Routing
+
+
+    namespace Scheme {
+
+    class CPlainSocketFactory {
+        constructor(
+            [in] IHostNameResolver* nameResolver);
+
+        constructor();
+
+        interface IPlainSocketFactory;
+        interface ISocketFactory;
+    }
+
+    singleton class CPlainSocketFactoryHelper {
+        interface IPlainSocketFactoryHelper;
+    }
+
+    class CScheme {
+        constructor(
+            [in] String name,
+            [in] ISocketFactory* factory,
+            [in] Int32 port);
+
+        interface IScheme;
+    }
+
+    class CSchemeRegistry {
+        constructor();
+
+        interface ISchemeRegistry;
+    }
+
+    } // namespace Scheme
+
+
+    namespace SSL {
+
+    class CAllowAllHostnameVerifier {
+        interface IAbstractVerifier;
+        interface IX509HostnameVerifier;
+        interface IHostnameVerifier;
+    }
+
+    class CBrowserCompatHostnameVerifier {
+        interface IAbstractVerifier;
+        interface IX509HostnameVerifier;
+        interface IHostnameVerifier;
+    }
+
+    class CStrictHostnameVerifier {
+        interface IAbstractVerifier;
+        interface IX509HostnameVerifier;
+        interface IHostnameVerifier;
+    }
+
+    class CSSLSocketFactory {
+        constructor();
+
+        constructor(
+            [in] String algorithm,
+            [in] IKeyStore* keystore,
+            [in] String keystorePassword,
+            [in] IKeyStore* truststore,
+            [in] ISecureRandom* random,
+            [in] IHostNameResolver* nameResolver);
+
+        constructor(
+            [in] IKeyStore* keystore,
+            [in] String keystorePassword,
+            [in] IKeyStore* truststore);
+
+        constructor(
+            [in] IKeyStore* keystore,
+            [in] String keystorePassword);
+
+        constructor(
+            [in] IKeyStore* truststore);
+
+        constructor(
+            [in] Elastosx.Net.Ssl.ISSLSocketFactory* socketfactory);
+
+        interface ISSLSocketFactory;
+        interface ILayeredSocketFactory;
+        interface ISocketFactory;
+    }
+
+    singleton class CSSLSocketFactoryHelper {
+        interface ISSLSocketFactoryHelper;
+    }
+
+    } // namespace SSL
+
+    } // namespace Conn
+
+
+    namespace Cookie {
+
+    namespace Params {
+
+    class CCookieSpecParamBean {
+        constructor(
+            [in] IHttpParams* params);
+
+        interface ICookieSpecParamBean;
+    }
+
+    } // namespace Params
+
+    class CCookieIdentityComparator {
+        interface IComparator;
+        interface ISerializable;
+    }
+
+    class CCookieOrigin {
+        constructor(
+            [in] String host,
+            [in] Int32 port,
+            [in] String path,
+            [in] Boolean secure);
+
+        interface ICookieOrigin;
+    }
+
+    class CCookiePathComparator {
+        interface IComparator;
+        interface ISerializable;
+    }
+
+    class CCookieSpecRegistry {
+        constructor();
+
+        interface ICookieSpecRegistry;
+    }
+
+    } // namespace Cookie
+
+
+    namespace Entity {
+
+    class CBasicHttpEntity {
+        constructor();
+
+        interface IBasicHttpEntity;
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+    }
+
+    class CBufferedHttpEntity {
+        constructor(
+            [in] IHttpEntity* entity);
+
+        interface IHttpEntity;
+    }
+
+    [deprecated]
+    class CByteArrayEntity {
+        constructor(
+            [in] ArrayOf<Byte>* b);
+
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+        interface ICloneable;
+    }
+
+    class CEntityTemplate {
+        constructor(
+            [in] IContentProducer* contentproducer);
+
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+    }
+
+    class CFileEntity {
+        constructor(
+            [in] IFile* file,
+            [in] String contentType);
+
+        constructor();
+
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+        interface ICloneable;
+    }
+
+    class CInputStreamEntity {
+        constructor(
+            [in] IInputStream* instream,
+            [in] Int64 length);
+
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+    }
+
+    class CSerializableEntity {
+        constructor(
+            [in] ISerializable* ser,
+            [in] Boolean bufferize);
+
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+    }
+
+    class CStringEntity {
+        constructor(
+            [in] String s,
+            [in] String charset);
+
+        constructor(
+            [in] String s);
+
+        constructor();
+
+        interface IAbstractHttpEntity;
+        interface IHttpEntity;
+        interface ICloneable;
+    }
+
+    } // namespace Entity
+
+
+    namespace Message {
+
+    class CBasicLineParser {
+        constructor(
+            [in] IProtocolVersion* proto);
+
+        constructor();
+
+        interface IBasicLineParser;
+        interface ILineParser;
+    }
+
+    class CBasicTokenIterator {
+        constructor(
+            [in] IHeaderIterator* headerIterator);
+
+        interface IBasicTokenIterator;
+        interface ITokenIterator;
+        interface IIterator;
+    }
+
+    class CBasicHeaderValueFormatter {
+        interface IBasicHeaderValueFormatter;
+        interface IHeaderValueFormatter;
+    }
+
+    class CBasicHeaderValueParser {
+        interface IBasicHeaderValueParser;
+        interface IHeaderValueParser;
+    }
+
+    class CBasicLineFormatter {
+        interface IBasicLineFormatter;
+        interface ILineFormatter;
+    }
+
+    [deprecated]
+    class CBasicHeaderElement {
+        constructor(
+            [in] String name,
+            [in] String value,
+            [in] IArrayOf* parameters);/*INameValuePair*/
+
+        constructor(
+            [in] String name,
+            [in] String value);
+
+        constructor();
+
+        interface IHeaderElement;
+        interface ICloneable;
+    }
+
+    class CHeaderGroup {
+        constructor();
+
+        interface IHeaderGroup;
+        interface ICloneable;
+    }
+
+    class CBasicHttpResponse {
+        constructor(
+            [in] IStatusLine* statusline,
+            [in] IReasonPhraseCatalog* catalog,
+            [in] ILocale* locale);
+
+        constructor(
+            [in] IStatusLine* statusline);
+
+        constructor(
+            [in] IProtocolVersion* ver,
+            [in] Int32 code,
+            [in] String reason);
+
+        constructor();
+
+        interface IBasicHttpResponse;
+        interface IHttpResponse;
+        interface IHttpMessage;
+        interface ICloneable;
+    }
+
+    class CBasicHttpRequest {
+        constructor(
+            [in] String method,
+            [in] String uri);
+
+        constructor(
+            [in] String method,
+            [in] String uri,
+            [in] IProtocolVersion* ver);
+
+        constructor(
+            [in] IRequestLine* requestline);
+
+        constructor();
+
+        interface IHttpRequest;
+        interface IHttpMessage;
+        interface ICloneable;
+    }
+
+    class CBasicNameValuePair {
+        constructor(
+            [in] String name,
+            [in] String value);
+
+        constructor();
+
+        interface IBasicNameValuePair;
+        interface INameValuePair;
+        interface ICloneable;
+    }
+
+    class CBasicListHeaderIterator {
+        constructor(
+            [in] IList* headers,
+            [in] String name);
+
+        interface IBasicListHeaderIterator;
+        interface IHeaderIterator;
+        interface IIterator;
+    }
+
+    class CBasicHeaderElementIterator {
+        constructor(
+            [in] IHeaderIterator* headerIterator,
+            [in] IHeaderValueParser* parser);
+
+        constructor(
+            [in] IHeaderIterator* headerIterator);
+
+        interface IHeaderElementIterator;
+        interface IIterator;
+    }
+
+    [deprecated]
+    class CBasicHeaderIterator {
+        constructor(
+            [in] ArrayOf<IHeader*>* headers,
+            [in] String name);
+
+        interface IBasicHeaderIterator;
+        interface IHeaderIterator;
+        interface IIterator;
+    }
+
+    class CBasicHeader {
+        constructor(
+            [in] String name,
+            [in] String value);
+
+        constructor();
+
+        interface IHeader;
+        interface ICloneable;
+    }
+
+    class CBufferedHeader {
+        constructor(
+            [in] ICharArrayBuffer* buffer);
+
+        constructor();
+
+        interface IFormattedHeader;
+        interface IHeader;
+        interface ICloneable;
+    }
+
+    class CBasicStatusLine {
+        constructor(
+            [in] IProtocolVersion* ver,
+            [in] Int32 statusCode,
+            [in] String reasonPhrase);
+
+        constructor();
+
+        interface IStatusLine;
+        interface ICloneable;
+    }
+
+    class CParserCursor {
+        constructor(
+            [in] Int32 lowerBound,
+            [in] Int32 upperBound);
+
+        interface IParserCursor;
+    }
+
+    class CBasicRequestLine {
+        constructor(
+            [in] String method,
+            [in] String uri,
+            [in] IProtocolVersion* ver);
+
+        constructor();
+
+        interface IRequestLine;
+        interface ICloneable;
+    }
+
+    class CBasicHttpEntityEnclosingRequest {
+        constructor(
+            [in] String method,
+            [in] String uri);
+
+        constructor(
+            [in] String method,
+            [in] String uri,
+            [in] IProtocolVersion* ver);
+
+        constructor(
+            [in] IRequestLine* requestline);
+
+        constructor();
+
+        interface IHttpEntityEnclosingRequest;
+        interface IHttpRequest;
+        interface IHttpMessage;
+        interface ICloneable;
+    }
+
+    } // namespace Message
+
+
+    namespace Params {
+
+    singleton class CHttpProtocolParams {
+        interface IHttpProtocolParams;
+        interface ICoreProtocolPNames;
+    }
+
+    singleton class CHttpConnectionParams {
+        interface IHttpConnectionParams;
+        interface ICoreConnectionPNames;
+    }
+
+    class CBasicHttpParams {
+        constructor();
+
+        interface IBasicHttpParams;
+        interface IHttpParams;
+        interface ICloneable;
+    }
+
+    class CDefaultedHttpParams {
+        constructor(
+            [in] IHttpParams* l,
+            [in] IHttpParams* defaults);
+
+        interface IDefaultedHttpParams;
+        interface IHttpParams;
+    }
+
+    class CHttpConnectionParamBean {
+        constructor(
+            [in] IHttpParams* params);
+
+        interface IHttpConnectionParamBean;
+    }
+
+    class CHttpProtocolParamBean {
+        constructor(
+            [in] IHttpParams* params);
+
+        interface IHttpProtocolParamBean;
+    }
+
+    } // namespace Params
+
+
+    namespace Protocol {
+
+    class CHttpRequestExecutor {
+        constructor();
+
+        interface IHttpRequestExecutor;
+    }
+
+    class CBasicHttpProcessor {
+        constructor();
+
+        interface IBasicHttpProcessor;
+        interface IHttpRequestInterceptor;
+        interface IHttpResponseInterceptor;
+        interface IHttpRequestInterceptorList;
+        interface IHttpResponseInterceptorList;
+        interface ICloneable;
+    }
+
+    class CHttpService {
+        constructor(
+            [in] IHttpProcessor* processor,
+            [in] IConnectionReuseStrategy* connStrategy,
+            [in] IHttpResponseFactory* responseFactory);
+
+        interface IHttpService;
+    }
+
+    class CUriPatternMatcher {
+        constructor();
+
+        interface IUriPatternMatcher;
+    }
+
+    class CResponseConnControl {
+        constructor();
+
+        interface IHttpResponseInterceptor;
+    }
+
+    class CRequestContent {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CResponseContent {
+        constructor();
+
+        interface IHttpResponseInterceptor;
+    }
+
+    class CRequestTargetHost {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CRequestExpectContinue {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CBasicHttpContext {
+        constructor();
+
+        constructor(
+            [in] IHttpContext* parentContext);
+
+        interface IHttpContext;
+    }
+
+    class CHttpRequestHandlerRegistry {
+        constructor();
+
+        interface IHttpRequestHandlerRegistry;
+        interface IHttpRequestHandlerResolver;
+    }
+
+    class CDefaultedHttpContext {
+        constructor(
+            [in] IHttpContext* l,
+            [in] IHttpContext* defaults);
+
+        interface IDefaultedHttpContext;
+        interface IHttpContext;
+    }
+
+    class CHttpDateGenerator {
+        constructor();
+
+        interface IHttpDateGenerator;
+    }
+
+    singleton class CHttpDateGeneratorHelper {
+        interface IHttpDateGeneratorHelper;
+    }
+
+    class CResponseDate {
+        constructor();
+
+        interface IHttpResponseInterceptor;
+    }
+
+    class CRequestDate {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CResponseServer {
+        constructor();
+
+        interface IHttpResponseInterceptor;
+    }
+
+    class CRequestUserAgent {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    class CRequestConnControl {
+        constructor();
+
+        interface IHttpRequestInterceptor;
+    }
+
+    } // namespace Protocol
+
+
+    namespace Utility {
+
+    class CCharArrayBuffer {
+        constructor(
+            [in] Int32 capacity);
+
+        interface ICharArrayBuffer;
+    }
+
+    class CByteArrayBuffer {
+        constructor(
+            [in] Int32 capacity);
+
+        interface IByteArrayBuffer;
+    }
+
+    } // namespace Utility
+
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+
+}

@@ -1,0 +1,15 @@
+
+module
+{
+//    const FAMILY_CORE = 0x26    // Utility.Concurrent exception codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Utility Concurrent exception codes (Family: 0x26)
+    const E_CANCELLATION_EXCEPTION                      = 0xA6010000;
+    const E_EXECUTION_EXCEPTION                         = 0xA6020000;
+    const E_TIMEOUT_EXCEPTION                           = 0xA6030000;
+    const E_REJECTED_EXECUTION_EXCEPTION                = 0xA6040000;
+}

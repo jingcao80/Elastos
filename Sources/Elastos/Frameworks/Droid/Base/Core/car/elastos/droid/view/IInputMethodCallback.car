@@ -1,0 +1,29 @@
+
+module
+{
+    interface Elastos.Droid.Internal.View.IIInputMethodSession;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+
+    /**
+     * Helper interface for IInputMethodStub to allow the input method to call back
+     * to its client with results from incoming calls.
+     * {@hide}
+     */
+    [oneway]
+    interface IInputMethodCallback {
+        FinishedEvent(
+            [in] Int32 seq,
+            [in] Boolean handled);
+
+        SessionCreated(
+            [in] IIInputMethodSession* session);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

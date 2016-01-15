@@ -1,0 +1,63 @@
+
+module
+{
+    using interface Elastos.Core.IStringBuilder;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with PolicyInformation structure which is a subpart of certificatePolicies
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     *  PolicyInformation ::= SEQUENCE {
+     *       policyIdentifier   CertPolicyId,
+     *       policyQualifiers   SEQUENCE SIZE (1..MAX) OF
+     *                               PolicyQualifierInfo OPTIONAL
+     *  }
+     * </pre>
+     *
+     * TODO: This class is not fully implemented, implemented only work
+     * with OIDs.
+     */
+
+    interface IPolicyInformation {
+        /**
+         * Returns the value of policyIdentifier field of the structure.
+         */
+        GetPolicyIdentifier(
+            [out] String* policyIdentifier);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 PolicyInformation value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        DumpValue(
+            [in] IStringBuilder* sb);
+    }
+
+    interface IPolicyInformationHelper {
+        /**
+         * ASN.1 DER X.509 PolicyInformation encoder/decoder class.
+         */
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

@@ -1,0 +1,219 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.IShader;
+    interface Elastos.Droid.Graphics.Drawable.Shapes.IShape;
+    interface Elastos.Droid.Graphics.IPaint;
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+
+    interface IShaderFactory;
+
+    /**
+     * A Drawable object that draws primitive shapes.
+     * A ShapeDrawable takes a shape object like this:
+     *
+     * @sa android.graphics.drawable.shapes.Shape
+     * and manages its presence on the screen. If no Shape is given, then
+     * the ShapeDrawable will default to a RecrShape:
+     *
+     * @sa android.graphics.drawable.shapes.RectShape
+     *
+     * <p>This object can be defined in an XML file with the <code>&lt;shape></code> element.</p>
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about how to use ShapeDrawable, read the
+     * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#shape-drawable">
+     * Canvas and Drawables</a> document. For more information about defining a ShapeDrawable in
+     * XML, read the
+     * <a href="{@docRoot}guide/topics/resources/drawable-resource.html#Shape">Drawable Resources</a>
+     * document.</p></div>
+     *
+     * @attr ref android.R.styleable#ShapeDrawablePadding_left
+     * @attr ref android.R.styleable#ShapeDrawablePadding_top
+     * @attr ref android.R.styleable#ShapeDrawablePadding_right
+     * @attr ref android.R.styleable#ShapeDrawablePadding_bottom
+     * @attr ref android.R.styleable#ShapeDrawable_color
+     * @attr ref android.R.styleable#ShapeDrawable_width
+     * @attr ref android.R.styleable#ShapeDrawable_height
+     */
+
+
+
+     /**
+    * A Drawable is a general abstraction for "something that can be drawn." Most often
+    * you will deal with Drawable as the type of resource retrieved for drawing things
+    * to the screen; the Drawable class provides a generic API for dealing with an
+    * underlying visual resource that may take a variety of forms. Unlike a View, a
+    * Drawable does not have any facility to receive events or otherwise interact with
+    * the user.
+    *
+    * @sa  View
+    * <p>
+    * In addition to simple drawing, Drawable provides a number of generic mechanisms
+    * for its client to interact with what is being drawn:
+    * <p>
+    * The setBounds(Rect) method must be called to tell the Drawable where it is drawn
+    * and how large it should be. All Drawables should respect the requested size,
+    * often simply by scaling their imagery. A client can find the preferred size for
+    * some Drawables with the getIntrinsicHeight() and getIntrinsicWidth() methods.
+    *
+    * @sa setBounds(Rect)
+    * @sa getIntrinsicHeight()
+    * @sa getIntrinsicWidth()
+    * <p>
+    * The getPadding(Rect) method can return from some Drawables information about how
+    * to frame content that is placed inside of them. For example, a Drawable that is
+    * intended to be the frame for a button widget would need to return padding that
+    * correctly places the label inside of itself.
+    *
+    * @sa getPadding(Rect)
+    * <p>
+    * The setState(int[]) method allows the client to tell the Drawable in which state
+    * it is to be drawn, such as "focused", "selected", etc. Some drawables may modify
+    * their imagery based on the selected state.
+    *
+    * @sa setState(int[])
+    * <p>
+    * The setLevel(int) method allows the client to supply a single continuous
+    * controller that can modify the Drawable is displayed, such as a battery level or
+    * progress level. Some drawables may modify their imagery based on the current
+    * level.
+    *
+    * @sa setLevel(int)
+    * <p>
+    * A Drawable can perform animations by calling back to its client through the
+    * Drawable.Callback interface. All clients should support this interface
+    * (via setCallback(Drawable.Callback)) so that animations will work. A simple way
+    * to do this is through the system facilities such as
+    * (setBackgroundDrawable(Drawable) and ImageView.
+    *
+    * @sa Drawable.Callback
+    * @sa setCallback(Drawable.Callback
+    * @sa setBackgroundDrawable(Drawable)
+    * @sa ImageView
+    * <p>
+    * Though usually not visible to the application, Drawables may take a variety of
+    * forms:
+    * Bitmap: the simplest Drawable, a PNG or JPEG image.
+    * Nine Patch: an extension to the PNG format allows it to specify information about
+    * how to stretch it and place things inside of it.
+    * Shape: contains simple drawing commands instead of a raw bitmap, allowing it to
+    * resize better in some cases.
+    * Layers: a compound drawable, which draws multiple underlying drawables on top of
+    * each other.
+    * States: a compound drawable that selects one of a set of drawables based on its
+    * state.
+    * Levels: a compound drawable that selects one of a set of drawables based on its
+    * level.
+    * Scale: a compound drawable with a single child drawable, whose overall size is
+    * modified based on the current level.
+    *
+    * @implements Elastos.Droid.Graphics.Drawable.IDrawable
+    */
+    /**
+     * @Involve
+     * interface IDrawable
+     */
+    interface IShapeDrawable {
+        /**
+         * Returns the Paint used to draw the shape.
+         */
+        GetPaint(
+            [out] IPaint** paint);
+
+        /**
+         * Returns the ShaderFactory used by this ShapeDrawable for requesting a Shader.
+         *
+         * @sa android.graphics.Shader
+         */
+        GetShaderFactory(
+            [out] IShaderFactory** fact);
+
+        /**
+         * Returns the Shape of this ShapeDrawable.
+         */
+        GetShape(
+            [out] IShape** shape);
+
+        /**
+         * Sets the intrinsic (default) height for this shape.
+         *
+         * @param height the intrinsic height (in pixels)
+         */
+        SetIntrinsicHeight(
+            [in] Int32 height);
+
+        /**
+         * Sets the intrinsic (default) width for this shape.
+         *
+         * @param width the intrinsic width (in pixels)
+         */
+        SetIntrinsicWidth(
+            [in] Int32 width);
+
+        /**
+         * Sets padding for the shape.
+         *
+         * @param left    padding for the left side (in pixels)
+         * @param top     padding for the top (in pixels)
+         * @param right   padding for the right side (in pixels)
+         * @param bottom  padding for the bottom (in pixels)
+         */
+        SetPadding(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /**
+         * Sets padding for this shape, defined by a Rect object.
+         * Define the padding in the Rect object as: left, top, right, bottom.
+         */
+        SetPadding(
+            [in] IRect* padding);
+
+        /**
+         * Sets a ShaderFactory to which requests for a Shader object will be made.
+         *
+         * @sa android.graphics.Shader
+         *
+         * @param fact an instance of your ShaderFactory implementation
+         */
+        SetShaderFactory(
+            [in] IShaderFactory* fact);
+
+        /**
+         * Sets the Shape of this ShapeDrawable.
+         */
+        SetShape(
+            [in] IShape* s);
+    }
+
+    interface IShaderFactory {
+        /**
+         * Returns the Shader to be drawn when a Drawable is drawn.
+         * The dimensions of the Drawable are passed because they may be needed
+         * to adjust how the Shader is configured for drawing.
+         * This is called by ShapeDrawable.setShape().
+         *
+         * @param width  the width of the Drawable being drawn
+         * @param height the heigh of the Drawable being drawn
+         * @return       the Shader to be drawn
+         */
+        Resize(
+            [in] Int32 width,
+            [in] Int32 height,
+            [out] IShader** shader);
+    }
+
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

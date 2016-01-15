@@ -1,0 +1,135 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IWindowManager;
+    interface Elastos.Droid.View.IViewGroupLayoutParams;
+    interface Elastos.Droid.Content.Res.IConfiguration;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    [local]
+    interface IWindowManagerGlobal {
+        /**
+         * The user is navigating with keys (not the touch screen), so
+         * navigational focus should be shown.
+         */
+        const Int32 RELAYOUT_RES_IN_TOUCH_MODE = 0x1;
+
+        /**
+         * This is the first time the window is being drawn,
+         * so the client must call drawingFinished() when done
+         */
+        const Int32 RELAYOUT_RES_FIRST_TIME = 0x2;
+
+        /**
+         * The window manager has changed the surface from the last call.
+         */
+        const Int32 RELAYOUT_RES_SURFACE_CHANGED = 0x4;
+
+        /**
+         * The window manager is currently animating.  It will call
+         * IWindow.doneAnimating() when done.
+         */
+        const Int32 RELAYOUT_RES_ANIMATING = 0x8;
+
+        /**
+         * Flag for relayout: the client will be later giving
+         * internal insets; as a result, the window will not impact other window
+         * layouts until the insets are given.
+         */
+        const Int32 RELAYOUT_INSETS_PENDING = 0x1;
+
+        /**
+         * Flag for relayout: the client may be currently using the current surface,
+         * so if it is to be destroyed as a part of the relayout the destroy must
+         * be deferred until later.  The client will call performDeferredDestroy()
+         * when it is okay.
+         */
+        const Int32 RELAYOUT_DEFER_SURFACE_DESTROY = 0x2;
+
+        const Int32 ADD_FLAG_APP_VISIBLE = 0x2;
+        const Int32 ADD_FLAG_IN_TOUCH_MODE = RELAYOUT_RES_IN_TOUCH_MODE;
+
+        const Int32 ADD_OKAY = 0;
+        const Int32 ADD_BAD_APP_TOKEN = -1;
+        const Int32 ADD_BAD_SUBWINDOW_TOKEN = -2;
+        const Int32 ADD_NOT_APP_TOKEN = -3;
+        const Int32 ADD_APP_EXITING = -4;
+        const Int32 ADD_DUPLICATE_ADD = -5;
+        const Int32 ADD_STARTING_NOT_NEEDED = -6;
+        const Int32 ADD_MULTIPLE_SINGLETON = -7;
+        const Int32 ADD_PERMISSION_DENIED = -8;
+        const Int32 ADD_INVALID_DISPLAY = -9;
+
+
+        GetViewRootNames(
+            [out, callee] ArrayOf<String>* names);
+
+        GetRootView(
+            [in] String name,
+            [out] IView** view);
+
+        AddView(
+            [in] IView* view,
+            [in] IViewGroupLayoutParams* params,
+            [in] IDisplay* display,
+            [in] IWindow* parentWindow);
+
+        UpdateViewLayout(
+            [in] IView* view,
+            [in] IViewGroupLayoutParams* params);
+
+        RemoveView(
+            [in] IView* view,
+            [in] Boolean immediate);
+
+        CloseAll(
+            [in] IBinder* token,
+            [in] String who,
+            [in] String what);
+
+        TrimMemory(
+            [in] Int32 level);
+
+        SetStoppedState(
+            [in] IBinder* token,
+            [in] Boolean state);
+
+        ReportNewConfiguration(
+            [in] IConfiguration* config);
+
+        ChangeCanvasOpacity(
+            [in] IBinder* token,
+            [in] Boolean opaque);
+    }
+
+    [local]
+    interface IWindowManagerGlobalHelper {
+        GetInstance(
+            [out] IWindowManagerGlobal** wmg);
+
+        GetWindowManagerService(
+            [out] IIWindowManager** windowManager);
+
+        GetWindowSession(
+            [out] IWindowSession** windowSession);
+
+        PeekWindowSession(
+            [out] IWindowSession** windowSession);
+
+        ShouldDestroyEglContext(
+            [in] Int32 trimLevel,
+            [out] Boolean* result);
+
+        TrimForeground();
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

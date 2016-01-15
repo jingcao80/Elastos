@@ -1,0 +1,39 @@
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /**
+     * @Involde
+     * interface IOutputStream;
+     */
+    interface IFileBridgeOutputStream {
+    }
+
+    /**
+     * @Involde
+     * interface IThread;
+     * interface IRunnable;
+     */
+    interface IFileBridge {
+
+        IsClosed(
+            [out] Boolean* isClosed);
+
+        ForceClose();
+
+        SetTargetFile(
+            [in] IFileDescriptor* target);
+
+        GetClientSocket(
+            [out] IFileDescriptor** sock);
+
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

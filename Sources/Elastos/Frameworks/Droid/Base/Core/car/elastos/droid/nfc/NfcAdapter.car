@@ -1,0 +1,212 @@
+
+module
+{
+
+    interface Elastos.Core.IArrayOf;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntentFilter;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.NFC.INfcEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+
+
+    interface INfcAdapterReaderCallback {
+
+        OnTagDiscovered(
+            [in] ITag* tag);
+    }
+
+    interface INfcAdapterOnNdefPushCompleteCallback {
+
+        OnNdefPushComplete(
+            [in] INfcEvent* event);
+    }
+
+    interface INfcAdapterCreateNdefMessageCallback {
+
+        CreateNdefMessage(
+            [in] INfcEvent* event,
+            [out] INdefMessage** message);
+    }
+
+    interface INfcAdapterCreateBeamUrisCallback {
+
+        CreateBeamUris(
+            [in] INfcEvent* event,
+            [out, callee] ArrayOf<IUri*> * uris);
+    }
+
+    interface INfcAdapterNfcUnlockHandler {
+
+        OnUnlockAttempted(
+            [in] ITag* tag,
+            [out] Boolean* res);
+    }
+
+    [deprecated, local]
+    interface INfcAdapter {
+        GetContext(
+            [out] IContext** context);
+
+        GetService(
+            [out] INfcAdapter** adapter);
+
+        GetTagService(
+            [out] IINfcTag** tag);
+
+        GetCardEmulationService(
+            [out] IINfcCardEmulation** res);
+
+        IsEnabled(
+            [out] Boolean* res);
+
+        GetAdapterState(
+            [out] Int32* state);
+
+        Enable(
+            [out] Boolean* res);
+
+        Disable(
+            [out] Boolean* res);
+
+        Disable(
+            [in] Boolean persist,
+            [out] Boolean* res);
+
+        PausePolling(
+            [in] Int32 timeoutInMs);
+
+        ResumePolling();
+
+        SetBeamPushUris(
+            [in] ArrayOf<IUri*> * uris,
+            [in] IActivity* activity);
+
+        SetBeamPushUrisCallback(
+            [in] INfcAdapterCreateBeamUrisCallback* cb,
+            [in] IActivity* activity);
+
+        SetNdefPushMessage(
+            [in] INdefMessage* message,
+            [in] IActivity* activity,
+            [in] ArrayOf<IActivity*>* activities);
+
+        SetNdefPushMessage(
+            [in] INdefMessage* message,
+            [in] IActivity* activity,
+            [in] Int32 flags);
+
+        SetNdefPushMessageCallback(
+            [in] INfcAdapterCreateNdefMessageCallback* cb,
+            [in] IActivity* activity,
+            [in] ArrayOf<IActivity*>* activities);
+
+        SetNdefPushMessageCallback(
+            [in] INfcAdapterCreateNdefMessageCallback* cb,
+            [in] IActivity* activity,
+            [in] Int32 flags);
+
+        SetOnNdefPushCompleteCallback(
+            [in] INfcAdapterOnNdefPushCompleteCallback* cb,
+            [in] IActivity* activity,
+            [in] ArrayOf<IActivity*>* activities);
+
+        EnableForegroundDispatch(
+            [in] IActivity* activity,
+            [in] IPendingIntent* intent,
+            [in] ArrayOf<IIntentFilter*>* filters,
+            [in] ArrayOf< IArrayOf* >* techLists);
+
+        DisableForegroundDispatch(
+            [in] IActivity* activity);
+
+        DisableForegroundDispatchInternal(
+            [in] IActivity* activity,
+            [in] Boolean force);
+
+        EnableReaderMode(
+            [in] IActivity* activity,
+            [in] INfcAdapterReaderCallback* cb,
+            [in] Int32 flags,
+            [in] IBundle* extras);
+
+        DisableReaderMode(
+            [in] IActivity* activity);
+
+        InvokeBeam(
+            [in] IActivity* activity,
+            [out] Boolean* res);
+
+        InvokeBeam(
+            [in] IBeamShareData* shareData,
+            [out] Boolean* res);
+
+        EnableForegroundNdefPush(
+            [in] IActivity* activity,
+            [in] INdefMessage* message);
+
+        DisableForegroundNdefPush(
+            [in] IActivity* activity);
+
+        EnableNdefPush(
+            [out] Boolean* res);
+
+        DisableNdefPush(
+            [out] Boolean* res);
+
+        IsNdefPushEnabled(
+            [out] Boolean* res);
+
+        Dispatch(
+            [in] ITag* tag);
+
+        SetP2pModes(
+            [in] Int32 initiatorModes,
+            [in] Int32 targetModes);
+
+        AddNfcUnlockHandler(
+            [in] INfcAdapterNfcUnlockHandler* unlockHandler,
+            [in] ArrayOf<String>* tagTechnologies,
+            [out] Boolean* res);
+
+        RemoveNfcUnlockHandler(
+            [in] INfcAdapterNfcUnlockHandler* unlockHandler,
+            [out] Boolean* res);
+
+        GetNfcAdapterExtrasInterface(
+            [out] IINfcAdapterExtras** extras);
+
+        EnforceResumed(
+            [in] IActivity* activity);
+
+        GetSdkVersion(
+            [out] Int32* vs);
+    }
+
+    [local]
+    interface INfcAdapterHelper {
+        GetNfcAdapter(
+            [in] IContext* context,
+            [out] INfcAdapter** adapter);
+
+        GetDefaultAdapter(
+            [in] IContext* context,
+            [out] INfcAdapter** adapter);
+
+        GetDefaultAdapter(
+            [out] INfcAdapter** adapter);
+
+
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

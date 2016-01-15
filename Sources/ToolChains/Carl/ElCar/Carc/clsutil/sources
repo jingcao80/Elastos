@@ -1,0 +1,22 @@
+#==========================================================================
+# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME= clsutil
+TARGET_TYPE= lib
+
+
+INCLUDESTEMP := $(INCLUDES);
+INCLUDES += $(MAKEDIR)/../../inc;
+INCLUDES += $(INCLUDESTEMP);
+
+
+
+SOURCES = strgen.cpp
+SOURCES += cls2car.cpp
+SOURCES += cls2abrg.cpp
+ifeq "$(XDK_TARGET_PLATFORM)" "win32"
+SOURCES += chgpath.cpp
+endif
+SOURCES += rabin.cpp
+

@@ -1,0 +1,231 @@
+
+module
+{
+    interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    interface Elastos.Droid.Content.Pm.IActivityInfo;
+    interface Elastos.Droid.Content.Pm.IServiceInfo;
+    interface Elastos.Droid.Content.Pm.IProviderInfo;
+    interface Elastos.Droid.Content.Pm.IInstrumentationInfo;
+    interface Elastos.Droid.Content.Pm.IPermissionInfo;
+    interface Elastos.Droid.Content.Pm.ISignature;
+    interface Elastos.Droid.Content.Pm.IConfigurationInfo;
+    interface Elastos.Droid.Content.Pm.IFeatureInfo;
+    interface Elastos.Droid.Content.Pm.IFeatureGroupInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Overall information about the contents of a package. This corresponds to all
+     * of the information collected from AndroidManifest.xml.
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    [deprecated]
+    interface IPackageInfo {
+        /**
+         * Flag for {@link #requestedPermissionsFlags}: the requested permission
+         * is required for the application to run; the user can not optionally
+         * disable it.  Currently all permissions are required.
+         */
+        const Int32 REQUESTED_PERMISSION_REQUIRED = 1<<0;
+
+        /**
+         * Flag for {@link #requestedPermissionsFlags}: the requested permission
+         * is currently granted to the application.
+         */
+        const Int32 REQUESTED_PERMISSION_GRANTED = 1<<1;
+
+        /**
+         * Constant corresponding to <code>auto</code> in
+         * the {@link android.R.attr#installLocation} attribute.
+         * @hide
+         */
+        const Int32 INSTALL_LOCATION_UNSPECIFIED = -1;
+
+        /**
+         * Constant corresponding to <code>auto</code> in the
+         * {@link android.R.attr#installLocation} attribute.
+         */
+        const Int32 INSTALL_LOCATION_AUTO = 0;
+
+        /**
+         * Constant corresponding to <code>internalOnly</code> in the
+         * {@link android.R.attr#installLocation} attribute.
+         */
+        const Int32 INSTALL_LOCATION_INTERNAL_ONLY = 1;
+
+        /**
+         * Constant corresponding to <code>preferExternal</code> in the
+         * {@link android.R.attr#installLocation} attribute.
+         */
+        const Int32 INSTALL_LOCATION_PREFER_EXTERNAL = 2;
+
+
+        ToString(
+            [out] String* str);
+
+        GetPackageName(
+            [out] String* packageName);
+
+        SetPackageName(
+            [in] String packageName);
+
+        SetSplitNames(
+            [in] ArrayOf<String>* names);
+
+        GetSplitNames(
+            [out, callee] ArrayOf<String>* names);
+
+        GetVersionCode(
+            [out] Int32* versionCode);
+
+        SetVersionCode(
+            [in] Int32 versionCode);
+
+        GetVersionName(
+            [out] String* versionName);
+
+        SetVersionName(
+            [in] String versionName);
+
+        GetSharedUserId(
+            [out] String* id);
+
+        SetSharedUserId(
+            [in] String id);
+
+        GetSharedUserLabel(
+            [out] Int32* label);
+
+        SetSharedUserLabel(
+            [in] Int32 label);
+
+        GetApplicationInfo(
+            [out] IApplicationInfo** info);
+
+        SetApplicationInfo(
+            [in] IApplicationInfo* info);
+
+        GetFirstInstallTime(
+            [out] Int64* time);
+
+        SetFirstInstallTime(
+            [in] Int64 time);
+
+        GetLastUpdateTime(
+            [out] Int64* time);
+
+        SetLastUpdateTime(
+            [in] Int64 time);
+
+        GetGids(
+            [out, callee] ArrayOf<Int32>* gids);
+
+        SetGids(
+            [in] ArrayOf<Int32>* gids);
+
+        GetActivities(
+            [out, callee] ArrayOf<IActivityInfo*>* activities);
+
+        SetActivities(
+            [in] ArrayOf<IActivityInfo*>* activities);
+
+        GetReceivers(
+            [out, callee] ArrayOf<IActivityInfo*>* receivers);
+
+        SetReceivers(
+            [in] ArrayOf<IActivityInfo*>* receivers);
+
+        GetServices(
+            [out, callee] ArrayOf<IServiceInfo*>* services);
+
+        SetServices(
+            [in] ArrayOf<IServiceInfo*>* services);
+
+        GetProviders(
+            [out, callee] ArrayOf<IProviderInfo*>* providers);
+
+        SetProviders(
+            [in] ArrayOf<IProviderInfo*>* providers);
+
+        GetInstrumentation(
+            [out, callee] ArrayOf<IInstrumentationInfo*>* instrumentation);
+
+        SetInstrumentation(
+            [in] ArrayOf<IInstrumentationInfo*>* instrumentation);
+
+        GetPermissions(
+            [out, callee] ArrayOf<IPermissionInfo*>* permissions);
+
+        SetPermissions(
+            [in] ArrayOf<IPermissionInfo*>* permissions);
+
+        GetRequestedPermissions(
+            [out, callee] ArrayOf<String>* requestedPermissions);
+
+        SetRequestedPermissions(
+            [in] ArrayOf<String>* requestedPermissions);
+
+        GetRequestedPermissionsFlags(
+            [out, callee] ArrayOf<Int32>* requestedPermissionsFlags);
+
+        SetRequestedPermissionsFlags(
+            [in] ArrayOf<Int32>* requestedPermissionsFlags);
+
+        GetSignatures(
+            [out, callee] ArrayOf<ISignature*>* signatures);
+
+        SetSignatures(
+            [in] ArrayOf<ISignature*>* signatures);
+
+        GetConfigPreferences(
+            [out, callee] ArrayOf<IConfigurationInfo*>* configPreferences);
+
+        SetConfigPreferences(
+            [in] ArrayOf<IConfigurationInfo*>* configPreferences);
+
+        GetReqFeatures(
+            [out, callee] ArrayOf<IFeatureInfo*>* reqFeatures);
+
+        SetReqFeatures(
+            [in] ArrayOf<IFeatureInfo*>* reqFeatures);
+
+        GetFeatureGroups(
+            [out, callee] ArrayOf<IFeatureGroupInfo*>* featureGroups);
+
+        SetFeatureGroups(
+            [in] ArrayOf<IFeatureGroupInfo*>* featureGroups);
+
+        GetInstallLocation(
+            [out] Int32* installLocation);
+
+        SetInstallLocation(
+            [in] Int32 installLocation);
+
+        /** @hide */
+        GetRequiredAccountType(
+            [out] String* type);
+
+        /** @hide */
+        SetRequiredAccountType(
+            [in] String type);
+
+        /** @hide */
+        GetRestrictedAccountType(
+            [out] String* type);
+
+        /** @hide */
+        SetRestrictedAccountType(
+            [in] String type);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

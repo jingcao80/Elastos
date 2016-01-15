@@ -1,0 +1,56 @@
+
+module
+{
+    interface Elastos.Droid.Text.ISpannable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+
+    /**
+     * When an object of this type is attached to a Spannable, its methods
+     * will be called to notify it that other markup objects have been
+     * added, changed, or removed.
+     *
+     * @Involve
+     * interface INoCopySpan
+     */
+    interface ISpanWatcher {
+        /**
+         * This method is called to notify you that the specified object
+         * has been attached to the specified range of the text.
+         */
+        OnSpanAdded(
+            [in] ISpannable* text,
+            [in] IInterface* what,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * This method is called to notify you that the specified object
+         * has been detached from the specified range of the text.
+         */
+        OnSpanRemoved(
+            [in] ISpannable* text,
+            [in] IInterface* what,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        /**
+         * This method is called to notify you that the specified object
+         * has been relocated from the range <code>ostart&hellip;oend</code>
+         * to the new range <code>nstart&hellip;nend</code> of the text.
+         */
+        OnSpanChanged(
+            [in] ISpannable* text,
+            [in] IInterface* what,
+            [in] Int32 ostart,
+            [in] Int32 oend,
+            [in] Int32 nstart,
+            [in] Int32 nend);
+    }
+
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

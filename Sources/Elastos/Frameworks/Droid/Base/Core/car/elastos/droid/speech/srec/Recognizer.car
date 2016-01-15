@@ -1,0 +1,377 @@
+module
+{
+    interface Elastos.Utility.ILocale;
+    interface Elastos.IO.IInputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Speech {
+    namespace Srec {
+
+    /**
+     * Simple, synchronous speech recognizer, using the Nuance SREC package.
+     * Usages proceeds as follows:
+     *
+     * <ul>
+     * <li>Create a <code>Recognizer</code>.
+     * <li>Create a <code>Recognizer.Grammar</code>.
+     * <li>Setup the <code>Recognizer.Grammar</code>.
+     * <li>Reset the <code>Recognizer.Grammar</code> slots, if needed.
+     * <li>Fill the <code>Recognizer.Grammar</code> slots, if needed.
+     * <li>Compile the <code>Recognizer.Grammar</code>, if needed.
+     * <li>Save the filled <code>Recognizer.Grammar</code>, if needed.
+     * <li>Start the <code>Recognizer</code>.
+     * <li>Loop over <code>advance</code> and <code>putAudio</code> until recognition complete.
+     * <li>Fetch and process results, or notify of failure.
+     * <li>Stop the <code>Recognizer</code>.
+     * <li>Destroy the <code>Recognizer</code>.
+     * </ul>
+     *
+     * <p>Below is example code</p>
+     *
+     * <pre class="prettyprint">
+     *
+     * // create and start audio input
+     * InputStream audio = new MicrophoneInputStream(11025, 11025*5);
+     * // create a Recognizer
+     * String cdir = Recognizer.getConfigDir(null);
+     * Recognizer recognizer = new Recognizer(cdir + "/baseline11k.par");
+     * // create and load a Grammar
+     * Recognizer.Grammar grammar = recognizer.new Grammar(cdir + "/grammars/VoiceDialer.g2g");
+     * // setup the Grammar to work with the Recognizer
+     * grammar.setupRecognizer();
+     * // fill the Grammar slots with names and save, if required
+     * grammar.resetAllSlots();
+     * for (String name : names) grammar.addWordToSlot("@Names", name, null, 1, "V=1");
+     * grammar.compile();
+     * grammar.save(".../foo.g2g");
+     * // start the Recognizer
+     * recognizer.start();
+     * // loop over Recognizer events
+     * while (true) {
+     *     switch (recognizer.advance()) {
+     *     case Recognizer.EVENT_INCOMPLETE:
+     *     case Recognizer.EVENT_STARTED:
+     *     case Recognizer.EVENT_START_OF_VOICING:
+     *     case Recognizer.EVENT_END_OF_VOICING:
+     *         // let the Recognizer continue to run
+     *         continue;
+     *     case Recognizer.EVENT_RECOGNITION_RESULT:
+     *         // success, so fetch results here!
+     *         for (int i = 0; i < recognizer.getResultCount(); i++) {
+     *             String result = recognizer.getResult(i, Recognizer.KEY_LITERAL);
+     *         }
+     *         break;
+     *     case Recognizer.EVENT_NEED_MORE_AUDIO:
+     *         // put more audio in the Recognizer
+     *         recognizer.putAudio(audio);
+     *         continue;
+     *     default:
+     *         notifyFailure();
+     *         break;
+     *     }
+     *     break;
+     * }
+     * // stop the Recognizer
+     * recognizer.stop();
+     * // destroy the Recognizer
+     * recognizer.destroy();
+     * // stop the audio device
+     * audio.close();
+     *
+     * </pre>
+     */
+    [deprecated]
+    interface IRecognizer {
+        /**
+         * Result key corresponding to confidence score.
+         */
+        const String KEY_CONFIDENCE = "conf";
+
+        /**
+         * Result key corresponding to literal text.
+         */
+        const String KEY_LITERAL = "literal";
+
+        /**
+         * Result key corresponding to semantic meaning text.
+         */
+        const String KEY_MEANING = "meaning";
+
+
+        /**
+         * Reserved value.
+         */
+        const Int32 EVENT_INVALID = 0;
+
+        /**
+         * <code>Recognizer</code> could not find a match for the utterance.
+         */
+        const Int32 EVENT_NO_MATCH = 1;
+
+        /**
+         * <code>Recognizer</code> processed one frame of audio.
+         */
+        const Int32 EVENT_INCOMPLETE = 2;
+
+        /**
+         * <code>Recognizer</code> has just been started.
+         */
+        const Int32 EVENT_STARTED = 3;
+
+        /**
+         * <code>Recognizer</code> is stopped.
+         */
+        const Int32 EVENT_STOPPED = 4;
+
+        /**
+         * Beginning of speech detected.
+         */
+        const Int32 EVENT_START_OF_VOICING = 5;
+
+        /**
+         * End of speech detected.
+         */
+        const Int32 EVENT_END_OF_VOICING = 6;
+
+        /**
+         * Beginning of utterance occured too soon.
+         */
+        const Int32 EVENT_SPOKE_TOO_SOON = 7;
+
+        /**
+         * Recognition match detected.
+         */
+        const Int32 EVENT_RECOGNITION_RESULT = 8;
+
+        /**
+         * Timeout occured before beginning of utterance.
+         */
+        const Int32 EVENT_START_OF_UTTERANCE_TIMEOUT = 9;
+
+        /**
+         * Timeout occured before speech recognition could complete.
+         */
+        const Int32 EVENT_RECOGNITION_TIMEOUT = 10;
+
+        /**
+         * Not enough samples to process one frame.
+         */
+        const Int32 EVENT_NEED_MORE_AUDIO = 11;
+
+        /**
+         * More audio encountered than is allowed by 'swirec_max_speech_duration'.
+         */
+        const Int32 EVENT_MAX_SPEECH = 12;
+
+        /**
+         * Start recognition
+         */
+        Start();
+
+        /**
+         * Process some audio and return the current status.
+         * @return recognition event, one of:
+         * <ul>
+         * <li><code>EVENT_INVALID</code>
+         * <li><code>EVENT_NO_MATCH</code>
+         * <li><code>EVENT_INCOMPLETE</code>
+         * <li><code>EVENT_STARTED</code>
+         * <li><code>EVENT_STOPPED</code>
+         * <li><code>EVENT_START_OF_VOICING</code>
+         * <li><code>EVENT_END_OF_VOICING</code>
+         * <li><code>EVENT_SPOKE_TOO_SOON</code>
+         * <li><code>EVENT_RECOGNITION_RESULT</code>
+         * <li><code>EVENT_START_OF_UTTERANCE_TIMEOUT</code>
+         * <li><code>EVENT_RECOGNITION_TIMEOUT</code>
+         * <li><code>EVENT_NEED_MORE_AUDIO</code>
+         * <li><code>EVENT_MAX_SPEECH</code>
+         * </ul>
+         */
+        Advance(
+            [out] Int32* ret);
+
+        /**
+         * Put audio samples into the <code>Recognizer</code>.
+         * @param buf holds the audio samples.
+         * @param offset offset of the first sample.
+         * @param length number of bytes containing samples.
+         * @param isLast indicates no more audio data, normally false.
+         * @return number of bytes accepted.
+         */
+        PutAudio(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] Boolean isLast,
+            [out] Int32* ret);
+
+        /**
+         * Read audio samples from an <code>InputStream</code> and put them in the
+         * <code>Recognizer</code>.
+         * @param audio <code>InputStream</code> containing PCM audio samples.
+         */
+        PutAudio(
+            [in] IInputStream* audio);
+
+        /**
+         * Get the number of recognition results.  Must be called after
+         * <code>EVENT_RECOGNITION_RESULT</code> is returned by
+         * <code>advance</code>, but before <code>stop</code>.
+         *
+         * @return number of results in nbest list.
+         */
+        GetResultCount(
+            [out] Int32* ret);
+
+        /**
+         * Get a set of keys for the result.  Must be called after
+         * <code>EVENT_RECOGNITION_RESULT</code> is returned by
+         * <code>advance</code>, but before <code>stop</code>.
+         *
+         * @param index index of result.
+         * @return array of keys.
+         */
+        GetResultKeys(
+            [in] Int32 index,
+            [out, callee] ArrayOf<String>* ret);
+
+        /**
+         * Get a result value.  Must be called after
+         * <code>EVENT_RECOGNITION_RESULT</code> is returned by
+         * <code>advance</code>, but before <code>stop</code>.
+         *
+         * @param index index of the result.
+         * @param key key of the result.  This is typically one of
+         * <code>KEY_CONFIDENCE</code>, <code>KEY_LITERAL</code>, or
+         * <code>KEY_MEANING</code>, but the user can also define their own keys
+         * in a grxml file, or in the <code>tag</code> slot of
+         * <code>Grammar.addWordToSlot</code>.
+         * @return the result.
+         */
+        GetResult(
+            [in] Int32 index,
+            [in] String key,
+            [out] String* ret);
+
+        /**
+         * Stop the <code>Recognizer</code>.
+         */
+        Stop();
+
+        /**
+         * Reset the acoustic state vectorto it's default value.
+         *
+         * @hide
+         */
+        ResetAcousticState();
+
+        /**
+         * Set the acoustic state vector.
+         * @param state String containing the acoustic state vector.
+         *
+         * @hide
+         */
+        SetAcousticState(
+            [in] String state);
+
+        /**
+         * Get the acoustic state vector.
+         * @return String containing the acoustic state vector.
+         *
+         * @hide
+         */
+        GetAcousticState(
+            [out] String* ret);
+
+        /**
+         * Clean up resources.
+         */
+        Destroy();
+
+        GetVocabulary(
+            [out] Int32* ret);
+    }
+
+    interface IRecognizerHelper {
+        /**
+         * Get the pathname of the SREC configuration directory corresponding to the
+         * language indicated by the Locale.
+         * This directory contains dictionaries, speech models,
+         * configuration files, and other data needed by the Recognizer.
+         * @param locale <code>Locale</code> corresponding to the desired language,
+         * or null for default, currently <code>Locale.US</code>.
+         * @return Pathname of the configuration directory.
+         */
+        GetConfigDir(
+            [in] ILocale* locale,
+            [out] String* ret);
+
+        /**
+         * Produce a displayable string from an <code>advance</code> event.
+         * @param event
+         * @return String representing the event.
+         */
+        EventToString(
+            [in] Int32 event,
+            [out] String* ret);
+
+    }
+
+
+    /**
+     * Represents a grammar loaded into the Recognizer.
+     */
+    interface IRecognizerGrammar {
+        /**
+         * Reset all slots.
+         */
+        ResetAllSlots();
+
+        /**
+         * Add a word to a slot.
+         *
+         * @param slot slot name.
+         * @param word word to insert.
+         * @param pron pronunciation, or null to derive from word.
+         * @param weight weight to give the word.  One is normal, 50 is low.
+         * @param tag semantic meaning tag string.
+         */
+        AddWordToSlot(
+            [in] String slot,
+            [in] String word,
+            [in] String pron,
+            [in] Int32 weight,
+            [in] String tag);
+
+        /**
+         * Compile all slots.
+         */
+        Compile();
+
+        /**
+         * Setup <code>Grammar</code> with <code>Recognizer</code>.
+         */
+        SetupRecognizer();
+
+        /**
+         * Save <code>Grammar</code> to g2g file.
+         *
+         * @param g2gFileName
+         * @throws IOException
+         */
+        Save(
+            [in] String g2gFileName);
+
+        /**
+         * Release resources associated with this <code>Grammar</code>.
+         */
+        Destroy();
+    }
+
+    } // namespace Srec
+    } // namespace Speech
+    } // namespace Droid
+    } // namespace Elastos
+
+}

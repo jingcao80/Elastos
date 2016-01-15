@@ -1,0 +1,9 @@
+
+DIRS = SystemUI
+DIRS += SoftKeyboard
+DIRS += PinyinIME
+#DIRS += Snowfox
+#DIRS += XBMC
+DIRS += MusicPlayer
+DIRS += Gallery
+DIRS += AccountsAndSyncSettings

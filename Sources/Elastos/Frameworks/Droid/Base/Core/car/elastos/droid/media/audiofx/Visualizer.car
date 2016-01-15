@@ -1,0 +1,377 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Audiofx {
+
+    interface IVisualizer;
+
+    //---------------------------------------------------------
+    // Interface definitions
+    //--------------------
+    /**
+     * The OnDataCaptureListener interface defines methods called by the Visualizer to periodically
+     * update the audio visualization capture.
+     * The client application can implement this interface and register the listener with the
+     * {@link #setDataCaptureListener(OnDataCaptureListener, int, boolean, boolean)} method.
+     */
+    [deprecated]
+    interface IVisualizerOnDataCaptureListener  {
+        /**
+         * Method called when a new waveform capture is available.
+         * @param visualizer Visualizer object on which the listener is registered.
+         * @param waveform array of bytes containing the waveform representation.
+         * @param samplingRate sampling rate of the audio visualized.
+         */
+        OnWaveFormDataCapture(
+            [in] IVisualizer* visualizer,
+            [in] ArrayOf<Byte>* waveform,
+            [in] Int32 samplingRate);
+
+        /**
+         * Method called when a new frequency capture is available.
+         * @param visualizer Visualizer object on which the listener is registered.
+         * @param fft array of bytes containing the frequency representation.
+         * @param samplingRate sampling rate of the audio visualized.
+         */
+        OnFftDataCapture(
+            [in] IVisualizer* visualizer,
+            [in] ArrayOf<Byte>* fft,
+            [in] Int32 samplingRate);
+    }
+
+    /**
+     * @hide
+     *
+     * The OnServerDiedListener interface defines a method called by the Visualizer to indicate that
+     * the connection to the native media server has been broken and that the Visualizer object will
+     * need to be released and re-created.
+     * The client application can implement this interface and register the listener with the
+     * {@link #setServerDiedListener(OnServerDiedListener)} method.
+     */
+    interface IVisualizerOnServerDiedListener  {
+        /**
+         * @hide
+         *
+         * Method called when the native media server has died.
+         * <p>If the native media server encounters a fatal error and needs to restart, the binder
+         * connection from the {@link #Visualizer} to the media server will be broken.  Data capture
+         * callbacks will stop happening, and client initiated calls to the {@link #Visualizer}
+         * instance will fail with the error code {@link #DEAD_OBJECT}.  To restore functionality,
+         * clients should {@link #release()} their old visualizer and create a new instance.
+         */
+        OnServerDied();
+    }
+
+    /**
+     * A class to store peak and RMS values.
+     * Peak and RMS are expressed in mB, as described in the
+     * {@link Visualizer#MEASUREMENT_MODE_PEAK_RMS} measurement mode.
+     */
+    interface IVisualizerMeasurementPeakRms {
+    }
+
+    [deprecated]
+    interface IVisualizer {
+        /**
+         * State of a Visualizer object that was not successfully initialized upon creation
+         */
+        const Int32 STATE_UNINITIALIZED = 0;
+        /**
+         * State of a Visualizer object that is ready to be used.
+         */
+        const Int32 STATE_INITIALIZED   = 1;
+        /**
+         * State of a Visualizer object that is active.
+         */
+        const Int32 STATE_ENABLED   = 2;
+
+        // to keep in sync with system/media/audio_effects/include/audio_effects/effect_visualizer.h
+        /**
+         * Defines a capture mode where amplification is applied based on the content of the captured
+         * data. This is the default Visualizer mode, and is suitable for music visualization.
+         */
+        const Int32 SCALING_MODE_NORMALIZED = 0;
+        /**
+         * Defines a capture mode where the playback volume will affect (scale) the range of the
+         * captured data. A low playback volume will lead to low sample and fft values, and vice-versa.
+         */
+        const Int32 SCALING_MODE_AS_PLAYED = 1;
+
+        /**
+         * Defines a measurement mode in which no measurements are performed.
+         */
+        const Int32 MEASUREMENT_MODE_NONE = 0;
+
+        /**
+         * Defines a measurement mode which computes the peak and RMS value in mB, where 0mB is the
+         * maximum sample value, and -9600mB is the minimum value.
+         * Values for peak and RMS can be retrieved with
+         * {@link #getMeasurementPeakRms(MeasurementPeakRms)}.
+         */
+        const Int32 MEASUREMENT_MODE_PEAK_RMS = 1 << 0;
+
+        // Error codes:
+        /**
+         * Successful operation.
+         */
+        const Int32 SUCCESS              = 0;
+        /**
+         * Unspecified error.
+         */
+        const Int32 ERROR                = -1;
+        /**
+         * Internal opreation status. Not returned by any method.
+         */
+        const Int32 ALREADY_EXISTS       = -2;
+        /**
+         * Operation failed due to bad object initialization.
+         */
+        const Int32 ERROR_NO_INIT              = -3;
+        /**
+         * Operation failed due to bad parameter value.
+         */
+        const Int32 ERROR_BAD_VALUE            = -4;
+        /**
+         * Operation failed because it was requested in wrong state.
+         */
+        const Int32 ERROR_INVALID_OPERATION    = -5;
+        /**
+         * Operation failed due to lack of memory.
+         */
+        const Int32 ERROR_NO_MEMORY            = -6;
+        /**
+         * Operation failed due to dead remote object.
+         */
+        const Int32 ERROR_DEAD_OBJECT          = -7;
+
+        /**
+         * Releases the native Visualizer resources. It is a good practice to release the
+         * visualization engine when not in use.
+         */
+        ReleaseResources();
+
+        /**
+         * Enable or disable the visualization engine.
+         * @param enabled requested enable state
+         * @return {@link #SUCCESS} in case of success,
+         * {@link #ERROR_INVALID_OPERATION} or {@link #ERROR_DEAD_OBJECT} in case of failure.
+         * @throws IllegalStateException
+         */
+        SetEnabled(
+            [in] Boolean enabled,
+            [out] Int32* result);
+
+        /**
+         * Get current activation state of the visualizer.
+         * @return true if the visualizer is active, false otherwise
+         */
+        GetEnabled(
+            [out] Boolean* enabled);
+
+        /**
+         * Sets the capture size, i.e. the number of bytes returned by {@link #getWaveForm(byte[])} and
+         * {@link #getFft(byte[])} methods. The capture size must be a power of 2 in the range returned
+         * by {@link #getCaptureSizeRange()}.
+         * This method must not be called when the Visualizer is enabled.
+         * @param size requested capture size
+         * @return {@link #SUCCESS} in case of success,
+         * {@link #ERROR_BAD_VALUE} in case of failure.
+         * @throws IllegalStateException
+         */
+        SetCaptureSize(
+            [in] Int32 size,
+            [out] Int32* result);
+
+        /**
+         * Returns current capture size.
+         * @return the capture size in bytes.
+         */
+        GetCaptureSize(
+            [out] Int32* captureSize);
+
+
+        /**
+         * Set the type of scaling applied on the captured visualization data.
+         * @param mode see {@link #SCALING_MODE_NORMALIZED}
+         *     and {@link #SCALING_MODE_AS_PLAYED}
+         * @return {@link #SUCCESS} in case of success,
+         *     {@link #ERROR_BAD_VALUE} in case of failure.
+         * @throws IllegalStateException
+         */
+        SetScalingMode(
+            [in] Int32 mode,
+            [out] Int32* result);
+
+        /**
+         * Returns the current scaling mode on the captured visualization data.
+         * @return the scaling mode, see {@link #SCALING_MODE_NORMALIZED}
+         *     and {@link #SCALING_MODE_AS_PLAYED}.
+         * @throws IllegalStateException
+         */
+        GetScalingMode(
+            [out] Int32* result);
+
+        /**
+         * Sets the combination of measurement modes to be performed by this audio effect.
+         * @param mode a mask of the measurements to perform. The valid values are
+         *     {@link #MEASUREMENT_MODE_NONE} (to cancel any measurement)
+         *     or {@link #MEASUREMENT_MODE_PEAK_RMS}.
+         * @return {@link #SUCCESS} in case of success, {@link #ERROR_BAD_VALUE} in case of failure.
+         * @throws IllegalStateException
+         */
+        SetMeasurementMode(
+            [in] Int32 mode,
+            [out] Int32* result);
+
+        /**
+         * Returns the current measurement modes performed by this audio effect
+         * @return the mask of the measurements,
+         *     {@link #MEASUREMENT_MODE_NONE} (when no measurements are performed)
+         *     or {@link #MEASUREMENT_MODE_PEAK_RMS}.
+         * @throws IllegalStateException
+         */
+        GetMeasurementMode(
+            [out] Int32* result);
+
+        /**
+         * Returns the sampling rate of the captured audio.
+         * @return the sampling rate in milliHertz.
+         */
+        GetSamplingRate(
+            [out] Int32* samplingRate);
+
+        /**
+         * Returns a waveform capture of currently playing audio content. The capture consists in
+         * a number of consecutive 8-bit (unsigned) mono PCM samples equal to the capture size returned
+         * by {@link #getCaptureSize()}.
+         * <p>This method must be called when the Visualizer is enabled.
+         * @param waveform array of bytes where the waveform should be returned
+         * @return {@link #SUCCESS} in case of success,
+         * {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or {@link #ERROR_DEAD_OBJECT}
+         * in case of failure.
+         * @throws IllegalStateException
+         */
+        GetWaveForm(
+            [in] ArrayOf<Byte>* waveform,
+            [out] Int32* result);
+
+        /**
+         * Returns a frequency capture of currently playing audio content.
+         * <p>This method must be called when the Visualizer is enabled.
+         * <p>The capture is an 8-bit magnitude FFT, the frequency range covered being 0 (DC) to half of
+         * the sampling rate returned by {@link #getSamplingRate()}. The capture returns the real and
+         * imaginary parts of a number of frequency points equal to half of the capture size plus one.
+         * <p>Note: only the real part is returned for the first point (DC) and the last point
+         * (sampling frequency / 2).
+         * <p>The layout in the returned byte array is as follows:
+         * <ul>
+         *   <li> n is the capture size returned by getCaptureSize()</li>
+         *   <li> Rfk, Ifk are respectively  the real and imaginary parts of the kth frequency
+         *   component</li>
+         *   <li> If Fs is the sampling frequency retuned by getSamplingRate() the kth frequency is:
+         *   (k*Fs)/(n/2) </li>
+         * </ul>
+         * <table border="0" cellspacing="0" cellpadding="0">
+         * <tr><td>Index </p></td>
+         *     <td>0 </p></td>
+         *     <td>1 </p></td>
+         *     <td>2 </p></td>
+         *     <td>3 </p></td>
+         *     <td>4 </p></td>
+         *     <td>5 </p></td>
+         *     <td>... </p></td>
+         *     <td>n - 2 </p></td>
+         *     <td>n - 1 </p></td></tr>
+         * <tr><td>Data </p></td>
+         *     <td>Rf0 </p></td>
+         *     <td>Rf(n/2) </p></td>
+         *     <td>Rf1 </p></td>
+         *     <td>If1 </p></td>
+         *     <td>Rf2 </p></td>
+         *     <td>If2 </p></td>
+         *     <td>... </p></td>
+         *     <td>Rf(n-1)/2 </p></td>
+         *     <td>If(n-1)/2 </p></td></tr>
+         * </table>
+         * @param fft array of bytes where the FFT should be returned
+         * @return {@link #SUCCESS} in case of success,
+         * {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or {@link #ERROR_DEAD_OBJECT}
+         * in case of failure.
+         * @throws IllegalStateException
+         */
+        GetFft(
+            [in] ArrayOf<Byte>* fft,
+            [out] Int32* result);
+
+        /**
+         * Retrieves the latest peak and RMS measurement.
+         * Sets the peak and RMS fields of the supplied {@link Visualizer.MeasurementPeakRms} to the
+         * latest measured values.
+         * @param measurement a non-null {@link Visualizer.MeasurementPeakRms} instance to store
+         *    the measurement values.
+         * @return {@link #SUCCESS} in case of success, {@link #ERROR_BAD_VALUE},
+         *    {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or {@link #ERROR_DEAD_OBJECT}
+         *    in case of failure.
+         */
+        GetMeasurementPeakRms(
+            [in] IVisualizerMeasurementPeakRms * measurement,
+            [out] Int32 * result);
+
+        /**
+         * Registers an OnDataCaptureListener interface and specifies the rate at which the capture
+         * should be updated as well as the type of capture requested.
+         * <p>Call this method with a null listener to stop receiving the capture updates.
+         * @param listener OnDataCaptureListener registered
+         * @param rate rate in milliHertz at which the capture should be updated
+         * @param waveform true if a waveform capture is requested: the onWaveFormDataCapture()
+         * method will be called on the OnDataCaptureListener interface.
+         * @param fft true if a frequency capture is requested: the onFftDataCapture() method will be
+         * called on the OnDataCaptureListener interface.
+         * @return {@link #SUCCESS} in case of success,
+         * {@link #ERROR_NO_INIT} or {@link #ERROR_BAD_VALUE} in case of failure.
+         */
+        SetDataCaptureListener(
+            [in] IVisualizerOnDataCaptureListener* listener,
+            [in] Int32 rate,
+            [in] Boolean waveform,
+            [in] Boolean fft,
+            [out] Int32* result);
+
+        /**
+         * @hide
+         *
+         * Registers an OnServerDiedListener interface.
+         * <p>Call this method with a null listener to stop receiving server death notifications.
+         * @return {@link #SUCCESS} in case of success,
+         */
+        SetServerDiedListener(
+            [in] IVisualizerOnServerDiedListener* listener,
+            [out] Int32* result);
+
+    }
+
+    interface IVisualizerHelper {
+        /**
+         * Returns the capture size range.
+         * @return the mininum capture size is returned in first array element and the maximum in second
+         * array element.
+         */
+        GetCaptureSizeRange(
+            [out, callee] ArrayOf<Int32>* captureSizeRange);
+
+        /**
+         * Returns the maximum capture rate for the callback capture method. This is the maximum value
+         * for the rate parameter of the
+         * {@link #setDataCaptureListener(OnDataCaptureListener, int, boolean, boolean)} method.
+         * @return the maximum capture rate expressed in milliHertz
+         */
+        GetMaxCaptureRate(
+            [out] Int32* captureRate);
+    }
+    } // namespace audiofx
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Security.Spec.IECPoint;
+    interface Elastos.Security.Interfaces.IECKey;
+
+    namespace Elastos {
+    namespace Security {
+    namespace Interfaces {
+
+    /**
+     * The interface for an Elliptic Curve (EC) public key.
+     */
+    interface IECPublicKey /*extends Elastos.Security.IPublicKey, Elastos.Security.Interfaces.IECKey*/ {
+        /**
+         * Returns the public point {@code W} on an elliptic curve (EC).
+         *
+         * @return the public point {@code W} on an elliptic curve (EC).
+         */
+        GetW(
+            [out] IECPoint** s);
+    }
+
+    } // namespace Interfaces
+    } // namespace Security
+    } // namespace Elastos
+}

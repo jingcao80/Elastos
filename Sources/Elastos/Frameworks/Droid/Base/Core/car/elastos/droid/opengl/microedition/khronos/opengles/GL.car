@@ -1,0 +1,113 @@
+
+module
+{
+    using interface Elastos.IO.IInt32Buffer;
+    using interface Elastos.IO.IFloatBuffer;
+    using interface Elastos.IO.IBuffer;
+
+    namespace Elastosx {
+    namespace Microedition {
+    namespace Khronos {
+    namespace Opengles {
+
+    [deprecated]
+    interface IGL {
+        glEnable(
+            [in] Int32 cap);
+
+        glEnableClientState(
+            [in] Int32 array);
+
+
+        glTexParameterf(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Float param);
+
+        glTexParameterfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glTexParameterfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glBindTexture(
+            [in] Int32 target,
+            [in] Int32 texture);
+
+        glCompressedTexImage2D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 internalformat,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 border,
+            [in] Int32 imageSize,
+            [in] IBuffer* data);
+
+        glCopyTexImage2D(
+            [in] Int32 target,
+            [in] Int32 level,
+            [in] Int32 internalformat,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 border);
+
+        glGetIntegerv(
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glGetIntegerv(
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+
+        glStencilOp(
+            [in] Int32 fail,
+            [in] Int32 zfail,
+            [in] Int32 zpass);
+
+        glTexEnvf(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Float param);
+
+        glTexEnvfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Float>* params,
+            [in] Int32 offset);
+
+        glTexEnvfv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IFloatBuffer* params);
+
+        glTexEnvx(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] Int32 param);
+
+        glTexEnvxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] ArrayOf<Int32>* params,
+            [in] Int32 offset);
+
+        glTexEnvxv(
+            [in] Int32 target,
+            [in] Int32 pname,
+            [in] IInt32Buffer* params);
+    }
+
+    } // namepsace Opengles
+    } // namepsace Khronos
+    } // namepsace Microedition
+    } // namespace Elastosx
+}

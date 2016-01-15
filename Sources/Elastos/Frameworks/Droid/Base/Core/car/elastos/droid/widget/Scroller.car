@@ -1,0 +1,238 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    interface IScroller {
+        /**
+         * The amount of friction applied to flings. The default value
+         * is {@link ViewConfiguration#getScrollFriction}.
+         *
+         * @param friction A scalar dimension-less value representing the coefficient of
+         *         friction.
+         */
+        SetFriction(
+            [in] Float friction);
+
+        /**
+         *
+         * Returns whether the scroller has finished scrolling.
+         *
+         * @return True if the scroller has finished scrolling, false otherwise.
+         */
+        IsFinished(
+            [out] Boolean* finished);
+
+        /**
+         * Force the finished field to a particular value.
+         *
+         * @param finished The new finished value.
+         */
+        ForceFinished(
+            [in] Boolean finished);
+
+        /**
+         * Returns how long the scroll event will take, in milliseconds.
+         *
+         * @return The duration of the scroll in milliseconds.
+         */
+        GetDuration(
+            [out] Int32* finished);
+
+        /**
+         * Returns the current X offset in the scroll.
+         *
+         * @return The new X offset as an absolute distance from the origin.
+         */
+        GetCurrX(
+            [out] Int32* x);
+
+        /**
+         * Returns the current Y offset in the scroll.
+         *
+         * @return The new Y offset as an absolute distance from the origin.
+         */
+        GetCurrY(
+            [out] Int32* y);
+
+        /**
+         * Returns the current velocity.
+         *
+         * @return The original velocity less the deceleration. Result may be
+         * negative.
+         */
+        GetCurrVelocity(
+            [out] Float* velocity);
+
+        /**
+         * Returns the start X offset in the scroll.
+         *
+         * @return The start X offset as an absolute distance from the origin.
+         */
+        GetStartX(
+            [out] Int32* x);
+
+        /**
+         * Returns the start Y offset in the scroll.
+         *
+         * @return The start Y offset as an absolute distance from the origin.
+         */
+        GetStartY(
+            [out] Int32* y);
+
+        /**
+         * Returns where the scroll will end. Valid only for "fling" scrolls.
+         *
+         * @return The final X offset as an absolute distance from the origin.
+         */
+        GetFinalX(
+            [out] Int32* x);
+
+        /**
+         * Returns where the scroll will end. Valid only for "fling" scrolls.
+         *
+         * @return The final Y offset as an absolute distance from the origin.
+         */
+        GetFinalY(
+            [out] Int32* y);
+
+        /**
+         * Call this when you want to know the new location.  If it returns true,
+         * the animation is not yet finished.  loc will be altered to provide the
+         * new location.
+         */
+        ComputeScrollOffset(
+            [out] Boolean* offset);
+
+        /**
+         * Start scrolling by providing a starting point and the distance to travel.
+         * The scroll will use the default value of 250 milliseconds for the
+         * duration.
+         *
+         * @param startX Starting horizontal scroll offset in pixels. Positive
+         *        numbers will scroll the content to the left.
+         * @param startY Starting vertical scroll offset in pixels. Positive numbers
+         *        will scroll the content up.
+         * @param dx Horizontal distance to travel. Positive numbers will scroll the
+         *        content to the left.
+         * @param dy Vertical distance to travel. Positive numbers will scroll the
+         *        content up.
+         */
+        StartScroll(
+            [in] Int32 startX,
+            [in] Int32 startY,
+            [in] Int32 dx,
+            [in] Int32 dy);
+
+        /**
+         * Start scrolling by providing a starting point and the distance to travel.
+         *
+         * @param startX Starting horizontal scroll offset in pixels. Positive
+         *        numbers will scroll the content to the left.
+         * @param startY Starting vertical scroll offset in pixels. Positive numbers
+         *        will scroll the content up.
+         * @param dx Horizontal distance to travel. Positive numbers will scroll the
+         *        content to the left.
+         * @param dy Vertical distance to travel. Positive numbers will scroll the
+         *        content up.
+         * @param duration Duration of the scroll in milliseconds.
+         */
+        StartScroll(
+            [in] Int32 startX,
+            [in] Int32 startY,
+            [in] Int32 dx,
+            [in] Int32 dy,
+            [in] Int32 duration);
+
+        /**
+         * Start scrolling based on a fling gesture. The distance travelled will
+         * depend on the initial velocity of the fling.
+         *
+         * @param startX Starting point of the scroll (X)
+         * @param startY Starting point of the scroll (Y)
+         * @param velocityX Initial velocity of the fling (X) measured in pixels per
+         *        second.
+         * @param velocityY Initial velocity of the fling (Y) measured in pixels per
+         *        second
+         * @param minX Minimum X value. The scroller will not scroll past this
+         *        point.
+         * @param maxX Maximum X value. The scroller will not scroll past this
+         *        point.
+         * @param minY Minimum Y value. The scroller will not scroll past this
+         *        point.
+         * @param maxY Maximum Y value. The scroller will not scroll past this
+         *        point.
+         */
+        Fling(
+            [in] Int32 startX,
+            [in] Int32 startY,
+            [in] Int32 velocityX,
+            [in] Int32 velocityY,
+            [in] Int32 minX,
+            [in] Int32 maxX,
+            [in] Int32 minY,
+            [in] Int32 maxY);
+
+        /**
+         * Stops the animation. Contrary to {@link #forceFinished(boolean)},
+         * aborting the animating cause the scroller to move to the final x and y
+         * position
+         *
+         * @see #forceFinished(boolean)
+         */
+        AbortAnimation();
+
+        /**
+         * Extend the scroll animation. This allows a running animation to scroll
+         * further and longer, when used with {@link #setFinalX(int)} or {@link #setFinalY(int)}.
+         *
+         * @param extend Additional time to scroll in milliseconds.
+         * @see #setFinalX(int)
+         * @see #setFinalY(int)
+         */
+        ExtendDuration(
+            [in] Int32 extend);
+
+        /**
+         * Returns the time elapsed since the beginning of the scrolling.
+         *
+         * @return The elapsed time in milliseconds.
+         */
+        TimePassed(
+            [out] Int32* passedTime);
+
+        /**
+         * Sets the final position (X) for this scroller.
+         *
+         * @param newX The new X offset as an absolute distance from the origin.
+         * @see #extendDuration(int)
+         * @see #setFinalY(int)
+         */
+        SetFinalX(
+            [in] Int32 x);
+
+        /**
+         * Sets the final position (Y) for this scroller.
+         *
+         * @param newY The new Y offset as an absolute distance from the origin.
+         * @see #extendDuration(int)
+         * @see #setFinalX(int)
+         */
+        SetFinalY(
+            [in] Int32 y);
+
+        /**
+         * @hide
+         */
+        IsScrollingInDirection(
+            [in] Float xvel,
+            [in] Float yvel,
+            [out] Boolean* result);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

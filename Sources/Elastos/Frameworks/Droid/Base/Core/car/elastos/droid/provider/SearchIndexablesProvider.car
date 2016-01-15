@@ -1,0 +1,95 @@
+module
+{
+    interface Elastos.Droid.Database.ICursor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+    /**
+     * Base class for a search indexable provider. Such provider offers data to be indexed either
+     * as a reference to an XML file (like a {@link android.preference.PreferenceScreen}) or either
+     * as some raw data.
+     *
+     * @see SearchIndexableResource
+     * @see SearchIndexableData
+     * @see SearchIndexablesContract
+     *
+     * To create a search indexables provider, extend this class, then implement the abstract methods,
+     * and add it to your manifest like this:
+     *
+     * <pre class="prettyprint">&lt;manifest&gt;
+     *    ...
+     *    &lt;application&gt;
+     *        ...
+     *        &lt;provider
+     *            android:name="com.example.MyIndexablesProvider"
+     *            android:authorities="com.example.myindexablesprovider"
+     *            android:exported="true"
+     *            android:grantUriPermissions="true"
+     *            android:permission="android.permission.READ_SEARCH_INDEXABLES"
+     *            &lt;intent-filter&gt;
+     *                &lt;action android:name="android.content.action.SEARCH_INDEXABLES_PROVIDER" /&gt;
+     *            &lt;/intent-filter&gt;
+     *        &lt;/provider&gt;
+     *        ...
+     *    &lt;/application&gt;
+     *&lt;/manifest&gt;</pre>
+     * <p>
+     * When defining your provider, you must protect it with
+     * {@link android.Manifest.permission#READ_SEARCH_INDEXABLES}, which is a permission only the system
+     * can obtain.
+     * </p>
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IContentProvider
+     */
+    [deprecated]
+    interface ISearchIndexablesProvider {
+        /**
+         * Returns all {@link android.provider.SearchIndexablesContract.XmlResource}.
+         *
+         * Those are Xml resource IDs to some {@link android.preference.PreferenceScreen}.
+         *
+         * @param projection list of {@link android.provider.SearchIndexablesContract.XmlResource}
+         *                   columns to put into the cursor. If {@code null} all supported columns
+         *                   should be included.
+         */
+        QueryXmlResources(
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** cursor);
+
+        /**
+         * Returns all {@link android.provider.SearchIndexablesContract.RawData}.
+         *
+         * Those are the raw indexable data.
+         *
+         * @param projection list of {@link android.provider.SearchIndexablesContract.RawData} columns
+         *                   to put into the cursor. If {@code null} all supported columns should be
+         *                   included.
+         */
+        QueryRawData(
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** cursor);
+
+        /**
+         * Returns all {@link android.provider.SearchIndexablesContract.NonIndexableKey}.
+         *
+         * Those are the non indexable data keys.
+         *
+         * @param projection list of {@link android.provider.SearchIndexablesContract.NonIndexableKey}
+         *                   columns to put into the cursor. If {@code null} all supported columns
+         *                   should be included.
+         */
+        QueryNonIndexableKeys(
+            [in] ArrayOf<String>* projection,
+            [out] ICursor** cursor);
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+}

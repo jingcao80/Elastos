@@ -1,0 +1,52 @@
+
+module
+{
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Sequence;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the ORAddress structure which is a part of X.509 certificate:
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     * <pre>
+     * ORAddress ::= SEQUENCE {
+     *   built-in-standard-attributes BuiltInStandardAttributes,
+     *   built-in-domain-defined-attributes
+     *                   BuiltInDomainDefinedAttributes OPTIONAL,
+     *   extension-attributes ExtensionAttributes OPTIONAL
+     * }
+     * </pre>
+     *
+     * TODO: this class needs to be finished.
+     */
+    interface IORAddress {
+        /**
+         * Returns ASN.1 encoded form of this X.509 ORAddress value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+    }
+
+    interface IORAddressHelper {
+        /**
+         * ASN.1 DER X.509 ORAddress encoder/decoder class.
+         */
+        GetASN1(
+            [out] IASN1Sequence** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

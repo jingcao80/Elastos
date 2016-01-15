@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Accounts {
+
+    /**
+     * Object used to communicate responses back to the AccountManager
+     */
+    interface IAccountAuthenticatorResponse {
+        OnResult(
+            [in] IBundle* value);
+
+        OnRequestContinued();
+
+        OnError(
+            [in] Int32 errorCode,
+            [in] String errorMessage);
+    }
+
+    } // Accounts
+    } // Droid
+    } // Elastos
+}

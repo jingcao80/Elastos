@@ -1,0 +1,25 @@
+module
+{
+    using interface Org.Xml.Sax.IAttributes;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Sax {
+
+    /**
+     * Listens for the beginning of elements.
+     */
+    interface IStartElementListener {
+        /**
+         * Invoked at the beginning of an element.
+         *
+         * @param attributes from the element
+         */
+        Start(
+            [in] IAttributes* attributes);
+    }
+
+    } // namespace Sax
+    } // namespace Droid
+    } // namespace Elastos
+}

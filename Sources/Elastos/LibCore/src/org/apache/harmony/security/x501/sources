@@ -1,0 +1,14 @@
+
+TARGET_NAME= x501
+TARGET_TYPE= lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Security/X501
+
+SOURCES = CAttributeTypeAndValue.cpp
+SOURCES += CAttributeTypeAndValueComparator.cpp
+SOURCES += CAttributeTypeAndValueHelper.cpp
+SOURCES += CAttributeValue.cpp
+SOURCES += CDirectoryString.cpp
+SOURCES += CName.cpp
+SOURCES += CNameHelper.cpp

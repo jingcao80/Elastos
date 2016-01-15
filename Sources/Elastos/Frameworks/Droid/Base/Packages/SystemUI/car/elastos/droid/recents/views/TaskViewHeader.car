@@ -1,0 +1,60 @@
+
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.Recents.Model.ITask;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Views {
+
+    /* The task bar view */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     */
+    interface ITaskViewHeader {
+
+        /** Sets whether the current task is full screen or not. */
+        SetIsFullscreen(
+            [in] Boolean isFullscreen);
+
+        /** Returns the secondary color for a primary color. */
+        GetSecondaryColor(
+            [in] Int32 primaryColor,
+            [in] Boolean useLightOverlayColor,
+            [out] Int32* result);
+
+        /** Binds the bar view to the task */
+        RebindToTask(
+            [in] ITask* t);
+
+        /** Unbinds the bar view from the task */
+        UnbindFromTask();
+
+        /** Animates this task bar dismiss button when launching a task. */
+        StartLaunchTaskDismissAnimation();
+
+        /** Animates this task bar if the user does not interact with the stack after a certain time. */
+        StartNoUserInteractionAnimation();
+
+        /** Mark this task view that the user does has not interacted with the stack after a certain time. */
+        SetNoUserInteractionState();
+
+        /** Notifies the associated TaskView has been focused. */
+        OnTaskViewFocusChanged(
+            [in] Boolean focused);
+
+        SetDimAlpha(
+            [in] Int32 alpha);
+    }
+
+    } // namespace Views
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

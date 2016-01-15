@@ -1,0 +1,11 @@
+DIRS += dreams
+DIRS += fingerprint
+DIRS += media
+DIRS += persistentdata
+DIRS += restrictions
+DIRS += textservice
+DIRS += trust
+DIRS += wallpaper
+DIRS += voice
+DIRS += notification
+

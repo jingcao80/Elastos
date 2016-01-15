@@ -1,0 +1,18 @@
+
+module
+{
+//    const FAMILY_CORE = 0x21    // Core error codes
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Elastos Core error codes (Family: 0x21)
+    const E_OUT_OF_MEMORY_ERROR                         = 0xA1010000;
+    const E_ASSERTION_ERROR                             = 0xA1020000;
+    const E_INTERNAL_ERROR                              = 0xA1030000;
+    const E_ILLEGAL_ACCESS_ERROR                        = 0xA1040000;
+    const E_VERIFY_ERROR                                = 0xA1050000;
+    const E_UNKNOWN_ERROR                               = 0xA1060000;
+    const E_ABSTRACET_METHOD_ERROR                      = 0xA1070000;
+}

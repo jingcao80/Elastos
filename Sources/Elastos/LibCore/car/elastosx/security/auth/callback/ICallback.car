@@ -1,0 +1,15 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Security {
+    namespace Auth {
+    namespace Callback {
+
+    interface ICallback {}
+
+    } // namespace Callback
+    } // namespace Auth
+    } // namespace Security
+    } // namespace Elastosx
+}

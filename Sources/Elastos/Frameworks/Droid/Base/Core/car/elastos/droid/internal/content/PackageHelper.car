@@ -1,0 +1,148 @@
+
+module
+{
+    using interface Elastos.IO.IFile;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Pm.IPackageLite;
+    interface Elastos.Droid.Os.Storage.IMountService;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Content {
+
+    /**
+     * Constants used internally between the PackageManager
+     * and media container service transports.
+     * Some utility methods to invoke MountService api.
+     */
+    [local]
+    interface IPackageHelper {
+        const Int32 RECOMMEND_INSTALL_INTERNAL = 1;
+        const Int32 RECOMMEND_INSTALL_EXTERNAL = 2;
+        const Int32 RECOMMEND_FAILED_INSUFFICIENT_STORAGE = -1;
+        const Int32 RECOMMEND_FAILED_INVALID_APK = -2;
+        const Int32 RECOMMEND_FAILED_INVALID_LOCATION = -3;
+        const Int32 RECOMMEND_FAILED_ALREADY_EXISTS = -4;
+        const Int32 RECOMMEND_MEDIA_UNAVAILABLE = -5;
+        const Int32 RECOMMEND_FAILED_INVALID_URI = -6;
+        const Int32 RECOMMEND_FAILED_VERSION_DOWNGRADE = -7;
+
+        // App installation location settings values
+        const Int32 APP_INSTALL_AUTO = 0;
+        const Int32 APP_INSTALL_INTERNAL = 1;
+        const Int32 APP_INSTALL_EXTERNAL = 2;
+
+        GetMountService(
+            [out] IMountService** mountService);
+
+        CreateSdDir(
+            [in] Int64 sizeBytes,
+            [in] String cid,
+            [in] String sdEncKey,
+            [in] Int32 uid,
+            [in] Boolean isExternal,
+            [out] String* dir);
+
+        ResizeSdDir(
+            [in] Int64 sizeBytes,
+            [in] String cid,
+            [in] String sdEncKey,
+            [out] Boolean* result);
+
+        MountSdDir(
+            [in] String cid,
+            [in] String key,
+            [in] Int32 ownerUid,
+            [out] String* dir);
+
+        MountSdDir(
+            [in] String cid,
+            [in] String key,
+            [in] Int32 ownerUid,
+            [in] Boolean readOnly,
+            [out] String* dir);
+
+        UnMountSdDir(
+            [in] String cid,
+            [out] Boolean* result);
+
+        RenameSdDir(
+            [in] String oldId,
+            [in] String newId,
+            [out] Boolean* result);
+
+        GetSdDir(
+            [in] String cid,
+            [out] String* dir);
+
+        GetSdFilesystem(
+            [in] String cid,
+            [out] String* str);
+
+        FinalizeSdDir(
+            [in] String cid,
+            [out] Boolean* result);
+
+        DestroySdDir(
+            [in] String cid,
+            [out] Boolean* result);
+
+        GetSecureContainerList(
+            [out, callee] ArrayOf<String>* ids);
+
+        IsContainerMounted(
+            [in] String cid,
+            [out] Boolean* isMounted);
+
+        /**
+         * Extract public files for the single given APK.
+         */
+        ExtractPublicFiles(
+            [in] IFile* apkFile,
+            [in] IFile* publicZipFile,
+            [out] Int64* size);
+
+        FixSdPermissions(
+            [in] String cid,
+            [in] Int32 gid,
+            [in] String filename,
+            [out] Boolean* result);
+
+        /**
+         * Given a requested {@link PackageInfo#installLocation} and calculated
+         * install size, pick the actual location to install the app.
+         */
+        ResolveInstallLocation(
+            [in] IContext* context,
+            [in] String packageName,
+            [in] Int32 installLocation,
+            [in] Int64 sizeBytes,
+            [in] Int32 installFlags,
+            [out] Int32* result);
+
+        CalculateInstalledSize(
+            [in] IPackageLite* pkg,
+            [in] Boolean isForwardLocked,
+            [in] String abiOverride,
+            [out] Int64* size);
+
+        CalculateInstalledSize(
+            [in] IPackageLite* pkg,
+            [in] INativeLibraryHelperHandle* handle,
+            [in] Boolean isForwardLocked,
+            [in] String abiOverride,
+            [out] Int64* size);
+
+        ReplaceEnd(
+            [in] String str,
+            [in] String before,
+            [in] String after,
+            [out] String* result);
+    }
+
+    } // namespace Content
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

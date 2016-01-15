@@ -1,0 +1,220 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface IKeyguardManagerKeyguardLock;
+    interface IKeyguardManagerOnKeyguardExitResult;
+
+    /**
+     * Class that can be used to lock and unlock the keyboard. Get an instance of
+     * this class by calling getSystemService(java.lang.String) with argument
+     * KEYGUARD_SERVICE. The actual class to control the keyboard locking is
+     * KeyguardManager.KeyguardLock.
+     *
+     * @sa getSystemService(java.lang.String)
+     * @sa KEYGUARD_SERVICE
+     * @sa KeyguardManager.KeyguardLock
+     */
+
+    interface IKeyguardManager {
+
+        /**
+         * Intent used to prompt user for device credentials.
+         * @hide
+         */
+        const String ACTION_CONFIRM_DEVICE_CREDENTIAL =
+                "android.app.action.CONFIRM_DEVICE_CREDENTIAL";
+
+        /**
+         * A CharSequence dialog title to show to the user when used with a
+         * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
+         * @hide
+         */
+        const String EXTRA_TITLE = "android.app.extra.TITLE";
+
+        /**
+         * A CharSequence description to show to the user when used with
+         * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
+         * @hide
+         */
+        const String EXTRA_DESCRIPTION = "android.app.extra.DESCRIPTION";
+
+        /**
+         * Get an intent to prompt the user to confirm credentials (pin, pattern or password)
+         * for the current user of the device. The caller is expected to launch this activity using
+         * {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
+         * {@link android.app.Activity#RESULT_OK} if the user successfully completes the challenge.
+         *
+         * @return the intent for launching the activity or null if no password is required.
+         **/
+        CreateConfirmDeviceCredentialIntent(
+            [in] ICharSequence* title,
+            [in] ICharSequence* description,
+            [out] IIntent** intent);
+
+        /**
+         * @deprecated Use android.view.WindowManager.LayoutParams#FLAG_DISMISS_KEYGUARD
+         * and/or android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED
+         * instead; this allows you to seamlessly hide the keyguard as your application
+         * moves in and out of the foreground and does not require that any special
+         * permissions be requested.
+         *
+         * @sa android.view.WindowManager.LayoutParams#FLAG_DISMISS_KEYGUARD
+         * @sa android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED
+         *
+         * Enables you to lock or unlock the keyboard. Get an instance of this class by
+         * calling android.content.Context#getSystemService(java.lang.String) Context.getSystemService().
+         * This class is wrapped by android.app.KeyguardManager KeyguardManager.
+         * @param tag A tag that informally identifies who you are (for debugging who
+         *   is disabling he keyguard).
+         *
+         * @sa android.content.Context#getSystemService(java.lang.String) Context.getSystemService()
+         * @sa android.app.KeyguardManager KeyguardManager
+         *
+         * @return A KeyguardLock handle to use to disable and reenable the
+         *   keyguard.
+         *
+         * @sa KeyguardLock
+         */
+        //@Deprecated
+        NewKeyguardLock(
+            [in] String tag,
+            [out] IKeyguardManagerKeyguardLock** keyguardLock);
+
+        /**
+         * Return whether the keyguard is currently locked.
+         *
+         * @return true if keyguard is locked.
+         */
+        IsKeyguardLocked(
+            [out] Boolean* locked);
+
+        /**
+         * Return whether the keyguard requires a password to unlock.
+         *
+         * @return true if keyguard is secure.
+         */
+        IsKeyguardSecure(
+            [out] Boolean* secure);
+
+        /**
+         * If keyguard screen is showing or in restricted key input mode (i.e. in
+         * keyguard password emergency screen). When in such mode, certain keys,
+         * such as the Home key and the right soft keys, don't work.
+         *
+         * @return true if in keyguard restricted input mode.
+         *
+         * @see android.view.WindowManagerPolicy#inKeyguardRestrictedKeyInputMode
+         */
+        InKeyguardRestrictedInputMode(
+            [out] Boolean* inMode);
+
+        /**
+         * @deprecated Use android.view.WindowManager.LayoutParams#FLAG_DISMISS_KEYGUARD
+         * and/or android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED
+         * instead; this allows you to seamlessly hide the keyguard as your application
+         * moves in and out of the foreground and does not require that any special
+         * permissions be requested.
+         *
+         * @sa android.view.WindowManager.LayoutParams#FLAG_DISMISS_KEYGUARD
+         * @sa android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED
+         *
+         * Exit the keyguard securely.  The use case for this api is that, after
+         * disabling the keyguard, your app, which was granted permission to
+         * disable the keyguard and show a limited amount of information deemed
+         * safe without the user getting past the keyguard, needs to navigate to
+         * something that is not safe to view without getting past the keyguard.
+         *
+         * This will, if the keyguard is secure, bring up the unlock screen of
+         * the keyguard.
+         *
+         * <p>This method requires the caller to hold the permission
+         * android.Manifest.permission#DISABLE_KEYGUARD.
+         *
+         * @sa android.Manifest.permission#DISABLE_KEYGUARD
+         *
+         * @param callback Let's you know whether the operation was succesful and
+         *   it is safe to launch anything that would normally be considered safe
+         *   once the user has gotten past the keyguard.
+         */
+        //@Deprecated
+        ExitKeyguardSecurely(
+            [in] IKeyguardManagerOnKeyguardExitResult* cb);
+    }
+
+    interface IKeyguardManagerKeyguardLock {
+        /**
+         * Disable the keyguard from showing.  If the keyguard is currently
+         * showing, hide it.  The keyguard will be prevented from showing again
+         * until #reenableKeyguard() is called.
+         *
+         * @sa #reenableKeyguard()
+         *
+         * A good place to call this is from android.app.Activity#onResume()
+         *
+         * @sa android.app.Activity#onResume()
+         *
+         * Note: This call has no effect while any android.app.admin.DevicePolicyManager
+         * is enabled that requires a password.
+         *
+         * @sa android.app.admin.DevicePolicyManager
+         *
+         * <p>This method requires the caller to hold the permission
+         * android.Manifest.permission#DISABLE_KEYGUARD.
+         *
+         * @sa android.Manifest.permission#DISABLE_KEYGUARD
+         *
+         * @see #reenableKeyguard()
+         */
+        DisableKeyguard();
+
+        /**
+         * Reenable the keyguard.  The keyguard will reappear if the previous
+         * call to #disableKeyguard() caused it to be hidden.
+         *
+         * @sa #disableKeyguard()
+         *
+         * A good place to call this is from android.app.Activity#onPause()
+         *
+         * @sa android.app.Activity#onPause()
+         *
+         * Note: This call has no effect while any android.app.admin.DevicePolicyManager
+         * is enabled that requires a password.
+         *
+         * @sa android.app.admin.DevicePolicyManager
+         *
+         * <p>This method requires the caller to hold the permission
+         * android.Manifest.permission#DISABLE_KEYGUARD.
+         *
+         * @sa android.Manifest.permission#DISABLE_KEYGUARD
+         *
+         * @see #disableKeyguard()
+         */
+        ReenableKeyguard();
+    }
+
+    /**
+     * Callback passed to KeyguardManager#exitKeyguardSecurely to notify
+     * caller of result.
+     *
+     * @sa KeyguardManager#exitKeyguardSecurely
+     */
+    interface IKeyguardManagerOnKeyguardExitResult {
+        /**
+         * @param success True if the user was able to authenticate, false if
+         *   not.
+         */
+        OnKeyguardExitResult(
+            [in] Boolean success);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

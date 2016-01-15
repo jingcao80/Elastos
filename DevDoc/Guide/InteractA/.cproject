@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.dbg.980042426">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.dbg.980042426" moduleId="org.eclipse.cdt.core.settings" name="Elastos_Application_Project">
+				<externalSettings/>
+				<extensions>
+					<extension id="com.kortide.edt.ElastosGCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.kortide.edt.ElastosLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.kortide.edt.ElastosASMErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="eco" artifactName="InteractA" buildArtefactType="com.kortide.edt.build.core.buildArtefactType.ElastosApplication" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,com.kortide.edt.core.CPUType=com.kortide.edt.core.CPUType.arm,org.eclipse.cdt.build.core.buildArtefactType=com.kortide.edt.build.core.buildArtefactType.ElastosApplication" cleanCommand="rm -f" description="" id="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.dbg.980042426" name="Elastos_Application_Project" parent="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.dbg">
+					<folderInfo id="com.kortide.edt.core.projectType.ElastosApplication_gnu.arm.dbg.980042426." name="/" resourcePath="">
+						<toolChain id="openkode.application.dbg.802958848" name="Elastos Application ToolChain" superClass="openkode.application.dbg">
+							<targetPlatform id="com.kortide.edt.openkode.targetPlatform.2136618422" isAbstract="false" name="Target Platform" superClass="com.kortide.edt.openkode.targetPlatform"/>
+							<builder buildPath="${workspace_loc:/InteractA}/Elastos_Application_Project" enableAutoBuild="true" id="com.kortide.edt.core.toolchain.builder.349908808" managedBuildOn="false" name="Elastos OpenKODE Toolchain Builder.Elastos_Application_Project" superClass="com.kortide.edt.core.toolchain.builder"/>
+							<tool id="com.kortide.edt.core.toolchain.carc.1907878081" name="Elastos CAR Compiler" superClass="com.kortide.edt.core.toolchain.carc"/>
+							<tool id="com.kortide.edt.core.toolchain.gcc.845359629" name="Elastos GCC C Compiler" superClass="com.kortide.edt.core.toolchain.gcc">
+								<inputType id="com.kortide.edt.tool.gnu.c.compiler.input.1694419693" superClass="com.kortide.edt.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="com.kortide.edt.core.toolchain.g++.272332140" name="Elastos GCC C++ Compiler" superClass="com.kortide.edt.core.toolchain.g++">
+								<inputType id="com.kortide.edt.tool.gnu.cpp.compiler.input.1932573406" superClass="com.kortide.edt.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="com.kortide.edt.core.toolchain.linker.72276440" name="Elastos GCC Linker" superClass="com.kortide.edt.core.toolchain.linker"/>
+							<tool id="com.kortide.edt.core.toolchain.archiver.1887914941" name="Elastos Archiver" superClass="com.kortide.edt.core.toolchain.archiver"/>
+							<tool id="com.kortide.edt.core.toolchain.assembler.1338887927" name="Elastos Assembler" superClass="com.kortide.edt.core.toolchain.assembler">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1743568391" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="InteractA.com.kortide.edt.core.projectType.ElastosApplication.890471480" name="Elastos C++ Application" projectType="com.kortide.edt.core.projectType.ElastosApplication"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+</cproject>

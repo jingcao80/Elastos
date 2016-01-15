@@ -1,0 +1,81 @@
+module
+{
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+    namespace Sqlite {
+
+    /**
+     * Represents a statement that can be executed against a database.  The statement
+     * cannot return multiple rows or columns, but single value (1 x 1) result sets
+     * are supported.
+     * <p>
+     * This class is not thread-safe.
+     * </p>
+     *
+     * @Involve
+     * interface ICloseable;
+     * interface ISQLiteClosable;
+     * interface ISQLiteProgram
+     */
+    interface ISQLiteStatement {
+        /**
+         * Execute this SQL statement, if it is not a query. For example,
+         * CREATE TABLE, DELTE, INSERT, etc.
+         */
+        Execute();
+
+        /**
+         * Execute this SQL statement, if the the number of rows affected by execution of this SQL
+         * statement is of any importance to the caller - for example, UPDATE / DELETE SQL statements.
+         *
+         * @return the number of rows affected by this SQL statement execution.
+         * @throws android.database.SQLException If the SQL string is invalid for
+         *         some reason
+         */
+        ExecuteUpdateDelete(
+            [out] Int32* result);
+
+        /**
+         * Execute this SQL statement and return the ID of the row inserted due to this call.
+         * The SQL statement should be an INSERT for this to be a useful call.
+         */
+        ExecuteInsert(
+            [out] Int64* value);
+
+        /**
+         * Execute a statement that returns a 1 by 1 table with a numeric value.
+         * For example, SELECT COUNT(*) FROM table;
+         */
+        SimpleQueryForInt64(
+            [out] Int64* value);
+
+        /**
+         * Execute a statement that returns a 1 by 1 table with a text value.
+         * For example, SELECT COUNT(*) FROM table;
+         */
+        SimpleQueryForString(
+            [out] String* value);
+
+        /**
+         * Executes a statement that returns a 1 by 1 table with a blob value.
+         *
+         * @return A read-only file descriptor for a copy of the blob value, or {@code null}
+         *         if the value is null or could not be read for some reason.
+         *
+         * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
+         */
+        SimpleQueryForBlobFileDescriptor(
+            [out] IParcelFileDescriptor** result);
+
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Sqlite
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

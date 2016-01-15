@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Graphics.Drawable.IDrawable
+     */
+    interface IScrollBarDrawable {
+        /**
+         * Indicate whether the horizontal scrollbar track should always be drawn regardless of the
+         * extent. Defaults to false.
+         *
+         * @param alwaysDrawTrack Set to true if the track should always be drawn
+         */
+        SetAlwaysDrawHorizontalTrack(
+            [in] Boolean alwaysDrawTrack);
+
+        /**
+         * Indicate whether the vertical scrollbar track should always be drawn regardless of the
+         * extent. Defaults to false.
+         *
+         * @param alwaysDrawTrack Set to true if the track should always be drawn
+         */
+        SetAlwaysDrawVerticalTrack(
+            [in] Boolean alwaysDrawTrack);
+
+        /**
+         * Indicates whether the horizontal scrollbar track should always be drawn regardless of the
+         * extent.
+         */
+        GetAlwaysDrawHorizontalTrack(
+            [out] Boolean* alwaysDrawTrack);
+
+        /**
+         * Indicates whether the vertical scrollbar track should always be drawn regardless of the
+         * extent.
+         */
+        GetAlwaysDrawVerticalTrack(
+            [out] Boolean* alwaysDrawTrack);
+
+        SetParameters(
+            [in] Int32 range,
+            [in] Int32 offset,
+            [in] Int32 extent,
+            [in] Boolean vertical);
+
+        SetVerticalThumbDrawable(
+            [in] IDrawable* thumb);
+
+        SetVerticalTrackDrawable(
+            [in] IDrawable* track);
+
+        SetHorizontalThumbDrawable(
+            [in] IDrawable* thumb);
+
+        SetHorizontalTrackDrawable(
+            [in] IDrawable* track);
+
+        GetSize(
+            [in] Boolean vertical,
+            [out] Int32* size);
+    }
+
+    } // namespace Widget
+    } // namespace Droid
+    } // namespace Elastos
+}

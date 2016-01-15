@@ -1,0 +1,21 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    interface ITimeZoneGetter {
+        GetId(
+            [out] String* result);
+    }
+
+    interface ITimeZoneGetterHelper {
+        SetInstance(
+            [in] ITimeZoneGetter* instance);
+
+        GetInstance(
+            [out] ITimeZoneGetter** instance);
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

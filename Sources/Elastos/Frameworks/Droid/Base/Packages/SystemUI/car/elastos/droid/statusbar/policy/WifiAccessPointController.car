@@ -1,0 +1,36 @@
+module
+{
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkControllerAccessPointCallback;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkControllerAccessPoint;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Policy {
+
+    [deprecated]
+    interface IWifiAccessPointController {
+        AddCallback(
+            [in] INetworkControllerAccessPointCallback* cb);
+
+        RemoveCallback(
+            [in] INetworkControllerAccessPointCallback* cb);
+
+        Scan();
+
+        Connect(
+            [in] INetworkControllerAccessPoint* ap);
+
+        FireCallback(
+            [in] ArrayOf<INetworkControllerAccessPoint*>* aps);
+    }
+
+    } // namespace Policy
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

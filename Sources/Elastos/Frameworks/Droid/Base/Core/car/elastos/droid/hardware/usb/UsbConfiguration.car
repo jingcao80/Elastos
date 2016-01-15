@@ -1,0 +1,96 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Usb {
+
+    /**
+     * A class representing a configuration on a {@link UsbDevice}.
+     * A USB configuration can have one or more interfaces, each one providing a different
+     * piece of functionality, separate from the other interfaces.
+     * An interface will have one or more {@link UsbEndpoint}s, which are the
+     * channels by which the host transfers data with the device.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about communicating with USB hardware, read the
+     * <a href="{@docRoot}guide/topics/usb/index.html">USB</a> developer guide.</p>
+     * </div>
+     *
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IUsbConfiguration {
+
+        /**
+         * Returns the configuration's ID field.
+         * This is an integer that uniquely identifies the configuration on the device.
+         *
+         * @return the configuration's ID
+         */
+        GetId(
+            [out] Int32* value);
+
+        /**
+         * Returns the configuration's name.
+         *
+         * @return the configuration's name
+         */
+        GetName(
+            [out] String* str);
+
+        /**
+         * Returns the self-powered attribute value configuration's attributes field.
+         * This attribute indicates that the device has a power source other than the USB connection.
+         *
+         * @return the configuration's self-powered attribute
+         */
+        IsSelfPowered(
+            [out] Boolean* value);
+
+        /**
+         * Returns the remote-wakeup attribute value configuration's attributes field.
+         * This attributes that the device may signal the host to wake from suspend.
+         *
+         * @return the configuration's remote-wakeup attribute
+         */
+        IsRemoteWakeup(
+            [out] Boolean* value);
+
+        /**
+         * Returns the configuration's max power consumption, in milliamps.
+         *
+         * @return the configuration's max power
+         */
+        GetMaxPower(
+            [out] Int32* value);
+
+        /**
+         * Returns the number of {@link UsbInterface}s this configuration contains.
+         *
+         * @return the number of endpoints
+         */
+        GetInterfaceCount(
+            [out] Int32* value);
+
+        /**
+         * Returns the {@link UsbInterface} at the given index.
+         *
+         * @return the interface
+         */
+        GetInterface(
+            [in] Int32 index,
+            [out] IUsbInterface** outui);
+
+        // @Override
+        ToString(
+            [out] String* str);
+    }
+
+    } // namespace Usb
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

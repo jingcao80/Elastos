@@ -1,0 +1,1057 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.IO.IInputStream;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
+    enum Elastos.Droid.Graphics.PorterDuffMode;
+
+    interface Elastos.Droid.Graphics.IInsets;
+    interface Elastos.Droid.Graphics.IBitmapFactoryOptions;
+    interface Elastos.Droid.Graphics.ICanvas;
+    interface Elastos.Droid.Graphics.IColorFilter;
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.Graphics.IOutline;
+    interface Elastos.Droid.Graphics.IRegion;
+    interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.Utility.ITypedValue;
+    interface Elastos.Droid.Content.Res.IResourcesTheme;
+    interface Elastos.Droid.Content.Res.IColorStateList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+    namespace Drawable {
+
+    interface IDrawableCallback;
+    interface IDrawableConstantState;
+
+    /**
+     * A Drawable is a general abstraction for "something that can be drawn."  Most
+     * often you will deal with Drawable as the type of resource retrieved for
+     * drawing things to the screen; the Drawable class provides a generic API for
+     * dealing with an underlying visual resource that may take a variety of forms.
+     * Unlike a
+     *
+     * @sa android.view.View
+     *, a Drawable does not have any facility to
+     * receive events or otherwise interact with the user.
+     *
+     * <p>In addition to simple drawing, Drawable provides a number of generic
+     * mechanisms for its client to interact with what is being drawn:
+     *
+     * <ul>
+     *     <li> The
+     *
+     *     @sa #setBounds
+     *     method <var>must</var> be called to tell the
+     *     Drawable where it is drawn and how large it should be.  All Drawables
+     *     should respect the requested size, often simply by scaling their
+     *     imagery.  A client can find the preferred size for some Drawables with
+     *     the
+     *
+     *     @sa #getIntrinsicHeight
+     *     and
+     *
+     *     @sa #getIntrinsicWidth
+     *     methods.
+     *
+     *     <li> The
+     *
+     *     @sa #getPadding
+     *     method can return from some Drawables
+     *     information about how to frame content that is placed inside of them.
+     *     For example, a Drawable that is intended to be the frame for a button
+     *     widget would need to return padding that correctly places the label
+     *     inside of itself.
+     *
+     *     <li> The
+     *
+     *     @sa #setState
+     *     method allows the client to tell the Drawable
+     *     in which state it is to be drawn, such as "focused", "selected", etc.
+     *     Some drawables may modify their imagery based on the selected state.
+     *
+     *     <li> The
+     *
+     *     @sa #setLevel
+     *     method allows the client to supply a single
+     *     continuous controller that can modify the Drawable is displayed, such as
+     *     a battery level or progress level.  Some drawables may modify their
+     *     imagery based on the current level.
+     *
+     *     <li> A Drawable can perform animations by calling back to its client
+     *     through the
+     *
+     *     @sa Callback
+     *     interface.  All clients should support this
+     *     interface (via
+     *
+     *     @sa #setCallback
+     *     ) so that animations will work.  A
+     *     simple way to do this is through the system facilities such as
+     *
+     *     @sa android.view.View#setBackgroundDrawable(Drawable)
+     *     and
+     *
+     *     @sa android.widget.ImageView
+     *     .
+     * </ul>
+     *
+     * Though usually not visible to the application, Drawables may take a variety
+     * of forms:
+     *
+     * <ul>
+     *     <li> <b>Bitmap</b>: the simplest Drawable, a PNG or JPEG image.
+     *     <li> <b>Nine Patch</b>: an extension to the PNG format allows it to
+     *     specify information about how to stretch it and place things inside of
+     *     it.
+     *     <li> <b>Shape</b>: contains simple drawing commands instead of a raw
+     *     bitmap, allowing it to resize better in some cases.
+     *     <li> <b>Layers</b>: a compound drawable, which draws multiple underlying
+     *     drawables on top of each other.
+     *     <li> <b>States</b>: a compound drawable that selects one of a set of
+     *     drawables based on its state.
+     *     <li> <b>Levels</b>: a compound drawable that selects one of a set of
+     *     drawables based on its level.
+     *     <li> <b>Scale</b>: a compound drawable with a single child drawable,
+     *     whose overall size is modified based on the current level.
+     * </ul>
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about how to use drawables, read the
+     * <a href="{@docRoot}guide/topics/graphics/2d-graphics.html">Canvas and Drawables</a> developer
+     * guide. For information and examples of creating drawable resources (XML or bitmap files that
+     * can be loaded in code), read the
+     * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>
+     * document.</p></div>
+     */
+    [deprecated]
+    interface IDrawable {
+        ClearColorFilter();
+
+        /**
+         * Return a copy of the drawable's bounds in a new Rect. This returns the
+         * same values as getBounds(), but the returned object is guaranteed to not
+         * be changed later by the drawable (i.e. it retains no reference to this
+         * rect). If the caller already has a Rect allocated, call copyBounds(rect).
+         *
+         * @return A copy of the drawable's bounds
+         */
+        CopyBounds(
+            [in] IRect* rect);
+
+        /**
+         * Return a copy of the drawable's bounds in the specified Rect (allocated
+         * by the caller). The bounds specify where this will draw when its draw()
+         * method is called.
+         *
+         * @param bounds Rect to receive the drawable's bounds (allocated by the
+         *               caller).
+         */
+        CopyBounds(
+            [out] IRect** rect);
+
+        /**
+         * Draw in its bounds (set via setBounds) respecting optional effects such
+         * as alpha (set via setAlpha) and color filter (set via setColorFilter).
+         *
+         * @param canvas The canvas to draw into
+         */
+        Draw(
+            [in] ICanvas* canvas);
+
+        /**
+         * Return the drawable's bounds Rect. Note: for efficiency, the returned
+         * object may be the same object stored in the drawable (though this is not
+         * guaranteed), so if a persistent copy of the bounds is needed, call
+         * copyBounds(rect) instead.
+         * You should also not change the object returned by this method as it may
+         * be the same object stored in the drawable.
+         *
+         * @return The bounds of the drawable (which may change later, so caller
+         *         beware). DO NOT ALTER the returned object as it may change the
+         *         stored bounds of this drawable.
+         *
+         * @see #copyBounds()
+         * @see #copyBounds(android.graphics.Rect)
+         */
+        GetBounds(
+            [out] IRect** rect);
+
+        /**
+         * Return the drawable's dirty bounds Rect. Note: for efficiency, the
+         * returned object may be the same object stored in the drawable (though
+         * this is not guaranteed).
+         * <p>
+         * By default, this returns the full drawable bounds. Custom drawables may
+         * override this method to perform more precise invalidation.
+         *
+         * @return The dirty bounds of this drawable
+         */
+        GetDirtyBounds(
+            [out] IRect** rect);
+
+        /**
+         * Return a mask of the configuration parameters for which this drawable
+         * may change, requiring that it be re-created.  The default implementation
+         * returns whatever was provided through
+         *
+         * @sa #setChangingConfigurations(int)
+         * or 0 by default.  Subclasses
+         * may extend this to or in the changing configurations of any other
+         * drawables they hold.
+         *
+         * @return Returns a mask of the changing configuration parameters, as
+         * defined by
+         *
+         * @sa android.content.res.Configuration
+         *.
+         * @see android.content.res.Configuration
+         */
+        GetChangingConfigurations(
+            [out] Int32* configs);
+
+        /**
+         * Return a
+         *
+         * @sa ConstantState
+         * instance that holds the shared state of this Drawable.
+         *
+         * @return The ConstantState associated to that Drawable.
+         * @see ConstantState
+         * @see Drawable#mutate()
+         */
+        GetConstantState(
+            [out] IDrawableConstantState** state);
+
+        /**
+         * @return The current drawable that will be used by this drawable. For simple drawables, this
+         *         is just the drawable itself. For drawables that change state like
+         *
+         *         @sa StateListDrawable
+         *         and
+         *
+         *         @sa LevelListDrawable
+         *         this will be the child drawable
+         *         currently in use.
+         */
+        GetCurrent(
+            [out] IDrawable** drawable);
+
+        /**
+         * Return the intrinsic height of the underlying drawable object. Returns
+         * -1 if it has no intrinsic height, such as with a solid color.
+         */
+        GetIntrinsicHeight(
+            [out] Int32* height);
+
+        /**
+         * Return the intrinsic width of the underlying drawable object.  Returns
+         * -1 if it has no intrinsic width, such as with a solid color.
+         */
+        GetIntrinsicWidth(
+            [out] Int32* width);
+
+        /**
+         * Returns the resolved layout direction for this Drawable.
+         *
+         * @return One of
+         *
+         *       @sa android.view.View#LAYOUT_DIRECTION_LTR
+         *       ,
+         *
+         *       @sa android.view.View#LAYOUT_DIRECTION_RTL
+         * @hidec
+         */
+        GetLayoutDirection(
+            [out] Int32* direction);
+
+        /**
+         * Set the layout direction for this drawable. Should be a resolved direction as the
+         * Drawable as no capacity to do the resolution on his own.
+         *
+         * @param layoutDirection One of
+         *
+         *     @sa android.view.View#LAYOUT_DIRECTION_LTR
+         *     ,
+         *
+         *     @sa android.view.View#LAYOUT_DIRECTION_RTL
+         * @hide
+         */
+        SetLayoutDirection(
+            [in] Int32 layoutDirection);
+
+        /**
+         * Gets the current alpha value for the drawable. 0 means fully transparent,
+         * 255 means fully opaque. This method is implemented by
+         * Drawable subclasses and the value returned is specific to how that class treats alpha.
+         * The default return value is 255 if the class does not override this method to return a value
+         * specific to its use of alpha.
+         */
+        GetAlpha(
+            [out] Int32* alpha);
+
+        /**
+         * Return in insets the layout insets suggested by this Drawable for use with alignment
+         * operations during layout.
+         *
+         * @hide
+         */
+        GetOpticalInsets(
+            [out] IInsets** insets);
+
+        /**
+         * Retrieve the current level.
+         *
+         * @return int Current level, from 0 (minimum) to 10000 (maximum).
+         */
+        GetLevel(
+            [out] Int32* curLevel);
+
+        /**
+         * Called to get the drawable to populate the Outline that defines its drawing area.
+         * <p>
+         * This method is called by the default {@link android.view.ViewOutlineProvider} to define
+         * the outline of the View.
+         * <p>
+         * The default behavior defines the outline to be the bounding rectangle of 0 alpha.
+         * Subclasses that wish to convey a different shape or alpha value must override this method.
+         *
+         * @see android.view.View#setOutlineProvider(android.view.ViewOutlineProvider)
+         */
+        GetOutline(
+            [in] IOutline* outline);
+
+        /**
+         * Returns the minimum height suggested by this Drawable. If a View uses this
+         * Drawable as a background, it is suggested that the View use at least this
+         * value for its height. (There will be some scenarios where this will not be
+         * possible.) This value should INCLUDE any padding.
+         *
+         * @return The minimum height suggested by this Drawable. If this Drawable
+         *         doesn't have a suggested minimum height, 0 is returned.
+         */
+        GetMinimumHeight(
+            [out] Int32* height);
+
+        /**
+         * Returns the minimum width suggested by this Drawable. If a View uses this
+         * Drawable as a background, it is suggested that the View use at least this
+         * value for its width. (There will be some scenarios where this will not be
+         * possible.) This value should INCLUDE any padding.
+         *
+         * @return The minimum width suggested by this Drawable. If this Drawable
+         *         doesn't have a suggested minimum width, 0 is returned.
+         */
+        GetMinimumWidth(
+            [out] Int32* width);
+
+        /**
+         * Return the opacity/transparency of this Drawable.  The returned value is
+         * one of the abstract format constants in
+         *
+         * @sa android.graphics.PixelFormat
+         * :
+         *
+         * @sa android.graphics.PixelFormat#UNKNOWN
+         * ,
+         *
+         * @sa android.graphics.PixelFormat#TRANSLUCENT
+         * ,
+         *
+         * @sa android.graphics.PixelFormat#TRANSPARENT
+         * ,or
+         *
+         * @sa android.graphics.PixelFormat#OPAQUE
+         *.
+         *
+         * <p>Generally a Drawable should be as conservative as possible with the
+         * value it returns.  For example, if it contains multiple child drawables
+         * and only shows one of them at a time, if only one of the children is
+         * TRANSLUCENT and the others are OPAQUE then TRANSLUCENT should be
+         * returned.  You can use the method
+         *
+         * @sa #resolveOpacity
+         * to perform a
+         * standard reduction of two opacities to the appropriate single output.
+         *
+         * <p>Note that the returned value does <em>not</em> take into account a
+         * custom alpha or color filter that has been applied by the client through
+         * the
+         *
+         *   @sa #setAlpha
+         *   or
+         *
+         *   @sa #setColorFilter
+         *   methods.
+         *
+         * @return int The opacity class of the Drawable.
+         *
+         * @see android.graphics.PixelFormat
+         */
+        GetOpacity(
+            [out] Int32* opacity);
+
+        /**
+         * Return in padding the insets suggested by this Drawable for placing
+         * content inside the drawable's bounds. Positive values move toward the
+         * center of the Drawable (set Rect.inset). Returns true if this drawable
+         * actually has a padding, else false. When false is returned, the padding
+         * is always set to 0.
+         */
+        GetPadding(
+            [in] IRect* padding,
+            [out] Boolean* isPadding);
+
+        /**
+         * Describes the current state, as a union of primitve states, such as
+         *
+         * @sa android.R.attr#state_focused
+         *,
+         *
+         * @sa android.R.attr#state_selected
+         *, etc.
+         * Some drawables may modify their imagery based on the selected state.
+         * @return An array of resource Ids describing the current state.
+         */
+        GetState(
+            [out, callee] ArrayOf<Int32>* stateSet);
+
+        /**
+         * Returns a Region representing the part of the Drawable that is completely
+         * transparent.  This can be used to perform drawing operations, identifying
+         * which parts of the target will not change when rendering the Drawable.
+         * The default implementation returns null, indicating no transparent
+         * region; subclasses can optionally override this to return an actual
+         * Region if they want to supply this optimization information, but it is
+         * not required that they do so.
+         *
+         * @return Returns null if the Drawables has no transparent region to
+         * report, else a Region holding the parts of the Drawable's bounds that
+         * are transparent.
+         */
+        GetTransparentRegion(
+            [out] IRegion** bounds);
+
+        /**
+         * Inflate this Drawable from an XML resource.
+         */
+        Inflate(
+            [in] IResources* r,
+            [in] IXmlPullParser* parser,
+            [in] IAttributeSet* attrs);
+
+        /**
+         * Inflate this Drawable from an XML resource optionally styled by a theme.
+         *
+         * @param r Resources used to resolve attribute values
+         * @param parser XML parser from which to inflate this Drawable
+         * @param attrs Base set of attribute values
+         * @param theme Theme to apply, may be null
+         * @throws XmlPullParserException
+         * @throws IOException
+         */
+        Inflate(
+            [in] IResources* r,
+            [in] IXmlPullParser* parser,
+            [in] IAttributeSet* attrs,
+            [in] IResourcesTheme* theme);
+
+        /**
+         * Use the current
+         *
+         * @sa Callback
+         * implementation to have this Drawable
+         * redrawn.  Does nothing if there is no Callback attached to the
+         * Drawable.
+         *
+         * @see Callback#invalidateDrawable
+         */
+        InvalidateSelf();
+
+        /**
+         * Indicates whether this view will change its appearance based on state.
+         * Clients can use this to determine whether it is necessary to calculate
+         * their state and call setState.
+         *
+         * @return True if this view changes its appearance based on state, false
+         *         otherwise.
+         *
+         * @see #setState(int[])
+         */
+        IsStateful(
+            [out] Boolean* isStateful);
+
+        IsVisible(
+            [out] Boolean* visible);
+
+        /**
+         * Set whether this Drawable is automatically mirrored when its layout direction is RTL
+         * (right-to left). See {@link android.util.LayoutDirection}.
+         *
+         * @param mirrored Set to true if the Drawable should be mirrored, false if not.
+         */
+        SetAutoMirrored(
+            [in] Boolean mirrored);
+
+        /**
+         * Tells if this Drawable will be automatically mirrored  when its layout direction is RTL
+         * right-to-left. See {@link android.util.LayoutDirection}.
+         *
+         * @return boolean Returns true if this Drawable will be automatically mirrored.
+         */
+        IsAutoMirrored(
+            [out] Boolean* rst);
+
+        /**
+         * Applies the specified theme to this Drawable and its children.
+         */
+        ApplyTheme(
+            [in] IResourcesTheme* t);
+
+        CanApplyTheme(
+            [out] Boolean* rst);
+
+
+        /**
+         * If this Drawable does transition animations between states, ask that
+         * it immediately jump to the current state and skip any active animations.
+         */
+        JumpToCurrentState();
+
+        /**
+         * Make this drawable mutable. This operation cannot be reversed. A mutable
+         * drawable is guaranteed to not share its state with any other drawable.
+         * This is especially useful when you need to modify properties of drawables
+         * loaded from resources. By default, all drawables instances loaded from
+         * the same resource share a common state; if you modify the state of one
+         * instance, all the other instances will receive the same modification.
+         *
+         * Calling this method on a mutable Drawable will have no effect.
+         *
+         * @return This drawable.
+         */
+        Mutate(
+            [out] IDrawable** drawable);
+
+        /**
+         * Use the current
+         *
+         * @sa Callback
+         * implementation to have this Drawable
+         * scheduled.  Does nothing if there is no Callback attached to the
+         * Drawable.
+         *
+         * @param what The action being scheduled.
+         * @param when The time (in milliseconds) to run.
+         *
+         * @see Callback#scheduleDrawable
+         */
+        ScheduleSelf(
+            [in] IRunnable* what,
+            [in] Int64 when);
+
+        /**
+         * Specify an alpha value for the drawable. 0 means fully transparent, and
+         * 255 means fully opaque.
+         */
+        SetAlpha(
+            [in] Int32 alpha);
+
+        /**
+         * Specify a bounding rectangle for the Drawable. This is where the drawable
+         * will draw when its draw() method is called.
+         */
+        SetBounds(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /**
+         * Specify a bounding rectangle for the Drawable. This is where the drawable
+         * will draw when its draw() method is called.
+         */
+        SetBounds(
+            [in] IRect* bounds);
+
+        /**
+         * Bind a
+         *
+         * @sa Callback
+         * object to this Drawable.  Required for clients
+         * that want to support animated drawables.
+         *
+         * @param cb The client's Callback implementation.
+         */
+        SetCallback(
+            [in] IDrawableCallback* cb);
+
+        /**
+         * Return the current
+         *
+         * @sa Callback
+         * implementation attached to this
+         * Drawable.
+         *
+         * @return A
+         *
+         *  @sa Callback
+         *      instance or null if no callback was set.
+         *
+         * @see #setCallback(android.graphics.drawable.Drawable.Callback)
+         */
+        GetCallback(
+            [out] IDrawableCallback** cb);
+
+        /**
+         * Set a mask of the configuration parameters for which this drawable
+         * may change, requiring that it be re-created.
+         *
+         * @param configs A mask of the changing configuration parameters, as
+         * defined by
+         *
+         *     @sa android.content.res.Configuration
+         *.
+         *
+         * @see android.content.res.Configuration
+         */
+        SetChangingConfigurations(
+            [in] Int32 configs);
+
+        /**
+         * Specify an optional colorFilter for the drawable. Pass null to remove
+         * any filters.
+        */
+        SetColorFilter(
+            [in] IColorFilter* cf);
+
+        /**
+         * Specifies a tint for this drawable.
+         * <p>
+         * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+         * tint.
+         *
+         * @param tint Color to use for tinting this drawable
+         * @see #setTintMode(PorterDuff.Mode)
+         */
+        SetTint(
+            [in] Int32 tint);
+
+        /**
+         * Specifies a tint for this drawable as a color state list.
+         * <p>
+         * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+         * tint.
+         *
+         * @param tint Color state list to use for tinting this drawable, or null to
+         *            clear the tint
+         * @see #setTintMode(PorterDuff.Mode)
+         */
+        SetTintList(
+            [in] IColorStateList* tint);
+
+        /**
+         * Specifies a tint blending mode for this drawable.
+         * <p>
+         * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
+         * tint.
+         *
+         * @param tintMode Color state list to use for tinting this drawable, or null to
+         *            clear the tint
+         * @param tintMode A Porter-Duff blending mode
+         */
+        SetTintMode(
+            [in] PorterDuffMode tintMode);
+
+        /**
+         * Returns the current color filter, or {@code null} if none set.
+         *
+         * @return the current color filter, or {@code null} if none set
+         */
+        GetColorFilter(
+            [out] IColorFilter** filter);
+
+        /**
+         * Specify a color and porterduff mode to be the colorfilter for this
+         * drawable.
+         */
+        SetColorFilter(
+            [in] Int32 color,
+            [in] PorterDuffMode mode);
+
+
+        /**
+         * Specifies the hotspot's location within the drawable.
+         *
+         * @param x The X coordinate of the center of the hotspot
+         * @param y The Y coordinate of the center of the hotspot
+         */
+        SetHotspot(
+            [in] Float x,
+            [in] Float y);
+
+        /**
+         * Sets the bounds to which the hotspot is constrained, if they should be
+         * different from the drawable bounds.
+         *
+         * @param left
+         * @param top
+         * @param right
+         * @param bottom
+         */
+        SetHotspotBounds(
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        /** @hide For internal use only. Individual results may vary. */
+        GetHotspotBounds(
+            [in] IRect* outRect);
+
+        /**
+         * Whether this drawable requests projection.
+         *
+         * @hide magic!
+         */
+        IsProjected(
+            [out] Boolean* rst);
+
+        /**
+         * Set to true to have the drawable dither its colors when drawn to a device
+         * with fewer than 8-bits per color component. This can improve the look on
+         * those devices, but can also slow down the drawing a little.
+         */
+        SetDither(
+            [in] Boolean dither);
+
+        /**
+         * Set to true to have the drawable filter its bitmap when scaled or rotated
+         * (for drawables that use bitmaps). If the drawable does not use bitmaps,
+         * this call is ignored. This can improve the look when scaled or rotated,
+         * but also slows down the drawing.
+         */
+        SetFilterBitmap(
+            [in] Boolean filter);
+
+        /**
+         * Specify the level for the drawable.  This allows a drawable to vary its
+         * imagery based on a continuous controller, for example to show progress
+         * or volume level.
+         *
+         * <p>If the new level you are supplying causes the appearance of the
+         * Drawable to change, then it is responsible for calling
+         *
+         * @sa #invalidateSelf
+         * in order to have itself redrawn, <em>and</em>
+         * true will be returned from this function.
+         *
+         * @param level The new level, from 0 (minimum) to 10000 (maximum).
+         *
+         * @return Returns true if this change in level has caused the appearance
+         * of the Drawable to change (hence requiring an invalidate), otherwise
+         * returns false.
+         */
+        SetLevel(
+            [in] Int32 level,
+            [out] Boolean* changed);
+
+        /**
+         * Specify a set of states for the drawable. These are use-case specific,
+         * so see the relevant documentation. As an example, the background for
+         * widgets like Button understand the following states:
+         * [
+         *
+         * @sa android.R.attr#state_focused
+         * ,
+         *
+         *  @sa android.R.attr#state_pressed
+         * ].
+         *
+         * <p>If the new state you are supplying causes the appearance of the
+         * Drawable to change, then it is responsible for calling
+         *
+         * @sa #invalidateSelf
+         * in order to have itself redrawn, <em>and</em>
+         * true will be returned from this function.
+         *
+         * <p>Note: The Drawable holds a reference on to <var>stateSet</var>
+         * until a new state array is given to it, so you must not modify this
+         * array during that time.</p>
+         *
+         * @param stateSet The new set of states to be displayed.
+         *
+         * @return Returns true if this change in state has caused the appearance
+         * of the Drawable to change (hence requiring an invalidate), otherwise
+         * returns false.
+         */
+        SetState(
+            [in] ArrayOf<Int32>* stateSet,
+            [out] Boolean* isStateful);
+
+        /**
+         * Set whether this Drawable is visible.  This generally does not impact
+         * the Drawable's behavior, but is a hint that can be used by some
+         * Drawables, for example, to decide whether run animations.
+         *
+         * @param visible Set to true if visible, false if not.
+         * @param restart You can supply true here to force the drawable to behave
+         *                as if it has just become visible, even if it had last
+         *                been set visible.  Used for example to force animations
+         *                to restart.
+         *
+         * @return boolean Returns true if the new visibility is different than
+         *         its previous state.
+         */
+        SetVisible(
+            [in] Boolean visible,
+            [in] Boolean restart,
+            [out] Boolean* isDifferent);
+
+        /**
+         * Use the current
+         *
+         * @sa Callback
+         * implementation to have this Drawable
+         * unscheduled.  Does nothing if there is no Callback attached to the
+         * Drawable.
+         *
+         * @param what The runnable that you no longer want called.
+         *
+         * @see Callback#unscheduleDrawable
+         */
+        UnscheduleSelf(
+            [in] IRunnable* what);
+    }
+
+    interface IDrawableCallback {
+        /**
+         * Called when the drawable needs to be redrawn.  A view at this point
+         * should invalidate itself (or at least the part of itself where the
+         * drawable appears).
+         *
+         * @param who The drawable that is requesting the update.
+         */
+        InvalidateDrawable(
+            [in] IDrawable* who);
+
+        /**
+         * A Drawable can call this to schedule the next frame of its
+         * animation.  An implementation can generally simply call
+         *
+         * @sa android.os.Handler#postAtTime(Runnable, Object, long)
+         * with
+         * the parameters <var>(what, who, when)</var> to perform the
+         * scheduling.
+         *
+         * @param who The drawable being scheduled.
+         * @param what The action to execute.
+         * @param when The time (in milliseconds) to run.  The timebase is
+         *
+         * @sa android.os.SystemClock#uptimeMillis
+         */
+        ScheduleDrawable(
+            [in] IDrawable* who,
+            [in] IRunnable* what,
+            [in] Int64 when);
+
+        /**
+         * A Drawable can call this to unschedule an action previously
+         * scheduled with
+         *
+         * @sa #scheduleDrawable
+         *
+         *.  An implementation can
+         * generally simply call
+         *
+         * @sa android.os.Handler#removeCallbacks(Runnable, Object)
+         * with
+         * the parameters <var>(what, who)</var> to unschedule the drawable.
+         *
+         * @param who The drawable being unscheduled.
+         * @param what The action being unscheduled.
+         */
+        UnscheduleDrawable(
+            [in] IDrawable* who,
+            [in] IRunnable* what);
+    }
+
+    interface IDrawableConstantState {
+        /**
+         * Create a new drawable without supplying resources the caller
+         * is running in.  Note that using this means the density-dependent
+         * drawables (like bitmaps) will not be able to update their target
+         * density correctly.
+         */
+        NewDrawable(
+            [out] IDrawable** drawable);
+
+        /**
+         * Create a new Drawable instance from its constant state.  This
+         * must be implemented for drawables that change based on the target
+         * density of their caller (that is depending on whether it is
+         * in compatibility mode).
+         */
+        NewDrawable(
+            [in] IResources* res,
+            [out] IDrawable** drawable);
+
+        /**
+         * Create a new Drawable instance from its constant state. This must be
+         * implemented for drawables that can have a theme applied.
+         */
+        NewDrawable(
+            [in] IResources* res,
+            [in] IResourcesTheme* theme,
+            [out] IDrawable** drawable);
+
+        /**
+         * Return a bit mask of configuration changes that will impact
+         * this drawable (and thus require completely reloading it).
+         */
+        GetChangingConfigurations(
+            [out] Int32* configs);
+
+        /**
+         * @hide
+         */
+        GetBitmap(
+            [out] IBitmap** bp);
+
+        /**
+         * Return whether this constant state can have a theme applied.
+         */
+        CanApplyTheme(
+            [out] Boolean* rst);
+    }
+
+    interface IDrawableHelper {
+        /**
+         * Return the appropriate opacity value for two source opacities.  If
+         * either is UNKNOWN, that is returned; else, if either is TRANSLUCENT,
+         * that is returned; else, if either is TRANSPARENT, that is returned;
+         * else, OPAQUE is returned.
+         *
+         * <p>This is to help in implementing
+         *
+         * @sa #getOpacity
+         * .
+         *
+         * @param op1 One opacity value.
+         * @param op2 Another opacity value.
+         *
+         * @return int The combined opacity value.
+         *
+         * @see #getOpacity
+         */
+        ResolveOpacity(
+            [in] Int32 op1,
+            [in] Int32 op2,
+            [out] Int32* opacity);
+
+        /**
+         * Create a drawable from file path name.
+         */
+        CreateFromPath(
+            [in] String pathName,
+            [out] IDrawable** drawable);
+
+        /**
+         * Create a drawable from an inputstream, using the given resources and
+         * value to determine density information.
+         */
+        CreateFromResourceStream(
+            [in] IResources* res,
+            [in] ITypedValue* value,
+            [in] IInputStream* is,
+            [in] String srcName,
+            [in] IBitmapFactoryOptions* opts,
+            [out] IDrawable** draw);
+
+        /**
+         * Create a drawable from an inputstream, using the given resources and
+         * value to determine density information.
+         */
+        CreateFromResourceStream(
+            [in] IResources* res,
+            [in] ITypedValue* value,
+            [in] IInputStream* is,
+            [in] String srcName,
+            [out] IDrawable** draw);
+
+        /**
+         * Create a drawable from an inputstream
+         */
+        CreateFromStream(
+            [in] IInputStream* is,
+            [in] String srcName,
+            [out] IDrawable** draw);
+
+        /**
+         * Create a drawable from an XML document. For more information on how to
+         * create resources in XML, see
+         * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
+         */
+        CreateFromXml(
+            [in] IResources* r,
+            [in] IXmlPullParser* parser,
+            [out] IDrawable** draw);
+
+        /**
+         * Create a drawable from an XML document using an optional {@link Theme}.
+         * For more information on how to create resources in XML, see
+         * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
+         */
+        CreateFromXml(
+            [in] IResources* r,
+            [in] IXmlPullParser* parser,
+            [in] IResourcesTheme* theme,
+            [out] IDrawable** draw);
+
+        /**
+         * Create from inside an XML document.  Called on a parser positioned at
+         * a tag in an XML document, tries to create a Drawable from that tag.
+         * Returns null if the tag is not a valid drawable.
+         */
+        CreateFromXmlInner(
+            [in] IResources* r,
+            [in] IXmlPullParser* parser,
+            [in] IAttributeSet* attrs,
+            [out] IDrawable** draw);
+
+        /**
+         * Create a drawable from inside an XML document using an optional
+         * {@link Theme}. Called on a parser positioned at a tag in an XML
+         * document, tries to create a Drawable from that tag. Returns {@code null}
+         * if the tag is not a valid drawable.
+         */
+        CreateFromXmlInner(
+            [in] IResources* r,
+            [in] IXmlPullParser* parser,
+            [in] IAttributeSet* attrs,
+            [in] IResourcesTheme* theme,
+            [out] IDrawable** draw);
+
+        /**
+         * Parses a {@link android.graphics.PorterDuff.Mode} from a tintMode
+         * attribute's enum value.
+         *
+         * @hide
+         */
+        ParseTintMode(
+            [in] Int32 value,
+            [in] PorterDuffMode defaultMode,
+            [out] PorterDuffMode* mode);
+    }
+
+    } // namespace Drawable
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,26 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+
+    /**
+     * This class wraps an output stream and a cipher so that {@code write} methods
+     * send the data through the cipher before writing them to the underlying output
+     * stream.
+     * <p>
+     * The cipher must be initialized for the requested operation before being used
+     * by a {@code CipherOutputStream}. For example, if a cipher initialized for
+     * encryption is used with a {@code CipherOutputStream}, the {@code
+     * CipherOutputStream} tries to encrypt the data writing it out.
+     */
+    /**
+     * @Involve
+     * interface Elastos.IO.IFilterOutputStream
+     */
+    interface ICipherOutputStream {
+    }
+
+    } // namespace Crypto
+    } // namespace Elastosx
+}

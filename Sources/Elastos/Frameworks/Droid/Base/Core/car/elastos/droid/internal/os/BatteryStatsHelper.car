@@ -1,0 +1,145 @@
+module
+{
+    using interface Elastos.IO.IFileInputStream;
+    using interface Elastos.Utility.IList;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IBatteryStats;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Internal.Os.IPowerProfile;
+    interface Elastos.Droid.Utility.ISparseArray;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Os {
+
+    /**
+     * A helper class for retrieving the power usage information for all applications and services.
+     *
+     * The caller must initialize this class as soon as activity object is ready to use (for example, in
+     * onAttach() for Fragment), call create() in onCreate() and call destroy() in onDestroy().
+     */
+    [local]
+    interface IBatteryStatsHelper {
+        StoreStatsHistoryInFile(
+            [in] String fname);
+
+        /** Clears the current stats and forces recreating for future use. */
+        ClearStats();
+
+        GetStats(
+            [out] IBatteryStats** stats);
+
+        GetBatteryBroadcast(
+            [out] IIntent** intent);
+
+        GetPowerProfile(
+            [out] IPowerProfile** powerProfile);
+
+        Create(
+            [in] IBatteryStats* stats);
+
+        Create(
+            [in] IBundle* icicle);
+
+        StoreState();
+
+        /**
+         * Refreshes the power usage list.
+         */
+        RefreshStats(
+            [in] Int32 statsType,
+            [in] Int32 asUser);
+
+        /**
+         * Refreshes the power usage list.
+         */
+        RefreshStats(
+            [in] Int32 statsType,
+            [in] IList* asUsers);
+
+        /**
+         * Refreshes the power usage list.
+         */
+        RefreshStats(
+            [in] Int32 statsType,
+            [in] ISparseArray* asUsers);
+
+        RefreshStats(
+            [in] Int32 statsType,
+            [in] ISparseArray* asUsers,
+            [in] Int64 rawRealtimeUs,
+            [in] Int64 rawUptimeUs);
+
+        GetUsageList(
+            [out] IList** result);
+
+        GetMobilemsppList(
+            [out] IList** result);
+
+        GetStatsPeriod(
+            [out] Int64* result);
+
+        GetStatsType(
+            [out] Int32* result);
+
+        GetMaxPower(
+            [out] Double* result);
+
+        GetMaxRealPower(
+            [out] Double* result);
+
+        GetTotalPower(
+            [out] Double* result);
+
+        GetComputedPower(
+            [out] Double* result);
+
+        GetMinDrainedPower(
+            [out] Double* result);
+
+        GetMaxDrainedPower(
+            [out] Double* result);
+
+        GetBatteryTimeRemaining(
+            [out] Int64* result);
+
+        GetChargeTimeRemaining(
+            [out] Int64* result);
+    }
+
+    [local]
+    interface IBatteryStatsHelperHelper {
+        CheckWifiOnly(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        StatsFromFile(
+            [in] IContext* context,
+            [in] String fname,
+            [out] IBatteryStats** stats);
+
+        DropFile(
+            [in] IContext* context,
+            [in] String fname);
+
+        MakemAh(
+            [in] Double power,
+            [out] String* result);
+
+        ReadFully(
+            [in] IFileInputStream* stream,
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        ReadFully(
+            [in] IFileInputStream* stream,
+            [in] Int32 avail,
+            [out, callee] ArrayOf<Byte>* bytes);
+    }
+
+    } // namespace Os
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

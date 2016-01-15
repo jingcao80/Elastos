@@ -1,0 +1,18 @@
+module
+{
+    namespace Elastos {
+    namespace Utility {
+
+    /**
+     * @Involve
+     * interface IPermission;
+     * interface IGuard;
+     * interface ISerializable;
+     */
+    interface IPropertyPermission {
+
+    }
+
+    } // namespace Utility
+    } // namespace Elastos
+}

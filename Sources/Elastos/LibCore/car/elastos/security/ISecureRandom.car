@@ -1,0 +1,131 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * @Involve
+     * interface IRandom
+     * interface ISerializable
+     */
+    [deprecated]
+    interface ISecureRandom {
+        /**
+         * Returns the provider associated with this {@code SecureRandom}.
+         *
+         * @return the provider associated with this {@code SecureRandom}.
+         */
+        GetProvider(
+            [out] IProvider** provider);
+
+        /**
+         * Returns the name of the algorithm of this {@code SecureRandom}.
+         *
+         * @return the name of the algorithm of this {@code SecureRandom}.
+         */
+        GetAlgorithm(
+            [out] String* algorithm);
+
+        /**
+         * Seeds this {@code SecureRandom} instance with the specified {@code
+         * seed}. <a href="#insecure_seed">Seeding {@code SecureRandom} may be
+         * insecure</a>.
+         */
+        SetSeed(
+            [in] ArrayOf<Byte>* seed);
+
+        /**
+         * Generates and returns the specified number of seed bytes, computed using
+         * the seed generation algorithm used by this {@code SecureRandom}.
+         *
+         * @param numBytes
+         *            the number of seed bytes.
+         * @return the seed bytes.
+         */
+        GenerateSeed(
+            [in] Int32 numBytes,
+            [out, callee] ArrayOf<Byte>* seed);
+    }
+
+    interface ISecureRandomHelper {
+        /**
+         * Returns a new instance of {@code SecureRandom} that utilizes the
+         * specified algorithm.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @return a new instance of {@code SecureRandom} that utilizes the
+         *         specified algorithm.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] ISecureRandom** instance);
+
+        /**
+         * Returns a new instance of {@code SecureRandom} that utilizes the
+         * specified algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @param provider
+         *            the name of the provider.
+         * @return a new instance of {@code SecureRandom} that utilizes the
+         *         specified algorithm from the specified provider.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NoSuchProviderException
+         *             if the specified provider is not available.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] ISecureRandom** instance);
+
+        /**
+         * Returns a new instance of {@code SecureRandom} that utilizes the
+         * specified algorithm from the specified provider. The
+         * {@code provider} supplied does not have to be registered.
+         *
+         * @param algorithm
+         *            the name of the algorithm to use.
+         * @param provider
+         *            the security provider.
+         * @return a new instance of {@code SecureRandom} that utilizes the
+         *         specified algorithm from the specified provider.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         * @throws IllegalArgumentException if {@code provider == null}
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider* provider,
+            [out] ISecureRandom** instance);
+
+        /**
+         * Generates and returns the specified number of seed bytes, computed using
+         * the seed generation algorithm used by this {@code SecureRandom}.
+         *
+         * @param numBytes
+         *            the number of seed bytes.
+         * @return the seed bytes
+         */
+        GetSeed(
+            [in] Int32 numBytes,
+            [out, callee] ArrayOf<Byte>* seed);
+    }
+
+    } // end namespace Security
+    } // end namespace Elastos
+}

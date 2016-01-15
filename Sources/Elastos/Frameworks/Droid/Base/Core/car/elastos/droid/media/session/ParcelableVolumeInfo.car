@@ -1,0 +1,21 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Session {
+
+    /**
+     * Convenience class for passing information about the audio configuration of a
+     * session. The public implementation is {@link MediaController.PlaybackInfo}.
+     *
+     * @hide
+     */
+    interface IParcelableVolumeInfo {
+    }
+
+    } // namespace Session
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

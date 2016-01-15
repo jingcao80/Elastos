@@ -1,0 +1,71 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.ICollection;
+    using interface Elastos.Core.IStringBuilder;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+
+    /**
+     * The class encapsulates the ASN.1 DER encoding/decoding work
+     * with the GeneralNames structure which is a part of X.509 certificate
+     * (as specified in RFC 3280 -
+     *  Internet X.509 Public Key Infrastructure.
+     *  Certificate and Certificate Revocation List (CRL) Profile.
+     *  http://www.ietf.org/rfc/rfc3280.txt):
+     *
+     *
+     * <pre>
+     *   GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
+     * </pre>
+     *
+     * @see org.apache.harmony.security.x509.NameConstraints
+     * @see org.apache.harmony.security.x509.GeneralSubtree
+     */
+    interface IGeneralNames {
+        /**
+         * Returns the list of values.
+         */
+        GetNames(
+            [out] IList** names);
+
+        /**
+         * Returns the collection of pairs: (Integer (tag), Object (name value))*
+         */
+        GetPairsList(
+            [out] ICollection** pairslist);
+
+        AddName(
+            [in] IGeneralName* name);
+
+        /**
+         * Returns ASN.1 encoded form of this X.509 GeneralNames value.
+         */
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        DumpValue(
+            [in] IStringBuilder* sb,
+            [in] String prefix);
+    }
+
+    interface IGeneralNamesHelper {
+        /**
+         * ASN.1 DER X.509 GeneralNames encoder/decoder class.
+         */
+        GetASN1(
+            [out] IASN1Type** asn1);
+    }
+
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

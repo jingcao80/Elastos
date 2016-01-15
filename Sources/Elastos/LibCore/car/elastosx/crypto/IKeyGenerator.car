@@ -1,0 +1,180 @@
+
+module
+{
+    interface Elastos.Security.IProvider;
+    interface Elastos.Security.ISecureRandom;
+    interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+    interface Elastosx.Crypto.ISecretKey;
+
+    namespace Elastosx {
+    namespace Crypto {
+
+    /**
+     * This class provides the public API for generating symmetric cryptographic
+     * keys.
+     */
+    interface IKeyGenerator {
+
+        /**
+         * Returns the name of the key generation algorithm.
+         *
+         * @return the name of the key generation algorithm.
+         */
+        GetAlgorithm(
+            [out] String * al);
+
+        /**
+         * Returns the provider for this {@code KeyAgreement} instance.
+         *
+         * @return the provider for this {@code KeyAgreement} instance.
+         */
+        GetProvider(
+            [out] IProvider ** provider);
+
+        /**
+         * Generates a secret key.
+         *
+         * @return the generated secret key.
+         */
+        GenerateKey(
+            [out] ISecretKey** skey);
+
+        /**
+         * Initializes this {@code KeyGenerator} instance with the specified
+         * algorithm parameters.
+         *
+         * @param params
+         *            the parameters for the key generation algorithm.
+         * @throws InvalidAlgorithmParameterException
+         *             if the parameters cannot be used to initialize this key
+         *             generator algorithm.
+         */
+        Init(
+            [in] IAlgorithmParameterSpec * params);
+
+        /**
+         * Initializes this {@code KeyGenerator} instance with the specified
+         * algorithm parameters and randomness source.
+         *
+         * @param params
+         *            the parameters for the key generation algorithm.
+         * @param random
+         *            the randomness source for any random bytes.
+         * @throws InvalidAlgorithmParameterException
+         *             if the parameters cannot be uses to initialize this key
+         *             generator algorithm.
+         */
+        Init(
+            [in] IAlgorithmParameterSpec * params,
+            [in] ISecureRandom * random);
+
+        /**
+         * Initializes this {@code KeyGenerator} instance for the specified key size
+         * (in bits).
+         *
+         * @param keysize
+         *            the size of the key (in bits).
+         */
+        Init(
+            [in] Int32 keysize);
+
+        /**
+         * Initializes this {@code KeyGenerator} instance for the specified key size
+         * (in bits) using the specified randomness source.
+         *
+         * @param keysize
+         *            the size of the key (in bits).
+         * @param random
+         *            the randomness source for any random bytes.
+         */
+        Init(
+            [in] Int32 keysize,
+            [in] ISecureRandom * random);
+
+        /**
+         * Initializes this {@code KeyGenerator} instance for the specified key size
+         * (in bits) using the specified randomness source.
+         *
+         * @param keysize
+         *            the size of the key (in bits).
+         * @param random
+         *            the randomness source for any random bytes.
+         */
+        Init(
+            [in] ISecureRandom * random);
+
+    }
+
+
+    interface IKeyGeneratorHelper {
+
+        /**
+         * Creates a new {@code KeyGenerator} instance that provides the specified
+         * key algorithm,
+         *
+         * @param algorithm
+         *            the name of the requested key algorithm
+         * @return the new {@code KeyGenerator} instance.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not available by any provider.
+         * @throws NullPointerException
+         *             if {@code algorithm} is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [out] IKeyGenerator ** ka);
+
+        /**
+         * Creates a new {@code KeyGenerator} instance that provides the specified
+         * key algorithm from the specified provider.
+         *
+         * @param algorithm
+         *            the name of the requested key algorithm.
+         * @param provider
+         *            the name of the provider that is providing the algorithm.
+         * @return the new {@code KeyGenerator} instance.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not provided by the specified
+         *             provider.
+         * @throws NoSuchProviderException
+         *             if the specified provider is not available.
+         * @throws IllegalArgumentException
+         *             if the specified provider is name is {@code null} or empty.
+         * @throws NullPointerException
+         *             if the specified algorithm name is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] String provider,
+            [out] IKeyGenerator ** ka);
+
+        /**
+         * Creates a new {@code KeyGenerator} instance that provides the specified
+         * key algorithm from the specified provider. The {@code provider}
+         * supplied does not have to be registered.
+         *
+         * @param algorithm
+         *            the name of the requested key algorithm.
+         * @param provider
+         *            the provider that is providing the algorithm
+         * @return the new {@code KeyGenerator} instance.
+         * @throws NoSuchAlgorithmException
+         *             if the specified algorithm is not provided by the specified
+         *             provider.
+         * @throws IllegalArgumentException
+         *             if the specified provider is {@code null}.
+         * @throws NullPointerException
+         *             if the specified algorithm name is {@code null}.
+         */
+        GetInstance(
+            [in] String algorithm,
+            [in] IProvider * provider,
+            [out] IKeyGenerator ** ka);
+
+
+    }
+
+
+    } // namespace Crypto
+    } // namespace Elastosx
+}

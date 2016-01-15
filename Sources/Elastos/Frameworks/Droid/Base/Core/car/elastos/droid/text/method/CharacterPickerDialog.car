@@ -1,0 +1,46 @@
+module
+{
+    interface Elastos.Droid.Widget.IAdapterView;
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Text {
+    namespace Method {
+
+    /**
+     * Dialog for choosing accented characters related to a base character.
+     *
+     * @Involve
+     * interface IViewOnClickListener;
+     * interface IAdapterViewOnItemClickListener;
+     * interface IOnWindowDismissedCallback;
+     * interface IViewOnCreateContextMenuListener;
+     * interface IKeyEventCallback;
+     * interface IWindowCallback;
+     * interface IDialogInterface;
+     * interface IDialog;
+     */
+    [local]
+    interface ICharacterPickerDialog {
+        /**
+         * Handles clicks on the character buttons.
+         */
+        OnItemClick(
+            [in] IAdapterView* parent,
+            [in] IView* view,
+            [in] Int32 position,
+            [in] Int64 id);
+
+        /**
+         * Handles clicks on the Cancel button.
+         */
+        OnClick(
+            [in] IView* v);
+    }
+
+    }//namespace Method
+    }//namespace Text
+    }//namespace Droid
+    }//namespace Elastos
+}

@@ -1,0 +1,67 @@
+
+module
+{
+    interface Elastos.Droid.View.ISubMenu;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * @hide Internal use only
+     */
+    interface ISubUiVisibilityListener {
+        OnSubUiVisibilityChanged(
+            [in] Boolean isVisible);
+    }
+
+    /**
+     * Listens to changes in visibility as reported by {@link ActionProvider#refreshVisibility()}.
+     *
+     * @see ActionProvider#overridesItemVisibility()
+     * @see ActionProvider#isVisible()
+     */
+    interface IVisibilityListener {
+        OnActionProviderVisibilityChanged(
+            [in] Boolean isVisible);
+    }
+
+    interface IActionProvider {
+        OnCreateActionView(
+            [out] IView** view);
+
+        OnCreateActionView(
+            [in] IMenuItem* forItem,
+            [out] IView** view);
+
+        OverridesItemVisibility(
+            [out] Boolean* res);
+
+        IsVisible(
+            [out] Boolean* res);
+
+        RefreshVisibility();
+
+        OnPerformDefaultAction(
+            [out] Boolean* res);
+
+        HasSubMenu(
+            [out] Boolean* res);
+
+        OnPrepareSubMenu(
+            [in] ISubMenu* submenu);
+
+        SubUiVisibilityChanged(
+            [in] Boolean isVisible);
+
+        SetSubUiVisibilityListener(
+            [in] ISubUiVisibilityListener* listener);
+
+        SetVisibilityListener(
+            [in] IVisibilityListener* listener);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

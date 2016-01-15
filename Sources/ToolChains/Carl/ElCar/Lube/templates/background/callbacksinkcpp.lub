@@ -1,0 +1,272 @@
+$INPUT module
+$OUTPUT "_CCallbackSink_.cpp"
+
+#include "_CCallbackSink_.h"
+#include <new>
+#include <unistd.h>
+#include <elcontainer.h>
+
+ECode _CCallbackSink_::_AddCallback(
+    PInterface pCallbackContext,
+    Int32 nEvent,
+    EventHandler & handler)
+{
+    assert(nEvent < _m_nMaxEvents);
+
+    ECode ec;
+
+    Mutex::Autolock lock(_m_lock);
+    ec = (*_m_ppConnector)->CheckCallbackSinkConnection(nEvent);
+    if (SUCCEEDED(ec)) {
+        ec = _m_events[nEvent].Add(pCallbackContext, handler);
+    }
+
+    return ec;
+}
+
+ECode _CCallbackSink_::_AddCallback(
+    /* [in] */ Int32 nEvent,
+    /* [in] */ EventHandler & handler)
+{
+    return _AddCallback(NULL, nEvent, handler);
+}
+
+ECode _CCallbackSink_::_RemoveCallback(
+    PInterface pCallbackContext,
+    Int32 nEvent,
+    EventHandler & handler)
+{
+    ECode ec;
+
+    assert(nEvent < _m_nMaxEvents);
+
+    assert(pCallbackContext);
+
+    do {
+        _m_lock.Lock();
+        ec = _m_events[nEvent].Remove(pCallbackContext, handler, *_m_ppServer, nEvent);
+        _m_lock.Unlock();
+
+        if (ec == E_CALLBACK_IS_BUSY) usleep(100);
+        else break;
+    } while (1);
+
+    return ec;
+}
+
+ECode _CCallbackSink_::_RemoveCallback(
+    /* [in] */ Int32 nEvent,
+    /* [in] */ EventHandler & handler)
+{
+    assert(nEvent < _m_nMaxEvents);
+
+    PInterface pCallbackContext;
+    ECode ec = _Impl_CallbackSink_GetCallbackContext(&pCallbackContext);
+    if (FAILED(ec)) return ec;
+
+    ec = _RemoveCallback(pCallbackContext, nEvent, handler);
+    pCallbackContext->Release();
+    return ec;
+}
+
+ECode _CCallbackSink_::_AcquireCallbackRendezvous(
+    /* [in] */ Int32 nEvent,
+    /* [out] */ ICallbackRendezvous** ppRendezvous)
+{
+    assert(nEvent < _m_nMaxEvents);
+
+    AutoPtr<IInterface> pCallbackContext;
+    CallbackContextContainer *pContainer;
+    CallbackContextNode *pCallbackNode;
+    Boolean bNewAdded = FALSE;
+    ECode ec;
+
+    ec = _Impl_CallbackSink_AcquireCallbackContext((IInterface**)&pCallbackContext);
+    if (FAILED(ec)) return ec;
+
+    {
+        Mutex::Autolock lock(_m_lock);
+
+        pContainer = &(_m_events[nEvent]);
+        pContainer->Find(pCallbackContext, &pCallbackNode);
+
+    }
+
+    if (pCallbackNode == NULL) {
+        EventHandler nullDelegate;
+        ec = _AddCallback(pCallbackContext, nEvent, nullDelegate);
+        if (FAILED(ec)) goto Exit;
+        bNewAdded = TRUE;
+
+        if (pCallbackNode == NULL) {
+            Mutex::Autolock lock(_m_lock);
+            pContainer->Find(pCallbackContext, &pCallbackNode);
+            if (pCallbackNode == NULL) goto Exit;
+        }
+    }
+    ec = _Impl_CCallbackRendezvous_New(
+                            pCallbackContext,
+                            _m_pSink,
+                            nEvent,
+                            &pCallbackNode->m_bEventOccured,
+                            bNewAdded,
+                            ppRendezvous);
+    if (FAILED(ec)) goto Exit;
+
+    return NOERROR;
+Exit:
+    if (bNewAdded) {
+        EventHandler nullDelegate;
+        _RemoveCallback(pCallbackContext, nEvent, nullDelegate);
+    }
+    return ec;
+}
+
+ECode _CCallbackSink_::_RemoveAllCallbacks()
+{
+    PInterface pCallbackContext;
+    ECode ec = _Impl_CallbackSink_GetCallbackContext(&pCallbackContext);
+    if (FAILED(ec)) return ec;
+
+    {
+        Mutex::Autolock lock(_m_lock);
+        for (int n = 0; n < _m_nMaxEvents; n++) {
+            _m_events[n].Dispose(pCallbackContext, *_m_ppServer, n);
+        }
+    }
+
+    pCallbackContext->Release();
+    return NOERROR;
+}
+
+ECode _CCallbackSink_::_CancelPendingCallback(Int32 nEventId)
+{
+    ECode ec = NOERROR;
+    PInterface _pCallbackContext_;
+    CallbackContextContainer *_pEvent_;
+    CallbackContextNode* _pContext_;
+    CallbackContextNode* _pCallbackNode_;
+
+    Mutex::Autolock lock(_m_lock);
+
+    _pEvent_ = &(_m_events[nEventId]);
+    _pContext_ = _pEvent_->m_pCurrent;
+
+    _pEvent_->Reset();
+    while (_pEvent_->MoveNext() == NOERROR) {
+        if (_pEvent_->Current(&_pCallbackNode_) != NOERROR) {
+            break;
+        }
+
+        assert(_pCallbackNode_);
+        _pCallbackContext_ = _pCallbackNode_->m_pCallbackContext;
+        ec = _Impl_CallbackSink_CancelPendingCallback(
+            _pCallbackContext_, *_m_ppServer, nEventId);
+        if (FAILED(ec)) goto _Exit_;
+    }
+    _pEvent_->m_pCurrent = _pContext_;
+
+_Exit_:
+    return ec;
+}
+
+ECode _CCallbackSink_::_CancelAllPendingCallbacks()
+{
+    ECode ec = NOERROR;
+    Int32 idxEvent = 0;
+
+    Mutex::Autolock lock(_m_lock);
+
+    for (idxEvent = 0; idxEvent < _m_nMaxEvents; ++idxEvent) {
+        ec =_CancelPendingCallback(idxEvent);
+        if (FAILED(ec)) break;
+    }
+
+    return ec;
+}
+
+ECode _CCallbackSink_::_PostCallbackEvent(
+    PInterface _pServer_,
+    Int32 _EventId_,
+    CallbackContextContainer *_pEvent_,
+    Int32 _cFlags_,
+    PVoid pCoalesceFunc,
+    IParcel **_ppParams_)
+{
+    PVoid _pvThis_, _pvFunc_;
+    PInterface _pCallbackContext_;
+    CallbackContextNode* _pCallbackNode_;
+    EventHandler *_pDelegate_;
+    ECode _ec_ = NOERROR;
+    ECode _ecLast_ = NOERROR;
+    AutoPtr<CarCallbackEvent> _pCallbackEvent_;
+    CallbackContextNode* _pContext_;
+    Millisecond32 timeOut = 0;
+
+    _pContext_ = _pEvent_->m_pCurrent;
+
+    _pEvent_->Reset();
+    while (_pEvent_->MoveNext() == NOERROR) {
+        if (_pEvent_->Current(&_pCallbackNode_) != NOERROR) {
+            break;
+        }
+
+        assert(_pCallbackNode_);
+
+        _pCallbackNode_->m_bEventOccured = TRUE;
+        _pCallbackContext_ = _pCallbackNode_->m_pCallbackContext;
+
+        _pCallbackNode_->Reset();
+        Boolean hasNext = (_pCallbackNode_->MoveNext() == NOERROR)? true : false;
+        while (hasNext) {
+            if (_pCallbackNode_->Current(&_pDelegate_) != NOERROR) break;
+            assert(_pDelegate_);
+            _pvThis_ = _pDelegate_->GetThisPtr();
+            _pvFunc_ = _pDelegate_->GetFuncPtr();
+
+            _pCallbackEvent_ = _Impl_CallbackSink_AllocCallbackEvent(sizeof(CarCallbackEvent));
+            _pCallbackEvent_ = new(_pCallbackEvent_) CarCallbackEvent(
+                    _EventId_, _cFlags_, _pServer_, _pDelegate_->m_pCarObjClient,
+                    pCoalesceFunc, _pvThis_, _pvFunc_,
+                    _pDelegate_->GetFuncType(), *_ppParams_);
+
+            if (_pCallbackEvent_ == NULL) {
+                _ec_ = E_OUT_OF_MEMORY;
+                goto _Exit_;
+            }
+
+            if (_pCallbackEvent_->m_flags & CallbackEventFlag_SyncCall) {
+                timeOut = (_pCallbackEvent_->m_flags >> 16);
+                if (timeOut == 0) timeOut = INFINITE;
+                _ec_ = _Impl_CallbackSink_SendCallbackEvent(_pCallbackContext_, _pCallbackEvent_, timeOut);
+
+                if (SUCCEEDED(_ec_)) _ec_ = _pCallbackEvent_->m_ecRet;
+            }
+            else {
+                _ec_ = _Impl_CallbackSink_PostCallbackEvent(_pCallbackContext_, _pCallbackEvent_);
+            }
+
+            hasNext = (_pCallbackNode_->MoveNext() == NOERROR)? true : false;
+            if (hasNext && (*_ppParams_ != NULL)) {
+                IParcel *newParcel;
+                CCallbackParcel::New(&newParcel);
+                newParcel->Clone(*_ppParams_);
+                (*_ppParams_)->Release();
+                *_ppParams_ = newParcel;
+            }
+
+            if (FAILED(_ec_)) _ecLast_ = _ec_;
+        }
+    }
+
+    _pEvent_->m_pCurrent = _pContext_;
+
+_Exit_:
+
+    if (FAILED(_ecLast_)) return _ecLast_;
+
+    return _ec_;
+}
+
+$END OUTPUT
+

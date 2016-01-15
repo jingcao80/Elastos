@@ -1,0 +1,23 @@
+
+module
+{
+    interface Elastos.Core.IArrayOf;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+
+    /**
+     * @Involve
+     * interace IParcelable
+     */
+    interface ITechListParcel {
+
+        GetTechLists(
+            [out, callee] ArrayOf< IArrayOf* >* lists);
+    }
+
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

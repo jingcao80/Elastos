@@ -1,0 +1,117 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Graphics {
+
+    /**
+     *  5x4 matrix for transforming the color+alpha components of a Bitmap.
+     *  The matrix is stored in a single array, and its treated as follows:
+     *  [ a, b, c, d, e,
+     *    f, g, h, i, j,
+     *    k, l, m, n, o,
+     *    p, q, r, s, t ]
+     *
+     * When applied to a color [r, g, b, a], the resulting color is computed as
+     * (after clamping)
+     *   R' = a*R + b*G + c*B + d*A + e;
+     *   G' = f*R + g*G + h*B + i*A + j;
+     *   B' = k*R + l*G + m*B + n*A + o;
+     *   A' = p*R + q*G + r*B + s*A + t;
+     */
+
+    [deprecated]
+    interface IColorMatrix {
+        /**
+         * Return the array of floats representing this colormatrix.
+         */
+        GetArray(
+            [out, callee] ArrayOf<Float>* pArray);
+
+        /**
+         * Concat this colormatrix with the specified postmatrix. This is logically
+         * the same as calling setConcat(postmatrix, this);
+         */
+        PostConcat(
+            [in] IColorMatrix* postmatrix);
+
+        /**
+         * Concat this colormatrix with the specified prematrix. This is logically
+         * the same as calling setConcat(this, prematrix);
+         */
+        PreConcat(
+            [in] IColorMatrix* prematrix);
+
+        /**
+         * Set this colormatrix to identity:
+         * [ 1 0 0 0 0   - red vector
+         *   0 1 0 0 0   - green vector
+         *   0 0 1 0 0   - blue vector
+         *   0 0 0 1 0 ] - alpha vector
+         */
+        Reset();
+
+        /**
+         * Assign the src colormatrix into this matrix, copying all of its values.
+         */
+        Set(
+            [in] IColorMatrix* src);
+
+        /**
+         * Assign the array of floats into this matrix, copying all of its values.
+         */
+        Set(
+            [in] ArrayOf<Float>* src);
+
+        /**
+         * Set this colormatrix to the concatenation of the two specified
+         * colormatrices, such that the resulting colormatrix has the same effect
+         * as applying matB and then applying matA. It is legal for either matA or
+         * matB to be the same colormatrix as this.
+         */
+        SetConcat(
+            [in] IColorMatrix* matA,
+            [in] IColorMatrix* matB);
+
+        /**
+         * Set the matrix to convert RGB to YUV
+         */
+        SetRGB2YUV();
+
+        /**
+         * Set the rotation on a color axis by the specified values.
+         * axis=0 correspond to a rotation around the RED color
+         * axis=1 correspond to a rotation around the GREEN color
+         * axis=2 correspond to a rotation around the BLUE color
+         */
+        SetRotate(
+            [in] Int32 axis,
+            [in] Float degrees);
+
+        /**
+         * Set the matrix to affect the saturation of colors. A value of 0 maps the
+         * color to gray-scale. 1 is identity.
+         */
+        SetSaturation(
+            [in] Float sat);
+
+        /**
+         * Set this colormatrix to scale by the specified values.
+         */
+        SetScale(
+            [in] Float rScale,
+            [in] Float gScale,
+            [in] Float bScale,
+            [in] Float aScale);
+
+        /**
+         * Set the matrix to convert from YUV to RGB
+         */
+        SetYUV2RGB();
+    }
+
+    } // namespace Graphics
+    } // namespace Droid
+    } // namespace Elastos
+}

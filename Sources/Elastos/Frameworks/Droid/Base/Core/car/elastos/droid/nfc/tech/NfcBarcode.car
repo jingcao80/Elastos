@@ -1,0 +1,34 @@
+
+module
+{
+
+    interface Elastos.Droid.NFC.ITag;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace NFC{
+    namespace Tech{
+
+    /**
+     * @Involve
+     * interace IBasicTagTechnology
+     */
+    interface INfcBarcode {
+        GetType(
+            [out] Int32* type);
+
+        GetBarcode(
+            [out, callee] ArrayOf<Byte>* code);
+    }
+
+    interface INfcBarcodeHelper {
+        GetNfcBarcode(
+            [in] ITag* tag,
+            [out] INfcBarcode** code);
+    }
+
+    }// namespace Tech
+    }// namespace NFC
+    }// namespace Droid
+    }// namespace Elastos
+}

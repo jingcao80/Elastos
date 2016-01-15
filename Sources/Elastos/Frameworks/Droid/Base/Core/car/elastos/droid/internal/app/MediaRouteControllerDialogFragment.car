@@ -1,0 +1,50 @@
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.App.IMediaRouteControllerDialog;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace App {
+
+    /**
+     * Media route controller dialog fragment.
+     * <p>
+     * Creates a {@link MediaRouteControllerDialog}.  The application may subclass
+     * this dialog fragment to customize the media route controller dialog.
+     * </p>
+     *
+     * TODO: Move this back into the API, as in the support library media router.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener
+     * interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener
+     * interface Elastos.Droid.App.IDialogFragment
+     */
+    [local]
+    interface IMediaRouteControllerDialogFragment {
+
+        /**
+         * Called when the controller dialog is being created.
+         * <p>
+         * Subclasses may override this method to customize the dialog.
+         * </p>
+         */
+        OnCreateControllerDialog(
+            [in] IContext* context,
+            [in] IBundle* savedInstanceState,
+            [out] IMediaRouteControllerDialog** result);
+    }
+
+    }//namespace App
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

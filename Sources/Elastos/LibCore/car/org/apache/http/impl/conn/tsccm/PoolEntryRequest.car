@@ -1,0 +1,54 @@
+
+module
+{
+    using interface Elastos.Utility.Concurrent.ITimeUnit;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Impl {
+    namespace Conn {
+    namespace Tsccm {
+
+    /**
+     * Encapsulates a request for a {@link BasicPoolEntry}.
+     */
+    interface IPoolEntryRequest {
+
+        /**
+         * Obtains a pool entry with a connection within the given timeout.
+         * If {@link #abortRequest()} is called before this completes
+         * an {@link InterruptedException} is thrown.
+         *
+         * @param timeout   the timeout, 0 or negative for no timeout
+         * @param tunit     the unit for the <code>timeout</code>,
+         *                  may be <code>null</code> only if there is no timeout
+         *
+         * @return  pool entry holding a connection for the route
+         *
+         * @throws ConnectionPoolTimeoutException
+         *         if the timeout expired
+         * @throws InterruptedException
+         *         if the calling thread was interrupted or the request was aborted
+         */
+        GetPoolEntry(
+            [in] Int64 timeout,
+            [in] ITimeUnit* tunit,
+            [out] IInterface** basicPoolEntry);
+
+        /**
+         * Aborts the active or next call to
+         * {@link #getPoolEntry(long, TimeUnit)}.
+         */
+        AbortRequest();
+
+    }
+
+    } // namespace Tsccm
+    } // namespace Conn
+    } // namespace Impl
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

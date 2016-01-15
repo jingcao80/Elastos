@@ -1,0 +1,272 @@
+
+module
+{
+    merge("xml/IXMLConstants.car");
+
+    merge("xml/parsers/IDocumentBuilder.car");
+    merge("xml/parsers/IDocumentBuilderFactory.car");
+    merge("xml/parsers/ISAXParserFactory.car");
+    merge("xml/parsers/ISAXParser.car");
+
+    merge("xml/validation/ITypeInfoProvider.car");
+    merge("xml/validation/IValidator.car");
+    merge("xml/validation/IValidatorHandler.car");
+    merge("xml/validation/ISchema.car");
+    merge("xml/validation/ISchemaFactory.car");
+    merge("xml/validation/ISchemaFactoryFinder.car");
+    merge("xml/validation/ISchemaFactoryLoader.car");
+
+    merge("xml/namespace/IQName.car");
+    merge("xml/namespace/INamespaceContext.car");
+
+    merge("xml/datatype/IDatatypeConstants.car");
+    merge("xml/datatype/IDuration.car");
+    merge("xml/datatype/IXMLGregorianCalendar.car");
+    merge("xml/datatype/IDatatypeFactory.car");
+
+    merge("xml/transform/IOutputKeys.car");
+    merge("xml/transform/IResult.car");
+    merge("xml/transform/ISource.car");
+    merge("xml/transform/ISourceLocator.car");
+    merge("xml/transform/IURIResolver.car");
+    merge("xml/transform/ITransformer.car");
+    merge("xml/transform/ITemplates.car");
+    merge("xml/transform/ITransformerFactory.car");
+    merge("xml/transform/IErrorListener.car");
+
+    merge("xml/transform/dom/IDOMLocator.car");
+    merge("xml/transform/dom/IDOMResult.car");
+    merge("xml/transform/dom/IDOMSource.car");
+
+    merge("xml/transform/sax/ISAXResult.car");
+    merge("xml/transform/sax/ISAXSource.car");
+    merge("xml/transform/sax/ITemplatesHandler.car");
+    merge("xml/transform/sax/ITransformerHandler.car");
+    merge("xml/transform/sax/ISAXTransformerFactory.car");
+
+    merge("xml/transform/stream/IFilePathToURI.car");
+    merge("xml/transform/stream/IStreamResult.car");
+    merge("xml/transform/stream/IStreamSource.car");
+
+    merge("xml/xpath/IXPathConstants.car");
+    merge("xml/xpath/IXPathExpression.car");
+    merge("xml/xpath/IXPathFunction.car");
+    merge("xml/xpath/IXPathFunctionResolver.car");
+    merge("xml/xpath/IXPathVariableResolver.car");
+    merge("xml/xpath/IXPath.car");
+    merge("xml/xpath/IXPathFactory.car");
+    merge("xml/xpath/IXPathFactoryFinder.car");
+
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.IWriter;
+    interface Elastos.IO.IReader;
+    interface Elastos.IO.IFile;
+    interface Elastosx.Xml.Transform.ISource;
+    interface Elastosx.Xml.Transform.IResult;
+    interface Org.W3c.Dom.INode;
+    interface Org.Xml.Sax.IContentHandler;
+    interface Org.Xml.Sax.IXMLReader;
+    interface Org.Xml.Sax.IInputSource;
+    interface Elastos.Core.IClassLoader;
+
+    namespace Elastosx {
+    namespace Xml {
+    namespace Namespace {
+
+    class CQName {
+        constructor(
+            [in] String namespaceURI,
+            [in] String localPart);
+
+        constructor(
+            [in] String namespaceURI,
+            [in] String localPart,
+            [in] String prefix);
+
+        constructor(
+            [in] String localPart);
+
+        interface IQName;
+    }
+
+    singleton class CQNameHelper {
+        interface IQNameHelper;
+    }
+
+    } // namespace Namespace
+
+
+
+    namespace Datatype {
+
+    singleton class CDatatypeConstants {
+        interface IDatatypeConstants;
+    }
+
+    singleton class CDatatypeFactoryHelper {
+        interface IDatatypeFactoryHelper;
+    }
+
+    } // namespace Datatype
+
+
+
+    namespace Parsers {
+
+    singleton class CDocumentBuilderFactoryHelper {
+        interface IDocumentBuilderFactoryHelper;
+    }
+
+    singleton class CSAXParserFactoryHelper {
+        interface ISAXParserFactoryHelper;
+    }
+
+    } // namespace Parsers
+
+
+
+    namespace Validation {
+
+    singleton class CSchemaFactoryHelper {
+        interface ISchemaFactoryHelper;
+    }
+
+    } // namespace Validation
+
+
+
+    namespace Transform {
+    namespace Dom {
+
+        class CDOMSource {
+            constructor();
+
+            constructor(
+                [in] INode* n);
+
+            constructor(
+                [in] INode* node,
+                [in] String systemID);
+
+            interface IDOMSource;
+            interface ISource;
+        }
+
+        class CDOMResult {
+            constructor();
+
+            constructor(
+                [in] INode* node);
+
+            constructor(
+                [in] INode* node,
+                [in] String systemId);
+
+            constructor(
+                [in] INode* node,
+                [in] INode* nextSibling);
+
+            constructor(
+                [in] INode* node,
+                [in] INode* nextSibling,
+                [in] String systemId);
+
+            interface IDOMResult;
+            interface IResult;
+        }
+
+    } // namespace Dom
+
+    namespace Sax {
+        class CSAXResult {
+            constructor(
+                [in] IContentHandler* handler);
+
+            interface ISAXResult;
+            interface IResult;
+        }
+
+        class CSAXSource {
+            constructor(
+                [in] IXMLReader* reader,
+                [in] IInputSource* inputSource);
+
+            constructor(
+                [in] IInputSource* inputSource);
+
+            interface ISAXSource;
+            interface ISource;
+        }
+    } // namespace Sax
+
+    namespace Stream {
+        class CStreamResult {
+            constructor();
+
+            constructor(
+                [in] IOutputStream* outputStream);
+
+            constructor(
+                [in] IWriter* writer);
+
+            constructor(
+                [in] String systemId);
+
+            constructor(
+                [in] IFile* f);
+
+            interface IStreamResult;
+            interface IResult;
+        }
+
+        class CStreamSource {
+            constructor();
+
+            constructor(
+                [in] IInputStream* inputStream);
+
+            constructor(
+                [in] IInputStream* inputStream,
+                [in] String systemId);
+
+            constructor(
+                [in] IReader* reader);
+
+            constructor(
+                [in] IReader* reader,
+                [in] String systemId);
+
+            constructor(
+                [in] String systemId);
+
+            constructor(
+                [in] IFile* f);
+
+            interface IStreamSource;
+            interface ISource;
+        }
+    } // namespace Stream
+
+    } // namespace Transform
+
+    namespace XPath {
+
+    class CXPathConstants {
+
+        interface IXPathConstants;
+    }
+
+    [local]
+    class CXPathFactoryFinder {
+        constructor(
+            [in] IClassLoader* cl);
+
+        interface IXPathFactoryFinder;
+    }
+
+    }// namespace XPath
+
+    } // namespace Xml
+    } // namespace Elastosx
+}

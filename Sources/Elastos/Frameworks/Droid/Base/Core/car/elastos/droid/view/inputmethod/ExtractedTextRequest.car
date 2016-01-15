@@ -1,0 +1,47 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+    namespace InputMethod {
+
+    /**
+     * Description of what an input method would like from an application when
+     * extract text from its input editor.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IExtractedTextRequest {
+        GetToken(
+            [out] Int32* token);
+
+        SetToken(
+            [in] Int32 token);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
+
+        GetHintMaxLines(
+            [out] Int32* hintMaxLines);
+
+        SetHintMaxLines(
+            [in] Int32 hintMaxLines);
+
+        GetHintMaxChars(
+            [out] Int32* hintMaxChars);
+
+        SetHintMaxChars(
+            [in] Int32 hintMaxChars);
+    }
+
+    } // namespace InputMethod
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

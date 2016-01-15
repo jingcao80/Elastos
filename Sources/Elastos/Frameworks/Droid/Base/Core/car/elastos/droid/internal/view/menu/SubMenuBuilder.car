@@ -1,0 +1,38 @@
+
+module
+{
+    interface Elastos.Droid.View.IMenu;
+    interface Elastos.Droid.View.IMenuItem;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace View {
+    namespace Menu {
+
+    /**
+     * The model for a sub menu, which is an extension of the menu.  Most methods are proxied to
+     * the parent menu.
+     */
+    /**
+     * @Involve
+     * interface IMenuBuilder
+     */
+    [local]
+    interface ISubMenuBuilder {
+        IsQwertyMode(
+            [out] Boolean* result);
+
+        GetParentMenu(
+            [out] IMenu** menu);
+
+        GetItem(
+            [out] IMenuItem** item);
+    }
+
+    } // namespace Menu
+    } // namespace View
+    } // namespace Internal
+    } // namepsace Droid
+    } // namespace Elastos
+}

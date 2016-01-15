@@ -1,0 +1,229 @@
+module
+{
+    using interface Elastos.Utility.IVector;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    /**
+     * A container class which represents a node in TTML.
+     *
+     * @hide
+     */
+    interface ITtmlNode
+    {
+        IsActive(
+            [in] Int64 startTimeMs,
+            [in] Int64 endTimeMs,
+            [out] Boolean* result);
+    }
+
+    /**
+     * @Involve
+     * interface ISubtitleControllerRenderer
+     */
+    interface ITtmlRenderer
+    {
+    }
+
+    /**
+     * A class which provides utillity methods for TTML parsing.
+     *
+     * @hide
+     */
+    [deprecated]
+    interface ITtmlUtils
+    {
+        const String TAG_TT = "tt";
+        const String TAG_HEAD = "head";
+        const String TAG_BODY = "body";
+        const String TAG_DIV = "div";
+        const String TAG_P = "p";
+        const String TAG_SPAN = "span";
+        const String TAG_BR = "br";
+        const String TAG_STYLE = "style";
+        const String TAG_STYLING = "styling";
+        const String TAG_LAYOUT = "layout";
+        const String TAG_REGION = "region";
+        const String TAG_METADATA = "metadata";
+        const String TAG_SMPTE_IMAGE = "smpte:image";
+        const String TAG_SMPTE_DATA = "smpte:data";
+        const String TAG_SMPTE_INFORMATION = "smpte:information";
+        const String PCDATA = "#pcdata";
+        const String ATTR_BEGIN = "begin";
+        const String ATTR_DURATION = "dur";
+        const String ATTR_END = "end";
+        const Int64 INVALID_TIMESTAMP = 0x7FFFFFFFFFFFFFFF; //Long.MAX_VALUE;
+
+        /**
+         * Parses the given time expression and returns a timestamp in millisecond.
+         * <p>
+         * For the format of the time expression, please refer <a href=
+         * "http://www.w3.org/TR/ttaf1-dfxp/#timing-value-timeExpression">timeExpression</a>
+         *
+         * @param time A string which includes time expression.
+         * @param frameRate the framerate of the stream.
+         * @param subframeRate the sub-framerate of the stream
+         * @param tickRate the tick rate of the stream.
+         * @return the parsed timestamp in micro-second.
+         * @throws NumberFormatException if the given string does not match to the
+         *             format.
+         */
+        ParseTimeExpression(
+            [in] String time,
+            [in] Int32 frameRate,
+            [in] Int32 subframeRate,
+            [in] Int32 tickRate,
+            [out] Int64* result);
+
+        /**
+         * Applies <a href
+         * src="http://www.w3.org/TR/ttaf1-dfxp/#content-attribute-space">the
+         * default space policy</a> to the given string.
+         *
+         * @param in A string to apply the policy.
+         */
+        ApplyDefaultSpacePolicy(
+            [in] String str,
+            [out] String* result);
+
+        /**
+         * Applies the space policy to the given string. This applies <a href
+         * src="http://www.w3.org/TR/ttaf1-dfxp/#content-attribute-space">the
+         * default space policy</a> with linefeed-treatment as treat-as-space
+         * or preserve.
+         *
+         * @param in A string to apply the policy.
+         * @param treatLfAsSpace Whether convert line feeds to spaces or not.
+         */
+        ApplySpacePolicy(
+            [in] String str,
+            [in] Boolean treatLfAsSpace,
+            [out] String* result);
+
+        /**
+         * Returns the timed text for the given time period.
+         *
+         * @param root The root node of the TTML document.
+         * @param startUs The start time of the time period in microsecond.
+         * @param endUs The end time of the time period in microsecond.
+         */
+        ExtractText(
+            [in] ITtmlNode* root,
+            [in] Int64 startUs,
+            [in] Int64 endUs,
+            [out] String* result);
+
+        /**
+         * Returns a TTML fragment string for the given time period.
+         *
+         * @param root The root node of the TTML document.
+         * @param startUs The start time of the time period in microsecond.
+         * @param endUs The end time of the time period in microsecond.
+         */
+        ExtractTtmlFragment(
+            [in] ITtmlNode* root,
+            [in] Int64 startUs,
+            [in] Int64 endUs,
+            [out] String* result);
+    }
+
+    /**
+     * A container class which represents a cue in TTML.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface ISubtitleTrackCue
+     */
+    interface ITtmlCue
+    {
+    }
+
+    /**
+     * A simple TTML parser (http://www.w3.org/TR/ttaf1-dfxp/) which supports DFXP
+     * presentation profile.
+     * <p>
+     * Supported features in this parser are:
+     * <ul>
+     * <li>content
+     * <li>core
+     * <li>presentation
+     * <li>profile
+     * <li>structure
+     * <li>time-offset
+     * <li>timing
+     * <li>tickRate
+     * <li>time-clock-with-frames
+     * <li>time-clock
+     * <li>time-offset-with-frames
+     * <li>time-offset-with-ticks
+     * </ul>
+     * </p>
+     *
+     * @hide
+     */
+    interface ITtmlParser
+    {
+        const String TAG = "TtmlParser";
+
+        /**
+         * Parse TTML data. Once this is called, all the previous data are
+         * reset and it starts parsing for the given text.
+         *
+         * @param ttmlText TTML text to parse.
+         * @throws XmlPullParserException
+         * @throws IOException
+         */
+        Parse(
+            [in] String ttmlText,
+            [in] Int64 runId);
+    }
+
+    /** @hide */
+    interface ITtmlNodeListener
+    {
+        OnTtmlNodeParsed(
+            [in] ITtmlNode* node);
+
+        OnRootNodeParsed(
+            [in] ITtmlNode* node);
+    }
+
+    /**
+     * @Involve
+     * interface ISubtitleTrack
+     * interface ITtmlNodeListener
+     */
+    interface ITtmlTrack
+    {
+        /**
+         * Returns a {@link TtmlCue} in the presentation time order.
+         * {@code null} is returned if there is no more timed text to show.
+         */
+        GetNextResult(
+            [out] ITtmlCue** result);
+    }
+
+    /**
+     * Widget capable of rendering TTML captions.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface ISubtitleTrackRenderingWidget
+     * interface ILinearLayout
+     */
+    [deprecated]
+    interface ITtmlRenderingWidget
+    {
+        SetActiveCues(
+            [in] IVector* activeCues);
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

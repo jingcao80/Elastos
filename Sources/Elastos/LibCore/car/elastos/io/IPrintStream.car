@@ -1,0 +1,272 @@
+
+module
+{
+    interface Elastos.Utility.ILocale;
+
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     *Wraps an existing OutputStream and provides convenience methods for writing common data types in a
+     *human readable format. This is not to be confused with DataOutputStream which is used for encoding
+     *common data types so that they can be read back in. No IOException is thrown by this class. Instead,
+     *callers should use checkError() to see if a problem has occurred in this stream.
+     *
+     *@implements Elastos.IO.IFilterOutputStream
+     */
+     /**
+     * @Involve
+     * interface ICloseable;
+     * interface IOutputStream;
+     * interface IFilterOutputStream;
+     */
+
+    [deprecated]
+    interface IPrintStream {
+        /**
+         * Formats args according to the format string format, and writes the result
+         * to this stream. This method uses the user's default locale.
+         * See "<a href="../util/Locale.html#default_locale">Be wary of the default locale</a>".
+         *
+         * @param format the format string
+         *
+         * @sa java.util.Formatter#format
+         *
+         * @param args
+         *            the list of arguments passed to the formatter. If there are
+         *            more arguments than required by format,
+         *            additional arguments are ignored.
+         * @return this stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalFormatException | if the format string is illegal or incompatible with the
+         *                          arguments, if there are not enough arguments or if any other
+         *                          error regarding the format string or arguments is detected.
+         * NullPointerException  |  if format == null
+         */
+        Format(
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args,
+            [out] IPrintStream** ps);
+
+        /**
+         * Writes a string formatted by an intermediate Formatter to this
+         * stream using the specified locale, format string and arguments.
+         *
+         *
+         * @sa Formatter
+         * @param l
+         *            the locale used in the method. No localization will be applied
+         *            if l is null.
+         * @param format the format string (see {@sa java.util.Formatter#format})
+         * @param args
+         *            the list of arguments passed to the formatter. If there are
+         *            more arguments than required by format,
+         *            additional arguments are ignored.
+         * @return this stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalFormatException | if the format string is illegal or incompatible with the
+         *                          arguments, if there are not enough arguments or if any other
+         *                          error regarding the format string or arguments is detected.
+         * NullPointerException  |  if format == null
+         */
+        Format(
+            [in] ILocale* l,
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args,
+            [out] IPrintStream** ps);
+
+        /**
+         * Prints a formatted string. The behavior of this method is the same as
+         * this stream's #format(String, Object...) method.
+         *
+         * <p>The Locale used is the user's default locale.
+         * See "<a href="../util/Locale.html#default_locale">Be wary of the default locale</a>".
+         *
+         * @param format the format string
+         *
+         * @sa java.util.Formatter#format
+         * @param args
+         *            the list of arguments passed to the formatter. If there are
+         *            more arguments than required by format,
+         *            additional arguments are ignored.
+         * @return this stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalFormatException | if the format string is illegal or incompatible with the
+         *                          arguments, if there are not enough arguments or if any other
+         *                          error regarding the format string or arguments is detected.
+         * NullPointerException  |  if format == null
+         */
+        Printf(
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args,
+            [out] IPrintStream** ps);
+
+        /**
+         * Prints a formatted string. The behavior of this method is the same as
+         * this stream's #format(Locale, String, Object...) method.
+         *
+         * @param l
+         *            the locale used in the method. No localization will be applied
+         *            if l is null.
+         * @param format the format string
+         * @sa java.util.Formatter#format
+         * @param args
+         *            the list of arguments passed to the formatter. If there are
+         *            more arguments than required by format,
+         *            additional arguments are ignored.
+         * @return this stream.
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalFormatException | if the format string is illegal or incompatible with the
+         *                          arguments, if there are not enough arguments or if any other
+         *                          error regarding the format string or arguments is detected.
+         * NullPointerException  |  if format == null.
+         */
+        Printf(
+            [in] ILocale* l,
+            [in] String format,
+            [in] ArrayOf<IInterface*>* args,
+            [out] IPrintStream** ps);
+
+        /**
+         * Prints the string representation of the character array chars.
+         */
+        Print(
+            [in] ArrayOf<Char32>* chars);
+
+        /**
+         * Prints the string representation of the char c.
+         */
+        PrintChar(
+            [in] Char32 c);
+
+        /**
+         * Prints the string representation of the double d.
+         */
+        Print(
+            [in] Double d);
+
+        /**
+         * Prints the string representation of the float f.
+         */
+        Print(
+            [in] Float f);
+
+        /**
+         * Prints the string representation of the int i.
+         */
+        Print(
+            [in] Int32 i);
+
+        /**
+         * Prints the string representation of the long l.
+         */
+        Print(
+            [in] Int64 l);
+
+        /**
+         * Prints the string representation of the Object o, or "null".
+         */
+        Print(
+            [in] IInterface* o);
+
+        /**
+         * Prints a string to the target stream. The string is converted to an array
+         * of bytes using the encoding chosen during the construction of this
+         * stream. The bytes are then written to the target stream with
+         * write(int).
+         *
+         * <p>If an I/O error occurs, this stream's error state is set to true.
+         *
+         * @param str
+         *            the string to print to the target stream.
+         * @see #write(int)
+         */
+        Print(
+            [in] String str);
+
+        /**
+         * Prints the string representation of the boolean b.
+         */
+        Print(
+            [in] Boolean b);
+
+        /**
+         * Prints a newline.
+         */
+        Println();
+
+        /**
+         * Prints the string representation of the character array chars followed by a newline.
+         */
+        Println(
+            [in] ArrayOf<Char32>* chars);
+
+        /**
+         * Prints the string representation of the char c followed by a newline.
+         */
+        PrintCharln(
+            [in] Char32 c);
+
+        /**
+         * Prints the string representation of the double d followed by a newline.
+         */
+        Println(
+            [in] Double d);
+
+        /**
+         * Prints the string representation of the float f followed by a newline.
+         */
+        Println(
+            [in] Float f);
+
+        /**
+         * Prints the string representation of the int i followed by a newline.
+         */
+        Println(
+            [in] Int32 i);
+
+        /**
+         * Prints the string representation of the long l followed by a newline.
+         */
+        Println(
+            [in] Int64 l);
+
+        /**
+         * Prints the string representation of the Object o, or "null",
+         * followed by a newline.
+         */
+        Println(
+            [in] IInterface* o);
+
+        /**
+         * Prints a string followed by a newline. The string is converted to an array of bytes using
+         * the encoding chosen during the construction of this stream. The bytes are
+         * then written to the target stream with write(int).
+         *
+         * <p>If an I/O error occurs, this stream's error state is set to true.
+         *
+         * @param str
+         *            the string to print to the target stream.
+         * @see #write(int)
+         */
+        Println(
+            [in] String str);
+
+        /**
+         * Prints the string representation of the boolean b followed by a newline.
+         */
+        Println(
+            [in] Boolean b);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

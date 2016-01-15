@@ -1,0 +1,48 @@
+
+TARGET_NAME= opengl
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+INCLUDES += $(PREBUILD_INC)/GLES
+INCLUDES += $(PREBUILD_INC)/utils
+INCLUDES += $(PREBUILD_INC)/skia
+INCLUDES += $(PREBUILD_INC)/ETC1
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = EGLObjectHandle.cpp
+SOURCES += EGLContextC.cpp
+SOURCES += EGLDisplayC.cpp
+SOURCES += EGLSurfaceC.cpp
+SOURCES += EGLConfigC.cpp
+SOURCES += CGLES10.cpp
+SOURCES += CGLES10Ext.cpp
+SOURCES += CGLES11.cpp
+SOURCES += CGLES11Ext.cpp
+SOURCES += CGLES20.cpp
+SOURCES += CEGL14.cpp
+SOURCES += CEGL14Helper.cpp
+SOURCES += CETC1.cpp
+SOURCES += CETC1Texture.cpp
+SOURCES += CETC1Util.cpp
+SOURCES += CGLU.cpp
+SOURCES += CGLUtils.cpp
+SOURCES += CMatrixGL.cpp
+SOURCES += CVisibilityGL.cpp
+SOURCES += GLSurfaceView.cpp
+SOURCES += CGLSurfaceView.cpp
+SOURCES += Poly.cpp
+SOURCES += ManagedEGLContext.cpp
+SOURCES += GLWrapperBase.cpp
+SOURCES += CGLDebugHelper.cpp
+SOURCES += GLErrorWrapper.cpp
+SOURCES += EGLLogWrapper.cpp
+SOURCES += GLLogWrapper.cpp
+
+// ELASTOS_LIBS += gles/gles.lib

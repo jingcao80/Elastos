@@ -1,0 +1,2544 @@
+module
+{
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IReader;
+    interface Elastos.Math.IBigDecimal;
+    interface Elastos.Net.IURL;
+    interface Elastos.Utility.ICalendar;
+    interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Sql {
+
+    /**
+      * @Involve
+      * interface Elastos.Sql.IWrapper;
+      */
+    interface IResultSet {
+        /**
+         * A constant used to indicate that a {@code ResultSet} object must be
+         * closed when the method {@code Connection.commit} is invoked.
+         */
+        const Int32 CLOSE_CURSORS_AT_COMMIT = 2;
+
+        /**
+         * A constant used to indicate that a {@code ResultSet} object must not be
+         * closed when the method {@code Connection.commit} is invoked.
+         */
+        const Int32 HOLD_CURSORS_OVER_COMMIT = 1;
+
+        /**
+         * A constant used to indicate the concurrency mode for a {@code ResultSet}
+         * object that cannot be updated.
+         */
+        const Int32 CONCUR_READ_ONLY = 1007;
+
+        /**
+         * A constant used to indicate the concurrency mode for a {@code ResultSet}
+         * object that can be updated.
+         */
+        const Int32 CONCUR_UPDATABLE = 1008;
+
+        /**
+         * A constant used to indicate processing of the rows of a {@code ResultSet}
+         * in the forward direction, first to last.
+         */
+        const Int32 FETCH_FORWARD = 1000;
+
+        /**
+         * A constant used to indicate processing of the rows of a {@code ResultSet}
+         * in the reverse direction, last to first.
+         */
+        const Int32 FETCH_REVERSE = 1001;
+
+        /**
+         * A constant used to indicate that the order of processing of the rows of a
+         * {@code ResultSet} is unknown.
+         */
+        const Int32 FETCH_UNKNOWN = 1002;
+
+        /**
+         * A constant used to indicate a {@code ResultSet} object whose cursor can
+         * only move forward.
+         */
+        const Int32 TYPE_FORWARD_ONLY = 1003;
+
+        /**
+         * A constant used to indicate a {@code ResultSet} object which is
+         * scrollable but is insensitive to changes made by others.
+         */
+        const Int32 TYPE_SCROLL_INSENSITIVE = 1004;
+
+        /**
+         * A constant used to indicate a {@code ResultSet} object which is
+         * scrollable and sensitive to changes made by others.
+         */
+        const Int32 TYPE_SCROLL_SENSITIVE = 1005;
+
+        /**
+         * Moves the cursor to a specified row number in the {@code ResultSet}.
+         *
+         * @param row
+         *            the index of the row starting at index 1. Index {@code -1}
+         *            returns the last row.
+         * @return {@code true} if the new cursor position is on the {@code
+         *         ResultSet}, {@code false} otherwise.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        Absolute(
+            [in] Int32 row,
+            [out] Boolean* isAbsolute);
+
+        /**
+         * Moves the cursor to the end of the {@code ResultSet}, after the last row.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        AfterLast();
+
+        /**
+         * Moves the cursor to the start of the {@code ResultSet}, before the first
+         * row.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        BeforeFirst();
+
+        /**
+         * Cancels any updates made to the current row in the {@code ResultSet}.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        CancelRowUpdates();
+
+        /**
+         * Clears all warnings related to this {@code ResultSet}.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        ClearWarnings();
+
+        /**
+         * Releases this {@code ResultSet}'s database and JDBC resources. You are
+         * strongly advised to use this method rather than relying on the release
+         * being done when the {@code ResultSet}'s finalize method is called during
+         * garbage collection process. Note that the {@code close()} method might
+         * take some time to complete since it is dependent on the behavior of the
+         * connection to the database and the database itself.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        Close();
+
+        /**
+         * Deletes the current row from the {@code ResultSet} and from the
+         * underlying database.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        DeleteRow();
+
+        /**
+         * Gets the index number for a column in the {@code ResultSet} from the
+         * provided column name.
+         *
+         * @param columnName
+         *            the column name.
+         * @return the column's index in the {@code ResultSet} identified by column
+         *         name.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        FindColumn(
+            [in] String columnName);
+
+        /**
+         * Shifts the cursor position to the first row in the {@code ResultSet}.
+         *
+         * @return {@code true} if the position is in a legitimate row, {@code
+         *         false} if the {@code ResultSet} contains no rows.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetFirst(
+            [out] Boolean *value);
+
+        /**
+         * Gets the content of a column specified by column index in the current row
+         * of this {@code ResultSet} as a {@code java.sql.Array}.
+         *
+         * @param columnIndex
+         *            the index of the column to read
+         * @return a {@code java.sql.Array} with the data from the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetArray(
+            [in] Int32 columnIndex,
+            [out] IArray ** iarray);
+
+        /**
+         * Gets the value of a column specified by column name as a {@code
+         * java.sql.Array}.
+         *
+         * @param colName
+         *            the name of the column to read.
+         * @return a {@code java.sql.Array} with the data from the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetArray(
+            [in] String colName,
+            [out] IArray ** iarray);
+
+        /**
+         * Gets the value of a column specified by column index as an ASCII
+         * character stream.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return an {@code InputStream} with the data from the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetAsciiStream(
+            [in] Int32 columnIndex,
+            [out] IInputStream** is);
+
+        /**
+         * Gets the value of a column specified by column name as an ASCII character
+         * stream.
+         *
+         * @param columnName
+         *            the name of the column to read
+         * @return an {@code InputStream} with the data from the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetAsciiStream(
+            [in] String columnName,
+            [out] IInputStream** is);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.math.BigDecimal}.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code BigDecimal} with the value of the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBigDecimal(
+            [in] Int32 columnIndex,
+            [out] IBigDecimal** bigDecimal);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.math.BigDecimal}.
+         *
+         * @deprecated use {@link #getBigDecimal(int)} or
+         *             {@link #getBigDecimal(String)}
+         * @param columnIndex
+         *            the index of the column to read.
+         * @param scale
+         *            the number of digits after the decimal point
+         * @return a {@code BigDecimal} with the value of the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        //@Deprecated
+        GetBigDecimal(
+            [in] Int32 columnIndex,
+            [in] Int32 scale,
+            [out] IBigDecimal** bigDecimal);
+
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code
+         * java.math.BigDecimal}.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a BigDecimal with value of the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBigDecimal(
+            [in] String columnName,
+            [out] IBigDecimal** bigDecimal);
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code
+         * java.math.BigDecimal}.
+         *
+         * @deprecated use {@link #getBigDecimal(int)} or
+         *             {@link #getBigDecimal(String)}
+         * @param columnName
+         *            the name of the column to read.
+         * @param scale
+         *            the number of digits after the decimal point
+         * @return a BigDecimal with value of the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        //@Deprecated
+        GetBigDecimal(
+            [in] String columnName,
+            [in] Int32 scale,
+            [out] IBigDecimal** bigDecimal);
+
+        /**
+         * Gets the value of a column specified by column index as a binary
+         * stream.
+         * <p>
+         * This method can be used to read {@code LONGVARBINARY} values. All of the
+         * data in the {@code InputStream} should be read before getting data from
+         * any other column. A further call to a getter method will implicitly close
+         * the {@code InputStream}.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return an {@code InputStream} with the data from the column. If the
+         *         column value is SQL {@code NULL}, {@code null} is returned.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBinaryStream(
+           [in] Int32 columnIndex,
+           [out] IInputStream** is);
+
+        /**
+         * Gets the value of a column specified by column name as a binary stream.
+         * <p>
+         * This method can be used to read {@code LONGVARBINARY} values. All of the
+         * data in the {@code InputStream} should be read before getting data from
+         * any other column. A further call to a getter method will implicitly close
+         * the {@code InputStream}.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return an {@code InputStream} with the data from the column if the
+         *         column value is SQL {@code NULL}, {@code null} is returned.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBinaryStream(
+            [in] String columnName,
+               [out] IInputStream** is);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.sql.Blob} object.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code java.sql.Blob} with the value of the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBlob(
+            [in] Int32 columnIndex,
+            [out] IBlob** blob);
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code
+         * java.sql.Blob} object.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a {@code java.sql.Blob} with the value of the column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBlob(
+            [in] String columnName,
+            [out] IBlob** blob);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code boolean}
+         * .
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code boolean} value from the column. If the column is SQL
+         *         {@code NULL}, {@code false} is returned.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBoolean(
+            [in] Int32 columnIndex,
+            [out] Boolean* value);
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code boolean}
+         * .
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a {@code boolean} value from the column. If the column is SQL
+         *         {@code NULL}, {@code false} is returned.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBoolean(
+            [in] String columnName,
+            [out] Boolean* value);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code byte}.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code byte} equal to the value of the column. 0 if the value
+         *         is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetByte(
+            [in] Int32 columnIndex,
+            [out] Byte* value);
+
+        /**
+         * Gets the value of a column specified by column name as a {@code byte}.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a {@code byte} equal to the value of the column. 0 if the value
+         *         is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetByte(
+            [in] String columnName,
+            [out] Byte* value);
+
+        /**
+         * Gets the value of a column specified by column index as a byte array.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a byte array containing the value of the column. {@code null} if
+         *         the column contains SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBytes(
+            [in] Int32 columnIndex,
+            [out, callee] ArrayOf<Byte>* value);
+
+        /**
+         * Gets the value of a column specified by column name as a byte array.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a byte array containing the value of the column. {@code null} if
+         *         the column contains SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetBytes(
+            [in] String columnName,
+            [out, callee] ArrayOf<Byte>* value);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.io.Reader} object.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code Reader} holding the value of the column. {@code null} if
+         *         the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         * @see java.io.Reader
+         */
+        GetCharacterStream(
+           [in] Int32 columnIndex,
+           [out] IReader** reader);
+
+        /**
+         * Gets the value of a column specified by column name as a {@code
+         * java.io.Reader} object.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a {@code Reader} holding the value of the column. {@code null} if
+         *         the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetCharacterStream(
+            [in] String columnName,
+            [out] IReader** reader);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.sql.Clob}.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code Clob} object representing the value in the column.
+         *         {@code null} if the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetClob(
+            [in] Int32 columnIndex,
+            [out] IClob** clob);
+
+        /**
+         * Gets the value of a column specified by column name as a {@code
+         * java.sql.Clob}.
+         *
+         * @param colName
+         *            the name of the column to read.
+         * @return a {@code Clob} object representing the value in the column.
+         *         {@code null} if the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetClob(
+            [in] String colName,
+            [out] IClob** clob);
+
+        /**
+         * Gets the concurrency mode of this {@code ResultSet}.
+         *
+         * @return the concurrency mode - one of: {@code ResultSet.CONCUR_READ_ONLY}
+         *         , {@code ResultSet.CONCUR_UPDATABLE}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetConcurrency(
+            [out] Int32* mode);
+
+        /**
+         * Gets the name of the SQL cursor of this {@code ResultSet}.
+         *
+         * @return the SQL cursor name.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetCursorName(
+            [out] String* name);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.sql.Date}.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code java.sql.Date} matching the column value. {@code null}
+         *         if the column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+         GetDate(
+            [in] Int32 columnIndex,
+            [out] ISQLDate ** idate);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.sql.Date}. This method uses a supplied calendar to compute the Date.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @param cal
+         *            a {@code java.util.Calendar} to use in constructing the Date.
+         * @return a {@code java.sql.Date} matching the column value. {@code null}
+         *         if the column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+         GetDate(
+            [in] Int32 columnIndex,
+            [in] ICalendar * cal,
+            [out] ISQLDate ** idate);
+
+        /**
+         * Gets the value of a column specified by column name as a {@code
+         * java.sql.Date}.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a {@code java.sql.Date} matching the column value. {@code null}
+         *         if the column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetDate(
+            [in] String columnName,
+            [out] ISQLDate ** idate);
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code
+         * java.sql.Date} object.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @param cal
+         *            {@code java.util.Calendar} to use in constructing the Date.
+         * @return a {@code java.sql.Date} matching the column value. {@code null}
+         *         if the column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetDate(
+            [in] String columnName,
+            [in] ICalendar * cal,
+            [out] ISQLDate ** idate);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code double}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code double} equal to the column value. {@code 0.0} if the
+         *         column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetDouble(
+            [in] Int32 columnIndex,
+            [out] Double* value);
+
+        /**
+         * Gets the value of a column specified by column name as a {@code double}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a {@code double} equal to the column value. {@code 0.0} if the
+         *         column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetDouble(
+            [in] String columnName,
+            [out] Double* value);
+
+        /**
+         * Gets the direction in which rows are fetched for this {@code ResultSet}
+         * object.
+         *
+         * @return the fetch direction. Will be one of:
+         *         <ul>
+         *         <li>ResultSet.FETCH_FORWARD</li><li>ResultSet.FETCH_REVERSE</li>
+         *         <li>ResultSet.FETCH_UNKNOWN</li>
+         *         </ul>
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetFetchDirection(
+            [out] Int32* value);
+
+        /**
+         * Gets the fetch size (in number of rows) for this {@code ResultSet}.
+         *
+         * @return the fetch size as an int
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetFetchSize(
+            [out] Int32* size);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code float}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code float} equal to the column value. {@code 0.0} if the
+         *         column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetFloat(
+            [in] Int32 columnIndex,
+            [out] Float* value);
+
+        /**
+         * Gets the value of a column specified by column name as a {@code float}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a {@code float} equal to the column value. {@code 0.0} if the
+         *         column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetFloat(
+            [in] String columnName,
+            [out] Float* value);
+
+        /**
+         * Gets the value of a column specified by column index as an {@code int}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return an {@code int} equal to the column value. {@code 0} if the
+         *         column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetInt32(
+            [in] Int32 columnIndex,
+            [out] Int32* value);
+
+        /**
+         * Gets the value of a column specified by column name, as an {@code int}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return an {@code int} equal to the column value. {@code 0} if the
+         *         column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetInt32(
+            [in] String columnName,
+            [out] Int32* value);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code long}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a {@code long} equal to the column value. {@code 0} if the
+         *         column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetInt64(
+            [in] Int32 columnIndex,
+            [out] Int64* value);
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code long}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a {@code long} equal to the column value. {@code 0} if the
+         *         column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetInt64(
+            [in] String columnName,
+            [out] Int64* value);
+
+        /**
+         * Gets the metadata for this {@code ResultSet}. This defines the number,
+         * types and properties of the columns in the {@code ResultSet}.
+         *
+         * @return a {@code ResultSetMetaData} object with information about this
+         *         {@code ResultSet}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetMetaData(
+            [out] IResultSetMetaData** metaData);
+
+        /**
+         * Gets the value of a specified column as a Java {@code Object}. The type
+         * of the returned object will be the default according to the column's SQL
+         * type, following the JDBC specification for built-in types.
+         * <p>
+         * For SQL User Defined Types, if a column value is Structured or Distinct,
+         * this method behaves the same as a call to: {@code
+         * getObject(columnIndex,this.getStatement().getConnection().getTypeMap())}
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return an {@code Object} containing the value of the column. {@code
+         *         null} if the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetObject(
+            [in] Int32 columnIndex,
+            [out] IInterface** obj);
+
+        /**
+         * Gets the value of a column specified by column index as a Java {@code
+         * Object}.
+         * <p>
+         * The type of the Java object will be determined by the supplied Map to
+         * perform the mapping of SQL {@code Struct} or Distinct types into Java
+         * objects.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @param map
+         *            a {@code java.util.Map} containing a mapping from SQL Type
+         *            names to Java classes.
+         * @return an {@code Object} containing the value of the column. {@code
+         *         null} if the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetObject(
+            [in] Int32 columnIndex,
+            [in] IMap * map,
+            [out] IInterface ** obj);
+
+        /**
+         * Gets the value of a specified column as a Java {@code Object}. The type
+         * of the returned object will be the default according to the column's SQL
+         * type, following the JDBC specification for built-in types.
+         * <p>
+         * For SQL User Defined Types, if a column value is structured or distinct,
+         * this method behaves the same as a call to: {@code
+         * getObject(columnIndex,this.getStatement().getConnection().getTypeMap())}
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return an {@code Object} containing the value of the column. {@code
+         *         null} if the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetObject(
+            [in] String columnName,
+            [out] IInterface** obj);
+
+        /**
+         * Gets the value of a column specified by column name as a Java {@code
+         * Object}.
+         * <p>
+         * The type of the Java object will be determined by the supplied Map to
+         * perform the mapping of SQL Struct or Distinct types into Java objects.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @param map
+         *            a {@code java.util.Map} containing a mapping from SQL Type names to
+         *            Java classes.
+         * @return an {@code Object} containing the value of the column. {@code
+         *         null} if the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetObject(
+            [in] String columnName,
+            [in] IMap * map,
+            [out] IInterface** obj);
+
+        /**
+         * Gets the value of a column specified by column index as a Java {@code
+         * java.sql.Ref}.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a Ref representing the value of the SQL REF in the column
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetRef(
+            [in] Int32 columnIndex,
+            [out] IRef** ref);
+
+        /**
+         * Gets the value of a column specified by column name as a Java {@code
+         * java.sql.Ref}.
+         *
+         * @param colName
+         *            the name of the column to read.
+         * @return a Ref representing the value of the SQL {@code REF} in the column
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetRef(
+            [in] String colName,
+            [out] IRef** ref);
+
+        /**
+         * Gets the number of the current row in the {@code ResultSet}. Row numbers
+         * start at 1 for the first row.
+         *
+         * @return the index number of the current row. {@code 0} is returned if
+         *         there is no current row.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetRow(
+            [out] Int32* row);
+
+        /**
+         * Gets the value of a column specified by column index as a short value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a short value equal to the value of the column. {@code 0} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetInt16(
+            [in] Int32 columnIndex,
+            [out] Int16* value);
+
+        /**
+         * Gets the value of a column specified by column name, as a short value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a short value equal to the value of the column. {@code 0} if
+         *         the value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetInt16(
+            [in] String columnName,
+            [out] Int16* value);
+
+        /**
+         * Gets the statement that produced this {@code ResultSet}. If the {@code
+         * ResultSet} was not created by a statement (i.e. because it was returned
+         * from one of the {@link DatabaseMetaData} methods), {@code null} is
+         * returned.
+         *
+         * @return the Statement which produced this {@code ResultSet}, or {@code
+         *         null} if the {@code ResultSet} was not created by a Statement.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetStatement(
+            [out] IStatement** statement);
+
+        /**
+         * Gets the value of a column specified by column index as a String.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return the String representing the value of the column, {@code null} if
+         *         the column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetString(
+            [in] Int32 columnIndex,
+            [out] String* value);
+
+        /**
+         * Gets the value of a column specified by column name, as a String.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return the String representing the value of the column, {@code null} if
+         *         the column is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetString(
+            [in] String columnName,
+            [out] String* value);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.sql.Time} value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a Time representing the column value, {@code null} if the column
+         *         value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetTime(
+            [in] Int32 columnIndex,
+            [out] ITime** ti);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.sql.Time} value. The supplied {@code Calendar} is used to
+         * map the SQL {@code Time} value to a Java Time value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @param cal
+         *            a {@code Calendar} to use in creating the Java Time value.
+         * @return a Time representing the column value, {@code null} if the column
+         *         value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetTime(
+            [in] Int32 columnIndex,
+            [in] ICalendar* cal,
+            [out] ITime** ti);
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code
+         * java.sql.Time} value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return the column value, {@code null} if the column value is SQL {@code
+         *         NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetTime(
+            [in] String columnName,
+            [out] ITime** ti);
+
+        /**
+         * Gets the value of a column specified by column index, as a {@code
+         * java.sql.Time} value. The supplied {@code Calendar} is used to
+         * map the SQL {@code Time} value to a Java Time value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @param cal
+         *            a {@code Calendar} to use in creating the Java time value.
+         * @return a Time representing the column value, {@code null} if the column
+         *         value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetTime(
+            [in] String columnName,
+            [in] ICalendar* cal,
+            [out] ITime** ti);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.sql.Timestamp} value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a timestamp representing the column value, {@code null} if the
+         *         column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetTimestamp(
+               [in] Int32 columnIndex,
+               [out] ITimestamp** timestamp);
+
+        /**
+         * Gets the value of a column specified by column index, as a {@code
+         * java.sql.Timestamp} value. The supplied Calendar is used when mapping
+         * the SQL {@code Timestamp} value to a Java {@code Timestamp} value.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @param cal
+         *            Calendar to use in creating the Java timestamp value.
+         * @return a timestamp representing the column value, {@code null} if the
+         *         column value is SQL NULL.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetTimestamp(
+            [in] Int32 columnIndex,
+            [in] ICalendar* cal,
+            [out] ITimestamp** timestamp);
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code
+         * java.sql.Timestamp} value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return a timestamp representing the column value, {@code null} if the
+         *         column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetTimestamp(
+            [in] String columnName,
+            [out] ITimestamp** timestamp);
+
+        /**
+         * Gets the value of a column specified by column name, as a {@code
+         * java.sql.Timestamp} value. The supplied Calendar is used when mapping
+         * the SQL {@code Timestamp} value to a Java {@code Timestamp} value.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @param cal
+         *            Calendar to use in creating the Java {@code Timestamp} value.
+         * @return a timestamp representing the column value, {@code null} if the
+         *         column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetTimestamp(
+            [in] String columnName,
+            [in] ICalendar* cal,
+            [out] ITimestamp** timestamp);
+
+        /**
+         * Gets the type of the {@code ResultSet}.
+         *
+         * @return The {@code ResultSet} type, one of:
+         *         <ul>
+         *         <li>{@code ResultSet.TYPE_FORWARD_ONLY}</li> <li>{@code
+         *         ResultSet.TYPE_SCROLL_INSENSITIVE}</li> <li>{@code
+         *         ResultSet.TYPE_SCROLL_SENSITIVE}</li>
+         *         </ul>
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetType(
+            [out] Int32* type);
+
+        /**
+         * Gets the value of the column as an {@code InputStream} of unicode
+         * characters.
+         *
+         * @deprecated Use {@link #getCharacterStream}.
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return an {@code InputStream} holding the value of the column. {@code
+         *         null} if the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetUnicodeStream(
+            [in] Int32 columnIndex,
+            [out] IInputStream** is);
+
+        /**
+         * Gets the value of the column as an {@code InputStream} of Unicode
+         * characters.
+         *
+         * @deprecated Use {@link #getCharacterStream}
+         * @param columnName
+         *            the name of the column to read.
+         * @return an {@code InputStream} holding the value of the column. {@code
+         *         null} if the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetUnicodeStream(
+            [in] String columnName,
+            [out] IInputStream** is);
+
+        /**
+         * Gets the value of a column specified by column index as a {@code
+         * java.net.URL}.
+         *
+         * @param columnIndex
+         *            the index of the column to read.
+         * @return a URL. {@code null} if the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetURL(
+            [in] Int32 columnIndex,
+            [out] IURL** url);
+
+        /**
+         * Gets the value of a column specified by column name as a {@code
+         * java.net.URL} object.
+         *
+         * @param columnName
+         *            the name of the column to read.
+         * @return the column vaule as a URL. {@code null} if the column value is SQL {@code NULL}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetURL(
+            [in] String columnName,
+            [out] IURL** url);
+
+        /**
+         * Gets the first warning generated by calls on this {@code ResultSet}.
+         * Subsequent warnings on this {@code ResultSet} are chained to the first
+         * one.
+         * <p>
+         * The warnings are cleared when a new Row is read from the {@code
+         * ResultSet}. The warnings returned by this method are only the warnings
+         * generated by {@code ResultSet} method calls - warnings generated by
+         * Statement methods are held by the Statement.
+         * <p>
+         * An {@code SQLException} is generated if this method is called on a closed
+         * {@code ResultSet}.
+         *
+         * @return an SQLWarning which is the first warning for this {@code
+         *         ResultSet}. {@code null} if there are no warnings.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetWarnings(
+            [out] ISQLWarning** warning);
+
+        /**
+         * Insert the insert row into the {@code ResultSet} and into the underlying
+         * database. The cursor must be set to the Insert Row before this method is
+         * invoked.
+         *
+         * @throws SQLException
+         *             if a database error happens. Particular cases include the
+         *             cursor not being on the Insert Row or if any columns in the
+         *             row do not have a value where the column is declared as
+         *             not-nullable.
+         */
+        InsertRow();
+
+        /**
+         * Gets if the cursor is after the last row of the {@code ResultSet}.
+         *
+         * @return {@code true} if the cursor is after the last row in the {@code
+         *         ResultSet}, {@code false} if the cursor is at any other position
+         *         in the {@code ResultSet}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        IsAfterLast(
+            [out] Boolean* isAfterLast);
+
+        /**
+         * Gets if the cursor is before the first row of the {@code ResultSet}.
+         *
+         * @return {@code true} if the cursor is before the first row in the {@code
+         *         ResultSet}, {@code false} if the cursor is at any other position
+         *         in the {@code ResultSet}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        IsBeforeFirst(
+            [out] Boolean* isBeforeFirst);
+
+        /**
+         * Gets if the cursor is on the first row of the {@code ResultSet}.
+         *
+         * @return {@code true} if the cursor is on the first row in the {@code
+         *         ResultSet}, {@code false} if the cursor is at any other position
+         *         in the {@code ResultSet}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        IsFirst(
+            [out] Boolean* ifFirst);
+
+        /**
+         * Gets if the cursor is on the last row of the {@code ResultSet}
+         *
+         * @return {@code true} if the cursor is on the last row in the {@code
+         *         ResultSet}, {@code false} if the cursor is at any other position
+         *         in the {@code ResultSet}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        IsLast(
+            [out] Boolean* isLast);
+
+        /**
+         * Shifts the cursor position to the last row of the {@code ResultSet}.
+         *
+         * @return {@code true} if the new position is in a legitimate row, {@code
+         *         false} if the {@code ResultSet} contains no rows.
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        GetLast(
+            [out] Boolean* last);
+
+        /**
+         * Moves the cursor to the remembered position, namely the
+         * row that was the current row before a call to {@code moveToInsertRow}.
+         * This only applies if the cursor is on the Insert Row.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        MoveToCurrentRow();
+
+        /**
+         * Moves the cursor position to the Insert Row. The current position is
+         * remembered and the cursor is positioned at the Insert Row. The columns in
+         * the Insert Row should be filled in with the appropriate update methods,
+         * before calling {@code insertRow} to insert the new row into the database.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        MoveToInsertRow();
+
+        /**
+         * Shifts the cursor position down one row in this {@code ResultSet} object.
+         * <p>
+         * Any input streams associated with the current row are closed and any
+         * warnings are cleared.
+         *
+         * @return {@code true} if the updated cursor position is pointing to a
+         *         valid row, {@code false} otherwise (i.e. when the cursor is after
+         *         the last row in the {@code ResultSet}).
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetNext(
+            [out] Boolean* isValid);
+
+        /**
+         * Relocates the cursor position to the preceding row in this {@code
+         * ResultSet}.
+         *
+         * @return {@code true} if the new position is in a legitimate row, {@code
+         *         false} if the cursor is now before the first row.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        GetPrevious(
+            [out] Boolean* isValid);
+
+        /**
+         * Refreshes the current row with its most up to date value in the database.
+         * Must not be called when the cursor is on the Insert Row.
+         * <p>
+         * If any columns in the current row have been updated but the {@code
+         * updateRow} has not been called, then the updates are lost when this
+         * method is called.
+         *
+         * @throws SQLException
+         *             if a database error happens., including if the current row is
+         *             the Insert row.
+         */
+        RefreshRow();
+
+        /**
+         * Moves the cursor position up or down by a specified number of rows. If
+         * the new position is beyond the start row (or end row), the cursor position is
+         * set before the first row (or, respectively, after the last row).
+         *
+         * @param rows
+         *            a number of rows to move the cursor - may be positive or
+         *            negative
+         * @return {@code true} if the new cursor position is on a row, {@code
+         *         false} otherwise
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        Relative(
+            [in] Int32 rows,
+            [out] Boolean* isValid);
+
+        /**
+         * Indicates whether a row has been deleted. This method depends on whether
+         * the JDBC driver and database can detect deletions.
+         *
+         * @return {@code true} if a row has been deleted and if deletions are
+         *         detected, {@code false} otherwise.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        RowDeleted(
+            [out] Boolean* isDeleted);
+
+        /**
+         * Indicates whether the current row has had an insertion operation. This
+         * method depends on whether the JDBC driver and database can detect
+         * insertions.
+         *
+         * @return {@code true} if a row has been inserted and if insertions are
+         *         detected, {@code false} otherwise.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        RowInserted(
+            [out] Boolean* isInserted);
+
+        /**
+         * Indicates whether the current row has been updated. This method depends
+         * on whether the JDBC driver and database can detect updates.
+         *
+         * @return {@code true} if the current row has been updated and if updates
+         *         can be detected, {@code false} otherwise.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        RowUpdated(
+            [out] Boolean* isUpdate);
+
+        /**
+         * Indicates which direction (forward/reverse) will be used to process the
+         * rows of this {@code ResultSet} object. This is treated as a hint by the
+         * JDBC driver.
+         *
+         * @param direction
+         *            can be {@code ResultSet.FETCH_FORWARD}, {@code
+         *            ResultSet.FETCH_REVERSE}, or {@code ResultSet.FETCH_UNKNOWN}
+         * @throws SQLException
+         *             if there is a database error.
+         */
+        SetFetchDirection(
+            [in] Int32 direction);
+
+        /**
+         * Indicates the number of rows to fetch from the database when extra rows
+         * are required for this {@code ResultSet}. This used as a hint to the JDBC
+         * driver.
+         *
+         * @param rows
+         *            the number of rows to fetch. {@code 0} implies that the JDBC
+         *            driver can make its own decision about the fetch size. The
+         *            number should not be greater than the maximum number of rows
+         *            established by the statement that generated the {@code
+         *            ResultSet}.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        SetFetchSize(
+            [in] Int32 rows);
+
+        /**
+         * Updates a column specified by a column index with a {@code
+         * java.sql.Array} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateArray(
+            [in] Int32 columnIndex,
+            [in] IArray* x);
+
+        /**
+         * Updates a column specified by a column name with a {@code java.sql.Array}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateArray(
+            [in] String columnName,
+            [in] IArray* x);
+
+        /**
+         * Updates a column specified by a column index with an ASCII stream value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @param length
+         *            the length of the data to write from the stream
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateAsciiStream(
+            [in] Int32 columnIndex,
+            [in] IInputStream* x,
+            [in] Int32 length);
+
+        /**
+         * Updates a column specified by a column name with an Ascii stream value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @param length
+         *            the length of the data to write from the stream
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateAsciiStream(
+            [in] String columnName,
+            [in] IInputStream* x,
+            [in] Int32 length);
+
+        /**
+         * Updates a column specified by a column index with a {@code
+         * java.sql.BigDecimal} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBigDecimal(
+            [in] Int32 columnIndex,
+            [in] IBigDecimal* x);
+
+        /**
+         * Updates a column specified by a column name with a {@code
+         * java.sql.BigDecimal} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBigDecimal(
+            [in] String columnName,
+            [in] IBigDecimal* x);
+
+        /**
+         * Updates a column specified by a column index with a binary stream value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @param length
+         *            the number of bytes to be read from the the stream.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBinaryStream(
+            [in] Int32 columnIndex,
+            [in] IInputStream* x,
+            [in] Int32 length);
+
+        /**
+         * Updates a column specified by a column name with a binary stream value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @param length
+         *            he number of bytes to be read from the the stream.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBinaryStream(
+            [in] String columnName,
+            [in] IInputStream* x,
+            [in] Int32 length);
+
+        /**
+         * Updates a column specified by a column index with a {@code java.sql.Blob}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBlob(
+            [in] Int32 columnIndex,
+            [in] IBlob* x);
+
+        /**
+         * Updates a column specified by a column name with a {@code java.sql.Blob}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBlob(
+            [in] String columnName,
+            [in] IBlob* x);
+
+        /**
+         * Updates a column specified by a column index with a {@code boolean}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBoolean(
+            [in] Int32 columnIndex,
+            [in] Boolean x);
+
+        /**
+         * Updates a column specified by a column name with a {@code boolean} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBoolean(
+            [in] String columnName,
+            [in] Boolean x);
+
+        /**
+         * Updates a column specified by a column index with a {@code byte} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateByte(
+            [in] Int32 columnIndex,
+            [in] Byte x);
+
+        /**
+         * Updates a column specified by a column name with a {@code byte} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateByte(
+            [in] String columnName,
+            [in] Byte x);
+
+        /**
+         * Updates a column specified by a column index with a {@code byte} array
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBytes(
+            [in] Int32 columnIndex,
+            [in] ArrayOf<Byte> x);
+
+        /**
+         * Updates a column specified by a column name with a byte array value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateBytes(
+            [in] String columnName,
+            [in] ArrayOf<Byte> x);
+
+        /**
+         * Updates a column specified by a column index with a character stream
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @param length
+         *            the length of data to write from the stream
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateCharacterStream(
+            [in] Int32 columnIndex,
+            [in] IReader* x,
+            [in] Int32 length);
+
+        /**
+         * Updates a column specified by a column name with a character stream
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param reader
+         *            the new value for the specified column.
+         * @param length
+         *            the length of data to write from the Reader
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateCharacterStream(
+            [in] String columnName,
+            [in] IReader* reader,
+                [in] Int32 length);
+
+        /**
+         * Updates a column specified by a column index with a {@code java.sql.Clob}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateClob(
+            [in] Int32 columnIndex,
+            [in] IClob* x);
+
+        /**
+         * Updates a column specified by a column name with a {@code java.sql.Clob}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateClob(
+            [in] String columnName,
+            [in] IClob* x);
+
+        /**
+         * Updates a column specified by a column index with a {@code java.sql.Date}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateDate(
+            [in] Int32 columnIndex,
+            [in] ISQLDate* x);
+
+        /**
+         * Updates a column specified by a column name with a {@code java.sql.Date}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateDate(
+            [in] String columnName,
+            [in] ISQLDate* x);
+
+        /**
+         * Updates a column specified by a column index with a {@code double} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateDouble(
+            [in] Int32 columnIndex,
+            [in] Double x);
+
+        /**
+         * Updates a column specified by a column name with a {@code double} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateDouble(
+            [in] String columnName,
+            [in] Double x);
+
+        /**
+         * Updates a column specified by a column index with a {@code float} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateFloat(
+            [in] Int32 columnIndex,
+            [in] Float x);
+
+        /**
+         * Updates a column specified by a column name with a {@code float} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateFloat(
+            [in] String columnName,
+            [in] Float x);
+
+        /**
+         * Updates a column specified by a column index with an {@code int} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateInt(
+            [in] Int32 columnIndex,
+            [in] Int32 x);
+
+        /**
+         * Updates a column specified by a column name with an {@code int} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateInt(
+            [in] String columnName,
+            [in] Int32 x);
+
+        /**
+         * Updates a column specified by a column index with a {@code long} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column..
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateLong(
+            [in] Int32 columnIndex,
+            [in] Int64 x);
+
+        /**
+         * Updates a column specified by a column name with a {@code long} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateLong(
+            [in] String columnName,
+            [in] Int64 x);
+
+        /**
+         * Updates a column specified by a column index with a {@code null} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateNull(
+            [in] Int32 columnIndex);
+
+        /**
+         * Updates a column specified by a column name with a {@code null} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateNull(
+            [in] String columnName);
+
+        /**
+         * Updates a column specified by a column index with an {@code Object}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateObject(
+            [in] Int32 columnIndex,
+            [in] IInterface* x);
+
+        /**
+         * Updates a column specified by a column index with an {@code Object}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @param scale
+         *            for the types {@code java.sql.Types.DECIMAL} or {@code
+         *            java.sql.Types.NUMERIC}, this specifies the number of digits
+         *            after the decimal point.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateObject(
+            [in] Int32 columnIndex,
+            [in] IInterface* x,
+            [in] Int32 scale);
+
+        /**
+         * Updates a column specified by a column name with an {@code Object} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateObject(
+            [in] String columnName,
+            [in] IInterface* x);
+
+        /**
+         * Updates a column specified by a column name with an {@code Object} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @param scale
+         *            for the types {@code java.sql.Types.DECIMAL} or {@code
+         *            java.sql.Types.NUMERIC}, this specifies the number of digits
+         *            after the decimal point.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateObject(
+            [in] String columnName,
+            [in] IInterface* x,
+            [in] Int32 scale);
+
+        /**
+         * Updates a column specified by a column index with a {@code java.sql.Ref}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateRef(
+            [in] Int32 columnIndex,
+            [in] IRef* x);
+
+        /**
+         * Updates a column specified by a column name with a {@code java.sql.Ref}
+         * value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateRef(
+            [in] String columnName,
+            [in] IRef* x);
+
+        /**
+         * Updates the database with the new contents of the current row of this
+         * {@code ResultSet} object.
+         *
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateRow();
+
+        /**
+         * Updates a column specified by a column index with a {@code short} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateShort(
+            [in] Int32 columnIndex,
+            [in] Int16 x);
+
+        /**
+         * Updates a column specified by a column name with a {@code short} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateShort(
+            [in] String columnName,
+            [in] Int16 x);
+
+        /**
+         * Updates a column specified by a column index with a {@code String} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateString(
+            [in] Int32 columnIndex,
+            [in] String x);
+
+        /**
+         * Updates a column specified by a column name with a {@code String} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateString(
+            [in] String columnName,
+            [in] String x);
+
+        /**
+         * Updates a column specified by a column index with a {@code Time} value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateTime(
+            [in] Int32 columnIndex,
+            [in] ITime* x);
+
+        /**
+         * Updates a column specified by a column name with a {@code Time} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateTime(
+            [in] String columnName,
+            [in] ITime* x);
+
+        /**
+         * Updates a column specified by a column index with a {@code Timestamp}
+         * value.
+         *
+         * @param columnIndex
+         *            the index of the column to update.
+         * @param x
+         *            the new timestamp value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateTimestamp(
+            [in] Int32 columnIndex,
+            [in] ITimestamp* x);
+
+        /**
+         * Updates a column specified by column name with a {@code Timestamp} value.
+         *
+         * @param columnName
+         *            the name of the column to update.
+         * @param x
+         *            the new timestamp value for the specified column.
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        UpdateTimestamp(
+            [in] String columnName,
+            [in] ITimestamp* x);
+
+        /**
+         * Determines whether the last column read from this {@code ResultSet}
+         * contained SQL {@code NULL}.
+         *
+         * @return {@code {@code true} if the last column contained SQL {@code
+         *         NULL}, {@code false} otherwise
+         * @throws SQLException
+         *             if a database error happens.
+         */
+        WasNull(
+            [out] Boolean* isNull);
+
+        /**
+         * Returns a {@code RowId} corresponding to the SQL ROWID at the 1-based {@code columnIndex}.
+         * @throws SQLException
+         */
+        GetRowId(
+            [in] Int32 columnIndex,
+            [out] IRowId** id);
+
+        /**
+         * Returns a {@code RowId} corresponding to the SQL ROWID at the named column.
+         * @throws SQLException
+         */
+        GetRowId(
+            [in] String columnLabel,
+            [out] IRowId** id);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateRowId(
+            [in] Int32 columnIndex,
+            [in] IRowId* value);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateRowId(
+            [in] String columnLabel,
+            [in] IRowId* value);
+
+        /**
+         * Returns the holdability of this result set: {@link #HOLD_CURSORS_OVER_COMMIT} or
+         * {@link #CLOSE_CURSORS_AT_COMMIT}.
+         * @throws SQLException
+         */
+        GetHoldability(
+            [out] Int32* holdability);
+
+        /**
+         * Returns true if this result set has been closed, false otherwise.
+         * @throws SQLException
+         */
+        IsClosed(
+            [out] Boolean* isClosed);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNString(
+            [in] Int32 columnIndex,
+            [in] String nString);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNString(
+            [in] String columnLabel,
+            [in] String nString);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNClob(
+            [in] Int32 columnIndex,
+            [in] INClob* nClob);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNClob(
+            [in] String columnLabel,
+            [in] INClob* nClob);
+
+        /**
+         * Returns an {@code NClob} corresponding to the value at the 1-based {@code columnIndex}.
+         * @throws SQLException
+         */
+        GetNClob(
+            [in] Int32 columnIndex,
+            [out] INClob** nClob);
+
+        /**
+         * Returns an {@code NClob} corresponding to the value in the named column.
+         * @throws SQLException
+         */
+        GetNClob(
+            [in] String columnLabel,
+            [out] INClob** nClob);
+
+        /**
+         * Returns an {@code SQLXML} corresponding to the value at the 1-based {@code columnIndex}.
+         * @throws SQLException
+         */
+        GetSQLXML(
+            [in] Int32 columnIndex,
+            [out] ISQLXML** sqlxml);
+
+        /**
+         * Returns an {@code SQLXML} corresponding to the value in the named column.
+         * @throws SQLException
+         */
+        GetSQLXML(
+            [in] String columnLabel,
+            [out] ISQLXML** sqlxml);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateSQLXML(
+            [in] Int32 columnIndex,
+            [in] ISQLXML* xmlObject);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateSQLXML(
+            [in] String columnLabel,
+            [in] ISQLXML* xmlObject);
+
+        /**
+         * Returns a {@code String} corresponding to the value at the 1-based {@code columnIndex}.
+         * @throws SQLException
+         */
+        GetNString(
+            [in] Int32 columnIndex,
+            [out] String* nstr);
+
+        /**
+         * Returns a {@code String} corresponding to the value in the named column.
+         * @throws SQLException
+         */
+        GetNString(
+            [in] String columnLabel,
+            [out] String* nstr);
+
+        /**
+         * Returns a {@code Reader} corresponding to the value at the 1-based {@code columnIndex}.
+         * @throws SQLException
+         */
+        GetNCharacterStream(
+            [in] Int32 columnIndex,
+            [out] IReader** reader);
+
+        /**
+         * Returns a {@code Reader} corresponding to the value in the named column.
+         * @throws SQLException
+         */
+        GetNCharacterStream(
+            [in] String columnLabel,
+            [out] IReader** reader);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNCharacterStream(
+            [in] Int32 columnIndex,
+            [in] IReader* x,
+            [in] Int64 length);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNCharacterStream(
+            [in] String columnLabel,
+            [in] IReader* reader,
+            [in] Int64 length);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateAsciiStream(
+            [in] Int32 columnIndex,
+            [in] IInputStream* x,
+            [in] Int64 length);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateBinaryStream(
+            [in] Int32 columnIndex,
+            [in] IInputStream* x,
+            [in] Int64 length);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateCharacterStream(
+            [in] Int32 columnIndex,
+            [in] IReader* x,
+            [in] Int64 length);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateAsciiStream(
+            [in] String columnLabel,
+            [in] IInputStream* x,
+            [in] Int64 length);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateBinaryStream(
+            [in] String columnLabel,
+            [in] IInputStream* x,
+            [in] Int64 length);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateCharacterStream(
+            [in] String columnLabel,
+            [in] IReader* reader,
+            [in] Int64 length);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateBlob(
+            [in] Int32 columnIndex,
+            [in] IInputStream* inputStream,
+            [in] Int64 length);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateBlob(
+            [in] String columnLabel,
+            [in] IInputStream* inputStream,
+            [in] Int64 length);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateClob(
+            [in] Int32 columnIndex,
+            [in] IReader* reader,
+            [in] Int64 length);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateClob(
+            [in] String columnLabel,
+            [in] IReader* reader,
+            [in] Int64 length);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNClob(
+            [in] Int64 columnIndex,
+            [in] IReader* reader,
+            [in] Int64 length);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNClob(
+            [in] String columnLabel,
+            [in] IReader* reader,
+            [in] Int64 length);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNCharacterStream(
+            [in] Int32 columnIndex,
+            [in] IReader* x);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNCharacterStream(
+            [in] String columnLabel,
+            [in] IReader* reader);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateAsciiStream(
+            [in] Int32 columnIndex,
+            [in] IInputStream* x);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateBinaryStream(
+            [in] Int32 columnIndex,
+            [in] IInputStream* x);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+       UpdateCharacterStream(
+           [in] Int32 columnIndex,
+           [in] IReader * x);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateAsciiStream(
+            [in] String columnLabel,
+            [in] IInputStream* x);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateBinaryStream(
+            [in] String columnLabel,
+            [in] IInputStream* x);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateCharacterStream(
+            [in] String columnLabel,
+            [in] IReader* reader);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateBlob(
+            [in] Int32 columnIndex,
+            [in] IInputStream* inputStream);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateBlob(
+            [in] String columnLabel,
+            [in] IInputStream* inputStream);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateClob(
+            [in] Int32 columnIndex,
+            [in] IReader* reader);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateClob(
+            [in] String columnLabel,
+            [in] IReader* reader);
+
+        /**
+         * Updates the value at the 1-based {@code columnIndex}.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNClob(
+            [in] Int32 columnIndex,
+            [in] IReader* reader);
+
+        /**
+         * Updates the value in the named column.
+         * The underlying database isn't changed until the next row update or insert operation.
+         * @throws SQLException
+         */
+        UpdateNClob(
+            [in] String columnLabel,
+            [in] IReader* reader);
+    }
+
+    } // namespace Sql
+    } // namespace Elastos
+}

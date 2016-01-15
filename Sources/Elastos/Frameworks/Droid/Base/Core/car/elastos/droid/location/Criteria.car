@@ -1,0 +1,237 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+      * @Involve interface IParcelable
+      */
+    interface ICriteria {
+
+        /**
+         * A constant indicating that the application does not choose to
+         * place requirement on a particular feature.
+         */
+        const Int32 Criteria_NO_REQUIREMENT = 0;
+
+        /**
+         * A constant indicating a low power requirement.
+         */
+        const Int32 Criteria_POWER_LOW = 1;
+
+        /**
+         * A constant indicating a medium power requirement.
+         */
+        const Int32 Criteria_POWER_MEDIUM = 2;
+
+        /**
+         * A constant indicating a high power requirement.
+         */
+        const Int32 Criteria_POWER_HIGH = 3;
+
+        /**
+         * A constant indicating a finer location accuracy requirement
+         */
+        const Int32 Criteria_ACCURACY_FINE = 1;
+
+        /**
+         * A constant indicating an approximate accuracy requirement
+         */
+        const Int32 Criteria_ACCURACY_COARSE = 2;
+
+        /**
+         * A constant indicating a low location accuracy requirement
+         * - may be used for horizontal, altitude, speed or bearing accuracy.
+         * For horizontal and vertical position this corresponds roughly to
+         * an accuracy of greater than 500 meters.
+         */
+        const Int32 Criteria_ACCURACY_LOW = 1;
+
+        /**
+         * A constant indicating a medium accuracy requirement
+         * - currently used only for horizontal accuracy.
+         * For horizontal position this corresponds roughly to to an accuracy
+         * of between 100 and 500 meters.
+         */
+        const Int32 Criteria_ACCURACY_MEDIUM = 2;
+
+        /**
+         * a constant indicating a high accuracy requirement
+         * - may be used for horizontal, altitude, speed or bearing accuracy.
+         * For horizontal and vertical position this corresponds roughly to
+         * an accuracy of less than 100 meters.
+         */
+        const Int32 Criteria_ACCURACY_HIGH = 3;
+
+        /**
+         * Indicates the desired horizontal accuracy (latitude and longitude).
+         * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
+         * {@link #ACCURACY_HIGH} or {@link #NO_REQUIREMENT}.
+         * More accurate location may consume more power and may take longer.
+         *
+         * @throws IllegalArgumentException if accuracy is not one of the supported constants
+         */
+        SetHorizontalAccuracy(
+            [in] Int32 accuracy);
+
+        /**
+         * Returns a constant indicating the desired horizontal accuracy (latitude and longitude).
+         * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
+         * {@link #ACCURACY_HIGH} or {@link #NO_REQUIREMENT}.
+         */
+        GetHorizontalAccuracy(
+            [out] Int32* accuracy);
+
+        /**
+         * Indicates the desired vertical accuracy (altitude).
+         * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
+         * {@link #ACCURACY_HIGH} or {@link #NO_REQUIREMENT}.
+         * More accurate location may consume more power and may take longer.
+         *
+         * @throws IllegalArgumentException if accuracy is not one of the supported constants
+         */
+        SetVerticalAccuracy(
+            [in] Int32 accuracy);
+
+        /**
+         * Returns a constant indicating the desired vertical accuracy (altitude).
+         * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
+         * or {@link #NO_REQUIREMENT}.
+         */
+        GetVerticalAccuracy(
+            [out] Int32* accuracy);
+
+        /**
+         * Indicates the desired speed accuracy.
+         * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
+         * or {@link #NO_REQUIREMENT}.
+         * More accurate location may consume more power and may take longer.
+         *
+         * @throws IllegalArgumentException if accuracy is not one of the supported constants
+         */
+        SetSpeedAccuracy(
+            [in] Int32 accuracy);
+
+        /**
+         * Returns a constant indicating the desired speed accuracy
+         * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
+         * or {@link #NO_REQUIREMENT}.
+         */
+        GetSpeedAccuracy(
+            [out] Int32* accuracy);
+
+         /**
+         * Indicates the desired bearing accuracy.
+         * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
+         * or {@link #NO_REQUIREMENT}.
+         * More accurate location may consume more power and may take longer.
+         *
+         * @throws IllegalArgumentException if accuracy is not one of the supported constants
+         */
+        SetBearingAccuracy(
+            [in] Int32 accuracy);
+
+        /**
+         * Returns a constant indicating the desired bearing accuracy.
+         * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
+         * or {@link #NO_REQUIREMENT}.
+         */
+        GetBearingAccuracy(
+            [out] Int32* accuracy);
+
+        /**
+         * Indicates the desired accuracy for latitude and longitude. Accuracy
+         * may be {@link #ACCURACY_FINE} if desired location
+         * is fine, else it can be {@link #ACCURACY_COARSE}.
+         * More accurate location may consume more power and may take longer.
+         *
+         * @throws IllegalArgumentException if accuracy is not one of the supported constants
+         */
+        SetAccuracy(
+            [in] Int32 accuracy);
+
+        /**
+         * Returns a constant indicating desired accuracy of location
+         * Accuracy may be {@link #ACCURACY_FINE} if desired location
+         * is fine, else it can be {@link #ACCURACY_COARSE}.
+         */
+        GetAccuracy(
+            [out] Int32* accuracy);
+
+        /**
+         * Indicates the desired maximum power level.  The level parameter
+         * must be one of NO_REQUIREMENT, POWER_LOW, POWER_MEDIUM, or
+         * POWER_HIGH.
+         */
+        SetPowerRequirement(
+            [in] Int32 level);
+
+        /**
+         * Returns a constant indicating the desired power requirement.  The
+         * returned
+         */
+        GetPowerRequirement(
+            [out] Int32* requirement);
+
+        /**
+         * Indicates whether the provider is allowed to incur monetary cost.
+         */
+        SetCostAllowed(
+            [in] Boolean costAllowed);
+
+        /**
+         * Returns whether the provider is allowed to incur monetary cost.
+         */
+        IsCostAllowed(
+            [out] Boolean* costAllowed);
+
+        /**
+         * Indicates whether the provider must provide altitude information.
+         * Not all fixes are guaranteed to contain such information.
+         */
+        SetAltitudeRequired(
+            [in] Boolean altitudeRequired);
+
+        /**
+         * Returns whether the provider must provide altitude information.
+         * Not all fixes are guaranteed to contain such information.
+         */
+        IsAltitudeRequired(
+            [out] Boolean* altitudeRequired);
+
+        /**
+         * Indicates whether the provider must provide speed information.
+         * Not all fixes are guaranteed to contain such information.
+         */
+        SetSpeedRequired(
+            [in] Boolean speedRequired);
+
+        /**
+         * Returns whether the provider must provide speed information.
+         * Not all fixes are guaranteed to contain such information.
+         */
+        IsSpeedRequired(
+            [out] Boolean* speedRequired);
+
+        /**
+         * Indicates whether the provider must provide bearing information.
+         * Not all fixes are guaranteed to contain such information.
+         */
+        SetBearingRequired(
+            [in] Boolean bearingRequired);
+
+        /**
+         * Returns whether the provider must provide bearing information.
+         * Not all fixes are guaranteed to contain such information.
+         */
+        IsBearingRequired(
+            [out] Boolean* bearingRequired);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+
+}

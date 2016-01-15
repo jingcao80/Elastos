@@ -1,0 +1,71 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X509 {
+    namespace Tsp {
+
+    /**
+     Corresponds to PKIStatus structure.
+     See RFC 3161 -
+     Internet X.509 Public Key Infrastructure
+     Time-Stamp Protocol (TSP)
+     http://www.ietf.org/rfc/rfc3161.txt)
+
+     PKIStatus ::= INTEGER {
+        granted                (0),
+        -- when the PKIStatus contains the value zero a TimeStampToken, as
+           requested, is present.
+        grantedWithMods        (1),
+         -- when the PKIStatus contains the value one a TimeStampToken,
+           with modifications, is present.
+        rejection              (2),
+        waiting                (3),
+        revocationWarning      (4),
+         -- this message contains a warning that a revocation is
+         -- imminent
+        revocationNotification (5)
+         -- notification that a revocation has occurred  }
+     */
+    enum PKIStatus {
+        /**
+         * TimeStampToken is present as requested
+         */
+        PKIStatus_GRANTED = 0,
+
+        /**
+        * TimeStampToken is present with modifications
+        */
+        PKIStatus_GRANTED_WITH_MODS = 1,
+
+        /**
+         * rejected
+         */
+        PKIStatus_REJECTION = 2,
+
+        /**
+         * waiting
+         */
+        PKIStatus_WAITING = 3,
+
+        /**
+         * revocation time comes soon
+         */
+        PKIStatus_REVOCATION_WARNING = 4,
+
+        /**
+         * revoked
+         */
+        PKIStatus_REVOCATION_NOTIFICATION = 5,
+    }
+
+    } // namespace Tsp
+    } // namespace X509
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

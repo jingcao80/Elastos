@@ -1,0 +1,84 @@
+
+module
+{
+    interface Elastos.Core.IStringBuilder;
+    interface Elastos.Utility.ICollection;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace X501 {
+
+    /**
+     * X.501 Attribute Value
+     */
+    [deprecated]
+    interface IAttributeValue {
+        GetTag(
+            [out] Int32* tag);
+
+        GetHexString(
+            [out] String* hexString);
+
+        GetValues(
+            [in] IASN1Type* type,
+            [out] ICollection** values);
+
+        AppendQEString(
+            [in] IStringBuilder* sb);
+
+        MakeCanonical(
+            [out] String* cannonical);
+
+        /**
+         * Removes escape sequences used in RFC1779 escaping but not in RFC2253 and
+         * returns the RFC2253 string to the caller..
+         */
+        GetRFC2253String(
+            [out] String* rfcString);
+
+        GetWasEncoded(
+            [out] Boolean* wasEncoded);
+
+        SetWasEncoded(
+            [in] Boolean wasEncoded);
+
+        GetEscapedString(
+            [out] String* escapedString);
+
+        SetEscapedString(
+            [in] String escapedString);
+
+        GetEncoded(
+            [out, callee] ArrayOf<Byte>* encoded);
+
+        SetEncoded(
+            [in] ArrayOf<Byte>* encoded);
+
+        GetBytes(
+            [out, callee] ArrayOf<Byte>* bytes);
+
+        SetBytes(
+            [in] ArrayOf<Byte>* bytes);
+
+        GetHasQE(
+            [out] Boolean* hasQE);
+
+        SetHasQE(
+            [in] Boolean hasQE);
+
+        GetRawString(
+            [out] String* rawString);
+
+        SetRawString(
+            [in] String rawString);
+    }
+
+    } // namespace X501
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

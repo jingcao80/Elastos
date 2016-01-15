@@ -1,0 +1,145 @@
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+
+    [local]
+    interface ISwipeHelperCallback {
+        GetChildAtPosition(
+            [in] IMotionEvent* ev,
+            [out] IView** result);
+
+        GetChildContentView(
+            [in] IView* v,
+            [out] IView** result);
+
+        CanChildBeDismissed(
+            [in] IView* v,
+            [out] Boolean* result);
+
+        IsAntiFalsingNeeded(
+            [out] Boolean* result);
+
+        OnBeginDrag(
+            [in] IView* v);
+
+        OnChildDismissed(
+            [in] IView* v);
+
+        OnDragCancelled(
+            [in] IView* v);
+
+        OnChildSnappedBack(
+            [in] IView* animView);
+
+        /**
+         * Updates the swipe progress on a child.
+         *
+         * @return if true, prevents the default alpha fading.
+         */
+        UpdateSwipeProgress(
+            [in] IView* animView,
+            [in] Boolean dismissable,
+            [in] Float swipeProgress,
+            [out] Boolean* result);
+
+        /**
+         * @return The factor the falsing threshold should be multiplied with
+         */
+        GetFalsingThresholdFactor(
+            [out] Float* result);
+    }
+
+    /**
+     * Equivalent to View.OnLongClickListener with coordinates
+     */
+    [local]
+    interface ISwipeHelperLongPressListener {
+        /**
+         * Equivalent to {@link View.OnLongClickListener#onLongClick(View)} with coordinates
+         * @return whether the longpress was handled
+         */
+        OnLongPress(
+            [in] IView* v,
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Boolean* result);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.SystemUI.IGefingerpoken
+     */
+    [local]
+    interface ISwipeHelper {
+        const Int32 X = 0;
+        const Int32 Y = 1;
+        const Float ALPHA_FADE_START = 0.0;    //fraction of thumbnail width where fade starts
+        const Float ALPHA_FADE_END = 0.5;      //fraction of thumbnail width beyond which
+
+        SetLongPressListener(
+            [in] ISwipeHelperLongPressListener* listener);
+
+        SetDensityScale(
+            [in] Float densityScale);
+
+        SetPagingTouchSlop(
+            [in] Float pagingTouchSlop);
+
+        SetMinSwipeProgress(
+            [in] Float pagingTouchSlop);
+
+        SetMaxSwipeProgress(
+            [in] Float pagingTouchSlop);
+
+        RemoveLongPressCallback();
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        /**
+         * @param view The view to be dismissed
+         * @param velocity The desired pixels/second speed at which the view should move
+         */
+        DismissChild(
+            [in] IView* v,
+            [in] Float velocity);
+
+        /**
+         * @param view The view to be dismissed
+         * @param velocity The desired pixels/second speed at which the view should move
+         * @param endAction The action to perform at the end
+         * @param delay The delay after which we should start
+         * @param useAccelerateInterpolator Should an accelerating Interpolator be used
+         * @param fixedDuration If not 0, this exact duration will be taken
+         */
+        DismissChild(
+            [in] IView* view,
+            [in] Float velocity,
+            [in] IRunnable* endAction,
+            [in] Int64 delay,
+            [in] Boolean useAccelerateInterpolator,
+            [in] Int64 fixedDuration);
+
+        SnapChild(
+            [in] IView* v,
+            [in] Float velocity);
+
+        OnTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+    }
+
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,33 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+    /**
+     *A class for turning a byte stream into a character stream. Data read from the source input stream is
+     *converted into characters by either a default or a provided character converter. The default encoding
+     *is taken from the "file.encoding" system property. InputStreamReader contains a buffer of bytes read
+     *from the source stream and converts these into characters as needed. The buffer size is 8K.
+     *
+     * @implement Elastos.IO.IReader
+     * @sa OutputStreamWriter
+     */
+     /**
+     * @Involve
+     * interface IReadable;
+     * interface IReader;
+     */
+    interface IInputStreamReader {
+        /**
+         * Returns the historical name of the encoding used by this writer to convert characters to
+         * bytes, or null if this writer has been closed. Most callers should probably keep
+         * track of the String or Charset they passed in; this method may not return the same
+         * name.
+         */
+        GetEncoding(
+            [out] String* encoding);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

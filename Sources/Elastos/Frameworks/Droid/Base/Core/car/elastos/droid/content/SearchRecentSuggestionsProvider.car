@@ -1,0 +1,77 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+
+    /**
+     * This superclass can be used to create a simple search suggestions provider for your application.
+     * It creates suggestions (as the user types) based on recent queries and/or recent views.
+     *
+     * <p>In order to use this class, you must do the following.
+     *
+     * <ul>
+     * <li>Implement and test query search, as described in {@link android.app.SearchManager}.  (This
+     * provider will send any suggested queries via the standard
+     * {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} Intent, which you'll already
+     * support once you have implemented and tested basic searchability.)</li>
+     * <li>Create a Content Provider within your application by extending
+     * {@link android.content.SearchRecentSuggestionsProvider}.  The class you create will be
+     * very simple - typically, it will have only a constructor.  But the constructor has a very
+     * important responsibility:  When it calls {@link #setupSuggestions(String, int)}, it
+     * <i>configures</i> the provider to match the requirements of your searchable activity.</li>
+     * <li>Create a manifest entry describing your provider.  Typically this would be as simple
+     * as adding the following lines:
+     * <pre class="prettyprint">
+     *     &lt;!-- Content provider for search suggestions --&gt;
+     *     &lt;provider android:name="YourSuggestionProviderClass"
+     *               android:authorities="your.suggestion.authority" /&gt;</pre>
+     * </li>
+     * <li>Please note that you <i>do not</i> instantiate this content provider directly from within
+     * your code.  This is done automatically by the system Content Resolver, when the search dialog
+     * looks for suggestions.</li>
+     * <li>In order for the Content Resolver to do this, you must update your searchable activity's
+     * XML configuration file with information about your content provider.  The following additions
+     * are usually sufficient:
+     * <pre class="prettyprint">
+     *     android:searchSuggestAuthority="your.suggestion.authority"
+     *     android:searchSuggestSelection=" ? "</pre>
+     * </li>
+     * <li>In your searchable activities, capture any user-generated queries and record them
+     * for future searches by calling {@link android.provider.SearchRecentSuggestions#saveRecentQuery
+     * SearchRecentSuggestions.saveRecentQuery()}.</li>
+     * </ul>
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For information about using search suggestions in your application, read the
+     * <a href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
+     * </div>
+     *
+     * @see android.provider.SearchRecentSuggestions
+     */
+    /**
+     * @Involve
+     * interface IContentProvider;
+     */
+    interface ISearchRecentSuggestionsProvider {
+        /**
+         * This mode bit configures the database to record recent queries.  <i>required</i>
+         *
+         * @see #setupSuggestions(String, int)
+         */
+        const Int32 DATABASE_MODE_QUERIES = 1;
+        /**
+         * This mode bit configures the database to include a 2nd annotation line with each entry.
+         * <i>optional</i>
+         *
+         * @see #setupSuggestions(String, int)
+         */
+        const Int32 DATABASE_MODE_2LINES = 2;
+    }
+
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

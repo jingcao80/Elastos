@@ -1,0 +1,51 @@
+
+module
+{
+
+    interface Org.Apache.Http.IHttpHost;
+    interface Org.Apache.Http.IHttpRequest;
+    interface Org.Apache.Http.Protocol.IHttpContext;
+
+    namespace Org {
+    namespace Apache {
+    namespace Http {
+    namespace Conn {
+    namespace Routing {
+
+    /**
+     * Encapsulates logic to compute a {@link HttpRoute} to a target host.
+     * Implementations may for example be based on parameters, or on the
+     * standard Java system properties.
+     */
+    interface IHttpRoutePlanner {
+
+        /**
+         * Determines the route for a request.
+         *
+         * @param target    the target host for the request.
+         *                  Implementations may accept <code>null</code>
+         *                  if they can still determine a route, for example
+         *                  to a default target or by inspecting the request.
+         * @param request   the request to execute
+         * @param context   the context to use for the subsequent execution.
+         *                  Implementations may accept <code>null</code>.
+         *
+         * @return  the route that the request should take
+         *
+         * @throws HttpException    in case of a problem
+         */
+        DetermineRoute(
+            [in] IHttpHost* target,
+            [in] IHttpRequest* request,
+            [in] IHttpContext* context,
+            [out] IHttpRoute** route);
+
+    }
+
+    } // namespace Routing
+    } // namespace Conn
+    } // namespace Http
+    } // namespace Apache
+    } // namespace Org
+
+}

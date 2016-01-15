@@ -1,0 +1,99 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    /**
+     * Helps answer common questions that come up when displaying a month in a
+     * 6 row calendar grid format.
+     *
+     * Not thread safe.
+     */
+    interface IMonthDisplayHelper {
+        GetYear(
+            [out] Int32* value);
+
+        GetMonth(
+            [out] Int32* value);
+
+        GetWeekStartDay(
+            [out] Int32* value);
+
+        /**
+         * @return The first day of the month using a constants such as
+         *   {@link java.util.Calendar#SUNDAY}.
+         */
+        GetFirstDayOfMonth(
+            [out] Int32* value);
+
+        /**
+         * @return The number of days in the month.
+         */
+        GetNumberOfDaysInMonth(
+            [out] Int32* value);
+
+        /**
+         * @return The offset from displaying everything starting on the very first
+         *   box.  For example, if the calendar is set to display the first day of
+         *   the week as Sunday, and the month starts on a Wednesday, the offset is 3.
+         */
+        GetOffset(
+            [out] Int32* value);
+
+        /**
+         * @param row Which row (0-5).
+         * @return the digits of the month to display in one
+         * of the 6 rows of a calendar month display.
+         */
+        GetDigitsForRow(
+            [in] Int32 row,
+            [out, callee] ArrayOf<Int32>* outarr);
+
+        /**
+         * @param row The row, 0-5, starting from the top.
+         * @param column The column, 0-6, starting from the left.
+         * @return The day at a particular row, column
+         */
+        GetDayAt(
+            [in] Int32 row,
+            [in] Int32 column,
+            [out] Int32* value);
+
+        /**
+         * @return Which row day is in.
+         */
+        GetRowOf(
+            [in] Int32 day,
+            [out] Int32* value);
+
+        /**
+         * @return Which column day is in.
+         */
+        GetColumnOf(
+            [in] Int32 day,
+            [out] Int32* value);
+
+        /**
+         * Decrement the month.
+         */
+        PreviousMonth();
+
+        /**
+         * Increment the month.
+         */
+        NextMonth();
+
+        /**
+         * @return Whether the row and column fall within the month.
+         */
+        IsWithinCurrentMonth(
+            [in] Int32 row,
+            [in] Int32 column,
+            [out] Boolean* value);
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+}

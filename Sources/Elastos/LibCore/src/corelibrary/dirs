@@ -1,0 +1,5 @@
+
+DIRS += ../libcore
+DIRS += ../elastos
+DIRS += ../elastosx
+DIRS += ../org

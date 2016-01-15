@@ -1,0 +1,328 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface ICamcorderProfile {
+        /**
+         * Quality level corresponding to the lowest available resolution.
+         */
+        const Int32 QUALITY_LOW  = 0;
+
+        /**
+         * Quality level corresponding to the highest available resolution.
+         */
+        const Int32 QUALITY_HIGH = 1;
+
+        /**
+         * Quality level corresponding to the qcif (176 x 144) resolution.
+         */
+        const Int32 QUALITY_QCIF = 2;
+
+        /**
+         * Quality level corresponding to the cif (352 x 288) resolution.
+         */
+        const Int32 QUALITY_CIF = 3;
+
+        /**
+         * Quality level corresponding to the 480p (720 x 480) resolution.
+         * Note that the horizontal resolution for 480p can also be other
+         * values, such as 640 or 704, instead of 720.
+         */
+        const Int32 QUALITY_480P = 4;
+
+        /**
+         * Quality level corresponding to the 720p (1280 x 720) resolution.
+         */
+        const Int32 QUALITY_720P = 5;
+
+        /**
+         * Quality level corresponding to the 1080p (1920 x 1080) resolution.
+         * Note that the vertical resolution for 1080p can also be 1088,
+         * instead of 1080 (used by some vendors to avoid cropping during
+         * video playback).
+         */
+        const Int32 QUALITY_1080P = 6;
+
+        /**
+         * Quality level corresponding to the QVGA (320x240) resolution.
+         */
+        const Int32 QUALITY_QVGA = 7;
+
+        /**
+         * Quality level corresponding to the 2160p (3840x2160) resolution.
+         */
+        const Int32 QUALITY_2160P = 8;
+
+        /**
+         * Time lapse quality level corresponding to the lowest available resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_LOW  = 1000;
+
+        /**
+         * Time lapse quality level corresponding to the highest available resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_HIGH = 1001;
+
+        /**
+         * Time lapse quality level corresponding to the qcif (176 x 144) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_QCIF = 1002;
+
+        /**
+         * Time lapse quality level corresponding to the cif (352 x 288) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_CIF = 1003;
+
+        /**
+         * Time lapse quality level corresponding to the 480p (720 x 480) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_480P = 1004;
+
+        /**
+         * Time lapse quality level corresponding to the 720p (1280 x 720) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_720P = 1005;
+
+        /**
+         * Time lapse quality level corresponding to the 1080p (1920 x 1088) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_1080P = 1006;
+
+        /**
+         * Time lapse quality level corresponding to the QVGA (320 x 240) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_QVGA = 1007;
+
+        /**
+         * Time lapse quality level corresponding to the 2160p (3840 x 2160) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_2160P = 1008;
+
+        /**
+         * High speed ( >= 100fps) quality level corresponding to the lowest available resolution.
+         */
+        const Int32 QUALITY_HIGH_SPEED_LOW = 2000;
+
+        /**
+         * High speed ( >= 100fps) quality level corresponding to the highest available resolution.
+         */
+        const Int32 QUALITY_HIGH_SPEED_HIGH = 2001;
+
+        /**
+         * High speed ( >= 100fps) quality level corresponding to the 480p (720 x 480) resolution.
+         *
+         * Note that the horizontal resolution for 480p can also be other
+         * values, such as 640 or 704, instead of 720.
+         */
+        const Int32 QUALITY_HIGH_SPEED_480P = 2002;
+
+        /**
+         * High speed ( >= 100fps) quality level corresponding to the 720p (1280 x 720) resolution.
+         */
+        const Int32 QUALITY_HIGH_SPEED_720P = 2003;
+
+        /**
+         * High speed ( >= 100fps) quality level corresponding to the 1080p (1920 x 1080 or 1920x1088)
+         * resolution.
+         */
+        const Int32 QUALITY_HIGH_SPEED_1080P = 2004;
+
+        /**
+         * High speed ( >= 100fps) quality level corresponding to the 2160p (3840 x 2160)
+         * resolution.
+         */
+        const Int32 QUALITY_HIGH_SPEED_2160P = 2005;
+
+        SetDuration(
+            [in] Int32 duration);
+
+        GetDuration(
+            [out] Int32* duration);
+
+        SetQuality(
+            [in] Int32 quality);
+
+        GetQuality(
+            [out] Int32* quality);
+
+        SetFileFormat(
+            [in] Int32 fileFormat);
+
+        GetFileFormat(
+            [out] Int32* fileFormat);
+
+        SetVideoCodec(
+            [in] Int32 videoCodec);
+
+        GetVideoCodec(
+            [out] Int32* videoCodec);
+
+        SetVideoBitRate(
+            [in] Int32 videoBitRate);
+
+        GetVideoBitRate(
+            [out] Int32* videoBitRate);
+
+        SetVideoFrameRate(
+            [in] Int32 videoFrameRate);
+
+        GetVideoFrameRate(
+            [out] Int32* videoFrameRate);
+
+        SetVideoFrameWidth(
+            [in] Int32 videoFrameWidth);
+
+        GetVideoFrameWidth(
+            [out] Int32* videoFrameWidth);
+
+        SetVideoFrameHeight(
+            [in] Int32 videoFrameHeight);
+
+        GetVideoFrameHeight(
+            [out] Int32* videoFrameHeight);
+
+        SetAudioCodec(
+            [in] Int32 audioCodec);
+
+        GetAudioCodec(
+            [out] Int32* audioCodec);
+
+        SetAudioBitRate(
+            [in] Int32 audioBitRate);
+
+        GetAudioBitRate(
+            [out] Int32* audioBitRate);
+
+        SetAudioSampleRate(
+            [in] Int32 audioSampleRate);
+
+        GetAudioSampleRate(
+            [out] Int32* audioSampleRate);
+
+        SetAudioChannels(
+            [in] Int32 audioChannels);
+
+        GetAudioChannels(
+            [out] Int32* audioChannels);
+    }
+
+    interface ICamcorderProfileHelper{
+        /**
+         * Returns the camcorder profile for the first back-facing camera on the
+         * device at the given quality level. If the device has no back-facing
+         * camera, this returns null.
+         * @param quality the target quality level for the camcorder profile
+         * @see #get(Int32, Int32)
+         */
+        Get(
+            [in] Int32 quality,
+            [out] ICamcorderProfile** result);
+
+        /**
+         * Returns the camcorder profile for the given camera at the given
+         * quality level.
+         *
+         * Quality levels QUALITY_LOW, QUALITY_HIGH are guaranteed to be supported, while
+         * other levels may or may not be supported. The supported levels can be checked using
+         * {@link #hasProfile(Int32, Int32)}.
+         * QUALITY_LOW refers to the lowest quality available, while QUALITY_HIGH refers to
+         * the highest quality available.
+         * QUALITY_LOW/QUALITY_HIGH have to match one of qcif, cif, 480p, 720p, or 1080p.
+         * E.g. if the device supports 480p, 720p, and 1080p, then low is 480p and high is
+         * 1080p.
+         *
+         * The same is true for time lapse quality levels, i.e. QUALITY_TIME_LAPSE_LOW,
+         * QUALITY_TIME_LAPSE_HIGH are guaranteed to be supported and have to match one of
+         * qcif, cif, 480p, 720p, or 1080p.
+         *
+         * A camcorder recording session with higher quality level usually has higher output
+         * bit rate, better video and/or audio recording quality, larger video frame
+         * resolution and higher audio sampling rate, etc, than those with lower quality
+         * level.
+         *
+         * @param cameraId the id for the camera
+         * @param quality the target quality level for the camcorder profile.
+         * @see #QUALITY_LOW
+         * @see #QUALITY_HIGH
+         * @see #QUALITY_QCIF
+         * @see #QUALITY_CIF
+         * @see #QUALITY_480P
+         * @see #QUALITY_720P
+         * @see #QUALITY_1080P
+         * @see #QUALITY_TIME_LAPSE_LOW
+         * @see #QUALITY_TIME_LAPSE_HIGH
+         * @see #QUALITY_TIME_LAPSE_QCIF
+         * @see #QUALITY_TIME_LAPSE_CIF
+         * @see #QUALITY_TIME_LAPSE_480P
+         * @see #QUALITY_TIME_LAPSE_720P
+         * @see #QUALITY_TIME_LAPSE_1080P
+         */
+        Get(
+            [in] Int32 cameraId,
+            [in] Int32 quality,
+            [out] ICamcorderProfile** result);
+
+        /**
+         * Returns true if camcorder profile exists for the first back-facing
+         * camera at the given quality level.
+         *
+         * <p>
+         * When using the Camera 2 API in {@code LEGACY} mode (i.e. when
+         * {@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL} is set
+         * to
+         * {@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY}),
+         * {@link #hasProfile} may return {@code true} for unsupported resolutions.  To ensure a
+         * a given resolution is supported in LEGACY mode, the configuration given in
+         * {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}
+         * must contain the the resolution in the supported output sizes.  The recommended way to check
+         * this is with
+         * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes(Class)} with the
+         * class of the desired recording endpoint, and check that the desired resolution is contained
+         * in the list returned.
+         * </p>
+         * @see android.hardware.camera2.CameraManager
+         * @see android.hardware.camera2.CameraCharacteristics
+         *
+         * @param quality the target quality level for the camcorder profile
+         */
+        HasProfile(
+            [in] Int32 quality,
+            [out] Boolean* result);
+
+        /**
+         * Returns true if camcorder profile exists for the given camera at
+         * the given quality level.
+         *
+         * <p>
+         * When using the Camera 2 API in {@code LEGACY} mode (i.e. when
+         * {@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL} is set
+         * to
+         * {@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY}),
+         * {@link #hasProfile} may return {@code true} for unsupported resolutions.  To ensure a
+         * a given resolution is supported in LEGACY mode, the configuration given in
+         * {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}
+         * must contain the the resolution in the supported output sizes.  The recommended way to check
+         * this is with
+         * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes(Class)} with the
+         * class of the desired recording endpoint, and check that the desired resolution is contained
+         * in the list returned.
+         * </p>
+         * @see android.hardware.camera2.CameraManager
+         * @see android.hardware.camera2.CameraCharacteristics
+         *
+         * @param cameraId the id for the camera
+         * @param quality the target quality level for the camcorder profile
+         */
+        HasProfile(
+            [in] Int32 cameraId,
+            [in] Int32 quality,
+            [out] Boolean* result);
+    }
+
+    } // namespace Media
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,129 @@
+
+module
+{
+    using interface Elastos.Security.Cert.ICertificate;
+    using interface Elastos.Security.Cert.IX509Certificate;
+    using interface Elastos.Utility.IDate;
+    using interface Elastos.Utility.ISet;
+    using interface Elastos.Utility.IList;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Xnet {
+    namespace Provider {
+    namespace Jsse {
+
+    /**
+     * Indexes {@code TrustAnchor} instances so they can be found in O(1)
+     * time instead of O(N).
+     */
+    interface ITrustedCertificateStore {
+        GetCertificate(
+            [in] String alias,
+            [out] ICertificate** certificate);
+
+        GetCertificateEx(
+            [in] String alias,
+            [in] Boolean includeDeletedSystem,
+            [out] ICertificate** certificate);
+
+        GetCreationDate(
+            [in] String alias,
+            [out] IDate** date);
+
+        Aliases(
+            [out] ISet** aliases);
+
+        UserAliases(
+            [out] ISet** aliases);
+
+        AllSystemAliases(
+            [out] ISet** aliases);
+
+        ContainsAlias(
+            [in] String alias,
+            [out] Boolean* isContained);
+
+        GetCertificateAlias(
+            [in] ICertificate* c,
+            [out] String* alias);
+
+        /**
+         * Returns true to indicate that the certificate was added by the
+         * user, false otherwise.
+         */
+        IsUserAddedCertificate(
+            [in] IX509Certificate* cert,
+            [out] Boolean* isUserAddedCertificate);
+
+        /**
+         * This non-{@code KeyStoreSpi} public interface is used by {@code
+         * TrustManagerImpl} to locate a CA certificate with the same name
+         * and public key as the provided {@code X509Certificate}. We
+         * match on the name and public key and not the entire certificate
+         * since a CA may be reissued with the same name and PublicKey but
+         * with other differences (for example when switching signature
+         * from md2WithRSAEncryption to SHA1withRSA)
+         */
+        IsTrustAnchor(
+            [in] IX509Certificate* c,
+            [out] Boolean* isTrustAnchor);
+
+        /**
+         * This non-{@code KeyStoreSpi} public interface is used by {@code
+         * TrustManagerImpl} to locate the CA certificate that signed the
+         * provided {@code X509Certificate}.
+         */
+        FindIssuer(
+            [in] IX509Certificate* c,
+            [out] IX509Certificate** issuer);
+
+        /**
+         * Attempt to build a certificate chain from the supplied {@code leaf}
+         * argument through the chain of issuers as high up as known. If the chain
+         * can't be completed, the most complete chain available will be returned.
+         * This means that a list with only the {@code leaf} certificate is returned
+         * if no issuer certificates could be found.
+         */
+        GetCertificateChain(
+            [in] IX509Certificate* leaf,
+            [out] IList** chain);
+
+        /**
+         * This non-{@code KeyStoreSpi} public interface is used by the
+         * {@code KeyChainService} to install new CA certificates. It
+         * silently ignores the certificate if it already exists in the
+         * store.
+         */
+        InstallCertificate(
+            [in] IX509Certificate* cert);
+
+        /**
+         * This could be considered the implementation of {@code
+         * TrustedCertificateKeyStoreSpi.engineDeleteEntry} but we
+         * consider {@code TrustedCertificateKeyStoreSpi} to be read
+         * only. Instead, this is used by the {@code KeyChainService} to
+         * delete CA certificates.
+         */
+        DeleteCertificateEntry(
+            [in] String alias);
+    }
+
+    interface ITrustedCertificateStoreHelper {
+        IsSystem(
+            [in] String alias,
+            [out] Boolean* isSystem);
+
+        IsUser(
+            [in] String alias,
+            [out] Boolean* isUser);
+    }
+
+    } // namespace Jsse
+    } // namespace Provider
+    } // namespace Xnet
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

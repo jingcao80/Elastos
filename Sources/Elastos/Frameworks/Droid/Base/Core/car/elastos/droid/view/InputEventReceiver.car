@@ -1,0 +1,43 @@
+
+module
+{
+    interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.View.IInputChannel;
+    interface Elastos.Droid.View.IInputEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Provides a low-level mechanism for an application to receive input events.
+     * @hide
+     */
+    interface IInputEventReceiver {
+        Dispose();
+
+        OnInputEvent(
+            [in] IInputEvent* event);
+
+        OnBatchedInputEventPending();
+
+        FinishInputEvent(
+            [in] IInputEvent* event,
+            [in] Boolean handled);
+
+        ConsumeBatchedInputEvents(
+            [in] Int64 frameTimeNanos,
+            [out] Boolean* result);
+    }
+
+    interface IInputEventReceiverFactory {
+        CreateInputEventReceiver(
+            [in] IInputChannel* inputChannel,
+            [in] ILooper* looper,
+            [out] IInputEventReceiver** receiver);
+    }
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

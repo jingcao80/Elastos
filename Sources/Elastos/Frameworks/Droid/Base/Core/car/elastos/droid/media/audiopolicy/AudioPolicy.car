@@ -1,0 +1,74 @@
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Media.AudioPolicy.IAudioPolicyConfig;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace AudioPolicy {
+
+    interface IAudioPolicyStatusListener {
+        OnStatusChange();
+
+        OnMixStateUpdate(
+            [in] IAudioMix * mix);
+    }
+
+    /**
+     * @hide CANDIDATE FOR PUBLIC API
+     * AudioPolicy provides access to the management of audio routing and audio focus.
+     */
+    interface IAudioPolicy {
+
+        /**
+         * The status of an audio policy that cannot be used because it is invalid.
+         */
+        const Int32 POLICY_STATUS_INVALID = 0;
+        /**
+         * The status of an audio policy that is valid but cannot be used because it is not registered.
+         */
+        const Int32 POLICY_STATUS_UNREGISTERED = 1;
+        /**
+         * The status of an audio policy that is valid, successfully registered and thus active.
+         */
+        const Int32 POLICY_STATUS_REGISTERED = 2;
+
+        /** @hide */
+        Token(
+            [out] IBinder ** result);
+
+        /** @hide */
+        GetConfig(
+            [out] IAudioPolicyConfig** result);
+
+        GetStatus(
+            [out] Int32 * result);
+
+        ToString(
+            [out] String * result);
+    }
+
+    /**
+     * Builder class for {@link AudioPolicy} objects
+     */
+    interface IAudioPolicyBuilder {
+        /**
+         * Add an {@link AudioMix} to be part of the audio policy being built.
+         * @param mix a non-null {@link AudioMix} to be part of the audio policy.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        AddMix(
+            [in] IAudioMix * mix,
+            [out] IAudioPolicyBuilder ** builder);
+
+        Build(
+            [out] IAudioPolicy** result);
+    }
+
+    } // namespace AudioPolicy
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,23 @@
+
+module
+{
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Net {
+
+    [deprecated]
+    interface IINetworkScoreCache {
+
+        UpdateScores(
+            [in] IList* networks);
+
+        ClearScores();
+    }
+
+    } // namespace Net
+    } // namepsace Droid
+    } // namespace Elastos
+}

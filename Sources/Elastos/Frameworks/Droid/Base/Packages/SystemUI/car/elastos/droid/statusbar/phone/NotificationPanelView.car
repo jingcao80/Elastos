@@ -1,0 +1,91 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IKeyguardUserSwitcher;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+    namespace Phone {
+
+    /**
+     * @Involve
+     * interface IPanelView
+     * interface IExpandableViewOnHeightChangedListener
+     * interface IObservableScrollViewListener
+     * interface IViewOnClickListener
+     * interface INotificationStackScrollLayoutOnOverscrollTopChangedListener
+     * interface IKeyguardAffordanceHelperCallback
+     */
+    interface INotificationPanelView {
+
+        SetStatusBar(
+            [in] IPhoneStatusBar* bar);
+
+        UpdateResources();
+
+        AnimateToFullShade(
+            [in] Int64 delay);
+
+        SetQsExpansionEnabled(
+            [in] Boolean qsExpansionEnabled);
+
+        CloseQs();
+
+        AnimateCloseQs();
+
+        OpenQs();
+
+        SetBarState(
+            [in] Int32 statusBarState,
+            [in] Boolean keyguardFadingAway,
+            [in] Boolean goingToFullShade);
+
+        NotifyVisibleChildrenChanged();
+
+        IsQsExpanded(
+            [out] Boolean* result);
+
+        IsQsDetailShowing(
+            [out] Boolean* result);
+
+        CloseQsDetail();
+
+        IsLaunchTransitionFinished(
+            [out] Boolean* result);
+
+        IsLaunchTransitionRunning(
+            [out] Boolean* result);
+
+        SetLaunchTransitionEndRunnable(
+            [in] IRunnable* r);
+
+        SetEmptyDragAmount(
+            [in] Float amount);
+
+        SetDozing(
+            [in] Boolean dozing);
+
+        SetShadeEmpty(
+            [in] Boolean shadeEmpty);
+
+        SetQsScrimEnabled(
+            [in] Boolean qsScrimEnabled);
+
+        SetKeyguardUserSwitcher(
+            [in] IKeyguardUserSwitcher* keyguardUserSwitcher);
+
+        OnScreenTurnedOn();
+    }
+
+    } // namespace Phone
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

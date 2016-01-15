@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+search/title_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/title_bar_height"
+        android:layout_alignParentTop="true"
+        android:background="@color/main_title_bgcolor" >
+        
+        <ImageView
+            android:id="@+search/imgview_title_back"
+            android:layout_width="@dimen/arrow_width"
+            android:layout_height="fill_parent"
+            android:layout_alignParentLeft="true"
+            android:contentDescription="@null"
+            android:paddingBottom="5dip"
+            android:paddingTop="5dip"
+            android:src="@drawable/title_arrow_back" />
+          
+        <TextView
+            android:id="@+main/title_tv_label"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@+search/imgview_title_back"
+            android:layout_height="@dimen/title_bar_height"
+            android:layout_marginLeft="10dip"
+            android:gravity="center_vertical"
+            android:text="@string/search"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+search/title_btn_edit"
+            style="@style/main_tab_btn_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/btn_edit"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+search/title_btn_search"
+            style="@style/main_btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+search/title_btn_edit" />
+
+        <!--
+              <EditText
+            android:id="@+main/title_et_keyword"
+            style="@style/title_bar"
+            android:layout_width="@dimen/search_edittext_width"
+            android:layout_height="@dimen/title_bar_height"
+            android:layout_marginRight="0dip"
+            android:layout_toLeftOf="@+main/title_btn_search" />
+        -->
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+main/list_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+main/seekbar_music"
+        android:layout_below="@+search/title_layout" >
+
+        <ListView
+            android:id="@+main/content_listview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+        </ListView>
+    </RelativeLayout>
+
+    <SeekBar
+        android:id="@+main/seekbar_music"
+        style="@style/play_music_seekbar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+main/foot_layout"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:maxHeight="5dp"
+        android:minHeight="5dp" />
+
+    <RelativeLayout
+        android:id="@+main/foot_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/foot_height"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:background="@drawable/main_bottom_bg" >
+
+        <ImageView
+            android:id="@+main/foot_imgview_album_art"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="10dip"
+            android:contentDescription="@null"
+            android:src="@drawable/music_unknown" />
+
+        <TextView
+            android:id="@+main/foot_tv_song"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+main/foot_imgview_album_art"
+            android:gravity="center"
+            android:text="死了都要爱" />
+
+        <TextView
+            android:id="@+main/foot_tv_singer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@+main/foot_imgview_album_art"
+            android:gravity="center"
+            android:text="@string/unknown_singer" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="center_vertical" >
+
+            <Button
+                android:id="@+main/foot_btn_play"
+                android:layout_width="50dip"
+                android:layout_height="50dip"
+                android:background="@drawable/main_bottom_btn_play" />
+
+            <Button
+                android:id="@+main/foot_btn_pause"
+                android:layout_width="50dip"
+                android:layout_height="50dip"
+                android:background="@drawable/main_bottom_btn_pause"
+                android:visibility="invisible" />
+        </FrameLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

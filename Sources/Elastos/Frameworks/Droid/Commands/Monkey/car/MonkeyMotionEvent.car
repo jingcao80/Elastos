@@ -1,0 +1,66 @@
+module
+{
+    using interface Elastos.Droid.Commands.Monkey.IMonkeyEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Monkey {
+
+    interface IMonkeyMotionEvent extends IMonkeyEvent {
+
+        /**
+        @add pointer
+        */
+        AddPointer(
+        	[in] Int32 id,
+        	[in] Float x,
+        	[in] Float y);
+
+        AddPointer(
+        	[in] Int32 id,
+        	[in] Float x,
+        	[in] Float y,
+        	[in] Float pressure,
+        	[in] Float size);
+
+        SetIntermediateNote(
+        	[in] Boolean b);
+
+        GetIntermediateNote(
+        	[out] Boolean *b);
+
+        GetAction(
+        	[out] Int32* action);
+
+        GetDownTime(
+        	[out] Int64* downtime);
+
+        GetEventTime(
+        	[out] Int64* eventtime);
+
+        SetDownTime(
+        	[in] Int64 downtime);
+
+        SetEventTime(
+        	[in] Int64 eventtime);
+
+        SetMetaState(
+        	[in] Int32 metaState);
+
+        SetPrecision(
+        	[in] Float xPrecision,
+        	[in] Float yPrecision);
+
+        SetDeviceId(
+        	[in] Int32 deviceId);
+
+        SetEdgeFlags(
+        	[in] Int32 edgeFlags);
+    }
+
+    } // namespace Monkey
+    } // namespace Commands
+    } // namespace Droid
+    } // namespace Elastos
+}

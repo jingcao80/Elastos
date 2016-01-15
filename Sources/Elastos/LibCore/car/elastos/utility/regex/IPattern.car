@@ -1,0 +1,435 @@
+
+module
+{
+    interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Utility.Regex.IMatcher;
+
+    namespace Elastos {
+    namespace Utility {
+    namespace Regex {
+
+    /**
+     * Patterns are compiled regular expressions. In many cases, convenience methods
+     * such as String.matches, String.replaceAll and String.split will be preferable,
+     * but if you need to do a lot of work with the same regular expression, it may be
+     * more efficient to compile it once and reuse it. The Pattern class and its
+     * companion, Matcher, also offer more functionality than the small amount exposed
+     * by String.
+     *
+     * @sa String.matches, String.replaceAll
+     * @sa String.split
+     * <pre>
+     * // String convenience methods:
+     * boolean sawFailures = s.matches("Failures: \\d+");
+     * String farewell = s.replaceAll("Hello, (\\S+)", "Goodbye, $1");
+     * String[] fields = s.split(":");
+     *
+     * // Direct use of Pattern:
+     * Pattern p = Pattern.compile("Hello, (\\S+)");
+     * Matcher m = p.matcher(inputString);
+     * while (m.find()) { // Find each match in turn; String can't do this.
+     * String name = m.group(1); // Access a submatch group; String can't do this.
+     * }
+     * </pre>
+     *
+     * <p>
+     * <strong>Regular expression syntax</strong>
+     * <p>
+     * Java supports a subset of Perl 5 regular expression syntax. An important gotcha
+     * is that Java has no regular expression literals, and uses plain old string
+     * literals instead. This means that you need an extra level of escaping. For
+     * example, the regular expression \s+ has to be represented as the string "\\s+".
+     * <p>
+     * <strong>Escape sequences</strong>
+     * <p>
+     * :-|:------------|
+     * \  |  Quote the following metacharacter (so \. matches a literal .).
+     * \Q | Quote all following metacharacters until \E.
+     * \E | Stop quoting metacharacters (started by \Q).
+     * \\ | A literal backslash.
+     * \uhhhh | The Unicode character U+hhhh (in hex).
+     * \xhh  |  The Unicode character U+00hh (in hex).
+     * \cx | The ASCII control character ^x (so \cH would be ^H, U+0008).
+     * \a  | The ASCII bell character (U+0007).
+     * \e  | The ASCII ESC character (U+001b).
+     * \f  | The ASCII form feed character (U+000c).
+     * \n  | The ASCII newline character (U+000a).
+     * \r  | The ASCII carriage return character (U+000d).
+     * \t  | The ASCII tab character (U+0009).
+     * <p>
+     * <strong>Character classes</strong>
+     * <p>
+     * It's possible to construct arbitrary character classes using set operations:
+     * :-|:------------|
+     * [abc]  |  Any one of a, b, or c. (Enumeration.)
+     * [a-c] |  Any one of a, b, or c. (Range.)
+     * [^abc] | Any character except a, b, or c. (Negation.)
+     * [[a-f][0-9]] |   Any character in either range. (Union.)
+     * [[a-z]&&[jkl]] | Any character in both ranges. (Intersection.)
+     * <p>
+     * Most of the time, the built-in character classes are more useful:
+     * <p>
+     * :-|:------------|
+     * \d  | Any digit character (see note below).
+     * \D | Any non-digit character (see note below).
+     * \s | Any whitespace character (see note below).
+     * \S | Any non-whitespace character (see note below).
+     * \w | Any word character (see note below).
+     * \W | Any non-word character (see note below).
+     * \p{NAME}  |   Any character in the class with the given NAME.
+     * \P{NAME}  |   Any character not in the named class.
+     * <p>
+     * Note that these built-in classes don't just cover the traditional ASCII range.
+     * For example, \w is equivalent to the character class [
+     * \p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nd}]. For more details see Unicode TR-18, and bear
+     * in mind that the set of characters in each class can vary between Unicode
+     * releases. If you actually want to match only ASCII characters, specify the
+     * explicit characters you want; if you mean 0-9 use [0-9] rather than \d, which
+     * would also include Gurmukhi digits and so forth.
+     *
+     * @sa Unicode TR-18
+     * <p>
+     * There are also a variety of named classes:
+     * <p>
+     * <li>Unicode category names, prefixed by Is. For example \p{IsLu} for all uppercase letters.</li>
+     * <p>
+     * <li>POSIX class names. These are 'Alnum', 'Alpha', 'ASCII', 'Blank', 'Cntrl',  'Digit', 'Graph', 'Lower', 'Print', 'Punct', 'Upper', 'XDigit'.</li>
+     * <p>
+     * <li>Unicode block names, as used by forName(String) prefixed by In. For example  \p{InHebrew} for all characters in the Hebrew block.</li>
+     * <p>
+     * <li>Character method names. These are all non-deprecated methods from Character whose name starts with is, but with the is replaced by java. For example, \p{javaLowerCase}.</li>
+     * <p>
+     * <strong>Quantifiers</strong>
+     * <p>
+     * Quantifiers match some number of instances of the preceding regular expression.
+     * <p>
+     * :-|:------------|
+     * *  |  Zero or more.
+     * ?  | Zero or one.
+     * +  | One or more.
+     * {n} | Exactly n.
+     * {n,}  |  At least n.
+     * {n,m} |  At least n but not more than m.
+     * <p>
+     * Quantifiers are "greedy" by default, meaning that they will match the longest
+     * possible input sequence. There are also non-greedy quantifiers that match the
+     * shortest possible input sequence. They're same as the greedy ones but with a
+     * trailing ?:
+     * <p>
+     * :-|:------------|
+     * *? |  Zero or more (non-greedy).
+     * ?? | Zero or one (non-greedy).
+     * +? | One or more (non-greedy).
+     * {n}?  |  Exactly n (non-greedy).
+     * {n,}? |  At least n (non-greedy).
+     * {n,m}? | At least n but not more than m (non-greedy).
+     * <p>
+     * Quantifiers allow backtracking by default. There are also possessive
+     * quantifiers to prevent backtracking. They're same as the greedy ones but with a
+     * trailing +:
+     * <p>
+     * :-|:------------|
+     * *+ |  Zero or more (possessive).
+     * ?+ | Zero or one (possessive).
+     * ++ | One or more (possessive).
+     * {n}+  |  Exactly n (possessive).
+     * {n,}+ |  At least n (possessive).
+     * {n,m}+ | At least n but not more than m (possessive).
+     * <p>
+     * <strong>Zero-width assertions</strong>
+     * <p>
+     * :-|:------------|
+     * ^  |  At beginning of line.
+     * $  | At end of line.
+     * \A | At beginning of input.
+     * \b | At word boundary.
+     * \B | At non-word boundary.
+     * \G | At end of previous match.
+     * \z | At end of input.
+     * \Z | At end of input, or before newline at end.
+     * <p>
+     * <strong>Look-around assertions</strong>
+     * <p>
+     * Look-around assertions assert that the subpattern does (positive) or
+     * doesn't (negative) match after (look-ahead) or before (look-behind) the current
+     * position, without including the matched text in the containing match. The
+     * maximum length of possible matches for look-behind patterns must not be
+     * unbounded.
+     * <p>
+     * :-|:------------|
+     * (?=a) |   Zero-width positive look-ahead.
+     * (?!a)  | Zero-width negative look-ahead.
+     * (?<=a) | Zero-width positive look-behind.
+     * (?<!a) | Zero-width negative look-behind.
+     * <p>
+     * <strong>Groups</strong>
+     * <p>
+     * :-|:------------|
+     * (a) | A capturing group.
+     * (?:a) |  A non-capturing group.
+     * (?>a)  | An independent non-capturing group. (The first match of the subgroup is the only match tried.)
+     * \n | The text already matched by capturing group n.
+     * <p>
+     * See group() for details of how capturing groups are numbered and accessed.
+     * <p>
+     * <strong>Operators</strong>
+     * <p>
+     * :-|:------------|
+     * ab  | Expression a followed by expression b.
+     * a|b Either | expression a or expression b.
+     * <p>
+     * <strong>Flags</strong>
+     * <p>
+     * :-|:------------|
+     * (?dimsux-dimsux:a) |  Evaluates the expression a with the given flags enabled/disabled.
+     * (?dimsux-dimsux)  |  Evaluates the rest of the pattern with the given flags enabled/disabled.
+     * <p>
+     * The flags are:
+     * <p>
+     * :-|:------------|:----------------|
+     * i  |  CASE_INSENSITIVE  |  case insensitive matching
+     * d |  UNIX_LINES | only accept '\n' as a line terminator
+     * m |  MULTILINE |  allow ^ and $ to match beginning/end of any line
+     * s |  DOTALL | allow . to match '\n' ("s" for "single line")
+     * u |  UNICODE_CASE  |  enable Unicode case folding
+     * x |  COMMENTS  |  allow whitespace and comments
+     *
+     * @sa CASE_INSENSITIVE
+     * @sa UNIX_LINES
+     * @sa MULTILINE
+     * @sa DOTALL
+     * @sa UNICODE_CASE
+     * @sa COMMENTS
+     *
+     * <p>
+     * Either set of flags may be empty. For example, (?i-m) would turn on
+     * case-insensitivity and turn off multiline mode, (?i) would just turn on
+     * case-insensitivity, and (?-m) would just turn off multiline mode.
+     * <p>
+     * Note that on Android, UNICODE_CASE is always on: case-insensitive matching
+     * will always be Unicode-aware.
+     * <p>
+     * There are two other flags not settable via this mechanism: CANON_EQ and LITERAL.
+     * Attempts to use CANON_EQ on Android will throw an exception.
+     *
+     * @sa CANON_EQ
+     * @sa LITERAL
+     * @sa CANON_EQ
+     *
+     * <p>
+     * <strong>Implementation notes</strong>
+     * <p>
+     * The regular expression implementation used in Android is provided by ICU. The
+     * notation for the regular expressions is mostly a superset of those used in
+     * other Java language implementations. This means that existing applications will
+     * normally work as expected, but in rare cases Android may accept a regular
+     * expression that is not accepted by other implementations.
+     *
+     * @sa ICU
+     * <p>
+     * In some cases, Android will recognize that a regular expression is a simple
+     * special case that can be handled more efficiently. This is true of both the
+     * convenience methods in String and the methods in Pattern.
+     *
+     * @sa Matcher
+     */
+
+    interface IPattern {
+        /**
+         * This constant specifies that a pattern matches Unix line endings ('\n')
+         * only against the '.', '^', and '$' meta characters. Corresponds to {(?d)}.
+         */
+        const Int32 UNIX_LINES = 0x01;
+
+        /**
+         * This constant specifies that a {Pattern} is matched
+         * case-insensitively. That is, the patterns "a+" and "A+" would both match
+         * the string "aAaAaA". See #UNICODE_CASE. Corresponds to {(?i)}.
+         *
+         * @sa #UNICODE_CASE
+         */
+        const Int32 CASE_INSENSITIVE = 0x02;
+
+        /**
+         * This constant specifies that a {Pattern} may contain whitespace or
+         * comments. Otherwise comments and whitespace are taken as literal
+         * characters. Corresponds to {(?x)}.
+         */
+        const Int32 COMMENTS = 0x04;
+
+        /**
+         * This constant specifies that the meta characters '^' and '$' match only
+         * the beginning and end of an input line, respectively. Normally, they
+         * match the beginning and the end of the complete input. Corresponds to {(?m)}.
+         */
+        const Int32 MULTILINE = 0x08;
+
+        /**
+         * This constant specifies that the whole {Pattern} is to be taken
+         * literally, that is, all meta characters lose their meanings.
+         */
+        const Int32 LITERAL = 0x10;
+
+        /**
+         * This constant specifies that the '.' meta character matches arbitrary
+         * characters, including line endings, which is normally not the case.
+         * Corresponds to {(?s)}.
+         */
+        const Int32 DOTALL = 0x20;
+
+        /**
+         * This constant specifies that a {Pattern} that uses case-insensitive matching
+         * will use Unicode case folding. On Android, {UNICODE_CASE} is always on:
+         * case-insensitive matching will always be Unicode-aware. If your code is intended to
+         * be portable and uses case-insensitive matching on non-ASCII characters, you should
+         * use this flag. Corresponds to {(?u)}.
+         */
+        const Int32 UNICODE_CASE = 0x40;
+
+        /**
+         * This constant specifies that a character in a {Pattern} and a
+         * character in the input string only match if they are canonically
+         * equivalent. It is (currently) not supported in Android.
+         */
+        const Int32 CANON_EQ = 0x80;
+
+        /**
+         * Returns a Matcher for this pattern applied to the given {input}.
+         * The {Matcher} can be used to match the {Pattern} against the
+         * whole input, find occurrences of the {Pattern} in the input, or
+         * replace parts of the input.
+         *
+         * @sa Matcher
+         */
+        Matcher(
+            [in] String input,
+            [out] IMatcher** matcher);
+
+        Matcher(
+            [in] ICharSequence* input,
+            [out] IMatcher** matcher);
+
+        /**
+         * Equivalent to {split(input, 0)}.
+         */
+        Split(
+            [in] String input,
+            [out, callee] ArrayOf<String>* result);
+
+        Split(
+            [in] ICharSequence* input,
+            [out, callee] ArrayOf<String>* result);
+
+        /**
+         * Splits the given {input} at occurrences of this pattern.
+         *
+         * <p>If this pattern does not occur in the input, the result is an
+         * array containing the input (converted from a {CharSequence} to
+         * a {String}).
+         *
+         * <p>Otherwise, the {limit} parameter controls the contents of the
+         * returned array as described below.
+         *
+         * @param limit
+         *            Determines the maximum number of entries in the resulting
+         *            array, and the treatment of trailing empty strings.
+         *            <ul>
+         *            <li>For n &gt; 0, the resulting array contains at most n
+         *            entries. If this is fewer than the number of matches, the
+         *            final entry will contain all remaining input.
+         *            <li>For n &lt; 0, the length of the resulting array is
+         *            exactly the number of occurrences of the {Pattern}
+         *            plus one for the text after the final separator.
+         *            All entries are included.
+         *            <li>For n == 0, the result is as for n &lt; 0, except
+         *            trailing empty strings will not be returned. (Note that
+         *            the case where the input is itself an empty string is
+         *            special, as described above, and the limit parameter does
+         *            not apply there.)
+         *            </ul>
+         */
+        Split(
+            [in] ICharSequence* input,
+            [in] Int32 limit,
+            [out, callee] ArrayOf<String>* result);
+
+        /**
+         * Returns the regular expression supplied to {compile}.
+         */
+        GetPattern(
+            [out] String* regex);
+
+        /**
+         * Returns the flags supplied to {compile}.
+         */
+        GetFlags(
+            [out] Int32* flags);
+    }
+
+    interface IPatternHelper {
+        /**
+         * Equivalent to {Pattern.compile(pattern, 0)}.
+         */
+        Compile(
+            [in] String pattern,
+            [out] IPattern** result);
+
+        /**
+         * Returns a compiled form of the given {regularExpression}, as modified by the
+         * given {flags}. See the <a href="#flags">flags overview</a> for more on flags.
+         *
+         * @throws PatternSyntaxException if the regular expression is syntactically incorrect.
+         *
+         * @see #CANON_EQ
+         * @see #CASE_INSENSITIVE
+         * @see #COMMENTS
+         * @see #DOTALL
+         * @see #LITERAL
+         * @see #MULTILINE
+         * @see #UNICODE_CASE
+         * @see #UNIX_LINES
+         */
+        Compile(
+            [in] String regularExpression,
+            [in] Int32 flags,
+            [out] IPattern** result);
+
+        /**
+         * Tests whether the given {regularExpression} matches the given {input}.
+         * Equivalent to {Pattern.compile(regularExpression).matcher(input).matches()}.
+         * If the same regular expression is to be used for multiple operations, it may be more
+         * efficient to reuse a compiled {Pattern}.
+         *
+         * @see Pattern#compile(java.lang.String, int)
+         * @see Matcher#matches()
+         */
+        Matches(
+            [in] String regularExpression,
+            [in] String input,
+            [out] Boolean* matched);
+
+        Matches(
+            [in] String regularExpression,
+            [in] ICharSequence* input,
+            [out] Boolean* matched);
+
+        /**
+         * Quotes the given {string} using "\Q" and "\E", so that all
+         * meta-characters lose their special meaning. This method correctly
+         * escapes embedded instances of "\Q" or "\E". If the entire result
+         * is to be passed verbatim to #compile, it's usually clearer
+         * to use the #LITERAL flag instead.
+         *
+         * @sa #compile
+         * @sa #LITERAL
+         */
+        Quote(
+            [in] String string,
+            [out] String* result);
+    }
+
+    } // namespace Regex
+    } // namespace Utility
+    } // namespace Elastos
+}

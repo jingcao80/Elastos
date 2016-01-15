@@ -1,0 +1,166 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Graphics.IRect;
+
+    interface Elastos.Droid.Packages.SystemUI.Recents.Model.ITask;
+    interface Elastos.Droid.Packages.SystemUI.Recents.Model.ITaskStack;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace Recents {
+    namespace Views {
+
+    interface ITaskStackViewCallbacks;
+
+    /* The visual representation of a task stack view */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     * interface ITaskStackCallbacks
+     * interface ITaskViewCallbacks
+     * interface ITaskStackViewScrollerCallbacks
+     * interface IViewPoolConsumer
+     * interface IPackageCallbacks
+     */
+    [local]
+    interface ITaskStackView {
+        /** Sets the callbacks */
+        SetCallbacks(
+            [in] ITaskStackViewCallbacks* cb);
+
+        /** Sets the debug overlay */
+        SetDebugOverlay(
+            [in] IDebugOverlayView* overlay);
+
+        /** Requests that the views be synchronized with the model */
+        RequestSynchronizeStackViewsWithModel();
+
+        RequestSynchronizeStackViewsWithModel(
+            [in] Int32 duration);
+
+        /** Requests that the views clipping be updated. */
+        RequestUpdateStackViewsClip();
+
+        /** Finds the child view given a specific task. */
+        GetChildViewForTask(
+            [in] ITask* t,
+            [out] ITaskView** result);
+
+        /** Returns the stack algorithm for this task stack. */
+        GetStackAlgorithm(
+            [out] ITaskStackViewLayoutAlgorithm** result);
+
+        /** Synchronizes the views with the model */
+        SynchronizeStackViewsWithModel(
+            [out] Boolean* result);
+
+        /** Updates the clip for each of the task views. */
+        ClipTaskViews();
+
+        /** The stack insets to apply to the stack contents */
+        SetStackInsetRect(
+            [in] IRect* r);
+
+        /** Updates the min and max virtual scroll bounds */
+        UpdateMinMaxScroll(
+            [in] Boolean boundScrollToNewMinMax,
+            [in] Boolean launchedWithAltTab,
+            [in] Boolean launchedFromHome);
+
+        /** Returns the scroller. */
+        GetScroller(
+            [out] ITaskStackViewScroller** result);
+
+        /** Focuses the task at the specified index in the stack */
+        FocusTask(
+            [in] Int32 taskIndex,
+            [in] Boolean scrollToNewPosition);
+
+        /** Focuses the next task in the stack */
+        FocusNextTask(
+            [in] Boolean forward);
+
+        /** Dismisses the focused task. */
+        DismissFocusedTask();
+
+        /** Computes the stack and task rects */
+        ComputeRects(
+            [in] Int32 windowWidth,
+            [in] Int32 windowHeight,
+            [in] IRect* taskStackBounds,
+            [in] Boolean launchedWithAltTab,
+            [in] Boolean launchedFromHome);
+
+        /**
+         * This is ONLY used from AlternateRecentsComponent to update the dummy stack view for purposes
+         * of getting the task rect to animate to.
+         */
+        UpdateMinMaxScrollForStack(
+            [in] ITaskStack* stack,
+            [in] Boolean launchedWithAltTab,
+            [in] Boolean launchedFromHome);
+
+        /** Handler for the first layout. */
+        OnFirstLayout();
+
+        /** Requests this task stacks to start it's enter-recents animation */
+        StartEnterRecentsAnimation(
+            [in] ITaskViewEnterContext* ctx);
+
+        /** Requests this task stacks to start it's exit-recents animation. */
+        StartExitToHomeAnimation(
+            [in] ITaskViewExitContext* ctx);
+
+        /** Animates a task view in this stack as it launches. */
+        StartLaunchTaskAnimation(
+            [in] ITaskView* tv,
+            [in] IRunnable* r,
+            [in] Boolean lockToTask);
+
+        IsTransformedTouchPointInView(
+            [in] Float x,
+            [in] Float y,
+            [in] IView* child,
+            [out] Boolean* result);
+
+        /** Pokes the dozer on user interaction. */
+        OnUserInteraction();
+    }
+
+    /** The TaskView callbacks */
+    [local]
+    interface ITaskStackViewCallbacks {
+        OnTaskViewClicked(
+            [in] ITaskStackView* stackView,
+            [in] ITaskView* tv,
+            [in] ITaskStack* stack,
+            [in] ITask* t,
+            [in] Boolean lockToTask);
+
+        OnTaskViewAppInfoClicked(
+            [in] ITask* t);
+
+        OnTaskViewDismissed(
+            [in] ITask* t);
+
+        OnAllTaskViewsDismissed();
+
+        OnTaskStackFilterTriggered();
+
+        OnTaskStackUnfilterTriggered();
+    }
+
+
+    } // namespace Views
+    } // namespace Recents
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

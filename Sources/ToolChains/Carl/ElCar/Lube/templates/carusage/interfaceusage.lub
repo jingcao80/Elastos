@@ -1,0 +1,32 @@
+$;;=========================================================================
+$;; Copyright (c) 2000-2007,  Elastos, Inc.  All Rights Reserved.
+$;;=========================================================================
+$
+$INPUT module
+$OUTPUT "${name}_interface.txt"
+$WITH all interfaces DO
+$IF attrib is not "generic"
+$ ;; static CARAPI
+${name}::Probe(
+        /*[in]*/  ${name}* pObj);
+$   WITH all methods DO
+$       IF type is "ECode"
+$ ;; CARAPI
+${interface.name}::${name}($^
+$       ELSE
+$ ;; CARAPI_(${type})
+${interface.name}::${name}($^
+$       END IF
+$       WITH all parameters DO
+
+        /*[${attrib}]*/ ${type} ${prefixingname(parameter)}$^
+$           IF parameter is not last
+,$^
+$           END IF
+$       END DO ;; all parameters
+);
+$   END DO ;; all methods
+$END IF ;; attrib is not "generic"
+
+$END DO ;; all interfaces
+$END OUTPUT

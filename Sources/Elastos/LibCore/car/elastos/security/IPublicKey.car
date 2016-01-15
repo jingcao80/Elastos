@@ -1,0 +1,16 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+
+    /**
+     * @Involve
+     * interface IKey
+     */
+    interface IPublicKey {
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

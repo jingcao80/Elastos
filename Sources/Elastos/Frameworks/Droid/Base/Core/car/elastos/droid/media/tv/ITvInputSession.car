@@ -1,0 +1,70 @@
+module
+{
+    interface Elastos.Droid.View.ISurface;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Graphics.IRect;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+    namespace Tv {
+
+    /**
+     * Sub-interface of ITvInputService which is created per session and has its own context.
+     * @hide
+     */
+    interface IITvInputSession {
+        ReleaseResources();
+
+        SetMain(
+            [in] Boolean isMain);
+
+        SetSurface(
+            [in] ISurface * surface);
+
+        DispatchSurfaceChanged(
+            [in] Int32 format,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        // TODO: Remove this once it becomes irrelevant for applications to handle audio focus. The plan
+        // is to introduce some new concepts that will solve a number of problems in audio policy today.
+        SetVolume(
+            [in] Float volume);
+
+        Tune(
+            [in] IUri * channelUri,
+            [in] IBundle * params);
+
+        SetCaptionEnabled(
+            [in] Boolean enabled);
+
+        SelectTrack(
+            [in] Int32 type,
+            [in] String trackId);
+
+        AppPrivateCommand(
+            [in] String action,
+            [in] IBundle * data);
+
+        CreateOverlayView(
+            [in] IBinder * windowToken,
+            [in] IRect * frame);
+
+        RelayoutOverlayView(
+            [in] IRect * frame);
+
+        RemoveOverlayView();
+
+        RequestUnblockContent(
+            [in] String unblockedRating);
+
+    }
+
+    } // namespace Tv
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,120 @@
+
+EXPORT_HEADERS = elastos/coredef.h
+
+EXPORT_HEADERS += elastos/core/UniquePtr.h
+EXPORT_HEADERS += elastos/core/NativeThread.h
+EXPORT_HEADERS += elastos/core/Mutex.h
+EXPORT_HEADERS += elastos/core/Object.h
+EXPORT_HEADERS += elastos/core/AutoLock.h
+EXPORT_HEADERS += elastos/core/Singleton.h
+EXPORT_HEADERS += elastos/core/Thread.h
+EXPORT_HEADERS += elastos/core/Math.h
+EXPORT_HEADERS += elastos/core/StrictMath.h
+EXPORT_HEADERS += elastos/core/Character.h
+EXPORT_HEADERS += elastos/core/CaseMapper.h
+EXPORT_HEADERS += elastos/core/CoreUtils.h
+EXPORT_HEADERS += elastos/core/StringUtils.h
+EXPORT_HEADERS += elastos/core/HexStringParser.h
+EXPORT_HEADERS += elastos/core/StringToIntegral.h
+EXPORT_HEADERS += elastos/core/IntegralToString.h
+EXPORT_HEADERS += elastos/core/StringToReal.h
+EXPORT_HEADERS += elastos/core/RealToString.h
+EXPORT_HEADERS += elastos/core/AbstractStringBuilder.h
+EXPORT_HEADERS += elastos/core/StringBuilder.h
+EXPORT_HEADERS += elastos/core/StringBuffer.h
+
+EXPORT_HEADERS += elastos/utility/etl/Algorithm.h
+EXPORT_HEADERS += elastos/utility/etl/ConceptCheck.h
+EXPORT_HEADERS += elastos/utility/etl/etl_algo.h
+EXPORT_HEADERS += elastos/utility/etl/etl_algobase.h
+EXPORT_HEADERS += elastos/utility/etl/etl_alloc.h
+EXPORT_HEADERS += elastos/utility/etl/etl_concept_check.h
+EXPORT_HEADERS += elastos/utility/etl/etl_construct.h
+EXPORT_HEADERS += elastos/utility/etl/etl_def.h
+EXPORT_HEADERS += elastos/utility/etl/etl_exception_defines.h
+EXPORT_HEADERS += elastos/utility/etl/etl_function.h
+EXPORT_HEADERS += elastos/utility/etl/etl_function_exception.h
+EXPORT_HEADERS += elastos/utility/etl/etl_hash_fun.h
+EXPORT_HEADERS += elastos/utility/etl/etl_hashmap.h
+EXPORT_HEADERS += elastos/utility/etl/etl_hashset.h
+EXPORT_HEADERS += elastos/utility/etl/etl_hashtable.h
+EXPORT_HEADERS += elastos/utility/etl/etl_iterator.h
+EXPORT_HEADERS += elastos/utility/etl/etl_iterator_base_funcs.h
+EXPORT_HEADERS += elastos/utility/etl/etl_iterator_base_types.h
+EXPORT_HEADERS += elastos/utility/etl/etl_list.h
+EXPORT_HEADERS += elastos/utility/etl/etl_map.h
+EXPORT_HEADERS += elastos/utility/etl/etl_multimap.h
+EXPORT_HEADERS += elastos/utility/etl/etl_multiset.h
+EXPORT_HEADERS += elastos/utility/etl/etl_pair.h
+EXPORT_HEADERS += elastos/utility/etl/etl_set.h
+EXPORT_HEADERS += elastos/utility/etl/etl_tree.h
+EXPORT_HEADERS += elastos/utility/etl/etl_type_traits.h
+EXPORT_HEADERS += elastos/utility/etl/etl_uninitialized.h
+EXPORT_HEADERS += elastos/utility/etl/etl_vector.h
+EXPORT_HEADERS += elastos/utility/etl/etl_deque.h
+EXPORT_HEADERS += elastos/utility/etl/etl_stack.h
+EXPORT_HEADERS += elastos/utility/etl/etl_heap.h
+EXPORT_HEADERS += elastos/utility/etl/etl_queue.h
+EXPORT_HEADERS += elastos/utility/etl/etl_blockingqueue.h
+EXPORT_HEADERS += elastos/utility/etl/HashMap.h
+EXPORT_HEADERS += elastos/utility/etl/HashSet.h
+EXPORT_HEADERS += elastos/utility/etl/HashTable.h
+EXPORT_HEADERS += elastos/utility/etl/List.h
+EXPORT_HEADERS += elastos/utility/etl/Map.h
+EXPORT_HEADERS += elastos/utility/etl/Pair.h
+EXPORT_HEADERS += elastos/utility/etl/Set.h
+EXPORT_HEADERS += elastos/utility/etl/Vector.h
+EXPORT_HEADERS += elastos/utility/etl/Stack.h
+EXPORT_HEADERS += elastos/utility/etl/Queue.h
+EXPORT_HEADERS += elastos/utility/etl/BlockingQueue.h
+
+EXPORT_HEADERS += elastos/utility/concurrent/FutureTask.h
+
+EXPORT_HEADERS += elastos/utility/logging/Logger.h
+EXPORT_HEADERS += elastos/utility/logging/Slogger.h
+
+EXPORT_HEADERS += elastos/utility/AbstractCollection.h
+EXPORT_HEADERS += elastos/utility/AbstractList.h
+EXPORT_HEADERS += elastos/utility/AbstractMap.h
+EXPORT_HEADERS += elastos/utility/AbstractSet.h
+EXPORT_HEADERS += elastos/utility/Arrays.h
+EXPORT_HEADERS += elastos/utility/ComparableTimSort.h
+EXPORT_HEADERS += elastos/utility/DualPivotQuicksort.h
+EXPORT_HEADERS += elastos/utility/HashMap.h
+EXPORT_HEADERS += elastos/utility/HashSet.h
+EXPORT_HEADERS += elastos/utility/HashTable.h
+EXPORT_HEADERS += elastos/utility/Objects.h
+EXPORT_HEADERS += elastos/utility/Observable.h
+EXPORT_HEADERS += elastos/utility/Properties.h
+EXPORT_HEADERS += elastos/utility/TimSort.h
+EXPORT_HEADERS += elastos/utility/TimerTask.h
+EXPORT_HEADERS += elastos/utility/regex/Pattern.h
+
+EXPORT_HEADERS += elastos/net/ProxySelector.h
+EXPORT_HEADERS += elastos/net/ResponseCache.h
+
+EXPORT_HEADERS += elastos/io/InputStream.h
+EXPORT_HEADERS += elastos/io/OutputStream.h
+EXPORT_HEADERS += elastos/io/FilterInputStream.h
+EXPORT_HEADERS += elastos/io/FilterOutputStream.h
+EXPORT_HEADERS += elastos/io/FileInputStream.h
+EXPORT_HEADERS += elastos/io/FileOutputStream.h
+EXPORT_HEADERS += elastos/io/PrintStream.h
+EXPORT_HEADERS += elastos/io/PrintWriter.h
+EXPORT_HEADERS += elastos/io/Writer.h
+
+EXPORT_HEADERS += elastos/security/Provider.h
+
+EXPORT_HEADERS += libcore/io/SocketTagger.h
+EXPORT_HEADERS += libcore/utility/EmptyArray.h
+
+EXPORT_HEADERS += elastos/droid/system/Os.h
+EXPORT_HEADERS += elastos/droid/system/OsConstants.h
+
+
+EXPORT_HEADERS += elastosx/net/SocketFactory.h
+EXPORT_HEADERS += elastosx/net/ssl/SSLSocketFactory.h
+
+EXPORT_HEADERS += org/apache/http/entity/AbstractHttpEntity.h
+EXPORT_HEADERS += org/apache/http/impl/client/DefaultHttpClient.h
+EXPORT_HEADERS += org/apache/http/utility/EncodingUtils.h
